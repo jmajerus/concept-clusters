@@ -1,13 +1,32 @@
 // Generated from content/puzzles/plate-boundary-landforms.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "plate-boundary-landforms",
   "title": "Where Plates Meet",
-  "category": "Science",
+  "category": "science",
   "large": true,
+  "info": {
+    "citations": [
+      {
+        "title": "Understanding plate motions",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"
+      },
+      {
+        "title": "This Dynamic Planet",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://pubs.usgs.gov/pdf/planet.pdf"
+      },
+      {
+        "title": "The Himalayas: Two continents collide",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://pubs.usgs.gov/gip/dynamic/himalaya.html"
+      }
+    ]
+  },
   "clusters": [
     {
       "id": "divergent",
@@ -26,26 +45,39 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "Mid-Atlantic Ridge": {
-          "link": "wiki:Mid-Atlantic Ridge"
+          "links": [
+            {
+              "href": "wiki:Mid-Atlantic Ridge"
+            }
+          ]
         },
         "rift valley": {
-          "link": "wiki:Rift valley"
+          "links": [
+            {
+              "href": "wiki:Rift valley"
+            }
+          ]
         },
         "seafloor spreading": {
-          "link": "wiki:Seafloor spreading"
+          "links": [
+            {
+              "href": "wiki:Seafloor spreading"
+            }
+          ]
         },
         "basaltic crust": {
           "text": "The mafic oceanic crust produced as magma cools at a spreading center.",
-          "link": "wiki:Oceanic crust"
+          "links": [
+            {
+              "href": "wiki:Oceanic crust"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Divergent boundary",
-        "citations": [
+        "links": [
           {
-            "title": "Understanding plate motions",
-            "publisher": "U.S. Geological Survey",
-            "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"
+            "href": "wiki:Divergent boundary"
           }
         ]
       }
@@ -67,27 +99,40 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "Mariana Trench": {
-          "link": "wiki:Mariana Trench"
+          "links": [
+            {
+              "href": "wiki:Mariana Trench"
+            }
+          ]
         },
         "volcanic arc": {
-          "link": "wiki:Volcanic arc"
+          "links": [
+            {
+              "href": "wiki:Volcanic arc"
+            }
+          ]
         },
         "Wadati-Benioff zone": {
           "text": "The dipping plane of earthquake foci that traces a descending slab.",
-          "link": "wiki:Wadati-Benioff zone"
+          "links": [
+            {
+              "href": "wiki:Wadati-Benioff zone"
+            }
+          ]
         },
         "accretionary wedge": {
           "text": "Sediment scraped from the descending plate and piled onto the overriding plate.",
-          "link": "wiki:Accretionary wedge"
+          "links": [
+            {
+              "href": "wiki:Accretionary wedge"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Subduction",
-        "citations": [
+        "links": [
           {
-            "title": "This Dynamic Planet",
-            "publisher": "U.S. Geological Survey",
-            "url": "https://pubs.usgs.gov/pdf/planet.pdf"
+            "href": "wiki:Subduction"
           }
         ]
       }
@@ -109,27 +154,40 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "Himalayas": {
-          "link": "wiki:Himalayas"
+          "links": [
+            {
+              "href": "wiki:Himalayas"
+            }
+          ]
         },
         "Tibetan Plateau": {
-          "link": "wiki:Tibetan Plateau"
+          "links": [
+            {
+              "href": "wiki:Tibetan Plateau"
+            }
+          ]
         },
         "suture zone": {
           "text": "The deformed belt marking where two formerly separate continental blocks joined.",
-          "link": "wiki:Suture (geology)"
+          "links": [
+            {
+              "href": "wiki:Suture (geology)"
+            }
+          ]
         },
         "fold-and-thrust belt": {
           "text": "A zone where compression folds rock layers and stacks them along thrust faults.",
-          "link": "wiki:Fold and thrust belt"
+          "links": [
+            {
+              "href": "wiki:Fold and thrust belt"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Continental collision",
-        "citations": [
+        "links": [
           {
-            "title": "The Himalayas: Two continents collide",
-            "publisher": "U.S. Geological Survey",
-            "url": "https://pubs.usgs.gov/gip/dynamic/himalaya.html"
+            "href": "wiki:Continental collision"
           }
         ]
       }
@@ -151,10 +209,18 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "San Andreas Fault": {
-          "link": "wiki:San Andreas Fault"
+          "links": [
+            {
+              "href": "wiki:San Andreas Fault"
+            }
+          ]
         },
         "strike-slip fault": {
-          "link": "wiki:Strike-slip tectonics"
+          "links": [
+            {
+              "href": "wiki:Strike-slip tectonics"
+            }
+          ]
         },
         "offset streams": {
           "text": "Channels displaced sideways where repeated fault motion cuts across their courses."
@@ -164,12 +230,9 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:Transform fault",
-        "citations": [
+        "links": [
           {
-            "title": "Understanding plate motions",
-            "publisher": "U.S. Geological Survey",
-            "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"
+            "href": "wiki:Transform fault"
           }
         ]
       }
@@ -185,12 +248,9 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Oceanic lithosphere links the two boundaries: it is created and carried away from spreading ridges, then bends downward and is recycled at subduction zones.",
       "info": {
-        "link": "wiki:Oceanic lithosphere",
-        "citations": [
+        "links": [
           {
-            "title": "Understanding plate motions",
-            "publisher": "U.S. Geological Survey",
-            "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"
+            "href": "wiki:Oceanic lithosphere"
           }
         ]
       },

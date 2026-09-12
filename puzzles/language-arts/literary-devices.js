@@ -1,17 +1,16 @@
-// Concept Clusters puzzle: Literary devices
-// Category: Language Arts
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/literary-devices.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "literary-devices",
   "title": "Literary devices",
-  "category": "Language Arts",
+  "category": "language-arts",
   "clusters": [
     {
+      "id": "sound-devices",
       "name": "Sound devices",
-      "info": {
-        "link": "wiki:Literary technique"
-      },
       "color": "teal",
       "fact": "Sound devices use the way words sound, not just what they mean, to create rhythm and emphasis.",
       "terms": [
@@ -26,25 +25,46 @@ export default {
       ],
       "termInfo": {
         "alliteration": {
-          "link": "wiki:Alliteration"
+          "links": [
+            {
+              "href": "wiki:Alliteration"
+            }
+          ]
         },
         "rhyme": {
-          "link": "wiki:Rhyme"
+          "links": [
+            {
+              "href": "wiki:Rhyme"
+            }
+          ]
         },
         "onomatopoeia": {
-          "link": "wiki:Onomatopoeia"
+          "links": [
+            {
+              "href": "wiki:Onomatopoeia"
+            }
+          ]
         },
         "assonance": {
           "text": "The repetition of vowel sounds in nearby words, without repeating the consonants around them.",
-          "link": "wiki:Assonance"
+          "links": [
+            {
+              "href": "wiki:Assonance"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Literary technique"
+          }
+        ]
       }
     },
     {
+      "id": "comparison-devices",
       "name": "Comparison devices",
-      "info": {
-        "link": "wiki:Figure of speech"
-      },
       "color": "blue",
       "fact": "Comparison devices link two unlike things to reveal a shared quality.",
       "terms": [
@@ -58,21 +78,38 @@ export default {
       ],
       "termInfo": {
         "simile": {
-          "link": "wiki:Simile"
+          "links": [
+            {
+              "href": "wiki:Simile"
+            }
+          ]
         },
         "metaphor": {
-          "link": "wiki:Metaphor"
+          "links": [
+            {
+              "href": "wiki:Metaphor"
+            }
+          ]
         },
         "analogy": {
-          "link": "wiki:Analogy"
+          "links": [
+            {
+              "href": "wiki:Analogy"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Figure of speech"
+          }
+        ]
       }
     },
     {
+      "id": "narrative-devices",
       "name": "Narrative devices",
-      "info": {
-        "link": "wiki:Literary technique"
-      },
       "color": "amber",
       "fact": "Narrative devices shape how a story reveals information over time.",
       "terms": [
@@ -87,55 +124,88 @@ export default {
       ],
       "termInfo": {
         "foreshadowing": {
-          "link": "wiki:Foreshadowing"
+          "links": [
+            {
+              "href": "wiki:Foreshadowing"
+            }
+          ]
         },
         "irony": {
-          "link": "wiki:Irony"
+          "links": [
+            {
+              "href": "wiki:Irony"
+            }
+          ]
         },
         "symbolism": {
           "text": "Using a concrete object, image, or action to represent a deeper, non-literal meaning.",
-          "link": "wiki:Artistic symbol"
+          "links": [
+            {
+              "href": "wiki:Artistic symbol"
+            }
+          ]
         },
         "flashback": {
           "text": "A scene that interrupts the present story to show an earlier event.",
-          "link": "wiki:Flashback (narrative)"
+          "links": [
+            {
+              "href": "wiki:Flashback (narrative)"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Literary technique"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "personification",
       "term": "personification",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "cross-cutting",
       "fact": "Personification bridges the two: it's a comparison device (giving human traits to a thing) that often carries symbolic, narrative weight.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Personification"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "metaphor",
         "symbolism"
-      ],
-      "info": {
-        "link": "wiki:Personification"
-      }
+      ]
     },
     {
+      "id": "repetition",
       "term": "repetition",
       "clusters": [
         0,
         2
       ],
-      "relationKind": "cross-cutting",
       "fact": "Repetition bridges the two: a sound device that writers reuse narratively to build foreshadowing or theme.",
+      "info": {
+        "text": "Reusing a word or phrase deliberately, for emphasis or rhythm rather than by accident.",
+        "links": [
+          {
+            "href": "wiki:Repetition (rhetorical device)"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         null,
         "foreshadowing"
-      ],
-      "info": {
-        "text": "Reusing a word or phrase deliberately, for emphasis or rhythm rather than by accident.",
-        "link": "wiki:Repetition (rhetorical device)"
-      }
+      ]
     }
   ]
-};
+});

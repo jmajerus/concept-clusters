@@ -1,9 +1,9 @@
 {
   "id": "cell-division-and-inheritance",
   "title": "Cell division and inheritance",
-  "category": "Biology",
+  "category": "biology",
   "subcategories": {
-    "Biology": "foundations"
+    "biology": "foundations"
   },
   "tags": [
     "biology",
@@ -53,7 +53,11 @@
         "cell-cycle checkpoint"
       ],
       "info": {
-        "link": "wiki:Cell cycle"
+        "links": [
+          {
+            "href": "wiki:Cell cycle"
+          }
+        ]
       }
     },
     {
@@ -78,7 +82,11 @@
         "cytokinesis"
       ],
       "info": {
-        "link": "wiki:Mitosis"
+        "links": [
+          {
+            "href": "wiki:Mitosis"
+          }
+        ]
       }
     },
     {
@@ -101,7 +109,11 @@
         "meiosis II"
       ],
       "info": {
-        "link": "wiki:Meiosis"
+        "links": [
+          {
+            "href": "wiki:Meiosis"
+          }
+        ]
       }
     },
     {
@@ -126,7 +138,11 @@
         "heterozygous"
       ],
       "info": {
-        "link": "wiki:Mendelian inheritance"
+        "links": [
+          {
+            "href": "wiki:Mendelian inheritance"
+          }
+        ]
       }
     }
   ],
@@ -140,7 +156,11 @@
       ],
       "fact": "A chromosome is copied before division and then condensed, aligned, and separated by the mitotic machinery.",
       "info": {
-        "link": "https://www.genome.gov/genetics-glossary/Chromosome"
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Chromosome"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -157,7 +177,11 @@
       ],
       "fact": "Meiosis contributes to forming haploid gametes, which carry one allele at each locus into the next generation.",
       "info": {
-        "link": "wiki:Gamete"
+        "links": [
+          {
+            "href": "wiki:Gamete"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -174,7 +198,11 @@
       ],
       "fact": "Crossing over and the assortment of homologous chromosomes create new allele combinations that inheritance can transmit.",
       "info": {
-        "link": "wiki:Genetic variation"
+        "links": [
+          {
+            "href": "wiki:Genetic variation"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -191,7 +219,11 @@
       ],
       "fact": "Fertilization joins haploid gametes, restores the diploid chromosome number, and combines parental alleles in one genotype.",
       "info": {
-        "link": "wiki:Fertilisation"
+        "links": [
+          {
+            "href": "wiki:Fertilisation"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -208,7 +240,11 @@
       ],
       "fact": "A haploid cell contains one chromosome set; in many life cycles, haploid gametes carry inherited alleles between generations.",
       "info": {
-        "link": "wiki:Ploidy"
+        "links": [
+          {
+            "href": "wiki:Ploidy"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -273,13 +309,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

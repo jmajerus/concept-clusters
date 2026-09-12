@@ -1,13 +1,15 @@
-// Concept Clusters puzzle: The integumentary system
-// Standard size: 11 cluster terms + 2 bridge terms = 13 nodes.
-// Cleveland Clinic and Mayo Clinic extraLink destinations verified July 2026.
+// Generated from content/puzzles/integumentary-system.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "integumentary-system",
   "title": "The integumentary system",
-  "category": "Physiology & Medicine",
+  "category": "physiology-medicine",
   "clusters": [
     {
+      "id": "skin-layers",
       "name": "Skin layers",
       "color": "teal",
       "fact": "Skin has three main layers: the epidermis forms the outer barrier, the dermis supports glands, follicles and sensation, and the fatty hypodermis cushions and insulates.",
@@ -23,26 +25,51 @@ export default {
       "termInfo": {
         "epidermis": {
           "text": "The outermost skin layer, made largely of keratin-producing cells that create a protective, water-resistant surface.",
-          "link": "wiki:Epidermis",
-          "extraLink": "https://my.clevelandclinic.org/health/body/21901-epidermis"
+          "links": [
+            {
+              "href": "wiki:Epidermis"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/21901-epidermis"
+            }
+          ]
         },
         "dermis": {
           "text": "The thick middle skin layer containing connective tissue, blood vessels, nerves, hair follicles and glands.",
-          "link": "wiki:Dermis",
-          "extraLink": "https://my.clevelandclinic.org/health/body/22357-dermis"
+          "links": [
+            {
+              "href": "wiki:Dermis"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/22357-dermis"
+            }
+          ]
         },
         "hypodermis": {
           "text": "The fatty layer beneath the dermis that cushions deeper tissues, stores energy and helps insulate the body.",
-          "link": "wiki:Subcutaneous tissue",
-          "extraLink": "https://my.clevelandclinic.org/health/body/21902-hypodermis-subcutaneous-tissue"
+          "links": [
+            {
+              "href": "wiki:Subcutaneous tissue"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/21902-hypodermis-subcutaneous-tissue"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Skin",
-        "extraLink": "https://my.clevelandclinic.org/health/body/10978-skin"
+        "links": [
+          {
+            "href": "wiki:Skin"
+          },
+          {
+            "href": "https://my.clevelandclinic.org/health/body/10978-skin"
+          }
+        ]
       }
     },
     {
+      "id": "accessory-structures",
       "name": "Accessory structures",
       "color": "blue",
       "fact": "Hair, nails and skin glands are accessory structures of the integumentary system: they protect surfaces and release substances such as sweat and sebum.",
@@ -59,31 +86,62 @@ export default {
       "termInfo": {
         "hair": {
           "text": "Keratin-based filaments that grow from follicles and help with protection, insulation and light-touch sensation.",
-          "link": "wiki:Hair",
-          "extraLink": "https://my.clevelandclinic.org/health/body/body-hair"
+          "links": [
+            {
+              "href": "wiki:Hair"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/body-hair"
+            }
+          ]
         },
         "nails": {
           "text": "Hard keratin plates that protect the sensitive tips of the fingers and toes and assist with fine manipulation.",
-          "link": "wiki:Nail (anatomy)",
-          "extraLink": "https://my.clevelandclinic.org/health/body/nail-anatomy"
+          "links": [
+            {
+              "href": "wiki:Nail (anatomy)"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/nail-anatomy"
+            }
+          ]
         },
         "sweat glands": {
           "text": "Skin glands that release sweat; eccrine glands open onto the skin surface, while apocrine glands open into hair follicles.",
-          "link": "wiki:Sweat gland",
-          "extraLink": "https://my.clevelandclinic.org/health/body/eccrine-glands"
+          "links": [
+            {
+              "href": "wiki:Sweat gland"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/eccrine-glands"
+            }
+          ]
         },
         "sebaceous glands": {
           "text": "Glands, usually connected to hair follicles, that secrete oily sebum to help lubricate skin and hair.",
-          "link": "wiki:Sebaceous gland",
-          "extraLink": "https://my.clevelandclinic.org/health/body/24538-sebaceous-glands"
+          "links": [
+            {
+              "href": "wiki:Sebaceous gland"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/24538-sebaceous-glands"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Integumentary system",
-        "extraLink": "https://my.clevelandclinic.org/health/body/22827-integumentary-system"
+        "links": [
+          {
+            "href": "wiki:Integumentary system"
+          },
+          {
+            "href": "https://my.clevelandclinic.org/health/body/22827-integumentary-system"
+          }
+        ]
       }
     },
     {
+      "id": "system-functions",
       "name": "System functions",
       "color": "amber",
       "fact": "The integumentary system protects the body, regulates temperature, detects sensations and uses sunlight to help synthesize vitamin D.",
@@ -100,67 +158,111 @@ export default {
       "termInfo": {
         "barrier protection": {
           "text": "The skin's physical and chemical defenses against injury, microbes, ultraviolet radiation and excessive water loss.",
-          "link": "wiki:Skin",
-          "extraLink": "https://my.clevelandclinic.org/health/body/21901-epidermis"
+          "links": [
+            {
+              "href": "wiki:Skin"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/21901-epidermis"
+            }
+          ]
         },
         "temperature regulation": {
           "text": "Keeping internal temperature within a workable range through mechanisms including sweating, changes in skin blood flow and insulation.",
-          "link": "wiki:Thermoregulation",
-          "extraLink": "https://my.clevelandclinic.org/health/body/eccrine-glands"
+          "links": [
+            {
+              "href": "wiki:Thermoregulation"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/eccrine-glands"
+            }
+          ]
         },
         "sensation": {
           "text": "Skin receptors and nerve endings detect touch, pressure, pain, itch, heat and cold.",
-          "link": "wiki:Somatosensory system",
-          "extraLink": "https://my.clevelandclinic.org/health/body/22357-dermis"
+          "links": [
+            {
+              "href": "wiki:Somatosensory system"
+            },
+            {
+              "href": "https://my.clevelandclinic.org/health/body/22357-dermis"
+            }
+          ]
         },
         "vitamin D synthesis": {
           "text": "Ultraviolet light begins a chemical process in the skin that allows the body to produce vitamin D.",
-          "link": "wiki:Vitamin D",
-          "extraLink": "https://www.mayoclinic.org/drugs-supplements-vitamin-d/art-20363792"
+          "links": [
+            {
+              "href": "wiki:Vitamin D"
+            },
+            {
+              "href": "https://www.mayoclinic.org/drugs-supplements-vitamin-d/art-20363792"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Integumentary system",
-        "extraLink": "https://my.clevelandclinic.org/health/body/22827-integumentary-system"
+        "links": [
+          {
+            "href": "wiki:Integumentary system"
+          },
+          {
+            "href": "https://my.clevelandclinic.org/health/body/22827-integumentary-system"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "keratin",
       "term": "keratin",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "foundation",
       "fact": "Keratin bridges skin layers and accessory structures: keratin-producing cells strengthen the epidermis, and hardened keratin forms the main structural material of hair and nails.",
+      "info": {
+        "text": "A tough structural protein produced by skin cells and used throughout the epidermis, hair and nails.",
+        "links": [
+          {
+            "href": "wiki:Keratin"
+          },
+          {
+            "href": "https://my.clevelandclinic.org/health/body/21901-epidermis"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         "epidermis",
         null
-      ],
-      "info": {
-        "text": "A tough structural protein produced by skin cells and used throughout the epidermis, hair and nails.",
-        "link": "wiki:Keratin",
-        "extraLink": "https://my.clevelandclinic.org/health/body/21901-epidermis"
-      }
+      ]
     },
     {
+      "id": "sweating",
       "term": "sweating",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "dynamic",
       "fact": "Sweating bridges accessory structures and system functions: sweat glands release fluid onto the skin, and its evaporation removes heat to help regulate body temperature.",
+      "info": {
+        "text": "The release of sweat onto the skin, especially from eccrine glands, where evaporation can cool the body.",
+        "links": [
+          {
+            "href": "wiki:Perspiration"
+          },
+          {
+            "href": "https://my.clevelandclinic.org/health/body/eccrine-glands"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
       "idealTerms": [
         "sweat glands",
         "temperature regulation"
-      ],
-      "info": {
-        "text": "The release of sweat onto the skin, especially from eccrine glands, where evaporation can cool the body.",
-        "link": "wiki:Perspiration",
-        "extraLink": "https://my.clevelandclinic.org/health/body/eccrine-glands"
-      }
+      ]
     }
   ]
-};
+});

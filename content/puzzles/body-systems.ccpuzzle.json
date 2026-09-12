@@ -1,7 +1,7 @@
 {
   "id": "body-systems",
   "title": "Human body systems",
-  "category": "Science",
+  "category": "science",
   "clusters": [
     {
       "id": "circulatory",
@@ -24,21 +24,41 @@
       ],
       "termInfo": {
         "heart": {
-          "link": "wiki:Heart"
+          "links": [
+            {
+              "href": "wiki:Heart"
+            }
+          ]
         },
         "blood vessels": {
-          "link": "wiki:Blood vessel"
+          "links": [
+            {
+              "href": "wiki:Blood vessel"
+            }
+          ]
         },
         "pulse": {
-          "link": "wiki:Pulse"
+          "links": [
+            {
+              "href": "wiki:Pulse"
+            }
+          ]
         },
         "red blood cells": {
           "text": "The blood cells that carry oxygen from the lungs to the rest of the body.",
-          "link": "wiki:Red blood cell"
+          "links": [
+            {
+              "href": "wiki:Red blood cell"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Circulatory system"
+        "links": [
+          {
+            "href": "wiki:Circulatory system"
+          }
+        ]
       }
     },
     {
@@ -62,22 +82,42 @@
       ],
       "termInfo": {
         "lungs": {
-          "link": "wiki:Lung"
+          "links": [
+            {
+              "href": "wiki:Lung"
+            }
+          ]
         },
         "alveoli": {
-          "link": "wiki:Pulmonary alveolus"
+          "links": [
+            {
+              "href": "wiki:Pulmonary alveolus"
+            }
+          ]
         },
         "diaphragm": {
           "text": "The dome-shaped muscle beneath the lungs that contracts to pull air in.",
-          "link": "wiki:Thoracic diaphragm"
+          "links": [
+            {
+              "href": "wiki:Thoracic diaphragm"
+            }
+          ]
         },
         "trachea": {
           "text": "The windpipe — the tube that carries air between the throat and the lungs.",
-          "link": "wiki:Trachea"
+          "links": [
+            {
+              "href": "wiki:Trachea"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Respiratory system"
+        "links": [
+          {
+            "href": "wiki:Respiratory system"
+          }
+        ]
       }
     },
     {
@@ -101,21 +141,41 @@
       ],
       "termInfo": {
         "stomach": {
-          "link": "wiki:Stomach"
+          "links": [
+            {
+              "href": "wiki:Stomach"
+            }
+          ]
         },
         "enzymes": {
-          "link": "wiki:Enzyme"
+          "links": [
+            {
+              "href": "wiki:Enzyme"
+            }
+          ]
         },
         "intestines": {
-          "link": "wiki:Gastrointestinal tract"
+          "links": [
+            {
+              "href": "wiki:Gastrointestinal tract"
+            }
+          ]
         },
         "esophagus": {
           "text": "The muscular tube that carries swallowed food from the throat to the stomach.",
-          "link": "wiki:Esophagus"
+          "links": [
+            {
+              "href": "wiki:Esophagus"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Digestive system"
+        "links": [
+          {
+            "href": "wiki:Digestive system"
+          }
+        ]
       }
     }
   ],
@@ -129,7 +189,11 @@
       ],
       "fact": "Oxygen bridges the two: the lungs load it into the blood, and the heart pumps it everywhere the body needs it.",
       "info": {
-        "link": "wiki:Oxygen"
+        "links": [
+          {
+            "href": "wiki:Oxygen"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -146,7 +210,11 @@
       ],
       "fact": "Nutrients bridge the two: digestion breaks food down, and circulation carries the nutrients to every cell.",
       "info": {
-        "link": "wiki:Nutrient"
+        "links": [
+          {
+            "href": "wiki:Nutrient"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {

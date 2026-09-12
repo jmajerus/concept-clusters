@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-poem-of-force.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-poem-of-force",
   "title": "The Poem of Force",
-  "category": "Philosophy",
+  "category": "philosophy",
   "categories": [
-    "Philosophy",
-    "Literary Theory & Poetics"
+    "philosophy",
+    "literary-theory-poetics"
   ],
   "tags": [
     "book",
@@ -145,6 +145,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "retribution",
       "term": "retribution",
       "clusters": [
         1,
@@ -160,6 +161,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "generosity",
       "term": "generosity",
       "clusters": [
         1,
@@ -175,6 +177,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "the-common-lot",
       "term": "the common lot",
       "clusters": [
         0,
@@ -190,6 +193,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "petrification",
       "term": "petrification",
       "clusters": [
         1,

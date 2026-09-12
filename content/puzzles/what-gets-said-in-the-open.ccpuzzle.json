@@ -1,7 +1,7 @@
 {
   "id": "what-gets-said-in-the-open",
   "title": "What gets said in the open",
-  "category": "Sociology",
+  "category": "sociology",
   "tags": [
     "book"
   ],
@@ -13,6 +13,13 @@
         "author": "Amy C. Edmondson",
         "publisher": "John Wiley & Sons",
         "year": "2018"
+      },
+      {
+        "title": "Psychological Safety and Learning Behavior in Work Teams",
+        "author": "Amy C. Edmondson",
+        "publisher": "Administrative Science Quarterly, 44(2)",
+        "year": "1999",
+        "pages": "pp. 350-383"
       }
     ]
   },
@@ -45,18 +52,7 @@
           "text": "A shared belief that the environment is safe for interpersonal risk-taking. A team-level climate, not an individual trait or a manager's personality."
         }
       },
-      "info": {
-        "text": "Edmondson's precise, original definition of psychological safety, distinguished sharply from comfort, niceness, or the mere absence of conflict.",
-        "citations": [
-          {
-            "title": "Psychological Safety and Learning Behavior in Work Teams",
-            "author": "Amy C. Edmondson",
-            "publisher": "Administrative Science Quarterly, 44(2)",
-            "year": "1999",
-            "pages": "pp. 350-383"
-          }
-        ]
-      }
+      "info": "Edmondson's precise, original definition of psychological safety, distinguished sharply from comfort, niceness, or the mere absence of conflict."
     },
     {
       "id": "cluster-two-axes",
@@ -91,17 +87,7 @@
           "text": "High safety and high standards together: the one climate where people take the interpersonal risk of speaking up specifically because something real is at stake."
         }
       },
-      "info": {
-        "text": "The two-axis framework crossing psychological safety against standards, and the four distinct climates that result.",
-        "citations": [
-          {
-            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
-            "author": "Amy C. Edmondson",
-            "publisher": "John Wiley & Sons",
-            "year": "2018"
-          }
-        ]
-      }
+      "info": "The two-axis framework crossing psychological safety against standards, and the four distinct climates that result."
     },
     {
       "id": "cluster-cost",
@@ -131,17 +117,7 @@
           "text": "Edmondson and James Detert's research finding that the large majority of employees have withheld something important from their manager out of fear of the consequences of speaking up."
         }
       },
-      "info": {
-        "text": "What happens in the absence of psychological safety -- not a vague cultural cost, but specific, documented failures traceable to someone who knew and didn't say.",
-        "citations": [
-          {
-            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
-            "author": "Amy C. Edmondson",
-            "publisher": "John Wiley & Sons",
-            "year": "2018"
-          }
-        ]
-      }
+      "info": "What happens in the absence of psychological safety -- not a vague cultural cost, but specific, documented failures traceable to someone who knew and didn't say."
     },
     {
       "id": "cluster-building",
@@ -171,17 +147,7 @@
           "text": "How a leader handles whatever gets said back: with genuine attention, not visible irritation, regardless of whether the answer was welcome."
         }
       },
-      "info": {
-        "text": "The deliberate, repeatable moves Edmondson argues actually build psychological safety -- not a matter of temperament or team chemistry.",
-        "citations": [
-          {
-            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
-            "author": "Amy C. Edmondson",
-            "publisher": "John Wiley & Sons",
-            "year": "2018"
-          }
-        ]
-      }
+      "info": "The deliberate, repeatable moves Edmondson argues actually build psychological safety -- not a matter of temperament or team chemistry."
     }
   ],
   "bridges": [

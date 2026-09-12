@@ -1,7 +1,7 @@
 {
   "id": "fundamental-forces",
   "title": "Fundamental forces of physics",
-  "category": "Science",
+  "category": "science",
   "large": true,
   "clusters": [
     {
@@ -25,21 +25,41 @@
       ],
       "termInfo": {
         "mass": {
-          "link": "wiki:Mass"
+          "links": [
+            {
+              "href": "wiki:Mass"
+            }
+          ]
         },
         "spacetime curvature": {
-          "link": "wiki:Curved spacetime"
+          "links": [
+            {
+              "href": "wiki:Curved spacetime"
+            }
+          ]
         },
         "universal attraction": {
           "text": "Newton's own term for gravity: the idea that every mass pulls on every other mass, without exception.",
-          "link": "wiki:Newton's law of universal gravitation"
+          "links": [
+            {
+              "href": "wiki:Newton's law of universal gravitation"
+            }
+          ]
         },
         "escape velocity": {
-          "link": "wiki:Escape velocity"
+          "links": [
+            {
+              "href": "wiki:Escape velocity"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Gravity"
+        "links": [
+          {
+            "href": "wiki:Gravity"
+          }
+        ]
       }
     },
     {
@@ -63,21 +83,41 @@
       ],
       "termInfo": {
         "electric charge": {
-          "link": "wiki:Electric charge"
+          "links": [
+            {
+              "href": "wiki:Electric charge"
+            }
+          ]
         },
         "photon": {
-          "link": "wiki:Photon"
+          "links": [
+            {
+              "href": "wiki:Photon"
+            }
+          ]
         },
         "magnetic field": {
-          "link": "wiki:Magnetic field"
+          "links": [
+            {
+              "href": "wiki:Magnetic field"
+            }
+          ]
         },
         "Coulomb's law": {
           "text": "The law describing the force between two electric charges — stronger when the charges are larger, weaker as the distance between them grows.",
-          "link": "wiki:Coulomb's law"
+          "links": [
+            {
+              "href": "wiki:Coulomb's law"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Electromagnetism"
+        "links": [
+          {
+            "href": "wiki:Electromagnetism"
+          }
+        ]
       }
     },
     {
@@ -101,21 +141,41 @@
       ],
       "termInfo": {
         "quarks": {
-          "link": "wiki:Quark"
+          "links": [
+            {
+              "href": "wiki:Quark"
+            }
+          ]
         },
         "gluons": {
-          "link": "wiki:Gluon"
+          "links": [
+            {
+              "href": "wiki:Gluon"
+            }
+          ]
         },
         "nuclear binding energy": {
-          "link": "wiki:Nuclear binding energy"
+          "links": [
+            {
+              "href": "wiki:Nuclear binding energy"
+            }
+          ]
         },
         "confinement": {
           "text": "The rule that quarks are never observed alone — the strong force grows stronger with distance, permanently trapping them inside particles like protons.",
-          "link": "wiki:Color confinement"
+          "links": [
+            {
+              "href": "wiki:Color confinement"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Strong interaction"
+        "links": [
+          {
+            "href": "wiki:Strong interaction"
+          }
+        ]
       }
     },
     {
@@ -139,21 +199,41 @@
       ],
       "termInfo": {
         "beta decay": {
-          "link": "wiki:Beta decay"
+          "links": [
+            {
+              "href": "wiki:Beta decay"
+            }
+          ]
         },
         "neutrino": {
-          "link": "wiki:Neutrino"
+          "links": [
+            {
+              "href": "wiki:Neutrino"
+            }
+          ]
         },
         "radioactive decay": {
-          "link": "wiki:Radioactive decay"
+          "links": [
+            {
+              "href": "wiki:Radioactive decay"
+            }
+          ]
         },
         "flavor change": {
           "text": "In particle physics, a quark or lepton transforming into a different type (\"flavor\") of itself — exactly what the weak force alone can make happen.",
-          "link": "wiki:Flavour (particle physics)"
+          "links": [
+            {
+              "href": "wiki:Flavour (particle physics)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Weak interaction"
+        "links": [
+          {
+            "href": "wiki:Weak interaction"
+          }
+        ]
       }
     }
   ],
@@ -168,7 +248,11 @@
       "fact": "Field bridges the two: gravity and electromagnetism are both classically described as continuous fields reaching across all of space, unlike the short-range strong and weak forces confined to the nucleus.",
       "info": {
         "text": "A quantity with a value at every point in space — how forces like gravity and electromagnetism are classically described as reaching across distance.",
-        "link": "wiki:Field (physics)"
+        "links": [
+          {
+            "href": "wiki:Field (physics)"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -186,7 +270,11 @@
       "fact": "The atomic nucleus bridges the two: both forces act only within it — the strong force binds it together, and the weak force can transform particles inside it, triggering radioactive decay.",
       "info": {
         "text": "The dense core of protons and neutrons at the center of an atom.",
-        "link": "wiki:Atomic nucleus"
+        "links": [
+          {
+            "href": "wiki:Atomic nucleus"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -203,7 +291,11 @@
       ],
       "fact": "Electroweak unification bridges the two: at extremely high energies, the electromagnetic and weak forces merge into a single force, as shown by the Standard Model of particle physics.",
       "info": {
-        "link": "wiki:Electroweak interaction"
+        "links": [
+          {
+            "href": "wiki:Electroweak interaction"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {

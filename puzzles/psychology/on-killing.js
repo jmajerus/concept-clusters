@@ -1,15 +1,15 @@
 // Generated from content/puzzles/on-killing.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "on-killing",
   "title": "On Killing",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Political Science"
+    "psychology",
+    "political-science"
   ],
   "large": true,
   "tags": [
@@ -17,60 +17,21 @@ export default definePuzzle(import.meta.url, {
     "war"
   ],
   "info": {
-    "citations": [
+    "text": "Dave Grossman's argument that human beings carry a deep, documented resistance to killing their own kind -- and what it costs, psychologically, to train a soldier out of it.",
+    "links": [
       {
-        "author": "Grossman, Dave",
-        "publisher": "Back Bay Books",
-        "title": "On Killing: The Psychological Cost of Learning to Kill in War and Society",
-        "year": "1996"
+        "href": "wiki:On Killing"
       }
     ],
-    "link": "wiki:On Killing",
-    "text": "Dave Grossman's argument that human beings carry a deep, documented resistance to killing their own kind -- and what it costs, psychologically, to train a soldier out of it."
-  },
-  "relatedPuzzles": {
-    "entries": [
+    "citations": [
       {
-        "id": "power-and-violence",
-        "via": [
-          "violence",
-          "instrumentality"
-        ],
-        "reason": "Grossman documents the individual psychology that has to be overridden before violence becomes possible; Arendt asks what violence is for at the political level once that threshold is crossed."
+        "title": "On Killing: The Psychological Cost of Learning to Kill in War and Society",
+        "author": "Grossman, Dave",
+        "publisher": "Back Bay Books",
+        "year": "1996"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "Each of these is a lever a twentieth-century military could pull on purpose -- a drill, a legitimizing chain of command, or a piece of training technology -- to raise the historically low rate at which soldiers actually fired to kill. Cultural and moral distance can also be cultivated, but they work through belief and narrative, not through a specific training apparatus.",
-      "id": "engineered-to-override",
-      "prompt": "Which concepts describe a specific method built into modern military training itself -- a drill, a chain of command, or a training technology -- rather than a broader cultural or moral belief that surrounds the war?",
-      "reasons": {
-        "mechanical distance": "Training simulators recreate the same screen-and-sight remove found in real combat technology, so the conditioned reflex is first practiced on a target, not a person."
-      },
-      "targets": [
-        "operant conditioning",
-        "desensitization",
-        "authorization",
-        "target discrimination",
-        "mechanical distance"
-      ]
-    },
-    {
-      "explanation": "Distance and technology change how vivid a kill feels in the moment; these four instead work on what it means -- letting a killer locate the moral weight of the act in the enemy's difference, the cause's justice, a superior's order, or a story told afterward, anywhere but in a single unshared choice.",
-      "id": "relocating-responsibility",
-      "prompt": "Which concepts work by relocating the moral responsibility or justification for a kill onto something other than the killer's own individual choice -- the enemy's supposed otherness, the cause's rightness, a superior's order, or a story told afterward -- rather than simply by making the act feel more distant or less vivid?",
-      "reasons": {
-        "authorization": "The same displacement Stanley Milgram's obedience experiments demonstrated in a laboratory: moral responsibility migrates to whoever gave the order."
-      },
-      "targets": [
-        "cultural distance",
-        "moral distance",
-        "authorization",
-        "rationalization"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "resistance-to-killing",
@@ -89,16 +50,24 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "posturing": {
-          "link": "wiki:Agonistic behaviour",
-          "text": "Displaying aggression -- size, noise, threat -- without actually attacking, the way many animals, and much of historical hand-to-hand combat, settle contests without a kill."
+          "text": "Displaying aggression -- size, noise, threat -- without actually attacking, the way many animals, and much of historical hand-to-hand combat, settle contests without a kill.",
+          "links": [
+            {
+              "href": "wiki:Agonistic behaviour"
+            }
+          ]
         },
         "ratio of fire": {
           "text": "S. L. A. Marshall's contested claim that as few as 15 to 20 percent of World War II riflemen in a position to fire on the enemy actually did so."
         }
       },
       "info": {
-        "link": "wiki:Agonistic behaviour",
-        "text": "The documented reluctance most human beings feel toward killing another person, especially at close range."
+        "text": "The documented reluctance most human beings feel toward killing another person, especially at close range.",
+        "links": [
+          {
+            "href": "wiki:Agonistic behaviour"
+          }
+        ]
       }
     },
     {
@@ -118,15 +87,23 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "cultural distance": {
-          "link": "wiki:Dehumanization",
-          "text": "Framing an enemy as racially, ethnically, or culturally other -- making them feel less like a specific person and more like a category."
+          "text": "Framing an enemy as racially, ethnically, or culturally other -- making them feel less like a specific person and more like a category.",
+          "links": [
+            {
+              "href": "wiki:Dehumanization"
+            }
+          ]
         },
         "mechanical distance": {
           "text": "A sight, screen, or intervening machine -- a rifle scope, a bomber's altitude -- that turns a person into a technical target."
         },
         "moral distance": {
-          "link": "wiki:Just war theory",
-          "text": "A belief that the killing is sanctioned -- required by a just cause, a legitimate authority, or the rules of war -- which can matter as much to a killer's willingness as literal range."
+          "text": "A belief that the killing is sanctioned -- required by a just cause, a legitimate authority, or the rules of war -- which can matter as much to a killer's willingness as literal range.",
+          "links": [
+            {
+              "href": "wiki:Just war theory"
+            }
+          ]
         }
       },
       "info": {
@@ -150,24 +127,40 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "authorization": {
-          "link": "wiki:Milgram experiment",
-          "text": "Acting against one's own resistance simply because a legitimate authority gave the order -- the same dynamic Stanley Milgram documented in his obedience experiments."
+          "text": "Acting against one's own resistance simply because a legitimate authority gave the order -- the same dynamic Stanley Milgram documented in his obedience experiments.",
+          "links": [
+            {
+              "href": "wiki:Milgram experiment"
+            }
+          ]
         },
         "desensitization": {
-          "link": "wiki:Desensitization (psychology)",
-          "text": "A diminished emotional response to a distressing stimulus after repeated exposure to it."
+          "text": "A diminished emotional response to a distressing stimulus after repeated exposure to it.",
+          "links": [
+            {
+              "href": "wiki:Desensitization (psychology)"
+            }
+          ]
         },
         "operant conditioning": {
-          "link": "wiki:Operant conditioning",
-          "text": "Learning a behavior by repeatedly pairing it with a consequence, until the response becomes automatic rather than deliberated."
+          "text": "Learning a behavior by repeatedly pairing it with a consequence, until the response becomes automatic rather than deliberated.",
+          "links": [
+            {
+              "href": "wiki:Operant conditioning"
+            }
+          ]
         },
         "target discrimination": {
           "text": "Training with realistic, human-shaped targets that fall when hit, instead of abstract bullseyes, so the body learns to fire on a human silhouette without conscious deliberation."
         }
       },
       "info": {
-        "link": "wiki:Operant conditioning",
-        "text": "The specific training techniques twentieth-century militaries developed to raise the historically low rate at which soldiers actually fired on the enemy."
+        "text": "The specific training techniques twentieth-century militaries developed to raise the historically low rate at which soldiers actually fired on the enemy.",
+        "links": [
+          {
+            "href": "wiki:Operant conditioning"
+          }
+        ]
       }
     },
     {
@@ -187,16 +180,28 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "guilt": {
-          "link": "wiki:Guilt (emotion)",
-          "text": "A moral emotion that occurs when a person believes they have violated their own or a shared standard of conduct."
+          "text": "A moral emotion that occurs when a person believes they have violated their own or a shared standard of conduct.",
+          "links": [
+            {
+              "href": "wiki:Guilt (emotion)"
+            }
+          ]
         },
         "psychiatric casualties": {
-          "link": "wiki:Psychiatric casualty",
-          "text": "Combatants unable to continue fighting because of psychological breakdown rather than physical wounds."
+          "text": "Combatants unable to continue fighting because of psychological breakdown rather than physical wounds.",
+          "links": [
+            {
+              "href": "wiki:Psychiatric casualty"
+            }
+          ]
         },
         "rationalization": {
-          "link": "wiki:Rationalization (psychology)",
-          "text": "Constructing a seemingly logical reason for an act after the fact, to defend against guilt and protect one's own self-image."
+          "text": "Constructing a seemingly logical reason for an act after the fact, to defend against guilt and protect one's own self-image.",
+          "links": [
+            {
+              "href": "wiki:Rationalization (psychology)"
+            }
+          ]
         }
       },
       "info": {
@@ -253,13 +258,55 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-12",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "engineered-to-override",
+      "prompt": "Which concepts describe a specific method built into modern military training itself -- a drill, a chain of command, or a training technology -- rather than a broader cultural or moral belief that surrounds the war?",
+      "explanation": "Each of these is a lever a twentieth-century military could pull on purpose -- a drill, a legitimizing chain of command, or a piece of training technology -- to raise the historically low rate at which soldiers actually fired to kill. Cultural and moral distance can also be cultivated, but they work through belief and narrative, not through a specific training apparatus.",
+      "targets": [
+        "operant conditioning",
+        "desensitization",
+        "authorization",
+        "target discrimination",
+        "mechanical distance"
+      ],
+      "reasons": {
+        "mechanical distance": "Training simulators recreate the same screen-and-sight remove found in real combat technology, so the conditioned reflex is first practiced on a target, not a person."
+      }
+    },
+    {
+      "id": "relocating-responsibility",
+      "prompt": "Which concepts work by relocating the moral responsibility or justification for a kill onto something other than the killer's own individual choice -- the enemy's supposed otherness, the cause's rightness, a superior's order, or a story told afterward -- rather than simply by making the act feel more distant or less vivid?",
+      "explanation": "Distance and technology change how vivid a kill feels in the moment; these four instead work on what it means -- letting a killer locate the moral weight of the act in the enemy's difference, the cause's justice, a superior's order, or a story told afterward, anywhere but in a single unshared choice.",
+      "targets": [
+        "cultural distance",
+        "moral distance",
+        "authorization",
+        "rationalization"
+      ],
+      "reasons": {
+        "authorization": "The same displacement Stanley Milgram's obedience experiments demonstrated in a laboratory: moral responsibility migrates to whoever gave the order."
+      }
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "power-and-violence",
+        "reason": "Grossman documents the individual psychology that has to be overridden before violence becomes possible; Arendt asks what violence is for at the political level once that threshold is crossed.",
+        "via": [
+          "violence",
+          "instrumentality"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

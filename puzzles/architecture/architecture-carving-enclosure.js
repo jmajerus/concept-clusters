@@ -1,14 +1,14 @@
 // Generated from content/puzzles/architecture-carving-enclosure.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "architecture-carving-enclosure",
   "title": "Carving and Enclosing: Mass, Void, and Threshold",
-  "category": "Architecture",
+  "category": "architecture",
   "subcategories": {
-    "Architecture": "form-and-space"
+    "architecture": "form-and-space"
   },
   "info": {
     "text": "How architects make rooms from raw matter: adding and subtracting mass to carve voids, then drawing walls, gates, and thresholds that divide space into inside and outside.",
@@ -103,6 +103,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "cloister",
       "term": "cloister",
       "clusters": [
         0,
@@ -112,6 +113,7 @@ export default definePuzzle(import.meta.url, {
       "termRole": "reference"
     },
     {
+      "id": "portal",
       "term": "portal",
       "clusters": [
         0,

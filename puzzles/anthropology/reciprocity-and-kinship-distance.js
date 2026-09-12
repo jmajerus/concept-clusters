@@ -1,15 +1,19 @@
 // Generated from content/puzzles/reciprocity-and-kinship-distance.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "reciprocity-and-kinship-distance",
   "title": "Reciprocity and Kinship Distance",
-  "category": "Anthropology",
+  "category": "anthropology",
   "info": {
     "text": "Marshall Sahlins argued that non-market giving is structured by kinship distance: the closer the relationship, the less anyone keeps accounts, and the farther the relationship, the more each party tries to come out ahead.",
-    "link": "wiki:Reciprocity (cultural anthropology)",
+    "links": [
+      {
+        "href": "wiki:Reciprocity (cultural anthropology)"
+      }
+    ],
     "citations": [
       {
         "title": "Stone Age Economics",
@@ -17,29 +21,15 @@ export default definePuzzle(import.meta.url, {
         "publisher": "Aldine-Atherton",
         "year": "1972",
         "pages": "185–204"
-      }
-    ]
-  },
-  "relatedPuzzles": {
-    "entries": [
+      },
       {
-        "id": "evolution-of-cooperation",
-        "reason": "That puzzle treats reciprocity as a strategy among anonymous players. This one treats it as a kinship-moral continuum of giving -- same everyday word, different lesson."
+        "title": "Argonauts of the Western Pacific",
+        "author": "Bronisław Malinowski",
+        "publisher": "Routledge & Kegan Paul",
+        "year": "1922"
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "who-the-giving-is-with",
-      "prompt": "Which terms name who the giving or taking is with, rather than a practice, a mechanism, or the distance scale itself?",
-      "explanation": "Sahlins indexes the typology by social position: close kin at the near pole, exchange partners in the middle, and strangers at the far pole. Food sharing, the Kula ring, haggling, and raiding are things people do; vague obligation, equivalent return, and something for nothing describe how return is treated; kinship distance is the scale that orders those positions.",
-      "targets": [
-        "close kin",
-        "exchange partner",
-        "strangers"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "generalized-reciprocity",
@@ -65,17 +55,6 @@ export default definePuzzle(import.meta.url, {
         "vague obligation": {
           "text": "A return may come someday, in some form, or not in any matched way -- and the relationship does not turn on tallying it."
         }
-      },
-      "info": {
-        "citations": [
-          {
-            "title": "Stone Age Economics",
-            "author": "Marshall Sahlins",
-            "publisher": "Aldine-Atherton",
-            "year": "1972",
-            "pages": "193–194"
-          }
-        ]
       }
     },
     {
@@ -95,13 +74,9 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Kula ring": {
           "text": "A ceremonial circuit of shell necklaces and armbands among island communities of the Massim archipelago, recorded by Malinowski, in which a partner is owed a counterpart valuable rather than an open-ended favor.",
-          "link": "wiki:Kula ring",
-          "citations": [
+          "links": [
             {
-              "title": "Argonauts of the Western Pacific",
-              "author": "Bronisław Malinowski",
-              "publisher": "Routledge & Kegan Paul",
-              "year": "1922"
+              "href": "wiki:Kula ring"
             }
           ]
         },
@@ -111,17 +86,6 @@ export default definePuzzle(import.meta.url, {
         "exchange partner": {
           "text": "A lasting counterpart in dyadic exchange -- not a household intimate, not a stranger to be fleeced -- with whom equivalence is the point of the relationship."
         }
-      },
-      "info": {
-        "citations": [
-          {
-            "title": "Stone Age Economics",
-            "author": "Marshall Sahlins",
-            "publisher": "Aldine-Atherton",
-            "year": "1972",
-            "pages": "194–195"
-          }
-        ]
       }
     },
     {
@@ -152,17 +116,6 @@ export default definePuzzle(import.meta.url, {
         "strangers": {
           "text": "People outside the kinship-moral field, with whom Sahlins located impersonal, self-interested taking rather than sharing or matched exchange."
         }
-      },
-      "info": {
-        "citations": [
-          {
-            "title": "Stone Age Economics",
-            "author": "Marshall Sahlins",
-            "publisher": "Aldine-Atherton",
-            "year": "1972",
-            "pages": "195"
-          }
-        ]
       }
     }
   ],
@@ -176,21 +129,16 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Sahlins argued that the three modes are a continuum of kinship distance, not a random typology: generalized reciprocity inside the household-kin group, balanced reciprocity among more distant community partners, and negative reciprocity with strangers and enemies.",
-      "termRole": "reference",
-      "relationKind": "continuity",
       "info": {
         "text": "In societies organized primarily by kinship, moral obligation tracks how close someone stands in that field: near kin are not supposed to keep accounts; strangers sit outside the ethic of matching gifts.",
-        "link": "wiki:Reciprocity (cultural anthropology)",
-        "citations": [
+        "links": [
           {
-            "title": "Stone Age Economics",
-            "author": "Marshall Sahlins",
-            "publisher": "Aldine-Atherton",
-            "year": "1972",
-            "pages": "196–201"
+            "href": "wiki:Reciprocity (cultural anthropology)"
           }
         ]
       },
+      "termRole": "reference",
+      "relationKind": "continuity",
       "idealTerms": [
         "close kin",
         "exchange partner",
@@ -198,20 +146,33 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Grok",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-20"
-    },
-    {
-      "system": "Grok",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-20"
+      "id": "who-the-giving-is-with",
+      "prompt": "Which terms name who the giving or taking is with, rather than a practice, a mechanism, or the distance scale itself?",
+      "explanation": "Sahlins indexes the typology by social position: close kin at the near pole, exchange partners in the middle, and strangers at the far pole. Food sharing, the Kula ring, haggling, and raiding are things people do; vague obligation, equivalent return, and something for nothing describe how return is treated; kinship distance is the scale that orders those positions.",
+      "targets": [
+        "close kin",
+        "exchange partner",
+        "strangers"
+      ]
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "evolution-of-cooperation",
+        "reason": "That puzzle treats reciprocity as a strategy among anonymous players. This one treats it as a kinship-moral continuum of giving -- same everyday word, different lesson."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Grok",
+        "kind": "generative"
+      }
+    ]
+  }
 });

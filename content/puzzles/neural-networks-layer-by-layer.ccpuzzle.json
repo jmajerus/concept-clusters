@@ -1,9 +1,9 @@
 {
   "id": "neural-networks-layer-by-layer",
   "title": "Neural networks, layer by layer",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "artificial-intelligence"
+    "computer-science": "artificial-intelligence"
   },
   "tags": [
     "artificial intelligence",
@@ -13,7 +13,11 @@
   "large": true,
   "info": {
     "text": "A neural network is both a layered computation and a trainable system: signals move forward to make a prediction, while error information moves backward to improve the parameters.",
-    "link": "wiki:Artificial neural network"
+    "links": [
+      {
+        "href": "wiki:Artificial neural network"
+      }
+    ]
   },
   "clusters": [
     {
@@ -38,19 +42,35 @@
       "termInfo": {
         "input layer": {
           "text": "The network boundary that receives the numerical representation of an example.",
-          "link": "wiki:Artificial neural network"
+          "links": [
+            {
+              "href": "wiki:Artificial neural network"
+            }
+          ]
         },
         "hidden layer": {
           "text": "A layer between input and output that learns intermediate representations.",
-          "link": "wiki:Hidden layer"
+          "links": [
+            {
+              "href": "wiki:Hidden layer"
+            }
+          ]
         },
         "output layer": {
           "text": "The final layer that produces prediction values or scores.",
-          "link": "wiki:Artificial neural network"
+          "links": [
+            {
+              "href": "wiki:Artificial neural network"
+            }
+          ]
         },
         "connection weight": {
           "text": "A learned multiplier controlling how strongly one unit's output contributes to another unit.",
-          "link": "wiki:Weight (artificial neural network)"
+          "links": [
+            {
+              "href": "wiki:Weight (artificial neural network)"
+            }
+          ]
         }
       }
     },
@@ -74,15 +94,27 @@
       "termInfo": {
         "weighted sum": {
           "text": "The sum of incoming values after each has been multiplied by its connection weight.",
-          "link": "wiki:Linear combination"
+          "links": [
+            {
+              "href": "wiki:Linear combination"
+            }
+          ]
         },
         "bias": {
           "text": "A learned offset added before a unit's activation function is applied.",
-          "link": "wiki:Bias (machine learning)"
+          "links": [
+            {
+              "href": "wiki:Bias (machine learning)"
+            }
+          ]
         },
         "activation function": {
           "text": "A usually nonlinear transformation applied to a unit's combined input.",
-          "link": "wiki:Activation function"
+          "links": [
+            {
+              "href": "wiki:Activation function"
+            }
+          ]
         }
       }
     },
@@ -106,15 +138,27 @@
       "termInfo": {
         "prediction": {
           "text": "The output value or scores produced by the network for an example.",
-          "link": "wiki:Prediction"
+          "links": [
+            {
+              "href": "wiki:Prediction"
+            }
+          ]
         },
         "target": {
           "text": "The desired or observed output used to evaluate a training prediction.",
-          "link": "wiki:Supervised learning"
+          "links": [
+            {
+              "href": "wiki:Supervised learning"
+            }
+          ]
         },
         "loss": {
           "text": "A numerical measure of how far a prediction is from the training objective.",
-          "link": "wiki:Loss function"
+          "links": [
+            {
+              "href": "wiki:Loss function"
+            }
+          ]
         }
       }
     },
@@ -140,19 +184,35 @@
       "termInfo": {
         "backpropagation": {
           "text": "An efficient use of the chain rule to calculate how network parameters contributed to loss.",
-          "link": "wiki:Backpropagation"
+          "links": [
+            {
+              "href": "wiki:Backpropagation"
+            }
+          ]
         },
         "gradient": {
           "text": "The collection of derivatives showing how a small change in each parameter would change loss.",
-          "link": "wiki:Gradient"
+          "links": [
+            {
+              "href": "wiki:Gradient"
+            }
+          ]
         },
         "optimizer": {
           "text": "An update rule that uses gradients and other state to change trainable parameters.",
-          "link": "wiki:Stochastic gradient descent"
+          "links": [
+            {
+              "href": "wiki:Stochastic gradient descent"
+            }
+          ]
         },
         "learning rate": {
           "text": "A hyperparameter controlling the scale of parameter updates made during optimization.",
-          "link": "wiki:Learning rate"
+          "links": [
+            {
+              "href": "wiki:Learning rate"
+            }
+          ]
         }
       }
     }
@@ -168,7 +228,11 @@
       "fact": "A simplified artificial neuron is where architecture becomes computation: it receives weighted connections, adds a bias, applies an activation function, and sends the result to the next layer.",
       "info": {
         "text": "A computational unit that combines inputs and applies an activation function to produce an output.",
-        "link": "wiki:Artificial neuron"
+        "links": [
+          {
+            "href": "wiki:Artificial neuron"
+          }
+        ]
       },
       "relationKind": "foundation",
       "direction": {
@@ -191,7 +255,11 @@
       "fact": "Connection weights and biases are trainable parameters: the architecture provides places to store them, and learning changes them according to gradients from the loss.",
       "info": {
         "text": "A value inside the network, usually a weight or bias, adjusted during training.",
-        "link": "wiki:Parameter (statistics)"
+        "links": [
+          {
+            "href": "wiki:Parameter (statistics)"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -215,7 +283,11 @@
       "fact": "One training step joins the two directions of work: a forward pass produces a prediction and loss, then backpropagation and the optimizer use that result to update parameters.",
       "info": {
         "text": "One cycle of forward computation, loss measurement, gradient calculation, and parameter updating.",
-        "link": "wiki:Backpropagation"
+        "links": [
+          {
+            "href": "wiki:Backpropagation"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -234,7 +306,11 @@
       "fact": "A forward pass turns the current input into a prediction; during training, that prediction then enters the loss calculation against a target.",
       "info": {
         "text": "The input-to-output evaluation of a network using its current parameters.",
-        "link": "wiki:Feedforward neural network"
+        "links": [
+          {
+            "href": "wiki:Feedforward neural network"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -343,13 +419,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

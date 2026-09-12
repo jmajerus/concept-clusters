@@ -1,15 +1,15 @@
 // Generated from content/puzzles/oath-betrayed.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "oath-betrayed",
   "title": "Oath Betrayed",
-  "category": "Bioethics",
+  "category": "bioethics",
   "categories": [
-    "Bioethics",
-    "Political Science"
+    "bioethics",
+    "political-science"
   ],
   "tags": [
     "book"
@@ -144,6 +144,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "calibration-as-research",
       "term": "calibration as research",
       "clusters": [
         0,

@@ -1,68 +1,36 @@
 // Generated from content/puzzles/the-leader-written-large.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-leader-written-large",
   "title": "The Leader Written Large",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "large": true,
   "tags": [
     "book"
   ],
   "info": {
-    "citations": [
+    "text": "Kets de Vries and Miller's claim that a company's whole structure and culture can come to mirror the neurotic style of the small group of executives, often just one person, running it -- four of the five styles they identified are on this board; the fifth, schizoid, is not.",
+    "links": [
       {
-        "author": "Manfred F. R. Kets de Vries and Danny Miller",
-        "publisher": "Jossey-Bass",
-        "title": "The Neurotic Organization: Diagnosing and Changing Counterproductive Styles of Management",
-        "year": "1984"
+        "href": "wiki:Manfred F.R. Kets de Vries"
       }
     ],
-    "link": "wiki:Manfred F.R. Kets de Vries",
-    "text": "Kets de Vries and Miller's claim that a company's whole structure and culture can come to mirror the neurotic style of the small group of executives, often just one person, running it -- four of the five styles they identified are on this board; the fifth, schizoid, is not."
+    "citations": [
+      {
+        "title": "The Neurotic Organization: Diagnosing and Changing Counterproductive Styles of Management",
+        "author": "Manfred F. R. Kets de Vries and Danny Miller",
+        "publisher": "Jossey-Bass",
+        "year": "1984"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "explanation": "Kets de Vries and Miller's whole argument depends on there being two levels here, not one: a personal trait in the person at the top, and a structural feature of the whole organization that mirrors it. These four are the personal traits; the rest of the board is what happens to a company once that trait sits at the top of it long enough.",
-      "id": "the-leaders-own-mind",
-      "prompt": "Which concepts describe the leader's own personality, rather than a structural feature of the organization built around it?",
-      "reasons": {
-        "need for admiration": "The dramatic leader's own disposition, prior to any centralization of authority built around it.",
-        "passivity": "The depressive leader's own disposition, prior to any bureaucratic inertia that comes to match it.",
-        "perfectionism": "The compulsive leader's own disposition, prior to any procedure built to enforce it.",
-        "suspicion": "The paranoid leader's own disposition, prior to any information system built to justify it."
-      },
-      "targets": [
-        "suspicion",
-        "perfectionism",
-        "need for admiration",
-        "passivity"
-      ]
-    },
-    {
-      "explanation": "Each of these is the organizational-level answer to the personal trait in the previous round: centralized control channels the paranoid leader's need to know everything before it happens; ritualized procedure channels the compulsive leader's need to eliminate deviation; overcentralization channels the dramatic leader's need to be the one everyone looks to; and bureaucratic inertia is what's left once the depressive leader's own energy for initiative has already gone. The company builds a structure to carry what one person's psychology can't carry alone.",
-      "id": "structure-as-defense",
-      "prompt": "Which concepts are structural features of the whole organization that channel the leader's personal trait, rather than the trait itself?",
-      "reasons": {
-        "bureaucratic inertia": "What continues operating once the depressive leader's own initiative is already gone.",
-        "centralized control": "The paranoid leader's vigilance, built into the org chart so it doesn't rest on one person's attention alone.",
-        "overcentralization": "The dramatic leader's need to be central, built into how authority is actually distributed.",
-        "ritualized procedure": "The compulsive leader's perfectionism, built into procedure so deviation is caught structurally."
-      },
-      "targets": [
-        "centralized control",
-        "ritualized procedure",
-        "overcentralization",
-        "bureaucratic inertia"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-paranoid",
@@ -166,10 +134,10 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Both styles produce elaborate control systems, but for different reasons: the paranoid leader needs to detect threats before they strike, while the compulsive leader needs to eliminate any outcome that deviates from a predetermined standard of perfection. Watching for danger and demanding perfection produce nearly identical org charts out of very different fears.",
-      "relationKind": "cross-cutting",
       "info": {
         "text": "Heavy organizational control, built for two very different underlying reasons."
       },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "hypervigilance",
         "perfectionism"
@@ -183,10 +151,10 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "These two styles sit at opposite poles of the same axis: the compulsive organization exists to suppress and channel impulse into predictable procedure, while the dramatic organization exists to act on impulse immediately, with barely any procedure standing between the leader's appetite and the organization's next move.",
-      "relationKind": "contrast",
       "info": {
         "text": "What each style does with impulse -- suppress it into procedure, or act on it immediately."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "ritualized procedure",
         "impulsive risk-taking"
@@ -200,10 +168,10 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "The dramatic organization's hyperactive energy is rarely sustainable, and depends entirely on one person supplying it. When a dramatic founder leaves, burns out, or is finally removed, the vacuum left behind often settles into exactly the depressive organization's passivity and loss of confidence -- one style's excess becoming the precondition for the other's collapse.",
-      "relationKind": "dynamic",
       "info": {
         "text": "How one style's unsustainable excess becomes the precondition for the next style's collapse."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "unplanned expansion",
         "loss of confidence"
@@ -215,20 +183,48 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "the-leaders-own-mind",
+      "prompt": "Which concepts describe the leader's own personality, rather than a structural feature of the organization built around it?",
+      "explanation": "Kets de Vries and Miller's whole argument depends on there being two levels here, not one: a personal trait in the person at the top, and a structural feature of the whole organization that mirrors it. These four are the personal traits; the rest of the board is what happens to a company once that trait sits at the top of it long enough.",
+      "targets": [
+        "suspicion",
+        "perfectionism",
+        "need for admiration",
+        "passivity"
+      ],
+      "reasons": {
+        "need for admiration": "The dramatic leader's own disposition, prior to any centralization of authority built around it.",
+        "passivity": "The depressive leader's own disposition, prior to any bureaucratic inertia that comes to match it.",
+        "perfectionism": "The compulsive leader's own disposition, prior to any procedure built to enforce it.",
+        "suspicion": "The paranoid leader's own disposition, prior to any information system built to justify it."
+      }
     },
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "lenses",
-      "system": "Claude"
+      "id": "structure-as-defense",
+      "prompt": "Which concepts are structural features of the whole organization that channel the leader's personal trait, rather than the trait itself?",
+      "explanation": "Each of these is the organizational-level answer to the personal trait in the previous round: centralized control channels the paranoid leader's need to know everything before it happens; ritualized procedure channels the compulsive leader's need to eliminate deviation; overcentralization channels the dramatic leader's need to be the one everyone looks to; and bureaucratic inertia is what's left once the depressive leader's own energy for initiative has already gone. The company builds a structure to carry what one person's psychology can't carry alone.",
+      "targets": [
+        "centralized control",
+        "ritualized procedure",
+        "overcentralization",
+        "bureaucratic inertia"
+      ],
+      "reasons": {
+        "bureaucratic inertia": "What continues operating once the depressive leader's own initiative is already gone.",
+        "centralized control": "The paranoid leader's vigilance, built into the org chart so it doesn't rest on one person's attention alone.",
+        "overcentralization": "The dramatic leader's need to be central, built into how authority is actually distributed.",
+        "ritualized procedure": "The compulsive leader's perfectionism, built into procedure so deviation is caught structurally."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

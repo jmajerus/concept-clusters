@@ -1,14 +1,14 @@
 // Generated from content/puzzles/tropical-cyclone-threat.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "tropical-cyclone-threat",
   "title": "Tracking the Threat",
-  "category": "Atmospheric Science",
+  "category": "atmospheric-science",
   "subcategories": {
-    "Atmospheric Science": "meteorology"
+    "atmospheric-science": "meteorology"
   },
   "info": {
     "text": "How forecasters follow a storm and who must respond: the currents that steer it, the separate hazards it delivers to coast and inland, and the instruments and graphics that turn a distant swirl into a warning.",

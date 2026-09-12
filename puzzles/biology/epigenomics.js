@@ -1,14 +1,14 @@
 // Generated from content/puzzles/epigenomics.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "epigenomics",
   "title": "The Epigenome",
-  "category": "Biology",
+  "category": "biology",
   "subcategories": {
-    "Biology": "multiomics"
+    "biology": "multiomics"
   },
   "large": true,
   "info": {
@@ -393,9 +393,9 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Cursor (Grok 4.6)"
+        "name": "Cursor (Grok 4.6)",
+        "reasoning": "high"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 });

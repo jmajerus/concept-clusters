@@ -1,14 +1,14 @@
 {
   "id": "aligning-biological-sequences",
   "title": "Aligning biological sequences",
-  "category": "Computer Science",
+  "category": "computer-science",
   "categories": [
-    "Computer Science",
-    "Biology"
+    "computer-science",
+    "biology"
   ],
   "subcategories": {
-    "Computer Science": "bioinformatics",
-    "Biology": "bioinformatics"
+    "computer-science": "bioinformatics",
+    "biology": "bioinformatics"
   },
   "tags": [
     "bioinformatics",
@@ -54,19 +54,35 @@
       "termInfo": {
         "match": {
           "text": "An aligned pair of identical or otherwise compatible sequence symbols that contributes positively to a score.",
-          "link": "wiki:Sequence alignment"
+          "links": [
+            {
+              "href": "wiki:Sequence alignment"
+            }
+          ]
         },
         "mismatch": {
           "text": "An aligned pair of different symbols, assigned a score or penalty by the alignment model.",
-          "link": "wiki:Sequence alignment"
+          "links": [
+            {
+              "href": "wiki:Sequence alignment"
+            }
+          ]
         },
         "gap penalty": {
           "text": "The scoring cost for opening or extending a gap representing an insertion or deletion.",
-          "link": "wiki:Gap penalty"
+          "links": [
+            {
+              "href": "wiki:Gap penalty"
+            }
+          ]
         },
         "substitution matrix": {
           "text": "A table assigning scores to possible amino-acid or nucleotide substitutions.",
-          "link": "wiki:Substitution matrix"
+          "links": [
+            {
+              "href": "wiki:Substitution matrix"
+            }
+          ]
         }
       }
     },
@@ -92,19 +108,35 @@
       "termInfo": {
         "global alignment": {
           "text": "An alignment that seeks a correspondence across the full lengths of both sequences.",
-          "link": "wiki:Needleman–Wunsch algorithm"
+          "links": [
+            {
+              "href": "wiki:Needleman–Wunsch algorithm"
+            }
+          ]
         },
         "local alignment": {
           "text": "An alignment that finds the highest-scoring pair of subsequences within longer inputs.",
-          "link": "wiki:Smith–Waterman algorithm"
+          "links": [
+            {
+              "href": "wiki:Smith–Waterman algorithm"
+            }
+          ]
         },
         "dynamic programming": {
           "text": "An optimization method that solves an alignment by combining solutions to overlapping subproblems.",
-          "link": "wiki:Dynamic programming"
+          "links": [
+            {
+              "href": "wiki:Dynamic programming"
+            }
+          ]
         },
         "heuristic search": {
           "text": "A faster search strategy that prioritizes promising candidates without exhaustively evaluating every possible alignment.",
-          "link": "wiki:Heuristic (computer science)"
+          "links": [
+            {
+              "href": "wiki:Heuristic (computer science)"
+            }
+          ]
         }
       }
     },
@@ -130,19 +162,35 @@
       "termInfo": {
         "query": {
           "text": "The nucleotide or protein sequence submitted for comparison against other sequences.",
-          "link": "https://www.ncbi.nlm.nih.gov/books/NBK1734/"
+          "links": [
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK1734/"
+            }
+          ]
         },
         "database": {
           "text": "The selected collection of subject sequences against which a query is searched.",
-          "link": "wiki:Biological database"
+          "links": [
+            {
+              "href": "wiki:Biological database"
+            }
+          ]
         },
         "bit score": {
           "text": "A normalized alignment score that allows comparisons across searches using related scoring systems.",
-          "link": "https://www.ncbi.nlm.nih.gov/books/NBK62051/"
+          "links": [
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK62051/"
+            }
+          ]
         },
         "E-value": {
           "text": "The number of matches with at least a given score expected by chance under the search model and database size.",
-          "link": "https://www.ncbi.nlm.nih.gov/books/NBK62051/"
+          "links": [
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK62051/"
+            }
+          ]
         }
       }
     }
@@ -158,7 +206,11 @@
       "fact": "Percent identity summarizes exact symbol matches within the reported alignment, but changes with alignment boundaries and does not measure biological function or ancestry by itself.",
       "info": {
         "text": "The percentage of aligned positions containing identical symbols, calculated over a specified alignment length.",
-        "link": "wiki:Sequence identity"
+        "links": [
+          {
+            "href": "wiki:Sequence identity"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "idealTerms": {
@@ -176,7 +228,11 @@
       "fact": "Seed-and-extend bridges heuristic strategy and database search by locating short promising matches before expanding and scoring their surrounding regions.",
       "info": {
         "text": "A search strategy that finds short seed matches and extends the promising ones into longer alignments.",
-        "link": "https://www.ncbi.nlm.nih.gov/books/NBK20261/"
+        "links": [
+          {
+            "href": "https://www.ncbi.nlm.nih.gov/books/NBK20261/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -200,7 +256,11 @@
       "fact": "Homology is shared evolutionary ancestry inferred from evidence that can include alignment, statistical support, domains, structure, and phylogeny; sequences are homologous or not, not a percentage homologous.",
       "info": {
         "text": "A relationship of common evolutionary ancestry between biological sequences or structures.",
-        "link": "wiki:Sequence homology"
+        "links": [
+          {
+            "href": "wiki:Sequence homology"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -294,13 +354,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

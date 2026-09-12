@@ -1,20 +1,42 @@
 {
   "id": "the-quiet-rebellion",
   "title": "The Quiet Rebellion",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Mulford Q. Sibley, University of Minnesota political theorist, Quaker conscientious objector, and self-described democratic socialist, whose 611-page history of political thought running from Plato to Marx was itself evidence that his McCarthy-era arguments for pacifism, civil disobedience, and utopian thought as serious political theory came from someone who commanded the whole tradition, not from someone speaking outside it.",
-    "link": "wiki:Mulford Q. Sibley",
     "citations": [
       {
         "title": "Political Ideas and Ideologies: A History of Political Thought",
         "author": "Mulford Q. Sibley",
         "publisher": "Harper & Row",
         "year": "1970"
+      },
+      {
+        "title": "The Political Theories of Modern Pacifism: An Analysis and Criticism",
+        "author": "Mulford Q. Sibley",
+        "publisher": "Pacifist Research Bureau",
+        "year": "1944"
+      },
+      {
+        "title": "Conscription of Conscience: The American State and the Conscientious Objector, 1940-1947",
+        "author": "Mulford Q. Sibley and Philip E. Jacob",
+        "publisher": "Cornell University Press",
+        "year": "1952"
+      },
+      {
+        "title": "The Obligation to Disobey: Conscience and the Law",
+        "author": "Mulford Q. Sibley",
+        "publisher": "Council on Religion and International Affairs",
+        "year": "1970"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Mulford Q. Sibley"
       }
     ]
   },
@@ -40,18 +62,18 @@
       ],
       "termInfo": {
         "the peace testimony": {
-          "link": "wiki:Testimony of peace"
+          "links": [
+            {
+              "href": "wiki:Testimony of peace"
+            }
+          ]
         }
       },
       "info": {
         "text": "Sibley's scholarly typology of twentieth-century pacifism, distinguishing traditions grounded in religious conviction from a separate, strategically-argued political pacifism.",
-        "link": "wiki:Mulford Q. Sibley",
-        "citations": [
+        "links": [
           {
-            "title": "The Political Theories of Modern Pacifism: An Analysis and Criticism",
-            "author": "Mulford Q. Sibley",
-            "publisher": "Pacifist Research Bureau",
-            "year": "1944"
+            "href": "wiki:Mulford Q. Sibley"
           }
         ]
       }
@@ -77,13 +99,9 @@
       ],
       "info": {
         "text": "The real, unequal tracks the WWII draft system actually sorted objectors into, documented by Sibley's own study of the American state's machinery for conscientious objection.",
-        "link": "wiki:Conscientious objector",
-        "citations": [
+        "links": [
           {
-            "title": "Conscription of Conscience: The American State and the Conscientious Objector, 1940-1947",
-            "author": "Mulford Q. Sibley and Philip E. Jacob",
-            "publisher": "Cornell University Press",
-            "year": "1952"
+            "href": "wiki:Conscientious objector"
           }
         ]
       }
@@ -109,13 +127,9 @@
       ],
       "info": {
         "text": "Sibley's own career-long insistence that conscience, utopian thinking, and open democratic-socialist commitment all belonged inside, not outside, serious political life and a university's own faculty.",
-        "link": "wiki:Mulford Q. Sibley",
-        "citations": [
+        "links": [
           {
-            "title": "The Obligation to Disobey: Conscience and the Law",
-            "author": "Mulford Q. Sibley",
-            "publisher": "Council on Religion and International Affairs",
-            "year": "1970"
+            "href": "wiki:Mulford Q. Sibley"
           }
         ]
       }
@@ -202,13 +216,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

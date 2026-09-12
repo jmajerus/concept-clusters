@@ -68,6 +68,35 @@ export async function run() {
   assert.ok(renamed.clusters[0].seeds.includes("light quantum"));
   assert.ok(!renamed.clusters[0].seeds.includes("photon"));
 
+  const quizLens = {
+    id: "which-photon",
+    prompt: "Which term is the quantum?",
+    explanation: "Only the photon is quantized light.",
+    options: [
+      {
+        id: "photon-option",
+        label: "photon",
+        correct: true,
+        targets: ["photon"]
+      },
+      {
+        id: "mass-option",
+        label: "mass",
+        targets: ["mass"]
+      }
+    ]
+  };
+  const withQuizLens = {
+    ...extended,
+    lenses: [...(extended.lenses || []), quizLens]
+  };
+  const renamedQuiz = renameTerm(withQuizLens, "photon", "light quantum");
+  const renamedOption = renamedQuiz.lenses[0].options[0];
+  assert.equal(renamedOption.label, "light quantum");
+  assert.deepEqual(renamedOption.targets, ["light quantum"]);
+  assert.equal(renamedQuiz.lenses[0].options[1].label, "mass");
+  assert.equal(renamedQuiz.lenses[0].options[1].id, "mass-option");
+
   const seeded = toggleSeed(joined, "electron");
   assert.deepEqual(seeded.clusters[0].seeds, ["photon"]);
   assert.deepEqual(seeded.clusters[0].floatingTerms, ["electron"]);

@@ -1,19 +1,21 @@
 {
   "id": "classical-narrative-architecture",
   "title": "Classical narrative architecture",
-  "category": "Literary Theory & Poetics",
+  "category": "literary-theory-poetics",
   "large": true,
   "info": {
     "text": "Aristotelian dramatic mechanics, Homeric epic conventions, and monomythic hero arcs offer three durable ways of describing how classical narratives are built.",
-    "link": "wiki:Poetics (Aristotle)",
-    "seeAlso": [
+    "links": [
       {
-        "label": "Stanford Encyclopedia: Aristotle's Rhetoric",
-        "href": "https://plato.stanford.edu/entries/aristotle-rhetoric/"
+        "href": "wiki:Poetics (Aristotle)"
       },
       {
-        "label": "Perseus Digital Library",
-        "href": "http://www.perseus.tufts.edu/hopper/"
+        "href": "https://plato.stanford.edu/entries/aristotle-rhetoric/",
+        "label": "Stanford Encyclopedia: Aristotle's Rhetoric"
+      },
+      {
+        "href": "http://www.perseus.tufts.edu/hopper/",
+        "label": "Perseus Digital Library"
       }
     ]
   },
@@ -44,31 +46,59 @@
       "termInfo": {
         "anagnorisis": {
           "text": "A critical discovery or recognition that changes what the protagonist understands about identity, situation, or past action.",
-          "link": "wiki:Anagnorisis"
+          "links": [
+            {
+              "href": "wiki:Anagnorisis"
+            }
+          ]
         },
         "catharsis": {
           "text": "The emotional purgation or clarification that tragedy is said to produce through pity and fear.",
-          "link": "wiki:Catharsis"
+          "links": [
+            {
+              "href": "wiki:Catharsis"
+            }
+          ]
         },
         "hamartia": {
           "text": "A tragic error or flaw in judgment that helps bring about the protagonist's downfall.",
-          "link": "wiki:Hamartia"
+          "links": [
+            {
+              "href": "wiki:Hamartia"
+            }
+          ]
         },
         "peripeteia": {
           "text": "A sudden reversal of the protagonist's fortunes within the plotted action.",
-          "link": "wiki:Peripeteia"
+          "links": [
+            {
+              "href": "wiki:Peripeteia"
+            }
+          ]
         },
         "classical unities": {
           "text": "Later neoclassical constraints—often of action, time, and place—derived from readings of Aristotelian dramatic coherence.",
-          "link": "wiki:Classical unities"
+          "links": [
+            {
+              "href": "wiki:Classical unities"
+            }
+          ]
         },
         "hubris": {
           "text": "Excessive pride or defiance that oversteps human limits and invites catastrophic correction.",
-          "link": "wiki:Hubris"
+          "links": [
+            {
+              "href": "wiki:Hubris"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Poetics (Aristotle)"
+        "links": [
+          {
+            "href": "wiki:Poetics (Aristotle)"
+          }
+        ]
       }
     },
     {
@@ -97,31 +127,59 @@
       "termInfo": {
         "in medias res": {
           "text": "Beginning a narrative in the middle of the action rather than at chronological origin.",
-          "link": "wiki:In medias res"
+          "links": [
+            {
+              "href": "wiki:In medias res"
+            }
+          ]
         },
         "invocation of the Muse": {
           "text": "An opening appeal to a Muse for memory, authority, and the telling of the tale.",
-          "link": "wiki:Invocation (poetry)"
+          "links": [
+            {
+              "href": "wiki:Invocation (poetry)"
+            }
+          ]
         },
         "dactylic hexameter": {
           "text": "The six-foot metrical line conventional to Greek and Latin epic verse.",
-          "link": "wiki:Dactylic hexameter"
+          "links": [
+            {
+              "href": "wiki:Dactylic hexameter"
+            }
+          ]
         },
         "formulaic epithets": {
           "text": "Repeated characterizing phrases that aid oral composition and recognition (for example, \"swift-footed Achilles\").",
-          "link": "wiki:Epithet"
+          "links": [
+            {
+              "href": "wiki:Epithet"
+            }
+          ]
         },
         "Telemachy": {
           "text": "The early Odyssey books centered on Telemachus's search, which frame Odysseus's larger return.",
-          "link": "wiki:Telemachy"
+          "links": [
+            {
+              "href": "wiki:Telemachy"
+            }
+          ]
         },
         "epic catalog": {
           "text": "A formal list of warriors, ships, places, or peoples that expands the epic's world and authority.",
-          "link": "wiki:Catalogue of Ships"
+          "links": [
+            {
+              "href": "wiki:Catalogue of Ships"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Epic poetry"
+        "links": [
+          {
+            "href": "wiki:Epic poetry"
+          }
+        ]
       }
     },
     {
@@ -150,31 +208,59 @@
       "termInfo": {
         "call to adventure": {
           "text": "The summons that draws the hero out of ordinary life toward a larger ordeal.",
-          "link": "wiki:Hero's journey"
+          "links": [
+            {
+              "href": "wiki:Hero's journey"
+            }
+          ]
         },
         "crossing the threshold": {
           "text": "The passage from the familiar world into the zone of adventure and danger.",
-          "link": "wiki:Hero's journey"
+          "links": [
+            {
+              "href": "wiki:Hero's journey"
+            }
+          ]
         },
         "meeting with the mentor": {
           "text": "An encounter that supplies guidance, tools, or courage for the journey ahead.",
-          "link": "wiki:Hero's journey"
+          "links": [
+            {
+              "href": "wiki:Hero's journey"
+            }
+          ]
         },
         "belly of the whale": {
           "text": "A stage of enclosure or apparent annihilation from which the hero's transformation proceeds.",
-          "link": "wiki:Hero's journey"
+          "links": [
+            {
+              "href": "wiki:Hero's journey"
+            }
+          ]
         },
         "apotheosis": {
           "text": "A climax of elevation or insight in which the hero attains a higher state of being or understanding.",
-          "link": "wiki:Apotheosis"
+          "links": [
+            {
+              "href": "wiki:Apotheosis"
+            }
+          ]
         },
         "ultimate boon": {
           "text": "The decisive gift, knowledge, or prize won in the special world and brought back for others.",
-          "link": "wiki:Hero's journey"
+          "links": [
+            {
+              "href": "wiki:Hero's journey"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Hero's journey"
+        "links": [
+          {
+            "href": "wiki:Hero's journey"
+          }
+        ]
       }
     }
   ],
@@ -189,7 +275,11 @@
       "fact": "A descent to the underworld—such as Odysseus's or Aeneas's—is a central epic ordeal that also matches the monomyth's abyss of death and rebirth.",
       "info": {
         "text": "A narrative descent into the underworld or an equivalent realm of death and counsel.",
-        "link": "wiki:Katabasis"
+        "links": [
+          {
+            "href": "wiki:Katabasis"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -212,7 +302,11 @@
       "fact": "Audiences often know a divine fate or impending catastrophe before the tragic protagonist or epic hero does, so knowledge itself becomes part of the narrative design.",
       "info": {
         "text": "A gap between what the audience knows and what a character understands.",
-        "link": "wiki:Irony#Dramatic irony"
+        "links": [
+          {
+            "href": "wiki:Irony#Dramatic irony"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -235,7 +329,11 @@
       "fact": "Prophecy can both catalyze Aristotelian hamartia—as in Oedipus—and force a monomythic hero across the threshold into ordeal.",
       "info": {
         "text": "A foretelling that binds characters to a fate they struggle to escape or fulfill.",
-        "link": "wiki:Prophecy"
+        "links": [
+          {
+            "href": "wiki:Prophecy"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -304,27 +402,15 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Gemini",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anysphere",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Cursor",
-      "scope": "lenses",
-      "role": "edited",
-      "provider": "Anysphere",
-      "date": "2026-08-21"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 }

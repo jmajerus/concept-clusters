@@ -1,109 +1,34 @@
 // Generated from content/puzzles/solidarity-in-brokenness.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "solidarity-in-brokenness",
   "title": "Solidarity in Brokenness",
-  "category": "Philosophy",
-  "categories": ["Philosophy", "Psychology"],
-  "subcategories": { "Philosophy": "political-philosophy" },
+  "category": "philosophy",
+  "categories": [
+    "philosophy",
+    "psychology"
+  ],
+  "subcategories": {
+    "philosophy": "political-philosophy"
+  },
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
   ],
   "info": {
-    "link": "wiki:Todd McGowan",
-    "text": "The Lacanian-Hegelian case for treating structural division not as a private defect but as the shared, universal ground of political solidarity."
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Wholeness and Its Discontents: how the promise of a unified self keeps breaking down, from early psychoanalysis to consumer culture, and what becomes possible when division is treated as a condition rather than a defect."
-    },
-    "entries": [
+    "text": "The Lacanian-Hegelian case for treating structural division not as a private defect but as the shared, universal ground of political solidarity.",
+    "links": [
       {
-        "id": "lacans-three-registers",
-        "via": [
-          "lacan"
-        ],
-        "reason": "Go deeper into the Imaginary, the Symbolic, and the Real -- the Lacanian scaffolding this puzzle's ontology of the split subject is built on."
+        "href": "wiki:Todd McGowan"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "These are the active, disruptive side of the theory, not the diagnosis behind it: sabotage that wrecks an opportunity, refusal that will not buy into the promise of harmony, protest the unconscious stages without a conscious plan, transgression that visibly breaks the expected pattern -- and, at the political scale, an explicit rejection of the demand for harmony in the first place.",
-      "id": "subversive-disruptions",
-      "prompt": "Which concepts describe an action or stance that actively interrupts capitalism's demand for smooth harmony and productivity, rather than merely describing the split itself?",
-      "reasons": {
-        "act of transgression": "A visible break from expected, smooth-functioning behavior.",
-        "critique of compulsory harmony": "The same refusal, taken from the unconscious register to the explicitly political one.",
-        "ideological refusal": "A refusal to fully accept society's demand for seamless conformity and productivity.",
-        "radical self-sabotage": "Undermining one's own advancement or stability, reread as meaningful rather than merely dysfunctional.",
-        "unconscious protest": "The unconscious's own name for what self-sabotage is actually doing, without a conscious plan behind it."
-      },
-      "targets": [
-        "radical self-sabotage",
-        "ideological refusal",
-        "unconscious protest",
-        "act of transgression",
-        "critique of compulsory harmony"
-      ]
-    },
-    {
-      "explanation": "The first four hold the diagnosis still: not what a person does about the gap, but the gap itself, named from the Real that language cannot capture through to its permanent, ontological status. Reclaiming alienation is the hinge into the next cluster -- the same gap, but now taken up deliberately rather than only suffered.",
-      "id": "structures-of-the-void",
-      "prompt": "Which concepts name the foundational, irreducible gap in human subjectivity itself, rather than a reaction to it or a response built on top of it?",
-      "reasons": {
-        "constitutive lack": "The lack left behind by that entry -- not an injury added later, but built in from the start.",
-        "lacanian real void": "What resists capture by image or language altogether -- Lacan's own name for the gap.",
-        "permanent alienation": "The ontological -- not temporary or curable -- status of that lack.",
-        "reclaiming alienation": "The same lack, no longer just endured, but named on purpose as shared ground.",
-        "structural split": "The division produced the moment a subject enters language and the symbolic order."
-      },
-      "targets": [
-        "lacanian real void",
-        "structural split",
-        "constitutive lack",
-        "permanent alienation",
-        "reclaiming alienation"
-      ]
-    },
-    {
-      "explanation": "This is the constructive payoff the whole puzzle has been building toward: not just refusing the myth of wholeness, but building something out of its absence. Refusal of fulfillment is where that construction starts -- the unconscious already declining capitalism's promise before any of the political conclusions can be drawn.",
-      "id": "horizons-of-liberation",
-      "prompt": "Which concepts point toward an alternative mode of political or personal existence built on the void, rather than around curing or resisting it alone?",
-      "reasons": {
-        "embracing incompleteness": "Accepting the split as the site of freedom, the necessary first move before any of the others follow.",
-        "non-totalized community": "A form of community explicitly built without pretending to organic, complete unity.",
-        "reclaiming alienation": "Taking a condition usually treated as a private failure and naming it, deliberately, as shared ground.",
-        "refusal of fulfillment": "The individual-scale refusal that the political conclusion, at collective scale, is built out of.",
-        "solidarity in brokenness": "The puzzle's own closing claim: shared brokenness, not shared wholeness, as the basis for solidarity."
-      },
-      "targets": [
-        "solidarity in brokenness",
-        "embracing incompleteness",
-        "reclaiming alienation",
-        "non-totalized community",
-        "refusal of fulfillment"
-      ]
-    }
-  ],
-  "learningIntroduction": {
-    "content": {
-      "mediaType": "text/markdown",
-      "text": "# The split as the site of freedom\n\nAcross this whole catalogue, internal conflict keeps getting treated as a problem awaiting a solution. Classical psychoanalysis wants to manage it. Analytical psychology wants to integrate it. Capitalist ideology wants to sell you a cure for it. A final tradition in this set turns that entire premise on its head: what if the division itself is not a defect at all -- what if it is the very site of human freedom?\n\n## Built in, not added on\n\nDrawing on Jacques Lacan's return to Freud, this line of thought argues that a person becomes split the moment they enter language and shared social life. That entry leaves behind a gap between who someone is and what any word, role, or system can actually express -- and because that gap opens at the very moment of becoming a subject at all, it is not an injury that happened afterward. It is closer to the price of admission.\n\n## Reading sabotage as protest\n\nIf that is right, an old clinical puzzle looks different. When someone undermines their own success, or clings to an inconvenient symptom no one asked for, the standard reading treats it as a failure of adjustment. This tradition reads it instead as a kind of unconscious protest -- a refusal, staged without a conscious plan, to fully accept a society's insistence that a person should be perfectly harmonious, endlessly productive, and completely satisfiable.\n\n## From a private wound to shared ground\n\nThe political move is what makes this the closing chapter of the catalogue rather than just another clinical theory. If every subject carries the same structural gap, then alienation stops being a private, shameful defect to hide -- it becomes something everyone actually has in common. A politics built on that basis does not promise unity or a cure. It proposes something else: solidarity built on shared incompleteness, rather than on any pretense that the incompleteness has been, or could be, resolved.\n\n## A question to hold onto\n\nThis is the one framework in the set that does not offer a route back to feeling whole. As you organize this puzzle's terms, notice what it offers instead -- and whether refusing a cure is the same thing as giving up.\n\n> **Reflection:** What changes, practically, between treating a shared limitation as something to fix together and treating it as the actual basis on which people can stand together?\n"
-    },
-    "estimatedMinutes": 5,
-    "requirement": "recommended",
-    "revision": 1,
-    "summary": "See why McGowan and Žižek's Lacanian-Hegelian critique treats structural division as the ground of solidarity rather than a problem to solve, before organizing this puzzle's vocabulary.",
-    "title": "The Split as the Site of Freedom"
-  },
   "clusters": [
     {
-      "id": "lacanian-ontology-of-the-split-subject",
+      "id": "cluster-lacanian-ontology-of-the-split-subject",
       "name": "Lacanian Ontology of the Split Subject",
       "color": "teal",
       "fact": "Lacan reworks Freud through structural linguistics and Hegel: entering language splits the subject permanently, leaving a constitutive lack no social or symbolic system can ever fully patch.",
@@ -123,12 +48,20 @@ export default definePuzzle(import.meta.url, {
           "text": "A lack that is not added on later by circumstance, but built into the structure of subjectivity from the start."
         },
         "lacanian real void": {
-          "link": "wiki:Lacanian Real",
-          "text": "What resists full capture by image or language -- Lacan's Real, the site the whole ontology of the split subject is built around."
+          "text": "What resists full capture by image or language -- Lacan's Real, the site the whole ontology of the split subject is built around.",
+          "links": [
+            {
+              "href": "wiki:Lacanian Real"
+            }
+          ]
         },
         "objet petit a": {
-          "link": "wiki:Objet petit a",
-          "text": "Lacan's term for the elusive object-cause of desire, which recedes the moment it is approached."
+          "text": "Lacan's term for the elusive object-cause of desire, which recedes the moment it is approached.",
+          "links": [
+            {
+              "href": "wiki:Objet petit a"
+            }
+          ]
         },
         "permanent alienation": {
           "text": "Alienation held as an ontological condition of being a subject at all, not a temporary or curable state."
@@ -138,11 +71,15 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:Jacques Lacan"
+        "links": [
+          {
+            "href": "wiki:Jacques Lacan"
+          }
+        ]
       }
     },
     {
-      "id": "unconscious-protest-dialectical-self-sabotage",
+      "id": "cluster-unconscious-protest-dialectical-self-sabotage",
       "name": "Unconscious Protest & Dialectical Self-Sabotage",
       "color": "blue",
       "fact": "McGowan and Žižek argue that self-sabotage is not a clinical malfunction but a radical, unconscious refusal to capitulate to capitalism's demand for seamless adaptation and constant productivity.",
@@ -175,11 +112,15 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:Slavoj Žižek"
+        "links": [
+          {
+            "href": "wiki:Slavoj Žižek"
+          }
+        ]
       }
     },
     {
-      "id": "emancipatory-politics-shared-incompleteness",
+      "id": "cluster-emancipatory-politics-shared-incompleteness",
       "name": "Emancipatory Politics & Shared Incompleteness",
       "color": "amber",
       "fact": "Rather than seeking false wholeness through consumption or authoritarian consensus, real political freedom, on this account, begins when people recognize their shared, permanent incompleteness and build community around mutual vulnerability instead of despite it.",
@@ -270,27 +211,99 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-07",
-      "provider": "Google",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Gemini"
+      "id": "subversive-disruptions",
+      "prompt": "Which concepts describe an action or stance that actively interrupts capitalism's demand for smooth harmony and productivity, rather than merely describing the split itself?",
+      "explanation": "These are the active, disruptive side of the theory, not the diagnosis behind it: sabotage that wrecks an opportunity, refusal that will not buy into the promise of harmony, protest the unconscious stages without a conscious plan, transgression that visibly breaks the expected pattern -- and, at the political scale, an explicit rejection of the demand for harmony in the first place.",
+      "targets": [
+        "radical self-sabotage",
+        "ideological refusal",
+        "unconscious protest",
+        "act of transgression",
+        "critique of compulsory harmony"
+      ],
+      "reasons": {
+        "act of transgression": "A visible break from expected, smooth-functioning behavior.",
+        "critique of compulsory harmony": "The same refusal, taken from the unconscious register to the explicitly political one.",
+        "ideological refusal": "A refusal to fully accept society's demand for seamless conformity and productivity.",
+        "radical self-sabotage": "Undermining one's own advancement or stability, reread as meaningful rather than merely dysfunctional.",
+        "unconscious protest": "The unconscious's own name for what self-sabotage is actually doing, without a conscious plan behind it."
+      }
     },
     {
-      "date": "2026-08-07",
-      "provider": "Google",
-      "role": "drafted",
-      "scope": "learningIntroduction",
-      "system": "Gemini"
+      "id": "structures-of-the-void",
+      "prompt": "Which concepts name the foundational, irreducible gap in human subjectivity itself, rather than a reaction to it or a response built on top of it?",
+      "explanation": "The first four hold the diagnosis still: not what a person does about the gap, but the gap itself, named from the Real that language cannot capture through to its permanent, ontological status. Reclaiming alienation is the hinge into the next cluster -- the same gap, but now taken up deliberately rather than only suffered.",
+      "targets": [
+        "lacanian real void",
+        "structural split",
+        "constitutive lack",
+        "permanent alienation",
+        "reclaiming alienation"
+      ],
+      "reasons": {
+        "constitutive lack": "The lack left behind by that entry -- not an injury added later, but built in from the start.",
+        "lacanian real void": "What resists capture by image or language altogether -- Lacan's own name for the gap.",
+        "permanent alienation": "The ontological -- not temporary or curable -- status of that lack.",
+        "reclaiming alienation": "The same lack, no longer just endured, but named on purpose as shared ground.",
+        "structural split": "The division produced the moment a subject enters language and the symbolic order."
+      }
     },
     {
-      "date": "2026-08-07",
-      "provider": "Anthropic",
-      "role": "edited",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "horizons-of-liberation",
+      "prompt": "Which concepts point toward an alternative mode of political or personal existence built on the void, rather than around curing or resisting it alone?",
+      "explanation": "This is the constructive payoff the whole puzzle has been building toward: not just refusing the myth of wholeness, but building something out of its absence. Refusal of fulfillment is where that construction starts -- the unconscious already declining capitalism's promise before any of the political conclusions can be drawn.",
+      "targets": [
+        "solidarity in brokenness",
+        "embracing incompleteness",
+        "reclaiming alienation",
+        "non-totalized community",
+        "refusal of fulfillment"
+      ],
+      "reasons": {
+        "embracing incompleteness": "Accepting the split as the site of freedom, the necessary first move before any of the others follow.",
+        "non-totalized community": "A form of community explicitly built without pretending to organic, complete unity.",
+        "reclaiming alienation": "Taking a condition usually treated as a private failure and naming it, deliberately, as shared ground.",
+        "refusal of fulfillment": "The individual-scale refusal that the political conclusion, at collective scale, is built out of.",
+        "solidarity in brokenness": "The puzzle's own closing claim: shared brokenness, not shared wholeness, as the basis for solidarity."
+      }
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Wholeness and Its Discontents: how the promise of a unified self keeps breaking down, from early psychoanalysis to consumer culture, and what becomes possible when division is treated as a condition rather than a defect."
+    },
+    "entries": [
+      {
+        "id": "lacans-three-registers",
+        "reason": "Go deeper into the Imaginary, the Symbolic, and the Real -- the Lacanian scaffolding this puzzle's ontology of the split subject is built on.",
+        "via": [
+          "lacan"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The Split as the Site of Freedom",
+    "summary": "See why McGowan and Žižek's Lacanian-Hegelian critique treats structural division as the ground of solidarity rather than a problem to solve, before organizing this puzzle's vocabulary.",
+    "estimatedMinutes": 5,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "# The split as the site of freedom\n\nAcross this whole catalogue, internal conflict keeps getting treated as a problem awaiting a solution. Classical psychoanalysis wants to manage it. Analytical psychology wants to integrate it. Capitalist ideology wants to sell you a cure for it. A final tradition in this set turns that entire premise on its head: what if the division itself is not a defect at all -- what if it is the very site of human freedom?\n\n## Built in, not added on\n\nDrawing on Jacques Lacan's return to Freud, this line of thought argues that a person becomes split the moment they enter language and shared social life. That entry leaves behind a gap between who someone is and what any word, role, or system can actually express -- and because that gap opens at the very moment of becoming a subject at all, it is not an injury that happened afterward. It is closer to the price of admission.\n\n## Reading sabotage as protest\n\nIf that is right, an old clinical puzzle looks different. When someone undermines their own success, or clings to an inconvenient symptom no one asked for, the standard reading treats it as a failure of adjustment. This tradition reads it instead as a kind of unconscious protest -- a refusal, staged without a conscious plan, to fully accept a society's insistence that a person should be perfectly harmonious, endlessly productive, and completely satisfiable.\n\n## From a private wound to shared ground\n\nThe political move is what makes this the closing chapter of the catalogue rather than just another clinical theory. If every subject carries the same structural gap, then alienation stops being a private, shameful defect to hide -- it becomes something everyone actually has in common. A politics built on that basis does not promise unity or a cure. It proposes something else: solidarity built on shared incompleteness, rather than on any pretense that the incompleteness has been, or could be, resolved.\n\n## A question to hold onto\n\nThis is the one framework in the set that does not offer a route back to feeling whole. As you organize this puzzle's terms, notice what it offers instead -- and whether refusing a cure is the same thing as giving up.\n\n> **Reflection:** What changes, practically, between treating a shared limitation as something to fix together and treating it as the actual basis on which people can stand together?\n"
+    },
+    "revision": 1
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

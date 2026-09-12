@@ -1,14 +1,18 @@
 {
   "id": "two-imprisonments",
   "title": "Two Imprisonments",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Eugene V. Debs, railroad-union organizer turned five-time Socialist Party presidential candidate, whose politics were forged twice over in a federal prison cell -- first by the Pullman strike's defeat, and later by his own conviction for opposing the First World War.",
-    "link": "wiki:Eugene V. Debs"
+    "links": [
+      {
+        "href": "wiki:Eugene V. Debs"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,15 +36,27 @@
       ],
       "termInfo": {
         "the American Railway Union": {
-          "link": "wiki:American Railway Union"
+          "links": [
+            {
+              "href": "wiki:American Railway Union"
+            }
+          ]
         },
         "the federal injunction": {
-          "link": "wiki:In re Debs"
+          "links": [
+            {
+              "href": "wiki:In re Debs"
+            }
+          ]
         }
       },
       "info": {
         "text": "Debs's organizing innovation and its defeat: uniting all railroad workers into one union rather than dividing them by craft, tested and broken in the 1894 Pullman boycott.",
-        "link": "wiki:Pullman Strike"
+        "links": [
+          {
+            "href": "wiki:Pullman Strike"
+          }
+        ]
       }
     },
     {
@@ -64,7 +80,11 @@
       ],
       "info": {
         "text": "Debs's conversion to socialism during his first imprisonment, and his subsequent decades building the Socialist Party of America into the country's most visible socialist movement.",
-        "link": "wiki:Socialist Party of America"
+        "links": [
+          {
+            "href": "wiki:Socialist Party of America"
+          }
+        ]
       }
     },
     {
@@ -88,12 +108,20 @@
       ],
       "termInfo": {
         "the Espionage Act": {
-          "link": "wiki:Espionage Act of 1917"
+          "links": [
+            {
+              "href": "wiki:Espionage Act of 1917"
+            }
+          ]
         }
       },
       "info": {
         "text": "Debs's second imprisonment, for a single anti-war speech, and the presidential campaign he ran from behind bars in 1920 -- his fifth and last.",
-        "link": "wiki:Debs v. United States"
+        "links": [
+          {
+            "href": "wiki:Debs v. United States"
+          }
+        ]
       }
     }
   ],
@@ -179,13 +207,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

@@ -1,13 +1,15 @@
 // Generated from content/puzzles/from-features-to-metabolic-meaning.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "from-features-to-metabolic-meaning",
   "title": "From Features to Metabolic Meaning",
-  "category": "Biology",
-  "subcategories": { "Biology": "multiomics" },
+  "category": "biology",
+  "subcategories": {
+    "biology": "multiomics"
+  },
   "tags": [
     "biology",
     "metabolomics",
@@ -266,8 +268,7 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Codex (GPT-5.6 Sol)",
-        "model": "gpt-5.6-sol"
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

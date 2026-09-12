@@ -1,7 +1,7 @@
 {
   "id": "algebra-basics",
   "title": "Algebra basics",
-  "category": "Math",
+  "category": "math",
   "clusters": [
     {
       "id": "variables",
@@ -25,22 +25,42 @@
       "termInfo": {
         "unknown": {
           "text": "The letter or symbol standing for the value an equation is solved to find.",
-          "link": "wiki:Equation"
+          "links": [
+            {
+              "href": "wiki:Equation"
+            }
+          ]
         },
         "coefficient": {
-          "link": "wiki:Coefficient"
+          "links": [
+            {
+              "href": "wiki:Coefficient"
+            }
+          ]
         },
         "term": {
           "text": "A single piece of an algebraic expression, like 3x or 7 — one part of what's added or subtracted together.",
-          "link": "wiki:Monomial"
+          "links": [
+            {
+              "href": "wiki:Monomial"
+            }
+          ]
         },
         "expression": {
           "text": "A combination of numbers, variables, and operations — unlike an equation, it has no equals sign.",
-          "link": "wiki:Expression (mathematics)"
+          "links": [
+            {
+              "href": "wiki:Expression (mathematics)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Variable (mathematics)"
+        "links": [
+          {
+            "href": "wiki:Variable (mathematics)"
+          }
+        ]
       }
     },
     {
@@ -63,18 +83,34 @@
       "termInfo": {
         "balance": {
           "text": "The idea that both sides of an equation must stay equal — whatever you do to one side, you must do to the other.",
-          "link": "wiki:Equation"
+          "links": [
+            {
+              "href": "wiki:Equation"
+            }
+          ]
         },
         "inverse operation": {
-          "link": "wiki:Inverse function"
+          "links": [
+            {
+              "href": "wiki:Inverse function"
+            }
+          ]
         },
         "solution": {
           "text": "The value (or values) that make an equation true when substituted in.",
-          "link": "wiki:Solution set"
+          "links": [
+            {
+              "href": "wiki:Solution set"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Equation"
+        "links": [
+          {
+            "href": "wiki:Equation"
+          }
+        ]
       }
     },
     {
@@ -99,23 +135,43 @@
       "termInfo": {
         "input": {
           "text": "The value fed into a function — the independent variable, which the output then depends on.",
-          "link": "wiki:Dependent and independent variables"
+          "links": [
+            {
+              "href": "wiki:Dependent and independent variables"
+            }
+          ]
         },
         "output": {
           "text": "The value a function produces from a given input — the dependent variable, since it depends on what's fed in.",
-          "link": "wiki:Dependent and independent variables"
+          "links": [
+            {
+              "href": "wiki:Dependent and independent variables"
+            }
+          ]
         },
         "domain": {
           "text": "The full set of inputs a function is allowed to take.",
-          "link": "wiki:Domain of a function"
+          "links": [
+            {
+              "href": "wiki:Domain of a function"
+            }
+          ]
         },
         "range": {
           "text": "The full set of outputs a function can produce, pairing with domain (its set of allowed inputs).",
-          "link": "wiki:Range of a function"
+          "links": [
+            {
+              "href": "wiki:Range of a function"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Function (mathematics)"
+        "links": [
+          {
+            "href": "wiki:Function (mathematics)"
+          }
+        ]
       }
     }
   ],
@@ -130,7 +186,11 @@
       "fact": "Solving for x bridges the two: it's the act of isolating a variable by keeping an equation balanced.",
       "info": {
         "text": "The general process of isolating an unknown by applying the same operation to both sides of an equation.",
-        "link": "wiki:Equation solving"
+        "links": [
+          {
+            "href": "wiki:Equation solving"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -148,7 +208,11 @@
       "fact": "A graph bridges the two: it's the visual picture of both an equation's solutions and a function's input-output pairs.",
       "info": {
         "text": "The visual plot of a function's input-output pairs on a coordinate plane.",
-        "link": "wiki:Graph of a function"
+        "links": [
+          {
+            "href": "wiki:Graph of a function"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {

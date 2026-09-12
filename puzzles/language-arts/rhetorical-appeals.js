@@ -1,15 +1,19 @@
 // Generated from content/puzzles/rhetorical-appeals.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "rhetorical-appeals",
   "title": "Rhetorical appeals",
-  "category": "Language Arts",
+  "category": "language-arts",
   "info": {
     "text": "Aristotle's three artistic proofs — ethos, pathos, and logos — are the means of persuasion a speech itself can produce. Kairos is the occasion: whether this is the time for those proofs to land.",
-    "link": "wiki:Modes of persuasion",
+    "links": [
+      {
+        "href": "wiki:Modes of persuasion"
+      }
+    ],
     "citations": [
       {
         "title": "Aristotle’s Rhetoric",
@@ -48,7 +52,11 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:Modes of persuasion#Ethos"
+        "links": [
+          {
+            "href": "wiki:Modes of persuasion#Ethos"
+          }
+        ]
       }
     },
     {
@@ -71,14 +79,22 @@ export default definePuzzle(import.meta.url, {
         },
         "loaded language": {
           "text": "Words chosen to provoke feeling rather than to name a thing neutrally — a local technique of pathos, not a property of the speaker or of the argument's structure.",
-          "link": "wiki:Loaded language"
+          "links": [
+            {
+              "href": "wiki:Loaded language"
+            }
+          ]
         },
         "sympathy": {
           "text": "Fellow-feeling with someone else's situation — one English descendant of pathos, and a common target of emotional appeal."
         }
       },
       "info": {
-        "link": "wiki:Modes of persuasion#Pathos"
+        "links": [
+          {
+            "href": "wiki:Modes of persuasion#Pathos"
+          }
+        ]
       }
     },
     {
@@ -98,7 +114,11 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "enthymeme": {
           "text": "Aristotle's distinctive form of rhetorical proof: a rhetorical syllogism, often with a premise left for the audience to supply.",
-          "link": "wiki:Enthymeme"
+          "links": [
+            {
+              "href": "wiki:Enthymeme"
+            }
+          ]
         },
         "evidence": {
           "text": "The material a claim is asked to rest on — facts, figures, and other support offered as proof inside the argument."
@@ -108,7 +128,11 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:Modes of persuasion#Logos"
+        "links": [
+          {
+            "href": "wiki:Modes of persuasion#Logos"
+          }
+        ]
       }
     },
     {
@@ -137,7 +161,11 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:Modes of persuasion#Kairos"
+        "links": [
+          {
+            "href": "wiki:Modes of persuasion#Kairos"
+          }
+        ]
       }
     }
   ],
@@ -152,15 +180,9 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Aristotle's artistic proofs are the three means of persuasion a speech itself can produce: the speaker's character, the audience's emotions, and the argument. Naming only two would describe a different pair, not that triad.",
       "info": {
-        "link": "wiki:Modes of persuasion",
-        "citations": [
+        "links": [
           {
-            "title": "Aristotle’s Rhetoric",
-            "author": "Christof Rapp",
-            "publisher": "Stanford Encyclopedia of Philosophy",
-            "year": "2022",
-            "pages": "§2 (the three pisteis), §5",
-            "url": "https://plato.stanford.edu/entries/aristotle-rhetoric/"
+            "href": "wiki:Modes of persuasion"
           }
         ]
       },

@@ -1,17 +1,16 @@
-// Concept Clusters puzzle: Math foundations
-// Category: Math
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/math-foundations.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "math-foundations",
   "title": "Math foundations",
-  "category": "Math",
+  "category": "math",
   "clusters": [
     {
+      "id": "number-systems",
       "name": "Number systems",
-      "info": {
-        "link": "wiki:Number"
-      },
       "color": "teal",
       "fact": "Integers, fractions, and decimals are different ways of writing quantity.",
       "terms": [
@@ -26,25 +25,46 @@ export default {
       ],
       "termInfo": {
         "integers": {
-          "link": "wiki:Integer"
+          "links": [
+            {
+              "href": "wiki:Integer"
+            }
+          ]
         },
         "fractions": {
-          "link": "wiki:Fraction"
+          "links": [
+            {
+              "href": "wiki:Fraction"
+            }
+          ]
         },
         "decimals": {
-          "link": "wiki:Decimal"
+          "links": [
+            {
+              "href": "wiki:Decimal"
+            }
+          ]
         },
         "negative numbers": {
           "text": "Numbers less than zero, extending the number line in the opposite direction from positive numbers.",
-          "link": "wiki:Negative number"
+          "links": [
+            {
+              "href": "wiki:Negative number"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Number"
+          }
+        ]
       }
     },
     {
+      "id": "geometry",
       "name": "Geometry",
-      "info": {
-        "link": "wiki:Geometry"
-      },
       "color": "blue",
       "fact": "Geometry studies shapes and the space they occupy.",
       "terms": [
@@ -60,25 +80,46 @@ export default {
       "termInfo": {
         "angles": {
           "text": "The figure formed by two rays sharing an endpoint, measured by how much one would need to rotate to meet the other.",
-          "link": "wiki:Angle"
+          "links": [
+            {
+              "href": "wiki:Angle"
+            }
+          ]
         },
         "polygons": {
-          "link": "wiki:Polygon"
+          "links": [
+            {
+              "href": "wiki:Polygon"
+            }
+          ]
         },
         "circles": {
-          "link": "wiki:Circle"
+          "links": [
+            {
+              "href": "wiki:Circle"
+            }
+          ]
         },
         "symmetry": {
           "text": "A shape's property of looking the same after being reflected, rotated, or otherwise transformed.",
-          "link": "wiki:Symmetry"
+          "links": [
+            {
+              "href": "wiki:Symmetry"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Geometry"
+          }
+        ]
       }
     },
     {
+      "id": "measurement",
       "name": "Measurement",
-      "info": {
-        "link": "wiki:Measurement"
-      },
       "color": "amber",
       "fact": "Measurement assigns numbers to real-world quantities using units.",
       "terms": [
@@ -93,53 +134,86 @@ export default {
       ],
       "termInfo": {
         "length": {
-          "link": "wiki:Length"
+          "links": [
+            {
+              "href": "wiki:Length"
+            }
+          ]
         },
         "mass": {
-          "link": "wiki:Mass"
+          "links": [
+            {
+              "href": "wiki:Mass"
+            }
+          ]
         },
         "time": {
-          "link": "wiki:Time"
+          "links": [
+            {
+              "href": "wiki:Time"
+            }
+          ]
         },
         "volume": {
           "text": "The amount of three-dimensional space a shape or object occupies.",
-          "link": "wiki:Volume"
+          "links": [
+            {
+              "href": "wiki:Volume"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Measurement"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "pi",
       "term": "pi",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "foundation",
       "fact": "Pi bridges the two: an irrational number that defines every circle.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Pi"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         null,
         "circles"
-      ],
-      "info": {
-        "link": "wiki:Pi"
-      }
+      ]
     },
     {
+      "id": "area",
       "term": "area",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "foundation",
       "fact": "Area bridges the two: measuring the space inside a shape links geometry to measurement.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Area"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         null,
         "length"
-      ],
-      "info": {
-        "link": "wiki:Area"
-      }
+      ]
     }
   ]
-};
+});

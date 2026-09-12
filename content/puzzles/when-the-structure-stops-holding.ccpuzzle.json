@@ -1,23 +1,27 @@
 {
   "id": "when-the-structure-stops-holding",
   "title": "When the Structure Stops Holding",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book"
   ],
   "info": {
     "text": "Larry Hirschhorn's account of how groups turn real work-risk into something bearable through boundaries, what they fall back on when that fails, and why postindustrial organizations lose the old bureaucratic defenses that used to do this work automatically.",
-    "link": "https://www.cfar.com/hirschhorn/",
     "citations": [
       {
         "title": "The Workplace Within: Psychodynamics of Organizational Life",
         "author": "Larry Hirschhorn",
         "publisher": "MIT Press",
         "year": "1988"
+      }
+    ],
+    "links": [
+      {
+        "href": "https://www.cfar.com/hirschhorn/"
       }
     ]
   },
@@ -198,20 +202,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

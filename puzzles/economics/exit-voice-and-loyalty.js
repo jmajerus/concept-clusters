@@ -1,86 +1,36 @@
 // Generated from content/puzzles/exit-voice-and-loyalty.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "exit-voice-and-loyalty",
   "title": "Exit, voice, and loyalty",
-  "category": "Economics",
-  "categories": ["Economics", "Sociology", "Political Science"],
+  "category": "economics",
+  "categories": [
+    "economics",
+    "sociology",
+    "political-science"
+  ],
   "tags": [
     "book"
   ],
   "info": {
-    "link": "https://www.hup.harvard.edu/books/9780674276604",
     "text": "Albert Hirschman's account of the two things a dissatisfied customer, member or citizen can do about a declining organisation -- leave, or speak up -- and the third thing that largely decides which of them happens.",
-    "title": "Exit, Voice, and Loyalty",
+    "links": [
+      {
+        "href": "https://www.hup.harvard.edu/books/9780674276604"
+      }
+    ],
     "citations": [
       {
-        "author": "Hirschman, Albert O.",
         "title": "Exit, Voice, and Loyalty: Responses to Decline in Firms, Organizations, and States",
+        "author": "Hirschman, Albert O.",
         "publisher": "Harvard University Press",
         "year": "1970"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "Hirschman's framework is often summarised as three parallel options, which is the one thing it is not. Two of the three are actions a person takes; the third is a disposition that determines which action they take. Loyalty is the excluded case and the distinction is the whole architecture of the book: nobody chooses loyalty in a moment of dissatisfaction the way they choose to complain or to cancel. It is already in place before the moment arrives, and it is what makes one of the other two thinkable.",
-      "id": "does-rather-than-faces",
-      "prompt": "Which of these name something a member or customer actually does, rather than a condition they find themselves in?",
-      "reasons": {
-        "complaint": "One person raising one grievance.",
-        "exit": "Leaving is an act with a moment and a cost.",
-        "pressure from within": "Voice organised into something collective.",
-        "switching": "Taking your custom elsewhere.",
-        "voice": "Saying the thing, at whatever risk saying it carries."
-      },
-      "targets": [
-        "exit",
-        "switching",
-        "voice",
-        "complaint",
-        "pressure from within"
-      ]
-    },
-    {
-      "explanation": "Everything here narrows or shuts the exit, and Hirschman's insight is that this is not simply bad. An organisation nobody can leave is unaccountable; an organisation everybody leaves at the first fault never learns what the fault was. The conditions gathered here are what create the space in which voice is worth using at all. Switching is the excluded case, and it is the exact inverse -- the move that is available precisely when none of these hold.",
-      "id": "what-closes-the-door",
-      "prompt": "Which of these make leaving harder, more costly, or impossible?",
-      "reasons": {
-        "cost of exit": "The price of leaving, whatever form it takes.",
-        "loyalty": "Raises that price from the inside, by attachment rather than by circumstance.",
-        "no substitute": "Nowhere to go is the hardest closure of all.",
-        "public goods": "You cannot decline the air or the neighbourhood.",
-        "the state": "Exit exists as emigration, at a cost most people cannot pay."
-      },
-      "targets": [
-        "cost of exit",
-        "loyalty",
-        "public goods",
-        "the state",
-        "no substitute"
-      ]
-    },
-    {
-      "explanation": "This is the argument the book was written to make. Competition is supposed to be self-correcting: dissatisfied customers leave, the firm notices, quality recovers. Each of these breaks that chain at a different link -- the organisation can absorb the loss, or prefers the quieter customers who remain, or the alternatives are no better, or the departing customers were the only ones who could have explained the problem. The cost of exit is excluded and the distinction matters: it explains why people fail to leave, not why leaving fails to fix anything.",
-      "id": "why-competition-isnt-enough",
-      "prompt": "Which of these are reasons that the freedom to leave fails, on its own, to correct a decline?",
-      "reasons": {
-        "exit of the quality-conscious": "The market removes the critics before it removes the revenue.",
-        "lazy monopolist": "Some organisations experience losing demanding customers as a relief.",
-        "no substitute": "Leaving corrects nothing if the alternative is no better.",
-        "slack": "There is enough spare capacity to absorb the lost revenue without noticing it."
-      },
-      "targets": [
-        "slack",
-        "lazy monopolist",
-        "exit of the quality-conscious",
-        "no substitute"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-decline",
@@ -208,10 +158,10 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Loyalty is not sentiment in Hirschman's account. It is a mechanism with a job: it raises the effective cost of leaving, which keeps a member in place long enough that speaking up becomes worth the trouble. Without it, the people who care most leave first and quietly. With too much of it, they stay well past the point where anything they say can help. It is useful within a band, and the band is narrower than people assume.",
-      "relationKind": "dynamic",
       "info": {
         "text": "Attachment that makes a member less likely to leave, and therefore more likely to speak up instead."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "cost of exit",
         "voice"
@@ -230,10 +180,10 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "The usual worry about monopoly is extraction: high prices charged to captive buyers. Hirschman's worry is the opposite temperament. An organisation under no pressure may simply relax -- and may find the departure of its most demanding customers a relief rather than a warning, since what remains is a quieter clientele. Competition is supposed to prevent this. Where the available alternatives are equally slack, it does not.",
-      "relationKind": "dynamic",
       "info": {
         "text": "An organisation insulated from exit that responds by relaxing rather than by extracting."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "slack",
         "no substitute"
@@ -247,14 +197,71 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "The customers quickest to notice deterioration are the same ones most likely to leave, and the most capable of making a complaint that lands. So the market's own mechanism removes, first and preferentially, exactly the people whose voice would have corrected the problem. The organisation loses its revenue and its best critics in the same movement, and those who remain are the least equipped to say what is wrong.",
-      "relationKind": "contrast",
       "info": {
         "text": "Hirschman's central irony: those most sensitive to decline leave first, taking their capacity to complain with them."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "quality deterioration",
         "exit"
       ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "does-rather-than-faces",
+      "prompt": "Which of these name something a member or customer actually does, rather than a condition they find themselves in?",
+      "explanation": "Hirschman's framework is often summarised as three parallel options, which is the one thing it is not. Two of the three are actions a person takes; the third is a disposition that determines which action they take. Loyalty is the excluded case and the distinction is the whole architecture of the book: nobody chooses loyalty in a moment of dissatisfaction the way they choose to complain or to cancel. It is already in place before the moment arrives, and it is what makes one of the other two thinkable.",
+      "targets": [
+        "exit",
+        "switching",
+        "voice",
+        "complaint",
+        "pressure from within"
+      ],
+      "reasons": {
+        "complaint": "One person raising one grievance.",
+        "exit": "Leaving is an act with a moment and a cost.",
+        "pressure from within": "Voice organised into something collective.",
+        "switching": "Taking your custom elsewhere.",
+        "voice": "Saying the thing, at whatever risk saying it carries."
+      }
+    },
+    {
+      "id": "what-closes-the-door",
+      "prompt": "Which of these make leaving harder, more costly, or impossible?",
+      "explanation": "Everything here narrows or shuts the exit, and Hirschman's insight is that this is not simply bad. An organisation nobody can leave is unaccountable; an organisation everybody leaves at the first fault never learns what the fault was. The conditions gathered here are what create the space in which voice is worth using at all. Switching is the excluded case, and it is the exact inverse -- the move that is available precisely when none of these hold.",
+      "targets": [
+        "cost of exit",
+        "loyalty",
+        "public goods",
+        "the state",
+        "no substitute"
+      ],
+      "reasons": {
+        "cost of exit": "The price of leaving, whatever form it takes.",
+        "loyalty": "Raises that price from the inside, by attachment rather than by circumstance.",
+        "no substitute": "Nowhere to go is the hardest closure of all.",
+        "public goods": "You cannot decline the air or the neighbourhood.",
+        "the state": "Exit exists as emigration, at a cost most people cannot pay."
+      }
+    },
+    {
+      "id": "why-competition-isnt-enough",
+      "prompt": "Which of these are reasons that the freedom to leave fails, on its own, to correct a decline?",
+      "explanation": "This is the argument the book was written to make. Competition is supposed to be self-correcting: dissatisfied customers leave, the firm notices, quality recovers. Each of these breaks that chain at a different link -- the organisation can absorb the loss, or prefers the quieter customers who remain, or the alternatives are no better, or the departing customers were the only ones who could have explained the problem. The cost of exit is excluded and the distinction matters: it explains why people fail to leave, not why leaving fails to fix anything.",
+      "targets": [
+        "slack",
+        "lazy monopolist",
+        "exit of the quality-conscious",
+        "no substitute"
+      ],
+      "reasons": {
+        "exit of the quality-conscious": "The market removes the critics before it removes the revenue.",
+        "lazy monopolist": "Some organisations experience losing demanding customers as a relief.",
+        "no substitute": "Leaving corrects nothing if the alternative is no better.",
+        "slack": "There is enough spare capacity to absorb the lost revenue without noticing it."
+      }
     }
   ]
 });

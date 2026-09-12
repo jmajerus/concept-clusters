@@ -1,14 +1,14 @@
 // Generated from content/puzzles/religion-ritual-practice.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "religion-ritual-practice",
   "title": "What Bodies Do With Belief: Passage, Time, Practice, and Place",
-  "category": "Religion",
+  "category": "religion",
   "subcategories": {
-    "Religion": "ritual-and-practice"
+    "religion": "ritual-and-practice"
   },
   "large": true,
   "info": {
@@ -160,6 +160,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "hajj",
       "term": "hajj",
       "clusters": [
         2,
@@ -169,6 +170,7 @@ export default definePuzzle(import.meta.url, {
       "termRole": "reference"
     },
     {
+      "id": "temple-feast",
       "term": "temple feast",
       "clusters": [
         3,

@@ -22,8 +22,8 @@ active published category registry from D1 over the Git registry and scans:
 - all owner-scoped `content_drafts`
 - all `puzzle_drafts`
 - canonical `content/puzzles/*.ccpuzzle.json` files
-- retained `content/puzzles/*.ccpuzzle.jsonld` interchange files (reported
-  separately; they are not rewritten by the D1/Freeze path)
+- retained legacy `content/puzzles/*.ccpuzzle.jsonld` interchange files
+  (reported separately; they are not rewritten by the D1/Freeze path)
 
 The report lists changed rows, ambiguous aliases, malformed documents, and Git
 files that need rewriting. The migration can apply current D1 rows and Git
@@ -43,8 +43,9 @@ conflict or unresolved alias is found, the command stops and should be rerun
 after the conflicting edit is reviewed.
 
 After application, the normal Freeze workflow is still responsible for
-shipping subsequent D1 changes to production. JSON-LD files are retained
-interchange artifacts and are rewritten by the Git side of this migration.
+shipping subsequent D1 changes to production. Run the follow-up
+`npm run content:canonicalize` pass to convert the retained JSON-LD artifacts
+to simplified sources and remove them; see [../CANONICAL-CONTENT.md](../CANONICAL-CONTENT.md).
 
 For a repository-only inspection, use:
 

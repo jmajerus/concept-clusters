@@ -1,19 +1,25 @@
 {
   "id": "after-the-click",
   "title": "After the Click",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Computer Science"
+    "psychology",
+    "computer-science"
   ],
   "subcategories": {
-    "Computer Science": "computing-and-society"
+    "computer-science": "computing-and-society"
   },
   "large": true,
   "info": {
     "text": "How recognizing that a digital choice was engineered can transform an unwanted outcome into regret, self-blame, perceived betrayal, and lasting defensive behavior. Research on fraud victimization is used cautiously to illuminate deception-related aftermath, not to equate every dark pattern with fraud.",
-    "link": "https://doi.org/10.1145/3479516",
-    "extraLink": "https://doi.org/10.3389/fpsyg.2026.1805536"
+    "links": [
+      {
+        "href": "https://doi.org/10.1145/3479516"
+      },
+      {
+        "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+      }
+    ]
   },
   "clusters": [
     {
@@ -40,27 +46,51 @@
       "termInfo": {
         "unexpected outcome": {
           "text": "A charge, enrollment, disclosure, purchase, or other result that differs materially from what the person expected the action to produce.",
-          "link": "https://doi.org/10.1145/3479516"
+          "links": [
+            {
+              "href": "https://doi.org/10.1145/3479516"
+            }
+          ]
         },
         "concealed condition discovered": {
           "text": "Later awareness of a fee, recurring term, data practice, or restriction that was not adequately visible when the choice was made.",
-          "link": "https://doi.org/10.1145/3479516"
+          "links": [
+            {
+              "href": "https://doi.org/10.1145/3479516"
+            }
+          ]
         },
         "fabricated signal exposed": {
           "text": "Discovery that a countdown, scarcity claim, testimonial, activity notice, or other persuasive cue was false or materially misleading.",
-          "link": "https://doi.org/10.1145/3461778.3462086"
+          "links": [
+            {
+              "href": "https://doi.org/10.1145/3461778.3462086"
+            }
+          ]
         },
         "manipulation recognized": {
           "text": "Understanding that the interface was designed to steer behavior in a way that served the business and conflicted with the person's own purposes.",
-          "link": "https://doi.org/10.1145/3461778.3462086"
+          "links": [
+            {
+              "href": "https://doi.org/10.1145/3461778.3462086"
+            }
+          ]
         },
         "intention mismatch": {
           "text": "A gap between the action registered by the system and the outcome the person knowingly meant to authorize.",
-          "link": "https://doi.org/10.1145/3479516"
+          "links": [
+            {
+              "href": "https://doi.org/10.1145/3479516"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://doi.org/10.1145/3461778.3462086"
+        "links": [
+          {
+            "href": "https://doi.org/10.1145/3461778.3462086"
+          }
+        ]
       }
     },
     {
@@ -87,27 +117,51 @@
       "termInfo": {
         "decision regret": {
           "text": "A painful comparison between the actual outcome and the choice the person believes they would have made with clearer or fairer information.",
-          "link": "https://doi.org/10.1086/339925"
+          "links": [
+            {
+              "href": "https://doi.org/10.1086/339925"
+            }
+          ]
         },
         "self-blame": {
           "text": "Attributing the harmful outcome to one's own failure to notice, understand, resist, or verify the deceptive presentation.",
-          "link": "https://doi.org/10.1177/0146167210393532"
+          "links": [
+            {
+              "href": "https://doi.org/10.1177/0146167210393532"
+            }
+          ]
         },
         "shame or humiliation": {
           "text": "A negative judgment about the self, such as feeling foolish, gullible, careless, or exposed, rather than only regretting a particular action.",
-          "link": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          "links": [
+            {
+              "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+            }
+          ]
         },
         "rumination": {
           "text": "Repeatedly replaying the interaction, missed cue, or alternative decision after the immediate event has ended.",
-          "link": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          "links": [
+            {
+              "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+            }
+          ]
         },
         "loss of self-trust": {
           "text": "Reduced confidence in one's own judgment and ability to recognize or resist manipulation in future decisions.",
-          "link": "https://doi.org/10.1177/0146167210393532"
+          "links": [
+            {
+              "href": "https://doi.org/10.1177/0146167210393532"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://doi.org/10.3389/fpsyg.2026.1805536"
+        "links": [
+          {
+            "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          }
+        ]
       }
     },
     {
@@ -134,27 +188,51 @@
       "termInfo": {
         "anger": {
           "text": "An emotional response to being treated unfairly or intentionally steered into an unwanted outcome.",
-          "link": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          "links": [
+            {
+              "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+            }
+          ]
         },
         "perceived betrayal": {
           "text": "The judgment that a business exploited an expectation of honesty, fair dealing, or care for the user's interests.",
-          "link": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          "links": [
+            {
+              "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+            }
+          ]
         },
         "credibility loss": {
           "text": "Reduced willingness to accept the business's future prices, claims, recommendations, or interface signals as trustworthy.",
-          "link": "https://doi.org/10.1007/978-3-030-77750-0_10"
+          "links": [
+            {
+              "href": "https://doi.org/10.1007/978-3-030-77750-0_10"
+            }
+          ]
         },
         "complaint or exit": {
           "text": "Seeking redress, cancelling, switching businesses, or ending the relationship after the manipulation is recognized.",
-          "link": "https://doi.org/10.1145/3479516"
+          "links": [
+            {
+              "href": "https://doi.org/10.1145/3479516"
+            }
+          ]
         },
         "warning others": {
           "text": "Sharing the experience so that other people can recognize the tactic, avoid the business, or protect themselves.",
-          "link": "https://doi.org/10.1145/3479516"
+          "links": [
+            {
+              "href": "https://doi.org/10.1145/3479516"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://doi.org/10.1007/978-3-030-77750-0_10"
+        "links": [
+          {
+            "href": "https://doi.org/10.1007/978-3-030-77750-0_10"
+          }
+        ]
       }
     },
     {
@@ -181,27 +259,51 @@
       "termInfo": {
         "defensive vigilance": {
           "text": "Increased checking, verification, and monitoring motivated by the expectation that an interface may conceal or distort something important.",
-          "link": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+          "links": [
+            {
+              "href": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+            }
+          ]
         },
         "avoidance": {
           "text": "Reducing contact with a business, platform, transaction type, or digital service to prevent another manipulative encounter.",
-          "link": "https://doi.org/10.1177/0146167210393532"
+          "links": [
+            {
+              "href": "https://doi.org/10.1177/0146167210393532"
+            }
+          ]
         },
         "generalized suspicion": {
           "text": "Extending distrust from the original business or tactic to other interface signals and organizations that may be honest.",
-          "link": "https://doi.org/10.1177/0146167210393532"
+          "links": [
+            {
+              "href": "https://doi.org/10.1177/0146167210393532"
+            }
+          ]
         },
         "trust erosion": {
           "text": "A gradual weakening of confidence that businesses and interfaces will present choices honestly and respect the person's intentions.",
-          "link": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+          "links": [
+            {
+              "href": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+            }
+          ]
         },
         "reduced participation": {
           "text": "Withdrawing from useful transactions, services, or forms of digital engagement because vigilance and perceived risk have become too costly.",
-          "link": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          "links": [
+            {
+              "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+        "links": [
+          {
+            "href": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+          }
+        ]
       }
     }
   ],
@@ -216,7 +318,11 @@
       "fact": "Once manipulation or intention mismatch is recognized, the person reinterprets the earlier choice in light of information that was absent, hidden, or misunderstood at the time.",
       "info": {
         "text": "Revising the meaning of a past decision after learning something that changes how the action and responsibility are understood.",
-        "link": "https://doi.org/10.1086/339925"
+        "links": [
+          {
+            "href": "https://doi.org/10.1086/339925"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -239,7 +345,11 @@
       "fact": "Discovery becomes betrayal when the person concludes that ordinary reliance on the business's presentation was deliberately used to produce an unwanted outcome.",
       "info": {
         "text": "The realization that an expectation of honest dealing was not merely disappointed but used as leverage.",
-        "link": "https://doi.org/10.3389/fpsyg.2026.1805536"
+        "links": [
+          {
+            "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -262,7 +372,11 @@
       "fact": "Lost credibility in one encounter increases the verification, suspicion, and avoidance required in later interactions, imposing costs even when the next interface is honest.",
       "info": {
         "text": "The additional time, attention, and lost opportunity created when trust can no longer function as a reasonable starting assumption.",
-        "link": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+        "links": [
+          {
+            "href": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

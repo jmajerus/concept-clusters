@@ -1,102 +1,37 @@
-// Concept Clusters puzzle: Counted and modeled
-// Essay-derived catalogue: Vectors — How Health Misinformation Kills
-// Source: Piece 6, "The Body Count"
-// https://blog.majerus.us/vectors-6-the-body-count/
-//
-// All four clusters carry field-consensus membership; the source's own
-// contribution — that an accounting owes its reader the evidentiary status
-// of every figure in it — is carried by the bridge facts and the lenses.
-// No specific mortality figure appears here: the puzzle teaches how a number
-// earns the claim it is used to make, not what any particular number was.
+// Generated from content/puzzles/counted-and-modeled.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "counted-and-modeled",
   "title": "Counted and modeled",
-  "category": "Public Health",
+  "category": "public-health",
   "categories": [
-    "Public Health",
-    "Media & Information Literacy"
+    "public-health",
+    "media-information-literacy"
   ],
   "large": true,
   "info": {
     "text": "Four ways of establishing how many — direct counts, estimates that correct for what counting missed, attribution from individual records, and projections of what would have happened otherwise. The distinctions are standard epidemiology; what is worth practising is the labelling, because each answers a different question and an accounting that blurs them discredits itself.",
-    "link": "https://blog.majerus.us/vectors-6-the-body-count/",
-    "linkLabel": "Vectors 6: The Body Count",
-    "seeAlso": [
-      { "href": "wiki:Statistical inference", "label": "Statistical inference" },
-      { "href": "wiki:Scientific method", "label": "Scientific method" }
-    ]
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Compare how different fields establish what happened, and how claims are tested once established."
-    },
-    "entries": [
+    "links": [
       {
-        "id": "evidence-and-inference-across-disciplines",
-        "via": [
-          "corroboration",
-          "provenance"
-        ],
-        "reason": "Move from how one discipline grades its own evidence to how science, history, law, and journalism grade theirs differently."
+        "href": "https://blog.majerus.us/vectors-6-the-body-count/",
+        "label": "Vectors 6: The Body Count"
       },
       {
-        "id": "data-probability",
-        "via": [
-          "sample",
-          "distribution"
-        ],
-        "reason": "Revisit the statistical machinery — sampling, distribution, likelihood — underneath every estimate on this map."
+        "href": "wiki:Statistical inference",
+        "label": "Statistical inference"
       },
       {
-        "id": "when-correction-fails",
-        "via": [
-          "contradictory evidence"
-        ],
-        "reason": "Follow what happens after a figure is well established and still not received."
+        "href": "wiki:Scientific method",
+        "label": "Scientific method"
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "where-the-assumption-enters",
-      "prompt": "Which concepts depend on an assumption that can either be stated plainly or left unstated?",
-      "targets": [
-        "expected baseline",
-        "case ascertainment",
-        "counterfactual scenario",
-        "modeling assumption",
-        "attributable fraction"
-      ],
-      "explanation": "Every step away from a direct count introduces an assumption. The discipline is not avoiding assumptions — no useful account of a large event can be built from certificates alone — but declaring them, so a reader can locate where a figure is carrying weight it was not built to carry.",
-      "reasons": {
-        "expected baseline": "What would have happened anyway is never observed; it is constructed from prior years and a choice about which ones.",
-        "case ascertainment": "How completely cases were captured must be estimated, and the estimate governs every correction built on it.",
-        "counterfactual scenario": "The comparison world does not exist and cannot be measured, only specified.",
-        "modeling assumption": "The stated inputs a projection runs on, and the place where a reader should look first.",
-        "attributable fraction": "Requires both an observed outcome and a specified alternative, so it inherits the assumptions of the alternative."
-      }
-    },
-    {
-      "id": "what-a-floor-means",
-      "prompt": "Which concepts describe a deliberate limit that makes an estimate smaller than the truth it points at?",
-      "targets": [
-        "bounded time window",
-        "underreporting",
-        "confidence interval",
-        "excess mortality"
-      ],
-      "explanation": "A conservative estimate is not a cautious guess at the middle. It is a figure built so that the real value is very unlikely to be lower — by excluding periods, by excluding cases that could not be confirmed, by reporting the range rather than the point. Read as a best guess, a floor understates. Read as a floor, it is the strongest kind of number an argument can rest on.",
-      "reasons": {
-        "bounded time window": "Restricting the period excludes real events outside it, pushing the total down by design.",
-        "underreporting": "Cases that were never recorded cannot enter a count, so the count begins below the truth.",
-        "confidence interval": "Reporting a range rather than a single value shows where the estimate is firm and where it is not.",
-        "excess mortality": "Built to capture deaths that direct certification missed, and therefore usually larger than the official count."
-      }
-    }
-  ],
   "clusters": [
     {
+      "id": "directly-counted",
       "name": "Directly counted",
       "color": "teal",
       "fact": "A counted event is one with a record attached — a certificate, a confirmed test, a registry entry. Its strength is that it happened. Its limit is that it can only see what someone recorded.",
@@ -116,14 +51,23 @@ export default {
         "notifiable disease report": "A case a clinician or laboratory is legally required to report to a public health authority.",
         "vital statistics": {
           "text": "The systematic civil registration of births, deaths, and causes of death.",
-          "link": "wiki:Public records"
+          "links": [
+            {
+              "href": "wiki:Public records"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Primary source"
+        "links": [
+          {
+            "href": "wiki:Primary source"
+          }
+        ]
       }
     },
     {
+      "id": "estimated-from-incomplete-counts",
       "name": "Estimated from incomplete counts",
       "color": "blue",
       "fact": "Where recording is known to be incomplete, the gap itself is estimated — which requires a model of what complete recording would have produced, and therefore a stated assumption.",
@@ -144,10 +88,15 @@ export default {
         "surveillance gap": "A population, region, or period a monitoring system does not effectively cover."
       },
       "info": {
-        "link": "wiki:Statistical inference"
+        "links": [
+          {
+            "href": "wiki:Statistical inference"
+          }
+        ]
       }
     },
     {
+      "id": "attributed-from-individual-records",
       "name": "Attributed from individual records",
       "color": "amber",
       "fact": "Linking individual outcomes to individual exposures answers a question no aggregate can: not how many events occurred, but how many occurred in one group and not the other.",
@@ -168,10 +117,15 @@ export default {
         "bounded time window": "An explicitly stated start and end date, outside which the study makes no claim at all."
       },
       "info": {
-        "link": "wiki:Scientific control"
+        "links": [
+          {
+            "href": "wiki:Scientific control"
+          }
+        ]
       }
     },
     {
+      "id": "projected-under-a-counterfactual",
       "name": "Projected under a counterfactual",
       "color": "magenta",
       "fact": "A projection answers a question no count can reach — what would have happened otherwise — and pays for that reach with assumptions it is obliged to declare.",
@@ -192,62 +146,141 @@ export default {
         "sensitivity analysis": "Systematically varying assumptions to show how much the result depends on each one."
       },
       "info": {
-        "link": "wiki:Scientific method"
+        "links": [
+          {
+            "href": "wiki:Scientific method"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "excess-mortality",
       "term": "excess mortality",
-      "conceptId": "excess-mortality",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "dynamic",
       "fact": "Excess mortality is computed from counted deaths but exists only relative to a modeled baseline. It is the point at which a count becomes an estimate — which is why it usually exceeds the official tally, and why it belongs to neither category alone.",
+      "info": {
+        "text": "The difference between deaths actually observed in a period and the deaths that would have been expected without the event under study."
+      },
+      "conceptId": "excess-mortality",
+      "relationKind": "dynamic",
       "idealTerms": [
         "vital statistics",
         "expected baseline"
-      ],
-      "info": {
-        "text": "The difference between deaths actually observed in a period and the deaths that would have been expected without the event under study."
-      }
+      ]
     },
     {
+      "id": "attributable-fraction",
       "term": "attributable fraction",
-      "conceptId": "attributable-fraction",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "evaluation",
       "fact": "An attributable fraction needs both an observed outcome and a specified alternative. The figure is meaningless without saying which of the two is doing more of the work — and conflating a share attributed from records with a total projected from a scenario is the most common way a consequence argument discredits itself.",
+      "info": {
+        "text": "The proportion of outcomes in a population that can be ascribed to a particular exposure rather than to background risk."
+      },
+      "conceptId": "attributable-fraction",
+      "relationKind": "evaluation",
       "idealTerms": [
         "case ascertainment",
         "cohort comparison"
-      ],
-      "info": {
-        "text": "The proportion of outcomes in a population that can be ascribed to a particular exposure rather than to background risk."
-      }
+      ]
     },
     {
+      "id": "declared-method",
       "term": "declared method",
-      "conceptId": "declared-method",
       "clusters": [
         2,
         3
       ],
-      "relationKind": "foundation",
       "fact": "An attribution study and a scenario projection rest on the same foundation: a method stated in advance. Without it a reader cannot tell where the estimate could be wrong, and is left taking the figure on trust — which is the one thing a number is supposed to make unnecessary.",
+      "info": {
+        "text": "The published account of how an estimate was produced, which is what makes it checkable by someone who did not produce it.",
+        "links": [
+          {
+            "href": "wiki:Scientific method"
+          }
+        ]
+      },
+      "conceptId": "declared-method",
+      "relationKind": "foundation",
       "idealTerms": [
         "bounded time window",
         "modeling assumption"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "where-the-assumption-enters",
+      "prompt": "Which concepts depend on an assumption that can either be stated plainly or left unstated?",
+      "explanation": "Every step away from a direct count introduces an assumption. The discipline is not avoiding assumptions — no useful account of a large event can be built from certificates alone — but declaring them, so a reader can locate where a figure is carrying weight it was not built to carry.",
+      "targets": [
+        "expected baseline",
+        "case ascertainment",
+        "counterfactual scenario",
+        "modeling assumption",
+        "attributable fraction"
       ],
-      "info": {
-        "text": "The published account of how an estimate was produced, which is what makes it checkable by someone who did not produce it.",
-        "link": "wiki:Scientific method"
+      "reasons": {
+        "expected baseline": "What would have happened anyway is never observed; it is constructed from prior years and a choice about which ones.",
+        "case ascertainment": "How completely cases were captured must be estimated, and the estimate governs every correction built on it.",
+        "counterfactual scenario": "The comparison world does not exist and cannot be measured, only specified.",
+        "modeling assumption": "The stated inputs a projection runs on, and the place where a reader should look first.",
+        "attributable fraction": "Requires both an observed outcome and a specified alternative, so it inherits the assumptions of the alternative."
+      }
+    },
+    {
+      "id": "what-a-floor-means",
+      "prompt": "Which concepts describe a deliberate limit that makes an estimate smaller than the truth it points at?",
+      "explanation": "A conservative estimate is not a cautious guess at the middle. It is a figure built so that the real value is very unlikely to be lower — by excluding periods, by excluding cases that could not be confirmed, by reporting the range rather than the point. Read as a best guess, a floor understates. Read as a floor, it is the strongest kind of number an argument can rest on.",
+      "targets": [
+        "bounded time window",
+        "underreporting",
+        "confidence interval",
+        "excess mortality"
+      ],
+      "reasons": {
+        "bounded time window": "Restricting the period excludes real events outside it, pushing the total down by design.",
+        "underreporting": "Cases that were never recorded cannot enter a count, so the count begins below the truth.",
+        "confidence interval": "Reporting a range rather than a single value shows where the estimate is firm and where it is not.",
+        "excess mortality": "Built to capture deaths that direct certification missed, and therefore usually larger than the official count."
       }
     }
-  ]
-};
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Compare how different fields establish what happened, and how claims are tested once established."
+    },
+    "entries": [
+      {
+        "id": "evidence-and-inference-across-disciplines",
+        "reason": "Move from how one discipline grades its own evidence to how science, history, law, and journalism grade theirs differently.",
+        "via": [
+          "corroboration",
+          "provenance"
+        ]
+      },
+      {
+        "id": "data-probability",
+        "reason": "Revisit the statistical machinery — sampling, distribution, likelihood — underneath every estimate on this map.",
+        "via": [
+          "sample",
+          "distribution"
+        ]
+      },
+      {
+        "id": "when-correction-fails",
+        "reason": "Follow what happens after a figure is well established and still not received.",
+        "via": [
+          "contradictory evidence"
+        ]
+      }
+    ]
+  }
+});

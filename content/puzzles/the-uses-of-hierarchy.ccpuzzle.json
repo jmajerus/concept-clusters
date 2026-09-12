@@ -1,23 +1,47 @@
 {
   "id": "the-uses-of-hierarchy",
   "title": "The Uses of Hierarchy",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book"
   ],
   "info": {
     "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation.",
-    "link": "wiki:Elliott Jaques",
     "citations": [
       {
         "author": "Jaques, Elliott",
         "title": "Requisite Organization: A Total System for Effective Managerial Organization and Managerial Leadership for the 21st Century",
         "publisher": "Cason Hall",
         "year": "1989"
+      },
+      {
+        "title": "Social Systems as a Defence against Persecutory and Depressive Anxiety",
+        "author": "Elliott Jaques",
+        "publisher": "In M. Klein, P. Heimann, and R. Money-Kyrle (eds.), New Directions in Psycho-Analysis, Tavistock Publications",
+        "year": "1955",
+        "pages": "478-498"
+      },
+      {
+        "title": "Requisite Organization: The CEO's Guide to Creative Structure and Leadership",
+        "author": "Elliott Jaques",
+        "publisher": "Cason Hall & Co.",
+        "year": "1989"
+      },
+      {
+        "title": "Why the Psychoanalytic Approach to Understanding Organizations Is Dysfunctional",
+        "author": "Elliott Jaques",
+        "publisher": "Human Relations, 48",
+        "year": "1995",
+        "pages": "343-349"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Elliott Jaques"
       }
     ]
   },
@@ -48,18 +72,7 @@
         "institutionalized ritual": "A routine, procedure, or fixed way of doing a task that persists because it manages anxiety, whether or not it's the most efficient way to get the task done.",
         "persecutory anxiety": "The Kleinian fear of attack from a bad, threatening object -- in Jaques's application, a dread institutions can structure themselves to absorb on their members' behalf."
       },
-      "info": {
-        "text": "The claim, argued in 1955 and later renounced by its own author, that institutions unconsciously help their members manage primitive anxiety.",
-        "citations": [
-          {
-            "title": "Social Systems as a Defence against Persecutory and Depressive Anxiety",
-            "author": "Elliott Jaques",
-            "publisher": "In M. Klein, P. Heimann, and R. Money-Kyrle (eds.), New Directions in Psycho-Analysis, Tavistock Publications",
-            "year": "1955",
-            "pages": "478-498"
-          }
-        ]
-      }
+      "info": "The claim, argued in 1955 and later renounced by its own author, that institutions unconsciously help their members manage primitive anxiety."
     },
     {
       "id": "cluster-requisite-hierarchy",
@@ -89,13 +102,9 @@
       },
       "info": {
         "text": "Jaques's later claim that the number of hierarchical levels an organization needs is an objective, measurable fact about the complexity of its work, not a matter of taste or tradition.",
-        "link": "wiki:Requisite organization",
-        "citations": [
+        "links": [
           {
-            "title": "Requisite Organization: The CEO's Guide to Creative Structure and Leadership",
-            "author": "Elliott Jaques",
-            "publisher": "Cason Hall & Co.",
-            "year": "1989"
+            "href": "wiki:Requisite organization"
           }
         ]
       }
@@ -110,18 +119,7 @@
         "cluster-requisite-hierarchy"
       ],
       "fact": "Jaques didn't just leave these two accounts in tension -- he later renounced the first one outright, arguing in 1995 that structural design fully explains what he had once attributed to unconscious defence, and that psychoanalytic readings of organizations were actively unhelpful. This board holds both claims rather than resolving them: the same hierarchy, built to his own later specification, can still be doing anxiety-management work its designer came to insist wasn't real.",
-      "info": {
-        "text": "The single structure both accounts are describing -- read by early Jaques as a shared defence, and by later Jaques as a rational allocation of authority to complexity.",
-        "citations": [
-          {
-            "title": "Why the Psychoanalytic Approach to Understanding Organizations Is Dysfunctional",
-            "author": "Elliott Jaques",
-            "publisher": "Human Relations, 48",
-            "year": "1995",
-            "pages": "343-349"
-          }
-        ]
-      },
+      "info": "The single structure both accounts are describing -- read by early Jaques as a shared defence, and by later Jaques as a rational allocation of authority to complexity.",
       "relationKind": "contrast",
       "idealTerms": {
         "cluster-requisite-hierarchy": "levels of work complexity"
@@ -145,20 +143,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

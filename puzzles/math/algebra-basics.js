@@ -1,17 +1,16 @@
-// Concept Clusters puzzle: Algebra basics
-// Category: Math
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/algebra-basics.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "algebra-basics",
   "title": "Algebra basics",
-  "category": "Math",
+  "category": "math",
   "clusters": [
     {
+      "id": "variables",
       "name": "Variables",
-      "info": {
-        "link": "wiki:Variable (mathematics)"
-      },
       "color": "teal",
       "fact": "Variables are symbols that stand in for unknown or changing quantities.",
       "terms": [
@@ -27,26 +26,47 @@ export default {
       "termInfo": {
         "unknown": {
           "text": "The letter or symbol standing for the value an equation is solved to find.",
-          "link": "wiki:Equation"
+          "links": [
+            {
+              "href": "wiki:Equation"
+            }
+          ]
         },
         "coefficient": {
-          "link": "wiki:Coefficient"
+          "links": [
+            {
+              "href": "wiki:Coefficient"
+            }
+          ]
         },
         "term": {
           "text": "A single piece of an algebraic expression, like 3x or 7 — one part of what's added or subtracted together.",
-          "link": "wiki:Monomial"
+          "links": [
+            {
+              "href": "wiki:Monomial"
+            }
+          ]
         },
         "expression": {
           "text": "A combination of numbers, variables, and operations — unlike an equation, it has no equals sign.",
-          "link": "wiki:Expression (mathematics)"
+          "links": [
+            {
+              "href": "wiki:Expression (mathematics)"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Variable (mathematics)"
+          }
+        ]
       }
     },
     {
+      "id": "equations",
       "name": "Equations",
-      "info": {
-        "link": "wiki:Equation"
-      },
       "color": "blue",
       "fact": "Equations state that two expressions are equal, and stay balanced under the same operation on both sides.",
       "terms": [
@@ -61,22 +81,39 @@ export default {
       "termInfo": {
         "balance": {
           "text": "The idea that both sides of an equation must stay equal — whatever you do to one side, you must do to the other.",
-          "link": "wiki:Equation"
+          "links": [
+            {
+              "href": "wiki:Equation"
+            }
+          ]
         },
         "inverse operation": {
-          "link": "wiki:Inverse function"
+          "links": [
+            {
+              "href": "wiki:Inverse function"
+            }
+          ]
         },
         "solution": {
           "text": "The value (or values) that make an equation true when substituted in.",
-          "link": "wiki:Solution set"
+          "links": [
+            {
+              "href": "wiki:Solution set"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Equation"
+          }
+        ]
       }
     },
     {
+      "id": "functions",
       "name": "Functions",
-      "info": {
-        "link": "wiki:Function (mathematics)"
-      },
       "color": "amber",
       "fact": "Functions map every input to exactly one output, describing how one quantity depends on another.",
       "terms": [
@@ -92,57 +129,90 @@ export default {
       "termInfo": {
         "input": {
           "text": "The value fed into a function — the independent variable, which the output then depends on.",
-          "link": "wiki:Dependent and independent variables"
+          "links": [
+            {
+              "href": "wiki:Dependent and independent variables"
+            }
+          ]
         },
         "output": {
           "text": "The value a function produces from a given input — the dependent variable, since it depends on what's fed in.",
-          "link": "wiki:Dependent and independent variables"
+          "links": [
+            {
+              "href": "wiki:Dependent and independent variables"
+            }
+          ]
         },
         "domain": {
           "text": "The full set of inputs a function is allowed to take.",
-          "link": "wiki:Domain of a function"
+          "links": [
+            {
+              "href": "wiki:Domain of a function"
+            }
+          ]
         },
         "range": {
           "text": "The full set of outputs a function can produce, pairing with domain (its set of allowed inputs).",
-          "link": "wiki:Range of a function"
+          "links": [
+            {
+              "href": "wiki:Range of a function"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Function (mathematics)"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "solving-for-x",
       "term": "solving for x",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "dynamic",
       "fact": "Solving for x bridges the two: it's the act of isolating a variable by keeping an equation balanced.",
+      "info": {
+        "text": "The general process of isolating an unknown by applying the same operation to both sides of an equation.",
+        "links": [
+          {
+            "href": "wiki:Equation solving"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
       "idealTerms": [
         "unknown",
         "inverse operation"
-      ],
-      "info": {
-        "text": "The general process of isolating an unknown by applying the same operation to both sides of an equation.",
-        "link": "wiki:Equation solving"
-      }
+      ]
     },
     {
+      "id": "graph",
       "term": "graph",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "foundation",
       "fact": "A graph bridges the two: it's the visual picture of both an equation's solutions and a function's input-output pairs.",
+      "info": {
+        "text": "The visual plot of a function's input-output pairs on a coordinate plane.",
+        "links": [
+          {
+            "href": "wiki:Graph of a function"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         "solution",
         null
-      ],
-      "info": {
-        "text": "The visual plot of a function's input-output pairs on a coordinate plane.",
-        "link": "wiki:Graph of a function"
-      }
+      ]
     }
   ]
-};
+});

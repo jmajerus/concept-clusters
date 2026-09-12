@@ -1,7 +1,7 @@
 {
   "id": "film-classics",
   "title": "Film Classics",
-  "category": "Trivia",
+  "category": "trivia",
   "large": true,
   "info": {
     "text": "Four genres that defined classic Hollywood, told through representative films from each."

@@ -1,11 +1,15 @@
 {
   "id": "revolutions-as-a-process",
   "title": "Revolutions as a process",
-  "category": "History & Society",
+  "category": "history-society",
   "large": true,
   "info": {
     "text": "Revolutions develop through interacting crises, mobilization, institutional change, conflict, and state-building rather than following one universal sequence.",
-    "link": "wiki:Revolution"
+    "links": [
+      {
+        "href": "wiki:Revolution"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "fiscal crisis": {
           "text": "A breakdown in a government's ability to raise revenue, service debt, or sustain expected spending.",
-          "link": "wiki:Fiscal crisis"
+          "links": [
+            {
+              "href": "wiki:Fiscal crisis"
+            }
+          ]
         },
         "food shortage": {
           "text": "A condition in which available food is insufficient, inaccessible, or sharply more expensive for part of a population.",
-          "link": "wiki:Food security"
+          "links": [
+            {
+              "href": "wiki:Food security"
+            }
+          ]
         },
         "political exclusion": {
           "text": "The denial or severe restriction of participation, representation, rights, or public power to particular groups.",
-          "link": "wiki:Political participation"
+          "links": [
+            {
+              "href": "wiki:Political participation"
+            }
+          ]
         },
         "imperial war": {
           "text": "War involving empires, colonies, or struggles for control across imperial boundaries.",
-          "link": "wiki:Imperialism"
+          "links": [
+            {
+              "href": "wiki:Imperialism"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Revolutionary situation"
+        "links": [
+          {
+            "href": "wiki:Revolutionary situation"
+          }
+        ]
       }
     },
     {
@@ -71,23 +95,43 @@
       "termInfo": {
         "pamphlet networks": {
           "text": "The production and circulation of short printed arguments through writers, printers, sellers, clubs, and readers.",
-          "link": "wiki:Pamphlet"
+          "links": [
+            {
+              "href": "wiki:Pamphlet"
+            }
+          ]
         },
         "popular assemblies": {
           "text": "Gatherings in which citizens, workers, soldiers, or local communities debate, decide, petition, or organize collectively.",
-          "link": "wiki:Popular assembly"
+          "links": [
+            {
+              "href": "wiki:Popular assembly"
+            }
+          ]
         },
         "slave uprising": {
           "text": "Collective armed or organized resistance by enslaved people against slavery and those enforcing it.",
-          "link": "wiki:Slave rebellion"
+          "links": [
+            {
+              "href": "wiki:Slave rebellion"
+            }
+          ]
         },
         "revolutionary party": {
           "text": "A political organization committed to taking or transforming state power through revolutionary change.",
-          "link": "wiki:Political party"
+          "links": [
+            {
+              "href": "wiki:Political party"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Collective action"
+        "links": [
+          {
+            "href": "wiki:Collective action"
+          }
+        ]
       }
     },
     {
@@ -112,23 +156,43 @@
       "termInfo": {
         "abolition of privilege": {
           "text": "The removal of inherited legal exemptions, status rights, or feudal obligations attached to estates or social orders.",
-          "link": "wiki:August Decrees"
+          "links": [
+            {
+              "href": "wiki:August Decrees"
+            }
+          ]
         },
         "emancipation": {
           "text": "The legal liberation of a person or group from slavery, serfdom, or another subordinated status.",
-          "link": "wiki:Emancipation"
+          "links": [
+            {
+              "href": "wiki:Emancipation"
+            }
+          ]
         },
         "land redistribution": {
           "text": "The transfer or reallocation of land to change patterns of ownership, tenancy, or access.",
-          "link": "wiki:Land reform"
+          "links": [
+            {
+              "href": "wiki:Land reform"
+            }
+          ]
         },
         "nationalization": {
           "text": "The transfer of privately owned assets or industries into public or state ownership.",
-          "link": "wiki:Nationalization"
+          "links": [
+            {
+              "href": "wiki:Nationalization"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Social revolution"
+        "links": [
+          {
+            "href": "wiki:Social revolution"
+          }
+        ]
       }
     },
     {
@@ -153,23 +217,43 @@
       "termInfo": {
         "constitution": {
           "text": "A fundamental framework defining political institutions, powers, procedures, and often rights.",
-          "link": "wiki:Constitution"
+          "links": [
+            {
+              "href": "wiki:Constitution"
+            }
+          ]
         },
         "counterrevolution": {
           "text": "Organized action intended to reverse, defeat, or substantially limit a revolution.",
-          "link": "wiki:Counter-revolution"
+          "links": [
+            {
+              "href": "wiki:Counter-revolution"
+            }
+          ]
         },
         "civil war": {
           "text": "Sustained armed conflict among organized groups within a state or former state.",
-          "link": "wiki:Civil war"
+          "links": [
+            {
+              "href": "wiki:Civil war"
+            }
+          ]
         },
         "new governing elite": {
           "text": "A newly ascendant group that occupies influential political, military, or administrative positions after a transfer of power.",
-          "link": "wiki:Political class"
+          "links": [
+            {
+              "href": "wiki:Political class"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:State-building"
+        "links": [
+          {
+            "href": "wiki:State-building"
+          }
+        ]
       }
     }
   ],
@@ -184,7 +268,11 @@
       "fact": "A legitimacy crisis connects structural breakdown with mobilization when existing rulers and institutions lose enough acceptance that alternatives become thinkable and collective action expands.",
       "info": {
         "text": "A condition in which substantial groups no longer accept the rightfulness or authority of existing political institutions.",
-        "link": "wiki:Legitimacy (political)"
+        "links": [
+          {
+            "href": "wiki:Legitimacy (political)"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -202,7 +290,11 @@
       "fact": "Mass politics connects mobilization with transformation because assemblies, movements, parties, and armed groups press demands that revolutionary institutions attempt to enact.",
       "info": {
         "text": "Political participation and organization involving large populations beyond a narrow governing elite.",
-        "link": "wiki:Mass politics"
+        "links": [
+          {
+            "href": "wiki:Mass politics"
+          }
+        ]
       },
       "relationKind": "dynamic"
     },
@@ -216,7 +308,11 @@
       "fact": "A revolutionary state connects institutional transformation with consolidation by turning new laws, property arrangements, and political claims into enforceable administration and authority.",
       "info": {
         "text": "A state whose institutions and legitimacy are reorganized through a revolution and tasked with defending or implementing its program.",
-        "link": "wiki:Revolution"
+        "links": [
+          {
+            "href": "wiki:Revolution"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -332,7 +428,11 @@
   "relatedPuzzles": {
     "info": {
       "text": "Compare revolutions as historical cases, recurring processes, and sources of later political institutions.",
-      "link": "wiki:Political revolution"
+      "links": [
+        {
+          "href": "wiki:Political revolution"
+        }
+      ]
     },
     "entries": [
       {

@@ -1,7 +1,7 @@
 {
   "id": "poetic-forms",
   "title": "Poetic forms",
-  "category": "Language Arts",
+  "category": "language-arts",
   "clusters": [
     {
       "id": "sonnet",
@@ -25,22 +25,42 @@
       "termInfo": {
         "14 lines": {
           "text": "The defining structural feature of a sonnet — no other fixed poetic form is exactly this length.",
-          "link": "wiki:Sonnet"
+          "links": [
+            {
+              "href": "wiki:Sonnet"
+            }
+          ]
         },
         "volta": {
           "text": "The turn — a shift in argument, tone, or perspective partway through a sonnet, often right before the final couplet.",
-          "link": "wiki:Volta (literature)"
+          "links": [
+            {
+              "href": "wiki:Volta (literature)"
+            }
+          ]
         },
         "rhyme scheme": {
           "text": "The pattern of end rhymes across a poem's lines — a sonnet's varies by tradition (Shakespearean, Petrarchan, and so on).",
-          "link": "wiki:Rhyme scheme"
+          "links": [
+            {
+              "href": "wiki:Rhyme scheme"
+            }
+          ]
         },
         "iambic pentameter": {
-          "link": "wiki:Iambic pentameter"
+          "links": [
+            {
+              "href": "wiki:Iambic pentameter"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Sonnet"
+        "links": [
+          {
+            "href": "wiki:Sonnet"
+          }
+        ]
       }
     },
     {
@@ -63,19 +83,35 @@
       "termInfo": {
         "5-7-5 syllables": {
           "text": "The traditional syllable count across a haiku's three lines: five, then seven, then five.",
-          "link": "wiki:Haiku"
+          "links": [
+            {
+              "href": "wiki:Haiku"
+            }
+          ]
         },
         "kigo": {
           "text": "A word or phrase that signals a specific season — a required element of traditional haiku.",
-          "link": "wiki:Kigo"
+          "links": [
+            {
+              "href": "wiki:Kigo"
+            }
+          ]
         },
         "single image": {
           "text": "A haiku typically centers on one concrete image or moment, rather than developing an idea across several.",
-          "link": "wiki:Haiku"
+          "links": [
+            {
+              "href": "wiki:Haiku"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Haiku"
+        "links": [
+          {
+            "href": "wiki:Haiku"
+          }
+        ]
       }
     },
     {
@@ -98,19 +134,35 @@
       "termInfo": {
         "no fixed meter": {
           "text": "Free verse's defining trait: it isn't built on a repeating pattern of stressed and unstressed syllables the way metered poetry is.",
-          "link": "wiki:Free verse"
+          "links": [
+            {
+              "href": "wiki:Free verse"
+            }
+          ]
         },
         "line breaks": {
           "text": "Where a line of poetry ends — in free verse, a deliberate choice rather than one forced by meter or rhyme.",
-          "link": "wiki:Line (poetry)"
+          "links": [
+            {
+              "href": "wiki:Line (poetry)"
+            }
+          ]
         },
         "natural cadence": {
           "text": "The rhythm of ordinary spoken language — what free verse follows instead of a fixed metrical pattern.",
-          "link": "wiki:Prosody (linguistics)"
+          "links": [
+            {
+              "href": "wiki:Prosody (linguistics)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Free verse"
+        "links": [
+          {
+            "href": "wiki:Free verse"
+          }
+        ]
       }
     }
   ],
@@ -124,7 +176,11 @@
       ],
       "fact": "Meter bridges the two: the sonnet is built on strict meter, while free verse is defined by deliberately rejecting it.",
       "info": {
-        "link": "wiki:Metre (poetry)"
+        "links": [
+          {
+            "href": "wiki:Metre (poetry)"
+          }
+        ]
       },
       "relationKind": "contrast",
       "idealTerms": {
@@ -141,7 +197,11 @@
       ],
       "fact": "Imagery bridges the two: haiku relies on a single vivid image, and free verse borrowed that same concentrated imagery when it broke from fixed forms.",
       "info": {
-        "link": "wiki:Imagery"
+        "links": [
+          {
+            "href": "wiki:Imagery"
+          }
+        ]
       },
       "relationKind": "continuity",
       "idealTerms": {

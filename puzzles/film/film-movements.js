@@ -1,82 +1,20 @@
 // Generated from content/puzzles/film-movements.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "film-movements",
   "title": "Film movements: Expressionism, Neorealism, New Wave",
-  "category": "Film",
+  "category": "film",
   "info": {
-    "link": "wiki:Film movement",
-    "text": "Three movements that each defined themselves against what came before -- through style, through subject, or through the frame itself."
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Put the vocabulary from a general survey of film technique to work on specific historical movements."
-    },
-    "entries": [
+    "text": "Three movements that each defined themselves against what came before -- through style, through subject, or through the frame itself.",
+    "links": [
       {
-        "id": "film-theory-basics",
-        "via": [
-          "cinematography",
-          "editing"
-        ],
-        "reason": "Bring the vocabulary from that survey to three specific historical movements that each redefined it."
+        "href": "wiki:Film movement"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "These are all visual and staging choices made at the moment of shooting -- how a scene is lit, tilted, built, or held -- regardless of which movement they come from. None describes what a story is about or how footage gets cut together afterward.",
-      "id": "how-a-shot-is-made",
-      "prompt": "Which concepts are decided by how a shot looks or is staged -- lighting, camera position, set construction -- rather than by what happens in front of it or how footage is assembled afterward?",
-      "reasons": {
-        "Dutch angle": "A camera placement decision made in the moment of shooting.",
-        "chiaroscuro lighting": "A lighting choice made on set, before a single cut is made.",
-        "distorted set design": "A staging and construction choice, built before the camera ever rolls.",
-        "handheld camera": "A way of holding and moving the camera during the shot itself."
-      },
-      "targets": [
-        "chiaroscuro lighting",
-        "Dutch angle",
-        "distorted set design",
-        "handheld camera"
-      ]
-    },
-    {
-      "explanation": "Each of these breaks a different convention: distorted sets rejected naturalistic staging, casting non-professional actors rejected the studio star system, the jump cut rejected invisible continuity editing, and nonlinear narrative rejected straightforward chronology. Four movements' worth of technique, one shared impulse to break with what came before.",
-      "id": "breaking-a-convention",
-      "prompt": "Which concepts represent a deliberate break from the mainstream studio filmmaking convention of their own moment?",
-      "reasons": {
-        "distorted set design": "Rejected naturalistic, believable staging in favor of visible artifice.",
-        "jump cut": "Rejected invisible continuity editing by making a cut visible on purpose.",
-        "non-professional actor": "Rejected the studio system's reliance on trained, contracted stars.",
-        "nonlinear narrative": "Rejected straightforward chronological storytelling."
-      },
-      "targets": [
-        "distorted set design",
-        "non-professional actor",
-        "jump cut",
-        "nonlinear narrative"
-      ]
-    },
-    {
-      "explanation": "None of these three belongs to just one movement's cluster -- each is the connective tissue between two of them: Neorealism's rejection of studio artifice, the journal that carried Neorealism's influence into the New Wave, and the New Wave's own habit of quoting film history, including Expressionism's.",
-      "id": "the-connective-tissue",
-      "prompt": "Which concepts describe how one movement inherited from, reacted against, or quoted an earlier one, rather than describing a single movement's own style?",
-      "reasons": {
-        "Cahiers du cinéma": "The critical bridge between Neorealism's reception and the New Wave's formation.",
-        "intertextuality": "Names the New Wave's own practice of quoting earlier cinema, including Expressionism.",
-        "studio artifice": "Names exactly what Neorealism defined itself against."
-      },
-      "targets": [
-        "studio artifice",
-        "Cahiers du cinéma",
-        "intertextuality"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-german-expressionism",
@@ -95,12 +33,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "Dutch angle": {
-          "link": "wiki:Dutch angle",
-          "text": "A tilted camera frame that makes the world itself look off-balance."
+          "text": "A tilted camera frame that makes the world itself look off-balance.",
+          "links": [
+            {
+              "href": "wiki:Dutch angle"
+            }
+          ]
         },
         "chiaroscuro lighting": {
-          "link": "wiki:Chiaroscuro",
-          "text": "Strong contrast between light and dark, borrowed from painting, used to build mood and hide or reveal a shape."
+          "text": "Strong contrast between light and dark, borrowed from painting, used to build mood and hide or reveal a shape.",
+          "links": [
+            {
+              "href": "wiki:Chiaroscuro"
+            }
+          ]
         },
         "distorted set design": {
           "text": "Deliberately unrealistic, angular, painted sets built to look psychologically wrong rather than architecturally plausible."
@@ -110,7 +56,11 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:German expressionist cinema"
+        "links": [
+          {
+            "href": "wiki:German expressionist cinema"
+          }
+        ]
       }
     },
     {
@@ -133,19 +83,31 @@ export default definePuzzle(import.meta.url, {
           "text": "The ordinary economic struggle of working people, treated as worthy of a film's full attention rather than as background."
         },
         "location shooting": {
-          "link": "wiki:Location (filmmaking)",
-          "text": "Filming on a real, existing site rather than a built studio set."
+          "text": "Filming on a real, existing site rather than a built studio set.",
+          "links": [
+            {
+              "href": "wiki:Location (filmmaking)"
+            }
+          ]
         },
         "long take": {
-          "link": "wiki:Long take",
-          "text": "A single continuous shot held far longer than a conventional edit would allow, letting real time and space play out uncut."
+          "text": "A single continuous shot held far longer than a conventional edit would allow, letting real time and space play out uncut.",
+          "links": [
+            {
+              "href": "wiki:Long take"
+            }
+          ]
         },
         "non-professional actor": {
           "text": "A performer without formal training or a studio contract, cast for authenticity rather than star power."
         }
       },
       "info": {
-        "link": "wiki:Italian neorealism"
+        "links": [
+          {
+            "href": "wiki:Italian neorealism"
+          }
+        ]
       }
     },
     {
@@ -165,24 +127,44 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "direct address": {
-          "link": "wiki:Breaking the fourth wall",
-          "text": "A character or narrator speaking straight to the audience, acknowledging the fiction as a fiction."
+          "text": "A character or narrator speaking straight to the audience, acknowledging the fiction as a fiction.",
+          "links": [
+            {
+              "href": "wiki:Breaking the fourth wall"
+            }
+          ]
         },
         "handheld camera": {
-          "link": "wiki:Handheld camera",
-          "text": "A camera held and moved by the operator's body rather than mounted and stabilized, trading smoothness for immediacy."
+          "text": "A camera held and moved by the operator's body rather than mounted and stabilized, trading smoothness for immediacy.",
+          "links": [
+            {
+              "href": "wiki:Handheld camera"
+            }
+          ]
         },
         "jump cut": {
-          "link": "wiki:Jump cut",
-          "text": "A cut that breaks continuity on purpose, visibly skipping time within what looks like a single ongoing shot."
+          "text": "A cut that breaks continuity on purpose, visibly skipping time within what looks like a single ongoing shot.",
+          "links": [
+            {
+              "href": "wiki:Jump cut"
+            }
+          ]
         },
         "nonlinear narrative": {
-          "link": "wiki:Nonlinear narrative",
-          "text": "A story told out of straightforward chronological order."
+          "text": "A story told out of straightforward chronological order.",
+          "links": [
+            {
+              "href": "wiki:Nonlinear narrative"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:French New Wave"
+        "links": [
+          {
+            "href": "wiki:French New Wave"
+          }
+        ]
       }
     }
   ],
@@ -195,11 +177,15 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Italian Neorealism defined itself in direct opposition to the built, staged world of studio filmmaking that German Expressionism had perfected -- trading distorted sets and controlled lighting for real streets and available light.",
-      "relationKind": "contrast",
       "info": {
-        "link": "wiki:Film studio",
-        "text": "The controlled, built environment of studio filmmaking -- sets and staged lighting -- as opposed to filming in real, unaltered locations."
+        "text": "The controlled, built environment of studio filmmaking -- sets and staged lighting -- as opposed to filming in real, unaltered locations.",
+        "links": [
+          {
+            "href": "wiki:Film studio"
+          }
+        ]
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "distorted set design",
         "location shooting"
@@ -213,11 +199,15 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The critics at Cahiers du cinéma championed Italian Neorealism's location-shot, observational style before several of them picked up cameras themselves and became the directors of the French New Wave.",
-      "relationKind": "continuity",
       "info": {
-        "link": "wiki:Cahiers du cinéma",
-        "text": "The influential French film journal whose critics -- including Truffaut and Godard -- became the directors of the French New Wave."
+        "text": "The influential French film journal whose critics -- including Truffaut and Godard -- became the directors of the French New Wave.",
+        "links": [
+          {
+            "href": "wiki:Cahiers du cinéma"
+          }
+        ]
       },
+      "relationKind": "continuity",
       "idealTerms": [
         "location shooting",
         null
@@ -236,27 +226,93 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "French New Wave directors were cinephiles who filled their own films with citations of earlier cinema, including German Expressionism's stylized shadow and tilted frame -- turning film history itself into raw material.",
-      "relationKind": "continuity",
       "info": {
-        "link": "wiki:Intertextuality",
-        "text": "A work's practice of referencing, quoting, or echoing other works -- here, turning cinema's own history into material a film can quote."
+        "text": "A work's practice of referencing, quoting, or echoing other works -- here, turning cinema's own history into material a film can quote.",
+        "links": [
+          {
+            "href": "wiki:Intertextuality"
+          }
+        ]
       },
+      "relationKind": "continuity",
       "idealTerms": [
         "Dutch angle",
         null
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "how-a-shot-is-made",
+      "prompt": "Which concepts are decided by how a shot looks or is staged -- lighting, camera position, set construction -- rather than by what happens in front of it or how footage is assembled afterward?",
+      "explanation": "These are all visual and staging choices made at the moment of shooting -- how a scene is lit, tilted, built, or held -- regardless of which movement they come from. None describes what a story is about or how footage gets cut together afterward.",
+      "targets": [
+        "chiaroscuro lighting",
+        "Dutch angle",
+        "distorted set design",
+        "handheld camera"
+      ],
+      "reasons": {
+        "Dutch angle": "A camera placement decision made in the moment of shooting.",
+        "chiaroscuro lighting": "A lighting choice made on set, before a single cut is made.",
+        "distorted set design": "A staging and construction choice, built before the camera ever rolls.",
+        "handheld camera": "A way of holding and moving the camera during the shot itself."
+      }
     },
     {
-      "role": "drafted",
-      "scope": "lenses",
-      "system": "Claude"
+      "id": "breaking-a-convention",
+      "prompt": "Which concepts represent a deliberate break from the mainstream studio filmmaking convention of their own moment?",
+      "explanation": "Each of these breaks a different convention: distorted sets rejected naturalistic staging, casting non-professional actors rejected the studio star system, the jump cut rejected invisible continuity editing, and nonlinear narrative rejected straightforward chronology. Four movements' worth of technique, one shared impulse to break with what came before.",
+      "targets": [
+        "distorted set design",
+        "non-professional actor",
+        "jump cut",
+        "nonlinear narrative"
+      ],
+      "reasons": {
+        "distorted set design": "Rejected naturalistic, believable staging in favor of visible artifice.",
+        "jump cut": "Rejected invisible continuity editing by making a cut visible on purpose.",
+        "non-professional actor": "Rejected the studio system's reliance on trained, contracted stars.",
+        "nonlinear narrative": "Rejected straightforward chronological storytelling."
+      }
+    },
+    {
+      "id": "the-connective-tissue",
+      "prompt": "Which concepts describe how one movement inherited from, reacted against, or quoted an earlier one, rather than describing a single movement's own style?",
+      "explanation": "None of these three belongs to just one movement's cluster -- each is the connective tissue between two of them: Neorealism's rejection of studio artifice, the journal that carried Neorealism's influence into the New Wave, and the New Wave's own habit of quoting film history, including Expressionism's.",
+      "targets": [
+        "studio artifice",
+        "Cahiers du cinéma",
+        "intertextuality"
+      ],
+      "reasons": {
+        "Cahiers du cinéma": "The critical bridge between Neorealism's reception and the New Wave's formation.",
+        "intertextuality": "Names the New Wave's own practice of quoting earlier cinema, including Expressionism.",
+        "studio artifice": "Names exactly what Neorealism defined itself against."
+      }
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Put the vocabulary from a general survey of film technique to work on specific historical movements."
+    },
+    "entries": [
+      {
+        "id": "film-theory-basics",
+        "reason": "Bring the vocabulary from that survey to three specific historical movements that each redefined it.",
+        "via": [
+          "cinematography",
+          "editing"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

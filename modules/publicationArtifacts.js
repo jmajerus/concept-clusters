@@ -35,7 +35,7 @@ export function generatedPuzzleModule(
   );
   if (!manifestImport.startsWith(".")) manifestImport = `./${manifestImport}`;
   return `// Generated from ${canonicalRelativePath}.\n` +
-    "// Edit the JSON-LD source and re-import it rather than editing this file directly.\n\n" +
+    "// Edit the canonical simplified source rather than editing this file directly.\n\n" +
     `import { definePuzzle } from "${manifestImport}";\n\n` +
     `export default definePuzzle(import.meta.url, ${JSON.stringify(puzzle, null, 2)});\n`;
 }

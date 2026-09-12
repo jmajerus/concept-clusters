@@ -1,11 +1,15 @@
 {
   "id": "from-evidence-to-action",
   "title": "From Evidence to Action",
-  "category": "Public Health",
+  "category": "public-health",
   "large": true,
   "info": {
     "text": "Public-health decisions move through a revisable cycle: observe what is happening, compare explanations, choose an intervention, and evaluate what follows.",
-    "link": "wiki:Evidence-based medicine"
+    "links": [
+      {
+        "href": "wiki:Evidence-based medicine"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,27 +36,51 @@
       "termInfo": {
         "case counts": {
           "text": "The number of recognized cases recorded within a defined population and period.",
-          "link": "wiki:Disease surveillance"
+          "links": [
+            {
+              "href": "wiki:Disease surveillance"
+            }
+          ]
         },
         "laboratory testing": {
           "text": "Testing specimens or samples for biological, chemical, or other evidence relevant to health.",
-          "link": "wiki:Medical laboratory"
+          "links": [
+            {
+              "href": "wiki:Medical laboratory"
+            }
+          ]
         },
         "population surveys": {
           "text": "Structured collection of information from a sample or population about health, behavior, or conditions.",
-          "link": "wiki:Survey methodology"
+          "links": [
+            {
+              "href": "wiki:Survey methodology"
+            }
+          ]
         },
         "hospital reports": {
           "text": "Information from hospitals about diagnoses, admissions, capacity, and patient outcomes.",
-          "link": "wiki:Health information management"
+          "links": [
+            {
+              "href": "wiki:Health information management"
+            }
+          ]
         },
         "wastewater sampling": {
           "text": "Testing sewage for biological or chemical markers that can reveal population-level trends.",
-          "link": "wiki:Wastewater-based epidemiology"
+          "links": [
+            {
+              "href": "wiki:Wastewater-based epidemiology"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Public health surveillance"
+        "links": [
+          {
+            "href": "wiki:Public health surveillance"
+          }
+        ]
       }
     },
     {
@@ -79,27 +107,51 @@
       "termInfo": {
         "incidence": {
           "text": "The occurrence of new cases or events in a population during a specified period.",
-          "link": "wiki:Incidence (epidemiology)"
+          "links": [
+            {
+              "href": "wiki:Incidence (epidemiology)"
+            }
+          ]
         },
         "control group": {
           "text": "A comparison group that does not receive the intervention being evaluated, or receives a different condition.",
-          "link": "wiki:Treatment and control groups"
+          "links": [
+            {
+              "href": "wiki:Treatment and control groups"
+            }
+          ]
         },
         "risk factor": {
           "text": "A characteristic or exposure associated with a higher probability of a health outcome.",
-          "link": "wiki:Risk factor"
+          "links": [
+            {
+              "href": "wiki:Risk factor"
+            }
+          ]
         },
         "trend": {
           "text": "A sustained pattern of increase, decrease, or change observed across time or groups.",
-          "link": "wiki:Trend estimation"
+          "links": [
+            {
+              "href": "wiki:Trend estimation"
+            }
+          ]
         },
         "confounding": {
           "text": "Distortion that occurs when another factor is associated with both the suspected cause and the observed outcome.",
-          "link": "wiki:Confounding"
+          "links": [
+            {
+              "href": "wiki:Confounding"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Epidemiology"
+        "links": [
+          {
+            "href": "wiki:Epidemiology"
+          }
+        ]
       }
     },
     {
@@ -126,27 +178,51 @@
       "termInfo": {
         "vaccination campaign": {
           "text": "An organized effort to make vaccination available and increase protection in a target population.",
-          "link": "wiki:Vaccination policy"
+          "links": [
+            {
+              "href": "wiki:Vaccination policy"
+            }
+          ]
         },
         "safety standard": {
           "text": "A defined requirement intended to reduce exposure, injury, or other preventable harm.",
-          "link": "wiki:Safety standards"
+          "links": [
+            {
+              "href": "wiki:Safety standards"
+            }
+          ]
         },
         "public advisory": {
           "text": "An official communication describing a health risk and recommended protective action.",
-          "link": "wiki:Risk communication"
+          "links": [
+            {
+              "href": "wiki:Risk communication"
+            }
+          ]
         },
         "screening program": {
           "text": "An organized effort to identify possible disease or risk in people without recognized symptoms.",
-          "link": "wiki:Screening (medicine)"
+          "links": [
+            {
+              "href": "wiki:Screening (medicine)"
+            }
+          ]
         },
         "environmental control": {
           "text": "A change to physical or shared conditions intended to reduce exposure to a health hazard.",
-          "link": "wiki:Environmental health"
+          "links": [
+            {
+              "href": "wiki:Environmental health"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Public health intervention"
+        "links": [
+          {
+            "href": "wiki:Public health intervention"
+          }
+        ]
       }
     },
     {
@@ -173,27 +249,51 @@
       "termInfo": {
         "effectiveness": {
           "text": "How well an intervention produces its intended benefit under real-world conditions.",
-          "link": "wiki:Effectiveness"
+          "links": [
+            {
+              "href": "wiki:Effectiveness"
+            }
+          ]
         },
         "adverse events": {
           "text": "Unfavorable health events occurring after an intervention, whether or not the intervention caused them.",
-          "link": "wiki:Adverse event"
+          "links": [
+            {
+              "href": "wiki:Adverse event"
+            }
+          ]
         },
         "follow-up data": {
           "text": "Information collected after an intervention to assess later outcomes and continuing effects.",
-          "link": "wiki:Follow-up study"
+          "links": [
+            {
+              "href": "wiki:Follow-up study"
+            }
+          ]
         },
         "unintended effects": {
           "text": "Consequences of an intervention that were not among its intended results.",
-          "link": "wiki:Unintended consequences"
+          "links": [
+            {
+              "href": "wiki:Unintended consequences"
+            }
+          ]
         },
         "updated guidance": {
           "text": "Recommendations revised in response to new evidence, changed conditions, or improved understanding.",
-          "link": "wiki:Clinical practice guideline"
+          "links": [
+            {
+              "href": "wiki:Clinical practice guideline"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Program evaluation"
+        "links": [
+          {
+            "href": "wiki:Program evaluation"
+          }
+        ]
       }
     }
   ],
@@ -208,7 +308,11 @@
       "fact": "Epidemiology turns observations into comparable population patterns and tests explanations for how health events are distributed and what may influence them.",
       "info": {
         "text": "The study of the distribution and determinants of health-related events in populations, and the application of that study to health problems.",
-        "link": "wiki:Epidemiology"
+        "links": [
+          {
+            "href": "wiki:Epidemiology"
+          }
+        ]
       },
       "conceptId": "epidemiology",
       "relationKind": "dynamic",
@@ -232,7 +336,11 @@
       "fact": "The weight of evidence integrates the quality, consistency, relevance, and limitations of multiple findings so action does not depend on one anecdote, study, or statistic.",
       "info": {
         "text": "A judgment based on the combined strength and limitations of the available evidence rather than any single result.",
-        "link": "wiki:Scientific evidence"
+        "links": [
+          {
+            "href": "wiki:Scientific evidence"
+          }
+        ]
       },
       "conceptId": "weight-of-evidence",
       "relationKind": "dynamic",
@@ -256,7 +364,11 @@
       "fact": "A feedback loop makes action corrigible: an intervention produces new observations about benefit, harm, and implementation, which return to the decision process and shape what happens next.",
       "info": {
         "text": "A process in which the observed results of an action are returned as information for later decisions.",
-        "link": "wiki:Feedback"
+        "links": [
+          {
+            "href": "wiki:Feedback"
+          }
+        ]
       },
       "conceptId": "evidence-based-action",
       "relationKind": "dynamic",
@@ -370,13 +482,12 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-02"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

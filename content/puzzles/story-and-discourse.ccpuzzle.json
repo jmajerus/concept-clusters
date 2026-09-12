@@ -1,7 +1,7 @@
 {
   "id": "story-and-discourse",
   "title": "Story and discourse",
-  "category": "Literary Theory & Poetics",
+  "category": "literary-theory-poetics",
   "info": {
     "text": "Narratology studies how telling is organized, not only what happens: Russian Formalists named the split between chronological events and arranged plot, and Genette mapped the temporal and perspectival operations that make that split visible.",
     "links": [
@@ -257,7 +257,6 @@
     "title": "Story is not the telling",
     "summary": "Separate chronological events from arranged telling, then distinguish narrative time from whose perception filters what we know.",
     "estimatedMinutes": 3,
-    "credit": "By Cursor, with editorial direction by jmajerus",
     "content": {
       "text": "# Story is not the telling\n\nA narrative can be summarized as a list of events in the order they would have occurred. The telling can delay those events, skip them, repeat them, or let us know them only as one character could. Twentieth-century narrative theory treated that gap as something to study, not as a defect in storytelling.\n\n## Two names for the gap\n\nRussian Formalists called the chronological events **fabula** and their arranged presentation **syuzhet**. Plot, on this view, is a device: it slows the automatic recognition of familiar happenings so that they can be perceived again.\n\n## Time and perception\n\nGérard Genette described the telling more finely as a set of relations. **Order**, **duration**, and **frequency** compare story time with discourse time. **Focalization** asks whose perceiving field the information is restricted to—which is not the same question as who is speaking. A narrator may tell in the third person what only one character could have seen.\n\nThis puzzle is about those operations of telling."
     },
@@ -271,44 +270,19 @@
         "label": "Signo: Genette's narratology"
       }
     ],
-    "citations": [
-      {
-        "title": "Narrative Discourse: An Essay in Method",
-        "author": "Gérard Genette",
-        "publisher": "Cornell University Press",
-        "year": "1980"
-      },
-      {
-        "title": "Art as Technique",
-        "author": "Viktor Shklovsky",
-        "year": "1917"
-      }
-    ],
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Cursor",
-      "scope": "lenses",
-      "role": "edited",
-      "provider": "Anysphere",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Cursor",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-21"
-    }
-  ],
   "language": "en",
-  "version": 1
+  "version": 1,
+  "provenance": {
+    "collaboration": "humanPrimary",
+    "contributors": [
+      {
+        "name": "Cursor"
+      },
+      {
+        "name": "jmajerus"
+      }
+    ]
+  }
 }

@@ -1,55 +1,27 @@
-// Generated from content/puzzles/power-without-a-center.ccpuzzle.jsonld.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Generated from content/puzzles/power-without-a-center.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "power-without-a-center",
   "title": "Power Without a Center",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "info": {
     "text": "Michel Foucault's account of power as a decentered, productive network rather than a possession held by a sovereign, a class, or a state -- and of resistance as sharing that same dispersed, centerless shape.",
-    "link": "wiki:Michel Foucault"
+    "links": [
+      {
+        "href": "wiki:Michel Foucault"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "decentered-by-design",
-      "prompt": "Which of these describe something with no single center or locus, distributed instead across a dispersed network?",
-      "explanation": "A net-like organization and capillary power both describe power's own lack of any single seat -- it does not radiate down from one point but reaches, thread-like, into the smallest interactions everywhere at once. No single locus of revolt says the same thing about resistance: exactly because power has this shape, nothing that opposes it can be gathered into one place either.",
-      "targets": [
-        "a net-like organization",
-        "no single locus of revolt",
-        "capillary power"
-      ],
-      "reasons": {
-        "a net-like organization": "Power's own shape: threads reaching everywhere rather than radiating from one point.",
-        "capillary power": "The fine-grained reach that follows from having no single center: power gets everywhere because it starts nowhere in particular.",
-        "no single locus of revolt": "The same absence of a center, applied to resistance instead of power."
-      }
-    },
-    {
-      "id": "what-power-generates",
-      "prompt": "Which of these describe something power actively creates, rather than something it simply prohibits or takes away?",
-      "explanation": "Productive power and regimes of truth both name something power builds rather than merely forbids: it does not just say no, it manufactures the accepted categories, identities, and truths a society lives by. Capillary power names the reach that makes this possible -- productive power is not a single factory turning out truths from above, it is generated at the smallest, most local points throughout the whole network.",
-      "targets": [
-        "productive power",
-        "regimes of truth",
-        "capillary power"
-      ],
-      "reasons": {
-        "capillary power": "The local, small-scale reach through which productive power is actually generated, rather than imposed from above.",
-        "productive power": "The core claim: power's main business is manufacturing categories, identities, and truths, not just forbidding things.",
-        "regimes of truth": "What productive power actually generates: the accepted, sayable truths a given society lives by."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "not-a-possession",
@@ -68,7 +40,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Foucault's rejection of power as a possession held by a sovereign, class, or state -- power instead functions as a decentered network with no single point of origin.",
-        "link": "wiki:The History of Sexuality"
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
       }
     },
     {
@@ -88,7 +64,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Foucault's argument that power is productive rather than purely repressive: it generates knowledge, identities, and the accepted categories of truth, rather than only prohibiting or forbidding.",
-        "link": "wiki:The History of Sexuality"
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
       }
     },
     {
@@ -108,7 +88,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Foucault's claim that resistance shares power's own decentered structure: never a single organized opposition, but a plurality of mobile points scattered throughout the same network power occupies.",
-        "link": "wiki:The History of Sexuality"
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
       }
     }
   ],
@@ -152,13 +136,44 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
+      "id": "decentered-by-design",
+      "prompt": "Which of these describe something with no single center or locus, distributed instead across a dispersed network?",
+      "explanation": "A net-like organization and capillary power both describe power's own lack of any single seat -- it does not radiate down from one point but reaches, thread-like, into the smallest interactions everywhere at once. No single locus of revolt says the same thing about resistance: exactly because power has this shape, nothing that opposes it can be gathered into one place either.",
+      "targets": [
+        "a net-like organization",
+        "no single locus of revolt",
+        "capillary power"
+      ],
+      "reasons": {
+        "a net-like organization": "Power's own shape: threads reaching everywhere rather than radiating from one point.",
+        "capillary power": "The fine-grained reach that follows from having no single center: power gets everywhere because it starts nowhere in particular.",
+        "no single locus of revolt": "The same absence of a center, applied to resistance instead of power."
+      }
+    },
+    {
+      "id": "what-power-generates",
+      "prompt": "Which of these describe something power actively creates, rather than something it simply prohibits or takes away?",
+      "explanation": "Productive power and regimes of truth both name something power builds rather than merely forbids: it does not just say no, it manufactures the accepted categories, identities, and truths a society lives by. Capillary power names the reach that makes this possible -- productive power is not a single factory turning out truths from above, it is generated at the smallest, most local points throughout the whole network.",
+      "targets": [
+        "productive power",
+        "regimes of truth",
+        "capillary power"
+      ],
+      "reasons": {
+        "capillary power": "The local, small-scale reach through which productive power is actually generated, rather than imposed from above.",
+        "productive power": "The core claim: power's main business is manufacturing categories, identities, and truths, not just forbidding things.",
+        "regimes of truth": "What productive power actually generates: the accepted, sayable truths a given society lives by."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

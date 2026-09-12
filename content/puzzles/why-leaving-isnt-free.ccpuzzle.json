@@ -1,10 +1,10 @@
 {
   "id": "why-leaving-isnt-free",
   "title": "Why leaving isn't free",
-  "category": "Economics",
+  "category": "economics",
   "categories": [
-    "Economics",
-    "Sociology"
+    "economics",
+    "sociology"
   ],
   "tags": [
     "book"
@@ -17,6 +17,11 @@
         "author": "Alan Manning",
         "publisher": "Princeton University Press",
         "year": "2003"
+      },
+      {
+        "title": "New Market Power Models and Sex Differences in Pay",
+        "author": "Michael R. Ransom and Ronald L. Oaxaca",
+        "year": "2010"
       }
     ]
   },
@@ -49,17 +54,7 @@
           "text": "The time and effort required just to find out whether a better job exists, before any question of taking it arises."
         }
       },
-      "info": {
-        "text": "What actually stands between a worker and a better-paying job elsewhere -- the costs the textbook model assumes away.",
-        "citations": [
-          {
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "year": "2003"
-          }
-        ]
-      }
+      "info": "What actually stands between a worker and a better-paying job elsewhere -- the costs the textbook model assumes away."
     },
     {
       "id": "cluster-room",
@@ -89,17 +84,7 @@
           "text": "The gap between what a worker is paid and what they actually produce, directly attributable to how costly leaving is. Estimated in the literature at anywhere from fifteen to fifty percent."
         }
       },
-      "info": {
-        "text": "What the friction is worth to an employer, measured directly rather than assumed away.",
-        "citations": [
-          {
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "year": "2003"
-          }
-        ]
-      }
+      "info": "What the friction is worth to an employer, measured directly rather than assumed away."
     },
     {
       "id": "cluster-instances",
@@ -129,17 +114,7 @@
           "text": "Occupations studied precisely because so few employers exist locally -- nurses, teachers, a single mill town's one real employer -- where the room to underpay shows up largest and most measurably."
         }
       },
-      "info": {
-        "text": "Where the theory shows up hardest in the data, and on whom.",
-        "citations": [
-          {
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "year": "2003"
-          }
-        ]
-      }
+      "info": "Where the theory shows up hardest in the data, and on whom."
     },
     {
       "id": "cluster-textbook",
@@ -169,17 +144,7 @@
           "text": "Manning's opening thought experiment: if an employer cut every wage by one cent, how many workers would actually leave? The real answer -- not many, not immediately -- is the whole book in miniature."
         }
       },
-      "info": {
-        "text": "What changes, against the textbook model, once frictions and the room they create are taken seriously.",
-        "citations": [
-          {
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "year": "2003"
-          }
-        ]
-      }
+      "info": "What changes, against the textbook model, once frictions and the room they create are taken seriously."
     }
   ],
   "bridges": [
@@ -213,16 +178,7 @@
         "cluster-instances"
       ],
       "fact": "The friction that makes leaving costly is not distributed evenly. Ransom and Oaxaca's study of a grocery chain found firm-level labor supply elasticities of roughly 2.7 for men and 1.5 for women -- women's job changes are constrained more tightly, often by geography, caregiving, or a dual-career household's other commitments. A lower elasticity is not a preference. It is a larger markdown, paid specifically because leaving costs more.",
-      "info": {
-        "text": "The finding that mobility costs fall unevenly across groups, and that the resulting gap in labor supply elasticity tracks a real and persistent wage gap.",
-        "citations": [
-          {
-            "title": "New Market Power Models and Sex Differences in Pay",
-            "author": "Michael R. Ransom and Ronald L. Oaxaca",
-            "year": "2010"
-          }
-        ]
-      },
+      "info": "The finding that mobility costs fall unevenly across groups, and that the resulting gap in labor supply elasticity tracks a real and persistent wage gap.",
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",

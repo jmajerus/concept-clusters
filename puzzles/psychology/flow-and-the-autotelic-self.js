@@ -1,18 +1,22 @@
 // Generated from content/puzzles/flow-and-the-autotelic-self.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "flow-and-the-autotelic-self",
   "title": "Flow and the Autotelic Self",
-  "category": "Psychology",
+  "category": "psychology",
   "tags": [
     "book"
   ],
   "info": {
     "text": "Mihaly Csikszentmihalyi's model of the mental state people enter when a task's demands and their own skill are closely matched, and attention becomes fully absorbed by the activity itself.",
-    "link": "wiki:Flow (psychology)",
+    "links": [
+      {
+        "href": "wiki:Flow (psychology)"
+      }
+    ],
     "citations": [
       {
         "title": "Flow: The Psychology of Optimal Experience",
@@ -22,25 +26,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "producing-the-autotelic-quality",
-      "prompt": "Which concepts describe what makes an activity self-rewarding -- whether the conditions that set it up or the trait it eventually produces -- rather than what the experience feels like once you're already absorbed in it?",
-      "explanation": "These six concepts trace one causal line: the four conditions on the left of the model set up the possibility of an autotelic activity, and repeated practice at creating those conditions is what Csikszentmihalyi calls an autotelic personality. The four terms in 'The Flow Experience' cluster describe something different -- not what produces the reward, but what it feels like once you're already inside it.",
-      "targets": [
-        "challenge-skill balance",
-        "clear goals",
-        "immediate feedback",
-        "merging of action and awareness",
-        "autotelic activity",
-        "autotelic personality"
-      ],
-      "reasons": {
-        "autotelic activity": "This bridge concept names the causal link directly: well-structured conditions turn ordinary effort into something rewarding for its own sake.",
-        "autotelic personality": "This is what happens when a person learns to produce autotelic conditions deliberately and repeatedly, not a one-time feeling."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "conditions-for-flow",
@@ -59,7 +44,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The specific circumstances Csikszentmihalyi identified as reliably producing a flow state.",
-        "link": "wiki:Flow (psychology)"
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ]
       }
     },
     {
@@ -79,7 +68,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "What flow actually feels like from the inside, as distinct from the conditions that produce it.",
-        "link": "wiki:Flow (psychology)"
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ]
       }
     },
     {
@@ -99,7 +92,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Csikszentmihalyi's broader theoretical claim about attention as a finite resource, underlying the flow model itself.",
-        "link": "wiki:Flow (psychology)"
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ]
       }
     }
   ],
@@ -133,13 +130,31 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
+      "id": "producing-the-autotelic-quality",
+      "prompt": "Which concepts describe what makes an activity self-rewarding -- whether the conditions that set it up or the trait it eventually produces -- rather than what the experience feels like once you're already absorbed in it?",
+      "explanation": "These six concepts trace one causal line: the four conditions on the left of the model set up the possibility of an autotelic activity, and repeated practice at creating those conditions is what Csikszentmihalyi calls an autotelic personality. The four terms in 'The Flow Experience' cluster describe something different -- not what produces the reward, but what it feels like once you're already inside it.",
+      "targets": [
+        "challenge-skill balance",
+        "clear goals",
+        "immediate feedback",
+        "merging of action and awareness",
+        "autotelic activity",
+        "autotelic personality"
+      ],
+      "reasons": {
+        "autotelic activity": "This bridge concept names the causal link directly: well-structured conditions turn ordinary effort into something rewarding for its own sake.",
+        "autotelic personality": "This is what happens when a person learns to produce autotelic conditions deliberately and repeatedly, not a one-time feeling."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

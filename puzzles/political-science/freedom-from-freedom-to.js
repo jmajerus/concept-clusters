@@ -1,18 +1,18 @@
 // Generated from content/puzzles/freedom-from-freedom-to.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "freedom-from-freedom-to",
   "title": "Freedom From, Freedom To",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "tags": [
     "book"
@@ -28,42 +28,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "requires-a-claim-about-your-true-self",
-      "prompt": "Which of these depend on someone else claiming to know your 'real' interests better than you do?",
-      "explanation": "Self-mastery already requires believing a person has a higher, truer self distinct from their everyday one; the divided self is that belief made explicit; forced to be free is what happens once someone else claims authority to speak for the higher self against the empirical one; and the general will is the collective version of the same move. Negative liberty never has to make a claim like this about anyone -- which is exactly Berlin's point about where it stays safer.",
-      "targets": [
-        "self-mastery",
-        "divided self",
-        "forced to be free",
-        "the general will"
-      ],
-      "reasons": {
-        "divided self": "That assumed split, made explicit as a higher, rational self and a lower, empirical one.",
-        "forced to be free": "What happens once someone else claims authority to speak for the higher self against the empirical one.",
-        "self-mastery": "Already assumes a split between a truer self and an everyday one -- the assumption the rest of this lens builds on.",
-        "the general will": "The collective version of the same move: an individual's true interest identified with the group's, licensing the same coercion."
-      }
-    },
-    {
-      "id": "genuine-senses-of-liberty",
-      "prompt": "Which of these are legitimate senses of freedom in Berlin's own account, rather than the corruption of one of them?",
-      "explanation": "Berlin defended both negative and positive liberty as real, legitimate human goals -- his warning was never that positive liberty is inherently false, only that its logic is more easily hijacked than negative liberty's. Non-interference, self-mastery, freedom to, and autonomy are all still on the legitimate side of that line; forced to be free and the general will are what happen once the positive side gets hijacked.",
-      "targets": [
-        "non-interference",
-        "self-mastery",
-        "freedom to",
-        "autonomy"
-      ],
-      "reasons": {
-        "autonomy": "Self-rule as opposed to dependence on others -- still a legitimate form of freedom in Berlin's own account.",
-        "freedom to": "The straightforward positive sense: the real ability to pursue and achieve what one wills.",
-        "non-interference": "Negative liberty's core claim, and the one Berlin thought hardest to weaponize.",
-        "self-mastery": "Positive liberty's legitimate core, before any claim about someone else's 'truer' self enters."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "negative-liberty",
@@ -87,7 +51,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Freedom as the absence of deliberate interference by other people -- the area within which a person can act unobstructed, whatever they choose to do with it.",
-        "link": "wiki:Negative and positive liberty"
+        "links": [
+          {
+            "href": "wiki:Negative and positive liberty"
+          }
+        ]
       }
     },
     {
@@ -135,7 +103,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Berlin's warning about how positive liberty's own internal logic -- not a distortion of it, but a short step from it -- has historically been used to justify coercion in freedom's own name.",
-        "link": "wiki:Isaiah Berlin"
+        "links": [
+          {
+            "href": "wiki:Isaiah Berlin"
+          }
+        ]
       }
     }
   ],
@@ -188,20 +160,48 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
+      "id": "requires-a-claim-about-your-true-self",
+      "prompt": "Which of these depend on someone else claiming to know your 'real' interests better than you do?",
+      "explanation": "Self-mastery already requires believing a person has a higher, truer self distinct from their everyday one; the divided self is that belief made explicit; forced to be free is what happens once someone else claims authority to speak for the higher self against the empirical one; and the general will is the collective version of the same move. Negative liberty never has to make a claim like this about anyone -- which is exactly Berlin's point about where it stays safer.",
+      "targets": [
+        "self-mastery",
+        "divided self",
+        "forced to be free",
+        "the general will"
+      ],
+      "reasons": {
+        "divided self": "That assumed split, made explicit as a higher, rational self and a lower, empirical one.",
+        "forced to be free": "What happens once someone else claims authority to speak for the higher self against the empirical one.",
+        "self-mastery": "Already assumes a split between a truer self and an everyday one -- the assumption the rest of this lens builds on.",
+        "the general will": "The collective version of the same move: an individual's true interest identified with the group's, licensing the same coercion."
+      }
     },
     {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
+      "id": "genuine-senses-of-liberty",
+      "prompt": "Which of these are legitimate senses of freedom in Berlin's own account, rather than the corruption of one of them?",
+      "explanation": "Berlin defended both negative and positive liberty as real, legitimate human goals -- his warning was never that positive liberty is inherently false, only that its logic is more easily hijacked than negative liberty's. Non-interference, self-mastery, freedom to, and autonomy are all still on the legitimate side of that line; forced to be free and the general will are what happen once the positive side gets hijacked.",
+      "targets": [
+        "non-interference",
+        "self-mastery",
+        "freedom to",
+        "autonomy"
+      ],
+      "reasons": {
+        "autonomy": "Self-rule as opposed to dependence on others -- still a legitimate form of freedom in Berlin's own account.",
+        "freedom to": "The straightforward positive sense: the real ability to pursue and achieve what one wills.",
+        "non-interference": "Negative liberty's core claim, and the one Berlin thought hardest to weaponize.",
+        "self-mastery": "Positive liberty's legitimate core, before any claim about someone else's 'truer' self enters."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

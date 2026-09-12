@@ -1,10 +1,14 @@
 {
   "id": "diatonic-modes",
   "title": "Diatonic modes",
-  "category": "Music",
+  "category": "music",
   "info": {
     "text": "The seven scales you get by starting on each different note of the major scale, each with its own distinctive sound.",
-    "link": "wiki:Mode (music)"
+    "links": [
+      {
+        "href": "wiki:Mode (music)"
+      }
+    ]
   },
   "clusters": [
     {
@@ -27,20 +31,36 @@
       "termInfo": {
         "Ionian": {
           "text": "The major scale itself, renamed as the first mode — no scale degree is altered, so it's the brightness baseline every other mode is measured against.",
-          "link": "wiki:Ionian mode"
+          "links": [
+            {
+              "href": "wiki:Ionian mode"
+            }
+          ]
         },
         "Lydian": {
           "text": "A major scale with the fourth degree raised a half step, making it the single brightest of the seven modes.",
-          "link": "wiki:Lydian mode"
+          "links": [
+            {
+              "href": "wiki:Lydian mode"
+            }
+          ]
         },
         "Mixolydian": {
           "text": "A major scale with the seventh degree lowered a half step, common in blues and rock.",
-          "link": "wiki:Mixolydian mode"
+          "links": [
+            {
+              "href": "wiki:Mixolydian mode"
+            }
+          ]
         }
       },
       "info": {
         "text": "Modes whose third scale degree is a major third above the tonic — the brighter half of the seven.",
-        "link": "wiki:Major third"
+        "links": [
+          {
+            "href": "wiki:Major third"
+          }
+        ]
       }
     },
     {
@@ -65,24 +85,44 @@
       "termInfo": {
         "Aeolian": {
           "text": "The natural minor scale itself, renamed as a mode — the darkness baseline the other minor-third modes are measured against.",
-          "link": "wiki:Aeolian mode"
+          "links": [
+            {
+              "href": "wiki:Aeolian mode"
+            }
+          ]
         },
         "Dorian": {
           "text": "A natural minor scale with the sixth degree raised a half step, giving it a brighter, jazzier color than plain minor.",
-          "link": "wiki:Dorian mode"
+          "links": [
+            {
+              "href": "wiki:Dorian mode"
+            }
+          ]
         },
         "Locrian": {
           "text": "A natural minor scale with both the second and fifth degrees lowered — the only mode whose tonic triad is itself diminished.",
-          "link": "wiki:Locrian mode"
+          "links": [
+            {
+              "href": "wiki:Locrian mode"
+            }
+          ]
         },
         "Phrygian": {
           "text": "A natural minor scale with the second degree lowered a half step, giving it a Spanish or Middle Eastern color.",
-          "link": "wiki:Phrygian mode"
+          "links": [
+            {
+              "href": "wiki:Phrygian mode"
+            }
+          ]
         }
       },
       "info": {
         "text": "Modes whose third scale degree is a minor third above the tonic — the darker half of the seven.",
-        "link": "wiki:Minor third"
+        "links": [
+          {
+            "href": "wiki:Minor third"
+          }
+        ]
       }
     },
     {
@@ -107,23 +147,39 @@
       "termInfo": {
         "brightness order": {
           "text": "Ranking the seven modes from brightest to darkest by counting how many sharps each needs relative to Ionian: Lydian, Ionian, Mixolydian, Dorian, Aeolian, Phrygian, Locrian.",
-          "link": "wiki:Circle of fifths"
+          "links": [
+            {
+              "href": "wiki:Circle of fifths"
+            }
+          ]
         },
         "characteristic note": {
           "text": "The one scale degree that distinguishes a mode from its nearest neighbor in the brightness order — Lydian's raised fourth, or Phrygian's lowered second."
         },
         "parallel key": {
           "text": "Two scales, or modes, sharing the same tonic but a different pattern of steps — C Ionian and C Aeolian are parallel.",
-          "link": "wiki:Parallel key"
+          "links": [
+            {
+              "href": "wiki:Parallel key"
+            }
+          ]
         },
         "relative key": {
           "text": "Two scales, or modes, sharing the same set of pitches and key signature but a different tonic — C Ionian and A Aeolian are relative.",
-          "link": "wiki:Relative key"
+          "links": [
+            {
+              "href": "wiki:Relative key"
+            }
+          ]
         }
       },
       "info": {
         "text": "Concepts for comparing modes to one another, rather than describing any single mode alone.",
-        "link": "wiki:Mode (music)"
+        "links": [
+          {
+            "href": "wiki:Mode (music)"
+          }
+        ]
       }
     }
   ],
@@ -138,7 +194,11 @@
       "fact": "Lydian's raised fourth and Locrian's lowered fifth are the only two of the seven modes where a scale degree sits a tritone above the tonic — the same unstable interval, pulling Lydian's sound upward toward brightness while leaving Locrian's tonic triad diminished and unresolved.",
       "info": {
         "text": "An interval of three whole steps — an augmented fourth or a diminished fifth — that splits the octave exactly in half.",
-        "link": "wiki:Tritone"
+        "links": [
+          {
+            "href": "wiki:Tritone"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -204,27 +264,12 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    },
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

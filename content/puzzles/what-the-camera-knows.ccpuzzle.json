@@ -1,10 +1,14 @@
 {
   "id": "what-the-camera-knows",
   "title": "What the camera knows",
-  "category": "Film",
+  "category": "film",
   "info": {
     "text": "How cinematography takes a position on knowledge: sharing a character's perception, surveying the scene from above, or signalling that the camera itself cannot be trusted.",
-    "link": "wiki:Cinematography"
+    "links": [
+      {
+        "href": "wiki:Cinematography"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,23 +33,43 @@
       "termInfo": {
         "point-of-view shot": {
           "text": "A shot explicitly representing what a character sees from their optical position, aligning the viewer's perception with theirs.",
-          "link": "wiki:Point of view shot"
+          "links": [
+            {
+              "href": "wiki:Point of view shot"
+            }
+          ]
         },
         "eyeline match": {
           "text": "A continuity cut that follows a character looking with a shot of what they look at, using spatial logic to structure the viewer's alignment with their gaze.",
-          "link": "wiki:Eyeline match"
+          "links": [
+            {
+              "href": "wiki:Eyeline match"
+            }
+          ]
         },
         "reaction shot": {
           "text": "A cut to a character's face (typically a close-up) as they receive what they have seen or heard, inviting the viewer to read and align with their response.",
-          "link": "wiki:Reaction shot"
+          "links": [
+            {
+              "href": "wiki:Reaction shot"
+            }
+          ]
         },
         "subjective camera": {
           "text": "The broader technique family in which camera choices -- tilting, blurring, distorting -- render a character's perceptual or psychological state rather than showing only what they literally see.",
-          "link": "wiki:Subjective camera"
+          "links": [
+            {
+              "href": "wiki:Subjective camera"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Film theory"
+        "links": [
+          {
+            "href": "wiki:Film theory"
+          }
+        ]
       }
     },
     {
@@ -70,23 +94,43 @@
       "termInfo": {
         "establishing shot": {
           "text": "A wide or long shot that surveys a setting before or between scenes, giving the viewer spatial knowledge that precedes and exceeds any character's entry into the space.",
-          "link": "wiki:Establishing shot"
+          "links": [
+            {
+              "href": "wiki:Establishing shot"
+            }
+          ]
         },
         "high-angle shot": {
           "text": "A shot taken from above the subject's eye level, looking down -- a position inaccessible to any character in the scene, surveying them from a height they cannot occupy.",
-          "link": "wiki:Camera angle"
+          "links": [
+            {
+              "href": "wiki:Camera angle"
+            }
+          ]
         },
         "long shot": {
           "text": "A shot that situates a human figure within a wider environment, giving the viewer environmental knowledge that dwarfs the character's own field of view.",
-          "link": "wiki:Long shot"
+          "links": [
+            {
+              "href": "wiki:Long shot"
+            }
+          ]
         },
         "bird's-eye view": {
           "text": "A shot taken from directly overhead, giving a completely top-down perspective -- the most extreme form of the surveying camera, representing a vantage point no character could occupy.",
-          "link": "wiki:Bird's-eye view"
+          "links": [
+            {
+              "href": "wiki:Bird's-eye view"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Camera angle"
+        "links": [
+          {
+            "href": "wiki:Camera angle"
+          }
+        ]
       }
     },
     {
@@ -111,23 +155,43 @@
       "termInfo": {
         "Dutch tilt": {
           "text": "A shot in which the camera is canted sideways so the frame is no longer level, used to signal psychological instability, moral distortion, or impending threat.",
-          "link": "wiki:Dutch angle"
+          "links": [
+            {
+              "href": "wiki:Dutch angle"
+            }
+          ]
         },
         "dolly zoom": {
           "text": "A technique in which the camera moves toward or away from a subject while the lens zooms in the opposite direction, keeping the subject constant while the background warps -- producing the disorientation associated with vertigo and dread.",
-          "link": "wiki:Dolly zoom"
+          "links": [
+            {
+              "href": "wiki:Dolly zoom"
+            }
+          ]
         },
         "whip pan": {
           "text": "An extremely rapid pan that blurs the image into abstraction, used to create disorientation, suggest time passing, or jolt the viewer's spatial orientation.",
-          "link": "wiki:Whip pan"
+          "links": [
+            {
+              "href": "wiki:Whip pan"
+            }
+          ]
         },
         "slow zoom": {
           "text": "A barely perceptible zoom, typically toward a subject, that creates a growing sense of unease before the viewer consciously registers the movement -- associated with directors like Kubrick and Spielberg.",
-          "link": "wiki:Zoom lens"
+          "links": [
+            {
+              "href": "wiki:Zoom lens"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Film technique"
+        "links": [
+          {
+            "href": "wiki:Film technique"
+          }
+        ]
       }
     }
   ],
@@ -142,7 +206,11 @@
       "fact": "A surveillance shot fuses both positions: the viewer is aligned with the watcher's point of view, sharing their look, but from a high-angle or concealed position the watched subject cannot see or reciprocate. The combination -- alignment without exchange, survey without disclosure -- captures the voyeuristic dynamic that film theorists have tied to cinema's structural power over its subjects.",
       "info": {
         "text": "A shot that represents the act of watching an unknowing subject, typically from an elevated or concealed position, aligning the viewer with the watcher's perspective while establishing the subject's unawareness.",
-        "link": "wiki:Surveillance in film"
+        "links": [
+          {
+            "href": "wiki:Surveillance in film"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {

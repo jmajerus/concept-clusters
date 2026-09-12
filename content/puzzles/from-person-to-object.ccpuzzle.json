@@ -1,11 +1,15 @@
 {
   "id": "from-person-to-object",
   "title": "From person to object",
-  "category": "Humanities",
+  "category": "humanities",
   "large": true,
   "info": {
     "text": "How a person can be compressed into a function, category, or threat—and how voice, particularity, recognition, and moral imagination resist that reduction.",
-    "link": "wiki:Objectification"
+    "links": [
+      {
+        "href": "wiki:Objectification"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "labor unit": {
           "text": "A representation of a worker chiefly in terms of available or productive labor.",
-          "link": "wiki:Workforce"
+          "links": [
+            {
+              "href": "wiki:Workforce"
+            }
+          ]
         },
         "case type": {
           "text": "A predefined class used to group matters that share administrative or procedural features.",
-          "link": "wiki:Classification"
+          "links": [
+            {
+              "href": "wiki:Classification"
+            }
+          ]
         },
         "market segment": {
           "text": "A group of potential consumers treated as sharing characteristics relevant to marketing.",
-          "link": "wiki:Market segmentation"
+          "links": [
+            {
+              "href": "wiki:Market segmentation"
+            }
+          ]
         },
         "security risk": {
           "text": "A person, condition, or event evaluated primarily by the danger it may pose.",
-          "link": "wiki:Risk assessment"
+          "links": [
+            {
+              "href": "wiki:Risk assessment"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Objectification"
+        "links": [
+          {
+            "href": "wiki:Objectification"
+          }
+        ]
       }
     },
     {
@@ -71,23 +95,43 @@
       "termInfo": {
         "silenced testimony": {
           "text": "A person's account is prevented, ignored, or made unable to influence judgment.",
-          "link": "wiki:Testimony"
+          "links": [
+            {
+              "href": "wiki:Testimony"
+            }
+          ]
         },
         "denied agency": {
           "text": "Failure to regard a person as capable of intention, choice, and meaningful action.",
-          "link": "wiki:Agency (philosophy)"
+          "links": [
+            {
+              "href": "wiki:Agency (philosophy)"
+            }
+          ]
         },
         "emotional dismissal": {
           "text": "Rejection or minimization of another person's reported emotional experience.",
-          "link": "wiki:Emotional validation"
+          "links": [
+            {
+              "href": "wiki:Emotional validation"
+            }
+          ]
         },
         "presumed interchangeability": {
           "text": "The assumption that one person can replace another without loss of morally relevant individuality.",
-          "link": "wiki:Fungibility"
+          "links": [
+            {
+              "href": "wiki:Fungibility"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Subjectivity"
+        "links": [
+          {
+            "href": "wiki:Subjectivity"
+          }
+        ]
       }
     },
     {
@@ -112,23 +156,43 @@
       "termInfo": {
         "conditional dignity": {
           "text": "The treatment of human worth as something that can be earned, forfeited, or withheld.",
-          "link": "wiki:Dignity"
+          "links": [
+            {
+              "href": "wiki:Dignity"
+            }
+          ]
         },
         "moral exclusion": {
           "text": "Placement of people outside the boundary within which ordinary moral rules and protections are understood to apply.",
-          "link": "wiki:Moral exclusion"
+          "links": [
+            {
+              "href": "wiki:Moral exclusion"
+            }
+          ]
         },
         "collective blame": {
           "text": "Assignment of responsibility to members of a group for acts they did not individually commit.",
-          "link": "wiki:Collective responsibility"
+          "links": [
+            {
+              "href": "wiki:Collective responsibility"
+            }
+          ]
         },
         "normalized cruelty": {
           "text": "Cruel treatment made familiar, expected, or socially ordinary through repetition and acceptance.",
-          "link": "wiki:Cruelty"
+          "links": [
+            {
+              "href": "wiki:Cruelty"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Moral exclusion"
+        "links": [
+          {
+            "href": "wiki:Moral exclusion"
+          }
+        ]
       }
     },
     {
@@ -153,23 +217,43 @@
       "termInfo": {
         "particular biography": {
           "text": "The concrete history and circumstances that make a person's life irreducible to a general category.",
-          "link": "wiki:Biography"
+          "links": [
+            {
+              "href": "wiki:Biography"
+            }
+          ]
         },
         "first-person voice": {
           "text": "A person's account of experience expressed from their own standpoint.",
-          "link": "wiki:First-person narrative"
+          "links": [
+            {
+              "href": "wiki:First-person narrative"
+            }
+          ]
         },
         "reciprocal recognition": {
           "text": "Mutual acknowledgment of each participant as a subject with standing, agency, and claims upon the other.",
-          "link": "wiki:Recognition (sociology)"
+          "links": [
+            {
+              "href": "wiki:Recognition (sociology)"
+            }
+          ]
         },
         "moral imagination": {
           "text": "The capacity to envision the human meaning and possible consequences of action beyond one's immediate standpoint.",
-          "link": "wiki:Imagination"
+          "links": [
+            {
+              "href": "wiki:Imagination"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Recognition (sociology)"
+        "links": [
+          {
+            "href": "wiki:Recognition (sociology)"
+          }
+        ]
       }
     }
   ],
@@ -184,7 +268,11 @@
       "fact": "An I–It relation connects functional reduction with erased subjectivity by approaching the other chiefly as an object to use, classify, manage, or experience rather than as a participant in mutual relation.",
       "info": {
         "text": "Martin Buber's term for relating to something or someone as an object of use or experience rather than as a Thou encountered in mutual relation.",
-        "link": "wiki:I and Thou"
+        "links": [
+          {
+            "href": "wiki:I and Thou"
+          }
+        ]
       },
       "conceptId": "i-it-relation",
       "relationKind": "dynamic",
@@ -203,7 +291,11 @@
       "fact": "Dehumanization connects erased subjectivity with withdrawn moral regard: when people are denied agency, feeling, individuality, or full humanness, exclusion and cruelty become easier to justify.",
       "info": {
         "text": "The denial or diminishment of human qualities, individuality, or moral standing.",
-        "link": "wiki:Dehumanization"
+        "links": [
+          {
+            "href": "wiki:Dehumanization"
+          }
+        ]
       },
       "conceptId": "dehumanization",
       "relationKind": "dynamic",
@@ -222,7 +314,11 @@
       "fact": "Recognition marks the boundary between withdrawal and restoration: exclusion denies a person's standing within the moral community, while reciprocal recognition receives the other as a particular subject with dignity and voice.",
       "info": {
         "text": "Acknowledgment of another person's standing, identity, claims, or achievements within a social relationship.",
-        "link": "wiki:Recognition (sociology)"
+        "links": [
+          {
+            "href": "wiki:Recognition (sociology)"
+          }
+        ]
       },
       "conceptId": "recognition",
       "relationKind": "contrast",

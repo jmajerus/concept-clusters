@@ -1,17 +1,29 @@
 {
   "id": "power-and-violence",
   "title": "Power and Violence",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "info": {
     "text": "Hannah Arendt's argument that power and violence are not degrees of the same thing but opposites -- and that ordinary political language collapses five genuinely distinct concepts into one blurry word.",
-    "link": "wiki:Hannah Arendt"
+    "links": [
+      {
+        "href": "wiki:Hannah Arendt"
+      }
+    ],
+    "citations": [
+      {
+        "title": "On Violence",
+        "author": "Hannah Arendt",
+        "publisher": "Harcourt, Brace & World",
+        "year": "1970"
+      }
+    ]
   },
   "clusters": [
     {
@@ -35,7 +47,11 @@
       ],
       "info": {
         "text": "Arendt's account, from The Human Condition, of power as a capacity that exists only in the actuality of people acting together -- never a fixed possession waiting to be seized.",
-        "link": "wiki:The Human Condition (Arendt book)"
+        "links": [
+          {
+            "href": "wiki:The Human Condition (Arendt book)"
+          }
+        ]
       }
     },
     {
@@ -57,17 +73,7 @@
         "justification",
         "muteness"
       ],
-      "info": {
-        "text": "Arendt's portrait, from her 1970 essay, of violence as a tool-using, single-actor phenomenon that can destroy power but can never bring it into being.",
-        "citations": [
-          {
-            "title": "On Violence",
-            "author": "Hannah Arendt",
-            "publisher": "Harcourt, Brace & World",
-            "year": "1970"
-          }
-        ]
-      }
+      "info": "Arendt's portrait, from her 1970 essay, of violence as a tool-using, single-actor phenomenon that can destroy power but can never bring it into being."
     },
     {
       "id": "authority-strength-and-force",
@@ -86,17 +92,7 @@
         "strength",
         "force"
       ],
-      "info": {
-        "text": "The three further terms Arendt insisted be kept separate from both power and violence, each naming a genuinely different kind of political or physical capacity.",
-        "citations": [
-          {
-            "title": "On Violence",
-            "author": "Hannah Arendt",
-            "publisher": "Harcourt, Brace & World",
-            "year": "1970"
-          }
-        ]
-      }
+      "info": "The three further terms Arendt insisted be kept separate from both power and violence, each naming a genuinely different kind of political or physical capacity."
     }
   ],
   "bridges": [
@@ -180,13 +176,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

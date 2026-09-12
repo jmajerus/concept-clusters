@@ -1,13 +1,13 @@
 {
   "id": "the-manufactured-desire",
   "title": "The Manufactured Desire",
-  "category": "Philosophy",
+  "category": "philosophy",
   "categories": [
-    "Philosophy",
-    "Sociology"
+    "philosophy",
+    "sociology"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "tags": [
     "catalogue:wholeness-and-its-discontents"
@@ -15,7 +15,11 @@
   "large": true,
   "info": {
     "text": "How the Frankfurt School, Situationism, and structural Marxism each describe modern capitalism turning private psychological anxiety into a permanent engine of consumption.",
-    "link": "wiki:Critical theory"
+    "links": [
+      {
+        "href": "wiki:Critical theory"
+      }
+    ]
   },
   "clusters": [
     {
@@ -42,14 +46,22 @@
       "termInfo": {
         "culture industry": {
           "text": "Adorno and Horkheimer's term for art, media, and entertainment produced and distributed on the logic of a factory.",
-          "link": "wiki:Culture industry"
+          "links": [
+            {
+              "href": "wiki:Culture industry"
+            }
+          ]
         },
         "false needs": {
           "text": "Desires manufactured by advertising and social pressure that promise psychological relief but leave the underlying void untouched."
         },
         "instrumental rationality": {
           "text": "A logic that reduces everything, including culture, to efficiency and calculation toward profit.",
-          "link": "wiki:Instrumental and value rationality"
+          "links": [
+            {
+              "href": "wiki:Instrumental and value rationality"
+            }
+          ]
         },
         "mass standardization": {
           "text": "The underlying condition pseudo-individualization is designed to disguise: cultural goods produced to predictable, repeatable formulas."
@@ -59,7 +71,11 @@
         }
       },
       "info": {
-        "link": "wiki:Culture industry"
+        "links": [
+          {
+            "href": "wiki:Culture industry"
+          }
+        ]
       }
     },
     {
@@ -89,22 +105,38 @@
         },
         "hyperreality": {
           "text": "A condition where media representations and models feel more real, and more meaningful, than the physical reality they were drawn from.",
-          "link": "wiki:Hyperreality"
+          "links": [
+            {
+              "href": "wiki:Hyperreality"
+            }
+          ]
         },
         "sign-value": {
           "text": "Baudrillard's term for value derived from what an object signals about status or identity, distinct from its use or exchange value."
         },
         "simulacra and simulation": {
           "text": "The point where a copy of something no longer refers to any original, and circulates as more convincing than reality itself.",
-          "link": "wiki:Simulacra and Simulation"
+          "links": [
+            {
+              "href": "wiki:Simulacra and Simulation"
+            }
+          ]
         },
         "society of the spectacle": {
           "text": "Debord's claim that authentic social relationship has been replaced by a mediated collection of images.",
-          "link": "wiki:The Society of the Spectacle"
+          "links": [
+            {
+              "href": "wiki:The Society of the Spectacle"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Jean Baudrillard"
+        "links": [
+          {
+            "href": "wiki:Jean Baudrillard"
+          }
+        ]
       }
     },
     {
@@ -137,18 +169,30 @@
         },
         "ideological state apparatus": {
           "text": "Althusser's term for institutions -- schools, media, family, religion -- that shape belief and behavior without physical coercion.",
-          "link": "wiki:Ideology and Ideological State Apparatuses"
+          "links": [
+            {
+              "href": "wiki:Ideology and Ideological State Apparatuses"
+            }
+          ]
         },
         "interpellation": {
           "text": "The moment ideology addresses, or 'hails,' an individual as a specific kind of subject, and the individual recognizes and accepts that address.",
-          "link": "wiki:Interpellation (philosophy)"
+          "links": [
+            {
+              "href": "wiki:Interpellation (philosophy)"
+            }
+          ]
         },
         "performative authenticity": {
           "text": "Authenticity itself pressured into becoming something visibly performed and maintained, rather than simply lived."
         }
       },
       "info": {
-        "link": "wiki:Louis Althusser"
+        "links": [
+          {
+            "href": "wiki:Louis Althusser"
+          }
+        ]
       }
     }
   ],
@@ -271,27 +315,15 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Gemini",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Gemini",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-07"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

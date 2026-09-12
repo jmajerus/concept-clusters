@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-capacity-to-harm.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-capacity-to-harm",
   "title": "The Capacity to Harm",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "History & Society"
+    "psychology",
+    "history-society"
   ],
   "large": true,
   "tags": [
@@ -321,6 +321,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "othering",
       "term": "othering",
       "clusters": [
         0,
@@ -339,6 +340,7 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "foundation"
     },
     {
+      "id": "exhilaration",
       "term": "exhilaration",
       "clusters": [
         2,

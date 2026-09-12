@@ -1,21 +1,37 @@
 {
   "id": "the-civilizing-mission",
   "title": "The Civilizing Mission",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "large": true,
   "info": {
     "text": "Liberal thought has long paired a strong doctrine of self-determination with an equally strong exception for peoples judged not yet ready to exercise it -- a hierarchy inherited across Mill's writing, democratic peace theory, formal colonial ideology, and today's humanitarian intervention doctrine.",
-    "link": "wiki:Civilizing mission",
     "citations": [
       {
         "title": "The Question of Intervention: John Stuart Mill and the Responsibility to Protect",
         "author": "Doyle, Michael W.",
         "publisher": "Yale University Press",
         "year": "2015"
+      },
+      {
+        "title": "The Standard of 'Civilization' in International Society",
+        "author": "Gong, Gerrit W.",
+        "publisher": "Clarendon Press",
+        "year": "1984"
+      },
+      {
+        "title": "Losing 'the Force'? The 'Dark Side' of Democratization after Iraq",
+        "author": "Whitehead, Laurence",
+        "publisher": "Democratization",
+        "year": "2009"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Civilizing mission"
       }
     ]
   },
@@ -51,12 +67,20 @@
         },
         "reciprocity": {
           "text": "The expectation that international obligations are mutual, returned in kind -- which Mill argued 'barbarian' peoples could not be counted on to honor.",
-          "link": "wiki:Reciprocity (international relations)"
+          "links": [
+            {
+              "href": "wiki:Reciprocity (international relations)"
+            }
+          ]
         }
       },
       "info": {
         "text": "John Stuart Mill's 1859 defense of non-intervention among 'civilized' states -- paired with an explicit exception for peoples he judged not yet fit to claim it.",
-        "link": "wiki:A Few Words on Non-Intervention"
+        "links": [
+          {
+            "href": "wiki:A Few Words on Non-Intervention"
+          }
+        ]
       }
     },
     {
@@ -81,7 +105,11 @@
       "termInfo": {
         "democratic peace": {
           "text": "The empirical claim that democracies behave more peacefully than other states, especially toward one another.",
-          "link": "wiki:Democratic peace theory"
+          "links": [
+            {
+              "href": "wiki:Democratic peace theory"
+            }
+          ]
         },
         "dyadic peace": {
           "text": "The better-supported version of the claim: that democracies rarely, if ever, go to war against other democracies specifically."
@@ -91,12 +119,20 @@
         },
         "perpetual peace": {
           "text": "Kant's 1795 essay proposing that republics, joined in a voluntary federation, could gradually make war between them obsolete.",
-          "link": "wiki:Perpetual Peace: A Philosophical Sketch"
+          "links": [
+            {
+              "href": "wiki:Perpetual Peace: A Philosophical Sketch"
+            }
+          ]
         }
       },
       "info": {
         "text": "The empirical and philosophical claim that representative government makes states more peaceful -- and the contested question of what that claim licenses toward states that are not democracies.",
-        "link": "wiki:Democratic peace theory"
+        "links": [
+          {
+            "href": "wiki:Democratic peace theory"
+          }
+        ]
       }
     },
     {
@@ -121,23 +157,39 @@
       "termInfo": {
         "Jules Ferry": {
           "text": "The French statesman who most forcefully argued, before the National Assembly, that 'superior races' had a duty to civilize 'inferior' ones.",
-          "link": "wiki:Jules Ferry"
+          "links": [
+            {
+              "href": "wiki:Jules Ferry"
+            }
+          ]
         },
         "assimilation": {
           "text": "The French colonial policy premised on the idea that colonized peoples could, in principle, become French by adopting French language and culture -- a promise mostly withheld in practice."
         },
         "mission civilisatrice": {
           "text": "The Third Republic's official rationale for empire: that France had a duty to spread civilization, not merely to acquire territory.",
-          "link": "wiki:Civilizing mission"
+          "links": [
+            {
+              "href": "wiki:Civilizing mission"
+            }
+          ]
         },
         "white man's burden": {
           "text": "Rudyard Kipling's 1899 poem urging the United States to take up the paternalistic 'burden' of ruling the Philippines, casting the same civilizing logic in Anglo-American dress.",
-          "link": "wiki:The White Man's Burden"
+          "links": [
+            {
+              "href": "wiki:The White Man's Burden"
+            }
+          ]
         }
       },
       "info": {
         "text": "The 19th-century doctrine that colonial conquest was, at bottom, a service performed for the people being conquered.",
-        "link": "wiki:Civilizing mission"
+        "links": [
+          {
+            "href": "wiki:Civilizing mission"
+          }
+        ]
       }
     },
     {
@@ -162,11 +214,19 @@
       "termInfo": {
         "mass atrocity crimes": {
           "text": "The four crimes R2P names as triggering the international community's responsibility: genocide, war crimes, ethnic cleansing, and crimes against humanity.",
-          "link": "wiki:Atrocity crimes"
+          "links": [
+            {
+              "href": "wiki:Atrocity crimes"
+            }
+          ]
         },
         "responsibility to protect": {
           "text": "The international norm, endorsed at the UN's 2005 World Summit, that sovereignty carries an obligation to protect a state's own population -- and that the obligation passes to the international community if a government fails it.",
-          "link": "wiki:Responsibility to protect"
+          "links": [
+            {
+              "href": "wiki:Responsibility to protect"
+            }
+          ]
         },
         "sovereignty as responsibility": {
           "text": "The conceptual move at R2P's core: redefining sovereignty itself as a duty owed to a state's population, rather than a shield against outside judgment."
@@ -177,7 +237,11 @@
       },
       "info": {
         "text": "The doctrine that sovereignty obligates a state to protect its own population, and passes to the wider world when that state manifestly fails.",
-        "link": "wiki:Responsibility to protect"
+        "links": [
+          {
+            "href": "wiki:Responsibility to protect"
+          }
+        ]
       }
     }
   ],
@@ -192,13 +256,9 @@
       "fact": "Nineteenth-century international law formalized Mill's civilized/barbarian line into actual legal doctrine: only 'civilized' states received full sovereign equality, while others faced unequal treaties and extraterritorial jurisdiction -- the same underlying move, sorting states into a zone of full reciprocity and everyone else, that reappears a century later in democratic peace theory's empirical 'zone of peace.'",
       "info": {
         "text": "The 19th-century legal doctrine that only 'civilized' states received full sovereign equality under international law -- while others faced unequal treaties and extraterritorial jurisdiction.",
-        "link": "wiki:Unequal treaties",
-        "citations": [
+        "links": [
           {
-            "title": "The Standard of 'Civilization' in International Society",
-            "author": "Gong, Gerrit W.",
-            "publisher": "Clarendon Press",
-            "year": "1984"
+            "href": "wiki:Unequal treaties"
           }
         ]
       },
@@ -219,7 +279,11 @@
       "fact": "The League of Nations' 1919 Mandate System recast conquest as a 'sacred trust of civilisation,' obligating 'advanced nations' to prepare supposedly unready peoples for self-rule -- language R2P's architects effectively revisited eight decades later when they redefined sovereignty itself as a responsibility rather than a possession.",
       "info": {
         "text": "Article 22 of the League Covenant's legal formula for mandate rule -- a direct historical link between colonial tutelage and today's language of sovereignty-as-duty.",
-        "link": "wiki:League of Nations mandate"
+        "links": [
+          {
+            "href": "wiki:League of Nations mandate"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "continuity",
@@ -243,13 +307,9 @@
       "fact": "When the 'monadic' claim that democracies act peacefully toward everyone proved empirically false, democratic peace reasoning was redeployed to justify coercive democratization -- installing government by force -- echoing the civilizing mission's confidence that outside rule could rightly remake another people's institutions.",
       "info": {
         "text": "Political scientist Laurence Whitehead's term for imposing democratic government on another country through military force -- a project vulnerable to the objection Mill himself raised: a people 'liberated by foreign arms without their own cooperation' rarely keeps that freedom.",
-        "link": "wiki:Democracy promotion by the United States",
-        "citations": [
+        "links": [
           {
-            "title": "Losing 'the Force'? The 'Dark Side' of Democratization after Iraq",
-            "author": "Whitehead, Laurence",
-            "publisher": "Democratization",
-            "year": "2009"
+            "href": "wiki:Democracy promotion by the United States"
           }
         ]
       },
@@ -302,31 +362,23 @@
     "content": {
       "text": "## A recurring shape\n\nAcross very different eras, thinkers and institutions have faced the same problem: how to justify one people governing another without simply admitting to domination for its own sake.\n\nJohn Stuart Mill, the philosopher of liberty and self-government, carved out an explicit exception to his own principles when he wrote about relations between nations. Decades later, the empirical claim that democracies are unusually peaceful became, in some hands, an argument for spreading democracy by force. Meanwhile, European empires -- and later, international law itself -- developed their own vocabulary for explaining why outside rule over a population was compatible with, or even required by, that population's own welfare.\n\nThis puzzle asks you to notice the shape shared by these otherwise very different arguments: each pairs a claim about who is capable of self-government with a claim about what duty that incapacity creates in others.\n\n### A question to hold onto\n\nWhat would have to be true about a people, or a state, before outside intervention in its affairs stopped needing any justification like these at all?"
     },
-    "sources": [
+    "links": [
       {
-        "label": "Mill, \"A Few Words on Non-Intervention\" (1859)",
-        "href": "https://en.wikipedia.org/wiki/A_Few_Words_on_Non-Intervention"
+        "href": "https://en.wikipedia.org/wiki/A_Few_Words_on_Non-Intervention",
+        "label": "Mill, \"A Few Words on Non-Intervention\" (1859)"
       },
       {
-        "label": "The Responsibility to Protect: Report of the ICISS (2001)",
-        "href": "https://www.globalr2p.org/resources/the-responsibility-to-protect-report-of-the-international-commission-on-intervention-and-state-sovereignty-2001/"
+        "href": "https://www.globalr2p.org/resources/the-responsibility-to-protect-report-of-the-international-commission-on-intervention-and-state-sovereignty-2001/",
+        "label": "The Responsibility to Protect: Report of the ICISS (2001)"
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-15"
-    },
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-14"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

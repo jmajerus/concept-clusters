@@ -1,9 +1,9 @@
 {
   "id": "tropical-cyclone-machine",
   "title": "The Tropical Cyclone Machine",
-  "category": "Atmospheric Science",
+  "category": "atmospheric-science",
   "subcategories": {
-    "Atmospheric Science": "meteorology"
+    "atmospheric-science": "meteorology"
   },
   "large": true,
   "info": {

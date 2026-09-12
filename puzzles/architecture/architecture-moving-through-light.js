@@ -1,14 +1,14 @@
 // Generated from content/puzzles/architecture-moving-through-light.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "architecture-moving-through-light",
   "title": "Moving Through Light: Path and Proportion",
-  "category": "Architecture",
+  "category": "architecture",
   "subcategories": {
-    "Architecture": "form-and-space"
+    "architecture": "form-and-space"
   },
   "info": {
     "text": "How architects choreograph the walk through a building: threading paths that order movement and views, then tuning daylight and measure so each room feels its intended size.",
@@ -103,6 +103,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "pantheon-oculus",
       "term": "Pantheon oculus",
       "clusters": [
         0,

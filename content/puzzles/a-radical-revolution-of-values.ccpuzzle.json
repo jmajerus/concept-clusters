@@ -1,14 +1,18 @@
 {
   "id": "a-radical-revolution-of-values",
   "title": "A Radical Revolution of Values",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Martin Luther King Jr.'s final year: an argument that racism, militarism, and poverty were one interlocking structure -- the giant triplets, in his own phrase -- that required nothing less than a radical revolution of values to dismantle, tested directly in his last campaign for economic justice before his assassination in Memphis.",
-    "link": "wiki:Martin Luther King Jr."
+    "links": [
+      {
+        "href": "wiki:Martin Luther King Jr."
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,7 +36,11 @@
       ],
       "info": {
         "text": "King's 1967 Riverside Church speech naming racism, militarism, and extreme materialism as one interlocking structure -- a speech many of his own allies called a mistake.",
-        "link": "wiki:Beyond Vietnam: A Time to Break Silence"
+        "links": [
+          {
+            "href": "wiki:Beyond Vietnam: A Time to Break Silence"
+          }
+        ]
       }
     },
     {
@@ -56,7 +64,11 @@
       ],
       "info": {
         "text": "The theological and philosophical core of King's nonviolence: love that seeks to convert rather than defeat an opponent, aimed at an integrated, justly reconciled society rather than a won argument.",
-        "link": "wiki:Martin Luther King Jr."
+        "links": [
+          {
+            "href": "wiki:Martin Luther King Jr."
+          }
+        ]
       }
     },
     {
@@ -80,7 +92,11 @@
       ],
       "info": {
         "text": "King's final organizing campaign: a planned multiracial march and encampment demanding economic justice, cut short by his assassination while supporting Memphis's striking sanitation workers.",
-        "link": "wiki:Poor People's Campaign"
+        "links": [
+          {
+            "href": "wiki:Poor People's Campaign"
+          }
+        ]
       }
     }
   ],
@@ -158,13 +174,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

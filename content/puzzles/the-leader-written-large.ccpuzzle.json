@@ -1,10 +1,10 @@
 {
   "id": "the-leader-written-large",
   "title": "The Leader Written Large",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book"
@@ -12,13 +12,17 @@
   "large": true,
   "info": {
     "text": "Kets de Vries and Miller's claim that a company's whole structure and culture can come to mirror the neurotic style of the small group of executives, often just one person, running it -- four of the five styles they identified are on this board; the fifth, schizoid, is not.",
-    "link": "wiki:Manfred F.R. Kets de Vries",
     "citations": [
       {
         "title": "The Neurotic Organization: Diagnosing and Changing Counterproductive Styles of Management",
         "author": "Manfred F. R. Kets de Vries and Danny Miller",
         "publisher": "Jossey-Bass",
         "year": "1984"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Manfred F.R. Kets de Vries"
       }
     ]
   },
@@ -226,20 +230,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

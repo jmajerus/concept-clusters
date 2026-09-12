@@ -1,12 +1,12 @@
 // Generated from content/puzzles/golden-shields.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "golden-shields",
   "title": "Golden Shields",
-  "category": "Political Science",
+  "category": "political-science",
   "large": true,
   "tags": [
     "book"
@@ -42,23 +42,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Bybee Memo": {
           "text": "The August 2002 Justice Department opinion, drafted by John Yoo and signed by Jay Bybee, that narrowed the legal definition of torture.",
-          "link": "wiki:Torture Memos"
+          "links": [
+            {
+              "href": "wiki:Torture Memos"
+            }
+          ]
         },
         "John Yoo": {
           "text": "The Office of Legal Counsel attorney who drafted the memos authorizing coercive interrogation.",
-          "link": "wiki:John Yoo"
+          "links": [
+            {
+              "href": "wiki:John Yoo"
+            }
+          ]
         },
         "Office of Legal Counsel": {
           "text": "The Justice Department office whose legal opinions are treated as binding on the rest of the executive branch.",
-          "link": "wiki:Office of Legal Counsel"
+          "links": [
+            {
+              "href": "wiki:Office of Legal Counsel"
+            }
+          ]
         },
         "Unitary Executive Theory": {
           "text": "The doctrine that the president holds essentially unchecked control over the executive branch, invoked to justify the interrogation program.",
-          "link": "wiki:Unitary executive theory"
+          "links": [
+            {
+              "href": "wiki:Unitary executive theory"
+            }
+          ]
         },
         "Unlawful Enemy Combatant": {
           "text": "A legal classification placing a detainee outside the categories that would guarantee Geneva Convention protections or judicial review.",
-          "link": "wiki:Unlawful combatant"
+          "links": [
+            {
+              "href": "wiki:Unlawful combatant"
+            }
+          ]
         }
       }
     },
@@ -80,19 +100,35 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "CIA Black Sites": {
           "text": "Secret CIA-operated prisons located outside the United States, used to hold detainees beyond the reach of any court.",
-          "link": "wiki:Black site"
+          "links": [
+            {
+              "href": "wiki:Black site"
+            }
+          ]
         },
         "Extraordinary Rendition": {
           "text": "The covert transfer of a detainee to another country's custody, circumventing extradition law and often enabling torture by proxy.",
-          "link": "wiki:Extraordinary rendition"
+          "links": [
+            {
+              "href": "wiki:Extraordinary rendition"
+            }
+          ]
         },
         "Guantanamo Bay Detention Camp": {
           "text": "The U.S. military prison at Guantanamo Bay, Cuba, chosen partly because its offshore status was argued to place it outside domestic legal jurisdiction.",
-          "link": "wiki:Guantanamo Bay detention camp"
+          "links": [
+            {
+              "href": "wiki:Guantanamo Bay detention camp"
+            }
+          ]
         },
         "Incommunicado Detention": {
           "text": "Holding a detainee with no outside contact and no acknowledgment of their whereabouts -- the same mechanism international law treats as enforced disappearance.",
-          "link": "wiki:Enforced disappearance"
+          "links": [
+            {
+              "href": "wiki:Enforced disappearance"
+            }
+          ]
         }
       }
     },
@@ -115,29 +151,50 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Enhanced Interrogation Techniques": {
           "text": "The euphemism for the CIA's memo-authorized set of coercive methods, including waterboarding, walling, and prolonged sleep deprivation.",
-          "link": "wiki:Enhanced interrogation techniques"
+          "links": [
+            {
+              "href": "wiki:Enhanced interrogation techniques"
+            }
+          ]
         },
         "SERE Program": {
           "text": "Military training designed to help personnel resist interrogation if captured; its techniques were reverse-engineered for offensive use against detainees.",
-          "link": "wiki:Survival, Evasion, Resistance and Escape"
+          "links": [
+            {
+              "href": "wiki:Survival, Evasion, Resistance and Escape"
+            }
+          ]
         },
         "Sleep Deprivation": {
           "text": "Prolonged forced wakefulness, authorized for up to 180 hours at a time as an interrogation technique.",
-          "link": "wiki:Sleep deprivation"
+          "links": [
+            {
+              "href": "wiki:Sleep deprivation"
+            }
+          ]
         },
         "Walling": {
           "text": "A technique in which a detainee's neck is encircled by a collar and used to slam them against a wall.",
-          "link": "wiki:Walling"
+          "links": [
+            {
+              "href": "wiki:Walling"
+            }
+          ]
         },
         "Waterboarding": {
           "text": "A technique simulating drowning, the most publicly notorious of the authorized methods.",
-          "link": "wiki:Waterboarding"
+          "links": [
+            {
+              "href": "wiki:Waterboarding"
+            }
+          ]
         }
       }
     }
   ],
   "bridges": [
     {
+      "id": "golden-shield",
       "term": "Golden Shield",
       "clusters": [
         0,
@@ -146,13 +203,9 @@ export default definePuzzle(import.meta.url, {
       "fact": "The OLC memos functioned as advance legal cover -- 'golden shields' -- that CIA personnel relied on before conducting renditions and running black sites, letting field officers act without individual criminal exposure.",
       "info": {
         "text": "Mayer's own term for how OLC legal opinions functioned: as advance immunity for anyone who acted on their authorization.",
-        "link": "wiki:Torture Memos",
-        "citations": [
+        "links": [
           {
-            "title": "The Dark Side: The Inside Story of How the War on Terror Turned Into a War on American Ideals",
-            "author": "Mayer, Jane",
-            "publisher": "Doubleday",
-            "year": "2008"
+            "href": "wiki:Torture Memos"
           }
         ]
       },
@@ -165,6 +218,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "ghost-detainees",
       "term": "Ghost Detainees",
       "clusters": [
         1,
@@ -173,7 +227,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Detainees were kept off official rolls and hidden from the Red Cross specifically to allow extended, unmonitored interrogation without legal or medical oversight.",
       "info": {
         "text": "A detainee held off official registries and hidden from the Red Cross, specifically to keep their interrogation outside any accountability structure.",
-        "link": "wiki:Ghost detainee"
+        "links": [
+          {
+            "href": "wiki:Ghost detainee"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -184,6 +242,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "abu-ghraib",
       "term": "Abu Ghraib",
       "clusters": [
         0,
@@ -192,7 +251,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Abu Ghraib's abuse was undisciplined military-police conduct downstream of the legal permissiveness the memos created -- not the CIA's own authorized program, but its cultural runoff.",
       "info": {
         "text": "The Iraqi military prison where photographs of military-police abuse became public in 2004, revealing conduct distinct from -- but enabled by -- the CIA's own memo-authorized program.",
-        "link": "wiki:Abu Ghraib torture and prisoner abuse"
+        "links": [
+          {
+            "href": "wiki:Abu Ghraib torture and prisoner abuse"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -250,13 +313,12 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-18"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

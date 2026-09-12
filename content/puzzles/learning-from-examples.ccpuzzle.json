@@ -1,9 +1,9 @@
 {
   "id": "learning-from-examples",
   "title": "Learning from examples",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "artificial-intelligence"
+    "computer-science": "artificial-intelligence"
   },
   "tags": [
     "artificial intelligence",
@@ -11,7 +11,11 @@
   ],
   "info": {
     "text": "A machine-learning system turns examples into adjustable parameters, then has to prove that what it learned works on data it did not train on.",
-    "link": "wiki:Machine learning"
+    "links": [
+      {
+        "href": "wiki:Machine learning"
+      }
+    ]
   },
   "clusters": [
     {
@@ -36,19 +40,35 @@
       "termInfo": {
         "example": {
           "text": "One case presented to a learning system, usually as an input and sometimes with a target output.",
-          "link": "wiki:Training data"
+          "links": [
+            {
+              "href": "wiki:Training data"
+            }
+          ]
         },
         "feature": {
           "text": "A measurable input property used to represent an example to a model.",
-          "link": "wiki:Feature (machine learning)"
+          "links": [
+            {
+              "href": "wiki:Feature (machine learning)"
+            }
+          ]
         },
         "label": {
           "text": "The target category or value attached to an example for supervised learning.",
-          "link": "wiki:Labeled data"
+          "links": [
+            {
+              "href": "wiki:Labeled data"
+            }
+          ]
         },
         "training set": {
           "text": "The examples used to fit a model's parameters.",
-          "link": "wiki:Training, validation, and test data sets"
+          "links": [
+            {
+              "href": "wiki:Training, validation, and test data sets"
+            }
+          ]
         }
       }
     },
@@ -74,19 +94,35 @@
       "termInfo": {
         "model": {
           "text": "A mathematical or computational structure that maps inputs to predictions.",
-          "link": "wiki:Statistical model"
+          "links": [
+            {
+              "href": "wiki:Statistical model"
+            }
+          ]
         },
         "parameter": {
           "text": "A value inside a model that is adjusted from data during training.",
-          "link": "wiki:Parameter (statistics)"
+          "links": [
+            {
+              "href": "wiki:Parameter (statistics)"
+            }
+          ]
         },
         "loss function": {
           "text": "A numerical measure of prediction error that training attempts to minimize.",
-          "link": "wiki:Loss function"
+          "links": [
+            {
+              "href": "wiki:Loss function"
+            }
+          ]
         },
         "gradient descent": {
           "text": "An optimization method that repeatedly changes parameters in a direction that reduces loss.",
-          "link": "wiki:Gradient descent"
+          "links": [
+            {
+              "href": "wiki:Gradient descent"
+            }
+          ]
         }
       }
     },
@@ -112,19 +148,35 @@
       "termInfo": {
         "validation set": {
           "text": "Held-out data used during development to compare choices without fitting ordinary model parameters on it.",
-          "link": "wiki:Training, validation, and test data sets"
+          "links": [
+            {
+              "href": "wiki:Training, validation, and test data sets"
+            }
+          ]
         },
         "test set": {
           "text": "Data reserved for estimating final performance after development choices have been made.",
-          "link": "wiki:Training, validation, and test data sets"
+          "links": [
+            {
+              "href": "wiki:Training, validation, and test data sets"
+            }
+          ]
         },
         "evaluation metric": {
           "text": "A measure, such as accuracy or mean squared error, used to summarize model performance.",
-          "link": "wiki:Evaluation of machine learning models"
+          "links": [
+            {
+              "href": "wiki:Evaluation of machine learning models"
+            }
+          ]
         },
         "overfitting": {
           "text": "Learning the training data's peculiarities so closely that performance suffers on new examples.",
-          "link": "wiki:Overfitting"
+          "links": [
+            {
+              "href": "wiki:Overfitting"
+            }
+          ]
         }
       }
     }
@@ -140,7 +192,11 @@
       "fact": "Supervised learning connects labeled examples to fitting: the model predicts from features, compares each prediction with its label, and adjusts parameters to reduce the resulting loss.",
       "info": {
         "text": "Learning a mapping from inputs to known target outputs supplied in labeled examples.",
-        "link": "wiki:Supervised learning"
+        "links": [
+          {
+            "href": "wiki:Supervised learning"
+          }
+        ]
       },
       "relationKind": "foundation",
       "direction": {
@@ -163,7 +219,11 @@
       "fact": "A hyperparameter controls training or model structure but is not fitted like an ordinary parameter; developers commonly compare hyperparameter choices using validation performance.",
       "info": {
         "text": "A setting chosen around training, such as a learning rate or model depth, rather than learned as an ordinary parameter.",
-        "link": "wiki:Hyperparameter (machine learning)"
+        "links": [
+          {
+            "href": "wiki:Hyperparameter (machine learning)"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "direction": {
@@ -186,7 +246,11 @@
       "fact": "Data leakage breaks the boundary between learning and evaluation: information unavailable in real use, or reserved for validation or testing, slips into training and makes performance look better than it is.",
       "info": {
         "text": "Improper use of information during model development that would not legitimately be available when predictions are made.",
-        "link": "wiki:Leakage (machine learning)"
+        "links": [
+          {
+            "href": "wiki:Leakage (machine learning)"
+          }
+        ]
       },
       "relationKind": "contrast",
       "direction": {
@@ -276,13 +340,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

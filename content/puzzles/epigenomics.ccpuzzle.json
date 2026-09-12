@@ -1,9 +1,9 @@
 {
   "id": "epigenomics",
   "title": "The Epigenome",
-  "category": "Biology",
+  "category": "biology",
   "subcategories": {
-    "Biology": "multiomics"
+    "biology": "multiomics"
   },
   "large": true,
   "info": {
@@ -407,9 +407,9 @@
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Cursor (Grok 4.6)"
+        "name": "Cursor (Grok 4.6)",
+        "reasoning": "high"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 }

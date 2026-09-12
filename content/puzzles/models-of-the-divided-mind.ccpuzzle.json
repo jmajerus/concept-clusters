@@ -1,10 +1,10 @@
 {
   "id": "models-of-the-divided-mind",
   "title": "Models of the Divided Mind",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Philosophy"
+    "psychology",
+    "philosophy"
   ],
   "tags": [
     "catalogue:wholeness-and-its-discontents"
@@ -12,7 +12,11 @@
   "large": true,
   "info": {
     "text": "Four traditions look at the same fact -- that a person is not unified inside themselves -- and draw four incompatible conclusions about what to do with it: manage it, integrate it, embrace it, or sell a cure for it.",
-    "link": "wiki:Psychoanalysis"
+    "links": [
+      {
+        "href": "wiki:Psychoanalysis"
+      }
+    ]
   },
   "clusters": [
     {
@@ -45,18 +49,30 @@
         },
         "id-ego-superego friction": {
           "text": "Freud's structural model of the mind as three agencies in permanent, unresolved negotiation.",
-          "link": "wiki:Id, ego and super-ego"
+          "links": [
+            {
+              "href": "wiki:Id, ego and super-ego"
+            }
+          ]
         },
         "repetition compulsion": {
           "text": "An involuntary drive to repeat a disruptive or traumatic pattern, resistant to conscious intention.",
-          "link": "wiki:Repetition compulsion"
+          "links": [
+            {
+              "href": "wiki:Repetition compulsion"
+            }
+          ]
         },
         "repressed guilt": {
           "text": "Superego-generated guilt kept out of conscious awareness, one of the frictions the ego has to manage."
         }
       },
       "info": {
-        "link": "wiki:Sigmund Freud"
+        "links": [
+          {
+            "href": "wiki:Sigmund Freud"
+          }
+        ]
       }
     },
     {
@@ -83,26 +99,46 @@
       "termInfo": {
         "archetypal unconscious": {
           "text": "The deeper, inherited layer of the psyche Jung held to underlie any one person's individual unconscious.",
-          "link": "wiki:Collective unconscious"
+          "links": [
+            {
+              "href": "wiki:Collective unconscious"
+            }
+          ]
         },
         "enantiodromia": {
           "text": "An overextended conscious attitude suddenly reverses into its own opposite.",
-          "link": "wiki:Enantiodromia"
+          "links": [
+            {
+              "href": "wiki:Enantiodromia"
+            }
+          ]
         },
         "individuation process": {
           "text": "Jung's lifelong movement toward psychological wholeness through confronting, not repressing, split-off material.",
-          "link": "wiki:Individuation"
+          "links": [
+            {
+              "href": "wiki:Individuation"
+            }
+          ]
         },
         "persona mask": {
           "text": "The curated social front the ego presents to the world.",
-          "link": "wiki:Persona (analytical psychology)"
+          "links": [
+            {
+              "href": "wiki:Persona (analytical psychology)"
+            }
+          ]
         },
         "shadow projection": {
           "text": "Unconsciously attributing one's own rejected traits to someone else."
         }
       },
       "info": {
-        "link": "wiki:Carl Jung"
+        "links": [
+          {
+            "href": "wiki:Carl Jung"
+          }
+        ]
       }
     },
     {
@@ -144,7 +180,11 @@
         }
       },
       "info": {
-        "link": "wiki:Todd McGowan"
+        "links": [
+          {
+            "href": "wiki:Todd McGowan"
+          }
+        ]
       }
     },
     {
@@ -337,27 +377,15 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Gemini",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Gemini",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-07"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

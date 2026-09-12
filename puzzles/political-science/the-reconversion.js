@@ -1,52 +1,32 @@
 // Generated from content/puzzles/the-reconversion.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-reconversion",
   "title": "The Reconversion",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "A.J. Muste -- Dutch-American minister, Lawrence strike organizer, and for a time the leader of an actual Trotskyist party -- until a 1936 religious reconversion sent him back to Christian pacifism for good, and into three more decades leading the Fellowship of Reconciliation, training Bayard Rustin's generation in nonviolent direct action, and traveling to Hanoi at eighty-one to try to end the Vietnam War.",
-    "link": "wiki:A. J. Muste"
+    "links": [
+      {
+        "href": "wiki:A. J. Muste"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Nonviolence in an Aggressive World",
+        "author": "A. J. Muste",
+        "publisher": "Harper & Brothers",
+        "year": "1940"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "institutions-not-events",
-      "prompt": "Which of these are organizations Muste helped found or lead, rather than a single event or personal experience?",
-      "explanation": "The Fellowship of Reconciliation, the American Workers Party, and the Spring Mobilization Committee were all organizations Muste helped found or lead, spanning three completely different phases and ideologies of his career -- Christian pacifist, Marxist revolutionary, and antiwar coalition-builder -- proof that institution-building, not any single ideology, was the real constant in his working life.",
-      "targets": [
-        "the Fellowship of Reconciliation",
-        "the American Workers Party",
-        "the Spring Mobilization Committee"
-      ],
-      "reasons": {
-        "the American Workers Party": "The Marxist party Muste led before its 1934 merger with the Trotskyists.",
-        "the Fellowship of Reconciliation": "Co-founded in 1915 as a young pacifist minister, and later led as its executive director from 1940.",
-        "the Spring Mobilization Committee": "The antiwar coalition he chaired at the very end of his life, organizing against the Vietnam War."
-      }
-    },
-    {
-      "id": "personal-turning-points",
-      "prompt": "Which of these mark a moment where Muste's own convictions visibly changed his course, rather than an organization he built?",
-      "explanation": "A forced resignation, a religious reconversion, and the Hanoi trip mark three moments where Muste's own convictions visibly changed his course, rather than an organization he was busy building: losing his pulpit over pacifism in WWI, breaking from Trotskyism back to Christian nonviolence in 1936, and, at eighty-one, traveling into a wartime capital to see whether personal diplomacy could still do what marches and speeches hadn't.",
-      "targets": [
-        "a forced resignation",
-        "a religious reconversion",
-        "the Hanoi trip"
-      ],
-      "reasons": {
-        "a forced resignation": "Losing his pulpit over pacifism during WWI, which sent him toward the labor movement instead of the church.",
-        "a religious reconversion": "A 1936 experience in Europe that ended his Marxist period and returned him to Christian pacifism for good.",
-        "the Hanoi trip": "At eighty-one, traveling into a wartime capital to see whether personal diplomacy could do what marches and speeches hadn't."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "from-pulpit-to-picket-line",
@@ -65,12 +45,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "the Fellowship of Reconciliation": {
-          "link": "wiki:Fellowship of Reconciliation"
+          "links": [
+            {
+              "href": "wiki:Fellowship of Reconciliation"
+            }
+          ]
         }
       },
       "info": {
         "text": "Muste's first political conversion: from a Massachusetts pulpit lost over WWI pacifism, into a decade of labor organizing and union education.",
-        "link": "wiki:A. J. Muste"
+        "links": [
+          {
+            "href": "wiki:A. J. Muste"
+          }
+        ]
       }
     },
     {
@@ -90,7 +78,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Muste's decade as a revolutionary Marxist, culminating in his brief leadership of an actual Trotskyist party -- and the sudden 1936 religious experience that ended it for good.",
-        "link": "wiki:American Workers Party"
+        "links": [
+          {
+            "href": "wiki:American Workers Party"
+          }
+        ]
       }
     },
     {
@@ -110,13 +102,9 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Muste's final three decades: rebuilding the Fellowship of Reconciliation, mentoring the activists who carried nonviolent direct action into the civil rights movement, and organizing against the Vietnam War until his death.",
-        "link": "wiki:A. J. Muste",
-        "citations": [
+        "links": [
           {
-            "title": "Nonviolence in an Aggressive World",
-            "author": "A. J. Muste",
-            "publisher": "Harper & Brothers",
-            "year": "1940"
+            "href": "wiki:A. J. Muste"
           }
         ]
       }
@@ -176,13 +164,44 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "institutions-not-events",
+      "prompt": "Which of these are organizations Muste helped found or lead, rather than a single event or personal experience?",
+      "explanation": "The Fellowship of Reconciliation, the American Workers Party, and the Spring Mobilization Committee were all organizations Muste helped found or lead, spanning three completely different phases and ideologies of his career -- Christian pacifist, Marxist revolutionary, and antiwar coalition-builder -- proof that institution-building, not any single ideology, was the real constant in his working life.",
+      "targets": [
+        "the Fellowship of Reconciliation",
+        "the American Workers Party",
+        "the Spring Mobilization Committee"
+      ],
+      "reasons": {
+        "the American Workers Party": "The Marxist party Muste led before its 1934 merger with the Trotskyists.",
+        "the Fellowship of Reconciliation": "Co-founded in 1915 as a young pacifist minister, and later led as its executive director from 1940.",
+        "the Spring Mobilization Committee": "The antiwar coalition he chaired at the very end of his life, organizing against the Vietnam War."
+      }
+    },
+    {
+      "id": "personal-turning-points",
+      "prompt": "Which of these mark a moment where Muste's own convictions visibly changed his course, rather than an organization he built?",
+      "explanation": "A forced resignation, a religious reconversion, and the Hanoi trip mark three moments where Muste's own convictions visibly changed his course, rather than an organization he was busy building: losing his pulpit over pacifism in WWI, breaking from Trotskyism back to Christian nonviolence in 1936, and, at eighty-one, traveling into a wartime capital to see whether personal diplomacy could still do what marches and speeches hadn't.",
+      "targets": [
+        "a forced resignation",
+        "a religious reconversion",
+        "the Hanoi trip"
+      ],
+      "reasons": {
+        "a forced resignation": "Losing his pulpit over pacifism during WWI, which sent him toward the labor movement instead of the church.",
+        "a religious reconversion": "A 1936 experience in Europe that ended his Marxist period and returned him to Christian pacifism for good.",
+        "the Hanoi trip": "At eighty-one, traveling into a wartime capital to see whether personal diplomacy could do what marches and speeches hadn't."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

@@ -1,9 +1,9 @@
 {
   "id": "religion-ritual-practice",
   "title": "What Bodies Do With Belief: Passage, Time, Practice, and Place",
-  "category": "Religion",
+  "category": "religion",
   "subcategories": {
-    "Religion": "ritual-and-practice"
+    "religion": "ritual-and-practice"
   },
   "large": true,
   "info": {

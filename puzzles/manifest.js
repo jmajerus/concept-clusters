@@ -623,19 +623,19 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "images-out-of-context",
+            "reason": "Compare how images and quotations lose meaning when detached from origins and context.",
             "via": [
               "provenance",
               "context"
-            ],
-            "reason": "Compare how images and quotations lose meaning when detached from origins and context."
+            ]
           },
           {
             "id": "ai-generated-synthetic-media",
+            "reason": "Extend source tracing from altered words to synthetic media and technical authenticity signals.",
             "via": [
               "provenance",
               "authentication"
-            ],
-            "reason": "Extend source tracing from altered words to synthetic media and technical authenticity signals."
+            ]
           }
         ]
       },
@@ -672,19 +672,19 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "social-media-hygiene",
+            "reason": "Apply source-tracing habits specifically to visual media.",
             "via": [
               "provenance",
               "reverse image search"
-            ],
-            "reason": "Apply source-tracing habits specifically to visual media."
+            ]
           },
           {
             "id": "quotations-and-attribution",
+            "reason": "Continue from visual context to the transmission and attribution of words.",
             "via": [
               "provenance",
               "context"
-            ],
-            "reason": "Continue from visual context to the transmission and attribution of words."
+            ]
           }
         ]
       },
@@ -721,11 +721,11 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "quotations-and-attribution",
+            "reason": "Compare attribution of words with authentication of synthetic images, audio, video and documents.",
             "via": [
               "provenance",
               "authentication"
-            ],
-            "reason": "Compare attribution of words with authentication of synthetic images, audio, video and documents."
+            ]
           }
         ]
       },
@@ -851,26 +851,32 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "integumentary-system",
+            "reason": "Apply feedback control to sweating, skin blood flow and the regulation of body temperature.",
             "via": [
               "temperature regulation",
               "negative feedback"
-            ],
-            "reason": "Apply feedback control to sweating, skin blood flow and the regulation of body temperature."
+            ]
           },
           {
             "id": "breathing-gas-exchange",
+            "reason": "See how changes in breathing help keep oxygen, carbon dioxide and acid-base conditions within workable ranges.",
             "via": [
               "blood gases",
               "negative feedback"
-            ],
-            "reason": "See how changes in breathing help keep oxygen, carbon dioxide and acid-base conditions within workable ranges."
+            ]
           }
         ]
       },
       "info": {
         "text": "How the body monitors internal conditions, compares them with workable ranges, and coordinates responses that limit deviations.",
-        "link": "wiki:Homeostasis",
-        "extraLink": "https://my.clevelandclinic.org/health/articles/homeostasis"
+        "links": [
+          {
+            "href": "wiki:Homeostasis"
+          },
+          {
+            "href": "https://my.clevelandclinic.org/health/articles/homeostasis"
+          }
+        ]
       },
       "_searchTerms": [
         "Monitoring conditions",
@@ -909,25 +915,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "reading-a-painting",
+            "reason": "Apply the same movement from observable details to contextual interpretation in a visual work.",
             "via": [
               "interpretation",
               "context"
-            ],
-            "reason": "Apply the same movement from observable details to contextual interpretation in a visual work."
+            ]
           },
           {
             "id": "literary-devices",
+            "reason": "Review the devices writers use before treating those features as evidence in an interpretation.",
             "via": [
               "imagery",
               "structure"
-            ],
-            "reason": "Review the devices writers use before treating those features as evidence in an interpretation."
+            ]
           }
         ]
       },
       "info": {
         "text": "Humanistic interpretation combines close attention to a text with knowledge of its setting and a reasoned argument about what it means.",
-        "link": "wiki:Literary criticism"
+        "links": [
+          {
+            "href": "wiki:Literary criticism"
+          }
+        ]
       },
       "_searchTerms": [
         "Features of the text",
@@ -965,25 +975,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "interpreting-a-text",
+            "reason": "Compare visual analysis with the way close reading builds an interpretation from details in a text.",
             "via": [
               "interpretation",
               "evidence"
-            ],
-            "reason": "Compare visual analysis with the way close reading builds an interpretation from details in a text."
+            ]
           },
           {
             "id": "myth-ritual-and-symbol",
+            "reason": "Follow symbolic images into the myths, rituals, and traditions that can give them cultural meaning.",
             "via": [
               "iconography",
               "sacred image"
-            ],
-            "reason": "Follow symbolic images into the myths, rituals, and traditions that can give them cultural meaning."
+            ]
           }
         ]
       },
       "info": {
         "text": "Visual analysis asks how a painting's elements and composition guide attention, and how its historical setting shapes what those choices may mean.",
-        "link": "wiki:Art history"
+        "links": [
+          {
+            "href": "wiki:Art history"
+          }
+        ]
       },
       "_searchTerms": [
         "Visual elements",
@@ -1022,26 +1036,30 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "reading-a-painting",
+            "reason": "Use visual analysis and iconography to examine how inherited symbols appear in works of art.",
             "via": [
               "iconography",
               "sacred image"
-            ],
-            "reason": "Use visual analysis and iconography to examine how inherited symbols appear in works of art."
+            ]
           },
           {
             "id": "ancient-civilizations",
+            "reason": "Place mythic narratives and ritual practices within the institutions and material cultures of ancient societies.",
             "via": [
               "myth",
               "ritual",
               "tradition"
-            ],
-            "reason": "Place mythic narratives and ritual practices within the institutions and material cultures of ancient societies."
+            ]
           }
         ]
       },
       "info": {
         "text": "Myths, rituals, and symbols are distinct cultural forms that often interact, carrying inherited meanings through narrative, performance, objects, images, and places.",
-        "link": "wiki:Myth and ritual"
+        "links": [
+          {
+            "href": "wiki:Myth and ritual"
+          }
+        ]
       },
       "_searchTerms": [
         "Mythic narratives",
@@ -1079,7 +1097,11 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How Lacanian thought relates image, language, and what resists symbolization.",
-        "link": "wiki:Jacques Lacan"
+        "links": [
+          {
+            "href": "wiki:Jacques Lacan"
+          }
+        ]
       },
       "_searchTerms": [
         "The Imaginary",
@@ -1118,30 +1140,38 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "info": {
           "text": "Compare regional environments and livelihoods with other ways people organize life and resources.",
-          "link": "wiki:Regional geography"
+          "links": [
+            {
+              "href": "wiki:Regional geography"
+            }
+          ]
         },
         "entries": [
           {
             "id": "ancient-civilizations",
+            "reason": "Examine how water, farming, and settlement supported early societies in particular regional environments.",
             "via": [
               "water management",
               "land use"
-            ],
-            "reason": "Examine how water, farming, and settlement supported early societies in particular regional environments."
+            ]
           },
           {
             "id": "economic-systems",
+            "reason": "Contrast geographically situated livelihoods with systems that organize ownership, exchange, and public provision.",
             "via": [
               "livelihoods",
               "land use"
-            ],
-            "reason": "Contrast geographically situated livelihoods with systems that organize ownership, exchange, and public provision."
+            ]
           }
         ]
       },
       "info": {
         "text": "Regional patterns emerge from relationships among climate, ecosystems, livelihoods, and human adaptations; no single feature defines an entire region.",
-        "link": "wiki:Regional geography"
+        "links": [
+          {
+            "href": "wiki:Regional geography"
+          }
+        ]
       },
       "_searchTerms": [
         "Climate and ground conditions",
@@ -1181,30 +1211,38 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "info": {
           "text": "Explore how regional environments shape livelihoods, settlement, and the management of shared resources.",
-          "link": "wiki:Human geography"
+          "links": [
+            {
+              "href": "wiki:Human geography"
+            }
+          ]
         },
         "entries": [
           {
             "id": "climate-and-livelihoods",
+            "reason": "Compare river-basin profiles with broader regional relationships among climate, ecosystems, livelihoods, and adaptation.",
             "via": [
               "water management",
               "land use"
-            ],
-            "reason": "Compare river-basin profiles with broader regional relationships among climate, ecosystems, livelihoods, and adaptation."
+            ]
           },
           {
             "id": "ancient-civilizations",
+            "reason": "Examine how river environments and water management supported several early urban societies.",
             "via": [
               "irrigation",
               "floodplains"
-            ],
-            "reason": "Examine how river environments and water management supported several early urban societies."
+            ]
           }
         ]
       },
       "info": {
         "text": "River basins connect headwaters, tributaries, floodplains, and deltas with livelihoods, hazards, infrastructure, and cooperation across an entire drainage system.",
-        "link": "wiki:Drainage basin"
+        "links": [
+          {
+            "href": "wiki:Drainage basin"
+          }
+        ]
       },
       "_searchTerms": [
         "River system",
@@ -1244,38 +1282,46 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "info": {
           "text": "Follow evidence from source and attribution through verification, interpretation, and public claims.",
-          "link": "wiki:Information literacy"
+          "links": [
+            {
+              "href": "wiki:Information literacy"
+            }
+          ]
         },
         "entries": [
           {
             "id": "quotations-and-attribution",
+            "reason": "Apply provenance and source verification to claims about who said or wrote particular words.",
             "via": [
               "provenance",
               "attribution"
-            ],
-            "reason": "Apply provenance and source verification to claims about who said or wrote particular words."
+            ]
           },
           {
             "id": "images-out-of-context",
+            "reason": "Use source history and external corroboration to evaluate visual evidence separated from its original setting.",
             "via": [
               "provenance",
               "independent verification"
-            ],
-            "reason": "Use source history and external corroboration to evaluate visual evidence separated from its original setting."
+            ]
           },
           {
             "id": "media-literacy",
+            "reason": "Connect disciplinary evidence practices with everyday habits for evaluating public information.",
             "via": [
               "verification",
               "evidence"
-            ],
-            "reason": "Connect disciplinary evidence practices with everyday habits for evaluating public information."
+            ]
           }
         ]
       },
       "info": {
         "text": "Science, history, law, and journalism use different kinds of evidence, but all must ask where information came from, how it was preserved, and what supports an inference.",
-        "link": "wiki:Evidence"
+        "links": [
+          {
+            "href": "wiki:Evidence"
+          }
+        ]
       },
       "_searchTerms": [
         "Scientific investigation",
@@ -1315,38 +1361,46 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "info": {
           "text": "Compare revolutions as historical cases, recurring processes, and sources of later political institutions.",
-          "link": "wiki:Political revolution"
+          "links": [
+            {
+              "href": "wiki:Political revolution"
+            }
+          ]
         },
         "entries": [
           {
             "id": "revolutions-modern-world",
+            "reason": "Reorganize the same broad subject by historical case and compare what becomes visible when cases, rather than processes, form the clusters.",
             "via": [
               "revolution",
               "mass politics"
-            ],
-            "reason": "Reorganize the same broad subject by historical case and compare what becomes visible when cases, rather than processes, form the clusters."
+            ]
           },
           {
             "id": "authoritarian-regimes",
+            "reason": "Examine how some states emerging from crisis and mass mobilization later concentrated coercive and political power.",
             "via": [
               "revolutionary state",
               "new governing elite"
-            ],
-            "reason": "Examine how some states emerging from crisis and mass mobilization later concentrated coercive and political power."
+            ]
           },
           {
             "id": "democracy-history",
+            "reason": "Trace how constitutions, assemblies, and political participation developed beyond revolutionary moments.",
             "via": [
               "constitution",
               "popular assemblies"
-            ],
-            "reason": "Trace how constitutions, assemblies, and political participation developed beyond revolutionary moments."
+            ]
           }
         ]
       },
       "info": {
         "text": "Revolutions develop through interacting crises, mobilization, institutional change, conflict, and state-building rather than following one universal sequence.",
-        "link": "wiki:Revolution"
+        "links": [
+          {
+            "href": "wiki:Revolution"
+          }
+        ]
       },
       "_searchTerms": [
         "Crisis of the old order",
@@ -1386,38 +1440,46 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "info": {
           "text": "Connect cellular communication with whole-body feedback, transport, and physiological regulation.",
-          "link": "wiki:Homeostasis"
+          "links": [
+            {
+              "href": "wiki:Homeostasis"
+            }
+          ]
         },
         "entries": [
           {
             "id": "maintaining-homeostasis",
+            "reason": "Place signaling molecules and receptors inside the larger control loops that maintain internal conditions.",
             "via": [
               "feedback loop",
               "receptor"
-            ],
-            "reason": "Place signaling molecules and receptors inside the larger control loops that maintain internal conditions."
+            ]
           },
           {
             "id": "body-systems",
+            "reason": "Relate cellular messages to the nervous, endocrine, immune, and circulatory systems that coordinate the body.",
             "via": [
               "communication",
               "regulation"
-            ],
-            "reason": "Relate cellular messages to the nervous, endocrine, immune, and circulatory systems that coordinate the body."
+            ]
           },
           {
             "id": "breathing-gas-exchange",
+            "reason": "Compare chemical signaling through blood with the transport and exchange of respiratory gases.",
             "via": [
               "bloodstream",
               "target cell"
-            ],
-            "reason": "Compare chemical signaling through blood with the transport and exchange of respiratory gases."
+            ]
           }
         ]
       },
       "info": {
         "text": "Nervous, endocrine, and immune systems use distinct signals and pathways, yet all depend on selective recognition, communication, and regulated cellular responses.",
-        "link": "wiki:Cell signaling"
+        "links": [
+          {
+            "href": "wiki:Cell signaling"
+          }
+        ]
       },
       "_searchTerms": [
         "Nervous signaling",
@@ -1452,39 +1514,47 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "info": {
           "text": "Compare how meaning is produced and interpreted in written, visual, symbolic, and performed works.",
-          "link": "wiki:Performing arts"
+          "links": [
+            {
+              "href": "wiki:Performing arts"
+            }
+          ]
         },
         "entries": [
           {
             "id": "interpreting-a-text",
+            "reason": "Begin with textual evidence, then examine how actors and designers realize or transform its possibilities in performance.",
             "via": [
               "dialogue",
               "subtext",
               "interpretation"
-            ],
-            "reason": "Begin with textual evidence, then examine how actors and designers realize or transform its possibilities in performance."
+            ]
           },
           {
             "id": "reading-a-painting",
+            "reason": "Compare a fixed visual composition with the changing visual emphasis created through staging, movement, and light.",
             "via": [
               "composition",
               "visual attention"
-            ],
-            "reason": "Compare a fixed visual composition with the changing visual emphasis created through staging, movement, and light."
+            ]
           },
           {
             "id": "myth-ritual-and-symbol",
+            "reason": "Explore how repeated forms, symbols, and communal participation shape meaning beyond literal words.",
             "via": [
               "convention",
               "shared attention"
-            ],
-            "reason": "Explore how repeated forms, symbols, and communal participation shape meaning beyond literal words."
+            ]
           }
         ]
       },
       "info": {
         "text": "A theatrical performance creates meaning through interaction among the written work, embodied choices, design, and an audience responding in shared time and space.",
-        "link": "wiki:Theatre"
+        "links": [
+          {
+            "href": "wiki:Theatre"
+          }
+        ]
       },
       "_searchTerms": [
         "Written work",
@@ -1528,27 +1598,31 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "the-webs-bargain",
+            "reason": "Examine who gained from browser delivery, who absorbed its costs, and which native powers were displaced.",
             "via": [
               "distribution",
               "browser mediation",
               "control"
-            ],
-            "reason": "Examine who gained from browser delivery, who absorbed its costs, and which native powers were displaced."
+            ]
           },
           {
             "id": "the-programmers-bargain",
+            "reason": "Follow the same migration from platform capabilities into its effects on programming leverage and professional craft.",
             "via": [
               "abstraction",
               "components",
               "frameworks"
-            ],
-            "reason": "Follow the same migration from platform capabilities into its effects on programming leverage and professional craft."
+            ]
           }
         ]
       },
       "info": {
         "text": "The web platform's standard account of its rise: immediate distribution, a browser security boundary, and native-like capabilities progressively reintroduced through standardized APIs.",
-        "link": "wiki:Web application"
+        "links": [
+          {
+            "href": "wiki:Web application"
+          }
+        ]
       },
       "_searchTerms": [
         "Web reach and deployment",
@@ -1597,27 +1671,31 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "the-programmers-bargain",
+            "reason": "See how the same migration changed programmers' tools, attention, expertise, and day-to-day work.",
             "via": [
               "cost shifting",
               "lost leverage",
               "frameworks"
-            ],
-            "reason": "See how the same migration changed programmers' tools, attention, expertise, and day-to-day work."
+            ]
           },
           {
             "id": "the-web-canon",
+            "reason": "Return to the standard account of reach, security, and progressive platform capability that this puzzle complicates.",
             "via": [
               "distribution",
               "security boundary",
               "web APIs"
-            ],
-            "reason": "Return to the standard account of reach, security, and progressive platform capability that this puzzle complicates."
+            ]
           }
         ]
       },
       "info": {
         "text": "Why software moved into the browser, who gained control and convenience, which costs were transferred to users, and which native powers were displaced.",
-        "link": "wiki:Web application"
+        "links": [
+          {
+            "href": "wiki:Web application"
+          }
+        ]
       },
       "_searchTerms": [
         "Promises of the universal web",
@@ -1661,27 +1739,31 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "the-webs-bargain",
+            "reason": "Connect programmers' increased reconstruction work to the organizational rewards and user costs that drove the migration.",
             "via": [
               "cost shifting",
               "centralized deployment",
               "lost leverage"
-            ],
-            "reason": "Connect programmers' increased reconstruction work to the organizational rewards and user costs that drove the migration."
+            ]
           },
           {
             "id": "the-web-canon",
+            "reason": "Compare the platform's progressive-capability narrative with what programmers still had to rebuild around it.",
             "via": [
               "web APIs",
               "browser mediation",
               "frameworks"
-            ],
-            "reason": "Compare the platform's progressive-capability narrative with what programmers still had to rebuild around it."
+            ]
           }
         ]
       },
       "info": {
         "text": "How moving applications into the browser changed programming leverage, professional expertise, and the balance between domain design and delivery plumbing.",
-        "link": "wiki:Software engineering"
+        "links": [
+          {
+            "href": "wiki:Software engineering"
+          }
+        ]
       },
       "_searchTerms": [
         "Mature application leverage",
@@ -1723,7 +1805,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Programming languages differ less by fashion than by the commitments they make about types, execution, and memory.",
-        "link": "wiki:Programming language"
+        "links": [
+          {
+            "href": "wiki:Programming language"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -1790,7 +1876,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Research languages make possible futures concrete: effects can become part of a function's type, types can state program properties, and resource use can be checked rather than merely documented.",
-        "link": "wiki:Programming language theory",
+        "links": [
+          {
+            "href": "wiki:Programming language theory"
+          }
+        ],
         "citations": [
           {
             "title": "The Koka Programming Language",
@@ -1872,7 +1962,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "A compelling language idea is only the beginning: production adoption also depends on evidence, developer tools, libraries, interoperability, and a credible promise that today's programs will keep working.",
-        "link": "wiki:Programming language implementation",
+        "links": [
+          {
+            "href": "wiki:Programming language implementation"
+          }
+        ],
         "citations": [
           {
             "title": "The Koka Programming Language",
@@ -1955,7 +2049,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Language ergonomics is not the absence of complexity but a decision about where complexity lives: in source code, compiler inference, diagnostics, tools, runtime machinery, or explicit escape hatches.",
-        "link": "wiki:Programming language design",
+        "links": [
+          {
+            "href": "wiki:Programming language design"
+          }
+        ],
         "citations": [
           {
             "title": "Rust's language ergonomics initiative",
@@ -2046,7 +2144,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "A language can make failure explicit without deciding how a whole system should survive it. Reliable error handling joins typed representation and local recovery to containment boundaries, verification tools, and deliberate degradation policies.",
-        "link": "wiki:Exception handling",
+        "links": [
+          {
+            "href": "wiki:Exception handling"
+          }
+        ],
         "citations": [
           {
             "title": "Recoverable Errors with Result",
@@ -2152,7 +2254,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "A machine-learning system turns examples into adjustable parameters, then has to prove that what it learned works on data it did not train on.",
-        "link": "wiki:Machine learning"
+        "links": [
+          {
+            "href": "wiki:Machine learning"
+          }
+        ]
       },
       "_searchTerms": [
         "Training data",
@@ -2209,7 +2315,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "A neural network is both a layered computation and a trainable system: signals move forward to make a prediction, while error information moves backward to improve the parameters.",
-        "link": "wiki:Artificial neural network"
+        "links": [
+          {
+            "href": "wiki:Artificial neural network"
+          }
+        ]
       },
       "_searchTerms": [
         "Layered architecture",
@@ -2270,7 +2380,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "A language model does not write a whole response at once: it represents text as tokens, transforms their context through attention, and repeatedly chooses a possible next token.",
-        "link": "wiki:Large language model"
+        "links": [
+          {
+            "href": "wiki:Large language model"
+          }
+        ]
       },
       "_searchTerms": [
         "Representing text",
@@ -2311,8 +2425,14 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How interface presentation, defaults, wording, and emotional framing can steer people away from choices that reflect their own goals. The source uses deceptive patterns for practices also widely known as dark patterns.",
-        "link": "https://deceptive.design/book/contents/part-1/",
-        "extraLink": "https://deceptive.design/types/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/part-1/"
+          },
+          {
+            "href": "https://deceptive.design/types/"
+          }
+        ]
       },
       "_searchTerms": [
         "Perceptual presentation",
@@ -2354,8 +2474,14 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How a transaction can appear to offer one product, price, or payment arrangement while relevant costs, add-ons, or recurring obligations remain hidden until after the user has committed. The resulting harms can include lost money, time, attention, peace of mind, and control over one's own commitments.",
-        "link": "https://deceptive.design/book/contents/chapter-14/",
-        "extraLink": "https://deceptive.design/types/sneaking/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-14/"
+          },
+          {
+            "href": "https://deceptive.design/types/sneaking/"
+          }
+        ]
       },
       "_searchTerms": [
         "Visible offer",
@@ -2399,8 +2525,14 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How fabricated time limits, scarcity claims, and social signals create pressure that narrows deliberation and steers people toward choices they might not otherwise make.",
-        "link": "https://deceptive.design/book/contents/chapter-8/",
-        "extraLink": "https://deceptive.design/types/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-8/"
+          },
+          {
+            "href": "https://deceptive.design/types/"
+          }
+        ]
       },
       "_searchTerms": [
         "Fabricated conditions",
@@ -2444,8 +2576,14 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How interfaces make access conditional, refuse to accept a clear no, and create asymmetric paths in which compliance and entry are easy while privacy protection and exit are costly. This puzzle examines Forced Action, Nagging, Obstruction, and Hard to Cancel.",
-        "link": "https://deceptive.design/types/forced-action/",
-        "extraLink": "https://deceptive.design/types/obstruction/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/forced-action/"
+          },
+          {
+            "href": "https://deceptive.design/types/obstruction/"
+          }
+        ]
       },
       "_searchTerms": [
         "Person's intended action",
@@ -2482,13 +2620,6 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "after-the-click",
     "module": "./computer-science/after-the-click.js",
-    "patch": {
-      "category": "Psychology",
-      "categories": [
-        "Psychology",
-        "Computer Science"
-      ]
-    },
     "browse": {
       "id": "after-the-click",
       "title": "After the Click",
@@ -2503,8 +2634,14 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How recognizing that a digital choice was engineered can transform an unwanted outcome into regret, self-blame, perceived betrayal, and lasting defensive behavior. Research on fraud victimization is used cautiously to illuminate deception-related aftermath, not to equate every dark pattern with fraud.",
-        "link": "https://doi.org/10.1145/3479516",
-        "extraLink": "https://doi.org/10.3389/fpsyg.2026.1805536"
+        "links": [
+          {
+            "href": "https://doi.org/10.1145/3479516"
+          },
+          {
+            "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
+          }
+        ]
       },
       "_searchTerms": [
         "Recognition and reappraisal",
@@ -2540,15 +2677,6 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "when-manipulation-becomes-normal",
     "module": "./business-organizations/when-manipulation-becomes-normal.js",
-    "patch": {
-      "categories": [
-        "Business & Organizations",
-        "Computer Science"
-      ],
-      "subcategories": {
-        "Computer Science": "computing-and-society"
-      }
-    },
     "browse": {
       "id": "when-manipulation-becomes-normal",
       "title": "When Manipulation Becomes Normal",
@@ -2563,8 +2691,14 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How strategic targets, experimentation, incentives, and organizational routines can turn an initially questionable tactic into standard practice, while distributing responsibility and eroding trust. Normalization of deviance is used here as an organizational lens, not to equate dark patterns with safety disasters.",
-        "link": "https://www.ftc.gov/news-events/events/2021/04/bringing-dark-patterns-light-ftc-workshop",
-        "extraLink": "https://press.uchicago.edu/ucp/books/book/chicago/C/bo22781921.html"
+        "links": [
+          {
+            "href": "https://www.ftc.gov/news-events/events/2021/04/bringing-dark-patterns-light-ftc-workshop"
+          },
+          {
+            "href": "https://press.uchicago.edu/ucp/books/book/chicago/C/bo22781921.html"
+          }
+        ]
       },
       "_searchTerms": [
         "Strategic incentives",
@@ -2614,9 +2748,11 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How professional commitments, ethical formation, organizational safeguards, and public accountability can work together to protect honest choice. The puzzle treats these remedies as complementary layers rather than interchangeable solutions.",
-        "link": "https://www.acm.org/code-of-ethics",
-        "linkLabel": "ACM Code of Ethics",
-        "seeAlso": [
+        "links": [
+          {
+            "href": "https://www.acm.org/code-of-ethics",
+            "label": "ACM Code of Ethics"
+          },
           {
             "href": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule",
             "label": "FTC negative-option rule"
@@ -2678,25 +2814,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "distortion-and-magnification",
+            "reason": "Place institutional blindness within a wider framework of distorted judgment and social magnification.",
             "via": [
               "institutional magnification",
               "moral distance"
-            ],
-            "reason": "Place institutional blindness within a wider framework of distorted judgment and social magnification."
+            ]
           },
           {
             "id": "restorative-patterns",
+            "reason": "Explore practices that preserve recognition, review, restraint, and repair.",
             "via": [
               "accountability",
               "corrective capacity"
-            ],
-            "reason": "Explore practices that preserve recognition, review, restraint, and repair."
+            ]
           }
         ]
       },
       "info": {
         "text": "How administrative representations, institutional roles, and procedural routines can obscure human consequences—and how corrective capacity restores judgment.",
-        "link": "wiki:Dehumanization"
+        "links": [
+          {
+            "href": "wiki:Dehumanization"
+          }
+        ]
       },
       "_searchTerms": [
         "Administrative abstraction",
@@ -2745,25 +2885,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "when-systems-stop-seeing-people",
+            "reason": "See how authority, roles, and procedures can magnify distance from particular people.",
             "via": [
               "institutional magnification",
               "moral distance"
-            ],
-            "reason": "See how authority, roles, and procedures can magnify distance from particular people."
+            ]
           },
           {
             "id": "restorative-patterns",
+            "reason": "Turn from diagnosis toward recognition, restraint, accountability, and repair.",
             "via": [
               "moral judgment",
               "corrective practices"
-            ],
-            "reason": "Turn from diagnosis toward recognition, restraint, accountability, and repair."
+            ]
           }
         ]
       },
       "info": {
         "text": "A diagnostic map separating distorted perception and moral judgment from the institutional and identity structures that can amplify them.",
-        "link": "wiki:Dehumanization"
+        "links": [
+          {
+            "href": "wiki:Dehumanization"
+          }
+        ]
       },
       "_searchTerms": [
         "Epistemic distortion",
@@ -2807,25 +2951,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "when-systems-stop-seeing-people",
+            "reason": "Apply restorative safeguards to institutions shaped by abstraction, role insulation, and procedural dominance.",
             "via": [
               "accountability",
               "corrective capacity"
-            ],
-            "reason": "Apply restorative safeguards to institutions shaped by abstraction, role insulation, and procedural dominance."
+            ]
           },
           {
             "id": "distortion-and-magnification",
+            "reason": "Relate each restorative practice to the distortions and magnifying structures it can interrupt.",
             "via": [
               "moral judgment",
               "barriers to correction"
-            ],
-            "reason": "Relate each restorative practice to the distortions and magnifying structures it can interrupt."
+            ]
           }
         ]
       },
       "info": {
         "text": "Repeatable practices that preserve human regard, restrain harmful action, keep institutions open to correction, and repair relationships after harm.",
-        "link": "wiki:Humanism"
+        "links": [
+          {
+            "href": "wiki:Humanism"
+          }
+        ]
       },
       "_searchTerms": [
         "Recognition and regard",
@@ -2869,33 +3017,37 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "distortion-and-magnification",
+            "reason": "Place reduction of the person within a wider framework of epistemic and moral distortion.",
             "via": [
               "abstraction",
               "moral exclusion"
-            ],
-            "reason": "Place reduction of the person within a wider framework of epistemic and moral distortion."
+            ]
           },
           {
             "id": "moral-disengagement-and-moral-inversion",
+            "reason": "Distinguish treating people as less morally relevant from the mechanisms that excuse or celebrate harmful conduct.",
             "via": [
               "dehumanization",
               "moral orientation"
-            ],
-            "reason": "Distinguish treating people as less morally relevant from the mechanisms that excuse or celebrate harmful conduct."
+            ]
           },
           {
             "id": "restorative-patterns",
+            "reason": "Move from reduction and exclusion toward practices that preserve dignity, voice, particularity, and relationship.",
             "via": [
               "recognition",
               "moral imagination"
-            ],
-            "reason": "Move from reduction and exclusion toward practices that preserve dignity, voice, particularity, and relationship."
+            ]
           }
         ]
       },
       "info": {
         "text": "How a person can be compressed into a function, category, or threat—and how voice, particularity, recognition, and moral imagination resist that reduction.",
-        "link": "wiki:Objectification"
+        "links": [
+          {
+            "href": "wiki:Objectification"
+          }
+        ]
       },
       "_searchTerms": [
         "Functional reduction",
@@ -2939,33 +3091,37 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "when-systems-stop-seeing-people",
+            "reason": "Examine the institutional safeguards whose absence allows evidence of harm to be absorbed without change.",
             "via": [
               "corrective capacity",
               "accountability"
-            ],
-            "reason": "Examine the institutional safeguards whose absence allows evidence of harm to be absorbed without change."
+            ]
           },
           {
             "id": "distortion-and-magnification",
+            "reason": "Relate defensive reception and blocked challenge to the broader structures that magnify distorted judgment.",
             "via": [
               "barriers to correction",
               "legitimacy"
-            ],
-            "reason": "Relate defensive reception and blocked challenge to the broader structures that magnify distorted judgment."
+            ]
           },
           {
             "id": "restorative-patterns",
+            "reason": "Turn from non-correction toward practices that protect challenge, accountability, and repair.",
             "via": [
               "protected dissent",
               "reviewable decisions"
-            ],
-            "reason": "Turn from non-correction toward practices that protect challenge, accountability, and repair."
+            ]
           }
         ]
       },
       "info": {
         "text": "How evidence of harm can be acknowledged yet not received, how challenge becomes blocked, and how institutions simulate correction without learning.",
-        "link": "wiki:Organizational learning"
+        "links": [
+          {
+            "href": "wiki:Organizational learning"
+          }
+        ]
       },
       "_searchTerms": [
         "Evidence of harm",
@@ -3013,33 +3169,37 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "distortion-and-magnification",
+            "reason": "Place disengagement and inversion within the broader interaction of moral distortion and social magnification.",
             "via": [
               "moral distortion",
               "normalization"
-            ],
-            "reason": "Place disengagement and inversion within the broader interaction of moral distortion and social magnification."
+            ]
           },
           {
             "id": "from-person-to-object",
+            "reason": "See how denial of personhood can help displace responsibility and narrow moral concern.",
             "via": [
               "dehumanization",
               "recognition"
-            ],
-            "reason": "See how denial of personhood can help displace responsibility and narrow moral concern."
+            ]
           },
           {
             "id": "restorative-patterns",
+            "reason": "Contrast disengagement and inversion with accurate naming, responsibility, proportionality, restraint, and repair.",
             "via": [
               "accountability",
               "dignity"
-            ],
-            "reason": "Contrast disengagement and inversion with accurate naming, responsibility, proportionality, restraint, and repair."
+            ]
           }
         ]
       },
       "info": {
         "text": "The difference between mechanisms that excuse harmful conduct and a deeper inversion in which cruelty, domination, or betrayal of restraint is treated as morally admirable.",
-        "link": "wiki:Moral disengagement"
+        "links": [
+          {
+            "href": "wiki:Moral disengagement"
+          }
+        ]
       },
       "_searchTerms": [
         "Reframing harmful conduct",
@@ -3078,8 +3238,14 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "A control system becomes a loop only when it can compare desired and measured conditions, act on the difference, and remain usable despite delays and disturbances.",
-        "link": "wiki:Control system",
-        "extraLink": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29"
+        "links": [
+          {
+            "href": "wiki:Control system"
+          },
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29"
+          }
+        ]
       },
       "_searchTerms": [
         "Reference and measurement",
@@ -3140,7 +3306,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Basic circuit analysis relates electrical quantities to component behavior, then uses network laws and connection patterns to solve for unknown voltages and currents.",
-        "link": "wiki:Electrical network"
+        "links": [
+          {
+            "href": "wiki:Electrical network"
+          }
+        ]
       },
       "_searchTerms": [
         "Electrical quantities",
@@ -3202,7 +3372,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Microcontroller family names identify related processor cores, memories, peripherals, tools, and migration paths—but similarly named portfolios can still span several architectures and performance levels.",
-        "link": "wiki:Microcontroller"
+        "links": [
+          {
+            "href": "wiki:Microcontroller"
+          }
+        ]
       },
       "_searchTerms": [
         "AVR families",
@@ -3264,7 +3438,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Across appliances, instruments, vehicles, and connected devices, microcontrollers repeatedly perform four kinds of work: measure inputs, control physical processes, manage human interfaces, and exchange or retain data.",
-        "link": "wiki:Embedded system"
+        "links": [
+          {
+            "href": "wiki:Embedded system"
+          }
+        ]
       },
       "_searchTerms": [
         "Sensing and measurement",
@@ -3303,7 +3481,11 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "Public health protects communities by observing patterns, preventing harm, improving shared conditions, and coordinating responses when threats emerge.",
-        "link": "wiki:Public health"
+        "links": [
+          {
+            "href": "wiki:Public health"
+          }
+        ]
       },
       "_searchTerms": [
         "Understand population health",
@@ -3351,17 +3533,21 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "what-public-health-does",
+            "reason": "Return to the broader map of surveillance, prevention, environmental protection, and coordinated response.",
             "via": [
               "public-health-surveillance",
               "evidence-based-action"
-            ],
-            "reason": "Return to the broader map of surveillance, prevention, environmental protection, and coordinated response."
+            ]
           }
         ]
       },
       "info": {
         "text": "Public-health decisions move through a revisable cycle: observe what is happening, compare explanations, choose an intervention, and evaluate what follows.",
-        "link": "wiki:Evidence-based medicine"
+        "links": [
+          {
+            "href": "wiki:Evidence-based medicine"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -3417,35 +3603,37 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "quotations-and-attribution",
+            "reason": "Compare a quotation severed from its surrounding context with a document severed from the circumstances that produced it.",
             "via": [
               "provenance",
               "context"
-            ],
-            "reason": "Compare a quotation severed from its surrounding context with a document severed from the circumstances that produced it."
+            ]
           },
           {
             "id": "images-out-of-context",
+            "reason": "See the same decontextualization mechanism operating on an image rather than on a person's record.",
             "via": [
               "provenance",
               "corroboration"
-            ],
-            "reason": "See the same decontextualization mechanism operating on an image rather than on a person's record."
+            ]
           },
           {
             "id": "when-correction-fails",
+            "reason": "Follow what happens inside an institution when the same discrediting tactics are turned on someone reporting harm.",
             "via": [
               "messenger discrediting",
               "organizational silence"
-            ],
-            "reason": "Follow what happens inside an institution when the same discrediting tactics are turned on someone reporting harm."
+            ]
           }
         ]
       },
       "info": {
         "text": "How a false picture of a person can be assembled entirely out of true fragments — through pressure applied off the merits, a challenge to standing rather than to evidence, republication that looks like confirmation, and a record that keeps the accusation after the answer is gone. Each mechanism is established separately: strategic litigation in legal scholarship, circular reporting in source criticism, and the coordinated targeting of researchers that Peter Hotez named anti-science aggression.",
-        "link": "https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/",
-        "linkLabel": "Vectors 4: The Ecosystem Strikes Back",
-        "seeAlso": [
+        "links": [
+          {
+            "href": "https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/",
+            "label": "Vectors 4: The Ecosystem Strikes Back"
+          },
           {
             "href": "wiki:Source criticism",
             "label": "Source criticism"
@@ -3510,34 +3698,36 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "evidence-and-inference-across-disciplines",
+            "reason": "Move from how one discipline grades its own evidence to how science, history, law, and journalism grade theirs differently.",
             "via": [
               "corroboration",
               "provenance"
-            ],
-            "reason": "Move from how one discipline grades its own evidence to how science, history, law, and journalism grade theirs differently."
+            ]
           },
           {
             "id": "data-probability",
+            "reason": "Revisit the statistical machinery — sampling, distribution, likelihood — underneath every estimate on this map.",
             "via": [
               "sample",
               "distribution"
-            ],
-            "reason": "Revisit the statistical machinery — sampling, distribution, likelihood — underneath every estimate on this map."
+            ]
           },
           {
             "id": "when-correction-fails",
+            "reason": "Follow what happens after a figure is well established and still not received.",
             "via": [
               "contradictory evidence"
-            ],
-            "reason": "Follow what happens after a figure is well established and still not received."
+            ]
           }
         ]
       },
       "info": {
         "text": "Four ways of establishing how many — direct counts, estimates that correct for what counting missed, attribution from individual records, and projections of what would have happened otherwise. The distinctions are standard epidemiology; what is worth practising is the labelling, because each answers a different question and an accounting that blurs them discredits itself.",
-        "link": "https://blog.majerus.us/vectors-6-the-body-count/",
-        "linkLabel": "Vectors 6: The Body Count",
-        "seeAlso": [
+        "links": [
+          {
+            "href": "https://blog.majerus.us/vectors-6-the-body-count/",
+            "label": "Vectors 6: The Body Count"
+          },
           {
             "href": "wiki:Statistical inference",
             "label": "Statistical inference"
@@ -3590,35 +3780,37 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "signals-and-regulation-in-the-body",
+            "reason": "Look inside the host at the immune signalling a novel pathogen encounters once it has crossed.",
             "via": [
               "receptor",
               "signal amplification"
-            ],
-            "reason": "Look inside the host at the immune signalling a novel pathogen encounters once it has crossed."
+            ]
           },
           {
             "id": "climate-and-livelihoods",
+            "reason": "See the same land-use and climate drivers from the perspective of the people living in the affected regions.",
             "via": [
               "land use",
               "seasonality"
-            ],
-            "reason": "See the same land-use and climate drivers from the perspective of the people living in the affected regions."
+            ]
           },
           {
             "id": "when-correction-fails",
+            "reason": "Ask why a near miss so often produces a flurry of concern and then no durable change.",
             "via": [
               "near miss",
               "recurrence without learning"
-            ],
-            "reason": "Ask why a near miss so often produces a flurry of concern and then no durable change."
+            ]
           }
         ]
       },
       "info": {
         "text": "Pandemic prevention as one connected system: the conditions that bring species into contact, the steps by which a pathogen establishes itself in a new host, the means of noticing early, and the standing capacity that has to exist before any of the noticing can happen. The organising principle is One Health — the established position in the field that human, animal, and environmental health cannot usefully be assessed apart from one another.",
-        "link": "https://blog.majerus.us/vectors-7-the-next-one/",
-        "linkLabel": "Vectors 7: The Next One",
-        "seeAlso": [
+        "links": [
+          {
+            "href": "https://blog.majerus.us/vectors-7-the-next-one/",
+            "label": "Vectors 7: The Next One"
+          },
           {
             "href": "wiki:Public health",
             "label": "Public health"
@@ -3755,10 +3947,6 @@ export const PUZZLE_MANIFEST = [
           {
             "id": "reading-chemical-reactions",
             "reason": "See how bonded substances are represented as reactants and products."
-          },
-          {
-            "id": "energy-rate-and-equilibrium",
-            "reason": "Connect bond rearrangement with energy change and reaction behavior."
           }
         ]
       },
@@ -4425,7 +4613,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "A genomic difference is first described, then supported—or rejected—by sequence evidence, and only then interpreted in population, functional, or clinical context. A variant is not automatically harmful, and a reference sequence is a coordinate system for comparison rather than a universal biological norm.",
-        "link": "https://www.genome.gov/genetics-glossary/Polymorphism",
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Polymorphism"
+          }
+        ],
         "citations": [
           {
             "title": "Talking Glossary of Genomic and Genetic Terms",
@@ -4515,7 +4707,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Computational biology begins before an algorithm runs. A specimen and assay must remain connected to encoded measurements, stable identifiers, coordinate conventions, and metadata—or a technically valid file can lose its biological meaning.",
-        "link": "wiki:Bioinformatics",
+        "links": [
+          {
+            "href": "wiki:Bioinformatics"
+          }
+        ],
         "citations": [
           {
             "title": "Exploring biological sequences",
@@ -4736,7 +4932,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Composition shapes what viewers notice, how they understand spatial relationships, and where their attention travels through an image.",
-        "link": "wiki:Composition (visual arts)"
+        "links": [
+          {
+            "href": "wiki:Composition (visual arts)"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -4787,11 +4987,11 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "how-a-picture-directs-the-eye",
+            "reason": "Return to the broader compositional question of how contrast, placement, scale, and movement direct attention.",
             "via": [
               "color-contrast",
               "visual-emphasis"
-            ],
-            "reason": "Return to the broader compositional question of how contrast, placement, scale, and movement direct attention."
+            ]
           },
           {
             "id": "reading-a-painting",
@@ -4801,7 +5001,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Color can describe, organize, emphasize, suggest space, shape mood, and carry meaning through both its properties and its relationships.",
-        "link": "wiki:Color theory"
+        "links": [
+          {
+            "href": "wiki:Color theory"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -4856,10 +5060,10 @@ export const PUZZLE_MANIFEST = [
           },
           {
             "id": "the-work-of-color",
+            "reason": "Explore how color can imitate observed appearance or depart from it for expressive and symbolic purposes.",
             "via": [
               "expressive-transformation"
-            ],
-            "reason": "Explore how color can imitate observed appearance or depart from it for expressive and symbolic purposes."
+            ]
           },
           {
             "id": "reading-a-painting",
@@ -4869,7 +5073,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Artists transform visible appearance through selection, convention, simplification, distortion, symbolism, memory, and imagination.",
-        "link": "wiki:Representation (arts)"
+        "links": [
+          {
+            "href": "wiki:Representation (arts)"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -4920,38 +5128,42 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "how-a-picture-directs-the-eye",
+            "reason": "Return to composition as one important body of evidence supporting an interpretation.",
             "via": [
               "formal-evidence"
-            ],
-            "reason": "Return to composition as one important body of evidence supporting an interpretation."
+            ]
           },
           {
             "id": "the-work-of-color",
+            "reason": "Examine how color gains expressive or symbolic meaning through both visual relationships and context.",
             "via": [
               "cultural-convention"
-            ],
-            "reason": "Examine how color gains expressive or symbolic meaning through both visual relationships and context."
+            ]
           },
           {
             "id": "why-art-changes-what-it-sees",
+            "reason": "Connect choices about realism, abstraction, distortion, symbolism, memory, and imagination to reasoned interpretation.",
             "via": [
               "interpretation"
-            ],
-            "reason": "Connect choices about realism, abstraction, distortion, symbolism, memory, and imagination to reasoned interpretation."
+            ]
           },
           {
             "id": "reading-a-painting",
+            "reason": "Apply these sources of meaning within a broader close reading of a painting.",
             "via": [
               "interpretation",
               "evidence"
-            ],
-            "reason": "Apply these sources of meaning within a broader close reading of a painting."
+            ]
           }
         ]
       },
       "info": {
         "text": "Artistic meaning emerges through relationships among artistic choices, the work's visible and material evidence, historical context, and changing audiences.",
-        "link": "wiki:Art interpretation"
+        "links": [
+          {
+            "href": "wiki:Art interpretation"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -4999,23 +5211,27 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "from-evidence-to-action",
+            "reason": "See how a single uncertain measurement fits into the larger process of comparing evidence and choosing an intervention.",
             "via": [
               "weight of evidence"
-            ],
-            "reason": "See how a single uncertain measurement fits into the larger process of comparing evidence and choosing an intervention."
+            ]
           },
           {
             "id": "what-public-health-does",
+            "reason": "Place screening within the broader work of detecting problems early and protecting populations.",
             "via": [
               "surveillance"
-            ],
-            "reason": "Place screening within the broader work of detecting problems early and protecting populations."
+            ]
           }
         ]
       },
       "info": {
-        "link": "wiki:Screening (medicine)",
-        "text": "A test result is not a diagnosis: what it implies depends on how the test performs, who was tested, and what happens after the result arrives."
+        "text": "A test result is not a diagnosis: what it implies depends on how the test performs, who was tested, and what happens after the result arrives.",
+        "links": [
+          {
+            "href": "wiki:Screening (medicine)"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -5276,8 +5492,12 @@ export const PUZZLE_MANIFEST = [
       "category": "Music",
       "large": false,
       "info": {
-        "link": "wiki:Music theory",
-        "text": "The three things music theory keeps track of at once: when a sound happens, how high it is, and what it sounds like alongside other notes."
+        "text": "The three things music theory keeps track of at once: when a sound happens, how high it is, and what it sounds like alongside other notes.",
+        "links": [
+          {
+            "href": "wiki:Music theory"
+          }
+        ]
       },
       "_searchTerms": [
         "Rhythm and meter",
@@ -5308,8 +5528,12 @@ export const PUZZLE_MANIFEST = [
       "category": "Film",
       "large": false,
       "info": {
-        "link": "wiki:Film theory",
-        "text": "The three things a film is built from at once: what the camera captures, how the pieces are joined, and the story that both are serving."
+        "text": "The three things a film is built from at once: what the camera captures, how the pieces are joined, and the story that both are serving.",
+        "links": [
+          {
+            "href": "wiki:Film theory"
+          }
+        ]
       },
       "_searchTerms": [
         "Cinematography",
@@ -5341,8 +5565,12 @@ export const PUZZLE_MANIFEST = [
       "category": "Data Science",
       "large": false,
       "info": {
-        "link": "wiki:Data science",
-        "text": "The three things every data science project needs, in order: data worth trusting, a clear-eyed summary of what it says, and a model that predicts without fooling itself."
+        "text": "The three things every data science project needs, in order: data worth trusting, a clear-eyed summary of what it says, and a model that predicts without fooling itself.",
+        "links": [
+          {
+            "href": "wiki:Data science"
+          }
+        ]
       },
       "_searchTerms": [
         "Working with data",
@@ -5382,8 +5610,12 @@ export const PUZZLE_MANIFEST = [
         ]
       },
       "info": {
-        "link": "wiki:Game theory",
-        "text": "How to describe a strategic situation precisely enough to predict what rational players will actually do -- once, or over and over."
+        "text": "How to describe a strategic situation precisely enough to predict what rational players will actually do -- once, or over and over.",
+        "links": [
+          {
+            "href": "wiki:Game theory"
+          }
+        ]
       },
       "_searchTerms": [
         "Describing a game",
@@ -5426,12 +5658,16 @@ export const PUZZLE_MANIFEST = [
         ]
       },
       "info": {
-        "link": "wiki:Finite and Infinite Games",
         "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going.",
+        "links": [
+          {
+            "href": "wiki:Finite and Infinite Games"
+          }
+        ],
         "citations": [
           {
-            "author": "Carse, James P.",
             "title": "Finite and Infinite Games: A Vision of Life as Play and Possibility",
+            "author": "Carse, James P.",
             "publisher": "Free Press",
             "year": "1986"
           }
@@ -5521,16 +5757,20 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": true,
       "info": {
-        "citations": [
+        "text": "The Gottmans' account of how two people fall into a cycle of reciprocated attack and defence, and what gets them out. Their widely quoted divorce-prediction accuracy has been criticised for being fitted to outcomes already known rather than tested on fresh couples; the interaction patterns themselves are the durable part of the work.",
+        "links": [
           {
-            "author": "John Gottman and Julie Schwartz Gottman",
-            "publisher": "Harmony",
-            "title": "Fight Right: How Successful Couples Turn Conflict into Connection",
-            "year": "2024"
+            "href": "https://www.gottman.com/about/research/couples/"
           }
         ],
-        "link": "https://www.gottman.com/about/research/couples/",
-        "text": "The Gottmans' account of how two people fall into a cycle of reciprocated attack and defence, and what gets them out. Their widely quoted divorce-prediction accuracy has been criticised for being fitted to outcomes already known rather than tested on fresh couples; the interaction patterns themselves are the durable part of the work."
+        "citations": [
+          {
+            "title": "Fight Right: How Successful Couples Turn Conflict into Connection",
+            "author": "John Gottman and Julie Schwartz Gottman",
+            "publisher": "Harmony",
+            "year": "2024"
+          }
+        ]
       },
       "_searchTerms": [
         "How this couple fights",
@@ -5576,13 +5816,16 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
-        "link": "https://www.beyondintractability.org/bksum/ostrom-governing",
         "text": "Elinor Ostrom's account of how communities sharing a finite resource have governed it for centuries without privatising it and without an outside enforcer -- and the features those arrangements turn out to have in common.",
-        "title": "Governing the Commons",
+        "links": [
+          {
+            "href": "https://www.beyondintractability.org/bksum/ostrom-governing"
+          }
+        ],
         "citations": [
           {
-            "author": "Ostrom, Elinor",
             "title": "Governing the Commons: The Evolution of Institutions for Collective Action",
+            "author": "Ostrom, Elinor",
             "publisher": "Cambridge University Press",
             "year": "1990"
           }
@@ -5632,24 +5875,23 @@ export const PUZZLE_MANIFEST = [
         ]
       },
       "info": {
+        "text": "Susan Heitler's framework for conflict resolution therapy, which treats the strategies people use to end conflicts as the same small set whether the conflict is between two people or inside one. The five strategies -- fight, submit, flee, freeze, problem-solve -- are Pruitt and Rubin's; the claim that they run inward as well as outward is Heitler's own. The book dates from 1990 and its clinical categories reflect that; what has held up, and what this puzzle is built from, is the structural account.",
         "citations": [
           {
-            "author": "Susan Heitler",
-            "pages": "Table 4.1 (Strategies Available to Parties in Conflict), Table 4.2 (Responses to Inner Conflicts), Table 4.4 (Interactional Conflict Patterns), Table 2.2 (Red Flags Indicating Disruptive Communication Habits)",
-            "publisher": "W. W. Norton",
             "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "year": "1990"
+            "author": "Susan Heitler",
+            "publisher": "W. W. Norton",
+            "year": "1990",
+            "pages": "Table 4.1 (Strategies Available to Parties in Conflict), Table 4.2 (Responses to Inner Conflicts), Table 4.4 (Interactional Conflict Patterns), Table 2.2 (Red Flags Indicating Disruptive Communication Habits)"
           },
           {
-            "author": "Dean G. Pruitt and Jeffrey Z. Rubin",
-            "pages": "pp. 2-3, cited in Heitler Table 4.1",
-            "publisher": "Random House",
             "title": "Social Conflict: Escalation, Stalemate, and Settlement",
-            "year": "1986"
+            "author": "Dean G. Pruitt and Jeffrey Z. Rubin",
+            "publisher": "Random House",
+            "year": "1986",
+            "pages": "pp. 2-3, cited in Heitler Table 4.1"
           }
-        ],
-        "text": "Susan Heitler's framework for conflict resolution therapy, which treats the strategies people use to end conflicts as the same small set whether the conflict is between two people or inside one. The five strategies -- fight, submit, flee, freeze, problem-solve -- are Pruitt and Rubin's; the claim that they run inward as well as outward is Heitler's own. The book dates from 1990 and its clinical categories reflect that; what has held up, and what this puzzle is built from, is the structural account.",
-        "title": "From Conflict to Resolution"
+        ]
       },
       "_searchTerms": [
         "Fighting",
@@ -5692,15 +5934,17 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "Aristotelian dramatic mechanics, Homeric epic conventions, and monomythic hero arcs offer three durable ways of describing how classical narratives are built.",
-        "link": "wiki:Poetics (Aristotle)",
-        "seeAlso": [
+        "links": [
           {
-            "label": "Stanford Encyclopedia: Aristotle's Rhetoric",
-            "href": "https://plato.stanford.edu/entries/aristotle-rhetoric/"
+            "href": "wiki:Poetics (Aristotle)"
           },
           {
-            "label": "Perseus Digital Library",
-            "href": "http://www.perseus.tufts.edu/hopper/"
+            "href": "https://plato.stanford.edu/entries/aristotle-rhetoric/",
+            "label": "Stanford Encyclopedia: Aristotle's Rhetoric"
+          },
+          {
+            "href": "http://www.perseus.tufts.edu/hopper/",
+            "label": "Perseus Digital Library"
           }
         ]
       },
@@ -5748,8 +5992,12 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": true,
       "info": {
-        "link": "wiki:Sigmund Freud",
-        "text": "Freud's earliest mapping of the psyche: where a wish lives, how much force it carries, and what happens to it when the ego will not let it through."
+        "text": "Freud's earliest mapping of the psyche: where a wish lives, how much force it carries, and what happens to it when the ego will not let it through.",
+        "links": [
+          {
+            "href": "wiki:Sigmund Freud"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -5799,8 +6047,12 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": true,
       "info": {
-        "link": "wiki:Carl Jung",
-        "text": "Carl Jung's analytical psychology: how a universal, inherited layer of the psyche, a social mask, and a rejected shadow interact -- and why Jung treats integrating the shadow as growth rather than failure."
+        "text": "Carl Jung's analytical psychology: how a universal, inherited layer of the psyche, a social mask, and a rejected shadow interact -- and why Jung treats integrating the shadow as growth rather than failure.",
+        "links": [
+          {
+            "href": "wiki:Carl Jung"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -5856,16 +6108,20 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "lacans-three-registers",
+            "reason": "For the Lacanian scaffolding underneath McGowan's critique here -- the Imaginary, the Symbolic, and the Real -- play the dedicated Lacan puzzle.",
             "via": [
               "lacan"
-            ],
-            "reason": "For the Lacanian scaffolding underneath McGowan's critique here -- the Imaginary, the Symbolic, and the Real -- play the dedicated Lacan puzzle."
+            ]
           }
         ]
       },
       "info": {
-        "link": "wiki:Psychoanalysis",
-        "text": "Four traditions look at the same fact -- that a person is not unified inside themselves -- and draw four incompatible conclusions about what to do with it: manage it, integrate it, embrace it, or sell a cure for it."
+        "text": "Four traditions look at the same fact -- that a person is not unified inside themselves -- and draw four incompatible conclusions about what to do with it: manage it, integrate it, embrace it, or sell a cure for it.",
+        "links": [
+          {
+            "href": "wiki:Psychoanalysis"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -5922,8 +6178,12 @@ export const PUZZLE_MANIFEST = [
       },
       "large": true,
       "info": {
-        "link": "wiki:Critical theory",
-        "text": "How the Frankfurt School, Situationism, and structural Marxism each describe modern capitalism turning private psychological anxiety into a permanent engine of consumption."
+        "text": "How the Frankfurt School, Situationism, and structural Marxism each describe modern capitalism turning private psychological anxiety into a permanent engine of consumption.",
+        "links": [
+          {
+            "href": "wiki:Critical theory"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -5979,16 +6239,20 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "lacans-three-registers",
+            "reason": "Go deeper into the Imaginary, the Symbolic, and the Real -- the Lacanian scaffolding this puzzle's ontology of the split subject is built on.",
             "via": [
               "lacan"
-            ],
-            "reason": "Go deeper into the Imaginary, the Symbolic, and the Real -- the Lacanian scaffolding this puzzle's ontology of the split subject is built on."
+            ]
           }
         ]
       },
       "info": {
-        "link": "wiki:Todd McGowan",
-        "text": "The Lacanian-Hegelian case for treating structural division not as a private defect but as the shared, universal ground of political solidarity."
+        "text": "The Lacanian-Hegelian case for treating structural division not as a private defect but as the shared, universal ground of political solidarity.",
+        "links": [
+          {
+            "href": "wiki:Todd McGowan"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -6036,13 +6300,16 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
-        "link": "https://www.hup.harvard.edu/books/9780674276604",
         "text": "Albert Hirschman's account of the two things a dissatisfied customer, member or citizen can do about a declining organisation -- leave, or speak up -- and the third thing that largely decides which of them happens.",
-        "title": "Exit, Voice, and Loyalty",
+        "links": [
+          {
+            "href": "https://www.hup.harvard.edu/books/9780674276604"
+          }
+        ],
         "citations": [
           {
-            "author": "Hirschman, Albert O.",
             "title": "Exit, Voice, and Loyalty: Responses to Decline in Firms, Organizations, and States",
+            "author": "Hirschman, Albert O.",
             "publisher": "Harvard University Press",
             "year": "1970"
           }
@@ -6087,15 +6354,20 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
+        "text": "Alan Manning's challenge to the textbook assumption that workers can leave a job instantly and for nothing -- and what an employer can get away with once leaving actually costs something.",
         "citations": [
           {
+            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
             "author": "Alan Manning",
             "publisher": "Princeton University Press",
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
             "year": "2003"
+          },
+          {
+            "title": "New Market Power Models and Sex Differences in Pay",
+            "author": "Michael R. Ransom and Ronald L. Oaxaca",
+            "year": "2010"
           }
-        ],
-        "text": "Alan Manning's challenge to the textbook assumption that workers can leave a job instantly and for nothing -- and what an employer can get away with once leaving actually costs something."
+        ]
       },
       "_searchTerms": [
         "Why leaving isn't free",
@@ -6132,15 +6404,22 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
+        "text": "Amy Edmondson's account of what makes it possible to speak up to power directly, rather than around it -- the sanctioned channel that survives, when it survives, only because someone built it on purpose.",
         "citations": [
           {
+            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
             "author": "Amy C. Edmondson",
             "publisher": "John Wiley & Sons",
-            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
             "year": "2018"
+          },
+          {
+            "title": "Psychological Safety and Learning Behavior in Work Teams",
+            "author": "Amy C. Edmondson",
+            "publisher": "Administrative Science Quarterly, 44(2)",
+            "year": "1999",
+            "pages": "pp. 350-383"
           }
-        ],
-        "text": "Amy Edmondson's account of what makes it possible to speak up to power directly, rather than around it -- the sanctioned channel that survives, when it survives, only because someone built it on purpose."
+        ]
       },
       "_searchTerms": [
         "What psychological safety actually is",
@@ -6183,13 +6462,25 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "James Scott's account of what happens to dissent under conditions where open confrontation is too costly to risk -- from small, deniable acts of everyday resistance to the disguised, half-public forms that let a hidden truth travel further than a name attached to it ever could.",
-        "title": "What gets said offstage",
         "citations": [
           {
-            "author": "Scott, James C.",
             "title": "Domination and the Arts of Resistance: Hidden Transcripts",
+            "author": "Scott, James C.",
             "publisher": "Yale University Press",
             "year": "1990"
+          },
+          {
+            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
+            "author": "James C. Scott",
+            "publisher": "Yale University Press",
+            "year": "1990"
+          },
+          {
+            "title": "Weapons of the Weak: Everyday Forms of Peasant Resistance",
+            "author": "James C. Scott",
+            "publisher": "Yale University Press",
+            "year": "1985",
+            "pages": "p. xvi"
           }
         ]
       },
@@ -6235,16 +6526,16 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
+        "text": "Isabel Menzies Lyth's study of a nursing service under strain, and the discovery that an institution can restructure itself -- without anyone deciding to -- so that the anxiety which would otherwise force a choice gets absorbed by the structure before any single person has to make one.",
         "citations": [
           {
-            "author": "Isabel E. P. Menzies",
-            "pages": "pp. 95-121",
-            "publisher": "Human Relations, vol. 13",
             "title": "A Case Study in the Functioning of Social Systems as a Defence against Anxiety: A Report on a Study of the Nursing Service of a General Hospital",
-            "year": "1960"
+            "author": "Isabel E. P. Menzies",
+            "publisher": "Human Relations, vol. 13",
+            "year": "1960",
+            "pages": "pp. 95-121"
           }
-        ],
-        "text": "Isabel Menzies Lyth's study of a nursing service under strain, and the discovery that an institution can restructure itself -- without anyone deciding to -- so that the anxiety which would otherwise force a choice gets absorbed by the structure before any single person has to make one."
+        ]
       },
       "_searchTerms": [
         "The anxiety underneath",
@@ -6285,25 +6576,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "film-theory-basics",
+            "reason": "See how the visual survey of cinematography, editing, and narrative pairs with the sound layer this puzzle adds.",
             "via": [
               "editing",
               "narrative"
-            ],
-            "reason": "See how the visual survey of cinematography, editing, and narrative pairs with the sound layer this puzzle adds."
+            ]
           },
           {
             "id": "music-theory-basics",
+            "reason": "A film score draws on the same building blocks of harmony and melody covered there -- see where a leitmotif actually comes from.",
             "via": [
               "leitmotif",
               "harmony"
-            ],
-            "reason": "A film score draws on the same building blocks of harmony and melody covered there -- see where a leitmotif actually comes from."
+            ]
           }
         ]
       },
       "info": {
-        "link": "wiki:Sound design",
-        "text": "A film's soundtrack is built in layers -- what the characters could hear, what only the audience hears, and the craft that shapes both into a mix."
+        "text": "A film's soundtrack is built in layers -- what the characters could hear, what only the audience hears, and the craft that shapes both into a mix.",
+        "links": [
+          {
+            "href": "wiki:Sound design"
+          }
+        ]
       },
       "_searchTerms": [
         "Diegetic sound",
@@ -6341,17 +6636,21 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "film-theory-basics",
+            "reason": "Bring the vocabulary from that survey to three specific historical movements that each redefined it.",
             "via": [
               "cinematography",
               "editing"
-            ],
-            "reason": "Bring the vocabulary from that survey to three specific historical movements that each redefined it."
+            ]
           }
         ]
       },
       "info": {
-        "link": "wiki:Film movement",
-        "text": "Three movements that each defined themselves against what came before -- through style, through subject, or through the frame itself."
+        "text": "Three movements that each defined themselves against what came before -- through style, through subject, or through the frame itself.",
+        "links": [
+          {
+            "href": "wiki:Film movement"
+          }
+        ]
       },
       "_searchTerms": [
         "German Expressionism",
@@ -6390,24 +6689,28 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "film-theory-basics",
+            "reason": "Return to genre and narrator with a much closer look at how audiences actually read them.",
             "via": [
               "genre",
               "narrator"
-            ],
-            "reason": "Return to genre and narrator with a much closer look at how audiences actually read them."
+            ]
           },
           {
             "id": "lacans-three-registers",
+            "reason": "See the Lacanian psychoanalytic framework that the male gaze directly borrows from.",
             "via": [
               "the gaze"
-            ],
-            "reason": "See the Lacanian psychoanalytic framework that the male gaze directly borrows from."
+            ]
           }
         ]
       },
       "info": {
-        "link": "wiki:Film theory",
-        "text": "How a film gets built from recognizable, repeated pieces, and how a viewer relates to what's on screen once it's playing."
+        "text": "How a film gets built from recognizable, repeated pieces, and how a viewer relates to what's on screen once it's playing.",
+        "links": [
+          {
+            "href": "wiki:Film theory"
+          }
+        ]
       },
       "_searchTerms": [
         "Genre conventions",
@@ -6448,16 +6751,20 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": true,
       "info": {
-        "citations": [
+        "text": "Wilfred Bion's claim that every working group is shadowed by an unconscious one -- reacting to a shared fantasy of rescue, threat, or salvation instead of pursuing its actual task.",
+        "links": [
           {
-            "author": "W. R. Bion",
-            "publisher": "Tavistock Publications",
-            "title": "Experiences in Groups: And Other Papers",
-            "year": "1961"
+            "href": "https://www.csudh.edu/Assets/csudh-sites/group-relations/documents/recommended-reading/Tavistock%20Primer%20II.pdf"
           }
         ],
-        "link": "https://www.csudh.edu/Assets/csudh-sites/group-relations/documents/recommended-reading/Tavistock%20Primer%20II.pdf",
-        "text": "Wilfred Bion's claim that every working group is shadowed by an unconscious one -- reacting to a shared fantasy of rescue, threat, or salvation instead of pursuing its actual task."
+        "citations": [
+          {
+            "title": "Experiences in Groups: And Other Papers",
+            "author": "W. R. Bion",
+            "publisher": "Tavistock Publications",
+            "year": "1961"
+          }
+        ]
       },
       "_searchTerms": [
         "The Work Group",
@@ -6502,14 +6809,38 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
-        "link": "wiki:Elliott Jaques",
         "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation.",
+        "links": [
+          {
+            "href": "wiki:Elliott Jaques"
+          }
+        ],
         "citations": [
           {
-            "author": "Jaques, Elliott",
             "title": "Requisite Organization: A Total System for Effective Managerial Organization and Managerial Leadership for the 21st Century",
+            "author": "Jaques, Elliott",
             "publisher": "Cason Hall",
             "year": "1989"
+          },
+          {
+            "title": "Social Systems as a Defence against Persecutory and Depressive Anxiety",
+            "author": "Elliott Jaques",
+            "publisher": "In M. Klein, P. Heimann, and R. Money-Kyrle (eds.), New Directions in Psycho-Analysis, Tavistock Publications",
+            "year": "1955",
+            "pages": "478-498"
+          },
+          {
+            "title": "Requisite Organization: The CEO's Guide to Creative Structure and Leadership",
+            "author": "Elliott Jaques",
+            "publisher": "Cason Hall & Co.",
+            "year": "1989"
+          },
+          {
+            "title": "Why the Psychoanalytic Approach to Understanding Organizations Is Dysfunctional",
+            "author": "Elliott Jaques",
+            "publisher": "Human Relations, 48",
+            "year": "1995",
+            "pages": "343-349"
           }
         ]
       },
@@ -6546,16 +6877,20 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
-        "citations": [
+        "text": "Larry Hirschhorn's account of how groups turn real work-risk into something bearable through boundaries, what they fall back on when that fails, and why postindustrial organizations lose the old bureaucratic defenses that used to do this work automatically.",
+        "links": [
           {
-            "author": "Larry Hirschhorn",
-            "publisher": "MIT Press",
-            "title": "The Workplace Within: Psychodynamics of Organizational Life",
-            "year": "1988"
+            "href": "https://www.cfar.com/hirschhorn/"
           }
         ],
-        "link": "https://www.cfar.com/hirschhorn/",
-        "text": "Larry Hirschhorn's account of how groups turn real work-risk into something bearable through boundaries, what they fall back on when that fails, and why postindustrial organizations lose the old bureaucratic defenses that used to do this work automatically."
+        "citations": [
+          {
+            "title": "The Workplace Within: Psychodynamics of Organizational Life",
+            "author": "Larry Hirschhorn",
+            "publisher": "MIT Press",
+            "year": "1988"
+          }
+        ]
       },
       "_searchTerms": [
         "Primary Risk and Boundary",
@@ -6601,26 +6936,43 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "moral-disengagement-and-moral-inversion",
+            "reason": "Compare Schwartz's psychoanalytic account of NASA's self-deception with Bandura's account of how harm gets reframed and responsibility displaced -- two very different explanations for how organizations manage to look away from what they already know.",
             "via": [
               "reality denial",
               "suppressed dissent"
-            ],
-            "reason": "Compare Schwartz's psychoanalytic account of NASA's self-deception with Bandura's account of how harm gets reframed and responsibility displaced -- two very different explanations for how organizations manage to look away from what they already know."
+            ]
           }
         ]
       },
       "info": {
-        "citations": [
+        "text": "Howard Schwartz's account of organizational narcissism: how identifying with a fantasy of institutional perfection can require an organization to suppress the very evidence that would tell it the fantasy is false.",
+        "links": [
           {
-            "author": "Howard S. Schwartz",
-            "pages": "59-67",
-            "publisher": "Columbia Journal of World Business, 22(1)",
-            "title": "On the Psychodynamics of Organizational Disaster: The Case of the Space Shuttle Challenger",
-            "year": "1987"
+            "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
           }
         ],
-        "link": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm",
-        "text": "Howard Schwartz's account of organizational narcissism: how identifying with a fantasy of institutional perfection can require an organization to suppress the very evidence that would tell it the fantasy is false."
+        "citations": [
+          {
+            "title": "On the Psychodynamics of Organizational Disaster: The Case of the Space Shuttle Challenger",
+            "author": "Howard S. Schwartz",
+            "publisher": "Columbia Journal of World Business, 22(1)",
+            "year": "1987",
+            "pages": "59-67"
+          },
+          {
+            "title": "Narcissistic Process and Corporate Decay: The Theory of the Organization Ideal",
+            "author": "Howard S. Schwartz",
+            "publisher": "New York University Press",
+            "year": "1990"
+          },
+          {
+            "title": "On the Psychodynamics of Organizational Totalitarianism",
+            "author": "Howard S. Schwartz",
+            "publisher": "Journal of Management, 13(1)",
+            "year": "1987",
+            "pages": "41-54"
+          }
+        ]
       },
       "_searchTerms": [
         "The Organization Ideal",
@@ -6653,16 +7005,20 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": true,
       "info": {
-        "citations": [
+        "text": "Kets de Vries and Miller's claim that a company's whole structure and culture can come to mirror the neurotic style of the small group of executives, often just one person, running it -- four of the five styles they identified are on this board; the fifth, schizoid, is not.",
+        "links": [
           {
-            "author": "Manfred F. R. Kets de Vries and Danny Miller",
-            "publisher": "Jossey-Bass",
-            "title": "The Neurotic Organization: Diagnosing and Changing Counterproductive Styles of Management",
-            "year": "1984"
+            "href": "wiki:Manfred F.R. Kets de Vries"
           }
         ],
-        "link": "wiki:Manfred F.R. Kets de Vries",
-        "text": "Kets de Vries and Miller's claim that a company's whole structure and culture can come to mirror the neurotic style of the small group of executives, often just one person, running it -- four of the five styles they identified are on this board; the fifth, schizoid, is not."
+        "citations": [
+          {
+            "title": "The Neurotic Organization: Diagnosing and Changing Counterproductive Styles of Management",
+            "author": "Manfred F. R. Kets de Vries and Danny Miller",
+            "publisher": "Jossey-Bass",
+            "year": "1984"
+          }
+        ]
       },
       "_searchTerms": [
         "The Paranoid Organization",
@@ -6700,8 +7056,12 @@ export const PUZZLE_MANIFEST = [
       "category": "Music",
       "large": false,
       "info": {
-        "link": "wiki:Mode (music)",
-        "text": "The seven scales you get by starting on each different note of the major scale, each with its own distinctive sound."
+        "text": "The seven scales you get by starting on each different note of the major scale, each with its own distinctive sound.",
+        "links": [
+          {
+            "href": "wiki:Mode (music)"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -6737,7 +7097,11 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "The concepts political scientists use to describe what a state is, why people obey it, and where its right to rule is said to come from.",
-        "link": "wiki:Political science"
+        "links": [
+          {
+            "href": "wiki:Political science"
+          }
+        ]
       },
       "_searchTerms": [
         "Elements of a State",
@@ -6775,7 +7139,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "How constitutional government divides authority twice over: horizontally among branches, and vertically between national and subnational levels.",
-        "link": "wiki:Separation of powers"
+        "links": [
+          {
+            "href": "wiki:Separation of powers"
+          }
+        ]
       },
       "_searchTerms": [
         "Branches of Government",
@@ -6816,11 +7184,11 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "power-authority-and-the-state",
+            "reason": "Compare Weber's legitimacy-based authority and French and Raven's five power bases against Fromm's own two-part reading of power, and his separate account of what makes an authority rational, irrational, or anonymous.",
             "via": [
               "legitimacy",
               "obedience"
-            ],
-            "reason": "Compare Weber's legitimacy-based authority and French and Raven's five power bases against Fromm's own two-part reading of power, and his separate account of what makes an authority rational, irrational, or anonymous."
+            ]
           }
         ]
       },
@@ -6877,7 +7245,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Behavioral economics research showing that scarcity itself depletes the cognitive bandwidth available for attention and self-control -- evidence used to challenge theories that treat attentional discipline as equally available to everyone, regardless of material circumstances.",
-        "link": "wiki:Scarcity: Why Having Too Little Means So Much",
+        "links": [
+          {
+            "href": "wiki:Scarcity: Why Having Too Little Means So Much"
+          }
+        ],
         "citations": [
           {
             "title": "Poverty Impedes Cognitive Function",
@@ -6935,7 +7307,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Mihaly Csikszentmihalyi's model of the mental state people enter when a task's demands and their own skill are closely matched, and attention becomes fully absorbed by the activity itself.",
-        "link": "wiki:Flow (psychology)",
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ],
         "citations": [
           {
             "title": "Flow: The Psychology of Optimal Experience",
@@ -7014,11 +7390,11 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "models-of-the-divided-mind",
+            "reason": "See exactly what's being conflated when capitalist ideology tempts someone to mistake Jung's persona mask for their true self -- the precise clinical line between a protective front and a substitute personality.",
             "via": [
               "persona",
               "authenticity"
-            ],
-            "reason": "See exactly what's being conflated when capitalist ideology tempts someone to mistake Jung's persona mask for their true self -- the precise clinical line between a protective front and a substitute personality."
+            ]
           }
         ]
       },
@@ -7159,7 +7535,19 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Hannah Arendt's argument that power and violence are not degrees of the same thing but opposites -- and that ordinary political language collapses five genuinely distinct concepts into one blurry word.",
-        "link": "wiki:Hannah Arendt"
+        "links": [
+          {
+            "href": "wiki:Hannah Arendt"
+          }
+        ],
+        "citations": [
+          {
+            "title": "On Violence",
+            "author": "Hannah Arendt",
+            "publisher": "Harcourt, Brace & World",
+            "year": "1970"
+          }
+        ]
       },
       "_searchTerms": [
         "Power as Acting in Concert",
@@ -7196,7 +7584,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Antonio Gramsci's account of how a ruling class secures its dominance mainly by diffusing consent across civil society, with direct coercion held in reserve rather than doing most of the work -- and what contesting that dominance would actually require.",
-        "link": "wiki:Antonio Gramsci"
+        "links": [
+          {
+            "href": "wiki:Antonio Gramsci"
+          }
+        ]
       },
       "_searchTerms": [
         "The Integral State",
@@ -7233,7 +7625,25 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Steven Lukes' argument that power operates in three progressively less visible ways -- through decisions actually made, through control of which issues ever reach a decision, and through the shaping of what people want in the first place.",
-        "link": "wiki:Steven Lukes"
+        "links": [
+          {
+            "href": "wiki:Steven Lukes"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Power and Poverty: Theory and Practice",
+            "author": "Peter Bachrach and Morton S. Baratz",
+            "publisher": "Oxford University Press",
+            "year": "1970"
+          },
+          {
+            "title": "Power: A Radical View",
+            "author": "Steven Lukes",
+            "publisher": "Palgrave Macmillan",
+            "year": "2005"
+          }
+        ]
       },
       "_searchTerms": [
         "The First Face: Decision-Making",
@@ -7272,7 +7682,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Michel Foucault's account of the shift from sovereign power's spectacular violence on the body to disciplinary power's quiet, constant arrangement of time, space, and observation -- illustrated by the two scenes he sets side by side at the start of Discipline and Punish.",
-        "link": "wiki:Discipline and Punish"
+        "links": [
+          {
+            "href": "wiki:Discipline and Punish"
+          }
+        ]
       },
       "_searchTerms": [
         "The Scaffold",
@@ -7313,7 +7727,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Michel Foucault's account of power as a decentered, productive network rather than a possession held by a sovereign, a class, or a state -- and of resistance as sharing that same dispersed, centerless shape.",
-        "link": "wiki:Michel Foucault"
+        "links": [
+          {
+            "href": "wiki:Michel Foucault"
+          }
+        ]
       },
       "_searchTerms": [
         "Not a Possession",
@@ -7351,12 +7769,34 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Mulford Q. Sibley, University of Minnesota political theorist, Quaker conscientious objector, and self-described democratic socialist, whose 611-page history of political thought running from Plato to Marx was itself evidence that his McCarthy-era arguments for pacifism, civil disobedience, and utopian thought as serious political theory came from someone who commanded the whole tradition, not from someone speaking outside it.",
-        "link": "wiki:Mulford Q. Sibley",
+        "links": [
+          {
+            "href": "wiki:Mulford Q. Sibley"
+          }
+        ],
         "citations": [
           {
             "title": "Political Ideas and Ideologies: A History of Political Thought",
             "author": "Mulford Q. Sibley",
             "publisher": "Harper & Row",
+            "year": "1970"
+          },
+          {
+            "title": "The Political Theories of Modern Pacifism: An Analysis and Criticism",
+            "author": "Mulford Q. Sibley",
+            "publisher": "Pacifist Research Bureau",
+            "year": "1944"
+          },
+          {
+            "title": "Conscription of Conscience: The American State and the Conscientious Objector, 1940-1947",
+            "author": "Mulford Q. Sibley and Philip E. Jacob",
+            "publisher": "Cornell University Press",
+            "year": "1952"
+          },
+          {
+            "title": "The Obligation to Disobey: Conscience and the Law",
+            "author": "Mulford Q. Sibley",
+            "publisher": "Council on Religion and International Affairs",
             "year": "1970"
           }
         ]
@@ -7397,7 +7837,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Henry David Thoreau's 1849 argument for civil disobedience: that individual conscience, grounded in a transcendentalist faith in intuition and nature over tradition and law, outranks the state -- tested against his own night in jail for refusing to pay a tax that funded slavery and the Mexican War.",
-        "link": "wiki:Henry David Thoreau"
+        "links": [
+          {
+            "href": "wiki:Henry David Thoreau"
+          }
+        ]
       },
       "_searchTerms": [
         "Civil Disobedience",
@@ -7435,7 +7879,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Eugene V. Debs, railroad-union organizer turned five-time Socialist Party presidential candidate, whose politics were forged twice over in a federal prison cell -- first by the Pullman strike's defeat, and later by his own conviction for opposing the First World War.",
-        "link": "wiki:Eugene V. Debs"
+        "links": [
+          {
+            "href": "wiki:Eugene V. Debs"
+          }
+        ]
       },
       "_searchTerms": [
         "Industrial Unionism",
@@ -7473,7 +7921,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Bayard Rustin, raised Quaker, the chief organizer behind the 1963 March on Washington and the man who brought Gandhian nonviolence into the American civil rights movement, whose Communist youth, wartime draft resistance, and open homosexuality were repeatedly turned into weapons to keep him out of the movement's own spotlight.",
-        "link": "wiki:Bayard Rustin"
+        "links": [
+          {
+            "href": "wiki:Bayard Rustin"
+          }
+        ]
       },
       "_searchTerms": [
         "Building Nonviolent Practice",
@@ -7512,7 +7964,19 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "A.J. Muste -- Dutch-American minister, Lawrence strike organizer, and for a time the leader of an actual Trotskyist party -- until a 1936 religious reconversion sent him back to Christian pacifism for good, and into three more decades leading the Fellowship of Reconciliation, training Bayard Rustin's generation in nonviolent direct action, and traveling to Hanoi at eighty-one to try to end the Vietnam War.",
-        "link": "wiki:A. J. Muste"
+        "links": [
+          {
+            "href": "wiki:A. J. Muste"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Nonviolence in an Aggressive World",
+            "author": "A. J. Muste",
+            "publisher": "Harper & Brothers",
+            "year": "1940"
+          }
+        ]
       },
       "_searchTerms": [
         "From Pulpit to Picket Line",
@@ -7550,7 +8014,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Martin Luther King Jr.'s final year: an argument that racism, militarism, and poverty were one interlocking structure -- the giant triplets, in his own phrase -- that required nothing less than a radical revolution of values to dismantle, tested directly in his last campaign for economic justice before his assassination in Memphis.",
-        "link": "wiki:Martin Luther King Jr."
+        "links": [
+          {
+            "href": "wiki:Martin Luther King Jr."
+          }
+        ]
       },
       "_searchTerms": [
         "The Triple Evils",
@@ -7594,17 +8062,21 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "power-without-a-center",
+            "reason": "Eisenhower names a specific, growing danger with an address and a warning label; Foucault argues modern power has no such single address at all -- reading them together raises the real question of where, if anywhere, power like this can still be located and resisted.",
             "via": [
               "power",
               "institutions"
-            ],
-            "reason": "Eisenhower names a specific, growing danger with an address and a warning label; Foucault argues modern power has no such single address at all -- reading them together raises the real question of where, if anywhere, power like this can still be located and resisted."
+            ]
           }
         ]
       },
       "info": {
         "text": "Dwight Eisenhower's warning that a permanent alliance between the armed forces and the arms industry -- and a parallel one between government funding and scientific research -- could quietly acquire more influence over American life than any citizen ever voted for.",
-        "link": "wiki:Dwight D. Eisenhower's farewell address",
+        "links": [
+          {
+            "href": "wiki:Dwight D. Eisenhower's farewell address"
+          }
+        ],
         "citations": [
           {
             "title": "Farewell Address to the Nation",
@@ -7657,25 +8129,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "exit-voice-and-loyalty",
+            "reason": "Shay's soldier can't simply exit a combat unit when authority betrays him; Hirschman's framework for what people do when exit is costly or impossible -- voice, or a loyalty that curdles into something else -- names the trap Shay's veterans are caught inside.",
             "via": [
               "betrayal",
               "loyalty"
-            ],
-            "reason": "Shay's soldier can't simply exit a combat unit when authority betrays him; Hirschman's framework for what people do when exit is costly or impossible -- voice, or a loyalty that curdles into something else -- names the trap Shay's veterans are caught inside."
+            ]
           }
         ]
       },
       "info": {
-        "citations": [
+        "text": "Jonathan Shay's argument, built from Vietnam veterans' testimony read against Homer's Iliad, that the deepest wound of combat is not fear but the betrayal of a soldier's sense of what's right by those who hold legitimate authority over him.",
+        "links": [
           {
-            "author": "Shay, Jonathan",
-            "publisher": "Atheneum",
-            "title": "Achilles in Vietnam: Combat Trauma and the Undoing of Character",
-            "year": "1994"
+            "href": "wiki:Moral injury"
           }
         ],
-        "link": "wiki:Moral injury",
-        "text": "Jonathan Shay's argument, built from Vietnam veterans' testimony read against Homer's Iliad, that the deepest wound of combat is not fear but the betrayal of a soldier's sense of what's right by those who hold legitimate authority over him."
+        "citations": [
+          {
+            "title": "Achilles in Vietnam: Combat Trauma and the Undoing of Character",
+            "author": "Shay, Jonathan",
+            "publisher": "Atheneum",
+            "year": "1994"
+          }
+        ]
       },
       "_searchTerms": [
         "Betrayal of What's Right",
@@ -7724,25 +8200,29 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "power-and-violence",
+            "reason": "Grossman documents the individual psychology that has to be overridden before violence becomes possible; Arendt asks what violence is for at the political level once that threshold is crossed.",
             "via": [
               "violence",
               "instrumentality"
-            ],
-            "reason": "Grossman documents the individual psychology that has to be overridden before violence becomes possible; Arendt asks what violence is for at the political level once that threshold is crossed."
+            ]
           }
         ]
       },
       "info": {
-        "citations": [
+        "text": "Dave Grossman's argument that human beings carry a deep, documented resistance to killing their own kind -- and what it costs, psychologically, to train a soldier out of it.",
+        "links": [
           {
-            "author": "Grossman, Dave",
-            "publisher": "Back Bay Books",
-            "title": "On Killing: The Psychological Cost of Learning to Kill in War and Society",
-            "year": "1996"
+            "href": "wiki:On Killing"
           }
         ],
-        "link": "wiki:On Killing",
-        "text": "Dave Grossman's argument that human beings carry a deep, documented resistance to killing their own kind -- and what it costs, psychologically, to train a soldier out of it."
+        "citations": [
+          {
+            "title": "On Killing: The Psychological Cost of Learning to Kill in War and Society",
+            "author": "Grossman, Dave",
+            "publisher": "Back Bay Books",
+            "year": "1996"
+          }
+        ]
       },
       "_searchTerms": [
         "The Resistance to Killing",
@@ -7791,18 +8271,24 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "hegemony-and-consent",
+            "reason": "Hedges shows a myth doing at wartime what Gramsci says ideology does at all times: making one version of reality feel too natural and too righteous to question.",
             "via": [
               "myth",
               "consent"
-            ],
-            "reason": "Hedges shows a myth doing at wartime what Gramsci says ideology does at all times: making one version of reality feel too natural and too righteous to question."
+            ]
           }
         ]
       },
       "info": {
         "text": "Chris Hedges' argument, drawn from fifteen years as a war correspondent, that societies sustain war through a seductive myth of glory and belonging -- one so intoxicating that even its horror can function as a drug -- and that only art and compassion for the enemy can break its hold.",
-        "link": "wiki:War Is a Force That Gives Us Meaning",
-        "extraLink": "wiki:Chris Hedges",
+        "links": [
+          {
+            "href": "wiki:War Is a Force That Gives Us Meaning"
+          },
+          {
+            "href": "wiki:Chris Hedges"
+          }
+        ],
         "citations": [
           {
             "title": "War Is a Force That Gives Us Meaning",
@@ -7907,8 +8393,12 @@ export const PUZZLE_MANIFEST = [
         ]
       },
       "info": {
-        "text": "Augustine's grief-stricken permission and Aquinas's threefold test decide when a war may even be fought — plus 'dirty hands,' a later term for the guilt that survives even a war held to every one of those conditions.",
-        "link": "wiki:Just war theory",
+        "text": "From Augustine's grief-stricken permission through Aquinas's threefold test to Michael Walzer's modern reckoning with dirty hands — the tradition that decides when a war may be fought, and why even a rightly fought one is never quite justified.",
+        "links": [
+          {
+            "href": "wiki:Just war theory"
+          }
+        ],
         "citations": [
           {
             "title": "A Plea for Excuses: The Presidential Address",
@@ -7964,7 +8454,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Three foundational texts that ground politics in power rather than moral aspiration: Machiavelli's princely necessity, Hobbes's lawless state of nature, and Morgenthau's realist doctrine of national interest.",
-        "link": "wiki:Realism (international relations)",
+        "links": [
+          {
+            "href": "wiki:Realism (international relations)"
+          }
+        ],
         "citations": [
           {
             "title": "The Prince",
@@ -8019,13 +8513,29 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "Liberal thought has long paired a strong doctrine of self-determination with an equally strong exception for peoples judged not yet ready to exercise it -- a hierarchy inherited across Mill's writing, democratic peace theory, formal colonial ideology, and today's humanitarian intervention doctrine.",
-        "link": "wiki:Civilizing mission",
+        "links": [
+          {
+            "href": "wiki:Civilizing mission"
+          }
+        ],
         "citations": [
           {
             "title": "The Question of Intervention: John Stuart Mill and the Responsibility to Protect",
             "author": "Doyle, Michael W.",
             "publisher": "Yale University Press",
             "year": "2015"
+          },
+          {
+            "title": "The Standard of 'Civilization' in International Society",
+            "author": "Gong, Gerrit W.",
+            "publisher": "Clarendon Press",
+            "year": "1984"
+          },
+          {
+            "title": "Losing 'the Force'? The 'Dark Side' of Democratization after Iraq",
+            "author": "Whitehead, Laurence",
+            "publisher": "Democratization",
+            "year": "2009"
           }
         ]
       },
@@ -8085,11 +8595,15 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Herman and Chomsky's argument that a free press still filters the news it prints -- not through censorship, but through ownership, markets, sourcing, and fear.",
-        "link": "wiki:Manufacturing Consent",
+        "links": [
+          {
+            "href": "wiki:Manufacturing Consent"
+          }
+        ],
         "citations": [
           {
-            "author": "Herman, Edward S., and Chomsky, Noam",
             "title": "Manufacturing Consent: The Political Economy of the Mass Media",
+            "author": "Herman, Edward S., and Chomsky, Noam",
             "publisher": "Pantheon Books",
             "year": "1988"
           }
@@ -8284,7 +8798,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Adam Johnson's data-driven account of how U.S. corporate media covered the destruction of Gaza -- not through censorship, but through word choice, timing rules, and decisions about who gets to speak.",
-        "link": "https://www.plutobooks.com/product/how-to-sell-a-genocide/",
+        "links": [
+          {
+            "href": "https://www.plutobooks.com/product/how-to-sell-a-genocide/"
+          }
+        ],
         "citations": [
           {
             "title": "How to Sell a Genocide: The Media's Complicity in the Destruction of Gaza",
@@ -8366,7 +8884,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "How CODEPINK turned a feminist critique of war into a recognizable style of theatrical, insider confrontation -- and how Jewish Voice for Peace scaled a version of the same disruption during the Gaza war.",
-        "link": "wiki:Code Pink"
+        "links": [
+          {
+            "href": "wiki:Code Pink"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -8432,7 +8954,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Four organizations that have pursued disarmament, civil rights, and conflict prevention for over a century through diplomacy, legislation, relief work, and unarmed field presence.",
-        "link": "wiki:Peace movement"
+        "links": [
+          {
+            "href": "wiki:Peace movement"
+          }
+        ]
       },
       "learningIntroduction": {
         "requirement": "recommended",
@@ -8506,7 +9032,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Jeremy Scahill's Dirty Wars traces how the post-9/11 targeted-killing program grew into a covert, borderless war fought with drones, secret kill lists, and mass surveillance.",
-        "link": "wiki:Dirty Wars",
+        "links": [
+          {
+            "href": "wiki:Dirty Wars"
+          }
+        ],
         "citations": [
           {
             "title": "Dirty Wars: The World Is a Battlefield",
@@ -8606,7 +9136,15 @@ export const PUZZLE_MANIFEST = [
       ],
       "large": false,
       "info": {
-        "text": "The Hiroshima bombing was a unique horror unleashed on the world. This puzzle doesn't condone massive civilian casualty counts as being the only possible way to end the war. It examines a narrower, documented question: the standing military order that authorized Nagasaki without any renewed presidential decision -- and a historiographical dispute that has run for decades, still unresolved, over whether atomic weapons needed to be used against Japanese cities at all."
+        "text": "The Hiroshima bombing was a unique horror unleashed on the world. This puzzle doesn't condone massive civilian casualty counts as being the only possible way to end the war. It examines a narrower, documented question: the standing military order that authorized Nagasaki without any renewed presidential decision -- and a historiographical dispute that has run for decades, still unresolved, over whether atomic weapons needed to be used against Japanese cities at all.",
+        "citations": [
+          {
+            "title": "Racing the Enemy: Stalin, Truman, and the Surrender of Japan",
+            "author": "Hasegawa, Tsuyoshi",
+            "publisher": "Belknap Press",
+            "year": "2005"
+          }
+        ]
       },
       "_searchTerms": [
         "The Standing Order",
@@ -8647,7 +9185,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "How a UN peacekeeping mandate, a Security Council withdrawal, and a State Department's avoidance of one word combined to let a genocide unfold in full view of an international community that had promised, after the Holocaust, never to let it happen again.",
-        "link": "wiki:Rwandan genocide",
+        "links": [
+          {
+            "href": "wiki:Rwandan genocide"
+          }
+        ],
         "citations": [
           {
             "title": "One Hundred Days of Silence: America and the Rwanda Genocide",
@@ -8700,7 +9242,11 @@ export const PUZZLE_MANIFEST = [
       "large": true,
       "info": {
         "text": "How the American Psychological Association's own ethics guidance came to permit psychologist participation in national-security interrogations -- and how a small group of dissenting psychologists spent a decade proving it, forcing a formal reversal.",
-        "link": "wiki:American Psychological Association",
+        "links": [
+          {
+            "href": "wiki:American Psychological Association"
+          }
+        ],
         "citations": [
           {
             "title": "Doing Harm: How the World's Largest Psychological Association Lost Its Way in the War on Terror",
@@ -8842,13 +9388,59 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "An operational amplifier is a high-gain differential amplifier whose useful circuits come from how that gain is used: tamed by negative feedback into a precise linear stage, or left open-loop so the output slams to a rail as a decision.",
-        "link": "wiki:Operational amplifier",
+        "links": [
+          {
+            "href": "wiki:Operational amplifier"
+          }
+        ],
         "citations": [
           {
             "title": "Operational Amplifiers and Linear Integrated Circuits: Theory and Application",
             "author": "James M. Fiore",
             "publisher": "Engineering LibreTexts",
             "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)"
+          },
+          {
+            "title": "4.2: Inverting and Noninverting Amplifiers",
+            "author": "James M. Fiore",
+            "publisher": "Engineering LibreTexts",
+            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers"
+          },
+          {
+            "title": "7.5: Comparators",
+            "author": "James M. Fiore",
+            "publisher": "Engineering LibreTexts",
+            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/07%3A_Nonlinear_Circuits/7.05%3A_Comparators"
+          },
+          {
+            "title": "2.3: Simple Op Amp Comparator",
+            "author": "James M. Fiore",
+            "publisher": "Engineering LibreTexts",
+            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/02%3A_Operational_Amplifier_Internals/2.03%3A_Simple_Op_Amp_Comparator"
+          },
+          {
+            "title": "5.3: Gain-Bandwidth Product",
+            "author": "James M. Fiore",
+            "publisher": "Engineering LibreTexts",
+            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.03%3A_Gain-Bandwidth_Product"
+          },
+          {
+            "title": "5.4: Slew Rate and Power Bandwidth",
+            "author": "James M. Fiore",
+            "publisher": "Engineering LibreTexts",
+            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.04%3A_Slew_Rate_and_Power_Bandwidth"
+          },
+          {
+            "title": "5.5: Offsets",
+            "author": "James M. Fiore",
+            "publisher": "Engineering LibreTexts",
+            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.05%3A_Offsets"
+          },
+          {
+            "title": "3.2: What Negative Feedback Is and Why We Use It",
+            "author": "James M. Fiore",
+            "publisher": "Engineering LibreTexts",
+            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/03%3A_Negative_Feedback/3.02%3A_What_Negative_Feedback_Is_and_Why_We_Use_It"
           }
         ]
       },
@@ -8895,7 +9487,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Marshall Sahlins argued that non-market giving is structured by kinship distance: the closer the relationship, the less anyone keeps accounts, and the farther the relationship, the more each party tries to come out ahead.",
-        "link": "wiki:Reciprocity (cultural anthropology)",
+        "links": [
+          {
+            "href": "wiki:Reciprocity (cultural anthropology)"
+          }
+        ],
         "citations": [
           {
             "title": "Stone Age Economics",
@@ -8903,6 +9499,12 @@ export const PUZZLE_MANIFEST = [
             "publisher": "Aldine-Atherton",
             "year": "1972",
             "pages": "185–204"
+          },
+          {
+            "title": "Argonauts of the Western Pacific",
+            "author": "Bronisław Malinowski",
+            "publisher": "Routledge & Kegan Paul",
+            "year": "1922"
           }
         ]
       },
@@ -8934,7 +9536,11 @@ export const PUZZLE_MANIFEST = [
       "large": false,
       "info": {
         "text": "Aristotle's three artistic proofs — ethos, pathos, and logos — are the means of persuasion a speech itself can produce. Kairos is the occasion: whether this is the time for those proofs to land.",
-        "link": "wiki:Modes of persuasion",
+        "links": [
+          {
+            "href": "wiki:Modes of persuasion"
+          }
+        ],
         "citations": [
           {
             "title": "Aristotle’s Rhetoric",
@@ -9009,6 +9615,16 @@ export const PUZZLE_MANIFEST = [
             "author": "David Bordwell and Kristin Thompson",
             "publisher": "McGraw-Hill",
             "year": "2006"
+          },
+          {
+            "title": "180-degree rule",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/180-degree_rule"
+          },
+          {
+            "title": "Camera coverage",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Camera_coverage"
           }
         ]
       },
@@ -9045,8 +9661,14 @@ export const PUZZLE_MANIFEST = [
       "lensMode": "sequential",
       "info": {
         "text": "Western meter is two questions at once: how many beats fill a bar, and whether each of those beats splits in two or in three.",
-        "link": "wiki:Metre (music)",
-        "extraLink": "wiki:Time signature",
+        "links": [
+          {
+            "href": "wiki:Metre (music)"
+          },
+          {
+            "href": "wiki:Time signature"
+          }
+        ],
         "citations": [
           {
             "title": "Meter and time signatures",
@@ -9113,9 +9735,25 @@ export const PUZZLE_MANIFEST = [
             "url": "https://en.wikipedia.org/wiki/Chiaroscuro"
           },
           {
-            "title": "Chiaroscuro",
-            "publisher": "Tate",
-            "url": "https://www.tate.org.uk/art/art-terms/c/chiaroscuro"
+            "title": "Color and Meaning: Practice and Theory in Renaissance Painting",
+            "author": "Marcia B. Hall",
+            "publisher": "Cambridge University Press",
+            "year": "1994"
+          },
+          {
+            "title": "Hatching",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Hatching"
+          },
+          {
+            "title": "Sfumato",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Sfumato"
+          },
+          {
+            "title": "Stippling",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Stippling"
           }
         ]
       },
@@ -9225,7 +9863,11 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "info": {
           "text": "Place urine formation next to the pressure, acid–base, and feedback systems it depends on.",
-          "link": "wiki:Homeostasis"
+          "links": [
+            {
+              "href": "wiki:Homeostasis"
+            }
+          ]
         },
         "entries": [
           {
@@ -9256,7 +9898,11 @@ export const PUZZLE_MANIFEST = [
       },
       "info": {
         "text": "Urine is not simply filtered blood. The kidney first forms a large volume of filtrate, then revises that fluid by taking useful substances back into the blood and adding selected acids and wastes.",
-        "link": "wiki:Renal physiology",
+        "links": [
+          {
+            "href": "wiki:Renal physiology"
+          }
+        ],
         "citations": [
           {
             "title": "Anatomy and Physiology 2e, §25.5 Physiology of Urine Formation",
@@ -9306,6 +9952,25 @@ export const PUZZLE_MANIFEST = [
       "title": "Where Plates Meet",
       "category": "Science",
       "large": true,
+      "info": {
+        "citations": [
+          {
+            "title": "Understanding plate motions",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"
+          },
+          {
+            "title": "This Dynamic Planet",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://pubs.usgs.gov/pdf/planet.pdf"
+          },
+          {
+            "title": "The Himalayas: Two continents collide",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://pubs.usgs.gov/gip/dynamic/himalaya.html"
+          }
+        ]
+      },
       "_searchTerms": [
         "Divergent boundaries",
         "Mid-Atlantic Ridge",
@@ -9342,7 +10007,11 @@ export const PUZZLE_MANIFEST = [
       "lensMode": "sequential",
       "info": {
         "text": "How cinematography takes a position on knowledge: sharing a character's perception, surveying the scene from above, or signalling that the camera itself cannot be trusted.",
-        "link": "wiki:Cinematography"
+        "links": [
+          {
+            "href": "wiki:Cinematography"
+          }
+        ]
       },
       "_searchTerms": [
         "Alignment",

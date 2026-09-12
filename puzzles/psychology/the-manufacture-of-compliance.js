@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-manufacture-of-compliance.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-manufacture-of-compliance",
   "title": "The Manufacture of Compliance",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "History & Society"
+    "psychology",
+    "history-society"
   ],
   "tags": [
     "war",
@@ -150,6 +150,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "moral-disengagement",
       "term": "moral disengagement",
       "clusters": [
         0,
@@ -178,6 +179,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "the-persistence-of-choice",
       "term": "the persistence of choice",
       "clusters": [
         0,

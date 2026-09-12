@@ -1,14 +1,18 @@
 {
   "id": "why-art-changes-what-it-sees",
   "title": "Why Art Changes What It Sees",
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "representation-and-interpretation"
+    "art": "representation-and-interpretation"
   },
   "large": true,
   "info": {
     "text": "Artists transform visible appearance through selection, convention, simplification, distortion, symbolism, memory, and imagination.",
-    "link": "wiki:Representation (arts)"
+    "links": [
+      {
+        "href": "wiki:Representation (arts)"
+      }
+    ]
   },
   "clusters": [
     {
@@ -33,23 +37,43 @@
       "termInfo": {
         "realism": {
           "text": "An approach that emphasizes recognizable subjects and convincing representation of ordinary visible experience.",
-          "link": "wiki:Realism (arts)"
+          "links": [
+            {
+              "href": "wiki:Realism (arts)"
+            }
+          ]
         },
         "naturalism": {
           "text": "Representation that seeks close observation of appearance, environment, light, anatomy, or material detail.",
-          "link": "wiki:Naturalism (visual art)"
+          "links": [
+            {
+              "href": "wiki:Naturalism (visual art)"
+            }
+          ]
         },
         "likeness": {
           "text": "A recognizable correspondence between a representation and the person or thing represented.",
-          "link": "wiki:Portrait"
+          "links": [
+            {
+              "href": "wiki:Portrait"
+            }
+          ]
         },
         "linear perspective": {
           "text": "A geometric system for representing depth through converging parallel lines and one or more vanishing points.",
-          "link": "wiki:Perspective (graphical)"
+          "links": [
+            {
+              "href": "wiki:Perspective (graphical)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Representation (arts)"
+        "links": [
+          {
+            "href": "wiki:Representation (arts)"
+          }
+        ]
       }
     },
     {
@@ -74,23 +98,43 @@
       "termInfo": {
         "simplification": {
           "text": "The reduction of detail so that selected features or structures become clearer.",
-          "link": "wiki:Abstraction"
+          "links": [
+            {
+              "href": "wiki:Abstraction"
+            }
+          ]
         },
         "stylization": {
           "text": "The representation of a subject according to a distinctive and consistent visual manner rather than strict natural appearance.",
-          "link": "wiki:Style (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Style (visual arts)"
+            }
+          ]
         },
         "abstraction": {
           "text": "The reduction, transformation, or removal of recognizable reference in order to emphasize form, structure, color, or other relationships.",
-          "link": "wiki:Abstract art"
+          "links": [
+            {
+              "href": "wiki:Abstract art"
+            }
+          ]
         },
         "geometric reduction": {
           "text": "The translation of complex forms into simpler geometric shapes or planes.",
-          "link": "wiki:Geometric abstraction"
+          "links": [
+            {
+              "href": "wiki:Geometric abstraction"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Abstraction"
+        "links": [
+          {
+            "href": "wiki:Abstraction"
+          }
+        ]
       }
     },
     {
@@ -115,23 +159,43 @@
       "termInfo": {
         "distortion": {
           "text": "A deliberate alteration of proportion, shape, space, or appearance.",
-          "link": "wiki:Distortion (art)"
+          "links": [
+            {
+              "href": "wiki:Distortion (art)"
+            }
+          ]
         },
         "exaggeration": {
           "text": "The enlargement or intensification of selected features beyond ordinary proportion or degree.",
-          "link": "wiki:Caricature"
+          "links": [
+            {
+              "href": "wiki:Caricature"
+            }
+          ]
         },
         "expressive brushwork": {
           "text": "Visible handling of paint used to communicate energy, gesture, texture, or feeling.",
-          "link": "wiki:Brushwork"
+          "links": [
+            {
+              "href": "wiki:Brushwork"
+            }
+          ]
         },
         "non-naturalistic color": {
           "text": "Color chosen for expressive, structural, or symbolic purposes rather than to imitate observed appearance.",
-          "link": "wiki:Expressionism"
+          "links": [
+            {
+              "href": "wiki:Expressionism"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Expressionism"
+        "links": [
+          {
+            "href": "wiki:Expressionism"
+          }
+        ]
       }
     },
     {
@@ -156,23 +220,43 @@
       "termInfo": {
         "symbolism": {
           "text": "The use of images, forms, colors, or objects to carry meanings beyond their literal appearance.",
-          "link": "wiki:Symbolism (arts)"
+          "links": [
+            {
+              "href": "wiki:Symbolism (arts)"
+            }
+          ]
         },
         "idealization": {
           "text": "The transformation of a subject toward a preferred, perfected, exemplary, or culturally valued form.",
-          "link": "wiki:Idealization"
+          "links": [
+            {
+              "href": "wiki:Idealization"
+            }
+          ]
         },
         "memory": {
           "text": "Recollected experience that may be selective, reconstructed, and shaped by later understanding.",
-          "link": "wiki:Memory"
+          "links": [
+            {
+              "href": "wiki:Memory"
+            }
+          ]
         },
         "imagination": {
           "text": "The capacity to form images, situations, or possibilities not directly present to the senses.",
-          "link": "wiki:Imagination"
+          "links": [
+            {
+              "href": "wiki:Imagination"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Symbolism (arts)"
+        "links": [
+          {
+            "href": "wiki:Symbolism (arts)"
+          }
+        ]
       }
     }
   ],
@@ -187,7 +271,11 @@
       "fact": "Convention connects resemblance with meaning because learned systems such as perspective, pose, attributes, and ideal proportions shape both what appears convincing and what an image communicates.",
       "info": {
         "text": "A learned and shared artistic practice that helps viewers recognize how an image represents or signifies.",
-        "link": "wiki:Convention (norm)"
+        "links": [
+          {
+            "href": "wiki:Convention (norm)"
+          }
+        ]
       },
       "conceptId": "representational-convention",
       "relationKind": "foundation",
@@ -206,7 +294,11 @@
       "fact": "Expression links simplification with intensification: selecting, reducing, distorting, or visibly handling form can communicate an artist's attitude, energy, or emotional emphasis.",
       "info": {
         "text": "The communication of feeling, attitude, energy, or subjective emphasis through artistic form.",
-        "link": "wiki:Expressionism"
+        "links": [
+          {
+            "href": "wiki:Expressionism"
+          }
+        ]
       },
       "conceptId": "expressive-transformation",
       "relationKind": "dynamic",
@@ -225,7 +317,11 @@
       "fact": "Interpretation connects expressive transformation with constructed meaning by asking how altered form, color, gesture, symbol, memory, and imagination work together within an artwork and its context.",
       "info": {
         "text": "A reasoned account of what an artwork may mean and how its features support that understanding.",
-        "link": "wiki:Art criticism"
+        "links": [
+          {
+            "href": "wiki:Art criticism"
+          }
+        ]
       },
       "conceptId": "interpretation",
       "relationKind": "evaluation",
@@ -353,15 +449,14 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-02"
-    }
-  ],
   "language": "en",
-  "version": 1
+  "version": 1,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

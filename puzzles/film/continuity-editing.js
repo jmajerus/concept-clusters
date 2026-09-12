@@ -1,12 +1,12 @@
 // Generated from content/puzzles/continuity-editing.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "continuity-editing",
   "title": "Continuity editing",
-  "category": "Film",
+  "category": "film",
   "info": {
     "text": "Classical continuity cutting keeps a scene readable: who sits where, what a look is aimed at, and which interchangeable angles the editor can cut among without the space flipping.",
     "citations": [
@@ -20,6 +20,16 @@ export default definePuzzle(import.meta.url, {
         "author": "David Bordwell and Kristin Thompson",
         "publisher": "McGraw-Hill",
         "year": "2006"
+      },
+      {
+        "title": "180-degree rule",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/180-degree_rule"
+      },
+      {
+        "title": "Camera coverage",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Camera_coverage"
       }
     ]
   },
@@ -41,24 +51,23 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "180-degree rule": {
           "text": "Keep the camera on one side of an imaginary axis between two subjects so their left-right positions stay consistent from shot to shot.",
-          "link": "wiki:180-degree rule"
+          "links": [
+            {
+              "href": "wiki:180-degree rule"
+            }
+          ]
         },
         "screen direction": {
           "text": "The left/right way people and motion read on the screen -- the property the 180-degree rule is there to protect.",
-          "link": "wiki:Screen direction"
+          "links": [
+            {
+              "href": "wiki:Screen direction"
+            }
+          ]
         },
         "crossing the line": {
           "text": "Cutting to the opposite side of the axis, which swaps who sits left and who sits right and can make a conversation look like both people face the same way."
         }
-      },
-      "info": {
-        "citations": [
-          {
-            "title": "180-degree rule",
-            "publisher": "Wikipedia",
-            "url": "https://en.wikipedia.org/wiki/180-degree_rule"
-          }
-        ]
       }
     },
     {
@@ -81,11 +90,19 @@ export default definePuzzle(import.meta.url, {
         },
         "eyeline match": {
           "text": "A shot of someone looking off-screen followed by a shot of what they are looking at, so the audience infers the gaze even though both were never in the same frame.",
-          "link": "wiki:Eyeline match"
+          "links": [
+            {
+              "href": "wiki:Eyeline match"
+            }
+          ]
         },
         "POV shot": {
           "text": "A subjective camera that shows the scene as a character sees it, rather than cutting to the object of the look from an observer's angle.",
-          "link": "wiki:Point-of-view shot"
+          "links": [
+            {
+              "href": "wiki:Point-of-view shot"
+            }
+          ]
         }
       }
     },
@@ -107,28 +124,41 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "master shot": {
           "text": "A recording of the entire scene from an angle that keeps all the players in view -- the wide backbone other angles are cut against.",
-          "link": "wiki:Master shot"
+          "links": [
+            {
+              "href": "wiki:Master shot"
+            }
+          ]
         },
         "shot-reverse-shot": {
           "text": "Alternating shots of two people looking toward each other, usually in conversation, so the viewer reads them as facing one another across the cut.",
-          "link": "wiki:Shot reverse shot"
+          "links": [
+            {
+              "href": "wiki:Shot reverse shot"
+            }
+          ]
         },
         "over-the-shoulder shot": {
           "text": "A closer angle framed past the near person's shoulder and head, used in pairs so each speaker is seen from the other's side of the conversation.",
-          "link": "wiki:Over-the-shoulder shot"
+          "links": [
+            {
+              "href": "wiki:Over-the-shoulder shot"
+            }
+          ]
         },
         "insert shot": {
           "text": "A closer view of a detail already covered in the master -- a clock, a letter, a hand on an object -- reframed so the editor can point at it without leaving the scene.",
-          "link": "wiki:Insert (filmmaking)"
+          "links": [
+            {
+              "href": "wiki:Insert (filmmaking)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Camera coverage",
-    "citations": [
+        "links": [
           {
-            "title": "Camera coverage",
-            "publisher": "Wikipedia",
-            "url": "https://en.wikipedia.org/wiki/Camera_coverage"
+            "href": "wiki:Camera coverage"
           }
         ]
       }
@@ -145,7 +175,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "An establishing shot orients the scene's geography -- who and what belong where -- and typically opens coverage as the wide from which closer angles will be cut.",
       "info": {
         "text": "Usually a long or extreme-long shot at the start of a scene that shows where the rest of the action takes place; a master can do double duty as one, but an establishing shot can also be an exterior that never appears in the coverage of the room.",
-        "link": "wiki:Establishing shot"
+        "links": [
+          {
+            "href": "wiki:Establishing shot"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "foundation",
@@ -217,19 +251,15 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "Most commercial films are cut so the audience can follow the story without noticing the splices. That tradition treats the cut as a way to keep space and action readable, rather than as a collision meant to generate a new association the pictures did not have separately.\n\nThis puzzle is about the grammar of that \"invisible\" style -- how a scene stays spatially and temporally followable even though the camera keeps jumping."
     },
-    
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor Grok 4.6",
-      "scope": "puzzle",
-      "role": "drafted"
-    },
-    {
-      "system": "Cursor Grok 4.6",
-      "scope": "lenses",
-      "role": "drafted"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor Grok 4.6",
+        "kind": "generative"
+      }
+    ]
+  }
 });

@@ -1,9 +1,9 @@
 {
   "id": "from-reads-to-a-genome",
   "title": "From reads to a genome",
-  "category": "Biology",
+  "category": "biology",
   "subcategories": {
-    "Biology": "genomics"
+    "biology": "genomics"
   },
   "tags": [
     "biology",
@@ -55,19 +55,35 @@
       "termInfo": {
         "DNA extraction": {
           "text": "The isolation of DNA from cells or other biological material for downstream measurement.",
-          "link": "wiki:DNA extraction"
+          "links": [
+            {
+              "href": "wiki:DNA extraction"
+            }
+          ]
         },
         "fragmentation": {
           "text": "Breaking DNA into a size distribution suitable for a sequencing method or library design.",
-          "link": "wiki:DNA sequencing"
+          "links": [
+            {
+              "href": "wiki:DNA sequencing"
+            }
+          ]
         },
         "adapter": {
           "text": "A designed oligonucleotide joined to sample DNA so fragments can be amplified, identified, or read by a sequencing platform.",
-          "link": "wiki:Adapter (genetic engineering)"
+          "links": [
+            {
+              "href": "wiki:Adapter (genetic engineering)"
+            }
+          ]
         },
         "library preparation": {
           "text": "Preparing DNA fragments, often with platform-specific adapters, so they can be sequenced.",
-          "link": "wiki:DNA sequencing#Basic methods"
+          "links": [
+            {
+              "href": "wiki:DNA sequencing#Basic methods"
+            }
+          ]
         }
       }
     },
@@ -91,15 +107,27 @@
       "termInfo": {
         "sequencing instrument": {
           "text": "A platform that measures physical or chemical signals associated with nucleotide sequence.",
-          "link": "https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Fact-Sheet"
+          "links": [
+            {
+              "href": "https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Fact-Sheet"
+            }
+          ]
         },
         "base calling": {
           "text": "The computational conversion of instrument signals into proposed nucleotide bases.",
-          "link": "wiki:Base calling"
+          "links": [
+            {
+              "href": "wiki:Base calling"
+            }
+          ]
         },
         "base quality": {
           "text": "A score expressing estimated confidence in a nucleotide call, commonly represented on a Phred scale.",
-          "link": "wiki:Phred quality score"
+          "links": [
+            {
+              "href": "wiki:Phred quality score"
+            }
+          ]
         }
       }
     },
@@ -125,19 +153,35 @@
       "termInfo": {
         "read overlap": {
           "text": "A matching sequence shared by reads that can support their placement relative to one another.",
-          "link": "wiki:Sequence assembly"
+          "links": [
+            {
+              "href": "wiki:Sequence assembly"
+            }
+          ]
         },
         "contig": {
           "text": "A continuous assembled sequence with no internal gaps in its consensus representation.",
-          "link": "wiki:Contig"
+          "links": [
+            {
+              "href": "wiki:Contig"
+            }
+          ]
         },
         "scaffold": {
           "text": "An ordered and oriented set of contigs whose intervening sequence may remain unresolved.",
-          "link": "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/policies-annotation/data-model/"
+          "links": [
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/policies-annotation/data-model/"
+            }
+          ]
         },
         "consensus sequence": {
           "text": "A sequence estimate formed by combining evidence from multiple aligned or overlapping observations.",
-          "link": "wiki:Consensus sequence"
+          "links": [
+            {
+              "href": "wiki:Consensus sequence"
+            }
+          ]
         }
       }
     },
@@ -163,19 +207,35 @@
       "termInfo": {
         "gene model": {
           "text": "A representation of a gene's predicted or supported exon, transcript, and coding structure on an assembly.",
-          "link": "wiki:Gene prediction"
+          "links": [
+            {
+              "href": "wiki:Gene prediction"
+            }
+          ]
         },
         "repeat annotation": {
           "text": "The identification and classification of repeated sequence elements in an assembled genome.",
-          "link": "wiki:Interspersed repeat"
+          "links": [
+            {
+              "href": "wiki:Interspersed repeat"
+            }
+          ]
         },
         "functional annotation": {
           "text": "Associating genes or other features with evidence about products, roles, pathways, or homology.",
-          "link": "wiki:Genome annotation"
+          "links": [
+            {
+              "href": "wiki:Genome annotation"
+            }
+          ]
         },
         "genome browser": {
           "text": "An interface for viewing sequence coordinates together with annotations and experimental evidence tracks.",
-          "link": "wiki:Genome browser"
+          "links": [
+            {
+              "href": "wiki:Genome browser"
+            }
+          ]
         }
       }
     }
@@ -192,7 +252,11 @@
       "fact": "A sequencing read is the fragmentary sequence record passed from signal interpretation into alignment or assembly.",
       "info": {
         "text": "A nucleotide sequence inferred from one DNA fragment or molecule during a sequencing run.",
-        "link": "https://www.genome.gov/genetics-glossary/Long-Read-DNA-Sequencing"
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Long-Read-DNA-Sequencing"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -211,7 +275,11 @@
       "fact": "Coverage measures how much sequence evidence supports genomic positions; adequate depth helps distinguish a reproducible consensus from isolated measurement error.",
       "info": {
         "text": "The amount of sequencing data covering a nucleotide or genome, often summarized as average depth.",
-        "link": "https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Costs-Data"
+        "links": [
+          {
+            "href": "https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Costs-Data"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "idealTerms": {
@@ -230,7 +298,11 @@
       "fact": "Long-read technologies generate longer fragments that can span repeats and reduce ambiguity during assembly, though read length is only one dimension of data quality.",
       "info": {
         "text": "A sequencing read thousands to hundreds of thousands of nucleotides long, depending on the technology and experiment.",
-        "link": "https://www.genome.gov/genetics-glossary/Long-Read-DNA-Sequencing"
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Long-Read-DNA-Sequencing"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -249,7 +321,11 @@
       "fact": "The assembly provides the sequence and coordinate framework on which gene, repeat, and functional annotations are placed.",
       "info": {
         "text": "A representation of an organism's genome reconstructed from sequence data, at contig, scaffold, chromosome, or complete-genome level.",
-        "link": "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/policies-annotation/data-model/"
+        "links": [
+          {
+            "href": "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/data-processing/policies-annotation/data-model/"
+          }
+        ]
       },
       "relationKind": "foundation",
       "direction": {
@@ -358,13 +434,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

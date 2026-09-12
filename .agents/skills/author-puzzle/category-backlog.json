@@ -324,6 +324,21 @@
         "consonance vs dissonance",
         "meter vs rhythm"
       ]
+    },
+    {
+      "category": "Geography",
+      "id": "hydrology",
+      "title": "Hydrology",
+      "info": {
+        "text": "How water moves through the Earth system: where it is stored, how it flows underground and over land, and how the invisible reservoir connects to every stream and well.",
+        "link": "wiki:Hydrology"
+      },
+      "rationale": "User-directed subcategory seed (2026-09). Natural slice of the only registered earth-environment category; first resident is the groundwater inventory. Register on Geography via update_category when the first puzzle lands.",
+      "seedSubjects": [
+        "groundwater storage and flow",
+        "streamflow and drainage basins",
+        "flooding and flood frequency"
+      ]
     }
   ]
 }

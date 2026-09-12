@@ -1,52 +1,24 @@
-// Generated from content/puzzles/hegemony-and-consent.ccpuzzle.jsonld.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Generated from content/puzzles/hegemony-and-consent.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "hegemony-and-consent",
   "title": "Hegemony and Consent",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Sociology"
+    "political-science",
+    "sociology"
   ],
   "info": {
     "text": "Antonio Gramsci's account of how a ruling class secures its dominance mainly by diffusing consent across civil society, with direct coercion held in reserve rather than doing most of the work -- and what contesting that dominance would actually require.",
-    "link": "wiki:Antonio Gramsci"
+    "links": [
+      {
+        "href": "wiki:Antonio Gramsci"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "the-civil-register",
-      "prompt": "Which of these operate primarily through civil society's own institutions, rather than through the state's directly coercive apparatus?",
-      "explanation": "Civil society, common sense, and organic intellectuals all belong to the register Gramsci distinguished from naked coercion: schools, churches, unions, and the media are where a class's worldview gets diffused and normalized as everyone's shared common sense, with organic intellectuals doing the actual work of articulating and spreading it. None of this requires police or prisons to function -- that is precisely Gramsci's point about how consent, not force, does most of the work in a developed state.",
-      "targets": [
-        "civil society",
-        "common sense",
-        "organic intellectuals"
-      ],
-      "reasons": {
-        "civil society": "The institutional half of the integral state that operates through culture and persuasion rather than direct coercion.",
-        "common sense": "What a class's worldview becomes once it has been diffused widely enough to feel like plain, unquestionable reality.",
-        "organic intellectuals": "The class-specific thinkers who do the actual work of articulating and diffusing that worldview."
-      }
-    },
-    {
-      "id": "tools-for-a-challenger",
-      "prompt": "Which of these name a strategy or resource available to a class trying to build a new hegemony, not just defend an existing one?",
-      "explanation": "Gramsci's vocabulary is symmetric: the same tools that build a ruling class's hegemony -- organic intellectuals doing patient cultural work, contesting the terrain of common sense -- are exactly what a rising class needs to mount a war of position and build a counter-hegemony of its own. Nothing here belongs exclusively to whoever currently holds power.",
-      "targets": [
-        "war of position",
-        "counter-hegemony",
-        "organic intellectuals"
-      ],
-      "reasons": {
-        "counter-hegemony": "The explicit goal of that strategy: not seizing the state directly, but building an alternative worldview capable of replacing the ruling one.",
-        "organic intellectuals": "The same class-specific thinkers who build any hegemony -- ruling or challenging -- by articulating a class's own worldview.",
-        "war of position": "The slow, civil-society-based strategy Gramsci thought a challenger needed wherever an existing hegemony was well dug in."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "the-integral-state",
@@ -65,7 +37,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Gramsci's expanded definition of the state as coercion and consent working together, rather than the narrower, purely coercive state other theorists describe.",
-        "link": "wiki:Antonio Gramsci"
+        "links": [
+          {
+            "href": "wiki:Antonio Gramsci"
+          }
+        ]
       }
     },
     {
@@ -85,7 +61,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The cultural mechanism by which a class's own outlook becomes lived, unquestioned reality for everyone else -- Gramsci's answer to why exploited groups so often consent to their own exploitation.",
-        "link": "wiki:Cultural hegemony"
+        "links": [
+          {
+            "href": "wiki:Cultural hegemony"
+          }
+        ]
       }
     },
     {
@@ -104,7 +84,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Gramsci's strategic vocabulary for how political struggle actually has to be fought, depending on how developed a society's civil society already is.",
-        "link": "wiki:Prison Notebooks"
+        "links": [
+          {
+            "href": "wiki:Prison Notebooks"
+          }
+        ]
       }
     }
   ],
@@ -158,13 +142,44 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
+      "id": "the-civil-register",
+      "prompt": "Which of these operate primarily through civil society's own institutions, rather than through the state's directly coercive apparatus?",
+      "explanation": "Civil society, common sense, and organic intellectuals all belong to the register Gramsci distinguished from naked coercion: schools, churches, unions, and the media are where a class's worldview gets diffused and normalized as everyone's shared common sense, with organic intellectuals doing the actual work of articulating and spreading it. None of this requires police or prisons to function -- that is precisely Gramsci's point about how consent, not force, does most of the work in a developed state.",
+      "targets": [
+        "civil society",
+        "common sense",
+        "organic intellectuals"
+      ],
+      "reasons": {
+        "civil society": "The institutional half of the integral state that operates through culture and persuasion rather than direct coercion.",
+        "common sense": "What a class's worldview becomes once it has been diffused widely enough to feel like plain, unquestionable reality.",
+        "organic intellectuals": "The class-specific thinkers who do the actual work of articulating and diffusing that worldview."
+      }
+    },
+    {
+      "id": "tools-for-a-challenger",
+      "prompt": "Which of these name a strategy or resource available to a class trying to build a new hegemony, not just defend an existing one?",
+      "explanation": "Gramsci's vocabulary is symmetric: the same tools that build a ruling class's hegemony -- organic intellectuals doing patient cultural work, contesting the terrain of common sense -- are exactly what a rising class needs to mount a war of position and build a counter-hegemony of its own. Nothing here belongs exclusively to whoever currently holds power.",
+      "targets": [
+        "war of position",
+        "counter-hegemony",
+        "organic intellectuals"
+      ],
+      "reasons": {
+        "counter-hegemony": "The explicit goal of that strategy: not seizing the state directly, but building an alternative worldview capable of replacing the ruling one.",
+        "organic intellectuals": "The same class-specific thinkers who build any hegemony -- ruling or challenging -- by articulating a class's own worldview.",
+        "war of position": "The slow, civil-society-based strategy Gramsci thought a challenger needed wherever an existing hegemony was well dug in."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

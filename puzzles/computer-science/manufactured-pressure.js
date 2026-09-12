@@ -1,23 +1,364 @@
-// Concept Clusters puzzle: Manufactured Pressure
-// Dark Patterns sequence drafted July 2026 from deceptive.design.
+// Generated from content/puzzles/manufactured-pressure.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
-  id: "manufactured-pressure",
-  title: "Manufactured Pressure",
-  category: "Computer Science",
-  subcategories: { "Computer Science": "computing-and-society" },
-  large: true,
-  info: {
-    text:
-      "How fabricated time limits, scarcity claims, and social signals create pressure that narrows deliberation and steers people toward choices they might not otherwise make.",
-    link: "https://deceptive.design/book/contents/chapter-8/",
-    extraLink: "https://deceptive.design/types/"
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "manufactured-pressure",
+  "title": "Manufactured Pressure",
+  "category": "computer-science",
+  "subcategories": {
+    "computer-science": "computing-and-society"
   },
-  lenses: [
+  "large": true,
+  "info": {
+    "text": "How fabricated time limits, scarcity claims, and social signals create pressure that narrows deliberation and steers people toward choices they might not otherwise make.",
+    "links": [
+      {
+        "href": "https://deceptive.design/book/contents/chapter-8/"
+      },
+      {
+        "href": "https://deceptive.design/types/"
+      }
+    ]
+  },
+  "clusters": [
     {
-      id: "fake-urgency",
-      prompt: "Which concepts form the dominant signature of the Fake Urgency dark pattern?",
-      targets: [
+      "id": "fabricated-conditions",
+      "name": "Fabricated conditions",
+      "color": "teal",
+      "fact": "Manufactured pressure begins by falsely representing when an opportunity ends, how scarce it is, how many people want it, or who endorses it.",
+      "terms": [
+        "false deadline",
+        "artificial scarcity",
+        "invented demand",
+        "invented endorsement"
+      ],
+      "seeds": [
+        "false deadline",
+        "artificial scarcity"
+      ],
+      "termInfo": {
+        "false deadline": {
+          "text": "A claimed expiration time that does not correspond to a genuine end of the offer, often because it resets or remains available afterward.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-urgency/"
+            }
+          ]
+        },
+        "artificial scarcity": {
+          "text": "A false or misleading representation that a product, service, seat, or opportunity is in unusually limited supply.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-scarcity/"
+            }
+          ]
+        },
+        "invented demand": {
+          "text": "A fabricated or exaggerated claim that many other people are viewing, buying, or competing for the same offer.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
+        },
+        "invented endorsement": {
+          "text": "Approval attributed to a customer, reviewer, or authority whose identity, experience, or praise is fabricated or materially misrepresented.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-8/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "interface-signals",
+      "name": "Interface signals",
+      "color": "blue",
+      "fact": "Countdowns, limited-time messages, stock warnings, activity notices, and testimonials make an asserted condition visible and emotionally immediate.",
+      "terms": [
+        "countdown timer",
+        "limited-time message",
+        "low-stock warning",
+        "activity notification",
+        "testimonial"
+      ],
+      "seeds": [
+        "countdown timer",
+        "low-stock warning"
+      ],
+      "termInfo": {
+        "countdown timer": {
+          "text": "A clock displayed as counting toward the end of an offer or opportunity.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-15/"
+            }
+          ]
+        },
+        "limited-time message": {
+          "text": "A statement that an offer, price, or opportunity will expire soon, without necessarily showing a moving timer.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-15/"
+            }
+          ]
+        },
+        "low-stock warning": {
+          "text": "A message claiming that only a small number of products, seats, rooms, or opportunities remain.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-scarcity/"
+            }
+          ]
+        },
+        "activity notification": {
+          "text": "A pop-up or message claiming that another person recently viewed, bought, booked, or otherwise acted on an offer.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
+        },
+        "testimonial": {
+          "text": "A statement presented as praise or recommendation from a customer, reviewer, expert, or other endorser.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-17/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://deceptive.design/types/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "psychological-leverage",
+      "name": "Psychological leverage",
+      "color": "amber",
+      "fact": "Time limits, apparent rarity, and other people's supposed behavior exploit ordinary ways of making decisions under uncertainty and limited attention.",
+      "terms": [
+        "time pressure",
+        "scarcity bias",
+        "social proof",
+        "fear of missing out"
+      ],
+      "seeds": [
+        "time pressure",
+        "social proof"
+      ],
+      "termInfo": {
+        "time pressure": {
+          "text": "The felt need to decide quickly because delay appears likely to remove an opportunity.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
+        },
+        "scarcity bias": {
+          "text": "The tendency to value an option more highly or pursue it more urgently when it appears rare or difficult to obtain.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-scarcity/"
+            }
+          ]
+        },
+        "social proof": {
+          "text": "The tendency to use other people's apparent choices and judgments as evidence about what is safe, valuable, or appropriate.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-17/"
+            }
+          ]
+        },
+        "fear of missing out": {
+          "text": "Anxiety or anticipated regret arising from the possibility that an opportunity will disappear or be taken by others.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-6/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pressured-decisions",
+      "name": "Pressured decisions",
+      "color": "magenta",
+      "fact": "Manufactured pressure harms decision quality by reducing deliberation and comparison, accelerating purchases, misplacing trust, and creating anxiety or stress.",
+      "terms": [
+        "compressed deliberation",
+        "reduced comparison",
+        "hasty purchase",
+        "misplaced trust",
+        "psychological strain"
+      ],
+      "seeds": [
+        "compressed deliberation",
+        "misplaced trust"
+      ],
+      "termInfo": {
+        "compressed deliberation": {
+          "text": "A shortened or subjectively narrowed opportunity to understand an offer and consider whether it serves one's goals.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
+        },
+        "reduced comparison": {
+          "text": "Less willingness or practical opportunity to inspect competing products, prices, evidence, or alternatives before acting.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
+        },
+        "hasty purchase": {
+          "text": "A transaction completed before the person has fully evaluated need, price, credibility, or alternatives.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-urgency/"
+            }
+          ]
+        },
+        "misplaced trust": {
+          "text": "Confidence assigned to an offer because fabricated popularity, activity, or endorsement appears to validate it.",
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
+        },
+        "psychological strain": {
+          "text": "Anxiety, stress, frustration, or emotional burden imposed by an artificially urgent or competitive decision environment.",
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-22/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-22/"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "manufactured-evidence",
+      "term": "manufactured evidence",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "A fabricated deadline, shortage, demand signal, or endorsement is converted into a visible interface cue that appears to provide evidence about the opportunity.",
+      "info": {
+        "text": "Interface content presented as evidence for a condition that has been invented, exaggerated, or detached from reality.",
+        "links": [
+          {
+            "href": "https://deceptive.design/types/"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "false deadline",
+        "countdown timer"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
+    },
+    {
+      "id": "pressure-cue",
+      "term": "pressure cue",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Visible timers, scarcity warnings, activity messages, and testimonials translate asserted conditions into time pressure, fear of missing out, and reliance on social proof.",
+      "info": {
+        "text": "A signal designed to make an asserted deadline, shortage, or social judgment feel immediately relevant to the user's choice.",
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-8/"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "low-stock warning",
+        "scarcity bias"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 2
+      }
+    },
+    {
+      "id": "decision-compression",
+      "term": "decision compression",
+      "clusters": [
+        2,
+        3
+      ],
+      "fact": "Time pressure, scarcity bias, social proof, and fear of missing out can narrow attention and shorten deliberation, making hurried or insufficiently verified choices more likely.",
+      "info": {
+        "text": "The narrowing of time, attention, and perceived options available for reflective decision-making.",
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-8/"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "time pressure",
+        "compressed deliberation"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 3
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "fake-urgency",
+      "prompt": "Which concepts form the dominant signature of the Fake Urgency dark pattern?",
+      "explanation": "Fake Urgency presents a time limit that is false, exaggerated, or repeatedly reset. The apparent deadline creates time pressure, leaving less room to evaluate the offer and increasing stress around the decision.",
+      "targets": [
         "false deadline",
         "countdown timer",
         "limited-time message",
@@ -25,9 +366,7 @@ export default {
         "compressed deliberation",
         "psychological strain"
       ],
-      explanation:
-        "Fake Urgency presents a time limit that is false, exaggerated, or repeatedly reset. The apparent deadline creates time pressure, leaving less room to evaluate the offer and increasing stress around the decision.",
-      reasons: {
+      "reasons": {
         "false deadline": "The claimed closing time does not reflect a genuine limit on the offer.",
         "countdown timer": "A prominent moving clock makes the supposed deadline immediate and difficult to ignore.",
         "limited-time message": "Static language can also claim that an opportunity will disappear soon.",
@@ -37,9 +376,10 @@ export default {
       }
     },
     {
-      id: "fake-scarcity",
-      prompt: "Which concepts form the dominant signature of the Fake Scarcity dark pattern?",
-      targets: [
+      "id": "fake-scarcity",
+      "prompt": "Which concepts form the dominant signature of the Fake Scarcity dark pattern?",
+      "explanation": "Fake Scarcity falsely presents a product or opportunity as difficult to obtain. Low-stock claims activate scarcity bias and fear of missing out, encouraging the person to stop comparing options and purchase before the supposed supply disappears.",
+      "targets": [
         "artificial scarcity",
         "low-stock warning",
         "scarcity bias",
@@ -47,9 +387,7 @@ export default {
         "reduced comparison",
         "hasty purchase"
       ],
-      explanation:
-        "Fake Scarcity falsely presents a product or opportunity as difficult to obtain. Low-stock claims activate scarcity bias and fear of missing out, encouraging the person to stop comparing options and purchase before the supposed supply disappears.",
-      reasons: {
+      "reasons": {
         "artificial scarcity": "The claimed shortage is created or misrepresented rather than reflecting actual supply.",
         "low-stock warning": "The interface announces that only a small number of items or places remain.",
         "scarcity bias": "Things presented as rare can seem more valuable or urgent than they otherwise would.",
@@ -59,9 +397,10 @@ export default {
       }
     },
     {
-      id: "fake-social-proof",
-      prompt: "Which concepts form the dominant signature of the Fake Social Proof dark pattern?",
-      targets: [
+      "id": "fake-social-proof",
+      "prompt": "Which concepts form the dominant signature of the Fake Social Proof dark pattern?",
+      "explanation": "Fake Social Proof fabricates or exaggerates the apparent behavior and approval of other people. Activity messages and testimonials borrow credibility from a crowd or endorser that may not exist, causing trust to rest on manufactured evidence.",
+      "targets": [
         "invented demand",
         "invented endorsement",
         "activity notification",
@@ -69,9 +408,7 @@ export default {
         "social proof",
         "misplaced trust"
       ],
-      explanation:
-        "Fake Social Proof fabricates or exaggerates the apparent behavior and approval of other people. Activity messages and testimonials borrow credibility from a crowd or endorser that may not exist, causing trust to rest on manufactured evidence.",
-      reasons: {
+      "reasons": {
         "invented demand": "The business claims that many other people are viewing, buying, or competing for the offer without a truthful basis.",
         "invented endorsement": "Approval is attributed to customers or reviewers whose support is fabricated or materially misrepresented.",
         "activity notification": "A pop-up or counter presents supposed real-time behavior by other users.",
@@ -81,9 +418,10 @@ export default {
       }
     },
     {
-      id: "decision-compression",
-      prompt: "Which concepts show how manufactured pressure narrows a person's decision process?",
-      targets: [
+      "id": "decision-compression",
+      "prompt": "Which concepts show how manufactured pressure narrows a person's decision process?",
+      "explanation": "Across urgency, scarcity, and social-proof patterns, the interface creates a reason to act before the person feels able to pause. The resulting pressure can reduce comparison, accelerate commitment, and impose psychological strain even when no purchase occurs.",
+      "targets": [
         "pressure cue",
         "fear of missing out",
         "compressed deliberation",
@@ -91,9 +429,7 @@ export default {
         "hasty purchase",
         "psychological strain"
       ],
-      explanation:
-        "Across urgency, scarcity, and social-proof patterns, the interface creates a reason to act before the person feels able to pause. The resulting pressure can reduce comparison, accelerate commitment, and impose psychological strain even when no purchase occurs.",
-      reasons: {
+      "reasons": {
         "pressure cue": "The visible signal converts a fabricated condition into an immediate felt reason to act.",
         "fear of missing out": "Anticipated loss makes delay feel dangerous rather than prudent.",
         "compressed deliberation": "The decision window is experienced as too narrow for careful evaluation.",
@@ -102,206 +438,5 @@ export default {
         "psychological strain": "Pressure consumes emotional and cognitive resources whether or not it succeeds."
       }
     }
-  ],
-  clusters: [
-    {
-      name: "Fabricated conditions",
-      color: "teal",
-      fact:
-        "Manufactured pressure begins by falsely representing when an opportunity ends, how scarce it is, how many people want it, or who endorses it.",
-      terms: [
-        "false deadline",
-        "artificial scarcity",
-        "invented demand",
-        "invented endorsement"
-      ],
-      seeds: ["false deadline", "artificial scarcity"],
-      termInfo: {
-        "false deadline": {
-          text: "A claimed expiration time that does not correspond to a genuine end of the offer, often because it resets or remains available afterward.",
-          link: "https://deceptive.design/types/fake-urgency/"
-        },
-        "artificial scarcity": {
-          text: "A false or misleading representation that a product, service, seat, or opportunity is in unusually limited supply.",
-          link: "https://deceptive.design/types/fake-scarcity/"
-        },
-        "invented demand": {
-          text: "A fabricated or exaggerated claim that many other people are viewing, buying, or competing for the same offer.",
-          link: "https://deceptive.design/types/fake-social-proof/"
-        },
-        "invented endorsement": {
-          text: "Approval attributed to a customer, reviewer, or authority whose identity, experience, or praise is fabricated or materially misrepresented.",
-          link: "https://deceptive.design/types/fake-social-proof/"
-        }
-      },
-      info: {
-        link: "https://deceptive.design/book/contents/chapter-8/"
-      }
-    },
-    {
-      name: "Interface signals",
-      color: "blue",
-      fact:
-        "Countdowns, limited-time messages, stock warnings, activity notices, and testimonials make an asserted condition visible and emotionally immediate.",
-      terms: [
-        "countdown timer",
-        "limited-time message",
-        "low-stock warning",
-        "activity notification",
-        "testimonial"
-      ],
-      seeds: ["countdown timer", "low-stock warning"],
-      termInfo: {
-        "countdown timer": {
-          text: "A clock displayed as counting toward the end of an offer or opportunity.",
-          link: "https://deceptive.design/book/contents/chapter-15/"
-        },
-        "limited-time message": {
-          text: "A statement that an offer, price, or opportunity will expire soon, without necessarily showing a moving timer.",
-          link: "https://deceptive.design/book/contents/chapter-15/"
-        },
-        "low-stock warning": {
-          text: "A message claiming that only a small number of products, seats, rooms, or opportunities remain.",
-          link: "https://deceptive.design/types/fake-scarcity/"
-        },
-        "activity notification": {
-          text: "A pop-up or message claiming that another person recently viewed, bought, booked, or otherwise acted on an offer.",
-          link: "https://deceptive.design/types/fake-social-proof/"
-        },
-        "testimonial": {
-          text: "A statement presented as praise or recommendation from a customer, reviewer, expert, or other endorser.",
-          link: "https://deceptive.design/book/contents/chapter-17/"
-        }
-      },
-      info: {
-        link: "https://deceptive.design/types/"
-      }
-    },
-    {
-      name: "Psychological leverage",
-      color: "amber",
-      fact:
-        "Time limits, apparent rarity, and other people's supposed behavior exploit ordinary ways of making decisions under uncertainty and limited attention.",
-      terms: [
-        "time pressure",
-        "scarcity bias",
-        "social proof",
-        "fear of missing out"
-      ],
-      seeds: ["time pressure", "social proof"],
-      termInfo: {
-        "time pressure": {
-          text: "The felt need to decide quickly because delay appears likely to remove an opportunity.",
-          link: "https://deceptive.design/book/contents/chapter-8/"
-        },
-        "scarcity bias": {
-          text: "The tendency to value an option more highly or pursue it more urgently when it appears rare or difficult to obtain.",
-          link: "https://deceptive.design/types/fake-scarcity/"
-        },
-        "social proof": {
-          text: "The tendency to use other people's apparent choices and judgments as evidence about what is safe, valuable, or appropriate.",
-          link: "https://deceptive.design/book/contents/chapter-17/"
-        },
-        "fear of missing out": {
-          text: "Anxiety or anticipated regret arising from the possibility that an opportunity will disappear or be taken by others.",
-          link: "https://deceptive.design/book/contents/chapter-8/"
-        }
-      },
-      info: {
-        link: "https://deceptive.design/book/contents/chapter-6/"
-      }
-    },
-    {
-      name: "Pressured decisions",
-      color: "magenta",
-      fact:
-        "Manufactured pressure harms decision quality by reducing deliberation and comparison, accelerating purchases, misplacing trust, and creating anxiety or stress.",
-      terms: [
-        "compressed deliberation",
-        "reduced comparison",
-        "hasty purchase",
-        "misplaced trust",
-        "psychological strain"
-      ],
-      seeds: ["compressed deliberation", "misplaced trust"],
-      termInfo: {
-        "compressed deliberation": {
-          text: "A shortened or subjectively narrowed opportunity to understand an offer and consider whether it serves one's goals.",
-          link: "https://deceptive.design/book/contents/chapter-8/"
-        },
-        "reduced comparison": {
-          text: "Less willingness or practical opportunity to inspect competing products, prices, evidence, or alternatives before acting.",
-          link: "https://deceptive.design/book/contents/chapter-8/"
-        },
-        "hasty purchase": {
-          text: "A transaction completed before the person has fully evaluated need, price, credibility, or alternatives.",
-          link: "https://deceptive.design/types/fake-urgency/"
-        },
-        "misplaced trust": {
-          text: "Confidence assigned to an offer because fabricated popularity, activity, or endorsement appears to validate it.",
-          link: "https://deceptive.design/types/fake-social-proof/"
-        },
-        "psychological strain": {
-          text: "Anxiety, stress, frustration, or emotional burden imposed by an artificially urgent or competitive decision environment.",
-          link: "https://deceptive.design/book/contents/chapter-22/"
-        }
-      },
-      info: {
-        link: "https://deceptive.design/book/contents/chapter-22/"
-      }
-    }
-  ],
-  bridges: [
-    {
-      term: "manufactured evidence",
-      clusters: [0, 1],
-      relationKind: "dynamic",
-      direction: {
-        kind: "through",
-        from: 0,
-        to: 1
-      },
-      fact:
-        "A fabricated deadline, shortage, demand signal, or endorsement is converted into a visible interface cue that appears to provide evidence about the opportunity.",
-      idealTerms: ["false deadline", "countdown timer"],
-      info: {
-        text: "Interface content presented as evidence for a condition that has been invented, exaggerated, or detached from reality.",
-        link: "https://deceptive.design/types/"
-      }
-    },
-    {
-      term: "pressure cue",
-      clusters: [1, 2],
-      relationKind: "dynamic",
-      direction: {
-        kind: "through",
-        from: 1,
-        to: 2
-      },
-      fact:
-        "Visible timers, scarcity warnings, activity messages, and testimonials translate asserted conditions into time pressure, fear of missing out, and reliance on social proof.",
-      idealTerms: ["low-stock warning", "scarcity bias"],
-      info: {
-        text: "A signal designed to make an asserted deadline, shortage, or social judgment feel immediately relevant to the user's choice.",
-        link: "https://deceptive.design/book/contents/chapter-8/"
-      }
-    },
-    {
-      term: "decision compression",
-      clusters: [2, 3],
-      relationKind: "dynamic",
-      direction: {
-        kind: "through",
-        from: 2,
-        to: 3
-      },
-      fact:
-        "Time pressure, scarcity bias, social proof, and fear of missing out can narrow attention and shorten deliberation, making hurried or insufficiently verified choices more likely.",
-      idealTerms: ["time pressure", "compressed deliberation"],
-      info: {
-        text: "The narrowing of time, attention, and perceived options available for reflective decision-making.",
-        link: "https://deceptive.design/book/contents/chapter-8/"
-      }
-    }
   ]
-};
+});

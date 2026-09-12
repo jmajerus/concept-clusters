@@ -1,9 +1,9 @@
 {
   "id": "where-failures-stop",
   "title": "Where failures stop",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "programming-languages"
+    "computer-science": "programming-languages"
   },
   "tags": [
     "programming languages",
@@ -14,7 +14,6 @@
   "large": true,
   "info": {
     "text": "A language can make failure explicit without deciding how a whole system should survive it. Reliable error handling joins typed representation and local recovery to containment boundaries, verification tools, and deliberate degradation policies.",
-    "link": "wiki:Exception handling",
     "citations": [
       {
         "title": "Recoverable Errors with Result",
@@ -54,6 +53,11 @@
         "author": "The Erlang/OTP project",
         "url": "https://www.erlang.org/docs/27/system/sup_princ.html"
       }
+    ],
+    "links": [
+      {
+        "href": "wiki:Exception handling"
+      }
     ]
   },
   "clusters": [
@@ -79,19 +83,35 @@
       "termInfo": {
         "Result<T, E>": {
           "text": "Rust's success-or-failure enum, containing either Ok(T) or Err(E).",
-          "link": "https://doc.rust-lang.org/core/result/"
+          "links": [
+            {
+              "href": "https://doc.rust-lang.org/core/result/"
+            }
+          ]
         },
         "Err value": {
           "text": "The Result variant carrying an anticipated failure value rather than a successful output.",
-          "link": "https://doc.rust-lang.org/core/result/enum.Result.html"
+          "links": [
+            {
+              "href": "https://doc.rust-lang.org/core/result/enum.Result.html"
+            }
+          ]
         },
         "question-mark operator": {
           "text": "Rust syntax that extracts success or returns a converted error early from the enclosing function.",
-          "link": "https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html"
+          "links": [
+            {
+              "href": "https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html"
+            }
+          ]
         },
         "error conversion": {
           "text": "Adapting one error type into another, including the From conversion performed during question-mark propagation.",
-          "link": "https://doc.rust-lang.org/std/convert/trait.From.html"
+          "links": [
+            {
+              "href": "https://doc.rust-lang.org/std/convert/trait.From.html"
+            }
+          ]
         }
       }
     },
@@ -117,19 +137,35 @@
       "termInfo": {
         "pattern match": {
           "text": "Explicitly branching on success and failure variants so each case can receive different behavior.",
-          "link": "wiki:Pattern matching"
+          "links": [
+            {
+              "href": "wiki:Pattern matching"
+            }
+          ]
         },
         "context enrichment": {
           "text": "Adding operation, input, or causal information while preserving the underlying error for diagnosis.",
-          "link": "wiki:Exception chaining"
+          "links": [
+            {
+              "href": "wiki:Exception chaining"
+            }
+          ]
         },
         "retry policy": {
           "text": "Rules for whether, when, and how often to attempt an operation again, usually with limits and backoff.",
-          "link": "wiki:Exponential backoff"
+          "links": [
+            {
+              "href": "wiki:Exponential backoff"
+            }
+          ]
         },
         "fallback value": {
           "text": "A deliberately chosen substitute result used when the preferred operation fails.",
-          "link": "wiki:Fault tolerance"
+          "links": [
+            {
+              "href": "wiki:Fault tolerance"
+            }
+          ]
         }
       }
     },
@@ -155,19 +191,35 @@
       "termInfo": {
         "recovery boundary": {
           "text": "A component boundary with enough context and authority to choose retry, fallback, isolation, rejection, or shutdown.",
-          "link": "wiki:Exception handling"
+          "links": [
+            {
+              "href": "wiki:Exception handling"
+            }
+          ]
         },
         "task supervision": {
           "text": "Monitoring isolated workers and applying an explicit restart, stop, or escalation strategy when one terminates.",
-          "link": "https://www.erlang.org/docs/27/system/sup_princ.html"
+          "links": [
+            {
+              "href": "https://www.erlang.org/docs/27/system/sup_princ.html"
+            }
+          ]
         },
         "circuit breaker": {
           "text": "Temporarily blocking calls to a failing dependency so repeated attempts do not amplify the outage.",
-          "link": "wiki:Circuit breaker design pattern"
+          "links": [
+            {
+              "href": "wiki:Circuit breaker design pattern"
+            }
+          ]
         },
         "degraded mode": {
           "text": "An intentionally reduced operating state that preserves safe or valuable functions when full service is unavailable.",
-          "link": "wiki:Graceful degradation"
+          "links": [
+            {
+              "href": "wiki:Graceful degradation"
+            }
+          ]
         }
       }
     },
@@ -193,19 +245,35 @@
       "termInfo": {
         "deny-unwrap lint": {
           "text": "A project rule that rejects unwrap-like calls in selected crates or modules; Clippy already provides an unwrap_used restriction lint.",
-          "link": "https://doc.rust-lang.org/clippy/index.html"
+          "links": [
+            {
+              "href": "https://doc.rust-lang.org/clippy/index.html"
+            }
+          ]
         },
         "panic-path analysis": {
           "text": "Proposed static analysis that traces where panics can originate and which critical tasks or public boundaries they can reach.",
-          "link": "wiki:Static program analysis"
+          "links": [
+            {
+              "href": "wiki:Static program analysis"
+            }
+          ]
         },
         "fault injection": {
           "text": "Deliberately introducing failures or adverse inputs to verify containment, fallback, and recovery behavior.",
-          "link": "wiki:Fault injection"
+          "links": [
+            {
+              "href": "wiki:Fault injection"
+            }
+          ]
         },
         "restricted safety profile": {
           "text": "A project or domain subset that forbids selected constructs and requires stronger analysis, review, and failure tests.",
-          "link": "wiki:Coding standard"
+          "links": [
+            {
+              "href": "wiki:Coding standard"
+            }
+          ]
         }
       }
     },
@@ -231,19 +299,35 @@
       "termInfo": {
         "failure effect": {
           "text": "A type-and-effect annotation recording that a computation may raise or signal specified failures.",
-          "link": "wiki:Effect system"
+          "links": [
+            {
+              "href": "wiki:Effect system"
+            }
+          ]
         },
         "effect handler": {
           "text": "A delimited construct that supplies an interpretation for effect operations and controls how computation resumes.",
-          "link": "https://koka-lang.github.io/koka/doc/book.html"
+          "links": [
+            {
+              "href": "https://koka-lang.github.io/koka/doc/book.html"
+            }
+          ]
         },
         "structured failure region": {
           "text": "A proposed lexical or task scope declaring where propagated failure must be handled and what it is allowed to abort.",
-          "link": "wiki:Structured programming"
+          "links": [
+            {
+              "href": "wiki:Structured programming"
+            }
+          ]
         },
         "typed supervision policy": {
           "text": "A proposed checked contract stating whether a failed task may restart, disable itself, or escalate to a wider boundary.",
-          "link": "https://www.erlang.org/docs/27/system/sup_princ.html"
+          "links": [
+            {
+              "href": "https://www.erlang.org/docs/27/system/sup_princ.html"
+            }
+          ]
         }
       }
     }
@@ -259,8 +343,14 @@
       "fact": "Unwrap crosses from representation to containment by converting Err into a panic. Cloudflare's official postmortem identifies that exact transition; how far the panic then travels depends on worker and system boundaries.",
       "info": {
         "text": "A Result method that returns the success value or panics when the value is Err.",
-        "link": "https://doc.rust-lang.org/core/result/enum.Result.html#method.unwrap",
-        "extraLink": "https://blog.cloudflare.com/18-november-2025-outage/"
+        "links": [
+          {
+            "href": "https://doc.rust-lang.org/core/result/enum.Result.html#method.unwrap"
+          },
+          {
+            "href": "https://blog.cloudflare.com/18-november-2025-outage/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -283,7 +373,11 @@
       "fact": "A failure policy joins local evidence to system intent: it decides which errors merit retry or fallback, which component should be isolated, and when reduced service is safer than continued escalation.",
       "info": {
         "text": "An explicit rule mapping classes of failure and operating context to recovery, containment, escalation, or shutdown behavior.",
-        "link": "wiki:Fault tolerance"
+        "links": [
+          {
+            "href": "wiki:Fault tolerance"
+          }
+        ]
       },
       "relationKind": "foundation",
       "direction": {
@@ -307,7 +401,11 @@
       "fact": "Improvement need not wait for a redesigned language: containment patterns can be adopted now, tools and profiles can verify them next, and research mechanisms can test which guarantees deserve eventual language support.",
       "info": {
         "text": "A sequence that deploys compatible practices and tooling before committing to more disruptive language-level mechanisms.",
-        "link": "wiki:Software evolution"
+        "links": [
+          {
+            "href": "wiki:Software evolution"
+          }
+        ]
       },
       "relationKind": "continuity",
       "idealTerms": {
@@ -433,13 +531,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

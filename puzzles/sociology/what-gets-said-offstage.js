@@ -1,15 +1,15 @@
 // Generated from content/puzzles/what-gets-said-offstage.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "what-gets-said-offstage",
   "title": "What gets said offstage",
-  "category": "Sociology",
+  "category": "sociology",
   "categories": [
-    "Sociology",
-    "Political Science"
+    "sociology",
+    "political-science"
   ],
   "large": true,
   "tags": [
@@ -17,75 +17,28 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "James Scott's account of what happens to dissent under conditions where open confrontation is too costly to risk -- from small, deniable acts of everyday resistance to the disguised, half-public forms that let a hidden truth travel further than a name attached to it ever could.",
-    "title": "What gets said offstage",
     "citations": [
       {
-        "author": "Scott, James C.",
         "title": "Domination and the Arts of Resistance: Hidden Transcripts",
+        "author": "Scott, James C.",
         "publisher": "Yale University Press",
         "year": "1990"
+      },
+      {
+        "title": "Domination and the Arts of Resistance: Hidden Transcripts",
+        "author": "James C. Scott",
+        "publisher": "Yale University Press",
+        "year": "1990"
+      },
+      {
+        "title": "Weapons of the Weak: Everyday Forms of Peasant Resistance",
+        "author": "James C. Scott",
+        "publisher": "Yale University Press",
+        "year": "1985",
+        "pages": "p. xvi"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "Everything targeted here has a built-in exit: if challenged, the person responsible can credibly claim it meant something else, or that no one in particular said it at all. That deniability is the whole design, not an accident of how these happen to work. Grumbling is the excluded case, and the contrast is exact: it is protected by where it happens rather than by any property of the thing said, which is why it disappears the moment the wrong person is in the room.",
-      "id": "deniable",
-      "prompt": "Which of these could be said or done in a way that lets the person responsible credibly deny they meant it?",
-      "reasons": {
-        "anonymity": "Removes the one thing -- a name -- that resistance could be answered to.",
-        "euphemism": "Says the sharp thing in words mild enough to disown.",
-        "feigned ignorance": "A claim about your own understanding that nobody can climb inside and disprove.",
-        "folktale": "Fiction is the disguise; everyone present can hear the target without anyone having said it.",
-        "rumor": "No traceable author, so no one to hold to it."
-      },
-      "targets": [
-        "rumor",
-        "folktale",
-        "anonymity",
-        "euphemism",
-        "feigned ignorance"
-      ]
-    },
-    {
-      "explanation": "Scott's larger claim is that resistance is not primarily a matter of what gets said -- most of it never gets put into words at all. These are things done with the body or the hands rather than argued. Flattery is the excluded case: it looks like behavior but its entire function is verbal, a form of speech that happens to be spoken upward.",
-      "id": "acts-not-words",
-      "prompt": "Which of these are things a person does, rather than things a person says?",
-      "reasons": {
-        "deference": "A performance carried out physically -- a posture, a title used, an argument not raised -- more than a spoken claim.",
-        "false compliance": "An act that looks like obedience and functions as its opposite.",
-        "foot-dragging": "The pace of the work itself is the whole statement.",
-        "pilfering": "Taking is a physical act with no verbal content at all.",
-        "sabotage": "Damage, arranged to look accidental."
-      },
-      "targets": [
-        "foot-dragging",
-        "pilfering",
-        "sabotage",
-        "deference",
-        "false compliance"
-      ]
-    },
-    {
-      "explanation": "Deference, flattery, false compliance, and feigned ignorance all exist only because someone with power might be watching -- take the watcher away and each of these has no reason to occur. The hidden transcript is the excluded case, and it names the exact opposite condition: it exists only in the watcher's absence, which is what makes it the one entry here that a powerful audience could never see performed, only ever be told about.",
-      "id": "needs-an-audience",
-      "prompt": "Which of these exist because power might be watching, rather than because it isn't?",
-      "reasons": {
-        "deference": "A performance with no point unless someone is present to receive it.",
-        "false compliance": "Only functions as resistance if it is being observed as compliance.",
-        "feigned ignorance": "A claim made to someone in particular, about what that person believes you understood.",
-        "flattery": "Praise offered upward has no target if no one upward is listening.",
-        "public transcript": "By definition the record kept where both parties can see each other."
-      },
-      "targets": [
-        "public transcript",
-        "deference",
-        "flattery",
-        "false compliance",
-        "feigned ignorance"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-public",
@@ -112,17 +65,7 @@ export default definePuzzle(import.meta.url, {
           "text": "The open, official record of an interaction between the powerful and the less powerful -- what gets said where both can hear it and both know they are being watched."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "James C. Scott",
-            "publisher": "Yale University Press",
-            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-            "year": "1990"
-          }
-        ],
-        "text": "The open, on-record interaction between the powerful and the less powerful, performed for each other rather than felt by either."
-      }
+      "info": "The open, on-record interaction between the powerful and the less powerful, performed for each other rather than felt by either."
     },
     {
       "id": "cluster-hidden",
@@ -149,17 +92,7 @@ export default definePuzzle(import.meta.url, {
           "text": "What people say about power when the people with power cannot hear it. Often flatly contradicts the public transcript given only minutes before."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "James C. Scott",
-            "publisher": "Yale University Press",
-            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-            "year": "1990"
-          }
-        ],
-        "text": "What gets said out of sight of power, among people who trust each other enough to drop the performance."
-      }
+      "info": "What gets said out of sight of power, among people who trust each other enough to drop the performance."
     },
     {
       "id": "cluster-weapons",
@@ -194,18 +127,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Damage disguised as accident: a gate left open, a machine run wrong. The most severe of these weapons, and the one requiring the most caution, because it invites the most severe response if traced."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "James C. Scott",
-            "pages": "p. xvi",
-            "publisher": "Yale University Press",
-            "title": "Weapons of the Weak: Everyday Forms of Peasant Resistance",
-            "year": "1985"
-          }
-        ],
-        "text": "The small, deniable, everyday acts Scott catalogued among Malaysian peasants -- resistance that never rises to the level of anything anyone could be charged with."
-      }
+      "info": "The small, deniable, everyday acts Scott catalogued among Malaysian peasants -- resistance that never rises to the level of anything anyone could be charged with."
     },
     {
       "id": "cluster-disguise",
@@ -236,17 +158,7 @@ export default definePuzzle(import.meta.url, {
           "text": "A claim with no traceable origin, which is exactly what lets it travel into rooms a signed statement never could."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "James C. Scott",
-            "publisher": "Yale University Press",
-            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-            "year": "1990"
-          }
-        ],
-        "text": "The forms that let something true about power be said where power can hear it, without anyone having to own having said it."
-      }
+      "info": "The forms that let something true about power be said where power can hear it, without anyone having to own having said it."
     }
   ],
   "bridges": [
@@ -258,10 +170,10 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The hidden transcript is not only spoken. Where grumbling among trusted equals fails to relieve the pressure, or conditions keep worsening, the same refusal tends to migrate from words into small, deniable acts -- a field left half-weeded, a tool that breaks at a convenient moment. Nothing has changed except the register. Underneath, it is the same transcript that was already there.",
-      "relationKind": "dynamic",
       "info": {
         "text": "Scott's observation that the hidden transcript exists in two forms -- as speech among trusted equals, and as practice, in acts too small and too deniable to answer for."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "grumbling",
         "foot-dragging"
@@ -280,10 +192,10 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "From the vantage of power, false compliance and genuine deference look identical -- both present as someone doing what they were told. Read from underneath, they are opposites: one is the relationship working as intended, the other is refusal wearing the relationship's clothes. Neither party watching the performance from outside can tell which one they are seeing, which is exactly what makes it usable.",
-      "relationKind": "contrast",
       "info": {
         "text": "The point where the public transcript and its subversion become visually identical, and only the outcome tells them apart."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "deference",
         "false compliance"
@@ -297,10 +209,10 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "A fantasy of the tables turning, told straight, is dangerous. Told as a story about animals, or a joke, or a rumor with no author, it can be said in the open -- even within earshot of the people it is about -- because it can always be disowned. The content of the hidden transcript survives the trip into public view. What it loses is a name attached to whoever said it.",
-      "relationKind": "dynamic",
       "info": {
         "text": "How the content of the hidden transcript gets smuggled into public view, in a form nobody can be made to answer for."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "fantasy of reversal",
         "folktale"
@@ -309,6 +221,65 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 3
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "deniable",
+      "prompt": "Which of these could be said or done in a way that lets the person responsible credibly deny they meant it?",
+      "explanation": "Everything targeted here has a built-in exit: if challenged, the person responsible can credibly claim it meant something else, or that no one in particular said it at all. That deniability is the whole design, not an accident of how these happen to work. Grumbling is the excluded case, and the contrast is exact: it is protected by where it happens rather than by any property of the thing said, which is why it disappears the moment the wrong person is in the room.",
+      "targets": [
+        "rumor",
+        "folktale",
+        "anonymity",
+        "euphemism",
+        "feigned ignorance"
+      ],
+      "reasons": {
+        "anonymity": "Removes the one thing -- a name -- that resistance could be answered to.",
+        "euphemism": "Says the sharp thing in words mild enough to disown.",
+        "feigned ignorance": "A claim about your own understanding that nobody can climb inside and disprove.",
+        "folktale": "Fiction is the disguise; everyone present can hear the target without anyone having said it.",
+        "rumor": "No traceable author, so no one to hold to it."
+      }
+    },
+    {
+      "id": "acts-not-words",
+      "prompt": "Which of these are things a person does, rather than things a person says?",
+      "explanation": "Scott's larger claim is that resistance is not primarily a matter of what gets said -- most of it never gets put into words at all. These are things done with the body or the hands rather than argued. Flattery is the excluded case: it looks like behavior but its entire function is verbal, a form of speech that happens to be spoken upward.",
+      "targets": [
+        "foot-dragging",
+        "pilfering",
+        "sabotage",
+        "deference",
+        "false compliance"
+      ],
+      "reasons": {
+        "deference": "A performance carried out physically -- a posture, a title used, an argument not raised -- more than a spoken claim.",
+        "false compliance": "An act that looks like obedience and functions as its opposite.",
+        "foot-dragging": "The pace of the work itself is the whole statement.",
+        "pilfering": "Taking is a physical act with no verbal content at all.",
+        "sabotage": "Damage, arranged to look accidental."
+      }
+    },
+    {
+      "id": "needs-an-audience",
+      "prompt": "Which of these exist because power might be watching, rather than because it isn't?",
+      "explanation": "Deference, flattery, false compliance, and feigned ignorance all exist only because someone with power might be watching -- take the watcher away and each of these has no reason to occur. The hidden transcript is the excluded case, and it names the exact opposite condition: it exists only in the watcher's absence, which is what makes it the one entry here that a powerful audience could never see performed, only ever be told about.",
+      "targets": [
+        "public transcript",
+        "deference",
+        "flattery",
+        "false compliance",
+        "feigned ignorance"
+      ],
+      "reasons": {
+        "deference": "A performance with no point unless someone is present to receive it.",
+        "false compliance": "Only functions as resistance if it is being observed as compliance.",
+        "feigned ignorance": "A claim made to someone in particular, about what that person believes you understood.",
+        "flattery": "Praise offered upward has no target if no one upward is listening.",
+        "public transcript": "By definition the record kept where both parties can see each other."
       }
     }
   ]

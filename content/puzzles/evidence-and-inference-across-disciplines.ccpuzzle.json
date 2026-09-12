@@ -1,11 +1,15 @@
 {
   "id": "evidence-and-inference-across-disciplines",
   "title": "Evidence and inference across disciplines",
-  "category": "Media & Information Literacy",
+  "category": "media-information-literacy",
   "large": true,
   "info": {
     "text": "Science, history, law, and journalism use different kinds of evidence, but all must ask where information came from, how it was preserved, and what supports an inference.",
-    "link": "wiki:Evidence"
+    "links": [
+      {
+        "href": "wiki:Evidence"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "controlled experiment": {
           "text": "A study that changes an independent variable while holding other relevant conditions constant or comparing against a control.",
-          "link": "wiki:Scientific control"
+          "links": [
+            {
+              "href": "wiki:Scientific control"
+            }
+          ]
         },
         "measurement": {
           "text": "The assignment of values to observations according to defined units, instruments, and procedures.",
-          "link": "wiki:Measurement"
+          "links": [
+            {
+              "href": "wiki:Measurement"
+            }
+          ]
         },
         "replication": {
           "text": "An independent repetition of a study or analysis to test whether its result can be obtained again.",
-          "link": "wiki:Reproducibility"
+          "links": [
+            {
+              "href": "wiki:Reproducibility"
+            }
+          ]
         },
         "statistical analysis": {
           "text": "Methods for summarizing data, estimating uncertainty, testing models, and drawing inferences from variation.",
-          "link": "wiki:Statistical inference"
+          "links": [
+            {
+              "href": "wiki:Statistical inference"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Scientific method"
+        "links": [
+          {
+            "href": "wiki:Scientific method"
+          }
+        ]
       }
     },
     {
@@ -71,23 +95,43 @@
       "termInfo": {
         "archival document": {
           "text": "A document preserved within an archive or manuscript collection together with information about its creator and context.",
-          "link": "wiki:Archive"
+          "links": [
+            {
+              "href": "wiki:Archive"
+            }
+          ]
         },
         "material artifact": {
           "text": "A human-made or modified object studied as evidence about past activity and culture.",
-          "link": "wiki:Artifact (archaeology)"
+          "links": [
+            {
+              "href": "wiki:Artifact (archaeology)"
+            }
+          ]
         },
         "chronology": {
           "text": "The ordering and dating of events so that sequence, duration, and possible relationships can be examined.",
-          "link": "wiki:Chronology"
+          "links": [
+            {
+              "href": "wiki:Chronology"
+            }
+          ]
         },
         "source criticism": {
           "text": "The evaluation of a source's origin, purpose, context, transmission, reliability, and relation to other evidence.",
-          "link": "wiki:Source criticism"
+          "links": [
+            {
+              "href": "wiki:Source criticism"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Historical method"
+        "links": [
+          {
+            "href": "wiki:Historical method"
+          }
+        ]
       }
     },
     {
@@ -112,23 +156,43 @@
       "termInfo": {
         "sworn testimony": {
           "text": "Evidence given by a witness under oath or affirmation in a legal proceeding.",
-          "link": "wiki:Testimony"
+          "links": [
+            {
+              "href": "wiki:Testimony"
+            }
+          ]
         },
         "physical evidence": {
           "text": "A tangible object offered to help prove or disprove a fact in a legal investigation or proceeding.",
-          "link": "wiki:Physical evidence"
+          "links": [
+            {
+              "href": "wiki:Physical evidence"
+            }
+          ]
         },
         "precedent": {
           "text": "An earlier judicial decision used as authority or guidance in deciding a later case.",
-          "link": "wiki:Precedent"
+          "links": [
+            {
+              "href": "wiki:Precedent"
+            }
+          ]
         },
         "chain of custody": {
           "text": "The documented sequence of possession, transfer, analysis, and storage of evidence.",
-          "link": "wiki:Chain of custody"
+          "links": [
+            {
+              "href": "wiki:Chain of custody"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Evidence (law)"
+        "links": [
+          {
+            "href": "wiki:Evidence (law)"
+          }
+        ]
       }
     },
     {
@@ -153,23 +217,43 @@
       "termInfo": {
         "on-record interview": {
           "text": "An interview in which the source agrees that the information and the source's identity may be published.",
-          "link": "wiki:Interview"
+          "links": [
+            {
+              "href": "wiki:Interview"
+            }
+          ]
         },
         "public record": {
           "text": "Information created or maintained by a government body and made available under applicable law or policy.",
-          "link": "wiki:Public records"
+          "links": [
+            {
+              "href": "wiki:Public records"
+            }
+          ]
         },
         "eyewitness account": {
           "text": "A first-person report from someone who directly perceived an event.",
-          "link": "wiki:Eyewitness testimony"
+          "links": [
+            {
+              "href": "wiki:Eyewitness testimony"
+            }
+          ]
         },
         "independent verification": {
           "text": "Confirmation obtained through evidence or sources that do not merely repeat the original claim.",
-          "link": "wiki:Fact-checking"
+          "links": [
+            {
+              "href": "wiki:Fact-checking"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Journalism ethics and standards"
+        "links": [
+          {
+            "href": "wiki:Journalism ethics and standards"
+          }
+        ]
       }
     }
   ],
@@ -185,7 +269,11 @@
       "fact": "Provenance links history, law, and journalism because the origin, custody, and transmission of a document, object, record, or media item shape whether it is authentic and what claims it can support.",
       "info": {
         "text": "The documented history of an item's origin, ownership, custody, or transmission.",
-        "link": "wiki:Provenance"
+        "links": [
+          {
+            "href": "wiki:Provenance"
+          }
+        ]
       },
       "conceptId": "provenance",
       "relationKind": "foundation"
@@ -200,7 +288,11 @@
       "fact": "Expert testimony connects scientific or technical knowledge with legal adjudication when a qualified specialist explains methods, evidence, and inferences relevant to a case.",
       "info": {
         "text": "Opinion evidence offered by a qualified person whose specialized knowledge may help a court understand evidence or decide a fact.",
-        "link": "wiki:Expert witness"
+        "links": [
+          {
+            "href": "wiki:Expert witness"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "idealTerms": {
@@ -218,7 +310,11 @@
       "fact": "Corroboration connects historical and journalistic inquiry because separate sources can support, qualify, or contradict an account rather than merely repeating it.",
       "info": {
         "text": "Support for a claim supplied by additional evidence or an independent source.",
-        "link": "wiki:Corroborating evidence"
+        "links": [
+          {
+            "href": "wiki:Corroborating evidence"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "idealTerms": {
@@ -327,7 +423,11 @@
   "relatedPuzzles": {
     "info": {
       "text": "Follow evidence from source and attribution through verification, interpretation, and public claims.",
-      "link": "wiki:Information literacy"
+      "links": [
+        {
+          "href": "wiki:Information literacy"
+        }
+      ]
     },
     "entries": [
       {

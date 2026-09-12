@@ -221,14 +221,14 @@ import tornadoes from "./anthropology/tornadoes.js";
 // surfaces resolve those ids back to display titles through the registry.
 const afterTheClick = {
   ...afterTheClickSource,
-  category: "Psychology",
-  categories: ["Psychology", "Computer Science"]
+  category: "psychology",
+  categories: ["psychology", "computer-science"]
 };
 
 const whenManipulationBecomesNormal = {
   ...whenManipulationBecomesNormalSource,
-  categories: ["Business & Organizations", "Computer Science"],
-  subcategories: { "Computer Science": "computing-and-society" }
+  categories: ["business-organizations", "computer-science"],
+  subcategories: { "computer-science": "computing-and-society" }
 };
 
 export const PUZZLES = [

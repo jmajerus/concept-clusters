@@ -1,10 +1,10 @@
 {
   "id": "oath-betrayed",
   "title": "Oath Betrayed",
-  "category": "Bioethics",
+  "category": "bioethics",
   "categories": [
-    "Bioethics",
-    "Political Science"
+    "bioethics",
+    "political-science"
   ],
   "tags": [
     "book"

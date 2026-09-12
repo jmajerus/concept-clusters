@@ -1,17 +1,16 @@
 {
   "id": "taking-off-the-engineering-hat",
   "title": "Taking Off the Engineering Hat",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book"
   ],
   "info": {
     "text": "Howard Schwartz's account of organizational narcissism: how identifying with a fantasy of institutional perfection can require an organization to suppress the very evidence that would tell it the fantasy is false.",
-    "link": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm",
     "citations": [
       {
         "title": "On the Psychodynamics of Organizational Disaster: The Case of the Space Shuttle Challenger",
@@ -19,6 +18,24 @@
         "publisher": "Columbia Journal of World Business, 22(1)",
         "year": "1987",
         "pages": "59-67"
+      },
+      {
+        "title": "Narcissistic Process and Corporate Decay: The Theory of the Organization Ideal",
+        "author": "Howard S. Schwartz",
+        "publisher": "New York University Press",
+        "year": "1990"
+      },
+      {
+        "title": "On the Psychodynamics of Organizational Totalitarianism",
+        "author": "Howard S. Schwartz",
+        "publisher": "Journal of Management, 13(1)",
+        "year": "1987",
+        "pages": "41-54"
+      }
+    ],
+    "links": [
+      {
+        "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
       }
     ]
   },
@@ -47,17 +64,7 @@
         "ego ideal": "Freud's term for the internalized image of who one ought to be -- a standard the self measures against and typically falls short of, generating shame. Schwartz's organization ideal offers a way to borrow this function from a collective fantasy instead of bearing it individually.",
         "return to narcissism": "Schwartz's name, after Freud, for the earliest and most primitive fantasy available to the psyche: being at the center of a loving world with no need or lack unmet. Impossible to actually achieve as an adult, but available as fantasy through identification with something imagined as perfect."
       },
-      "info": {
-        "text": "Schwartz's claim that organizations offer members a collective fantasy of perfection to identify with, in place of the individual ego ideal they can never fully live up to on their own.",
-        "citations": [
-          {
-            "title": "Narcissistic Process and Corporate Decay: The Theory of the Organization Ideal",
-            "author": "Howard S. Schwartz",
-            "publisher": "New York University Press",
-            "year": "1990"
-          }
-        ]
-      }
+      "info": "Schwartz's claim that organizations offer members a collective fantasy of perfection to identify with, in place of the individual ego ideal they can never fully live up to on their own."
     },
     {
       "id": "cluster-organizational-totalitarianism",
@@ -85,14 +92,9 @@
       },
       "info": {
         "text": "Schwartz's account of what an organization does to defend the organization ideal once it's been threatened by disconfirming evidence or dissent.",
-        "link": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm",
-        "citations": [
+        "links": [
           {
-            "title": "On the Psychodynamics of Organizational Totalitarianism",
-            "author": "Howard S. Schwartz",
-            "publisher": "Journal of Management, 13(1)",
-            "year": "1987",
-            "pages": "41-54"
+            "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
           }
         ]
       }
@@ -169,20 +171,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

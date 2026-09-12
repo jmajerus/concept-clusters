@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-grammar-of-genocide.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-grammar-of-genocide",
   "title": "The Grammar of Genocide",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "large": true,
   "tags": [
@@ -25,30 +25,30 @@ export default definePuzzle(import.meta.url, {
       }
     ],
     "citations": [
-    {
-      "title": "Eichmann in Jerusalem: A Report on the Banality of Evil",
-      "author": "Arendt, Hannah",
-      "publisher": "Viking Press",
-      "year": "1963"
-    },
-    {
-      "title": "Moral Disengagement: How People Do Harm and Live with Themselves",
-      "author": "Bandura, Albert",
-      "publisher": "Worth Publishers",
-      "year": "2016"
-    },
-    {
-      "title": "Ordinary Men: Reserve Police Battalion 101 and the Final Solution in Poland",
-      "author": "Browning, Christopher R.",
-      "publisher": "HarperCollins",
-      "year": "1992"
-    },
-    {
-      "title": "The Ten Stages of Genocide",
-      "author": "Stanton, Gregory H.",
-      "publisher": "Genocide Watch"
-    }
-  ]
+      {
+        "title": "Eichmann in Jerusalem: A Report on the Banality of Evil",
+        "author": "Arendt, Hannah",
+        "publisher": "Viking Press",
+        "year": "1963"
+      },
+      {
+        "title": "Moral Disengagement: How People Do Harm and Live with Themselves",
+        "author": "Bandura, Albert",
+        "publisher": "Worth Publishers",
+        "year": "2016"
+      },
+      {
+        "title": "Ordinary Men: Reserve Police Battalion 101 and the Final Solution in Poland",
+        "author": "Browning, Christopher R.",
+        "publisher": "HarperCollins",
+        "year": "1992"
+      },
+      {
+        "title": "The Ten Stages of Genocide",
+        "author": "Stanton, Gregory H.",
+        "publisher": "Genocide Watch"
+      }
+    ]
   },
   "clusters": [
     {
@@ -454,28 +454,21 @@ export default definePuzzle(import.meta.url, {
     "requirement": "recommended",
     "title": "Before You Begin: One Impulse, Many Vocabularies",
     "estimatedMinutes": 5,
-    "credit": "By Claude, with editorial direction by jmajerus",
     "content": {
       "mediaType": "text/markdown",
       "text": "## One impulse, many vocabularies\n\nFive genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- share no era, ideology, or geography. Genocide studies has a name for what they do share: dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nThis puzzle traces the architecture a state or movement built -- the objective, the directive, the propaganda category, the administrative apparatus. Christopher Browning's study of a single Holocaust killing unit found individual men complying under peer pressure and duress, without needing full personal conviction -- but that's a claim about behavior in the moment, a different question from what built the architecture those men already stood inside. Some sense that the targeted group counted for less had almost certainly already filtered through the surrounding culture before that architecture was ever built -- a slogan like Untermenschen or inyenzi usually crystallizes a prejudice already circulating, rather than inventing it from nothing. The specific, coined slogans traced here aren't always first in the documented paper trail, though: in these five cases, classification and collective blame each precede a slogan in one instance and follow it in another.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare. A plausible-sounding vocabulary, and a structure willing to act on it, were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
     },
-    
     "revision": 8
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-19"
-    },
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-19"
-    }
-  ]
+  "provenance": {
+    "collaboration": "humanPrimary",
+    "contributors": [
+      {
+        "name": "Claude"
+      },
+      {
+        "name": "jmajerus"
+      }
+    ]
+  }
 });

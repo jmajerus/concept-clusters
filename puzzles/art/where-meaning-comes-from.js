@@ -1,162 +1,24 @@
 // Generated from content/puzzles/where-meaning-comes-from.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "where-meaning-comes-from",
   "title": "Where Meaning Comes From",
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "representation-and-interpretation"
+    "art": "representation-and-interpretation"
   },
   "large": true,
   "info": {
     "text": "Artistic meaning emerges through relationships among artistic choices, the work's visible and material evidence, historical context, and changing audiences.",
-    "link": "wiki:Art interpretation"
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "These Art puzzles move from visual attention and color toward representation and interpretation."
-    },
-    "entries": [
+    "links": [
       {
-        "id": "how-a-picture-directs-the-eye",
-        "via": [
-          "formal-evidence"
-        ],
-        "reason": "Return to composition as one important body of evidence supporting an interpretation."
-      },
-      {
-        "id": "the-work-of-color",
-        "via": [
-          "cultural-convention"
-        ],
-        "reason": "Examine how color gains expressive or symbolic meaning through both visual relationships and context."
-      },
-      {
-        "id": "why-art-changes-what-it-sees",
-        "via": [
-          "interpretation"
-        ],
-        "reason": "Connect choices about realism, abstraction, distortion, symbolism, memory, and imagination to reasoned interpretation."
-      },
-      {
-        "id": "reading-a-painting",
-        "via": [
-          "interpretation",
-          "evidence"
-        ],
-        "reason": "Apply these sources of meaning within a broader close reading of a painting."
+        "href": "wiki:Art interpretation"
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "directly-observable",
-      "prompt": "Which concepts can usually be examined directly in or on the artwork itself?",
-      "targets": [
-        "medium",
-        "technique",
-        "title",
-        "subject matter",
-        "composition",
-        "material evidence"
-      ],
-      "explanation": "These concepts are available through close examination of the work or its immediate presentation, although their significance may still require outside context.",
-      "reasons": {
-        "medium": "The material or technological form of the work can usually be identified from the object or reliable documentation.",
-        "technique": "Marks, joins, layers, carving, printing, or other procedures may be visible in the work.",
-        "title": "A title is commonly presented with the work, though its source and date may still need verification.",
-        "subject matter": "Represented persons, objects, events, or settings can often be identified provisionally from visible content.",
-        "composition": "The arrangement of forms, spaces, and visual relationships is present in the work.",
-        "material evidence": "Physical features, alterations, and traces are evidence carried by the object itself."
-      }
-    },
-    {
-      "id": "requires-outside-evidence",
-      "prompt": "Which concepts usually require evidence beyond the artwork itself?",
-      "targets": [
-        "artist's intention",
-        "patron",
-        "historical context",
-        "original setting",
-        "cultural convention",
-        "provenance"
-      ],
-      "explanation": "These concepts depend on documents, comparison, historical research, or knowledge of institutions and traditions not fully contained within the visible work.",
-      "reasons": {
-        "artist's intention": "Claims about intention normally require statements, preparatory work, or other historical evidence.",
-        "patron": "The identity and influence of a commissioner must usually be established from records.",
-        "historical context": "Political, religious, economic, and social conditions come from evidence outside the object.",
-        "original setting": "The place and function for which a work was made may no longer be visible in its current display.",
-        "cultural convention": "Shared symbolic or representational practices must be reconstructed from broader cultural evidence.",
-        "provenance": "Ownership and transfer history depend on records, inscriptions, catalogues, and related documentation."
-      }
-    },
-    {
-      "id": "can-change-over-time",
-      "prompt": "Which concepts can change substantially during an artwork's later history?",
-      "targets": [
-        "museum label",
-        "viewer response",
-        "critical interpretation",
-        "later reinterpretation",
-        "display context",
-        "provenance"
-      ],
-      "explanation": "Labels, responses, interpretations, display settings, and documented ownership histories can change as institutions, scholarship, and audiences change.",
-      "reasons": {
-        "museum label": "Labels are rewritten as scholarship, institutional priorities, and public language change.",
-        "viewer response": "Different viewers and generations can respond differently to the same work.",
-        "critical interpretation": "Scholarly and critical arguments are revised as evidence and methods develop.",
-        "later reinterpretation": "Later communities may connect a work to questions not foregrounded in its first setting.",
-        "display context": "Movement into a museum, archive, public square, or digital platform changes how a work is encountered.",
-        "provenance": "New ownership records, restitution research, or discoveries can revise the documented history of a work."
-      }
-    },
-    {
-      "id": "supports-accountable-interpretation",
-      "prompt": "Which concepts help make an interpretation accountable rather than merely personal?",
-      "targets": [
-        "composition",
-        "material evidence",
-        "historical context",
-        "cultural convention",
-        "provenance",
-        "interpretive argument"
-      ],
-      "explanation": "Accountable interpretation connects a claim to formal and material evidence, relevant historical conventions, the work's documented history, and an explicit argument that others can assess.",
-      "reasons": {
-        "composition": "Formal relationships provide observable evidence for claims about emphasis, hierarchy, and structure.",
-        "material evidence": "The object's physical features can confirm, complicate, or contradict an interpretation.",
-        "historical context": "Context constrains anachronistic claims and clarifies what was possible or intelligible.",
-        "cultural convention": "Conventions help explain meanings that cannot be inferred reliably from present-day intuition alone.",
-        "provenance": "Ownership and movement can reveal changing functions, power relations, and contexts of display.",
-        "interpretive argument": "An argument states the claim, evidence, reasoning, and uncertainty openly."
-      }
-    }
-  ],
-  "learningIntroduction": {
-    "requirement": "recommended",
-    "title": "Meaning Has More Than One Source",
-    "summary": "Distinguish artistic intention, evidence in the work, historical context, and changing reception before organizing the puzzle.",
-    "estimatedMinutes": 5,
-    "revision": 1,
-    "content": {
-      "text": "# Where Does an Artwork's Meaning Come From?\n\nPeople often ask what an artwork means as though the answer must be hidden in one place.\n\nPerhaps the artist intended a message. Perhaps the subject carries a familiar story. Perhaps the original audience recognized symbols that later viewers no longer know. Perhaps the work acquired new meanings after it entered a museum, appeared in a textbook, or became associated with later events.\n\nArtistic meaning can arise through several interacting sources.\n\n## The artist makes choices\n\nArtists choose materials, subjects, forms, titles, and ways of presenting a work. They may also leave letters, sketches, interviews, or other evidence about their aims.\n\nThis evidence matters, but intention does not automatically settle every question. Artists may have several purposes, may change their minds, or may not fully control how their choices are understood.\n\n## The artwork provides evidence\n\nInterpretation should remain accountable to the work itself.\n\nIts composition, imagery, materials, scale, technique, and internal relationships can support some readings more strongly than others. A convincing interpretation explains details rather than ignoring inconvenient ones.\n\nThis is why interpretation is not simply a free association produced by the viewer.\n\n## Context changes what can be recognized\n\nAn artwork is made in a time and place. It may depend on religious narratives, political events, social roles, artistic conventions, systems of patronage, or a particular location.\n\nA mural in a government building, an image used in worship, and a small portrait kept in a home may function differently even when they share visual features.\n\nRecovering context can make previously obscure choices intelligible.\n\n## Viewers participate in meaning\n\nViewers bring knowledge, memories, identities, expectations, and emotional responses. Different audiences may notice different aspects of the same work.\n\nThose responses are real parts of an artwork's reception, but they are not all equally well supported as claims about the work. Personal response becomes interpretation when it is connected to evidence and explained.\n\n## Meaning can change over time\n\nArtworks can outlive the purposes and institutions that first shaped them.\n\nA work may be moved, damaged, restored, reproduced, censored, celebrated, or reinterpreted. A museum label may emphasize facts that earlier viewers took for granted. Later communities may challenge the conditions under which the work was collected or displayed.\n\nThese later meanings do not erase the original setting, but neither are they merely accidental additions. They become part of the work's history.\n\n## Interpretation is reasoned, not final\n\nA responsible interpretation can be strong without claiming to be the only possible one.\n\nIt should ask:\n\n- What features of the artwork support this reading?\n- What historical or cultural evidence clarifies those features?\n- Which parts remain uncertain?\n- What plausible alternatives should be considered?\n\nThe goal is not to eliminate ambiguity. It is to make interpretation more careful, transparent, and accountable.\n\n---\n\nBefore beginning the puzzle, think of an artwork whose meaning changed after you learned something about its maker, original setting, or history. What new evidence changed your understanding?\n",
-      "mediaType": "text/markdown"
-    }
-  },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "provider": "Anthropic",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "date": "2026-08-02"
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-making-and-purpose",
@@ -176,23 +38,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "medium": {
           "text": "The material, process, or technological form through which an artwork is made.",
-          "link": "wiki:Art medium"
+          "links": [
+            {
+              "href": "wiki:Art medium"
+            }
+          ]
         },
         "technique": {
           "text": "The procedures and skills used to shape, apply, assemble, record, or transform artistic materials.",
-          "link": "wiki:Artistic technique"
+          "links": [
+            {
+              "href": "wiki:Artistic technique"
+            }
+          ]
         },
         "artist's intention": {
           "text": "The purposes, aims, or effects an artist sought, as reconstructed from relevant evidence.",
-          "link": "wiki:Authorial intent"
+          "links": [
+            {
+              "href": "wiki:Authorial intent"
+            }
+          ]
         },
         "patron": {
           "text": "A person or institution that commissions, funds, supports, or otherwise enables the production of art.",
-          "link": "wiki:Patronage"
+          "links": [
+            {
+              "href": "wiki:Patronage"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Artistic production"
+        "links": [
+          {
+            "href": "wiki:Artistic production"
+          }
+        ]
       }
     },
     {
@@ -213,23 +95,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "title": {
           "text": "The name associated with an artwork, which may be assigned by the artist, patron, institution, or later cataloguer.",
-          "link": "wiki:Title (property)"
+          "links": [
+            {
+              "href": "wiki:Title (property)"
+            }
+          ]
         },
         "subject matter": {
           "text": "The persons, objects, events, places, stories, or ideas represented or addressed by a work.",
-          "link": "wiki:Iconography"
+          "links": [
+            {
+              "href": "wiki:Iconography"
+            }
+          ]
         },
         "composition": {
           "text": "The arrangement and relationship of visual elements within an artwork.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         },
         "material evidence": {
           "text": "Physical features such as supports, pigments, joins, inscriptions, damage, alteration, and restoration that bear on a work's history and interpretation.",
-          "link": "wiki:Conservation and restoration of cultural property"
+          "links": [
+            {
+              "href": "wiki:Conservation and restoration of cultural property"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Formal analysis"
+        "links": [
+          {
+            "href": "wiki:Formal analysis"
+          }
+        ]
       }
     },
     {
@@ -250,23 +152,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "historical context": {
           "text": "The political, religious, social, economic, and artistic conditions surrounding a work's production.",
-          "link": "wiki:Art history"
+          "links": [
+            {
+              "href": "wiki:Art history"
+            }
+          ]
         },
         "original setting": {
           "text": "The architectural, civic, domestic, sacred, or other environment for which a work was first made or used.",
-          "link": "wiki:Site-specific art"
+          "links": [
+            {
+              "href": "wiki:Site-specific art"
+            }
+          ]
         },
         "cultural convention": {
           "text": "A shared practice or code through which a community learns to recognize forms, roles, symbols, or meanings.",
-          "link": "wiki:Convention (norm)"
+          "links": [
+            {
+              "href": "wiki:Convention (norm)"
+            }
+          ]
         },
         "provenance": {
           "text": "The documented history of an artwork's ownership, custody, location, and transfer.",
-          "link": "wiki:Provenance"
+          "links": [
+            {
+              "href": "wiki:Provenance"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Art history"
+        "links": [
+          {
+            "href": "wiki:Art history"
+          }
+        ]
       }
     },
     {
@@ -287,23 +209,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "viewer response": {
           "text": "A viewer's perceptual, emotional, intellectual, or embodied reaction to an artwork.",
-          "link": "wiki:Reception theory"
+          "links": [
+            {
+              "href": "wiki:Reception theory"
+            }
+          ]
         },
         "museum label": {
           "text": "Interpretive or identifying text presented by an institution alongside an artwork.",
-          "link": "wiki:Museum label"
+          "links": [
+            {
+              "href": "wiki:Museum label"
+            }
+          ]
         },
         "critical interpretation": {
           "text": "A reasoned account of an artwork developed through analysis, evidence, comparison, and argument.",
-          "link": "wiki:Art criticism"
+          "links": [
+            {
+              "href": "wiki:Art criticism"
+            }
+          ]
         },
         "later reinterpretation": {
           "text": "A subsequent understanding of a work shaped by new evidence, changed values, or a different historical situation.",
-          "link": "wiki:Reception theory"
+          "links": [
+            {
+              "href": "wiki:Reception theory"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Reception theory"
+        "links": [
+          {
+            "href": "wiki:Reception theory"
+          }
+        ]
       }
     }
   ],
@@ -316,12 +258,16 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Formal evidence connects artistic making with interpretation because choices of medium and technique become visible in composition, surface, scale, and other features that can support or challenge a claim.",
-      "conceptId": "formal-evidence",
-      "relationKind": "foundation",
       "info": {
         "text": "Observable features of form and arrangement used as evidence in visual analysis.",
-        "link": "wiki:Formal analysis"
+        "links": [
+          {
+            "href": "wiki:Formal analysis"
+          }
+        ]
       },
+      "conceptId": "formal-evidence",
+      "relationKind": "foundation",
       "idealTerms": [
         "technique",
         "composition"
@@ -335,12 +281,16 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "Display context connects original function with later reception because moving a work into a museum, public space, archive, or digital environment changes what surrounds it, who encounters it, and how it is framed.",
-      "conceptId": "display-context",
-      "relationKind": "continuity",
       "info": {
         "text": "The physical, institutional, and interpretive setting in which an artwork is encountered.",
-        "link": "wiki:Exhibition"
+        "links": [
+          {
+            "href": "wiki:Exhibition"
+          }
+        ]
       },
+      "conceptId": "display-context",
+      "relationKind": "continuity",
       "idealTerms": [
         "original setting",
         "museum label"
@@ -354,18 +304,163 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "An interpretive argument connects evidence with reception by stating what a work may mean, identifying the features and context that support the claim, and making uncertainty or alternative readings available for evaluation.",
-      "conceptId": "interpretation",
-      "relationKind": "evaluation",
       "info": {
         "text": "A claim about meaning supported by explicit evidence and reasoning.",
-        "link": "wiki:Art criticism"
+        "links": [
+          {
+            "href": "wiki:Art criticism"
+          }
+        ]
       },
+      "conceptId": "interpretation",
+      "relationKind": "evaluation",
       "idealTerms": [
         "material evidence",
         "critical interpretation"
       ]
     }
   ],
+  "lenses": [
+    {
+      "id": "directly-observable",
+      "prompt": "Which concepts can usually be examined directly in or on the artwork itself?",
+      "explanation": "These concepts are available through close examination of the work or its immediate presentation, although their significance may still require outside context.",
+      "targets": [
+        "medium",
+        "technique",
+        "title",
+        "subject matter",
+        "composition",
+        "material evidence"
+      ],
+      "reasons": {
+        "medium": "The material or technological form of the work can usually be identified from the object or reliable documentation.",
+        "technique": "Marks, joins, layers, carving, printing, or other procedures may be visible in the work.",
+        "title": "A title is commonly presented with the work, though its source and date may still need verification.",
+        "subject matter": "Represented persons, objects, events, or settings can often be identified provisionally from visible content.",
+        "composition": "The arrangement of forms, spaces, and visual relationships is present in the work.",
+        "material evidence": "Physical features, alterations, and traces are evidence carried by the object itself."
+      }
+    },
+    {
+      "id": "requires-outside-evidence",
+      "prompt": "Which concepts usually require evidence beyond the artwork itself?",
+      "explanation": "These concepts depend on documents, comparison, historical research, or knowledge of institutions and traditions not fully contained within the visible work.",
+      "targets": [
+        "artist's intention",
+        "patron",
+        "historical context",
+        "original setting",
+        "cultural convention",
+        "provenance"
+      ],
+      "reasons": {
+        "artist's intention": "Claims about intention normally require statements, preparatory work, or other historical evidence.",
+        "patron": "The identity and influence of a commissioner must usually be established from records.",
+        "historical context": "Political, religious, economic, and social conditions come from evidence outside the object.",
+        "original setting": "The place and function for which a work was made may no longer be visible in its current display.",
+        "cultural convention": "Shared symbolic or representational practices must be reconstructed from broader cultural evidence.",
+        "provenance": "Ownership and transfer history depend on records, inscriptions, catalogues, and related documentation."
+      }
+    },
+    {
+      "id": "can-change-over-time",
+      "prompt": "Which concepts can change substantially during an artwork's later history?",
+      "explanation": "Labels, responses, interpretations, display settings, and documented ownership histories can change as institutions, scholarship, and audiences change.",
+      "targets": [
+        "museum label",
+        "viewer response",
+        "critical interpretation",
+        "later reinterpretation",
+        "display context",
+        "provenance"
+      ],
+      "reasons": {
+        "museum label": "Labels are rewritten as scholarship, institutional priorities, and public language change.",
+        "viewer response": "Different viewers and generations can respond differently to the same work.",
+        "critical interpretation": "Scholarly and critical arguments are revised as evidence and methods develop.",
+        "later reinterpretation": "Later communities may connect a work to questions not foregrounded in its first setting.",
+        "display context": "Movement into a museum, archive, public square, or digital platform changes how a work is encountered.",
+        "provenance": "New ownership records, restitution research, or discoveries can revise the documented history of a work."
+      }
+    },
+    {
+      "id": "supports-accountable-interpretation",
+      "prompt": "Which concepts help make an interpretation accountable rather than merely personal?",
+      "explanation": "Accountable interpretation connects a claim to formal and material evidence, relevant historical conventions, the work's documented history, and an explicit argument that others can assess.",
+      "targets": [
+        "composition",
+        "material evidence",
+        "historical context",
+        "cultural convention",
+        "provenance",
+        "interpretive argument"
+      ],
+      "reasons": {
+        "composition": "Formal relationships provide observable evidence for claims about emphasis, hierarchy, and structure.",
+        "material evidence": "The object's physical features can confirm, complicate, or contradict an interpretation.",
+        "historical context": "Context constrains anachronistic claims and clarifies what was possible or intelligible.",
+        "cultural convention": "Conventions help explain meanings that cannot be inferred reliably from present-day intuition alone.",
+        "provenance": "Ownership and movement can reveal changing functions, power relations, and contexts of display.",
+        "interpretive argument": "An argument states the claim, evidence, reasoning, and uncertainty openly."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "These Art puzzles move from visual attention and color toward representation and interpretation."
+    },
+    "entries": [
+      {
+        "id": "how-a-picture-directs-the-eye",
+        "reason": "Return to composition as one important body of evidence supporting an interpretation.",
+        "via": [
+          "formal-evidence"
+        ]
+      },
+      {
+        "id": "the-work-of-color",
+        "reason": "Examine how color gains expressive or symbolic meaning through both visual relationships and context.",
+        "via": [
+          "cultural-convention"
+        ]
+      },
+      {
+        "id": "why-art-changes-what-it-sees",
+        "reason": "Connect choices about realism, abstraction, distortion, symbolism, memory, and imagination to reasoned interpretation.",
+        "via": [
+          "interpretation"
+        ]
+      },
+      {
+        "id": "reading-a-painting",
+        "reason": "Apply these sources of meaning within a broader close reading of a painting.",
+        "via": [
+          "interpretation",
+          "evidence"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Meaning Has More Than One Source",
+    "summary": "Distinguish artistic intention, evidence in the work, historical context, and changing reception before organizing the puzzle.",
+    "estimatedMinutes": 5,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "# Where Does an Artwork's Meaning Come From?\n\nPeople often ask what an artwork means as though the answer must be hidden in one place.\n\nPerhaps the artist intended a message. Perhaps the subject carries a familiar story. Perhaps the original audience recognized symbols that later viewers no longer know. Perhaps the work acquired new meanings after it entered a museum, appeared in a textbook, or became associated with later events.\n\nArtistic meaning can arise through several interacting sources.\n\n## The artist makes choices\n\nArtists choose materials, subjects, forms, titles, and ways of presenting a work. They may also leave letters, sketches, interviews, or other evidence about their aims.\n\nThis evidence matters, but intention does not automatically settle every question. Artists may have several purposes, may change their minds, or may not fully control how their choices are understood.\n\n## The artwork provides evidence\n\nInterpretation should remain accountable to the work itself.\n\nIts composition, imagery, materials, scale, technique, and internal relationships can support some readings more strongly than others. A convincing interpretation explains details rather than ignoring inconvenient ones.\n\nThis is why interpretation is not simply a free association produced by the viewer.\n\n## Context changes what can be recognized\n\nAn artwork is made in a time and place. It may depend on religious narratives, political events, social roles, artistic conventions, systems of patronage, or a particular location.\n\nA mural in a government building, an image used in worship, and a small portrait kept in a home may function differently even when they share visual features.\n\nRecovering context can make previously obscure choices intelligible.\n\n## Viewers participate in meaning\n\nViewers bring knowledge, memories, identities, expectations, and emotional responses. Different audiences may notice different aspects of the same work.\n\nThose responses are real parts of an artwork's reception, but they are not all equally well supported as claims about the work. Personal response becomes interpretation when it is connected to evidence and explained.\n\n## Meaning can change over time\n\nArtworks can outlive the purposes and institutions that first shaped them.\n\nA work may be moved, damaged, restored, reproduced, censored, celebrated, or reinterpreted. A museum label may emphasize facts that earlier viewers took for granted. Later communities may challenge the conditions under which the work was collected or displayed.\n\nThese later meanings do not erase the original setting, but neither are they merely accidental additions. They become part of the work's history.\n\n## Interpretation is reasoned, not final\n\nA responsible interpretation can be strong without claiming to be the only possible one.\n\nIt should ask:\n\n- What features of the artwork support this reading?\n- What historical or cultural evidence clarifies those features?\n- Which parts remain uncertain?\n- What plausible alternatives should be considered?\n\nThe goal is not to eliminate ambiguity. It is to make interpretation more careful, transparent, and accountable.\n\n---\n\nBefore beginning the puzzle, think of an artwork whose meaning changed after you learned something about its maker, original setting, or history. What new evidence changed your understanding?\n"
+    },
+    "revision": 1
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  },
   "language": "en",
   "version": 1
 });

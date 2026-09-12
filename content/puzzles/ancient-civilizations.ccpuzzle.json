@@ -1,7 +1,7 @@
 {
   "id": "ancient-civilizations",
   "title": "Ancient civilizations",
-  "category": "History & Society",
+  "category": "history-society",
   "clusters": [
     {
       "id": "mesopotamia",
@@ -24,21 +24,41 @@
       ],
       "termInfo": {
         "cuneiform": {
-          "link": "wiki:Cuneiform"
+          "links": [
+            {
+              "href": "wiki:Cuneiform"
+            }
+          ]
         },
         "ziggurat": {
-          "link": "wiki:Ziggurat"
+          "links": [
+            {
+              "href": "wiki:Ziggurat"
+            }
+          ]
         },
         "Tigris-Euphrates": {
-          "link": "wiki:Tigris–Euphrates river system"
+          "links": [
+            {
+              "href": "wiki:Tigris–Euphrates river system"
+            }
+          ]
         },
         "Hammurabi's Code": {
           "text": "One of the earliest written law codes, carved in stone under the Babylonian king Hammurabi around 1750 BCE.",
-          "link": "wiki:Code of Hammurabi"
+          "links": [
+            {
+              "href": "wiki:Code of Hammurabi"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Mesopotamia"
+        "links": [
+          {
+            "href": "wiki:Mesopotamia"
+          }
+        ]
       }
     },
     {
@@ -62,21 +82,41 @@
       ],
       "termInfo": {
         "pharaoh": {
-          "link": "wiki:Pharaoh"
+          "links": [
+            {
+              "href": "wiki:Pharaoh"
+            }
+          ]
         },
         "Nile": {
-          "link": "wiki:Nile"
+          "links": [
+            {
+              "href": "wiki:Nile"
+            }
+          ]
         },
         "pyramid": {
-          "link": "wiki:Pyramid"
+          "links": [
+            {
+              "href": "wiki:Pyramid"
+            }
+          ]
         },
         "hieroglyphics": {
           "text": "Ancient Egypt's writing system, combining pictorial and phonetic symbols.",
-          "link": "wiki:Egyptian hieroglyphs"
+          "links": [
+            {
+              "href": "wiki:Egyptian hieroglyphs"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Ancient Egypt"
+        "links": [
+          {
+            "href": "wiki:Ancient Egypt"
+          }
+        ]
       }
     },
     {
@@ -100,22 +140,42 @@
       ],
       "termInfo": {
         "Mohenjo-daro": {
-          "link": "wiki:Mohenjo-daro"
+          "links": [
+            {
+              "href": "wiki:Mohenjo-daro"
+            }
+          ]
         },
         "standardized weights": {
           "text": "Uniform stone weights found across Indus Valley sites, suggesting a shared system of trade and measurement spanning the whole civilization.",
-          "link": "wiki:Indus Valley Civilisation"
+          "links": [
+            {
+              "href": "wiki:Indus Valley Civilisation"
+            }
+          ]
         },
         "drainage": {
-          "link": "wiki:Drainage"
+          "links": [
+            {
+              "href": "wiki:Drainage"
+            }
+          ]
         },
         "Indus script": {
           "text": "The Indus Valley's system of symbols, found on seals and pottery — still undeciphered today.",
-          "link": "wiki:Indus script"
+          "links": [
+            {
+              "href": "wiki:Indus script"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Indus Valley Civilisation"
+        "links": [
+          {
+            "href": "wiki:Indus Valley Civilisation"
+          }
+        ]
       }
     }
   ],
@@ -129,7 +189,11 @@
       ],
       "fact": "Writing systems bridge the two: cuneiform and hieroglyphics both emerged as river-valley civilizations needed to track trade and law.",
       "info": {
-        "link": "wiki:Writing system"
+        "links": [
+          {
+            "href": "wiki:Writing system"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -145,7 +209,11 @@
       ],
       "fact": "Trade bridges the two: Egyptian and Indus Valley merchants exchanged goods across the Arabian Sea, linking two of the era's great river civilizations.",
       "info": {
-        "link": "wiki:Trade"
+        "links": [
+          {
+            "href": "wiki:Trade"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {

@@ -1,79 +1,49 @@
 // Generated from content/puzzles/taking-off-the-engineering-hat.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "taking-off-the-engineering-hat",
   "title": "Taking Off the Engineering Hat",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book"
   ],
   "info": {
-    "citations": [
+    "text": "Howard Schwartz's account of organizational narcissism: how identifying with a fantasy of institutional perfection can require an organization to suppress the very evidence that would tell it the fantasy is false.",
+    "links": [
       {
-        "author": "Howard S. Schwartz",
-        "pages": "59-67",
-        "publisher": "Columbia Journal of World Business, 22(1)",
-        "title": "On the Psychodynamics of Organizational Disaster: The Case of the Space Shuttle Challenger",
-        "year": "1987"
+        "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
       }
     ],
-    "link": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm",
-    "text": "Howard Schwartz's account of organizational narcissism: how identifying with a fantasy of institutional perfection can require an organization to suppress the very evidence that would tell it the fantasy is false."
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Another route to the same puzzle: how organizations manage not to know what they already know."
-    },
-    "entries": [
+    "citations": [
       {
-        "id": "moral-disengagement-and-moral-inversion",
-        "via": [
-          "reality denial",
-          "suppressed dissent"
-        ],
-        "reason": "Compare Schwartz's psychoanalytic account of NASA's self-deception with Bandura's account of how harm gets reframed and responsibility displaced -- two very different explanations for how organizations manage to look away from what they already know."
+        "title": "On the Psychodynamics of Organizational Disaster: The Case of the Space Shuttle Challenger",
+        "author": "Howard S. Schwartz",
+        "publisher": "Columbia Journal of World Business, 22(1)",
+        "year": "1987",
+        "pages": "59-67"
+      },
+      {
+        "title": "Narcissistic Process and Corporate Decay: The Theory of the Organization Ideal",
+        "author": "Howard S. Schwartz",
+        "publisher": "New York University Press",
+        "year": "1990"
+      },
+      {
+        "title": "On the Psychodynamics of Organizational Totalitarianism",
+        "author": "Howard S. Schwartz",
+        "publisher": "Journal of Management, 13(1)",
+        "year": "1987",
+        "pages": "41-54"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "All three protect the same thing from being tested. Dissent gets repressed because it might prove the ideal false; reality testing gets lost because updating on evidence would mean the same thing; and advancement gets treated as attainment so that someone, somewhere in the hierarchy, can keep embodying the ideal for everyone else's faith in it to rest on. Each is a different move in service of not finding out.",
-      "id": "not-finding-out",
-      "prompt": "Which concepts describe something that becomes harder to challenge specifically because challenging it would mean admitting the ideal is false?",
-      "reasons": {
-        "advancement as attainment": "Required so that someone, somewhere in the hierarchy, can keep embodying the ideal for everyone else.",
-        "loss of reality testing": "Abandoned specifically where confirming it would mean disconfirming the ideal.",
-        "repressed dissent": "Silenced specifically because it might disconfirm the ideal."
-      },
-      "targets": [
-        "repressed dissent",
-        "loss of reality testing",
-        "advancement as attainment"
-      ]
-    },
-    {
-      "explanation": "Schwartz's account inverts the usual assumption that authority tracks competence or being well-informed. The higher a role sits, the more it's expected to embody the organization ideal, the more invested it becomes in protecting that fantasy against disconfirming evidence, and the more power it has to enforce that protection on everyone below it. Reality-testing capacity and positional power move in opposite directions.",
-      "id": "further-up-further-from",
-      "prompt": "Which concepts describe something that gets stronger, not weaker, the higher up the hierarchy you go?",
-      "reasons": {
-        "advancement as attainment": "The premise the other two build on: higher position is treated as closer to the ideal.",
-        "loss of reality testing": "Concentrated most heavily in roles most invested in, and most rewarded for, protecting the ideal.",
-        "organizational totalitarianism": "Requires the power that comes with higher position to actually enforce."
-      },
-      "targets": [
-        "advancement as attainment",
-        "loss of reality testing",
-        "organizational totalitarianism"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-organization-ideal",
@@ -95,17 +65,7 @@ export default definePuzzle(import.meta.url, {
         "ego ideal": "Freud's term for the internalized image of who one ought to be -- a standard the self measures against and typically falls short of, generating shame. Schwartz's organization ideal offers a way to borrow this function from a collective fantasy instead of bearing it individually.",
         "return to narcissism": "Schwartz's name, after Freud, for the earliest and most primitive fantasy available to the psyche: being at the center of a loving world with no need or lack unmet. Impossible to actually achieve as an adult, but available as fantasy through identification with something imagined as perfect."
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Howard S. Schwartz",
-            "publisher": "New York University Press",
-            "title": "Narcissistic Process and Corporate Decay: The Theory of the Organization Ideal",
-            "year": "1990"
-          }
-        ],
-        "text": "Schwartz's claim that organizations offer members a collective fantasy of perfection to identify with, in place of the individual ego ideal they can never fully live up to on their own."
-      }
+      "info": "Schwartz's claim that organizations offer members a collective fantasy of perfection to identify with, in place of the individual ego ideal they can never fully live up to on their own."
     },
     {
       "id": "cluster-organizational-totalitarianism",
@@ -128,17 +88,12 @@ export default definePuzzle(import.meta.url, {
         "repressed dissent": "Disagreement or bad news treated as a threat to be silenced rather than information to be evaluated, since acknowledging it would mean acknowledging the organization ideal is false."
       },
       "info": {
-        "citations": [
+        "text": "Schwartz's account of what an organization does to defend the organization ideal once it's been threatened by disconfirming evidence or dissent.",
+        "links": [
           {
-            "author": "Howard S. Schwartz",
-            "pages": "41-54",
-            "publisher": "Journal of Management, 13(1)",
-            "title": "On the Psychodynamics of Organizational Totalitarianism",
-            "year": "1987"
+            "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
           }
-        ],
-        "link": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm",
-        "text": "Schwartz's account of what an organization does to defend the organization ideal once it's been threatened by disconfirming evidence or dissent."
+        ]
       }
     }
   ],
@@ -151,10 +106,10 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Schwartz's clearest illustration is the night before the Challenger launch, when Morton-Thiokol's vice president of engineering was asked, in effect, to \"take off his engineering hat and put on his management hat.\" The engineering role stayed in contact with the O-ring data; the management role was committed to protecting NASA's self-image as reliable and operational. He switched, reversed the engineers' unanimous no-launch recommendation, and the organization ideal survived one more day at the cost of seven astronauts.",
-      "relationKind": "dynamic",
       "info": {
         "text": "The same person can occupy either role -- one still testing belief against evidence, one committed to protecting the ideal -- and which role is active determines which cluster's logic governs the decision."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "advancement as attainment",
         "distance from reality"
@@ -166,20 +121,59 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "not-finding-out",
+      "prompt": "Which concepts describe something that becomes harder to challenge specifically because challenging it would mean admitting the ideal is false?",
+      "explanation": "All three protect the same thing from being tested. Dissent gets repressed because it might prove the ideal false; reality testing gets lost because updating on evidence would mean the same thing; and advancement gets treated as attainment so that someone, somewhere in the hierarchy, can keep embodying the ideal for everyone else's faith in it to rest on. Each is a different move in service of not finding out.",
+      "targets": [
+        "repressed dissent",
+        "loss of reality testing",
+        "advancement as attainment"
+      ],
+      "reasons": {
+        "advancement as attainment": "Required so that someone, somewhere in the hierarchy, can keep embodying the ideal for everyone else.",
+        "loss of reality testing": "Abandoned specifically where confirming it would mean disconfirming the ideal.",
+        "repressed dissent": "Silenced specifically because it might disconfirm the ideal."
+      }
     },
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "lenses",
-      "system": "Claude"
+      "id": "further-up-further-from",
+      "prompt": "Which concepts describe something that gets stronger, not weaker, the higher up the hierarchy you go?",
+      "explanation": "Schwartz's account inverts the usual assumption that authority tracks competence or being well-informed. The higher a role sits, the more it's expected to embody the organization ideal, the more invested it becomes in protecting that fantasy against disconfirming evidence, and the more power it has to enforce that protection on everyone below it. Reality-testing capacity and positional power move in opposite directions.",
+      "targets": [
+        "advancement as attainment",
+        "loss of reality testing",
+        "organizational totalitarianism"
+      ],
+      "reasons": {
+        "advancement as attainment": "The premise the other two build on: higher position is treated as closer to the ideal.",
+        "loss of reality testing": "Concentrated most heavily in roles most invested in, and most rewarded for, protecting the ideal.",
+        "organizational totalitarianism": "Requires the power that comes with higher position to actually enforce."
+      }
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Another route to the same puzzle: how organizations manage not to know what they already know."
+    },
+    "entries": [
+      {
+        "id": "moral-disengagement-and-moral-inversion",
+        "reason": "Compare Schwartz's psychoanalytic account of NASA's self-deception with Bandura's account of how harm gets reframed and responsibility displaced -- two very different explanations for how organizations manage to look away from what they already know.",
+        "via": [
+          "reality denial",
+          "suppressed dissent"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

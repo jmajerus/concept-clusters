@@ -1,13 +1,13 @@
 {
   "id": "freedom-from-freedom-to",
   "title": "Freedom From, Freedom To",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "tags": [
     "book"
@@ -50,7 +50,11 @@
       },
       "info": {
         "text": "Freedom as the absence of deliberate interference by other people -- the area within which a person can act unobstructed, whatever they choose to do with it.",
-        "link": "wiki:Negative and positive liberty"
+        "links": [
+          {
+            "href": "wiki:Negative and positive liberty"
+          }
+        ]
       }
     },
     {
@@ -105,7 +109,11 @@
       },
       "info": {
         "text": "Berlin's warning about how positive liberty's own internal logic -- not a distortion of it, but a short step from it -- has historically been used to justify coercion in freedom's own name.",
-        "link": "wiki:Isaiah Berlin"
+        "links": [
+          {
+            "href": "wiki:Isaiah Berlin"
+          }
+        ]
       }
     }
   ],
@@ -194,20 +202,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

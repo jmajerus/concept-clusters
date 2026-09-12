@@ -1,10 +1,10 @@
 {
   "id": "true-self-false-self",
   "title": "True Self, False Self",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Business & Organizations"
+    "psychology",
+    "business-organizations"
   ],
   "tags": [
     "book"
@@ -47,7 +47,11 @@
       },
       "info": {
         "text": "Winnicott's name for the part of a person rooted in bodily aliveness and spontaneous action -- the source of feeling real, as distinct from merely existing or performing.",
-        "link": "wiki:True self and false self"
+        "links": [
+          {
+            "href": "wiki:True self and false self"
+          }
+        ]
       }
     },
     {
@@ -103,7 +107,11 @@
       },
       "info": {
         "text": "Winnicott's developmental account of why the split forms at all -- not a single trauma, but a pattern of how reliably an early environment meets a person's own spontaneous expression.",
-        "link": "wiki:Good enough parenting"
+        "links": [
+          {
+            "href": "wiki:Good enough parenting"
+          }
+        ]
       }
     }
   ],
@@ -200,20 +208,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

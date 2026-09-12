@@ -1,82 +1,36 @@
 // Generated from content/puzzles/governing-the-commons.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "governing-the-commons",
   "title": "Governing the commons",
-  "category": "Economics",
-  "categories": ["Economics", "Sociology", "Political Science"],
+  "category": "economics",
+  "categories": [
+    "economics",
+    "sociology",
+    "political-science"
+  ],
   "tags": [
     "book"
   ],
   "info": {
-    "link": "https://www.beyondintractability.org/bksum/ostrom-governing",
     "text": "Elinor Ostrom's account of how communities sharing a finite resource have governed it for centuries without privatising it and without an outside enforcer -- and the features those arrangements turn out to have in common.",
-    "title": "Governing the Commons",
+    "links": [
+      {
+        "href": "https://www.beyondintractability.org/bksum/ostrom-governing"
+      }
+    ],
     "citations": [
       {
-        "author": "Ostrom, Elinor",
         "title": "Governing the Commons: The Evolution of Institutions for Collective Action",
+        "author": "Ostrom, Elinor",
         "publisher": "Cambridge University Press",
         "year": "1990"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "Almost everything else on this board rests on the answer to this one. You cannot monitor a group without knowing who is in it, cannot sanction someone who was never a member, and cannot fit rules to a resource whose extent is undefined. It is also where the parable does its damage: an open-access pasture has no line at all, and generalising from it to commons that do have lines is the substitution Ostrom spent a book undoing. Polycentric governance is the excluded case worth arguing over -- overlapping centres of authority are exactly where lines are least clean, and that is the point of them rather than a defect.",
-      "id": "where-the-line-runs",
-      "prompt": "Which of these are about where the line runs -- who counts as a member, and what falls inside the resource?",
-      "reasons": {
-        "clearly defined boundaries": "The principle is the line itself: who may draw, and from what.",
-        "common-pool resource": "Defined by how hard exclusion is -- which is to say, by how badly the line behaves.",
-        "nested enterprises": "Layers of governance are boundaries drawn at more than one scale at once.",
-        "open access": "The case where no line exists at all, which is what makes it the parable's setting."
-      },
-      "targets": [
-        "clearly defined boundaries",
-        "common-pool resource",
-        "open access",
-        "nested enterprises"
-      ]
-    },
-    {
-      "explanation": "Ostrom's account separates two questions that policy discussion usually runs together: what the rules should be, and why anyone would follow them. The second is not answered by better rules. It is answered by arrangements letting each person see that their own restraint is not being farmed -- which is why monitoring by users rather than inspectors matters, and why a light first penalty matters. Congruence with local conditions is the excluded case: it makes rules worth following, which is a different job from making them followed.",
-      "id": "believable",
-      "prompt": "Which of these exist to make a commitment believable, rather than to decide what the rules should say?",
-      "reasons": {
-        "credible commitment": "Names the problem the other three are solving.",
-        "graduated sanctions": "A penalty schedule people will actually apply is what makes the threat real.",
-        "monitoring": "A promise nobody can check is not evidence about anything.",
-        "quasi-voluntary compliance": "Willing compliance, held in place by seeing others comply."
-      },
-      "targets": [
-        "monitoring",
-        "graduated sanctions",
-        "credible commitment",
-        "quasi-voluntary compliance"
-      ]
-    },
-    {
-      "explanation": "This is what makes Ostrom's problem harder than the two-player version. Two people in a long relationship see each other's moves, can answer a defection proportionately, and carry a shared history that makes repair possible -- all of it free, a by-product of there being two of them. A hundred irrigators sharing a canal have none of it. Every one of those conditions has to be built deliberately, paid for, and maintained, and the design principles are the specification for building them. Congruence with local conditions is excluded because it has no two-player analogue at all: it is about fitting rules to a resource, not to an opponent.",
-      "id": "built-not-inherited",
-      "prompt": "Which of these deliberately supply something that two people in a long relationship get for nothing?",
-      "reasons": {
-        "clearly defined boundaries": "Two people know exactly who they are dealing with; a hundred users of an aquifer do not.",
-        "conflict-resolution mechanisms": "A couple can repair in the moment; a group needs somewhere to take it.",
-        "graduated sanctions": "Proportionate response, written down in advance because no one's temper can be relied on to be proportionate.",
-        "monitoring": "In a two-player game you see every move the other makes. Here someone has to be assigned to look."
-      },
-      "targets": [
-        "monitoring",
-        "graduated sanctions",
-        "conflict-resolution mechanisms",
-        "clearly defined boundaries"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-trap",
@@ -104,13 +58,21 @@ export default definePuzzle(import.meta.url, {
           "text": "A resource with no defined membership and no way to exclude anyone. Hardin's pasture is one of these. Most historical commons were not, which is the substitution the parable quietly makes."
         },
         "tragedy of the commons": {
-          "link": "https://ostromworkshop.indiana.edu/courses-teaching/teaching-tools/tragedy-commons/index.html",
-          "text": "Hardin's 1968 argument that a shared finite resource will be depleted, because each user gains the whole benefit of taking more while bearing only a share of the cost."
+          "text": "Hardin's 1968 argument that a shared finite resource will be depleted, because each user gains the whole benefit of taking more while bearing only a share of the cost.",
+          "links": [
+            {
+              "href": "https://ostromworkshop.indiana.edu/courses-teaching/teaching-tools/tragedy-commons/index.html"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://ostromworkshop.indiana.edu/courses-teaching/teaching-tools/tragedy-commons/index.html",
-        "text": "The argument that a shared resource is destroyed by the ordinary self-interest of the people using it."
+        "text": "The argument that a shared resource is destroyed by the ordinary self-interest of the people using it.",
+        "links": [
+          {
+            "href": "https://ostromworkshop.indiana.edu/courses-teaching/teaching-tools/tragedy-commons/index.html"
+          }
+        ]
       }
     },
     {
@@ -210,10 +172,10 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Nobody restrains themselves first if they expect everyone else to take whatever they leave. The obstacle is not selfishness; it is assurance. And assurance is not a feeling people can decide to have -- it is something an arrangement either produces or fails to produce. Monitoring and a schedule of penalties are the machinery that turns a shared promise into one it is reasonable to act on before anyone else has.",
-      "relationKind": "dynamic",
       "info": {
         "text": "The problem of making a promise to restrain yourself believable enough that others will act on it. One of the three core problems Ostrom sets out."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "free riding",
         "monitoring"
@@ -232,10 +194,10 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "People keep rules they had a hand in writing, provided they can see that most others are keeping them too. Neither half works alone. Participation without monitoring produces rules everyone endorses and nobody follows; monitoring without participation produces rules people evade on principle. This is why these two groups of principles are one mechanism rather than two lists.",
-      "relationKind": "dynamic",
       "info": {
         "text": "Following a rule willingly, but conditional on evidence that others are doing the same."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "collective-choice arrangements",
         "graduated sanctions"
@@ -254,14 +216,67 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "Hardin's argument, and the policy tradition that followed it, cast an outside enforcer as the thing that saves a commons. Ostrom's cases point the other way: what they most needed from outside was to be left alone. Not administration -- only non-interference. Where governments intervened by replacing local rules with national ones, arrangements that had run for centuries came apart within a generation.",
-      "relationKind": "contrast",
       "info": {
         "text": "The state, or any body outside the group of users, and what part it plays in whether a commons survives."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         null,
         "recognition of the right to organize"
       ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "where-the-line-runs",
+      "prompt": "Which of these are about where the line runs -- who counts as a member, and what falls inside the resource?",
+      "explanation": "Almost everything else on this board rests on the answer to this one. You cannot monitor a group without knowing who is in it, cannot sanction someone who was never a member, and cannot fit rules to a resource whose extent is undefined. It is also where the parable does its damage: an open-access pasture has no line at all, and generalising from it to commons that do have lines is the substitution Ostrom spent a book undoing. Polycentric governance is the excluded case worth arguing over -- overlapping centres of authority are exactly where lines are least clean, and that is the point of them rather than a defect.",
+      "targets": [
+        "clearly defined boundaries",
+        "common-pool resource",
+        "open access",
+        "nested enterprises"
+      ],
+      "reasons": {
+        "clearly defined boundaries": "The principle is the line itself: who may draw, and from what.",
+        "common-pool resource": "Defined by how hard exclusion is -- which is to say, by how badly the line behaves.",
+        "nested enterprises": "Layers of governance are boundaries drawn at more than one scale at once.",
+        "open access": "The case where no line exists at all, which is what makes it the parable's setting."
+      }
+    },
+    {
+      "id": "believable",
+      "prompt": "Which of these exist to make a commitment believable, rather than to decide what the rules should say?",
+      "explanation": "Ostrom's account separates two questions that policy discussion usually runs together: what the rules should be, and why anyone would follow them. The second is not answered by better rules. It is answered by arrangements letting each person see that their own restraint is not being farmed -- which is why monitoring by users rather than inspectors matters, and why a light first penalty matters. Congruence with local conditions is the excluded case: it makes rules worth following, which is a different job from making them followed.",
+      "targets": [
+        "monitoring",
+        "graduated sanctions",
+        "credible commitment",
+        "quasi-voluntary compliance"
+      ],
+      "reasons": {
+        "credible commitment": "Names the problem the other three are solving.",
+        "graduated sanctions": "A penalty schedule people will actually apply is what makes the threat real.",
+        "monitoring": "A promise nobody can check is not evidence about anything.",
+        "quasi-voluntary compliance": "Willing compliance, held in place by seeing others comply."
+      }
+    },
+    {
+      "id": "built-not-inherited",
+      "prompt": "Which of these deliberately supply something that two people in a long relationship get for nothing?",
+      "explanation": "This is what makes Ostrom's problem harder than the two-player version. Two people in a long relationship see each other's moves, can answer a defection proportionately, and carry a shared history that makes repair possible -- all of it free, a by-product of there being two of them. A hundred irrigators sharing a canal have none of it. Every one of those conditions has to be built deliberately, paid for, and maintained, and the design principles are the specification for building them. Congruence with local conditions is excluded because it has no two-player analogue at all: it is about fitting rules to a resource, not to an opponent.",
+      "targets": [
+        "monitoring",
+        "graduated sanctions",
+        "conflict-resolution mechanisms",
+        "clearly defined boundaries"
+      ],
+      "reasons": {
+        "clearly defined boundaries": "Two people know exactly who they are dealing with; a hundred users of an aquifer do not.",
+        "conflict-resolution mechanisms": "A couple can repair in the moment; a group needs somewhere to take it.",
+        "graduated sanctions": "Proportionate response, written down in advance because no one's temper can be relied on to be proportionate.",
+        "monitoring": "In a two-player game you see every move the other makes. Here someone has to be assigned to look."
+      }
     }
   ]
 });

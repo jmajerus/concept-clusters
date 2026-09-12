@@ -1,15 +1,15 @@
 // Generated from content/puzzles/manufacturing-consent.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "manufacturing-consent",
   "title": "Manufacturing Consent",
-  "category": "Media & Information Literacy",
+  "category": "media-information-literacy",
   "categories": [
-    "Media & Information Literacy",
-    "Political Science"
+    "media-information-literacy",
+    "political-science"
   ],
   "large": true,
   "tags": [
@@ -17,11 +17,15 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Herman and Chomsky's argument that a free press still filters the news it prints -- not through censorship, but through ownership, markets, sourcing, and fear.",
-    "link": "wiki:Manufacturing Consent",
+    "links": [
+      {
+        "href": "wiki:Manufacturing Consent"
+      }
+    ],
     "citations": [
       {
-        "author": "Herman, Edward S., and Chomsky, Noam",
         "title": "Manufacturing Consent: The Political Economy of the Mass Media",
+        "author": "Herman, Edward S., and Chomsky, Noam",
         "publisher": "Pantheon Books",
         "year": "1988"
       }
@@ -50,7 +54,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Herman and Chomsky's account of how ownership, markets, and access to power quietly filter which stories become news at all.",
-        "link": "wiki:Propaganda model"
+        "links": [
+          {
+            "href": "wiki:Propaganda model"
+          }
+        ]
       }
     },
     {
@@ -71,24 +79,44 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "constructive bloodbaths": {
           "text": "Mass killing that serves the interests of the reporting country's own government, and is accordingly minimized, justified, or left uninvestigated.",
-          "link": "wiki:Counter-Revolutionary Violence: Bloodbaths in Fact & Propaganda"
+          "links": [
+            {
+              "href": "wiki:Counter-Revolutionary Violence: Bloodbaths in Fact & Propaganda"
+            }
+          ]
         },
         "nefarious bloodbaths": {
           "text": "Mass killing carried out by an official enemy, reported with extensive documentation, moral outrage, and sustained follow-up coverage.",
-          "link": "wiki:Counter-Revolutionary Violence: Bloodbaths in Fact & Propaganda"
+          "links": [
+            {
+              "href": "wiki:Counter-Revolutionary Violence: Bloodbaths in Fact & Propaganda"
+            }
+          ]
         },
         "unworthy victims": {
           "text": "Victims of one's own government or its allies, whose suffering is reported briefly, without names, and without follow-up.",
-          "link": "wiki:Manufacturing Consent"
+          "links": [
+            {
+              "href": "wiki:Manufacturing Consent"
+            }
+          ]
         },
         "worthy victims": {
           "text": "Victims of officially designated enemies, whose suffering the press documents in named, humanized, sustained detail.",
-          "link": "wiki:Manufacturing Consent"
+          "links": [
+            {
+              "href": "wiki:Manufacturing Consent"
+            }
+          ]
         }
       },
       "info": {
         "text": "How the same act of violence reads as an atrocity or a footnote depending on whether it was committed by an enemy state or by one's own government and its allies.",
-        "link": "wiki:Manufacturing Consent"
+        "links": [
+          {
+            "href": "wiki:Manufacturing Consent"
+          }
+        ]
       }
     },
     {
@@ -109,21 +137,37 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "bewildered herd": {
           "text": "Lippmann's name for the general public: too numerous, distracted, and locally focused to grasp common interests directly, and therefore requiring managers.",
-          "link": "wiki:Public Opinion (book)"
+          "links": [
+            {
+              "href": "wiki:Public Opinion (book)"
+            }
+          ]
         },
         "engineering of consent": {
           "text": "Edward Bernays's term for the professional, psychology-informed practice of manufacturing public support -- the discipline that became modern public relations.",
-          "link": "wiki:The Engineering of Consent"
+          "links": [
+            {
+              "href": "wiki:The Engineering of Consent"
+            }
+          ]
         },
         "manufacture of consent": {
           "text": "Walter Lippmann's 1922 phrase for the deliberate shaping of public opinion by a specialized class, offered as a necessary feature of modern democracy rather than a corruption of it.",
-          "link": "wiki:Public Opinion (book)"
+          "links": [
+            {
+              "href": "wiki:Public Opinion (book)"
+            }
+          ]
         },
         "spectator democracy": "A democracy in which ordinary citizens periodically ratify decisions made elsewhere, rather than participating directly in making them."
       },
       "info": {
         "text": "The decades-older theory that mass democracy requires an elite class to manage public opinion on the public's behalf -- the premise Chomsky and Herman's filters mechanize.",
-        "link": "wiki:Public Opinion (book)"
+        "links": [
+          {
+            "href": "wiki:Public Opinion (book)"
+          }
+        ]
       }
     },
     {
@@ -149,12 +193,17 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "How later scholars have pushed back on, refined, and tested Herman and Chomsky's model in the decades since 1988.",
-        "link": "wiki:Propaganda model"
+        "links": [
+          {
+            "href": "wiki:Propaganda model"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "selective-indignation",
       "term": "selective indignation",
       "clusters": [
         0,
@@ -174,6 +223,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "necessary-illusions",
       "term": "necessary illusions",
       "clusters": [
         2,
@@ -182,7 +232,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Chomsky's own phrase for the fabricated beliefs a formally free society still needs names exactly what the five filters mechanically produce, decades after Lippmann first described their necessity.",
       "info": {
         "text": "Chomsky's 1989 book extending the propaganda model's five filters into detailed case studies.",
-        "link": "wiki:Necessary Illusions"
+        "links": [
+          {
+            "href": "wiki:Necessary Illusions"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "continuity",
@@ -197,6 +251,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "the-war-on-terror",
       "term": "the war on terror",
       "clusters": [
         0,
@@ -205,7 +260,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "When the Cold War ended, critics asked whether the fifth filter would disappear with it; instead the same fear-based mechanism reappeared with a new named enemy, exactly the adaptive persistence defenders of the model point to as evidence of a structural cause rather than an ideological one.",
       "info": {
         "text": "The post-9/11 U.S.-led campaign that many media scholars cite as the clearest post-Cold-War instance of the fifth filter's target updating.",
-        "link": "wiki:War on terror"
+        "links": [
+          {
+            "href": "wiki:War on terror"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "continuity",
@@ -263,13 +322,12 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-15"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

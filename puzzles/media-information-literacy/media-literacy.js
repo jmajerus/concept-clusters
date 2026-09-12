@@ -1,17 +1,16 @@
-// Concept Clusters puzzle: Misinformation & media literacy
-// Category: Media & Information Literacy
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/media-literacy.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "media-literacy",
   "title": "Misinformation & media literacy",
-  "category": "Media & Information Literacy",
+  "category": "media-information-literacy",
   "clusters": [
     {
+      "id": "types-of-false-information",
       "name": "Types of false information",
-      "info": {
-        "link": "wiki:Misinformation"
-      },
       "color": "teal",
       "fact": "False information falls into three types by intent and harm: misinformation is false but spread without intent to deceive, disinformation is deliberately fabricated to mislead, and malinformation is genuine information shared to cause harm.",
       "terms": [
@@ -26,22 +25,41 @@ export default {
       "termInfo": {
         "misinformation": {
           "text": "False information spread without knowing — or intending — that it's false.",
-          "link": "wiki:Misinformation",
-          "extraLink": "https://www.poynter.org/mediawise/is-this-legit-digital-media-literacy-101/misinformation-red-flags/"
+          "links": [
+            {
+              "href": "wiki:Misinformation"
+            },
+            {
+              "href": "https://www.poynter.org/mediawise/is-this-legit-digital-media-literacy-101/misinformation-red-flags/"
+            }
+          ]
         },
         "disinformation": {
-          "link": "wiki:Disinformation"
+          "links": [
+            {
+              "href": "wiki:Disinformation"
+            }
+          ]
         },
         "malinformation": {
-          "link": "wiki:Malinformation"
+          "links": [
+            {
+              "href": "wiki:Malinformation"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Misinformation"
+          }
+        ]
       }
     },
     {
+      "id": "verification-practices",
       "name": "Verification practices",
-      "info": {
-        "link": "wiki:Fact-checking"
-      },
       "color": "blue",
       "fact": "Verifying a claim means checking it against the original evidence: fact-checking tests a specific claim, a primary source is the original record itself, and lateral reading means leaving a site to check other sources rather than digging deeper within it.",
       "terms": [
@@ -56,26 +74,49 @@ export default {
       "termInfo": {
         "fact-checking": {
           "text": "Testing a specific factual claim against evidence — what professional fact-checkers do, and what any reader can do informally.",
-          "link": "wiki:Fact-checking",
-          "extraLink": "https://www.poynter.org/mediawise/is-this-legit-digital-media-literacy-101/fact-checking-101/"
+          "links": [
+            {
+              "href": "wiki:Fact-checking"
+            },
+            {
+              "href": "https://www.poynter.org/mediawise/is-this-legit-digital-media-literacy-101/fact-checking-101/"
+            }
+          ]
         },
         "lateral reading": {
           "text": "A verification habit of jumping to outside sources to check a site's credibility, rather than staying on the page and evaluating it in isolation.",
-          "link": "wiki:Media literacy",
-          "extraLink": "https://www.poynter.org/fact-checking/media-literacy/2023/lateral-reading-the-best-media-literacy-tip-to-vet-credible-sources/"
+          "links": [
+            {
+              "href": "wiki:Media literacy"
+            },
+            {
+              "href": "https://www.poynter.org/fact-checking/media-literacy/2023/lateral-reading-the-best-media-literacy-tip-to-vet-credible-sources/"
+            }
+          ]
         },
         "primary source": {
           "text": "The original record of something — a document, a photo, an eyewitness account — rather than someone else's account of it.",
-          "link": "wiki:Primary source",
-          "extraLink": "https://www.poynter.org/mediawise/misinformation-resilience-toolkit-libraries/what-makes-a-source-reputable/"
+          "links": [
+            {
+              "href": "wiki:Primary source"
+            },
+            {
+              "href": "https://www.poynter.org/mediawise/misinformation-resilience-toolkit-libraries/what-makes-a-source-reputable/"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Fact-checking"
+          }
+        ]
       }
     },
     {
+      "id": "cognitive-social-dynamics",
       "name": "Cognitive & social dynamics",
-      "info": {
-        "link": "wiki:Misinformation"
-      },
       "color": "amber",
       "fact": "People don't just receive false information passively: confirmation bias makes us favor claims that fit what we already believe, echo chambers repeatedly reinforce those same beliefs, and conspiracy theories offer an appealingly simple explanation that resists correction.",
       "terms": [
@@ -89,53 +130,86 @@ export default {
       ],
       "termInfo": {
         "confirmation bias": {
-          "link": "wiki:Confirmation bias"
+          "links": [
+            {
+              "href": "wiki:Confirmation bias"
+            }
+          ]
         },
         "echo chamber": {
           "text": "An information environment where you mostly encounter views that already match your own, reinforcing them rather than testing them.",
-          "link": "wiki:Echo chamber",
-          "extraLink": "https://www.poynter.org/tfcn/2023/echo-chambers-how-theyre-created-and-how-to-avoid-them/"
+          "links": [
+            {
+              "href": "wiki:Echo chamber"
+            },
+            {
+              "href": "https://www.poynter.org/tfcn/2023/echo-chambers-how-theyre-created-and-how-to-avoid-them/"
+            }
+          ]
         },
         "conspiracy theory": {
-          "link": "wiki:Conspiracy theory"
+          "links": [
+            {
+              "href": "wiki:Conspiracy theory"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Misinformation"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "algorithmic-amplification",
       "term": "algorithmic amplification",
       "clusters": [
         0,
         2
       ],
-      "relationKind": "dynamic",
       "fact": "Algorithmic amplification bridges the two: platforms rank content by engagement, and false information — especially the kind that triggers strong emotion — often spreads faster than accurate information, feeding directly into echo chambers.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Algorithmic amplification"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
       "idealTerms": [
         null,
         "echo chamber"
-      ],
-      "info": {
-        "link": "wiki:Algorithmic amplification"
-      }
+      ]
     },
     {
+      "id": "gatekeeping",
       "term": "gatekeeping",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "dynamic",
       "fact": "Gatekeeping bridges the two: traditional editorial fact-checking acted as a gate before publication, and social media's removal of that gate is part of why echo chambers and conspiracy theories now spread largely unchecked.",
+      "info": {
+        "text": "The traditional role of editors deciding what gets published — increasingly shared with, or replaced by, the algorithms that decide what gets shown.",
+        "links": [
+          {
+            "href": "wiki:Gatekeeper"
+          },
+          {
+            "href": "https://www.poynter.org/ethics-trust/2020/when-journalism-and-silicon-valley-collide/"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
       "idealTerms": [
         "fact-checking",
         null
-      ],
-      "info": {
-        "text": "The traditional role of editors deciding what gets published — increasingly shared with, or replaced by, the algorithms that decide what gets shown.",
-        "link": "wiki:Gatekeeper",
-        "extraLink": "https://www.poynter.org/ethics-trust/2020/when-journalism-and-silicon-valley-collide/"
-      }
+      ]
     }
   ]
-};
+});

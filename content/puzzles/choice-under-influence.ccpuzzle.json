@@ -1,15 +1,21 @@
 {
   "id": "choice-under-influence",
   "title": "Choice Under Influence",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "computing-and-society"
+    "computer-science": "computing-and-society"
   },
   "large": true,
   "info": {
     "text": "How interface presentation, defaults, wording, and emotional framing can steer people away from choices that reflect their own goals. The source uses deceptive patterns for practices also widely known as dark patterns.",
-    "link": "https://deceptive.design/book/contents/part-1/",
-    "extraLink": "https://deceptive.design/types/"
+    "links": [
+      {
+        "href": "https://deceptive.design/book/contents/part-1/"
+      },
+      {
+        "href": "https://deceptive.design/types/"
+      }
+    ]
   },
   "clusters": [
     {
@@ -34,23 +40,43 @@
       "termInfo": {
         "visual prominence": {
           "text": "The use of size, color, position, spacing, or emphasis to make one element command attention before others.",
-          "link": "https://deceptive.design/types/visual-interference/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/visual-interference/"
+            }
+          ]
         },
         "low contrast": {
           "text": "A small visual difference between text or controls and their background, making important information harder to notice or read.",
-          "link": "https://deceptive.design/types/visual-interference/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/visual-interference/"
+            }
+          ]
         },
         "familiar interface cues": {
           "text": "Visual forms that users already interpret as controls or native content, such as download buttons, navigation links, or related articles.",
-          "link": "https://deceptive.design/types/disguised-ads/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/disguised-ads/"
+            }
+          ]
         },
         "scan reading": {
           "text": "The ordinary online reading strategy of sampling headings, labels, and prominent words rather than closely reading every sentence.",
-          "link": "https://deceptive.design/types/trick-wording/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/trick-wording/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/types/visual-interference/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/visual-interference/"
+          }
+        ]
       }
     },
     {
@@ -75,23 +101,43 @@
       "termInfo": {
         "preselected default": {
           "text": "An option chosen in advance by the business so that accepting it requires no additional action from the user.",
-          "link": "https://deceptive.design/types/preselection/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/preselection/"
+            }
+          ]
         },
         "obscured alternative": {
           "text": "A meaningful option that remains technically present but is hidden, deemphasized, disguised, or placed where it is difficult to find.",
-          "link": "https://deceptive.design/types/visual-interference/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/visual-interference/"
+            }
+          ]
         },
         "ambiguous wording": {
           "text": "Language whose apparent or expected meaning differs from the action it actually authorizes.",
-          "link": "https://deceptive.design/types/trick-wording/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/trick-wording/"
+            }
+          ]
         },
         "loaded refusal": {
           "text": "A decline option written to express guilt, foolishness, selfishness, or another negative judgment about the person choosing it.",
-          "link": "https://deceptive.design/types/confirmshaming/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/confirmshaming/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-16/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-16/"
+          }
+        ]
       }
     },
     {
@@ -116,23 +162,43 @@
       "termInfo": {
         "default effect": {
           "text": "The tendency to retain an option that has already been selected rather than expend effort replacing it.",
-          "link": "https://deceptive.design/types/preselection/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/preselection/"
+            }
+          ]
         },
         "limited attention": {
           "text": "The practical inability to inspect every word, control, consequence, and competing signal in a complex interface.",
-          "link": "https://deceptive.design/book/contents/part-1/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/part-1/"
+            }
+          ]
         },
         "expectation matching": {
           "text": "The habit of interpreting a familiar-looking label or control according to its usual meaning and role.",
-          "link": "https://deceptive.design/types/trick-wording/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/trick-wording/"
+            }
+          ]
         },
         "self-image pressure": {
           "text": "Influence that works by threatening how a person wishes to understand or present their own character and values.",
-          "link": "https://deceptive.design/types/confirmshaming/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/confirmshaming/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-13/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-13/"
+          }
+        ]
       }
     },
     {
@@ -157,23 +223,43 @@
       "termInfo": {
         "mistaken click": {
           "text": "Activating an element under a false understanding of what it is or what it will do.",
-          "link": "https://deceptive.design/types/disguised-ads/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/disguised-ads/"
+            }
+          ]
         },
         "unwanted consent": {
           "text": "An apparent agreement to communication, data use, or another condition that the person meant to decline or did not understand.",
-          "link": "https://deceptive.design/book/contents/part-1/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/part-1/"
+            }
+          ]
         },
         "unintended purchase": {
           "text": "A commercial transaction or added charge that does not reflect what the person set out to buy.",
-          "link": "https://deceptive.design/types/preselection/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/preselection/"
+            }
+          ]
         },
         "impaired autonomy": {
           "text": "Reduced ability to understand available choices and act according to one's own goals rather than an external steering objective.",
-          "link": "https://deceptive.design/book/contents/part-1/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/part-1/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/part-1/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/part-1/"
+          }
+        ]
       }
     }
   ],
@@ -188,7 +274,11 @@
       "fact": "Hierarchy, contrast, placement, and familiar visual cues can make the business's preferred option feel obvious while another option becomes easy to miss or misinterpret.",
       "info": {
         "text": "The deliberate direction of attention and interpretation through visual presentation.",
-        "link": "https://deceptive.design/types/visual-interference/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/visual-interference/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -211,7 +301,11 @@
       "fact": "Defaults, selective attention, expectations, and self-image are ordinary ways of coping with complexity; choice framing becomes manipulative when it deliberately turns them against the person's own goals.",
       "info": {
         "text": "Normal mental shortcuts and coping strategies treated as opportunities for behavioral control.",
-        "link": "https://deceptive.design/book/contents/chapter-13/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-13/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -230,7 +324,11 @@
       "fact": "A technically available choice is not meaningfully autonomous when presentation or wording materially steers a person into agreement they did not understand or intend.",
       "info": {
         "text": "Apparent agreement produced by steering the conditions of choice rather than supporting informed, voluntary decision-making.",
-        "link": "https://deceptive.design/book/contents/part-1/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/part-1/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

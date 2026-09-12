@@ -1,11 +1,15 @@
 {
   "id": "climate-and-livelihoods",
   "title": "Climate and livelihoods across regions",
-  "category": "Geography",
+  "category": "geography",
   "large": true,
   "info": {
     "text": "Regional patterns emerge from relationships among climate, ecosystems, livelihoods, and human adaptations; no single feature defines an entire region.",
-    "link": "wiki:Regional geography"
+    "links": [
+      {
+        "href": "wiki:Regional geography"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "dry-summer climate": {
           "text": "A climate with dry summers and wetter cool seasons, characteristic of much of the Mediterranean Basin and several comparable regions elsewhere.",
-          "link": "wiki:Mediterranean climate"
+          "links": [
+            {
+              "href": "wiki:Mediterranean climate"
+            }
+          ]
         },
         "seasonal monsoon": {
           "text": "A seasonal circulation pattern whose shifting winds produce strongly contrasting wet and dry periods.",
-          "link": "wiki:Monsoon of South Asia"
+          "links": [
+            {
+              "href": "wiki:Monsoon of South Asia"
+            }
+          ]
         },
         "variable semiarid rainfall": {
           "text": "Limited rainfall concentrated in a short season and varying substantially from year to year and place to place.",
-          "link": "wiki:Sahel"
+          "links": [
+            {
+              "href": "wiki:Sahel"
+            }
+          ]
         },
         "permafrost": {
           "text": "Ground that remains at or below freezing for at least two consecutive years.",
-          "link": "wiki:Permafrost"
+          "links": [
+            {
+              "href": "wiki:Permafrost"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Climate classification"
+        "links": [
+          {
+            "href": "wiki:Climate classification"
+          }
+        ]
       }
     },
     {
@@ -71,23 +95,43 @@
       "termInfo": {
         "sclerophyll vegetation": {
           "text": "Evergreen vegetation with small, hard, often thick leaves that reduce water loss during seasonal drought.",
-          "link": "wiki:Sclerophyll"
+          "links": [
+            {
+              "href": "wiki:Sclerophyll"
+            }
+          ]
         },
         "monsoon forest": {
           "text": "A seasonal tropical forest in which many trees lose leaves during the dry part of the monsoon cycle.",
-          "link": "wiki:Seasonal tropical forest"
+          "links": [
+            {
+              "href": "wiki:Seasonal tropical forest"
+            }
+          ]
         },
         "Sahelian savanna": {
           "text": "The semiarid transition of grasses, shrubs, and drought-tolerant trees between the Sahara and wetter savannas to the south.",
-          "link": "wiki:Sahel"
+          "links": [
+            {
+              "href": "wiki:Sahel"
+            }
+          ]
         },
         "Arctic tundra": {
           "text": "A cold, largely treeless biome of low-growing plants across northern continental lands and islands.",
-          "link": "wiki:Tundra"
+          "links": [
+            {
+              "href": "wiki:Tundra"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Biome"
+        "links": [
+          {
+            "href": "wiki:Biome"
+          }
+        ]
       }
     },
     {
@@ -112,23 +156,43 @@
       "termInfo": {
         "olive cultivation": {
           "text": "The growing of olive trees for fruit and oil, a practice deeply embedded in Mediterranean landscapes and foodways.",
-          "link": "wiki:Olive"
+          "links": [
+            {
+              "href": "wiki:Olive"
+            }
+          ]
         },
         "wet-rice agriculture": {
           "text": "Rice cultivation in bunded, irrigated, rain-fed, or seasonally flooded fields where water is managed around the crop.",
-          "link": "wiki:Paddy field"
+          "links": [
+            {
+              "href": "wiki:Paddy field"
+            }
+          ]
         },
         "mobile pastoralism": {
           "text": "Livestock keeping in which herds move to make use of changing pasture and water resources.",
-          "link": "wiki:Pastoralism"
+          "links": [
+            {
+              "href": "wiki:Pastoralism"
+            }
+          ]
         },
         "reindeer herding": {
           "text": "The management of semi-domesticated reindeer by several Indigenous and other northern communities across the circumpolar North.",
-          "link": "wiki:Reindeer herding"
+          "links": [
+            {
+              "href": "wiki:Reindeer herding"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Livelihood"
+        "links": [
+          {
+            "href": "wiki:Livelihood"
+          }
+        ]
       }
     },
     {
@@ -153,23 +217,43 @@
       "termInfo": {
         "terraced farming": {
           "text": "Cultivation on level steps constructed across slopes to retain soil, manage runoff, and create workable fields.",
-          "link": "wiki:Terrace (earthworks)"
+          "links": [
+            {
+              "href": "wiki:Terrace (earthworks)"
+            }
+          ]
         },
         "irrigation": {
           "text": "The managed application of water to crops through channels, pipes, pumps, reservoirs, or other systems.",
-          "link": "wiki:Irrigation"
+          "links": [
+            {
+              "href": "wiki:Irrigation"
+            }
+          ]
         },
         "transhumance": {
           "text": "The recurring seasonal movement of livestock between complementary grazing areas.",
-          "link": "wiki:Transhumance"
+          "links": [
+            {
+              "href": "wiki:Transhumance"
+            }
+          ]
         },
         "elevated foundations": {
           "text": "Building supports that raise a structure above frozen ground so outside air can circulate and reduce heat transfer into permafrost.",
-          "link": "wiki:Permafrost"
+          "links": [
+            {
+              "href": "wiki:Permafrost"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Human ecology"
+        "links": [
+          {
+            "href": "wiki:Human ecology"
+          }
+        ]
       }
     }
   ],
@@ -184,7 +268,11 @@
       "fact": "Seasonality links climate and ecosystems because recurring annual changes in rain, temperature, snow, and daylight structure plant growth and ecological activity.",
       "info": {
         "text": "Regular variation over the year in environmental conditions and biological or human activity.",
-        "link": "wiki:Seasonality"
+        "links": [
+          {
+            "href": "wiki:Seasonality"
+          }
+        ]
       },
       "relationKind": "cross-cutting"
     },
@@ -198,7 +286,11 @@
       "fact": "Water management connects climate with adaptation by storing, redirecting, draining, or sharing water whose natural supply may be seasonal, scarce, or variable.",
       "info": {
         "text": "The planning and operation of systems that allocate, store, move, drain, or protect water.",
-        "link": "wiki:Water resource management"
+        "links": [
+          {
+            "href": "wiki:Water resource management"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -216,7 +308,11 @@
       "fact": "Land use links ecosystems, livelihoods, and adaptation because farming, grazing, settlement, and infrastructure both depend upon and transform regional landscapes.",
       "info": {
         "text": "The purposes and practices through which people occupy, manage, and transform land.",
-        "link": "wiki:Land use"
+        "links": [
+          {
+            "href": "wiki:Land use"
+          }
+        ]
       },
       "relationKind": "dynamic"
     }
@@ -321,7 +417,11 @@
   "relatedPuzzles": {
     "info": {
       "text": "Compare regional environments and livelihoods with other ways people organize life and resources.",
-      "link": "wiki:Regional geography"
+      "links": [
+        {
+          "href": "wiki:Regional geography"
+        }
+      ]
     },
     "entries": [
       {

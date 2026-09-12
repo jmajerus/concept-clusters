@@ -1,12 +1,12 @@
 // Generated from content/puzzles/dissonance-and-its-treatment.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "dissonance-and-its-treatment",
   "title": "Dissonance and its treatment",
-  "category": "Music",
+  "category": "music",
   "large": true,
   "info": {
     "text": "Dissonance is classified by common-practice interval theory, handled by two different contrapuntal families (the suspension figure and embellishing tones), and separately explained by scale-degree tendency within harmonic function -- three different frameworks for one word.",
@@ -219,6 +219,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "resolution-tendency",
       "term": "resolution tendency",
       "clusters": [
         0,
@@ -242,6 +243,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "stepwise-fill",
       "term": "stepwise fill",
       "clusters": [
         0,
@@ -259,6 +261,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "unprepared-entry",
       "term": "unprepared entry",
       "clusters": [
         1,
@@ -276,6 +279,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "shared-half-step",
       "term": "shared half step",
       "clusters": [
         0,
@@ -293,6 +297,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "resolution-site",
       "term": "resolution site",
       "clusters": [
         1,
@@ -377,9 +382,9 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude Code (Claude Sonnet 5)"
+        "name": "Claude Code (Claude Sonnet 5)",
+        "reasoning": "high"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 });

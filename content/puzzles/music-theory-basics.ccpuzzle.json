@@ -1,10 +1,14 @@
 {
   "id": "music-theory-basics",
   "title": "Music theory basics",
-  "category": "Music",
+  "category": "music",
   "info": {
     "text": "The three things music theory keeps track of at once: when a sound happens, how high it is, and what it sounds like alongside other notes.",
-    "link": "wiki:Music theory"
+    "links": [
+      {
+        "href": "wiki:Music theory"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,24 +33,44 @@
       "termInfo": {
         "beat": {
           "text": "The steady pulse you tap your foot to — the unit everything else in the music is counted against.",
-          "link": "wiki:Beat (music)"
+          "links": [
+            {
+              "href": "wiki:Beat (music)"
+            }
+          ]
         },
         "rest": {
           "text": "A measured silence — written and counted exactly like a note, but played by not playing.",
-          "link": "wiki:Rest (music)"
+          "links": [
+            {
+              "href": "wiki:Rest (music)"
+            }
+          ]
         },
         "tempo": {
           "text": "How fast the beats go by, usually given in beats per minute or by an Italian word like allegro.",
-          "link": "wiki:Tempo"
+          "links": [
+            {
+              "href": "wiki:Tempo"
+            }
+          ]
         },
         "time signature": {
           "text": "The pair of numbers at the start of a piece saying how many beats fill each measure, and which note value counts as one beat.",
-          "link": "wiki:Time signature"
+          "links": [
+            {
+              "href": "wiki:Time signature"
+            }
+          ]
         }
       },
       "info": {
         "text": "How music is organized in time.",
-        "link": "wiki:Rhythm"
+        "links": [
+          {
+            "href": "wiki:Rhythm"
+          }
+        ]
       }
     },
     {
@@ -71,24 +95,44 @@
       "termInfo": {
         "half step": {
           "text": "The smallest distance between two pitches in standard Western tuning — adjacent keys on a piano, black or white.",
-          "link": "wiki:Semitone"
+          "links": [
+            {
+              "href": "wiki:Semitone"
+            }
+          ]
         },
         "major scale": {
           "text": "The familiar do-re-mi ladder of seven pitches, built from one particular pattern of half and whole steps.",
-          "link": "wiki:Major scale"
+          "links": [
+            {
+              "href": "wiki:Major scale"
+            }
+          ]
         },
         "octave": {
           "text": "The distance at which a pitch repeats itself — the higher note sounds like the same note, only higher.",
-          "link": "wiki:Octave"
+          "links": [
+            {
+              "href": "wiki:Octave"
+            }
+          ]
         },
         "sharp": {
           "text": "The symbol that raises a written note by one half step; its opposite, the flat, lowers it.",
-          "link": "wiki:Sharp (music)"
+          "links": [
+            {
+              "href": "wiki:Sharp (music)"
+            }
+          ]
         }
       },
       "info": {
         "text": "How high or low a sound is, and how those levels get organized into ladders.",
-        "link": "wiki:Pitch (music)"
+        "links": [
+          {
+            "href": "wiki:Pitch (music)"
+          }
+        ]
       }
     },
     {
@@ -111,20 +155,36 @@
       "termInfo": {
         "chord progression": {
           "text": "A sequence of chords played one after another, which is what gives a passage its sense of moving somewhere.",
-          "link": "wiki:Chord progression"
+          "links": [
+            {
+              "href": "wiki:Chord progression"
+            }
+          ]
         },
         "root": {
           "text": "The pitch a chord is built up from, and the one the chord is named after.",
-          "link": "wiki:Root (chord)"
+          "links": [
+            {
+              "href": "wiki:Root (chord)"
+            }
+          ]
         },
         "triad": {
           "text": "Three pitches sounded together, stacked in thirds — the basic chord of Western music.",
-          "link": "wiki:Triad (music)"
+          "links": [
+            {
+              "href": "wiki:Triad (music)"
+            }
+          ]
         }
       },
       "info": {
         "text": "What happens when several pitches sound at the same time.",
-        "link": "wiki:Harmony"
+        "links": [
+          {
+            "href": "wiki:Harmony"
+          }
+        ]
       }
     }
   ],
@@ -139,7 +199,11 @@
       "fact": "A single written note does two jobs at once: where it sits on the staff says how high to play it, and its shape says how many beats to hold it. That is why one symbol belongs to rhythm and to pitch equally.",
       "info": {
         "text": "The basic written symbol of Western music, carrying a pitch and a duration together.",
-        "link": "wiki:Note (music)"
+        "links": [
+          {
+            "href": "wiki:Note (music)"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -156,7 +220,11 @@
       "fact": "An interval is the distance between two pitches. Play those distances one after another and you get a scale; stack them on top of each other instead and you get a chord — the same measurement, read horizontally or vertically.",
       "info": {
         "text": "The distance in pitch between two notes, counted in half steps or by name (a third, a fifth, an octave).",
-        "link": "wiki:Interval (music)"
+        "links": [
+          {
+            "href": "wiki:Interval (music)"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {

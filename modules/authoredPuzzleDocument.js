@@ -19,7 +19,7 @@ import {
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
-import { puzzleToSimplified } from "./puzzleSimplified.js";
+import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
 import { withDecodedLearningMarkdown } from "./learningIntroduction.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
@@ -38,10 +38,26 @@ export { createPuzzleSkeleton };
 // a bespoke second one. Falls through to the untouched input on a profile
 // error so a genuinely malformed document still surfaces its own error
 // downstream instead of a confusing one from this conversion attempt.
-function jsonLdShapedDocumentAsSimplified(document) {
+function jsonLdShapedDocumentAsSimplified(document, categoryRegistry = CATEGORIES) {
   if (!isJsonLdShaped(document)) return document;
   try {
-    return puzzleToSimplified(puzzleFromJsonLd(document));
+    // Canonicalize the runtime puzzle before converting it to simplified
+    // form.  Converting first would discard fields that only live on the
+    // interchange shape (notably nested learning-introduction citations)
+    // before hoistDocumentCitations can move them to puzzle info.
+    const puzzle = puzzleFromJsonLd(document);
+    const simplified = puzzleForCanonicalPublication(puzzle, {
+      categoryRegistry: categoryRegistry || CATEGORIES
+    }).simplified;
+    if (!categoryRegistry) {
+      // A registry is optional on the read/editor projection. Preserve the
+      // source's category spelling when no live registry was supplied; the
+      // explicit storage path always passes one and canonicalizes to ids.
+      simplified.category = puzzle.category;
+      if (puzzle.categories) simplified.categories = [...puzzle.categories];
+      if (puzzle.subcategories) simplified.subcategories = structuredClone(puzzle.subcategories);
+    }
+    return simplified;
   } catch {
     return document;
   }
@@ -217,7 +233,9 @@ function displayPuzzleCategoryTitles(document, categoryRegistry) {
  */
 export function documentForEditor(document, { categoryRegistry = null } = {}) {
   const folded = withDecodedLearningMarkdown(
-    canonicalizeAuthoredDocumentFields(jsonLdShapedDocumentAsSimplified(document))
+    canonicalizeAuthoredDocumentFields(
+      jsonLdShapedDocumentAsSimplified(document, categoryRegistry)
+    )
   );
   return categoryRegistry ? displayPuzzleCategoryTitles(folded, categoryRegistry) : folded;
 }

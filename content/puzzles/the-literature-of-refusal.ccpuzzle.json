@@ -1,10 +1,10 @@
 {
   "id": "the-literature-of-refusal",
   "title": "The Literature of Refusal",
-  "category": "History & Society",
+  "category": "history-society",
   "categories": [
-    "History & Society",
-    "Political Science"
+    "history-society",
+    "political-science"
   ],
   "tags": [
     "book",
@@ -35,15 +35,27 @@
       "termInfo": {
         "Merchants of Death": {
           "text": "A 1934 investigative book on the international arms trade that helped provoke the Senate's Nye Committee hearings into WWI munitions profits.",
-          "link": "https://mises.org/books/merchantsofdeath.pdf"
+          "links": [
+            {
+              "href": "https://mises.org/books/merchantsofdeath.pdf"
+            }
+          ]
         },
         "War Is a Racket": {
           "text": "Smedley Butler's 1935 pamphlet, written by a retired Marine Corps major general and two-time Medal of Honor recipient.",
-          "link": "wiki:War Is a Racket"
+          "links": [
+            {
+              "href": "wiki:War Is a Racket"
+            }
+          ]
         },
         "War is the health of the State": {
           "text": "The opening line of Randolph Bourne's unfinished 1918 essay 'The State,' written as wartime laws criminalized public dissent.",
-          "link": "https://www.marxists.org/archive/bourne/1918/war-is-the-health-of-the-state.html"
+          "links": [
+            {
+              "href": "https://www.marxists.org/archive/bourne/1918/war-is-the-health-of-the-state.html"
+            }
+          ]
         }
       }
     },
@@ -67,15 +79,27 @@
       "termInfo": {
         "All Quiet on the Western Front": {
           "text": "Erich Maria Remarque's 1929 novel of German soldiers on the WWI front, drawn from his own service.",
-          "link": "wiki:All Quiet on the Western Front"
+          "links": [
+            {
+              "href": "wiki:All Quiet on the Western Front"
+            }
+          ]
         },
         "Dulce et Decorum Est": {
           "text": "Wilfred Owen's 1917 poem, drafted at Craiglockhart War Hospital, describing a gas attack in unflinching physical detail.",
-          "link": "wiki:Dulce et Decorum est"
+          "links": [
+            {
+              "href": "wiki:Dulce et Decorum est"
+            }
+          ]
         },
         "Johnny Got His Gun": {
           "text": "Dalton Trumbo's 1939 novel, narrated by a WWI soldier who has lost his arms, legs, and entire face to a shell blast.",
-          "link": "wiki:Johnny Got His Gun"
+          "links": [
+            {
+              "href": "wiki:Johnny Got His Gun"
+            }
+          ]
         }
       }
     },
@@ -99,15 +123,27 @@
       "termInfo": {
         "Catch-22": {
           "text": "Joseph Heller's 1961 satirical novel, drawn from his own service as a WWII bombardier.",
-          "link": "wiki:Catch-22"
+          "links": [
+            {
+              "href": "wiki:Catch-22"
+            }
+          ]
         },
         "Slaughterhouse-Five": {
           "text": "Kurt Vonnegut's 1969 novel, built from his own experience as a POW who survived the firebombing of Dresden.",
-          "link": "wiki:Slaughterhouse-Five"
+          "links": [
+            {
+              "href": "wiki:Slaughterhouse-Five"
+            }
+          ]
         },
         "The Good Soldier Švejk": {
           "text": "Jaroslav Hašek's unfinished 1921-1923 Czech satire, following a soldier whose relentless, guileless incompetence quietly sabotages the Austro-Hungarian war machine.",
-          "link": "wiki:The Good Soldier Švejk"
+          "links": [
+            {
+              "href": "wiki:The Good Soldier Švejk"
+            }
+          ]
         }
       }
     },
@@ -131,15 +167,27 @@
       "termInfo": {
         "A Soldier's Declaration": {
           "text": "Siegfried Sassoon's 1917 public letter refusing to return to combat, read into the record of the House of Commons.",
-          "link": "https://ww1.nam.ac.uk/stories/captain-siegfried-sassoon/"
+          "links": [
+            {
+              "href": "https://ww1.nam.ac.uk/stories/captain-siegfried-sassoon/"
+            }
+          ]
         },
         "Testament of Youth": {
           "text": "Vera Brittain's 1933 memoir of serving as a nurse through WWI, in which she lost her fiance, brother, and closest friends.",
-          "link": "wiki:Testament of Youth"
+          "links": [
+            {
+              "href": "wiki:Testament of Youth"
+            }
+          ]
         },
         "The Things They Carried": {
           "text": "Tim O'Brien's 1990 collection of linked, semi-fictionalized stories drawn from his own service in Vietnam.",
-          "link": "wiki:The Things They Carried"
+          "links": [
+            {
+              "href": "wiki:The Things They Carried"
+            }
+          ]
         }
       }
     }
@@ -155,7 +203,11 @@
       "fact": "Owen drafted and revised 'Dulce et Decorum Est' at Craiglockhart War Hospital, where he was being treated for shell shock -- and where he met fellow patient Siegfried Sassoon, already a decorated officer and published poet, who mentored him and helped sharpen the poem's fury.",
       "info": {
         "text": "The Scottish military hospital for shell-shocked officers where Sassoon and Owen met.",
-        "link": "wiki:Craiglockhart"
+        "links": [
+          {
+            "href": "wiki:Craiglockhart"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -179,7 +231,11 @@
       "fact": "Bourne argues a wartime state cannot afford to let dissent be heard as a political argument -- and Sassoon's case shows exactly that mechanism at work: rather than court-martial a decorated officer for refusing to fight, a medical board declared him unfit for duty due to shell shock, converting a political claim into a medical one instead of answering it.",
       "info": {
         "text": "The WWI-era term for the psychological trauma of combat, and the diagnosis a military medical board used to explain away Sassoon's protest.",
-        "link": "wiki:Shell shock"
+        "links": [
+          {
+            "href": "wiki:Shell shock"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -218,13 +274,12 @@
       ]
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-13"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

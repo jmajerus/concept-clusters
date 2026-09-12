@@ -1,13 +1,17 @@
 {
   "id": "language-design-choices",
   "title": "Language design choices",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "programming-languages"
+    "computer-science": "programming-languages"
   },
   "info": {
     "text": "Programming languages differ less by fashion than by the commitments they make about types, execution, and memory.",
-    "link": "wiki:Programming language"
+    "links": [
+      {
+        "href": "wiki:Programming language"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,23 +36,43 @@
       "termInfo": {
         "static typing": {
           "text": "Types are checked before the program runs, so many mismatches are rejected early.",
-          "link": "wiki:Static typing"
+          "links": [
+            {
+              "href": "wiki:Static typing"
+            }
+          ]
         },
         "dynamic typing": {
           "text": "Types are checked while the program runs, so mismatches may appear only on particular paths.",
-          "link": "wiki:Dynamic typing"
+          "links": [
+            {
+              "href": "wiki:Dynamic typing"
+            }
+          ]
         },
         "type inference": {
           "text": "The language deduces many types from how values are used, without requiring every annotation to be written out.",
-          "link": "wiki:Type inference"
+          "links": [
+            {
+              "href": "wiki:Type inference"
+            }
+          ]
         },
         "gradual typing": {
           "text": "Some parts of a program are checked statically while others remain dynamically typed, with a boundary between them.",
-          "link": "wiki:Gradual typing"
+          "links": [
+            {
+              "href": "wiki:Gradual typing"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Type system"
+        "links": [
+          {
+            "href": "wiki:Type system"
+          }
+        ]
       }
     },
     {
@@ -73,23 +97,43 @@
       "termInfo": {
         "compiler": {
           "text": "A program that translates source code into another form, often machine code or an intermediate representation, before it is run.",
-          "link": "wiki:Compiler"
+          "links": [
+            {
+              "href": "wiki:Compiler"
+            }
+          ]
         },
         "interpreter": {
           "text": "A program that reads source (or an intermediate form) and carries out its meaning directly.",
-          "link": "wiki:Interpreter (computing)"
+          "links": [
+            {
+              "href": "wiki:Interpreter (computing)"
+            }
+          ]
         },
         "bytecode": {
           "text": "A compact intermediate instruction format that a virtual machine can execute or further compile.",
-          "link": "wiki:Bytecode"
+          "links": [
+            {
+              "href": "wiki:Bytecode"
+            }
+          ]
         },
         "JIT compilation": {
           "text": "Compiling parts of a program to native code while it is already running, often focusing on frequently executed paths.",
-          "link": "wiki:Just-in-time compilation"
+          "links": [
+            {
+              "href": "wiki:Just-in-time compilation"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Programming language implementation"
+        "links": [
+          {
+            "href": "wiki:Programming language implementation"
+          }
+        ]
       }
     },
     {
@@ -114,23 +158,43 @@
       "termInfo": {
         "garbage collection": {
           "text": "Automatic reclaiming of memory that the program can no longer reach.",
-          "link": "wiki:Garbage collection (computer science)"
+          "links": [
+            {
+              "href": "wiki:Garbage collection (computer science)"
+            }
+          ]
         },
         "manual allocation": {
           "text": "The programmer explicitly requests and releases storage, typically with allocate/free operations.",
-          "link": "wiki:Manual memory management"
+          "links": [
+            {
+              "href": "wiki:Manual memory management"
+            }
+          ]
         },
         "ownership": {
           "text": "A discipline in which each value has a clear owner, so when that owner is done the value can be freed safely—often checked before the program runs.",
-          "link": "wiki:Ownership types"
+          "links": [
+            {
+              "href": "wiki:Ownership types"
+            }
+          ]
         },
         "reference counting": {
           "text": "Tracking how many references point to a value and freeing it when the count drops to zero.",
-          "link": "wiki:Reference counting"
+          "links": [
+            {
+              "href": "wiki:Reference counting"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Memory management"
+        "links": [
+          {
+            "href": "wiki:Memory management"
+          }
+        ]
       }
     }
   ],
@@ -145,7 +209,11 @@
       "fact": "When types are checked only while the program runs, a mismatch becomes a failure during execution rather than a rejection by the compiler—so type discipline and the execution model meet at the moment the check happens.",
       "info": {
         "text": "An error raised because a value's type is incompatible with an operation at the moment that operation is attempted.",
-        "link": "wiki:Type system"
+        "links": [
+          {
+            "href": "wiki:Type system"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -283,44 +351,36 @@
     "content": {
       "text": "# Languages as design commitments\n\nA programming language is more than a list of keywords. It packages choices about how programs are checked, how they become running behavior, and how memory is kept safe enough to use.\n\nThose choices trade off against one another. Catching mistakes early can cost annotation or compile time. Deferring checks until a program runs can make small scripts feel immediate, while shifting failures onto particular paths. Managing memory automatically can free attention for the problem at hand; managing it more explicitly can make costs and lifetimes clearer.\n\n## Three axes to watch\n\nAs you organize the board, ask of each idea which axis it mainly belongs to:\n\n- **Types** — When is type information known, and who is responsible for getting it right?\n- **Execution** — How does source become something a machine can carry out?\n- **Memory** — Who decides when storage can be reclaimed, and on what evidence?\n\nAfter the map is solved, later rounds will ask you to reassemble those same ideas into familiar language profiles. The point is not that every implementation of a named language is identical, but that recognizable combinations of commitments keep showing up.\n\n> **Reflection:** When you reach for a language you already know, which of these three commitments do you notice first—and which do you usually take for granted?\n"
     },
-    "sources": [
+    "revision": 1,
+    "links": [
       {
-        "label": "Programming language (Wikipedia)",
-        "href": "https://en.wikipedia.org/wiki/Programming_language"
+        "href": "https://en.wikipedia.org/wiki/Programming_language",
+        "label": "Programming language (Wikipedia)"
       },
       {
-        "label": "Type system (Wikipedia)",
-        "href": "https://en.wikipedia.org/wiki/Type_system"
+        "href": "https://en.wikipedia.org/wiki/Type_system",
+        "label": "Type system (Wikipedia)"
       },
       {
-        "label": "Just-in-time compilation (Wikipedia)",
-        "href": "https://en.wikipedia.org/wiki/Just-in-time_compilation"
+        "href": "https://en.wikipedia.org/wiki/Just-in-time_compilation",
+        "label": "Just-in-time compilation (Wikipedia)"
       },
       {
-        "label": "Garbage collection (Wikipedia)",
-        "href": "https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)"
+        "href": "https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)",
+        "label": "Garbage collection (Wikipedia)"
       },
       {
-        "label": "Crafting Interpreters (Nystrom)",
-        "href": "https://craftinginterpreters.com/"
+        "href": "https://craftinginterpreters.com/",
+        "label": "Crafting Interpreters (Nystrom)"
       }
-    ],
-    "revision": 1
+    ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anysphere",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Cursor",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-07"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 }

@@ -1,19 +1,23 @@
 {
   "id": "flow-and-the-autotelic-self",
   "title": "Flow and the Autotelic Self",
-  "category": "Psychology",
+  "category": "psychology",
   "tags": [
     "book"
   ],
   "info": {
     "text": "Mihaly Csikszentmihalyi's model of the mental state people enter when a task's demands and their own skill are closely matched, and attention becomes fully absorbed by the activity itself.",
-    "link": "wiki:Flow (psychology)",
     "citations": [
       {
         "title": "Flow: The Psychology of Optimal Experience",
         "author": "Csikszentmihalyi, Mihaly",
         "publisher": "Harper & Row",
         "year": "1990"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Flow (psychology)"
       }
     ]
   },
@@ -39,7 +43,11 @@
       ],
       "info": {
         "text": "The specific circumstances Csikszentmihalyi identified as reliably producing a flow state.",
-        "link": "wiki:Flow (psychology)"
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ]
       }
     },
     {
@@ -63,7 +71,11 @@
       ],
       "info": {
         "text": "What flow actually feels like from the inside, as distinct from the conditions that produce it.",
-        "link": "wiki:Flow (psychology)"
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ]
       }
     },
     {
@@ -87,7 +99,11 @@
       ],
       "info": {
         "text": "Csikszentmihalyi's broader theoretical claim about attention as a finite resource, underlying the flow model itself.",
-        "link": "wiki:Flow (psychology)"
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ]
       }
     }
   ],
@@ -139,13 +155,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

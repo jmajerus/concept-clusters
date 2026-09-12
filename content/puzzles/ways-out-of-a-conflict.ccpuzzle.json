@@ -1,7 +1,7 @@
 {
   "id": "ways-out-of-a-conflict",
   "title": "Ways out of a conflict",
-  "category": "Psychology",
+  "category": "psychology",
   "tags": [
     "book"
   ],
@@ -59,18 +59,7 @@
           "text": "Attacking one's own thoughts or feelings. The contending strategy turned inward, with both parties inside one person."
         }
       },
-      "info": {
-        "text": "Trying to impose your preferred solution -- on the other party, or on the part of yourself that disagrees.",
-        "citations": [
-          {
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "author": "Susan Heitler",
-            "publisher": "W. W. Norton",
-            "year": "1990",
-            "pages": "Table 4.1, Table 4.2"
-          }
-        ]
-      }
+      "info": "Trying to impose your preferred solution -- on the other party, or on the part of yourself that disagrees."
     },
     {
       "id": "cluster-submit",
@@ -100,18 +89,7 @@
           "text": "Settling for less than you would have liked, and treating the reduced version as what you wanted."
         }
       },
-      "info": {
-        "text": "Ending the conflict by lowering your own aspirations and settling for less than you wanted.",
-        "citations": [
-          {
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "author": "Susan Heitler",
-            "publisher": "W. W. Norton",
-            "year": "1990",
-            "pages": "Table 4.1, Table 4.2"
-          }
-        ]
-      }
+      "info": "Ending the conflict by lowering your own aspirations and settling for less than you wanted."
     },
     {
       "id": "cluster-flee",
@@ -146,18 +124,7 @@
           "text": "Preoccupation with compelling but safe thoughts that crowd out frightening ones. Somewhere to go without moving."
         }
       },
-      "info": {
-        "text": "Leaving the scene of the conflict -- the room, the conversation, or the thought.",
-        "citations": [
-          {
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "author": "Susan Heitler",
-            "publisher": "W. W. Norton",
-            "year": "1990",
-            "pages": "Table 4.1, Table 4.2"
-          }
-        ]
-      }
+      "info": "Leaving the scene of the conflict -- the room, the conversation, or the thought."
     },
     {
       "id": "cluster-freeze",
@@ -187,18 +154,7 @@
           "text": "Choosing to let the other party act first, which leaves the outcome to whoever tires of waiting."
         }
       },
-      "info": {
-        "text": "Waiting for the other party's next move rather than making one.",
-        "citations": [
-          {
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "author": "Susan Heitler",
-            "publisher": "W. W. Norton",
-            "year": "1990",
-            "pages": "Table 4.1, Table 4.2"
-          }
-        ]
-      }
+      "info": "Waiting for the other party's next move rather than making one."
     },
     {
       "id": "cluster-problem-solve",
@@ -233,18 +189,7 @@
           "text": "Roughly even airtime, volume, speaking rate, and turns in the speaking and listening roles. Asymmetry shows up in a recording before it shows up in anyone's account of the conversation."
         }
       },
-      "info": {
-        "text": "Pursuing alternatives that satisfy both sides, and the observable components that make that possible.",
-        "citations": [
-          {
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "author": "Susan Heitler",
-            "publisher": "W. W. Norton",
-            "year": "1990",
-            "pages": "Table 4.1, Table 2.2"
-          }
-        ]
-      }
+      "info": "Pursuing alternatives that satisfy both sides, and the observable components that make that possible."
     }
   ],
   "bridges": [

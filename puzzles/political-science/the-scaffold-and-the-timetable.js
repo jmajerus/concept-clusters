@@ -1,55 +1,27 @@
 // Generated from content/puzzles/the-scaffold-and-the-timetable.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-scaffold-and-the-timetable",
   "title": "The Scaffold and the Timetable",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "info": {
     "text": "Michel Foucault's account of the shift from sovereign power's spectacular violence on the body to disciplinary power's quiet, constant arrangement of time, space, and observation -- illustrated by the two scenes he sets side by side at the start of Discipline and Punish.",
-    "link": "wiki:Discipline and Punish"
+    "links": [
+      {
+        "href": "wiki:Discipline and Punish"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "mechanisms-of-visibility",
-      "prompt": "Which of these work specifically by putting a subject under actual or potential observation, rather than by physically marking or restraining their body?",
-      "explanation": "Discipline's real innovation over the scaffold isn't gentleness, it's a different mechanism entirely: instead of marking a body once in public, it arranges people so they can always potentially be seen. Hierarchical observation formalizes who watches whom, the panopticon's visibility makes that watching structurally permanent even without an actual watcher, and self-surveillance is what happens once a person internalizes the possibility of being watched and starts policing themselves in the watcher's absence.",
-      "targets": [
-        "hierarchical observation",
-        "visibility",
-        "self-surveillance"
-      ],
-      "reasons": {
-        "hierarchical observation": "Arranges people so that a superior can always potentially see what a subordinate is doing.",
-        "self-surveillance": "What a subject does once they have internalized the possibility of being watched, whether or not anyone actually is.",
-        "visibility": "The panopticon's core architectural trick: the watched can never confirm whether they are actually being watched."
-      }
-    },
-    {
-      "id": "effects-not-mechanisms",
-      "prompt": "Which of these name what a subject becomes as a result of a given form of power, rather than the technique used to produce that result?",
-      "explanation": "The condemned body, docile bodies, and self-surveillance are all end states rather than tools: public torture produces a body publicly marked and broken as proof of the sovereign's power, discipline as a whole aims at docile bodies -- obedient and useful without needing constant force -- and self-surveillance is what a disciplined subject actually does once the panopticon's visibility has done its work.",
-      "targets": [
-        "the condemned body",
-        "docile bodies",
-        "self-surveillance"
-      ],
-      "reasons": {
-        "docile bodies": "What discipline as a whole aims at: bodies made obedient and useful without needing constant force.",
-        "self-surveillance": "What a disciplined subject actually does, once external observation has been internalized.",
-        "the condemned body": "What sovereign punishment produces: a body publicly marked and broken as proof of the sovereign's power."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "the-scaffold",
@@ -68,7 +40,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The pre-modern regime of punishment Foucault uses to open his history: violent, public, and staged as a reassertion of the sovereign's own power rather than a calculated correction of the offender.",
-        "link": "wiki:Discipline and Punish"
+        "links": [
+          {
+            "href": "wiki:Discipline and Punish"
+          }
+        ]
       }
     },
     {
@@ -88,7 +64,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The disciplinary techniques Foucault identifies as replacing spectacular punishment: fine-grained control of time, space, and activity, aimed at producing a certain kind of person rather than simply displaying a punishment.",
-        "link": "wiki:Discipline and Punish"
+        "links": [
+          {
+            "href": "wiki:Discipline and Punish"
+          }
+        ]
       }
     },
     {
@@ -108,7 +88,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Bentham's architectural design, taken up by Foucault as the general model of disciplinary power: permanent visibility that eventually makes external enforcement unnecessary.",
-        "link": "wiki:Panopticon"
+        "links": [
+          {
+            "href": "wiki:Panopticon"
+          }
+        ]
       }
     }
   ],
@@ -153,13 +137,44 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "contrast"
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
+      "id": "mechanisms-of-visibility",
+      "prompt": "Which of these work specifically by putting a subject under actual or potential observation, rather than by physically marking or restraining their body?",
+      "explanation": "Discipline's real innovation over the scaffold isn't gentleness, it's a different mechanism entirely: instead of marking a body once in public, it arranges people so they can always potentially be seen. Hierarchical observation formalizes who watches whom, the panopticon's visibility makes that watching structurally permanent even without an actual watcher, and self-surveillance is what happens once a person internalizes the possibility of being watched and starts policing themselves in the watcher's absence.",
+      "targets": [
+        "hierarchical observation",
+        "visibility",
+        "self-surveillance"
+      ],
+      "reasons": {
+        "hierarchical observation": "Arranges people so that a superior can always potentially see what a subordinate is doing.",
+        "self-surveillance": "What a subject does once they have internalized the possibility of being watched, whether or not anyone actually is.",
+        "visibility": "The panopticon's core architectural trick: the watched can never confirm whether they are actually being watched."
+      }
+    },
+    {
+      "id": "effects-not-mechanisms",
+      "prompt": "Which of these name what a subject becomes as a result of a given form of power, rather than the technique used to produce that result?",
+      "explanation": "The condemned body, docile bodies, and self-surveillance are all end states rather than tools: public torture produces a body publicly marked and broken as proof of the sovereign's power, discipline as a whole aims at docile bodies -- obedient and useful without needing constant force -- and self-surveillance is what a disciplined subject actually does once the panopticon's visibility has done its work.",
+      "targets": [
+        "the condemned body",
+        "docile bodies",
+        "self-surveillance"
+      ],
+      "reasons": {
+        "docile bodies": "What discipline as a whole aims at: bodies made obedient and useful without needing constant force.",
+        "self-surveillance": "What a disciplined subject actually does, once external observation has been internalized.",
+        "the condemned body": "What sovereign punishment produces: a body publicly marked and broken as proof of the sovereign's power."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

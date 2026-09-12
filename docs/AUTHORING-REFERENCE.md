@@ -1520,6 +1520,10 @@ Puzzles join a category by the stable **category id** (`category`,
    save. The one-time `content:migrate-category-identifiers` command performs
    this conversion across current D1 rows and Git artifacts.
 
+The follow-up `content:canonicalize` pass folds the remaining legacy authored
+fields and converts any retained JSON-LD puzzle source to simplified JSON;
+see [CANONICAL-CONTENT.md](CANONICAL-CONTENT.md).
+
 After migration, renaming a title never requires a puzzle rewrite. The
 `previousTitles` ledger remains only as a read-compatibility aid for old
 interchange or working-copy data.

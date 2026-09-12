@@ -1,101 +1,33 @@
-// Concept Clusters puzzle: Before it crosses
-// Essay-derived catalogue: Vectors — How Health Misinformation Kills
-// Source: Piece 7, "The Next One"
-// https://blog.majerus.us/vectors-7-the-next-one/
-//
-// Cluster membership is field consensus throughout, drawn from the One Health
-// literature the source cites; One Health is credited in the puzzle info rather
-// than left implicit. The source's own claim — that degrading detection
-// capacity is a decision with a forward cost — is carried by the bridge facts
-// and the second lens.
+// Generated from content/puzzles/before-it-crosses.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "before-it-crosses",
   "title": "Before it crosses",
-  "category": "Public Health",
+  "category": "public-health",
   "large": true,
   "info": {
     "text": "Pandemic prevention as one connected system: the conditions that bring species into contact, the steps by which a pathogen establishes itself in a new host, the means of noticing early, and the standing capacity that has to exist before any of the noticing can happen. The organising principle is One Health — the established position in the field that human, animal, and environmental health cannot usefully be assessed apart from one another.",
-    "link": "https://blog.majerus.us/vectors-7-the-next-one/",
-    "linkLabel": "Vectors 7: The Next One",
-    "seeAlso": [
-      { "href": "wiki:Public health", "label": "Public health" },
-      { "href": "wiki:Epidemiology", "label": "Epidemiology" }
-    ]
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Connect spillover risk to the biology of infection and to the institutional conditions under which warnings are or are not acted on."
-    },
-    "entries": [
+    "links": [
       {
-        "id": "signals-and-regulation-in-the-body",
-        "via": [
-          "receptor",
-          "signal amplification"
-        ],
-        "reason": "Look inside the host at the immune signalling a novel pathogen encounters once it has crossed."
+        "href": "https://blog.majerus.us/vectors-7-the-next-one/",
+        "label": "Vectors 7: The Next One"
       },
       {
-        "id": "climate-and-livelihoods",
-        "via": [
-          "land use",
-          "seasonality"
-        ],
-        "reason": "See the same land-use and climate drivers from the perspective of the people living in the affected regions."
+        "href": "wiki:Public health",
+        "label": "Public health"
       },
       {
-        "id": "when-correction-fails",
-        "via": [
-          "near miss",
-          "recurrence without learning"
-        ],
-        "reason": "Ask why a near miss so often produces a flurry of concern and then no durable change."
+        "href": "wiki:Epidemiology",
+        "label": "Epidemiology"
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "acting-before-human-infection",
-      "prompt": "Which concepts describe action taken before any person is infected?",
-      "targets": [
-        "land-use change",
-        "wildlife trade",
-        "animal reservoir",
-        "spillover",
-        "primary prevention"
-      ],
-      "explanation": "Most pandemic policy is response: treat, trace, vaccinate. Primary prevention acts upstream of all of it — at the point where the pathogen is still in the reservoir and the contact that would move it has not yet happened. It is the cheapest intervention available and the one most easily cut, because its successes are events that do not occur.",
-      "reasons": {
-        "land-use change": "Clearing and converting habitat creates contact zones that did not previously exist.",
-        "wildlife trade": "Moving and concentrating live animals manufactures encounters between species that would not otherwise meet.",
-        "animal reservoir": "The population a pathogen persists in before any human is involved, and the place upstream monitoring looks.",
-        "spillover": "The crossing itself — the moment prevention is trying to stop and detection is trying to catch.",
-        "primary prevention": "Acting on the conditions that generate spillover rather than on the outbreak that follows it."
-      }
-    },
-    {
-      "id": "what-a-funding-decision-removes",
-      "prompt": "Which concepts name capacity that must already exist before a novel pathogen appears, and cannot be assembled once it has?",
-      "targets": [
-        "field epidemiology",
-        "genomic sequencing",
-        "laboratory network",
-        "coordination agreement",
-        "detection window"
-      ],
-      "explanation": "Detection capacity is not a service that can be purchased during an emergency. Trained epidemiologists, working laboratories, sequencing capability, and the agreements that let findings cross borders all take years to build and can be dismantled in weeks. A decision to stop funding them is not a decision about a budget line; it is a decision about how long the next outbreak runs before anyone knows it has begun.",
-      "reasons": {
-        "field epidemiology": "Investigators have to be trained, placed, and trusted locally long before there is anything to investigate.",
-        "genomic sequencing": "Sequencing capacity near the sample is what turns an unexplained illness into an identified pathogen.",
-        "laboratory network": "Distributed laboratories with compatible methods are what allow results to be compared rather than merely collected.",
-        "coordination agreement": "Standing agreements determine whether a finding in one country reaches the others in days or in months.",
-        "detection window": "The interval between establishment and recognition — the thing all of the above exist to shorten."
-      }
-    }
-  ],
   "clusters": [
     {
+      "id": "conditions-that-create-contact",
       "name": "Conditions that create contact",
       "color": "teal",
       "fact": "Spillover opportunity is manufactured by ordinary economic activity: clearing habitat, concentrating livestock, moving live animals, and shifting the ranges species occupy. More contact means more attempts, and more attempts means more chances for one to succeed.",
@@ -116,10 +48,15 @@ export default {
         "range shift": "Movement of animal populations into new territory as climate alters where they can live, producing novel encounters between species."
       },
       "info": {
-        "link": "wiki:Ecosystem"
+        "links": [
+          {
+            "href": "wiki:Ecosystem"
+          }
+        ]
       }
     },
     {
+      "id": "how-a-pathogen-establishes-itself",
       "name": "How a pathogen establishes itself",
       "color": "blue",
       "fact": "Crossing into a person is common and usually a dead end. What turns a crossing into an outbreak is the acquisition of efficient transmission between people — a threshold, not a gradient.",
@@ -140,10 +77,15 @@ export default {
         "sustained transmission": "Continuing person-to-person spread without repeated reintroduction from an animal source."
       },
       "info": {
-        "link": "wiki:Virus"
+        "links": [
+          {
+            "href": "wiki:Virus"
+          }
+        ]
       }
     },
     {
+      "id": "noticing-early",
       "name": "Noticing early",
       "color": "amber",
       "fact": "Detection is the one intervention that compresses every other response. The difference between recognizing a novel pathogen early and recognizing it late is not a difference of degree in the response; it is a difference in what response remains possible.",
@@ -164,10 +106,15 @@ export default {
         "international reporting": "The obligation and the channels by which a country notifies others of an event of potential international concern."
       },
       "info": {
-        "link": "wiki:Epidemiology"
+        "links": [
+          {
+            "href": "wiki:Epidemiology"
+          }
+        ]
       }
     },
     {
+      "id": "capacity-that-must-exist-beforehand",
       "name": "Capacity that must exist beforehand",
       "color": "magenta",
       "fact": "Every detection method depends on infrastructure that takes years to build: trained people, working laboratories, sustained funding, and agreements that let findings cross borders. None of it can be assembled after the outbreak starts.",
@@ -188,63 +135,149 @@ export default {
         "coordination agreement": "Standing arrangements between countries and agencies governing how surveillance findings are shared and acted on."
       },
       "info": {
-        "link": "wiki:Public health"
+        "links": [
+          {
+            "href": "wiki:Public health"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "spillover",
       "term": "spillover",
-      "conceptId": "spillover",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "dynamic",
       "fact": "Spillover is where the ecological conditions meet the biology: contact created by land use and trade supplies the opportunity, and the pathogen's capacity to bind and replicate in a new host determines whether the opportunity is taken.",
+      "info": {
+        "text": "The transmission of a pathogen from an animal reservoir into a new host species, including humans.",
+        "links": [
+          {
+            "href": "wiki:Spillover infection"
+          }
+        ]
+      },
+      "conceptId": "spillover",
+      "relationKind": "dynamic",
       "idealTerms": [
         "wildlife trade",
         "animal reservoir"
-      ],
-      "info": {
-        "text": "The transmission of a pathogen from an animal reservoir into a new host species, including humans.",
-        "link": "wiki:Spillover infection"
-      }
+      ]
     },
     {
+      "id": "detection-window",
       "term": "detection window",
-      "conceptId": "detection-window",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "dynamic",
       "fact": "The detection window is the interval between a pathogen establishing sustained transmission and anyone recognizing that it has. Surveillance does not change the biology; it changes how much of the biology happens unobserved, and that interval determines which responses are still available.",
+      "info": {
+        "text": "The time between a pathogen becoming transmissible in a population and its recognition by a surveillance system."
+      },
+      "conceptId": "detection-window",
+      "relationKind": "dynamic",
       "idealTerms": [
         "sustained transmission",
         "genomic sequencing"
-      ],
-      "info": {
-        "text": "The time between a pathogen becoming transmissible in a population and its recognition by a surveillance system."
-      }
+      ]
     },
     {
+      "id": "primary-prevention",
       "term": "primary prevention",
-      "conceptId": "primary-prevention",
       "clusters": [
         0,
         3
       ],
-      "relationKind": "evaluation",
       "fact": "Primary prevention connects the drivers to the budget. Acting on land use, trade, and reservoir monitoring costs a small fraction of responding to the outbreaks they produce — but its returns are events that never happen, which makes it the easiest capacity to cut and the hardest to defend.",
+      "info": {
+        "text": "Intervening on the conditions that generate disease emergence, rather than on the outbreak once it has begun.",
+        "links": [
+          {
+            "href": "wiki:Public health"
+          }
+        ]
+      },
+      "conceptId": "primary-prevention",
+      "relationKind": "evaluation",
       "idealTerms": [
         "land-use change",
         "sustained funding"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "acting-before-human-infection",
+      "prompt": "Which concepts describe action taken before any person is infected?",
+      "explanation": "Most pandemic policy is response: treat, trace, vaccinate. Primary prevention acts upstream of all of it — at the point where the pathogen is still in the reservoir and the contact that would move it has not yet happened. It is the cheapest intervention available and the one most easily cut, because its successes are events that do not occur.",
+      "targets": [
+        "land-use change",
+        "wildlife trade",
+        "animal reservoir",
+        "spillover",
+        "primary prevention"
       ],
-      "info": {
-        "text": "Intervening on the conditions that generate disease emergence, rather than on the outbreak once it has begun.",
-        "link": "wiki:Public health"
+      "reasons": {
+        "land-use change": "Clearing and converting habitat creates contact zones that did not previously exist.",
+        "wildlife trade": "Moving and concentrating live animals manufactures encounters between species that would not otherwise meet.",
+        "animal reservoir": "The population a pathogen persists in before any human is involved, and the place upstream monitoring looks.",
+        "spillover": "The crossing itself — the moment prevention is trying to stop and detection is trying to catch.",
+        "primary prevention": "Acting on the conditions that generate spillover rather than on the outbreak that follows it."
+      }
+    },
+    {
+      "id": "what-a-funding-decision-removes",
+      "prompt": "Which concepts name capacity that must already exist before a novel pathogen appears, and cannot be assembled once it has?",
+      "explanation": "Detection capacity is not a service that can be purchased during an emergency. Trained epidemiologists, working laboratories, sequencing capability, and the agreements that let findings cross borders all take years to build and can be dismantled in weeks. A decision to stop funding them is not a decision about a budget line; it is a decision about how long the next outbreak runs before anyone knows it has begun.",
+      "targets": [
+        "field epidemiology",
+        "genomic sequencing",
+        "laboratory network",
+        "coordination agreement",
+        "detection window"
+      ],
+      "reasons": {
+        "field epidemiology": "Investigators have to be trained, placed, and trusted locally long before there is anything to investigate.",
+        "genomic sequencing": "Sequencing capacity near the sample is what turns an unexplained illness into an identified pathogen.",
+        "laboratory network": "Distributed laboratories with compatible methods are what allow results to be compared rather than merely collected.",
+        "coordination agreement": "Standing agreements determine whether a finding in one country reaches the others in days or in months.",
+        "detection window": "The interval between establishment and recognition — the thing all of the above exist to shorten."
       }
     }
-  ]
-};
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Connect spillover risk to the biology of infection and to the institutional conditions under which warnings are or are not acted on."
+    },
+    "entries": [
+      {
+        "id": "signals-and-regulation-in-the-body",
+        "reason": "Look inside the host at the immune signalling a novel pathogen encounters once it has crossed.",
+        "via": [
+          "receptor",
+          "signal amplification"
+        ]
+      },
+      {
+        "id": "climate-and-livelihoods",
+        "reason": "See the same land-use and climate drivers from the perspective of the people living in the affected regions.",
+        "via": [
+          "land use",
+          "seasonality"
+        ]
+      },
+      {
+        "id": "when-correction-fails",
+        "reason": "Ask why a near miss so often produces a flurry of concern and then no durable change.",
+        "via": [
+          "near miss",
+          "recurrence without learning"
+        ]
+      }
+    ]
+  }
+});

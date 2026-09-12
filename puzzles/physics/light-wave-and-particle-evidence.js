@@ -1,12 +1,12 @@
 // Generated from content/puzzles/light-wave-and-particle-evidence.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "light-wave-and-particle-evidence",
   "title": "Light: wave and particle evidence",
-  "category": "Physics",
+  "category": "physics",
   "large": true,
   "info": {
     "text": "Classical wave and particle models make different predictions. Light needs both descriptions: interference and diffraction reveal phase-sensitive wave behavior, while photoelectric and Compton experiments reveal discrete transfers of energy and momentum.",
@@ -263,7 +263,7 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "aiPrimary",
     "contributors": [
       {
-        "name": "Codex (gpt-5.6-sol)"
+        "name": "Codex (GPT-5.6 Sol)"
       },
       {
         "name": "Cursor"

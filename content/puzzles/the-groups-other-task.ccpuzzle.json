@@ -1,10 +1,10 @@
 {
   "id": "the-groups-other-task",
   "title": "The Group's Other Task",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book",
@@ -13,13 +13,17 @@
   "large": true,
   "info": {
     "text": "Wilfred Bion's claim that every working group is shadowed by an unconscious one -- reacting to a shared fantasy of rescue, threat, or salvation instead of pursuing its actual task.",
-    "link": "https://www.csudh.edu/Assets/csudh-sites/group-relations/documents/recommended-reading/Tavistock%20Primer%20II.pdf",
     "citations": [
       {
         "title": "Experiences in Groups: And Other Papers",
         "author": "W. R. Bion",
         "publisher": "Tavistock Publications",
         "year": "1961"
+      }
+    ],
+    "links": [
+      {
+        "href": "https://www.csudh.edu/Assets/csudh-sites/group-relations/documents/recommended-reading/Tavistock%20Primer%20II.pdf"
       }
     ]
   },
@@ -214,20 +218,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-08"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

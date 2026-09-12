@@ -1,13 +1,13 @@
 {
   "id": "solidarity-in-brokenness",
   "title": "Solidarity in Brokenness",
-  "category": "Philosophy",
+  "category": "philosophy",
   "categories": [
-    "Philosophy",
-    "Psychology"
+    "philosophy",
+    "psychology"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "tags": [
     "catalogue:wholeness-and-its-discontents"
@@ -15,7 +15,11 @@
   "large": true,
   "info": {
     "text": "The Lacanian-Hegelian case for treating structural division not as a private defect but as the shared, universal ground of political solidarity.",
-    "link": "wiki:Todd McGowan"
+    "links": [
+      {
+        "href": "wiki:Todd McGowan"
+      }
+    ]
   },
   "clusters": [
     {
@@ -45,11 +49,19 @@
         },
         "lacanian real void": {
           "text": "What resists full capture by image or language -- Lacan's Real, the site the whole ontology of the split subject is built around.",
-          "link": "wiki:Lacanian Real"
+          "links": [
+            {
+              "href": "wiki:Lacanian Real"
+            }
+          ]
         },
         "objet petit a": {
           "text": "Lacan's term for the elusive object-cause of desire, which recedes the moment it is approached.",
-          "link": "wiki:Objet petit a"
+          "links": [
+            {
+              "href": "wiki:Objet petit a"
+            }
+          ]
         },
         "permanent alienation": {
           "text": "Alienation held as an ontological condition of being a subject at all, not a temporary or curable state."
@@ -59,7 +71,11 @@
         }
       },
       "info": {
-        "link": "wiki:Jacques Lacan"
+        "links": [
+          {
+            "href": "wiki:Jacques Lacan"
+          }
+        ]
       }
     },
     {
@@ -101,7 +117,11 @@
         }
       },
       "info": {
-        "link": "wiki:Slavoj Žižek"
+        "links": [
+          {
+            "href": "wiki:Slavoj Žižek"
+          }
+        ]
       }
     },
     {
@@ -284,27 +304,15 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Gemini",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Gemini",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-07"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

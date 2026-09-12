@@ -1,16 +1,20 @@
 // Generated from content/puzzles/power-authority-and-the-state.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "power-authority-and-the-state",
   "title": "Power, Authority, and the State",
-  "category": "Political Science",
+  "category": "political-science",
   "large": true,
   "info": {
     "text": "The concepts political scientists use to describe what a state is, why people obey it, and where its right to rule is said to come from.",
-    "link": "wiki:Political science"
+    "links": [
+      {
+        "href": "wiki:Political science"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,7 +34,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The traditional legal checklist for what counts as a state, first codified for the Americas in 1933 and now treated as customary international law.",
-        "link": "wiki:Montevideo Convention"
+        "links": [
+          {
+            "href": "wiki:Montevideo Convention"
+          }
+        ]
       }
     },
     {
@@ -49,18 +57,34 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "charismatic authority": {
-          "link": "wiki:Charismatic authority"
+          "links": [
+            {
+              "href": "wiki:Charismatic authority"
+            }
+          ]
         },
         "rational-legal authority": {
-          "link": "wiki:Rational-legal authority"
+          "links": [
+            {
+              "href": "wiki:Rational-legal authority"
+            }
+          ]
         },
         "traditional authority": {
-          "link": "wiki:Traditional authority"
+          "links": [
+            {
+              "href": "wiki:Traditional authority"
+            }
+          ]
         }
       },
       "info": {
         "text": "Sociologist Max Weber's three-part answer to why people obey political authority at all, rather than simply submitting to superior force.",
-        "link": "wiki:Tripartite classification of authority"
+        "links": [
+          {
+            "href": "wiki:Tripartite classification of authority"
+          }
+        ]
       }
     },
     {
@@ -81,7 +105,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "A 1959 taxonomy from social psychology naming the different resources that let one person influence another, independent of whether that influence is legitimate.",
-        "link": "wiki:French and Raven's bases of power"
+        "links": [
+          {
+            "href": "wiki:French and Raven's bases of power"
+          }
+        ]
       }
     },
     {
@@ -100,12 +128,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "popular sovereignty": {
-          "link": "wiki:Popular sovereignty"
+          "links": [
+            {
+              "href": "wiki:Popular sovereignty"
+            }
+          ]
         }
       },
       "info": {
         "text": "Supreme, independent authority over a territory -- the core claim every state makes, both toward its own population and toward the rest of the world.",
-        "link": "wiki:Sovereignty"
+        "links": [
+          {
+            "href": "wiki:Sovereignty"
+          }
+        ]
       }
     }
   ],
@@ -118,10 +154,14 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "An 'effective government' is not just one that controls territory by force; Weber's point is that lasting effectiveness rests on some claim to legitimacy, whichever of the three grounds it draws on.",
-      "relationKind": "foundation",
       "info": {
-        "link": "wiki:Political legitimacy"
+        "links": [
+          {
+            "href": "wiki:Political legitimacy"
+          }
+        ]
       },
+      "relationKind": "foundation",
       "idealTerms": [
         "effective government",
         null
@@ -135,10 +175,14 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "A state's real capacity for foreign relations depends on other states granting diplomatic recognition of its external sovereignty -- sovereignty claimed at home only becomes sovereignty exercised abroad once others acknowledge it.",
-      "relationKind": "dynamic",
       "info": {
-        "link": "wiki:Diplomatic recognition"
+        "links": [
+          {
+            "href": "wiki:Diplomatic recognition"
+          }
+        ]
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "capacity for foreign relations",
         "external sovereignty"
@@ -157,23 +201,26 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Both frameworks classify why someone complies with another's power: Weber sorts the specific claims to legitimacy that make obedience feel right, while French and Raven catalogue power's sources more broadly, including ones -- like coercion -- that need no legitimacy at all.",
-      "relationKind": "cross-cutting",
       "info": {
-        "link": "wiki:Obedience (human behavior)"
+        "links": [
+          {
+            "href": "wiki:Obedience (human behavior)"
+          }
+        ]
       },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         null,
         "legitimate power"
       ]
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

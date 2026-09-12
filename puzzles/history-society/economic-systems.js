@@ -1,17 +1,16 @@
-// Concept Clusters puzzle: Economic systems
-// Category: History & Society
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/economic-systems.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "economic-systems",
   "title": "Economic systems",
-  "category": "History & Society",
+  "category": "history-society",
   "clusters": [
     {
+      "id": "capitalism",
       "name": "Capitalism",
-      "info": {
-        "link": "wiki:Capitalism"
-      },
       "color": "teal",
       "fact": "Capitalism relies on private property and competitive markets to decide what gets produced.",
       "terms": [
@@ -26,26 +25,47 @@ export default {
       ],
       "termInfo": {
         "private property": {
-          "link": "wiki:Private property"
+          "links": [
+            {
+              "href": "wiki:Private property"
+            }
+          ]
         },
         "competition": {
-          "link": "wiki:Competition"
+          "links": [
+            {
+              "href": "wiki:Competition"
+            }
+          ]
         },
         "profit": {
           "text": "The money left over after a business's costs are subtracted from its revenue.",
-          "link": "wiki:Profit (economics)"
+          "links": [
+            {
+              "href": "wiki:Profit (economics)"
+            }
+          ]
         },
         "supply and demand": {
           "text": "The market forces that set prices: how much of something is available, and how much people want it.",
-          "link": "wiki:Supply and demand"
+          "links": [
+            {
+              "href": "wiki:Supply and demand"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Capitalism"
+          }
+        ]
       }
     },
     {
+      "id": "socialism",
       "name": "Socialism",
-      "info": {
-        "link": "wiki:Socialism"
-      },
       "color": "blue",
       "fact": "Socialism emphasizes collective or state ownership of resources to reduce inequality.",
       "terms": [
@@ -60,25 +80,46 @@ export default {
       ],
       "termInfo": {
         "collective ownership": {
-          "link": "wiki:Collective ownership"
+          "links": [
+            {
+              "href": "wiki:Collective ownership"
+            }
+          ]
         },
         "central planning": {
-          "link": "wiki:Planned economy"
+          "links": [
+            {
+              "href": "wiki:Planned economy"
+            }
+          ]
         },
         "public services": {
-          "link": "wiki:Public service"
+          "links": [
+            {
+              "href": "wiki:Public service"
+            }
+          ]
         },
         "means of production": {
           "text": "The factories, land, and tools used to produce goods — socialism holds these should be collectively or state owned rather than privately.",
-          "link": "wiki:Means of production"
+          "links": [
+            {
+              "href": "wiki:Means of production"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Socialism"
+          }
+        ]
       }
     },
     {
+      "id": "mixed-economy",
       "name": "Mixed economy",
-      "info": {
-        "link": "wiki:Mixed economy"
-      },
       "color": "amber",
       "fact": "A mixed economy combines private markets with government regulation and public programs.",
       "terms": [
@@ -92,49 +133,78 @@ export default {
       ],
       "termInfo": {
         "regulation": {
-          "link": "wiki:Regulation"
+          "links": [
+            {
+              "href": "wiki:Regulation"
+            }
+          ]
         },
         "welfare state": {
-          "link": "wiki:Welfare state"
+          "links": [
+            {
+              "href": "wiki:Welfare state"
+            }
+          ]
         },
         "public-private": {
-          "link": "wiki:Public–private partnership"
+          "links": [
+            {
+              "href": "wiki:Public–private partnership"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Mixed economy"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "markets",
       "term": "markets",
       "clusters": [
         0,
         2
       ],
       "fact": "Markets bridge the two: mixed economies keep capitalism's competitive markets but layer regulation on top.",
+      "info": {
+        "text": "A system where buyers and sellers exchange goods, coordinated through prices rather than central planning.",
+        "links": [
+          {
+            "href": "wiki:Market (economics)"
+          }
+        ]
+      },
       "idealTerms": [
         "competition",
         "regulation"
-      ],
-      "info": {
-        "text": "A system where buyers and sellers exchange goods, coordinated through prices rather than central planning.",
-        "link": "wiki:Market (economics)"
-      }
+      ]
     },
     {
+      "id": "taxation",
       "term": "taxation",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "cross-cutting",
       "fact": "Taxation bridges the two: it funds socialism's public services and a mixed economy's welfare state alike.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Tax"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "public services",
         "welfare state"
-      ],
-      "info": {
-        "link": "wiki:Tax"
-      }
+      ]
     }
   ]
-};
+});

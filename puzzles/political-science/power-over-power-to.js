@@ -1,15 +1,15 @@
 // Generated from content/puzzles/power-over-power-to.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "power-over-power-to",
   "title": "Power Over, Power To",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Psychology"
+    "political-science",
+    "psychology"
   ],
   "tags": [
     "book"
@@ -31,50 +31,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "relatedPuzzles": {
-    "entries": [
-      {
-        "id": "power-authority-and-the-state",
-        "via": [
-          "legitimacy",
-          "obedience"
-        ],
-        "reason": "Compare Weber's legitimacy-based authority and French and Raven's five power bases against Fromm's own two-part reading of power, and his separate account of what makes an authority rational, irrational, or anonymous."
-      }
-    ]
-  },
-  "lenses": [
-    {
-      "id": "needs-feeding",
-      "prompt": "Which of these must be continually re-secured through another person's submission, rather than being a stable possession?",
-      "explanation": "None of these can simply be achieved and then held. Domination has to keep dominating; sadism has to keep controlling to relieve the isolation it covers for; irrational authority has to keep extracting submission or it collapses. Power to, by contrast, is a capacity a person actually has, whether or not anyone else is involved at all.",
-      "targets": [
-        "domination",
-        "sadism",
-        "irrational authority"
-      ],
-      "reasons": {
-        "domination": "Requires an ongoing relationship of control, not a one-time achievement.",
-        "irrational authority": "Survives only by continually extracting submission; it has no independent basis.",
-        "sadism": "The underlying isolation it defends against returns the moment control lapses."
-      }
-    },
-    {
-      "id": "aimed-at-independence",
-      "prompt": "Which of these are meant to leave a person more capable and independent, rather than more dependent on someone else?",
-      "explanation": "Rational authority is unusual among the forms of authority here because it is designed to shrink: a good teacher's authority over a student is supposed to diminish as the student's own competence grows, which is exactly the direction productiveness and self-realization already point on their own -- toward a person's own capacities, not toward continued reliance on someone else.",
-      "targets": [
-        "rational authority",
-        "productiveness",
-        "self-realization"
-      ],
-      "reasons": {
-        "productiveness": "The exercise of a person's own faculties, not a transaction with anyone else.",
-        "rational authority": "Explicitly meant to diminish as the other person's own competence grows.",
-        "self-realization": "Growth in one's own capacity, independent of anyone else's submission or authority."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "power-to",
@@ -140,14 +96,26 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "anonymous authority": {
           "text": "Authority with no visible source -- no person, office, or law giving an order -- exercised instead through unspoken pressure to conform to what everyone else already seems to be doing or believing.",
-          "link": "wiki:Erich Fromm"
+          "links": [
+            {
+              "href": "wiki:Erich Fromm"
+            }
+          ]
         },
         "conformity": "The outcome anonymous authority produces: adjustment to the group not because anyone commanded it, but because standing apart starts to feel unthinkable.",
         "irrational authority": {
-          "link": "wiki:Traditional authority"
+          "links": [
+            {
+              "href": "wiki:Traditional authority"
+            }
+          ]
         },
         "rational authority": {
-          "link": "wiki:Rational-legal authority"
+          "links": [
+            {
+              "href": "wiki:Rational-legal authority"
+            }
+          ]
         }
       },
       "info": {
@@ -199,20 +167,56 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
+      "id": "needs-feeding",
+      "prompt": "Which of these must be continually re-secured through another person's submission, rather than being a stable possession?",
+      "explanation": "None of these can simply be achieved and then held. Domination has to keep dominating; sadism has to keep controlling to relieve the isolation it covers for; irrational authority has to keep extracting submission or it collapses. Power to, by contrast, is a capacity a person actually has, whether or not anyone else is involved at all.",
+      "targets": [
+        "domination",
+        "sadism",
+        "irrational authority"
+      ],
+      "reasons": {
+        "domination": "Requires an ongoing relationship of control, not a one-time achievement.",
+        "irrational authority": "Survives only by continually extracting submission; it has no independent basis.",
+        "sadism": "The underlying isolation it defends against returns the moment control lapses."
+      }
     },
     {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
+      "id": "aimed-at-independence",
+      "prompt": "Which of these are meant to leave a person more capable and independent, rather than more dependent on someone else?",
+      "explanation": "Rational authority is unusual among the forms of authority here because it is designed to shrink: a good teacher's authority over a student is supposed to diminish as the student's own competence grows, which is exactly the direction productiveness and self-realization already point on their own -- toward a person's own capacities, not toward continued reliance on someone else.",
+      "targets": [
+        "rational authority",
+        "productiveness",
+        "self-realization"
+      ],
+      "reasons": {
+        "productiveness": "The exercise of a person's own faculties, not a transaction with anyone else.",
+        "rational authority": "Explicitly meant to diminish as the other person's own competence grows.",
+        "self-realization": "Growth in one's own capacity, independent of anyone else's submission or authority."
+      }
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "power-authority-and-the-state",
+        "reason": "Compare Weber's legitimacy-based authority and French and Raven's five power bases against Fromm's own two-part reading of power, and his separate account of what makes an authority rational, irrational, or anonymous.",
+        "via": [
+          "legitimacy",
+          "obedience"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

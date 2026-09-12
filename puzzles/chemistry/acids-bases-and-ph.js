@@ -1,12 +1,12 @@
 // Generated from content/puzzles/acids-bases-and-ph.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "acids-bases-and-ph",
   "title": "Acids, bases, and pH",
-  "category": "Chemistry",
+  "category": "chemistry",
   "tags": [
     "chemistry",
     "acids",
@@ -48,7 +48,11 @@ export default definePuzzle(import.meta.url, {
         "hydronium"
       ],
       "info": {
-        "link": "wiki:Acid"
+        "links": [
+          {
+            "href": "wiki:Acid"
+          }
+        ]
       }
     },
     {
@@ -66,7 +70,11 @@ export default definePuzzle(import.meta.url, {
         "hydroxide"
       ],
       "info": {
-        "link": "wiki:Base (chemistry)"
+        "links": [
+          {
+            "href": "wiki:Base (chemistry)"
+          }
+        ]
       }
     },
     {
@@ -85,7 +93,11 @@ export default definePuzzle(import.meta.url, {
         "neutral solution"
       ],
       "info": {
-        "link": "wiki:pH"
+        "links": [
+          {
+            "href": "wiki:pH"
+          }
+        ]
       }
     }
   ],
@@ -99,7 +111,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "When an acid donates a proton, the remainder is a base; the protonated base is an acid. The two species that differ by that one proton are a conjugate pair.",
       "info": {
-        "link": "wiki:Conjugate acid"
+        "links": [
+          {
+            "href": "wiki:Conjugate acid"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -118,7 +134,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The ion-product of water, Kw = [H3O+][OH−], ties hydronium and hydroxide together so that raising one lowers the other and a neutral solution sits where they are equal.",
       "info": {
-        "link": "wiki:Self-ionization of water"
+        "links": [
+          {
+            "href": "wiki:Self-ionization of water"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "foundation",
@@ -172,20 +192,12 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "SpaceXAI",
-      "date": "2026-08-20"
-    },
-    {
-      "system": "Cursor",
-      "scope": "lenses",
-      "role": "edited",
-      "provider": "SpaceXAI",
-      "date": "2026-08-20"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 });

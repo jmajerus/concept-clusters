@@ -1,107 +1,31 @@
-// Generated from content/puzzles/finite-and-infinite-games.ccpuzzle.jsonld.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Generated from content/puzzles/finite-and-infinite-games.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "finite-and-infinite-games",
   "title": "Finite and infinite games",
-  "category": "Philosophy",
+  "category": "philosophy",
   "tags": [
     "book"
   ],
   "info": {
-    "link": "wiki:Finite and Infinite Games",
     "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going.",
+    "links": [
+      {
+        "href": "wiki:Finite and Infinite Games"
+      }
+    ],
     "citations": [
       {
-        "author": "Carse, James P.",
         "title": "Finite and Infinite Games: A Vision of Life as Play and Possibility",
+        "author": "Carse, James P.",
         "publisher": "Free Press",
         "year": "1986"
       }
     ]
   },
-  "relatedPuzzles": {
-    "entries": [
-      {
-        "id": "game-theory-basics",
-        "reason": "Carse's finite play is a philosophical account of something game theory formalizes with precision -- see how strategy, equilibrium, and repeated play work when the rules are exact rather than existential."
-      }
-    ]
-  },
-  "lenses": [
-    {
-      "explanation": "A finite game exists to reach a definite end: it needs a boundary to be won inside, rules everyone agrees to in advance, and it produces a title once someone wins. Veiling belongs here too -- a finite player conceals a future move the same way a society conceals its own origin, so that neither is ever questioned while play continues.",
-      "id": "aimed-at-an-end",
-      "prompt": "Which concepts belong to play aimed at a definite end -- its limits, its terms, what it conceals, and what it awards a winner?",
-      "reasons": {
-        "boundary": "The fixed limit a finite game needs in order to be won at all.",
-        "finite game": "Play whose whole purpose is to reach a definite end and declare a winner.",
-        "rules": "The terms that let everyone agree, once the game ends, on who won.",
-        "title": "What a winner is given -- the mark that this particular contest is now closed.",
-        "veiling": "Concealing a future move, or a society concealing its own origin, so that neither is ever questioned."
-      },
-      "targets": [
-        "finite game",
-        "boundary",
-        "rules",
-        "title",
-        "veiling"
-      ]
-    },
-    {
-      "explanation": "An infinite game refuses a definite end: it has a horizon instead of a boundary, it welcomes surprise instead of guarding against it, and its players go by name instead of title, since what they'll do next has to stay open. Evil belongs here as the force aimed directly against all of this -- the attempt to end infinite play by shutting every horizon inside one boundary.",
-      "id": "refusing-an-end",
-      "prompt": "Which concepts belong to play that refuses a definite end -- its far edge, what it welcomes rather than guards against, how its players are known, and the one force that tries to shut it down by force?",
-      "reasons": {
-        "evil": "The attempt to end infinite play by force, closing every horizon into a single boundary.",
-        "horizon": "The far edge of an infinite player's awareness, which moves rather than holding still like a boundary.",
-        "infinite game": "Play whose whole purpose is to keep going, with even its own rules and players free to change.",
-        "name": "How an infinite player is known, leaving what they'll do next genuinely open.",
-        "surprise": "What a finite game is designed to prevent, but what an infinite player deliberately stays open to."
-      },
-      "targets": [
-        "infinite game",
-        "horizon",
-        "surprise",
-        "name",
-        "evil"
-      ]
-    },
-    {
-      "explanation": "Society is organized like a finite game, staying inside its own boundary, and power is the specifically comparative way of relating to others that only makes sense inside one -- it means nothing until it's measured against someone else, the way winning means nothing outside a boundary.",
-      "id": "living-inside-a-boundary",
-      "prompt": "Which concepts describe living, or relating to others, as though inside a fixed, closed field -- something with an edge, and something only meaningful by comparison?",
-      "reasons": {
-        "boundary": "The fixed edge that both a finite game, and a society organized like one, need in order to hold together.",
-        "power": "A way of relating to others that only means anything by comparison, the way a finite game only means anything inside a boundary.",
-        "society": "The parts of life organized like a finite game, held inside a boundary of rules and titles."
-      },
-      "targets": [
-        "society",
-        "power",
-        "boundary"
-      ]
-    },
-    {
-      "explanation": "Culture is organized like an infinite game, always moving toward its horizon rather than settling inside a fixed edge, and strength is the specifically infinite way of relating to others -- available to anyone, and never used up by being compared, the way an infinite game is never closed off by reaching its horizon. Deviancy belongs here too -- it's the same openness to the unscripted that defines an infinite player generally, applied to what keeps a culture alive rather than repeating its own past.",
-      "id": "living-toward-a-horizon",
-      "prompt": "Which concepts describe living, or relating to others, as though moving toward an ever-receding edge -- open-ended, and available to anyone regardless of comparison?",
-      "reasons": {
-        "culture": "The parts of life organized like an infinite game, always moving toward its horizon rather than settling inside a boundary.",
-        "deviancy": "Departing from the expected script, which Carse treats as what keeps a culture alive rather than as a threat to it.",
-        "horizon": "The ever-receding edge that both an infinite game, and a culture organized like one, keep moving toward.",
-        "strength": "A way of relating to others that anyone can have, regardless of comparison, the way an infinite game is never closed off by reaching its horizon."
-      },
-      "targets": [
-        "culture",
-        "strength",
-        "horizon",
-        "deviancy"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-finite-play",
@@ -120,20 +44,36 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "boundary": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "A fixed limit -- of space, time, or number of players -- that a finite game requires in order to be won at all."
+          "text": "A fixed limit -- of space, time, or number of players -- that a finite game requires in order to be won at all.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "finite game": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "A game played inside fixed limits, with the aim of reaching a definite end and declaring a winner."
+          "text": "A game played inside fixed limits, with the aim of reaching a definite end and declaring a winner.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "rules": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "The terms every player agrees to in advance, which is how everyone can later agree on who has won."
+          "text": "The terms every player agrees to in advance, which is how everyone can later agree on who has won.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "title": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "The recognition a winner is given, which fixes a completed contest in place and marks it as no longer being played."
+          "text": "The recognition a winner is given, which fixes a completed contest in place and marks it as no longer being played.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         }
       }
     },
@@ -154,20 +94,36 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "horizon": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "The far edge of an infinite player's awareness, which moves as they move -- unlike a boundary, it can never actually be reached."
+          "text": "The far edge of an infinite player's awareness, which moves as they move -- unlike a boundary, it can never actually be reached.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "infinite game": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "A game played for the sake of keeping play going, where the rules, the boundaries, and even who's playing are all allowed to change."
+          "text": "A game played for the sake of keeping play going, where the rules, the boundaries, and even who's playing are all allowed to change.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "name": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "How an infinite player is known -- unlike a title, a name doesn't fix who someone is, so what they'll do next stays genuinely open."
+          "text": "How an infinite player is known -- unlike a title, a name doesn't fix who someone is, so what they'll do next stays genuinely open.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "surprise": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "What ends a finite game's careful planning, but what an infinite player deliberately stays open to, since it's what keeps play alive."
+          "text": "What ends a finite game's careful planning, but what an infinite player deliberately stays open to, since it's what keeps play alive.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         }
       }
     },
@@ -188,20 +144,36 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "culture": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "The parts of life organized as an infinite game -- shaped by open, undirected choices that keep changing what gets handed down."
+          "text": "The parts of life organized as an infinite game -- shaped by open, undirected choices that keep changing what gets handed down.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "power": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "The ability to bring a contest to a close on your own terms -- always measured by comparison, and always about what's already happened."
+          "text": "The ability to bring a contest to a close on your own terms -- always measured by comparison, and always about what's already happened.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "society": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "The parts of life organized as a finite game -- held together by rules people feel they must follow, and by titles it keeps track of."
+          "text": "The parts of life organized as a finite game -- held together by rules people feel they must follow, and by titles it keeps track of.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "strength": {
-          "link": "wiki:Finite and Infinite Games",
-          "text": "The capacity to keep engaging and creating that anyone can have, whether or not they ever compare it to someone else's."
+          "text": "The capacity to keep engaging and creating that anyone can have, whether or not they ever compare it to someone else's.",
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         }
       }
     }
@@ -215,11 +187,15 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Carse defines evil not as ordinary cruelty but as the attempt to end infinite play by force -- to contain every horizon within a single boundary, so that no other game, and no other culture, is allowed to keep playing.",
-      "relationKind": "dynamic",
       "info": {
-        "link": "wiki:Finite and Infinite Games",
-        "text": "Carse's term for the drive to force an infinite game closed -- to make one boundary swallow every horizon."
+        "text": "Carse's term for the drive to force an infinite game closed -- to make one boundary swallow every horizon.",
+        "links": [
+          {
+            "href": "wiki:Finite and Infinite Games"
+          }
+        ]
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "boundary",
         "horizon"
@@ -238,11 +214,15 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Finite players veil their future moves to keep opponents from anticipating them, and Carse extends the same idea to society itself: society functions by veiling its own origins, letting people forget that every rule they follow began as a choice they made freely.",
-      "relationKind": "continuity",
       "info": {
-        "link": "wiki:Finite and Infinite Games",
-        "text": "Concealing something -- an intention from an opponent, or a choice from oneself -- to make it feel fixed rather than freely chosen."
+        "text": "Concealing something -- an intention from an opponent, or a choice from oneself -- to make it feel fixed rather than freely chosen.",
+        "links": [
+          {
+            "href": "wiki:Finite and Infinite Games"
+          }
+        ]
       },
+      "relationKind": "continuity",
       "idealTerms": [
         "rules",
         "society"
@@ -261,11 +241,15 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Departing from the expected script is exactly what keeps a culture alive: an infinite player welcomes this kind of unscripted departure as a matter of course, and Carse treats that same willingness as the actual substance of culture, not a threat to it.",
-      "relationKind": "continuity",
       "info": {
-        "link": "wiki:Finite and Infinite Games",
-        "text": "Departing from an expected script, which Carse treats as culture's actual substance rather than something culture must resist."
+        "text": "Departing from an expected script, which Carse treats as culture's actual substance rather than something culture must resist.",
+        "links": [
+          {
+            "href": "wiki:Finite and Infinite Games"
+          }
+        ]
       },
+      "relationKind": "continuity",
       "idealTerms": [
         "surprise",
         "culture"
@@ -276,5 +260,85 @@ export default definePuzzle(import.meta.url, {
         "to": 2
       }
     }
-  ]
+  ],
+  "lenses": [
+    {
+      "id": "aimed-at-an-end",
+      "prompt": "Which concepts belong to play aimed at a definite end -- its limits, its terms, what it conceals, and what it awards a winner?",
+      "explanation": "A finite game exists to reach a definite end: it needs a boundary to be won inside, rules everyone agrees to in advance, and it produces a title once someone wins. Veiling belongs here too -- a finite player conceals a future move the same way a society conceals its own origin, so that neither is ever questioned while play continues.",
+      "targets": [
+        "finite game",
+        "boundary",
+        "rules",
+        "title",
+        "veiling"
+      ],
+      "reasons": {
+        "boundary": "The fixed limit a finite game needs in order to be won at all.",
+        "finite game": "Play whose whole purpose is to reach a definite end and declare a winner.",
+        "rules": "The terms that let everyone agree, once the game ends, on who won.",
+        "title": "What a winner is given -- the mark that this particular contest is now closed.",
+        "veiling": "Concealing a future move, or a society concealing its own origin, so that neither is ever questioned."
+      }
+    },
+    {
+      "id": "refusing-an-end",
+      "prompt": "Which concepts belong to play that refuses a definite end -- its far edge, what it welcomes rather than guards against, how its players are known, and the one force that tries to shut it down by force?",
+      "explanation": "An infinite game refuses a definite end: it has a horizon instead of a boundary, it welcomes surprise instead of guarding against it, and its players go by name instead of title, since what they'll do next has to stay open. Evil belongs here as the force aimed directly against all of this -- the attempt to end infinite play by shutting every horizon inside one boundary.",
+      "targets": [
+        "infinite game",
+        "horizon",
+        "surprise",
+        "name",
+        "evil"
+      ],
+      "reasons": {
+        "evil": "The attempt to end infinite play by force, closing every horizon into a single boundary.",
+        "horizon": "The far edge of an infinite player's awareness, which moves rather than holding still like a boundary.",
+        "infinite game": "Play whose whole purpose is to keep going, with even its own rules and players free to change.",
+        "name": "How an infinite player is known, leaving what they'll do next genuinely open.",
+        "surprise": "What a finite game is designed to prevent, but what an infinite player deliberately stays open to."
+      }
+    },
+    {
+      "id": "living-inside-a-boundary",
+      "prompt": "Which concepts describe living, or relating to others, as though inside a fixed, closed field -- something with an edge, and something only meaningful by comparison?",
+      "explanation": "Society is organized like a finite game, staying inside its own boundary, and power is the specifically comparative way of relating to others that only makes sense inside one -- it means nothing until it's measured against someone else, the way winning means nothing outside a boundary.",
+      "targets": [
+        "society",
+        "power",
+        "boundary"
+      ],
+      "reasons": {
+        "boundary": "The fixed edge that both a finite game, and a society organized like one, need in order to hold together.",
+        "power": "A way of relating to others that only means anything by comparison, the way a finite game only means anything inside a boundary.",
+        "society": "The parts of life organized like a finite game, held inside a boundary of rules and titles."
+      }
+    },
+    {
+      "id": "living-toward-a-horizon",
+      "prompt": "Which concepts describe living, or relating to others, as though moving toward an ever-receding edge -- open-ended, and available to anyone regardless of comparison?",
+      "explanation": "Culture is organized like an infinite game, always moving toward its horizon rather than settling inside a fixed edge, and strength is the specifically infinite way of relating to others -- available to anyone, and never used up by being compared, the way an infinite game is never closed off by reaching its horizon. Deviancy belongs here too -- it's the same openness to the unscripted that defines an infinite player generally, applied to what keeps a culture alive rather than repeating its own past.",
+      "targets": [
+        "culture",
+        "strength",
+        "horizon",
+        "deviancy"
+      ],
+      "reasons": {
+        "culture": "The parts of life organized like an infinite game, always moving toward its horizon rather than settling inside a boundary.",
+        "deviancy": "Departing from the expected script, which Carse treats as what keeps a culture alive rather than as a threat to it.",
+        "horizon": "The ever-receding edge that both an infinite game, and a culture organized like one, keep moving toward.",
+        "strength": "A way of relating to others that anyone can have, regardless of comparison, the way an infinite game is never closed off by reaching its horizon."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "game-theory-basics",
+        "reason": "Carse's finite play is a philosophical account of something game theory formalizes with precision -- see how strategy, equilibrium, and repeated play work when the rules are exact rather than existential."
+      }
+    ]
+  }
 });

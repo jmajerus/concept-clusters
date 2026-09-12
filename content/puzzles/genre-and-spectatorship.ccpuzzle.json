@@ -1,10 +1,14 @@
 {
   "id": "genre-and-spectatorship",
   "title": "Genre and spectatorship",
-  "category": "Film",
+  "category": "film",
   "info": {
     "text": "How a film gets built from recognizable, repeated pieces, and how a viewer relates to what's on screen once it's playing.",
-    "link": "wiki:Film theory"
+    "links": [
+      {
+        "href": "wiki:Film theory"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,23 +33,43 @@
       "termInfo": {
         "convention": {
           "text": "A structural or narrative pattern audiences have learned to expect a genre's stories to follow.",
-          "link": "wiki:Film genre"
+          "links": [
+            {
+              "href": "wiki:Film genre"
+            }
+          ]
         },
         "hybridity": {
           "text": "A film blending more than one genre's conventions and expectations at once.",
-          "link": "wiki:Film genre"
+          "links": [
+            {
+              "href": "wiki:Film genre"
+            }
+          ]
         },
         "iconography": {
           "text": "Recurring visual symbols -- a six-shooter, a flying saucer -- that signal a genre to the audience at a glance.",
-          "link": "wiki:Iconography"
+          "links": [
+            {
+              "href": "wiki:Iconography"
+            }
+          ]
         },
         "stock character": {
           "text": "A recurring, easily recognized character type, like the gunslinger or the femme fatale.",
-          "link": "wiki:Stock character"
+          "links": [
+            {
+              "href": "wiki:Stock character"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Film genre"
+        "links": [
+          {
+            "href": "wiki:Film genre"
+          }
+        ]
       }
     },
     {
@@ -70,23 +94,43 @@
       "termInfo": {
         "identification": {
           "text": "The process by which a viewer comes to see themselves in, or closely relate to, a character.",
-          "link": "wiki:Identification (literature)"
+          "links": [
+            {
+              "href": "wiki:Identification (literature)"
+            }
+          ]
         },
         "male gaze": {
           "text": "Laura Mulvey's term for how mainstream cinema often frames and positions women as objects for a presumed male viewer's look.",
-          "link": "wiki:Male gaze"
+          "links": [
+            {
+              "href": "wiki:Male gaze"
+            }
+          ]
         },
         "star persona": {
           "text": "The public identity a performer accumulates across roles and publicity, which audiences bring with them into a new film.",
-          "link": "wiki:Movie star"
+          "links": [
+            {
+              "href": "wiki:Movie star"
+            }
+          ]
         },
         "suspension of disbelief": {
           "text": "A viewer's willingness to accept a fiction's premises rather than question their implausibility.",
-          "link": "wiki:Suspension of disbelief"
+          "links": [
+            {
+              "href": "wiki:Suspension of disbelief"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Film theory"
+        "links": [
+          {
+            "href": "wiki:Film theory"
+          }
+        ]
       }
     },
     {
@@ -111,11 +155,19 @@
       "termInfo": {
         "auteur theory": {
           "text": "The critical claim that a film's director, not its collaborators, is its primary author.",
-          "link": "wiki:Auteur theory"
+          "links": [
+            {
+              "href": "wiki:Auteur theory"
+            }
+          ]
         },
         "canon": {
           "text": "The set of works critics and institutions treat as significant enough to study, preserve, and hand down.",
-          "link": "wiki:Literary canon"
+          "links": [
+            {
+              "href": "wiki:Literary canon"
+            }
+          ]
         },
         "collaborative authorship": {
           "text": "The counter-observation that writers, cinematographers, editors, and performers all substantially shape a finished film."
@@ -125,7 +177,11 @@
         }
       },
       "info": {
-        "link": "wiki:Auteur theory"
+        "links": [
+          {
+            "href": "wiki:Auteur theory"
+          }
+        ]
       }
     }
   ],
@@ -140,7 +196,11 @@
       "fact": "An actor repeatedly cast as the same stock character becomes typecast -- the audience's memory of past roles starts to shape, or limit, how a new one can be read.",
       "info": {
         "text": "When an actor becomes so associated with one type of role that audiences and casting directors expect it going forward.",
-        "link": "wiki:Typecasting (acting)"
+        "links": [
+          {
+            "href": "wiki:Typecasting (acting)"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -163,7 +223,11 @@
       "fact": "A paratext -- a trailer, a poster, a director's public reputation -- frames how a viewer approaches a film before a single frame plays, folding authorship into the very act of spectatorship.",
       "info": {
         "text": "The framing material around a work -- titles, trailers, promotional material, a creator's reputation -- that shapes how it's read before or alongside the work itself.",
-        "link": "wiki:Paratext"
+        "links": [
+          {
+            "href": "wiki:Paratext"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -186,7 +250,11 @@
       "fact": "A revisionist Western doesn't just work within the genre's stock characters and conventions -- it consciously subverts them, one of the clearest cases of a director's authorial stamp reshaping a genre from inside it.",
       "info": {
         "text": "A Western that consciously reworks or subverts the genre's expected conventions as a mark of directorial intent, rather than following them straightforwardly.",
-        "link": "wiki:Revisionist Western"
+        "links": [
+          {
+            "href": "wiki:Revisionist Western"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -273,16 +341,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

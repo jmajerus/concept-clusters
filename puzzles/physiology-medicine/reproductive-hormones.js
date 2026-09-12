@@ -1,12 +1,12 @@
 // Generated from content/puzzles/reproductive-hormones.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "reproductive-hormones",
   "title": "Reproductive hormones",
-  "category": "Physiology & Medicine",
+  "category": "physiology-medicine",
   "large": true,
   "info": {
     "text": "One pulsatile command drives two different gonadal programs plus pregnancy support: FSH and LH order the testes and ovaries, feedback closes every loop, and one loop flips positive to trigger ovulation.",
@@ -305,6 +305,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "gonadotropins",
       "term": "gonadotropins",
       "clusters": [
         0,
@@ -323,6 +324,7 @@ export default definePuzzle(import.meta.url, {
       "termRole": "reference"
     },
     {
+      "id": "human-chorionic-gonadotropin",
       "term": "human chorionic gonadotropin",
       "clusters": [
         2,

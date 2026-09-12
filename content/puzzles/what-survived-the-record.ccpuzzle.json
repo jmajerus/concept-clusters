@@ -1,34 +1,36 @@
 {
   "id": "what-survived-the-record",
   "title": "What survived the record",
-  "category": "Media & Information Literacy",
+  "category": "media-information-literacy",
   "categories": [
-    "Media & Information Literacy",
-    "Public Health"
+    "media-information-literacy",
+    "public-health"
   ],
   "large": true,
   "info": {
     "text": "How a false picture of a person can be assembled entirely out of true fragments — through pressure applied off the merits, a challenge to standing rather than to evidence, republication that looks like confirmation, and a record that keeps the accusation after the answer is gone. Each mechanism is established separately: strategic litigation in legal scholarship, circular reporting in source criticism, and the coordinated targeting of researchers that Peter Hotez named anti-science aggression.",
-    "link": "https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/",
-    "seeAlso": [
+    "links": [
       {
-        "label": "Source criticism",
-        "href": "wiki:Source criticism"
+        "href": "https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/",
+        "label": "Vectors 4: The Ecosystem Strikes Back"
       },
       {
-        "label": "Circular reporting",
-        "href": "wiki:Circular reporting"
+        "href": "wiki:Source criticism",
+        "label": "Source criticism"
       },
       {
-        "label": "Hotez, \"Anti-science kills\" (PLOS Biology, 2021)",
-        "href": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001068"
+        "href": "wiki:Circular reporting",
+        "label": "Circular reporting"
       },
       {
-        "label": "Hotez, \"Mounting antiscience aggression\" (PLOS Biology, 2021)",
-        "href": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001369"
+        "href": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001068",
+        "label": "Hotez, \"Anti-science kills\" (PLOS Biology, 2021)"
+      },
+      {
+        "href": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001369",
+        "label": "Hotez, \"Mounting antiscience aggression\" (PLOS Biology, 2021)"
       }
-    ],
-    "linkLabel": "Vectors 4: The Ecosystem Strikes Back"
+    ]
   },
   "clusters": [
     {
@@ -57,7 +59,11 @@
         "coerced apology": "A statement issued to end pressure rather than to concede a point, whose wording may be negotiated as part of the settlement."
       },
       "info": {
-        "link": "wiki:Whistleblowing"
+        "links": [
+          {
+            "href": "wiki:Whistleblowing"
+          }
+        ]
       }
     },
     {
@@ -82,14 +88,22 @@
       "termInfo": {
         "ad hominem": {
           "text": "An attempt to defeat a claim by attacking the character, motives, or standing of the person making it.",
-          "link": "wiki:Ad hominem"
+          "links": [
+            {
+              "href": "wiki:Ad hominem"
+            }
+          ]
         },
         "credential challenge": "A dispute over whether someone is entitled to speak on a subject, raised in place of a dispute over what they said.",
         "special pleading": "Applying a standard to one case while exempting other cases that meet the same conditions, without giving a reason for the exemption.",
         "manufactured controversy": "A dispute generated and sustained deliberately, whose appearance of live disagreement is the product rather than a by-product."
       },
       "info": {
-        "link": "wiki:Source credibility"
+        "links": [
+          {
+            "href": "wiki:Source credibility"
+          }
+        ]
       }
     },
     {
@@ -114,14 +128,22 @@
       "termInfo": {
         "circular reporting": {
           "text": "A situation in which information appears to come from several independent sources but in fact traces back to only one.",
-          "link": "wiki:Circular reporting"
+          "links": [
+            {
+              "href": "wiki:Circular reporting"
+            }
+          ]
         },
         "amplification network": "A set of outlets or accounts that reliably reproduce each other's material, multiplying reach without multiplying sourcing.",
         "appearance of independence": "The impression that two accounts confirm each other, created by separate publication rather than by separate evidence.",
         "laundered claim": "An assertion that acquires credibility by passing through a more reputable venue than the one it started in."
       },
       "info": {
-        "link": "wiki:Source criticism"
+        "links": [
+          {
+            "href": "wiki:Source criticism"
+          }
+        ]
       }
     },
     {
@@ -147,13 +169,21 @@
         "search indexing": "The process by which published material is catalogued and made retrievable, independently of whether it was ever contested.",
         "decontextualization": {
           "text": "The separation of a statement or document from the circumstances that determine what it means.",
-          "link": "wiki:Quoting out of context"
+          "links": [
+            {
+              "href": "wiki:Quoting out of context"
+            }
+          ]
         },
         "removed rebuttal": "A reply that is no longer reachable at its original address, leaving the claim it answered in circulation alone.",
         "unanswered claim": "An assertion that stands in the record without a visible response, whether because none was made or because the response is gone."
       },
       "info": {
-        "link": "wiki:Archive"
+        "links": [
+          {
+            "href": "wiki:Archive"
+          }
+        ]
       }
     }
   ],
@@ -186,7 +216,11 @@
       "fact": "Corroboration means a second source, not a second appearance. When a discrediting claim travels from one outlet to another, what has increased is its visibility; what has not increased is the evidence behind it.",
       "info": {
         "text": "Independent evidence that supports, qualifies, or contradicts a claim, as distinct from its repetition.",
-        "link": "wiki:Corroborating evidence"
+        "links": [
+          {
+            "href": "wiki:Corroborating evidence"
+          }
+        ]
       },
       "conceptId": "corroboration",
       "relationKind": "evaluation",
@@ -205,7 +239,11 @@
       "fact": "Manufactured corroboration and durable indexing depend on the same absence: a record that carries a claim without carrying where the claim came from cannot be checked by anyone who arrives later.",
       "info": {
         "text": "The traceable origin and chain of custody of a claim, document, or image.",
-        "link": "wiki:Provenance"
+        "links": [
+          {
+            "href": "wiki:Provenance"
+          }
+        ]
       },
       "conceptId": "provenance",
       "relationKind": "foundation",

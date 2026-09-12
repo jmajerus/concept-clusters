@@ -1,14 +1,18 @@
 {
   "id": "how-a-picture-directs-the-eye",
   "title": "How a Picture Directs the Eye",
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "visual-form"
+    "art": "visual-form"
   },
   "large": true,
   "info": {
     "text": "Composition shapes what viewers notice, how they understand spatial relationships, and where their attention travels through an image.",
-    "link": "wiki:Composition (visual arts)"
+    "links": [
+      {
+        "href": "wiki:Composition (visual arts)"
+      }
+    ]
   },
   "clusters": [
     {
@@ -33,23 +37,43 @@
       "termInfo": {
         "focal point": {
           "text": "The area of a composition that attracts attention most strongly or is intended to be noticed first.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         },
         "contrast": {
           "text": "A noticeable difference in qualities such as lightness, color, size, shape, direction, or texture.",
-          "link": "wiki:Contrast (vision)"
+          "links": [
+            {
+              "href": "wiki:Contrast (vision)"
+            }
+          ]
         },
         "isolation": {
           "text": "The separation of a visual element from nearby forms or activity, making it easier to notice.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         },
         "scale": {
           "text": "The perceived or represented size of something in relation to other forms, the image, or the viewer.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Composition (visual arts)"
+        "links": [
+          {
+            "href": "wiki:Composition (visual arts)"
+          }
+        ]
       }
     },
     {
@@ -74,23 +98,43 @@
       "termInfo": {
         "foreground": {
           "text": "The part of an image represented or perceived as nearest to the viewer.",
-          "link": "wiki:Foreground, middleground, and background"
+          "links": [
+            {
+              "href": "wiki:Foreground, middleground, and background"
+            }
+          ]
         },
         "background": {
           "text": "The part of an image represented or perceived as lying behind its principal forms.",
-          "link": "wiki:Foreground, middleground, and background"
+          "links": [
+            {
+              "href": "wiki:Foreground, middleground, and background"
+            }
+          ]
         },
         "overlap": {
           "text": "The partial covering of one depicted form by another, commonly interpreted as evidence that one is in front.",
-          "link": "wiki:Depth perception"
+          "links": [
+            {
+              "href": "wiki:Depth perception"
+            }
+          ]
         },
         "negative space": {
           "text": "The apparently empty or open area around and between represented forms.",
-          "link": "wiki:Negative space"
+          "links": [
+            {
+              "href": "wiki:Negative space"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Composition (visual arts)"
+        "links": [
+          {
+            "href": "wiki:Composition (visual arts)"
+          }
+        ]
       }
     },
     {
@@ -115,23 +159,43 @@
       "termInfo": {
         "symmetry": {
           "text": "A balanced correspondence of parts across an axis, around a center, or through another orderly transformation.",
-          "link": "wiki:Symmetry"
+          "links": [
+            {
+              "href": "wiki:Symmetry"
+            }
+          ]
         },
         "asymmetry": {
           "text": "An unequal arrangement whose parts may still achieve an overall sense of balance.",
-          "link": "wiki:Asymmetry"
+          "links": [
+            {
+              "href": "wiki:Asymmetry"
+            }
+          ]
         },
         "visual weight": {
           "text": "The degree to which an element attracts attention and seems to exert force within a composition.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         },
         "placement": {
           "text": "The position of an element within the frame and in relation to other elements.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Composition (visual arts)"
+        "links": [
+          {
+            "href": "wiki:Composition (visual arts)"
+          }
+        ]
       }
     },
     {
@@ -156,23 +220,43 @@
       "termInfo": {
         "leading lines": {
           "text": "Actual or implied lines that guide attention toward or through selected parts of an image.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         },
         "diagonal lines": {
           "text": "Lines that cross the image at an angle and often create a strong sense of direction or instability.",
-          "link": "wiki:Diagonal"
+          "links": [
+            {
+              "href": "wiki:Diagonal"
+            }
+          ]
         },
         "repetition": {
           "text": "The recurrence of a form, color, line, texture, or interval within an image.",
-          "link": "wiki:Pattern"
+          "links": [
+            {
+              "href": "wiki:Pattern"
+            }
+          ]
         },
         "implied motion": {
           "text": "The suggestion that a depicted subject is moving or that an action continues beyond the represented instant.",
-          "link": "wiki:Motion perception"
+          "links": [
+            {
+              "href": "wiki:Motion perception"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Composition (visual arts)"
+        "links": [
+          {
+            "href": "wiki:Composition (visual arts)"
+          }
+        ]
       }
     }
   ],
@@ -187,7 +271,11 @@
       "fact": "Visual hierarchy joins emphasis with balance: differences in contrast, scale, position, isolation, and visual weight establish which parts of a composition appear most important and in what order they are noticed.",
       "info": {
         "text": "The perceived order of importance among elements in a visual composition.",
-        "link": "wiki:Visual hierarchy"
+        "links": [
+          {
+            "href": "wiki:Visual hierarchy"
+          }
+        ]
       },
       "conceptId": "visual-hierarchy",
       "relationKind": "dynamic",
@@ -206,7 +294,11 @@
       "fact": "Pictorial depth connects spatial organization with eye movement: overlapping forms and directional paths can lead attention from nearer areas toward spaces perceived as farther away.",
       "info": {
         "text": "The appearance of three-dimensional distance or spatial layering within a two-dimensional image.",
-        "link": "wiki:Depth perception"
+        "links": [
+          {
+            "href": "wiki:Depth perception"
+          }
+        ]
       },
       "conceptId": "pictorial-depth",
       "relationKind": "cross-cutting",
@@ -225,7 +317,11 @@
       "fact": "Visual rhythm links balance and movement by arranging repeated forms or intervals so that their recurrence creates both an overall structure and a path for attention.",
       "info": {
         "text": "An ordered recurrence of visual elements or intervals that produces a sense of sequence and movement.",
-        "link": "wiki:Rhythm"
+        "links": [
+          {
+            "href": "wiki:Rhythm"
+          }
+        ]
       },
       "conceptId": "visual-rhythm",
       "relationKind": "dynamic",
@@ -340,15 +436,14 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-02"
-    }
-  ],
   "language": "en",
-  "version": 1
+  "version": 1,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

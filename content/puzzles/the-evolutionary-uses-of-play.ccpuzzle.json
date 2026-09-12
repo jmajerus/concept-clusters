@@ -1,7 +1,7 @@
 {
   "id": "the-evolutionary-uses-of-play",
   "title": "The Evolutionary Uses of Play",
-  "category": "Anthropology",
+  "category": "anthropology",
   "clusters": [
     {
       "id": "extended-immaturity",
@@ -45,11 +45,19 @@
       "termInfo": {
         "capuchin monkey": {
           "text": "A New World monkey genus known for unusually skilled, dexterous object handling and tool use.",
-          "link": "wiki:Capuchin monkey"
+          "links": [
+            {
+              "href": "wiki:Capuchin monkey"
+            }
+          ]
         },
         "ring-tailed lemur": {
           "text": "A highly social lemur species from Madagascar that lives in large troops of both sexes.",
-          "link": "wiki:Ring-tailed lemur"
+          "links": [
+            {
+              "href": "wiki:Ring-tailed lemur"
+            }
+          ]
         }
       }
     },
@@ -99,7 +107,11 @@
       "fact": "Jolly located primate intelligence in the demands of social life; Bruner located flexible intelligence in a long, protected childhood -- but both point to the same setting, the primate social group, as where either capacity is actually exercised and passed on.",
       "info": {
         "text": "Acquiring behavior by observing and participating in a social group, rather than through solitary trial and error.",
-        "link": "wiki:Social learning in animals"
+        "links": [
+          {
+            "href": "wiki:Social learning in animals"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -125,13 +137,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-10"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

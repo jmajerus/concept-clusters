@@ -1,10 +1,14 @@
 {
   "id": "game-theory-basics",
   "title": "Game theory basics",
-  "category": "Math",
+  "category": "math",
   "info": {
     "text": "How to describe a strategic situation precisely enough to predict what rational players will actually do -- once, or over and over.",
-    "link": "wiki:Game theory"
+    "links": [
+      {
+        "href": "wiki:Game theory"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,19 +33,35 @@
       "termInfo": {
         "payoff": {
           "text": "What a player actually gets -- money, points, years in prison -- for one particular combination of everyone's choices.",
-          "link": "wiki:Normal-form game"
+          "links": [
+            {
+              "href": "wiki:Normal-form game"
+            }
+          ]
         },
         "perfect information": {
           "text": "A game where every player can see everything that's happened so far before making their next move.",
-          "link": "wiki:Perfect information"
+          "links": [
+            {
+              "href": "wiki:Perfect information"
+            }
+          ]
         },
         "strategy": {
           "text": "A complete plan for what a player will do in every situation that might come up in the game.",
-          "link": "wiki:Strategy (game theory)"
+          "links": [
+            {
+              "href": "wiki:Strategy (game theory)"
+            }
+          ]
         },
         "zero-sum game": {
           "text": "A game where one player's gain is exactly balanced by another's loss, so the payoffs always add up to zero.",
-          "link": "wiki:Zero-sum game"
+          "links": [
+            {
+              "href": "wiki:Zero-sum game"
+            }
+          ]
         }
       }
     },
@@ -67,19 +87,35 @@
       "termInfo": {
         "Nash equilibrium": {
           "text": "A set of strategies, one per player, where no one can do better by switching, given what everyone else is doing.",
-          "link": "wiki:Nash equilibrium"
+          "links": [
+            {
+              "href": "wiki:Nash equilibrium"
+            }
+          ]
         },
         "best response": {
           "text": "The strategy that gives a player the best result against one specific set of choices by everyone else.",
-          "link": "wiki:Best response"
+          "links": [
+            {
+              "href": "wiki:Best response"
+            }
+          ]
         },
         "dominant strategy": {
           "text": "A strategy that gives a player their best result no matter what any other player does.",
-          "link": "wiki:Strategic dominance"
+          "links": [
+            {
+              "href": "wiki:Strategic dominance"
+            }
+          ]
         },
         "mixed strategy": {
           "text": "Choosing randomly among several strategies according to fixed probabilities, rather than committing to just one.",
-          "link": "wiki:Mixed strategy"
+          "links": [
+            {
+              "href": "wiki:Mixed strategy"
+            }
+          ]
         }
       }
     },
@@ -105,19 +141,35 @@
       "termInfo": {
         "cooperative game": {
           "text": "A game where players can make binding agreements with each other before choosing their strategies.",
-          "link": "wiki:Cooperative game theory"
+          "links": [
+            {
+              "href": "wiki:Cooperative game theory"
+            }
+          ]
         },
         "prisoner's dilemma": {
           "text": "A single-round game where each player's dominant strategy is to betray the other, even though mutual cooperation would leave them both better off.",
-          "link": "wiki:Prisoner's dilemma"
+          "links": [
+            {
+              "href": "wiki:Prisoner's dilemma"
+            }
+          ]
         },
         "repeated game": {
           "text": "The same game played over multiple rounds, where past choices can shape what happens next.",
-          "link": "wiki:Repeated game"
+          "links": [
+            {
+              "href": "wiki:Repeated game"
+            }
+          ]
         },
         "tit for tat": {
           "text": "A repeated-game strategy that starts by cooperating, then simply copies whatever the other player did last round.",
-          "link": "wiki:Tit for tat"
+          "links": [
+            {
+              "href": "wiki:Tit for tat"
+            }
+          ]
         }
       }
     }
@@ -133,7 +185,11 @@
       "fact": "Solving a game for a Nash equilibrium or a dominant strategy assumes something about the players first: that each one is rational, always choosing whichever strategy maximizes their own payoff given what everyone else is doing.",
       "info": {
         "text": "The assumption that a player always chooses the action that maximizes their own expected payoff.",
-        "link": "wiki:Rational choice theory"
+        "links": [
+          {
+            "href": "wiki:Rational choice theory"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -151,7 +207,11 @@
       "fact": "Defecting is each player's dominant strategy in a single round of the prisoner's dilemma, even though mutual cooperation would pay both more. Once the game repeats, cooperation can become the stable equilibrium instead, because a player who defects today can be punished tomorrow.",
       "info": {
         "text": "Working toward a shared or mutual benefit, which game theory treats as something that has to be explained, not assumed.",
-        "link": "wiki:Cooperation"
+        "links": [
+          {
+            "href": "wiki:Cooperation"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

@@ -1,12 +1,12 @@
 // Generated from content/puzzles/theories-of-the-sublime.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "theories-of-the-sublime",
   "title": "Theories of the sublime",
-  "category": "Literary Theory & Poetics",
+  "category": "literary-theory-poetics",
   "large": true,
   "info": {
     "text": "Longinus treated the sublime as rhetorical height that transports a hearer beyond persuasion; Burke relocated it in terror and obscurity; Kant split it into mathematical and dynamical encounters in which reason outruns imagination.",
@@ -389,7 +389,6 @@ export default definePuzzle(import.meta.url, {
     "title": "One word, three theories",
     "summary": "The same word names a rhetorical seizure, a passion of terror, and a failure of imagination that reason survives.",
     "estimatedMinutes": 3,
-    "credit": "By Cursor, with editorial direction by jmajerus",
     "content": {
       "mediaType": "text/markdown",
       "text": "# One word, three theories\n\nWriters still reach for *sublime* when speech or landscape overwhelms. Literary theory inherited that word from three accounts that do not describe the same event.\n\n## Height of speech\n\nThe Greek treatise *On the Sublime* (*Peri Hypsous*), traditionally ascribed to Longinus, is a poetics of elevation. Great writing, on this view, does not merely persuade. It seizes. The sources of that height are partly innate—grandeur of thought, passion—and partly art: diction, arrangement, rhythm.\n\n## Terror, not polish\n\nEdmund Burke's 1757 *Enquiry* moved the problem out of rhetoric and into the passions. He insisted that the sublime and the beautiful had been confused, even by Longinus. For Burke, the sublime belongs with terror, darkness, and a mixed feeling he refused to call pleasure; the beautiful belongs with smoothness, smallness, and social affection.\n\n## Imagination fails, reason does not\n\nKant's *Critique of Judgment* (1790) split the sublime again. One mode is unbounded magnitude; the other is overwhelming might contemplated from safety. The feeling is mixed because imagination cannot present what reason can think—and that failure is supposed to disclose something about the mind, not only about the mountain or the storm.\n\nThis puzzle is about those three theories, not about collecting every later Romantic use of the word."
@@ -408,30 +407,17 @@ export default definePuzzle(import.meta.url, {
         "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology"
       }
     ],
-    
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-22"
-    },
-    {
-      "system": "Cursor",
-      "scope": "lenses",
-      "role": "edited",
-      "provider": "Anysphere",
-      "date": "2026-08-22"
-    },
-    {
-      "system": "Cursor",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-22"
-    }
-  ]
+  "provenance": {
+    "collaboration": "humanPrimary",
+    "contributors": [
+      {
+        "name": "Cursor"
+      },
+      {
+        "name": "jmajerus"
+      }
+    ]
+  }
 });
