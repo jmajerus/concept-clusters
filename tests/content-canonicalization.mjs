@@ -27,7 +27,9 @@ function registry() {
     Art: {
       slug: "art",
       subcategories: { "visual-form": { title: "Visual Form" } }
-    }
+    },
+    "Political Science": { slug: "political-science" },
+    Philosophy: { slug: "philosophy" }
   };
 }
 
@@ -215,6 +217,28 @@ export async function run() {
   assert.deepEqual(second.errors, []);
   assert.equal(second.changed, false);
   assert.deepEqual(second.document, result.document);
+
+  // Category canonicalization must never invent a slug for an unknown
+  // display title, and a retired alias shared by two categories must remain
+  // unresolved rather than choosing one arbitrarily.
+  const unknownCategory = canonicalizePuzzleDocument({
+    ...legacy,
+    category: "D1 Only Subject"
+  }, { categoryRegistry: categories });
+  assert.equal(unknownCategory.document, null);
+  assert.match(unknownCategory.errors[0], /refusing slug fallback/);
+  const ambiguousCategoryRegistry = {
+    ...categories,
+    "Other Subject": {
+      slug: "other-subject",
+      previousTitles: ["Old Subject"]
+    }
+  };
+  const ambiguousCategory = canonicalizePuzzleDocument(legacy, {
+    categoryRegistry: ambiguousCategoryRegistry
+  });
+  assert.equal(ambiguousCategory.document, null);
+  assert.match(ambiguousCategory.errors[0], /more than one current category/);
 
   // JSON-LD conversion must hoist citations before puzzleToSimplified drops
   // the interchange-only learningIntroduction.citations location.
@@ -493,7 +517,7 @@ export async function run() {
   assert.equal(planned.skipped.catalogue, 1);
   assert.deepEqual(planned.unresolved, []);
 
-  const semanticallyInvalid = planRows([{
+  const splitRelated = planRows([{
     source: "d1:puzzle_drafts",
     table: "puzzle_drafts",
     kind: "puzzle",
@@ -506,8 +530,55 @@ export async function run() {
       }
     }
   }], categories, { knownPuzzleIds: new Set([legacy.id]) });
-  assert.equal(semanticallyInvalid.changes.length, 0);
-  assert.match(semanticallyInvalid.unresolved[0].reason, /not a real puzzle id/);
+  assert.equal(splitRelated.changes.length, 1);
+  assert.deepEqual(splitRelated.unresolved, []);
+
+  const selfRelated = planRows([{
+    source: "d1:puzzle_drafts",
+    table: "puzzle_drafts",
+    kind: "puzzle",
+    id: legacy.id,
+    row: { id: legacy.id, owner_subject: "author", revision: 1 },
+    document: {
+      ...legacy,
+      relatedPuzzles: {
+        entries: [{ id: legacy.id, reason: "Self-link should still fail." }]
+      }
+    }
+  }], categories, { knownPuzzleIds: new Set([legacy.id]) });
+  assert.equal(selfRelated.changes.length, 0);
+  assert.match(selfRelated.unresolved[0].reason, /lists itself/);
+
+  const unknownCategoryPlan = planRows([{
+    source: "d1:puzzle_drafts",
+    table: "puzzle_drafts",
+    kind: "puzzle",
+    id: legacy.id,
+    row: { id: legacy.id, owner_subject: "author", revision: 1 },
+    document: { ...legacy, category: "D1 Only Subject" }
+  }], categories);
+  assert.equal(unknownCategoryPlan.changes.length, 0);
+  assert.match(unknownCategoryPlan.unresolved[0].reason, /refusing slug fallback/);
+
+  const unknownGitFixture = await makeGitFixture();
+  try {
+    const unknownGitPlan = await planGit([{
+      source: "git:content/puzzles",
+      table: "git",
+      kind: "puzzle",
+      id: unknownGitFixture.canonical.id,
+      sourceId: unknownGitFixture.canonical.id,
+      path: unknownGitFixture.canonicalPath,
+      document: { ...unknownGitFixture.canonical, category: "D1 Only Subject" }
+    }], unknownGitFixture.categories, {
+      repositoryRoot: unknownGitFixture.repositoryRoot,
+      knownPuzzleIds: new Set([unknownGitFixture.canonical.id])
+    });
+    assert.equal(unknownGitPlan.changes.length, 0);
+    assert.match(unknownGitPlan.unresolved[0].reason, /refusing slug fallback/);
+  } finally {
+    await removeGitFixture(unknownGitFixture);
+  }
 
   const variantDraft = planRows([{
     source: "d1:puzzle_drafts",

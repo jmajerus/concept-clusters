@@ -56,11 +56,25 @@ function aliasConflicts(registry) {
   return new Map([...conflicts].filter(([, targets]) => targets.size > 1));
 }
 
+// Return the category references that cannot be resolved safely from the
+// supplied registry.  Keep this check shared by the title-to-id migration and
+// the broader content canonicalization pass: both writers must reject an
+// unknown display title or an ambiguous retired alias before categoryIdFor()
+// gets a chance to fall back to slugification.
+export function categoryReferenceIssues(document, registry = CATEGORIES) {
+  const conflicts = aliasConflicts(registry);
+  const ambiguous = [...new Set(referenceValues(document)
+    .filter(value => conflicts.has(value.trim())))];
+  const ambiguousTrimmed = new Set(ambiguous.map(value => value.trim()));
+  const unknown = unknownReferences(document, registry)
+    .filter(value => !ambiguousTrimmed.has(value.trim()));
+  return { ambiguous, unknown };
+}
+
 export function planCategoryReferenceMigration({
   registry = CATEGORIES,
   rows = []
 } = {}) {
-  const conflicts = aliasConflicts(registry);
   const changes = [];
   const unresolved = [];
   for (const row of rows) {
@@ -75,8 +89,7 @@ export function planCategoryReferenceMigration({
       });
       continue;
     }
-    const ambiguous = referenceValues(document)
-      .filter(value => conflicts.has(value.trim()));
+    const { ambiguous, unknown } = categoryReferenceIssues(document, registry);
     if (ambiguous.length) {
       unresolved.push({
         source: row?.source || "unknown",
@@ -87,7 +100,6 @@ export function planCategoryReferenceMigration({
       });
       continue;
     }
-    const unknown = unknownReferences(document, registry);
     if (unknown.length) {
       unresolved.push({
         source: row?.source || "unknown",

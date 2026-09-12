@@ -89,8 +89,21 @@ function semanticErrors(document, categoryRegistry, knownPuzzleIds = null) {
     categoryRegistry
   });
   if (!puzzle) return conversionErrors;
+  // Match hosted authoring validation: a document may introduce a related
+  // sibling in the same change set, so its own related IDs are valid even
+  // before those siblings appear in the global corpus registry.  The
+  // validator still rejects self-links separately.
+  const scopedKnownPuzzleIds = knownPuzzleIds instanceof Set
+    ? new Set([
+        ...knownPuzzleIds,
+        puzzle.id,
+        ...(puzzle.relatedPuzzles?.entries || [])
+          .map(entry => entry?.id)
+          .filter(Boolean)
+      ])
+    : knownPuzzleIds;
   const errors = [
-    ...validatePuzzleContent(puzzle, { knownPuzzleIds }),
+    ...validatePuzzleContent(puzzle, { knownPuzzleIds: scopedKnownPuzzleIds }),
     ...validateLearningIntroductionStructure(puzzle, { requireEmbedded: true })
   ];
   errors.push(...validateSubcategoryAssignments([puzzle], categoryRegistry)

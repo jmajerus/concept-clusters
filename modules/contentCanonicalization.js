@@ -6,6 +6,7 @@ import {
   CATEGORIES,
   canonicalizePuzzleCategoryReferences
 } from "../puzzles/categories.js";
+import { categoryReferenceIssues } from "./categoryReferenceMigration.js";
 import {
   documentForStorage,
   canonicalizeAuthoredDocumentFields
@@ -166,6 +167,25 @@ function categoryReferences(document, categoryRegistry) {
     categoryRegistry
   );
   return sameJson(categoryCanonical, document) ? null : categoryCanonical;
+}
+
+function categoryReferenceErrors(document, categoryRegistry) {
+  const { ambiguous, unknown } = categoryReferenceIssues(
+    document,
+    categoryRegistry
+  );
+  const errors = [];
+  if (ambiguous.length) {
+    errors.push(
+      `category title alias maps to more than one current category: ${ambiguous.join(", ")}`
+    );
+  }
+  if (unknown.length) {
+    errors.push(
+      `category reference is not present in the supplied registry; refusing slug fallback: ${unknown.join(", ")}`
+    );
+  }
+  return errors;
 }
 
 // JSON-LD allows a small extension vocabulary, but the simplified authoring
@@ -442,6 +462,15 @@ export function canonicalizePuzzleDocument(
     const normalizedMediaType = normalizeLegacyLearningMediaType(normalizedDocument);
     normalizedDocument = normalizedMediaType.document;
     learningMediaTypeCorrection = normalizedMediaType.corrected;
+
+    // Check legacy titles and aliases before any storage/converter boundary
+    // can turn an unknown display title into an invented slug.  A stable id
+    // that is not in this checkout is still permitted when it already has its
+    // own slug spelling; a display title must be present in the live registry.
+    const categoryErrors = categoryReferenceErrors(normalizedDocument, registry);
+    if (categoryErrors.length) {
+      return errorResult(categoryErrors, sourceFormat);
+    }
 
     if (sourceFormat === "jsonld") {
       const unsupported = unsupportedJsonLdFields(normalizedDocument);
