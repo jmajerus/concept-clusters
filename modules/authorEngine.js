@@ -230,7 +230,16 @@ export function renameTerm(document, from, rawTo) {
             reason
           ])
         )
-        : lens.reasons
+        : lens.reasons,
+      options: Array.isArray(lens.options)
+        ? lens.options.map(option => ({
+          ...option,
+          label: option.label === from ? to : option.label,
+          targets: Array.isArray(option.targets)
+            ? option.targets.map(term => term === from ? to : term)
+            : option.targets
+        }))
+        : lens.options
     }));
   }
   return next;
