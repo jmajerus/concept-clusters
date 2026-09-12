@@ -168,6 +168,38 @@ export async function run() {
   assert.deepEqual(convertedAgain.errors, []);
   assert.equal(convertedAgain.changed, false);
 
+  // A handful of legacy JSON-LD drafts used a `cluster-` prefix in the local
+  // fragment and in bridge references, but omitted it from the node's bare
+  // id.  The migration keeps those already-published fragments and repairs
+  // the bare ids instead of guessing a new identity or rewriting references.
+  const driftedJsonLd = jsonLdFixture();
+  driftedJsonLd.clusters = driftedJsonLd.clusters.map(cluster => ({
+    ...cluster,
+    "@id": `#cluster-${cluster.id}`
+  }));
+  driftedJsonLd.bridges = driftedJsonLd.bridges.map(bridge => ({
+    ...bridge,
+    clusters: bridge.clusters.map(reference => ({
+      "@id": `#cluster-${reference["@id"].slice(1)}`
+    }))
+  }));
+  const repairedDrift = canonicalizePuzzleDocument(driftedJsonLd, {
+    categoryRegistry: {
+      "Political Science": { slug: "political-science" },
+      Philosophy: { slug: "philosophy" }
+    }
+  });
+  assert.deepEqual(repairedDrift.errors, []);
+  assert.ok(repairedDrift.reasons.includes("jsonld-id-drift"));
+  assert.deepEqual(
+    repairedDrift.document.clusters.map(cluster => cluster.id),
+    ["cluster-one", "cluster-two"]
+  );
+  assert.deepEqual(repairedDrift.document.bridges[0].clusters, [
+    "cluster-one",
+    "cluster-two"
+  ]);
+
   const assistedJsonLd = {
     ...jsonLd,
     generativeAssistance: [{

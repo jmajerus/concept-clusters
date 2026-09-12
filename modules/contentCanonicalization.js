@@ -37,6 +37,36 @@ function objectLike(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
+// A small batch of older JSON-LD drafts used the original example's
+// `cluster-`/`bridge-` namespace in @id, but omitted that namespace from the
+// node's bare id.  The fragment is the identity that all bridge references
+// already point at, so the lossless migration is to bring id up to the
+// existing fragment rather than rewriting every reference (or silently
+// choosing a new identity).  Do not repair arbitrary mismatches here: those
+// remain validation errors because their intended identity cannot be inferred
+// safely.
+function normalizeLegacyJsonLdNodeIds(document) {
+  let normalized = document;
+  const corrections = [];
+  for (const [collection, prefix] of [
+    ["clusters", "cluster-"],
+    ["bridges", "bridge-"]
+  ]) {
+    if (!Array.isArray(document[collection])) continue;
+    document[collection].forEach((node, index) => {
+      if (!objectLike(node)) return;
+      const id = node.id;
+      const fragment = node["@id"];
+      if (typeof id !== "string" || !id.trim()
+        || fragment !== `#${prefix}${id}`) return;
+      if (normalized === document) normalized = JSON.parse(JSON.stringify(document));
+      normalized[collection][index].id = fragment.slice(1);
+      corrections.push(`${collection}[${index}].id`);
+    });
+  }
+  return { document: normalized, corrections };
+}
+
 function categoryReferences(document, categoryRegistry) {
   const categoryCanonical = canonicalizePuzzleCategoryReferences(
     document,
@@ -138,6 +168,7 @@ export function canonicalizePuzzleDocument(
   const sourceFormat = isJsonLdShaped(document) ? "jsonld" : "simplified";
   let canonical;
   let sourceSimplified = document;
+  let jsonLdIdCorrections = [];
   try {
     if (sourceFormat === "jsonld") {
       const unsupported = unsupportedJsonLdFields(document);
@@ -147,7 +178,9 @@ export function canonicalizePuzzleDocument(
           sourceFormat
         );
       }
-      const puzzle = puzzleFromJsonLd(document);
+      const normalizedJsonLd = normalizeLegacyJsonLdNodeIds(document);
+      jsonLdIdCorrections = normalizedJsonLd.corrections;
+      const puzzle = puzzleFromJsonLd(normalizedJsonLd.document);
       sourceSimplified = puzzleToSimplified(puzzle);
       canonical = documentForStorage(
         puzzleForCanonicalPublication(puzzle, {
@@ -185,6 +218,9 @@ export function canonicalizePuzzleDocument(
   const reasons = [];
   if (sourceFormat === "jsonld") {
     reasons.push("jsonld-to-simplified");
+  }
+  if (jsonLdIdCorrections.length) {
+    reasons.push("jsonld-id-drift");
   }
   const fieldCanonical = canonicalizeAuthoredDocumentFields(sourceSimplified);
   if (!sameJson(fieldCanonical, sourceSimplified)) {
@@ -227,4 +263,4 @@ export function canonicalizeCorpusRow(row, options = {}) {
   return canonicalizePuzzleDocument(row.document, options);
 }
 
-export { unsupportedJsonLdFields };
+export { normalizeLegacyJsonLdNodeIds, unsupportedJsonLdFields };
