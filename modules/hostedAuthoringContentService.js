@@ -192,14 +192,16 @@ export function createHostedAuthoringContentService({
     } catch {
       // Fall through to the ordinary shape conversion for malformed input.
     }
-    const { puzzle } = puzzleFromAuthoredDocument(authoredDocument);
+    const { puzzle } = puzzleFromAuthoredDocument(authoredDocument, {
+      categoryRegistry: categories
+    });
     return puzzle ? computeUserOnlyAuthoringFlags(puzzle) : [];
   }
 
-  function previewRepositoryImport(document) {
-    const validation = validatePuzzleDraft(document);
+  function previewRepositoryImport(document, { categoryRegistry = categories } = {}) {
+    const validation = validatePuzzleDraft(document, { categoryRegistry });
     if (!validation.valid) return { ...validation, preview: null };
-    const { puzzle } = puzzleFromAuthoredDocument(document);
+    const { puzzle } = puzzleFromAuthoredDocument(document, { categoryRegistry });
     const action = knownPuzzleIds.has(puzzle.id) ? "replace" : "create";
     const affectedPaths = [
       `content/puzzles/${puzzle.id}.ccpuzzle.json`,

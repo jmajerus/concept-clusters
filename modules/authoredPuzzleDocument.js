@@ -197,16 +197,15 @@ function displayPuzzleCategoryTitles(document, categoryRegistry) {
   if (!folded || !categoryRegistry) return folded;
   const next = { ...folded };
   if (typeof folded.category === "string") {
-    next.category = categoryTitleFor(folded.category, categoryRegistry);
+    next.category = categoryTitleFor(folded.category, categoryRegistry) ?? folded.category;
   }
   if (Array.isArray(folded.categories)) {
     next.categories = [...new Set(folded.categories
-      .map(value => categoryTitleFor(value, categoryRegistry))
-      .filter(Boolean))];
+      .map(value => categoryTitleFor(value, categoryRegistry) ?? value))];
   }
   if (folded.subcategories && typeof folded.subcategories === "object" && !Array.isArray(folded.subcategories)) {
     next.subcategories = Object.fromEntries(Object.entries(folded.subcategories).map(([key, value]) => [
-      categoryTitleFor(key, categoryRegistry), value
+      categoryTitleFor(key, categoryRegistry) ?? key, value
     ]));
   }
   return next;
@@ -221,6 +220,22 @@ export function documentForEditor(document, { categoryRegistry = null } = {}) {
     canonicalizeAuthoredDocumentFields(jsonLdShapedDocumentAsSimplified(document))
   );
   return categoryRegistry ? displayPuzzleCategoryTitles(folded, categoryRegistry) : folded;
+}
+
+// Storage/publication boundary: editors work with display titles, but draft
+// and published documents persist stable category ids. Keeping this as a
+// named helper makes it difficult for a new write path to accidentally store
+// the read projection again.
+/**
+ * @param {any} document
+ * @param {{ categoryRegistry?: Record<string, any> | null }} [options]
+ */
+export function documentForStorage(document, { categoryRegistry = CATEGORIES } = {}) {
+  const registry = categoryRegistry || CATEGORIES;
+  return canonicalizeAuthoredCategoryReferences(
+    documentForEditor(document, { categoryRegistry: registry }),
+    { categoryRegistry: registry }
+  );
 }
 
 /**
@@ -335,12 +350,11 @@ export function documentForDraftStore(supplied, createSkeleton, { categoryRegist
   if (isJsonLdShaped(supplied)) {
     return { document: null, normalization };
   }
-  const folded = documentForEditor(normalization.document ?? supplied);
+  const folded = documentForEditor(normalization.document ?? supplied, { categoryRegistry });
   return {
-    document: canonicalizeAuthoredCategoryReferences(
-      folded,
-      { categoryRegistry: categoryRegistry || CATEGORIES }
-    ),
+    document: canonicalizeAuthoredCategoryReferences(folded, {
+      categoryRegistry: categoryRegistry || CATEGORIES
+    }),
     normalization
   };
 }

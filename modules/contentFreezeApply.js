@@ -61,6 +61,16 @@ function categoryMetadataFromDocument(document) {
   return metadata;
 }
 
+/**
+ * @param {{
+ *   plan?: object,
+ *   contentDocuments?: object | null,
+ *   repositoryRoot?: string,
+ *   validateRepository?: (root: string) => unknown,
+ *   keepChanges?: boolean,
+ *   categoryRegistry?: Record<string, any>
+ * }} options
+ */
 export async function applyContentFreeze({
   plan,
   contentDocuments,

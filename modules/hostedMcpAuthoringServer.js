@@ -22,6 +22,7 @@ import {
 import {
   documentForDraftStore,
   documentForEditor,
+  documentForStorage,
   draftForAuthoring,
   withStorageCanonicalizeFlags
 } from "./authoredPuzzleDocument.js";
@@ -987,7 +988,7 @@ export function createAuthoringMcpServer({
         published = await contentDocuments.publish({
           kind: "puzzle",
           id: puzzleId,
-          document: documentForEditor(draft.document, {
+          document: documentForStorage(draft.document, {
             categoryRegistry: taxonomy.categoryRegistry
           }),
           actor

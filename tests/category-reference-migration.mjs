@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   CATEGORY_REFERENCE_SCHEMA_VERSION,
   canonicalizePuzzleCategoryReferences,
+  categoryReferenceKnown,
   categoryIdFor,
   categoryTitleFor,
   puzzleBelongsToCategory,
@@ -11,9 +12,16 @@ import {
   categoryReferencesAreCanonical,
   planCategoryReferenceMigration
 } from "../modules/categoryReferenceMigration.js";
-import { gitRowsForModuleGeneration } from "../tools/migrate-category-identifiers.mjs";
+import {
+  canonicalRuntimeRegistrySource,
+  gitRowsForModuleGeneration
+} from "../tools/migrate-category-identifiers.mjs";
 import { normalizeAuthoredPuzzleDocument } from "../modules/simplifiedPuzzleSchema.js";
-import { documentForEditor, documentForDraftStore } from "../modules/authoredPuzzleDocument.js";
+import {
+  documentForEditor,
+  documentForDraftStore,
+  documentForStorage
+} from "../modules/authoredPuzzleDocument.js";
 import { SIMPLIFIED_PUZZLE_SCHEMA } from "../modules/authoringSchemaResource.js";
 
 export const name = "category references: ids are canonical and title reads stay compatible";
@@ -46,6 +54,8 @@ export async function run() {
   assert.equal(categoryIdFor("Current Subject", categories), "subject");
   assert.equal(categoryIdFor("Old Subject", categories), "subject");
   assert.equal(categoryTitleFor("subject", categories), "Current Subject");
+  assert.equal(categoryReferenceKnown("Old Subject", categories), true);
+  assert.equal(categoryReferenceKnown("unregistered-display-title", categories), false);
 
   const stale = {
     id: "example",
@@ -70,12 +80,78 @@ export async function run() {
     "subject"
   );
 
+  // Editor projections must not hide malformed values before the schema sees
+  // them, while the storage boundary still canonicalizes valid references.
+  const malformed = {
+    id: "malformed",
+    category: "",
+    categories: ["Art", 42, ""],
+    subcategories: { "": "bad", Art: "visual-form" }
+  };
+  assert.deepEqual(
+    documentForEditor(malformed, { categoryRegistry: categories }),
+    malformed
+  );
+  assert.deepEqual(
+    documentForStorage(malformed, { categoryRegistry: categories }),
+    {
+      id: "malformed",
+      category: "",
+      categories: ["art", 42, ""],
+      subcategories: { "": "bad", art: "visual-form" }
+    }
+  );
+
+  // If both a retired title key and its canonical id survive a partial
+  // migration, the canonical assignment is authoritative regardless of key
+  // insertion order.
+  assert.equal(
+    subcategoryIdForPuzzle({
+      category: "Current Subject",
+      subcategories: { "Current Subject": "legacy", subject: "canonical" }
+    }, "Current Subject", categories),
+    "canonical"
+  );
+
   const plan = planCategoryReferenceMigration({
     registry: categories,
     rows: [{ source: "git", table: "git", kind: "puzzle", id: "example", document: stale }]
   });
   assert.equal(plan.unresolved.length, 0);
   assert.deepEqual(plan.changes[0].after, canonical);
+
+  const unknownTitlePlan = planCategoryReferenceMigration({
+    registry: categories,
+    rows: [{
+      source: "git",
+      table: "git",
+      kind: "puzzle",
+      id: "unknown",
+      document: { id: "unknown", category: "D1 Only Subject" }
+    }]
+  });
+  assert.equal(unknownTitlePlan.changes.length, 0);
+  assert.equal(unknownTitlePlan.unresolved.length, 1);
+  assert.match(unknownTitlePlan.unresolved[0].reason, /refusing slug fallback/);
+  const unknownIdPlan = planCategoryReferenceMigration({
+    registry: categories,
+    rows: [{
+      source: "git",
+      table: "git",
+      kind: "puzzle",
+      id: "unknown-id",
+      document: { id: "unknown-id", category: "d1-only-subject" }
+    }]
+  });
+  assert.equal(unknownIdPlan.unresolved.length, 0);
+  assert.equal(unknownIdPlan.changes.length, 0);
+
+  const runtime = canonicalRuntimeRegistrySource(
+    'export const overlay = { categories: ["Old Subject", "Current Subject"] };',
+    categories
+  );
+  assert.equal(runtime.changed, true);
+  assert.match(runtime.source, /\["subject", "subject"\]/);
 
   const normalized = normalizeAuthoredPuzzleDocument({
     id: "example",

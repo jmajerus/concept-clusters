@@ -11,11 +11,11 @@
     "schemaVersion": { "const": "1.0" },
     "id": { "$ref": "#/$defs/slug" },
     "title": { "$ref": "#/$defs/nonEmpty" },
-    "category": { "$ref": "#/$defs/categoryId" },
-    "categories": { "type": "array", "items": { "$ref": "#/$defs/categoryId" }, "uniqueItems": true },
+    "category": { "$ref": "#/$defs/categoryReference" },
+    "categories": { "type": "array", "items": { "$ref": "#/$defs/categoryReference" }, "uniqueItems": true },
     "subcategories": {
       "type": "object",
-      "propertyNames": { "$ref": "#/$defs/categoryId" },
+      "propertyNames": { "$ref": "#/$defs/categoryReference" },
       "additionalProperties": { "$ref": "#/$defs/slug" }
     },
     "large": { "type": "boolean" },
@@ -54,7 +54,14 @@
     "categoryId": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-      "description": "Stable category id, not the category display title. Legacy titles are read-compatible and converted by the authoring server."
+      "description": "Stable category id used by canonical authoring and repository storage."
+    },
+    "categoryReference": {
+      "anyOf": [
+        { "$ref": "#/$defs/categoryId" },
+        { "$ref": "#/$defs/nonEmpty" }
+      ],
+      "description": "JSON-LD interchange accepts either a stable category id or a legacy display title. The authoring server canonicalizes legacy titles before storing a draft or publication."
     },
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "reference": { "type": "object", "required": ["@id"], "properties": { "@id": { "type": "string" } }, "additionalProperties": false },

@@ -82,6 +82,9 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
     errors.push(`@id must be "${puzzleUrn(document.id)}"`);
   }
   if (!nonEmpty(document.title)) errors.push("title must be a non-empty string");
+  // JSON-LD is a backwards-compatible interchange surface: both the
+  // canonical stable id and a legacy display title are valid here. Repository
+  // import/authoring storage canonicalizes the value before persistence.
   if (!nonEmpty(document.category)) errors.push("category must be a non-empty string");
   if (document.subcategories !== undefined) {
     if (!isObject(document.subcategories)) {

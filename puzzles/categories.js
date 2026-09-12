@@ -542,6 +542,26 @@ export function categoryTitleFor(value, registry = CATEGORIES) {
   return match?.title || input;
 }
 
+// Whether a value is explicitly represented by the supplied registry as a
+// current title/key, stable id, or retired title alias. Migration tools use
+// this to distinguish a legacy title that needs a registry mapping from an
+// already-canonical (but not yet registered locally) id that should be left
+// untouched rather than guessed via slugification.
+export function categoryReferenceKnown(value, registry = CATEGORIES) {
+  if (typeof value !== "string") return false;
+  const input = value.trim();
+  if (!input) return false;
+  return categoryEntries(registry).some(entry =>
+    entry.key.trim() === input
+    || entry.id === input
+    || entry.title === input
+    || (Array.isArray(entry.metadata.previousTitles) &&
+      entry.metadata.previousTitles.some(previous =>
+        typeof previous === "string" && previous.trim() === input
+      ))
+  );
+}
+
 export function categoryMetadataFor(value, registry = CATEGORIES) {
   if (typeof value !== "string") return null;
   const input = value.trim();
@@ -577,10 +597,12 @@ export function canonicalizePuzzleCategoryReferences(
     return document;
   }
   const category = typeof document.category === "string"
-    ? categoryIdFor(document.category, registry)
+    ? (categoryIdFor(document.category, registry) ?? document.category)
     : document.category;
   const categories = Array.isArray(document.categories)
-    ? [...new Set(document.categories.map(value => categoryIdFor(value, registry)).filter(Boolean))]
+    ? [...new Set(document.categories.map(value =>
+      categoryIdFor(value, registry) ?? value
+    ))]
     : undefined;
   const subcategories = document.subcategories &&
     typeof document.subcategories === "object" && !Array.isArray(document.subcategories)
@@ -590,8 +612,7 @@ export function canonicalizePuzzleCategoryReferences(
   if (subcategories) {
     canonicalSubcategories = {};
     for (const [key, value] of Object.entries(subcategories)) {
-      const id = categoryIdFor(key, registry);
-      if (!id) continue;
+      const id = categoryIdFor(key, registry) ?? key;
       // If both title and id occur, the already-canonical id wins.
       if (Object.hasOwn(canonicalSubcategories, id) && key !== id) continue;
       canonicalSubcategories[id] = value;
@@ -639,10 +660,14 @@ export function subcategoryIdForPuzzle(puzzle, category, registry = CATEGORIES) 
   const categoryId = categoryIdFor(category, registry);
   const values = puzzle?.subcategories;
   if (!values || typeof values !== "object" || Array.isArray(values)) return null;
-  const key = Object.keys(values).find(candidate =>
-    categoryIdFor(candidate, registry) === categoryId
-  );
-  const id = key ? values[key] : null;
+  // Transitional documents can contain both a canonical id key and a retired
+  // title key. The canonical key is authoritative regardless of object order.
+  const key = Object.hasOwn(values, categoryId)
+    ? categoryId
+    : Object.keys(values).find(candidate =>
+      categoryIdFor(candidate, registry) === categoryId
+    );
+  const id = key !== undefined ? values[key] : null;
   return typeof id === "string" && id.trim() ? id.trim() : null;
 }
 

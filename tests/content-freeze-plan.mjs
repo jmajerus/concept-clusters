@@ -240,6 +240,35 @@ export async function run() {
   });
   assert.deepEqual(loaded.puzzles.add, ["brand-new"]);
 
+  // A category published only in D1 must still resolve puzzle dependencies
+  // to its stable id when the freeze plan is built. The static Git registry
+  // cannot be the fallback for this path because the category may not exist
+  // there yet.
+  const loadedWithD1Category = await loadContentFreezePlan({
+    contentDocuments: {
+      async listPublished({ kind }) {
+        if (kind === "puzzle") {
+          return [{
+            id: "d1-only-puzzle",
+            cuedForFreezeAt: "2026-09-02T00:00:00.000Z",
+            document: { category: "D1 Only Subject" }
+          }];
+        }
+        if (kind === "category") {
+          return [{
+            id: "d1-only-subject",
+            document: { id: "d1-only-subject", title: "D1 Only Subject" }
+          }];
+        }
+        return [];
+      }
+    },
+    gitIds: { puzzles: [], catalogues: [], categories: [] },
+    categoryRegistry: { "D1 Only Subject": { slug: "d1-only-subject" } }
+  });
+  assert.deepEqual(loadedWithD1Category.puzzles.add, ["d1-only-puzzle"]);
+  assert.deepEqual(loadedWithD1Category.categories.add, ["d1-only-subject"]);
+
   const seedFlags = freezeFlagsFromPublished({
     id: "seeded-production",
     cuedForFreezeAt: "2026-08-31T00:00:00.000Z",

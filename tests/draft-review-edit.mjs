@@ -374,8 +374,8 @@ export async function run() {
       renamedBatch = next;
     }
   });
-  assert.equal(renamedBatch.category, "Physical Geography");
-  assert.deepEqual(renamedBatch.categories, ["Physical Geography"]);
+  assert.equal(renamedBatch.category, "geography");
+  assert.deepEqual(renamedBatch.categories, ["geography"]);
 
   let migratedSave = null;
   await persistDraftFieldEdit({

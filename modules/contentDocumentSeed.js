@@ -1,7 +1,7 @@
 import { canonicalizePuzzleCategoryReferences, slugify } from "../puzzles/categories.js";
 import { LEVEL_CATALOGUE_ID_PREFIX } from "./catalogueRegistry.js";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
-import { documentForEditor } from "./authoredPuzzleDocument.js";
+import { documentForStorage } from "./authoredPuzzleDocument.js";
 import { DraftNotFoundError } from "./draftRepository.js";
 
 export const OPEN_EXISTING_DRAFT_CONFIRM = "open-existing-draft";
@@ -444,7 +444,7 @@ export async function openPuzzleWorkingCopy({
   // Published D1 rows may predate the simplified-only draft contract and
   // therefore still be canonical JSON-LD. A new working copy is authoring
   // data, not interchange data: normalize it before its first write.
-  const document = documentForEditor(sourceDocument, { categoryRegistry });
+  const document = documentForStorage(sourceDocument, { categoryRegistry });
   try {
     const draft = await createDraft({ draftId: id, document });
     return { draft, created: true };

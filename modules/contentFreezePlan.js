@@ -99,6 +99,13 @@ export function freezePlanSummary(plan = emptyContentFreezePlan()) {
   return suffixes.length ? `${cuedText}; ${suffixes.join("; ")}.` : `${cuedText}.`;
 }
 
+/**
+ * @param {{
+ *   contentDocuments?: object | null,
+ *   gitIds?: { puzzles?: string[], catalogues?: string[], categories?: string[] },
+ *   categoryRegistry?: Record<string, any>
+ * }} options
+ */
 export async function loadContentFreezePlan({
   contentDocuments,
   gitIds = { puzzles: [], catalogues: [], categories: [] },
@@ -341,6 +348,17 @@ function automaticIdsFor(dependencies, kind) {
 // published snapshot not yet in git. Withdrawn D1 rows and git-only ids both
 // land in remove. Derived catalogues stay out. Admin Freeze on the LAN server
 // applies this patch to the checkout.
+/**
+ * @param {{
+ *   publishedPuzzles?: any[],
+ *   publishedCatalogues?: any[],
+ *   publishedCategories?: any[],
+ *   gitPuzzleIds?: string[],
+ *   gitCatalogueIds?: string[],
+ *   gitCategoryIds?: string[],
+ *   categoryRegistry?: Record<string, any>
+ * }} options
+ */
 export function planContentFreeze({
   publishedPuzzles = [],
   publishedCatalogues = [],

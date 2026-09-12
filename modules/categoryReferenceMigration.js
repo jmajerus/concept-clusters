@@ -4,7 +4,9 @@
 // D1 maintenance jobs, and tests all use the same conversion.
 import {
   CATEGORIES,
-  canonicalizePuzzleCategoryReferences
+  canonicalizePuzzleCategoryReferences,
+  categoryIdFor,
+  categoryReferenceKnown
 } from "../puzzles/categories.js";
 
 function clone(value) {
@@ -24,6 +26,18 @@ function referenceValues(document) {
       ? Object.keys(document.subcategories)
       : [])
   ].filter(value => typeof value === "string" && value.trim());
+}
+
+function unknownReferences(document, registry) {
+  return [...new Set(referenceValues(document).filter(value => {
+    const trimmed = value.trim();
+    // A value already equal to its slug-like spelling may be a valid id from
+    // a D1-only category that is not present in a Git-only registry. Do not
+    // rewrite it by guesswork; reject only values that look like an unmapped
+    // display title (or contain surrounding whitespace that would be lost).
+    return !categoryReferenceKnown(value, registry)
+      && (value !== trimmed || categoryIdFor(value, registry) !== trimmed);
+  }))];
 }
 
 function aliasConflicts(registry) {
@@ -70,6 +84,17 @@ export function planCategoryReferenceMigration({
         id: row?.id || document.id || null,
         reason: "category title alias maps to more than one current category",
         values: [...new Set(ambiguous)]
+      });
+      continue;
+    }
+    const unknown = unknownReferences(document, registry);
+    if (unknown.length) {
+      unresolved.push({
+        source: row?.source || "unknown",
+        kind: "puzzle",
+        id: row?.id || document.id || null,
+        reason: "category reference is not present in the supplied registry; refusing slug fallback",
+        values: unknown
       });
       continue;
     }

@@ -4,7 +4,7 @@
 // trust a hidden "before" value in the form. Human saves leave
 // generativeAssistance unchanged.
 
-import { documentForEditor } from "./authoredPuzzleDocument.js";
+import { documentForEditor, documentForStorage } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
 import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting, applyReviewedBy } from "./authoringProvenance.js";
@@ -697,7 +697,7 @@ export async function persistDraftFieldEdit({
     { publishedDocument }
   );
   return saveDraft({
-    document,
+    document: documentForStorage(document, { categoryRegistry }),
     expectedRevision: form.expectedRevision
   });
 }
@@ -731,7 +731,10 @@ export async function persistDraftWorkingCopy({
       isRevertField: false
     });
   }
-  return saveDraft({ document, expectedRevision });
+  return saveDraft({
+    document: documentForStorage(document, { categoryRegistry }),
+    expectedRevision
+  });
 }
 
 /**
@@ -752,7 +755,7 @@ export async function persistDraftCanonicalForm({
     throw new DraftFieldError("expected_revision must be a positive integer");
   }
   if (!draft?.document) throw new DraftFieldError("Draft has no document");
-  const document = documentForEditor(draft.document, { categoryRegistry });
+  const document = documentForStorage(draft.document, { categoryRegistry });
   if (JSON.stringify(document) === JSON.stringify(draft.document)) {
     return { unchanged: true };
   }

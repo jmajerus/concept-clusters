@@ -221,7 +221,7 @@ export function gitCategoryRegistryChanges({ publishedCategories = [], gitCatego
   return changes;
 }
 
-function categoryRegistryVersion(rows = []) {
+export function categoryRegistryVersion(rows = []) {
   return rows
     .filter(row => row?.kind === "category")
     .map(row => ({
@@ -233,7 +233,7 @@ function categoryRegistryVersion(rows = []) {
     .sort((left, right) => String(left.id).localeCompare(String(right.id)));
 }
 
-async function currentCategoryRegistryVersion(database) {
+export async function currentCategoryRegistryVersion(database) {
   return categoryRegistryVersion(await queryRows(
     database,
     "SELECT id, revision, document, withdrawn_at FROM published_documents WHERE kind = ? ORDER BY id",

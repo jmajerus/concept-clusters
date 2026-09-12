@@ -28,7 +28,11 @@ import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
-import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import {
+  documentForEditor,
+  documentForStorage,
+  withStorageCanonicalizeFlags
+} from "./authoredPuzzleDocument.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   OPEN_EXISTING_DRAFT_CONFIRM,
@@ -383,7 +387,7 @@ export function createLocalDraftReviewHandler({
         });
         const record = await draftStore.replaceDraft({
           draftId,
-          document: documentForEditor(body.document, { categoryRegistry }),
+          document: documentForStorage(body.document, { categoryRegistry }),
           expectedRevision
         });
         json(res, {
@@ -483,7 +487,15 @@ export function createLocalDraftReviewHandler({
           replyCreateDraft(req, res, body, 400, { message: error.message });
           return true;
         }
-        const record = await draftStore.createDraft({ draftId: id, document: skeleton });
+        const categoryRegistry = await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        });
+        const record = await draftStore.createDraft({
+          draftId: id,
+          document: documentForStorage(skeleton, { categoryRegistry })
+        });
         if (wantsJson(req, body)) {
           json(res, {
             draftId: record.draftId,
@@ -788,7 +800,7 @@ export function createLocalDraftReviewHandler({
             });
             await draftStore.replaceDraft({
               draftId,
-              document: documentForEditor(published.document, { categoryRegistry }),
+              document: documentForStorage(published.document, { categoryRegistry }),
               expectedRevision: record.revision
             });
             res.writeHead(303, {
@@ -821,7 +833,7 @@ export function createLocalDraftReviewHandler({
           const published = await contentDocuments.publish({
             kind: "puzzle",
             id: puzzleId,
-            document: authoredDocument,
+            document: documentForStorage(authoredDocument, { categoryRegistry }),
             actor: publicationActor
           });
           if (form.isPublishAndCue) {

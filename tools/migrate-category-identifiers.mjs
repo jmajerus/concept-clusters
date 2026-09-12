@@ -36,6 +36,8 @@ import {
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
 import {
   applyD1Changes,
+  categoryRegistryVersion,
+  currentCategoryRegistryVersion,
   loadD1Rows,
   loadGitRows
 } from "./propagate-category-renames.mjs";
@@ -86,6 +88,40 @@ export function gitRowsForModuleGeneration(gitRows = [], changes = []) {
     rowsById.set(change.id, change);
   }
   return [...rowsById.values()];
+}
+
+// `puzzles/index.js` contains a small hand-maintained overlay in addition to
+// generated puzzle imports. Convert its category-reference literals using
+// the same live registry as the document migration. Retired titles are
+// included when the registry records `previousTitles`; ambiguous aliases are
+// skipped rather than guessing a destination.
+export function canonicalRuntimeRegistrySource(source, registry = CATEGORIES) {
+  if (typeof source !== "string") return { source, changed: false };
+  const currentTitles = new Set(Object.keys(registry || {}).map(title => title.trim()));
+  const replacements = new Map();
+  const ambiguousAliases = new Set();
+  for (const [title, metadata] of Object.entries(registry || {})) {
+    const id = categoryIdFor(title, registry);
+    if (id && id !== title) replacements.set(title, id);
+    for (const previous of metadata?.previousTitles || []) {
+      const alias = typeof previous === "string" ? previous.trim() : "";
+      if (!alias || currentTitles.has(alias) || alias === id) continue;
+      const existing = replacements.get(alias);
+      if (existing && existing !== id) {
+        replacements.delete(alias);
+        ambiguousAliases.add(alias);
+        continue;
+      }
+      if (!ambiguousAliases.has(alias)) replacements.set(alias, id);
+    }
+  }
+  let next = source;
+  for (const [value, id] of [...replacements.entries()]
+    .sort(([left], [right]) => right.length - left.length)) {
+    const quoted = JSON.stringify(value);
+    if (next.includes(quoted)) next = next.split(quoted).join(JSON.stringify(id));
+  }
+  return { source: next, changed: next !== source };
 }
 
 async function applyGitChanges(
@@ -139,22 +175,11 @@ async function applyGitChanges(
   for (const change of [...canonical, ...interchange]) {
     await writeFile(change.path, formattedJson(change.after), "utf8");
   }
-  let registryChanged = false;
   const registryPath = join(root, "puzzles", "index.js");
-  let registrySource = await readFile(registryPath, "utf8");
-  // The registry contains two hand-maintained cross-disciplinary overlays.
-  // Their category values are part of the runtime corpus too, so convert
-  // those literals alongside generated modules. The category registry file
-  // itself intentionally remains title-keyed metadata for display.
-  for (const [title, metadata] of Object.entries(registry || {})) {
-    const id = categoryIdFor(title, registry);
-    if (!id || id === title) continue;
-    const quoted = JSON.stringify(title);
-    if (!registrySource.includes(quoted)) continue;
-    registrySource = registrySource.split(quoted).join(JSON.stringify(id));
-    registryChanged = true;
-  }
-  if (registryChanged) await writeFile(registryPath, registrySource, "utf8");
+  const registrySource = await readFile(registryPath, "utf8");
+  const runtimeRegistry = canonicalRuntimeRegistrySource(registrySource, registry);
+  if (runtimeRegistry.changed) await writeFile(registryPath, runtimeRegistry.source, "utf8");
+  const registryChanged = runtimeRegistry.changed;
   if (!generated || !moduleRows.length) {
     return {
       files: canonical.length + interchange.length + (registryChanged ? 1 : 0),
@@ -217,6 +242,9 @@ function render(report, json) {
   if (report.changes.git && !report.applyGit) {
     console.log("Re-run with --apply-git (or --apply) to rewrite canonical Git artifacts and generated modules.");
   }
+  if (report.changes.runtimeRegistry && !report.applyGit) {
+    console.log(`  Runtime puzzle registry literals requiring rewrite: ${report.changes.runtimeRegistry}`);
+  }
 }
 
 async function main() {
@@ -245,10 +273,20 @@ async function main() {
   if ((options.applyD1 || options.applyGit) && unresolved.length) {
     throw new Error(`Refusing to apply with ${unresolved.length} unresolved row(s); resolve them first.`);
   }
+  const runtimeRegistryPath = join(root, "puzzles", "index.js");
+  const runtimeRegistrySource = await readFile(runtimeRegistryPath, "utf8");
+  const runtimeRegistryPlan = canonicalRuntimeRegistrySource(runtimeRegistrySource, registry);
   let appliedD1 = 0;
   let appliedGit = { files: 0, modules: 0 };
   if (options.applyD1) {
     if (!database) throw new Error("D1 apply requires credentials; omit --git-only.");
+    const initialCategoryVersion = categoryRegistryVersion(
+      d1.published.filter(row => row.kind === "category")
+    );
+    const latestCategoryVersion = await currentCategoryRegistryVersion(database);
+    if (JSON.stringify(initialCategoryVersion) !== JSON.stringify(latestCategoryVersion)) {
+      throw new Error("Category registry changed while planning; re-run the dry-run and retry.");
+    }
     appliedD1 = await applyD1Changes(database, d1Changes, {
       actor: "category-id-migration"
     });
@@ -276,9 +314,14 @@ async function main() {
       generatedModules: options.applyGit
         ? appliedGit.modules
         : new Set(gitChanges.filter(change => change.table === "git").map(change => change.id)).size,
+      runtimeRegistry: runtimeRegistryPlan.changed ? 1 : 0
+    },
+    applied: {
+      d1: appliedD1,
+      gitFiles: appliedGit.files,
+      generatedModules: appliedGit.modules,
       runtimeRegistry: appliedGit.registryChanged ? 1 : 0
     },
-    applied: { d1: appliedD1, gitFiles: appliedGit.files, generatedModules: appliedGit.modules, runtimeRegistry: appliedGit.registryChanged ? 1 : 0 },
     bySource: summarize([...d1Changes, ...gitChanges]),
     unresolved,
     d1Changes: d1Changes.map(change => ({ source: change.source, kind: change.kind, id: change.id, ownerSubject: change.ownerSubject || null })),
