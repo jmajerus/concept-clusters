@@ -4,7 +4,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.9.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.10.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export const AUTHORING_PHASES = Object.freeze([
   "complete",
@@ -29,13 +29,24 @@ const generatedSimplifiedPuzzleSchema = z.toJSONSchema(SimplifiedPuzzleInputSche
   // Zod defaults (such as bridges: []) have already been materialized.
   io: "input"
 });
+// `large` remains an internal compatibility field on the storage/runtime
+// schema, but its value is derived from node count and is not part of the
+// MCP authoring contract. Keep it out of the discoverable complete schema as
+// well as the focused phase projections so clients see only the real content
+// limit rather than a rendering switch.
+const generatedAuthoringProperties = Object.fromEntries(
+  Object.entries(generatedSimplifiedPuzzleSchema.properties)
+    .filter(([name]) => name !== "large")
+);
 export const SIMPLIFIED_PUZZLE_SCHEMA = Object.freeze({
   ...generatedSimplifiedPuzzleSchema,
+  description:
+    "Complete simplified puzzle authoring contract. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
   // Zod deliberately keeps these input fields permissive so a legacy title
   // can be canonicalized before parsing. The discoverable authoring contract
   // should nevertheless teach clients to send the new stable-id shape.
   properties: {
-    ...generatedSimplifiedPuzzleSchema.properties,
+    ...generatedAuthoringProperties,
     category: CATEGORY_ID_SCHEMA,
     categories: {
       ...generatedSimplifiedPuzzleSchema.properties.categories,

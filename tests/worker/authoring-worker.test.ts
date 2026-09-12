@@ -211,12 +211,9 @@ describe("hosted authoring Worker", () => {
       .toMatch(/prefer a verified direct resource/);
     expect(resourceSchema.properties.bridges.items.properties.termRole.description)
       .toMatch(/no automatic or authored reference links or citations/);
-    expect(resourceSchema.properties.large.description)
-      .toMatch(/Derived from node count on save/);
-    expect(resourceSchema.properties.large.description)
-      .toMatch(/exceed 16/);
-    expect(resourceSchema.properties.large.description)
-      .toMatch(/do not drop a distinct term to stay on the standard board/);
+    expect(resourceSchema.properties.large)
+      .toBeUndefined();
+    expect(JSON.stringify(resourceSchema)).toMatch(/25/);
     expect(resourceSchema.required).not.toContain("bridges");
 
     const authoringSchemaResponse = await rpc({
@@ -384,7 +381,9 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/confirmed final edit/);
     expect(guidance.result.structuredContent.markdown).toMatch(/admin\/drafts/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/do not hunt for the weakest term to drop/);
+      .toMatch(/hunt for the weakest\s+term to drop/);
+    expect(guidance.result.structuredContent.markdown)
+      .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
 
     const coreGuided = await rpc({
       jsonrpc: "2.0",
@@ -409,6 +408,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/do not plan to rediscover/);
     expect(coreGuidance.result.structuredContent.markdown)
       .toMatch(/Carry approved inventory connections/);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
     const reviewGuided = await rpc({
       jsonrpc: "2.0",
       id: "guidance-review",
@@ -419,9 +420,9 @@ describe("hosted authoring Worker", () => {
       result: { structuredContent: { markdown: string } };
     };
     expect(reviewGuidance.result.structuredContent.markdown)
-      .toMatch(/Canvas size is derived/);
+      .toMatch(/more than 25 nodes/);
     expect(reviewGuidance.result.structuredContent.markdown)
-      .toMatch(/Do not drop a distinct\s+term to stay on\s+the standard board/);
+      .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
     expect(reviewGuidance.result.structuredContent.markdown)
       .toMatch(/silently replace text/);
     const pedagogyGuided = await rpc({

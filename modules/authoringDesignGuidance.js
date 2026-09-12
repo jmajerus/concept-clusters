@@ -69,13 +69,11 @@ derives from \`name\` -- a bridge referencing an id-less cluster should
 predict that plain slug). Each cluster's color must be unique within the
 puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
 is reserved for bridges and green/red for lens feedback, so none of those
-three are valid cluster colors. Total nodes (all cluster terms plus
-bridges) fit 16 on the standard board or 25 on the wide board. Size
-by genuine distinct terms, not to stay under 16. Canvas size is derived
-from that count on save -- omit \`large\`. Do not drop a distinct term
-or bridge to shrink the board. Do not treat board size as a difficulty
-signal; it only affects rendering. Above 25, split into relatedPuzzles
-rather than compressing the lesson onto one board.
+three are valid cluster colors. Keep the complete board to at most 25 total
+nodes (all cluster terms plus bridges). Size by genuine distinct terms; do not
+drop a distinct term or bridge to fit a rendering threshold. If the material
+needs more than 25 nodes, split it into relatedPuzzles rather than compressing
+the lesson onto one board.
 
 These are validity limits for a completed document, not composition targets.
 Before mapping the material, do not choose or announce a cluster count,
@@ -125,12 +123,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   when called provisional or said to be within limits. Equal and unequal
   outcomes are both legitimate; never alter the material merely to make the
   resulting counts look less regular.
-  The 16-node standard-board cap is a rendering default, not a
-  composition target. An honest 17-25-node board uses the wide canvas
-  automatically; do not hunt for the weakest term to drop so the
-  puzzle stays small. Redundancy checks are independent of the cap --
-  run them because a term is actually duplicate work, not because
-  the node count crossed 16. The firm ceiling is 25; only then split
+  The firm board ceiling is 25 total nodes. Do not hunt for the weakest
+  term to drop to fit a rendering threshold. Redundancy checks are a separate
+  distinctness judgment; run them because a term is actually duplicate work,
+  not because of how many nodes the board contains. Only above 25 nodes split
   into relatedPuzzles rather than dropping essential terms.
 - Bridges must be genuine, and are optional: a bridge should encode a real
   conceptual connection, never a trick or a link manufactured just to make
@@ -413,9 +409,8 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   for a minimum-size two-term cluster only, one seed and one floating
   term. No trap
   words: every term must belong unambiguously to its declared cluster.
-  Size by distinct concepts, not to stay under 16 nodes. Canvas size
-  is derived from the honest total; do not drop a genuine term to shrink
-  the board. If the map is too big for one board (above 25 nodes), split.
+  Size by distinct concepts. Do not drop a genuine term to fit a rendering
+  threshold. If the map needs more than 25 nodes, split it into relatedPuzzles.
 - Carry approved inventory connections onto the board as bridges. Do not
   invent extras to make the graph connected. A disconnected board or no
   bridges is acceptable. Write each bridge fact now, then classify
@@ -441,10 +436,8 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   redundant terms doing the same conceptual job, missing concepts named by a
   cluster fact, seed recognizability, bridge necessity, and termRole choices.
 - If validation flags more than 25 nodes, split into relatedPuzzles rather
-  than dropping essential terms. Do not drop a distinct term to stay on
-  the standard board. Checking for redundant terms is a separate
-  distinctness judgment; do not start it because the node count crossed
-  16. Canvas size is derived; omit \`large\`.
+  than dropping essential terms. Checking for redundant terms is a separate
+  distinctness judgment; do not start it because of the node count alone.
 - Verify every retained direct link and citation against the claim it supports.
   Keep exact citation data gathered during research; this pass confirms and
   corrects it rather than performing a second generic source hunt. Check that

@@ -211,18 +211,12 @@ export async function run() {
       resourceSchema.properties.bridges.items.properties.termRole.description,
       /no automatic or authored reference links or citations/
     );
-    assert.match(
-      resourceSchema.properties.large.description,
-      /Derived from node count on save/
+    assert.equal(
+      resourceSchema.properties.large,
+      undefined,
+      "renderer layout fields should stay out of the MCP schema"
     );
-    assert.match(
-      resourceSchema.properties.large.description,
-      /exceed 16/
-    );
-    assert.match(
-      resourceSchema.properties.large.description,
-      /do not drop a distinct term to stay on the standard board/
-    );
+    assert.match(JSON.stringify(resourceSchema), /25/);
     assert.ok(!resourceSchema.required.includes("bridges"));
 
     const authoringSchema = await request("tools/call", {
@@ -349,8 +343,12 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /publish_to_authoring=true/);
     assert.match(guidance.result.structuredContent.markdown, /confirmed final edit/);
     assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
-    assert.match(guidance.result.structuredContent.markdown, /uses the wide canvas\s+automatically/);
-    assert.match(guidance.result.structuredContent.markdown, /do not hunt for the weakest term to drop/);
+    assert.match(guidance.result.structuredContent.markdown, /at most 25 total\s+nodes/);
+    assert.match(guidance.result.structuredContent.markdown, /hunt for the weakest\s+term to drop/);
+    assert.doesNotMatch(
+      guidance.result.structuredContent.markdown,
+      /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i
+    );
 
     const coreGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
@@ -365,14 +363,21 @@ export async function run() {
     assert.match(coreGuidance.result.structuredContent.markdown, /appropriate level of granularity/);
     assert.match(coreGuidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
     assert.match(coreGuidance.result.structuredContent.markdown, /Carry approved inventory connections/);
+    assert.doesNotMatch(
+      coreGuidance.result.structuredContent.markdown,
+      /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i
+    );
     const reviewGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
     });
     assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the surface/);
-    assert.match(reviewGuidance.result.structuredContent.markdown, /Canvas size is derived/);
-    assert.match(reviewGuidance.result.structuredContent.markdown, /Do not drop a distinct\s+term to stay on\s+the standard board/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /more than 25 nodes/);
+    assert.doesNotMatch(
+      reviewGuidance.result.structuredContent.markdown,
+      /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i
+    );
     assert.match(reviewGuidance.result.structuredContent.markdown, /silently replace text/);
     const pedagogyGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
@@ -415,6 +420,14 @@ export async function run() {
     assert.ok(puzzleList.result.structuredContent.puzzles.every(puzzle =>
       puzzle.category === "Art" || puzzle.categories?.includes("Art")
     ));
+    assert.ok(puzzleList.result.structuredContent.puzzles.every(puzzle =>
+      !Object.hasOwn(puzzle, "large")
+    ));
+    const largePuzzle = await request("tools/call", {
+      name: "get_puzzle",
+      arguments: { puzzle_id: "control-and-exit" }
+    });
+    assert.equal(largePuzzle.result.structuredContent.document.large, undefined);
 
     const overlap = await request("tools/call", {
       name: "search_puzzles",

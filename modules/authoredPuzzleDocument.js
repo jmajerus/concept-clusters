@@ -240,6 +240,20 @@ export function documentForEditor(document, { categoryRegistry = null } = {}) {
   return categoryRegistry ? displayPuzzleCategoryTitles(folded, categoryRegistry) : folded;
 }
 
+// MCP authors receive the simplified content shape, not renderer bookkeeping.
+// The board-layout flag is derived again on every storage/publication boundary
+// and is intentionally omitted from reads so clients make decisions from the
+// lesson content and the single 25-node hard limit.
+export function documentForMcp(document, options = {}) {
+  const authored = documentForEditor(document, options);
+  if (!authored || typeof authored !== "object" || Array.isArray(authored)) {
+    return authored;
+  }
+  const result = { ...authored };
+  delete result.large;
+  return result;
+}
+
 // Storage/publication boundary: editors work with display titles, but draft
 // and published documents persist stable category ids. Keeping this as a
 // named helper makes it difficult for a new write path to accidentally store
@@ -263,6 +277,11 @@ export function documentForStorage(document, { categoryRegistry = CATEGORIES } =
 export function draftForAuthoring(draft, options = {}) {
   if (!draft || typeof draft !== "object") return draft;
   return { ...draft, document: documentForEditor(draft.document, options) };
+}
+
+export function draftForMcp(draft, options = {}) {
+  if (!draft || typeof draft !== "object") return draft;
+  return { ...draft, document: documentForMcp(draft.document, options) };
 }
 
 export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";

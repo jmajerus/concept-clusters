@@ -21,9 +21,9 @@ import {
 } from "./authoringSchemaResource.js";
 import {
   documentForDraftStore,
-  documentForEditor,
+  documentForMcp,
   documentForStorage,
-  draftForAuthoring,
+  draftForMcp,
   withStorageCanonicalizeFlags
 } from "./authoredPuzzleDocument.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
@@ -445,7 +445,7 @@ export function createAuthoringMcpServer({
     const published = (await publishedPuzzleRows())
       .find(row => row.id === puzzleId && row.document);
     const document = published?.document || contentService.getPuzzleDocument(puzzleId);
-    return documentForEditor(document, { categoryRegistry });
+    return documentForMcp(document, { categoryRegistry });
   }
 
   function puzzleListSummary(puzzle) {
@@ -455,7 +455,6 @@ export function createAuthoringMcpServer({
       category: puzzle.category,
       ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
       ...(puzzle.subcategories ? { subcategories: { ...puzzle.subcategories } } : {}),
-      large: puzzle.large === true,
       hasLenses: Boolean(puzzle.lenses?.length),
       hasLearningIntroduction: Boolean(puzzle.learningIntroduction)
     };
@@ -546,7 +545,7 @@ export function createAuthoringMcpServer({
           uri: uri.href,
           mimeType: "application/json",
           text: JSON.stringify(
-            documentForEditor(await contentService.getPuzzleDocument(puzzle.id), {
+            documentForMcp(await contentService.getPuzzleDocument(puzzle.id), {
               categoryRegistry: await categoryRegistry()
             }),
             null,
@@ -841,7 +840,7 @@ export function createAuthoringMcpServer({
           ? `Opened working copy ${draftId} from the published snapshot.`
           : `Working copy ${draftId} already exists.`,
         {
-          draft: draftForAuthoring(draft, { categoryRegistry: await categoryRegistry() }),
+          draft: draftForMcp(draft, { categoryRegistry: await categoryRegistry() }),
           created
         }
       );
@@ -882,7 +881,7 @@ export function createAuthoringMcpServer({
       { analytics, recordStamp }
     );
     return success(`Created draft ${draftId}.`, {
-      draft,
+      draft: draftForMcp(draft, { categoryRegistry: null }),
       ...(normalization && !normalization.document
         ? { normalization: { applied: false, errors: normalization.errors } }
         : {})
@@ -899,7 +898,7 @@ export function createAuthoringMcpServer({
   }, tracked("get_puzzle_draft", safe(async ({ draft_id }) => {
     const stored = await draftRepository.get({ draftId: draft_id, actor });
     const registry = await categoryRegistry();
-    const draft = draftForAuthoring(stored, { categoryRegistry: registry });
+    const draft = draftForMcp(stored, { categoryRegistry: registry });
     // Same non-blocking flag validate_puzzle_draft surfaces, so a caller
     // that only ever reads a draft (never explicitly validates it) still
     // sees a stale-storage-shape draft worth saving to lock in.
@@ -1007,12 +1006,21 @@ export function createAuthoringMcpServer({
           ? `Saved draft ${draft_id}; current revision is ${draft.revision}. Not published: it has ${publicationErrors.length} errors.`
           : `Saved draft ${draft_id}; current revision is ${draft.revision}.`) + repairNote,
       {
-        draft,
+        draft: draftForMcp(draft, { categoryRegistry: null }),
         ...(!normalization.document
           ? { normalization: { applied: false, errors: normalization.errors } }
           : {}),
         ...(repair ? { repair: { applied: repaired.changes.length > 0, changes: repaired.changes } } : {}),
-        ...(publish_to_authoring ? { published, publicationErrors } : {})
+        ...(publish_to_authoring
+          ? {
+            published: published
+              ? { ...published, document: documentForMcp(published.document, {
+                categoryRegistry: null
+              }) }
+              : published,
+            publicationErrors
+          }
+          : {})
       }
     );
   })));

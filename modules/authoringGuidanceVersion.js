@@ -61,7 +61,9 @@
 // terms, and genuine connections before deciding any count or range. Equal
 // inventory/board counts are neither blocked nor a reason to manufacture
 // irregularity.
+// 5.2: same review bar; MCP guidance exposes only the 25-node hard ceiling.
+// Layout details and derived renderer fields are not authoring inputs.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 1
+  minor: 2
 });
