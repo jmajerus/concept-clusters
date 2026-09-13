@@ -401,6 +401,23 @@ export async function run() {
   assert.equal(assistedSimplified.document.generativeAssistance, undefined);
   assert.equal(assistedSimplified.document.provenance.collaboration, "ai");
 
+  // Validate legacy attribution before JSON-LD projection: an invalid entry
+  // must not disappear merely because current simplified output omits the
+  // retired field.
+  const malformedAssistedJsonLd = canonicalizePuzzleDocument({
+    ...jsonLd,
+    generativeAssistance: [{}]
+  }, {
+    categoryRegistry: {
+      "Political Science": { slug: "political-science" },
+      Philosophy: { slug: "philosophy" }
+    }
+  });
+  assert.equal(malformedAssistedJsonLd.document, null);
+  assert.ok(malformedAssistedJsonLd.errors.some(error =>
+    error.includes("generativeAssistance[0].system")
+  ));
+
   const escapedLesson = {
     ...jsonLd,
     learningIntroduction: {

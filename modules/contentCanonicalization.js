@@ -22,6 +22,7 @@ import {
   puzzleForCanonicalPublication,
   puzzleToSimplified
 } from "./puzzleSimplified.js";
+import { validateGenerativeAssistance } from "./generativeAssistance.js";
 import { puzzleUrn } from "./jsonLdProfile.js";
 
 const JSON_LD_TOP_LEVEL_KEYS = new Set([
@@ -456,6 +457,16 @@ export function canonicalizePuzzleDocument(
   const sourceFormat = isJsonLdShaped(document) ? "jsonld" : "simplified";
   const hadRetiredBridgeTermRole = documentHasRetiredBridgeTermRole(document);
   const hadRetiredGenerativeAssistance = documentHasRetiredGenerativeAssistance(document);
+  // Validate the legacy field before any runtime projection. In particular,
+  // puzzleToSimplified intentionally omits retired fields, so validating only
+  // after a JSON-LD -> simplified conversion would silently discard malformed
+  // attribution instead of surfacing an actionable migration error.
+  const generativeAssistanceErrors = validateGenerativeAssistance(
+    document.generativeAssistance
+  );
+  if (generativeAssistanceErrors.length) {
+    return errorResult(generativeAssistanceErrors, sourceFormat);
+  }
   let canonical;
   let sourceSimplified = document;
   let jsonLdIdCorrections = [];

@@ -78,8 +78,11 @@ The retired `generativeAssistance` field follows the same boundary policy:
 legacy simplified and JSON-LD documents are read and folded into puzzle-level
 `provenance`, while current simplified documents and JSON-LD exports omit the
 field. The corpus report identifies a migrated value as
-`generative-assistance-removed`; scope/role/date audit detail remains in the
-append-only D1 assistance-stamp record.
+`generative-assistance-removed`. The migration does not synthesize
+`draft_assistance_stamps`: scope/role/date detail remains available only when
+the legacy document came from an MCP write that already has its corresponding
+append-only D1 assistance-stamp record. Older D1 rows and Git/JSON-LD sources
+without such a record intentionally cannot recover that retired audit detail.
 
 The Git side replaces `content/puzzles/*.ccpuzzle.jsonld` with
 `*.ccpuzzle.json`, removes the old interchange files, rewrites canonical

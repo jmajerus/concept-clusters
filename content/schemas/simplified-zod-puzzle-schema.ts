@@ -210,7 +210,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
         provider: z.string().min(1).optional(),
         model: z.string().min(1).optional(),
         // Per-contributor client settings (see authoringProvenance.js).
-        reasoning: z.enum(["light", "medium", "high", "extraHigh", "ultra", "noThinking"]).optional(),
+        reasoning: z.enum(["light", "medium", "high", "extra", "extraHigh", "ultra", "noThinking"]).optional(),
         switch: z.enum(["fast", "thinking"]).optional()
       }).strict()
     ])).min(1),
