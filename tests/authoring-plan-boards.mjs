@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-export const name = "Authoring plan-boards: single-board vs split, no standard/large fork";
+export const name = "Authoring plan-boards: one-board maximum without renderer fork";
 
 const PLANNER = ".agents/skills/author-puzzle/scripts/plan-boards.mjs";
 
@@ -48,7 +48,8 @@ export async function run() {
   const wide = runPlan(inventory({ termCounts: [6, 6, 5], connections: 2 }));
   assert.equal(wide.nodeRangeWithBridges[1], 19);
   assert.equal(wide.options[0].strategy, "single-board");
-  assert.match(wide.options[0].note, /wide canvas is derived/);
+  assert.match(wide.options[0].note, /Layout is derived/);
+  assert.deepEqual(wide.caps, { maxNodes: 25 });
 
   const split = runPlan(inventory({ termCounts: [8, 8, 8, 8], connections: 3 }));
   assert.ok(split.nodeRangeWithBridges[1] > 24);

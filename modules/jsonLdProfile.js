@@ -150,6 +150,9 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
       errors.push(`${label}.id must match "@id": @id is always "#" + id, verbatim -- no separate prefix (e.g. "bridge-") is ever added automatically. Omit @id entirely and it will be derived for you. Got id "${bridge.id}", @id "${bridge["@id"]}"`);
     }
     if (!nonEmpty(bridge.term)) errors.push(`${label}.term must be a non-empty string`);
+    // Legacy interchange documents may still carry termRole. The canonical
+    // converter accepts the old enum so migration can discard it, but current
+    // simplified and newly exported JSON-LD documents never emit the field.
     if (bridge.termRole !== undefined &&
         !["reference", "connector"].includes(bridge.termRole)) {
       errors.push(`${label}.termRole must be "reference" or "connector"`);

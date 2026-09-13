@@ -9,8 +9,6 @@ export const VALID_RELATION_KINDS = new Set([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
 ]);
 
-export const VALID_TERM_ROLES = new Set(["reference", "connector"]);
-
 export const VALID_BRIDGE_DIRECTIONS = new Set([
   "undirected", "through", "bidirectional", "outward", "inward"
 ]);
@@ -210,49 +208,6 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
   return errors;
 }
 
-// A proper noun (a specific named person, place, organization, or work)
-// carries no self-descriptive content of its own and always reads as a
-// specific, findable thing worth looking up, however incidental its role
-// in the bridge feels -- so it's always a reference, never a connector.
-// Connector-eligible terms in this codebase are, without exception,
-// phrased as the generic thing itself (a mechanism, process, or
-// relationship) rather than as a named entity, and are consistently
-// lowercase as a result -- checked against the full published corpus
-// before adding this as a hard rule, not a heuristic guess. Wanting
-// connector treatment for something that's really a specific named thing
-// means keeping the name out of the displayed term and putting it in the
-// surrounding fact/info prose instead, where it isn't the term being
-// classified at all.
-//
-// Deliberately a hard failure, not an automatic fix (e.g. silently
-// allowing a link on a connector and auto-attaching a search result) --
-// that would quietly re-permit the state this rule exists to prevent,
-// and remove the forcing function that surfaces a real misclassification
-// for a human to look at. Revisit only if this produces a lot of
-// try/fail/try-again churn during authoring in practice -- not something
-// today's analytics (modules/hostedMcpAuthoringServer.js's track(), tool
-// call counts only, no pass/fail or error detail) can actually detect,
-// so this would have to be noticed qualitatively, not measured.
-function looksLikeProperNoun(term) {
-  return /[A-Z]/.test(term);
-}
-
-function validateConnectorInfo(raw, label) {
-  if (!raw || typeof raw === "string" || typeof raw !== "object" || Array.isArray(raw)) {
-    return [];
-  }
-  const disallowedFields = [];
-  if (raw.link !== undefined) disallowedFields.push("link");
-  if (raw.extraLink !== undefined) disallowedFields.push("extraLink");
-  if (raw.seeAlso !== undefined) disallowedFields.push("seeAlso");
-  if (raw.links !== undefined) disallowedFields.push("links");
-  if (raw.citations !== undefined) disallowedFields.push("citations");
-  return disallowedFields.length ? [
-    `${label}: connector info clarifies the bridge's local role with text; ` +
-    `it must not add references or citations (${disallowedFields.join(", ")})`
-  ] : [];
-}
-
 // A single drafting mistake tends to repeat across every term in a
 // document (see escapedQuoteFix below), so individual [escaped-quote]
 // lines are held back and capped rather than dumped into the error list
@@ -415,22 +370,6 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     if (bridge.conceptId !== undefined &&
         (typeof bridge.conceptId !== "string" || !bridge.conceptId.trim())) {
       fail(`${label}: conceptId must be a non-empty string`);
-    }
-    if (bridge.termRole !== undefined &&
-        !VALID_TERM_ROLES.has(bridge.termRole)) {
-      fail(`${label}: unknown termRole "${bridge.termRole}"`);
-    }
-    if (bridge.termRole === "connector") {
-      errors.push(...validateConnectorInfo(bridge.info, `${label}.info`));
-      if (typeof bridge.term === "string" && looksLikeProperNoun(bridge.term)) {
-        fail(
-          `${label}: a capitalized term reads as a proper noun (a specific ` +
-          "named person, place, organization, or work), which is always a " +
-          "reference, never a connector -- phrase connector terms as the " +
-          "generic mechanism/relationship itself, and put any specific name " +
-          "in the surrounding fact/info text instead"
-        );
-      }
     }
     if (bridge.relationKind !== undefined &&
         !VALID_RELATION_KINDS.has(bridge.relationKind)) {

@@ -28,6 +28,8 @@ one accumulating draft and preserve fields from every earlier pass.
 Draft-write tool schemas intentionally leave `document` permissive so
 temporarily invalid simplified drafts remain writable; that permissiveness
 should not be mistaken for the absence of a field contract.
+Bridge terms have no separate pedagogical-role field; describe their
+relationship in `fact`, optional `info`, and (when useful) `relationKind`.
 
 ## How guidance reaches an agent
 
@@ -175,7 +177,7 @@ The following progressive workflow remains useful for agents that need it:
    skeleton for a live id. You can still pass `get_puzzle`'s document into
    `create_puzzle_draft` if you already have it.
 2. Optionally call both authoring tools with `phase: "core"`. Build the identity,
-   clusters, terms, facts, bridges, `termRole`, info, links, and citations.
+   clusters, terms, facts, bridges, info, links, and citations.
    Capture exact citation details when research finds them; do not defer a
    second search merely to reconstruct their final shape.
 3. Save with `save_puzzle_draft`, passing the current revision.

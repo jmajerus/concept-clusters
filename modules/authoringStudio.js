@@ -20,7 +20,6 @@ import {
   renameTerm,
   setBridgeDirection,
   setBridgeFact,
-  setBridgeTermRole,
   setClusterColor,
   setClusterFact,
   setIdealTerm,
@@ -394,12 +393,6 @@ export function createAuthoringStudio({
       body += `<h3>Bridge</h3>
         ${field("rename", bridge.term, { label: "term" })}
         ${field("bridge-fact", bridge.fact || "", { label: "fact", multiline: true })}
-        <label>term role
-          <select data-field="term-role">
-            <option value="reference"${bridge.termRole !== "connector" ? " selected" : ""}>reference</option>
-            <option value="connector"${bridge.termRole === "connector" ? " selected" : ""}>connector</option>
-          </select>
-        </label>
         <label>direction
           <select data-field="direction">
             ${DIRECTION_KINDS.map(kind =>
@@ -718,10 +711,6 @@ export function createAuthoringStudio({
       mutate(current => toggleSeed(current, described.word), { selectWord: described.word });
     } else if (fieldName === "bridge-fact" && described.word) {
       mutate(current => setBridgeFact(current, described.word, event.target.value), {
-        selectWord: described.word
-      });
-    } else if (fieldName === "term-role" && described.word) {
-      mutate(current => setBridgeTermRole(current, described.word, event.target.value), {
         selectWord: described.word
       });
     } else if (fieldName === "direction" && described.word) {

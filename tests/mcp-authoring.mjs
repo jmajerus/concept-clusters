@@ -195,21 +195,10 @@ export async function run() {
       uri: schemaResource.uri
     });
     const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
-    assert.deepEqual(
-      resourceSchema.properties.bridges.items.properties.termRole.enum,
-      ["reference", "connector"]
-    );
-    assert.match(
-      resourceSchema.properties.bridges.items.properties.termRole.description,
-      /intended object of learning/
-    );
-    assert.match(
-      resourceSchema.properties.bridges.items.properties.termRole.description,
-      /prefer a verified direct resource/
-    );
-    assert.match(
-      resourceSchema.properties.bridges.items.properties.termRole.description,
-      /no automatic or authored reference links or citations/
+    assert.equal(
+      resourceSchema.properties.bridges.items.properties.termRole,
+      undefined,
+      "retired bridge term metadata should stay out of the MCP schema"
     );
     assert.equal(
       resourceSchema.properties.large,
@@ -228,10 +217,10 @@ export async function run() {
       authoringSchema.result.structuredContent.resourceUri,
       schemaResource.uri
     );
-    assert.deepEqual(
+    assert.equal(
       authoringSchema.result.structuredContent.schema.properties.bridges.items
-        .properties.termRole.enum,
-      ["reference", "connector"]
+        .properties.termRole,
+      undefined
     );
     assert.ok(
       !authoringSchema.result.structuredContent.schema.required.includes("bridges")
@@ -252,7 +241,7 @@ export async function run() {
     }
     const coreBridgeProperties = phasedSchemas.core.schema.properties.bridges
       .items.properties;
-    assert.ok(coreBridgeProperties.termRole);
+    assert.equal(coreBridgeProperties.termRole, undefined);
     assert.equal(coreBridgeProperties.relationKind, undefined);
     assert.equal(phasedSchemas.core.schema.properties.lenses, undefined);
     assert.deepEqual(
@@ -306,17 +295,13 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /No trap words/);
     assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
     assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
-    assert.match(guidance.result.structuredContent.markdown, /optional termRole/);
-    assert.match(guidance.result.structuredContent.markdown, /pedagogical classification/);
-    assert.match(guidance.result.structuredContent.markdown, /tracheotomy/);
-    assert.match(guidance.result.structuredContent.markdown, /Do not use article existence/);
+    assert.doesNotMatch(guidance.result.structuredContent.markdown, /termRole|reference\/connector/);
+    assert.match(guidance.result.structuredContent.markdown, /ordinary authored concepts/);
     assert.match(guidance.result.structuredContent.markdown, /prefer\s+a verified direct resource/);
     assert.match(guidance.result.structuredContent.markdown, /appropriate level of granularity/);
     assert.match(guidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
     assert.match(guidance.result.structuredContent.markdown, /information surfaces stable/);
-    assert.match(guidance.result.structuredContent.markdown, /often should.*info\.text/);
-    assert.match(guidance.result.structuredContent.markdown, /does not need or want a\s+reference link/);
-    assert.match(guidance.result.structuredContent.markdown, /do not give it links, link, extraLink, seeAlso, or citations/);
+    assert.match(guidance.result.structuredContent.markdown, /concise bridge info/);
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
     assert.match(guidance.result.structuredContent.markdown, /inherited, transmitted, adapted/);
     assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);
@@ -359,7 +344,7 @@ export async function run() {
     assert.match(coreGuidance.result.structuredContent.markdown, /one accumulating/);
     assert.match(coreGuidance.result.structuredContent.markdown, /exact citation shape/);
     assert.match(coreGuidance.result.structuredContent.markdown, /do not plan to rediscover/);
-    assert.match(coreGuidance.result.structuredContent.markdown, /termRole independently/);
+    assert.doesNotMatch(coreGuidance.result.structuredContent.markdown, /termRole/);
     assert.match(coreGuidance.result.structuredContent.markdown, /appropriate level of granularity/);
     assert.match(coreGuidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
     assert.match(coreGuidance.result.structuredContent.markdown, /Carry approved inventory connections/);
@@ -638,9 +623,10 @@ export async function run() {
       error.includes("assign every listed term")
     ));
 
-    // create_puzzle_draft accepts the simplified format directly and stores
-    // it unchanged -- everything downstream (here, validate_puzzle_draft)
-    // works from that same document.
+    // create_puzzle_draft accepts the simplified format directly. A legacy
+    // bridge termRole in the supplied document is folded away before storage;
+    // everything downstream (here, validate_puzzle_draft) sees the current
+    // bridge shape.
     const simplifiedCreated = await request("tools/call", {
       name: "create_puzzle_draft",
       arguments: {
@@ -691,7 +677,8 @@ export async function run() {
     );
     assert.equal(
       simplifiedDraft.result.structuredContent.draft.document.bridges[0].termRole,
-      "connector"
+      undefined,
+      "legacy bridge term metadata should be removed at the authoring boundary"
     );
     assert.deepEqual(simplifiedDraft.result.structuredContent.flags, []);
 

@@ -9,7 +9,8 @@ import {
 import { categoryReferenceIssues } from "./categoryReferenceMigration.js";
 import {
   documentForStorage,
-  canonicalizeAuthoredDocumentFields
+  canonicalizeAuthoredDocumentFields,
+  documentHasRetiredBridgeTermRole
 } from "./authoredPuzzleDocument.js";
 import {
   isJsonLdShaped,
@@ -41,6 +42,8 @@ const JSON_LD_CLUSTER_KEYS = new Set([
 ]);
 const JSON_LD_BRIDGE_KEYS = new Set([
   "@id", "@type", "id", "term", "clusters", "fact", "conceptId",
+  // Legacy JSON-LD termRole is accepted long enough for this migration to
+  // discard it; it is not emitted in current simplified or JSON-LD output.
   "termRole", "relationKind", "info", "idealTerms", "direction"
 ]);
 const JSON_LD_LENS_KEYS = new Set([
@@ -421,7 +424,10 @@ function errorResult(errors, sourceFormat = null) {
 
 /**
  * Convert one puzzle document to the canonical simplified storage shape.
- * This does not mutate the input and never writes files or D1 rows.
+ * This does not mutate the input and never writes files or D1 rows. Legacy
+ * bridge termRole annotations are removed as part of the authored-field
+ * fold; the current simplified schema has one bridge shape, with
+ * relationKind/direction/idealTerms as its optional relationship annotations.
  *
  * @param {any} document
  * @param {{ categoryRegistry?: Record<string, any> }} [options]
@@ -444,6 +450,7 @@ export function canonicalizePuzzleDocument(
   }
 
   const sourceFormat = isJsonLdShaped(document) ? "jsonld" : "simplified";
+  const hadRetiredBridgeTermRole = documentHasRetiredBridgeTermRole(document);
   let canonical;
   let sourceSimplified = document;
   let jsonLdIdCorrections = [];
@@ -532,6 +539,9 @@ export function canonicalizePuzzleDocument(
   const fieldCanonical = canonicalizeAuthoredDocumentFields(sourceSimplified);
   if (!sameJson(fieldCanonical, sourceSimplified)) {
     reasons.push("authored-fields");
+  }
+  if (hadRetiredBridgeTermRole || documentHasRetiredBridgeTermRole(sourceSimplified)) {
+    reasons.push("term-role-removed");
   }
   const categoryCanonical = categoryReferences(fieldCanonical, registry);
   if (categoryCanonical) reasons.push("category-identifiers");

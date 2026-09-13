@@ -4,8 +4,8 @@ Save as `inventories/<id>.json` before the fit pass. Prose in chat should
 match this structure. **Do not** write simplified puzzle JSON or call
 `create_puzzle_draft` until the human approves the inventory.
 
-Board size (`large`), node-cap arithmetic, and seeds/floatingTerms are
-**forbidden** in this artifact.
+Renderer fields, node-cap arithmetic, and seeds/floatingTerms are **forbidden**
+in this artifact.
 
 **Do not read existing puzzle files** during inventory. The concept map must
 come from the subject and cited sources, not from mirroring another board in

@@ -30,7 +30,7 @@ This session built two puzzles in one continuous thread — *Deterrence by Prese
 
 > "The use of the term 'close air support' is not one I was familiar with. It's a term that sanitizes the process of bombing the shit of hostile troops that are close to one's own 'friendly' troops apparently? And this is what we use as a bridge?"
 
-**Resolution:** Agreed directly — the term had been used unchallenged despite an existing standing rule that euphemistic language must be named and critiqued in the surrounding prose, not accepted at face value. Rewrote the bridge's fact and info text to open by naming what the term obscures, and reclassified its `termRole` from connector to reference, since the euphemism itself had become an object of the lesson rather than incidental vocabulary.
+**Resolution:** Agreed directly — the term had been used unchallenged despite an existing standing rule that euphemistic language must be named and critiqued in the surrounding prose, not accepted at face value. Rewrote the bridge's fact and info text to open by naming what the term obscures, and treated the euphemism as an object of the lesson rather than incidental vocabulary.
 
 ---
 

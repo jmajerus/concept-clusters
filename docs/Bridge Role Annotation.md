@@ -1,5 +1,10 @@
 # Bridge Role Annotation
 
+Archived design discussion. The former bridge-role metadata has been retired:
+current bridge terms are ordinary authored concepts, and the live schema has
+no `termRole`/`bridgeRole` field. The material below is retained as historical
+context only; use the current authoring reference and schema for implementation.
+
 Input from ChatGPT on the proposed inclusion of bridge roles, with Claude's actual replies inserted at each point so this reads as the conversation it was.
 
 ## Part One

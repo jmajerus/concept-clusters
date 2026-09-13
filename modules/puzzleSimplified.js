@@ -46,13 +46,14 @@ function stableIds(items, labelFor) {
 // migration of hand-authored JSON-LD content to the simplified canonical
 // format, by repository/content-interchange publication to write the
 // canonical content/puzzles/<id>.ccpuzzle.json file, and by content:export
-// as the simplified-shaped sibling of puzzleToJsonLd. Round-trips
-// losslessly: bridge/cluster ids are always carried explicitly (never left
-// to re-derivation), and a cluster's terms order is always set explicitly
+// as the simplified-shaped sibling of puzzleToJsonLd. Round-trips current
+// fields losslessly: bridge/cluster ids are always carried explicitly (never
+// left to re-derivation), and a cluster's terms order is always set explicitly
 // via the `terms` override field (see ClusterSchema in
 // simplifiedPuzzleSchema.js), even when it happens to already equal
 // seeds-then-floatingTerms, so this never depends on floatingTerms order
-// reconstructing anything.
+// reconstructing anything. Retired legacy bridge termRole is intentionally
+// omitted from the current projection.
 export function puzzleToSimplified(
   puzzle,
   {
@@ -90,7 +91,6 @@ export function puzzleToSimplified(
       fact: bridge.fact,
       ...(bridge.info ? { info: clone(bridge.info) } : {}),
       ...(bridge.conceptId ? { conceptId: bridge.conceptId } : {}),
-      ...(bridge.termRole ? { termRole: bridge.termRole } : {}),
       ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {})
     };
     if (bridge.idealTerms) {

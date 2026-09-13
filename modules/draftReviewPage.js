@@ -45,7 +45,6 @@ import { modelSuggestionsForHost } from "./authoringModelSuggestions.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { CLASSIFICATION_EDITOR_SCRIPT } from "./classificationEditorElement.js";
 import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
-import { VALID_TERM_ROLES } from "./contentValidation.js";
 
 function knownGenerativeHostSystems() {
   const labels = AUTHORING_SETTINGS.hosts?.labels || {};
@@ -440,25 +439,6 @@ function renderRemoved(kind, title, detail) {
   </section>`;
 }
 
-function renderBridgeTermRole({ edit, bridge, bridgeId }) {
-  if (!edit?.draftId) return "";
-  const slot = copyHidden(edit, {
-    section: "bridge", id: bridgeId, term: "", field: "termRole"
-  });
-  const current = VALID_TERM_ROLES.has(bridge.termRole) ? bridge.termRole : "reference";
-  const selectId = `bridge-term-role-${String(bridgeId).replace(/\s+/g, "-").toLowerCase()}`;
-  const options = [...VALID_TERM_ROLES].map(role => {
-    const selected = role === current ? " selected" : "";
-    return `<option value="${escapeHtml(role)}"${selected}>${escapeHtml(role)}</option>`;
-  }).join("");
-  return `<div class="bridge-term-role">
-    ${slot.hidden}
-    <label class="field-label" for="${escapeHtml(selectId)}">Term role</label>
-    <select${slot.form} id="${escapeHtml(selectId)}" name="${slot.prefix}value">${options}</select>
-    <p class="meta">reference when this displayed term is something the lesson sets out to teach; connector when it only names a local mechanism.</p>
-  </div>`;
-}
-
 function renderBridge(bridge, clusterNameById, collection, edit) {
   const { kind, mark } = collectionMark(collection, bridge, "id", "term");
   const bridgeId = bridge.id || bridge.term || "";
@@ -487,13 +467,10 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
     })}
     <p class="badges">
       ${badge(bridge.relationKind, "accent")}
-      ${edit?.draftId ? "" : badge(bridge.termRole || "reference")}
       ${bridge.conceptId ? badge(`concept: ${bridge.conceptId}`) : ""}
       ${bridge.direction ? badge(`direction: ${bridge.direction.kind}`) : ""}
     </p>
-    ${renderBridgeTermRole({ edit, bridge, bridgeId })}
     ${renderWas(mark?.fields?.relationKind)}
-    ${renderWas(mark?.fields?.termRole)}
     ${renderWas(mark?.fields?.direction)}
     ${renderWas(mark?.fields?.idealTerms)}
     ${idealTerms ? `<p>ideal terms:</p><ul>${idealTerms}</ul>` : ""}
@@ -504,7 +481,7 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
       value: infoText(bridge.info), change: mark?.fields?.["info.text"], label: "bridge info"
     })}
     ${renderWas(mark?.fields?.["info.links"])}
-    ${bridge.termRole === "connector" ? "" : renderInfoEditors({
+    ${renderInfoEditors({
       edit, section: "bridge", id: bridgeId, info: bridge.info,
       linkChange: mark?.fields?.["info.links"]
     })}
@@ -730,10 +707,6 @@ const PAGE_STYLE = `
     min-width: 5.5em;
     color: #1a1a1a;
     font-weight: 600;
-  }
-  .bridge-term-role { margin: 10px 0; }
-  .bridge-term-role select {
-    font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
   }
   form.new-puzzle {
     margin: 16px 0 24px; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;

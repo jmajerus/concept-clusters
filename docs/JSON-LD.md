@@ -178,7 +178,6 @@ Through-direction endpoints and ideal terms do the same:
 {
   "@type": "Bridge",
   "term": "from monitoring to comparison",
-  "termRole": "connector",
   "clusters": [
     { "@id": "#cluster-monitoring" },
     { "@id": "#cluster-comparison" }
@@ -197,30 +196,16 @@ Through-direction endpoints and ideal terms do the same:
 }
 ```
 
-`termRole` is optional and accepts `reference` or `connector`. Omission means
-`reference` for backward compatibility. A reference bridge term is itself an
-intended object of learning within the puzzle's conceptual territory and
-central lesson, or is a proper noun (a specific named person, place,
-organization, or work) -- a name carries no self-descriptive content and
-always reads as a specific, findable thing worth looking up, however
-incidental its role feels. A connector instead carries a local relationship,
-evidence, mechanism, plot detail, or biographical thread phrased as the
-generic thing itself; it may be a concrete or notable common noun, not only a
-phrase, but not a named entity. Among non-proper-noun candidates, article
-existence, familiarity, and searchability still do not decide the role. Want
-connector treatment for something that's really a specific named thing? Keep
-the name out of the displayed term and put it in the surrounding fact/info
-prose instead, where it isn't the term being classified at all.
+Bridge help should match the relationship described by its fact. Use concise
+`info.text` for local context, `info.links` for verified destinations that
+advance that connection, and puzzle-level citations for broader lesson
+support. Omitting a link is fine; automatic Wikipedia search is not inferred.
+`relationKind`, when present, classifies the relationship expressed by the
+bridge fact.
 
-Classify the role first, then provide help at the appropriate level of
-granularity. Prefer a verified direct resource for references.
-Cluster-sized help on the cluster; term-sized help on a term. Omitting a
-link means no chip -- automatic Wikipedia search is not inferred. `connector`
-suppresses that fallback and must not carry authored `links` (or leftover
-`link` / `extraLink` / `seeAlso`) or `citations`. Its `info.text` may—and often should—clarify the
-connector's local role. Source support belongs with the puzzle's lesson
-content, not with the connector. The field is independent of `relationKind`, which classifies
-the relationship rather than the displayed term's role in the lesson.
+Legacy JSON-LD documents may still contain `termRole`; the importer and the
+corpus canonicalizer accept that old field only long enough to discard it.
+Current simplified content and newly exported JSON-LD never emit it.
 
 The importer translates those references back to the current runtime's
 numeric indices. Reordering a JSON-LD cluster list therefore does not silently

@@ -87,9 +87,9 @@ function samePartition(left, right) {
 
 // Model clusters and bridges as a colored incidence graph. This covers
 // n-ary bridges without pretending they are pairwise links. Cluster colors
-// preserve term counts; bridge colors preserve its structural authored role,
-// but deliberately omit the bridge word itself (unique words would erase the
-// structural question before it can be asked).
+// preserve term counts; bridge colors preserve structural relationship
+// annotations, but deliberately omit the bridge word itself (unique words
+// would erase the structural question before it can be asked).
 function incidenceGraph(clusters, bridges) {
   if (clusters.length < 3 || !bridges.length) return null;
   if (bridges.some(bridge => {
@@ -110,7 +110,6 @@ function incidenceGraph(clusters, bridges) {
       "bridge",
       bridge.clusters.length,
       bridge.relationKind || "",
-      bridge.termRole || "",
       bridge.direction || ""
     ].join(":"));
     for (const clusterIndex of bridge.clusters) {

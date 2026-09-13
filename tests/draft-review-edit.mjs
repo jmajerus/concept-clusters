@@ -581,31 +581,4 @@ export async function run() {
     contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high" }]
   });
 
-  const roleSet = applyDraftFieldValue(document, {
-    section: "bridge",
-    id: "link",
-    field: "termRole"
-  }, "reference");
-  assert.equal(roleSet.bridges[0].termRole, "reference");
-
-  const connectorStripped = applyDraftFieldValue({
-    ...document,
-    bridges: [{
-      id: "link",
-      term: "link",
-      fact: "Bridge fact.",
-      termRole: "reference",
-      info: {
-        text: "Local note.",
-        links: [{ href: "wiki:Foo" }],
-        citations: [{ title: "Source" }]
-      }
-    }]
-  }, {
-    section: "bridge",
-    id: "link",
-    field: "termRole"
-  }, "connector");
-  assert.equal(connectorStripped.bridges[0].termRole, "connector");
-  assert.equal(connectorStripped.bridges[0].info, "Local note.");
 }

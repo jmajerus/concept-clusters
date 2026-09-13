@@ -60,7 +60,7 @@ is an inspector on the same page:
 
 - Selected node: name, seed, fact/info, delete
 - Selected cluster (color chip): name, color, fact, delete
-- Selected bridge: term, fact, termRole, direction, idealTerms, delete
+- Selected bridge: term, fact, direction, idealTerms, delete
 - Puzzle chrome: id, title, category, related puzzles
 - Lesson / lenses / citations as panels on the same canvas
 

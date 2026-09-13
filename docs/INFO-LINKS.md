@@ -106,21 +106,18 @@ small block below that content, one line per citation, in authored order.
 In the Lesson dialog, citations appear under a **References** heading
 (below any "Sources and further reading" links).
 
-Terms and reference bridge terms no longer receive an automatic Wikipedia
-search when no link is authored. That missing-link fallback is deprecated:
+Terms and bridges no longer receive an automatic Wikipedia search when no link
+is authored. That missing-link fallback is deprecated:
 it looked like a unique destination and often landed on the wrong sense or
 a disambiguation page. Prefer a verified direct link that serves the
 puzzle's lesson. Provide help at the appropriate level of granularity:
 cluster-sized help on the cluster, term-sized help on a term. Omitting a
 link means no chip; author a Wikipedia search URL as the first `links`
 entry only when the results page itself is the exploration surface this
-lesson needs. A bridge with `termRole: "connector"` receives no automatic
-search because it is not itself an intended object of learning in this
-puzzle; its grammar, familiarity, and independent notability do not decide
-that role. It receives no authored `links` either. A concise `info.text`
-is often useful to clarify what the connector is doing locally. Do not add
-citations; source support belongs with the puzzle's lesson content. With
-no description present, hovering it opens no empty information panel.
+lesson needs. Bridge `info` may carry concise local context or verified links
+when they directly support the relationship stated by its fact. Source support
+for a broader claim belongs with the puzzle's lesson content. With no
+description present, hovering a node opens no empty information panel.
 
 ## Validation
 
@@ -128,8 +125,6 @@ no description present, hovering it opens no empty information panel.
 
 - `links`, when present, is a non-empty array;
 - each entry is a non-empty string or `{ href, label? }` object;
-- connector bridges have no `links`, `link`, `extraLink`, `seeAlso`, or
-  `citations`;
 - `linkLabel` is used only with `link` or `links`;
 - `citations`, when present, is a non-empty array of objects, each with a
   non-empty `title` and any other fields non-empty strings when present.

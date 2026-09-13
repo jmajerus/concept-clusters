@@ -203,14 +203,8 @@ describe("hosted authoring Worker", () => {
       result: { contents: Array<{ text: string }> };
     };
     const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
-    expect(resourceSchema.properties.bridges.items.properties.termRole.enum)
-      .toEqual(["reference", "connector"]);
-    expect(resourceSchema.properties.bridges.items.properties.termRole.description)
-      .toMatch(/intended object of learning/);
-    expect(resourceSchema.properties.bridges.items.properties.termRole.description)
-      .toMatch(/prefer a verified direct resource/);
-    expect(resourceSchema.properties.bridges.items.properties.termRole.description)
-      .toMatch(/no automatic or authored reference links or citations/);
+    expect(resourceSchema.properties.bridges.items.properties.termRole)
+      .toBeUndefined();
     expect(resourceSchema.properties.large)
       .toBeUndefined();
     expect(JSON.stringify(resourceSchema)).toMatch(/25/);
@@ -230,7 +224,7 @@ describe("hosted authoring Worker", () => {
           schema: {
             required: string[];
             properties: {
-              bridges: { items: { properties: { termRole: { enum: string[] } } } };
+              bridges: { items: { properties: Record<string, unknown> } };
             };
           };
         };
@@ -240,7 +234,7 @@ describe("hosted authoring Worker", () => {
     expect(authoringSchema.result.structuredContent.resourceUri)
       .toBe(schemaResource?.uri);
     expect(authoringSchema.result.structuredContent.schema.properties.bridges
-      .items.properties.termRole.enum).toEqual(["reference", "connector"]);
+      .items.properties.termRole).toBeUndefined();
     expect(authoringSchema.result.structuredContent.schema.required)
       .not.toContain("bridges");
 
@@ -273,7 +267,7 @@ describe("hosted authoring Worker", () => {
         .toMatch(/not a standalone puzzle schema/);
     }
     expect(phaseSchemas.core.schema.properties.bridges.items?.properties.termRole)
-      .toBeDefined();
+      .toBeUndefined();
     expect(phaseSchemas.core.schema.properties.bridges.items?.properties.relationKind)
       .toBeUndefined();
     expect(phaseSchemas.core.schema.properties.large).toBeUndefined();
@@ -333,13 +327,10 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/No trap words/);
     expect(guidance.result.structuredContent.markdown).toMatch(/Seed pairs are the orienting clue/);
     expect(guidance.result.structuredContent.markdown).toMatch(/wrong link is worse/);
-    expect(guidance.result.structuredContent.markdown).toMatch(/optional termRole/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/pedagogical classification/);
+      .toMatch(/ordinary authored concepts/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/tracheotomy/);
-    expect(guidance.result.structuredContent.markdown)
-      .toMatch(/Do not use article existence/);
+      .not.toMatch(/termRole|reference\/connector/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/prefer\s+a verified direct resource/);
     expect(guidance.result.structuredContent.markdown)
@@ -349,11 +340,7 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/information surfaces stable/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/often should.*info\.text/);
-    expect(guidance.result.structuredContent.markdown)
-      .toMatch(/does not need or want a\s+reference link/);
-    expect(guidance.result.structuredContent.markdown)
-      .toMatch(/do not give it links, link, extraLink, seeAlso, or citations/);
+      .toMatch(/concise bridge info/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
     expect(guidance.result.structuredContent.markdown).toMatch(/inherited, transmitted, adapted/);
     expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);
@@ -454,8 +441,8 @@ describe("hosted authoring Worker", () => {
     expect(corePayloadSize).toBeLessThan(completePayloadSize / 2);
 
     // create_puzzle_draft accepts the simplified format (no @context) and
-    // stores that document unchanged -- validate_puzzle_draft sees the same
-    // simplified shape.
+    // stores the current canonical shape; legacy bridge fields are folded at
+    // the boundary before validate_puzzle_draft sees the document.
     const simplifiedCreated = await rpc({
       jsonrpc: "2.0",
       id: 6,
@@ -613,11 +600,11 @@ describe("hosted authoring Worker", () => {
     );
   });
 
-  it("surfaces lens-reasons-coverage without bridge-term-role", async () => {
+  it("surfaces lens-reasons-coverage without retired bridge-role flags", async () => {
     // Lens reason coverage is cheap and actionable for both the authoring
     // agent and the human review page. Bridge term-role regularity is retired
-    // as too noisy; the termRole field remains available for authored data.
-    // See modules/puzzleSymmetryFlags.js.
+    // as too noisy, and legacy role fields are folded away on save. See
+    // modules/puzzleSymmetryFlags.js and modules/simplifiedPuzzleSchema.js.
     const created = await rpc({
       jsonrpc: "2.0",
       id: 31,

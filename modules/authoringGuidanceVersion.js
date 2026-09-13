@@ -17,8 +17,8 @@
 // the learning objective; prefer a genuine cross-cut. 1–6 remains the
 // legal range, not a size to chase. 2.x lens reviews that applied
 // drop-one should be re-checked.
-// 3.1: same bar; 17-25 nodes set large: true rather than dropping a
-// distinct term to stay under the standard-board cap of 16.
+// 3.1: same bar; 17-25-node puzzles retained their distinct terms while
+// layout remained a derived renderer choice.
 // 3.2: same bar; a focused 1-3 term lens is complete. Cross-cutting is
 // welcome when it works, not a preferred grade, and 6 is a ceiling
 // rather than a fill target.
@@ -50,8 +50,8 @@
 // exists, play shows it under References in the Lesson dialog (not on the
 // board). Leftover learningIntroduction.citations fold into info.citations.
 // 4.8: same bar; do not mirror citation URLs on info.links / lesson links.
-// 4.9: same bar; canvas size (large) is derived from node count. Do not
-// drop a distinct term to stay under 16; split only above 25.
+// 4.9: same bar; canvas selection is derived from node count. Do not drop a
+// distinct term to satisfy a renderer threshold; split only above 25.
 // 5.0: structural regularity is described for every three-or-more-item
 // pattern, independent of historical corpus frequency. MCP sees only a
 // combination of an actual incidence-graph symmetry and a cross-axis count
@@ -63,7 +63,10 @@
 // irregularity.
 // 5.2: same review bar; MCP guidance exposes only the 25-node hard ceiling.
 // Layout details and derived renderer fields are not authoring inputs.
+// 5.3: same review bar; the legacy bridge-role annotation was retired. Bridge terms are
+// ordinary authored concepts; use relationKind only when the relationship
+// itself needs classification.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 2
+  minor: 3
 });

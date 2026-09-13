@@ -361,9 +361,9 @@ export function searchLink(word) {
 // Automatic Wikipedia search as a missing-link fallback is deprecated.
 // Authors who have confirmed a genuine multi-hit results page (two or more
 // productive paths for this lesson) should author that search URL as `link`.
-// Connectors never had this fallback. The helper stays so callers and tests
-// have one place that encodes "do not synthesize a search chip."
-export function searchLinkForTerm(_word, _termRole = "reference") {
+// The helper stays so callers and tests have one place that encodes "do not
+// synthesize a search chip."
+export function searchLinkForTerm(_word) {
   return null;
 }
 

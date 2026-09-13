@@ -274,7 +274,7 @@ export function createBridge(document, clusterIds, rawTerm) {
   }
   next.bridges = [
     ...asBridges(next),
-    { term, clusters: ids, fact: "", termRole: "reference" }
+    { term, clusters: ids, fact: "" }
   ];
   return next;
 }
@@ -340,17 +340,6 @@ export function setBridgeFact(document, bridgeTerm, fact) {
   const bridge = asBridges(next).find(item => item.term === bridgeTerm);
   if (!bridge) throw new Error(`Unknown bridge "${bridgeTerm}"`);
   bridge.fact = String(fact || "");
-  return next;
-}
-
-export function setBridgeTermRole(document, bridgeTerm, termRole) {
-  if (termRole !== "reference" && termRole !== "connector") {
-    throw new Error(`Unknown term role "${termRole}"`);
-  }
-  const next = clone(document);
-  const bridge = asBridges(next).find(item => item.term === bridgeTerm);
-  if (!bridge) throw new Error(`Unknown bridge "${bridgeTerm}"`);
-  bridge.termRole = termRole;
   return next;
 }
 
@@ -611,7 +600,6 @@ export function createAuthorEngine() {
     setClusterFact,
     deleteCluster,
     setBridgeFact,
-    setBridgeTermRole,
     setBridgeDirection,
     setIdealTerm,
     setPuzzleChrome,

@@ -42,8 +42,8 @@ export function bridgePoints(w, h = 30) {
   ].map(pt => pt.join(",")).join(" ");
 }
 
-// A completed bridge's optional relationKind (see AUTHORING.md and
-// docs/Bridge Role Annotation.md for the full taxonomy history) resolves
+// A completed bridge's optional relationKind (see AUTHORING.md for the
+// current taxonomy) resolves
 // to one of these, never authored per-bridge -- keeping the wording
 // centralized here is what lets it change in one place if the taxonomy
 // itself ever does, and what keeps every bridge of the same kind reading
@@ -201,7 +201,6 @@ export function buildNodesAndLinks(puzzle) {
     nodes.push({
       id: nodes.length, word: b.term, gs: b.clusters.slice(),
       connected: [], w: pillWidth(b.term), fact: b.fact, idealTerms: b.idealTerms,
-      termRole: b.termRole ?? "reference",
       relationKind: b.relationKind, direction: b.direction,
       info: normalizeInfo(b.info)
     });

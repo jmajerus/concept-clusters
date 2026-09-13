@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://concept-clusters.org/schemas/simplified-puzzle-v1.json",
-  "$comment": "Reference copy of the schema actually enforced by modules/simplifiedPuzzleSchema.js (zod, not this file -- see that module's own comment). Kept in sync by hand, not generated; not imported by any runtime code, the same way puzzle-v1.schema.json (the JSON-LD counterpart) already isn't. See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the authoring-facing version. 'Simplified' means no @context/@id/@type/schemaVersion and no cluster/bridge @id to hand-sync with id -- not a cut-down feature set; every puzzle-content field JSON-LD can express, this schema can too. Category references are stable ids; the authoring server accepts legacy display titles only while reading and canonicalizes them before storage.",
+  "$comment": "Reference copy of the schema actually enforced by modules/simplifiedPuzzleSchema.js (zod, not this file -- see that module's own comment). Kept in sync by hand, not generated; not imported by any runtime code, the same way puzzle-v1.schema.json (the JSON-LD counterpart) already isn't. See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the authoring-facing version. 'Simplified' means no @context/@id/@type/schemaVersion and no cluster/bridge @id to hand-sync with id -- not a cut-down feature set; every current puzzle-content field JSON-LD can express, this schema can too. Legacy JSON-LD bridge termRole is accepted only during import and removed before simplified validation. Category references are stable ids; the authoring server accepts legacy display titles only while reading and canonicalizes them before storage.",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "title", "category", "clusters"],
@@ -146,11 +146,6 @@
           "fact": { "type": "string", "minLength": 1 },
           "info": { "$ref": "#/$defs/info" },
           "conceptId": { "type": "string", "minLength": 1 },
-          "termRole": {
-            "type": "string",
-            "enum": ["reference", "connector"],
-            "description": "reference (default) when the bridge term itself is an intended object of learning within the puzzle's conceptual territory and central lesson; connector when it only carries a local relationship, evidence, mechanism, plot detail, or biographical thread, even if it is a concrete, unfamiliar, specific, or encyclopedia-worthy noun. Article existence, search quality, familiarity, and grammatical form are not classification tests. Classify the role first, then curate links separately: prefer a verified direct resource for references, retaining automatic search only when its result set is deliberately useful. A connector gets no automatic or authored reference links or citations; use concise info.text, often recommended, to clarify its local function."
-          },
           "relationKind": {
             "type": "string",
             "enum": ["dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"]

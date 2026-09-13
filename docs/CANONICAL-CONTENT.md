@@ -68,6 +68,12 @@ npm run content:canonicalize -- --git-only --apply-git
 An unresolved D1 row blocks `--apply-d1`; an unresolved Git source blocks
 `--apply-git`. A combined `--apply` requires both sides to be clean.
 
+The retired bridge `termRole` field is treated as a known legacy annotation:
+the read/write fold accepts it long enough to remove it, and the corpus
+report identifies those repairs as `term-role-removed`. It is not part of the
+current simplified schema, MCP projections, runtime bridge shape, or newly
+exported JSON-LD.
+
 The Git side replaces `content/puzzles/*.ccpuzzle.jsonld` with
 `*.ccpuzzle.json`, removes the old interchange files, rewrites canonical
 simplified sources, regenerates every registered puzzle module, updates the

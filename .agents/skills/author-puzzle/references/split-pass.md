@@ -29,7 +29,7 @@ Skip this pass when `plan-boards.mjs` reports `single-board`.
    ```
 
 2. Discuss seam and trims with the human (pedagogy stays in chat). Do not
-   discuss standard vs large — canvas size is derived.
+   discuss renderer cutovers — layout is derived.
 3. Write `plans/<parent-id>-split-plan.json` capturing the **agreed** plan.
 4. Resolve answered `openQuestions` on the inventory JSON (move to
    `resolvedQuestions`; clear or shorten `openQuestions`).
@@ -78,7 +78,7 @@ Save as `plans/<parent-id>-split-plan.json`. See
 ```json
 {
   "inventoryId": "same as inventory id",
-  "strategy": "two-large-boards",
+  "strategy": "two-balanced-boards",
   "seam": "One sentence: where the cut falls and why pedagogically.",
   "boards": [
     {
@@ -112,7 +112,7 @@ Save as `plans/<parent-id>-split-plan.json`. See
 
 ### Rules
 
-- `strategy`: `single-board`, `two-large-boards`, `two-mixed-boards`, or `split-custom`.
+- `strategy`: `single-board`, `two-balanced-boards`, `two-mixed-density-boards`, or `split-custom`.
 - Every inventory `distinction.id` appears on **exactly one** board.
 - Every inventory `candidateTerms` entry is either on that board (via its
   distinction), listed in `sharedTerms`, or in some board's `trim` with reason.

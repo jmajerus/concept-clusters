@@ -131,7 +131,6 @@ export function authoringBoardFromDocument(document) {
         term: bridge.term.trim(),
         clusters: clusterIndexes,
         fact: typeof bridge.fact === "string" ? bridge.fact : "",
-        termRole: bridge.termRole === "connector" ? "connector" : "reference",
         ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {}),
         ...(bridge.direction ? { direction: bridge.direction } : {}),
         ...(bridge.idealTerms ? { idealTerms: bridge.idealTerms } : {}),

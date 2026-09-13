@@ -1,6 +1,6 @@
 {
   "inventoryId": "wave-and-particle-descriptions",
-  "strategy": "two-large-boards",
+  "strategy": "two-balanced-boards",
   "seam": "Board 1 establishes why neither classical wave nor classical particle models suffice for light. Board 2 extends the same tension to matter and states the quantum link between amplitudes and localized outcomes.",
   "boards": [
     {
