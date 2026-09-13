@@ -5,7 +5,8 @@ import { join } from "node:path";
 import { canonicalizePuzzleDocument, unsupportedJsonLdFields } from "../modules/contentCanonicalization.js";
 import {
   documentForEditor,
-  documentForStorage
+  documentForStorage,
+  storedDocumentNeedsCanonicalSave
 } from "../modules/authoredPuzzleDocument.js";
 import {
   applyGitPlan,
@@ -213,6 +214,30 @@ export async function run() {
   ]);
   assert.equal("sources" in result.document.learningIntroduction, false);
 
+  // Legacy authored drafts may still carry bridge termRole, but the
+  // canonicalizer removes the retired annotation before writing current
+  // simplified content and reports the repair explicitly.
+  const legacyBridgeRole = canonicalizePuzzleDocument(puzzleDocument({
+    bridges: [{
+      term: "shared idea",
+      clusters: ["one", "two"],
+      fact: "A shared idea connects the clusters.",
+      termRole: "connector"
+    }]
+  }), { categoryRegistry: categories });
+  assert.deepEqual(legacyBridgeRole.errors, []);
+  assert.ok(legacyBridgeRole.reasons.includes("term-role-removed"));
+  assert.equal(legacyBridgeRole.document.bridges[0].termRole, undefined);
+  assert.equal(storedDocumentNeedsCanonicalSave({
+    ...result.document,
+    bridges: [{
+      term: "shared idea",
+      clusters: ["one", "two"],
+      fact: "A shared idea connects the clusters.",
+      termRole: "reference"
+    }]
+  }), true);
+
   const second = canonicalizePuzzleDocument(result.document, { categoryRegistry: categories });
   assert.deepEqual(second.errors, []);
   assert.equal(second.changed, false);
@@ -255,6 +280,19 @@ export async function run() {
   assert.equal(converted.document.category, "political-science");
   assert.equal(converted.document.info.citations.length, 1);
   assert.equal(converted.document.learningIntroduction.citations, undefined);
+  const legacyJsonLdRole = {
+    ...jsonLd,
+    bridges: jsonLd.bridges.map(bridge => ({ ...bridge, termRole: "connector" }))
+  };
+  const convertedLegacyRole = canonicalizePuzzleDocument(legacyJsonLdRole, {
+    categoryRegistry: {
+      "Political Science": { slug: "political-science" },
+      Philosophy: { slug: "philosophy" }
+    }
+  });
+  assert.deepEqual(convertedLegacyRole.errors, []);
+  assert.ok(convertedLegacyRole.reasons.includes("term-role-removed"));
+  assert.equal(convertedLegacyRole.document.bridges[0].termRole, undefined);
   const convertedAgain = canonicalizePuzzleDocument(converted.document, {
     categoryRegistry: {
       "Political Science": { slug: "political-science" },

@@ -179,9 +179,9 @@ export async function run() {
   const threeRelations = computeSymmetryFlags({
     clusters: [],
     bridges: [
-      { relationKind: "dynamic", termRole: "reference" },
-      { relationKind: "dynamic", termRole: "connector" },
-      { relationKind: "dynamic", termRole: "reference" }
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" }
     ]
   });
   assert.equal(threeRelations.length, 1);
@@ -189,10 +189,10 @@ export async function run() {
   const relationFlags = computeSymmetryFlags({
     clusters: [],
     bridges: [
-      { relationKind: "dynamic", termRole: "reference" },
-      { relationKind: "dynamic", termRole: "connector" },
-      { relationKind: "dynamic", termRole: "reference" },
-      { relationKind: "dynamic", termRole: "connector" }
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" }
     ]
   });
   assert.equal(relationFlags.length, 1);
@@ -380,22 +380,5 @@ export async function run() {
       lenses: [{ targets: ["one", "two"], reasons: { one: "One." } }]
     }).some(flag => flag.id === "lens-reasons-coverage"),
     true
-  );
-  const retiredBridgeRolePuzzle = {
-    bridges: [
-      { termRole: "reference" },
-      { termRole: "reference" },
-      { termRole: "reference" }
-    ]
-  };
-  assert.equal(
-    computeAuthoringFlags(retiredBridgeRolePuzzle)
-      .some(flag => flag.id === "bridge-term-role"),
-    false
-  );
-  assert.equal(
-    computeUserOnlyAuthoringFlags(retiredBridgeRolePuzzle)
-      .some(flag => flag.id === "bridge-term-role"),
-    false
   );
 }

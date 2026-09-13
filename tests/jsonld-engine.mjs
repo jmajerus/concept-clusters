@@ -20,7 +20,11 @@ export const name = "JSON-LD: puzzle and catalogue profile round trips";
 function runtimeShape(puzzle) {
   const copy = JSON.parse(JSON.stringify(puzzle));
   copy.clusters.forEach(cluster => delete cluster.id);
-  copy.bridges.forEach(bridge => delete bridge.id);
+  copy.bridges.forEach(bridge => {
+    delete bridge.id;
+    // The runtime importer deliberately drops the retired legacy annotation.
+    delete bridge.termRole;
+  });
   delete copy.large;
   Object.assign(copy, largeField(puzzleNodeCount(copy)));
   return copy;
@@ -36,52 +40,53 @@ export async function run() {
     assert.deepEqual(runtimeShape(puzzleFromJsonLd(document)), runtimeShape(puzzle), puzzle.id);
   }
 
-  const connectorPuzzle = PUZZLES.find(puzzle => puzzle.id === "the-quiet-rebellion");
-  assert.ok(connectorPuzzle.bridges.every(bridge => bridge.termRole === "connector"));
-  const connectorDocument = puzzleToJsonLd(connectorPuzzle);
-  assert.ok(connectorDocument.bridges.every(bridge => bridge.termRole === "connector"));
-  const invalidTermRole = {
-    ...connectorDocument,
-    bridges: connectorDocument.bridges.map((bridge, index) =>
+  const bridgePuzzle = PUZZLES.find(puzzle => puzzle.id === "the-quiet-rebellion");
+  const bridgeDocument = puzzleToJsonLd(bridgePuzzle);
+  assert.ok(bridgeDocument.bridges.every(bridge => bridge.termRole === undefined));
+  assert.ok(puzzleFromJsonLd(bridgeDocument).bridges.every(bridge =>
+    bridge.termRole === undefined
+  ));
+  const invalidLegacyRole = {
+    ...bridgeDocument,
+    bridges: bridgeDocument.bridges.map((bridge, index) =>
       index === 0 ? { ...bridge, termRole: "phrase" } : bridge
     )
   };
   assert.ok(
-    validateJsonLdProfile(invalidTermRole).some(error => error.includes("termRole")),
-    "unknown bridge termRole should fail the JSON-LD profile"
+    validateJsonLdProfile(invalidLegacyRole).some(error => error.includes("termRole")),
+    "unknown legacy bridge role should fail the JSON-LD profile"
   );
 
-  const connectorWithInfo = info => ({
-    ...connectorPuzzle,
-    bridges: connectorPuzzle.bridges.map((bridge, index) =>
+  const bridgeWithInfo = info => ({
+    ...bridgePuzzle,
+    bridges: bridgePuzzle.bridges.map((bridge, index) =>
       index === 0 ? { ...bridge, info } : bridge
     )
   });
   assert.deepEqual(
-    validatePuzzleContent(connectorWithInfo({
+    validatePuzzleContent(bridgeWithInfo({
       text: "Clarifies what this bridge is doing in the puzzle."
     }), { knownPuzzleIds: ids }),
     [],
-    "connector info.text should be valid"
+    "bridge info.text should be valid"
   );
   for (const [field, info] of [
-    ["link", { text: "Local role.", link: "wiki:Touch" }],
-    ["extraLink", { text: "Local role.", extraLink: "wiki:Touch" }],
-    ["seeAlso", { text: "Local role.", seeAlso: ["wiki:Touch"] }],
+    ["link", { text: "Local context.", link: "wiki:Touch" }],
+    ["extraLink", { text: "Local context.", extraLink: "wiki:Touch" }],
+    ["seeAlso", { text: "Local context.", seeAlso: ["wiki:Touch"] }],
     ["citations", {
-      text: "Local role.",
+      text: "Local context.",
       citations: [{ title: "Source edition" }]
     }],
     ["citations", {
-      text: "Local role.",
+      text: "Local context.",
       citations: [{ title: "Source edition", url: "https://example.com/source" }]
     }]
   ]) {
-    assert.ok(
-      validatePuzzleContent(connectorWithInfo(info), { knownPuzzleIds: ids })
-        .some(error => error.includes("must not add references or citations") &&
-          error.includes(field)),
-      `connector ${field} should fail semantic validation`
+    assert.deepEqual(
+      validatePuzzleContent(bridgeWithInfo(info), { knownPuzzleIds: ids }),
+      [],
+      `bridge ${field} should be valid with the current bridge shape`
     );
   }
 

@@ -112,9 +112,9 @@ function collect(word, info, puzzleTitle, location, skipAutoSearch) {
 }
 
 // Puzzle-level, category-level, catalogue-level, and relatedPuzzles-set
-// `info` are unlike a normal term/cluster/reference bridge's: when absent,
-// renderInfoLine shows nothing at all. Connector bridges behave the same way
-// unless they have explicit info. These surfaces are only collected when
+// `info` are unlike a normal term/cluster/bridge's: when absent,
+// renderInfoLine shows nothing at all. Bridge info behaves the same way
+// unless explicitly authored. These surfaces are only collected when
 // actually present.
 for (const p of PUZZLES) {
   if (p.info) collect(p.title, p.info, p.title, "puzzle", false);

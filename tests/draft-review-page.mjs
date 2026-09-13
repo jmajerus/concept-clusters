@@ -489,7 +489,6 @@ export async function run() {
         clusters: ["ethos", "pathos", "logos"],
         fact: "The three artistic proofs.",
         relationKind: "foundation",
-        termRole: "reference",
         idealTerms: { ethos: "character", pathos: "emotion", logos: "reasoning" }
       }]
     }
@@ -499,10 +498,7 @@ export async function run() {
   assert.match(simplifiedPage, /Ethos: <strong>character<\/strong>/);
   assert.match(simplifiedPage, /Pathos: <strong>emotion<\/strong>/);
   assert.match(simplifiedPage, /Logos: <strong>reasoning<\/strong>/);
-  assert.match(simplifiedPage, /field" value="termRole"/);
-  assert.match(simplifiedPage, /<option value="reference" selected>/);
-  assert.match(simplifiedPage, /<option value="connector">/);
-  assert.doesNotMatch(simplifiedPage, />Save term role</);
+  assert.doesNotMatch(simplifiedPage, /termRole|Term role|Save term role/);
 
   // Puzzle drafts no longer ship via Export / Install; Freeze is on Admin.
   assert.doesNotMatch(draftPage, /Replace the published puzzle/);
@@ -912,7 +908,7 @@ export async function run() {
   assert.match(retargetedBylinePage, /<option value="Grok 4\.6" selected>Grok 4\.6 \(not in list\)<\/option>/);
   assert.doesNotMatch(retargetedBylinePage, /value="Grok 4\.6 High Fast"/);
 
-  const connectorBridgePage = renderDraftPage({
+  const bridgePage = renderDraftPage({
     ...baseDraft,
     document: {
       ...baseDraft.document,
@@ -921,14 +917,12 @@ export async function run() {
         term: "local link",
         clusters: ["alpha"],
         fact: "A local mechanism.",
-        termRole: "connector",
-        info: { text: "Connector note." }
+        info: { text: "Bridge note." }
       }]
     }
   });
-  assert.match(connectorBridgePage, /id="bridge-term-role-local-link"/);
-  assert.match(connectorBridgePage, /<option value="connector" selected>/);
-  const connectorSection = connectorBridgePage.match(/<section class="bridge[\s\S]*?<\/section>/)?.[0] || "";
-  assert.match(connectorSection, /local link/);
-  assert.doesNotMatch(connectorSection, /field" value="info.links"/);
+  assert.doesNotMatch(bridgePage, /bridge-term-role|Term role/);
+  const bridgeSection = bridgePage.match(/<section class="bridge[\s\S]*?<\/section>/)?.[0] || "";
+  assert.match(bridgeSection, /local link/);
+  assert.match(bridgeSection, /field" value="info.links"/);
 }

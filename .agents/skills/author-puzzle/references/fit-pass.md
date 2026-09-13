@@ -8,8 +8,8 @@ the subject spans multiple boards). Re-read `inventories/<id>.json` and
 
 Translate the approved inventory into simplified puzzle JSON. Pruning,
 merging, seed/floating assignment, and carrying inventory connections
-happen **here**, with a visible loss ledger. Canvas size is derived from
-the resulting node count; do not set `large`.
+happen **here**, with a visible loss ledger. Layout is derived from the
+resulting node count; do not set renderer fields.
 
 ## Steps
 

@@ -140,7 +140,7 @@ Run `plan-split-boards.mjs` once per board; **print its `humanPrompt` verbatim**
 
 ```
 What's next?
-1. Revise notes, lenses, or connector help
+1. Revise notes, lenses, or bridge help
 2. Approve — open the drafts page to review copy
 3. Publish and cue for freeze when ready (or next board in a split)
 ```
@@ -216,7 +216,7 @@ Stop-gate: concept-map review only.
 ### 2. Human gate — inventory approval
 
 Stop after inventory unless the human already said to proceed (create/fit/go
-ahead/large board/etc.). If they only asked for the map, wait — one line is
+ahead/etc.). If they only asked for the map, wait — one line is
 enough: inventory path + what you need to continue. The human reviews **concept
 substance** (thesis, distinction jobs, exclusions, open questions) — not count
 symmetry; equal and unequal candidate-term counts are both valid when the
@@ -278,7 +278,8 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 - If the category is new (no peers), skip comparable reads; rely on MCP `get_authoring_schema` phase `core`.
 - Write `ledgers/<id>-fit.json` (loss ledger) **before** MCP save.
 - MCP tools **one at a time** (never parallel on stdio — Codex closes the transport): `get_authoring_guidance` phase `core`, then `get_authoring_schema` phase `core`, then `review`.
-- `create_puzzle_draft` / `save_puzzle_draft`: clusters, bridges, `termRole` only.
+- `create_puzzle_draft` / `save_puzzle_draft`: clusters and bridges first; add
+  notes, lenses, and publication metadata in later passes.
 
 **Codex:** first draft write hits Cloudflare D1 — approve network if prompted, then retry unchanged.
 
@@ -297,7 +298,7 @@ Stop-gate: board + loss ledger review on `/admin/drafts`.
 
 ### 4. Complete pass
 
-Retrieve latest draft. Add puzzle `info`, `termInfo`, connector help, lenses. Preserve every earlier field.
+Retrieve latest draft. Add puzzle `info`, `termInfo`, bridge help, and lenses. Preserve every earlier field.
 
 ```sh
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level complete working/<id>.json

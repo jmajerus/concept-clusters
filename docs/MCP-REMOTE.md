@@ -58,19 +58,21 @@ resources can call `get_authoring_schema` for the same schema as structured
 tool output. The `document` parameters on draft-write tools remain
 deliberately permissive so incomplete drafts can still be stored; clients
 should use the schema resource or tool, rather than `tools/list` alone, to
-discover nested authoring fields such as `bridges[].termRole`.
+discover nested authoring fields such as `bridges[].relationKind` and
+`bridges[].direction`.
+Bridge terms are ordinary authored concepts; there is no separate role field.
 
 Both authoring tools accept an optional `phase`: `core`, `review`, `pedagogy`,
 `publication`, or `complete`. Omitting it remains equivalent to `complete` for
 existing clients. The smaller responses support progressive authoring over one
 accumulating draft:
 
-1. `core` establishes identity, clusters, terms, facts, bridges, `termRole`,
-   info, verified links, and citations. Record the exact citation object
+1. `core` establishes identity, clusters, terms, facts, bridges, info,
+   verified links, and citations. Record the exact citation object
    `{ title, author?, publisher?, year?, pages?, url? }` when research finds a
    source rather than attempting to rediscover it later.
 2. `review` checks ambiguity, redundancy, seed quality, bridge necessity,
-   connector/reference classification, sources, and optional relationship
+   sources, and optional relationship
    fields such as `relationKind`, `direction`, and `idealTerms`.
 3. `pedagogy` owns lenses and learning introductions. They may be authored at
    different times: revisiting this phase to add a later introduction must

@@ -8,8 +8,8 @@ modules. It's the same puzzle content a `puzzles/*.js` module already
 carries, minus the identity-bookkeeping problem JSON-LD's `@id`/`@type`
 ceremony has -- not a cut-down subset of what a puzzle can express.
 Everything a puzzle's *content* can do, this format can author:
-multi-cluster bridges, bridge direction, ideal terms, bridge term roles, all
-three lens modes, related puzzles, learning introductions, and provenance.
+multi-cluster bridges, bridge direction, ideal terms, all three lens modes,
+related puzzles, learning introductions, and provenance.
 See "What's authored elsewhere" at the bottom for the one thing that
 genuinely doesn't fit here.
 
@@ -89,7 +89,7 @@ publication all work from directly, with no JSON-LD conversion in between.
 
 **Puzzle** — `id`, `title`, `category` required. `categories` (array,
 primary first), `subcategories` (`{categoryId: subcategoryId}`), `tags`,
-`large`, `info` (string, or `{text?, links?, citations?}` at puzzle
+`info` (string, or `{text?, links?, citations?}` at puzzle
 level; nested info is `{text?, links?}`) are
 optional, as are:
 
@@ -121,8 +121,7 @@ crowds its neighbors.
 
 **Bridge** — `term`, `clusters` (two cluster `id`s, or three for a ternary
 bridge), `fact` required. `id` is optional, derived from `term` when
-omitted. Also optional: `info`, `conceptId`, `termRole` (`reference` |
-`connector`; omitted means `reference`), `relationKind` (`dynamic` |
+omitted. Also optional: `info`, `conceptId`, `relationKind` (`dynamic` |
 `foundation` | `cross-cutting` | `contrast` | `continuity` | `evaluation`),
 `direction` (`{kind: "undirected"|"through"|"bidirectional"|"outward"|"inward",
 from?, to?}` -- `from`/`to` are cluster ids, only meaningful for `"through"`,
@@ -131,33 +130,12 @@ and only valid on a two-cluster bridge), `idealTerms`
 default to no term-specific endpoint). Each value is the author's canonical
 bridge endpoint in that cluster, not a player preference.
 
-Use `termRole: "reference"` (or omit it) when the displayed bridge term is
-itself an intended object of learning within the puzzle's conceptual
-territory and central lesson, or whenever the term is a proper noun (a
-specific named person, place, organization, or work) -- a name carries no
-self-descriptive content and always reads as a specific, findable thing
-worth looking up, however incidental its role feels. Use `connector` when
-it carries a local relationship, evidence, mechanism, plot detail, or
-biographical thread phrased as the generic thing itself rather than as a
-named entity. A connector may be a phrase or a concrete, unfamiliar,
-specific, encyclopedia-worthy common noun (a technical process, say); among
-these non-proper-noun candidates, article existence, search quality,
-familiarity, and grammar still are not the test. Want connector treatment
-for something that's really a specific named thing? Keep the name out of
-the displayed term and put it in the surrounding fact/info prose instead,
-where it isn't the term being classified at all.
-
-Classify the role first, then provide help at the appropriate level of
-granularity. Prefer a verified direct resource for references.
-Cluster-sized help on the cluster; term-sized help on a term. Omitting a
-link means no chip -- automatic Wikipedia search is not inferred. A connector receives no automatic search
-but may still carry a concise `info` description—often useful—to clarify its
-local function.
-It must not carry `links` (or legacy `link` / `extraLink` / `seeAlso`) or `citations`. Source support
-belongs with the puzzle's lesson content, not with the connector.
-`termRole` is independent of `relationKind`: the former describes the term's
-role in the lesson, while the latter describes the relationship expressed by
-the bridge fact.
+Bridge help should match the relationship the fact describes. Use concise
+`info.text` for local context, `info.links` for verified destinations that
+advance that connection, and puzzle-level citations for broader lesson
+support. Omission of a link is fine; automatic Wikipedia search is not inferred.
+There is no separate bridge-term role field: every bridge term is an ordinary
+authored concept.
 
 **Lens** (optional, `lenses[]`) — `id`, `prompt`, `explanation` required
 (every lens needs `explanation` regardless of mode). Also optional: `label`,

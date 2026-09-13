@@ -181,13 +181,13 @@ in its fact for a distinct concept the term list omitted. Make a change only
 when that semantic check finds a real problem; do not alter a puzzle merely to
 make it look less symmetric.
 
-The standard board supports at most 16 nodes. An honest 17–25-node puzzle
-uses the wide canvas automatically; do not drop a distinct term merely to stay small.
-Twenty-five is the firm ceiling. Above it, split the subject into focused
-related puzzles rather than compressing the lesson.
+The complete board may contain at most 25 total nodes (all cluster terms plus
+bridges). Layout is derived automatically from the node count and play mode;
+do not drop a distinct term to satisfy a rendering threshold. Above 25, split
+the subject into focused related puzzles rather than compressing the lesson.
 
 See the extended [shape rationale](AUTHORING-REFERENCE.md#extended-design-rationale)
-and [size rules](AUTHORING-REFERENCE.md#puzzle-size-large).
+and [node limit](AUTHORING-REFERENCE.md#puzzle-node-limit).
 
 ### Bridges must teach a real relationship
 
@@ -198,14 +198,10 @@ touch both subjects. Ask whether the bridge deepens the puzzle's thesis; if it
 only reports who wrote about both ideas, it probably belongs in a citation or
 nowhere on the board.
 
-The optional bridge fields refine different questions and should not be filled
-by routine:
-
-- `termRole` asks whether the displayed term is itself an intended object of
-  learning (`reference`) or only carries the local relationship (`connector`).
-- `relationKind` classifies the relationship described by the bridge fact, not
-  the bridge term in isolation. Leave it unset when none of the six broad kinds
-  clearly fits.
+The optional bridge fields refine the relationship and should not be filled by
+routine. `relationKind` classifies the relationship described by the bridge
+fact, not the bridge term in isolation. Leave it unset when none of the six
+broad kinds clearly fits.
 - `direction` is for a binary relationship whose meaning changes when reversed.
   Omission is normal.
 - `idealTerms` identifies the canonical endpoint in each connected cluster:
@@ -216,8 +212,7 @@ by routine:
 - A ternary bridge is for one genuinely collective three-cluster relationship,
   not shorthand for three pairwise links.
 
-Detailed decision tests are in [bridge term
-roles](AUTHORING-REFERENCE.md#bridge-term-roles), [relation
+Detailed decision tests are in [relation
 kinds](AUTHORING-REFERENCE.md#bridge-relation-kinds),
 [direction](AUTHORING-REFERENCE.md#bridge-direction), [ideal
 terms](AUTHORING-REFERENCE.md#ideal-bridge-terms), and [ternary
@@ -226,11 +221,10 @@ bridges](AUTHORING-REFERENCE.md#ternary-bridges-experimental).
 ### Put help at the right grain
 
 Help should match the concept it explains. Cluster-sized context belongs on
-the cluster; term-sized help belongs on the term; a connector bridge normally
-needs concise `info.text`, not a reference lookup. A confidently wrong direct
-link is worse than leaving a term unlinked, so verify every retained target.
-Omitting a link means no chip; the player does not receive an inferred
-Wikipedia search.
+the cluster; term-sized help belongs on the term; bridge info should explain
+the relationship itself. A confidently wrong direct link is worse than
+leaving a term unlinked, so verify every retained target. Omitting a link
+means no chip; the player does not receive an inferred Wikipedia search.
 
 Use structured citations for a specific book, edition, passage, page range, or
 claim that a general link cannot carry. Keep always-visible explanation and
@@ -333,7 +327,7 @@ Before validation and human review, check the complete puzzle as one lesson:
 - Links resolve to the intended resource at the appropriate grain.
 - Lens wording includes every honest answer and explicitly rules out plausible
   exclusions where necessary.
-- The board uses the wide canvas at 17–25 nodes and never exceeds 25.
+- The complete board stays at or below 25 total nodes; layout is derived.
 - The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
 - `generativeAssistance` reflects the current AI-authored or AI-edited scopes.
@@ -349,7 +343,7 @@ Use the [authoring reference](AUTHORING-REFERENCE.md) for:
 - the complete schema example;
 - term, cluster, puzzle, and bridge information shapes;
 - links, citations, and overrides;
-- bridge roles, kinds, direction, ideal terms, and ternary bridges;
+- bridge kinds, direction, ideal terms, and ternary bridges;
 - learning-introduction packaging;
 - all lens modes and diagnostics;
 - category and subcategory registration;

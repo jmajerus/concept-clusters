@@ -3,7 +3,8 @@
 // One-time corpus migration to the canonical authored-content shape.
 //
 // Puzzle documents in D1 and Git may still contain the old JSON-LD envelope
-// or legacy authored fields.  The canonical result is the simplified puzzle
+// or legacy authored fields (including retired bridge roles). The canonical
+// result is the simplified puzzle
 // document used by MCP, D1, and content/puzzles/*.ccpuzzle.json.  JSON-LD
 // remains available only through the explicit interchange commands.
 //

@@ -3,8 +3,9 @@
 // bridge's own id/@id pair in sync by hand.
 //
 // "Simplified" means the identity ceremony is gone, not that features are
-// gone: every puzzle-content field the interchange JSON-LD format can
-// express, this format can too. JSON-LD is interchange-only
+// gone: every current puzzle-content field the interchange JSON-LD format can
+// express, this format can too. Legacy bridge termRole is migration-only and
+// is removed before this schema is parsed. JSON-LD is interchange-only
 // (content:export/import), never a stored draft. Live authoring uses
 // puzzleFromAuthoredDocument() to reach the runtime puzzle model.
 import * as z from "zod/v4";
@@ -119,16 +120,14 @@ const RelationKindEnum = z.enum([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
 ]);
 
-// Whether the displayed bridge term is itself intended lesson content,
-// independently of relationKind's classification of the relationship in the
-// bridge fact. Missing-link search is deprecated and is not inferred from
-// this role; searchability, familiarity, and grammatical form do not
-// determine it.
-const TermRoleEnum = z.enum(["reference", "connector"]);
+// The old bridge-role field had exactly these two values. Keep the legacy
+// vocabulary narrow at the compatibility boundary: a malformed old value is
+// left in place so the current strict schema reports it instead of silently
+// discarding authored data.
+const LEGACY_TERM_ROLES = new Set(["reference", "connector"]);
+
 export const LARGE_DESCRIPTION =
   "Derived automatically from node count on save; omit this field. Keep total nodes (cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.";
-export const TERM_ROLE_DESCRIPTION =
-  "reference (default) when the bridge term itself is an intended object of learning within the puzzle's conceptual territory and central lesson, or whenever the term is a proper noun (a specific named person, place, organization, or work) -- a name carries no self-descriptive content and always reads as a specific, findable thing worth looking up, however incidental its role feels. connector when it carries a local relationship, evidence, mechanism, plot detail, or biographical thread phrased as the generic thing itself rather than as a named entity; among non-proper-noun candidates, article existence, search quality, familiarity, and grammatical form still are not classification tests. Want connector treatment for something that's really a specific named thing? Keep the name out of the displayed term and put it in the surrounding fact/info prose instead, where it isn't the term being classified at all. Classify the role first, then provide help at the appropriate level of granularity: prefer a verified direct resource for references; cluster-sized help on the cluster, term-sized help on a term. Omitting a link means no chip -- automatic Wikipedia search is not inferred. A connector gets no automatic or authored reference links or citations; use concise info.text, often recommended, to clarify its local function.";
 export const LEARNING_MARKDOWN_DESCRIPTION =
   "Markdown lesson body whose string value contains real line breaks: blank lines between paragraphs, headings on their own lines. The dialog already shows title, so do not repeat it as the first line. Do not write the two-character sequence backslash-n; the tool serializer encodes newlines.";
 export const LESSON_CREDIT_DESCRIPTION = lessonCreditFieldDescription();
@@ -304,7 +303,6 @@ const BridgeSchema = z.object({
   fact: z.string().min(1),
   info: InfoValueSchema.optional(),
   conceptId: z.string().min(1).optional(),
-  termRole: TermRoleEnum.optional().describe(TERM_ROLE_DESCRIPTION),
   relationKind: RelationKindEnum.optional(),
   direction: DirectionSchema.optional(),
   // {clusterId: idealTerm} -- only list the clusters worth specifying;
@@ -362,6 +360,26 @@ export function isJsonLdShaped(input) {
   return isObject(input) && "@context" in input;
 }
 
+// `termRole` belonged to an earlier bridge schema. Keep old drafts and
+// interchange documents readable, but remove known legacy values before the
+// current strict authoring schema sees them. Unknown values remain so the
+// schema can report them instead of silently losing authored data. Returning
+// the original object when there is nothing to repair keeps the load-time fold
+// cheap and lets callers detect whether a canonical save is needed.
+export function canonicalizeBridgeTermRoles(document) {
+  if (!isObject(document) || !Array.isArray(document.bridges)) return document;
+  let next = document;
+  document.bridges.forEach((bridge, index) => {
+    if (!isObject(bridge) || !Object.hasOwn(bridge, "termRole")
+      || !LEGACY_TERM_ROLES.has(bridge.termRole)) return;
+    if (next === document) next = { ...document, bridges: [...document.bridges] };
+    const cleaned = { ...bridge };
+    delete cleaned.termRole;
+    next.bridges[index] = cleaned;
+  });
+  return next;
+}
+
 function formatZodIssues(error) {
   return error.issues.map(issue => {
     const path = issue.path.reduce((acc, segment) =>
@@ -391,7 +409,6 @@ function convertBridge(bridge, clusterIndexById) {
     fact: bridge.fact,
     ...(bridge.info ? { info: clone(bridge.info) } : {}),
     ...(bridge.conceptId ? { conceptId: bridge.conceptId } : {}),
-    ...(bridge.termRole ? { termRole: bridge.termRole } : {}),
     ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {})
   };
   if (bridge.idealTerms) {
@@ -557,9 +574,11 @@ export function authoredDocumentForSchema(input, { categoryRegistry = CATEGORIES
   if (!input || typeof input !== "object" || Array.isArray(input)) return input;
   return hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
-      canonicalizePuzzleCategoryReferences(
-        canonicalizeDocumentProvenance(input),
-        categoryRegistry
+      canonicalizeBridgeTermRoles(
+        canonicalizePuzzleCategoryReferences(
+          canonicalizeDocumentProvenance(input),
+          categoryRegistry
+        )
       )
     )
   );

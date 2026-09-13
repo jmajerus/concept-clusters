@@ -73,7 +73,8 @@ three are valid cluster colors. Keep the complete board to at most 25 total
 nodes (all cluster terms plus bridges). Size by genuine distinct terms; do not
 drop a distinct term or bridge to fit a rendering threshold. If the material
 needs more than 25 nodes, split it into relatedPuzzles rather than compressing
-the lesson onto one board.
+the lesson onto one board. Bridge terms are ordinary authored concepts; there
+is no separate pedagogical-role field.
 
 These are validity limits for a completed document, not composition targets.
 Before mapping the material, do not choose or announce a cluster count,
@@ -81,7 +82,7 @@ terms-per-cluster range, or bridge count just to stay within them.
 
 "Simplified" means no @context/@id/@type/schemaVersion and no cluster/bridge
 @id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
-\`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`, ternary bridges, all three lens
+\`idealTerms\`/\`conceptId\`/\`relationKind\`, ternary bridges, all three lens
 modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
 authorable here; call \`get_authoring_schema\` for the complete machine-readable
 field contract.
@@ -133,33 +134,13 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   the cluster graph connected. A puzzle with no bridges, or with bridges
   that leave separate components, is fine -- every board mode renders that
   honestly rather than hiding it.
-- A bridge's optional termRole is a pedagogical classification: is the
-  displayed bridge term itself an intended object of learning, within the
-  puzzle's conceptual territory and central lesson? Use the default reference
-  role only when learning more about that term independently would deepen the
-  lesson the puzzle is actually teaching. Use connector when the term instead
-  carries a local relationship, piece of evidence, mechanism, plot detail, or
-  biographical thread and the bridge fact already gives the player what this
-  lesson needs from it. A connector may be a relational phrase ("how far to
-  go", "taken seriously") or a perfectly concrete, specific, unfamiliar, and
-  encyclopedia-worthy noun. In a literary puzzle, for example, "touch", "the
-  tracheotomy", and "wireless telegraphy" can all be connectors when they
-  serve only as mechanisms or details of the work rather than subjects the
-  lesson sets out to teach. Do not use article existence, search quality,
-  familiarity, obscurity, specificity, or grammatical form as the test. A
-  generic search being possible does not make a term a reference, just as a
-  missing verified direct link does not make a real lesson topic a connector.
-  After classifying the role, provide help at the appropriate level of granularity:
-  prefer a verified direct resource that advances this lesson.
-  Cluster-sized help lives on the cluster; a term gets a link only at
-  term-sized specificity; a connector's grain is concise info.text -- it
-  may, and often should, have that info.text -- not a reference lookup. A
-  connector does not need or want a reference link: do not give it links, link, extraLink, seeAlso, or citations.
-  Source support belongs with the puzzle's lesson content, not with the connector. Omitting a link means
-  no chip -- automatic Wikipedia search is not inferred. termRole and
-  relationKind are independent:
-  the first classifies the displayed term's role in the lesson, while the
-  second classifies the relationship described by the bridge fact.
+- Bridge terms are ordinary authored concepts. The bridge fact should explain
+  the actual relationship between its clusters, rather than relying on term
+  metadata to tell the player why the connection matters. Provide help at the
+  appropriate level of granularity and prefer a verified direct resource that advances this lesson:
+  concise bridge info for the connection itself, term info for one term, and
+  sources on the puzzle lesson when they support a broader claim. Omission of
+  a link is fine; automatic Wikipedia search is not inferred.
 - A bridge's optional relationKind classifies the connection its fact
   describes, never the term in isolation: dynamic is one cluster
   affecting, regulating, moving into, transforming, exchanging with, or
@@ -413,20 +394,15 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   threshold. If the map needs more than 25 nodes, split it into relatedPuzzles.
 - Carry approved inventory connections onto the board as bridges. Do not
   invent extras to make the graph connected. A disconnected board or no
-  bridges is acceptable. Write each bridge fact now, then classify
-  termRole independently: reference
-  means the displayed term is itself part of the puzzle's central lesson;
-  connector means it only carries the local relationship, evidence, mechanism,
-  plot detail, or biographical thread. A connector may and often should use
-  info.text to explain that local function; it gets no automatic or authored
-  reference link.
+  bridges is acceptable. Write each bridge fact now and make its local
+  relationship understandable from the fact and any concise bridge info.
 - Research while shaping the concepts. When a source supports a fact or term,
   record it immediately in the existing exact citation shape
   { title, author?, publisher?, year?, pages?, url? } under the appropriate
   puzzle, cluster, term, bridge, or learning info. Preserve URLs and page
   details discovered now; do not plan to rediscover or reconstruct them in a
   later pass.
-- Provide help at the appropriate level of granularity. Prefer a verified
+- Provide help at the appropriate level of granularity; prefer a verified
   direct resource that advances this lesson. Omitting a link means no chip
   -- automatic Wikipedia search is not inferred.`;
 
@@ -434,7 +410,8 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
 
 - Review the latest accumulated draft; do not regenerate it. Check ambiguity,
   redundant terms doing the same conceptual job, missing concepts named by a
-  cluster fact, seed recognizability, bridge necessity, and termRole choices.
+  cluster fact, seed recognizability, bridge necessity, and whether each
+  bridge fact genuinely explains its connection.
 - If validation flags more than 25 nodes, split into relatedPuzzles rather
   than dropping essential terms. Checking for redundant terms is a separate
   distinctness judgment; do not start it because of the node count alone.
@@ -447,7 +424,7 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   no hover or help surface should silently replace text the player already read.
 - Add relationKind only when the bridge clearly fits dynamic, foundation,
   cross-cutting, contrast, continuity, or evaluation. It classifies the
-  relationship, independently of termRole. Leave it unset when ambiguous.
+  relationship described by the bridge fact. Leave it unset when ambiguous.
 - Add binary direction only when reversing it changes the fact's meaning. Use
   idealTerms only for the canonical term in a connected cluster the bridge fact
   would naturally name; every valid cluster tap resolves to that endpoint, so

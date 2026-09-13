@@ -7,7 +7,8 @@ module disagree, trust the module.
 
 - **Map the concept space before the grid.** On inventory pass: thesis, distinctions
   with distinct jobs, flat `candidateTerms`, anchors, exclusions, genuine
-  `connections` — no seeds, no floatingTerms, no `large`, no node-cap arithmetic.
+  `connections` — no seeds, no floatingTerms, no renderer fields, and no
+  node-cap arithmetic.
 - **Fit is a lossy translation**, not a second survey. Every dropped inventory
   term needs a ledger reason; neither equal nor unequal counts require a
   justification in themselves.
@@ -24,12 +25,10 @@ module disagree, trust the module.
   not pick any count or narrow range for clusters, terms, bridges, or lenses.
   Size by genuine distinctness. Same counts across clusters are common; use
   that only as a trigger to check for two terms doing one job or a fact naming
-  a concept never used as a term. The 16-node standard board is not a
-  composition target: canvas size is derived from the honest node count. Do
-  not drop a distinct term to stay small. Split only above 25.
+  a concept never used as a term. Canvas size is derived from the honest node
+  count. Do not drop a distinct term to stay small. Split only above 25.
 - **Bridges are optional** and must be genuine. A disconnected graph is fine. Never add a bridge merely to connect the board.
-- **`termRole`:** Use `reference` (the default) when learning more about the displayed term deepens the lesson; use `connector` when it carries only a local relationship, mechanism, or detail. Do not classify by Wikipedia-worthiness, obscurity, or grammar. A connector may have short `info.text`; it must not get `links`, `link`, `extraLink`, `seeAlso`, or `citations`.
-- **Help at the right grain.** Put cluster-sized help on the cluster, term-sized help on a term, and local `info.text` on a connector. Omitting a link means no chip; search is not inferred.
+- **Help at the right grain.** Put cluster-sized help on the cluster, term-sized help on a term, and bridge context on the bridge. Omitting a link means no chip; search is not inferred.
 - **Keep information surfaces stable.** Always-visible `info.text` and a completion-gated `fact` have different jobs; never make a hover or help surface silently replace text the player already read.
 - **`relationKind`** classifies the relationship in the fact, not the term: `dynamic`, `foundation`, `cross-cutting`, `contrast`, `continuity`, or `evaluation`. Leave it unset unless one clearly fits. Contrast means the clusters oppose each other about the concept; cross-cutting means the concept recurs or functions differently without contradiction.
 - **`direction`** applies only to binary bridges and only when reversal would falsify the fact: `through` (with explicit from/to cluster ids), `bidirectional`, `outward`, or `inward`. Omission is normal. Ternary bridges stay undirected.

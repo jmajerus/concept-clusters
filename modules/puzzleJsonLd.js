@@ -105,6 +105,9 @@ export function puzzleToJsonLd(
     const clusterRefs = bridge.clusters.map(clusterIndex => ({
       "@id": `#${clusterIds[clusterIndex]}`
     }));
+    // Bridge terms no longer carry a pedagogical role. Older JSON-LD input is
+    // validated for compatibility, then puzzleFromJsonLd() drops that field;
+    // exports therefore never reintroduce it.
     const result = {
       "@id": `#${bridgeIds[index]}`,
       "@type": JSON_LD_TYPES.bridge,
@@ -113,7 +116,6 @@ export function puzzleToJsonLd(
       clusters: clusterRefs,
       fact: bridge.fact,
       ...(bridge.conceptId ? { conceptId: bridge.conceptId } : {}),
-      ...(bridge.termRole ? { termRole: bridge.termRole } : {}),
       ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {}),
       ...(bridge.info ? { info: clone(bridge.info) } : {})
     };
@@ -131,7 +133,7 @@ export function puzzleToJsonLd(
       }
     }
     return copyExtensions(bridge, result, new Set([
-      "id", "term", "clusters", "fact", "conceptId", "termRole", "relationKind", "info",
+      "id", "term", "clusters", "fact", "conceptId", "relationKind", "info",
       "idealTerms", "direction"
     ]));
   });
@@ -212,7 +214,6 @@ export function puzzleFromJsonLd(document) {
       clusters: indices,
       fact: bridge.fact,
       ...(bridge.conceptId ? { conceptId: bridge.conceptId } : {}),
-      ...(bridge.termRole ? { termRole: bridge.termRole } : {}),
       ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {}),
       ...(bridge.info ? { info: clone(bridge.info) } : {})
     };
@@ -231,7 +232,7 @@ export function puzzleFromJsonLd(document) {
     }
     return copyExtensions(bridge, result, new Set([
       "@id", "@type", "id", "term", "clusters", "fact", "conceptId",
-      "termRole", "relationKind", "info", "idealTerms", "direction"
+      "relationKind", "info", "idealTerms", "direction"
     ]));
   });
 

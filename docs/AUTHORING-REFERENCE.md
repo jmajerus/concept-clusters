@@ -63,7 +63,6 @@ JSON-LD is portable interchange, not the everyday authoring format.
     science: "physics",
     engineering: "control-systems"
   },
-  large: true,                  // derived from node count; omit when authoring
   tags: ["book"],                // optional, informal -- see "Tags" below
   level: "introductory",         // optional, opt-in -- see "Learning level" below
   info: { link: "wiki:Puzzle Topic" }, // optional, see "Puzzle info &
@@ -124,7 +123,6 @@ JSON-LD is portable interchange, not the everyday authoring format.
     term: "bridge term",        // must NOT appear in any cluster's terms
     conceptId: "shared-concept-id", // optional, see "Related puzzles" below
     clusters: [0, 1],           // 2 normally; [0, 1, 2] in the ternary pilot
-    termRole: "connector",      // optional when the bridge term is not itself lesson content
     relationKind: "dynamic",    // optional, see "Bridge relation kinds" below
     direction: { kind: "through", from: 0, to: 1 }, // optional, binary only
     fact: "Explains WHY it spans both — the key teaching moment.",
@@ -270,15 +268,12 @@ in a lens on its own merits, say so directly in the prompt (e.g. "besides
 everything in the X cluster, which other concepts also apply to Y?")
 instead of leaving the inclusion looking coincidental.
 
-The 25-node ceiling remains firm even when the natural structure is
-larger. Do not evade it by compressing distinct ideas into vague clusters or
-by dropping essential terms. 17–25 nodes is not over that ceiling: the wide
-canvas is derived from that count. Do not hunt for the weakest term to drop.
-The 16-node
-standard board is a rendering default, not a composition target. Split the
-subject into focused, linked puzzles only when one honest treatment would
-exceed 25; see [Puzzle size (`large`)](#puzzle-size-large) and [Related
-puzzles](#related-puzzles).
+The 25-node ceiling remains firm even when the natural structure is larger.
+Do not evade it by compressing distinct ideas into vague clusters or by
+dropping essential terms. Layout is derived from node count and play mode;
+authors and agents do not set renderer fields. Split the subject into
+focused, linked puzzles only when one honest treatment would exceed 25; see
+[Puzzle node limit](#puzzle-node-limit) and [Related puzzles](#related-puzzles).
 
 ### Star-mode cold-read check
 
@@ -296,11 +291,10 @@ resist it: figuring out which two hubs a bridge spans is the intended "aha,"
 so the bar there is "not actively misleading toward the wrong hub," not
 "instantly placeable."
 
-Check this at the board level, not just per term. A board leaning heavily on
-`connector`-type bridges — mechanism, plot detail, biographical thread, one
-after another — can have every individual term correctly classified and
-still read as a wall of connective tissue, even to a player who already
-knows the material well.
+Check this at the board level, not just per term. A board whose bridges are
+mostly vague or weakly supported can still read as a wall of connective
+tissue, even to a player who already knows the material well. Each bridge
+should earn its place by stating a concrete relationship in its fact.
 
 ## Ideal bridge terms
 
@@ -534,16 +528,11 @@ Missing-link search chips are no longer synthesized at runtime.
 
 A bridge's own `info` field works the same way, one level up
 — directly on the bridge object rather than nested under a term name,
-since a bridge is a single term rather than a map of several. The one
-exception is a bridge marked `termRole: "connector"`: it has no search
-fallback and no authored reference links, because the bridge term is not
-itself an intended object of
-learning in this puzzle. This applies to concrete nouns and proper names as
-well as phrases. Do not add `info.links`, `link`, `extraLink`, `seeAlso`, or `citations`
-to a connector. Its `info` may—and often should—provide a concise local
-description of what the connector is doing on this board. Source support
-belongs with the puzzle's lesson content, not with the connector. See
-`oxygen` in the first puzzle (`energy-flow`) for a plain-string example.
+since a bridge is a single term rather than a map of several. Use it for a
+concise explanation or a verified destination that supports the relationship
+stated by the bridge fact. Source support for a broader claim belongs with
+the puzzle's lesson content. See `oxygen` in the first puzzle (`energy-flow`)
+for a plain-string example.
 
 ## Cluster info & links
 
@@ -602,8 +591,8 @@ is why `info.link` exists on the cluster. A term gets its own `link` at
 term-sized specificity (`wiki:Enthymeme` inside Logos; a `#Section` when
 that heading is the right landing). Omitting a link means no chip —
 runtime does not inherit the cluster link onto terms, and does not
-synthesize a Wikipedia search. Connector bridges still get no search and
-no authored reference links.
+synthesize a Wikipedia search. Bridges follow the same optional-link rules
+as every other authored concept.
 
 A cluster's own `info.citations` is valid and round-trips through the
 puzzle's canonical document, but currently has no rendering surface in the app —
@@ -818,63 +807,6 @@ editorial sequence -- so opening "Introductory Puzzles" and browsing to
 Science already gives "introductory science puzzles" for free, with no
 separate per-category-per-level catalogue needed.
 
-## Bridge term roles
-
-A bridge's optional `termRole` is a pedagogical distinction: is the displayed
-bridge term itself one of the things this puzzle intends to teach?
-
-- **`reference`** — the term itself belongs inside the puzzle's conceptual
-  territory and central lesson. Learning more about it independently would
-  deepen the understanding the puzzle is designed to produce. This is the
-  backward-compatible default when `termRole` is omitted.
-- **`connector`** — the term carries a local relationship, piece of evidence,
-  mechanism, plot detail, or biographical thread, while the bridge fact already
-  gives the player what this lesson needs from it. It is connecting tissue,
-  not an independent learning destination.
-
-A bridge term that is a proper noun — a specific named person, place,
-organization, or work — is always `reference`, however incidental its role
-feels; a bare name carries no self-descriptive content of its own and always
-reads as a specific, findable thing worth looking up. This is enforced by
-validation, not just advised — a capitalized `connector` term fails.
-
-Among non-proper-noun terms, do not infer the role from grammar or web
-notability. A connector can be a phrase such as `how far to go`, `beyond
-compliance`, or `taken seriously`, but it can just as readily be a concrete
-and specific common noun. In a literary puzzle, `touch`, `the tracheotomy`,
-and `wireless telegraphy` can all be connectors when their job is to carry
-the work's plot, mechanism, or biography rather than teach touch, surgery,
-or radio history. The fact that an encyclopedia article exists—or that a
-player may not know the term—does not promote it to `reference`.
-
-When a proper noun's role actually is incidental — carrying a relationship
-or mechanism, not itself part of the lesson — the fix isn't to keep it on
-display as a forced reference. It's to not display the name at all: rephrase
-the term as the generic relationship or mechanism, and move the name into
-`fact`/`info.text` as supporting detail. (Real example: a bridge spanning
-three frameworks through one scholar's career was originally displayed as
-his name; since his role was biographical rather than itself the lesson, it
-was rewritten as `one continuous argument`, with the scholar named in
-`fact` instead.)
-
-Classify the pedagogical role before considering links. Then provide
-help at the appropriate level of granularity:
-
-- For a `reference`, prefer a verified direct resource that advances this
-  puzzle's lesson. Cluster-sized help on the cluster; term-sized help on
-  a term. Omitting a link means no chip.
-- A missing direct link does not make a reference into a connector.
-- A connector's grain is local clarification, not a reference lookup.
-  Use a plain `info` string or `{ text: "..." }`—often worthwhile. Connector
-  `link`, `extraLink`, `seeAlso`, and `citations` are invalid; source
-  support belongs with the lesson content.
-
-`termRole` and `relationKind` answer different questions and are independent.
-`termRole` describes what function the displayed term serves in the lesson;
-`relationKind` describes what kind of relationship the bridge's `fact`
-expresses. A connector may therefore be `dynamic`, `cross-cutting`, or any
-other valid relation kind without conflict.
-
 ## Bridge relation kinds
 
 A bridge can optionally carry a `relationKind`, naming what kind
@@ -889,9 +821,7 @@ term in isolation.** `{ term: "oxygen", relationKind: "dynamic" }`
 doesn't claim oxygen itself is a process — it says the fact describes
 oxygen moving between the two clusters. Six values are valid —
 `validate.mjs` enforces this — the result of two revisions after a
-full-catalog pilot pass (see `docs/Bridge Role Annotation.md` for the
-complete history and classification table) surfaced gaps in earlier,
-narrower versions:
+full-catalog pilot pass surfaced gaps in earlier, narrower versions:
 
 - **`dynamic`** — one cluster affects, regulates, moves into, transforms,
   exchanges with, or constrains the other.
@@ -940,9 +870,7 @@ Still unclear?
 ontology of the bridge term.** It exists to help a player notice how a
 bridge is functioning in *this* puzzle, not to formally classify what
 kind of thing negative feedback or oxygen "really is" -- that's a much
-larger and, for this project, unnecessary undertaking (see "Where this
-sits relative to formal knowledge-representation work" in `docs/Bridge
-Role Annotation.md` if the distinction matters to you). Don't add a
+larger and, for this project, unnecessary undertaking. Don't add a
 finer-grained predicate field alongside it, however tempting a specific
 borderline bridge makes that feel -- it would recreate exactly the
 duplicate-authoring, spoiler-risk problem `relationKind` itself was
@@ -1620,69 +1548,14 @@ subcategories that have no puzzles in the active catalogue. A category with
 no represented assignments retains the original direct puzzle list instead
 of adding an unnecessary navigation step.
 
-## Puzzle size (`large`)
+## Puzzle node limit
 
-`large: true` marks a puzzle for the bigger board: a 960×620 viewBox
-and a wider page layout (`.wrap.wide` in `styles.css`), instead of the
-standard 640×460. It is **derived from node count** on save and at play —
-authors and agents omit it. It only affects rendering — the puzzle still lives
-in its normal `category` group, and the flag is purely about node
-count/board size, not conceptual difficulty (a puzzle can be large and
-introductory, or small and conceptually hard — don't conflate the two
-axes). It's shown with a small badge next to the title and on puzzle cards.
-
-The page layout only becomes physically wider on a viewport with room
-for it. The 960×620 coordinate space itself is preserved at narrower
-viewports and the responsive SVG scales it down to fit. Falling back to
-640×460 caused the dense puzzles that need the wide canvas most to develop real
-overlaps and crossings; preserving their layout space is more important
-than making their already-dense labels marginally larger.
-
-`large` isn't the only thing that requests the wide board, though —
-Circle and Star modes always do, on *any* puzzle, regardless of node
-count (`applyBoardSize` in `game.js`). Both need more room than Graph
-mode's per-term layout for reasons that have nothing to do with node
-count: Circle mode draws containers as well as the terms inside them,
-and Star mode routes every connection through a cluster's title hub
-rather than point-to-point, so a bridge fans two lines into two
-different hubs instead of one. Graph mode never requests it on its own
-unless the node count is 17–25. On an ordinary puzzle it
-remains the most readable fallback for a narrow screen; on a wide
-puzzle all three modes honor that larger-canvas requirement.
-
-**`validate.mjs` enforces the ceiling**, not the canvas flag: total
-nodes (every cluster's terms, plus every bridge) is capped at 25. Count
-17–25 uses the wide canvas automatically. Cluster count on its own only has a loose
-sanity floor/ceiling now (2–6, mostly a typo guard) — it used to be a
-hard cap at 4, but that couldn't tell a puzzle with four dense 6-term
-clusters from one with four light 3-term clusters, same cluster count,
-very different actual size. The total-node cap is what actually tracks
-render load, so it's the real constraint; cluster count and per-cluster
-term count are both free to trade off against each other underneath it
-however suits the topic — five light clusters on the wide board is
-exactly as valid as three heavier ones, if either total fits.
-
-| Total nodes | Fits at |
-|---|---|
-| ≤16 | standard size |
-| 17–25 | wide canvas (derived `large`) |
-| 26+ | rejected by `validate.mjs` — split into `relatedPuzzles` instead |
-
-Do not treat 16 as a composition target. Do not drop a distinct term to
-stay on the standard board. Checking for redundant terms is a separate
-distinctness judgment. `large` only affects rendering and is not a
-difficulty signal.
-
-Both ceilings were calibrated against every puzzle's own actual totals
-at the time this was written (normal puzzles topped out at 14; every
-existing `large` puzzle happened to be exactly 4 clusters × 4 terms +
-3 bridges = 19) — so there's real headroom above anything already
-authored, this isn't just barely covering the status quo. If a topic
-still doesn't fit at 24, that's the signal to split it into two
-`relatedPuzzles`-linked puzzles rather than reaching for a bigger
-number here (see "Related puzzles" above) — the total-node cap is
-about what one board can hold at once, not about how much a topic is
-allowed to say across a whole visit.
+The complete board may contain at most 25 nodes: count every cluster term and
+every bridge. The validator enforces this limit; layout is derived by the
+runtime from the count and selected play mode. Authors and agents omit
+renderer fields and should not remove a distinct term to satisfy an internal
+layout threshold. When an honest treatment needs more than 25 nodes, split the
+subject into focused, linked puzzles through `relatedPuzzles`.
 
 ## Optional authored Star layouts
 

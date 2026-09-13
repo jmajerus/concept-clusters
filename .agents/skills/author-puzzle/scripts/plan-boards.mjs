@@ -4,7 +4,7 @@
 // from a required split.
 import { readFileSync } from "node:fs";
 import { pillWidth } from "../../../../modules/puzzleGraph.js";
-import { NODE_CAP_LARGE, NODE_CAP_STANDARD } from "../../../../modules/puzzleBoardSize.js";
+import { NODE_CAP_LARGE } from "../../../../modules/puzzleBoardSize.js";
 
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
@@ -51,7 +51,7 @@ function trimCandidates(inventory) {
           distinction: distinction.id,
           connectionLoad: connLoad,
           note: score >= 3
-            ? "Application or low-bridge term in a large distinction — first reconsider if trimming."
+            ? "Application or low-bridge term in a dense distinction — first reconsider if trimming."
             : "Low bridge involvement — reconsider if squeezing node count."
         });
       }
@@ -70,15 +70,13 @@ function buildOptions(inventory, totalTerms, connectionCount) {
     options.push({
       strategy: "single-board",
       nodeRange: [minNodes, maxNodes],
-      note: maxNodes <= NODE_CAP_STANDARD
-        ? "Fits one board. Canvas size is derived on save."
-        : "Fits one board (wide canvas is derived on save). Do not drop distinct terms to shrink."
+      note: "Fits one board. Layout is derived on save; do not drop distinct terms to shrink."
     });
   } else {
     options.push({
       strategy: "split-required",
       nodeRange: [minNodes, maxNodes],
-      note: `Exceeds ${NODE_CAP_LARGE} nodes even with one bridge per connection. Plan a split or trim with ledger entries.`
+      note: `Exceeds the ${NODE_CAP_LARGE}-node maximum even with one bridge per connection. Plan a split or trim with ledger entries.`
     });
     const half = Math.ceil(distinctions.length / 2);
     const first = distinctions.slice(0, half);
@@ -108,7 +106,7 @@ function buildOptions(inventory, totalTerms, connectionCount) {
     options.push({
       strategy: "marginal-overshoot",
       nodeRange: [minNodes, maxNodes],
-      note: "Within a few nodes of large cap — consider honest merge, defer-with-destination, or layout verification before split."
+      note: `Within a few nodes of the ${NODE_CAP_LARGE}-node maximum — consider an honest merge, defer-with-destination, or layout verification before split.`
     });
   }
 
@@ -147,10 +145,7 @@ function analyze(inventory) {
     longestTerms: longest,
     trimCandidates: trimCandidates(inventory),
     options: buildOptions(inventory, totalTerms, connectionCount),
-    caps: {
-      standard: NODE_CAP_STANDARD,
-      large: NODE_CAP_LARGE
-    },
+    caps: { maxNodes: NODE_CAP_LARGE },
     nextStep: maxNodes <= NODE_CAP_LARGE
       ? "Fits one board. Proceed to fit; canvas size is derived."
       : "Discuss seam and board plan, then write the split plan under the authoring data dir (plans/<id>-split-plan.json) before fit."

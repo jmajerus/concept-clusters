@@ -236,8 +236,10 @@ export async function run() {
     assert.deepEqual(validateJsonLdProfile(document), []);
   }
 
-  // Ternary bridges, direction, idealTerms, conceptId, termRole, and
-  // relationKind all round-trip through the real validators with zero errors.
+  // Ternary bridges, direction, idealTerms, conceptId, and relationKind all
+  // round-trip through the real validators with zero errors. A legacy
+  // termRole is accepted at the load boundary and removed from the current
+  // authored shape.
   {
     const input = {
       id: "advanced-bridge-fixture",
@@ -273,20 +275,44 @@ export async function run() {
     assert.equal(puzzle.bridges[1].direction.kind, "through");
     assert.equal(puzzle.bridges[1].idealTerms[0], "a1");
     assert.equal(puzzle.bridges[1].conceptId, "concept-x");
-    assert.equal(puzzle.bridges[1].termRole, "connector");
-    assert.equal(document.bridges[1].termRole, "connector");
+    assert.equal(puzzle.bridges[1].termRole, undefined);
+    assert.equal(document.bridges[1].termRole, undefined);
 
-    const invalidRole = normalizeAuthoredPuzzleDocument({
+    const retiredRole = normalizeAuthoredPuzzleDocument({
       ...input,
       bridges: [{
         term: "invalid role",
         clusters: ["a", "b"],
         fact: "invalid role bridge",
+        termRole: "connector"
+      }]
+    });
+    assert.deepEqual(retiredRole.errors, []);
+    assert.equal(retiredRole.document.bridges[0].termRole, undefined);
+    const invalidLegacyRole = normalizeAuthoredPuzzleDocument({
+      ...input,
+      bridges: [{
+        term: "invalid legacy role",
+        clusters: ["a", "b"],
+        fact: "Invalid legacy role should remain visible to validation.",
         termRole: "phrase"
       }]
     });
-    assert.equal(invalidRole.document, null);
-    assert.ok(invalidRole.errors.some(error => error.includes("termRole")));
+    assert.equal(invalidLegacyRole.document, null);
+    assert.ok(invalidLegacyRole.errors.some(error => error.includes("termRole")));
+    const schemaRejectsRetiredRole = SimplifiedPuzzleInputSchema.safeParse({
+      ...validPuzzle(),
+      bridges: [{
+        term: "old role",
+        clusters: ["intrinsic-load", "extraneous-load"],
+        fact: "Old role should not be authored.",
+        termRole: "connector"
+      }]
+    });
+    assert.equal(schemaRejectsRetiredRole.success, false);
+    assert.ok(schemaRejectsRetiredRole.error.issues.some(issue =>
+      issue.message.includes("termRole")
+    ));
   }
 
   // idealTerms referencing a cluster outside the bridge's own clusters, and

@@ -12,10 +12,13 @@
 // same read pass, same "not rewritten until an explicit save" rule.
 // Category ids are the join key puzzles store. Legacy title references are
 // still folded to the current display title for the editor on read, while
-// successful saves canonicalize them to ids.
+// successful saves canonicalize them to ids. The retired bridge termRole is
+// likewise removed on this read/save fold so MCP and editors only expose the
+// current bridge shape.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
+  canonicalizeBridgeTermRoles,
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
@@ -68,9 +71,20 @@ function jsonLdShapedDocumentAsSimplified(document, categoryRegistry = CATEGORIE
 export function canonicalizeAuthoredDocumentFields(document) {
   return hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
-      canonicalizeDocumentProvenance(document)
+      canonicalizeBridgeTermRoles(
+        canonicalizeDocumentProvenance(document)
+      )
     )
   );
+}
+
+export function documentHasRetiredBridgeTermRole(document) {
+  return !!(document && typeof document === "object" && !Array.isArray(document)
+    && Array.isArray(document.bridges)
+    && document.bridges.some(bridge => (
+      bridge && typeof bridge === "object" && !Array.isArray(bridge)
+      && Object.hasOwn(bridge, "termRole")
+    )));
 }
 
 // Category references are the one schema migration that changes values, not
@@ -89,7 +103,9 @@ export function canonicalizeAuthoredCategoryReferences(
 // caller that falls back to `normalization.document ?? document` still
 // needs documentForDraftStore to avoid persisting `@context`.
 export function normalizeAuthoredDocument(document, options = {}) {
-  const canonical = canonicalizeAuthoredCategoryReferences(document, options);
+  const canonical = canonicalizeAuthoredDocumentFields(
+    canonicalizeAuthoredCategoryReferences(document, options)
+  );
   const { puzzle, errors } = puzzleFromAuthoredDocument(canonical, options);
   return { document: puzzle ? canonical : null, errors };
 }
@@ -289,7 +305,7 @@ export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
 const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
-    "This stored draft still uses leftover link, citation, or provenance fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance). The folded form is already what authoring tools show; storage does not change until you save."
+    "This stored draft still uses legacy link, citation, provenance, or bridge-role fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, and unclassified bridge terms). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
 const SAVE_RENAMED_CATEGORIES_FLAG = Object.freeze({

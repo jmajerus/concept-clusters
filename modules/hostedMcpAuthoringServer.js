@@ -519,7 +519,7 @@ export function createAuthoringMcpServer({
     {
       title: "Simplified puzzle authoring schema v1",
       description:
-        "Complete JSON Schema for simplified Concept Clusters puzzle documents, including bridge termRole and relationKind.",
+        "Complete JSON Schema for simplified Concept Clusters puzzle documents, including bridge relationship fields.",
       mimeType: SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE
     },
     async uri => ({

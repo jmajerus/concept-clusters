@@ -171,7 +171,7 @@ function clusterTermMark(published, draft) {
 function bridgeMark(published, draft) {
   const fields = {};
   for (const name of [
-    "term", "clusters", "fact", "relationKind", "termRole",
+    "term", "clusters", "fact", "relationKind",
     "conceptId", "direction", "idealTerms"
   ]) {
     const change = fieldChange(published?.[name], draft?.[name]);

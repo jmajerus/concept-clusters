@@ -127,7 +127,7 @@ function fitSteps({ boardId, transport, inventoryPath, planPath, ledgerPath, dra
 function completeSteps({ boardId, transport, draftPath, dryRun }) {
   return [
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_puzzle_draft", { draft_id: boardId }),
-    `Refresh revision; add puzzle info, termInfo, connector help, lenses for "${boardId}" only`,
+    `Refresh revision; add puzzle info, termInfo, bridge help, lenses for "${boardId}" only`,
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_guidance", { phase: "pedagogy" }),
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "save_puzzle_draft", {
       draft_id: boardId,
@@ -192,7 +192,7 @@ function buildHumanPrompt({ pass, active, boardOrder, nextBoard, draftsUrl, plan
   if (pass === "complete") {
     const options = [
       {
-        label: "Revise notes, lenses, or connector help on this board",
+        label: "Revise notes, lenses, or bridge help on this board",
         accepts: ["revise", "change", "fix", "push back"]
       },
       {

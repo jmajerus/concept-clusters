@@ -160,6 +160,8 @@ function structuredCatalogueRank(catalogue, query) {
 // trying to search. Booleans/numbers are skipped by collectStringFields anyway.
 const FULLTEXT_SKIP_KEYS = new Set([
   "id", "color", "link", "extraLink", "href", "url", "src",
+  // Legacy runtime modules may retain the retired bridge annotation until
+  // the corpus canonicalizer is run; never make its enum value searchable.
   "relationKind", "termRole", "conceptId", "date", "system", "provider",
   "scope", "role", "requirement", "revision", "mediaType", "ordered",
   "kind", "showInLibrary", "large", "lensMode", "level", "language",

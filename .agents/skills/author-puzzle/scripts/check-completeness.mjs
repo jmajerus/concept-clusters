@@ -16,7 +16,7 @@ Levels:
   split      board split plan vs inventory (--plan authoring data dir plans/<id>-split-plan.json).
   fit        board structure + loss ledger (--ledger authoring data dir ledgers/<id>-fit.json).
   board      clusters/terms/bridges. Notes/lenses deferred.
-  complete   (default) puzzle info, term notes, connector info, ≥1 lens
+  complete   (default) puzzle info, term notes, bridge help, ≥1 lens
 
 Exit 0 only when blocking gaps are empty. Print JSON either way.`);
   process.exit(message ? 1 : 0);
@@ -347,9 +347,9 @@ function checkSplitPlan(plan, inventory) {
   for (const board of boards) {
     if (typeof board.expectedNodes === "number" && board.expectedNodes > NODE_CAP_LARGE) {
       advisory.push({
-        id: "plan-over-large-cap",
+        id: "plan-over-node-cap",
         boardId: board.id,
-        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds ${NODE_CAP_LARGE} — confirm split, trim, or future XL/layout verification.`
+        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds the ${NODE_CAP_LARGE}-node maximum — confirm split or trim.`
       });
     }
   }
@@ -675,15 +675,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   }
 
   for (const bridge of bridges) {
-    const role = bridge.termRole || "reference";
-    if (role === "connector" && !hasInfoText(bridge.info)) {
-      const gap = {
-        id: "connector-info",
-        bridgeId: bridge.id || null,
-        message: `Connector bridge "${bridge.id || bridge.term || "?"}" needs info.text explaining its local function (no reference link).`
-      };
-      (boardOnly ? deferred : blocking).push(gap);
-    } else if (role !== "connector" && !hasAnyInfoSurface(bridge.info) && !bridge.fact) {
+    if (!hasAnyInfoSurface(bridge.info) && !bridge.fact) {
       advisory.push({
         id: "bridge-help",
         bridgeId: bridge.id || null,

@@ -1420,8 +1420,8 @@ let clearInfoTimer = null;
 let focusedInfoNode = null;
 // A node gets an outbound chip only when it authored a primary `link`
 // (or seeAlso/citations). Missing-link Wikipedia search is deprecated:
-// it looked unique and often landed on the wrong sense. Connector bridges
-// never had that fallback. The info-dot still marks hand-written text
+// it looked unique and often landed on the wrong sense. Bridges have no
+// automatic fallback. The info-dot still marks hand-written text
 // specifically — a link-only override with no note shouldn't look like a
 // definition.
 function appendInfoAnchor(container, href, label = null) {

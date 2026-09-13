@@ -329,9 +329,9 @@ npm run check-wiki-links            # only checks titles not already cached
 npm run check-wiki-links -- --force # re-checks everything
 ```
 
-It verifies that every reference term or bridge still relying on the
-auto-generated Wikipedia search actually has a matching article (connector
-bridges have no such fallback). That verifies the compatibility fallback; it
+It verifies that every term or bridge still relying on the
+auto-generated Wikipedia search actually has a matching article. That verifies
+the compatibility fallback; it
 does not make uncurated search the preferred authoring outcome. A verified
 direct resource is normally better, with search retained deliberately only
 when its result set offers useful exploratory paths. The tool also checks every curated
@@ -629,9 +629,7 @@ plus a few small backend pieces that need somewhere to run:
   `src/link-manifest.json`. The manifest contains curated Wikipedia links and
   any remaining overview-surface titles that still receive a search fallback;
   board terms, clusters, and bridges are collected only when they author a
-  `wiki:` link. Connector
-  bridges are intentionally absent because both automatic and authored
-  reference links are invalid for them. These
+  `wiki:` link. These
   references are only as good as the day they were checked.
   Wikipedia article titles do occasionally get renamed or merged; this
   catches that drift automatically instead of relying on someone
@@ -682,7 +680,7 @@ Cloudflare's "Workers Builds" (dashboard) for production deploys from
 - Pill width is estimated from character count (`modules/puzzleGraph.js: pillWidth`); very long terms may clip
 - Mobile works but isn't polished — a horizontal-overflow regression (the board rendering past the viewport edge) is covered by `tests/mobile-layout.mjs`, but touch target sizing and pinch-zoom are still unaddressed (see roadmap #9)
 - Cluster colors support seven non-semantic hues (`teal`, `blue`, `amber`, `magenta`, `olive`, `brown`, `cyan`); purple is reserved for bridges and natural green/red for success/error feedback — see [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#cluster-colors)
-- Puzzle sizing (standard vs. `large`) is covered in [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#puzzle-size-large), including the node-count guidance for each
+- The 25-node puzzle limit and derived layout behavior are covered in [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#puzzle-node-limit)
 - Cluster names are visible as a permanent heading in Circle and Star modes but never surface anywhere in (plain) Graph mode — there, cluster identity is color-only, and a cluster's name only appears via a wrong-guess hint message or the fact card after that cluster is fully completed. A player who hasn't triggered either yet may not know a colored cluster's name at all — deliberately so, per the player's own request: it's part of what makes Graph mode's extra challenge (over Star mode's otherwise-identical board) real
 
 ## Roadmap ideas (in rough priority order)

@@ -16,8 +16,6 @@ async function waitForPuzzle(page, id) {
 
 export async function run(page, baseURL) {
   assert.equal(searchLinkForTerm("negative feedback"), null);
-  assert.equal(searchLinkForTerm("negative feedback", "reference"), null);
-  assert.equal(searchLinkForTerm("how far to go", "connector"), null);
 
   assert.deepEqual(parseWikiShorthand("wiki:Irony#Dramatic irony"), {
     title: "Irony",
@@ -63,20 +61,18 @@ export async function run(page, baseURL) {
   assert.match(byWord.goodwill.info.link, /Eunoia/);
   assert.equal(byWord.emotion.info.link, null);
 
-  const connectorPuzzle = PUZZLES.find(candidate =>
+  const bridgePuzzle = PUZZLES.find(candidate =>
     candidate.id === "the-quiet-rebellion"
   );
-  const connectorNodes = buildNodesAndLinks(connectorPuzzle).nodes.filter(node =>
+  const bridgeNodes = buildNodesAndLinks(bridgePuzzle).nodes.filter(node =>
     node.gs.length > 1
   );
-  assert.deepEqual(
-    connectorNodes.map(node => [node.word, node.termRole]),
-    [
-      ["how far to go", "connector"],
-      ["beyond compliance", "connector"],
-      ["taken seriously", "connector"]
-    ]
-  );
+  assert.deepEqual(bridgeNodes.map(node => node.word), [
+    "how far to go",
+    "beyond compliance",
+    "taken seriously"
+  ]);
+  assert.ok(bridgeNodes.every(node => !Object.hasOwn(node, "termRole")));
 
   const legacy = normalizeInfo({
     text: "Legacy shape",
@@ -516,7 +512,7 @@ export async function run(page, baseURL) {
   );
 
   // Contextual bridge wording is useful on the board but not as a raw
-  // Wikipedia query. With no authored info of its own, hovering a connector
+  // Wikipedia query. With no authored info of its own, hovering a bridge
   // should neither synthesize a Search link nor leave an empty panel open.
   await page.goto(`${baseURL}/index.html?puzzle=the-quiet-rebellion`);
   await waitForPuzzle(page, "the-quiet-rebellion");
