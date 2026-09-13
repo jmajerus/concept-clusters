@@ -227,26 +227,19 @@ dateCreated
 dateModified
 language
 version
-generativeAssistance
 provenance
 ```
 
-`generativeAssistance` is compact current attribution for generative-AI help
-(not an edit history): an ordered list of
-`{ system, scope, role?, date? }`. `system` and `scope` are
-required; `scope` is `learningIntroduction`, `puzzle`, or `lenses`; `role`
-is `drafted` or `edited`. Keep one entry per system+scope and update it in
-place when the same assistant continues on that scope. The Lesson modal
-renders a short "Assisted by …" line from `learningIntroduction`- and
-`puzzle`-scoped entries.
-
-`provenance` is the optional two-axis authoring record
+`provenance` is the optional two-axis authoring record and the current model
+of record for authoring attribution
 (`collaboration` + `contributors`, plus optional client settings and
 author-owned `reviewedBy`). See
 [authoring provenance shape](dev-briefs/authoring-provenance-shape.md). It
-is meant to supersede the split between `generativeAssistance` and
-`learningIntroduction.credit` in a later interchange bump (byline becomes a
-derived L1 render). Agents should only author the L2 two-axis shape.
+replaces the retired split between `generativeAssistance` and
+`learningIntroduction.credit` (the byline is a derived L1 render). Agents
+should only author the L2 two-axis shape. Legacy JSON-LD input may still carry
+`generativeAssistance`; import accepts it for compatibility, folds it into
+`provenance`, and current exports omit it.
 
 Unknown namespaced properties such as `example:reviewStatus` are preserved
 through puzzle import/export instead of silently discarded. Unknown plain

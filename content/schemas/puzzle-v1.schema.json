@@ -32,21 +32,7 @@
     "dateCreated": { "type": "string", "format": "date" },
     "dateModified": { "type": "string", "format": "date" },
     "language": { "type": "string" }, "version": {},
-    "generativeAssistance": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["system", "scope"],
-        "properties": {
-          "system": { "$ref": "#/$defs/nonEmpty" },
-          "provider": { "$ref": "#/$defs/nonEmpty" },
-          "scope": { "enum": ["learningIntroduction", "puzzle", "lenses"] },
-          "role": { "enum": ["drafted", "edited"] },
-          "date": { "type": "string", "format": "date" }
-        }
-      }
-    },
+    "provenance": { "$ref": "#/$defs/provenance" },
     "layouts": { "type": "object" }
   },
   "$defs": {
@@ -65,6 +51,37 @@
     },
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "reference": { "type": "object", "required": ["@id"], "properties": { "@id": { "type": "string" } }, "additionalProperties": false },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contributors"],
+      "properties": {
+        "collaboration": { "type": "string", "enum": ["human", "humanPrimary", "aiPrimary", "ai"] },
+        "contributors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/nonEmpty" },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name"],
+                "properties": {
+                  "kind": { "type": "string", "enum": ["human", "generative"] },
+                  "name": { "$ref": "#/$defs/nonEmpty" },
+                  "provider": { "$ref": "#/$defs/nonEmpty" },
+                  "model": { "$ref": "#/$defs/nonEmpty" },
+                  "reasoning": { "type": "string", "enum": ["light", "medium", "high", "extra", "extraHigh", "ultra", "noThinking"] },
+                  "switch": { "type": "string", "enum": ["fast", "thinking"] }
+                }
+              }
+            ]
+          }
+        },
+        "reviewedBy": { "$ref": "#/$defs/nonEmpty" }
+      }
+    },
     "info": {
       "oneOf": [
         { "$ref": "#/$defs/nonEmpty" },

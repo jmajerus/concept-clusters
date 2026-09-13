@@ -30,6 +30,7 @@
     "dateCreated": { "@id": "schema:dateCreated", "@type": "http://www.w3.org/2001/XMLSchema#date" },
     "dateModified": { "@id": "schema:dateModified", "@type": "http://www.w3.org/2001/XMLSchema#date" },
     "language": "schema:inLanguage",
-    "generativeAssistance": { "@id": "cc:generativeAssistance", "@container": "@list" }
+    "generativeAssistance": { "@id": "cc:generativeAssistance", "@container": "@list" },
+    "provenance": "cc:provenance"
   }
 }

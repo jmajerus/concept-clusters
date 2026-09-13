@@ -10,8 +10,8 @@
 // "Simplified" means no @context/@id/@type/schemaVersion and no
 // cluster/bridge @id to hand-sync with id -- not a cut-down feature set.
 // Every current puzzle-content field JSON-LD can express, this schema can too.
-// Legacy JSON-LD bridge termRole is accepted only during import and removed
-// before simplified validation.
+// Legacy JSON-LD bridge termRole and generativeAssistance are accepted only
+// during import and removed before simplified validation.
 // Category references are stable ids; the authoring server accepts legacy
 // display titles only while reading and canonicalizes them before storage.
 import { z } from "zod";
@@ -87,18 +87,6 @@ const DirectionSchema = z.object({
   kind: z.enum(["undirected", "through", "bidirectional", "outward", "inward"]),
   from: SlugSchema.optional(),
   to: SlugSchema.optional()
-}).strict();
-
-// Matches modules/generativeAssistance.js. Both authoring-guidance blocks
-// instruct the author to set this before saving -- omitting it from a
-// .strict() schema would reject every AI-authored draft that follows the
-// tool's own instructions.
-const GenerativeAssistanceEntrySchema = z.object({
-  system: z.string().min(1),
-  scope: z.enum(["learningIntroduction", "puzzle", "lenses"]),
-  role: z.enum(["drafted", "edited"]).optional(),
-  provider: z.string().min(1).optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
 }).strict();
 
 // Every lens requires `explanation` regardless of mode
@@ -212,7 +200,6 @@ export const SimplifiedPuzzleInputSchema = z.object({
 
   relatedPuzzles: RelatedPuzzlesSchema.optional(),
   learningIntroduction: LearningIntroductionSchema.optional(),
-  generativeAssistance: z.array(GenerativeAssistanceEntrySchema).min(1).optional(),
   provenance: z.object({
     collaboration: z.enum(["human", "humanPrimary", "aiPrimary", "ai"]).optional(),
     contributors: z.array(z.union([
@@ -222,16 +209,11 @@ export const SimplifiedPuzzleInputSchema = z.object({
         name: z.string().min(1),
         provider: z.string().min(1).optional(),
         model: z.string().min(1).optional(),
-        // Per-contributor client settings (see authoringProvenance.js). The
-        // top-level fields below remain only for legacy documents predating
-        // that move, folded onto the sole generative contributor on
-        // normalize.
+        // Per-contributor client settings (see authoringProvenance.js).
         reasoning: z.enum(["light", "medium", "high", "extraHigh", "ultra", "noThinking"]).optional(),
         switch: z.enum(["fast", "thinking"]).optional()
       }).strict()
     ])).min(1),
-    reasoning: z.enum(["light", "medium", "high", "extraHigh", "ultra", "noThinking"]).optional(),
-    switch: z.enum(["fast", "thinking"]).optional(),
     speed: z.enum(["fast", "normal", "max", "ultracode"]).optional(),
     reviewedBy: z.string().max(80).optional()
   }).strict().optional(),

@@ -1,8 +1,9 @@
 # Authoring provenance shape
 
-**Status: implemented in schema/runtime as optional `provenance` — keep
-`generativeAssistance` / `learningIntroduction.credit` until a later
-interchange bump retires them.**
+**Status: implemented in schema/runtime as optional `provenance`; the active
+simplified/MCP contract is provenance-only. Legacy `generativeAssistance` and
+`learningIntroduction.credit` remain read/import compatibility paths and are
+not active authoring fields.**
 
 Compact structured authoring provenance for human and generative-AI input to a
 digital work product (Concept Clusters puzzles first). The saved shape is the
@@ -177,11 +178,11 @@ Intended end state:
 | Model of record | Puzzle-level `provenance` (two axes) |
 | Player byline | **Derived L1** from `provenance` (optional human override cache if needed) |
 | Today’s `learningIntroduction.credit` | **Retire** after interchange bump (legacy L1 string) |
-| Today’s `generativeAssistance` | **Fold into** generative `contributors` (+ mode); keep until the same bump |
+| Legacy `generativeAssistance` | **Fold into** generative `contributors` (+ mode); retain only at read/import boundaries |
 
-Until that bump, keep shipping `generativeAssistance` and
-`learningIntroduction.credit` as today. New design work and future MCP guidance
-should speak in `provenance` terms.
+New authoring and MCP guidance speaks only in `provenance` terms. Existing
+documents may still carry the legacy fields until they are explicitly saved or
+canonicalized; those boundaries fold them into `provenance` where possible.
 
 ## Concept Clusters mapping (today → proposed)
 
@@ -191,7 +192,7 @@ should speak in `provenance` terms.
 | Human from drafts UI / JWT / default author when known | Human `contributors` |
 | Directed / drafted-only / human-only bylines | L1 from `collaboration` + names |
 | `learningIntroduction.credit` | Derived L1 (or temporary override); not the model of record |
-| `generativeAssistance` scopes / roles / dates | Collapse to mode for agents; scopes/roles/dates → L3 if kept |
+| Legacy assistance scopes / roles / dates | Not part of the puzzle document; retained in the append-only D1 assistance-stamp audit |
 
 ## Separation of concerns
 
@@ -216,5 +217,9 @@ should speak in `provenance` terms.
    provenance; when L1 can render, **deletes** stored `learningIntroduction.credit`
    so the byline stays derived. Opaque legacy credits remain only when L1 cannot
    render.
-3. **Later interchange bump** — drop `generativeAssistance` with read compatibility;
-   remove legacy credit field from schema when corpus is migrated.
+3. **Authoring/export contract migration (now)** — remove
+   `generativeAssistance` from the active simplified/MCP and export schemas
+   while retaining read/import compatibility. The wire/content version remains
+   v1 because readers still accept the legacy shape. The separate legacy
+   `learningIntroduction.credit` read/display fallback can be retired in a
+   later byline migration after existing opaque credits have been reviewed.
