@@ -275,14 +275,13 @@ on it; otherwise prefer `recommended` or `optional`.
 
 Instructional content should point toward richer resources rather than trying
 to teach everything inline. Preserve exact citations discovered during
-research instead of planning to reconstruct them later. Keep generative
-assistance as compact current attribution—one entry per system and scope—not
-an edit log or a citation. A proposed two-axis `provenance` shape (contributors
-+ collaboration mode) would replace that split later; see
+research instead of planning to reconstruct them later. Keep authoring
+assistance as compact attribution in the puzzle-level `provenance` shape—not
+an edit log or a citation. The server may add the identified MCP host; see
 [authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
 
 See [learning introductions](AUTHORING-REFERENCE.md#learning-introductions)
-and [generative assistance](AUTHORING-REFERENCE.md#generative-assistance).
+and [provenance](AUTHORING-REFERENCE.md#provenance).
 
 ## Discovery and stewardship
 
@@ -330,7 +329,8 @@ Before validation and human review, check the complete puzzle as one lesson:
 - The complete board stays at or below 25 total nodes; layout is derived.
 - The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
-- `generativeAssistance` reflects the current AI-authored or AI-edited scopes.
+- `provenance` reflects known human and generative contributors; leave it
+  unset when attribution is unknown.
 
 Then run `validate_puzzle_draft` for MCP drafts or `node validate.mjs` for a
 direct repository edit. Structural validation is necessary, but the judgments

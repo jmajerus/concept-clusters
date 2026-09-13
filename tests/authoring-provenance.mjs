@@ -675,7 +675,7 @@ export async function run() {
       collaboration: "ai",
       contributors: [{ name: "Cursor", reasoning: "nope" }]
     }),
-    ['provenance.contributors[0].reasoning must be one of light, medium, high, extraHigh, ultra, noThinking']
+    ['provenance.contributors[0].reasoning must be one of light, medium, high, extra, extraHigh, ultra, noThinking']
   );
 
   const clientSet = applyProvenanceClientSetting({

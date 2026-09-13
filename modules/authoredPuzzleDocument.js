@@ -2,8 +2,8 @@
 // Leftover link/extraLink/seeAlso fold into `links` when a document
 // enters a draft, and again when a stored draft is loaded for authoring,
 // so MCP tools and the copy editor always see the current schema.
-// Provenance folds generativeAssistance into the two-axis record, drops the
-// legacy block when provenance is present, and may fill/normalize a parseable
+// Provenance folds legacy generativeAssistance into the two-axis record, drops
+// the retired block when provenance is present, and may fill/normalize a parseable
 // lesson byline from L1. Lesson Markdown that used the two-character sequence
 // \n instead of real line breaks is decoded the same way. Storage is not
 // rewritten on read. JSON-LD is interchange-only and is never what gets persisted,
@@ -85,6 +85,15 @@ export function documentHasRetiredBridgeTermRole(document) {
       bridge && typeof bridge === "object" && !Array.isArray(bridge)
       && Object.hasOwn(bridge, "termRole")
     )));
+}
+
+// `generativeAssistance` is no longer part of the active simplified/MCP
+// authoring contract. Keep a narrow presence check for corpus migration and
+// storage flags: legacy values are folded by canonicalizeDocumentProvenance,
+// while malformed values still reach the strict schema and produce an error.
+export function documentHasRetiredGenerativeAssistance(document) {
+  return !!(document && typeof document === "object" && !Array.isArray(document)
+    && Object.hasOwn(document, "generativeAssistance"));
 }
 
 // Category references are the one schema migration that changes values, not
@@ -305,7 +314,7 @@ export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
 const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
-    "This stored draft still uses legacy link, citation, provenance, or bridge-role fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, and unclassified bridge terms). The folded form is already what authoring tools show; storage does not change until you save."
+    "This stored draft still uses legacy link, citation, generative-assistance, provenance, or bridge-role fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, and unclassified bridge terms). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
 const SAVE_RENAMED_CATEGORIES_FLAG = Object.freeze({

@@ -66,7 +66,9 @@
 // 5.3: same review bar; the legacy bridge-role annotation was retired. Bridge terms are
 // ordinary authored concepts; use relationKind only when the relationship
 // itself needs classification.
+// 5.4: same review bar; puzzle-level provenance is the sole active authoring
+// attribution shape. Legacy generative-assistance data is read/import only.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 3
+  minor: 4
 });

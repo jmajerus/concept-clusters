@@ -128,7 +128,8 @@ when needed to disambiguate). The native Muse Code runtime uses Meta's exact
 `tbh` codename; match that name, not a broad prefix. Only Codex is known to
 expose a **model** in the call frame today.
 
-On draft create/save, the server stamps `generativeAssistance` from that host.
+On draft create/save, the server stamps a generative contributor in
+`provenance` from that host when it can identify one.
 
 ### Recognition doctrine (read before adding rules)
 
@@ -148,7 +149,9 @@ On draft create/save, the server stamps `generativeAssistance` from that host.
   labels are attached. Nothing may identify a call by its label.
 - **Guidance stays universal; records stay author-originated.** Authoring
   guidance tells every drafting client *to* attribute, never *as whom*. Agents
-  write their own `generativeAssistance` entries only.
+  may supply their own `provenance` contributor name; the server stamps the
+  identified MCP host. Legacy `generativeAssistance` entries are folded on
+  import and are not an active write shape.
 
 **Host registry:** `modules/authoringHosts.js` — add a label entry here, then
 add a matching fingerprint in `modules/mcpClientIdentity.js` (same `id` key).

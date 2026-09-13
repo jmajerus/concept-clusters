@@ -267,14 +267,13 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   a second list on the lesson. When a learningIntroduction exists, play
   shows that list under References in the Lesson dialog; otherwise it
   shows on the board. Do not duplicate references across surfaces.
-- generativeAssistance is optional structured AI attribution, not the lesson
-  footnote. The server also stamps it (and provenance) from the MCP call-frame
-  host on draft create/save. Do not write learningIntroduction.credit; the
-  player byline is derived from provenance. If you still set
-  generativeAssistance yourself, keep it compact: one entry per system+scope,
-  not an edit log, and do not put AI credit in citations.
-- provenance is optional and agent-cheap: prefer
-  \`{ contributors: ["Cursor", "Jane Doe"] }\`. Known AI host names
+- provenance is optional structured authoring attribution, not the lesson
+  footnote. Prefer \`{ contributors: ["Cursor", "Jane Doe"] }\`; the server
+  stamps a generative contributor from the MCP call-frame host on draft
+  create/save when it can identify one. Do not write learningIntroduction.credit;
+  the player byline is derived from provenance. Do not put AI credit in
+  citations.
+- Known AI host names
   (authoringHosts.js) are inferred as generative; other names as human.
   Storage keeps names (+ collaboration); kind is omitted when derivable and
   provider is never stored, so draft reads stay cheap. Collaboration defaults
@@ -481,9 +480,8 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 - Add only useful discovery and stewardship metadata: tags, secondary category
   assignments, level, related puzzles, attribution, licensing, language, dates,
   and version. Most are optional; omission is better than filler.
-- Keep generativeAssistance optional (the server may already have stamped the
-  MCP host). Keep provenance optional the same way — agents can send bare
-  contributor names; kinds/mode are inferred. Do not write
+- Keep provenance optional — the server may already have stamped the MCP host;
+  agents can send bare contributor names and kinds/mode are inferred. Do not write
   learningIntroduction.credit; the lesson byline is derived from provenance
   (humans override collaboration and may name a reviewer on the drafts page).
   Do not invent a reviewer name. Do not treat dates,

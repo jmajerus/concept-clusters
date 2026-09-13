@@ -388,9 +388,35 @@ export async function run() {
     }
   });
   assert.deepEqual(assisted.errors, []);
+  assert.ok(assisted.reasons.includes("generative-assistance-removed"));
   assert.equal(assisted.document.generativeAssistance, undefined);
   assert.equal(assisted.document.provenance.collaboration, "ai");
   assert.equal(assisted.document.provenance.contributors[0].name, "A drafting system");
+
+  const assistedSimplified = canonicalizePuzzleDocument(puzzleDocument({
+    generativeAssistance: [{ system: "A drafting system", scope: "puzzle" }]
+  }), { categoryRegistry: categories });
+  assert.deepEqual(assistedSimplified.errors, []);
+  assert.ok(assistedSimplified.reasons.includes("generative-assistance-removed"));
+  assert.equal(assistedSimplified.document.generativeAssistance, undefined);
+  assert.equal(assistedSimplified.document.provenance.collaboration, "ai");
+
+  // Validate legacy attribution before JSON-LD projection: an invalid entry
+  // must not disappear merely because current simplified output omits the
+  // retired field.
+  const malformedAssistedJsonLd = canonicalizePuzzleDocument({
+    ...jsonLd,
+    generativeAssistance: [{}]
+  }, {
+    categoryRegistry: {
+      "Political Science": { slug: "political-science" },
+      Philosophy: { slug: "philosophy" }
+    }
+  });
+  assert.equal(malformedAssistedJsonLd.document, null);
+  assert.ok(malformedAssistedJsonLd.errors.some(error =>
+    error.includes("generativeAssistance[0].system")
+  ));
 
   const escapedLesson = {
     ...jsonLd,

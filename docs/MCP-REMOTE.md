@@ -61,6 +61,9 @@ should use the schema resource or tool, rather than `tools/list` alone, to
 discover nested authoring fields such as `bridges[].relationKind` and
 `bridges[].direction`.
 Bridge terms are ordinary authored concepts; there is no separate role field.
+Attribution uses optional puzzle-level `provenance`; legacy
+`generativeAssistance` is accepted only while importing older documents and is
+folded before a current draft is validated or stored.
 
 Both authoring tools accept an optional `phase`: `core`, `review`, `pedagogy`,
 `publication`, or `complete`. Omitting it remains equivalent to `complete` for

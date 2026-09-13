@@ -100,7 +100,10 @@ optional, as are:
   title?, summary?, estimatedMinutes?, content: {text}, links?:
   (same shape as info.links), citations?}`. Nested cluster/term/bridge `info` is
   `{text?, links?}` — bibliography stays on the puzzle.
-- `generativeAssistance` (see `get_authoring_guidance` for when to set this).
+- `provenance` (optional structured authoring attribution; see
+  `get_authoring_guidance` for when to set this). Legacy
+  `generativeAssistance` is accepted only while reading/importing older
+  documents and is folded into `provenance` before validation and storage.
 - Provenance pass-through: `creator`, `license`, `derivedFrom`,
   `dateCreated`, `dateModified`, `language`, `version` -- plain strings,
   carried through unchanged.
