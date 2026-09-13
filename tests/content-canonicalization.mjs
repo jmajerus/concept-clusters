@@ -388,9 +388,18 @@ export async function run() {
     }
   });
   assert.deepEqual(assisted.errors, []);
+  assert.ok(assisted.reasons.includes("generative-assistance-removed"));
   assert.equal(assisted.document.generativeAssistance, undefined);
   assert.equal(assisted.document.provenance.collaboration, "ai");
   assert.equal(assisted.document.provenance.contributors[0].name, "A drafting system");
+
+  const assistedSimplified = canonicalizePuzzleDocument(puzzleDocument({
+    generativeAssistance: [{ system: "A drafting system", scope: "puzzle" }]
+  }), { categoryRegistry: categories });
+  assert.deepEqual(assistedSimplified.errors, []);
+  assert.ok(assistedSimplified.reasons.includes("generative-assistance-removed"));
+  assert.equal(assistedSimplified.document.generativeAssistance, undefined);
+  assert.equal(assistedSimplified.document.provenance.collaboration, "ai");
 
   const escapedLesson = {
     ...jsonLd,

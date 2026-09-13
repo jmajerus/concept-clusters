@@ -10,7 +10,8 @@ import { categoryReferenceIssues } from "./categoryReferenceMigration.js";
 import {
   documentForStorage,
   canonicalizeAuthoredDocumentFields,
-  documentHasRetiredBridgeTermRole
+  documentHasRetiredBridgeTermRole,
+  documentHasRetiredGenerativeAssistance
 } from "./authoredPuzzleDocument.js";
 import {
   isJsonLdShaped,
@@ -28,7 +29,10 @@ const JSON_LD_TOP_LEVEL_KEYS = new Set([
   "categories", "subcategories", "large", "info", "relatedPuzzles",
   "lensMode", "lenses", "preSolve", "tags", "level", "learningIntroduction",
   "clusters", "bridges", "creator", "license", "derivedFrom", "dateCreated",
-  "dateModified", "language", "version", "generativeAssistance", "provenance",
+  "dateModified", "language", "version",
+  // Legacy JSON-LD may still carry this field. It is recognized so import
+  // compatibility can fold it into provenance; current exports omit it.
+  "generativeAssistance", "provenance",
   "layouts"
 ]);
 
@@ -451,6 +455,7 @@ export function canonicalizePuzzleDocument(
 
   const sourceFormat = isJsonLdShaped(document) ? "jsonld" : "simplified";
   const hadRetiredBridgeTermRole = documentHasRetiredBridgeTermRole(document);
+  const hadRetiredGenerativeAssistance = documentHasRetiredGenerativeAssistance(document);
   let canonical;
   let sourceSimplified = document;
   let jsonLdIdCorrections = [];
@@ -542,6 +547,10 @@ export function canonicalizePuzzleDocument(
   }
   if (hadRetiredBridgeTermRole || documentHasRetiredBridgeTermRole(sourceSimplified)) {
     reasons.push("term-role-removed");
+  }
+  if (hadRetiredGenerativeAssistance
+    || documentHasRetiredGenerativeAssistance(sourceSimplified)) {
+    reasons.push("generative-assistance-removed");
   }
   const categoryCanonical = categoryReferences(fieldCanonical, registry);
   if (categoryCanonical) reasons.push("category-identifiers");

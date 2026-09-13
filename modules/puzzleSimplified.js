@@ -53,7 +53,8 @@ function stableIds(items, labelFor) {
 // simplifiedPuzzleSchema.js), even when it happens to already equal
 // seeds-then-floatingTerms, so this never depends on floatingTerms order
 // reconstructing anything. Retired legacy bridge termRole is intentionally
-// omitted from the current projection.
+// omitted from the current projection. Retired generativeAssistance is folded
+// into provenance before projection when a legacy runtime module still has it.
 export function puzzleToSimplified(
   puzzle,
   {
@@ -62,9 +63,14 @@ export function puzzleToSimplified(
     categoryRegistry
   } = {}
 ) {
+  // Runtime modules from before the provenance migration may still carry the
+  // legacy generative-assistance array. Canonicalize that read projection too
+  // so authoring/interchange callers do not silently lose attribution merely
+  // because they bypassed the publication wrapper.
+  const withProvenance = canonicalizeDocumentProvenance(puzzle);
   const source = canonicalCategories
-    ? canonicalizePuzzleCategoryReferences(puzzle, categoryRegistry)
-    : puzzle;
+    ? canonicalizePuzzleCategoryReferences(withProvenance, categoryRegistry)
+    : withProvenance;
   const clusterIds = stableIds(source.clusters, cluster => cluster.name);
   const bridgeIds = stableIds(source.bridges, bridge => bridge.term);
 
@@ -146,7 +152,6 @@ export function puzzleToSimplified(
     ...(source.preSolve !== undefined ? { preSolve: source.preSolve } : {}),
     ...(source.relatedPuzzles ? { relatedPuzzles: clone(source.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
-    ...(source.generativeAssistance ? { generativeAssistance: clone(source.generativeAssistance) } : {}),
     ...(source.provenance ? { provenance: clone(source.provenance) } : {}),
     ...(source.creator ? { creator: source.creator } : {}),
     ...(source.license ? { license: source.license } : {}),
@@ -164,9 +169,8 @@ export function puzzleToSimplified(
 //
 // Install and publication replace the puzzle as one JSON blob. That write
 // is when leftover link/extraLink/seeAlso become `links` puzzle-wide,
-// generativeAssistance folds into two-axis provenance and is dropped, and
-// puzzleToSimplified stays a lossless round-trip so unedited published
-// puzzles do not look rewritten in checkout diffs when nothing needs folding.
+// legacy generativeAssistance folds into two-axis provenance and is dropped,
+// and puzzleToSimplified emits only the current schema fields.
 export function puzzleForCanonicalPublication(puzzle, options) {
   const next = hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(

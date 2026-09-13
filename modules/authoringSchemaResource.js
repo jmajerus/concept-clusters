@@ -4,7 +4,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.11.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.12.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export const AUTHORING_PHASES = Object.freeze([
   "complete",
@@ -41,7 +41,7 @@ const generatedAuthoringProperties = Object.fromEntries(
 export const SIMPLIFIED_PUZZLE_SCHEMA = Object.freeze({
   ...generatedSimplifiedPuzzleSchema,
   description:
-    "Complete simplified puzzle authoring contract. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
+    "Complete simplified puzzle authoring contract. Use provenance for attribution; legacy attribution is folded by the compatibility boundary and is not an authoring field. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
   // Zod deliberately keeps these input fields permissive so a legacy title
   // can be canonicalized before parsing. The discoverable authoring contract
   // should nevertheless teach clients to send the new stable-id shape.
@@ -82,7 +82,7 @@ const PHASE_FIELDS = Object.freeze({
   publication: Object.freeze({
     root: [
       "categories", "subcategories", "tags", "level", "relatedPuzzles",
-      "generativeAssistance", "provenance", "creator", "license", "derivedFrom",
+      "provenance", "creator", "license", "derivedFrom",
       "dateCreated", "dateModified", "language", "version"
     ]
   })

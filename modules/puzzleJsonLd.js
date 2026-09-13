@@ -12,6 +12,7 @@ import {
   referenceId,
   validatePuzzleJsonLdProfile
 } from "./jsonLdProfile.js";
+import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
 const PUZZLE_KEYS = new Set([
   "@context", "@id", "@type", "schemaVersion", "id", "title", "category",
@@ -19,7 +20,7 @@ const PUZZLE_KEYS = new Set([
   "preSolve", "tags", "level",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
   "derivedFrom", "dateCreated", "dateModified", "language", "version",
-  "generativeAssistance", "provenance", "layouts"
+  "provenance", "layouts"
 ]);
 
 function clone(value) {
@@ -80,15 +81,19 @@ export function puzzleToJsonLd(
     categoryRegistry
   } = {}
 ) {
+  // Legacy runtime modules may still carry generativeAssistance. Fold it on
+  // the projection boundary so current exports retain attribution as
+  // provenance while never re-emitting the retired field.
+  const withProvenance = canonicalizeDocumentProvenance(puzzle);
   // Interchange callers can request the same stable category-id projection
   // as canonical authoring/publication storage without changing the legacy
   // default used by older hand-authored runtime fixtures.
   const categorySource = canonicalCategories
-    ? canonicalizePuzzleCategoryReferences(puzzle, categoryRegistry)
-    : puzzle;
-  const clusterIds = stableLocalIds(puzzle.clusters, "cluster", cluster => cluster.name);
-  const bridgeIds = stableLocalIds(puzzle.bridges, "bridge", bridge => bridge.term);
-  const clusters = puzzle.clusters.map((cluster, index) => copyExtensions(cluster, {
+    ? canonicalizePuzzleCategoryReferences(withProvenance, categoryRegistry)
+    : withProvenance;
+  const clusterIds = stableLocalIds(categorySource.clusters, "cluster", cluster => cluster.name);
+  const bridgeIds = stableLocalIds(categorySource.bridges, "bridge", bridge => bridge.term);
+  const clusters = categorySource.clusters.map((cluster, index) => copyExtensions(cluster, {
     "@id": `#${clusterIds[index]}`,
     "@type": JSON_LD_TYPES.cluster,
     id: clusterIds[index],
@@ -101,7 +106,7 @@ export function puzzleToJsonLd(
     ...(cluster.info ? { info: clone(cluster.info) } : {})
   }, new Set(["id", "name", "color", "fact", "terms", "seeds", "termInfo", "info"])));
 
-  const bridges = puzzle.bridges.map((bridge, index) => {
+  const bridges = categorySource.bridges.map((bridge, index) => {
     const clusterRefs = bridge.clusters.map(clusterIndex => ({
       "@id": `#${clusterIds[clusterIndex]}`
     }));
@@ -138,8 +143,8 @@ export function puzzleToJsonLd(
     ]));
   });
 
-  const introduction = puzzle.learningIntroduction
-    ? clone(puzzle.learningIntroduction)
+  const introduction = categorySource.learningIntroduction
+    ? clone(categorySource.learningIntroduction)
     : undefined;
   if (introduction && learningContent !== null) {
     introduction.content = {
@@ -150,22 +155,22 @@ export function puzzleToJsonLd(
 
   const document = {
     "@context": CONCEPT_CLUSTERS_CONTEXT,
-    "@id": puzzleUrn(puzzle.id),
+    "@id": puzzleUrn(categorySource.id),
     "@type": JSON_LD_TYPES.puzzle,
     schemaVersion: CONTENT_SCHEMA_VERSION,
-    id: puzzle.id,
-    title: puzzle.title,
+    id: categorySource.id,
+    title: categorySource.title,
     category: categorySource.category,
     ...(categorySource.categories ? { categories: [...categorySource.categories] } : {}),
     ...(categorySource.subcategories ? { subcategories: clone(categorySource.subcategories) } : {}),
-    ...largeField(puzzleNodeCount(puzzle)),
-    ...(puzzle.tags ? { tags: [...puzzle.tags] } : {}),
-    ...(puzzle.level ? { level: puzzle.level } : {}),
-    ...(puzzle.info ? { info: clone(puzzle.info) } : {}),
-    ...(puzzle.relatedPuzzles ? { relatedPuzzles: relatedToJsonLd(puzzle.relatedPuzzles) } : {}),
-    ...(puzzle.lensMode ? { lensMode: puzzle.lensMode } : {}),
-    ...(puzzle.preSolve ? { preSolve: true } : {}),
-    ...(puzzle.lenses ? { lenses: puzzle.lenses.map(lens => ({
+    ...largeField(puzzleNodeCount(categorySource)),
+    ...(categorySource.tags ? { tags: [...categorySource.tags] } : {}),
+    ...(categorySource.level ? { level: categorySource.level } : {}),
+    ...(categorySource.info ? { info: clone(categorySource.info) } : {}),
+    ...(categorySource.relatedPuzzles ? { relatedPuzzles: relatedToJsonLd(categorySource.relatedPuzzles) } : {}),
+    ...(categorySource.lensMode ? { lensMode: categorySource.lensMode } : {}),
+    ...(categorySource.preSolve ? { preSolve: true } : {}),
+    ...(categorySource.lenses ? { lenses: categorySource.lenses.map(lens => ({
       "@id": `#lens-${lens.id}`,
       "@type": JSON_LD_TYPES.lens,
       ...clone(lens)
@@ -176,12 +181,12 @@ export function puzzleToJsonLd(
   };
   for (const key of [
     "creator", "license", "derivedFrom", "dateCreated", "dateModified",
-    "language", "version", "generativeAssistance", "provenance"
+    "language", "version", "provenance"
   ]) {
-    if (puzzle[key] !== undefined) document[key] = clone(puzzle[key]);
+    if (categorySource[key] !== undefined) document[key] = clone(categorySource[key]);
   }
   if (layouts) document.layouts = clone(layouts);
-  return copyExtensions(puzzle, document, PUZZLE_KEYS);
+  return copyExtensions(categorySource, document, PUZZLE_KEYS);
 }
 
 export function puzzleFromJsonLd(document) {
@@ -254,6 +259,9 @@ export function puzzleFromJsonLd(document) {
     bridges
   };
   Object.assign(puzzle, largeField(puzzleNodeCount(puzzle)));
+  // Legacy JSON-LD may still carry generativeAssistance. Keep accepting it
+  // on import so the shared provenance canonicalizer can fold it; current
+  // JSON-LD exports never emit the retired field.
   for (const key of [
     "creator", "license", "derivedFrom", "dateCreated", "dateModified",
     "language", "version", "generativeAssistance", "provenance"

@@ -4,8 +4,9 @@
 //
 // "Simplified" means the identity ceremony is gone, not that features are
 // gone: every current puzzle-content field the interchange JSON-LD format can
-// express, this format can too. Legacy bridge termRole is migration-only and
-// is removed before this schema is parsed. JSON-LD is interchange-only
+// express, this format can too. Legacy bridge termRole and
+// generativeAssistance are migration-only and are removed before this schema
+// is parsed. JSON-LD is interchange-only
 // (content:export/import), never a stored draft. Live authoring uses
 // puzzleFromAuthoredDocument() to reach the runtime puzzle model.
 import * as z from "zod/v4";
@@ -20,8 +21,6 @@ import {
   normalizeAuthoringProvenance
 } from "./authoringProvenance.js";
 import {
-  GENERATIVE_ASSISTANCE_ROLES,
-  GENERATIVE_ASSISTANCE_SCOPES,
   MAX_LESSON_CREDIT_LENGTH
 } from "./generativeAssistance.js";
 import {
@@ -167,18 +166,6 @@ const LensSchema = z.object({
   reasons: z.record(z.string().min(1), z.string().min(1)).optional(),
   options: z.array(LensOptionSchema).optional()
 }).strict();
-
-// Matches modules/generativeAssistance.js. Both authoring-guidance blocks
-// instruct the author to set this before saving, so it has to be
-// representable here -- a .strict() schema that omitted it would reject
-// every AI-authored draft that follows the tool's own instructions.
-const GenerativeAssistanceEntrySchema = z.object({
-  system: z.string().min(1),
-  scope: z.enum([...GENERATIVE_ASSISTANCE_SCOPES]),
-  role: z.enum([...GENERATIVE_ASSISTANCE_ROLES]).optional(),
-  provider: z.string().min(1).optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "must be YYYY-MM-DD").optional()
-}).strict().transform(({ provider: _legacyProvider, ...entry }) => entry);
 
 // Two-axis authoring provenance (docs/dev-briefs/authoring-provenance-shape.md).
 // Agents may send bare contributor names; kinds and collaboration are inferred
@@ -332,7 +319,6 @@ export const SimplifiedPuzzleInputSchema = z.object({
   preSolve: z.boolean().optional(),
   relatedPuzzles: RelatedPuzzlesSchema.optional(),
   learningIntroduction: LearningIntroductionSchema.optional(),
-  generativeAssistance: z.array(GenerativeAssistanceEntrySchema).min(1).optional(),
   provenance: ProvenanceSchema.optional(),
   // Pass-through publication metadata -- not semantically validated by
   // contentValidation.js, just carried through unchanged. `layouts` (Star
@@ -537,7 +523,6 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     ...(input.preSolve !== undefined ? { preSolve: input.preSolve } : {}),
     ...(input.relatedPuzzles ? { relatedPuzzles: clone(input.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
-    ...(input.generativeAssistance ? { generativeAssistance: clone(input.generativeAssistance) } : {}),
     ...(input.provenance ? { provenance: clone(input.provenance) } : {}),
     ...(input.creator ? { creator: input.creator } : {}),
     ...(input.license ? { license: input.license } : {}),

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { validateJsonLdProfile } from "../modules/jsonLdProfile.js";
 import { validatePuzzleContent } from "../modules/contentValidation.js";
-import { validateGenerativeAssistance } from "../modules/generativeAssistance.js";
 import { puzzleFromJsonLd } from "../modules/puzzleJsonLd.js";
 import {
   isJsonLdShaped,
@@ -177,14 +176,23 @@ export async function run() {
     assert.ok(result.errors.some(e => e.includes("description")));
   }
 
-  // generativeAssistance round-trips and passes its own validator.
+  // Legacy generativeAssistance is no longer an active simplified/MCP field.
+  // The compatibility boundary folds valid entries into provenance before
+  // the strict schema sees them; malformed values remain schema errors.
   {
     const input = validPuzzle({
       generativeAssistance: [{ system: "Claude", scope: "puzzle", role: "drafted" }]
     });
-    const { document, errors } = normalizeAuthoredPuzzleDocument(input);
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(input).success, false);
+    const { puzzle, errors } = puzzleFromAuthoredDocument(input);
     assert.deepEqual(errors, []);
-    assert.deepEqual(validateGenerativeAssistance(document.generativeAssistance), []);
+    assert.equal(puzzle.generativeAssistance, undefined);
+    assert.equal(puzzle.provenance.collaboration, "ai");
+    assert.deepEqual(puzzle.provenance.contributors, [{ name: "Claude" }]);
+    const normalized = normalizeAuthoredPuzzleDocument(input);
+    assert.deepEqual(normalized.errors, []);
+    assert.equal(normalized.document.generativeAssistance, undefined);
+    assert.equal(normalized.document.provenance.collaboration, "ai");
   }
 
   // Already-JSON-LD-shaped input passes through unchanged, untouched.
@@ -545,18 +553,22 @@ export async function run() {
     { name: "Muse Code (Spark 1.3)", reasoning: "high", switch: "fast" }
   ]);
 
-  // Legacy document-wide reasoning/switch (pre-per-client) is still
-  // accepted on input and folds onto the sole generative contributor.
-  const legacyClientSettings = SimplifiedPuzzleInputSchema.safeParse(validPuzzle({
+  // Legacy document-wide reasoning/switch (pre-per-client) is still accepted
+  // at the authoring compatibility boundary and folds onto the sole
+  // generative contributor. The raw strict schema correctly rejects it.
+  const legacyClientInput = validPuzzle({
     provenance: {
       collaboration: "ai",
       contributors: [{ name: "Cursor" }],
       reasoning: "high",
       switch: "fast"
     }
-  }));
-  assert.equal(legacyClientSettings.success, true, JSON.stringify(legacyClientSettings.error?.issues));
-  assert.deepEqual(legacyClientSettings.data.provenance.contributors, [
+  });
+  assert.equal(SimplifiedPuzzleInputSchema.safeParse(legacyClientInput).success, false);
+  const { puzzle: legacyClientSettings, errors: legacyClientErrors } =
+    puzzleFromAuthoredDocument(legacyClientInput);
+  assert.deepEqual(legacyClientErrors, []);
+  assert.deepEqual(legacyClientSettings.provenance.contributors, [
     { name: "Cursor", reasoning: "high", switch: "fast" }
   ]);
 }

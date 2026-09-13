@@ -93,12 +93,9 @@ JSON-LD is portable interchange, not the everyday authoring format.
     // Bibliographic references belong on puzzle info.citations (one list);
     // the Lesson dialog renders that same list under References.
   },
-  generativeAssistance: [ {    // optional AI attribution; see
-    system: "Claude",           // "Generative assistance" below
-    scope: "learningIntroduction",
-    role: "drafted",
-    date: "2026-08-03"
-  } ],
+  provenance: {                 // optional structured attribution; see below
+    contributors: ["Claude"]
+  },
   lenses: [ {                   // optional post-solve rounds; see
                                  // "Concept Lenses" below
     id: "direct-evidence",
@@ -1025,43 +1022,27 @@ Bibliographic credit is **not** authored on the lesson. Use puzzle
 When a learning introduction exists, that same list renders at the bottom
 of the Lesson dialog under a **References** heading (below `links` when
 both are present); without a lesson, it renders on the board.
-AI drafting credit belongs on puzzle-level `generativeAssistance` instead
-(see below), which the Lesson modal turns into a short "Assisted by …" line.
 `learningIntroduction.credit` remains only as a **legacy** stored byline when
 provenance cannot derive L1 (or for opaque freeform lines). Prefer structured
 puzzle-level `provenance`; the Lesson modal and drafts derive the visible
 byline via `resolveLessonByline`. See
 [authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
 
-### Generative assistance
+### Provenance
 
-`generativeAssistance` records which AI systems materially helped author
-the puzzle. It is **current attribution**, not a changelog. Optional
-successor field (already accepted on drafts/runtime): compact two-axis
-`provenance` (`contributors` + `collaboration` mode) — see
-[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
-Agents should only author that L2 shape; player bylines are derived from
-provenance (`resolveLessonByline`), not written as `credit`. Optional
-`reviewedBy` is author-owned attribution on that derived byline, not a
-contributor and not a sign-off.
+Puzzle-level `provenance` is the current model of record for authoring
+attribution. Agents should send the compact L2 shape, normally just bare
+contributor names (for example `{ contributors: ["Claude", "Jane Doe"] }`);
+the server infers contributor kinds and collaboration mode and may stamp the
+identified MCP host. Player bylines are derived from provenance, not authored
+as `learningIntroduction.credit`. Optional `reviewedBy` is human-owned
+attribution on that derived byline, not a contributor or sign-off.
 
-```js
-generativeAssistance: [
-  {
-    system: "Claude",           // required — chatbot / product name
-    scope: "learningIntroduction", // required: learningIntroduction | puzzle | lenses
-    role: "drafted",            // optional: drafted | edited
-    date: "2026-08-03"          // optional YYYY-MM-DD
-  }
-]
-```
-
-Keep **one entry per `system`+`scope`**. When the same assistant continues
-on that scope, update that entry in place (and optionally refresh `date`)
-instead of appending. MCP authoring guidance and the draft tools ask
-chatbots to populate this when they draft or materially regenerate
-content. The Lesson modal credits systems whose scope is
-`learningIntroduction` or `puzzle`.
+Older JSON-LD and stored drafts may still contain `generativeAssistance`.
+The import/read compatibility boundary validates and folds those entries into
+provenance, and current simplified documents and JSON-LD exports never emit
+the retired field. Scope/role/date audit detail belongs in the append-only D1
+assistance-stamp record, not in the puzzle document.
 
 The first implementation intentionally supports a safe Markdown subset:
 headings, paragraphs, emphasis, strong text, inline code, fenced code,
