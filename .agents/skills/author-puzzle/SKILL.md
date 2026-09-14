@@ -260,9 +260,14 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 - **Split:** run `plan-split-boards.mjs` once per board; obey its JSON. Use
   `--transport stdio` when this client has the authoring server registered as a
   native MCP server: invoke each returned MCP tool directly and sequentially.
-  This preserves the host's true call frame and is preferred. Use the default
-  `mcp-call` transport only when native MCP calls are unavailable (including
-  Codex-safe shell execution). Fit **each board** in `split-plan.json` order;
+  This preserves the host's true call frame and is preferred. In Kilo Code,
+  the project `.kilo/kilo.json` registers this server and exposes its tools
+  under the `concept-clusters_<tool>` names; call those namespaced tools
+  directly, never `node tools/mcp-call.mjs`. If those tools are not visible,
+  reload the Kilo MCP connection or start a new session instead of silently
+  switching transports. Use the default `mcp-call` transport only when native
+  MCP calls are unavailable (including Codex-safe shell execution). Fit **each
+  board** in `split-plan.json` order;
   wire `relatedPuzzles` from the plan on the first board (reciprocal link on the
   sequel when useful). **Never fit or complete two boards in one burst.**
   `mcp-call` starts a distinct stdio client: when the invoking client has an
@@ -272,6 +277,10 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
   a client identity. Without the actual envelope, the server cannot auto-stamp
   the drafting client. `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME` is a surface-only
   fallback for isolated scripts or CI, never a shared repository setting.
+  When Kilo launches the helper from its own VS Code backend, the helper
+  recognizes Kilo's exact process markers and stamps the Kilo surface as a
+  low-trust fallback; native calls remain the only way to preserve per-call
+  metadata.
 - Use `destinationPuzzleId` in ledger `deferred` entries for sibling terms.
 
 - If the category already has published puzzles, read **one same-category** comparable for JSON field conventions only — not to copy its cluster count or term counts.

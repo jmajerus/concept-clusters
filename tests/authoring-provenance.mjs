@@ -11,6 +11,7 @@ import {
   listGenerativeContributorsForEdit,
   normalizeGenerativeContributorDisplayName,
   normalizeAuthoringProvenance,
+  normalizeReasoningLevel,
   provenanceFromGenerativeAssistance,
   reconcileCollaboration,
   renderProvenanceL1,
@@ -36,6 +37,8 @@ export async function run() {
   assert.equal(modelToHostSlug("Claude Opus 5"), "claude-opus-5");
   assert.equal(canonicalModelLabel("gpt-5.6-sol"), "GPT-5.6 Sol");
   assert.equal(canonicalModelLabel("GPT-5.6 Sol"), "GPT-5.6 Sol");
+  assert.equal(normalizeReasoningLevel("Default"), "default");
+  assert.equal(normalizeReasoningLevel("max"), "max");
 
   assert.deepEqual(
     validateAuthoringProvenance({
@@ -675,7 +678,7 @@ export async function run() {
       collaboration: "ai",
       contributors: [{ name: "Cursor", reasoning: "nope" }]
     }),
-    ['provenance.contributors[0].reasoning must be one of light, medium, high, extra, extraHigh, ultra, noThinking']
+    ['provenance.contributors[0].reasoning must be one of default, light, medium, high, extra, extraHigh, ultra, max, noThinking']
   );
 
   const clientSet = applyProvenanceClientSetting({

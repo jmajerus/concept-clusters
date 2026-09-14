@@ -51,6 +51,11 @@ Skip this pass when `plan-boards.mjs` reports `single-board`.
    When the client has the authoring server registered as a native MCP server,
    pass **`--transport stdio`** and call the returned MCP tools directly,
    sequentially. This preserves the actual client envelope and is preferred.
+   In Kilo Code, use the namespaced native tools (`concept-clusters_<tool>`)
+   directly; the project `.kilo/kilo.json` registers and auto-approves that
+   namespace. If they are not listed, reload Kilo's MCP connection or start a
+   new session. Do not fall back to `node tools/mcp-call.mjs` just because a
+   permission prompt appeared.
    Default **`mcp-call`** is one-shot stdio per tool for clients without native
    MCP calls (Codex-safe). Fit **one board per burst**; stop at the planner's
    `stopAfter`. Present the planner's **`humanPrompt`** at the gate; on reply,

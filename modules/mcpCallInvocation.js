@@ -1,6 +1,10 @@
 // Parse the one-shot MCP helper invocation without making the helper pretend
 // to be the client that launched it. A caller may explicitly forward its
 // original clientInfo and call _meta; otherwise the helper remains mcp-call.
+// The one exception is Kilo Code's own process markers: when this helper is
+// launched from the Kilo VS Code backend, those exact markers identify the
+// host surface (but never a model or per-call metadata) without requiring a
+// repository-wide environment override.
 
 export const MCP_CALL_FALLBACK_CLIENT_INFO = Object.freeze({
   name: "mcp-call",
@@ -44,6 +48,29 @@ function clientInfoFromName(name, model) {
 }
 
 /**
+ * Kilo's VS Code backend marks child processes with a product marker and one
+ * of its transport markers. Keep this check shared with authoring planners so
+ * they choose the same native-vs-fallback behavior as the helper.
+ */
+export function isKiloCodeEnvironment(env = process.env) {
+  const appName = String(env.KILO_APP_NAME || "").trim().toLowerCase();
+  const feature = String(env.KILOCODE_FEATURE || "").trim().toLowerCase();
+  const client = String(env.KILO_CLIENT || "").trim().toLowerCase();
+
+  return appName === "kilo-code" &&
+    (feature === "vscode-extension" || client === "vscode");
+}
+
+function clientInfoFromKiloEnvironment(env) {
+  if (!isKiloCodeEnvironment(env)) return null;
+
+  const version = String(
+    env.KILO_APP_VERSION || env.KILOCODE_VERSION || ""
+  ).trim();
+  return { name: "kilo", version: version || "unknown" };
+}
+
+/**
  * Parse `tools/mcp-call.mjs` arguments.
  *
  * --client-info and --meta take precedence over their environment equivalents:
@@ -54,7 +81,9 @@ function clientInfoFromName(name, model) {
  * (e.g. a fixed-model host with no per-call model in its protocol frame).
  * CLIENT_MODEL is ignored unless CLIENT_NAME (or --client-info, where the
  * caller can just include "model" in that JSON directly) is also set --
- * there is no host to attach a bare model claim to otherwise.
+ * there is no host to attach a bare model claim to otherwise. If no explicit
+ * forwarding is supplied, Kilo's own process markers are recognized as a
+ * surface-only fallback; arbitrary environment names are never inferred.
  */
 export function parseMcpCallInvocation(argv, env = process.env) {
   let clientInfoRaw = env.CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO || null;
@@ -80,15 +109,17 @@ export function parseMcpCallInvocation(argv, env = process.env) {
     throw new McpCallInvocationError("Expected a tool name and at most one JSON arguments object.");
   }
   const argsRaw = argv[index];
+  const explicitClientInfo = clientInfoRaw
+    ? normalizeClientInfo(clientInfoRaw)
+    : clientName
+      ? clientInfoFromName(clientName, clientModel)
+      : null;
+  const kiloClientInfo = explicitClientInfo ? null : clientInfoFromKiloEnvironment(env);
 
   return {
     toolName,
     args: argsRaw ? parseJsonObject(argsRaw, "Tool arguments") : {},
-    clientInfo: clientInfoRaw
-      ? normalizeClientInfo(clientInfoRaw)
-      : clientName
-        ? clientInfoFromName(clientName, clientModel)
-        : MCP_CALL_FALLBACK_CLIENT_INFO,
+    clientInfo: explicitClientInfo || kiloClientInfo || MCP_CALL_FALLBACK_CLIENT_INFO,
     meta: metaRaw ? parseJsonObject(metaRaw, "Call metadata") : null
   };
 }

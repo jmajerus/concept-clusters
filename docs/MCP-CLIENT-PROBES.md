@@ -243,7 +243,12 @@ agent that knows its actual envelope can forward it with `--client-info` /
 `--meta` or the matching
 `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO` /
 `CONCEPT_CLUSTERS_MCP_CALL_META` environment variables. The helper warns on an
-unstamped create/save call; it never guesses or impersonates a client.
+unstamped create/save call; it never guesses or impersonates a client. When
+Kilo Code's own VS Code backend launches the helper, it recognizes Kilo's
+exact `KILO_APP_NAME` plus `KILOCODE_FEATURE`/`KILO_CLIENT` markers and forwards
+the native-compatible `{name: "kilo", version}` surface as a low-trust
+fallback. This does not claim a model or per-call metadata, and arbitrary
+environment names are never inferred.
 
 For isolated scripts or CI that need stable surface attribution but cannot
 expose a full envelope, configure

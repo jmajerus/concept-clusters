@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   MCP_CALL_FALLBACK_CLIENT_INFO,
   McpCallInvocationError,
+  isKiloCodeEnvironment,
   parseMcpCallInvocation
 } from "../modules/mcpCallInvocation.js";
 import { identifyMcpAssistanceClient } from "../modules/mcpClientIdentity.js";
@@ -69,6 +70,61 @@ export async function run() {
     model: "GLM 4.7 Flash",
     hostId: "kilo-code",
     clientName: "kilo-code"
+  });
+
+  // Kilo's VS Code backend supplies stable product markers to shell commands.
+  // They are a narrowly scoped fallback for the one-shot helper: native MCP
+  // calls still carry the live protocol envelope and remain preferred.
+  const kiloHostFallback = parseMcpCallInvocation(
+    ["save_puzzle_draft", '{"draft_id":"host-kilo"}'],
+    {
+      KILO_APP_NAME: "kilo-code",
+      KILO_APP_VERSION: "7.6.2",
+      KILOCODE_FEATURE: "vscode-extension"
+    }
+  );
+  assert.deepEqual(kiloHostFallback.clientInfo, {
+    name: "kilo",
+    version: "7.6.2"
+  });
+  assert.equal(isKiloCodeEnvironment({
+    KILO_APP_NAME: "kilo-code",
+    KILO_APP_VERSION: "7.6.2",
+    KILOCODE_FEATURE: "vscode-extension"
+  }), true);
+  assert.deepEqual(identifyForwarded(kiloHostFallback), {
+    system: "Kilo Code",
+    hostId: "kilo-code",
+    clientName: "kilo"
+  });
+
+  const kiloHostWithoutVersion = parseMcpCallInvocation(
+    ["get_authoring_guidance"],
+    { KILO_APP_NAME: "kilo-code", KILO_CLIENT: "vscode" }
+  );
+  assert.deepEqual(kiloHostWithoutVersion.clientInfo, {
+    name: "kilo",
+    version: "unknown"
+  });
+
+  const spoofedKilo = parseMcpCallInvocation(
+    ["get_authoring_guidance"],
+    { KILO_APP_NAME: "kilo-code" }
+  );
+  assert.equal(spoofedKilo.clientInfo, MCP_CALL_FALLBACK_CLIENT_INFO);
+  assert.equal(isKiloCodeEnvironment({ KILO_APP_NAME: "kilo-code" }), false);
+
+  const explicitOverrideWins = parseMcpCallInvocation(
+    ["get_authoring_guidance"],
+    {
+      KILO_APP_NAME: "kilo-code",
+      KILOCODE_FEATURE: "vscode-extension",
+      CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME: "test-harness"
+    }
+  );
+  assert.deepEqual(explicitOverrideWins.clientInfo, {
+    name: "test-harness",
+    version: "unknown"
   });
 
   // CLIENT_MODEL alone, with no CLIENT_NAME, has no host to attach to and is

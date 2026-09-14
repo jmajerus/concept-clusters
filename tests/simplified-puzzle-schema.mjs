@@ -545,13 +545,20 @@ export async function run() {
   const withClientSettings = SimplifiedPuzzleInputSchema.safeParse(validPuzzle({
     provenance: {
       collaboration: "ai",
-      contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high", switch: "fast" }]
+      contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "max", switch: "fast" }]
     }
   }));
   assert.equal(withClientSettings.success, true, JSON.stringify(withClientSettings.error?.issues));
   assert.deepEqual(withClientSettings.data.provenance.contributors, [
-    { name: "Muse Code (Spark 1.3)", reasoning: "high", switch: "fast" }
+    { name: "Muse Code (Spark 1.3)", reasoning: "max", switch: "fast" }
   ]);
+  const withDefaultClientSettings = SimplifiedPuzzleInputSchema.safeParse(validPuzzle({
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Kilo Code (GLM)", reasoning: "default" }]
+    }
+  }));
+  assert.equal(withDefaultClientSettings.success, true, JSON.stringify(withDefaultClientSettings.error?.issues));
 
   // Legacy document-wide reasoning/switch (pre-per-client) is still accepted
   // at the authoring compatibility boundary and folds onto the sole

@@ -31,12 +31,14 @@ export const AUTHORING_PROVENANCE_KINDS = Object.freeze(["human", "generative"])
 
 /** Client reasoning/effort tier used during drafting (L3; optional). */
 export const AUTHORING_PROVENANCE_REASONING_LEVELS = Object.freeze([
+  "default",
   "light",
   "medium",
   "high",
   "extra",
   "extraHigh",
   "ultra",
+  "max",
   "noThinking"
 ]);
 
@@ -68,12 +70,14 @@ const LEGACY_SPEED_LABELS = Object.freeze({
 });
 
 export const AUTHORING_PROVENANCE_REASONING_LABELS = Object.freeze({
+  default: "Default",
   light: "Light",
   medium: "Medium",
   high: "High",
   extraHigh: "Extra High",
   extra: "Extra",
   ultra: "Ultra",
+  max: "Max",
   noThinking: "No Thinking"
 });
 
