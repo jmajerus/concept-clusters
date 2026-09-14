@@ -223,6 +223,16 @@ export async function run() {
     "By Jane Doe, with assistance from Gemini 3.1 Pro"
   );
 
+  const clearedSummary = applyDraftFieldValue(document, {
+    section: "learning", field: "summary"
+  }, "");
+  assert.equal(clearedSummary.learningIntroduction.summary, undefined);
+
+  const clearedTitle = applyDraftFieldValue(document, {
+    section: "learning", field: "title"
+  }, "   ");
+  assert.equal(clearedTitle.learningIntroduction.title, undefined);
+
   const leftoverPublished = {
     ...published,
     learningIntroduction: {

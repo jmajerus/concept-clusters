@@ -66,16 +66,37 @@ function jsonLdShapedDocumentAsSimplified(document, categoryRegistry = CATEGORIE
   }
 }
 
+// Optional lesson metadata is omitted when blank. Both the MCP document
+// input and the drafts-page controls can represent an unset optional field
+// as an empty string; keeping that string would make an otherwise valid
+// draft fail the strict simplified schema (`z.string().min(1).optional()`).
+// Normalize it at the shared read/write boundary so opening or saving a
+// draft never turns an empty optional control into an invalid document.
+function omitBlankOptionalLearningIntroductionFields(document) {
+  const introduction = document?.learningIntroduction;
+  if (!introduction || typeof introduction !== "object" ||
+      Array.isArray(introduction)) {
+    return document;
+  }
+  const blankFields = ["title", "summary", "credit"].filter(field =>
+    typeof introduction[field] === "string" && !introduction[field].trim()
+  );
+  if (!blankFields.length) return document;
+  const normalizedIntroduction = { ...introduction };
+  for (const field of blankFields) delete normalizedIntroduction[field];
+  return { ...document, learningIntroduction: normalizedIntroduction };
+}
+
 // Link/citation folding + provenance sync. Order: provenance first so a
 // parseable credit can seed human contributors before other folds clone.
 export function canonicalizeAuthoredDocumentFields(document) {
-  return hoistDocumentCitations(
+  return omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
       canonicalizeBridgeTermRoles(
         canonicalizeDocumentProvenance(document)
       )
     )
-  );
+  ));
 }
 
 export function documentHasRetiredBridgeTermRole(document) {

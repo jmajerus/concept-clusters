@@ -539,8 +539,12 @@ export function applyDraftFieldValue(document, form, value) {
   }
 
   const intro = ensureLearningIntro(next);
-  if (field === "title") intro.title = value;
-  else if (field === "summary") intro.summary = value;
+  if (field === "title" || field === "summary") {
+    // These are optional schema fields. A blank drafts-page control means
+    // "unset", not an invalid present empty string.
+    if (typeof value === "string" && value.trim()) intro[field] = value;
+    else delete intro[field];
+  }
   else if (field === "credit") {
     if (value) intro.credit = value;
     else delete intro.credit;

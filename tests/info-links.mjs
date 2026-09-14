@@ -328,6 +328,26 @@ export async function run(page, baseURL) {
   ]);
   assert.equal(storedLesson.document.learningIntroduction.sources, undefined);
 
+  // Empty optional lesson metadata is how both MCP clients and the draft
+  // form express an unset control. It must be omitted before storage rather
+  // than poisoning the strict schema with a present empty string.
+  const storedBlankLessonMetadata = documentForDraftStore({
+    id: "blank-lesson-metadata",
+    title: "Blank lesson metadata",
+    category: "Test",
+    clusters: [],
+    learningIntroduction: {
+      requirement: "optional",
+      title: " ",
+      summary: "",
+      credit: "\t",
+      content: { text: "Body." }
+    }
+  });
+  assert.equal(storedBlankLessonMetadata.document.learningIntroduction.title, undefined);
+  assert.equal(storedBlankLessonMetadata.document.learningIntroduction.summary, undefined);
+  assert.equal(storedBlankLessonMetadata.document.learningIntroduction.credit, undefined);
+
   const hoisted = documentForDraftStore({
     id: "nested-citations",
     title: "Nested",
