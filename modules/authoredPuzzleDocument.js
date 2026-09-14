@@ -31,6 +31,7 @@ import {
   canonicalizePuzzleCategoryReferences,
   categoryTitleFor
 } from "../puzzles/categories.js";
+import { projectAuthoredDocument } from "./authoringDomains.js";
 
 export { createPuzzleSkeleton };
 
@@ -300,6 +301,24 @@ export function documentForMcp(document, options = {}) {
   return result;
 }
 
+// Focused MCP domain projection. The complete document path above remains the
+// compatibility contract; a domain projection is an explicit opt-in that
+// keeps protected provenance/system data out of the agent's context.
+export function documentForMcpDomain(document, domain, options = {}) {
+  // Canonicalize legacy stored rows before partitioning. In particular, a
+  // pre-simplified JSON-LD draft can still be read through the complete
+  // compatibility path and must not be split as if its `@graph` were content.
+  const authored = documentForEditor(document, options);
+  const projection = projectAuthoredDocument(authored, domain);
+  return {
+    domain: projection.domain,
+    document: documentForMcp(projection.document, options),
+    ...(projection.context
+      ? { context: documentForMcp(projection.context, options) }
+      : {})
+  };
+}
+
 // Storage/publication boundary: editors work with display titles, but draft
 // and published documents persist stable category ids. Keeping this as a
 // named helper makes it difficult for a new write path to accidentally store
@@ -328,6 +347,35 @@ export function draftForAuthoring(draft, options = {}) {
 export function draftForMcp(draft, options = {}) {
   if (!draft || typeof draft !== "object") return draft;
   return { ...draft, document: documentForMcp(draft.document, options) };
+}
+
+export function draftForMcpDomain(draft, domain, options = {}) {
+  if (!draft || typeof draft !== "object") return draft;
+  const projection = documentForMcpDomain(draft.document, domain, options);
+  return {
+    ...(draft.draftId !== undefined ? { draftId: draft.draftId } : {}),
+    ...(draft.revision !== undefined ? { revision: draft.revision } : {}),
+    domain: projection.domain,
+    document: projection.document,
+    ...(projection.context ? { context: projection.context } : {})
+  };
+}
+
+// Focused publish responses carry only the identity and revision needed to
+// correlate the result. The complete response remains unchanged for existing
+// clients, while scoped responses do not echo publication timestamps, hashes,
+// or actor metadata back into the agent context.
+export function publishedForMcpDomain(record, domain, options = {}) {
+  if (!record || typeof record !== "object") return record;
+  const projection = documentForMcpDomain(record.document, domain, options);
+  return {
+    ...(record.kind !== undefined ? { kind: record.kind } : {}),
+    ...(record.id !== undefined ? { id: record.id } : {}),
+    ...(record.revision !== undefined ? { revision: record.revision } : {}),
+    domain: projection.domain,
+    document: projection.document,
+    ...(projection.context ? { context: projection.context } : {})
+  };
 }
 
 export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";

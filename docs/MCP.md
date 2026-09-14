@@ -34,6 +34,14 @@ Puzzle attribution uses optional puzzle-level `provenance`; the retired
 `generativeAssistance` field is read/import compatibility only and is not part
 of the active authoring schema.
 
+For smaller authoring payloads, `get_puzzle_draft` and
+`save_puzzle_draft` accept `domain: "content"` or `domain: "pedagogy"`.
+Content is the core puzzle write surface. Pedagogy is the annotation, learning,
+and discovery-metadata write surface and includes content as read-only
+`context`. Focused responses omit provenance and system metadata and retain
+only the draft id and revision needed for the next save. Omitting `domain`
+remains the complete-document compatibility path.
+
 ## How guidance reaches an agent
 
 The server does not load either authoring document into every conversation. Its initial

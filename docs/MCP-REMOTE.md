@@ -65,9 +65,25 @@ Attribution uses optional puzzle-level `provenance`; legacy
 `generativeAssistance` is accepted only while importing older documents and is
 folded before a current draft is validated or stored.
 
-Both authoring tools accept an optional `phase`: `core`, `review`, `pedagogy`,
-`publication`, or `complete`. Omitting it remains equivalent to `complete` for
-existing clients. The smaller responses support progressive authoring over one
+The guidance and schema tools accept an optional `phase`: `core`, `review`,
+`pedagogy`, `publication`, or `complete`. Draft reads and writes instead accept
+an optional `domain`: `content`, `pedagogy`, or the backwards-compatible
+`complete` default. A focused domain is a real write boundary, not just prose
+guidance:
+
+- `domain: "content"` returns the core puzzle document.
+- `domain: "pedagogy"` returns the annotation/learning metadata and a
+  read-only `context` containing content needed to refer to it.
+- `domain: "complete"` preserves the existing whole-document contract.
+
+Focused draft responses carry only `draftId`, `revision`, the selected domain,
+and its document/context. Provenance and system metadata stay outside the
+focused payload. A focused save applies the selected domain to the current
+stored document, materializes the complete document, and then follows the
+same validation/publication path as a complete save. The save still requires
+`expected_revision`.
+
+The smaller guidance/schema responses support progressive authoring over one
 accumulating draft:
 
 1. `core` establishes identity, clusters, terms, facts, bridges, info,
@@ -83,12 +99,12 @@ accumulating draft:
 4. `publication` adds only useful discovery, attribution, and publication
    metadata before validation and submission.
 
-Before every later pass, call `get_puzzle_draft`, edit the latest document, and
-preserve all earlier fields when saving. A phase schema is a focused field
-projection, not a smaller replacement document or an independent validator;
-the complete schema resource remains canonical. Phases can be revisited in any
-order when their concern needs further work; they are not one-way lifecycle
-gates.
+Before every later pass, call `get_puzzle_draft`, edit the latest document or
+selected domain, and preserve all earlier fields when saving. A phase schema is
+a focused field projection, not a standalone replacement schema or an
+independent validator; the complete schema resource remains canonical. Phases
+can be revisited in any order when their concern needs further work; they are
+not one-way lifecycle gates.
 
 ## What is implemented
 
@@ -180,8 +196,10 @@ remains the deliberate boundary for overwriting the draft's document.
 
 The tracked D1 migrations create:
 
-- `puzzle_drafts` for owner, status, current document, revision (OCC token),
-  content hash, and last validation result; and
+- `puzzle_drafts` for owner, status, current materialized document, revision
+  (OCC token), content hash, last validation result, and the persisted
+  `content_json`, `pedagogy_json`, and protected `provenance_json` projections
+  added by migration `0019_authoring_domains.sql`; and
 - `puzzle_draft_history` for the capped previous-working-copy stack the
   drafts page pops; and
 - `content_drafts` for owner-scoped catalogue and category working copies; and
@@ -192,8 +210,10 @@ The tracked D1 migrations create:
 
 `save_puzzle_draft` requires `expected_revision` matching the draft's current
 generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
-A matching save replaces the current document and bumps the integer; a stale
-token fails closed. Distinct saves push the previous working copy onto a
+A matching complete save replaces the current document; a matching focused
+save replaces only the selected domain, reassembles the complete document, and
+then bumps the integer. A stale token fails closed. Distinct saves push the
+previous working copy onto a
 capped D1 stack (`puzzle_draft_history`). The drafts page
 **Revert to last working copy** button pops one save at a time. Set
 `publish_to_authoring: true` on a confirmed final edit to also publish the

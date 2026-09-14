@@ -8,9 +8,11 @@ function compactActor(actor) {
   return { subject: actor.subject };
 }
 
-export function assistanceStampScopes(document) {
-  const scopes = ["puzzle"];
-  if (
+export function assistanceStampScopes(document, { domain = "complete" } = {}) {
+  const scopes = domain === "content" || domain === "pedagogy"
+    ? [domain]
+    : ["puzzle"];
+  if (domain === "complete" &&
     document?.learningIntroduction &&
     typeof document.learningIntroduction === "object" &&
     !Array.isArray(document.learningIntroduction)

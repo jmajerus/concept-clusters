@@ -214,6 +214,7 @@ export function stampDocumentAssistanceFromMcp(document, {
   server = null,
   role = "edited",
   substantial = false,
+  domain = "complete",
   date = todayStamp(),
   settings = AUTHORING_SETTINGS,
   log = null
@@ -252,7 +253,7 @@ export function stampDocumentAssistanceFromMcp(document, {
       transport: log.transport ?? null,
       actor: log.actor ?? null,
       provenance: next.provenance ?? null,
-      scopes: assistanceStampScopes(next)
+      scopes: assistanceStampScopes(next, { domain })
     })
     : null;
 

@@ -13,6 +13,12 @@ import {
   MAX_WORKING_COPY_HISTORY,
   draftContentHash
 } from "./draftRepository.js";
+import {
+  assembleAuthoredDocument,
+  assembleStoredDomainDocuments,
+  partitionAuthoredDocument,
+  storedDomainDocuments
+} from "./authoringDomains.js";
 import { slugify } from "../puzzles/categories.js";
 
 const MAX_DRAFT_DOCUMENT_BYTES = 2 * 1024 * 1024;
@@ -44,6 +50,30 @@ export function createPuzzleDraftStore({ directory }) {
     return join(directory, `${id}.json`);
   }
 
+  function storedDomainValue(record, key, label) {
+    const value = record?.domains?.[key];
+    if (value == null) return null;
+    if (typeof value !== "string") return value;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      throw new Error(`${label} contains invalid JSON: ${error.message}`);
+    }
+  }
+
+  function materializeRecord(record) {
+    if (!record?.domains || typeof record.domains !== "object") return record;
+    return {
+      ...record,
+      document: assembleStoredDomainDocuments({
+        document: record.document,
+        content: storedDomainValue(record, "content", "Stored content domain"),
+        pedagogy: storedDomainValue(record, "pedagogy", "Stored pedagogy domain"),
+        provenance: storedDomainValue(record, "provenance", "Stored provenance domain")
+      })
+    };
+  }
+
   async function readRecord(id) {
     const path = pathFor(id);
     let text;
@@ -54,7 +84,7 @@ export function createPuzzleDraftStore({ directory }) {
       throw error;
     }
     try {
-      return JSON.parse(text);
+      return materializeRecord(JSON.parse(text));
     } catch (error) {
       throw new Error(`Draft ${id} is not valid JSON: ${error.message}`);
     }
@@ -76,7 +106,7 @@ export function createPuzzleDraftStore({ directory }) {
   }
 
   function publicRecord(record) {
-    const { workingCopyStack, ...rest } = record;
+    const { workingCopyStack, domains, ...rest } = record;
     return clone({
       ...rest,
       workingCopyHistoryCount: historyOf({ workingCopyStack }).length
@@ -93,14 +123,17 @@ export function createPuzzleDraftStore({ directory }) {
       if (error.code !== "ENOENT") throw error;
     }
     const now = new Date().toISOString();
+    const domains = partitionAuthoredDocument(document);
+    const materialized = assembleAuthoredDocument(domains);
     const record = {
       draftId,
       revision: 1,
       status: "draft",
-      contentHash: await draftContentHash(document),
+      contentHash: await draftContentHash(materialized),
       createdAt: now,
       updatedAt: now,
-      document: clone(document)
+      document: clone(materialized),
+      domains: storedDomainDocuments(materialized)
     };
     await writeRecord(record);
     return publicRecord(record);
@@ -114,7 +147,8 @@ export function createPuzzleDraftStore({ directory }) {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
       );
     }
-    const contentHash = await draftContentHash(document);
+    const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
+    const contentHash = await draftContentHash(materialized);
     const stack = historyOf(current);
     if (contentHash !== current.contentHash) {
       stack.push({
@@ -131,7 +165,8 @@ export function createPuzzleDraftStore({ directory }) {
       revision: current.revision + 1,
       contentHash,
       updatedAt: new Date().toISOString(),
-      document: clone(document),
+      document: clone(materialized),
+      domains: storedDomainDocuments(materialized),
       workingCopyStack: stack
     };
     await writeRecord(record);
@@ -148,12 +183,16 @@ export function createPuzzleDraftStore({ directory }) {
     const stack = historyOf(current);
     const previous = stack.pop();
     if (!previous) throw new DraftEmptyHistoryError(draftId);
+    const materialized = assembleAuthoredDocument(
+      partitionAuthoredDocument(previous.document)
+    );
     const record = {
       ...current,
       revision: current.revision + 1,
-      contentHash: previous.contentHash,
+      contentHash: await draftContentHash(materialized),
       updatedAt: new Date().toISOString(),
-      document: clone(previous.document),
+      document: clone(materialized),
+      domains: storedDomainDocuments(materialized),
       workingCopyStack: stack
     };
     await writeRecord(record);
@@ -244,7 +283,7 @@ export function createPuzzleDraftStore({ directory }) {
       .map(entry => readRecord(entry.name.slice(0, -5))));
     return records
       .map(record => {
-        const { document, workingCopyStack, ...metadata } = record;
+        const { document, workingCopyStack, domains, ...metadata } = record;
         return {
           ...metadata,
           puzzleId: document?.id || null,
