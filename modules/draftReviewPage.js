@@ -7,7 +7,6 @@
 // (`/?puzzle=`) or via optional MCP. Freeze on `/admin` writes cued D1
 // snapshots into git. Publish writes the shared D1 row.
 
-import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
 import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
@@ -17,7 +16,6 @@ import {
   WORKING_COPY_FORM_ID
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
-import { suggestLessonCredit } from "./generativeAssistance.js";
 import { draftBoardQuery, draftPlayQuery, playQuery } from "./stagingPlayLinks.js";
 import {
   CATEGORIES,
@@ -1356,16 +1354,6 @@ function renderPuzzleMeta(document) {
   for (const [label, value] of provenance) {
     parts.push(labeledLine(label, escapeHtml(value)));
   }
-  if (Array.isArray(document.generativeAssistance) && document.generativeAssistance.length) {
-    const items = document.generativeAssistance.map(entry => {
-      const bits = [entry.system, entry.role, entry.scope, entry.date]
-        .filter(Boolean)
-        .map(escapeHtml)
-        .join(" · ");
-      return `<li>${bits || escapeHtml(JSON.stringify(entry))}</li>`;
-    }).join("");
-    parts.push(`<p class="field-label">generative assistance:</p><ul>${items}</ul>`);
-  }
   const provenanceL2 = renderProvenanceL2(document.provenance);
   if (provenanceL2) {
     parts.push(labeledLine("provenance", escapeHtml(provenanceL2)));
@@ -1604,34 +1592,10 @@ function authorDisplayName(actor) {
   return null;
 }
 
-function renderCreditSuggestion({ edit, intro, document, actor, allowApply = true }) {
-  if (!edit?.draftId) return "";
-  // When provenance can derive L1, byline is read-only — no credit apply.
-  if (renderProvenanceL1(document?.provenance)) return "";
-  const current = typeof intro?.credit === "string" ? intro.credit.trim() : "";
-  const suggested = suggestLessonCredit(
-    intro?.credit,
-    document?.generativeAssistance,
-    { authorName: authorDisplayName(actor) }
-  );
-  if (!suggested || suggested === current) return "";
-  const apply = allowApply
-    ? `<button type="button" data-fill-control="copy-learning-credit" data-fill-value="${escapeHtml(suggested)}">Apply legacy byline</button>`
-    : `<p class="meta">Legacy byline apply needs a Learning introduction when provenance is not yet available.</p>`;
-  return `<aside class="credit-suggestion">
-    <p><span class="field-label">legacy byline suggestion:</span> ${escapeHtml(suggested)}</p>
-    <p class="meta">${escapeHtml(lessonCreditSuggestionHint())}</p>
-    ${apply}
-  </aside>`;
-}
-
-function renderCreditsSection({ edit, intro, document, actor, diff }) {
-  const hasAssistance = Array.isArray(document?.generativeAssistance)
-    && document.generativeAssistance.length > 0;
+function renderCreditsSection({ edit, intro, document, diff }) {
   const derived = resolveLessonByline({
     introduction: intro,
-    provenance: document?.provenance,
-    generativeAssistance: document?.generativeAssistance
+    provenance: document?.provenance
   });
   const hasDerivedProvenance = Boolean(renderProvenanceL1(document?.provenance));
   if (intro) {
@@ -1660,10 +1624,9 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
         : ""}
       ${hasDerivedProvenance
         ? `<p class="meta">Byline is derived from provenance. Change it in Provenance above, then Save working copy; it is not stored on the lesson.</p>`
-        : `${renderCreditSuggestion({ edit, intro, document, actor })}
-      ${renderCopyField({
+        : `${renderCopyField({
         edit, section: "learning", field: "credit",
-        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit (legacy)",
+        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit",
         controlId: "copy-learning-credit"
       })}`}
       ${renderLearningReferences(intro)}
@@ -1675,11 +1638,10 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
       <p class="meta">Bibliographic references are edited on puzzle info citations (one list for the puzzle and lesson).</p>
       ${renderWas(diff?.fields?.learningIntroduction)}`;
   }
-  if (!hasAssistance && !edit?.draftId) return "";
+  if (!edit?.draftId) return "";
   return `<h2>Credits</h2>
     <p class="meta">The player-visible byline is derived from provenance when present. This draft has no learning introduction yet.</p>
-    ${derived ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(derived)}</p>` : ""}
-    ${renderCreditSuggestion({ edit, intro: null, document, actor, allowApply: false })}`;
+    ${derived ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(derived)}</p>` : ""}`;
 }
 
 function renderLearningReferences(intro) {
@@ -1808,7 +1770,7 @@ export function renderDraftPage(draft, {
       ).join("")}</ul>
       ${renderWas(diff?.fields?.relatedPuzzles)}` : ""}
 
-    ${renderCreditsSection({ edit, intro, document, actor, diff })}
+    ${renderCreditsSection({ edit, intro, document, diff })}
 
     ${edit.draftId ? `<p class="working-copy-save-foot">
       <button type="submit" form="${WORKING_COPY_FORM_ID}">Save working copy</button>

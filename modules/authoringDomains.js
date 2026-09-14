@@ -53,7 +53,6 @@ const PEDAGOGY_BRIDGE_FIELDS = new Set([
 
 const PROTECTED_ROOT_FIELDS = new Set([
   "provenance",
-  "generativeAssistance",
   "schemaVersion",
   "publicationState",
   "validatedAt",
@@ -376,7 +375,6 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
   assertObject(currentDocument, "Current authored document");
   assertDomainPayload(domain, incoming);
   const current = partitionAuthoredDocument(currentDocument);
-  const hasLegacyGenerativeAssistance = hasOwn(currentDocument, "generativeAssistance");
   if (domain === "pedagogy") {
     assertPedagogyBridgeIdentities(current.content.bridges, incoming.bridges);
   }
@@ -415,12 +413,6 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
   // normal canonical boundary recomputes it.
   if (hasOwn(currentDocument, "large")) {
     assembled.large = clone(currentDocument.large);
-  }
-  // Legacy assistance is folded into provenance by the normal canonical
-  // boundary, but preserve it until then so a direct focused merge cannot
-  // erase a protected attribution field from an older document.
-  if (hasLegacyGenerativeAssistance) {
-    assembled.generativeAssistance = clone(currentDocument.generativeAssistance);
   }
   return assembled;
 }

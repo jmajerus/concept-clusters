@@ -4,9 +4,8 @@
 //
 // "Simplified" means the identity ceremony is gone, not that features are
 // gone: every current puzzle-content field the interchange JSON-LD format can
-// express, this format can too. Legacy bridge termRole and
-// generativeAssistance are migration-only and are removed before this schema
-// is parsed. JSON-LD is interchange-only
+// express, this format can too. Legacy bridge termRole is migration-only and
+// is removed before this schema is parsed. JSON-LD is interchange-only
 // (content:export/import), never a stored draft. Live authoring uses
 // puzzleFromAuthoredDocument() to reach the runtime puzzle model.
 import * as z from "zod/v4";

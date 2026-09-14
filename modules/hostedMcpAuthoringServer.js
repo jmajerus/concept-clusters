@@ -228,12 +228,11 @@ function safe(handler) {
 // save_puzzle_draft replaces a complete document, but provenance is server
 // maintained and intentionally optional for MCP authors. A client that reads
 // a simplified document without that optional field must not accidentally
-// erase existing attribution on its next save. Supplying either modern
-// provenance or legacy generativeAssistance remains an explicit replacement.
+// erase existing attribution on its next save. Supplying modern provenance
+// remains an explicit replacement.
 function retainStoredProvenance(document, previousDocument) {
   if (!document || typeof document !== "object" ||
-      Object.hasOwn(document, "provenance") ||
-      Object.hasOwn(document, "generativeAssistance")) {
+      Object.hasOwn(document, "provenance")) {
     return document;
   }
   const previous = canonicalizeDocumentProvenance(previousDocument);

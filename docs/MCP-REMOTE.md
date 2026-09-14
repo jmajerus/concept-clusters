@@ -38,13 +38,12 @@ production.
 
 `document` is the simplified format
 ([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md)) -- the only
-supported authoring shape. A document with a top-level `@context`
-(hand-written JSON-LD, [JSON-LD.md](./JSON-LD.md)) is still accepted and
-converted as a read-compatibility path, for drafts saved before this was
-true, but is not how a new puzzle should be authored. A draft saved with
-input that doesn't yet validate is stored exactly as given, not rejected --
-consistent with drafts generally being allowed to stay temporarily invalid
-between saves.
+supported authoring shape. A document with a top-level `@context` belongs to
+the explicit JSON-LD interchange tools ([JSON-LD.md](./JSON-LD.md)) and is not
+accepted by current draft writes. A simplified draft saved with input that
+doesn't yet validate is stored exactly as given, not rejected -- consistent
+with drafts generally being allowed to stay temporarily invalid between saves.
+JSON-LD is rejected rather than stored in that fallback path.
 
 Puzzle `category`, `categories[]`, and `subcategories` keys are stable
 category ids; category titles are display metadata. Legacy title references
@@ -61,9 +60,9 @@ should use the schema resource or tool, rather than `tools/list` alone, to
 discover nested authoring fields such as `bridges[].relationKind` and
 `bridges[].direction`.
 Bridge terms are ordinary authored concepts; there is no separate role field.
-Attribution uses optional puzzle-level `provenance`; legacy
-`generativeAssistance` is accepted only while importing older documents and is
-folded before a current draft is validated or stored.
+Attribution uses optional puzzle-level `provenance`. JSON-LD remains available
+through the explicit interchange CLI, but current draft inputs and D1 rows use
+the simplified shape directly.
 
 The guidance and schema tools accept an optional `phase`: `core`, `review`,
 `pedagogy`, `publication`, or `complete`. Draft reads and writes instead accept
@@ -212,7 +211,7 @@ The tracked D1 migrations create:
 - `published_documents` plus `published_document_revisions` for the shared
   live document of each puzzle, catalogue, or category id; and
 - `draft_assistance_stamps` for append-only MCP assistance audit (scope, role,
-  date, client system) formerly carried in `generativeAssistance`.
+  date, client system); this detail is not part of the puzzle document.
 
 `save_puzzle_draft` requires `expected_revision` matching the draft's current
 generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
@@ -324,8 +323,8 @@ Successful MCP assistance stamps on `create_puzzle_draft` / `save_puzzle_draft`
 also write `authoring_assistance_stamp` rows (`blob1` = event name,
 `blob2` = tool, `blob3` = client system, `blob4` = role, `blob5` =
 comma-separated scopes, `blob6` = date; `index1` = draft id). That preserves
-scope/role/date audit detail after `generativeAssistance` was dropped from stored
-drafts. The full record is in D1 table `draft_assistance_stamps` — see
+scope/role/date audit detail outside stored drafts. The full record is in D1
+table `draft_assistance_stamps` — see
 `docs/MCP-CLIENT-PROBES.md`.
 
 `src/admin.js` queries this dataset (same `ACCOUNT_ID`/`API_TOKEN` as the

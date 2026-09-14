@@ -14,11 +14,9 @@ See "What's authored elsewhere" at the bottom for the one thing that
 genuinely doesn't fit here.
 
 `document` in those tools accepts this format. A document with a top-level
-`@context` (hand-written JSON-LD) is still read as a compatibility path on
-the hosted server -- for drafts saved before this was the only supported
-shape -- but is not a supported way to author a new puzzle; see
-[JSON-LD.md](./JSON-LD.md) for JSON-LD's current, narrower role as an
-on-demand interchange format.
+`@context` belongs to the explicit JSON-LD interchange tools, not to the
+current draft authoring or storage path; see [JSON-LD.md](./JSON-LD.md) for
+the retained on-demand interchange format.
 
 ## Why this exists
 
@@ -101,9 +99,7 @@ optional, as are:
   (same shape as info.links), citations?}`. Nested cluster/term/bridge `info` is
   `{text?, links?}` — bibliography stays on the puzzle.
 - `provenance` (optional structured authoring attribution; see
-  `get_authoring_guidance` for when to set this). Legacy
-  `generativeAssistance` is accepted only while reading/importing older
-  documents and is folded into `provenance` before validation and storage.
+  `get_authoring_guidance` for when to set this).
 - Provenance pass-through: `creator`, `license`, `derivedFrom`,
   `dateCreated`, `dateModified`, `language`, `version` -- plain strings,
   carried through unchanged.

@@ -30,9 +30,9 @@ temporarily invalid simplified drafts remain writable; that permissiveness
 should not be mistaken for the absence of a field contract.
 Bridge terms have no separate pedagogical-role field; describe their
 relationship in `fact`, optional `info`, and (when useful) `relationKind`.
-Puzzle attribution uses optional puzzle-level `provenance`; the retired
-`generativeAssistance` field is read/import compatibility only and is not part
-of the active authoring schema.
+Puzzle attribution uses optional puzzle-level `provenance`; JSON-LD is an
+explicit interchange format, not part of the active authoring schema or draft
+storage path.
 
 For smaller authoring payloads, `get_puzzle_draft` and
 `save_puzzle_draft` accept `domain: "content"` or `domain: "pedagogy"`.

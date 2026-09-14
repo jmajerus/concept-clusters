@@ -15,7 +15,6 @@ import {
 } from "./authoringSettings.js";
 import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import {
-  formatAssistanceCredit,
   formatSystemsList,
   parseLessonCredit
 } from "./generativeAssistance.js";
@@ -830,29 +829,6 @@ export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   return appendReviewedBy(line, provenance);
 }
 
-/**
- * Build provenance from generativeAssistance systems (distinct names).
- * Mode is ai when only systems are known — humans are not invented.
- */
-export function provenanceFromGenerativeAssistance(entries, settings = AUTHORING_SETTINGS) {
-  const seen = new Set();
-  const contributors = [];
-  for (const entry of entries || []) {
-    if (!nonEmptyString(entry?.system)) continue;
-    const name = entry.system.trim();
-    const key = contributorNameKey(name);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const compacted = compactProvenanceContributor({
-      kind: "generative",
-      name
-    }, settings);
-    if (compacted) contributors.push(compacted);
-  }
-  if (!contributors.length) return undefined;
-  return { collaboration: "ai", contributors };
-}
-
 function applyCreditMax(line, settings = AUTHORING_SETTINGS) {
   if (!line) return null;
   const max = settings.credit?.maxLength || 160;
@@ -863,11 +839,9 @@ function applyCreditMax(line, settings = AUTHORING_SETTINGS) {
 }
 
 /**
- * Fold generativeAssistance (+ parseable lesson credit) into two-axis
- * provenance. When provenance is present, drop generativeAssistance so
- * attribution has one model of record. When L1 can render, drop stored
- * learningIntroduction.credit so the byline stays a derived read-only field.
- * Opaque legacy credits are kept only when provenance cannot produce L1.
+ * Normalize current provenance and parseable lesson credits. When L1 can
+ * render, drop the duplicated stored credit so the byline stays derived.
+ * Opaque freeform credits remain author-owned text.
  */
 export function canonicalizeDocumentProvenance(document, {
   settings = AUTHORING_SETTINGS
@@ -879,14 +853,6 @@ export function canonicalizeDocumentProvenance(document, {
   let provenance = next.provenance && typeof next.provenance === "object"
     ? next.provenance
     : undefined;
-
-  for (const entry of next.generativeAssistance || []) {
-    if (!nonEmptyString(entry?.system)) continue;
-    provenance = upsertGenerativeProvenance(provenance, {
-      system: entry.system,
-      model: entry.model
-    });
-  }
 
   const intro = next.learningIntroduction;
   if (intro && typeof intro === "object" && !Array.isArray(intro)) {
@@ -930,13 +896,11 @@ export function canonicalizeDocumentProvenance(document, {
   }
 
   if (!next.provenance) delete next.provenance;
-  else delete next.generativeAssistance;
   return next;
 }
 
 /**
- * Generative hosts on a draft for the model editor — from provenance and/or
- * legacy generativeAssistance before fold.
+ * Generative hosts on a draft for the model editor, read from provenance.
  */
 export function listGenerativeContributorsForEdit(document, settings = AUTHORING_SETTINGS) {
   const seen = new Map();
@@ -952,22 +916,6 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
       model: canonicalModelLabel(stripClientTierLabelsFromModel(entry.model || split.model || "")),
       reasoning: normalizeReasoningLevel(entry.reasoning) || "",
       switch: normalizeClientSwitch(entry.switch) || ""
-    });
-  }
-
-  for (const entry of document?.generativeAssistance || []) {
-    if (!nonEmptyString(entry?.system)) continue;
-    const key = generativeHostKey(entry.system, settings);
-    if (!key || seen.has(key)) continue;
-    const known = knownHostLabelForName(entry.system, settings);
-    const split = splitGenerativeContributorLabel(entry.system.trim(), settings);
-    seen.set(key, {
-      host: known?.system || split.host,
-      model: canonicalModelLabel(stripClientTierLabelsFromModel(
-        (typeof entry.model === "string" ? entry.model.trim() : "") || split.model || ""
-      )),
-      reasoning: "",
-      switch: ""
     });
   }
 
@@ -1003,14 +951,6 @@ export function applyGenerativeContributorModel(document, {
     }
     : { contributors: [] };
 
-  for (const entry of document.generativeAssistance || []) {
-    if (!nonEmptyString(entry?.system)) continue;
-    provenance = upsertGenerativeProvenance(provenance, {
-      system: entry.system,
-      model: entry.model
-    }, settings);
-  }
-
   provenance = upsertGenerativeProvenance(provenance, {
     system: composedName,
     ...(modelValue ? { model: modelValue } : {})
@@ -1022,7 +962,6 @@ export function applyGenerativeContributorModel(document, {
 
   const next = structuredClone(document);
   next.provenance = provenance;
-  delete next.generativeAssistance;
 
   if (next.learningIntroduction && typeof next.learningIntroduction === "object") {
     const credit = typeof next.learningIntroduction.credit === "string"
@@ -1069,14 +1008,6 @@ export function applyProvenanceCollaboration(document, {
     provenance = upsertHumanProvenance(provenance, { name: authorName });
   }
 
-  for (const entry of document.generativeAssistance || []) {
-    if (!nonEmptyString(entry?.system)) continue;
-    provenance = upsertGenerativeProvenance(provenance, {
-      system: entry.system,
-      model: entry.model
-    });
-  }
-
   provenance = normalizeAuthoringProvenance({
     ...provenance,
     collaboration
@@ -1115,7 +1046,6 @@ export function applyProvenanceCollaboration(document, {
     const l1 = applyCreditMax(renderProvenanceL1(provenance, settings), settings);
     if (l1 && (!credit || parsed)) delete next.learningIntroduction.credit;
   }
-  delete next.generativeAssistance;
   return next;
 }
 
@@ -1144,14 +1074,6 @@ export function applyProvenanceClientSetting(document, {
     }
     : { contributors: [] };
 
-  for (const entry of document.generativeAssistance || []) {
-    if (!nonEmptyString(entry?.system)) continue;
-    provenance = upsertGenerativeProvenance(provenance, {
-      system: entry.system,
-      model: entry.model
-    }, settings);
-  }
-
   const trimmed = typeof value === "string" ? value.trim() : "";
   let normalized = "";
   if (trimmed) {
@@ -1174,7 +1096,6 @@ export function applyProvenanceClientSetting(document, {
 
   const next = structuredClone(document);
   next.provenance = provenance;
-  delete next.generativeAssistance;
   return next;
 }
 
@@ -1196,14 +1117,6 @@ export function applyReviewedBy(document, {
     }
     : { contributors: [] };
 
-  for (const entry of document.generativeAssistance || []) {
-    if (!nonEmptyString(entry?.system)) continue;
-    provenance = upsertGenerativeProvenance(provenance, {
-      system: entry.system,
-      model: entry.model
-    }, settings);
-  }
-
   const name = typeof reviewedBy === "string" ? reviewedBy.trim().replace(/\s+/g, " ") : "";
   if (!name) {
     delete provenance.reviewedBy;
@@ -1222,18 +1135,16 @@ export function applyReviewedBy(document, {
 
   const next = structuredClone(document);
   next.provenance = provenance;
-  delete next.generativeAssistance;
   return next;
 }
 
 /**
- * Player/admin byline: opaque legacy credit wins; otherwise prefer L1 from
- * provenance, then parseable/any remaining credit, then generativeAssistance.
+ * Player/admin byline: opaque credit wins; otherwise prefer the derived L1
+ * provenance line.
  */
 export function resolveLessonByline({
   introduction = null,
   provenance = null,
-  generativeAssistance = null,
   settings = AUTHORING_SETTINGS
 } = {}) {
   const authored = typeof introduction?.credit === "string"
@@ -1245,5 +1156,5 @@ export function resolveLessonByline({
   const fromProvenance = applyCreditMax(renderProvenanceL1(provenance, settings), settings);
   if (fromProvenance) return fromProvenance;
   if (authored) return authored;
-  return formatAssistanceCredit(generativeAssistance, settings);
+  return null;
 }

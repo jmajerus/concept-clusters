@@ -165,8 +165,8 @@ On draft create/save, the server stamps a generative contributor in
 - **Guidance stays universal; records stay author-originated.** Authoring
   guidance tells every drafting client *to* attribute, never *as whom*. Agents
   may supply their own `provenance` contributor name; the server stamps the
-  identified MCP host. Legacy `generativeAssistance` entries are folded on
-  import and are not an active write shape.
+  identified MCP host. Current writes use the modern `provenance` shape; JSON-LD
+  interchange is handled only by the explicit import/export boundary.
 
 **Host registry:** `modules/authoringHosts.js` — add a label entry here, then
 add a matching fingerprint in `modules/mcpClientIdentity.js` (same `id` key).
@@ -174,8 +174,9 @@ add a matching fingerprint in `modules/mcpClientIdentity.js` (same `id` key).
 **Credit/byline policy:** `modules/authoringSettings.js` — templates, max
 length, default author, preferred render (`directed` / `compact`), and accept
 patterns for known bylines (authoring-only; not ops/deploy).
-The drafts page can **suggest** `learningIntroduction.credit` from those
-templates (append hosts or rewrite a known variant), e.g.:
+The drafts page derives the player-facing byline from puzzle-level
+`provenance` when it can. A human may still retain or edit an opaque
+`learningIntroduction.credit` line when no derived byline is available, e.g.:
 
 `By Cursor, with editorial direction by Jane Doe`
 
@@ -184,9 +185,8 @@ Corpus dry-run / apply on canonical files:
 `npm run content:normalize-credits` (add `-- --write` to apply).
 
 That names the drafting tool first and keeps the human as accountable editor
-(COPE/CASRAI: AI tools are not legal authors). A second host is appended into
-the host list (`By Cursor and Claude Code, with editorial direction by …`).
-Humans still own and apply the field; agents must not write it.
+(COPE/CASRAI: AI tools are not legal authors). Humans still own and apply the
+freeform lesson credit; agents must not write it.
 
 ## What the probe returns
 
@@ -218,14 +218,11 @@ each actually sends before designing automatic assistance metadata.
 
 On `create_puzzle_draft` / `save_puzzle_draft`, the server upserts the MCP
 host into puzzle-level `provenance` (Codex may include model in the contributor
-name). Scope/role/date detail that used to live in `generativeAssistance` is
-stored in D1 (`draft_assistance_stamps`) on create/save when MCP identity is
-recognized. Hosted MCP also writes a summary row to the authoring Analytics
-Engine dataset. The drafts page
-can **suggest** a `learningIntroduction.credit` line such as `By Cursor,
-with editorial direction by Jane Doe`, appending another host when one is
-missing. Humans still own and apply credit; the lesson byline is derived from
-`provenance` when possible.
+name). Scope/role/date detail is stored in D1 (`draft_assistance_stamps`) on
+create/save when MCP identity is recognized. Hosted MCP also writes a summary
+row to the authoring Analytics Engine dataset. The lesson byline is derived
+from `provenance` when possible; humans still own any opaque
+`learningIntroduction.credit` text.
 
 ## Assistance stamp audit (D1)
 

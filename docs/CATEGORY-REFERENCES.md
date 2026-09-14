@@ -35,10 +35,11 @@ npm run content:migrate-category-identifiers -- --apply
 ```
 
 The migration updates current `published_documents`, `content_drafts`, and
-`puzzle_drafts` rows using optimistic concurrency. It does not rewrite
-`published_document_revisions` or `puzzle_draft_history`; those remain an
-immutable record of what was previously published or saved. D1 revision
-entries created by this tool are attributed to `category-id-migration`.
+`puzzle_drafts` rows using optimistic concurrency. Retained snapshot history
+is disposable: migration `0020_purge_retired_document_snapshots` clears
+`published_document_revisions` and `puzzle_draft_history` once, while current
+rows retain their ordinary revision counters. D1 revision entries created by
+this tool are attributed to `category-id-migration`.
 Git application rewrites canonical `.ccpuzzle.json` and retained `.jsonld`
 artifacts, updates the cross-disciplinary overlays in `puzzles/index.js`, then
 regenerates every puzzle module and the manifest. Module validation happens

@@ -138,7 +138,8 @@ Column-level partitioning enforces domain boundaries at the domain level. It can
 The current schema audit did retire some fields, but not all fields proposed for removal in the original design note. In the actual active simplified schema:
 
 - **`termRole` on bridges** is compatibility-only and removed before current authoring validation.
-- **`generativeAssistance`** is compatibility-only and folds into `provenance`.
+- JSON-LD and audit-only client details are not stored in the current puzzle
+  document; attribution is represented by `provenance`.
 - **`color` on clusters**, **`via` on related-puzzle entries**, and **`conceptId` on bridges** are still represented by the active schema and are therefore retained in the appropriate projection. They may be candidates for a later, separately reviewed ownership change.
 
 This distinction matters: a domain partition should not silently become a schema deletion.

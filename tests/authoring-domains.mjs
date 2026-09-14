@@ -135,25 +135,6 @@ export async function run() {
     /learningIntroduction\.credit is protected/
   );
 
-  const legacyDocument = {
-    ...document,
-    generativeAssistance: [{ system: "Legacy host", scope: "puzzle" }]
-  };
-  const legacyContent = projectAuthoredDocument(legacyDocument, "content");
-  assert.equal(legacyContent.document.generativeAssistance, undefined);
-  assert.throws(
-    () => applyAuthoredDomain(legacyDocument, "content", {
-      ...legacyContent.document,
-      generativeAssistance: []
-    }),
-    /generativeAssistance is protected/
-  );
-  assert.deepEqual(
-    applyAuthoredDomain(legacyDocument, "content", legacyContent.document)
-      .generativeAssistance,
-    legacyDocument.generativeAssistance
-  );
-
   const withUnannotatedBridge = {
     ...document,
     bridges: [

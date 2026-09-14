@@ -16,7 +16,6 @@ const document = {
   id: "edit-fixture",
   title: "Old title",
   info: "String info.",
-  generativeAssistance: [{ system: "Cursor", date: "2026-08-01" }],
   clusters: [{
     id: "alpha",
     name: "Alpha",
@@ -54,7 +53,6 @@ export async function run() {
   }, "New title");
   assert.equal(patched.title, "New title");
   assert.equal(document.title, "Old title");
-  assert.deepEqual(patched.generativeAssistance, document.generativeAssistance);
 
   const infoText = applyDraftFieldValue(document, {
     section: "puzzle", field: "info.text"
@@ -340,10 +338,8 @@ export async function run() {
   });
   assert.equal(saved.expectedRevision, 3);
   assert.equal(saved.document.title, "Hi");
-  assert.equal(saved.document.generativeAssistance, undefined);
-  assert.deepEqual(saved.document.provenance?.contributors, [{ name: "Cursor" }]);
+  assert.equal(saved.document.provenance, undefined);
   assert.equal(document.title, "Old title");
-  assert.deepEqual(document.generativeAssistance, [{ system: "Cursor", date: "2026-08-01" }]);
 
   let batchSaved = null;
   await persistDraftWorkingCopy({
@@ -470,10 +466,6 @@ export async function run() {
 
   const collaboration = applyDraftFieldValue({
     ...document,
-    generativeAssistance: [
-      { system: "Codex (GPT-5.6 Sol)", provider: "OpenAI", scope: "puzzle" },
-      { system: "Cursor", provider: "Cursor", scope: "puzzle" }
-    ],
     provenance: {
       collaboration: "aiPrimary",
       contributors: [
@@ -502,7 +494,10 @@ export async function run() {
 
   const modelSet = applyDraftFieldValue({
     ...document,
-    generativeAssistance: [{ system: "Cursor", provider: "Cursor", scope: "puzzle" }],
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }]
+    },
     learningIntroduction: {
       ...document.learningIntroduction,
       content: { text: "Body." }
@@ -513,7 +508,6 @@ export async function run() {
     id: "Cursor"
   }, "auto");
   assert.deepEqual(modelSet.provenance.contributors, [{ name: "Cursor (auto)" }]);
-  assert.equal(modelSet.generativeAssistance, undefined);
   assert.equal(
     resolveLessonByline({ provenance: modelSet.provenance }),
     "Drafted with Cursor (auto)"
@@ -598,10 +592,9 @@ export async function run() {
     ["collaboration", ""],
     ["reviewedBy", ""]
   ]));
-  const { generativeAssistance, ...unattributedDocument } = document;
-  const unchangedProvenance = applyDraftFieldValue(unattributedDocument, blankEditorForm, "");
+  const unchangedProvenance = applyDraftFieldValue(document, blankEditorForm, "");
   assert.equal(unchangedProvenance.provenance, undefined);
-  const recoveredProvenance = applyDraftFieldValue(unattributedDocument, {
+  const recoveredProvenance = applyDraftFieldValue(document, {
     ...blankEditorForm,
     models: [{ host: "Muse Code", model: "Spark 1.3" }],
     reasonings: [{ host: "Muse Code", value: "high" }]

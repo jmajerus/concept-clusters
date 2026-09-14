@@ -372,7 +372,10 @@ export async function run() {
   assert.ok(repairedMediaType.reasons.includes("learning-media-type"));
   assert.equal(repairedMediaType.document.learningIntroduction.content.mediaType, undefined);
 
-  const assistedJsonLd = {
+  // Retired attribution arrays are no longer an input contract. JSON-LD
+  // remains a future interchange boundary, but it must use the current
+  // provenance shape rather than reviving the removed field.
+  const retiredJsonLd = {
     ...jsonLd,
     generativeAssistance: [{
       system: "A drafting system",
@@ -381,41 +384,25 @@ export async function run() {
       role: "drafted"
     }]
   };
-  const assisted = canonicalizePuzzleDocument(assistedJsonLd, {
+  assert.match(
+    unsupportedJsonLdFields(retiredJsonLd).join("; "),
+    /generativeAssistance.*unknown top-level JSON-LD field/
+  );
+  const rejectedJsonLd = canonicalizePuzzleDocument(retiredJsonLd, {
     categoryRegistry: {
       "Political Science": { slug: "political-science" },
       Philosophy: { slug: "philosophy" }
     }
   });
-  assert.deepEqual(assisted.errors, []);
-  assert.ok(assisted.reasons.includes("generative-assistance-removed"));
-  assert.equal(assisted.document.generativeAssistance, undefined);
-  assert.equal(assisted.document.provenance.collaboration, "ai");
-  assert.equal(assisted.document.provenance.contributors[0].name, "A drafting system");
+  assert.equal(rejectedJsonLd.document, null);
+  assert.match(rejectedJsonLd.errors[0], /generativeAssistance/);
 
-  const assistedSimplified = canonicalizePuzzleDocument(puzzleDocument({
+  const retiredSimplified = canonicalizePuzzleDocument(puzzleDocument({
     generativeAssistance: [{ system: "A drafting system", scope: "puzzle" }]
   }), { categoryRegistry: categories });
-  assert.deepEqual(assistedSimplified.errors, []);
-  assert.ok(assistedSimplified.reasons.includes("generative-assistance-removed"));
-  assert.equal(assistedSimplified.document.generativeAssistance, undefined);
-  assert.equal(assistedSimplified.document.provenance.collaboration, "ai");
-
-  // Validate legacy attribution before JSON-LD projection: an invalid entry
-  // must not disappear merely because current simplified output omits the
-  // retired field.
-  const malformedAssistedJsonLd = canonicalizePuzzleDocument({
-    ...jsonLd,
-    generativeAssistance: [{}]
-  }, {
-    categoryRegistry: {
-      "Political Science": { slug: "political-science" },
-      Philosophy: { slug: "philosophy" }
-    }
-  });
-  assert.equal(malformedAssistedJsonLd.document, null);
-  assert.ok(malformedAssistedJsonLd.errors.some(error =>
-    error.includes("generativeAssistance[0].system")
+  assert.equal(retiredSimplified.document, null);
+  assert.ok(retiredSimplified.errors.some(error =>
+    error.includes("generativeAssistance")
   ));
 
   const escapedLesson = {
@@ -655,14 +642,19 @@ export async function run() {
   assert.equal(variantDraft.unresolved.length, 0);
   assert.equal(variantDraft.changes.length, 1);
 
-  // The read/storage boundary uses the same citation-safe JSON-LD conversion
-  // as the migration, so opening an old draft cannot drop its bibliography.
-  const stored = documentForStorage(jsonLd, { categoryRegistry: {
+  // Explicit interchange conversion retains citations, but storage itself
+  // accepts only the resulting simplified document.
+  const imported = canonicalizePuzzleDocument(jsonLd, { categoryRegistry: {
+    "Political Science": { slug: "political-science" },
+    Philosophy: { slug: "philosophy" }
+  } }).document;
+  assert.equal(imported.info.citations.length, 1);
+  const stored = documentForStorage(imported, { categoryRegistry: {
     "Political Science": { slug: "political-science" },
     Philosophy: { slug: "philosophy" }
   } });
   assert.equal(stored.info.citations.length, 1);
-  assert.equal(documentForEditor(jsonLd).category, "Political Science");
+  assert.equal(documentForEditor(jsonLd)["@context"], jsonLd["@context"]);
 
   // A JSON-LD replacement is planned as an add+delete pair and can be
   // applied transactionally in an isolated repository.

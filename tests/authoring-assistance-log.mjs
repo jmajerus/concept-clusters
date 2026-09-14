@@ -84,7 +84,6 @@ export async function run() {
   // role "edited" is logged for audit purposes (stampRecord below) but must
   // not auto-credit the calling MCP client as a puzzle contributor.
   assert.equal(stamped.provenance, undefined);
-  assert.equal(stamped.generativeAssistance, undefined);
   assert.equal(stampRecord.tool, "save_puzzle_draft");
   assert.equal(stampRecord.client.system, "Cursor");
 

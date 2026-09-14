@@ -344,10 +344,9 @@ export function createLocalDraftReviewHandler({
         json(res, {
           draftId,
           revision: record.revision,
-          // Legacy drafts may have been stored as JSON-LD before the
-          // simplified-only draft contract was enforced. The editor and
-          // preview both consume simplified documents, so apply the shared
-          // read compatibility conversion without mutating stored history.
+          // Current drafts are simplified documents. Keep this response on
+          // the authoring projection path; JSON-LD conversion belongs to the
+          // explicit interchange tools and never happens as a draft read.
           document: documentForEditor(record.document, {
             categoryRegistry: await loadMergedCategoryRegistry({
               contentDocuments,

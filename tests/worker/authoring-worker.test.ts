@@ -205,10 +205,6 @@ describe("hosted authoring Worker", () => {
     const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
     expect(resourceSchema.properties.bridges.items.properties.termRole)
       .toBeUndefined();
-    expect(resourceSchema.properties.generativeAssistance)
-      .toBeUndefined();
-    expect(JSON.stringify(resourceSchema))
-      .not.toMatch(/generativeAssistance/);
     expect(resourceSchema.properties.large)
       .toBeUndefined();
     expect(JSON.stringify(resourceSchema)).toMatch(/25/);
@@ -239,8 +235,6 @@ describe("hosted authoring Worker", () => {
       .toBe(schemaResource?.uri);
     expect(authoringSchema.result.structuredContent.schema.properties.bridges
       .items.properties.termRole).toBeUndefined();
-    expect(authoringSchema.result.structuredContent.schema.properties.generativeAssistance)
-      .toBeUndefined();
     expect(authoringSchema.result.structuredContent.schema.required)
       .not.toContain("bridges");
 
@@ -281,7 +275,6 @@ describe("hosted authoring Worker", () => {
     expect(phaseSchemas.review.schema.properties.bridges.items?.properties.relationKind)
       .toBeDefined();
     expect(phaseSchemas.pedagogy.schema.properties.lenses).toBeDefined();
-    expect(phaseSchemas.publication.schema.properties.generativeAssistance).toBeUndefined();
     expect(phaseSchemas.publication.schema.properties.provenance).toBeDefined();
 
     const created = await rpc({
@@ -367,7 +360,6 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/real\s+line breaks/);
     expect(guidance.result.structuredContent.markdown).toMatch(/two-character sequence/);
     expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction\.credit/);
-    expect(guidance.result.structuredContent.markdown).not.toMatch(/generativeAssistance/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/provenance is optional structured authoring attribution/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);

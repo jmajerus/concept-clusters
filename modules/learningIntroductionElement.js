@@ -345,8 +345,7 @@ class LearningIntroductionElement extends HTMLElement {
     const line = this.shadowRoot.getElementById("assistance");
     const text = resolveLessonByline({
       introduction,
-      provenance: puzzle?.provenance,
-      generativeAssistance: puzzle?.generativeAssistance
+      provenance: puzzle?.provenance
     });
     line.textContent = text || "";
     line.hidden = !text;

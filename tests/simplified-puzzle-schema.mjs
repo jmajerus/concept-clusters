@@ -176,26 +176,8 @@ export async function run() {
     assert.ok(result.errors.some(e => e.includes("description")));
   }
 
-  // Legacy generativeAssistance is no longer an active simplified/MCP field.
-  // The compatibility boundary folds valid entries into provenance before
-  // the strict schema sees them; malformed values remain schema errors.
-  {
-    const input = validPuzzle({
-      generativeAssistance: [{ system: "Claude", scope: "puzzle", role: "drafted" }]
-    });
-    assert.equal(SimplifiedPuzzleInputSchema.safeParse(input).success, false);
-    const { puzzle, errors } = puzzleFromAuthoredDocument(input);
-    assert.deepEqual(errors, []);
-    assert.equal(puzzle.generativeAssistance, undefined);
-    assert.equal(puzzle.provenance.collaboration, "ai");
-    assert.deepEqual(puzzle.provenance.contributors, [{ name: "Claude" }]);
-    const normalized = normalizeAuthoredPuzzleDocument(input);
-    assert.deepEqual(normalized.errors, []);
-    assert.equal(normalized.document.generativeAssistance, undefined);
-    assert.equal(normalized.document.provenance.collaboration, "ai");
-  }
-
-  // Already-JSON-LD-shaped input passes through unchanged, untouched.
+  // Already-JSON-LD-shaped input remains available to the explicit
+  // interchange normalizer, untouched.
   {
     const jsonld = { "@context": "https://concept-clusters.org/context/v1", id: "x" };
     assert.equal(isJsonLdShaped(jsonld), true);

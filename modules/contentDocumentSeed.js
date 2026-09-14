@@ -441,9 +441,9 @@ export async function openPuzzleWorkingCopy({
   if (!sourceDocument) {
     throw Object.assign(new Error(`Unknown puzzle: ${id}`), { status: 404 });
   }
-  // Published D1 rows may predate the simplified-only draft contract and
-  // therefore still be canonical JSON-LD. A new working copy is authoring
-  // data, not interchange data: normalize it before its first write.
+  // Published rows feeding the authoring workflow are already simplified.
+  // JSON-LD belongs at the explicit interchange boundary; do not silently
+  // turn an interchange document into a draft while opening a working copy.
   const document = documentForStorage(sourceDocument, { categoryRegistry });
   try {
     const draft = await createDraft({ draftId: id, document });

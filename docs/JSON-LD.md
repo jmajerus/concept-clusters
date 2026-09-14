@@ -235,11 +235,10 @@ of record for authoring attribution
 (`collaboration` + `contributors`, plus optional client settings and
 author-owned `reviewedBy`). See
 [authoring provenance shape](dev-briefs/authoring-provenance-shape.md). It
-replaces the retired split between `generativeAssistance` and
+replaces the retired split between an older client-attribution array and
 `learningIntroduction.credit` (the byline is a derived L1 render). Agents
-should only author the L2 two-axis shape. Legacy JSON-LD input may still carry
-`generativeAssistance`; import accepts it for compatibility, folds it into
-`provenance`, and current exports omit it.
+should only author the L2 two-axis shape. Current JSON-LD interchange uses
+`provenance` directly; the draft authoring/storage path does not accept JSON-LD.
 
 Unknown namespaced properties such as `example:reviewStatus` are preserved
 through puzzle import/export instead of silently discarded. Unknown plain

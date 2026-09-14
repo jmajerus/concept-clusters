@@ -26,9 +26,6 @@ function runtimeShape(puzzle) {
     delete bridge.termRole;
   });
   delete copy.large;
-  // The runtime compatibility shape can still carry legacy attribution, but
-  // current JSON-LD exports intentionally omit it.
-  delete copy.generativeAssistance;
   Object.assign(copy, largeField(puzzleNodeCount(copy)));
   return copy;
 }
@@ -225,25 +222,6 @@ export async function run() {
     puzzleFromJsonLd(puzzleToJsonLd(citedPuzzle)).info.citations,
     citedPuzzle.info.citations,
     "citations should round-trip through JSON-LD"
-  );
-  const assistedPuzzle = {
-    ...PUZZLES[0],
-    generativeAssistance: [{ system: "Claude", scope: "puzzle", role: "drafted" }]
-  };
-  const assistedExport = puzzleToJsonLd(assistedPuzzle);
-  assert.equal(assistedExport.generativeAssistance, undefined);
-  assert.deepEqual(assistedExport.provenance, {
-    collaboration: "ai",
-    contributors: [{ name: "Claude" }]
-  });
-  const legacyAssistedDocument = {
-    ...assistedExport,
-    generativeAssistance: assistedPuzzle.generativeAssistance
-  };
-  assert.deepEqual(
-    puzzleFromJsonLd(legacyAssistedDocument).generativeAssistance,
-    assistedPuzzle.generativeAssistance,
-    "legacy generativeAssistance should remain readable on JSON-LD import"
   );
   assert.ok(
     validatePuzzleContent({

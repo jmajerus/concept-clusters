@@ -1,8 +1,7 @@
 // Copy-field save/revert for /admin/drafts. Addresses one field with
 // structured form keys (section, id, term, field) rather than a JSONPath
 // string. Revert copies from the live published document -- it does not
-// trust a hidden "before" value in the form. Human saves leave
-// generativeAssistance unchanged.
+// trust a hidden "before" value in the form.
 
 import { documentForEditor, documentForStorage } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
@@ -359,7 +358,7 @@ function applyProvenanceEditor(document, form) {
         authorName: typeof form.authorName === "string" ? form.authorName : null
       });
     }
-    if (form.reviewedBy !== undefined && (form.reviewedBy.trim() || next.provenance || next.generativeAssistance)) {
+    if (form.reviewedBy !== undefined && (form.reviewedBy.trim() || next.provenance)) {
       next = applyReviewedBy(next, {
         reviewedBy: typeof form.reviewedBy === "string" ? form.reviewedBy : ""
       });

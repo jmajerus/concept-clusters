@@ -10,8 +10,8 @@
 // "Simplified" means no @context/@id/@type/schemaVersion and no
 // cluster/bridge @id to hand-sync with id -- not a cut-down feature set.
 // Every current puzzle-content field JSON-LD can express, this schema can too.
-// Legacy JSON-LD bridge termRole and generativeAssistance are accepted only
-// during import and removed before simplified validation.
+// Legacy JSON-LD bridge termRole is accepted only during import and removed
+// before simplified validation.
 // Category references are stable ids; the authoring server accepts legacy
 // display titles only while reading and canonicalizes them before storage.
 import { z } from "zod";

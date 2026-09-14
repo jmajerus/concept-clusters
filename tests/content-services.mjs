@@ -28,23 +28,12 @@ export async function run() {
     // modules/puzzleSymmetryFlags.js.
     assert.ok(Array.isArray(energyValidation.flags));
 
-    // Read-compatibility path: a draft stored raw JSON-LD from before
-    // save_puzzle_draft started rejecting it (docs/MCP-REMOTE.md). validatePuzzleDraft
-    // must fold it to simplified shape via documentForEditor rather than reporting
-    // "Drafts use the simplified format" against a document nobody chose to submit
-    // that way -- see jsonLdShapedDocumentAsSimplified in authoredPuzzleDocument.js.
+    // JSON-LD is still available through the explicit interchange service, but
+    // is not a current draft input. Authoring validation should reject it at
+    // the boundary rather than converting it as a side effect of a draft read.
     const draftValidationOfJsonLd = await content.validatePuzzleDraft(energy, { categoryRegistry: content.categories });
-    assert.equal(draftValidationOfJsonLd.valid, true);
-    const { documentForEditor, storedDocumentNeedsCanonicalSave } =
-      await import("../modules/authoredPuzzleDocument.js");
-    const editedFromJsonLd = documentForEditor(energy);
-    assert.equal("@context" in editedFromJsonLd, false);
-    assert.equal(editedFromJsonLd.id, "energy-flow");
-    assert.ok(Array.isArray(editedFromJsonLd.clusters) && editedFromJsonLd.clusters.length > 0);
-    // Converted-but-not-yet-saved: the flag that prompts a save to lock in
-    // the conversion, same as any other legacy-shaped stored draft.
-    assert.equal(storedDocumentNeedsCanonicalSave(energy), true);
-    assert.equal(storedDocumentNeedsCanonicalSave(editedFromJsonLd), false);
+    assert.equal(draftValidationOfJsonLd.valid, false);
+    assert.match(draftValidationOfJsonLd.errors.join("; "), /JSON-LD is interchange-only/);
     assert.ok(content.listPuzzles({ category: "Science" }).length > 0);
     const staleLargeFlag = {
       id: "stale-large-flag",
@@ -205,6 +194,11 @@ export async function run() {
     assert.equal(reinstalled.status, "installed");
     assert.equal(reinstalled.installedContentHash, reinstalled.contentHash);
     const replacement = {
+      ...content.getPuzzleDocument("energy-flow"),
+      id: "service-fixture",
+      title: "Service fixture"
+    };
+    const replacementInterchange = {
       ...energy,
       "@id": "urn:concept-clusters:puzzle:service-fixture",
       id: "service-fixture",
@@ -226,8 +220,8 @@ export async function run() {
       /revision conflict/
     );
 
-    const firstPlan = await publisher.planPuzzleImport(replacement);
-    const secondPlan = await publisher.planPuzzleImport(replacement);
+    const firstPlan = await publisher.planPuzzleImport(replacementInterchange);
+    const secondPlan = await publisher.planPuzzleImport(replacementInterchange);
     assert.equal(firstPlan.action, "create");
     assert.equal(firstPlan.approvalToken, secondPlan.approvalToken);
     assert.deepEqual(firstPlan.affectedPaths, [

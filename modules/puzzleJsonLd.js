@@ -81,9 +81,8 @@ export function puzzleToJsonLd(
     categoryRegistry
   } = {}
 ) {
-  // Legacy runtime modules may still carry generativeAssistance. Fold it on
-  // the projection boundary so current exports retain attribution as
-  // provenance while never re-emitting the retired field.
+  // Normalize attribution on the projection boundary so interchange exports
+  // use the same provenance shape as current authoring documents.
   const withProvenance = canonicalizeDocumentProvenance(puzzle);
   // Interchange callers can request the same stable category-id projection
   // as canonical authoring/publication storage without changing the legacy
@@ -259,12 +258,9 @@ export function puzzleFromJsonLd(document) {
     bridges
   };
   Object.assign(puzzle, largeField(puzzleNodeCount(puzzle)));
-  // Legacy JSON-LD may still carry generativeAssistance. Keep accepting it
-  // on import so the shared provenance canonicalizer can fold it; current
-  // JSON-LD exports never emit the retired field.
   for (const key of [
     "creator", "license", "derivedFrom", "dateCreated", "dateModified",
-    "language", "version", "generativeAssistance", "provenance"
+    "language", "version", "provenance"
   ]) {
     if (document[key] !== undefined) puzzle[key] = clone(document[key]);
   }
