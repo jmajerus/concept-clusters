@@ -9,12 +9,22 @@ export const name = "Authoring split-board planner: one board per burst";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PLANNER = ".agents/skills/author-puzzle/scripts/plan-split-boards.mjs";
 const EXAMPLE_PLAN = ".agents/skills/author-puzzle/references/split-plan-example.json";
+const KILO_MARKER_KEYS = [
+  "KILO_APP_NAME",
+  "KILO_APP_VERSION",
+  "KILOCODE_FEATURE",
+  "KILOCODE_VERSION",
+  "KILO_CLIENT"
+];
 
 function runPlanner(args, env = {}) {
+  const childEnv = { ...process.env };
+  for (const key of KILO_MARKER_KEYS) delete childEnv[key];
+  Object.assign(childEnv, env);
   const result = spawnSync(process.execPath, [PLANNER, ...args], {
     encoding: "utf8",
     cwd: ROOT,
-    env: { ...process.env, ...env }
+    env: childEnv
   });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   return JSON.parse(result.stdout);
@@ -47,8 +57,22 @@ export async function run() {
   });
   assert.equal(kiloNative.mcpTransport, "stdio");
   assert.ok(
-    kiloNative.steps.some(step => step.startsWith("Call MCP tool get_authoring_guidance sequentially")),
+    kiloNative.steps.some(step => step.startsWith("Call MCP tool concept-clusters_get_authoring_guidance sequentially")),
     "Kilo's project environment should select native MCP transport by default"
+  );
+  assert.ok(
+    kiloNative.steps.some(step => step.startsWith("Call MCP tool concept-clusters_create_puzzle_draft sequentially")),
+    "Kilo's native planner steps should use the server-namespaced tool names"
+  );
+  assert.ok(
+    !kiloNative.steps.some(step => step.startsWith("Call MCP tool get_authoring_guidance sequentially")),
+    "Kilo's native planner steps should not emit bare tool names"
+  );
+  const kiloMcpSteps = kiloNative.steps.filter(step => step.startsWith("Call MCP tool "));
+  assert.ok(kiloMcpSteps.length > 0);
+  assert.ok(
+    kiloMcpSteps.every(step => step.startsWith("Call MCP tool concept-clusters_")),
+    "every Kilo native MCP step should use a server-namespaced tool name"
   );
 
   const nativeMcp = runPlanner([

@@ -10,6 +10,7 @@ import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
 import { isKiloCodeEnvironment } from "../../../../modules/mcpCallInvocation.js";
 
 const SCRIPT = "node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs";
+const MCP_SERVER_NAME = "concept-clusters";
 const PASSES = ["fit", "complete", "board-review"];
 const TRANSPORTS = ["mcp-call", "stdio"];
 const ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -103,44 +104,45 @@ function resolveBoard(plan, { board, continue: advance }) {
   return { id: order[0], index: 0, order };
 }
 
-function mcpCall(transport, tool, args = {}) {
+function mcpCall(transport, tool, args = {}, { kiloNative = false } = {}) {
   const argsJson = JSON.stringify(args);
   if (transport === "stdio") {
-    return `Call MCP tool ${tool} sequentially with ${argsJson}`;
+    const visibleTool = kiloNative ? `${MCP_SERVER_NAME}_${tool}` : tool;
+    return `Call MCP tool ${visibleTool} sequentially with ${argsJson}`;
   }
   return `node tools/mcp-call.mjs ${tool} '${argsJson.replace(/'/g, "'\\''")}'`;
 }
 
-function fitSteps({ boardId, transport, inventoryPath, planPath, ledgerPath, draftPath, dryRun }) {
+function fitSteps({ boardId, transport, kiloNative, inventoryPath, planPath, ledgerPath, draftPath, dryRun }) {
   return [
     `Read ${inventoryPath}, ${planPath}, and references/fit-pass.md for board "${boardId}" only`,
     `Write ${ledgerPath} before any MCP save`,
-    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_guidance", { phase: "core" }),
-    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_schema", { phase: "core" }),
+    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_guidance", { phase: "core" }, { kiloNative }),
+    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_schema", { phase: "core" }, { kiloNative }),
     `Build ${draftPath} from inventory + plan for this board only (clusters/bridges; no notes or lenses)`,
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "create_puzzle_draft", {
       draft_id: boardId,
       document: `<from ${draftPath}>`
-    }),
+    }, { kiloNative }),
     `node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level fit ${draftPath} --ledger ${ledgerPath}`,
-    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "validate_puzzle_draft", { draft_id: boardId }),
+    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "validate_puzzle_draft", { draft_id: boardId }, { kiloNative }),
     `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`,
     "Emit stop-gate: Fit ready. Waiting on board review. STOP — do not start the next board."
   ];
 }
 
-function completeSteps({ boardId, transport, draftPath, dryRun }) {
+function completeSteps({ boardId, transport, kiloNative, draftPath, dryRun }) {
   return [
-    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_puzzle_draft", { draft_id: boardId }),
+    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_puzzle_draft", { draft_id: boardId }, { kiloNative }),
     `Refresh revision; add puzzle info, termInfo, bridge help, lenses for "${boardId}" only`,
-    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_guidance", { phase: "pedagogy" }),
+    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_guidance", { phase: "pedagogy" }, { kiloNative }),
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "save_puzzle_draft", {
       draft_id: boardId,
       expected_revision: "<from get_puzzle_draft>",
       document: `<merged draft from ${draftPath} or get_puzzle_draft>`
-    }),
+    }, { kiloNative }),
     `node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level complete ${draftPath}`,
-    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "validate_puzzle_draft", { draft_id: boardId }),
+    dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "validate_puzzle_draft", { draft_id: boardId }, { kiloNative }),
     `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`,
     "Emit stop-gate: Validated. Waiting on /admin/drafts. STOP — do not start the next board."
   ];
@@ -273,6 +275,7 @@ function build() {
 
   const workspace = ensureAuthoringWorkspace();
   const plan = loadPlan(args.plan);
+  const kiloNative = isKiloCodeEnvironment(process.env) && args.transport === "stdio";
   const active = resolveBoard(plan, { board: args.board, continue: args.continue });
   const board = plan.boards.find(item => item.id === active.id);
   if (!board) throw new Error(`Board "${active.id}" missing from plan.boards[].`);
@@ -291,6 +294,7 @@ function build() {
     ? fitSteps({
       boardId: active.id,
       transport: args.transport,
+      kiloNative,
       inventoryPath,
       planPath,
       ledgerPath,
@@ -301,6 +305,7 @@ function build() {
       ? completeSteps({
         boardId: active.id,
         transport: args.transport,
+        kiloNative,
         draftPath,
         dryRun: args.dryRun
       })
