@@ -158,6 +158,67 @@ export async function run() {
     });
     assert.equal(rejected.result.isError, true);
     assert.match(rejected.result.content[0].text, /belongs to the content domain/);
+
+    const repairCreated = await session.request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "repair-domain-mcp",
+        document: {
+          id: "repair-domain-mcp",
+          title: "Repair domain MCP",
+          category: "Science",
+          clusters: [
+            {
+              id: "alpha",
+              name: "Alpha",
+              fact: "Alpha",
+              seeds: ["\"a\"", "b"],
+              floatingTerms: ["c"],
+              terms: ["a", "b", "c"],
+              termInfo: { "\"a\"": { text: "Escaped key" } }
+            },
+            { id: "beta", name: "Beta", fact: "Beta", seeds: ["d", "e"], floatingTerms: ["f"] }
+          ],
+          bridges: []
+        }
+      }
+    });
+    assert.equal(repairCreated.result.isError, undefined);
+    const repairPedagogyRead = await session.request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "repair-domain-mcp", domain: "pedagogy" }
+    });
+    const repairPedagogy = repairPedagogyRead.result.structuredContent.draft;
+    const repairRejected = await session.request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "repair-domain-mcp",
+        expected_revision: repairPedagogy.revision,
+        domain: "pedagogy",
+        repair: true,
+        document: repairPedagogy.document
+      }
+    });
+    assert.equal(repairRejected.result.isError, true);
+    assert.match(repairRejected.result.content[0].text, /only supported for complete or content/);
+
+    const repairContentRead = await session.request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "repair-domain-mcp", domain: "content" }
+    });
+    const repairContent = repairContentRead.result.structuredContent.draft;
+    const repairedContentSave = await session.request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "repair-domain-mcp",
+        expected_revision: repairContent.revision,
+        domain: "content",
+        repair: true,
+        document: repairContent.document
+      }
+    });
+    assert.equal(repairedContentSave.result.isError, undefined);
+    assert.equal(repairedContentSave.result.structuredContent.repair.applied, true);
   } finally {
     await session.close();
     await rm(directory, { recursive: true, force: true });

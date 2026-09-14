@@ -30,7 +30,7 @@ Structural and discovery annotations layered on top of content: bridge relations
 
 Separating pedagogy from content allows a focused annotation pass — potentially by a different agent or a different model configuration — without touching the content domain.
 
-Fields: `categories`, `subcategories`, `tags`, `level`, `lenses`, `lensMode`, `preSolve`, `relatedPuzzles`, `learningIntroduction`, publication/discovery metadata, and the bridge annotation fields above.
+Fields: `categories`, `subcategories`, `tags`, `level`, `lenses`, `lensMode`, `preSolve`, `relatedPuzzles`, `learningIntroduction`, publication/discovery metadata, and the bridge annotation fields above. The legacy human-owned `learningIntroduction.credit` value is protected: it is omitted from the focused pedagogy projection and remains under the provenance/editor boundary.
 
 ### Provenance
 Who contributed to this puzzle. The current document shape is an object with `collaboration` and an ordered `contributors` array; normalization may add contributor kind and observed model settings. This domain is protected from focused agent writes. Recognized MCP clients can be stamped by the server, while author-owned attribution remains available through the existing provenance/editor paths.
@@ -80,7 +80,7 @@ In neither case does the agent receive `provenance` or `system` fields. They are
 
 ### Merge semantics
 
-The infrastructure combines the stored content, pedagogy, and provenance projections into a complete document at the draft repository read boundary. The system domain remains the row envelope. A complete materialized document is then written on create/save/pop and is the artifact passed to validation and publication.
+The infrastructure combines the stored content, pedagogy, and provenance projections into a complete document at the draft repository read boundary. The system domain remains the row envelope. A complete materialized document is then written on create/save/pop and is the artifact passed to validation and publication. Writers that update a complete snapshot outside the draft repository, such as category-rename propagation, must refresh all three projections in the same update so a later read cannot reintroduce stale sidecar data.
 
 Published puzzle rows are intentionally still complete snapshots. The current Freeze and rendering paths read `published_documents.document`; they do not need to know about mutable draft projections. This keeps the domain upgrade out of the player and Freeze bundle format while preserving the option to make published reads assemble later.
 
@@ -100,13 +100,18 @@ The default is `complete`, preserving existing clients. `content` and
 `pedagogy` are the only focused agent domains. A focused save still requires
 the normal `expected_revision`; it replaces the selected domain while the
 server retains the other projections, reassembles the complete document, and
-runs the normal canonicalization path. A content payload containing pedagogy
-fields (or vice versa) is rejected rather than silently moved.
+runs the normal canonicalization path. Omitting an optional field from the
+selected projection therefore removes it. A content payload containing
+pedagogy fields (or vice versa) is rejected rather than silently moved.
 
 The `pedagogy` response has a writable `document` projection and a read-only
 `context` containing content needed to refer to clusters and bridges. The
-`content` response has no pedagogy context because it is the primary drafting
-surface. Neither focused document includes provenance or system metadata.
+projection omits legacy `learningIntroduction.credit`; an explicit attempt to
+write that protected field is rejected, while an existing value is preserved
+when the introduction remains present. The `content` response has no pedagogy
+context because it is the primary drafting surface. Neither focused document
+includes provenance or system metadata. Mechanical `repair` is available to
+complete and content saves only because it repairs content-domain fields.
 
 ### Content domain (drafting pass)
 

@@ -53,6 +53,7 @@ const PEDAGOGY_BRIDGE_FIELDS = new Set([
 
 const PROTECTED_ROOT_FIELDS = new Set([
   "provenance",
+  "generativeAssistance",
   "schemaVersion",
   "publicationState",
   "validatedAt",
@@ -259,6 +260,17 @@ function publicDomain(value) {
   return result;
 }
 
+function publicPedagogyDomain(value) {
+  const result = publicDomain(value);
+  // `learningIntroduction.credit` is a legacy human-owned byline. It is
+  // parsed into provenance by the canonicalization path, so it is protected
+  // even though its containing learningIntroduction belongs to pedagogy.
+  if (isObject(result.learningIntroduction)) {
+    delete result.learningIntroduction.credit;
+  }
+  return result;
+}
+
 /**
  * Return an agent-facing projection. Pedagogy receives content as read-only
  * context because annotations reference clusters and bridges, but only the
@@ -277,7 +289,7 @@ export function projectAuthoredDocument(document, domain = "complete") {
   }
   return {
     domain,
-    document: publicDomain(domains.pedagogy),
+    document: publicPedagogyDomain(domains.pedagogy),
     context: publicDomain(domains.content)
   };
 }
@@ -319,6 +331,13 @@ function assertDomainPayload(domain, incoming) {
       }
     });
   }
+
+  if (domain === "pedagogy" && isObject(incoming.learningIntroduction) &&
+      hasOwn(incoming.learningIntroduction, "credit")) {
+    throw new Error(
+      "learningIntroduction.credit is protected and cannot be written through the pedagogy domain"
+    );
+  }
 }
 
 function assertPedagogyBridgeIdentities(contentBridges, incomingBridges) {
@@ -357,6 +376,7 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
   assertObject(currentDocument, "Current authored document");
   assertDomainPayload(domain, incoming);
   const current = partitionAuthoredDocument(currentDocument);
+  const hasLegacyGenerativeAssistance = hasOwn(currentDocument, "generativeAssistance");
   if (domain === "pedagogy") {
     assertPedagogyBridgeIdentities(current.content.bridges, incoming.bridges);
   }
@@ -366,17 +386,43 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     provenance: current.provenance
   };
   if (domain === "content") {
-    next.content = { ...current.content, ...clone(incoming) };
+    // A focused payload is the complete selected projection. Replacing it
+    // makes omission meaningful (for example, removing an optional info
+    // field), while the other logical domains remain untouched.
+    next.content = clone(incoming);
   } else {
-    next.pedagogy = {
-      ...current.pedagogy,
-      ...clone(incoming),
-      ...(hasOwn(incoming, "bridges")
-        ? { bridges: splitDomainBridges(incoming.bridges) }
-        : {})
-    };
+    next.pedagogy = clone(incoming);
+    if (hasOwn(incoming, "bridges")) {
+      next.pedagogy.bridges = splitDomainBridges(incoming.bridges);
+    }
+    // The focused projection omits this legacy field. Preserve it when the
+    // lesson itself remains present; deleting the whole lesson remains a
+    // legitimate pedagogy-domain replacement and cannot feed credit back
+    // through canonicalization.
+    const currentIntroduction = current.pedagogy.learningIntroduction;
+    const incomingIntroduction = next.pedagogy.learningIntroduction;
+    if (isObject(currentIntroduction) && hasOwn(currentIntroduction, "credit") &&
+        isObject(incomingIntroduction)) {
+      next.pedagogy.learningIntroduction = {
+        ...incomingIntroduction,
+        credit: clone(currentIntroduction.credit)
+      };
+    }
   }
-  return assembleAuthoredDocument(next);
+  const assembled = assembleAuthoredDocument(next);
+  // `large` is derived and absent from focused payloads, but preserving an
+  // existing value keeps the complete materialized snapshot stable until the
+  // normal canonical boundary recomputes it.
+  if (hasOwn(currentDocument, "large")) {
+    assembled.large = clone(currentDocument.large);
+  }
+  // Legacy assistance is folded into provenance by the normal canonical
+  // boundary, but preserve it until then so a direct focused merge cannot
+  // erase a protected attribution field from an older document.
+  if (hasLegacyGenerativeAssistance) {
+    assembled.generativeAssistance = clone(currentDocument.generativeAssistance);
+  }
+  return assembled;
 }
 
 export function storedDomainDocuments(document) {

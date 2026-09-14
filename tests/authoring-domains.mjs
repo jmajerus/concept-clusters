@@ -14,6 +14,7 @@ const document = {
   id: "domain-fixture",
   title: "Domain fixture",
   category: "science",
+  large: true,
   info: { text: "Core information" },
   clusters: [{
     id: "alpha",
@@ -35,6 +36,7 @@ const document = {
   lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }],
   learningIntroduction: {
     requirement: "optional",
+    credit: "By Jane Doe",
     content: { text: "Introduction" }
   },
   provenance: {
@@ -60,6 +62,7 @@ export async function run() {
   assert.equal(pedagogy.document.provenance, undefined);
   assert.equal(pedagogy.document.bridges[0].fact, undefined);
   assert.equal(pedagogy.document.bridges[0].relationKind, "contrast");
+  assert.equal(pedagogy.document.learningIntroduction.credit, undefined);
   assert.equal(pedagogy.context.provenance, undefined);
   assert.equal(pedagogy.context.bridges[0].fact, "Shared fact");
 
@@ -79,6 +82,19 @@ export async function run() {
   assert.deepEqual(pedagogyEdit.provenance, document.provenance);
   assert.deepEqual(pedagogyEdit.lenses, []);
   assert.equal(pedagogyEdit.bridges[0].relationKind, "contrast");
+  assert.equal(pedagogyEdit.learningIntroduction.credit, "By Jane Doe");
+  assert.equal(contentEdit.large, true);
+
+  const { info: _contentInfo, ...contentWithoutInfo } = content.document;
+  assert.equal(
+    applyAuthoredDomain(document, "content", contentWithoutInfo).info,
+    undefined
+  );
+  const { lenses: _pedagogyLenses, ...pedagogyWithoutLenses } = pedagogy.document;
+  assert.equal(
+    applyAuthoredDomain(document, "pedagogy", pedagogyWithoutLenses).lenses,
+    undefined
+  );
 
   assert.throws(
     () => applyAuthoredDomain(document, "content", {
@@ -107,6 +123,35 @@ export async function run() {
       bridges: [{ ...pedagogy.document.bridges[0], term: "Renamed bridge" }]
     }),
     /term belongs to the content domain/
+  );
+  assert.throws(
+    () => applyAuthoredDomain(document, "pedagogy", {
+      ...pedagogy.document,
+      learningIntroduction: {
+        ...pedagogy.document.learningIntroduction,
+        credit: "By an untrusted editor"
+      }
+    }),
+    /learningIntroduction\.credit is protected/
+  );
+
+  const legacyDocument = {
+    ...document,
+    generativeAssistance: [{ system: "Legacy host", scope: "puzzle" }]
+  };
+  const legacyContent = projectAuthoredDocument(legacyDocument, "content");
+  assert.equal(legacyContent.document.generativeAssistance, undefined);
+  assert.throws(
+    () => applyAuthoredDomain(legacyDocument, "content", {
+      ...legacyContent.document,
+      generativeAssistance: []
+    }),
+    /generativeAssistance is protected/
+  );
+  assert.deepEqual(
+    applyAuthoredDomain(legacyDocument, "content", legacyContent.document)
+      .generativeAssistance,
+    legacyDocument.generativeAssistance
   );
 
   const withUnannotatedBridge = {

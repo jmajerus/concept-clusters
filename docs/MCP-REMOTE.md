@@ -78,9 +78,14 @@ guidance:
 
 Focused draft responses carry only `draftId`, `revision`, the selected domain,
 and its document/context. Provenance and system metadata stay outside the
-focused payload. A focused save applies the selected domain to the current
-stored document, materializes the complete document, and then follows the
-same validation/publication path as a complete save. The save still requires
+focused payload. A focused save replaces the selected projection, preserves
+the other domains, materializes the complete document, and then follows the
+same validation/publication path as a complete save. Omitting an optional
+field from the selected projection removes it. The legacy human-owned
+`learningIntroduction.credit` is omitted from pedagogy responses, preserved
+when that introduction remains present, and rejected if supplied explicitly.
+`repair: true` is accepted for complete or content saves, not pedagogy saves,
+because it repairs content-domain fields. The save still requires
 `expected_revision`.
 
 The smaller guidance/schema responses support progressive authoring over one
@@ -100,11 +105,12 @@ accumulating draft:
    metadata before validation and submission.
 
 Before every later pass, call `get_puzzle_draft`, edit the latest document or
-selected domain, and preserve all earlier fields when saving. A phase schema is
-a focused field projection, not a standalone replacement schema or an
-independent validator; the complete schema resource remains canonical. Phases
-can be revisited in any order when their concern needs further work; they are
-not one-way lifecycle gates.
+selected domain, preserve all fields outside the selected domain, and send the
+full latest selected projection when saving. A phase schema is a focused field
+projection, not a standalone replacement schema or an independent validator;
+the complete schema resource remains canonical. Phases can be revisited in any
+order when their concern needs further work; they are not one-way lifecycle
+gates.
 
 ## What is implemented
 
@@ -230,7 +236,8 @@ abandoned or test draft.
 When a category has been renamed, the one-time corpus repair is run from the
 authoring checkout with `npm run content:propagate-category-renames` (dry-run)
 and then `--apply` after the report is reviewed. It updates revisioned D1
-rows, leaves historical `previousTitles` and draft undo history intact, and
+rows (including their persisted domain projections), leaves historical
+`previousTitles` and draft undo history intact, and
 reports Git files for the normal Freeze PR rather than editing production
 source directly. See [Category rename propagation](dev-briefs/category-rename-propagation.md).
 

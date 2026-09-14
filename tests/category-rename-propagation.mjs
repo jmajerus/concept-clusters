@@ -170,6 +170,46 @@ export async function run() {
   assert.match(database.batches[0][0].sql, /UPDATE published_documents/);
   assert.match(database.batches[0][1].sql, /INSERT INTO published_document_revisions/);
 
+  const puzzleDatabase = fakeDatabase();
+  const puzzleDocument = {
+    id: "river-basins",
+    title: "River basins",
+    category: "Physical Geography",
+    info: { text: "A puzzle about drainage patterns." },
+    clusters: [{ id: "alpha", name: "Alpha", fact: "Alpha fact." }],
+    bridges: [{
+      id: "shared",
+      term: "shared idea",
+      clusters: ["alpha", "beta"],
+      fact: "Shared fact.",
+      relationKind: "contrast"
+    }],
+    lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }],
+    provenance: { contributors: ["Claude"] }
+  };
+  await applyD1Changes(puzzleDatabase, [{
+    source: "d1:puzzle_drafts",
+    table: "puzzle_drafts",
+    kind: "puzzle",
+    id: "river-basins-draft",
+    revision: 4,
+    row: {
+      id: "river-basins-draft",
+      owner_subject: "author",
+      revision: 4,
+      document: JSON.stringify(puzzleDocument),
+      content_hash: "sha256:old"
+    },
+    after: puzzleDocument
+  }]);
+  const puzzleUpdate = puzzleDatabase.batches[0][0];
+  assert.match(puzzleUpdate.sql, /content_json = \?, pedagogy_json = \?, provenance_json = \?/);
+  const storedContent = JSON.parse(puzzleUpdate.params[5]);
+  const storedPedagogy = JSON.parse(puzzleUpdate.params[6]);
+  assert.equal(storedContent.bridges[0].relationKind, undefined);
+  assert.equal(storedPedagogy.bridges[0].relationKind, "contrast");
+  assert.deepEqual(JSON.parse(puzzleUpdate.params[7]), puzzleDocument.provenance);
+
   await assert.rejects(
     () => applyD1Changes(fakeDatabase({ changes: 0 }), [{
       source: "d1:published_documents",

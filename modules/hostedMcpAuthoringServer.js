@@ -930,7 +930,7 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server preserves the other domains and rejects fields owned by another domain; pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving -- the response always echoes every change made under `repair`, never silently.",
+      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server preserves the other domains and rejects fields owned by another domain; pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
@@ -948,13 +948,24 @@ export function createAuthoringMcpServer({
     repair,
     publish_to_authoring
   }, ctx) => {
+    if (domain === "pedagogy" && repair) {
+      throw new Error(
+        "repair=true is only supported for complete or content domain saves"
+      );
+    }
     let previousDocument = null;
+    const repairedInput = repair
+      ? repairEscapedQuotes(document)
+      : { document, changes: [] };
     if (domain !== "complete") {
       const previous = await draftRepository.get({ draftId: draft_id, actor });
       previousDocument = documentForEditor(previous.document);
-      document = applyAuthoredDomain(previousDocument, domain, document);
+      document = applyAuthoredDomain(previousDocument, domain, repairedInput.document);
     }
-    const repaired = repair ? repairEscapedQuotes(document) : { document, changes: [] };
+    const repaired = {
+      document: domain === "complete" ? repairedInput.document : document,
+      changes: repairedInput.changes
+    };
     const liveCategoryRegistry = await categoryRegistry();
     const { document: stored, normalization } = documentForDraftStore(
       repaired.document,

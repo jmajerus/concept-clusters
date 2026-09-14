@@ -26,6 +26,7 @@ import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
 import { planCategoryRenamePropagation } from "../modules/categoryRenamePropagation.js";
 import { isCuedForFreeze } from "../modules/contentFreezePlan.js";
+import { storedDomainDocuments } from "../modules/authoringDomains.js";
 
 const root = join(fileURLToPath(new URL("..", import.meta.url)));
 loadProjectEnv({ repositoryRoot: root });
@@ -328,13 +329,15 @@ export async function applyD1Changes(
     if (change.table === "puzzle_drafts") {
       const seq = (nextHistory.get(row.id) || 0) + 1;
       nextHistory.set(row.id, seq);
+      const domains = storedDomainDocuments(change.after);
       operations.push({
         id: `puzzle_draft:${row.id}:${row.owner_subject}`,
         statements: [
           database.prepare(`
             UPDATE puzzle_drafts
             SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
-                revision = revision + 1, validation_json = NULL, updated_at = ?
+                revision = revision + 1, validation_json = NULL, updated_at = ?,
+                content_json = ?, pedagogy_json = ?, provenance_json = ?
             WHERE id = ? AND owner_subject = ? AND revision = ?
           `).bind(
             typeof change.after.id === "string" ? change.after.id : null,
@@ -342,6 +345,9 @@ export async function applyD1Changes(
             documentJson,
             contentHash,
             now,
+            domains.content,
+            domains.pedagogy,
+            domains.provenance,
             row.id,
             row.owner_subject,
             Number(row.revision)
