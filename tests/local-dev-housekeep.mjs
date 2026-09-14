@@ -38,6 +38,25 @@ export async function run() {
     };
     assert.equal(isOurDevServerProcess(absolute, repositoryRoot), true);
     assert.equal(isOurDevServerProcess(absolute, otherRoot), false);
+    const absoluteScript = join(repositoryRoot, "tools/dev-server.mjs");
+    assert.equal(
+      isOurDevServerProcess({
+        ...absolute,
+        args: `node -e ${absolute.args}`,
+        argv: ["/usr/bin/node", "-e", absolute.args]
+      }, repositoryRoot),
+      false,
+      "a script path embedded in eval source must not claim the process"
+    );
+    assert.equal(
+      isOurDevServerProcess({
+        ...absolute,
+        args: `node ${absoluteScript} 8788 --worker`,
+        argv: ["/usr/bin/node", absoluteScript, "8788", "--worker"]
+      }, repositoryRoot),
+      true,
+      "the actual script argv may be absolute"
+    );
     assert.equal(
       isOurDevServerProcess({ ...absolute, comm: "bash" }, repositoryRoot),
       false,

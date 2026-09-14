@@ -119,8 +119,22 @@ if (result.forced.length) {
     console.log(`  SIGKILL pid ${entry.pid}`);
   }
 }
+if (result.forcedChildren?.length) {
+  console.log(
+    `Sent SIGKILL to ${result.forcedChildren.length} verified worker child process(es).`
+  );
+  for (const child of result.forcedChildren) {
+    console.log(`  SIGKILL child pid ${child.pid}`);
+  }
+}
 if (result.remaining.length) {
   console.error(`Could not stop ${result.remaining.length} verified process(es).`);
+  process.exitCode = 1;
+}
+if (result.remainingChildren?.length) {
+  console.error(
+    `Could not stop ${result.remainingChildren.length} verified worker child process(es).`
+  );
   process.exitCode = 1;
 }
 

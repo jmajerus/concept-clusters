@@ -182,7 +182,12 @@ export async function run() {
     assert.match(adminBody, /value="refresh-github-production"/);
 
     // Second start on the same port should reclaim the first process.
-    const second = await spawnDev([String(port)], leaseEnv);
+    const second = await spawnDev([String(port)], {
+      ...leaseEnv,
+      // The first server used loopback. Reclamation must still find it when
+      // the replacement requests the LAN/all-interface bind.
+      AUTHORING_LISTEN_HOST: "0.0.0.0"
+    });
     try {
       assert.match(second.output, /Stopped \d+ previous tools\/dev-server\.mjs/);
       assert.match(

@@ -33,6 +33,7 @@ import { loadProjectEnv } from "./loadProjectEnv.js";
 import {
   DEFAULT_DEV_PORT,
   reclaimLocalDevPort,
+  readProcessSnapshot,
   removeLocalDevLease,
   writeLocalDevLease
 } from "./localDevHousekeep.js";
@@ -382,6 +383,27 @@ function childHasExited(child) {
   return child.exitCode !== null || child.signalCode !== null;
 }
 
+function signalChildProcess(child, signal) {
+  if (process.platform !== "win32" &&
+    Number.isInteger(child.pid) &&
+    child.pid > 1 &&
+    child.pid !== process.pid) {
+    try {
+      // Wrangler is spawned detached, so its PID is also the process-group
+      // leader. This reaches the wrapper and the actual Wrangler child.
+      process.kill(-child.pid, signal);
+      return true;
+    } catch {
+      // Fall back to the direct child below if a platform rejects group kill.
+    }
+  }
+  try {
+    return child.kill(signal);
+  } catch {
+    return false;
+  }
+}
+
 function waitForChildExit(child, timeoutMs) {
   if (childHasExited(child)) return Promise.resolve(true);
   return new Promise(resolve => {
@@ -406,17 +428,13 @@ async function stopChildProcess(child, {
   killGraceMs = 1000
 } = {}) {
   if (childHasExited(child)) return { forced: false, remaining: false };
-  try {
-    child.kill("SIGTERM");
-  } catch {
-    return { forced: false, remaining: false };
+  if (!signalChildProcess(child, "SIGTERM")) {
+    return { forced: false, remaining: !childHasExited(child) };
   }
   if (await waitForChildExit(child, termGraceMs)) {
     return { forced: false, remaining: false };
   }
-  try {
-    child.kill("SIGKILL");
-  } catch {
+  if (!signalChildProcess(child, "SIGKILL")) {
     return { forced: false, remaining: !childHasExited(child) };
   }
   const exited = await waitForChildExit(child, killGraceMs);
@@ -596,7 +614,11 @@ export async function startLocalWorkerDev({
   const wrangler = spawn(
     join(repositoryRoot, "node_modules", ".bin", "wrangler"),
     ["dev", "--ip", DEFAULT_HOST, "--port", String(wranglerPort), ...wranglerArgs],
-    { cwd: repositoryRoot, stdio: ["ignore", "pipe", "pipe"] }
+    {
+      cwd: repositoryRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+      detached: process.platform !== "win32"
+    }
   );
 
   try {
@@ -644,6 +666,7 @@ export async function startLocalWorkerDev({
       host,
       port: actualPort,
       mode: "worker",
+      children: [readProcessSnapshot(wrangler.pid)],
       env
     });
   } catch (error) {
@@ -729,6 +752,14 @@ export async function runLocalDev({
         `tools/dev-server.mjs process(es) to exit.`
       );
     }
+  }
+  if (reclaim.remaining?.length || reclaim.remainingChildren?.length) {
+    console.error(
+      `Could not stop ${reclaim.remaining?.length || 0} verified ` +
+      `dev-server process(es) and ${reclaim.remainingChildren?.length || 0} ` +
+      `worker child process(es); refusing to start a second server.`
+    );
+    process.exit(1);
   }
   if (!reclaim.free) {
     console.error(
