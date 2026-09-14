@@ -267,24 +267,31 @@ function searchCursor() {
 /** GitHub Copilot Chat: per-workspace chatSessions/*.jsonl (plain JSON lines)
  * plus the cross-workspace session-store.db (sessions/turns tables). Scoped
  * to workspaces whose workspace.json folder mentions this repo. */
+/** VS Code/Cursor key workspaceStorage entries by an opaque hash; the only
+ * way to find which one(s) correspond to this repo is to read each
+ * workspace.json's `folder` field. Shared by any per-workspace source. */
+function repoWorkspaceIds(editorUserDir) {
+  const wsRoot = join(editorUserDir, "workspaceStorage");
+  const ids = [];
+  for (const wsId of safeReaddir(wsRoot)) {
+    const wsJsonPath = join(wsRoot, wsId, "workspace.json");
+    if (!isFile(wsJsonPath)) continue;
+    let folder = "";
+    try {
+      folder = JSON.parse(readFileSync(wsJsonPath, "utf8")).folder || "";
+    } catch { /* ignore */ }
+    if (folder.toLowerCase().includes("concept-clusters")) ids.push(wsId);
+  }
+  return ids;
+}
+
 function searchCopilot() {
   const hits = [];
   const codeUsers = join(HOME, ".config", "Code", "User");
   if (!existsSync(codeUsers)) return { hits: [], note: "no ~/.config/Code/User directory found" };
-  const wsRoot = join(codeUsers, "workspaceStorage");
-  let scopedWorkspaces = 0;
-  for (const wsId of safeReaddir(wsRoot)) {
-    const wsPath = join(wsRoot, wsId);
-    const wsJsonPath = join(wsPath, "workspace.json");
-    let folder = "";
-    if (isFile(wsJsonPath)) {
-      try {
-        folder = JSON.parse(readFileSync(wsJsonPath, "utf8")).folder || "";
-      } catch { /* ignore */ }
-    }
-    if (!folder.toLowerCase().includes("concept-clusters")) continue;
-    scopedWorkspaces++;
-    for (const file of walkFiles(join(wsPath, "chatSessions"), [".jsonl"], 1)) {
+  const wsIds = repoWorkspaceIds(codeUsers);
+  for (const wsId of wsIds) {
+    for (const file of walkFiles(join(codeUsers, "workspaceStorage", wsId, "chatSessions"), [".jsonl"], 1)) {
       hits.push(...scanLinesFile(file, "copilot", file));
     }
   }
@@ -294,26 +301,63 @@ function searchCopilot() {
       { table: "turns", cols: ["user_message", "assistant_response"], extra: "session_id, turn_index, timestamp" }
     ]));
   }
-  return { hits, note: scopedWorkspaces ? undefined : "no workspaceStorage entry maps to this repo" };
+  return { hits, note: wsIds.length ? undefined : "no workspaceStorage entry maps to this repo" };
 }
 
 /** kilo-code has no confirmed native local store on this machine yet -- probe
  * the plausible extension globalStorage locations and say so either way. */
 function searchKiloCode() {
-  const candidates = [
-    join(HOME, ".config", "Code", "User", "globalStorage", "kilocode.kilo-code"),
-    join(HOME, ".config", "Cursor", "User", "globalStorage", "kilocode.kilo-code")
-  ];
   const hits = [];
-  let foundAny = false;
-  for (const dir of candidates) {
+  let sawTaskStore = false; // a directory that could actually hold chat/task content
+  let sawActivityTrace = false; // any evidence the extension has run at all
+
+  // Confirmed native task-store location (Cline/Roo-Code family convention):
+  // globalStorage/kilocode.kilo-code/. Not present on this machine as of the
+  // last check, but kept in case a future version starts writing here.
+  for (const editorRoot of [
+    join(HOME, ".config", "Code", "User"),
+    join(HOME, ".config", "Cursor", "User")
+  ]) {
+    const dir = join(editorRoot, "globalStorage", "kilocode.kilo-code");
     if (!existsSync(dir)) continue;
-    foundAny = true;
+    sawTaskStore = true;
+    sawActivityTrace = true;
     for (const file of walkFiles(dir, [".json", ".jsonl"])) {
       hits.push(...scanLinesFile(file, "kilo-code", file));
     }
   }
-  return { hits, note: foundAny ? undefined : "kilo-code extension storage not found on this machine" };
+
+  // What's actually on this machine instead: a settings/usage-stats blob
+  // under the ItemTable key "kilocode.kilo-code" (model usage counts, no
+  // chat text) -- search it anyway in case that ever changes.
+  const codeUsers = join(HOME, ".config", "Code", "User");
+  const dbPaths = [join(codeUsers, "globalStorage", "state.vscdb")];
+  for (const wsId of repoWorkspaceIds(codeUsers)) {
+    dbPaths.push(join(codeUsers, "workspaceStorage", wsId, "state.vscdb"));
+  }
+  for (const dbPath of dbPaths) {
+    if (!existsSync(dbPath)) continue;
+    sawActivityTrace = true;
+    hits.push(searchSqliteLike(dbPath, "kilo-code", [
+      { table: "ItemTable", cols: ["value"], where: "key = 'kilocode.kilo-code'" }
+    ]));
+  }
+
+  // Diagnostic output channels (diff/agent-manager panels) -- thin, but real
+  // and timestamped; scan them too since they're cheap and may improve.
+  for (const logsRoot of [join(HOME, ".config", "Code", "logs"), join(HOME, ".config", "Cursor", "logs")]) {
+    if (!existsSync(logsRoot)) continue;
+    const kiloLogs = walkFiles(logsRoot, [".log"]).filter(f => f.includes("Kilo"));
+    if (kiloLogs.length) sawActivityTrace = true;
+    for (const file of kiloLogs) hits.push(...scanLinesFile(file, "kilo-code", file));
+  }
+
+  const note = sawTaskStore
+    ? undefined
+    : sawActivityTrace
+      ? "Kilo Code is active on this machine (settings/log traces found) but no local chat/task-transcript store was found -- its conversation content appears to live in the Kilo cloud account, not on disk"
+      : "no trace of Kilo Code (extension storage, settings, or logs) found on this machine";
+  return { hits, note };
 }
 
 // Generic sqlite substring search using node's built-in driver. Never
