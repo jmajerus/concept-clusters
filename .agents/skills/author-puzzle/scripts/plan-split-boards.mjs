@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 // Single entry for split-board fit/complete. Emits a machine-readable contract
 // so agents work one board per burst — native MCP when registered, otherwise
-// via mcp-call by default (Codex-safe).
+// via mcp-call by default (Codex-safe). Kilo's own backend markers select the
+// native transport automatically; callers can still override explicitly.
 import { readFileSync } from "node:fs";
 import { localDraftReviewUrl } from "../../../../modules/authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "../../../../modules/authoringWorkspacePaths.js";
 import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
+import { isKiloCodeEnvironment } from "../../../../modules/mcpCallInvocation.js";
 
 const SCRIPT = "node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs";
 const PASSES = ["fit", "complete", "board-review"];
@@ -29,7 +31,7 @@ Flags:
   --pass <fit|complete|board-review>   (default: fit)
   --board <board-id>                   Active board (default: first in plan order)
   --continue                           Next board after --board (or first if omitted)
-  --transport <mcp-call|stdio>         stdio = registered native MCP; default mcp-call
+  --transport <mcp-call|stdio>         stdio = registered native MCP; default mcp-call (stdio in Kilo Code)
   --dry-run                            Emit plan only; no MCP
 
 Examples:
@@ -39,8 +41,11 @@ Examples:
   process.exit(message ? 1 : 0);
 }
 
-function parseArgs(raw) {
-  const values = { dryRun: false, transport: "mcp-call" };
+function parseArgs(raw, env = process.env) {
+  const values = {
+    dryRun: false,
+    transport: isKiloCodeEnvironment(env) ? "stdio" : "mcp-call"
+  };
   for (let index = 0; index < raw.length; index++) {
     const arg = raw[index];
     if (arg === "--help" || arg === "-h") usage();

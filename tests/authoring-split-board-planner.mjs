@@ -10,10 +10,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PLANNER = ".agents/skills/author-puzzle/scripts/plan-split-boards.mjs";
 const EXAMPLE_PLAN = ".agents/skills/author-puzzle/references/split-plan-example.json";
 
-function runPlanner(args) {
+function runPlanner(args, env = {}) {
   const result = spawnSync(process.execPath, [PLANNER, ...args], {
     encoding: "utf8",
-    cwd: ROOT
+    cwd: ROOT,
+    env: { ...process.env, ...env }
   });
   assert.equal(result.status, 0, result.stderr || result.stdout);
   return JSON.parse(result.stdout);
@@ -35,6 +36,20 @@ export async function run() {
   assert.ok(plan.humanPrompt.draftsUrl.includes("/admin/drafts/"));
   assert.ok(plan.humanPrompt.defaultReply);
   assert.equal(plan.humanNext.acceptsNaturalLanguage, true);
+
+  const kiloNative = runPlanner([
+    "--plan", EXAMPLE_PLAN,
+    "--pass", "fit"
+  ], {
+    KILO_APP_NAME: "kilo-code",
+    KILO_APP_VERSION: "7.6.2",
+    KILOCODE_FEATURE: "vscode-extension"
+  });
+  assert.equal(kiloNative.mcpTransport, "stdio");
+  assert.ok(
+    kiloNative.steps.some(step => step.startsWith("Call MCP tool get_authoring_guidance sequentially")),
+    "Kilo's project environment should select native MCP transport by default"
+  );
 
   const nativeMcp = runPlanner([
     "--plan", EXAMPLE_PLAN,

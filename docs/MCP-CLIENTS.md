@@ -63,6 +63,7 @@ the clients below so it can complete protocol negotiation and OAuth.
 | Claude, Claude Desktop, and Cowork | Yes | Remote custom connectors are currently offered on Free, Pro, Max, Team, and Enterprise; Free is limited to one custom connector. |
 | Gemini CLI | Yes | Supports remote HTTP MCP and automatic OAuth discovery. This does not imply equivalent support in the consumer Gemini web application. |
 | Kimi Code CLI | Yes | Supports remote HTTP MCP, browser OAuth, and Kimi Platform API-key login. |
+| Kilo Code | Yes (local stdio) | Supports project `.kilo/kilo.json` MCP configuration and namespaced tool permissions. |
 | Cline (VS Code extension/CLI) | Yes | Supports remote Streamable HTTP MCP and OAuth. Config is user/global-level only — Cline does not read a project-committed config file, unlike Cursor or VS Code's built-in MCP support. |
 | OpenAI Responses API | Yes, for an application integration | Has a native remote-MCP tool. Use a normal project API key for inference and supply a separately acquired Access OAuth token; do not use an OpenAI admin key. |
 | Anthropic Messages API | Yes, for an application integration | Has a native remote-MCP connector for tools. Use a normal workspace API key and a separately acquired Access OAuth token; do not use an Anthropic Admin API key. |
@@ -146,6 +147,24 @@ from a machine that can open a browser and receive that callback. Do not add
 publication tools whose calls should remain visible for approval.
 
 See the current [Gemini CLI MCP documentation][gemini-mcp].
+
+## Kilo Code
+
+This checkout includes a project-level `.kilo/kilo.json` entry for the local
+authoring server. Kilo loads project configuration when the workspace session
+starts, so reload the VS Code window or start a new Kilo session after pulling
+changes to that file. Confirm the server is **connected** and that its tools
+are listed before authoring.
+
+Kilo exposes MCP tools under namespaced names such as
+`concept-clusters_save_puzzle_draft`. The project config auto-approves the
+trusted `concept-clusters_*` namespace so a write does not need to fall back
+to a shell command merely because of a repeated approval prompt. Native MCP
+calls are still required for the live Kilo client envelope and full assistance
+metadata. Do not run `node tools/mcp-call.mjs` when the namespaced native tool
+is available; if it is missing, reload MCP or start a fresh session.
+
+See Kilo's [MCP configuration and permissions documentation][kilo-mcp].
 
 ## Kimi Code CLI
 
@@ -484,6 +503,7 @@ Cloudflare explains this flow in its [Managed OAuth documentation][cloudflare-oa
 [chatgpt-mcp]: https://help.openai.com/en/articles/12584461-developer-mode-apps-and-full-mcp-connectors-in-chatgpt-beta
 [claude-mcp]: https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp
 [gemini-mcp]: https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md
+[kilo-mcp]: https://kilo.ai/docs/automate/mcp/using-in-kilo-code
 [kimi-code]: https://platform.kimi.ai/docs/guide/kimi-code-cli
 [kimi-mcp]: https://www.kimi.com/code/docs/en/kimi-code-cli/customization/mcp.html
 [cline-mcp]: https://docs.cline.bot/mcp/mcp-overview
