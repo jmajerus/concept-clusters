@@ -1,0 +1,19 @@
+{
+  "mcp": {
+    "servers": {
+      "concept-clusters-local": {
+        "command": "node",
+        "args": [
+          "/home/john/Workspace/concept-clusters/tools/mcp-server.mjs"
+        ]
+      },
+      "concept-clusters": {
+        "command": "/usr/bin/node",
+        "args": [
+          "/home/john/Workspace/concept-clusters/tools/mcp-server.mjs"
+        ],
+        "enabled": true
+      }
+    }
+  }
+}

@@ -369,6 +369,26 @@ export async function run() {
   assert.equal(batchSaved.document.clusters[0].fact, "Batch fact.");
   assert.equal(batchSaved.document.clusters[0].name, "Alpha");
 
+  // The working-copy form submits every rendered copy control. Clearing an
+  // optional lesson summary must remove its property rather than storing
+  // `summary: ""`, which the strict draft schema correctly rejects.
+  let clearedLessonSummary = null;
+  await persistDraftWorkingCopy({
+    draft: { document, revision: 3 },
+    expectedRevision: 3,
+    params: new URLSearchParams([
+      ["confirm", "save-working-copy"],
+      ["expected_revision", "3"],
+      ["c0.section", "learning"],
+      ["c0.field", "summary"],
+      ["c0.value", ""]
+    ]),
+    saveDraft: ({ document: next }) => {
+      clearedLessonSummary = next;
+    }
+  });
+  assert.equal(clearedLessonSummary.learningIntroduction.summary, undefined);
+
   let renamedBatch = null;
   await persistDraftWorkingCopy({
     draft: {
