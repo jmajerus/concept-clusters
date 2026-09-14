@@ -883,6 +883,8 @@ export async function run() {
   assert.doesNotMatch(modelEditorPage, /Set collaboration/);
   assert.doesNotMatch(modelEditorPage, /Set reasoning/);
   assert.doesNotMatch(modelEditorPage, /field" value="generativeModel"/);
+  assert.match(modelEditorPage, /<option value="default">Default<\/option>/);
+  assert.match(modelEditorPage, /<option value="max">Max<\/option>/);
   assert.match(modelEditorPage, /<option value="noThinking">No Thinking<\/option>/);
   assert.match(modelEditorPage, /<option value="thinking">Thinking<\/option>/);
   assert.match(modelEditorPage, /concatenate into the derived byline/);
