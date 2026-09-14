@@ -295,6 +295,44 @@ export async function run() {
     "the native Muse runtime version must not affect its client-surface identity"
   );
 
+  // Kilo Code's native stdio client reports exactly "kilo" with its release
+  // version (probed 2026-09-14). Same exact-name doctrine as the native Muse
+  // runtime: match "kilo" itself, never a broader "kilo*" prefix.
+  const nativeKilo = identifyMcpAssistanceClient({
+    server: {
+      server: {
+        getClientVersion: () => ({ name: "kilo", version: "7.6.2" })
+      }
+    }
+  });
+  assert.deepEqual(nativeKilo, {
+    system: "Kilo Code",
+    hostId: "kilo-code",
+    clientName: "kilo"
+  });
+  assert.equal(
+    identifyMcpAssistanceClient({
+      server: {
+        server: {
+          getClientVersion: () => ({ name: "kilo", version: "8.0.0" })
+        }
+      }
+    }).system,
+    "Kilo Code",
+    "the native Kilo client version must not affect its client-surface identity"
+  );
+  assert.equal(
+    identifyMcpAssistanceClient({
+      server: {
+        server: {
+          getClientVersion: () => ({ name: "kilogram", version: "1.0.0" })
+        }
+      }
+    }),
+    null,
+    "an unrelated kilo-prefixed client name must not be attributed to Kilo Code"
+  );
+
   const codex = identifyMcpAssistanceClient({
     ctx: {
       mcpReq: {

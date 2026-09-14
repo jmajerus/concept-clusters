@@ -62,11 +62,15 @@ const HOST_FINGERPRINTS = Object.freeze([
       /^codex\b/i.test(name || "")
   },
   {
-    // Kilo Code has no known native envelope yet -- this matches the plain
-    // surface name set by CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME=kilo-code.
-    // Refine with a real fingerprint once a native connection is probed.
+    // Kilo Code's native stdio client identifies itself exactly as "kilo"
+    // with its real release version (probed 2026-09-14: `kilo` @ `7.6.2`,
+    // `meta.progressToken`, no model in the frame). Match the exact name,
+    // never a broad prefix. The surface name "kilo-code" remains the match
+    // for CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME=kilo-code on the mcp-call
+    // fallback path, where no native envelope exists.
     id: "kilo-code",
-    match: ({ name }) => name === "kilo-code" || /^kilo-code\b/i.test(name || "")
+    match: ({ name }) =>
+      name === "kilo" || name === "kilo-code" || /^kilo-code\b/i.test(name || "")
   },
   {
     // ZCode has no known native envelope yet -- this matches the plain surface

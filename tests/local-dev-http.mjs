@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
-import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import {
   formatDevTimestamp,
   parseListenPort,
@@ -10,6 +12,7 @@ import {
   portBusyMessage,
   suggestedBusyCommand
 } from "../modules/localDevHttp.js";
+import { localDevLeasePath } from "../modules/localDevHousekeep.js";
 import { PUZZLE_MANIFEST } from "../puzzles/manifest.js";
 
 export const name = "local HTTP bootstrap: one npm run dev entry, optional Worker";
@@ -149,8 +152,16 @@ export async function run() {
   assert.match(Buffer.concat(invalidStderr).toString(), /Invalid port: nope/);
 
   const port = await freePort();
-  const { child, output } = await spawnDev([String(port)]);
+  const leaseRoot = await mkdtemp(join(tmpdir(), "cc-dev-http-lease-"));
+  const leaseEnv = { AUTHORING_DATA_DIR: leaseRoot };
+  const leasePath = localDevLeasePath({
+    repositoryRoot: process.cwd(),
+    port,
+    env: leaseEnv
+  });
+  const { child, output } = await spawnDev([String(port)], leaseEnv);
   try {
+    assert.equal(existsSync(leasePath), true, "a running server should hold a lease");
     assert.match(output, /^Started at \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}$/m);
     assert.match(output, new RegExp(`Concept Clusters ready at http://127\\.0\\.0\\.1:${port}`));
     assert.match(output, new RegExp(`Admin: http://127\\.0\\.0\\.1:${port}/admin`));
@@ -171,7 +182,12 @@ export async function run() {
     assert.match(adminBody, /value="refresh-github-production"/);
 
     // Second start on the same port should reclaim the first process.
-    const second = await spawnDev([String(port)]);
+    const second = await spawnDev([String(port)], {
+      ...leaseEnv,
+      // The first server used loopback. Reclamation must still find it when
+      // the replacement requests the LAN/all-interface bind.
+      AUTHORING_LISTEN_HOST: "0.0.0.0"
+    });
     try {
       assert.match(second.output, /Stopped \d+ previous tools\/dev-server\.mjs/);
       assert.match(
@@ -182,12 +198,14 @@ export async function run() {
       assert.equal(again.status, 200);
     } finally {
       await stopDev(second.child);
+      assert.equal(existsSync(leasePath), false, "a graceful stop should remove its lease");
     }
   } finally {
     // First child may already be gone after reclaim.
     if (child.exitCode == null && child.signalCode == null) {
       await stopDev(child);
     }
+    await rm(leaseRoot, { recursive: true, force: true });
   }
 
   // Bound to all interfaces (the LAN/tunnel shape) -- /admin should now

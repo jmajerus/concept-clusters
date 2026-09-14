@@ -35,6 +35,7 @@ same JSON in the tool result; stderr appears in Wrangler logs when applicable.
 | `claude-code` | stdio | project or user MCP | Claude Code MCP settings (stdio → `tools/mcp-server.mjs`) |
 | `gemini` / `gemini-cli` | stdio | user MCP | Gemini CLI MCP config (stdio → `tools/mcp-server.mjs`) |
 | `copilot` | stdio | VS Code Copilot MCP | Copilot MCP settings (stdio → `tools/mcp-server.mjs`) |
+| `kilo-code` | stdio | project MCP | `.kilo/kilo.json` (local → `tools/mcp-server.mjs`) |
 | `claude-web` | hosted HTTP | `concept-clusters-authoring` | Claude web custom connector → `https://concept-clusters-authoring.jmajerus.workers.dev/mcp` |
 
 ### Cursor
@@ -86,6 +87,19 @@ Register the same stdio command. Then:
 
 > Call `probe_mcp_client` with `{ "label": "copilot" }`.
 
+### Kilo Code
+
+Register the stdio server in the project's `.kilo/kilo.json` (local →
+`node tools/mcp-server.mjs`); it loads on the next Kilo session or after an
+MCP reload. Then in a Kilo session:
+
+> Call `probe_mcp_client` with `{ "label": "kilo-code" }`.
+
+Observed (2026-09-14, CLI 7.6.2): the native client sends
+`clientInfo { name: "kilo", version: "<release>" }` — the exact word `kilo`,
+not `kilo-code` — and an empty per-call `_meta` besides a generic
+`progressToken`. No model in the frame.
+
 ### Claude Web (hosted)
 
 Connect the remote custom connector documented in [MCP-CLIENTS.md](MCP-CLIENTS.md).
@@ -107,6 +121,7 @@ Copy the `probe` object from the tool result; it is not written to the local
 | `gemini` | stdio | `gemini-cli-mcp-client` | `progressToken` | No |
 | `claude-web` | hosted | `Anthropic/ClaudeAI` @ `1.0.0` | modern envelope `2026-07-28`; `http.user-agent: Claude-User`; Access email on actor/http | No |
 | `muse-code` | stdio | `tbh` @ `0.1.0` | Native Muse Code runtime frame; Meta internal codename | No |
+| `kilo-code` | stdio | `kilo` @ `7.6.2` | `meta.progressToken`; probes as plain `kilo`, not `kilo-code` | No |
 | `harness` | stdio | `mcp-call` @ `1` | control from `tools/mcp-call.mjs` | No |
 
 ### Hosted Claude Web (verified)
