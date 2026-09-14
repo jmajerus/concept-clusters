@@ -87,6 +87,7 @@ import * as loadProjectEnv from "./load-project-env.mjs";
 import * as authoringWorkspace from "./authoring-workspace.mjs";
 import * as stagingPlayLinks from "./staging-play-links.mjs";
 import * as localDevHttp from "./local-dev-http.mjs";
+import * as localDevHousekeep from "./local-dev-housekeep.mjs";
 import * as boot from "./boot.mjs";
 import * as puzzleManifest from "./puzzle-manifest.mjs";
 import * as playCorpus from "./play-corpus.mjs";
@@ -106,7 +107,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, authoringChangeScore, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest, playCorpus,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, authoringChangeScore, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
@@ -123,7 +124,7 @@ const quickTests = [
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
   nodeCaseAudit,
   learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,
-  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest, playCorpus,
+  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
   librarySearchEngine, geometryVisibleSegment, categoryReferenceMigration, contentCanonicalization
 ];
 

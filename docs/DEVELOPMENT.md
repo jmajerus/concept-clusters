@@ -14,12 +14,16 @@ npm run dev
 
 It serves the site at `http://127.0.0.1:8787` by default (loopback only),
 does not watch or rebuild files, and picks up edits whenever the browser is
-refreshed. Starting `npm run dev` again reclaims port 8787 when the listener
-is this project's previous `tools/dev-server.mjs` (no manual `kill` needed).
-To stop without restarting: `npm run dev:stop`. To use a different port,
-append it after `--`, for example `npm run dev -- 8788`. Bind off loopback
-with `AUTHORING_LISTEN_HOST=0.0.0.0` or `npm run dev -- --host 0.0.0.0` (no
-auth on `/admin/drafts` or `/admin/catalogues` — home LAN / VPN only). Set
+refreshed. Each running server records a per-repository, per-port lease in
+the git-ignored authoring data directory. Starting `npm run dev` again
+gracefully stops (and, after a bounded timeout, force-stops) only a matching
+server from this checkout before binding the port; an unrelated listener is
+never killed. To stop without restarting: `npm run dev:stop` (optionally
+`npm run dev:stop -- --port 8788`). To use a different port, append it after
+`--`, for example `npm run dev -- 8788`. Bind off loopback with
+`AUTHORING_LISTEN_HOST=0.0.0.0` or `npm run dev -- --host 0.0.0.0` (no
+auth prompt on loopback; an all-interface bind requires `ADMIN_KEY` for
+`/admin` routes). Set
 `AUTHORING_DRAFT_REVIEW_URL` to the URL agents should print, for example
 `http://authoring.example:8787/admin/drafts`. The same server also serves a
 read-only review of stdio MCP's D1 drafts at
@@ -143,7 +147,8 @@ anything ever imports from it directly):
 | `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, and GitHub-production snapshot | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js`, `githubProductionManifest.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
 | `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |
-| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin`; Freeze refreshes the GitHub production snapshot (joined with the freeze patch); Refresh from GitHub writes origin membership only | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `githubProductionManifest.js`, `tests/lib/server.mjs` |
+| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin`; owns the dev-server lease and bounded shutdown; Freeze refreshes the GitHub production snapshot (joined with the freeze patch); Refresh from GitHub writes origin membership only | `localDevHousekeep.js`, `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `githubProductionManifest.js`, `tests/lib/server.mjs` |
+| `localDevHousekeep.js` | Per-repository/per-port dev-server leases, exact PID/start-time/cwd/command ownership checks, stale-lease pruning, and graceful shutdown with verified escalation; foreign listeners are never stopped | `authoringWorkspacePaths.js`, OS process/socket APIs |
 | `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the GitHub production snapshot of `puzzles/manifest.js` | Node filesystem APIs |
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/draft services | official MCP server SDK, Zod, shared services |

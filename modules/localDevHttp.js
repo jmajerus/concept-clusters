@@ -30,13 +30,18 @@ import { guardLocalAdmin } from "./localAdminAuth.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
-import { reclaimLocalDevPort } from "./localDevHousekeep.js";
+import {
+  DEFAULT_DEV_PORT,
+  reclaimLocalDevPort,
+  removeLocalDevLease,
+  writeLocalDevLease
+} from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
 import { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES } from "../puzzles/manifest.js";
 
 const DEFAULT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const DEFAULT_HOST = "127.0.0.1";
-export const DEFAULT_PORT = 8787;
+export const DEFAULT_PORT = DEFAULT_DEV_PORT;
 const SUGGESTED_PORT = 8788;
 
 function envFlag(value) {
@@ -352,6 +357,72 @@ function installShutdown(stop) {
   process.on("SIGTERM", stop);
 }
 
+function boundPort(server, requestedPort) {
+  const address = server.address();
+  return address && typeof address === "object" && Number.isInteger(address.port)
+    ? address.port
+    : requestedPort;
+}
+
+function closeHttpServer(server) {
+  return new Promise(resolve => {
+    if (!server.listening) {
+      resolve();
+      return;
+    }
+    try {
+      server.close(() => resolve());
+    } catch {
+      resolve();
+    }
+  });
+}
+
+function childHasExited(child) {
+  return child.exitCode !== null || child.signalCode !== null;
+}
+
+function waitForChildExit(child, timeoutMs) {
+  if (childHasExited(child)) return Promise.resolve(true);
+  return new Promise(resolve => {
+    let settled = false;
+    const finish = exited => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      child.off("exit", onExit);
+      child.off("close", onExit);
+      resolve(exited);
+    };
+    const onExit = () => finish(true);
+    const timer = setTimeout(() => finish(childHasExited(child)), timeoutMs);
+    child.once("exit", onExit);
+    child.once("close", onExit);
+  });
+}
+
+async function stopChildProcess(child, {
+  termGraceMs = 2000,
+  killGraceMs = 1000
+} = {}) {
+  if (childHasExited(child)) return { forced: false, remaining: false };
+  try {
+    child.kill("SIGTERM");
+  } catch {
+    return { forced: false, remaining: false };
+  }
+  if (await waitForChildExit(child, termGraceMs)) {
+    return { forced: false, remaining: false };
+  }
+  try {
+    child.kill("SIGKILL");
+  } catch {
+    return { forced: false, remaining: !childHasExited(child) };
+  }
+  const exited = await waitForChildExit(child, killGraceMs);
+  return { forced: true, remaining: !exited && !childHasExited(child) };
+}
+
 async function listen(server, { host, port }) {
   await new Promise((resolve, reject) => {
     server.once("error", reject);
@@ -394,13 +465,42 @@ export async function startLocalStaticDev({
   } catch (error) {
     rethrowBusy(error, { port, tryCommand });
   }
-  const fallbackBase = serverURL(server);
-  const base = displayBaseUrl({ host, port, fallbackBase });
-  printReady(base, authoringReadyExtras({ host, port, repositoryRoot }));
-  if (installSignals) {
-    installShutdown(() => server.close(() => process.exit(0)));
+  const actualPort = boundPort(server, port);
+  let lease;
+  try {
+    lease = writeLocalDevLease({
+      repositoryRoot,
+      host,
+      port: actualPort,
+      mode: "static",
+      env
+    });
+  } catch (error) {
+    await closeHttpServer(server);
+    throw error;
   }
-  return { server, base, handleRequest: handler };
+
+  const fallbackBase = serverURL(server);
+  const base = displayBaseUrl({ host, port: actualPort, fallbackBase });
+  printReady(base, authoringReadyExtras({ host, port: actualPort, repositoryRoot, env }));
+
+  let stopping = false;
+  const stop = () => {
+    if (stopping) return;
+    stopping = true;
+    closeHttpServer(server).then(() => {
+      removeLocalDevLease({
+        repositoryRoot,
+        port: actualPort,
+        pid: process.pid,
+        startTime: lease.lease.startTime,
+        env
+      });
+      process.exit(0);
+    });
+  };
+  if (installSignals) installShutdown(stop);
+  return { server, base, handleRequest: handler, lease, stop };
 }
 
 function waitForWrangler(child, port) {
@@ -503,7 +603,7 @@ export async function startLocalWorkerDev({
     await waitForWrangler(wrangler, wranglerPort);
   } catch (error) {
     console.error(error.message);
-    wrangler.kill("SIGTERM");
+    await stopChildProcess(wrangler);
     process.exit(1);
   }
 
@@ -526,7 +626,8 @@ export async function startLocalWorkerDev({
   try {
     await listen(server, { host, port });
   } catch (error) {
-    wrangler.kill("SIGTERM");
+    await closeHttpServer(server);
+    await stopChildProcess(wrangler);
     if (error.code === "EADDRINUSE") {
       console.error(portBusyMessage(port, tryCommand));
       process.exit(1);
@@ -535,22 +636,54 @@ export async function startLocalWorkerDev({
     process.exit(1);
   }
 
-  const base = displayBaseUrl({ host, port, fallbackBase: `http://${host}:${port}` });
+  const actualPort = boundPort(server, port);
+  let lease;
+  try {
+    lease = writeLocalDevLease({
+      repositoryRoot,
+      host,
+      port: actualPort,
+      mode: "worker",
+      env
+    });
+  } catch (error) {
+    await closeHttpServer(server);
+    await stopChildProcess(wrangler);
+    throw error;
+  }
+
+  const base = displayBaseUrl({
+    host,
+    port: actualPort,
+    fallbackBase: `http://${host}:${actualPort}`
+  });
   printReady(base, [
     `Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`,
-    ...authoringReadyExtras({ host, port, repositoryRoot })
+    ...authoringReadyExtras({ host, port: actualPort, repositoryRoot, env })
   ]);
 
-  function stop() {
-    server.close();
-    wrangler.kill("SIGTERM");
+  let stopping = false;
+  async function stop(exitCode = 0) {
+    if (stopping) return;
+    stopping = true;
+    await Promise.all([
+      closeHttpServer(server),
+      stopChildProcess(wrangler)
+    ]);
+    removeLocalDevLease({
+      repositoryRoot,
+      port: actualPort,
+      pid: process.pid,
+      startTime: lease.lease.startTime,
+      env
+    });
+    process.exit(exitCode);
   }
   wrangler.on("exit", code => {
-    server.close();
-    process.exit(typeof code === "number" ? code : 0);
+    if (!stopping) void stop(typeof code === "number" ? code : 0);
   });
-  if (installSignals) installShutdown(stop);
-  return { server, base, wrangler, wranglerPort, handleRequest: handler, stop };
+  if (installSignals) installShutdown(() => void stop(0));
+  return { server, base, wrangler, wranglerPort, handleRequest: handler, lease, stop };
 }
 
 export async function runLocalDev({
@@ -573,23 +706,31 @@ export async function runLocalDev({
     repositoryRoot,
     host: options.host,
     port: options.port,
-    loadEnv: false
+    loadEnv: false,
+    env
   };
 
   // Cursor "npm run dev" tasks often leave the previous listener up. Reclaim
-  // only when the holder is this repo's tools/dev-server.mjs — never a
-  // foreign process on the same port.
+  // only when ownership is verified through the lease or this repo's exact
+  // tools/dev-server.mjs path/cwd — never a foreign process on the same port.
   const reclaim = await reclaimLocalDevPort(options.port, {
     host: options.host,
-    repositoryRoot
+    repositoryRoot,
+    env
   });
   if (reclaim.reclaimed) {
     console.log(
       `${formatDevTimestamp()} Stopped ${reclaim.stopped.length} previous ` +
       `tools/dev-server.mjs process(es) to free port ${options.port}.`
     );
+    if (reclaim.forced?.length) {
+      console.log(
+        `${formatDevTimestamp()} Forced ${reclaim.forced.length} unresponsive ` +
+        `tools/dev-server.mjs process(es) to exit.`
+      );
+    }
   }
-  if (reclaim.matches?.length && !reclaim.free) {
+  if (!reclaim.free) {
     console.error(
       portBusyMessage(options.port, suggestedBusyCommand({ worker: options.worker }))
     );
