@@ -295,6 +295,22 @@ export async function run() {
     "the native Muse runtime version must not affect its client-surface identity"
   );
 
+  // ZCode's native client identity lives in the namespaced request envelope,
+  // not the flattened clientVersion probe field.
+  assert.deepEqual(identifyMcpAssistanceClient({
+    ctx: {
+      mcpReq: {
+        envelope: {
+          "io.modelcontextprotocol/clientInfo": { name: "zcode", version: "0.16.5" }
+        }
+      }
+    }
+  }), {
+    system: "ZCode",
+    hostId: "zcode",
+    clientName: "zcode"
+  });
+
   // Kilo Code's native stdio client reports exactly "kilo" with its release
   // version (probed 2026-09-14). Same exact-name doctrine as the native Muse
   // runtime: match "kilo" itself, never a broader "kilo*" prefix.

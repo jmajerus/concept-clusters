@@ -180,6 +180,24 @@ export async function run() {
   assert.deepEqual(stamped.provenance?.contributors, [{ name: "Cursor" }]);
   assert.equal(stamped.generativeAssistance, undefined);
 
+  const { document: zcodeStamped } = stampDocumentAssistanceFromMcp(
+    { id: "zcode-demo", title: "ZCode demo" },
+    {
+      role: "drafted",
+      ctx: {
+        mcpReq: {
+          envelope: {
+            "io.modelcontextprotocol/clientInfo": { name: "zcode", version: "0.16.5" }
+          }
+        }
+      }
+    }
+  );
+  assert.deepEqual(zcodeStamped.provenance, {
+    collaboration: "ai",
+    contributors: [{ name: "ZCode" }]
+  });
+
   const parsed = SimplifiedPuzzleInputSchema.safeParse({
     id: "demo-puzzle",
     title: "Demo",

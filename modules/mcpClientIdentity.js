@@ -73,9 +73,8 @@ const HOST_FINGERPRINTS = Object.freeze([
       name === "kilo" || name === "kilo-code" || /^kilo-code\b/i.test(name || "")
   },
   {
-    // ZCode has no known native envelope yet -- this matches the plain surface
-    // name set by CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME=zcode. Refine with a
-    // real fingerprint once a native connection is probed.
+    // ZCode native stdio client (probed 2026-09-14, v0.16.5) sends
+    // clientInfo.name "zcode" in the namespaced request envelope.
     id: "zcode",
     match: ({ name }) => name === "zcode" || /^zcode\b/i.test(name || "")
   }
@@ -176,6 +175,7 @@ export function identifyMcpAssistanceClient({
       clientName: name || "Claude-User"
     };
   }
+
   return null;
 }
 
