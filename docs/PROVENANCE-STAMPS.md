@@ -100,13 +100,12 @@ make a valid authoring operation fail. The stamp intentionally does not claim
 to contain a before/after document, a content hash, a field-level diff, a
 complete revision record, or cryptographic tamper evidence.
 
-The old `generativeAssistance` document field and client-attribution array are
-not part of this model. Current authoring uses simplified documents, keeps
-repository metadata outside the document, and retains JSON-LD only as an
-explicit interchange format. Historical document snapshots are handled as a
-storage cleanup, not as provenance the agent must preserve. See the [implementation
-notes](dev-briefs/authoring-domain-scoping-implementation.md) for those
-boundaries.
+Legacy attribution mechanisms are not part of this model. Current authoring
+keeps session telemetry and repository metadata outside the document, while
+alternate interchange representations remain separate from the authoring
+contract. Historical document snapshots are handled as a storage cleanup, not
+as provenance the agent must preserve. See the [implementation notes](dev-briefs/authoring-domain-scoping-implementation.md)
+for those boundaries.
 
 ## What remains human-dependent
 

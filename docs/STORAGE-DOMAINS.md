@@ -90,9 +90,8 @@ within a domain. The complete path is intentionally broader for compatibility;
 focused writes are the path for reducing the agent's context and integrity
 burden.
 
-Current authoring and storage use the simplified document shape. JSON-LD is
-retained as an explicit interchange format, not as a current puzzle workflow
-or D1 row format. The retired `generativeAssistance` field is not part of the
+Current authoring and storage use the simplified document shape. Alternate
+interchange representations and legacy authoring fields are kept outside the
 current contract. Historical document snapshots are handled by the one-time
 cleanup described in the [implementation notes](dev-briefs/authoring-domain-scoping-implementation.md),
 not by asking an agent to preserve obsolete formats.
