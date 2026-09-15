@@ -10,6 +10,12 @@ This is a working prototype handed off from a Claude.ai design session. It runs 
 
 ## Design brief (the decisions behind the code)
 
+The authoring and storage model is grounded in the companion position paper,
+[The Integrity Burden: Why Agentic Document Editing Belongs in the
+Infrastructure, Not the Agent](https://github.com/jmajerus/write-domain-scoping).
+The paper explains the rationale; this repository is a working example and
+implementation.
+
 These choices were deliberate; preserve them unless there's a reason not to.
 A condensed version of the authoring-relevant points below ships to AI
 authors directly through the MCP servers' `get_authoring_guidance` tool
@@ -56,7 +62,7 @@ The technical details live in [docs/](docs/):
   working on the game's code.
 
 ------
-*This project was developed with the aid of the following generative AI assistants and tools:*
-*ChatGPT web, Claude Code, Claude web, Cloudflare, Codex, Copilot, Copilot Autofix, Copilot CLI, Cursor, Deepseek, Gemini CLI, Gemini web, Google AI, Grok, Ollama, OpenClaw, Perplexity, Qwen*
+*This project was developed with the aid of generative AI assistants and tools, including the following:*
+*ChatGPT web, Claude Code, Claude web, Cline, Cloudflare, Codex, Copilot, Copilot Autofix, Copilot CLI, Cursor, Deepseek, Gemini CLI, Gemini web, GLM, Google AI, Grok, Kilo Code, Kimi, Llama, Ollama, OpenClaw, Perplexity, Qwen, ZCode*
 
 *This project is licensed under the PolyForm Noncommercial License 1.0.0.*
