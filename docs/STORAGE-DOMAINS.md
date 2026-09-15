@@ -75,6 +75,45 @@ keeps current publication and player-facing paths independent of the domain
 model. The system domain remains in D1 columns and response metadata rather
 than being duplicated in a `system` document field.
 
+## Projections and sub-schemas
+
+The complete puzzle schema remains the canonical contract, but it need not be
+the contract an agent receives for every authoring pass. A projection is a
+server-built view of the canonical document: it contains the selected
+domain's writable fields and, where necessary, a read-only context view of
+related data owned by another domain. The agent can refer to sibling data
+without copying it into its response or taking responsibility for preserving
+it.
+
+These layers answer different questions:
+
+| Layer | Question | Role in an authoring pass |
+|---|---|---|
+| Canonical schema | What is valid in the complete puzzle? | Final validation after recombination |
+| Domain projection | Which data belongs to this authoring boundary? | Writable fields plus necessary read-only context |
+| Pass sub-schema | Which part of that domain is relevant now? | Narrow task or phase contract for the agent |
+
+A pass sub-schema is therefore not an independently complete puzzle schema.
+It can be requested for a particular task and composed with the selected
+domain projection. The intended flow is: infrastructure selects the pass,
+builds its projection and context, accepts the narrow response, retains the
+parallel domains, and reassembles the complete document before canonical
+validation, rendering, or Freeze.
+
+This distinction also makes omission semantics explicit. A partial phase pass
+should preserve fields outside that pass; an explicit replacement of a whole
+domain may define omission as removal within that domain. A narrow contract
+must never cause an incomplete agent response to be mistaken for a complete
+document.
+
+The current implementation provides the first building blocks: focused
+`content` and `pedagogy` projections, and phase-specific schema guidance. A
+future refinement can make those dimensions composable, deriving domain and
+pass sub-schemas from the canonical schema plus a field-ownership map. That
+would let an agent learn only the structure needed for its current pass while
+keeping field definitions, cross-domain references, and final invariants
+centralized.
+
 ## The integrity boundary
 
 The infrastructure owns the things an agent should not have to reproduce:

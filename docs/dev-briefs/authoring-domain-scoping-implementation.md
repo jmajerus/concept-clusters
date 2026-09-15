@@ -49,6 +49,64 @@ owned by the other domain are rejected. Mechanical `repair` is accepted for
 complete and content saves, not pedagogy saves, because it repairs content
 fields.
 
+## Projection and sub-schema refinement
+
+The implementation currently has two related but separate focus mechanisms:
+
+- `projectAuthoredDocument()` defines the data and ownership boundary for a
+  domain read or write; and
+- `get_authoring_schema` supplies focused guidance and schemas for the
+  `core`, `review`, `pedagogy`, and `publication` phases. Those responses set
+  `preserveExisting: true`; they are task views, not independently complete
+  replacement documents.
+
+The intended next refinement is to make these dimensions composable. The
+canonical simplified schema should remain the source of truth, supplemented
+by a centrally maintained ownership/context registry that records, for each
+field:
+
+- its owning domain;
+- whether it may be exposed as read-only context to another domain;
+- the stable identity used when it is referenced across domains; and
+- whether it is authored, protected, or derived.
+
+From that metadata, infrastructure can derive or validate a domain projection
+and then narrow it to a pass sub-schema. A pass sub-schema is an agent-facing
+contract, not a valid standalone puzzle document. It should contain only the
+fields the pass may change, while cross-domain context should be supplied
+separately and marked read-only. The agent should not have to reproduce a
+parallel domain merely to keep it intact.
+
+The conceptual composition is:
+
+```text
+canonical schema + ownership/context metadata
+        -> domain projection + read-only sibling context
+        -> task or phase sub-schema
+        -> narrow agent response
+        -> retained sibling domains + infrastructure merge
+        -> complete-document validation
+```
+
+The merge contract needs two explicit modes. A partial phase pass preserves
+fields omitted because they are outside that pass. A deliberate whole-domain
+replacement retains the current behavior of treating omission as removal of
+optional fields within the selected domain. The API must identify which mode
+is being used; it must not infer deletion from a response produced against a
+narrow sub-schema.
+
+Cross-domain references should use stable identities and small, purpose-built
+context surfaces. For example, a pedagogy pass may need bridge identity and
+content meaning, but it should not return the bridge core or cluster data.
+Infrastructure can resolve those identities against the retained content
+projection, reject unknown or conflicting references, and apply the
+pedagogical annotations before validating the assembled document.
+
+Open decisions for this refinement are the ownership/context metadata shape,
+whether sub-schemas are generated or checked against a hand-authored
+registry, how domain and phase selectors are represented in the authoring
+API, and how sub-schema versions are tied to the canonical schema.
+
 ## D1 storage
 
 Migration `0019_authoring_domains` adds `content_json`, `pedagogy_json`, and
