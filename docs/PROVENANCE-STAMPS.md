@@ -1,221 +1,178 @@
 # Provenance Stamps: Session Provenance Capture in Concept Clusters
 
-*Status: document provenance and the MCP invocation audit are implemented; attested session provenance remains aspirational.*
+*Status: document provenance and infrastructure-level invocation capture are
+implemented; fully attested session provenance remains aspirational.*
 
-This document describes how the Concept Clusters authoring system records who contributed to a puzzle document, what is captured automatically at the invocation boundary, what requires human input, and where the gap to the full session provenance capture primitive lies. It is the companion implementation document to [STORAGE-DOMAINS.md](STORAGE-DOMAINS.md), which covers the write-domain scoping side of the same design.
+This document describes the provenance side of the accountability model for
+Concept Clusters. It is written as a companion to the position paper and to
+[STORAGE-DOMAINS.md](STORAGE-DOMAINS.md), which describes what an agent may
+change. Repository-specific behavior is recorded in the [authoring domain
+scoping implementation notes](dev-briefs/authoring-domain-scoping-implementation.md).
 
-Both documents implement the paired primitives argued for in [The Integrity Burden: Why Agentic Document Editing Belongs in the Infrastructure, Not the Agent](https://github.com/jmajerus/write-domain-scoping).
-
----
-
-## Overview
-
-Provenance in an agentic document editing system has to answer two questions: what was changed, and who changed it under what conditions. The write-domain scoping implementation described in [STORAGE-DOMAINS.md](STORAGE-DOMAINS.md) addresses the first question by making domain ownership explicit and infrastructure-enforced. This document addresses the second through two complementary records: the puzzle document's compact `provenance` field, which is the model of record for contributor attribution, and the infrastructure-owned `draft_assistance_stamps` audit, which records recognized MCP invocation context.
-
-The honest answer, for the current implementation, is: partially. For recognized MCP clients, new puzzle drafts and substantial MCP edits can update document provenance automatically, while the invocation boundary, authenticated owner, date, role, and focused authoring domain are recorded in the assistance audit. Some clients also expose model or reasoning hints. Complete, attested model identity, configuration, and runtime parameters are not available from the protocol in a consistent verifiable form. This is a workable approximation for a supervised single-author workflow. It is not the intended endpoint.
-
----
-
-## The Three-Position Landscape
-
-The gap between no provenance capture and full session provenance capture has three positions, not two.
-
-**Position 1: No capture.** The round-trip model with attribution entirely absent. The document is handed to an agent and returned; nothing records who touched it, under what conditions, or what changed. This is the baseline from which the current implementation has moved.
-
-**Position 2: Partial infrastructure capture.** What the current Concept Clusters implementation achieves. Recognized MCP client identity, authenticated owner identity, timing, role, and (when present in the call frame) model/reasoning hints are recorded automatically for stamped puzzle-authoring calls. A focused `content` or `pedagogy` call is also stamped with that logical domain. New drafts and substantial MCP edits can update the document's compact contributor provenance; trivial edits do not change the contributor list merely because an agent touched the draft. The record is not a cryptographically attested model/runtime statement, and complete configuration is not available from the protocol.
-
-**Position 3: Full session provenance capture.** The missing primitive. All of the above — including model identity, version, reasoning configuration, and runtime parameters — recorded automatically at the invocation boundary, without requiring human presence or manual recording. This position requires protocol-level support that does not yet exist in the MCP specification.
-
-The current implementation occupies Position 2 honestly. It has closed the gap between no capture and infrastructure capture of the invocation event. The gap between Position 2 and Position 3 is precisely where the full primitive is needed.
+Both documents implement the paired primitives argued for in [The Integrity
+Burden: Why Agentic Document Editing Belongs in the Infrastructure, Not the
+Agent](https://github.com/jmajerus/write-domain-scoping).
 
 ---
 
-## What `draft_assistance_stamps` Records
+## Why two provenance records exist
 
-Stamped puzzle-authoring calls through the hosted MCP server write an
-append-oriented record to the `draft_assistance_stamps` table in D1. This is
-not self-reported by the agent — it is assembled by the server while handling
-the request. Persistence and Analytics Engine emission are best-effort and
-must never make the authoring call fail.
+Provenance has two distinct audiences and time horizons. The puzzle needs a
+compact, durable account of who contributed to it. The authoring
+infrastructure needs an operational record of what happened when a tool was
+invoked. Combining those records would either burden the authored document
+with session telemetry or make the operational record too weak to explain a
+contribution.
 
-```sql
-draft_assistance_stamps (
-  id            TEXT PRIMARY KEY,
-  draft_id      TEXT NOT NULL,
-  owner_subject TEXT NOT NULL,        -- authenticated Access subject
-  captured_at   TEXT NOT NULL,        -- ISO 8601 timestamp
-  record_json   TEXT NOT NULL         -- tool, role, scope, client, and actor data
-)
-```
+| Record | Purpose | Owner |
+|---|---|---|
+| Document `provenance` | Contributor names, collaboration mode, and optional per-contributor detail | Author and infrastructure |
+| Assistance stamp | Invocation context: client, owner, time, role, and authoring scope | Infrastructure |
 
-The record contains an `authoring_assistance_stamp` event name, a server-side
-`capturedAt`, the tool and draft/puzzle identifiers, the supplied authoring
-`role` and `date`, the effective scope, recognized client details, and (when
-available) the authenticated actor subject. It may include the current
-document's collaboration mode as context, but it is not a document snapshot.
+The document record is the model of record for contributor attribution and can
+feed player bylines or editor summaries. The assistance stamp is an audit
+event, not a document snapshot or immutable version history.
 
-### What this captures
+## Current implementation
 
-- **Tool call identity** — which MCP tool was invoked (e.g., `save_puzzle_draft`, `validate_puzzle_draft`)
-- **Session identity** — the authenticated Cloudflare Access subject, verified independently of anything the agent reports about itself
-- **Timing** — when the call was made, enabling reconstruction of the interaction sequence
-- **Authoring scope** — a focused `content` or `pedagogy` write records that
-  domain; a complete write records `puzzle` and, when present, the separate
-  `learningIntroduction` scope
-- **Authoring state** — the record identifies the draft/puzzle and the client call, but the current stamp does not claim to be a content hash or a full snapshot
-- **Transport and actor context** — when available, the transport and the
-  authenticated actor subject are retained in the audit record
+At the MCP boundary, the server can recognize the calling client and observe
+the authenticated authoring owner. For recognized clients, a newly created
+puzzle draft and a substantial MCP edit can update document-level contributor
+provenance. A trivial edit does not change the contributor list merely because
+an agent touched the draft.
 
-### What this does not capture
+The infrastructure also records the invocation's tool, server capture time,
+authoring role and date, and focused domain when a stamp is available. A
+focused `content` or `pedagogy` operation identifies that domain; a complete
+operation is recorded at the broader puzzle level. Model or reasoning hints
+are retained when a client exposes them, but they are observations, not
+attestations.
 
-- **Attested model identity** — the server can observe a model hint from some client frames, but it cannot verify that hint as the model/checkpoint actually running
-- **Complete model version** — the specific release or checkpoint is not consistently available from the protocol
-- **Complete reasoning configuration** — some clients expose a reasoning hint; the full setting is not standardized or guaranteed
-- **Runtime parameters** — temperature, context window, system prompt, and equivalent settings are not provided as a verified per-call record
-- **Document change evidence** — the stamp has no before/after document,
-  field-level diff, content hash, or revision snapshot
-- **Tamper evidence** — D1 and Analytics Engine records are not currently
-  cryptographically anchored or externally immutable
+The implementation therefore occupies an intermediate position: attribution
+and scope are captured by infrastructure at the invocation boundary, but the
+system does not yet provide a complete, cryptographically verifiable session
+record.
 
-These are the fields that distinguish Position 2 from Position 3. Some facts
-exist at the invocation boundary — the infrastructure that handed the agent
-its domain may know them — but the MCP protocol does not currently convey
-them to the server in a verified, consistent form.
+## Document provenance
 
----
+The optional `provenance` object contains an ordered `contributors` list and,
+when useful, a `collaboration` mode describing the relationship between human
+and generative contributors. Contributors may be bare names or structured
+entries with model, reasoning, or switch details. Known authoring hosts can be
+recognized as generative; unknown names default to human unless explicitly
+classified otherwise. Derivable kind values and provider data are not part of
+the compact stored form.
 
-## What Requires Human Input
-
-The author may record model identity and configuration in the `provenance`
-field of the puzzle document when the call frame does not provide enough
-information. This field is part of the protected provenance domain described
-in [STORAGE-DOMAINS.md](STORAGE-DOMAINS.md); focused agent writes cannot
-replace it. Recognized MCP clients may also be added automatically on a new
-puzzle draft or a substantial MCP edit.
-
-### The `provenance` field
-
-An object containing an optional collaboration mode and an ordered
-`contributors` array. Contributor entries may be bare names or objects
-carrying an explicit kind, model, reasoning, or switch details. The server
-infers `generative` for recognized host names and defaults unknown names to
-`human`; explicit kind overrides are retained. The stored form omits
-derivable kind values and never persists provider data. `reviewedBy` is an
-author-owned reviewer name for the lesson byline, not another contributor.
+For example:
 
 ```json
-"provenance": {
-  "collaboration": "aiPrimary",
-  "contributors": [
-    { "name": "Claude", "model": "claude-opus-5", "reasoning": "high" },
-    { "name": "jmajerus" }
-  ]
+{
+  "provenance": {
+    "collaboration": "aiPrimary",
+    "contributors": [
+      { "name": "Claude", "model": "claude-opus-5", "reasoning": "high" },
+      { "name": "jmajerus" }
+    ]
+  }
 }
 ```
 
-The per-contributor `reasoning` and `switch` fields record settings visible to
-the author at session initiation — not a self-report by the agent, but an
-observation by the human who controlled for them. The server may also fill a
-model label and reasoning level from a recognized client call frame when the
-client exposes them; switch values remain author-supplied. Neither route is a
-cryptographically attested model/runtime statement.
+The author may supply model or configuration information that the invocation
+boundary cannot verify. `reviewedBy`, when present, is an author-owned lesson
+byline and is not another contributor. Focused agent writes cannot replace
+the provenance domain; human editorial workflows remain responsible for
+human-owned lesson credit and review attribution.
 
-### Automatic document attribution
+## Assistance stamps
 
-For a recognized MCP client, `create_puzzle_draft` credits the client when it
-creates a draft from a supplied document or a new skeleton. Seeding a working
-copy from an existing published document does not invent a new contributor. A
-`save_puzzle_draft` call credits the client only when its change is substantial;
-a trivial edit or metadata fix does not add or update a contributor merely
-because the client touched the draft. The server preserves existing provenance
-when a complete save omits the optional field, and focused writes cannot
-replace the protected provenance domain.
+An assistance stamp is assembled by the server rather than self-reported by
+the agent. It can contain:
 
-This document-level attribution is intentionally separate from the assistance
-stamp. A substantial save may both update `provenance` and create an audit
-stamp; a recognized but non-credit-worthy call still creates the audit stamp.
-The document stores contributor attribution, while the D1 audit stores the
-invocation's role, date, and scope.
+- the tool and target draft or puzzle;
+- server capture time and the supplied authoring role and date;
+- authenticated owner and actor context when available;
+- the focused authoring scope;
+- recognized client identity; and
+- model or reasoning hints when the client exposes them.
 
-### Current-format boundary
+Persistence is best-effort and fire-and-forget. A failed audit write must not
+make a valid authoring operation fail. The stamp intentionally does not claim
+to contain a before/after document, a content hash, a field-level diff, a
+complete revision record, or cryptographic tamper evidence.
 
-The former `generativeAssistance` document field and client-attribution array
-are retired. They are not read or written by current authoring; the retired
-field is rejected if it appears at the current storage boundary. JSON-LD is
-also not a current authoring or D1 row format. It remains available through
-the explicit `content:export`, `content:import`, and `content:check` commands
-as a future interchange format; `content:canonicalize` is the one-time
-migration path for legacy JSON-LD current rows.
+The old `generativeAssistance` document field and client-attribution array are
+not part of this model. Current authoring uses simplified documents, keeps
+repository metadata outside the document, and retains JSON-LD only as an
+explicit interchange format. Historical document snapshots are handled as a
+storage cleanup, not as provenance the agent must preserve. See the [implementation
+notes](dev-briefs/authoring-domain-scoping-implementation.md) for those
+boundaries.
 
-The one-time `0020_purge_retired_document_snapshots` migration clears the
-historical document-snapshot tables rather than attempting to preserve their
-old attribution or format. `draft_assistance_stamps` is separate operational
-audit data: it records invocation context, not immutable document history.
+## What remains human-dependent
 
-### Why human presence is currently load-bearing
+Human authors remain the reliable source for facts the protocol does not
+provide or verify: the model and configuration selected for a session, the
+decision to name a contributor, and the editorial reviewer associated with a
+lesson. This is manageable in a supervised workflow because it can be done at
+session initiation or during editorial review.
 
-The human author is present at session initiation. They may know which agent
-is being used, which model version, and what configuration settings they
-selected. Recording information unavailable or unverified in the client call
-frame is a single deliberate act at the start of a session, not an ongoing
-burden. The human also owns the lesson reviewer byline; it is deliberately not
-assigned to an agent's focused pedagogy write.
+It does not scale cleanly to unattended authoring, decentralized teams,
+configuration changes during a long session, or retrospective reconstruction
+of a session. Those are the cases a complete infrastructure primitive should
+address.
 
-This works reliably in a supervised single-author workflow. It does not scale to:
+## The gap to a full session primitive
 
-- Delegated or automated authoring pipelines where no human is present at invocation
-- Multi-author workflows where session initiation is not centralized
-- Long sessions where configuration changes mid-session
-- Retrospective attribution where the session record must be reconstructed
+A complete session provenance primitive would capture model identity and
+configuration automatically at the moment infrastructure hands an agent its
+domain. It would be external to the agent's own claims and resistant to
+post-hoc alteration.
 
-These are the failure modes that the full primitive would eliminate.
+The position paper identifies four properties that must hold together:
 
----
+1. **Region/field-level** — attribution at the granularity of the domain
+   modified, not merely the whole document.
+2. **Invocation-boundary** — captured when the agent receives its domain, not
+   reconstructed afterward.
+3. **External** — recorded by the infrastructure, not self-reported by the
+   agent.
+4. **Tamper-evident** — anchored so the record cannot be silently modified
+   after the fact.
 
-## The Gap to the Full Primitive
+The current system provides logical-domain scope for focused authoring calls,
+and external capture of the server-observed event and authenticated owner. It
+does not provide exact changed-field attribution, verified model or runtime
+identity, or tamper evidence. The D1 audit is useful operational provenance,
+not the final primitive.
 
-Full session provenance capture requires the MCP protocol — or a layer above it — to convey model identity and configuration to the server at the invocation boundary, automatically and without agent self-report.
+## Standards landscape
 
-### What the protocol would need to provide
+Three standards illuminate parts of the problem:
 
-At minimum, for each tool call:
+**C2PA** provides cryptographically bound provenance assertions and
+per-action software-agent attribution. Its normal binding is claim-level and
+self-asserted; it does not by itself prove that attribution was captured
+externally at invocation time.
 
-- A verified model identifier (not self-reported by the model; attested by the infrastructure that loaded it)
-- A model version or checkpoint identifier
-- Active configuration parameters material to output quality (reasoning mode, context window, system prompt hash)
+**PROV-AGENT** extends W3C PROV with an entity for AI model invocation, tool
+use, and response generation. It models the event well but relies on
+cooperative instrumentation and does not provide tamper evidence or complete
+configuration capture.
 
-These are facts the infrastructure knows at invocation time. They are not facts the agent knows about itself reliably. The protocol gap is not a capability gap — the information exists — it is an interface gap: the server has no channel through which to receive it.
+**IETF SCITT** provides signed claims, transparency services, and
+Merkle-anchored receipts. It is close to the external and tamper-evident side
+of the requirement, but it has not been connected here to region-level
+structured-document edit attribution or model-invocation provenance.
 
-### The four-property requirement
+No existing standard simultaneously supplies all four properties for
+structured-document agentic editing. That unoccupied intersection is where
+the full primitive remains to be developed.
 
-The companion paper identifies four properties that a complete session provenance capture primitive must satisfy simultaneously:
+## Relationship to write-domain scoping
 
-1. **Region/field-level** — attribution at the granularity of the domain modified, not merely the whole document
-2. **Invocation-boundary** — captured at the moment the agent is handed its domain, not reconstructed afterward
-3. **External** — recorded by the infrastructure, not self-reported by the agent
-4. **Tamper-evident** — cryptographically anchored so the record cannot be modified after the fact
-
-The current implementation provides property 1 at logical-domain granularity for focused calls, and properties 2 and 3 for the server-observed tool event and authenticated owner. It does not provide exact changed-field attribution, verified model/configuration identity, or property 4: the D1 audit has no cryptographic transparency or immutable external anchor yet.
-
-### Standards landscape
-
-Three existing standards address parts of this requirement:
-
-**C2PA** (Coalition for Content Provenance and Authenticity, v2.1–2.4) provides region-level assertions and per-action `softwareAgent` attribution with cryptographic binding. Its binding operates at whole-claim granularity via a single signer and is self-asserted — a valid signature certifies the metadata was not modified since signing, but not that the attribution was captured externally at the moment of invocation.
-
-**PROV-AGENT** (Souza et al., IEEE e-Science 2025) extends W3C PROV with an `AIModelInvocation` entity modelling agent identity, tool use, and response generation. Implemented via cooperative in-process instrumentation with no tamper-evidence; records agent identity and name but not model configuration.
-
-**IETF SCITT** (Signed Claims → Transparency Service → Merkle-anchored receipts) provides the closest standards-track mechanism for external capture and tamper-evidence, but has not been connected to per-region document edit attribution or model-invocation provenance.
-
-No existing standard simultaneously satisfies all four properties for structured-document agentic editing. The unoccupied intersection is where the full primitive sits.
-
----
-
-## Relationship to Write-Domain Scoping
-
-This document and [STORAGE-DOMAINS.md](STORAGE-DOMAINS.md) together cover both sides of the accountability gap described in the companion paper. Write-domain scoping answers what the agent may change; session provenance capture answers who changed it and under what conditions. Each is weakened by the absence of the other:
-
-- Authority without attribution is unauditable: the domain boundary was enforced, but there is no reliable record of who acted within it.
-- Attribution without authority is unreliable: the record names a contributor, but the contributor was never properly constrained.
-
-The Concept Clusters implementation has made meaningful progress on both sides. [STORAGE-DOMAINS.md](STORAGE-DOMAINS.md) describes the write-domain scoping implementation and its limits. This document describes the provenance capture implementation and its limits. Together they constitute an honest account of where the paired primitives stand in a real system — further along than the round-trip model left things, and short of where the full primitives would take them.
+Write-domain scoping answers what an agent may change; provenance answers who
+acted and under what observed conditions. Authority without attribution is
+unauditable. Attribution without authority is unreliable. Together, the two
+documents describe a system that has moved beyond unconstrained round trips
+while remaining honest about the limits of current protocol and storage
+support.

@@ -1,203 +1,111 @@
 # Storage Domains: Write-Domain Scoping in Concept Clusters
 
-*Status: implemented for puzzle authoring (MCP authoring contract v1.14.0). The `complete` contract remains available for compatibility, while `content` and `pedagogy` are the only focused agent-write domains. Finer-grained partitioning remains future work.*
+*Status: the first production slice is implemented. `content` and `pedagogy`
+are the focused agent-write domains; the complete document contract remains
+available for compatibility. Finer-grained partitioning remains future work.*
 
-This document describes how the Concept Clusters authoring system decomposes puzzle documents into ownership domains, how those domains map to storage, and what the agent-facing contract looks like in practice. It is the companion implementation document to [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md), which covers the session provenance capture side of the same design.
+This document describes the design and the reader-visible behavior of the
+Concept Clusters authoring boundary. The repository-level migration and
+compatibility details live in the [authoring domain scoping implementation
+notes](dev-briefs/authoring-domain-scoping-implementation.md).
 
-Both documents implement the paired primitives argued for in [The Integrity Burden: Why Agentic Document Editing Belongs in the Infrastructure, Not the Agent](https://github.com/jmajerus/write-domain-scoping).
-
----
-
-## Overview
-
-The Concept Clusters puzzle document is a structured JSON object with fields serving distinct purposes: educational content authored by an agent, pedagogical annotations layered on top of that content, provenance recording who contributed, and system fields maintained entirely by the infrastructure. In the round-trip model, an agent receives the whole document and must return it intact with targeted changes — placing the integrity burden for all four categories on the agent regardless of which category required its judgment.
-
-The storage-domain design reduces that burden by making logical ownership explicit at the authoring boundary. The current implementation exposes two agent-writable domains (`content` and `pedagogy`), keeps `provenance` protected from focused writes, and treats the existing D1 row metadata as the `system` domain. The complete document remains materialized for compatibility with the rest of the application.
-
----
-
-## Domain Decomposition
-
-The puzzle document decomposes into four ownership domains:
-
-### Content
-The puzzle's educational core: `id`, `title`, `category`, `info`, `clusters`, and the core of `bridges` (`id`, `term`, `clusters`, `fact`, `info`). Cluster fields remain together in this first slice, including names, facts, terms, seeds, colors, term notes, and links. This is the primary agent write domain.
-
-Unknown authored root fields are retained here for forward compatibility. That keeps a new field from being silently discarded before the ownership map is deliberately updated.
-
-### Pedagogy
-Structural and discovery annotations layered on top of content: bridge relationship classifications (`conceptId`, `relationKind`, `direction`, `idealTerms`), lenses and lens mode, learning introductions, related puzzles, category membership metadata (`categories`, `subcategories`, `tags`, `level`), and editorial publication metadata. These require judgment but can be handled as a separate pass from the core puzzle. Repository lifecycle metadata is not part of this domain.
-
-Separating pedagogy from content allows a focused annotation pass — potentially by a different agent or a different model configuration — without touching the content domain.
-
-Fields: `categories`, `subcategories`, `tags`, `level`, `lenses`, `lensMode`, `preSolve`, `relatedPuzzles`, `learningIntroduction`, editorial publication/discovery metadata (`creator`, `license`, `derivedFrom`, `language`), and the bridge annotation fields above. The legacy human-owned `learningIntroduction.credit` value is protected: it is omitted from the focused pedagogy projection and remains under the provenance/editor boundary.
-
-### Provenance
-Who contributed to this puzzle. The current document shape is an object with an optional `collaboration` mode and an ordered `contributors` array. Contributor kind is inferred from recognized authoring hosts when possible; per-contributor model, reasoning, and switch details are retained when supplied, while provider data is not. This domain is protected from focused agent writes. Recognized MCP clients can be credited by the server, while author-owned attribution remains available through the existing provenance/editor paths.
-
-For the limits of human-controlled provenance and the path toward automated capture, see [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md).
-
-Fields: `provenance`.
-
-### System
-Fields the infrastructure owns entirely: authenticated owner, draft id, revision, status, hashes, timestamps, validation state, checkout/publish metadata, and other repository envelope values. This also includes the portable aliases `dateCreated`, `dateModified`, and `version`, plus the learning-introduction progress invalidation key. These lifecycle values are removed from current authored documents rather than being handed to an agent to reproduce. The derived `large` rendering flag is also omitted from focused MCP documents. Agents receive the minimum draft envelope needed to address a scoped save (`draftId` and `revision`), not the full system record.
-
-These values currently live in D1 columns, the draft response envelope, or a
-derived runtime fingerprint rather than a `system_json` document column. Core
-queryable lifecycle values stay in dedicated columns; a JSON blob is not
-needed merely to avoid putting them in the puzzle document. JSON-LD may carry
-portable equivalents when explicitly exported, but those aliases are not
-accepted as current authoring fields.
+It is the companion to [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md), and both
+documents implement the paired primitives argued for in [The Integrity Burden:
+Why Agentic Document Editing Belongs in the Infrastructure, Not the
+Agent](https://github.com/jmajerus/write-domain-scoping).
 
 ---
 
-## Storage Model
+## Why domains matter
 
-The migration adds persisted projections for the three JSON domains that belong in the draft document. The existing `document` column remains the materialized canonical snapshot used by current consumers:
+The puzzle document contains several kinds of information: educational
+content, pedagogical annotations, contributor attribution, and repository
+state. In a round-trip editing workflow, an agent receives all of it and must
+return everything intact while changing only the part that required its
+judgment. That makes the agent responsible for information it neither needs
+to see nor is competent to maintain.
 
-```sql
-puzzle_drafts (
-  id             TEXT PRIMARY KEY,
-  owner_subject  TEXT NOT NULL,
-  document       TEXT NOT NULL, -- materialized complete document
-  content_json   TEXT,          -- content projection; null only before backfill
-  pedagogy_json  TEXT,          -- pedagogy projection; null only before backfill
-  provenance_json TEXT,         -- protected provenance projection
-  status         TEXT,
-  content_hash   TEXT,
-  revision       INTEGER,
-  updated_at     TEXT
-)
-```
+Write-domain scoping makes ownership explicit at the authoring boundary. The
+agent is given the smallest useful document for the pass it is performing;
+the infrastructure preserves and recombines the other domains.
 
-Migration `0019` deliberately leaves these new columns nullable so existing
-simplified draft rows remain readable. A read falls back to the legacy complete
-blob when the projections are null; the next successful write materializes and
-stores all three projections. This fallback is only for older simplified rows.
-JSON-LD and the retired `generativeAssistance` field are not valid stored-row
-formats. A current JSON-LD row must be converted through the one-time
-canonicalization/import boundary before the authoring Worker is released; a
-row containing `generativeAssistance` must be manually replaced or removed,
-because the current authoring path deliberately has no compatibility fold for
-it. The explicit JSON-LD adapter remains available for interchange, but it is
-not part of the current puzzle workflow.
+## The four domains
 
-### Agent-facing API presentation
+| Domain | Purpose | Current owner | Focused agent access |
+|---|---|---|---|
+| `content` | Educational meaning: puzzle identity, copy, clusters, and bridge core | Agent | Read/write |
+| `pedagogy` | Relationships, lenses, learning introductions, and discovery metadata | Agent | Read/write; content is read-only context |
+| `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
+| `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document |
 
-When an agent is asked to draft educational content, the API presents only the `content` column. The `pedagogy` column may be included as read-only context when the agent needs to understand existing annotations, but it is not part of the agent's write surface for a content pass.
+The first two domains are intentionally broad enough to be useful authoring
+surfaces. Content includes the core of a bridge and its cluster membership;
+pedagogy includes bridge relationship annotations and the surrounding
+discovery and lesson structure. Provenance is a compact document-level record,
+while system state belongs to the repository envelope rather than to authored
+JSON.
 
-When an agent is asked to annotate bridge relationships or classify lenses, it receives only the `pedagogy` column, with `content` visible as read-only context.
+The boundary is about ownership, not an assertion that every field needs to
+remain authored. A partitioning review is also a good time to ask whether a
+field is semantic, human-controlled, or derivable. For example, a
+presentational cluster color may eventually be derived from cluster order
+instead of being part of an agent payload. That would be a schema decision,
+not a silent consequence of partitioning.
 
-In neither case does the agent receive `provenance` or `system` fields. They are not in its context. It cannot read them, reproduce them incorrectly, or accidentally modify them.
+## What is implemented
 
-### Merge semantics
+An MCP caller may request `content` or `pedagogy` when reading or saving a
+puzzle draft. A focused read contains only the selected writable projection;
+the pedagogy response additionally supplies content as read-only context. A
+focused save replaces the selected projection, preserves the protected
+domains, and lets the infrastructure reassemble a complete document for
+validation, publication, rendering, and Freeze.
 
-The infrastructure combines the stored content, pedagogy, and provenance projections into a complete document at the draft repository read boundary. The system domain remains the row envelope; it is never reintroduced into the assembled authoring document. A complete materialized document is then written on create/save/pop and is the artifact passed to validation and publication. Writers that update a complete snapshot outside the draft repository, such as category-rename propagation, must refresh all three projections in the same update so a later read cannot reintroduce stale sidecar data.
+The `complete` path remains available for existing clients and workflows and
+is intentionally broader. Repository state remains infrastructure-controlled;
+the server preserves existing provenance when a complete save omits it and
+normalizes modern provenance when a complete client supplies it. Focused
+writes cannot replace provenance or system metadata. Human-owned lesson credit
+is similarly kept outside the focused pedagogy write surface.
 
-Published puzzle rows are intentionally still complete snapshots. The current Freeze and rendering paths read `published_documents.document`; they do not need to know about mutable draft projections. This keeps the domain upgrade out of the player and Freeze bundle format while preserving the option to make published reads assemble later.
+For puzzle drafts, D1 stores the complete materialized document alongside
+projections for the three authored domains. The projections reduce the
+context and write payload seen by focused MCP calls; the materialized document
+keeps current publication and player-facing paths independent of the domain
+model. The system domain remains in D1 columns and response metadata rather
+than being duplicated in a `system` document field.
 
-### Retired formats and historical snapshots
+## The integrity boundary
 
-Current authoring and storage rows use the simplified document shape. The
-runtime rejects JSON-LD rows and the retired root field `generativeAssistance`
-rather than trying to preserve them as invalid intermediate drafts. The
-explicit `content:export`, `content:import`, and `content:check` commands are
-the supported JSON-LD interchange path; `content:canonicalize` is the
-one-time migration path for any legacy JSON-LD current rows.
+The infrastructure owns the things an agent should not have to reproduce:
+authenticated ownership, revision tokens, timestamps, hashes, validation
+state, checkout and publication state, and derived rendering values. The
+agent still owns content-domain integrity: terms must be placed consistently,
+cluster and bridge references must resolve, and the educational relationships
+must make sense.
 
-Migration `0020_purge_retired_document_snapshots` deletes all rows from
-`published_document_revisions` and `puzzle_draft_history`. Those tables contain
-historical document snapshots, not current source-of-truth rows, so the
-migration purges them instead of converting them. Current `puzzle_drafts`,
-`content_drafts`, and `published_documents` rows are retained. Any current
-JSON-LD rows must be canonicalized before the Worker release; rows containing
-the retired `generativeAssistance` field must be manually replaced or removed.
+Domain scoping is enforced at the domain boundary. It does not replace
+semantic validation, and it does not yet enforce every ownership distinction
+within a domain. The complete path is intentionally broader for compatibility;
+focused writes are the path for reducing the agent's context and integrity
+burden.
 
-This is a one-time data purge, not removal of the history mechanisms. Normal
-publishes still append a published revision, and distinct draft saves still
-maintain the bounded working-copy undo stack. The separate
-`draft_assistance_stamps` and `puzzle_review_events` tables are operational
-audit/review records, not document snapshots, and are outside this purge.
+Current authoring and storage use the simplified document shape. JSON-LD is
+retained as an explicit interchange format, not as a current puzzle workflow
+or D1 row format. The retired `generativeAssistance` field is not part of the
+current contract. Historical document snapshots are handled by the one-time
+cleanup described in the [implementation notes](dev-briefs/authoring-domain-scoping-implementation.md),
+not by asking an agent to preserve obsolete formats.
 
----
+## The next boundary
 
-## What the Agent Sees
+The current partition is deliberately a useful minimum: two agent-write
+domains plus protected provenance and infrastructure-owned system state.
+Further separation may be worthwhile where a field has a distinct owner or
+where a different model needs a different context. The criterion is whether
+the separation removes real decision and integrity burden without turning the
+authoring contract into a collection of fragments that must be mentally
+reconstructed by the agent.
 
-### Focused MCP contract
-
-`get_puzzle_draft` and `save_puzzle_draft` accept an optional `domain`:
-
-```json
-{ "draft_id": "energy-flow", "domain": "content" }
-```
-
-The default is `complete`, preserving the existing response envelope and
-complete-document workflow. That compatibility path does not make retired
-JSON-LD or `generativeAssistance` storage valid. `content` and `pedagogy` are
-the only focused agent domains. A focused save still requires
-the normal `expected_revision`; it replaces the selected domain while the
-server retains the other projections, reassembles the complete document, and
-runs the normal canonicalization path. Omitting an optional field from the
-selected projection therefore removes it. A content payload containing
-pedagogy fields (or vice versa) is rejected rather than silently moved.
-
-The `pedagogy` response has a writable `document` projection and a read-only
-`context` containing content needed to refer to clusters and bridges. The
-projection omits legacy `learningIntroduction.credit`; an explicit attempt to
-write that protected field is rejected, while an existing value is preserved
-when the introduction remains present. The `content` response has no pedagogy
-context because it is the primary drafting surface. Neither focused document
-includes provenance or system metadata. Mechanical `repair` is available to
-complete and content saves only because it repairs content-domain fields.
-
-### Content domain (drafting pass)
-
-The agent receives the content projection — identity, core puzzle copy, clusters, and bridge core — with pedagogy annotations, provenance, derived flags, and repository metadata absent by construction.
-
-The agent's task is unambiguous: produce good educational content within this structure. It does not need to know what it is not seeing. The integrity of what it is not seeing is not its concern.
-
-### Pedagogy domain (annotation pass)
-
-The agent receives the pedagogy projection alongside content as read-only `context`. It can classify bridge relationships, set directions and ideal terms, author lenses or learning introductions, and update the grouped discovery metadata. It does not send content fields back through this scoped write, and it does not supply repository dates, revisions, or cache keys.
-
-### What is absent by construction
-
-Focused domain documents do not transmit system or provenance fields. The small draft envelope still exposes `draftId` and `revision`, because those values are required to address and concurrency-check the next save. The backwards-compatible `domain: "complete"` response continues to expose the existing complete draft contract.
-
----
-
-## Limits of the Implementation
-
-Column-level partitioning enforces domain boundaries at the domain level. It cannot enforce field-level ownership boundaries *within* a domain, and the complete compatibility path remains intentionally broad.
-
-### Fields removed rather than partitioned
-
-The current schema audit retired some fields rather than assigning them to a
-domain. In the actual active simplified schema:
-
-- **`termRole` on bridges** is compatibility-only and removed before current authoring validation.
-- **`generativeAssistance`** is retired. It is rejected at the current
-  authoring/storage boundary and is not folded back into a new document.
-- JSON-LD and audit-only client details are not stored in the current puzzle
-  document. JSON-LD remains an explicit interchange format; attribution in the
-  current document is represented by `provenance`, while invocation scope,
-  role, and date belong to the D1 assistance-stamp audit.
-- The former client-attribution array was folded into `provenance` during the
-  completed corpus migration. It is not read or written by current authoring.
-- **`color` on clusters**, **`via` on related-puzzle entries**, and **`conceptId` on bridges** are still represented by the active schema and are therefore retained in the appropriate projection. They may be candidates for a later, separately reviewed ownership change.
-
-This distinction matters: a domain partition should not silently become a schema deletion.
-
-### The residual integrity burden
-
-What remains within the content domain is a residual integrity burden that is appropriate and correctly located: term references must be consistent, seed terms must appear in their cluster's term list, bridge cluster references must point to real clusters. These are content-domain integrity constraints, checkable by validation, within the agent's competence to satisfy, and directly related to the quality of the educational content being produced.
-
-This is the integrity burden the agent should bear. Everything else has been moved to domains owned by parties competent to discharge it.
-
----
-
-## Relationship to Session Provenance Capture
-
-This document covers the write-domain scoping side of the paired primitives. The provenance domain is protected, but the current server can automatically record recognized MCP client identity and domain scope in its assistance audit. That is useful attribution, not yet a complete attested session record.
-
-The session provenance capture side — automatic, infrastructure-level recording of agent identity, model configuration, and runtime parameters at the invocation boundary — is covered in [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md), which also maps the three-position landscape between no capture and full capture, and identifies where the current implementation sits within it.
+The provenance and invocation-capture side of the design is described in
+[PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md).
