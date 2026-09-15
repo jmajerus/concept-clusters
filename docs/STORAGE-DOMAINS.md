@@ -1,6 +1,6 @@
 # Storage Domains: Write-Domain Scoping in Concept Clusters
 
-*Status: implemented compatibility-preserving first slice (MCP authoring contract v1.14.0). The final sections retain the further partitioning ideas that are not yet implemented.*
+*Status: implemented for puzzle authoring (MCP authoring contract v1.14.0). The `complete` contract remains available for compatibility, while `content` and `pedagogy` are the only focused agent-write domains. Finer-grained partitioning remains future work.*
 
 This document describes how the Concept Clusters authoring system decomposes puzzle documents into ownership domains, how those domains map to storage, and what the agent-facing contract looks like in practice. It is the companion implementation document to [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md), which covers the session provenance capture side of the same design.
 
@@ -12,7 +12,7 @@ Both documents implement the paired primitives argued for in [The Integrity Burd
 
 The Concept Clusters puzzle document is a structured JSON object with fields serving distinct purposes: educational content authored by an agent, pedagogical annotations layered on top of that content, provenance recording who contributed, and system fields maintained entirely by the infrastructure. In the round-trip model, an agent receives the whole document and must return it intact with targeted changes — placing the integrity burden for all four categories on the agent regardless of which category required its judgment.
 
-The storage-domain design reduces that burden by making logical ownership explicit at the authoring boundary. The current implementation exposes two agent-writable domains (`content` and `pedagogy`), keeps `provenance` protected, and treats the existing D1 row metadata as the `system` domain. The complete document remains materialized for compatibility with the rest of the application.
+The storage-domain design reduces that burden by making logical ownership explicit at the authoring boundary. The current implementation exposes two agent-writable domains (`content` and `pedagogy`), keeps `provenance` protected from focused writes, and treats the existing D1 row metadata as the `system` domain. The complete document remains materialized for compatibility with the rest of the application.
 
 ---
 
@@ -33,19 +33,21 @@ Separating pedagogy from content allows a focused annotation pass — potentiall
 Fields: `categories`, `subcategories`, `tags`, `level`, `lenses`, `lensMode`, `preSolve`, `relatedPuzzles`, `learningIntroduction`, editorial publication/discovery metadata (`creator`, `license`, `derivedFrom`, `language`), and the bridge annotation fields above. The legacy human-owned `learningIntroduction.credit` value is protected: it is omitted from the focused pedagogy projection and remains under the provenance/editor boundary.
 
 ### Provenance
-Who contributed to this puzzle. The current document shape is an object with `collaboration` and an ordered `contributors` array; normalization may add contributor kind and observed model settings. This domain is protected from focused agent writes. Recognized MCP clients can be stamped by the server, while author-owned attribution remains available through the existing provenance/editor paths.
+Who contributed to this puzzle. The current document shape is an object with an optional `collaboration` mode and an ordered `contributors` array. Contributor kind is inferred from recognized authoring hosts when possible; per-contributor model, reasoning, and switch details are retained when supplied, while provider data is not. This domain is protected from focused agent writes. Recognized MCP clients can be credited by the server, while author-owned attribution remains available through the existing provenance/editor paths.
 
 For the limits of human-controlled provenance and the path toward automated capture, see [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md).
 
 Fields: `provenance`.
 
 ### System
-Fields the infrastructure owns entirely: authenticated owner, draft id, revision, status, hashes, timestamps, validation state, checkout/publish metadata, and other repository envelope values. This also includes the portable aliases `dateCreated`, `dateModified`, and `version`, plus the learning-introduction progress invalidation key. The derived `large` rendering flag is also omitted from focused MCP documents. Agents receive the minimum draft envelope needed to address a scoped save (`draftId` and `revision`), not the full system record.
+Fields the infrastructure owns entirely: authenticated owner, draft id, revision, status, hashes, timestamps, validation state, checkout/publish metadata, and other repository envelope values. This also includes the portable aliases `dateCreated`, `dateModified`, and `version`, plus the learning-introduction progress invalidation key. These lifecycle values are removed from current authored documents rather than being handed to an agent to reproduce. The derived `large` rendering flag is also omitted from focused MCP documents. Agents receive the minimum draft envelope needed to address a scoped save (`draftId` and `revision`), not the full system record.
 
 These values currently live in D1 columns, the draft response envelope, or a
 derived runtime fingerprint rather than a `system_json` document column. Core
 queryable lifecycle values stay in dedicated columns; a JSON blob is not
-needed merely to avoid putting them in the puzzle document.
+needed merely to avoid putting them in the puzzle document. JSON-LD may carry
+portable equivalents when explicitly exported, but those aliases are not
+accepted as current authoring fields.
 
 ---
 
@@ -71,9 +73,14 @@ puzzle_drafts (
 Migration `0019` deliberately leaves these new columns nullable so existing
 simplified draft rows remain readable. A read falls back to the legacy complete
 blob when the projections are null; the next successful write materializes and
-stores all three projections. JSON-LD is not a valid stored-row fallback: any
-current row containing `@context` fails closed and must be converted by the
-one-time D1 canonicalization before the authoring Worker is released.
+stores all three projections. This fallback is only for older simplified rows.
+JSON-LD and the retired `generativeAssistance` field are not valid stored-row
+formats. A current JSON-LD row must be converted through the one-time
+canonicalization/import boundary before the authoring Worker is released; a
+row containing `generativeAssistance` must be manually replaced or removed,
+because the current authoring path deliberately has no compatibility fold for
+it. The explicit JSON-LD adapter remains available for interchange, but it is
+not part of the current puzzle workflow.
 
 ### Agent-facing API presentation
 
@@ -89,6 +96,29 @@ The infrastructure combines the stored content, pedagogy, and provenance project
 
 Published puzzle rows are intentionally still complete snapshots. The current Freeze and rendering paths read `published_documents.document`; they do not need to know about mutable draft projections. This keeps the domain upgrade out of the player and Freeze bundle format while preserving the option to make published reads assemble later.
 
+### Retired formats and historical snapshots
+
+Current authoring and storage rows use the simplified document shape. The
+runtime rejects JSON-LD rows and the retired root field `generativeAssistance`
+rather than trying to preserve them as invalid intermediate drafts. The
+explicit `content:export`, `content:import`, and `content:check` commands are
+the supported JSON-LD interchange path; `content:canonicalize` is the
+one-time migration path for any legacy JSON-LD current rows.
+
+Migration `0020_purge_retired_document_snapshots` deletes all rows from
+`published_document_revisions` and `puzzle_draft_history`. Those tables contain
+historical document snapshots, not current source-of-truth rows, so the
+migration purges them instead of converting them. Current `puzzle_drafts`,
+`content_drafts`, and `published_documents` rows are retained. Any current
+JSON-LD rows must be canonicalized before the Worker release; rows containing
+the retired `generativeAssistance` field must be manually replaced or removed.
+
+This is a one-time data purge, not removal of the history mechanisms. Normal
+publishes still append a published revision, and distinct draft saves still
+maintain the bounded working-copy undo stack. The separate
+`draft_assistance_stamps` and `puzzle_review_events` tables are operational
+audit/review records, not document snapshots, and are outside this purge.
+
 ---
 
 ## What the Agent Sees
@@ -101,8 +131,10 @@ Published puzzle rows are intentionally still complete snapshots. The current Fr
 { "draft_id": "energy-flow", "domain": "content" }
 ```
 
-The default is `complete`, preserving existing clients. `content` and
-`pedagogy` are the only focused agent domains. A focused save still requires
+The default is `complete`, preserving the existing response envelope and
+complete-document workflow. That compatibility path does not make retired
+JSON-LD or `generativeAssistance` storage valid. `content` and `pedagogy` are
+the only focused agent domains. A focused save still requires
 the normal `expected_revision`; it replaces the selected domain while the
 server retains the other projections, reassembles the complete document, and
 runs the normal canonicalization path. Omitting an optional field from the
@@ -140,11 +172,18 @@ Column-level partitioning enforces domain boundaries at the domain level. It can
 
 ### Fields removed rather than partitioned
 
-The current schema audit did retire some fields, but not all fields proposed for removal in the original design note. In the actual active simplified schema:
+The current schema audit retired some fields rather than assigning them to a
+domain. In the actual active simplified schema:
 
 - **`termRole` on bridges** is compatibility-only and removed before current authoring validation.
+- **`generativeAssistance`** is retired. It is rejected at the current
+  authoring/storage boundary and is not folded back into a new document.
 - JSON-LD and audit-only client details are not stored in the current puzzle
-  document; attribution is represented by `provenance`.
+  document. JSON-LD remains an explicit interchange format; attribution in the
+  current document is represented by `provenance`, while invocation scope,
+  role, and date belong to the D1 assistance-stamp audit.
+- The former client-attribution array was folded into `provenance` during the
+  completed corpus migration. It is not read or written by current authoring.
 - **`color` on clusters**, **`via` on related-puzzle entries**, and **`conceptId` on bridges** are still represented by the active schema and are therefore retained in the appropriate projection. They may be candidates for a later, separately reviewed ownership change.
 
 This distinction matters: a domain partition should not silently become a schema deletion.
