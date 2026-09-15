@@ -21,38 +21,11 @@ export const AUTHORING_READ_DOMAINS = Object.freeze([
 ]);
 export const AUTHORING_WRITE_DOMAINS = Object.freeze(["content", "pedagogy"]);
 
-const PEDAGOGY_ROOT_FIELDS = new Set([
-  "categories",
-  "subcategories",
-  "tags",
-  "level",
-  "lenses",
-  "lensMode",
-  "preSolve",
-  "relatedPuzzles",
-  "learningIntroduction",
-  "creator",
-  "license",
-  "derivedFrom",
-  "dateCreated",
-  "dateModified",
-  "language",
-  "version"
-]);
-
-// These are relationship annotations layered onto a bridge's authored core.
-// The agent-facing pedagogy projection keeps the familiar `bridges` shape but
-// contains only identity plus these fields. The storage/domain boundary does
-// not duplicate bridge facts or cluster membership.
-const PEDAGOGY_BRIDGE_FIELDS = new Set([
-  "conceptId",
-  "relationKind",
-  "direction",
-  "idealTerms"
-]);
-
-const PROTECTED_ROOT_FIELDS = new Set([
-  "provenance",
+// These values describe the repository state around a document, not the
+// document an agent is being asked to author.  The portable JSON-LD adapter
+// still knows how to read/write their interchange names, but current
+// simplified authoring never stores them inline.
+export const SYSTEM_ROOT_FIELDS = new Set([
   "schemaVersion",
   "publicationState",
   "validatedAt",
@@ -74,7 +47,50 @@ const PROTECTED_ROOT_FIELDS = new Set([
   "validation",
   "workingCopyHistoryCount",
   "installedContentHash",
-  "baseCommitSha"
+  "baseCommitSha",
+  "publishedAt",
+  "publishedBy",
+  "withdrawnAt",
+  "cuedForFreezeAt",
+  "cuedForFreezeBy",
+  "lastAgentReviewedAt",
+  "lastHumanReviewedAt",
+  // JSON-LD publication aliases for D1's row-owned lifecycle values.
+  "dateCreated",
+  "dateModified",
+  "version"
+]);
+
+const PEDAGOGY_ROOT_FIELDS = new Set([
+  "categories",
+  "subcategories",
+  "tags",
+  "level",
+  "lenses",
+  "lensMode",
+  "preSolve",
+  "relatedPuzzles",
+  "learningIntroduction",
+  "creator",
+  "license",
+  "derivedFrom",
+  "language"
+]);
+
+// These are relationship annotations layered onto a bridge's authored core.
+// The agent-facing pedagogy projection keeps the familiar `bridges` shape but
+// contains only identity plus these fields. The storage/domain boundary does
+// not duplicate bridge facts or cluster membership.
+const PEDAGOGY_BRIDGE_FIELDS = new Set([
+  "conceptId",
+  "relationKind",
+  "direction",
+  "idealTerms"
+]);
+
+const PROTECTED_ROOT_FIELDS = new Set([
+  "provenance",
+  ...SYSTEM_ROOT_FIELDS
 ]);
 
 const DERIVED_ROOT_FIELDS = new Set(["large"]);
@@ -93,6 +109,32 @@ function assertObject(value, label) {
 
 function hasOwn(value, key) {
   return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+/**
+ * Remove repository-owned metadata from a simplified authoring document.
+ *
+ * This is deliberately a compatibility fold rather than a JSON-LD fold:
+ * JSON-LD remains allowed to carry its own publication metadata at the
+ * explicit interchange boundary.  Old drafts and generated puzzle files can
+ * therefore be read once, while newly saved authoring documents cannot make
+ * an agent reproduce timestamps or revision tokens.
+ */
+export function stripSystemAuthoredMetadata(document) {
+  if (!isObject(document) || Object.hasOwn(document, "@context")) return document;
+  let next = document;
+  for (const key of SYSTEM_ROOT_FIELDS) {
+    if (!hasOwn(document, key)) continue;
+    if (next === document) next = { ...document };
+    delete next[key];
+  }
+  const introduction = document.learningIntroduction;
+  if (isObject(introduction) && hasOwn(introduction, "revision")) {
+    if (next === document) next = { ...document };
+    next.learningIntroduction = { ...introduction };
+    delete next.learningIntroduction.revision;
+  }
+  return next;
 }
 
 function bridgeIdentity(bridge) {
@@ -188,11 +230,12 @@ function assembleBridges(contentBridges, pedagogyBridges) {
  */
 export function partitionAuthoredDocument(document, { system = {} } = {}) {
   assertObject(document, "Authored document");
+  const authored = stripSystemAuthoredMetadata(document);
   const content = {};
   const pedagogy = {};
   let provenance;
 
-  for (const [key, value] of Object.entries(document)) {
+  for (const [key, value] of Object.entries(authored)) {
     if (key === "bridges") continue;
     if (key === "provenance") {
       provenance = clone(value);
@@ -200,14 +243,13 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
       pedagogy[key] = clone(value);
     } else {
       // Keep unknown authored fields in content for forward compatibility.
-      // Explicitly-known protected fields are not expected in a simplified
-      // document, but preserving them here avoids silent data loss when old
-      // stored rows are read before their next canonical save.
+      // Explicitly-known system fields were stripped above and can never be
+      // smuggled into a domain projection.
       content[key] = clone(value);
     }
   }
 
-  const bridges = splitBridges(document.bridges);
+  const bridges = splitBridges(authored.bridges);
   if (bridges.content !== undefined) content.bridges = bridges.content;
   if (bridges.pedagogy) pedagogy.bridges = bridges.pedagogy;
 
@@ -244,11 +286,11 @@ export function assembleAuthoredDocument({
   } else {
     delete document.provenance;
   }
-  return document;
+  return stripSystemAuthoredMetadata(document);
 }
 
 function publicDomain(value) {
-  const result = clone(value) || {};
+  const result = stripSystemAuthoredMetadata(clone(value) || {}) || {};
   // `large` is derived at the canonical boundary and is never useful in an
   // agent's context or write payload.
   delete result.large;
@@ -256,6 +298,9 @@ function publicDomain(value) {
   // metadata. Keep them out of focused domain projections even when an old
   // stored row happens to contain them inside its document blob.
   for (const key of PROTECTED_ROOT_FIELDS) delete result[key];
+  if (isObject(result.learningIntroduction)) {
+    delete result.learningIntroduction.revision;
+  }
   return result;
 }
 
@@ -277,7 +322,7 @@ function publicPedagogyDomain(value) {
  */
 export function projectAuthoredDocument(document, domain = "complete") {
   if (domain === "complete") {
-    return { domain, document: clone(document) };
+    return { domain, document: stripSystemAuthoredMetadata(clone(document)) };
   }
   if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
     throw new Error(`Unknown agent authoring domain: ${domain}`);
@@ -308,6 +353,14 @@ function assertDomainPayload(domain, incoming) {
     if (domain === "pedagogy" && key !== "bridges" && !PEDAGOGY_ROOT_FIELDS.has(key)) {
       throw new Error(`${key} belongs to the content domain`);
     }
+  }
+
+  if (isObject(incoming.learningIntroduction) &&
+      hasOwn(incoming.learningIntroduction, "revision")) {
+    throw new Error(
+      "learningIntroduction.revision is system-managed and cannot be written through " +
+      `the ${domain} domain`
+    );
   }
 
   if (domain === "content" && Array.isArray(incoming.bridges)) {
@@ -446,10 +499,12 @@ export default {
   AUTHORING_DOMAINS,
   AUTHORING_READ_DOMAINS,
   AUTHORING_WRITE_DOMAINS,
+  SYSTEM_ROOT_FIELDS,
   partitionAuthoredDocument,
   assembleAuthoredDocument,
   projectAuthoredDocument,
   applyAuthoredDomain,
   storedDomainDocuments,
-  assembleStoredDomainDocuments
+  assembleStoredDomainDocuments,
+  stripSystemAuthoredMetadata
 };

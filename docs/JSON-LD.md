@@ -217,7 +217,8 @@ seeds, lenses, lens targets, ideal terms, and catalogue entries.
 
 ## Provenance and extensions
 
-The puzzle adapter preserves these publication fields when present:
+The puzzle adapter preserves these explicit-interchange publication fields
+when present:
 
 ```js
 creator
@@ -229,6 +230,12 @@ language
 version
 provenance
 ```
+
+`dateCreated`, `dateModified`, and `version` are intentionally not part of the
+simplified authoring/storage document. When a future repository-backed export
+has D1 lifecycle metadata available, the adapter may synthesize their portable
+values; an import into the current authoring workflow does not ask an agent to
+reproduce them.
 
 `provenance` is the optional two-axis authoring record and the current model
 of record for authoring attribution
@@ -267,7 +274,9 @@ the future authoring portal should call.
 - Installing portable catalogue bundles into the repository in one command.
 - Packaging binary assets in a ZIP-like `.ccpuzzle` container.
 - A browser authoring workspace and IndexedDB draft repository.
-- Immutable published revisions and database-backed identity.
+- Durable published snapshot archives and database-backed portable identity;
+  current-row OCC revisions remain, while retained snapshot history is
+  disposable and purged by migration.
 - JSON-LD expansion, RDF graph processing, SHACL, or a triple store.
 
 These are compatible with the v1 boundary but are not required to begin
@@ -285,9 +294,10 @@ for itself outside the genuinely-portable-interchange case. Canonical files
 are `content/puzzles/*.ccpuzzle.json` (simplified format) now; all 81
 puzzles that had JSON-LD canonical files were mechanically migrated over
 losslessly, and the small number of gaps the migration surfaced (a `seeAlso`
-info-link shape, `learningIntroduction.revision`, non-string `version`
-values, and cluster term order not always being seeds-then-floatingTerms)
-were folded into the simplified schema rather than dropped.
+info-link shape and cluster term order not always being
+seeds-then-floatingTerms) were folded into the simplified schema rather than
+dropped. Repository-owned lesson revisions and publication version values are
+now derived or retained only at the explicit JSON-LD boundary.
 
 Any later JSON-LD puzzle files are legacy repository artifacts rather than a
 second source of truth. `npm run content:canonicalize` converts them to the

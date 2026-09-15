@@ -179,8 +179,7 @@
         "bodied-practice",
         "holy-places"
       ],
-      "fact": "The hajj is five days of prescribed bodily rites -- circling, standing, walking -- culminating at one built shrine, the Kaaba.",
-      "termRole": "reference"
+      "fact": "The hajj is five days of prescribed bodily rites -- circling, standing, walking -- culminating at one built shrine, the Kaaba."
     },
     {
       "id": "temple-feast",
@@ -189,8 +188,7 @@
         "holy-places",
         "sacred-time"
       ],
-      "fact": "Feasts unfold at shrines on set calendar days; the gathering keeps sacred time at a sacred place.",
-      "termRole": "reference"
+      "fact": "Feasts unfold at shrines on set calendar days; the gathering keeps sacred time at a sacred place."
     }
   ],
   "lenses": [

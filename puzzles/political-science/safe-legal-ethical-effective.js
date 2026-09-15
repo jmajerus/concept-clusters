@@ -237,7 +237,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "A documented internal plan for presenting the ethics guidance publicly in terms very different from its operative legal effect."
       },
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": [
         "Safe, Legal, Ethical, Effective",
@@ -260,7 +259,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "Stephen Behnke",
@@ -288,7 +286,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "PENS Task Force",
@@ -354,8 +351,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.democracynow.org/2023/9/5/doing_harm_roy_j_eidelson_psychology",
         "label": "Democracy Now!: Roy Eidelson on Doing Harm"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "ai",

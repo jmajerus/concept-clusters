@@ -194,7 +194,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "syuzhet",
@@ -263,8 +262,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.signosemio.com/pages/genette/narratology.php",
         "label": "Signo: Genette's narratology"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "humanPrimary",
@@ -277,6 +275,5 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "language": "en",
-  "version": 1
+  "language": "en"
 });

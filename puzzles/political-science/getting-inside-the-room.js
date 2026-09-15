@@ -276,7 +276,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "Mother's Day Proclamation",
@@ -304,7 +303,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "costume protest",
@@ -327,7 +325,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Deliberately accepting arrest as a form of political speech, rather than an unwanted cost of protest -- the shared premise linking a lone activist's hearing disruption to a sit-in involving hundreds."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "red-stained hands",

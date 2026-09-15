@@ -259,7 +259,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Genesis and engine share one fuel gauge: only where sea surface temperatures reach roughly 27 °C can evaporation feed the latent-heat engine, and a storm fades when it leaves that warm water behind.",
       "info": "A label for the shared constraint, not a formal term: both clusters are describing one relationship — the ocean's warmth is simultaneously the entry requirement and the running fuel.",
-      "termRole": "connector",
       "idealTerms": [
         "warm sea surface temperature",
         "latent heat"
@@ -274,7 +273,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Latent heat released in the eyewall forces air to sink gently over the center; that subsidence warms, dries, and clears the eye — the engine building the most famous feature of the storm.",
       "info": "The mechanism link: this bridge is how the engine's heating shows up as a physical structure — condensation aloft forces gentle sinking at the center.",
-      "termRole": "connector",
       "idealTerms": [
         "eye",
         "latent heat"
@@ -289,7 +287,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "In an eyewall replacement cycle, an outer ring of storms chokes off the inner eyewall; the old eyewall collapses and is replaced, winds briefly weaken, and the storm often rebounds stronger.",
       "info": "The event link: this bridge names the process by which anatomy and intensity change together during an eyewall replacement cycle.",
-      "termRole": "connector",
       "idealTerms": [
         "eyewall",
         "eyewall replacement cycle"

@@ -271,7 +271,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Feeding and caring for civilians in a defeated or enemy nation, treated as a direct act of peacemaking rather than merely charity -- the shared practice underneath both organizations' World War I-era pacifism."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         null,
@@ -294,7 +293,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         null,
@@ -322,7 +320,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "the 1947 Nobel Peace Prize",

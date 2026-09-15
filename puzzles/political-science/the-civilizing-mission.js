@@ -251,7 +251,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "civilized nations",
@@ -274,7 +273,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "mission civilisatrice",
@@ -302,7 +300,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "monadic peace",

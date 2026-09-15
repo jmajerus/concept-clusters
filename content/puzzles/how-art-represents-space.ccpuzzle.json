@@ -161,7 +161,6 @@
         "cluster-stack-and-layer"
       ],
       "fact": "Illusion links geometric systems with relational cues; both use visual patterns to trick the brain into seeing depth where there is only a flat surface.",
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": {
         "cluster-project-depth": "linear perspective",
@@ -176,7 +175,6 @@
         "cluster-emphasize-surface"
       ],
       "fact": "Organization connects composite views with surface-oriented art; both prioritize a structured, often symbolic arrangement of elements over a naturalistic \"window\" into depth.",
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": {
         "cluster-multiple-viewpoints": "simultaneous view",

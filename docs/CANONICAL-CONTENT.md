@@ -17,7 +17,7 @@ There are two deliberately different paths:
 - **Read-time compatibility** may project an older document into the current
   shape in memory (for example, folding legacy links or category titles). It
   is pure and idempotent: it does not write D1 or Git, remove source data, or
-  rewrite immutable revisions. A read can report that an explicit save is
+  mutate retained snapshot rows. A read can report that an explicit save is
   needed to persist the folded form.
 - **Write-time canonicalization** runs the same safe transforms before a
   draft or current published row is stored. Shape conversion is followed by

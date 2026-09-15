@@ -26,7 +26,10 @@ import {
   canonicalizePuzzleCategoryReferences,
   categoryTitleFor
 } from "../puzzles/categories.js";
-import { projectAuthoredDocument } from "./authoringDomains.js";
+import {
+  projectAuthoredDocument,
+  stripSystemAuthoredMetadata
+} from "./authoringDomains.js";
 
 export { createPuzzleSkeleton };
 
@@ -54,13 +57,13 @@ function omitBlankOptionalLearningIntroductionFields(document) {
 // Link/citation folding + provenance sync. Order: provenance first so a
 // parseable credit can seed human contributors before other folds clone.
 export function canonicalizeAuthoredDocumentFields(document) {
-  return omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
+  return stripSystemAuthoredMetadata(omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
       canonicalizeBridgeTermRoles(
         canonicalizeDocumentProvenance(document)
       )
     )
-  ));
+  )));
 }
 
 export function documentHasRetiredBridgeTermRole(document) {
@@ -336,7 +339,7 @@ export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
 const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
-    "This stored draft still uses legacy link, citation, provenance, or bridge-role fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, and unclassified bridge terms). The folded form is already what authoring tools show; storage does not change until you save."
+    "This stored draft still uses legacy link, citation, provenance, bridge-role, or repository-metadata fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, unclassified bridge terms, and infrastructure-owned lifecycle metadata outside the document). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
 const SAVE_RENAMED_CATEGORIES_FLAG = Object.freeze({

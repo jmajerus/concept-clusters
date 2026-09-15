@@ -443,6 +443,36 @@ export async function run() {
     assert.equal(document.language, "en");
   }
 
+  // Repository-owned dates, version, and lesson-progress revision are not
+  // part of the authoring contract. Legacy values are accepted only by the
+  // compatibility fold and disappear before the simplified document is
+  // materialized.
+  {
+    const legacyMetadata = validPuzzle({
+      dateCreated: "2026-01-01",
+      dateModified: "2026-01-02",
+      version: 7,
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "Lesson." },
+        revision: 4
+      }
+    });
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(legacyMetadata).success, false);
+    const { puzzle, errors } = puzzleFromAuthoredDocument(legacyMetadata);
+    assert.deepEqual(errors, []);
+    assert.equal(puzzle.dateCreated, undefined);
+    assert.equal(puzzle.dateModified, undefined);
+    assert.equal(puzzle.version, undefined);
+    assert.equal(puzzle.learningIntroduction.revision, undefined);
+    const normalized = normalizeAuthoredPuzzleDocument(legacyMetadata);
+    assert.deepEqual(normalized.errors, []);
+    assert.equal(normalized.document.dateCreated, undefined);
+    assert.equal(normalized.document.dateModified, undefined);
+    assert.equal(normalized.document.version, undefined);
+    assert.equal(normalized.document.learningIntroduction.revision, undefined);
+  }
+
   // Leftover link/sources names are a load-time fold, not the write schema.
   {
     const leftover = validPuzzle({

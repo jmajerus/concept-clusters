@@ -320,8 +320,7 @@ export default definePuzzle(import.meta.url, {
             "href": "wiki:Gonadotropin"
           }
         ]
-      },
-      "termRole": "reference"
+      }
     },
     {
       "id": "human-chorionic-gonadotropin",
@@ -339,7 +338,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": [
         "corpus luteum",
         "placenta"

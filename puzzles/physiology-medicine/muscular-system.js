@@ -294,7 +294,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Sarcoplasmic calcium release links command to machine because the muscle action potential opens calcium stores, and calcium-bound troponin exposes actin for cross-bridges.",
       "info": "Bulk calcium release turning an electrical command into exposed actin sites.",
-      "termRole": "connector",
       "idealTerms": [
         "muscle action potential",
         "calcium ions"
@@ -316,7 +315,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": [
         "myosin",
         "ATP"
@@ -331,7 +329,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The oxygen reserve links fiber construction to fuel choice because myoglobin's stored oxygen feeds the oxidative phosphorylation slow fibers live on.",
       "info": "Stored oxygen linking fiber construction to fuel choice.",
-      "termRole": "connector",
       "idealTerms": [
         "myoglobin",
         "oxidative phosphorylation"

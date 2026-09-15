@@ -287,7 +287,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "ideal-model": "open-loop gain",
@@ -310,7 +309,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "contrast",
       "idealTerms": {
         "comparison-and-switching": "comparator"

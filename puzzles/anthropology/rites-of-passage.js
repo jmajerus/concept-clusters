@@ -143,7 +143,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Van Gennep argued that a complete scheme theoretically includes all three -- preliminal rites of separation, liminal (threshold) rites of transition, and postliminal rites of incorporation -- even though a given ceremony may emphasize one stage more than the others.",
       "info": "Birth, initiation, marriage, and funeral ceremonies all move a person between social worlds; the three-part sequence is the shared pattern, not a claim that every performance spends equal time on each stage.",
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "preliminal rites",

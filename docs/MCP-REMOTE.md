@@ -62,7 +62,9 @@ discover nested authoring fields such as `bridges[].relationKind` and
 Bridge terms are ordinary authored concepts; there is no separate role field.
 Attribution uses optional puzzle-level `provenance`. JSON-LD remains available
 through the explicit interchange CLI, but current draft inputs and D1 rows use
-the simplified shape directly.
+the simplified shape directly. Repository-owned timestamps, document
+revisions, hashes, status, and lesson-progress fingerprints are generated or
+stored by infrastructure rather than supplied by an agent.
 
 The guidance and schema tools accept an optional `phase`: `core`, `review`,
 `pedagogy`, `publication`, or `complete`. Draft reads and writes instead accept

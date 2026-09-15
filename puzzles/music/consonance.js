@@ -163,7 +163,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The acoustic reason perfect intervals sound maximally fused, not just a label for it."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "harmonicity",
@@ -181,7 +180,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Sensory roughness shows up even on the 'consonant' side of the classification, without contradicting it."
       },
-      "termRole": "connector",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "beating",

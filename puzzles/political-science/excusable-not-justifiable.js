@@ -207,7 +207,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Not a term from any single source, but a name for the tone linking Augustine's grief-laden permission to the ethics-of-excuse reading that follows it: an obligation carried out with reluctance, never with triumph."
       },
-      "termRole": "connector",
       "relationKind": "continuity",
       "direction": {
         "kind": "through",

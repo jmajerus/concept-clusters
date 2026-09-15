@@ -191,7 +191,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic"
     },
     {
@@ -210,7 +209,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "direction": {
         "kind": "through",
@@ -234,7 +232,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting"
     }
   ],

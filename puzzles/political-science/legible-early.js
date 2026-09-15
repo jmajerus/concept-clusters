@@ -145,7 +145,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "dehumanization",
@@ -173,7 +172,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         null,
@@ -201,7 +199,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "contrast",
       "idealTerms": [
         "organization",

@@ -100,9 +100,14 @@ optional, as are:
   `{text?, links?}` — bibliography stays on the puzzle.
 - `provenance` (optional structured authoring attribution; see
   `get_authoring_guidance` for when to set this).
-- Provenance pass-through: `creator`, `license`, `derivedFrom`,
-  `dateCreated`, `dateModified`, `language`, `version` -- plain strings,
-  carried through unchanged.
+- Optional publication metadata: `creator`, `license`, `derivedFrom`, and
+  `language`. These are editorial fields, not repository lifecycle state.
+
+The authoring document does not contain `dateCreated`, `dateModified`,
+`version`, or a learning-introduction `revision`. Timestamps, revision tokens,
+hashes, status, and lesson-progress invalidation keys are owned and generated
+by infrastructure (D1 row fields or derived runtime values). JSON-LD export
+may represent the portable equivalents at its explicit interchange boundary.
 
 Two to six `clusters`, zero or more `bridges`.
 

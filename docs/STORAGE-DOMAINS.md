@@ -1,6 +1,6 @@
 # Storage Domains: Write-Domain Scoping in Concept Clusters
 
-*Status: implemented compatibility-preserving first slice (MCP authoring contract v1.13.0). The final sections retain the further partitioning ideas that are not yet implemented.*
+*Status: implemented compatibility-preserving first slice (MCP authoring contract v1.14.0). The final sections retain the further partitioning ideas that are not yet implemented.*
 
 This document describes how the Concept Clusters authoring system decomposes puzzle documents into ownership domains, how those domains map to storage, and what the agent-facing contract looks like in practice. It is the companion implementation document to [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md), which covers the session provenance capture side of the same design.
 
@@ -26,11 +26,11 @@ The puzzle's educational core: `id`, `title`, `category`, `info`, `clusters`, an
 Unknown authored root fields are retained here for forward compatibility. That keeps a new field from being silently discarded before the ownership map is deliberately updated.
 
 ### Pedagogy
-Structural and discovery annotations layered on top of content: bridge relationship classifications (`conceptId`, `relationKind`, `direction`, `idealTerms`), lenses and lens mode, learning introductions, related puzzles, category membership metadata (`categories`, `subcategories`, `tags`, `level`), and the current publication/discovery metadata fields. These require judgment but can be handled as a separate pass from the core puzzle.
+Structural and discovery annotations layered on top of content: bridge relationship classifications (`conceptId`, `relationKind`, `direction`, `idealTerms`), lenses and lens mode, learning introductions, related puzzles, category membership metadata (`categories`, `subcategories`, `tags`, `level`), and editorial publication metadata. These require judgment but can be handled as a separate pass from the core puzzle. Repository lifecycle metadata is not part of this domain.
 
 Separating pedagogy from content allows a focused annotation pass — potentially by a different agent or a different model configuration — without touching the content domain.
 
-Fields: `categories`, `subcategories`, `tags`, `level`, `lenses`, `lensMode`, `preSolve`, `relatedPuzzles`, `learningIntroduction`, publication/discovery metadata, and the bridge annotation fields above. The legacy human-owned `learningIntroduction.credit` value is protected: it is omitted from the focused pedagogy projection and remains under the provenance/editor boundary.
+Fields: `categories`, `subcategories`, `tags`, `level`, `lenses`, `lensMode`, `preSolve`, `relatedPuzzles`, `learningIntroduction`, editorial publication/discovery metadata (`creator`, `license`, `derivedFrom`, `language`), and the bridge annotation fields above. The legacy human-owned `learningIntroduction.credit` value is protected: it is omitted from the focused pedagogy projection and remains under the provenance/editor boundary.
 
 ### Provenance
 Who contributed to this puzzle. The current document shape is an object with `collaboration` and an ordered `contributors` array; normalization may add contributor kind and observed model settings. This domain is protected from focused agent writes. Recognized MCP clients can be stamped by the server, while author-owned attribution remains available through the existing provenance/editor paths.
@@ -40,9 +40,12 @@ For the limits of human-controlled provenance and the path toward automated capt
 Fields: `provenance`.
 
 ### System
-Fields the infrastructure owns entirely: authenticated owner, draft id, revision, status, hashes, timestamps, validation state, checkout/publish metadata, and other repository envelope values. The derived `large` rendering flag is also omitted from focused MCP documents. Agents receive the minimum draft envelope needed to address a scoped save (`draftId` and `revision`), not the full system record.
+Fields the infrastructure owns entirely: authenticated owner, draft id, revision, status, hashes, timestamps, validation state, checkout/publish metadata, and other repository envelope values. This also includes the portable aliases `dateCreated`, `dateModified`, and `version`, plus the learning-introduction progress invalidation key. The derived `large` rendering flag is also omitted from focused MCP documents. Agents receive the minimum draft envelope needed to address a scoped save (`draftId` and `revision`), not the full system record.
 
-These values currently live in D1 columns and the draft response envelope rather than a `system_json` document column.
+These values currently live in D1 columns, the draft response envelope, or a
+derived runtime fingerprint rather than a `system_json` document column. Core
+queryable lifecycle values stay in dedicated columns; a JSON blob is not
+needed merely to avoid putting them in the puzzle document.
 
 ---
 
@@ -80,7 +83,7 @@ In neither case does the agent receive `provenance` or `system` fields. They are
 
 ### Merge semantics
 
-The infrastructure combines the stored content, pedagogy, and provenance projections into a complete document at the draft repository read boundary. The system domain remains the row envelope. A complete materialized document is then written on create/save/pop and is the artifact passed to validation and publication. Writers that update a complete snapshot outside the draft repository, such as category-rename propagation, must refresh all three projections in the same update so a later read cannot reintroduce stale sidecar data.
+The infrastructure combines the stored content, pedagogy, and provenance projections into a complete document at the draft repository read boundary. The system domain remains the row envelope; it is never reintroduced into the assembled authoring document. A complete materialized document is then written on create/save/pop and is the artifact passed to validation and publication. Writers that update a complete snapshot outside the draft repository, such as category-rename propagation, must refresh all three projections in the same update so a later read cannot reintroduce stale sidecar data.
 
 Published puzzle rows are intentionally still complete snapshots. The current Freeze and rendering paths read `published_documents.document`; they do not need to know about mutable draft projections. This keeps the domain upgrade out of the player and Freeze bundle format while preserving the option to make published reads assemble later.
 
@@ -121,7 +124,7 @@ The agent's task is unambiguous: produce good educational content within this st
 
 ### Pedagogy domain (annotation pass)
 
-The agent receives the pedagogy projection alongside content as read-only `context`. It can classify bridge relationships, set directions and ideal terms, author lenses or learning introductions, and update the grouped discovery metadata. It does not send content fields back through this scoped write.
+The agent receives the pedagogy projection alongside content as read-only `context`. It can classify bridge relationships, set directions and ideal terms, author lenses or learning introductions, and update the grouped discovery metadata. It does not send content fields back through this scoped write, and it does not supply repository dates, revisions, or cache keys.
 
 ### What is absent by construction
 

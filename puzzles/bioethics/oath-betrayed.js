@@ -152,7 +152,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Monitoring a detainee's physiological responses to refine an interrogation method is not passive medical oversight — it is using professional knowledge to optimize harm, which PHR identifies as the specific act that makes physician participation a Nuremberg Code violation, not merely a Declaration of Tokyo violation.",
       "info": "The framing PHR uses to connect active physiological monitoring to the Nuremberg Code: measuring harm to adjust technique crosses from participation into human subject research.",
-      "termRole": "connector",
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",
@@ -238,8 +237,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.wma.net/policies-post/wma-declaration-of-tokyo-guidelines-for-physicians-concerning-torture-and-other-cruel-inhuman-or-degrading-treatment-or-punishment-in-relation-to-detention-and-imprisonment/",
         "label": "World Medical Association: Declaration of Tokyo"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "ai",

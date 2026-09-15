@@ -288,7 +288,6 @@
       "info": {
         "text": "Johnson's name for the circular assumption that a state's violence is presumptively reluctant while its enemy's violence is presumptively sadistic -- a premise that does the same discrediting work in language choice and in dehumanization."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": {
         "massacre-vs-blast": "the massacre/slaughter gap",
@@ -306,7 +305,6 @@
       "info": {
         "text": "Johnson's side-by-side count of agency language in coverage of Russia's invasion of Ukraine versus Israel's invasion of Gaza -- the evidence base for both the vanishing-agency pattern in headlines and the timing of the IDF-confirmation rule."
       },
-      "termRole": "connector",
       "relationKind": "evaluation",
       "idealTerms": {
         "massacre-vs-blast": "blast emerges",
@@ -332,7 +330,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "isis-ification-of-hamas": "the moral plane of acceptable parties",

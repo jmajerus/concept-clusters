@@ -142,7 +142,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": {
         "generalized-reciprocity": "close kin",

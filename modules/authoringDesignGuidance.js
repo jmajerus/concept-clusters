@@ -73,8 +73,11 @@ three are valid cluster colors. Keep the complete board to at most 25 total
 nodes (all cluster terms plus bridges). Size by genuine distinct terms; do not
 drop a distinct term or bridge to fit a rendering threshold. If the material
 needs more than 25 nodes, split it into relatedPuzzles rather than compressing
-the lesson onto one board. Bridge terms are ordinary authored concepts; there
-is no separate pedagogical-role field.
+the lesson onto one board. Bridge terms are ordinary authored concepts; there is
+no separate pedagogical-role field.
+
+Repository-owned timestamps, revision numbers, and cache-invalidation keys
+are not authoring fields; the server derives them.
 
 These are validity limits for a completed document, not composition targets.
 Before mapping the material, do not choose or announce a cluster count,
@@ -470,6 +473,8 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   body stored as one line with \`\\n\` tokens renders as a single paragraph.
   learningIntroduction.credit is a human-owned lesson byline; leave it unset.
   Do not put credit in content.text.
+  Never add dateCreated, dateModified, version, or
+  learningIntroduction.revision; those are infrastructure-derived values.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
   they do not have to be authored together. It is normal to add or revise a
   learning introduction long after the lenses exist; preserve those lenses
@@ -478,14 +483,15 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
 const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 
 - Add only useful discovery and stewardship metadata: tags, secondary category
-  assignments, level, related puzzles, attribution, licensing, language, dates,
-  and version. Most are optional; omission is better than filler.
+  assignments, level, related puzzles, attribution, licensing, and language.
+  Most are optional; omission is better than filler. The server supplies
+  timestamps and revision metadata.
 - Keep provenance optional — the server may already have stamped the MCP host;
   agents can send bare contributor names and kinds/mode are inferred. Do not write
   learningIntroduction.credit; the lesson byline is derived from provenance
   (humans override collaboration and may name a reviewer on the drafts page).
-  Do not invent a reviewer name. Do not treat dates,
-  roles, or per-scope assistance entries as required publication metadata.
+  Do not invent a reviewer name. Do not treat roles or per-scope assistance
+  entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse

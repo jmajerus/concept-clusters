@@ -109,8 +109,7 @@ export default definePuzzle(import.meta.url, {
         0,
         1
       ],
-      "fact": "A cloister is a void subtracted from a monastery's mass that works as a walled outdoor room, open to the sky yet fully enclosed.",
-      "termRole": "reference"
+      "fact": "A cloister is a void subtracted from a monastery's mass that works as a walled outdoor room, open to the sky yet fully enclosed."
     },
     {
       "id": "portal",
@@ -119,8 +118,7 @@ export default definePuzzle(import.meta.url, {
         0,
         1
       ],
-      "fact": "A portal is a void cut through solid wall mass that frames the moment of crossing from outside to inside.",
-      "termRole": "reference"
+      "fact": "A portal is a void cut through solid wall mass that frames the moment of crossing from outside to inside."
     }
   ],
   "lenses": [

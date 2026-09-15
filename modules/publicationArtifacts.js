@@ -1,3 +1,5 @@
+import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
+
 function dirname(path) {
   const index = path.lastIndexOf("/");
   return index < 0 ? "." : path.slice(0, index) || ".";
@@ -34,10 +36,11 @@ export function generatedPuzzleModule(
     "modules/puzzleManifest.js"
   );
   if (!manifestImport.startsWith(".")) manifestImport = `./${manifestImport}`;
+  const authoredPuzzle = stripSystemAuthoredMetadata(puzzle);
   return `// Generated from ${canonicalRelativePath}.\n` +
     "// Edit the canonical simplified source rather than editing this file directly.\n\n" +
     `import { definePuzzle } from "${manifestImport}";\n\n` +
-    `export default definePuzzle(import.meta.url, ${JSON.stringify(puzzle, null, 2)});\n`;
+    `export default definePuzzle(import.meta.url, ${JSON.stringify(authoredPuzzle, null, 2)});\n`;
 }
 
 // A brand-new catalogues/<id>.js file's full source, in the same

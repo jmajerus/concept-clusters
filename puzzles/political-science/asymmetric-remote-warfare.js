@@ -302,7 +302,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "metadata",
@@ -330,7 +329,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation"
     },
     {
@@ -349,7 +347,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "AUMF",
@@ -435,8 +432,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.washingtonpost.com/world/national-security/plan-for-hunting-terrorists-signals-us-intends-to-keep-adding-names-to-kill-lists/2012/10/23/4789b2ae-18b3-11e2-a55c-39408fbe6a4b_story.html",
         "label": "Greg Miller, \"Plan for hunting terrorists signals U.S. intends to keep adding names to kill lists\" (The Washington Post, 2012)"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "ai",

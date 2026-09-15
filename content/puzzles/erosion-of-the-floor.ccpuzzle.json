@@ -242,7 +242,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "contrast",
       "idealTerms": {
         "legal-floor": "medical neutrality",
@@ -265,7 +264,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": {
         "the-crime-of-crimes": "genocide",
@@ -288,7 +286,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": {
         "patterns-of-erosion": "explosive weapons in populated areas",

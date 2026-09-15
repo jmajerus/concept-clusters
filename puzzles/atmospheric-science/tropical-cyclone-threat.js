@@ -173,7 +173,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Which hazard dominates depends on the track: a storm's forward speed sets rainfall totals, the shape of the coast sets the surge, and mountains can wring out record rain — the same cyclone is a different threat on different coasts.",
       "info": "The exposure link: this bridge is why identical categories land differently — track, speed, and coastline decide which hazard writes the headline.",
-      "termRole": "connector",
       "idealTerms": [
         "landfall",
         "storm surge"
@@ -188,7 +187,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Because the steering flow itself can shift, a storm's future path is a probability, not a promise — the forecast cone draws that uncertainty so people know whether they are inside it.",
       "info": "The uncertainty link: this bridge is why forecasts speak in cones rather than lines — the atmosphere that steers the storm cannot be known perfectly in advance.",
-      "termRole": "connector",
       "idealTerms": [
         "steering flow",
         "forecast cone"

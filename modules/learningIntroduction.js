@@ -42,16 +42,32 @@ export function withDecodedLearningMarkdown(document) {
   };
 }
 
+// Reading-progress invalidation is derived from the lesson content rather
+// than maintained as an authored field. This keeps the cache key useful to
+// the player without asking an authoring agent to remember to bump metadata.
+export function learningIntroductionFingerprint(puzzle) {
+  const introduction = puzzle?.learningIntroduction;
+  if (!introduction) return "none";
+  const { revision: _legacyRevision, ...authoredIntroduction } = introduction;
+  const serialized = JSON.stringify(authoredIntroduction);
+  let hash = 2166136261;
+  for (let index = 0; index < serialized.length; index += 1) {
+    hash ^= serialized.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `content-${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+
 export function normalizedLearningIntroduction(puzzle) {
   const introduction = puzzle?.learningIntroduction;
   if (!introduction) return null;
+  const { revision: _legacyRevision, ...authoredIntroduction } = introduction;
   return {
-    ...introduction,
+    ...authoredIntroduction,
     requirement: LEARNING_REQUIREMENTS.has(introduction.requirement)
       ? introduction.requirement
       : "optional",
-    title: introduction.title || "Before You Begin",
-    revision: String(introduction.revision ?? 1)
+    title: introduction.title || "Before You Begin"
   };
 }
 

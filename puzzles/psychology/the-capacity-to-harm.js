@@ -336,7 +336,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation"
     },
     {
@@ -348,7 +347,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Hedges describes the intoxicating rush of combat as what draws people toward war before it begins; Grossman documents the same exhilaration as the first stage in the psychological cost sequence after a kill. The same experience functions as bait on one side of the threshold and as trap on the other — the seductive pull and the engineered override share this one emotional hinge.",
       "info": "The same intense emotional high that makes war feel meaningful before it starts and extracts its psychological cost once it is underway.",
-      "termRole": "connector",
       "relationKind": "cross-cutting"
     }
   ],
@@ -459,8 +457,7 @@ export default definePuzzle(import.meta.url, {
     "content": {
       "mediaType": "text/markdown",
       "text": "Four researchers spent careers on a problem that feels like it should have a simple answer: how do ordinary people come to commit, or comply with, organized violence? The uncomfortable finding, across all four bodies of work, is that extraordinary evil rarely requires extraordinary people.\r\n\r\nDave Grossman documented that human beings carry a deep instinctive resistance to killing their own kind — and catalogued the deliberate training machinery twentieth-century militaries built to override it. Christopher Browning traced how ordinary reservists, given an explicit chance to refuse, mostly didn't — and how each subsequent act became easier not because conscience dissolved but because the resistance refusing would have required had already worn down. Albert Bandura named the cognitive moves that let people commit harmful acts without experiencing themselves as having abandoned their own moral standards. Chris Hedges, drawing on fifteen years as a war correspondent, added something the other three don't account for: before any of those mechanisms engage, war has to be made to feel desirable — and societies are very good at that.\r\n\r\nThese four frameworks are usually taught separately. This puzzle asks what they look like side by side."
-    },
-    "revision": 1
+    }
   },
   "provenance": {
     "collaboration": "ai",

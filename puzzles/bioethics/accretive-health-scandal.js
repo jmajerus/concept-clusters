@@ -281,7 +281,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Business-associate status wasn't automatic — it followed directly from putting Accretive's own staff and systems inside hospital operations, with access to the same patient data the hospital held."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "embedded collectors",
@@ -299,7 +298,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Before this case, HITECH's direct liability for business associates was mostly theoretical; Minnesota's settlement was the first time it was actually enforced against one."
       },
-      "termRole": "connector",
       "relationKind": "continuity",
       "idealTerms": [
         "HIPAA business associate",
@@ -317,7 +315,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "A fine punishes what already happened; a structural ban tries to prevent a repeat — this settlement did both, aiming at the model itself, not just its output."
       },
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": [
         "embedded collectors",
@@ -335,7 +332,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The behavioral link between the two clusters: it's this specific kind of encounter, not medical debt in the abstract, that teaches a patient to fear the next visit."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "bedside payment demand",
@@ -353,7 +349,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The senator running the hearing wasn't reacting to a hypothetical — he named exactly the outcome this cluster's evidence documents."
       },
-      "termRole": "connector",
       "relationKind": "continuity",
       "idealTerms": [
         "Senate HELP hearing",

@@ -471,8 +471,8 @@ export async function run(page, baseURL) {
     candidate.id === "restoring-honest-choice"
   );
   assert.ok(puzzle);
-  assert.equal(puzzle.info.linkLabel, "ACM Code of Ethics");
-  assert.equal(puzzle.info.seeAlso.length, 3);
+  assert.equal(puzzle.info.links[0].label, "ACM Code of Ethics");
+  assert.equal(puzzle.info.links.length, 4);
 
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));

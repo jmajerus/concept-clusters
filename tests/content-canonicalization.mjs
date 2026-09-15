@@ -15,6 +15,8 @@ import {
 } from "../tools/canonicalize-content.mjs";
 import { formattedJson, generatedPuzzleModule } from "../modules/publicationArtifacts.js";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
+import { puzzleFromJsonLd, puzzleToJsonLd } from "../modules/puzzleJsonLd.js";
+import { puzzleForCanonicalPublication } from "../modules/puzzleSimplified.js";
 
 export const name = "content canonicalization: simplified storage and JSON-LD conversion are lossless";
 
@@ -280,6 +282,40 @@ export async function run() {
   assert.equal(converted.document.category, "political-science");
   assert.equal(converted.document.info.citations.length, 1);
   assert.equal(converted.document.learningIntroduction.citations, undefined);
+
+  // Portable JSON-LD may still carry publication metadata, but the current
+  // authoring/storage boundary must not bring it back into the simplified
+  // document or generated runtime module.
+  const runtimeWithSystemMetadata = {
+    ...puzzleFromJsonLd(jsonLd),
+    dateCreated: "2026-01-01",
+    dateModified: "2026-01-02",
+    version: 7,
+    learningIntroduction: {
+      ...puzzleFromJsonLd(jsonLd).learningIntroduction,
+      revision: 4
+    }
+  };
+  const interchangeWithMetadata = puzzleToJsonLd(runtimeWithSystemMetadata);
+  assert.equal(interchangeWithMetadata.dateCreated, "2026-01-01");
+  assert.equal(interchangeWithMetadata.dateModified, "2026-01-02");
+  assert.equal(interchangeWithMetadata.version, 7);
+  assert.equal(interchangeWithMetadata.learningIntroduction.revision, 4);
+  const publishedWithMetadata = puzzleForCanonicalPublication(runtimeWithSystemMetadata);
+  assert.equal(publishedWithMetadata.puzzle.dateCreated, undefined);
+  assert.equal(publishedWithMetadata.puzzle.dateModified, undefined);
+  assert.equal(publishedWithMetadata.puzzle.version, undefined);
+  assert.equal(publishedWithMetadata.puzzle.learningIntroduction.revision, undefined);
+  assert.equal(publishedWithMetadata.simplified.dateCreated, undefined);
+  const generatedWithMetadata = generatedPuzzleModule(
+    runtimeWithSystemMetadata,
+    "content/puzzles/canonicalization-fixture.ccpuzzle.json",
+    "puzzles/fixture/canonicalization-fixture.js"
+  );
+  assert.equal(generatedWithMetadata.includes('"dateCreated"'), false);
+  assert.equal(generatedWithMetadata.includes('"dateModified"'), false);
+  assert.equal(generatedWithMetadata.includes('"revision"'), false);
+
   const legacyJsonLdRole = {
     ...jsonLd,
     bridges: jsonLd.bridges.map(bridge => ({ ...bridge, termRole: "connector" }))

@@ -163,4 +163,20 @@ export async function run() {
   assert.deepEqual(assistanceStampScopes(document, { domain: "content" }), ["content"]);
   assert.deepEqual(assistanceStampScopes(document, { domain: "pedagogy" }), ["pedagogy"]);
   assert.deepEqual(assistanceStampScopes(document), ["puzzle", "learningIntroduction"]);
+
+  const legacyMetadata = {
+    ...document,
+    dateCreated: "2026-01-01",
+    dateModified: "2026-01-02",
+    version: 3,
+    learningIntroduction: {
+      ...document.learningIntroduction,
+      revision: 9
+    }
+  };
+  const legacyDomains = partitionAuthoredDocument(legacyMetadata);
+  assert.equal(legacyDomains.content.dateCreated, undefined);
+  assert.equal(legacyDomains.pedagogy.dateModified, undefined);
+  assert.equal(legacyDomains.pedagogy.learningIntroduction.revision, undefined);
+  assert.equal(assembleAuthoredDocument(legacyDomains).version, undefined);
 }

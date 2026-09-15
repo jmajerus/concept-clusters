@@ -313,7 +313,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "pervasive-surveillance": "metadata",
@@ -341,7 +340,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation"
     },
     {
@@ -360,7 +358,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "the-borderless-battlefield": "AUMF",
@@ -440,7 +437,6 @@
     "content": {
       "text": "## A war without a map\n\nAfter September 11, 2001, Congress gave the president broad authority to use force against those responsible for the attacks. Over the following decade, that authority was stretched, quietly and with little public debate, to cover a widening set of countries and a widening set of enemies who had nothing to do with September 11 itself.\n\nAt the same time, the way individual targets were chosen changed. Killing a specific, named enemy gave way to killing people who merely matched a statistical or behavioral pattern. And the raw material for those patterns increasingly came from mass surveillance: communications data collected not because a person was already suspected of anything, but so that suspicion could be manufactured later, at scale, by machine.\n\nJournalist Jeremy Scahill spent years reporting from the countries where this new kind of war was actually fought — Yemen, Somalia, Pakistan — rather than from Washington briefing rooms. His book and documentary, both titled *Dirty Wars: The World Is a Battlefield*, follow the people who built this apparatus and the people who lived, and sometimes died, underneath it.\n\nAs you play, notice how often a single institution or process shows up wearing two different hats: sometimes as a legal safeguard, and sometimes as the very mechanism that lets a safeguard be quietly set aside.\n\n**Before you start:** what would it take for a government to convince you that it had correctly identified an enemy it could never publicly name?"
     },
-    "revision": 1,
     "links": [
       {
         "href": "https://www.washingtonpost.com/world/national-security/plan-for-hunting-terrorists-signals-us-intends-to-keep-adding-names-to-kill-lists/2012/10/23/4789b2ae-18b3-11e2-a55c-39408fbe6a4b_story.html",

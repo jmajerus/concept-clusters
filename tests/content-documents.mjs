@@ -176,7 +176,15 @@ export async function run() {
     title: "Published Title",
     category: "Science",
     clusters: [],
-    bridges: []
+    bridges: [],
+    dateCreated: "2026-01-01",
+    dateModified: "2026-01-02",
+    version: 7,
+    learningIntroduction: {
+      requirement: "optional",
+      content: { text: "A short introduction." },
+      revision: 4
+    }
   };
   await repo.seedPublishedIfAbsent({
     kind: "puzzle",
@@ -184,6 +192,10 @@ export async function run() {
     document: publishedPuzzle
   });
   const initiallyReviewed = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
+  assert.equal(initiallyReviewed.document.dateCreated, undefined);
+  assert.equal(initiallyReviewed.document.dateModified, undefined);
+  assert.equal(initiallyReviewed.document.version, undefined);
+  assert.equal(initiallyReviewed.document.learningIntroduction.revision, undefined);
   assert.ok(initiallyReviewed.lastAgentReviewedAt);
   const reviewTime = "2026-09-08T12:00:00.000Z";
   const reviewed = await repo.recordPuzzleAgentReview({

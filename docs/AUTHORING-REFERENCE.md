@@ -81,7 +81,6 @@ JSON-LD is portable interchange, not the everyday authoring format.
     title: "Before You Begin",
     summary: "What this short preparation helps the learner notice.",
     estimatedMinutes: 4,
-    revision: 1,                // change when prior acknowledgements should expire
     content: {
       src: "./unique-string.intro.md",
       mediaType: "text/markdown"
@@ -950,10 +949,11 @@ The three requirement levels deliberately behave differently:
   particular source.
 
 A read or skipped choice is stored separately from puzzle progress. It is
-revision-aware, so changing `revision` causes the revised introduction to be
-offered again. **Start over** intentionally does not erase that choice. A
-shared solved/moves link also waits at a recommended or required
-introduction rather than briefly exposing its board first.
+content-aware: the player derives a fingerprint from the introduction, so
+changing the lesson causes it to be offered again without an author-maintained
+revision field. **Start over** intentionally does not erase that choice. A
+shared solved/moves link also waits at a recommended or required introduction
+rather than briefly exposing its board first.
 
 ### Inline and outboard Markdown
 
@@ -969,7 +969,6 @@ export default definePuzzle(import.meta.url, {
     requirement: "optional",
     title: "Energy in an Ecosystem",
     estimatedMinutes: 3,
-    revision: 1,
     content: {
       text: `## Follow the energy
 
@@ -988,7 +987,6 @@ learningIntroduction: {
   title: "Reasoning from Evidence",
   summary: "Distinguish observations, explanations, and revisable decisions.",
   estimatedMinutes: 4,
-  revision: 1,
   content: {
     src: "./from-evidence-to-action.intro.md",
     mediaType: "text/markdown"

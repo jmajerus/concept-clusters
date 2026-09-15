@@ -227,7 +227,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": {
         "wave-momentum-link": "de Broglie relation",
@@ -246,7 +245,6 @@
       "info": {
         "text": "The local chain is amplitude addition, probability calculation, then one registered detector result under a specified setup."
       },
-      "termRole": "connector",
       "relationKind": "cross-cutting",
       "idealTerms": {
         "quantum-amplitudes": "probability amplitude",

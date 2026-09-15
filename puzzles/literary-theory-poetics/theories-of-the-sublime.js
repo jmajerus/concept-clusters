@@ -264,7 +264,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "transport",
@@ -292,7 +291,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "vastness",
@@ -320,7 +318,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "contrast"
     }
   ],
@@ -406,8 +403,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://plato.stanford.edu/entries/kant-aesthetics/",
         "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "humanPrimary",

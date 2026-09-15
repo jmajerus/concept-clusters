@@ -620,11 +620,25 @@ describe("hosted authoring Worker", () => {
         relationKind: "contrast"
       }],
       lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }],
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "A short introduction." }
+      },
       provenance: { collaboration: "ai", contributors: [{ name: "Claude" }] }
+    };
+    const legacyDocument = {
+      ...document,
+      dateCreated: "2026-01-01",
+      dateModified: "2026-01-02",
+      version: 7,
+      learningIntroduction: {
+        ...document.learningIntroduction,
+        revision: 4
+      }
     };
     await repository.create({
       draftId: "domain-projection-fixture",
-      document,
+      document: legacyDocument,
       actor: { subject: "local-author" }
     });
 
@@ -637,11 +651,18 @@ describe("hosted authoring Worker", () => {
     };
     const content = JSON.parse(row.content_json);
     const pedagogy = JSON.parse(row.pedagogy_json);
+    const stored = JSON.parse((await env.AUTHORING_DB.prepare(
+      "SELECT document FROM puzzle_drafts WHERE id = ?"
+    ).bind("domain-projection-fixture").first() as { document: string }).document);
     expect(content.clusters).toHaveLength(2);
     expect(content.bridges[0].relationKind).toBeUndefined();
     expect(pedagogy.lenses).toHaveLength(1);
     expect(pedagogy.bridges[0].relationKind).toBe("contrast");
     expect(JSON.parse(row.provenance_json)).toEqual(document.provenance);
+    expect(stored.dateCreated).toBeUndefined();
+    expect(stored.dateModified).toBeUndefined();
+    expect(stored.version).toBeUndefined();
+    expect(stored.learningIntroduction.revision).toBeUndefined();
 
     const populated = await repository.get({
       draftId: "domain-projection-fixture",
@@ -650,7 +671,7 @@ describe("hosted authoring Worker", () => {
     expect(populated.document).toEqual(document);
 
     // A row written before migration 0019 has no projections. The complete
-    // legacy blob remains sufficient to reconstruct the same document.
+    // legacy blob remains sufficient to reconstruct the same authored document.
     await env.AUTHORING_DB.prepare(`
       UPDATE puzzle_drafts
       SET content_json = NULL, pedagogy_json = NULL, provenance_json = NULL

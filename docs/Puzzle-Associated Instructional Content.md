@@ -574,14 +574,15 @@ deliberately narrow choices:
   DOM-built, raw-HTML-free Markdown subset in an accessible native dialog;
 - local images require alt text, while external HTTP(S) reading may be
   listed separately under `sources`;
-- read/skipped acknowledgement is local, revision-aware, and independent of
-  saved board progress;
+- read/skipped acknowledgement is local, content-fingerprint-aware, and
+  independent of saved board progress;
 - recommended and required introductions pause shared moves/solved state
   until the learner has made the appropriate entry choice; and
 - **From Evidence to Action** supplies the first outboard example, written to
   teach evidence reasoning without naming its map or lens answers.
 
-Structured lesson JSON, shared-resource registries, remote lesson bodies,
-directory migration for existing puzzles, and JSON-LD/package export remain
-deferred. The concrete authoring contract and solution-leakage checklist now
-live in [AUTHORING.md](AUTHORING.md#learning-introductions).
+Structured lesson JSON, shared-resource registries, remote lesson bodies, and
+directory migration for existing puzzles remain deferred. JSON-LD export/import
+is implemented as explicit interchange; package export remains deferred. The
+concrete authoring contract and solution-leakage checklist now live in
+[AUTHORING.md](AUTHORING.md#learning-introductions).

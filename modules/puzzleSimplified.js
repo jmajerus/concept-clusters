@@ -15,6 +15,7 @@ import {
 import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
+import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -47,13 +48,14 @@ function stableIds(items, labelFor) {
 // format, by repository/content-interchange publication to write the
 // canonical content/puzzles/<id>.ccpuzzle.json file, and by content:export
 // as the simplified-shaped sibling of puzzleToJsonLd. Round-trips current
-// fields losslessly: bridge/cluster ids are always carried explicitly (never
-// left to re-derivation), and a cluster's terms order is always set explicitly
-// via the `terms` override field (see ClusterSchema in
+// authored fields losslessly: bridge/cluster ids are always carried explicitly
+// (never left to re-derivation), and a cluster's terms order is always set
+// explicitly via the `terms` override field (see ClusterSchema in
 // simplifiedPuzzleSchema.js), even when it happens to already equal
 // seeds-then-floatingTerms, so this never depends on floatingTerms order
-// reconstructing anything. Retired legacy bridge termRole is intentionally
-// omitted from the current projection.
+// reconstructing anything. Repository-owned timestamps and revision fields
+// are intentionally omitted; the explicit JSON-LD adapter owns their
+// interchange representation.
 export function puzzleToSimplified(
   puzzle,
   {
@@ -125,9 +127,7 @@ export function puzzleToSimplified(
       ? { credit: source.learningIntroduction.credit } : {}),
     content: { text: learningContent !== null ? learningContent : source.learningIntroduction.content.text },
     ...(source.learningIntroduction.links ? { links: clone(source.learningIntroduction.links) } : {}),
-    ...(source.learningIntroduction.sources ? { sources: clone(source.learningIntroduction.sources) } : {}),
-    ...(source.learningIntroduction.revision !== undefined
-      ? { revision: source.learningIntroduction.revision } : {})
+    ...(source.learningIntroduction.sources ? { sources: clone(source.learningIntroduction.sources) } : {})
   } : undefined;
 
   return {
@@ -151,10 +151,7 @@ export function puzzleToSimplified(
     ...(source.creator ? { creator: source.creator } : {}),
     ...(source.license ? { license: source.license } : {}),
     ...(source.derivedFrom ? { derivedFrom: source.derivedFrom } : {}),
-    ...(source.dateCreated ? { dateCreated: source.dateCreated } : {}),
-    ...(source.dateModified ? { dateModified: source.dateModified } : {}),
-    ...(source.language ? { language: source.language } : {}),
-    ...(source.version ? { version: source.version } : {})
+    ...(source.language ? { language: source.language } : {})
   };
 }
 
@@ -168,7 +165,7 @@ export function puzzleToSimplified(
 export function puzzleForCanonicalPublication(puzzle, options) {
   const next = hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
-      canonicalizeDocumentProvenance(clone(puzzle))
+      stripSystemAuthoredMetadata(canonicalizeDocumentProvenance(clone(puzzle)))
     )
   );
   const canonical = canonicalizePuzzleCategoryReferences(

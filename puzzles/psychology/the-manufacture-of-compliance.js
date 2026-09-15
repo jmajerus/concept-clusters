@@ -166,7 +166,6 @@ export default definePuzzle(import.meta.url, {
         ]
       },
       "conceptId": "moral-disengagement",
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "conformity to the group",
@@ -189,7 +188,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Same order, same offer, same absence of punishment -- for everyone."
       },
-      "termRole": "connector",
       "relationKind": "evaluation",
       "idealTerms": [
         "the minority who refused",
@@ -251,8 +249,7 @@ export default definePuzzle(import.meta.url, {
     "content": {
       "mediaType": "text/markdown",
       "text": "Historians studying the perpetrators of mass atrocity keep running into the same uncomfortable finding: most of the people who carried it out were not exceptional in any obvious sense beforehand. They were reservists, clerks, family men -- ordinary by every available measure except what they went on to do.\n\nThat finding gets misread in two opposite directions. Read one way, it excuses: if almost anyone might have done the same thing in the same circumstances, then perhaps no single person bears full responsibility for what they did. Read the other way, it moralizes: surely there was something different, something worse, about the ones who actually pulled the trigger. Neither reading survives contact with the evidence. Some people, given the exact same order and the exact same chance to step back, did. Most didn't -- and for most of them, each time made the next time a little easier.\n\nAs you work through this, notice what actually kept the choice open, and what happened, inside the people who didn't take it, with every repetition."
-    },
-    "revision": 1
+    }
   },
   "provenance": {
     "collaboration": "ai",
