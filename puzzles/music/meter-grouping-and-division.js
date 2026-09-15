@@ -112,7 +112,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Four quarter-note beats, each splitting into two eighths. Also written as common time (C)."
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "quadruple meter",
@@ -130,7 +129,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Three quarter-note beats, each splitting into two eighths — six eighths on the page, counted in three."
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "triple meter",
@@ -148,7 +146,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Two dotted-quarter beats, each splitting into three eighths — six eighths on the page, counted in two."
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "duple meter",

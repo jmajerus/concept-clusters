@@ -225,7 +225,6 @@
       "info": {
         "text": "The specific killing that connected a legal limit on the mission's authority to the political decision to shrink it rather than reinforce it."
       },
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": {
         "mandate-ceiling": "Chapter VI Mandate",
@@ -253,7 +252,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "withdrawal": "Resolution 912",
@@ -284,7 +282,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": {
         "mandate-ceiling": "Genocide Fax",
@@ -345,7 +342,6 @@
     "content": {
       "text": "## A warning, withheld\n\nIn January 1994, the force commander of a small UN peacekeeping mission in Rwanda learned of a plan to register and exterminate the country's Tutsi minority. He asked permission to raid the weapons caches being stockpiled for it. New York said no -- the plan was beyond his mandate.\n\nTen weeks later, the killing began. Ten Belgian peacekeepers were murdered on its first morning. Two weeks after that, the same Security Council that had authorized the mission voted to shrink it by ninety percent. And in Washington, State Department officials spent the following six weeks explaining, in careful non-answers, why they could not quite say the word for what was happening -- because saying it might have meant having to do something about it.\n\nNone of this was secret at the time. All of it is documented now, in declassified cables, Security Council votes, and press-briefing transcripts. This puzzle traces three separate, ordinary-seeming bureaucratic decisions that, together, added up to the world watching a genocide it had the information -- and arguably the ability -- to stop.\n\n**Before you start:** what's the difference between not knowing something is happening, and knowing it but not naming it?"
     },
-    "revision": 1,
     "links": [
       {
         "href": "https://rowman.com/ISBN/9781461640400/One-Hundred-Days-of-Silence-America-and-the-Rwanda-Genocide",

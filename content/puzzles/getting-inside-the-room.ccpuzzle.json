@@ -287,7 +287,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "feminist-anti-militarism": "Mother's Day Proclamation",
@@ -315,7 +314,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": {
         "spectacle-as-strategy": "costume protest",
@@ -338,7 +336,6 @@
       "info": {
         "text": "Deliberately accepting arrest as a form of political speech, rather than an unwanted cost of protest -- the shared premise linking a lone activist's hearing disruption to a sit-in involving hundreds."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": {
         "confronting-the-institution": "red-stained hands",

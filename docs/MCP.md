@@ -30,9 +30,19 @@ temporarily invalid simplified drafts remain writable; that permissiveness
 should not be mistaken for the absence of a field contract.
 Bridge terms have no separate pedagogical-role field; describe their
 relationship in `fact`, optional `info`, and (when useful) `relationKind`.
-Puzzle attribution uses optional puzzle-level `provenance`; the retired
-`generativeAssistance` field is read/import compatibility only and is not part
-of the active authoring schema.
+Puzzle attribution uses optional puzzle-level `provenance`; JSON-LD is an
+explicit interchange format, not part of the active authoring schema or draft
+storage path. Repository-owned timestamps, document revisions, hashes, status,
+and lesson-progress fingerprints are supplied by infrastructure and are not
+fields an agent has to author.
+
+For smaller authoring payloads, `get_puzzle_draft` and
+`save_puzzle_draft` accept `domain: "content"` or `domain: "pedagogy"`.
+Content is the core puzzle write surface. Pedagogy is the annotation, learning,
+and discovery-metadata write surface and includes content as read-only
+`context`. Focused responses omit provenance and system metadata and retain
+only the draft id and revision needed for the next save. Omitting `domain`
+remains the complete-document compatibility path.
 
 ## How guidance reaches an agent
 

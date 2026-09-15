@@ -326,7 +326,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": {
         "describe-the-state": "temperature",
         "state-the-limits": "zeroth law"
@@ -348,7 +347,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": {
         "describe-the-state": "temperature",
         "state-the-limits": "third law"
@@ -370,7 +368,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": {
         "run-engines": "Carnot cycle",
         "state-the-limits": "second law"
@@ -392,7 +389,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": {
         "move-energy": "heat",
         "run-engines": "heat engine"

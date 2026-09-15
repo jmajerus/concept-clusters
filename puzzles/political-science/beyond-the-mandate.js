@@ -218,7 +218,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The specific killing that connected a legal limit on the mission's authority to the political decision to shrink it rather than reinforce it."
       },
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": [
         "Chapter VI Mandate",
@@ -246,7 +245,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "Resolution 912",
@@ -277,7 +275,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": [
         "Genocide Fax",
@@ -348,8 +345,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.theatlantic.com/magazine/archive/2001/09/bystanders-to-genocide/304571/",
         "label": "Samantha Power, \"Bystanders to Genocide\" (The Atlantic, 2001)"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "ai",

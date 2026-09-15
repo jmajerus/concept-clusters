@@ -183,7 +183,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "This connector marks a limit on interpretation: uncertain compound names make downstream pathway assignments uncertain too."
       },
-      "termRole": "connector",
       "relationKind": "evaluation",
       "idealTerms": [
         "annotation confidence",

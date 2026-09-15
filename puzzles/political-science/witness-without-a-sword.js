@@ -149,7 +149,6 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Confidential diplomacy and a written statute both depend on votes no one is obligated to cast: on May 22, 2014, Russia's Vitaly Churkin and China's Wang Min cast the two votes -- against thirteen others and sixty-five co-sponsoring states -- that vetoed a Security Council resolution referring Syria's war crimes to the International Criminal Court.",
-      "termRole": "reference",
       "relationKind": "foundation"
     },
     {
@@ -168,7 +167,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": [
         null,
@@ -191,7 +189,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "attacks on humanitarian personnel",

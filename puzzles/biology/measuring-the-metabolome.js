@@ -200,7 +200,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "This connector names the observable chemical window produced jointly by sample preparation and platform choice."
       },
-      "termRole": "connector",
       "relationKind": "foundation"
     }
   ],

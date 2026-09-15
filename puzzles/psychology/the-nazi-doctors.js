@@ -145,7 +145,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": [
         null,
@@ -173,7 +172,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "Aktion T4",

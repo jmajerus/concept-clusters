@@ -148,7 +148,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": {
         "against-instinctivism": "instinctivism",
@@ -176,7 +175,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": {
         "passions-of-destruction": "necrophilia",

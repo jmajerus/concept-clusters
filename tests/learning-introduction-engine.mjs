@@ -2,9 +2,8 @@ import assert from "node:assert/strict";
 import fromEvidenceToAction from "../puzzles/public-health/from-evidence-to-action.js";
 import { validatePuzzleContent } from "../modules/contentValidation.js";
 import {
-  formatAssistanceCredit,
-  lessonCredit,
-  upsertGenerativeAssistance
+  formatHostCredit,
+  lessonCredit
 } from "../modules/generativeAssistance.js";
 import {
   decodeAuthoredEscapedNewlines,
@@ -48,70 +47,62 @@ export async function run() {
 
   const introduction = normalizedLearningIntroduction(fromEvidenceToAction);
   assert.equal(introduction.requirement, "recommended");
-  assert.equal(introduction.revision, "1");
+  assert.equal(introduction.revision, undefined);
   assert.equal(learningIntroductionGate(introduction, null), true);
   assert.equal(learningIntroductionGate(introduction, "skipped"), false);
   assert.equal(learningIntroductionGate({ requirement: "required" }, "skipped"), true);
   assert.equal(learningIntroductionGate({ requirement: "required" }, "read"), false);
   assert.equal(learningIntroductionGate({ requirement: "optional" }, null), false);
 
+  const packagedPuzzle = definePuzzle(
+    new URL("../puzzles/public-health/from-evidence-to-action.js", import.meta.url),
+    {
+      ...fromEvidenceToAction,
+      learningIntroduction: {
+        ...fromEvidenceToAction.learningIntroduction,
+        content: {
+          src: "./from-evidence-to-action.intro.md",
+          mediaType: "text/markdown"
+        }
+      }
+    }
+  );
+
   const resource = resolvePuzzleResourceUrl(
-    fromEvidenceToAction,
-    fromEvidenceToAction.learningIntroduction.content.src
+    packagedPuzzle,
+    packagedPuzzle.learningIntroduction.content.src
   );
   assert.match(resource.pathname, /from-evidence-to-action\.intro\.md$/);
   assert.throws(
-    () => resolvePuzzleResourceUrl(fromEvidenceToAction, "../unrelated.md"),
+    () => resolvePuzzleResourceUrl(packagedPuzzle, "../unrelated.md"),
     /cannot escape/
   );
   assert.throws(
-    () => resolvePuzzleResourceUrl(fromEvidenceToAction, "./other-puzzle.intro.md"),
+    () => resolvePuzzleResourceUrl(packagedPuzzle, "./other-puzzle.intro.md"),
     /must begin with "from-evidence-to-action\."/
   );
-  assert.deepEqual(await validateLearningIntroduction(fromEvidenceToAction), []);
-  assert.equal(fromEvidenceToAction.generativeAssistance?.[0]?.system, "Claude");
+  assert.deepEqual(await validateLearningIntroduction(packagedPuzzle), []);
   assert.equal(
-    formatAssistanceCredit(fromEvidenceToAction.generativeAssistance),
+    formatHostCredit(fromEvidenceToAction.provenance?.contributors),
     "Drafted with Claude"
   );
   assert.equal(
+    formatHostCredit([{ name: "Jane Doe" }, { name: "Codex" }]),
+    "Drafted with Codex"
+  );
+  assert.equal(formatHostCredit([{ name: "Jane Doe" }]), null);
+  assert.equal(
     lessonCredit(
       { credit: "By Jane Doe, with assistance from Gemini 3.1 Pro" },
-      fromEvidenceToAction.generativeAssistance
+      fromEvidenceToAction.provenance?.contributors
     ),
     "By Jane Doe, with assistance from Gemini 3.1 Pro"
   );
   assert.equal(
-    lessonCredit({}, fromEvidenceToAction.generativeAssistance),
+    lessonCredit({}, fromEvidenceToAction.provenance?.contributors),
     "Drafted with Claude"
   );
-  assert.deepEqual(
-    validatePuzzleContent(fromEvidenceToAction).filter(error =>
-      error.includes("generativeAssistance")
-    ),
-    []
-  );
-  assert.ok(
-    validatePuzzleContent({
-      ...fromEvidenceToAction,
-      generativeAssistance: [{ system: "Claude" }]
-    }).some(error => error.includes("generativeAssistance[0].scope"))
-  );
-  assert.deepEqual(
-    upsertGenerativeAssistance(fromEvidenceToAction.generativeAssistance, {
-      system: "Claude",
-      scope: "learningIntroduction",
-      role: "edited",
-      date: "2026-08-07"
-    }),
-    [{
-      system: "Claude",
-      provider: "Anthropic",
-      scope: "learningIntroduction",
-      role: "edited",
-      date: "2026-08-07"
-    }]
-  );
+  assert.deepEqual(validatePuzzleContent(fromEvidenceToAction), []);
 
   const storage = memoryStorage();
   assert.equal(loadLearningIntroductionStatus(storage, fromEvidenceToAction), null);
@@ -122,7 +113,10 @@ export async function run() {
     ...fromEvidenceToAction,
     learningIntroduction: {
       ...fromEvidenceToAction.learningIntroduction,
-      revision: 2
+      content: {
+        ...fromEvidenceToAction.learningIntroduction.content,
+        text: `${fromEvidenceToAction.learningIntroduction.content.text}\n\nA changed lesson.`
+      }
     }
   };
   assert.equal(loadLearningIntroductionStatus(storage, revisedPuzzle), null);

@@ -28,13 +28,11 @@ const published = {
     explanation: "The whole cluster.",
     targets: ["in medias res", "invocation of the Muse", "dactylic hexameter"]
   }],
-  generativeAssistance: [{ system: "Cursor", date: "2026-08-07" }]
 };
 
 export async function run() {
   const identical = diffPublishedDraft(published, {
     ...published,
-    generativeAssistance: [{ system: "Cursor", date: "2026-08-21" }]
   });
   assert.equal(identical.total, 0);
 

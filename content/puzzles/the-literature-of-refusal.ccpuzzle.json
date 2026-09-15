@@ -209,7 +209,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",
@@ -237,7 +236,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",

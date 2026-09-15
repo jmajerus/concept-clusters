@@ -185,7 +185,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": [
         "glomerulus",
@@ -209,7 +208,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "reabsorption",

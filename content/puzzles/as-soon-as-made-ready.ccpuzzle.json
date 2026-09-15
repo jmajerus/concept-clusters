@@ -198,7 +198,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic"
     },
     {
@@ -217,7 +216,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "direction": {
         "kind": "through",
@@ -241,7 +239,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting"
     }
   ],

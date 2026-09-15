@@ -201,16 +201,6 @@ export async function run() {
       "retired bridge term metadata should stay out of the MCP schema"
     );
     assert.equal(
-      resourceSchema.properties.generativeAssistance,
-      undefined,
-      "retired generative attribution should stay out of the MCP schema"
-    );
-    assert.doesNotMatch(
-      JSON.stringify(resourceSchema),
-      /generativeAssistance/,
-      "the discoverable schema must not teach the retired field"
-    );
-    assert.equal(
       resourceSchema.properties.large,
       undefined,
       "renderer layout fields should stay out of the MCP schema"
@@ -230,10 +220,6 @@ export async function run() {
     assert.equal(
       authoringSchema.result.structuredContent.schema.properties.bridges.items
         .properties.termRole,
-      undefined
-    );
-    assert.equal(
-      authoringSchema.result.structuredContent.schema.properties.generativeAssistance,
       undefined
     );
     assert.ok(
@@ -294,7 +280,6 @@ export async function run() {
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.idealTerms);
     assert.ok(phasedSchemas.pedagogy.schema.properties.lenses);
     assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction);
-    assert.equal(phasedSchemas.publication.schema.properties.generativeAssistance, undefined);
     assert.ok(phasedSchemas.publication.schema.properties.provenance);
     assert.ok(phasedSchemas.publication.schema.properties.relatedPuzzles);
 
@@ -335,7 +320,6 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(guidance.result.structuredContent.markdown, /two-character sequence/);
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
-    assert.doesNotMatch(guidance.result.structuredContent.markdown, /generativeAssistance/);
     assert.match(guidance.result.structuredContent.markdown, /provenance is optional structured authoring attribution/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);

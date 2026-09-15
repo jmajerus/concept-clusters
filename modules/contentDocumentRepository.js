@@ -6,6 +6,10 @@ import {
   normalizeDraftActor,
   serializeDraftDocument
 } from "./draftRepository.js";
+import {
+  assertCurrentAuthoredDocument,
+  stripSystemAuthoredMetadata
+} from "./authoringDomains.js";
 
 export const CONTENT_DRAFT_KINDS = Object.freeze(["catalogue", "category"]);
 export const PUBLISHED_DOCUMENT_KINDS = Object.freeze([
@@ -33,6 +37,10 @@ function changes(result) {
 }
 
 function draftRecord(row) {
+  const document = assertCurrentAuthoredDocument(
+    parsedJson(row.document, "Stored content draft"),
+    "Stored content draft"
+  );
   return {
     kind: row.kind,
     id: row.id,
@@ -43,11 +51,15 @@ function draftRecord(row) {
     contentHash: row.content_hash,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    document: parsedJson(row.document, "Stored content draft")
+    document
   };
 }
 
 function publishedRecord(row) {
+  const document = assertCurrentAuthoredDocument(
+    parsedJson(row.document, "Published document"),
+    "Published document"
+  );
   return {
     kind: row.kind,
     id: row.id,
@@ -62,8 +74,21 @@ function publishedRecord(row) {
     withdrawnAt: row.withdrawn_at || null,
     cuedForFreezeAt: row.cued_for_freeze_at || row.ready_for_freeze_at || null,
     cuedForFreezeBy: row.cued_for_freeze_by || row.ready_for_freeze_by || null,
-    document: parsedJson(row.document, "Published document")
+    // Puzzle rows are complete snapshots for the player, but repository
+    // lifecycle metadata still belongs in the surrounding D1 row. Clean old
+    // simplified rows on read as a compatibility measure; new writes use the
+    // same fold before serialization below.
+    document: row.kind === "puzzle"
+      ? stripSystemAuthoredMetadata(document)
+      : document
   };
+}
+
+function documentForPublishedStorage(kind, document) {
+  assertCurrentAuthoredDocument(document, `${kind} document`);
+  return kind === "puzzle"
+    ? stripSystemAuthoredMetadata(document)
+    : document;
 }
 
 function titleOf(document) {
@@ -420,7 +445,8 @@ export class D1ContentDocumentRepository {
     for (const item of items) {
       assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(item.id);
-      const documentJson = serializeDraftDocument({ ...item.document, id: item.id });
+      const sourceDocument = documentForPublishedStorage(item.kind, item.document);
+      const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
       const contentHash = await draftContentHash(documentJson);
       statements.push(
         this.database.prepare(`
@@ -430,7 +456,7 @@ export class D1ContentDocumentRepository {
             cued_for_freeze_at, cued_for_freeze_by
           ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed')
         `).bind(
-          item.kind, item.id, titleOf(item.document), documentJson, contentHash, now, now, now, now
+          item.kind, item.id, titleOf(sourceDocument), documentJson, contentHash, now, now, now, now
         ),
         this.database.prepare(`
           INSERT OR IGNORE INTO published_document_revisions (
@@ -449,7 +475,8 @@ export class D1ContentDocumentRepository {
     assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
     assertDraftId(id);
     const publishedBy = normalizeDraftActor(actor).subject;
-    const documentJson = serializeDraftDocument({ ...document, id });
+    const sourceDocument = documentForPublishedStorage(kind, document);
+    const documentJson = serializeDraftDocument({ ...sourceDocument, id });
     const contentHash = await draftContentHash(documentJson);
     const now = new Date().toISOString();
     const existing = await this.database.prepare(`
@@ -462,7 +489,7 @@ export class D1ContentDocumentRepository {
             kind, id, title, document, content_hash, revision,
             published_by, published_at, updated_at, last_agent_reviewed_at
           ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
-        `).bind(kind, id, titleOf(document), documentJson, contentHash, publishedBy, now, now, now),
+        `).bind(kind, id, titleOf(sourceDocument), documentJson, contentHash, publishedBy, now, now, now),
         this.database.prepare(`
           INSERT INTO published_document_revisions (
             kind, id, revision, document, content_hash, published_by, published_at
@@ -480,7 +507,7 @@ export class D1ContentDocumentRepository {
             cued_for_freeze_at = NULL, cued_for_freeze_by = NULL
         WHERE kind = ? AND id = ?
       `).bind(
-        titleOf(document), documentJson, contentHash, nextRevision,
+        titleOf(sourceDocument), documentJson, contentHash, nextRevision,
         publishedBy, now, now, kind, id
       ),
       this.database.prepare(`
@@ -660,14 +687,15 @@ export function createMemoryContentDocumentRepository() {
       for (const item of items) {
         assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
         assertDraftId(item.id);
+        const sourceDocument = documentForPublishedStorage(item.kind, item.document);
         const key = publishedKey(item.kind, item.id);
         if (published.has(key)) continue;
-        const documentJson = serializeDraftDocument({ ...item.document, id: item.id });
+        const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
         const now = new Date().toISOString();
         const row = {
           kind: item.kind,
           id: item.id,
-          title: titleOf(item.document),
+          title: titleOf(sourceDocument),
           document: documentJson,
           content_hash: await draftContentHash(documentJson),
           revision: 1,
@@ -688,7 +716,8 @@ export function createMemoryContentDocumentRepository() {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(id);
       const publishedBy = normalizeDraftActor(actor).subject;
-      const documentJson = serializeDraftDocument({ ...document, id });
+      const sourceDocument = documentForPublishedStorage(kind, document);
+      const documentJson = serializeDraftDocument({ ...sourceDocument, id });
       const now = new Date().toISOString();
       const key = publishedKey(kind, id);
       const existing = published.get(key);
@@ -696,7 +725,7 @@ export function createMemoryContentDocumentRepository() {
       const row = {
         kind,
         id,
-        title: titleOf(document),
+        title: titleOf(sourceDocument),
         document: documentJson,
         content_hash: await draftContentHash(documentJson),
         revision: nextRevision,

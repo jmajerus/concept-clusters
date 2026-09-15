@@ -217,7 +217,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": [
         "de Broglie relation",
@@ -236,7 +235,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The local chain is amplitude addition, probability calculation, then one registered detector result under a specified setup."
       },
-      "termRole": "connector",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "probability amplitude",

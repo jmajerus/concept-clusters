@@ -246,7 +246,6 @@
       "info": {
         "text": "A documented internal plan for presenting the ethics guidance publicly in terms very different from its operative legal effect."
       },
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": {
         "ethics-machinery": "Safe, Legal, Ethical, Effective",
@@ -269,7 +268,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "collusion": "Stephen Behnke",
@@ -297,7 +295,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "ethics-machinery": "PENS Task Force",
@@ -357,7 +354,6 @@
     "content": {
       "text": "## When ethics guidance becomes cover\n\nAfter 9/11, journalists and human rights investigators began documenting psychologists' presence at CIA black sites and Guantanamo Bay -- not as outside observers, but as participants in designing and overseeing coercive interrogation methods drawn from a military program originally built to train resistance against them.\n\nIn 2005, the American Psychological Association convened a task force to address the controversy. Its report became the profession's governing standard for a decade. It would take an independent 542-page investigation -- and years of work by a small group of psychologists inside the association's own ranks -- before that standard was formally reversed.\n\nThis puzzle traces both halves of that story: the ethics guidance itself, and the professionals who spent a decade proving it had never really been about ethics at all.\n\n**Before you start:** what would it take for you to conclude that your own profession's ethical guidelines had been quietly rewritten to permit something they were supposed to prevent?"
     },
-    "revision": 1,
     "links": [
       {
         "href": "https://www.democracynow.org/2023/9/5/doing_harm_roy_j_eidelson_psychology",

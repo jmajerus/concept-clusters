@@ -87,11 +87,8 @@ export function puzzleBrowseFromDocument(
       ? { learningIntroduction: document.learningIntroduction }
       : {}),
     // Preserve authoring-search and attribution inputs. The lesson component
-    // derives its byline from provenance (with generativeAssistance as the
-    // legacy fallback); gameplay still loads the compiled puzzle separately.
+    // derives its byline from provenance; gameplay still loads the compiled
+    // puzzle separately.
     ...(document?.provenance ? { provenance: document.provenance } : {}),
-    ...(document?.generativeAssistance
-      ? { generativeAssistance: document.generativeAssistance }
-      : {})
   };
 }

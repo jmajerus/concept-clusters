@@ -205,10 +205,6 @@ describe("hosted authoring Worker", () => {
     const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
     expect(resourceSchema.properties.bridges.items.properties.termRole)
       .toBeUndefined();
-    expect(resourceSchema.properties.generativeAssistance)
-      .toBeUndefined();
-    expect(JSON.stringify(resourceSchema))
-      .not.toMatch(/generativeAssistance/);
     expect(resourceSchema.properties.large)
       .toBeUndefined();
     expect(JSON.stringify(resourceSchema)).toMatch(/25/);
@@ -239,8 +235,6 @@ describe("hosted authoring Worker", () => {
       .toBe(schemaResource?.uri);
     expect(authoringSchema.result.structuredContent.schema.properties.bridges
       .items.properties.termRole).toBeUndefined();
-    expect(authoringSchema.result.structuredContent.schema.properties.generativeAssistance)
-      .toBeUndefined();
     expect(authoringSchema.result.structuredContent.schema.required)
       .not.toContain("bridges");
 
@@ -281,7 +275,6 @@ describe("hosted authoring Worker", () => {
     expect(phaseSchemas.review.schema.properties.bridges.items?.properties.relationKind)
       .toBeDefined();
     expect(phaseSchemas.pedagogy.schema.properties.lenses).toBeDefined();
-    expect(phaseSchemas.publication.schema.properties.generativeAssistance).toBeUndefined();
     expect(phaseSchemas.publication.schema.properties.provenance).toBeDefined();
 
     const created = await rpc({
@@ -367,7 +360,6 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/real\s+line breaks/);
     expect(guidance.result.structuredContent.markdown).toMatch(/two-character sequence/);
     expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction\.credit/);
-    expect(guidance.result.structuredContent.markdown).not.toMatch(/generativeAssistance/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/provenance is optional structured authoring attribution/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
@@ -607,6 +599,132 @@ describe("hosted authoring Worker", () => {
     expect(payload.result.structuredContent.draft.document.provenance).toEqual(
       { collaboration: "ai", contributors: [{ name: "Claude" }] }
     );
+  });
+
+  it("materializes authoring domains, reads legacy simplified rows, and rejects JSON-LD", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const document = {
+      id: "domain-projection-fixture",
+      title: "Domain projection fixture",
+      category: "Science",
+      info: { text: "Core information." },
+      clusters: [
+        { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+        { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+      ],
+      bridges: [{
+        id: "shared",
+        term: "shared idea",
+        clusters: ["alpha", "beta"],
+        fact: "Shared fact.",
+        relationKind: "contrast"
+      }],
+      lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }],
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "A short introduction." }
+      },
+      provenance: { collaboration: "ai", contributors: [{ name: "Claude" }] }
+    };
+    const legacyDocument = {
+      ...document,
+      dateCreated: "2026-01-01",
+      dateModified: "2026-01-02",
+      version: 7,
+      learningIntroduction: {
+        ...document.learningIntroduction,
+        revision: 4
+      }
+    };
+    await repository.create({
+      draftId: "domain-projection-fixture",
+      document: legacyDocument,
+      actor: { subject: "local-author" }
+    });
+
+    const row = await env.AUTHORING_DB.prepare(
+      "SELECT content_json, pedagogy_json, provenance_json FROM puzzle_drafts WHERE id = ?"
+    ).bind("domain-projection-fixture").first() as {
+      content_json: string;
+      pedagogy_json: string;
+      provenance_json: string;
+    };
+    const content = JSON.parse(row.content_json);
+    const pedagogy = JSON.parse(row.pedagogy_json);
+    const stored = JSON.parse((await env.AUTHORING_DB.prepare(
+      "SELECT document FROM puzzle_drafts WHERE id = ?"
+    ).bind("domain-projection-fixture").first() as { document: string }).document);
+    expect(content.clusters).toHaveLength(2);
+    expect(content.bridges[0].relationKind).toBeUndefined();
+    expect(pedagogy.lenses).toHaveLength(1);
+    expect(pedagogy.bridges[0].relationKind).toBe("contrast");
+    expect(JSON.parse(row.provenance_json)).toEqual(document.provenance);
+    expect(stored.dateCreated).toBeUndefined();
+    expect(stored.dateModified).toBeUndefined();
+    expect(stored.version).toBeUndefined();
+    expect(stored.learningIntroduction.revision).toBeUndefined();
+
+    const populated = await repository.get({
+      draftId: "domain-projection-fixture",
+      actor: { subject: "local-author" }
+    });
+    expect(populated.document).toEqual(document);
+
+    // A row written before migration 0019 has no projections. The complete
+    // legacy simplified blob remains sufficient to reconstruct the same
+    // authored document.
+    await env.AUTHORING_DB.prepare(`
+      UPDATE puzzle_drafts
+      SET content_json = NULL, pedagogy_json = NULL, provenance_json = NULL
+      WHERE id = ?
+    `).bind("domain-projection-fixture").run();
+    const legacy = await repository.get({
+      draftId: "domain-projection-fixture",
+      actor: { subject: "local-author" }
+    });
+    expect(legacy.document).toEqual(document);
+
+    // JSON-LD rows are not a compatibility case. They must be canonicalized
+    // before this Worker is released, so a stray row fails closed rather than
+    // becoming an uneditable draft through the nullable-column fallback.
+    const originalRow = await env.AUTHORING_DB.prepare(`
+      SELECT document, content_hash FROM puzzle_drafts
+      WHERE id = ? AND owner_subject = ?
+    `).bind("domain-projection-fixture", "local-author").first() as {
+      document: string;
+      content_hash: string;
+    };
+    try {
+      await env.AUTHORING_DB.prepare(`
+        UPDATE puzzle_drafts
+        SET document = ?, content_json = NULL, pedagogy_json = NULL, provenance_json = NULL
+        WHERE id = ? AND owner_subject = ?
+      `).bind(
+        JSON.stringify({
+          "@context": "https://concept-clusters.org/context/v1",
+          id: "domain-projection-fixture",
+          title: "Legacy JSON-LD row"
+        }),
+        "domain-projection-fixture",
+        "local-author"
+      ).run();
+      await expect(repository.get({
+        draftId: "domain-projection-fixture",
+        actor: { subject: "local-author" }
+      })).rejects.toThrow(/JSON-LD.*simplified/);
+    } finally {
+      await env.AUTHORING_DB.prepare(`
+        UPDATE puzzle_drafts
+        SET document = ?, content_hash = ?, content_json = NULL,
+            pedagogy_json = NULL, provenance_json = NULL
+        WHERE id = ? AND owner_subject = ?
+      `).bind(
+        originalRow.document,
+        originalRow.content_hash,
+        "domain-projection-fixture",
+        "local-author"
+      ).run();
+    }
   });
 
   it("surfaces lens-reasons-coverage without retired bridge-role flags", async () => {

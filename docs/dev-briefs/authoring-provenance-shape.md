@@ -1,9 +1,9 @@
 # Authoring provenance shape
 
 **Status: implemented in schema/runtime as optional `provenance`; the active
-simplified/MCP contract is provenance-only. Legacy `generativeAssistance` and
-`learningIntroduction.credit` remain read/import compatibility paths and are
-not active authoring fields.**
+simplified/MCP contract is provenance-only. JSON-LD remains a future
+interchange format, while current draft authoring/storage uses simplified
+documents directly.**
 
 Compact structured authoring provenance for human and generative-AI input to a
 digital work product (Concept Clusters puzzles first). The saved shape is the
@@ -178,17 +178,19 @@ Intended end state:
 | Model of record | Puzzle-level `provenance` (two axes) |
 | Player byline | **Derived L1** from `provenance` (optional human override cache if needed) |
 | Today’s `learningIntroduction.credit` | **Retire** after interchange bump (legacy L1 string) |
-| Legacy `generativeAssistance` | **Fold into** generative `contributors` (+ mode); retain only at read/import boundaries |
+| Retired client-attribution array | **Folded into** generative `contributors` (+ mode); no longer part of current documents |
 
-New authoring and MCP guidance speaks only in `provenance` terms. Existing
-documents may still carry the legacy fields until they are explicitly saved or
-canonicalized; those boundaries fold them into `provenance` where possible.
+New authoring and MCP guidance speaks only in `provenance` terms. The corpus
+canonicalization pass has completed for the retired client-attribution array;
+current documents no longer carry it, and current authoring rejects it rather
+than treating it as a second input contract. JSON-LD remains available only
+through the explicit interchange boundary.
 
 ## Concept Clusters mapping (today → proposed)
 
 | Today | Proposed |
 |---|---|
-| Distinct `generativeAssistance[].system` | Generative `contributors` |
+| Distinct legacy client systems | Generative `contributors` |
 | Human from drafts UI / JWT / default author when known | Human `contributors` |
 | Directed / drafted-only / human-only bylines | L1 from `collaboration` + names |
 | `learningIntroduction.credit` | Derived L1 (or temporary override); not the model of record |
@@ -212,14 +214,14 @@ canonicalized; those boundaries fold them into `provenance` where possible.
 1. **This brief + optional field** — vocabulary locked; `provenance` accepted
    on simplified/runtime documents; MCP stamps generative contributors;
    agents taught L2 only in publication/pedagogy guidance.
-2. **Canonicalize fold** — `canonicalizeDocumentProvenance` runs with link/citation
-   folding on editor load and publication: syncs generative systems into
-   provenance; when L1 can render, **deletes** stored `learningIntroduction.credit`
-   so the byline stays derived. Opaque legacy credits remain only when L1 cannot
-   render.
-3. **Authoring/export contract migration (now)** — remove
-   `generativeAssistance` from the active simplified/MCP and export schemas
-   while retaining read/import compatibility. The wire/content version remains
-   v1 because readers still accept the legacy shape. The separate legacy
-   `learningIntroduction.credit` read/display fallback can be retired in a
-   later byline migration after existing opaque credits have been reviewed.
+2. **Canonicalize fold (completed)** — `canonicalizeDocumentProvenance` and
+   the corpus migration moved any retired client-attribution data that could
+   be recovered into `provenance`. When L1 can render, **deletes** stored
+   `learningIntroduction.credit` so the byline stays derived. Opaque legacy
+   credits remain only when L1 cannot render.
+3. **Current authoring/interchange contract** — the retired client-attribution
+   array is removed from active simplified/MCP and JSON-LD contracts. Current
+   authoring accepts simplified documents only; JSON-LD is a separately
+   invoked interchange boundary and uses `provenance` directly. The separate
+   `learningIntroduction.credit` read/display fallback can be retired later
+   after existing opaque credits have been reviewed.

@@ -423,8 +423,7 @@ export default definePuzzle(import.meta.url, {
     "content": {
       "mediaType": "text/markdown",
       "text": "# Learning to Follow the Eye\n\nLooking at a picture may feel immediate, but seeing is not a single, neutral act. Your attention moves. Some parts stand out quickly, some are noticed later, and some may remain almost invisible until you deliberately search for them.\n\nArtists and designers can influence this experience through **composition**: the arrangement of visual elements within an image.\n\n## Attention is relational\n\nAn object does not attract attention only because of what it is. It may stand out because it differs from its surroundings.\n\nA light form can become prominent against a dark field. A small shape may draw attention when everything around it is large. A lone figure may stand out because it is separated from a crowd.\n\nThis means that visual prominence often belongs not to one element by itself, but to a **relationship** among elements.\n\n## A flat surface can suggest space\n\nA painting, drawing, photograph, or screen is physically flat, yet it can suggest nearness, distance, enclosure, openness, and depth.\n\nViewers use clues such as:\n\n- one form partly covering another;\n- differences in apparent size;\n- the division between nearer and more distant areas;\n- open areas surrounding objects; and\n- lines that seem to continue into the image.\n\nThese clues do not create actual depth. They organize marks on a surface so that depth can be perceived or imagined.\n\n## Balance is not the same as symmetry\n\nA symmetrical image may feel stable because similar forms appear on opposite sides. But an image can also feel balanced without matching halves.\n\nA large, quiet form might be balanced by several small, active ones. A dark area might counter a larger but lighter area. An object near the edge may create more tension than the same object near the center.\n\nWhat matters is not only physical size. Viewers also experience **visual weight**: the strength with which an area attracts and holds attention.\n\n## Still images can imply movement\n\nNothing in a still image literally moves, but the arrangement can make the eye travel.\n\nLines may point toward a subject. Repeated shapes may establish a sequence. Diagonal forms may seem more active than horizontal ones. A body caught in an unstable pose may imply what happened just before the depicted moment and what may happen next.\n\nThe image remains still while the viewer experiences direction, continuation, and momentum.\n\n## Guidance is not control\n\nComposition influences attention, but it does not determine a single identical response in every viewer.\n\nPeople bring different experiences, purposes, cultural knowledge, visual abilities, and habits of attention. The same arrangement can therefore support more than one path through an image.\n\nCareful looking asks both:\n\n> Where did my attention go?\n\nand:\n\n> What relationships in the image may have encouraged it to go there?\n\n---\n\nBefore beginning the puzzle, think of an image you remember clearly. Which part did you notice first, and what made that part different from everything around it?\n"
-    },
-    "revision": 1
+    }
   },
   "provenance": {
     "collaboration": "ai",
@@ -434,6 +433,5 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "language": "en",
-  "version": 1
+  "language": "en"
 });

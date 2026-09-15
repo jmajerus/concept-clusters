@@ -7,10 +7,10 @@
 // and is not an edit log -- see docs/dev-briefs/authoring-provenance-shape.md
 // ("Non-goals: not an edit log or changelog").
 
-// provenance/generativeAssistance are attribution metadata, not puzzle
-// content -- diffing them would make the trigger circular (the previous
+// Provenance is attribution metadata, not puzzle content -- diffing it would
+// make the trigger circular (the previous
 // stamp decision would influence the next one).
-const DEFAULT_EXCLUDE_KEYS = Object.freeze(["provenance", "generativeAssistance"]);
+const DEFAULT_EXCLUDE_KEYS = Object.freeze(["provenance"]);
 
 /** Stable key for one array item: its own id when present, else its index. */
 function arrayItemKey(item, index) {

@@ -335,8 +335,7 @@
             "href": "wiki:Gonadotropin"
           }
         ]
-      },
-      "termRole": "reference"
+      }
     },
     {
       "id": "human-chorionic-gonadotropin",
@@ -354,7 +353,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": {
         "ovarian-program": "corpus luteum",
         "pregnancy-support": "placenta"

@@ -68,7 +68,10 @@
 // itself needs classification.
 // 5.4: same review bar; puzzle-level provenance is the sole active authoring
 // attribution shape. Legacy generative-assistance data is read/import only.
+// 5.5: same review bar; repository-owned timestamps and revision metadata are
+// infrastructure fields, never simplified authoring fields. Lesson progress
+// invalidation is derived from the introduction content.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 4
+  minor: 5
 });

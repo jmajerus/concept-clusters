@@ -210,7 +210,6 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "The five filters do not operate in the abstract: applied to news about political killing, they consistently produce more sustained outrage for victims of enemy states than for victims of one's own government and its allies.",
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": [
         "fear ideology",
@@ -238,7 +237,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "manufacture of consent",
@@ -266,7 +264,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
         "fear ideology",

@@ -247,7 +247,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "dissonant-intervals": "tritone",
@@ -265,7 +264,6 @@
       "info": {
         "text": "The interval is the motion that defines the tone type, not a coincidence of naming."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": {
         "dissonant-intervals": "major second",
@@ -283,7 +281,6 @@
       "info": {
         "text": "States the exact line that justified splitting these into two clusters instead of one."
       },
-      "termRole": "connector",
       "relationKind": "contrast",
       "idealTerms": {
         "suspension-figure": "preparation",
@@ -301,7 +298,6 @@
       "info": {
         "text": "The same physical half-step, explained by two different frameworks."
       },
-      "termRole": "connector",
       "relationKind": "cross-cutting",
       "idealTerms": {
         "dissonant-intervals": "minor second",
@@ -319,7 +315,6 @@
       "info": {
         "text": "Contrasts a fixed single-voice resolution with a resolution that moves between voices."
       },
-      "termRole": "connector",
       "relationKind": "contrast",
       "idealTerms": {
         "suspension-figure": "suspension",

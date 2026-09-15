@@ -832,16 +832,15 @@ export async function run() {
     ...baseDraft,
     document: {
       ...baseDraft.document,
-      generativeAssistance: [
-        { system: "Codex", provider: "OpenAI", role: "edited", scope: "puzzle", date: "2026-08-27" }
-      ]
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Codex" }]
+      }
     }
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   assert.match(creditsOnlyPage, /<h2>Credits<\/h2>/);
   assert.match(creditsOnlyPage, /<h2>Provenance<\/h2>/);
-  assert.match(creditsOnlyPage, /legacy byline suggestion:/);
-  assert.match(creditsOnlyPage, /Legacy byline apply needs a Learning introduction/);
-  assert.doesNotMatch(creditsOnlyPage, /Apply legacy byline/);
+  assert.match(creditsOnlyPage, /byline \(derived\):/);
 
   const modelEditorPage = renderDraftPage({
     ...baseDraft,

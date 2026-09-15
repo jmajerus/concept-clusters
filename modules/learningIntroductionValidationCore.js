@@ -44,11 +44,6 @@ export function validateLearningIntroductionStructure(
         introduction.estimatedMinutes > 60)) {
     fail("learningIntroduction.estimatedMinutes must be an integer from 1 to 60");
   }
-  if (introduction.revision !== undefined &&
-      !nonEmptyString(String(introduction.revision))) {
-    fail("learningIntroduction.revision must be a non-empty string or number");
-  }
-
   const content = introduction.content;
   if (!content || typeof content !== "object" || Array.isArray(content)) {
     fail("learningIntroduction.content must be an object");

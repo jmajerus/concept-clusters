@@ -235,7 +235,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "tritone",
@@ -253,7 +252,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The interval is the motion that defines the tone type, not a coincidence of naming."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "major second",
@@ -271,7 +269,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "States the exact line that justified splitting these into two clusters instead of one."
       },
-      "termRole": "connector",
       "relationKind": "contrast",
       "idealTerms": [
         "preparation",
@@ -289,7 +286,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The same physical half-step, explained by two different frameworks."
       },
-      "termRole": "connector",
       "relationKind": "cross-cutting",
       "idealTerms": [
         "minor second",
@@ -307,7 +303,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Contrasts a fixed single-voice resolution with a resolution that moves between voices."
       },
-      "termRole": "connector",
       "relationKind": "contrast",
       "idealTerms": [
         "suspension",

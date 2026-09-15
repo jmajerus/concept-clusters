@@ -312,7 +312,6 @@
       "info": {
         "text": "The connector is the recorded ion signal: acquisition produces it, and identification and reuse depend on being able to examine it."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": {
         "acquisition-choices": "precursor ion",

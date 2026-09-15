@@ -280,7 +280,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "contrast",
       "idealTerms": {
         "inside-the-enclave": "refugee overcrowding",
@@ -303,7 +302,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "a-mandate-with-no-teeth": "hostage-taking of peacekeepers",
@@ -331,7 +329,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": {
         "inside-the-enclave": "separation of men and boys"
@@ -358,7 +355,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "inside-the-enclave": "refugee overcrowding"
@@ -385,7 +381,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "a-mandate-with-no-teeth": "overrun observation posts"
@@ -477,8 +472,7 @@
         "href": "https://www.icty.org/en/press/radislav-krstic-becomes-first-person-be-convicted-genocide-icty-and-sentenced-46-years",
         "label": "ICTY: Radislav Krstić becomes the first person convicted of genocide at the ICTY"
       }
-    ],
-    "revision": 6
+    ]
   },
   "provenance": {
     "collaboration": "humanPrimary",

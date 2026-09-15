@@ -15,6 +15,8 @@ import {
 } from "../tools/canonicalize-content.mjs";
 import { formattedJson, generatedPuzzleModule } from "../modules/publicationArtifacts.js";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
+import { puzzleFromJsonLd, puzzleToJsonLd } from "../modules/puzzleJsonLd.js";
+import { puzzleForCanonicalPublication } from "../modules/puzzleSimplified.js";
 
 export const name = "content canonicalization: simplified storage and JSON-LD conversion are lossless";
 
@@ -280,6 +282,40 @@ export async function run() {
   assert.equal(converted.document.category, "political-science");
   assert.equal(converted.document.info.citations.length, 1);
   assert.equal(converted.document.learningIntroduction.citations, undefined);
+
+  // Portable JSON-LD may still carry publication metadata, but the current
+  // authoring/storage boundary must not bring it back into the simplified
+  // document or generated runtime module.
+  const runtimeWithSystemMetadata = {
+    ...puzzleFromJsonLd(jsonLd),
+    dateCreated: "2026-01-01",
+    dateModified: "2026-01-02",
+    version: 7,
+    learningIntroduction: {
+      ...puzzleFromJsonLd(jsonLd).learningIntroduction,
+      revision: 4
+    }
+  };
+  const interchangeWithMetadata = puzzleToJsonLd(runtimeWithSystemMetadata);
+  assert.equal(interchangeWithMetadata.dateCreated, "2026-01-01");
+  assert.equal(interchangeWithMetadata.dateModified, "2026-01-02");
+  assert.equal(interchangeWithMetadata.version, 7);
+  assert.equal(interchangeWithMetadata.learningIntroduction.revision, 4);
+  const publishedWithMetadata = puzzleForCanonicalPublication(runtimeWithSystemMetadata);
+  assert.equal(publishedWithMetadata.puzzle.dateCreated, undefined);
+  assert.equal(publishedWithMetadata.puzzle.dateModified, undefined);
+  assert.equal(publishedWithMetadata.puzzle.version, undefined);
+  assert.equal(publishedWithMetadata.puzzle.learningIntroduction.revision, undefined);
+  assert.equal(publishedWithMetadata.simplified.dateCreated, undefined);
+  const generatedWithMetadata = generatedPuzzleModule(
+    runtimeWithSystemMetadata,
+    "content/puzzles/canonicalization-fixture.ccpuzzle.json",
+    "puzzles/fixture/canonicalization-fixture.js"
+  );
+  assert.equal(generatedWithMetadata.includes('"dateCreated"'), false);
+  assert.equal(generatedWithMetadata.includes('"dateModified"'), false);
+  assert.equal(generatedWithMetadata.includes('"revision"'), false);
+
   const legacyJsonLdRole = {
     ...jsonLd,
     bridges: jsonLd.bridges.map(bridge => ({ ...bridge, termRole: "connector" }))
@@ -372,7 +408,10 @@ export async function run() {
   assert.ok(repairedMediaType.reasons.includes("learning-media-type"));
   assert.equal(repairedMediaType.document.learningIntroduction.content.mediaType, undefined);
 
-  const assistedJsonLd = {
+  // Retired attribution arrays are no longer an input contract. JSON-LD
+  // remains a future interchange boundary, but it must use the current
+  // provenance shape rather than reviving the removed field.
+  const retiredJsonLd = {
     ...jsonLd,
     generativeAssistance: [{
       system: "A drafting system",
@@ -381,41 +420,25 @@ export async function run() {
       role: "drafted"
     }]
   };
-  const assisted = canonicalizePuzzleDocument(assistedJsonLd, {
+  assert.match(
+    unsupportedJsonLdFields(retiredJsonLd).join("; "),
+    /generativeAssistance.*unknown top-level JSON-LD field/
+  );
+  const rejectedJsonLd = canonicalizePuzzleDocument(retiredJsonLd, {
     categoryRegistry: {
       "Political Science": { slug: "political-science" },
       Philosophy: { slug: "philosophy" }
     }
   });
-  assert.deepEqual(assisted.errors, []);
-  assert.ok(assisted.reasons.includes("generative-assistance-removed"));
-  assert.equal(assisted.document.generativeAssistance, undefined);
-  assert.equal(assisted.document.provenance.collaboration, "ai");
-  assert.equal(assisted.document.provenance.contributors[0].name, "A drafting system");
+  assert.equal(rejectedJsonLd.document, null);
+  assert.match(rejectedJsonLd.errors[0], /generativeAssistance/);
 
-  const assistedSimplified = canonicalizePuzzleDocument(puzzleDocument({
+  const retiredSimplified = canonicalizePuzzleDocument(puzzleDocument({
     generativeAssistance: [{ system: "A drafting system", scope: "puzzle" }]
   }), { categoryRegistry: categories });
-  assert.deepEqual(assistedSimplified.errors, []);
-  assert.ok(assistedSimplified.reasons.includes("generative-assistance-removed"));
-  assert.equal(assistedSimplified.document.generativeAssistance, undefined);
-  assert.equal(assistedSimplified.document.provenance.collaboration, "ai");
-
-  // Validate legacy attribution before JSON-LD projection: an invalid entry
-  // must not disappear merely because current simplified output omits the
-  // retired field.
-  const malformedAssistedJsonLd = canonicalizePuzzleDocument({
-    ...jsonLd,
-    generativeAssistance: [{}]
-  }, {
-    categoryRegistry: {
-      "Political Science": { slug: "political-science" },
-      Philosophy: { slug: "philosophy" }
-    }
-  });
-  assert.equal(malformedAssistedJsonLd.document, null);
-  assert.ok(malformedAssistedJsonLd.errors.some(error =>
-    error.includes("generativeAssistance[0].system")
+  assert.equal(retiredSimplified.document, null);
+  assert.ok(retiredSimplified.errors.some(error =>
+    error.includes("generativeAssistance")
   ));
 
   const escapedLesson = {
@@ -655,14 +678,19 @@ export async function run() {
   assert.equal(variantDraft.unresolved.length, 0);
   assert.equal(variantDraft.changes.length, 1);
 
-  // The read/storage boundary uses the same citation-safe JSON-LD conversion
-  // as the migration, so opening an old draft cannot drop its bibliography.
-  const stored = documentForStorage(jsonLd, { categoryRegistry: {
+  // Explicit interchange conversion retains citations, but storage itself
+  // accepts only the resulting simplified document.
+  const imported = canonicalizePuzzleDocument(jsonLd, { categoryRegistry: {
+    "Political Science": { slug: "political-science" },
+    Philosophy: { slug: "philosophy" }
+  } }).document;
+  assert.equal(imported.info.citations.length, 1);
+  const stored = documentForStorage(imported, { categoryRegistry: {
     "Political Science": { slug: "political-science" },
     Philosophy: { slug: "philosophy" }
   } });
   assert.equal(stored.info.citations.length, 1);
-  assert.equal(documentForEditor(jsonLd).category, "Political Science");
+  assert.equal(documentForEditor(jsonLd)["@context"], jsonLd["@context"]);
 
   // A JSON-LD replacement is planned as an add+delete pair and can be
   // applied transactionally in an isolated repository.

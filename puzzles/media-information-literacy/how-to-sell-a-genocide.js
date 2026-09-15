@@ -277,7 +277,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Johnson's name for the circular assumption that a state's violence is presumptively reluctant while its enemy's violence is presumptively sadistic -- a premise that does the same discrediting work in language choice and in dehumanization."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "the massacre/slaughter gap",
@@ -295,7 +294,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "Johnson's side-by-side count of agency language in coverage of Russia's invasion of Ukraine versus Israel's invasion of Gaza -- the evidence base for both the vanishing-agency pattern in headlines and the timing of the IDF-confirmation rule."
       },
-      "termRole": "connector",
       "relationKind": "evaluation",
       "idealTerms": [
         "blast emerges",
@@ -321,7 +319,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "the moral plane of acceptable parties",

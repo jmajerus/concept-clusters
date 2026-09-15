@@ -147,7 +147,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": {
         "the-auschwitz-self": "doubling"
@@ -174,7 +173,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "medicalized-killing": "Aktion T4",

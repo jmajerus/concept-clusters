@@ -269,7 +269,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "contrast",
       "idealTerms": [
         "refugee overcrowding",
@@ -292,7 +291,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "hostage-taking of peacekeepers",
@@ -320,7 +318,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": [
         "separation of men and boys",
@@ -348,7 +345,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         null,
@@ -376,7 +372,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         null,
@@ -470,8 +465,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.icty.org/en/press/radislav-krstic-becomes-first-person-be-convicted-genocide-icty-and-sentenced-46-years",
         "label": "ICTY: Radislav Krstić becomes the first person convicted of genocide at the ICTY"
       }
-    ],
-    "revision": 6
+    ]
   },
   "provenance": {
     "collaboration": "humanPrimary",

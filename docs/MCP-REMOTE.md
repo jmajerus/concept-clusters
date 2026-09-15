@@ -38,13 +38,12 @@ production.
 
 `document` is the simplified format
 ([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md)) -- the only
-supported authoring shape. A document with a top-level `@context`
-(hand-written JSON-LD, [JSON-LD.md](./JSON-LD.md)) is still accepted and
-converted as a read-compatibility path, for drafts saved before this was
-true, but is not how a new puzzle should be authored. A draft saved with
-input that doesn't yet validate is stored exactly as given, not rejected --
-consistent with drafts generally being allowed to stay temporarily invalid
-between saves.
+supported authoring shape. A document with a top-level `@context` belongs to
+the explicit JSON-LD interchange tools ([JSON-LD.md](./JSON-LD.md)) and is not
+accepted by current draft writes. A simplified draft saved with input that
+doesn't yet validate is stored exactly as given, not rejected -- consistent
+with drafts generally being allowed to stay temporarily invalid between saves.
+JSON-LD is rejected rather than stored in that fallback path.
 
 Puzzle `category`, `categories[]`, and `subcategories` keys are stable
 category ids; category titles are display metadata. Legacy title references
@@ -61,13 +60,36 @@ should use the schema resource or tool, rather than `tools/list` alone, to
 discover nested authoring fields such as `bridges[].relationKind` and
 `bridges[].direction`.
 Bridge terms are ordinary authored concepts; there is no separate role field.
-Attribution uses optional puzzle-level `provenance`; legacy
-`generativeAssistance` is accepted only while importing older documents and is
-folded before a current draft is validated or stored.
+Attribution uses optional puzzle-level `provenance`. JSON-LD remains available
+through the explicit interchange CLI, but current draft inputs and D1 rows use
+the simplified shape directly. Repository-owned timestamps, document
+revisions, hashes, status, and lesson-progress fingerprints are generated or
+stored by infrastructure rather than supplied by an agent.
 
-Both authoring tools accept an optional `phase`: `core`, `review`, `pedagogy`,
-`publication`, or `complete`. Omitting it remains equivalent to `complete` for
-existing clients. The smaller responses support progressive authoring over one
+The guidance and schema tools accept an optional `phase`: `core`, `review`,
+`pedagogy`, `publication`, or `complete`. Draft reads and writes instead accept
+an optional `domain`: `content`, `pedagogy`, or the backwards-compatible
+`complete` default. A focused domain is a real write boundary, not just prose
+guidance:
+
+- `domain: "content"` returns the core puzzle document.
+- `domain: "pedagogy"` returns the annotation/learning metadata and a
+  read-only `context` containing content needed to refer to it.
+- `domain: "complete"` preserves the existing whole-document contract.
+
+Focused draft responses carry only `draftId`, `revision`, the selected domain,
+and its document/context. Provenance and system metadata stay outside the
+focused payload. A focused save replaces the selected projection, preserves
+the other domains, materializes the complete document, and then follows the
+same validation/publication path as a complete save. Omitting an optional
+field from the selected projection removes it. The legacy human-owned
+`learningIntroduction.credit` is omitted from pedagogy responses, preserved
+when that introduction remains present, and rejected if supplied explicitly.
+`repair: true` is accepted for complete or content saves, not pedagogy saves,
+because it repairs content-domain fields. The save still requires
+`expected_revision`.
+
+The smaller guidance/schema responses support progressive authoring over one
 accumulating draft:
 
 1. `core` establishes identity, clusters, terms, facts, bridges, info,
@@ -83,9 +105,10 @@ accumulating draft:
 4. `publication` adds only useful discovery, attribution, and publication
    metadata before validation and submission.
 
-Before every later pass, call `get_puzzle_draft`, edit the latest document, and
-preserve all earlier fields when saving. A phase schema is a focused field
-projection, not a smaller replacement document or an independent validator;
+Before every later pass, call `get_puzzle_draft`, edit the latest document or
+selected domain, preserve all fields outside the selected domain, and send the
+full latest selected projection when saving. A phase schema is a focused field
+projection, not a standalone replacement schema or an independent validator;
 the complete schema resource remains canonical. Phases can be revisited in any
 order when their concern needs further work; they are not one-way lifecycle
 gates.
@@ -180,20 +203,24 @@ remains the deliberate boundary for overwriting the draft's document.
 
 The tracked D1 migrations create:
 
-- `puzzle_drafts` for owner, status, current document, revision (OCC token),
-  content hash, and last validation result; and
+- `puzzle_drafts` for owner, status, current materialized document, revision
+  (OCC token), content hash, last validation result, and the persisted
+  `content_json`, `pedagogy_json`, and protected `provenance_json` projections
+  added by migration `0019_authoring_domains.sql`; and
 - `puzzle_draft_history` for the capped previous-working-copy stack the
   drafts page pops; and
 - `content_drafts` for owner-scoped catalogue and category working copies; and
 - `published_documents` plus `published_document_revisions` for the shared
   live document of each puzzle, catalogue, or category id; and
 - `draft_assistance_stamps` for append-only MCP assistance audit (scope, role,
-  date, client system) formerly carried in `generativeAssistance`.
+  date, client system); this detail is not part of the puzzle document.
 
 `save_puzzle_draft` requires `expected_revision` matching the draft's current
 generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
-A matching save replaces the current document and bumps the integer; a stale
-token fails closed. Distinct saves push the previous working copy onto a
+A matching complete save replaces the current document; a matching focused
+save replaces only the selected domain, reassembles the complete document, and
+then bumps the integer. A stale token fails closed. Distinct saves push the
+previous working copy onto a
 capped D1 stack (`puzzle_draft_history`). The drafts page
 **Revert to last working copy** button pops one save at a time. Set
 `publish_to_authoring: true` on a confirmed final edit to also publish the
@@ -210,7 +237,8 @@ abandoned or test draft.
 When a category has been renamed, the one-time corpus repair is run from the
 authoring checkout with `npm run content:propagate-category-renames` (dry-run)
 and then `--apply` after the report is reviewed. It updates revisioned D1
-rows, leaves historical `previousTitles` and draft undo history intact, and
+rows (including their persisted domain projections), leaves historical
+`previousTitles` and draft undo history intact, and
 reports Git files for the normal Freeze PR rather than editing production
 source directly. See [Category rename propagation](dev-briefs/category-rename-propagation.md).
 
@@ -297,8 +325,8 @@ Successful MCP assistance stamps on `create_puzzle_draft` / `save_puzzle_draft`
 also write `authoring_assistance_stamp` rows (`blob1` = event name,
 `blob2` = tool, `blob3` = client system, `blob4` = role, `blob5` =
 comma-separated scopes, `blob6` = date; `index1` = draft id). That preserves
-scope/role/date audit detail after `generativeAssistance` was dropped from stored
-drafts. The full record is in D1 table `draft_assistance_stamps` — see
+scope/role/date audit detail outside stored drafts. The full record is in D1
+table `draft_assistance_stamps` — see
 `docs/MCP-CLIENT-PROBES.md`.
 
 `src/admin.js` queries this dataset (same `ACCOUNT_ID`/`API_TOKEN` as the

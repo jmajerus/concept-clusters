@@ -276,7 +276,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "DNA methylation is one way a specialized cell remembers, through division, which genes stay off.",
       "info": "The copying of epigenomic marks through cell division, so a specialized cell's daughters keep the same instructions. That is how epigenetic memory is physically transmitted, not a third kind of chemical tag.",
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "DNA methylation",
@@ -294,7 +293,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "This names packaging that differs by cell type, not a separate chemical tag on the DNA letters."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "open chromatin",
@@ -312,7 +310,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "This names the same kind of DNA tag used in the wrong place: methylation that silences genes that should still limit growth."
       },
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": [
         "DNA methylation",

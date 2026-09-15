@@ -208,7 +208,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",
@@ -232,7 +231,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting"
     }
   ],
@@ -312,8 +310,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.bbc.co.uk/religion/religions/judaism/beliefs/goldenrule_1.shtml",
         "label": "BBC Religions: The Golden Rule across traditions"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "ai",

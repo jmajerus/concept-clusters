@@ -21,11 +21,18 @@ import {
 } from "./authoringSchemaResource.js";
 import {
   documentForDraftStore,
+  draftForMcpDomain,
   documentForMcp,
+  documentForEditor,
   documentForStorage,
   draftForMcp,
+  publishedForMcpDomain,
   withStorageCanonicalizeFlags
 } from "./authoredPuzzleDocument.js";
+import {
+  applyAuthoredDomain,
+  AUTHORING_READ_DOMAINS
+} from "./authoringDomains.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
 import {
   buildMcpClientProbeRecord,
@@ -62,6 +69,7 @@ import {
 } from "./authoringMcpTaxonomy.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
+const authoringDomainSchema = z.enum(AUTHORING_READ_DOMAINS).default("complete");
 const authoringPhaseSchema = z.object({
   phase: z.enum(AUTHORING_PHASES).default("complete")
 });
@@ -220,12 +228,11 @@ function safe(handler) {
 // save_puzzle_draft replaces a complete document, but provenance is server
 // maintained and intentionally optional for MCP authors. A client that reads
 // a simplified document without that optional field must not accidentally
-// erase existing attribution on its next save. Supplying either modern
-// provenance or legacy generativeAssistance remains an explicit replacement.
+// erase existing attribution on its next save. Supplying modern provenance
+// remains an explicit replacement.
 function retainStoredProvenance(document, previousDocument) {
   if (!document || typeof document !== "object" ||
-      Object.hasOwn(document, "provenance") ||
-      Object.hasOwn(document, "generativeAssistance")) {
+      Object.hasOwn(document, "provenance")) {
     return document;
   }
   const previous = canonicalizeDocumentProvenance(previousDocument);
@@ -313,6 +320,10 @@ function serverInstructions({
     "when it helps the current work. " +
     "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
     "links and citation details during the research that found them rather than rediscovering them. " +
+    "For a focused authoring pass, call get_puzzle_draft with domain=content or domain=pedagogy and " +
+    "save_puzzle_draft with the same domain; the server preserves protected provenance and system state " +
+    "and materializes the complete document for validation and publication. Pedagogy responses include " +
+    "content as read-only context. The complete domain remains available for compatibility. " +
     "Before create_puzzle_draft for a gap-fill or densify subject, call search_puzzles with 2-3 " +
     "planned anchor terms scoped to that category; if a hit already covers the distinction, extend " +
     "or relate instead of opening a parallel puzzle. search_puzzles covers the authoring corpus " +
@@ -890,15 +901,22 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_puzzle_draft", {
     title: "Get puzzle draft",
-    description: "Return a private draft's current state.",
+    description:
+      "Return a private draft's current state. The default complete domain is " +
+      "backwards-compatible; request content or pedagogy to receive only that " +
+      "agent-facing write domain. Pedagogy includes content as read-only context. " +
+      "Provenance and system metadata are never included in focused projections.",
     inputSchema: z.object({
-      draft_id: draftIdSchema
+      draft_id: draftIdSchema,
+      domain: authoringDomainSchema
     }),
     annotations: READ_ONLY
-  }, tracked("get_puzzle_draft", safe(async ({ draft_id }) => {
+  }, tracked("get_puzzle_draft", safe(async ({ draft_id, domain = "complete" }) => {
     const stored = await draftRepository.get({ draftId: draft_id, actor });
     const registry = await categoryRegistry();
-    const draft = draftForMcp(stored, { categoryRegistry: registry });
+    const draft = domain === "complete"
+      ? draftForMcp(stored, { categoryRegistry: registry })
+      : draftForMcpDomain(stored, domain, { categoryRegistry: registry });
     // Same non-blocking flag validate_puzzle_draft surfaces, so a caller
     // that only ever reads a draft (never explicitly validates it) still
     // sees a stale-storage-shape draft worth saving to lock in.
@@ -911,11 +929,12 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the saved document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving -- the response always echoes every change made under `repair`, never silently.",
+      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server preserves the other domains and rejects fields owned by another domain; pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
       document: documentSchema,
+      domain: authoringDomainSchema,
       repair: z.boolean().optional(),
       ...publishToAuthoringInput
     }),
@@ -924,10 +943,28 @@ export function createAuthoringMcpServer({
     draft_id,
     expected_revision,
     document,
+    domain = "complete",
     repair,
     publish_to_authoring
   }, ctx) => {
-    const repaired = repair ? repairEscapedQuotes(document) : { document, changes: [] };
+    if (domain === "pedagogy" && repair) {
+      throw new Error(
+        "repair=true is only supported for complete or content domain saves"
+      );
+    }
+    let previousDocument = null;
+    const repairedInput = repair
+      ? repairEscapedQuotes(document)
+      : { document, changes: [] };
+    if (domain !== "complete") {
+      const previous = await draftRepository.get({ draftId: draft_id, actor });
+      previousDocument = documentForEditor(previous.document);
+      document = applyAuthoredDomain(previousDocument, domain, repairedInput.document);
+    }
+    const repaired = {
+      document: domain === "complete" ? repairedInput.document : document,
+      changes: repairedInput.changes
+    };
     const liveCategoryRegistry = await categoryRegistry();
     const { document: stored, normalization } = documentForDraftStore(
       repaired.document,
@@ -946,9 +983,11 @@ export function createAuthoringMcpServer({
     // ever credits". Best-effort: any failure here (e.g. draft not found)
     // is left for draftRepository.save below to raise as the real error.
     let substantial = false;
-    let previousDocument = null;
+
     try {
-      const previous = await draftRepository.get({ draftId: draft_id, actor });
+      const previous = previousDocument
+        ? { document: previousDocument }
+        : await draftRepository.get({ draftId: draft_id, actor });
       previousDocument = previous.document;
       substantial = isSubstantialChange(computeChangeScore(previous.document, stored));
     } catch {
@@ -960,6 +999,7 @@ export function createAuthoringMcpServer({
       server,
       role: "edited",
       substantial,
+      domain,
       log: stampLog("save_puzzle_draft", draft_id, stored)
     });
     const draft = await draftRepository.save({
@@ -1006,7 +1046,9 @@ export function createAuthoringMcpServer({
           ? `Saved draft ${draft_id}; current revision is ${draft.revision}. Not published: it has ${publicationErrors.length} errors.`
           : `Saved draft ${draft_id}; current revision is ${draft.revision}.`) + repairNote,
       {
-        draft: draftForMcp(draft, { categoryRegistry: null }),
+        draft: domain === "complete"
+          ? draftForMcp(draft, { categoryRegistry: null })
+          : draftForMcpDomain(draft, domain, { categoryRegistry: null }),
         ...(!normalization.document
           ? { normalization: { applied: false, errors: normalization.errors } }
           : {}),
@@ -1014,9 +1056,12 @@ export function createAuthoringMcpServer({
         ...(publish_to_authoring
           ? {
             published: published
-              ? { ...published, document: documentForMcp(published.document, {
-                categoryRegistry: null
-              }) }
+              ? (domain === "complete"
+                ? {
+                  ...published,
+                  document: documentForMcp(published.document, { categoryRegistry: null })
+                }
+                : publishedForMcpDomain(published, domain, { categoryRegistry: null }))
               : published,
             publicationErrors
           }

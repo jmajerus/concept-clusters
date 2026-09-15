@@ -268,7 +268,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The mesocyclone's rotation tightens and stretches toward the ground to become the tornado — the wall cloud and funnel are the visible signs of that parent circulation concentrating.",
       "info": "The mechanism link: this bridge is the birth process — rotation inherited from the mesocyclone is stretched and concentrated into the tornado vortex.",
-      "termRole": "connector",
       "idealTerms": [
         "mesocyclone",
         "funnel cloud"
@@ -283,7 +282,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Doppler radar and trained spotters watch the supercell's mesocyclone and hook echo, so a warning usually exists before any tornado — and sometimes no tornado ever follows.",
       "info": "The warning link: this bridge explains why tornado warnings often lead the tornado — the radar and the spotter watch the supercell's rotation rather than wait for a funnel.",
-      "termRole": "connector",
       "idealTerms": [
         "mesocyclone",
         "hook echo"
@@ -298,7 +296,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Because anemometers rarely survive a direct hit, strength is assigned afterward: the Enhanced Fujita scale reads the damage, cross-checked against radar and photogrammetry.",
       "info": "The measurement link: this bridge is why the EF scale reads damage rather than wind — the vortex destroys every gauge that tries to meet it.",
-      "termRole": "connector",
       "idealTerms": [
         null,
         "Enhanced Fujita scale"
@@ -313,7 +310,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Waterspouts and landspouts are genuine tornadoes born without supercells, but a gustnado or dust devil never connects cloud base to ground — the parent circulation is where the definition turns.",
       "info": "The definition link: this bridge is the boundary test — which parent circulation, or none, a swirl comes from decides whether it counts as a tornado.",
-      "termRole": "connector",
       "idealTerms": [
         "supercell",
         "waterspout"
@@ -328,7 +324,6 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Outbreak days and places like Tornado Alley are simply where and when the ingredients — CAPE, wind shear, dry line, Gulf moisture — reliably meet at scale.",
       "info": "The geography link: this bridge is why outbreaks and hotspots exist — climate arranges the same ingredients into favored places and days.",
-      "termRole": "connector",
       "idealTerms": [
         "CAPE",
         "Tornado Alley"

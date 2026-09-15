@@ -1,24 +1,13 @@
-// Compact current-attribution for generative-AI help on a puzzle.
-// Not an edit log: one entry per system+scope, updated in place when the
-// same assistant keeps working that scope. Credit wording comes from
+// Lesson-credit parsing and rendering helpers. Credit wording comes from
 // modules/authoringSettings.js: parse known bylines → { hosts, author },
-// then render with the preferred template.
+// then render with the preferred template. Contributor hosts are supplied by
+// current provenance rather than being stored in a separate credit array.
 import {
   AUTHORING_SETTINGS,
   fillAuthoringTemplate,
+  isKnownGenerativeSystemName,
   preferredCreditTemplateId
 } from "./authoringSettings.js";
-
-export const GENERATIVE_ASSISTANCE_SCOPES = new Set([
-  "learningIntroduction",
-  "puzzle",
-  "lenses"
-]);
-
-export const GENERATIVE_ASSISTANCE_ROLES = new Set([
-  "drafted",
-  "edited"
-]);
 
 export const MAX_LESSON_CREDIT_LENGTH = AUTHORING_SETTINGS.credit.maxLength;
 
@@ -37,84 +26,23 @@ function applyCreditLength(suggested, settings = AUTHORING_SETTINGS) {
   return suggested;
 }
 
-export function validateGenerativeAssistance(raw, label = "generativeAssistance") {
-  if (raw === undefined) return [];
-  if (!Array.isArray(raw) || raw.length === 0) {
-    return [`${label} must be a non-empty array when present`];
-  }
-  const errors = [];
-  const seen = new Set();
-  raw.forEach((entry, index) => {
-    const entryLabel = `${label}[${index}]`;
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
-      errors.push(`${entryLabel} must be an object`);
-      return;
-    }
-    if (!nonEmptyString(entry.system)) {
-      errors.push(`${entryLabel}.system must be a non-empty string`);
-    }
-    if (!GENERATIVE_ASSISTANCE_SCOPES.has(entry.scope)) {
-      errors.push(
-        `${entryLabel}.scope must be one of ${[...GENERATIVE_ASSISTANCE_SCOPES].join(", ")}`
-      );
-    }
-    if (entry.role !== undefined && !GENERATIVE_ASSISTANCE_ROLES.has(entry.role)) {
-      errors.push(
-        `${entryLabel}.role must be one of ${[...GENERATIVE_ASSISTANCE_ROLES].join(", ")} when present`
-      );
-    }
-    for (const key of ["provider", "date"]) {
-      if (entry[key] !== undefined && !nonEmptyString(entry[key])) {
-        errors.push(`${entryLabel}.${key} must be a non-empty string when present`);
-      }
-    }
-    if (entry.date !== undefined && nonEmptyString(entry.date) &&
-        !/^\d{4}-\d{2}-\d{2}$/.test(entry.date.trim())) {
-      errors.push(`${entryLabel}.date must be YYYY-MM-DD when present`);
-    }
-    if (nonEmptyString(entry.system) && GENERATIVE_ASSISTANCE_SCOPES.has(entry.scope)) {
-      const key = `${entry.system.trim().toLowerCase()}::${entry.scope}`;
-      if (seen.has(key)) {
-        errors.push(
-          `${entryLabel} duplicates system+scope "${entry.system.trim()}" / ${entry.scope}; update in place instead of appending`
-        );
-      }
-      seen.add(key);
-    }
-  });
-  return errors;
-}
-
-// Replace-or-append by case-insensitive system + scope. Callers use this
-// when stamping assistance so minor follow-up edits don't grow the list.
-export function upsertGenerativeAssistance(list, entry) {
-  const next = {
-    system: entry.system.trim(),
-    scope: entry.scope,
-    ...(entry.role ? { role: entry.role } : { role: "drafted" }),
-    ...(entry.date ? { date: entry.date.trim() } : {})
-  };
-  const key = `${next.system.toLowerCase()}::${next.scope}`;
-  const result = Array.isArray(list) ? [...list] : [];
-  const index = result.findIndex(existing =>
-    existing &&
-    typeof existing.system === "string" &&
-    `${existing.system.trim().toLowerCase()}::${existing.scope}` === key
-  );
-  if (index < 0) result.push(next);
-  else result[index] = { ...result[index], ...next };
-  return result;
-}
-
-export function systemsForLessonCredit(entries) {
+export function systemsForLessonCredit(entries, settings = AUTHORING_SETTINGS) {
   const seen = new Set();
   const systems = [];
   for (const entry of entries || []) {
-    if (entry?.scope !== "learningIntroduction" && entry?.scope !== "puzzle") {
-      continue;
-    }
-    if (!nonEmptyString(entry.system)) continue;
-    const system = entry.system.trim();
+    const value = typeof entry === "string" ? entry : entry?.name || entry?.system;
+    if (!nonEmptyString(value)) continue;
+    const isAssistanceRecord = entry && typeof entry === "object" &&
+      !nonEmptyString(entry.name) && nonEmptyString(entry.system);
+    const explicitKind = entry && typeof entry === "object" &&
+      (entry.kind === "human" || entry.kind === "generative")
+      ? entry.kind
+      : null;
+    const kind = explicitKind || (isAssistanceRecord
+      ? "generative"
+      : isKnownGenerativeSystemName(value, settings) ? "generative" : "human");
+    if (kind !== "generative") continue;
+    const system = value.trim();
     const key = system.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
@@ -210,8 +138,8 @@ export function renderLessonCredit(
 }
 
 // Player-facing fallback when learningIntroduction.credit is absent.
-export function formatAssistanceCredit(entries, settings = AUTHORING_SETTINGS) {
-  const systems = systemsForLessonCredit(entries);
+export function formatHostCredit(entries, settings = AUTHORING_SETTINGS) {
+  const systems = systemsForLessonCredit(entries, settings);
   if (!systems.length) return null;
   return renderLessonCredit({ hosts: systems, author: null }, settings);
 }
@@ -247,19 +175,19 @@ export function normalizeLessonCredit(
   } = {}
 ) {
   const credit = typeof currentCredit === "string" ? currentCredit.trim() : "";
-  const assistanceHosts = (hosts || []).map(h => String(h).trim()).filter(Boolean);
+  const hostNames = (hosts || []).map(h => String(h).trim()).filter(Boolean);
   const parsed = credit ? parseLessonCredit(credit, settings) : null;
   const author = resolveAuthorName(authorName, parsed, settings);
 
   if (!credit) {
     return applyCreditLength(
-      renderLessonCredit({ hosts: assistanceHosts, author }, settings),
+      renderLessonCredit({ hosts: hostNames, author }, settings),
       settings
     );
   }
 
   if (parsed) {
-    const mergedHosts = mergeSystemNames(parsed.hosts, assistanceHosts);
+    const mergedHosts = mergeSystemNames(parsed.hosts, hostNames);
     const suggested = renderLessonCredit(
       { hosts: mergedHosts, author: author || parsed.author },
       settings
@@ -268,8 +196,8 @@ export function normalizeLessonCredit(
     return applyCreditLength(suggested, settings);
   }
 
-  // Unknown wording: only append missing assistance hosts; never invent a rewrite.
-  const missing = assistanceHosts.filter(system =>
+  // Unknown wording: only append missing host names; never invent a rewrite.
+  const missing = hostNames.filter(system =>
     !credit.toLowerCase().includes(system.toLowerCase())
   );
   if (!missing.length || !allowOpaqueAppend) return null;
@@ -282,7 +210,7 @@ export function normalizeLessonCredit(
 }
 
 /**
- * Suggest a lesson credit line from generativeAssistance using
+ * Suggest a lesson credit line from current contributor hosts using the
  * authoringSettings credit templates. Appends newly seen hosts and rewrites
  * known variants to the preferred template. Returns null when unchanged.
  */
@@ -292,20 +220,19 @@ export function suggestLessonCredit(
   { authorName = null, settings = AUTHORING_SETTINGS } = {}
 ) {
   return normalizeLessonCredit(currentCredit, {
-    hosts: systemsForLessonCredit(entries),
+    hosts: systemsForLessonCredit(entries, settings),
     authorName,
     settings,
     allowOpaqueAppend: true
   });
 }
 
-// Human-owned lesson byline wins when present. Prefer resolveLessonByline()
-// when provenance may be available (player lesson UI). generativeAssistance
-// remains a fallback for published puzzles that never got credit or provenance.
+// Human-owned lesson byline wins when present. Use this helper when a caller
+// wants the same fallback rendering policy outside the player byline module.
 export function lessonCredit(introduction, entries, settings = AUTHORING_SETTINGS) {
   const authored = typeof introduction?.credit === "string"
     ? introduction.credit.trim()
     : "";
   if (authored) return authored;
-  return formatAssistanceCredit(entries, settings);
+  return formatHostCredit(entries, settings);
 }

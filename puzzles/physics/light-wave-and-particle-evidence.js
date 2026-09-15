@@ -192,7 +192,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": [
         "interference",
@@ -210,7 +209,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "One localized interaction exchanges a photon-sized amount of energy and momentum rather than drawing continuously from a classical wave."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "collision",

@@ -150,7 +150,6 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Illusion links geometric systems with relational cues; both use visual patterns to trick the brain into seeing depth where there is only a flat surface.",
-      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": [
         "linear perspective",
@@ -165,7 +164,6 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "Organization connects composite views with surface-oriented art; both prioritize a structured, often symbolic arrangement of elements over a naturalistic \"window\" into depth.",
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "simultaneous view",

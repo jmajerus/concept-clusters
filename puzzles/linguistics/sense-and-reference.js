@@ -242,8 +242,7 @@ export default definePuzzle(import.meta.url, {
             "href": "wiki:Sense and reference"
           }
         ]
-      },
-      "termRole": "reference"
+      }
     },
     {
       "id": "identity-statement",
@@ -253,8 +252,7 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Two signs with different senses can share the same reference, which is what makes an identity statement informative rather than trivial.",
-      "info": "The logical form 'a = b', where two expressions with different senses designate the same object — as in 'The Morning Star is the Evening Star'.",
-      "termRole": "connector"
+      "info": "The logical form 'a = b', where two expressions with different senses designate the same object — as in 'The Morning Star is the Evening Star'."
     },
     {
       "id": "telescope-analogy",
@@ -265,8 +263,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Frege compares reference to the actual moon, sense to the telescope's optical image, and representation to the observer's retinal image.",
-      "info": "Frege's own illustration of the three-way distinction: the moon (reference), its optical image in the telescope (sense), and the observer's retinal image (private representation).",
-      "termRole": "connector"
+      "info": "Frege's own illustration of the three-way distinction: the moon (reference), its optical image in the telescope (sense), and the observer's retinal image (private representation)."
     },
     {
       "id": "thought",
@@ -283,8 +280,7 @@ export default definePuzzle(import.meta.url, {
             "href": "wiki:Thought (essay)"
           }
         ]
-      },
-      "termRole": "reference"
+      }
     },
     {
       "id": "indirect-context",
@@ -301,8 +297,7 @@ export default definePuzzle(import.meta.url, {
             "href": "wiki:Opaque context"
           }
         ]
-      },
-      "termRole": "reference"
+      }
     }
   ],
   "lenses": [

@@ -2,14 +2,11 @@
 // Leftover link/extraLink/seeAlso fold into `links` when a document
 // enters a draft, and again when a stored draft is loaded for authoring,
 // so MCP tools and the copy editor always see the current schema.
-// Provenance folds legacy generativeAssistance into the two-axis record, drops
-// the retired block when provenance is present, and may fill/normalize a parseable
-// lesson byline from L1. Lesson Markdown that used the two-character sequence
-// \n instead of real line breaks is decoded the same way. Storage is not
-// rewritten on read. JSON-LD is interchange-only and is never what gets persisted,
-// but a draft saved before that was enforced may still be stored raw JSON-LD
-// (see jsonLdShapedDocumentAsSimplified below) -- that gets converted on the
-// same read pass, same "not rewritten until an explicit save" rule.
+// Provenance is normalized into the two-axis record and may fill/normalize a
+// parseable lesson byline from L1. Lesson Markdown that used the two-character
+// sequence \n instead of real line breaks is decoded the same way. Storage is
+// not rewritten on read. JSON-LD remains an interchange format, never a
+// current authoring or storage shape.
 // Category ids are the join key puzzles store. Legacy title references are
 // still folded to the current display title for the editor on read, while
 // successful saves canonicalize them to ids. The retired bridge termRole is
@@ -21,8 +18,6 @@ import {
   canonicalizeBridgeTermRoles,
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
-import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
-import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
 import { withDecodedLearningMarkdown } from "./learningIntroduction.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
@@ -31,40 +26,13 @@ import {
   canonicalizePuzzleCategoryReferences,
   categoryTitleFor
 } from "../puzzles/categories.js";
+import {
+  assertNoRetiredAuthoringFields,
+  projectAuthoredDocument,
+  stripSystemAuthoredMetadata
+} from "./authoringDomains.js";
 
 export { createPuzzleSkeleton };
-
-// Read-compatibility path for a draft stored before save_puzzle_draft
-// started rejecting JSON-LD input (docs/MCP-REMOTE.md). Converts through
-// the same interchange functions content:import/export use, so it's the
-// one existing, tested route from JSON-LD to simplified shape rather than
-// a bespoke second one. Falls through to the untouched input on a profile
-// error so a genuinely malformed document still surfaces its own error
-// downstream instead of a confusing one from this conversion attempt.
-function jsonLdShapedDocumentAsSimplified(document, categoryRegistry = CATEGORIES) {
-  if (!isJsonLdShaped(document)) return document;
-  try {
-    // Canonicalize the runtime puzzle before converting it to simplified
-    // form.  Converting first would discard fields that only live on the
-    // interchange shape (notably nested learning-introduction citations)
-    // before hoistDocumentCitations can move them to puzzle info.
-    const puzzle = puzzleFromJsonLd(document);
-    const simplified = puzzleForCanonicalPublication(puzzle, {
-      categoryRegistry: categoryRegistry || CATEGORIES
-    }).simplified;
-    if (!categoryRegistry) {
-      // A registry is optional on the read/editor projection. Preserve the
-      // source's category spelling when no live registry was supplied; the
-      // explicit storage path always passes one and canonicalizes to ids.
-      simplified.category = puzzle.category;
-      if (puzzle.categories) simplified.categories = [...puzzle.categories];
-      if (puzzle.subcategories) simplified.subcategories = structuredClone(puzzle.subcategories);
-    }
-    return simplified;
-  } catch {
-    return document;
-  }
-}
 
 // Optional lesson metadata is omitted when blank. Both the MCP document
 // input and the drafts-page controls can represent an unset optional field
@@ -90,13 +58,14 @@ function omitBlankOptionalLearningIntroductionFields(document) {
 // Link/citation folding + provenance sync. Order: provenance first so a
 // parseable credit can seed human contributors before other folds clone.
 export function canonicalizeAuthoredDocumentFields(document) {
-  return omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
+  assertNoRetiredAuthoringFields(document);
+  return stripSystemAuthoredMetadata(omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
       canonicalizeBridgeTermRoles(
         canonicalizeDocumentProvenance(document)
       )
     )
-  ));
+  )));
 }
 
 export function documentHasRetiredBridgeTermRole(document) {
@@ -106,15 +75,6 @@ export function documentHasRetiredBridgeTermRole(document) {
       bridge && typeof bridge === "object" && !Array.isArray(bridge)
       && Object.hasOwn(bridge, "termRole")
     )));
-}
-
-// `generativeAssistance` is no longer part of the active simplified/MCP
-// authoring contract. Keep a narrow presence check for corpus migration and
-// storage flags: legacy values are folded by canonicalizeDocumentProvenance,
-// while malformed values still reach the strict schema and produce an error.
-export function documentHasRetiredGenerativeAssistance(document) {
-  return !!(document && typeof document === "object" && !Array.isArray(document)
-    && Object.hasOwn(document, "generativeAssistance"));
 }
 
 // Category references are the one schema migration that changes values, not
@@ -129,9 +89,8 @@ export function canonicalizeAuthoredCategoryReferences(
 }
 
 // Shape/cardinality gate only. Incomplete-but-simplified documents stay
-// writable (`document: null` plus errors); JSON-LD is the same shape so a
-// caller that falls back to `normalization.document ?? document` still
-// needs documentForDraftStore to avoid persisting `@context`.
+// writable (`document: null` plus errors). JSON-LD is rejected by the
+// authoring schema and handled separately by the interchange boundary.
 export function normalizeAuthoredDocument(document, options = {}) {
   const canonical = canonicalizeAuthoredDocumentFields(
     canonicalizeAuthoredCategoryReferences(document, options)
@@ -279,9 +238,7 @@ function displayPuzzleCategoryTitles(document, categoryRegistry) {
  */
 export function documentForEditor(document, { categoryRegistry = null } = {}) {
   const folded = withDecodedLearningMarkdown(
-    canonicalizeAuthoredDocumentFields(
-      jsonLdShapedDocumentAsSimplified(document, categoryRegistry)
-    )
+    canonicalizeAuthoredDocumentFields(document)
   );
   return categoryRegistry ? displayPuzzleCategoryTitles(folded, categoryRegistry) : folded;
 }
@@ -300,6 +257,21 @@ export function documentForMcp(document, options = {}) {
   return result;
 }
 
+// Focused MCP domain projection. The complete document path remains the
+// compatibility contract; a domain projection is an explicit opt-in that
+// keeps protected provenance/system data out of the agent's context.
+export function documentForMcpDomain(document, domain, options = {}) {
+  const authored = documentForEditor(document, options);
+  const projection = projectAuthoredDocument(authored, domain);
+  return {
+    domain: projection.domain,
+    document: documentForMcp(projection.document, options),
+    ...(projection.context
+      ? { context: documentForMcp(projection.context, options) }
+      : {})
+  };
+}
+
 // Storage/publication boundary: editors work with display titles, but draft
 // and published documents persist stable category ids. Keeping this as a
 // named helper makes it difficult for a new write path to accidentally store
@@ -309,6 +281,11 @@ export function documentForMcp(document, options = {}) {
  * @param {{ categoryRegistry?: Record<string, any> | null }} [options]
  */
 export function documentForStorage(document, { categoryRegistry = CATEGORIES } = {}) {
+  if (isJsonLdShaped(document)) {
+    throw new Error(
+      "Storage requires the simplified authoring format; use the explicit JSON-LD import boundary first."
+    );
+  }
   const registry = categoryRegistry || CATEGORIES;
   return canonicalizeAuthoredCategoryReferences(
     documentForEditor(document, { categoryRegistry: registry }),
@@ -330,24 +307,47 @@ export function draftForMcp(draft, options = {}) {
   return { ...draft, document: documentForMcp(draft.document, options) };
 }
 
+export function draftForMcpDomain(draft, domain, options = {}) {
+  if (!draft || typeof draft !== "object") return draft;
+  const projection = documentForMcpDomain(draft.document, domain, options);
+  return {
+    ...(draft.draftId !== undefined ? { draftId: draft.draftId } : {}),
+    ...(draft.revision !== undefined ? { revision: draft.revision } : {}),
+    domain: projection.domain,
+    document: projection.document,
+    ...(projection.context ? { context: projection.context } : {})
+  };
+}
+
+// Focused publish responses carry only the identity and revision needed to
+// correlate the result. The complete response remains unchanged for existing
+// clients, while scoped responses do not echo publication timestamps, hashes,
+// or actor metadata back into the agent context.
+export function publishedForMcpDomain(record, domain, options = {}) {
+  if (!record || typeof record !== "object") return record;
+  const projection = documentForMcpDomain(record.document, domain, options);
+  return {
+    ...(record.kind !== undefined ? { kind: record.kind } : {}),
+    ...(record.id !== undefined ? { id: record.id } : {}),
+    ...(record.revision !== undefined ? { revision: record.revision } : {}),
+    domain: projection.domain,
+    document: projection.document,
+    ...(projection.context ? { context: projection.context } : {})
+  };
+}
+
 export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
 
 const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
-    "This stored draft still uses legacy link, citation, generative-assistance, provenance, or bridge-role fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, and unclassified bridge terms). The folded form is already what authoring tools show; storage does not change until you save."
+    "This stored draft still uses legacy link, citation, provenance, bridge-role, or repository-metadata fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, unclassified bridge terms, and infrastructure-owned lifecycle metadata outside the document). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
 const SAVE_RENAMED_CATEGORIES_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
     "This stored draft still cites a category by a retired title (the category has since been renamed). Authoring tools already show the current title; save to persist it. Storage does not change until you save."
-});
-
-const SAVE_JSONLD_TO_CANONICALIZE_FLAG = Object.freeze({
-  id: SAVE_TO_CANONICALIZE_FLAG_ID,
-  message:
-    "This stored draft is legacy JSON-LD interchange data. Save canonical form to rewrite it as the simplified authoring format used by Board and Play."
 });
 
 function withStableProvenanceKeyOrder(document) {
@@ -372,7 +372,6 @@ export function storedDocumentNeedsCanonicalSave(document) {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     return false;
   }
-  if (isJsonLdShaped(document)) return true;
   try {
     // Field folding only. Lesson Markdown newline decoding is a separate
     // ingest repair and must not raise this flag. Provenance key order alone
@@ -403,11 +402,7 @@ export function withStorageCanonicalizeFlags(storedDocument, validation, {
 } = {}) {
   const flags = Array.isArray(validation?.flags) ? [...validation.flags] : [];
   if (storedDocumentNeedsCanonicalSave(storedDocument)) {
-    flags.push({
-      ...(isJsonLdShaped(storedDocument)
-        ? SAVE_JSONLD_TO_CANONICALIZE_FLAG
-        : SAVE_TO_CANONICALIZE_FLAG)
-    });
+    flags.push({ ...SAVE_TO_CANONICALIZE_FLAG });
   } else if (storedDocumentCitesRenamedCategory(storedDocument, categoryRegistry)) {
     flags.push({ ...SAVE_RENAMED_CATEGORIES_FLAG });
   }
@@ -430,6 +425,10 @@ export function documentForDraftStore(supplied, createSkeleton, { categoryRegist
     };
   }
   const normalization = normalizeAuthoredDocument(supplied, { categoryRegistry: categoryRegistry || CATEGORIES });
+  // Invalid simplified documents remain writable as intermediate drafts so
+  // authoring can repair them incrementally. JSON-LD is different: it is a
+  // valid interchange shape, but never a valid current draft shape, so do
+  // not let the intermediate-document fallback persist it unchanged.
   if (isJsonLdShaped(supplied)) {
     return { document: null, normalization };
   }

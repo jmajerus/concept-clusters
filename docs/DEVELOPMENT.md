@@ -112,9 +112,9 @@ anything ever imports from it directly):
 | `playerSessionStore.js` | Versioned per-puzzle local progress records | `starLayoutSchema.js` for the puzzle revision fingerprint |
 | `puzzleManifest.js` | Non-serializing puzzle module origins plus package-scoped local resource resolution | browser/Node URL APIs only |
 | `learningIntroduction.js` | Learning-introduction normalization, gating, and lazy Markdown loading | `puzzleManifest.js` |
-| `learningIntroductionStore.js` | Revision-aware read/skipped acknowledgement records | nothing — caller supplies storage |
+| `learningIntroductionStore.js` | Content-fingerprint-aware read/skipped acknowledgement records | nothing — caller supplies storage |
 | `learningIntroductionElement.js` | Controlled `<cc-learning-introduction>` offer/review dialog | `learningIntroduction.js`, `puzzleManifest.js`, `safeMarkdown.js`, `generativeAssistance.js` |
-| `generativeAssistance.js` | Legacy AI-assistance import/player-credit helpers (current authoring attribution is `provenance`) | nothing — pure |
+| `generativeAssistance.js` | Lesson-credit parsing/rendering helpers; current authoring attribution comes from `provenance` | nothing — pure |
 | `safeMarkdown.js` | DOM-built safe Markdown subset; no raw-HTML insertion | browser DOM APIs only |
 | `learningIntroductionValidation.js` | Node-side manifest, Markdown, and packaged-image validation | Node file APIs plus the learning/resource modules |
 | `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |
@@ -228,9 +228,10 @@ changed content.
 
 Learning-introduction acknowledgement deliberately uses a separate
 `ccLearningIntroduction:v1:<puzzle-id>` record. It stores only `read` or
-`skipped` plus the introduction revision; resetting board progress therefore
-does not make a learner repeat preparatory material, while an author can bump
-the lesson revision independently of puzzle topology.
+`skipped` plus a server-derived content fingerprint;
+resetting board progress therefore does not make a learner repeat preparatory
+material, and changing the lesson automatically invalidates stale
+acknowledgement without asking an author to bump a field.
 
 ## Concept Lens lifecycle
 

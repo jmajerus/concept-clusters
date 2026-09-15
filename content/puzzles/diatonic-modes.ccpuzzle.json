@@ -261,8 +261,7 @@
     "estimatedMinutes": 3,
     "content": {
       "text": "## Seven scales, one set of notes\n\nPlay only the white keys on a piano, but start on a different one each time, and you get seven different-sounding scales — the same seven pitches, rearranged around a different home note, or tonic. Each starting point is a **mode**: Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian, and Locrian.\n\nTwo of them are already familiar under other names. Starting on C gives the ordinary major scale; starting on A gives the natural minor scale. The other five sit at various points in between, each with a personality of its own — brighter than major, darker than minor, or somewhere in the shifting middle.\n\nMusic theorists often rank the seven modes from brightest to darkest by counting how far each one strays from the major scale's pattern of whole and half steps. As you sort the terms below, listen for whether a mode's most distinctive quality comes from its third scale degree — the one that decides whether a scale sounds major or minor in the first place — or from somewhere else entirely."
-    },
-    "revision": 1
+    }
   },
   "provenance": {
     "collaboration": "ai",

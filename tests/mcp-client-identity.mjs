@@ -6,15 +6,14 @@ import {
   preferredLessonCreditExample
 } from "../modules/authoringSettings.js";
 import {
-  formatAssistanceCredit,
+  formatHostCredit,
   formatDirectedCredit,
   formatSystemsList,
   normalizeLessonCredit,
   parseLessonCredit,
   parseSystemsList,
   renderLessonCredit,
-  suggestLessonCredit,
-  upsertGenerativeAssistance
+  suggestLessonCredit
 } from "../modules/generativeAssistance.js";
 import {
   identifyMcpAssistanceClient,
@@ -196,7 +195,7 @@ export async function run() {
     null
   );
   assert.equal(
-    formatAssistanceCredit([
+    formatHostCredit([
       { system: "Cursor", scope: "puzzle" },
       { system: "Claude Code", scope: "puzzle" }
     ]),
@@ -414,17 +413,15 @@ export async function run() {
     "Codex"
   );
 
-  // role "edited" (save_puzzle_draft) must fold existing generativeAssistance
-  // into provenance but must NOT auto-credit the calling MCP client -- a
+  // role "edited" (save_puzzle_draft) must not auto-credit the calling MCP
+  // client -- a
   // later save is functionally the same act as a human editing the working
   // copy on /admin/drafts, which never auto-credits a contributor either.
   const { document: stamped } = stampDocumentAssistanceFromMcp(
     {
       id: "demo",
       learningIntroduction: { requirement: "optional", content: { text: "Hi" } },
-      generativeAssistance: [
-        { system: "Cursor", scope: "puzzle", role: "drafted", date: "2026-08-01" }
-      ]
+      provenance: { collaboration: "ai", contributors: [{ name: "Cursor" }] }
     },
     {
       role: "edited",
@@ -441,7 +438,6 @@ export async function run() {
     stamped.provenance.contributors.map(entry => entry.name).sort(),
     ["Cursor"]
   );
-  assert.equal(stamped.generativeAssistance, undefined);
 
   const { document: againDoc } = stampDocumentAssistanceFromMcp(stamped, {
     role: "edited",
@@ -457,7 +453,6 @@ export async function run() {
     againDoc.provenance.contributors.map(entry => entry.name).sort(),
     ["Cursor"]
   );
-  assert.equal(againDoc.generativeAssistance, undefined);
 
   // role "edited" with substantial:true (a real drafting pass through
   // save_puzzle_draft, per an upstream computeChangeScore/isSubstantialChange
@@ -530,10 +525,4 @@ export async function run() {
     ["Claude", "Claude Code"]
   );
 
-  const merged = upsertGenerativeAssistance(
-    [{ system: "Cursor", scope: "puzzle", role: "drafted" }],
-    { system: "Cursor", scope: "puzzle", role: "edited", date: "2026-08-26" }
-  );
-  assert.equal(merged.length, 1);
-  assert.equal(merged[0].role, "edited");
 }

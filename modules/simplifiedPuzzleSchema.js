@@ -2,13 +2,13 @@
 // never write @context/@id/@type/schemaVersion, and never keep a cluster or
 // bridge's own id/@id pair in sync by hand.
 //
-// "Simplified" means the identity ceremony is gone, not that features are
-// gone: every current puzzle-content field the interchange JSON-LD format can
-// express, this format can too. Legacy bridge termRole and
-// generativeAssistance are migration-only and are removed before this schema
-// is parsed. JSON-LD is interchange-only
-// (content:export/import), never a stored draft. Live authoring uses
-// puzzleFromAuthoredDocument() to reach the runtime puzzle model.
+// "Simplified" means the identity ceremony is gone while authored puzzle
+// content remains available. Repository-owned lifecycle metadata is excluded:
+// the infrastructure supplies dates, revisions, hashes, and status outside
+// this document. Legacy bridge termRole is migration-only and is removed before
+// this schema is parsed. JSON-LD is interchange-only (content:export/import),
+// never a stored draft. Live authoring uses puzzleFromAuthoredDocument() to
+// reach the runtime puzzle model.
 import * as z from "zod/v4";
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import { lessonCreditFieldDescription } from "./authoringSettings.js";
@@ -23,6 +23,7 @@ import {
 import {
   MAX_LESSON_CREDIT_LENGTH
 } from "./generativeAssistance.js";
+import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
 import {
   decodeAuthoredEscapedNewlines,
   LEARNING_MEDIA_TYPE,
@@ -239,10 +240,6 @@ const LearningIntroductionSchema = z.object({
   links: z.array(LinkEntrySchema).min(1).optional(),
   // Bibliographic references live on puzzle info.citations only. Leftover
   // learningIntroduction.citations still fold up via hoistDocumentCitations.
-  // Cache-invalidation key for locally-stored reading progress
-  // (modules/learningIntroductionStore.js); bump it when content changes
-  // enough that stale local progress should be discarded. Defaults to 1.
-  revision: z.union([z.string().min(1), z.number()]).optional()
 }).strict();
 
 const ClusterSchema = z.object({
@@ -328,10 +325,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   creator: z.string().min(1).optional(),
   license: z.string().min(1).optional(),
   derivedFrom: z.string().min(1).optional(),
-  dateCreated: z.string().min(1).optional(),
-  dateModified: z.string().min(1).optional(),
-  language: z.string().min(1).optional(),
-  version: z.union([z.string().min(1), z.number()]).optional()
+  language: z.string().min(1).optional()
 }).strict();
 
 function isObject(value) {
@@ -501,9 +495,7 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
       mediaType: LEARNING_MEDIA_TYPE,
       text: decodeAuthoredEscapedNewlines(input.learningIntroduction.content.text)
     },
-    ...(input.learningIntroduction.links ? { links: clone(input.learningIntroduction.links) } : {}),
-    ...(input.learningIntroduction.revision !== undefined
-      ? { revision: input.learningIntroduction.revision } : {})
+    ...(input.learningIntroduction.links ? { links: clone(input.learningIntroduction.links) } : {})
   } : undefined;
 
   return {
@@ -527,10 +519,7 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     ...(input.creator ? { creator: input.creator } : {}),
     ...(input.license ? { license: input.license } : {}),
     ...(input.derivedFrom ? { derivedFrom: input.derivedFrom } : {}),
-    ...(input.dateCreated ? { dateCreated: input.dateCreated } : {}),
-    ...(input.dateModified ? { dateModified: input.dateModified } : {}),
-    ...(input.language ? { language: input.language } : {}),
-    ...(input.version ? { version: input.version } : {})
+    ...(input.language ? { language: input.language } : {})
   };
 }
 
@@ -561,7 +550,9 @@ export function authoredDocumentForSchema(input, { categoryRegistry = CATEGORIES
     canonicalizeDocumentInfoLinks(
       canonicalizeBridgeTermRoles(
         canonicalizePuzzleCategoryReferences(
-          canonicalizeDocumentProvenance(input),
+          canonicalizeDocumentProvenance(
+            stripSystemAuthoredMetadata(input)
+          ),
           categoryRegistry
         )
       )

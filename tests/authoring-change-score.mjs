@@ -114,7 +114,7 @@ export async function run() {
   const substantialScore = computeChangeScore(before, substantialDraft);
   assert.equal(isSubstantialChange(substantialScore), true);
 
-  // provenance / generativeAssistance are excluded from the diff -- an
+  // Provenance is excluded from the diff -- an
   // otherwise-trivial save that also happens to carry a provenance edit
   // (e.g. a human's own model-specificity edit round-tripping through the
   // same document) must not itself trip the trigger.

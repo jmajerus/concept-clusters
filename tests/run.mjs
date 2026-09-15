@@ -66,6 +66,7 @@ import * as draftReviewDiff from "./draft-review-diff.mjs";
 import * as draftReviewEdit from "./draft-review-edit.mjs";
 import * as localDraftReview from "./local-draft-review.mjs";
 import * as mcpAuthoring from "./mcp-authoring.mjs";
+import * as mcpAuthoringDomains from "./mcp-authoring-domains.mjs";
 import * as mcpAuthoringContract from "./mcp-authoring-contract.mjs";
 import * as mcpAuthoringAnalytics from "./mcp-authoring-analytics.mjs";
 import * as mcpTaxonomy from "./mcp-taxonomy.mjs";
@@ -81,6 +82,7 @@ import * as puzzleBoardSize from "./puzzle-board-size.mjs";
 import * as authoringSplitBoardPlanner from "./authoring-split-board-planner.mjs";
 import * as authoringAssistanceLog from "./authoring-assistance-log.mjs";
 import * as authoringChangeScore from "./authoring-change-score.mjs";
+import * as authoringDomains from "./authoring-domains.mjs";
 import * as localGitHubConfig from "./local-github-config.mjs";
 import * as localD1Workspace from "./local-d1-workspace.mjs";
 import * as loadProjectEnv from "./load-project-env.mjs";
@@ -102,12 +104,13 @@ import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 
 const allTests = [
+  mcpAuthoringDomains,
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
   starDetangle, starPrettyPrint, starLayoutAuthoring, starFreeStrip, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, authoringChangeScore, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, authoringChangeScore, authoringDomains, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
@@ -118,13 +121,14 @@ const allTests = [
 // default. Adding a test to allTests guarantees extended coverage; add it here
 // only when it is both high-signal for routine edits and consistently cheap.
 const quickTests = [
+  mcpAuthoringDomains,
   mobileLayout,
   bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
   nodeCaseAudit,
   learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,
-  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
+  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore, authoringDomains, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
   librarySearchEngine, geometryVisibleSegment, categoryReferenceMigration, contentCanonicalization
 ];
 

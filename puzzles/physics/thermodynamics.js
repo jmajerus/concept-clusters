@@ -312,7 +312,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": [
         "temperature",
         "zeroth law"
@@ -334,7 +333,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": [
         "temperature",
         "third law"
@@ -356,7 +354,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": [
         "Carnot cycle",
         "second law"
@@ -378,7 +375,6 @@ export default definePuzzle(import.meta.url, {
           }
         ]
       },
-      "termRole": "reference",
       "idealTerms": [
         "heat",
         "heat engine"

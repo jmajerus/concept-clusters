@@ -158,7 +158,6 @@
       ],
       "fact": "'Those who have force on loan from fate count on it too much and are destroyed.' The wielder is only ever borrowing. When he exceeds the measure of force at his disposal — which he inevitably will, since nothing interposes reflection between impulse and act — the return is automatic. Weil calls this operation 'geometrically rigorous.' It is what makes the wielder's fate structurally the same as the victim's: force is not a possession, only ever a passage, and the wielder is a future victim from the moment he mistakes it for his own.",
       "info": "The automatic operation by which the wielder eventually becomes the next victim. Weil identifies it as the main subject of Greek thought: 'Under the name of Nemesis, it functions as the mainspring of Aeschylus's tragedies.'",
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "the-empire-of-force": "excess",
@@ -174,7 +173,6 @@
       ],
       "fact": "'To respect life in somebody else when you have had to castrate yourself of all yearning for it demands a truly heartbreaking exertion of the powers of generosity.' What the wielder has lost — the capacity to see another's life as one might see one's own — is exactly what a moment of grace requires. Same faculty, absent in one condition and briefly summoned in the other.",
       "info": "Weil's specific term for the exertion that makes grace possible — the recognition of another's life as one might recognize one's own, mustered by someone who has otherwise had to castrate that yearning in himself.",
-      "termRole": "connector",
       "relationKind": "cross-cutting",
       "idealTerms": {
         "the-empire-of-force": "blindness",
@@ -190,7 +188,6 @@
       ],
       "fact": "Weil closes: 'the sense of human misery is a pre-condition of justice and love. He who does not realize to what extent shifting fortune and necessity hold in subjection every human spirit, cannot regard as fellow-creatures nor love as he loves himself those whom chance separated from him by an abyss.' The reduced person is not a category apart; he is what one might be. Grace comes only to those who have measured this — Achilles feeds Priam because he sees his own father in Priam's face.",
       "info": "Weil's phrase for the shared human condition — 'this subjection is the common lot' — and, in her closing thesis, the precondition for love and justice.",
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": {
         "the-reduction-to-a-thing": "the suppliant",
@@ -213,7 +210,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": {
         "the-empire-of-force": "blind force",
@@ -292,8 +288,7 @@
     "estimatedMinutes": 4,
     "content": {
       "text": "Simone Weil wrote this essay in the final months of 1940, in Marseille, after France fell to Nazi Germany. She was thirty-one, a philosopher, and — under Vichy's new anti-Jewish laws — a Jew barred from publishing under her own name, so she signed the essay \"Émile Novis\" instead. The subject she chose was Homer's *Iliad*, and the claim she opened with was direct: \"The true hero, the true subject, the center of the Iliad is force.\"\n\nWeil's method is not commentary. She defines force by what it does: force is what turns anyone subjected to it into a thing. Her claim is that this operation runs the entire poem, and that a reader who watches for it sees the Iliad's real subject.\n\nThen she reaches the essay's harder claim. Force does not spare its wielders. Whatever it does to those it touches, it also does — in a different fashion — to those who wield it. The wielder is not the exception to force's operation; he is its second case.\n\nAnd then, briefly, the essay turns to what it calls grace — the rare moments when force loses its grip on someone. These moments are \"brief and celestial,\" Weil says, and the poem's greatness, for her, is that it shows them without pretending they are anything more."
-    },
-    "revision": 1
+    }
   },
   "provenance": {
     "collaboration": "aiPrimary",

@@ -366,8 +366,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://craftinginterpreters.com/",
         "label": "Crafting Interpreters (Nystrom)"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "ai",

@@ -275,7 +275,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": {
         "cluster-longinian-elevation": "transport",
@@ -303,7 +302,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "cross-cutting",
       "idealTerms": {
         "cluster-burkean-sublime": "vastness",
@@ -331,7 +329,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "contrast"
     }
   ],
@@ -416,8 +413,7 @@
         "href": "https://plato.stanford.edu/entries/kant-aesthetics/",
         "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology"
       }
-    ],
-    "revision": 1
+    ]
   },
   "provenance": {
     "collaboration": "humanPrimary",

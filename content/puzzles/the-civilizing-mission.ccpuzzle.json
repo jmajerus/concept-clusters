@@ -262,7 +262,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": {
         "mills-civilizational-threshold": "civilized nations",
@@ -285,7 +284,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": {
         "mission-civilisatrice": "mission civilisatrice",
@@ -313,7 +311,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": {
         "democratic-peace-theory": "monadic peace",

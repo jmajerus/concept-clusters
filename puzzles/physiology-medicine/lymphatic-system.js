@@ -247,7 +247,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The venous endpoint where the lymphatic return route delivers its fluid and lipid cargo back to blood."
       },
-      "termRole": "connector",
       "idealTerms": [
         "thoracic duct",
         "lymph"
@@ -264,7 +263,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The handoff where cargo carried into lymphoid tissue becomes a signal lymphocytes can respond to."
       },
-      "termRole": "connector",
       "idealTerms": [
         "lymph nodes",
         "dendritic cells"

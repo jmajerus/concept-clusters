@@ -294,7 +294,6 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The connector is the recorded ion signal: acquisition produces it, and identification and reuse depend on being able to examine it."
       },
-      "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": [
         "precursor ion",

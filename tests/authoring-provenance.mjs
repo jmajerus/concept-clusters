@@ -12,7 +12,6 @@ import {
   normalizeGenerativeContributorDisplayName,
   normalizeAuthoringProvenance,
   normalizeReasoningLevel,
-  provenanceFromGenerativeAssistance,
   reconcileCollaboration,
   renderProvenanceL1,
   renderProvenanceL2,
@@ -146,21 +145,6 @@ export async function run() {
     "aiPrimary"
   );
 
-  assert.deepEqual(
-    provenanceFromGenerativeAssistance([
-      { system: "Cursor", scope: "puzzle" },
-      { system: "Cursor", scope: "learningIntroduction" },
-      { system: "Claude", scope: "puzzle", provider: "Anthropic" }
-    ]),
-    {
-      collaboration: "ai",
-      contributors: [
-        { name: "Cursor" },
-        { name: "Claude" }
-      ]
-    }
-  );
-
   const { document: stamped } = stampDocumentAssistanceFromMcp(
     { id: "demo", title: "Demo" },
     {
@@ -178,7 +162,6 @@ export async function run() {
   );
   assert.equal(stamped.provenance?.collaboration, "ai");
   assert.deepEqual(stamped.provenance?.contributors, [{ name: "Cursor" }]);
-  assert.equal(stamped.generativeAssistance, undefined);
 
   const { document: zcodeStamped } = stampDocumentAssistanceFromMcp(
     { id: "zcode-demo", title: "ZCode demo" },
@@ -448,22 +431,17 @@ export async function run() {
   );
   assert.deepEqual(modelKept.contributors, [{ name: "Cursor (Grok 4.6)" }]);
 
-  assert.deepEqual(
-    listGenerativeContributorsForEdit({
-      generativeAssistance: [{ system: "Cursor", provider: "Cursor" }]
-    }),
-    [{ host: "Cursor", model: "", reasoning: "", switch: "" }]
-  );
-
   const withModel = applyGenerativeContributorModel({
-    generativeAssistance: [{ system: "Cursor", provider: "Cursor", scope: "puzzle" }],
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }]
+    },
     learningIntroduction: {
       requirement: "optional",
       content: { text: "Body." }
     }
   }, { host: "Cursor", model: "auto" });
   assert.deepEqual(withModel.provenance.contributors, [{ name: "Cursor (auto)" }]);
-  assert.equal(withModel.generativeAssistance, undefined);
   assert.equal(
     resolveLessonByline({ provenance: withModel.provenance }),
     "Drafted with Cursor (auto)"
@@ -496,10 +474,6 @@ export async function run() {
   );
 
   const overridden = applyProvenanceCollaboration({
-    generativeAssistance: [
-      { system: "Codex (GPT-5.6 Sol)", provider: "OpenAI", scope: "puzzle" },
-      { system: "Cursor", provider: "Cursor", scope: "puzzle" }
-    ],
     learningIntroduction: {
       requirement: "optional",
       content: { text: "Body." },
@@ -516,8 +490,6 @@ export async function run() {
     collaboration: "humanPrimary",
     authorName: "John Majerus"
   });
-  // The generativeAssistance fold re-upserts by exact host key, so the
-  // pre-existing Codex contributor row is updated in place, not appended.
   assert.equal(overridden.provenance.collaboration, "humanPrimary");
   assert.deepEqual(overridden.provenance.contributors, [
     { name: "Codex (GPT-5.6 Sol)" },
@@ -532,13 +504,8 @@ export async function run() {
     }),
     "By Codex (GPT-5.6 Sol) and Cursor, with editorial direction by John Majerus"
   );
-  assert.equal(overridden.generativeAssistance, undefined);
-
   const folded = canonicalizeDocumentProvenance({
     id: "fold-me",
-    generativeAssistance: [
-      { system: "Cursor", scope: "puzzle", provider: "Cursor" }
-    ],
     learningIntroduction: {
       requirement: "optional",
       content: { text: "Hello." },
@@ -552,7 +519,6 @@ export async function run() {
     resolveLessonByline({ provenance: folded.provenance }),
     "By Cursor, with editorial direction by Jane Doe"
   );
-  assert.equal(folded.generativeAssistance, undefined);
 
   const keptReviewer = canonicalizeDocumentProvenance({
     id: "keep-reviewer",
@@ -570,7 +536,10 @@ export async function run() {
 
   const filled = canonicalizeDocumentProvenance({
     id: "fill-credit",
-    generativeAssistance: [{ system: "Claude", scope: "puzzle" }],
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Claude" }]
+    },
     learningIntroduction: {
       requirement: "optional",
       content: { text: "Body." }
@@ -582,7 +551,6 @@ export async function run() {
     resolveLessonByline({ provenance: filled.provenance }),
     "Drafted with Claude"
   );
-  assert.equal(filled.generativeAssistance, undefined);
 
   const geminiCredit = canonicalizeDocumentProvenance({
     id: "how-art-represents-space",
@@ -613,7 +581,10 @@ export async function run() {
 
   const opaque = canonicalizeDocumentProvenance({
     id: "opaque-credit",
-    generativeAssistance: [{ system: "Cursor", scope: "puzzle" }],
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }]
+    },
     learningIntroduction: {
       requirement: "optional",
       content: { text: "Body." },
@@ -622,26 +593,21 @@ export async function run() {
   });
   assert.equal(opaque.learningIntroduction.credit, "Custom freeform credit line");
   assert.equal(opaque.provenance.collaboration, "ai");
-  assert.equal(opaque.generativeAssistance, undefined);
 
   const composed = canonicalizeAuthoredDocumentFields({
     id: "compose",
     info: { text: "Note", link: "wiki:Note" },
-    generativeAssistance: [{ system: "Cursor", scope: "puzzle" }]
+    provenance: { collaboration: "ai", contributors: [{ name: "Cursor" }] }
   });
   assert.deepEqual(composed.info.links, [{ href: "wiki:Note" }]);
   assert.equal(composed.info.link, undefined);
   assert.equal(composed.provenance.collaboration, "ai");
-  assert.equal(composed.generativeAssistance, undefined);
 
   const { puzzleForCanonicalPublication } = await import("../modules/puzzleSimplified.js");
   const published = puzzleForCanonicalPublication({
     id: "publish-strip",
     title: "Publish strip",
     category: "Science",
-    generativeAssistance: [
-      { system: "Cursor", scope: "puzzle", role: "edited", date: "2026-08-27" }
-    ],
     provenance: {
       collaboration: "ai",
       contributors: [{ name: "Cursor" }]
@@ -665,7 +631,6 @@ export async function run() {
     bridges: []
   });
   assert.equal(published.simplified.provenance?.collaboration, "ai");
-  assert.equal(published.simplified.generativeAssistance, undefined);
 
   // Legacy document-wide reasoning/switch (pre-per-client) fold onto the
   // sole generative contributor -- the only case where "whose was this" is

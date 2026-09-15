@@ -8,10 +8,11 @@
 // for the authoring-facing version of this reference.
 //
 // "Simplified" means no @context/@id/@type/schemaVersion and no
-// cluster/bridge @id to hand-sync with id -- not a cut-down feature set.
-// Every current puzzle-content field JSON-LD can express, this schema can too.
-// Legacy JSON-LD bridge termRole and generativeAssistance are accepted only
-// during import and removed before simplified validation.
+// cluster/bridge @id to hand-sync with id. Repository-owned timestamps and
+// revision metadata are intentionally absent; infrastructure and the explicit
+// JSON-LD interchange adapter own those values.
+// Legacy JSON-LD bridge termRole is accepted only during import and removed
+// before simplified validation.
 // Category references are stable ids; the authoring server accepts legacy
 // display titles only while reading and canonicalizes them before storage.
 import { z } from "zod";
@@ -225,10 +226,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   creator: z.string().min(1).optional(),
   license: z.string().min(1).optional(),
   derivedFrom: z.string().min(1).optional(),
-  dateCreated: z.string().min(1).optional(),
-  dateModified: z.string().min(1).optional(),
-  language: z.string().min(1).optional(),
-  version: z.string().min(1).optional()
+  language: z.string().min(1).optional()
 }).strict();
 
 export type SimplifiedPuzzleInput = z.infer<typeof SimplifiedPuzzleInputSchema>;

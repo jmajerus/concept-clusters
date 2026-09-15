@@ -191,7 +191,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": {
         "glomerular-filtration": "glomerulus",
@@ -215,7 +214,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "tubular-reabsorption": "reabsorption",

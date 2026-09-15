@@ -15,6 +15,7 @@ import {
 import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
+import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -47,14 +48,14 @@ function stableIds(items, labelFor) {
 // format, by repository/content-interchange publication to write the
 // canonical content/puzzles/<id>.ccpuzzle.json file, and by content:export
 // as the simplified-shaped sibling of puzzleToJsonLd. Round-trips current
-// fields losslessly: bridge/cluster ids are always carried explicitly (never
-// left to re-derivation), and a cluster's terms order is always set explicitly
-// via the `terms` override field (see ClusterSchema in
+// authored fields losslessly: bridge/cluster ids are always carried explicitly
+// (never left to re-derivation), and a cluster's terms order is always set
+// explicitly via the `terms` override field (see ClusterSchema in
 // simplifiedPuzzleSchema.js), even when it happens to already equal
 // seeds-then-floatingTerms, so this never depends on floatingTerms order
-// reconstructing anything. Retired legacy bridge termRole is intentionally
-// omitted from the current projection. Retired generativeAssistance is folded
-// into provenance before projection when a legacy runtime module still has it.
+// reconstructing anything. Repository-owned timestamps and revision fields
+// are intentionally omitted; the explicit JSON-LD adapter owns their
+// interchange representation.
 export function puzzleToSimplified(
   puzzle,
   {
@@ -63,10 +64,6 @@ export function puzzleToSimplified(
     categoryRegistry
   } = {}
 ) {
-  // Runtime modules from before the provenance migration may still carry the
-  // legacy generative-assistance array. Canonicalize that read projection too
-  // so authoring/interchange callers do not silently lose attribution merely
-  // because they bypassed the publication wrapper.
   const withProvenance = canonicalizeDocumentProvenance(puzzle);
   const source = canonicalCategories
     ? canonicalizePuzzleCategoryReferences(withProvenance, categoryRegistry)
@@ -130,9 +127,7 @@ export function puzzleToSimplified(
       ? { credit: source.learningIntroduction.credit } : {}),
     content: { text: learningContent !== null ? learningContent : source.learningIntroduction.content.text },
     ...(source.learningIntroduction.links ? { links: clone(source.learningIntroduction.links) } : {}),
-    ...(source.learningIntroduction.sources ? { sources: clone(source.learningIntroduction.sources) } : {}),
-    ...(source.learningIntroduction.revision !== undefined
-      ? { revision: source.learningIntroduction.revision } : {})
+    ...(source.learningIntroduction.sources ? { sources: clone(source.learningIntroduction.sources) } : {})
   } : undefined;
 
   return {
@@ -156,10 +151,7 @@ export function puzzleToSimplified(
     ...(source.creator ? { creator: source.creator } : {}),
     ...(source.license ? { license: source.license } : {}),
     ...(source.derivedFrom ? { derivedFrom: source.derivedFrom } : {}),
-    ...(source.dateCreated ? { dateCreated: source.dateCreated } : {}),
-    ...(source.dateModified ? { dateModified: source.dateModified } : {}),
-    ...(source.language ? { language: source.language } : {}),
-    ...(source.version ? { version: source.version } : {})
+    ...(source.language ? { language: source.language } : {})
   };
 }
 
@@ -168,13 +160,12 @@ export function puzzleToSimplified(
 // legacy runtime modules.
 //
 // Install and publication replace the puzzle as one JSON blob. That write
-// is when leftover link/extraLink/seeAlso become `links` puzzle-wide,
-// legacy generativeAssistance folds into two-axis provenance and is dropped,
-// and puzzleToSimplified emits only the current schema fields.
+// is when leftover link/extraLink/seeAlso become `links` puzzle-wide and
+// puzzleToSimplified emits only the current schema fields.
 export function puzzleForCanonicalPublication(puzzle, options) {
   const next = hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
-      canonicalizeDocumentProvenance(clone(puzzle))
+      stripSystemAuthoredMetadata(canonicalizeDocumentProvenance(clone(puzzle)))
     )
   );
   const canonical = canonicalizePuzzleCategoryReferences(

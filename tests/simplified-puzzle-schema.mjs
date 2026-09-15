@@ -176,26 +176,8 @@ export async function run() {
     assert.ok(result.errors.some(e => e.includes("description")));
   }
 
-  // Legacy generativeAssistance is no longer an active simplified/MCP field.
-  // The compatibility boundary folds valid entries into provenance before
-  // the strict schema sees them; malformed values remain schema errors.
-  {
-    const input = validPuzzle({
-      generativeAssistance: [{ system: "Claude", scope: "puzzle", role: "drafted" }]
-    });
-    assert.equal(SimplifiedPuzzleInputSchema.safeParse(input).success, false);
-    const { puzzle, errors } = puzzleFromAuthoredDocument(input);
-    assert.deepEqual(errors, []);
-    assert.equal(puzzle.generativeAssistance, undefined);
-    assert.equal(puzzle.provenance.collaboration, "ai");
-    assert.deepEqual(puzzle.provenance.contributors, [{ name: "Claude" }]);
-    const normalized = normalizeAuthoredPuzzleDocument(input);
-    assert.deepEqual(normalized.errors, []);
-    assert.equal(normalized.document.generativeAssistance, undefined);
-    assert.equal(normalized.document.provenance.collaboration, "ai");
-  }
-
-  // Already-JSON-LD-shaped input passes through unchanged, untouched.
+  // Already-JSON-LD-shaped input remains available to the explicit
+  // interchange normalizer, untouched.
   {
     const jsonld = { "@context": "https://concept-clusters.org/context/v1", id: "x" };
     assert.equal(isJsonLdShaped(jsonld), true);
@@ -459,6 +441,36 @@ export async function run() {
     assert.equal(document.creator, "Jane Doe");
     assert.equal(document.license, "CC-BY-4.0");
     assert.equal(document.language, "en");
+  }
+
+  // Repository-owned dates, version, and lesson-progress revision are not
+  // part of the authoring contract. Legacy values are accepted only by the
+  // compatibility fold and disappear before the simplified document is
+  // materialized.
+  {
+    const legacyMetadata = validPuzzle({
+      dateCreated: "2026-01-01",
+      dateModified: "2026-01-02",
+      version: 7,
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "Lesson." },
+        revision: 4
+      }
+    });
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(legacyMetadata).success, false);
+    const { puzzle, errors } = puzzleFromAuthoredDocument(legacyMetadata);
+    assert.deepEqual(errors, []);
+    assert.equal(puzzle.dateCreated, undefined);
+    assert.equal(puzzle.dateModified, undefined);
+    assert.equal(puzzle.version, undefined);
+    assert.equal(puzzle.learningIntroduction.revision, undefined);
+    const normalized = normalizeAuthoredPuzzleDocument(legacyMetadata);
+    assert.deepEqual(normalized.errors, []);
+    assert.equal(normalized.document.dateCreated, undefined);
+    assert.equal(normalized.document.dateModified, undefined);
+    assert.equal(normalized.document.version, undefined);
+    assert.equal(normalized.document.learningIntroduction.revision, undefined);
   }
 
   // Leftover link/sources names are a load-time fold, not the write schema.

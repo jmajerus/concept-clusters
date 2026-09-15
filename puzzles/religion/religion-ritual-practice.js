@@ -166,8 +166,7 @@ export default definePuzzle(import.meta.url, {
         2,
         3
       ],
-      "fact": "The hajj is five days of prescribed bodily rites -- circling, standing, walking -- culminating at one built shrine, the Kaaba.",
-      "termRole": "reference"
+      "fact": "The hajj is five days of prescribed bodily rites -- circling, standing, walking -- culminating at one built shrine, the Kaaba."
     },
     {
       "id": "temple-feast",
@@ -176,8 +175,7 @@ export default definePuzzle(import.meta.url, {
         3,
         1
       ],
-      "fact": "Feasts unfold at shrines on set calendar days; the gathering keeps sacred time at a sacred place.",
-      "termRole": "reference"
+      "fact": "Feasts unfold at shrines on set calendar days; the gathering keeps sacred time at a sacred place."
     }
   ],
   "lenses": [

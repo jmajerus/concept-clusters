@@ -122,7 +122,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": {
         "cluster-donating-protons": "proton donor",
@@ -145,7 +144,6 @@
           }
         ]
       },
-      "termRole": "reference",
       "relationKind": "foundation",
       "idealTerms": {
         "cluster-donating-protons": "hydronium",

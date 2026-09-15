@@ -109,8 +109,7 @@ export default definePuzzle(import.meta.url, {
         0,
         1
       ],
-      "fact": "The Pantheon's oculus crowns the rotunda's processional axis: a single eye of daylight that marks each step of the movement sequence through the room.",
-      "termRole": "reference"
+      "fact": "The Pantheon's oculus crowns the rotunda's processional axis: a single eye of daylight that marks each step of the movement sequence through the room."
     }
   ],
   "lenses": [

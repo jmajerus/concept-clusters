@@ -17,7 +17,7 @@ There are two deliberately different paths:
 - **Read-time compatibility** may project an older document into the current
   shape in memory (for example, folding legacy links or category titles). It
   is pure and idempotent: it does not write D1 or Git, remove source data, or
-  rewrite immutable revisions. A read can report that an explicit save is
+  mutate retained snapshot rows. A read can report that an explicit save is
   needed to persist the folded form.
 - **Write-time canonicalization** runs the same safe transforms before a
   draft or current published row is stored. Shape conversion is followed by
@@ -36,11 +36,11 @@ Treat each future transform as one of three cases:
    references must block with an actionable unresolved result; never guess or
    silently drop authored content.
 
-Keep current working/published rows and generated artifacts migratable, but
-leave immutable published revisions and working-copy history untouched. Add
-fixtures for every transform, verify that a second pass is a no-op, and keep
-the corpus report free of unresolved rows before declaring an evolution
-complete.
+Keep current working/published rows and generated artifacts migratable. The
+retained published-revision and working-copy snapshot tables are disposable
+and are cleared once by the reviewed migration below. Add fixtures for every
+transform, verify that a second pass is a no-op, and keep the corpus report
+free of unresolved rows before declaring an evolution complete.
 
 ## One-time corpus pass
 
@@ -74,15 +74,11 @@ report identifies those repairs as `term-role-removed`. It is not part of the
 current simplified schema, MCP projections, runtime bridge shape, or newly
 exported JSON-LD.
 
-The retired `generativeAssistance` field follows the same boundary policy:
-legacy simplified and JSON-LD documents are read and folded into puzzle-level
-`provenance`, while current simplified documents and JSON-LD exports omit the
-field. The corpus report identifies a migrated value as
-`generative-assistance-removed`. The migration does not synthesize
-`draft_assistance_stamps`: scope/role/date detail remains available only when
-the legacy document came from an MCP write that already has its corresponding
-append-only D1 assistance-stamp record. Older D1 rows and Git/JSON-LD sources
-without such a record intentionally cannot recover that retired audit detail.
+The retired client-attribution array was folded into puzzle-level `provenance`
+during the completed corpus pass. Current simplified documents and JSON-LD
+interchange exports use `provenance` directly; the authoring/storage path no
+longer reads or writes the retired array. Scope/role/date detail remains only
+in the append-only D1 assistance-stamp record when an MCP write produced one.
 
 The Git side replaces `content/puzzles/*.ccpuzzle.jsonld` with
 `*.ccpuzzle.json`, removes the old interchange files, rewrites canonical
@@ -91,9 +87,14 @@ cross-disciplinary registry overlay, and rebuilds `puzzles/manifest.js`.
 
 The D1 side updates only current `published_documents` puzzle rows and puzzle
 working copies. Each published update creates a new revision attributed to
-`content-canonicalization`; existing published revisions and working-copy
-history remain immutable. Publication, withdrawal, and Freeze-cue state are
-unchanged.
+`content-canonicalization`; migration `0020_purge_retired_document_snapshots`
+clears the retained published-revision and working-copy snapshot tables once.
+Run and complete `content:canonicalize -- --apply-d1` before deploying the
+Worker: current JSON-LD rows are not converted at read time and the runtime
+rejects them as invalid storage state.
+Current drafts, published rows, publication state, withdrawal, and Freeze-cue
+state are unchanged. New snapshots, if created later, contain only the
+current simplified document contract.
 
 Categories and catalogues share the D1 table but have separate document
 contracts, so this pass does not run puzzle canonicalization against them.

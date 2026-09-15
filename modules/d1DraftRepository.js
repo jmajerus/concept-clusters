@@ -9,6 +9,10 @@ import {
   normalizeDraftActor,
   serializeDraftDocument
 } from "./draftRepository.js";
+import {
+  assembleStoredDomainDocuments,
+  storedDomainDocuments
+} from "./authoringDomains.js";
 
 function parsedJson(text, label) {
   try {
@@ -34,13 +38,28 @@ function metadata(row) {
 }
 
 function fullDraft(row) {
+  const storedDocument = parsedJson(row.document, "Stored draft");
   return {
     ...metadata(row),
     workingCopyHistoryCount: Number(row.working_copy_history_count || 0),
     validation: row.validation_json
       ? parsedJson(row.validation_json, "Stored validation")
       : null,
-    document: parsedJson(row.document, "Stored draft")
+    // `assembleStoredDomainDocuments` deliberately rejects JSON-LD here. The
+    // nullable-column fallback is for old simplified rows only; interchange
+    // documents must be canonicalized before the Worker is released.
+    document: assembleStoredDomainDocuments({
+      document: storedDocument,
+      content: row.content_json == null
+        ? null
+        : parsedJson(row.content_json, "Stored content domain"),
+      pedagogy: row.pedagogy_json == null
+        ? null
+        : parsedJson(row.pedagogy_json, "Stored pedagogy domain"),
+      provenance: row.provenance_json == null
+        ? null
+        : parsedJson(row.provenance_json, "Stored provenance domain")
+    })
   };
 }
 
@@ -58,7 +77,9 @@ export class D1DraftRepository extends DraftRepository {
   async create({ draftId, document, actor, baseCommitSha = null }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor);
-    const documentJson = serializeDraftDocument(document);
+    const materialized = assembleStoredDomainDocuments({ document });
+    const documentJson = serializeDraftDocument(materialized);
+    const domains = storedDomainDocuments(materialized);
     const contentHash = await draftContentHash(documentJson);
     const now = new Date().toISOString();
     try {
@@ -66,18 +87,22 @@ export class D1DraftRepository extends DraftRepository {
         INSERT INTO puzzle_drafts (
           id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
-          created_at, updated_at, revision
-        ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1)
+          created_at, updated_at, revision,
+          content_json, pedagogy_json, provenance_json
+        ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?)
       `).bind(
         draftId,
-        typeof document.id === "string" ? document.id : null,
+        typeof materialized.id === "string" ? materialized.id : null,
         owner.subject,
-        typeof document.title === "string" ? document.title : null,
+        typeof materialized.title === "string" ? materialized.title : null,
         documentJson,
         contentHash,
         baseCommitSha,
         now,
-        now
+        now,
+        domains.content,
+        domains.pedagogy,
+        domains.provenance
       ).run();
     } catch (error) {
       if (String(error?.message || error).includes("UNIQUE constraint failed")) {
@@ -120,20 +145,26 @@ export class D1DraftRepository extends DraftRepository {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${Number(current.revision)}`
       );
     }
-    const documentJson = serializeDraftDocument(document);
+    const materialized = assembleStoredDomainDocuments({ document });
+    const documentJson = serializeDraftDocument(materialized);
+    const domains = storedDomainDocuments(materialized);
     const contentHash = await draftContentHash(documentJson);
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
-          revision = revision + 1, validation_json = NULL, updated_at = ?
+          revision = revision + 1, validation_json = NULL, updated_at = ?,
+          content_json = ?, pedagogy_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
-      typeof document.id === "string" ? document.id : null,
-      typeof document.title === "string" ? document.title : null,
+      typeof materialized.id === "string" ? materialized.id : null,
+      typeof materialized.title === "string" ? materialized.title : null,
       documentJson,
       contentHash,
       now,
+      domains.content,
+      domains.pedagogy,
+      domains.provenance,
       draftId,
       owner.subject,
       expectedRevision
@@ -191,18 +222,26 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(draftId).first();
     if (!previous) throw new DraftEmptyHistoryError(draftId);
     const restored = parsedJson(previous.document, "Stored working copy");
+    const materialized = assembleStoredDomainDocuments({ document: restored });
+    const documentJson = serializeDraftDocument(materialized);
+    const domains = storedDomainDocuments(materialized);
+    const contentHash = await draftContentHash(documentJson);
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
-          revision = revision + 1, validation_json = NULL, updated_at = ?
+          revision = revision + 1, validation_json = NULL, updated_at = ?,
+          content_json = ?, pedagogy_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
-      typeof restored.id === "string" ? restored.id : null,
-      typeof restored.title === "string" ? restored.title : null,
-      previous.document,
-      previous.content_hash,
+      typeof materialized.id === "string" ? materialized.id : null,
+      typeof materialized.title === "string" ? materialized.title : null,
+      documentJson,
+      contentHash,
       now,
+      domains.content,
+      domains.pedagogy,
+      domains.provenance,
       draftId,
       owner.subject,
       expectedRevision

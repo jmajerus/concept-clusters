@@ -1,6 +1,6 @@
 // MCP assistance stamp audit — scope/role/date detail formerly in
-// generativeAssistance. Provenance on the draft document stays the model of
-// record; append-only rows live in D1 (draft_assistance_stamps). Hosted MCP
+// older attribution arrays. Provenance on the draft document stays the model
+// of record; append-only rows live in D1 (draft_assistance_stamps). Hosted MCP
 // may also write a summary row to Analytics Engine.
 
 function compactActor(actor) {
@@ -8,9 +8,11 @@ function compactActor(actor) {
   return { subject: actor.subject };
 }
 
-export function assistanceStampScopes(document) {
-  const scopes = ["puzzle"];
-  if (
+export function assistanceStampScopes(document, { domain = "complete" } = {}) {
+  const scopes = domain === "content" || domain === "pedagogy"
+    ? [domain]
+    : ["puzzle"];
+  if (domain === "complete" &&
     document?.learningIntroduction &&
     typeof document.learningIntroduction === "object" &&
     !Array.isArray(document.learningIntroduction)
