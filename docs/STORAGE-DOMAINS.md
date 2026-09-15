@@ -114,6 +114,36 @@ would let an agent learn only the structure needed for its current pass while
 keeping field definitions, cross-domain references, and final invariants
 centralized.
 
+## Canonicalization, batch migration, and history
+
+Automated canonicalization is the normal way for the repository to absorb
+schema evolution. A known, representable legacy shape can be normalized or
+converted into the current canonical document, checked for semantic validity,
+and written back through an explicit save or corpus pass. This keeps migration
+knowledge at a shared infrastructure boundary instead of requiring every
+authoring pass to understand every historical representation.
+
+When a schema change affects many current records, batch canonicalization is
+the intermediate step between routine normalization and cleanup. A reviewed
+batch pass brings the active corpus and current source artifacts to one
+canonical shape, validates the result, and identifies anything that needs
+human attention. It lets the repository absorb a substantial schema change
+without making each authoring pass carry the entire migration history.
+
+Purging has a different role and a narrower target. It is reserved for
+historical revisions or snapshots that are no longer worth supporting. If
+history must be retained, it needs an explicit format/version policy of its
+own; the current canonicalizer should not be expected to understand every
+ancient schema indefinitely. Current drafts and published records should be
+canonicalized or stopped for review, not discarded merely because they use an
+older shape.
+
+Purging therefore complements canonicalization; it does not replace it or
+turn every schema change into a deletion exercise.
+
+The detailed migration contract and verification sequence are in
+[Canonical content and schema evolution](CANONICAL-CONTENT.md).
+
 ## The integrity boundary
 
 The infrastructure owns the things an agent should not have to reproduce:

@@ -28,25 +28,31 @@ Treat each future transform as one of three cases:
 
 1. **Lossless and non-breaking:** add it to the shared read/write pipeline and
    keep it idempotent.
-2. **Lossless but corpus-wide:** add a dry-run/apply migration using the
-   transaction and optimistic-concurrency safeguards below, then retire the
-   compatibility branch only after the corpus is clean.
+2. **Lossless but corpus-wide:** add a batch canonicalization migration for
+   active/current D1 rows and Git sources using the transaction and
+   optimistic-concurrency safeguards below, then retire the compatibility
+   branch only after the active corpus is clean.
 3. **Breaking or ambiguous:** introduce an explicit target format/version and
    a reviewed migration. Unknown fields, unmappable values, and ambiguous
    references must block with an actionable unresolved result; never guess or
    silently drop authored content.
 
-Keep current working/published rows and generated artifacts migratable. The
-retained published-revision and working-copy snapshot tables are disposable
-and are cleared once by the reviewed migration below. Add fixtures for every
-transform, verify that a second pass is a no-op, and keep the corpus report
-free of unresolved rows before declaring an evolution complete.
+Keep current working/published rows and generated artifacts migratable. Batch
+canonicalization is the point at which a schema change is applied across that
+active corpus. Historical revision and working-copy snapshot tables are a
+separate retention decision: either give retained history an explicit format
+and reader policy, or treat it as disposable and clear it once the active
+corpus is canonical. Do not make the current canonicalizer responsible for
+every historical schema indefinitely. Add fixtures for every transform,
+verify that a second pass is a no-op, and keep the active-corpus report free
+of unresolved rows before declaring an evolution complete.
 
-## One-time corpus pass
+## Batch canonicalization of the active corpus
 
-`content:canonicalize` previews the current D1 puzzle rows and Git puzzle
-sources, folds the remaining legacy authored fields, converts any JSON-LD
-puzzle to simplified JSON, and plans a fresh generated-module/manifest pass:
+`content:canonicalize` is the batch canonicalization tool for the active
+corpus. It previews the current D1 puzzle rows and Git puzzle sources, folds
+the remaining legacy authored fields, converts any JSON-LD puzzle to
+simplified JSON, and plans a fresh generated-module/manifest pass:
 
 ```sh
 npm run content:canonicalize -- --json
@@ -88,7 +94,8 @@ cross-disciplinary registry overlay, and rebuilds `puzzles/manifest.js`.
 The D1 side updates only current `published_documents` puzzle rows and puzzle
 working copies. Each published update creates a new revision attributed to
 `content-canonicalization`; migration `0020_purge_retired_document_snapshots`
-clears the retained published-revision and working-copy snapshot tables once.
+handles the separate decision to clear the retained published-revision and
+working-copy snapshot tables once.
 Run and complete `content:canonicalize -- --apply-d1` before deploying the
 Worker: current JSON-LD rows are not converted at read time and the runtime
 rejects them as invalid storage state.

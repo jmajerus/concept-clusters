@@ -132,7 +132,40 @@ Any writer that updates a complete puzzle snapshot outside the draft
 repository must refresh all three projections in the same update. Category
 rename propagation is the current example.
 
-## Retired formats and cleanup
+## Canonicalization, batch migration, and cleanup
+
+Canonicalization is the normal forward path for schema evolution, not merely
+a prelude to the current cleanup. `content:canonicalize` centralizes the
+read/write transforms and can produce a reviewable report or an apply plan
+for current D1 rows and Git sources. Transforms should be shared, lossless
+where possible, idempotent, and followed by the same semantic validation used
+by authoring and publication. This keeps future compatibility logic out of
+individual domain passes.
+
+Use the following lifecycle for future changes:
+
+1. Lossless, non-breaking changes belong in the shared read/write
+   canonicalization pipeline and should be safe to run repeatedly.
+2. Lossless changes that affect the existing corpus should use a batch
+   canonicalization pass with a dry-run/apply migration and
+   optimistic-concurrency safeguards. Review unresolved rows before applying
+   the plan.
+3. Breaking or ambiguous changes require an explicit target format or
+   reviewed migration. Unknown, unmappable, or ambiguous data must block the
+   migration rather than being guessed at or silently dropped.
+
+The batch pass is deliberately scoped to active/current material: current D1
+rows, current Git sources, and generated artifacts derived from them. It is
+the bridge between reusable canonicalization logic and a stable corpus. It
+does not imply that every retained historical revision must be rewritten.
+
+Purge is the final history decision, not the migration mechanism. Historical
+revisions may contain shapes from several generations of the schema. Unless
+they have an explicit format/version and reader policy, they should not be
+fed indefinitely through the current canonicalizer. Retain them only when
+their recovery or audit value justifies that support burden; otherwise purge
+the disposable historical rows after the active corpus is canonical. A
+schema change does not automatically justify purging current records.
 
 The current authoring/storage contract is simplified JSON:
 
@@ -149,9 +182,10 @@ The current authoring/storage contract is simplified JSON:
   into `provenance`; it is not part of current authoring.
 
 The supported JSON-LD interchange commands are `content:export`,
-`content:import`, and `content:check`. The one-time corpus migration,
-`content:canonicalize`, can convert legacy JSON-LD current puzzle rows when
-the conversion is lossless and semantically valid. Current rows containing
+`content:import`, and `content:check`. The current corpus pass uses
+`content:canonicalize` to convert legacy JSON-LD current puzzle rows when the
+conversion is lossless and semantically valid; the same tool remains the
+forward path for future compatible schema changes. Current rows containing
 `generativeAssistance` require manual replacement or removal because the
 retired field is intentionally rejected.
 
