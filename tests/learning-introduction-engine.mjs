@@ -87,6 +87,11 @@ export async function run() {
     "Drafted with Claude"
   );
   assert.equal(
+    formatHostCredit([{ name: "Jane Doe" }, { name: "Codex" }]),
+    "Drafted with Codex"
+  );
+  assert.equal(formatHostCredit([{ name: "Jane Doe" }]), null);
+  assert.equal(
     lessonCredit(
       { credit: "By Jane Doe, with assistance from Gemini 3.1 Pro" },
       fromEvidenceToAction.provenance?.contributors

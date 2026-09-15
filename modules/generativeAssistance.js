@@ -5,6 +5,7 @@
 import {
   AUTHORING_SETTINGS,
   fillAuthoringTemplate,
+  isKnownGenerativeSystemName,
   preferredCreditTemplateId
 } from "./authoringSettings.js";
 
@@ -25,13 +26,22 @@ function applyCreditLength(suggested, settings = AUTHORING_SETTINGS) {
   return suggested;
 }
 
-export function systemsForLessonCredit(entries) {
+export function systemsForLessonCredit(entries, settings = AUTHORING_SETTINGS) {
   const seen = new Set();
   const systems = [];
   for (const entry of entries || []) {
-    if (entry && typeof entry === "object" && entry.kind === "human") continue;
     const value = typeof entry === "string" ? entry : entry?.name || entry?.system;
     if (!nonEmptyString(value)) continue;
+    const isAssistanceRecord = entry && typeof entry === "object" &&
+      !nonEmptyString(entry.name) && nonEmptyString(entry.system);
+    const explicitKind = entry && typeof entry === "object" &&
+      (entry.kind === "human" || entry.kind === "generative")
+      ? entry.kind
+      : null;
+    const kind = explicitKind || (isAssistanceRecord
+      ? "generative"
+      : isKnownGenerativeSystemName(value, settings) ? "generative" : "human");
+    if (kind !== "generative") continue;
     const system = value.trim();
     const key = system.toLowerCase();
     if (seen.has(key)) continue;
@@ -129,7 +139,7 @@ export function renderLessonCredit(
 
 // Player-facing fallback when learningIntroduction.credit is absent.
 export function formatHostCredit(entries, settings = AUTHORING_SETTINGS) {
-  const systems = systemsForLessonCredit(entries);
+  const systems = systemsForLessonCredit(entries, settings);
   if (!systems.length) return null;
   return renderLessonCredit({ hosts: systems, author: null }, settings);
 }
@@ -210,7 +220,7 @@ export function suggestLessonCredit(
   { authorName = null, settings = AUTHORING_SETTINGS } = {}
 ) {
   return normalizeLessonCredit(currentCredit, {
-    hosts: systemsForLessonCredit(entries),
+    hosts: systemsForLessonCredit(entries, settings),
     authorName,
     settings,
     allowOpaqueAppend: true

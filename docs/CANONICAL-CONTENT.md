@@ -89,6 +89,9 @@ The D1 side updates only current `published_documents` puzzle rows and puzzle
 working copies. Each published update creates a new revision attributed to
 `content-canonicalization`; migration `0020_purge_retired_document_snapshots`
 clears the retained published-revision and working-copy snapshot tables once.
+Run and complete `content:canonicalize -- --apply-d1` before deploying the
+Worker: current JSON-LD rows are not converted at read time and the runtime
+rejects them as invalid storage state.
 Current drafts, published rows, publication state, withdrawal, and Freeze-cue
 state are unchanged. New snapshots, if created later, contain only the
 current simplified document contract.

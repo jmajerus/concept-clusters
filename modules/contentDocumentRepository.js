@@ -6,7 +6,10 @@ import {
   normalizeDraftActor,
   serializeDraftDocument
 } from "./draftRepository.js";
-import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
+import {
+  assertCurrentAuthoredDocument,
+  stripSystemAuthoredMetadata
+} from "./authoringDomains.js";
 
 export const CONTENT_DRAFT_KINDS = Object.freeze(["catalogue", "category"]);
 export const PUBLISHED_DOCUMENT_KINDS = Object.freeze([
@@ -34,6 +37,10 @@ function changes(result) {
 }
 
 function draftRecord(row) {
+  const document = assertCurrentAuthoredDocument(
+    parsedJson(row.document, "Stored content draft"),
+    "Stored content draft"
+  );
   return {
     kind: row.kind,
     id: row.id,
@@ -44,12 +51,15 @@ function draftRecord(row) {
     contentHash: row.content_hash,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    document: parsedJson(row.document, "Stored content draft")
+    document
   };
 }
 
 function publishedRecord(row) {
-  const document = parsedJson(row.document, "Published document");
+  const document = assertCurrentAuthoredDocument(
+    parsedJson(row.document, "Published document"),
+    "Published document"
+  );
   return {
     kind: row.kind,
     id: row.id,
@@ -75,6 +85,7 @@ function publishedRecord(row) {
 }
 
 function documentForPublishedStorage(kind, document) {
+  assertCurrentAuthoredDocument(document, `${kind} document`);
   return kind === "puzzle"
     ? stripSystemAuthoredMetadata(document)
     : document;

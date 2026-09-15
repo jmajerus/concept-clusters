@@ -45,6 +45,9 @@ function fullDraft(row) {
     validation: row.validation_json
       ? parsedJson(row.validation_json, "Stored validation")
       : null,
+    // `assembleStoredDomainDocuments` deliberately rejects JSON-LD here. The
+    // nullable-column fallback is for old simplified rows only; interchange
+    // documents must be canonicalized before the Worker is released.
     document: assembleStoredDomainDocuments({
       document: storedDocument,
       content: row.content_json == null

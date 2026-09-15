@@ -27,6 +27,7 @@ import {
   categoryTitleFor
 } from "../puzzles/categories.js";
 import {
+  assertNoRetiredAuthoringFields,
   projectAuthoredDocument,
   stripSystemAuthoredMetadata
 } from "./authoringDomains.js";
@@ -57,6 +58,7 @@ function omitBlankOptionalLearningIntroductionFields(document) {
 // Link/citation folding + provenance sync. Order: provenance first so a
 // parseable credit can seed human contributors before other folds clone.
 export function canonicalizeAuthoredDocumentFields(document) {
+  assertNoRetiredAuthoringFields(document);
   return stripSystemAuthoredMetadata(omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
       canonicalizeBridgeTermRoles(

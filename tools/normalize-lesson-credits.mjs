@@ -58,7 +58,10 @@ async function main() {
       continue;
     }
     const next = normalizeLessonCredit(credit, {
-      hosts: systemsForLessonCredit(document.provenance?.contributors),
+      hosts: systemsForLessonCredit(
+        document.provenance?.contributors,
+        AUTHORING_SETTINGS
+      ),
       authorName: AUTHORING_SETTINGS.credit.defaultAuthorName,
       settings: AUTHORING_SETTINGS,
       allowOpaqueAppend: false

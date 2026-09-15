@@ -61,6 +61,8 @@ export const SYSTEM_ROOT_FIELDS = new Set([
   "version"
 ]);
 
+const RETIRED_ROOT_FIELDS = new Set(["generativeAssistance"]);
+
 const PEDAGOGY_ROOT_FIELDS = new Set([
   "categories",
   "subcategories",
@@ -112,6 +114,37 @@ function hasOwn(value, key) {
 }
 
 /**
+ * Retired authoring fields are hard errors. Invalid intermediate drafts are
+ * otherwise intentionally writable, but allowing this field through would
+ * quietly resurrect an attribution model that no longer exists.
+ */
+export function assertNoRetiredAuthoringFields(document, label = "Authored document") {
+  if (!isObject(document)) return document;
+  for (const key of RETIRED_ROOT_FIELDS) {
+    if (hasOwn(document, key)) {
+      throw new Error(`${label} contains retired field ${key}; remove it before continuing`);
+    }
+  }
+  return document;
+}
+
+/**
+ * Documents stored by the current authoring workflow are simplified JSON,
+ * never JSON-LD. JSON-LD remains available through the explicit interchange
+ * adapter, but a row or domain projection containing @context is corrupt for
+ * this repository contract and must fail closed.
+ */
+export function assertCurrentAuthoredDocument(document, label = "Authored document") {
+  assertObject(document, label);
+  if (hasOwn(document, "@context")) {
+    throw new Error(
+      `${label} contains JSON-LD; current authoring/storage rows require the simplified format`
+    );
+  }
+  return assertNoRetiredAuthoringFields(document, label);
+}
+
+/**
  * Remove repository-owned metadata from a simplified authoring document.
  *
  * This is deliberately a compatibility fold rather than a JSON-LD fold:
@@ -122,6 +155,7 @@ function hasOwn(value, key) {
  */
 export function stripSystemAuthoredMetadata(document) {
   if (!isObject(document) || Object.hasOwn(document, "@context")) return document;
+  assertNoRetiredAuthoringFields(document);
   let next = document;
   for (const key of SYSTEM_ROOT_FIELDS) {
     if (!hasOwn(document, key)) continue;
@@ -229,7 +263,7 @@ function assembleBridges(contentBridges, pedagogyBridges) {
  * metadata rather than fields in the player-facing puzzle document.
  */
 export function partitionAuthoredDocument(document, { system = {} } = {}) {
-  assertObject(document, "Authored document");
+  assertCurrentAuthoredDocument(document, "Authored document");
   const authored = stripSystemAuthoredMetadata(document);
   const content = {};
   const pedagogy = {};
@@ -286,7 +320,10 @@ export function assembleAuthoredDocument({
   } else {
     delete document.provenance;
   }
-  return stripSystemAuthoredMetadata(document);
+  return assertCurrentAuthoredDocument(
+    stripSystemAuthoredMetadata(document),
+    "Assembled authored document"
+  );
 }
 
 function publicDomain(value) {
@@ -340,6 +377,7 @@ export function projectAuthoredDocument(document, domain = "complete") {
 
 function assertDomainPayload(domain, incoming) {
   assertObject(incoming, `${domain} domain document`);
+  assertNoRetiredAuthoringFields(incoming, `${domain} domain document`);
   for (const key of Object.keys(incoming)) {
     if (PROTECTED_ROOT_FIELDS.has(key)) {
       throw new Error(`${key} is protected and cannot be written through the ${domain} domain`);
@@ -500,6 +538,8 @@ export default {
   AUTHORING_READ_DOMAINS,
   AUTHORING_WRITE_DOMAINS,
   SYSTEM_ROOT_FIELDS,
+  assertNoRetiredAuthoringFields,
+  assertCurrentAuthoredDocument,
   partitionAuthoredDocument,
   assembleAuthoredDocument,
   projectAuthoredDocument,

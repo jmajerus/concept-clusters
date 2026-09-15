@@ -601,7 +601,7 @@ describe("hosted authoring Worker", () => {
     );
   });
 
-  it("materializes populated authoring domains and reads legacy rows by fallback", async () => {
+  it("materializes authoring domains, reads legacy simplified rows, and rejects JSON-LD", async () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const document = {
       id: "domain-projection-fixture",
@@ -671,7 +671,8 @@ describe("hosted authoring Worker", () => {
     expect(populated.document).toEqual(document);
 
     // A row written before migration 0019 has no projections. The complete
-    // legacy blob remains sufficient to reconstruct the same authored document.
+    // legacy simplified blob remains sufficient to reconstruct the same
+    // authored document.
     await env.AUTHORING_DB.prepare(`
       UPDATE puzzle_drafts
       SET content_json = NULL, pedagogy_json = NULL, provenance_json = NULL
@@ -682,6 +683,48 @@ describe("hosted authoring Worker", () => {
       actor: { subject: "local-author" }
     });
     expect(legacy.document).toEqual(document);
+
+    // JSON-LD rows are not a compatibility case. They must be canonicalized
+    // before this Worker is released, so a stray row fails closed rather than
+    // becoming an uneditable draft through the nullable-column fallback.
+    const originalRow = await env.AUTHORING_DB.prepare(`
+      SELECT document, content_hash FROM puzzle_drafts
+      WHERE id = ? AND owner_subject = ?
+    `).bind("domain-projection-fixture", "local-author").first() as {
+      document: string;
+      content_hash: string;
+    };
+    try {
+      await env.AUTHORING_DB.prepare(`
+        UPDATE puzzle_drafts
+        SET document = ?, content_json = NULL, pedagogy_json = NULL, provenance_json = NULL
+        WHERE id = ? AND owner_subject = ?
+      `).bind(
+        JSON.stringify({
+          "@context": "https://concept-clusters.org/context/v1",
+          id: "domain-projection-fixture",
+          title: "Legacy JSON-LD row"
+        }),
+        "domain-projection-fixture",
+        "local-author"
+      ).run();
+      await expect(repository.get({
+        draftId: "domain-projection-fixture",
+        actor: { subject: "local-author" }
+      })).rejects.toThrow(/JSON-LD.*simplified/);
+    } finally {
+      await env.AUTHORING_DB.prepare(`
+        UPDATE puzzle_drafts
+        SET document = ?, content_hash = ?, content_json = NULL,
+            pedagogy_json = NULL, provenance_json = NULL
+        WHERE id = ? AND owner_subject = ?
+      `).bind(
+        originalRow.document,
+        originalRow.content_hash,
+        "domain-projection-fixture",
+        "local-author"
+      ).run();
+    }
   });
 
   it("surfaces lens-reasons-coverage without retired bridge-role flags", async () => {

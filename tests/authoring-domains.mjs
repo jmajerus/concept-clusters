@@ -106,6 +106,13 @@ export async function run() {
   assert.throws(
     () => applyAuthoredDomain(document, "content", {
       ...content.document,
+      generativeAssistance: [{ system: "Codex" }]
+    }),
+    /retired field generativeAssistance/
+  );
+  assert.throws(
+    () => applyAuthoredDomain(document, "content", {
+      ...content.document,
       bridges: [{ ...content.document.bridges[0], relationKind: "contrast" }]
     }),
     /belongs to the pedagogy domain/

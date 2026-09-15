@@ -186,6 +186,18 @@ export async function run() {
       revision: 4
     }
   };
+  await assert.rejects(
+    () => repo.seedPublishedIfAbsent({
+      kind: "puzzle",
+      id: "jsonld-row",
+      document: {
+        "@context": "https://concept-clusters.org/context/v1",
+        id: "jsonld-row",
+        title: "Legacy JSON-LD row"
+      }
+    }),
+    /JSON-LD.*simplified/
+  );
   await repo.seedPublishedIfAbsent({
     kind: "puzzle",
     id: "old-git-puzzle",

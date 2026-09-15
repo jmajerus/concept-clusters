@@ -69,9 +69,11 @@ puzzle_drafts (
 ```
 
 Migration `0019` deliberately leaves these new columns nullable so existing
-draft rows remain readable. A read falls back to the legacy complete blob when
-the projections are null; the next successful write materializes and stores
-all three projections.
+simplified draft rows remain readable. A read falls back to the legacy complete
+blob when the projections are null; the next successful write materializes and
+stores all three projections. JSON-LD is not a valid stored-row fallback: any
+current row containing `@context` fails closed and must be converted by the
+one-time D1 canonicalization before the authoring Worker is released.
 
 ### Agent-facing API presentation
 
