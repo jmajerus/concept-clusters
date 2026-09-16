@@ -45,6 +45,12 @@ import {
 } from "./contentDocumentSeed.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
+import { validateStarLayoutDocument } from "./starLayoutSchema.js";
+import {
+  layoutForMode,
+  normalizeLayoutDocument
+} from "./layoutDocument.js";
+import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   diffPublishedDraft,
   publishedDocumentFromService,
@@ -191,6 +197,7 @@ export async function mapDraftDetail(record, {
   inCheckout = false,
   matchesCheckout = null,
   publishedDocument = null,
+  publishedLayout = null,
   categoryRegistry = undefined
 }) {
   const puzzleId = typeof record.document?.id === "string"
@@ -201,6 +208,9 @@ export async function mapDraftDetail(record, {
     ? documentForEditor(publishedDocument, { categoryRegistry })
     : gitPublished;
   const document = documentForEditor(record.document, { categoryRegistry });
+  const layoutDiffersFromPublished = Boolean(
+    publishedDocument && !valuesEqual(publishedLayout || null, record.layout || null)
+  );
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -211,6 +221,7 @@ export async function mapDraftDetail(record, {
     document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
     publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
+    layoutDiffersFromPublished,
     validation: contentService
       ? await withUserOnlyFlags(
         contentService,
@@ -412,6 +423,82 @@ export function createLocalDraftReviewHandler({
           return true;
         }
         throw error;
+      }
+      return true;
+    }
+
+    const layoutMatch = urlPath.match(/^\/admin\/drafts\/([^/]+)\/layout(?:\.json)?$/);
+    if (layoutMatch) {
+      if (!sameOrigin()) {
+        json(res, { error: "Cross-origin submit is not allowed." }, 403);
+        return true;
+      }
+      const draftId = decodeURIComponent(layoutMatch[1]);
+      try {
+        const record = await draftStore.getDraft(draftId);
+        if (req.method === "GET" || req.method === "HEAD") {
+          json(res, {
+            draftId,
+            revision: record.revision,
+            layout: record.layout || null
+          });
+          return true;
+        }
+        if (req.method !== "PUT" && req.method !== "DELETE") return false;
+        if (req.method === "DELETE") {
+          const cleared = await draftStore.clearLayout(draftId);
+          json(res, {
+            draftId,
+            revision: cleared.revision,
+            layout: cleared.layout || null
+          });
+          return true;
+        }
+        const { json: body } = await readRequestPayload(req);
+        const submitted = body && Object.prototype.hasOwnProperty.call(body, "layout")
+          ? body.layout
+          : body;
+        const layout = normalizeLayoutDocument(submitted);
+        const categoryRegistry = await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        });
+        const { puzzle, errors } = puzzleFromAuthoredDocument(
+          documentForEditor(record.document, { categoryRegistry })
+        );
+        if (!puzzle) {
+          json(res, {
+            error: "Draft puzzle document is not valid simplified content",
+            draftId,
+            errors
+          }, 400);
+          return true;
+        }
+        const starLayout = layoutForMode(layout, "star");
+        if (starLayout) {
+          const validation = validateStarLayoutDocument(starLayout, puzzle);
+          if (!validation.valid) {
+            json(res, {
+              error: "Layout is invalid",
+              draftId,
+              errors: validation.errors
+            }, 400);
+            return true;
+          }
+        }
+        const saved = await draftStore.saveLayout({ draftId, layout });
+        json(res, {
+          draftId,
+          revision: saved.revision,
+          layout: saved.layout || layout
+        });
+      } catch (error) {
+        if (isMissingDraft(error)) {
+          json(res, { error: "Draft not found", detail: formatActionError(error) }, 404);
+          return true;
+        }
+        json(res, { error: formatActionError(error) }, error.status || 400);
       }
       return true;
     }
@@ -805,6 +892,12 @@ export function createLocalDraftReviewHandler({
               document: documentForStorage(published.document, { categoryRegistry }),
               expectedRevision: record.revision
             });
+            if (typeof draftStore.saveLayout === "function") {
+              await draftStore.saveLayout({
+                draftId,
+                layout: published.layout || null
+              });
+            }
             res.writeHead(303, {
               Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
               "Cache-Control": "no-store"
@@ -832,11 +925,33 @@ export function createLocalDraftReviewHandler({
               return true;
             }
           }
+          const publishedBefore = await publishedRowOrNull(
+            contentDocuments,
+            "puzzle",
+            puzzleId
+          );
+          const publishLayout = record.layout || publishedBefore?.layout || undefined;
+          const layoutValidation = validatePublishedPuzzleLayout({
+            document: authoredDocument,
+            layout: publishLayout,
+            categoryRegistry
+          });
+          if (!layoutValidation.valid) {
+            html(res, renderContentPublishResultPage({
+              kind: "puzzle",
+              id: puzzleId,
+              error: "The saved layout must be reconfirmed after this puzzle edit.\n" +
+                layoutValidation.errors.join("\n"),
+              backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+            }), 400);
+            return true;
+          }
           const published = await contentDocuments.publish({
             kind: "puzzle",
             id: puzzleId,
             document: documentForStorage(authoredDocument, { categoryRegistry }),
-            actor: publicationActor
+            actor: publicationActor,
+            layout: publishLayout
           });
           if (form.isPublishAndCue) {
             await contentDocuments.setFreezeCue({
@@ -1044,8 +1159,10 @@ export function createLocalDraftReviewHandler({
           "puzzle",
           puzzle.id
         );
-        const playPuzzle = published?.starLayout
-          ? { ...puzzle, starLayout: published.starLayout }
+        const layout = record.layout || published?.layout;
+        const starLayout = layoutForMode(layout, "star");
+        const playPuzzle = layout
+          ? { ...puzzle, layout, ...(starLayout ? { starLayout } : {}) }
           : puzzle;
         json(res, {
           draftId,
@@ -1174,6 +1291,9 @@ export function createLocalDraftReviewHandler({
         matchesCheckout,
         publishedDocument: publishedRow && !publishedRow.withdrawnAt
           ? publishedRow.document
+          : null,
+        publishedLayout: publishedRow && !publishedRow.withdrawnAt
+          ? publishedRow.layout
           : null,
         categoryRegistry
       });

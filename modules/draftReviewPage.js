@@ -1232,7 +1232,11 @@ function renderSubmitForm(draft, variant = "hosted") {
   const draftId = draft.draftId;
   const valid = draft.validation?.valid === true;
   const d1Published = draft.d1Published === true && draft.d1Withdrawn !== true;
-  const differsFromPublished = d1Published && Number(draft.publishedDiff?.total) > 0;
+  const documentDiffersFromPublished = Number(draft.publishedDiff?.total) > 0;
+  const layoutDiffersFromPublished = draft.layoutDiffersFromPublished === true;
+  const differsFromPublished = d1Published && (
+    documentDiffersFromPublished || layoutDiffersFromPublished
+  );
   const alreadyAuthoringPlay = d1Published && !differsFromPublished;
   const canPublish = valid && !alreadyAuthoringPlay;
   const disabled = canPublish ? "" : " disabled";
@@ -1252,7 +1256,9 @@ function renderSubmitForm(draft, variant = "hosted") {
     Number(draft.workingCopyHistoryCount) > 0
       ? "Revert to last working copy restores the previous save. Each click goes back one save."
       : "",
-    differsFromPublished ? "Revert to published restores the last D1 published document." : "",
+    differsFromPublished
+      ? `Revert to published restores the last D1 published document${layoutDiffersFromPublished ? " and layout" : ""}.`
+      : "",
     d1Published
       ? "Remove from authoring play withdraws the published row (Freeze later deletes git files)."
       : "",
@@ -1672,17 +1678,19 @@ function renderLearningReferences(intro) {
   return labeledLine("links", links || emptyValue());
 }
 
-function renderDiffSummary(diff) {
+function renderDiffSummary(diff, { layoutDiffersFromPublished = false } = {}) {
   if (!diff) return "";
-  if (!diff.total) {
+  const total = Number(diff.total || 0) + (layoutDiffersFromPublished ? 1 : 0);
+  if (!total) {
     return `<aside class="diff-summary diff-summary-none">No changes from the published puzzle.</aside>`;
   }
   const bits = [];
   if (diff.counts.changed) bits.push(`${diff.counts.changed} changed`);
   if (diff.counts.added) bits.push(`${diff.counts.added} added`);
   if (diff.counts.removed) bits.push(`${diff.counts.removed} removed`);
+  if (layoutDiffersFromPublished) bits.push("layout override changed");
   return `<aside class="diff-summary">
-    <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
+    <strong>${total} change${total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
     <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here; Save working copy writes the private draft. Structure is authored on the construct board or via optional MCP.</p>
   </aside>`;
@@ -1762,7 +1770,9 @@ export function renderDraftPage(draft, {
       ${renderGithubProductionStatus(draft.inGithubProduction)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
-    ${renderDiffSummary(diff)}
+    ${renderDiffSummary(diff, {
+      layoutDiffersFromPublished: draft.layoutDiffersFromPublished
+    })}
     ${renderDraftFreshness(draft, variant)}
     ${renderValidation(draft.validation, variant)}
     ${renderFlags(draft.validation?.flags, edit)}

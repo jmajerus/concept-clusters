@@ -1,9 +1,10 @@
 import { STAR_FREE_STRIP } from "../puzzles/layouts/star/free-strip.js";
 import { pillWidth } from "./puzzleGraph.js";
+import { layoutForMode } from "./layoutDocument.js";
 import { validateStarLayoutDocument } from "./starLayoutSchema.js";
 
 export function publishedStarLayoutFor(puzzle, width, height) {
-  const layout = puzzle?.starLayout;
+  const layout = layoutForMode(puzzle?.layout, "star") || puzzle?.starLayout;
   if (!layout) return null;
   const result = validateStarLayoutDocument(layout, puzzle, { width, height });
   if (result.valid) return layout;

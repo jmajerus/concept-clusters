@@ -6,6 +6,7 @@ import { join, relative, sep } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
+import { layoutDocumentForMode } from "./layoutDocument.js";
 import {
   formattedJson,
   generatedCatalogueModule,
@@ -135,11 +136,14 @@ export async function applyContentFreeze({
     await remember(canonicalPath);
     await remember(modulePath);
     queueWrite(files, canonicalPath, formattedJson(publishedShape.simplified));
+    const layout = published.layout || (published.starLayout
+      ? layoutDocumentForMode("star", published.starLayout)
+      : null);
     queueWrite(files, modulePath, generatedPuzzleModule(
       publishedShape.puzzle,
       canonicalRelative,
       relativePath(repositoryRoot, modulePath),
-      { starLayout: published.starLayout || null }
+      { layout }
     ));
     if (existing && existing !== modulePath) {
       await remember(existing);

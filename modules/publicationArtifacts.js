@@ -30,8 +30,11 @@ export function generatedPuzzleModule(
   puzzle,
   canonicalRelativePath,
   moduleRelativePath,
-  { starLayout = null } = {}
+  { layout = null, starLayout = null } = {}
 ) {
+  const layoutDocument = layout || (starLayout
+    ? { schemaVersion: 1, modes: { star: starLayout } }
+    : null);
   let manifestImport = relative(
     dirname(moduleRelativePath),
     "modules/puzzleManifest.js"
@@ -41,13 +44,14 @@ export function generatedPuzzleModule(
   const header = `// Generated from ${canonicalRelativePath}.\n` +
     "// Edit the canonical simplified source rather than editing this file directly.\n\n" +
     `import { definePuzzle } from "${manifestImport}";\n\n`;
-  if (!starLayout) {
+  if (!layoutDocument) {
     return header +
       `export default definePuzzle(import.meta.url, ${JSON.stringify(authoredPuzzle, null, 2)});\n`;
   }
   return header +
     `const puzzle = definePuzzle(import.meta.url, ${JSON.stringify(authoredPuzzle, null, 2)});\n` +
-    `puzzle.starLayout = ${JSON.stringify(starLayout, null, 2)};\n` +
+    `puzzle.layout = ${JSON.stringify(layoutDocument, null, 2)};\n` +
+    "puzzle.starLayout = puzzle.layout?.modes?.star || null;\n" +
     "export default puzzle;\n";
 }
 

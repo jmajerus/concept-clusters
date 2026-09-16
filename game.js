@@ -36,7 +36,7 @@ import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
-import { saveStarLayout } from "./modules/starLayoutApi.js";
+import { saveLayout } from "./modules/starLayoutApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
 import { createCatalogueStudio, bindCatalogueCardDrag } from "./modules/catalogueStudio.js";
@@ -1779,7 +1779,9 @@ layoutAuthoring = createLayoutAuthoringController({
   getMode: () => mode,
   getBoard: () => ({ width: W, height: H }),
   showSolution,
-  saveLayout: playSource === "d1" ? saveStarLayout : null
+  saveLayout: playSource === "d1"
+    ? args => saveLayout({ ...args, draftId: overlayDraftId })
+    : null
 });
 // tests/star-free-strip.mjs pokes this after mutating STAR_FREE_STRIP in-page.
 window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;

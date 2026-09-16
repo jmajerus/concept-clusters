@@ -10,6 +10,10 @@ import {
   assertCurrentAuthoredDocument,
   stripSystemAuthoredMetadata
 } from "./authoringDomains.js";
+import {
+  parseLayoutDocument,
+  serializeLayoutDocument
+} from "./layoutDocument.js";
 
 export const CONTENT_DRAFT_KINDS = Object.freeze(["catalogue", "category"]);
 export const PUBLISHED_DOCUMENT_KINDS = Object.freeze([
@@ -30,30 +34,6 @@ function parsedJson(text, label) {
   } catch (error) {
     throw new Error(`${label} contains invalid JSON: ${error.message}`);
   }
-}
-
-function optionalParsedJson(text, label) {
-  if (text == null || text === "") return null;
-  return typeof text === "string" ? parsedJson(text, label) : text;
-}
-
-const MAX_STAR_LAYOUT_JSON_BYTES = 900_000;
-
-function serializeStarLayout(layout) {
-  if (!layout || typeof layout !== "object" || Array.isArray(layout)) {
-    throw new Error("Star layout must be a JSON object");
-  }
-  let json;
-  try {
-    json = JSON.stringify(layout);
-  } catch (error) {
-    throw new Error(`Star layout could not be serialized: ${error.message}`);
-  }
-  if (typeof json !== "string") throw new Error("Star layout must serialize to JSON");
-  if (new TextEncoder().encode(json).byteLength > MAX_STAR_LAYOUT_JSON_BYTES) {
-    throw new Error("Star layout is too large to store");
-  }
-  return json;
 }
 
 function changes(result) {
@@ -84,8 +64,8 @@ function publishedRecord(row) {
     parsedJson(row.document, "Published document"),
     "Published document"
   );
-  const starLayout = row.kind === "puzzle"
-    ? optionalParsedJson(row.star_layout_json, "Stored Star layout")
+  const layout = row.kind === "puzzle"
+    ? parseLayoutDocument(row.layout_json, "Stored layout")
     : null;
   return {
     kind: row.kind,
@@ -108,7 +88,7 @@ function publishedRecord(row) {
     document: row.kind === "puzzle"
       ? stripSystemAuthoredMetadata(document)
       : document,
-    ...(starLayout ? { starLayout } : {})
+    ...(layout ? { layout } : {})
   };
 }
 
@@ -357,28 +337,28 @@ export class D1ContentDocumentRepository {
     return publishedRecord(row);
   }
 
-  async savePuzzleLayout({ id, layout }) {
+  async saveLayout({ id, layout }) {
     assertDraftId(id);
     const current = await this.getPublished({ kind: "puzzle", id });
     if (current.withdrawnAt) throw new Error(`Cannot save a layout for withdrawn puzzle "${id}"`);
-    const layoutJson = serializeStarLayout(layout);
+    const layoutJson = serializeLayoutDocument(layout);
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE published_documents
-      SET star_layout_json = ?, updated_at = ?
+      SET layout_json = ?, updated_at = ?
       WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
     `).bind(layoutJson, now, id).run();
     if (changes(result) !== 1) throw new ContentDocumentNotFoundError("puzzle", id);
     return this.getPublished({ kind: "puzzle", id });
   }
 
-  async clearPuzzleLayout({ id }) {
+  async clearLayout({ id }) {
     assertDraftId(id);
     await this.getPublished({ kind: "puzzle", id });
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE published_documents
-      SET star_layout_json = NULL, updated_at = ?
+      SET layout_json = NULL, updated_at = ?
       WHERE kind = 'puzzle' AND id = ?
     `).bind(now, id).run();
     if (changes(result) !== 1) throw new ContentDocumentNotFoundError("puzzle", id);
@@ -489,8 +469,8 @@ export class D1ContentDocumentRepository {
     return reviewIssueThreads(result.results.map(reviewEventRecord))[0] || null;
   }
 
-  async seedPublishedIfAbsent({ kind, id, document }) {
-    await this.seedPublishedManyIfAbsent([{ kind, id, document }]);
+  async seedPublishedIfAbsent({ kind, id, document, layout = null }) {
+    await this.seedPublishedManyIfAbsent([{ kind, id, document, layout }]);
     return this.getPublished({ kind, id });
   }
 
@@ -504,15 +484,19 @@ export class D1ContentDocumentRepository {
       const sourceDocument = documentForPublishedStorage(item.kind, item.document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
       const contentHash = await draftContentHash(documentJson);
+      const layoutJson = item.kind === "puzzle"
+        ? serializeLayoutDocument(item.layout)
+        : null;
       statements.push(
         this.database.prepare(`
           INSERT OR IGNORE INTO published_documents (
             kind, id, title, document, content_hash, revision,
             published_by, published_at, updated_at, last_agent_reviewed_at,
-            cued_for_freeze_at, cued_for_freeze_by
-          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed')
+            cued_for_freeze_at, cued_for_freeze_by, layout_json
+          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed', ?)
         `).bind(
-          item.kind, item.id, titleOf(sourceDocument), documentJson, contentHash, now, now, now, now
+          item.kind, item.id, titleOf(sourceDocument), documentJson, contentHash,
+          now, now, now, now, layoutJson
         ),
         this.database.prepare(`
           INSERT OR IGNORE INTO published_document_revisions (
@@ -527,7 +511,16 @@ export class D1ContentDocumentRepository {
     }
   }
 
-  async publish({ kind, id, document, actor }) {
+  /**
+   * @param {{
+   *   kind: string,
+   *   id: string,
+   *   document: object,
+   *   actor: object,
+   *   layout?: object | null
+   * }} options
+   */
+  async publish({ kind, id, document, actor, layout = undefined }) {
     assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
     assertDraftId(id);
     const publishedBy = normalizeDraftActor(actor).subject;
@@ -538,14 +531,23 @@ export class D1ContentDocumentRepository {
     const existing = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? AND id = ?
     `).bind(kind, id).first();
+    const layoutJson = kind === "puzzle"
+      ? layout === undefined
+        ? existing?.layout_json || null
+        : serializeLayoutDocument(layout)
+      : null;
     if (!existing) {
       await this.database.batch([
         this.database.prepare(`
           INSERT INTO published_documents (
             kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at, last_agent_reviewed_at
-          ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
-        `).bind(kind, id, titleOf(sourceDocument), documentJson, contentHash, publishedBy, now, now, now),
+            published_by, published_at, updated_at, last_agent_reviewed_at,
+            layout_json
+          ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+        `).bind(
+          kind, id, titleOf(sourceDocument), documentJson, contentHash,
+          publishedBy, now, now, now, layoutJson
+        ),
         this.database.prepare(`
           INSERT INTO published_document_revisions (
             kind, id, revision, document, content_hash, published_by, published_at
@@ -560,11 +562,11 @@ export class D1ContentDocumentRepository {
         UPDATE published_documents
         SET title = ?, document = ?, content_hash = ?, revision = ?,
             published_by = ?, published_at = ?, updated_at = ?, withdrawn_at = NULL,
-            cued_for_freeze_at = NULL, cued_for_freeze_by = NULL
+            cued_for_freeze_at = NULL, cued_for_freeze_by = ?, layout_json = ?
         WHERE kind = ? AND id = ?
       `).bind(
         titleOf(sourceDocument), documentJson, contentHash, nextRevision,
-        publishedBy, now, now, kind, id
+        publishedBy, now, now, null, layoutJson, kind, id
       ),
       this.database.prepare(`
         INSERT INTO published_document_revisions (
@@ -735,34 +737,34 @@ export function createMemoryContentDocumentRepository() {
         .filter(row => includeWithdrawn || !row.withdrawnAt)
         .sort((left, right) => String(left.title || left.id).localeCompare(right.title || right.id));
     },
-    async savePuzzleLayout({ id, layout }) {
+    async saveLayout({ id, layout }) {
       assertDraftId(id);
       const current = await repository.getPublished({ kind: "puzzle", id });
       if (current.withdrawnAt) throw new Error(`Cannot save a layout for withdrawn puzzle "${id}"`);
-      const layoutJson = serializeStarLayout(layout);
+      const layoutJson = serializeLayoutDocument(layout);
       const key = publishedKey("puzzle", id);
       const row = published.get(key);
       published.set(key, {
         ...row,
-        star_layout_json: layoutJson,
+        layout_json: layoutJson,
         updated_at: new Date().toISOString()
       });
       return repository.getPublished({ kind: "puzzle", id });
     },
-    async clearPuzzleLayout({ id }) {
+    async clearLayout({ id }) {
       assertDraftId(id);
       await repository.getPublished({ kind: "puzzle", id });
       const key = publishedKey("puzzle", id);
       const row = published.get(key);
       published.set(key, {
         ...row,
-        star_layout_json: null,
+        layout_json: null,
         updated_at: new Date().toISOString()
       });
       return repository.getPublished({ kind: "puzzle", id });
     },
-    async seedPublishedIfAbsent({ kind, id, document }) {
-      await repository.seedPublishedManyIfAbsent([{ kind, id, document }]);
+    async seedPublishedIfAbsent({ kind, id, document, layout = null }) {
+      await repository.seedPublishedManyIfAbsent([{ kind, id, document, layout }]);
       return repository.getPublished({ kind, id });
     },
     async seedPublishedManyIfAbsent(items = []) {
@@ -787,7 +789,9 @@ export function createMemoryContentDocumentRepository() {
           last_agent_reviewed_at: now,
           last_human_reviewed_at: null,
           withdrawn_at: null,
-          star_layout_json: null,
+          layout_json: item.kind === "puzzle"
+            ? serializeLayoutDocument(item.layout)
+            : null,
           cued_for_freeze_at: now,
           cued_for_freeze_by: "git-seed"
         };
@@ -795,7 +799,7 @@ export function createMemoryContentDocumentRepository() {
         revisions.set(`${key}:1`, row);
       }
     },
-    async publish({ kind, id, document, actor }) {
+    async publish({ kind, id, document, actor, layout = undefined }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(id);
       const publishedBy = normalizeDraftActor(actor).subject;
@@ -805,6 +809,11 @@ export function createMemoryContentDocumentRepository() {
       const key = publishedKey(kind, id);
       const existing = published.get(key);
       const nextRevision = existing ? Number(existing.revision) + 1 : 1;
+      const layoutJson = kind === "puzzle"
+        ? layout === undefined
+          ? existing?.layout_json || null
+          : serializeLayoutDocument(layout)
+        : null;
       const row = {
         kind,
         id,
@@ -818,7 +827,7 @@ export function createMemoryContentDocumentRepository() {
         last_agent_reviewed_at: existing?.last_agent_reviewed_at || now,
         last_human_reviewed_at: existing?.last_human_reviewed_at || null,
         withdrawn_at: null,
-        star_layout_json: existing?.star_layout_json || null,
+        layout_json: layoutJson,
         cued_for_freeze_at: null,
         cued_for_freeze_by: null
       };

@@ -21,6 +21,10 @@ import {
   expectedStarLayoutNodeKeys,
   starLayoutRevision
 } from "../modules/starLayoutSchema.js";
+import {
+  layoutDocumentForMode,
+  parseLayoutDocument
+} from "../modules/layoutDocument.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
 export const name = "authoring play corpus: D1 Library navigation without git modules";
@@ -66,6 +70,25 @@ export async function run(page) {
   assert.equal(errors.length, 0, errors.join("; "));
   assert.equal(puzzle.id, "lab-d1-play");
   assert.equal(puzzle.bridges[0].term, "lab-bridge");
+  const layout = {
+    schemaVersion: 1,
+    puzzleId: puzzle.id,
+    puzzleRevision: starLayoutRevision(puzzle),
+    board: { width: 1000, height: 500 },
+    nodes: Object.fromEntries(expectedStarLayoutNodeKeys(puzzle).map((key, index) => [
+      key,
+      { x: 40 + index * 20, y: 40 }
+    ])),
+    metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+  };
+  assert.throws(
+    () => parseLayoutDocument("{"),
+    /contains invalid JSON/
+  );
+  assert.throws(
+    () => parseLayoutDocument(JSON.stringify({ schemaVersion: 1 })),
+    /has an unsupported shape/
+  );
 
   assert.equal(catalogueFromDocument({ id: "all", title: "All", entries: [] }), null);
   assert.equal(catalogueFromDocument({ id: "level-introductory", title: "Intro", entries: [] }), null);
@@ -144,9 +167,16 @@ export async function run(page) {
     async getPuzzleDocumentForPublication(id) {
       if (id !== "lab-d1-play") throw new Error(`unknown ${id}`);
       return labPuzzle;
+    },
+    getPuzzleLayoutForPublication() {
+      return layoutDocumentForMode("star", layout);
     }
   }, ["lab-d1-play", "lab-d1-play", "missing-ignored"]);
   assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).document.title, "Lab D1 play");
+  assert.deepEqual(
+    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
+    layoutDocumentForMode("star", layout)
+  );
   await repo.publish({
     kind: "catalogue",
     id: "lab-set",
@@ -193,38 +223,119 @@ export async function run(page) {
   assert.deepEqual(compiled.puzzle.bridges[0].clusters, [0, 1]);
   assert.deepEqual(compiled.puzzle.provenance, labPuzzle.provenance);
 
-  const layout = {
-    schemaVersion: 1,
-    puzzleId: compiled.puzzle.id,
-    puzzleRevision: starLayoutRevision(compiled.puzzle),
-    board: { width: 1000, height: 500 },
-    nodes: Object.fromEntries(expectedStarLayoutNodeKeys(compiled.puzzle).map((key, index) => [
-      key,
-      { x: 40 + index * 20, y: 40 }
-    ])),
-    metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
-  };
   const saveLayoutResponse = createResponse();
   assert.equal(await handleRequest({
     method: "PUT",
-    url: "/admin/puzzles/lab-d1-play/star-layout.json",
+    url: "/admin/puzzles/lab-d1-play/layout.json",
     headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
     async *[Symbol.asyncIterator]() {
       yield Buffer.from(JSON.stringify({ layout }));
     }
   }, saveLayoutResponse), true);
   assert.equal(saveLayoutResponse.status, 200, saveLayoutResponse.body);
-  assert.deepEqual(JSON.parse(saveLayoutResponse.body).layout, layout);
   assert.deepEqual(
-    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).starLayout,
-    layout
+    JSON.parse(saveLayoutResponse.body).layout,
+    layoutDocumentForMode("star", layout)
+  );
+  assert.deepEqual(
+    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
+    layoutDocumentForMode("star", layout)
   );
   const boardWithLayout = createResponse();
   assert.equal(await handleRequest({
     method: "GET",
     url: "/play/puzzles/lab-d1-play.json"
   }, boardWithLayout), true);
+  assert.deepEqual(JSON.parse(boardWithLayout.body).layout, layoutDocumentForMode("star", layout));
   assert.deepEqual(JSON.parse(boardWithLayout.body).starLayout, layout);
+
+  const unpublishedDraftDirectory = await mkdtemp(
+    join(tmpdir(), "cc-play-corpus-unpublished-layout-")
+  );
+  try {
+    const draftStore = createPuzzleDraftStore({ directory: unpublishedDraftDirectory });
+    const unpublishedDocument = {
+      ...labPuzzle,
+      id: "lab-unpublished-layout",
+      title: "Lab unpublished layout"
+    };
+    await draftStore.createDraft({
+      draftId: "lab-unpublished-layout-draft",
+      document: unpublishedDocument
+    });
+    const { puzzle: unpublishedPuzzle } = compilePublishedPuzzle(unpublishedDocument);
+    const unpublishedLayout = {
+      ...layout,
+      puzzleId: unpublishedPuzzle.id,
+      puzzleRevision: starLayoutRevision(unpublishedPuzzle),
+      nodes: Object.fromEntries(
+        expectedStarLayoutNodeKeys(unpublishedPuzzle).map((key, index) => [
+          key,
+          { x: 40 + index * 20, y: 40 }
+        ])
+      )
+    };
+    const handleUnpublishedDraft = createLocalDraftReviewHandler({
+      draftStore,
+      contentDocuments: repo,
+      publicationActor: actor,
+      repositoryRoot: root
+    });
+    const saveUnpublishedLayout = createResponse();
+    assert.equal(await handleUnpublishedDraft({
+      method: "PUT",
+      url: "/admin/drafts/lab-unpublished-layout-draft/layout.json",
+      headers: {
+        host: "127.0.0.1:8787",
+        origin: "http://127.0.0.1:8787",
+        "content-type": "application/json"
+      },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({
+          layout: layoutDocumentForMode("star", unpublishedLayout)
+        }));
+      }
+    }, saveUnpublishedLayout), true);
+    assert.equal(saveUnpublishedLayout.status, 200, saveUnpublishedLayout.body);
+    assert.deepEqual(
+      (await draftStore.getDraft("lab-unpublished-layout-draft")).layout,
+      layoutDocumentForMode("star", unpublishedLayout)
+    );
+    await assert.rejects(
+      repo.getPublished({ kind: "puzzle", id: "lab-unpublished-layout" }),
+      /Unknown puzzle/
+    );
+
+    const unpublishedPlay = createResponse();
+    assert.equal(await handleUnpublishedDraft({
+      method: "GET",
+      url: "/admin/drafts/lab-unpublished-layout-draft/play.json"
+    }, unpublishedPlay), true);
+    assert.deepEqual(JSON.parse(unpublishedPlay.body).puzzle.layout, layoutDocumentForMode("star", unpublishedLayout));
+    assert.deepEqual(JSON.parse(unpublishedPlay.body).puzzle.starLayout, unpublishedLayout);
+
+    const publishUnpublished = createResponse();
+    assert.equal(await handleUnpublishedDraft({
+      method: "POST",
+      url: "/admin/drafts/lab-unpublished-layout-draft",
+      headers: {
+        host: "127.0.0.1:8787",
+        origin: "http://127.0.0.1:8787",
+        "content-type": "application/x-www-form-urlencoded"
+      },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from("confirm=publish");
+      }
+    }, publishUnpublished), true);
+    assert.equal(publishUnpublished.status, 303, publishUnpublished.body);
+    assert.deepEqual(
+      (await repo.getPublished({ kind: "puzzle", id: "lab-unpublished-layout" })).layout,
+      layoutDocumentForMode("star", unpublishedLayout)
+    );
+    await repo.unpublish({ kind: "puzzle", id: "lab-unpublished-layout", actor });
+  } finally {
+    await rm(unpublishedDraftDirectory, { recursive: true, force: true });
+  }
 
   const missing = createResponse();
   assert.equal(await handleRequest({
@@ -259,6 +370,14 @@ export async function run(page) {
   });
   try {
     const draftStore = createPuzzleDraftStore({ directory: draftDir });
+    await draftStore.createDraft({
+      draftId: "lab-browser-unpublished-draft",
+      document: {
+        ...labPuzzle,
+        id: "lab-browser-unpublished",
+        title: "Lab browser unpublished"
+      }
+    });
     const handleBrowserPlay = createLocalPlayCorpusHandler({
       contentDocuments: repo,
       contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
@@ -274,6 +393,27 @@ export async function run(page) {
     const server = await startServer(root, { handleRequest: handleBrowserRequest });
     const baseURL = serverURL(server);
     try {
+      await page.goto(
+        `${baseURL}/?puzzle=lab-browser-unpublished-draft&play&author=layout`,
+        { waitUntil: "networkidle" }
+      );
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-browser-unpublished"
+        && !document.getElementById("layout-authoring")?.hidden,
+      null, { timeout: 15000 });
+      await page.click("#layout-authoring-prepare");
+      await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, {
+        timeout: 15000
+      });
+      await page.click("#layout-authoring-export");
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-status")?.textContent === "Layout saved to D1.",
+      null, { timeout: 15000 });
+      assert.ok(
+        (await draftStore.getDraft("lab-browser-unpublished-draft")).layout,
+        "Save Layout did not persist the unpublished draft override"
+      );
+
       await page.goto(`${baseURL}/index.html?library`, { waitUntil: "networkidle" });
       await page.waitForFunction(() => window.CC?.playSource === "d1", null, { timeout: 60000 });
       assert.equal(await page.evaluate(() => CC.playSource), "d1");
@@ -313,7 +453,7 @@ export async function run(page) {
         document.getElementById("layout-authoring-status")?.textContent === "Layout saved to D1.",
       null, { timeout: 15000 });
       assert.ok(
-        (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).starLayout,
+        (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
         "Save Layout did not persist the D1 override"
       );
 

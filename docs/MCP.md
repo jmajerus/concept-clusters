@@ -94,9 +94,8 @@ running; list or prune them with `npm run mcp:housekeep` or
 `npm run mcp:prune` (keeps the newest match). Optional automatic pruning
 on startup: set `MCP_PRUNE_SIBLINGS=1` in `.env`. The `mcp:hosted:*`
 family is the Cloudflare authoring Worker (Wrangler preview, D1
-migrations, deploy).
-`mcp:hosted:migrate:dev` is Wrangler's local D1 for that Worker preview —
-not the stdio server.
+migrations, deploy). The `authoring:d1:migrate:*` scripts explicitly select
+the local or remote D1 database; they are independent of the stdio server.
 
 | Script | What it is |
 |---|---|
@@ -105,11 +104,11 @@ not the stdio server.
 | `mcp:prune` | Stop extra stdio servers; keep the newest one. |
 | `mcp:probe-report` | Summarize captured `probe_mcp_client` call frames. |
 | `mcp:hosted:dev` | Hosted authoring Worker on localhost (`http://localhost:8788/mcp`). |
-| `mcp:hosted:migrate:dev` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
-| `mcp:hosted:migrate` | D1 migrations on production. |
+| `authoring:d1:migrate:local` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
+| `authoring:d1:migrate:remote` | D1 migrations on the remote authoring database. |
 | `mcp:hosted:deploy` | Deploy the hosted Worker. |
 | `authoring:deploy` | From this machine, SSH to the LAN authoring server, fast-forward pull `/opt/concept-clusters`, then restart `concept-clusters-authoring.service`. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. |
-| `mcp:hosted:release` | Production migrate, then deploy. |
+| `mcp:hosted:release` | Remote D1 migration, then hosted Worker deploy. |
 | `mcp:hosted:types` | Regenerate Worker TypeScript types. |
 
 From the repository root:

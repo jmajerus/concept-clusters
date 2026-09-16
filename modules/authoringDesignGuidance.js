@@ -100,11 +100,12 @@ terms-per-cluster range, or bridge count just to stay within them.
 modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
 authorable here; call \`get_authoring_schema\` for the complete machine-readable
 field contract.
-Star layout curation is authored separately from puzzle content, through
+Layout curation is authored separately from puzzle content, through
 \`?author=layout\` on the D1-backed authoring server. \`Save Layout\` stores the
-validated override with the puzzle; Freeze materializes it in the generated
-player module. This is the sole layout publication path; deployed player pages
-do not expose file export.`;
+validated, mode-neutral override with the working copy; \`Publish\` transfers
+that confirmed artifact to the shared puzzle row, and Freeze materializes it in
+the generated player module. This is the sole layout publication path; deployed
+player pages do not expose file export.`;
 
 export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema validity)
 

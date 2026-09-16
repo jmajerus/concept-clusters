@@ -78,7 +78,9 @@ non-blocking authoring flags as prompts for judgment, not automatic failures.
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
 review. Play is a clean player preview of the working copy
 (`/?draft=<id>&view=play`); Open board (`/?draft=<id>`) is Construct.
-Neither writes git. Add `&admin` for layout tools. **Publish** writes the
+Neither writes git. Add `&admin` for layout tools. In `?author=layout`,
+`Save Layout` stores the confirmed layout override on the working copy; it does
+not publish the puzzle. **Publish** writes the
 shared D1 document and leaves the editor open; it is enabled only when the
 working copy is not already that snapshot. **Revert to published** appears
 only when the working copy differs from the D1 row. **Cue** means “I’m done

@@ -3,6 +3,7 @@ import { LEVEL_CATALOGUE_ID_PREFIX } from "./catalogueRegistry.js";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
 import { documentForStorage } from "./authoredPuzzleDocument.js";
 import { DraftNotFoundError } from "./draftRepository.js";
+import { layoutDocumentForMode } from "./layoutDocument.js";
 
 export const OPEN_EXISTING_DRAFT_CONFIRM = "open-existing-draft";
 
@@ -115,10 +116,16 @@ export async function seedPublishedPuzzles(repository, contentService, puzzleIds
     if (!puzzleId || seen.has(puzzleId) || existingIds.has(puzzleId)) continue;
     seen.add(puzzleId);
     let document;
+    let layout = null;
     try {
       document = typeof contentService.getPuzzleDocumentForPublication === "function"
         ? await contentService.getPuzzleDocumentForPublication(puzzleId)
         : contentService.getPuzzleDocument(puzzleId);
+      layout = typeof contentService.getPuzzleLayoutForPublication === "function"
+        ? await contentService.getPuzzleLayoutForPublication(puzzleId)
+        : document?.layout || (document?.starLayout
+          ? layoutDocumentForMode("star", document.starLayout)
+          : null);
     } catch {
       continue;
     }
@@ -126,7 +133,8 @@ export async function seedPublishedPuzzles(repository, contentService, puzzleIds
     candidates.push({
       kind: "puzzle",
       id: document.id,
-      document: canonicalizePuzzleCategoryReferences(document, categoryRegistry)
+      document: canonicalizePuzzleCategoryReferences(document, categoryRegistry),
+      layout
     });
   }
   return seedMissingPublished(repository, "puzzle", candidates, { existingIds });
@@ -144,8 +152,14 @@ export async function seedPublishedPuzzleIfAbsent(
     if (!(error instanceof ContentDocumentNotFoundError)) throw error;
   }
   let document;
+  let layout = null;
   try {
     document = await contentService.getPuzzleDocument(puzzleId);
+    layout = typeof contentService.getPuzzleLayoutForPublication === "function"
+      ? await contentService.getPuzzleLayoutForPublication(puzzleId)
+      : document?.layout || (document?.starLayout
+        ? layoutDocumentForMode("star", document.starLayout)
+        : null);
   } catch {
     return null;
   }
@@ -154,7 +168,8 @@ export async function seedPublishedPuzzleIfAbsent(
   return repository.seedPublishedIfAbsent({
     kind: "puzzle",
     id: puzzleId,
-    document: canonicalizePuzzleCategoryReferences(document, categoryRegistry)
+    document: canonicalizePuzzleCategoryReferences(document, categoryRegistry),
+    layout
   });
 }
 

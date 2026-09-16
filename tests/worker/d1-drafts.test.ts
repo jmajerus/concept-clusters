@@ -5,7 +5,9 @@ import {
   DraftNotFoundError
 } from "../../modules/draftRepository.js";
 import { D1DraftRepository } from "../../modules/d1DraftRepository.js";
+import { D1ContentDocumentRepository } from "../../modules/contentDocumentRepository.js";
 import { createHostedAuthoringContentService } from "../../modules/hostedAuthoringContentService.js";
+import { layoutDocumentForMode } from "../../modules/layoutDocument.js";
 
 describe("D1 draft repository", () => {
   it("holds one mutable document per draft and enforces owner boundaries", async () => {
@@ -66,6 +68,45 @@ describe("D1 draft repository", () => {
     });
     expect(fetched.document.title).toBe("D1 draft fixture revised");
     expect(fetched.revision).toBe(2);
+
+    const layout = {
+      schemaVersion: 1,
+      puzzleId: "d1-draft-fixture",
+      puzzleRevision: "fnv1a32:test",
+      board: { width: 1000, height: 500 },
+      nodes: { "cluster:0": { x: 40, y: 40 } },
+      metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+    };
+    const layoutDocument = layoutDocumentForMode("star", layout);
+    const withLayout = await repository.saveLayout({
+      draftId: "d1-draft-fixture",
+      layout: layoutDocument,
+      actor
+    });
+    expect(withLayout.layout).toEqual(layoutDocument);
+    expect(withLayout.revision).toBe(2);
+    const clearedLayout = await repository.clearLayout({
+      draftId: "d1-draft-fixture",
+      actor
+    });
+    expect(clearedLayout.layout).toBeNull();
+
+    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+    const publishedWithLayout = await contentDocuments.publish({
+      kind: "puzzle",
+      id: "d1-draft-fixture",
+      document: fetched.document,
+      actor,
+      layout: layoutDocument
+    });
+    expect(publishedWithLayout.layout).toEqual(layoutDocument);
+    const republished = await contentDocuments.publish({
+      kind: "puzzle",
+      id: "d1-draft-fixture",
+      document: { ...fetched.document, title: "D1 draft fixture published again" },
+      actor
+    });
+    expect(republished.layout).toEqual(layoutDocument);
 
     await expect(repository.get({
       draftId: "d1-draft-fixture",

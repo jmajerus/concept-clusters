@@ -266,7 +266,8 @@ otherwise. Update the environment variable when the host's model changes;
 nothing here is observed or re-verified per call.
 
 Apply migration `0008_draft_assistance_stamps` locally with
-`npm run mcp:hosted:migrate:dev` (and remotely before deploy).
+`npm run authoring:d1:migrate:local` (and remotely before deploy with
+`npm run authoring:d1:migrate:remote`).
 
 ## Related scripts
 

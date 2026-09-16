@@ -14,7 +14,7 @@ JSON-LD stays interchange only.
 
 | Kind | Working copy | Published row |
 |---|---|---|
-| Puzzle | existing `puzzle_drafts` (owner-scoped) | `published_documents` `kind=puzzle` |
+| Puzzle | existing `puzzle_drafts` (owner-scoped), including an optional confirmed layout document | `published_documents` `kind=puzzle`, including the layout copied at Publish |
 | Catalogue | `content_drafts` `kind=catalogue` | `published_documents` `kind=catalogue` |
 | Category | `content_drafts` `kind=category` | `published_documents` `kind=category` |
 
@@ -28,7 +28,8 @@ catalogue rows; their entries are other catalogues.
 ## Publish vs freeze
 
 **Publish** (admin page) copies the working document onto the published D1
-row after validation, and appends `published_document_revisions`. It does
+row after validation, promotes any confirmed layout document from the working
+copy, and appends `published_document_revisions`. It does
 not write `main` and does not open a GitHub pull request. After Publish
 the author may **Cue** that snapshot for the next freeze, or **Hold** it
 in authoring play. **Cue** means “I’m done with this” and is the author’s
@@ -101,8 +102,10 @@ rows the pages use, then may still export a GitHub PR.
 
 Apply `d1/migrations/0009_content_documents.sql`,
 `d1/migrations/0010_published_withdrawn.sql`, and
-`d1/migrations/0011_ready_for_freeze.sql`
-(`npm run mcp:hosted:migrate`) before the Worker that reads these tables.
+`d1/migrations/0011_ready_for_freeze.sql` plus all later tracked migrations
+(including `0022_puzzle_draft_star_layout.sql` and
+`0023_rename_layout_json.sql`)
+(`npm run authoring:d1:migrate:remote`) before the Worker that reads these tables.
 
 ## Out of scope here
 

@@ -19,8 +19,13 @@ import {
 } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
+import { layoutDocumentForMode } from "./layoutDocument.js";
 
 export { HOSTED_AUTHORING_GUIDANCE };
+
+function clone(value) {
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
 
 export function createHostedAuthoringContentService({
   puzzles = PUZZLES,
@@ -98,6 +103,15 @@ export function createHostedAuthoringContentService({
     return puzzleToSimplified(puzzle, {
       ...(embedded === undefined ? {} : { learningContent: embedded })
     });
+  }
+
+  function getPuzzleLayoutForPublication(puzzleId) {
+    const puzzle = puzzleById.get(puzzleId);
+    if (!puzzle) throw new Error(`Unknown puzzle: ${puzzleId}`);
+    if (puzzle.layout) return clone(puzzle.layout);
+    return puzzle.starLayout
+      ? layoutDocumentForMode("star", puzzle.starLayout)
+      : null;
   }
 
   // Plain equivalent of the old JSON-LD catalogue manifest (no @context/
@@ -229,6 +243,7 @@ export function createHostedAuthoringContentService({
     getCatalogueDocument,
     getCategory,
     getPuzzleDocument,
+    getPuzzleLayoutForPublication,
     guidance: HOSTED_AUTHORING_GUIDANCE,
     knownPuzzleIds,
     listPuzzles,
