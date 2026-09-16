@@ -50,6 +50,7 @@ import {
   layoutForMode,
   normalizeLayoutDocument
 } from "./layoutDocument.js";
+import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   diffPublishedDraft,
   publishedDocumentFromService,
@@ -196,6 +197,7 @@ export async function mapDraftDetail(record, {
   inCheckout = false,
   matchesCheckout = null,
   publishedDocument = null,
+  publishedLayout = null,
   categoryRegistry = undefined
 }) {
   const puzzleId = typeof record.document?.id === "string"
@@ -206,6 +208,9 @@ export async function mapDraftDetail(record, {
     ? documentForEditor(publishedDocument, { categoryRegistry })
     : gitPublished;
   const document = documentForEditor(record.document, { categoryRegistry });
+  const layoutDiffersFromPublished = Boolean(
+    publishedDocument && !valuesEqual(publishedLayout || null, record.layout || null)
+  );
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -216,6 +221,7 @@ export async function mapDraftDetail(record, {
     document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
     publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
+    layoutDiffersFromPublished,
     validation: contentService
       ? await withUserOnlyFlags(
         contentService,
@@ -886,6 +892,12 @@ export function createLocalDraftReviewHandler({
               document: documentForStorage(published.document, { categoryRegistry }),
               expectedRevision: record.revision
             });
+            if (typeof draftStore.saveLayout === "function") {
+              await draftStore.saveLayout({
+                draftId,
+                layout: published.layout || null
+              });
+            }
             res.writeHead(303, {
               Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
               "Cache-Control": "no-store"
@@ -919,31 +931,20 @@ export function createLocalDraftReviewHandler({
             puzzleId
           );
           const publishLayout = record.layout || publishedBefore?.layout || undefined;
-          if (publishLayout) {
-            const { puzzle, errors } = puzzleFromAuthoredDocument(authoredDocument, {
-              categoryRegistry
-            });
-            if (!puzzle) {
-              html(res, renderContentPublishResultPage({
-                kind: "puzzle",
-                id: puzzleId,
-                error: errors.join("\n") || "Draft is not valid.",
-                backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
-              }), 400);
-              return true;
-            }
-            const starLayout = layoutForMode(publishLayout, "star");
-            const layoutValidation = validateStarLayoutDocument(starLayout, puzzle);
-            if (starLayout && !layoutValidation.valid) {
-              html(res, renderContentPublishResultPage({
-                kind: "puzzle",
-                id: puzzleId,
-                error: "The saved layout must be reconfirmed after this puzzle edit.\n" +
-                  layoutValidation.errors.join("\n"),
-                backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
-              }), 400);
-              return true;
-            }
+          const layoutValidation = validatePublishedPuzzleLayout({
+            document: authoredDocument,
+            layout: publishLayout,
+            categoryRegistry
+          });
+          if (!layoutValidation.valid) {
+            html(res, renderContentPublishResultPage({
+              kind: "puzzle",
+              id: puzzleId,
+              error: "The saved layout must be reconfirmed after this puzzle edit.\n" +
+                layoutValidation.errors.join("\n"),
+              backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+            }), 400);
+            return true;
           }
           const published = await contentDocuments.publish({
             kind: "puzzle",
@@ -1290,6 +1291,9 @@ export function createLocalDraftReviewHandler({
         matchesCheckout,
         publishedDocument: publishedRow && !publishedRow.withdrawnAt
           ? publishedRow.document
+          : null,
+        publishedLayout: publishedRow && !publishedRow.withdrawnAt
+          ? publishedRow.layout
           : null,
         categoryRegistry
       });

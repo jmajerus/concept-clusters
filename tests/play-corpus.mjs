@@ -21,7 +21,10 @@ import {
   expectedStarLayoutNodeKeys,
   starLayoutRevision
 } from "../modules/starLayoutSchema.js";
-import { layoutDocumentForMode } from "../modules/layoutDocument.js";
+import {
+  layoutDocumentForMode,
+  parseLayoutDocument
+} from "../modules/layoutDocument.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
 export const name = "authoring play corpus: D1 Library navigation without git modules";
@@ -67,6 +70,25 @@ export async function run(page) {
   assert.equal(errors.length, 0, errors.join("; "));
   assert.equal(puzzle.id, "lab-d1-play");
   assert.equal(puzzle.bridges[0].term, "lab-bridge");
+  const layout = {
+    schemaVersion: 1,
+    puzzleId: puzzle.id,
+    puzzleRevision: starLayoutRevision(puzzle),
+    board: { width: 1000, height: 500 },
+    nodes: Object.fromEntries(expectedStarLayoutNodeKeys(puzzle).map((key, index) => [
+      key,
+      { x: 40 + index * 20, y: 40 }
+    ])),
+    metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+  };
+  assert.throws(
+    () => parseLayoutDocument("{"),
+    /contains invalid JSON/
+  );
+  assert.throws(
+    () => parseLayoutDocument(JSON.stringify({ schemaVersion: 1 })),
+    /has an unsupported shape/
+  );
 
   assert.equal(catalogueFromDocument({ id: "all", title: "All", entries: [] }), null);
   assert.equal(catalogueFromDocument({ id: "level-introductory", title: "Intro", entries: [] }), null);
@@ -145,9 +167,16 @@ export async function run(page) {
     async getPuzzleDocumentForPublication(id) {
       if (id !== "lab-d1-play") throw new Error(`unknown ${id}`);
       return labPuzzle;
+    },
+    getPuzzleLayoutForPublication() {
+      return layoutDocumentForMode("star", layout);
     }
   }, ["lab-d1-play", "lab-d1-play", "missing-ignored"]);
   assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).document.title, "Lab D1 play");
+  assert.deepEqual(
+    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
+    layoutDocumentForMode("star", layout)
+  );
   await repo.publish({
     kind: "catalogue",
     id: "lab-set",
@@ -194,17 +223,6 @@ export async function run(page) {
   assert.deepEqual(compiled.puzzle.bridges[0].clusters, [0, 1]);
   assert.deepEqual(compiled.puzzle.provenance, labPuzzle.provenance);
 
-  const layout = {
-    schemaVersion: 1,
-    puzzleId: compiled.puzzle.id,
-    puzzleRevision: starLayoutRevision(compiled.puzzle),
-    board: { width: 1000, height: 500 },
-    nodes: Object.fromEntries(expectedStarLayoutNodeKeys(compiled.puzzle).map((key, index) => [
-      key,
-      { x: 40 + index * 20, y: 40 }
-    ])),
-    metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
-  };
   const saveLayoutResponse = createResponse();
   assert.equal(await handleRequest({
     method: "PUT",

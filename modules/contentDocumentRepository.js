@@ -469,8 +469,8 @@ export class D1ContentDocumentRepository {
     return reviewIssueThreads(result.results.map(reviewEventRecord))[0] || null;
   }
 
-  async seedPublishedIfAbsent({ kind, id, document }) {
-    await this.seedPublishedManyIfAbsent([{ kind, id, document }]);
+  async seedPublishedIfAbsent({ kind, id, document, layout = null }) {
+    await this.seedPublishedManyIfAbsent([{ kind, id, document, layout }]);
     return this.getPublished({ kind, id });
   }
 
@@ -484,15 +484,19 @@ export class D1ContentDocumentRepository {
       const sourceDocument = documentForPublishedStorage(item.kind, item.document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
       const contentHash = await draftContentHash(documentJson);
+      const layoutJson = item.kind === "puzzle"
+        ? serializeLayoutDocument(item.layout)
+        : null;
       statements.push(
         this.database.prepare(`
           INSERT OR IGNORE INTO published_documents (
             kind, id, title, document, content_hash, revision,
             published_by, published_at, updated_at, last_agent_reviewed_at,
-            cued_for_freeze_at, cued_for_freeze_by
-          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed')
+            cued_for_freeze_at, cued_for_freeze_by, layout_json
+          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed', ?)
         `).bind(
-          item.kind, item.id, titleOf(sourceDocument), documentJson, contentHash, now, now, now, now
+          item.kind, item.id, titleOf(sourceDocument), documentJson, contentHash,
+          now, now, now, now, layoutJson
         ),
         this.database.prepare(`
           INSERT OR IGNORE INTO published_document_revisions (
@@ -759,8 +763,8 @@ export function createMemoryContentDocumentRepository() {
       });
       return repository.getPublished({ kind: "puzzle", id });
     },
-    async seedPublishedIfAbsent({ kind, id, document }) {
-      await repository.seedPublishedManyIfAbsent([{ kind, id, document }]);
+    async seedPublishedIfAbsent({ kind, id, document, layout = null }) {
+      await repository.seedPublishedManyIfAbsent([{ kind, id, document, layout }]);
       return repository.getPublished({ kind, id });
     },
     async seedPublishedManyIfAbsent(items = []) {
@@ -785,7 +789,9 @@ export function createMemoryContentDocumentRepository() {
           last_agent_reviewed_at: now,
           last_human_reviewed_at: null,
           withdrawn_at: null,
-          layout_json: null,
+          layout_json: item.kind === "puzzle"
+            ? serializeLayoutDocument(item.layout)
+            : null,
           cued_for_freeze_at: now,
           cued_for_freeze_by: "git-seed"
         };

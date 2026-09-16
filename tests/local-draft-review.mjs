@@ -17,6 +17,7 @@ import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { openPuzzleWorkingCopy } from "../modules/contentDocumentSeed.js";
+import { layoutDocumentForMode } from "../modules/layoutDocument.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
@@ -788,6 +789,46 @@ export async function run() {
     }), unknownExisting), true);
     assert.equal(unknownExisting.status, 404);
     assert.match(JSON.parse(unknownExisting.body).error, /Unknown puzzle/);
+
+    // A layout-only edit of an already published working copy must still
+    // enable Publish and promote the layout, even when the document itself is
+    // unchanged.
+    const layoutOnly = layoutDocumentForMode("circle", {
+      schemaVersion: 1,
+      puzzleId: "energy-flow",
+      puzzleRevision: "layout-only",
+      board: { width: 640, height: 460 }
+    });
+    const savedLayoutOnly = createResponse();
+    assert.equal(await handlePublish(jsonRequest(
+      "/admin/drafts/energy-flow-review/layout.json",
+      {
+        method: "PUT",
+        origin: "http://127.0.0.1:8787",
+        host: "127.0.0.1:8787",
+        body: { layout: layoutOnly }
+      }
+    ), savedLayoutOnly), true);
+    assert.equal(savedLayoutOnly.status, 200, savedLayoutOnly.body);
+    const layoutOnlyPage = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review"
+    }, layoutOnlyPage), true);
+    assert.equal(layoutOnlyPage.status, 200);
+    assert.match(layoutOnlyPage.body, /layout override changed/);
+    assert.match(layoutOnlyPage.body, /name="confirm" value="publish">Publish/);
+    const publishedLayoutOnly = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=publish"
+    }), publishedLayoutOnly), true);
+    assert.equal(publishedLayoutOnly.status, 303);
+    assert.deepEqual(
+      (await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" })).layout,
+      layoutOnly
+    );
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

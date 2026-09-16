@@ -1565,10 +1565,12 @@ source of truth.
 `Save Layout` is enabled when the solved Star layout has no line crossings.
 Overlaps and lines passing through unrelated pills are reported separately so
 an author can make a deliberate judgment about minor edge cases. On the
-authoring server, the button validates and stores a mode-neutral layout
-document with the current working copy in `puzzle_drafts.layout_json`; it does
-not publish the puzzle. The draft's D1 play preview uses that saved override
-automatically.
+authoring server, a draft opened from a working copy validates and stores a
+mode-neutral layout document with that copy in `puzzle_drafts.layout_json`; it
+does not publish the puzzle. The draft's D1 play preview uses that saved
+override automatically. When there is no draft overlay, the same button uses
+the published endpoint and updates only `published_documents.layout_json` for
+the puzzle; it does not publish a new document revision.
 
 The persisted shape is intentionally small and extensible:
 

@@ -57,10 +57,18 @@ export function layoutDocumentForMode(mode, value, existing = null) {
 
 export function parseLayoutDocument(text, label = "Stored layout") {
   if (text == null || text === "") return null;
+  let parsed = text;
+  if (typeof text === "string") {
+    try {
+      parsed = JSON.parse(text);
+    } catch (error) {
+      throw new Error(`${label} contains invalid JSON: ${error.message}`);
+    }
+  }
   try {
-    return normalizeLayoutDocument(typeof text === "string" ? JSON.parse(text) : text);
+    return normalizeLayoutDocument(parsed);
   } catch (error) {
-    throw new Error(`${label} contains invalid JSON: ${error.message}`);
+    throw new Error(`${label} has an unsupported shape: ${error.message}`);
   }
 }
 

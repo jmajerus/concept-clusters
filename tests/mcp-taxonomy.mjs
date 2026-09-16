@@ -9,6 +9,12 @@ import { createMemoryContentDocumentRepository } from "../modules/contentDocumen
 import { mergeCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { validateCategoryDocument } from "../modules/categoryValidation.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
+import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
+import {
+  expectedStarLayoutNodeKeys,
+  starLayoutRevision
+} from "../modules/starLayoutSchema.js";
+import { layoutDocumentForMode } from "../modules/layoutDocument.js";
 
 export const name = "MCP authoring: D1 categories and catalogues without GitHub";
 
@@ -50,6 +56,25 @@ function inMemoryDraftRepository(seed) {
       return { ...next };
     }
   };
+}
+
+function starLayoutFor(document) {
+  const { puzzle, errors } = puzzleFromAuthoredDocument(document);
+  assert.equal(errors.length, 0, errors.join("; "));
+  return layoutDocumentForMode("star", {
+    schemaVersion: 1,
+    puzzleId: puzzle.id,
+    puzzleRevision: starLayoutRevision(puzzle),
+    board: { width: 1000, height: 500 },
+    nodes: Object.fromEntries(expectedStarLayoutNodeKeys(puzzle).map((key, index) => [
+      key,
+      {
+        x: 40 + (index % 20) * 40,
+        y: 40 + Math.floor(index / 20) * 40
+      }
+    ])),
+    metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+  });
 }
 
 async function connect(server) {
@@ -276,10 +301,12 @@ export async function run() {
     id: publishFixtureId,
     title: "Publish fixture"
   };
+  const publishFixtureLayout = starLayoutFor(publishFixtureDocument);
   const publishServer = createHostedMcpAuthoringServer({
     draftRepository: inMemoryDraftRepository({
       [publishFixtureId]: {
         document: publishFixtureDocument,
+        layout: publishFixtureLayout,
         revision: 1,
         puzzleId: publishFixtureId,
         status: "draft"
@@ -301,26 +328,51 @@ export async function run() {
     assert.equal(saved.published.id, publishFixtureId);
     assert.equal(saved.published.cuedForFreezeAt, null);
     assert.equal(saved.publicationErrors, null);
+    assert.deepEqual(
+      (await contentDocuments.getPublished({ kind: "puzzle", id: publishFixtureId })).layout,
+      publishFixtureLayout
+    );
 
-    // An invalid document still saves (drafts stay permissive) but does
-    // not publish; the response reports why.
-    const invalidSaved = await publishCall("save_puzzle_draft", {
+    // A document edit still saves (drafts stay permissive) but does not
+    // publish when its previously confirmed layout is stale.
+    const changedFixtureDocument = {
+      ...publishFixtureDocument,
+      clusters: publishFixtureDocument.clusters.map((cluster, index) =>
+        index === 0 ? { ...cluster, name: `${cluster.name} revised` } : cluster
+      )
+    };
+    const invalidLayoutSaved = await publishCall("save_puzzle_draft", {
       draft_id: publishFixtureId,
       expected_revision: 2,
-      document: { ...publishFixtureDocument, clusters: [] },
+      document: changedFixtureDocument,
       publish_to_authoring: true
     });
-    assert.equal(invalidSaved.draft.revision, 3);
-    assert.equal(invalidSaved.published, null);
-    assert.ok(invalidSaved.publicationErrors.length > 0);
+    assert.equal(invalidLayoutSaved.draft.revision, 3);
+    assert.equal(invalidLayoutSaved.published, null);
+    assert.ok(invalidLayoutSaved.publicationErrors.some(error => /reconfirmed/i.test(error)));
+    assert.equal(
+      (await contentDocuments.getPublished({ kind: "puzzle", id: publishFixtureId })).revision,
+      1
+    );
+
+    // An invalid document still saves but does not publish either.
+    const invalidDocumentSaved = await publishCall("save_puzzle_draft", {
+      draft_id: publishFixtureId,
+      expected_revision: 3,
+      document: { ...changedFixtureDocument, clusters: [] },
+      publish_to_authoring: true
+    });
+    assert.equal(invalidDocumentSaved.draft.revision, 4);
+    assert.equal(invalidDocumentSaved.published, null);
+    assert.ok(invalidDocumentSaved.publicationErrors.length > 0);
 
     // Without the flag, a save never touches authoring play.
     const plainSaved = await publishCall("save_puzzle_draft", {
       draft_id: publishFixtureId,
-      expected_revision: 3,
+      expected_revision: 4,
       document: publishFixtureDocument
     });
-    assert.equal(plainSaved.draft.revision, 4);
+    assert.equal(plainSaved.draft.revision, 5);
     assert.equal(plainSaved.published, undefined);
     assert.equal(plainSaved.publicationErrors, undefined);
   } finally {

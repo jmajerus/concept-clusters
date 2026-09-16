@@ -27,6 +27,7 @@ import {
 } from "./puzzleManifest.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
+import { layoutDocumentForMode } from "./layoutDocument.js";
 import { computeAuthoringFlags, computeUserOnlyAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
@@ -124,6 +125,15 @@ export function createContentInterchangeService({
       canonicalCategories: true,
       categoryRegistry: state.categories
     });
+  }
+
+  function getPuzzleLayoutForPublication(id) {
+    const puzzle = puzzles.find(item => item.id === id);
+    if (!puzzle) throw new Error(`Unknown puzzle: ${id}`);
+    if (puzzle.layout) return clone(puzzle.layout);
+    return puzzle.starLayout
+      ? layoutDocumentForMode("star", puzzle.starLayout)
+      : null;
   }
 
   function getCatalogueDocument(id) {
@@ -462,6 +472,7 @@ export function createContentInterchangeService({
     getPuzzleJsonLd,
     getPuzzleDocument,
     getPuzzleDocumentForPublication,
+    getPuzzleLayoutForPublication,
     getCatalogueDocument,
     getCategory,
     listCategories,

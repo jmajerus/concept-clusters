@@ -43,6 +43,8 @@ import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
+import { publishedRowOrNull } from "./contentDocumentRepository.js";
+import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   filterAuthoringPuzzles,
   gitPuzzlesFromService,
@@ -1011,19 +1013,37 @@ export function createAuthoringMcpServer({
       });
       if (validation.valid) {
         const puzzleId = typeof draft.document?.id === "string" ? draft.document.id : draft.puzzleId;
-        published = await contentDocuments.publish({
-          kind: "puzzle",
-          id: puzzleId,
-          document: documentForStorage(draft.document, {
-            categoryRegistry: taxonomy.categoryRegistry
-          }),
-          actor,
-          // A layout is a presentation artifact, not part of the MCP
-          // document domain. If this draft has one, promote it with the
-          // document; otherwise the repository may retain the current live
-          // layout for a content-only edit.
-          layout: draft.layout || undefined
+        const publishedBefore = await publishedRowOrNull(
+          contentDocuments,
+          "puzzle",
+          puzzleId
+        );
+        const publishLayout = draft.layout || publishedBefore?.layout || undefined;
+        const layoutValidation = validatePublishedPuzzleLayout({
+          document: draft.document,
+          layout: publishLayout,
+          categoryRegistry: taxonomy.categoryRegistry
         });
+        if (!layoutValidation.valid) {
+          publicationErrors = [
+            "The saved layout must be reconfirmed after this puzzle edit.",
+            ...layoutValidation.errors
+          ];
+        } else {
+          published = await contentDocuments.publish({
+            kind: "puzzle",
+            id: puzzleId,
+            document: documentForStorage(draft.document, {
+              categoryRegistry: taxonomy.categoryRegistry
+            }),
+            actor,
+            // A layout is a presentation artifact, not part of the MCP
+            // document domain. If this draft has one, promote it with the
+            // document; otherwise the repository may retain the current live
+            // layout for a content-only edit.
+            layout: publishLayout
+          });
+        }
       } else {
         publicationErrors = validation.errors;
       }
