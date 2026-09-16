@@ -261,11 +261,6 @@
           "type": "array",
           "minItems": 1,
           "items": { "$ref": "#/$defs/linkEntry" }
-        },
-        "citations": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/$defs/citation" }
         }
       }
     },

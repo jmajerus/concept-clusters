@@ -414,6 +414,21 @@ export async function run() {
     ));
   }
 
+  // Formal bibliography belongs to puzzle info, not the lesson object.
+  {
+    const result = SimplifiedPuzzleInputSchema.safeParse(validPuzzle({
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "A short orientation." },
+        citations: [{ title: "A source" }]
+      }
+    }));
+    assert.equal(result.success, false);
+    assert.ok(result.error.issues.some(issue =>
+      issue.path.join(".") === "learningIntroduction" && issue.message.includes("citations")
+    ));
+  }
+
   {
     const input = validPuzzle({
       learningIntroduction: {

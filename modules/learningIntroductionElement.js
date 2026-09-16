@@ -173,7 +173,7 @@ class LearningIntroductionElement extends HTMLElement {
           <div id="lesson-status" class="lesson-status" role="status"></div>
           <article id="lesson" class="lesson"></article>
           <section id="sources" class="sources" aria-labelledby="sources-title">
-            <h3 id="sources-title">Sources and further reading</h3>
+            <h3 id="sources-title">Further reading</h3>
             <ul id="source-list"></ul>
           </section>
           <section id="citations" class="citations-block" aria-labelledby="citations-title" hidden>

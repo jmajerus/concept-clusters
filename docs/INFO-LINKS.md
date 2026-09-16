@@ -57,7 +57,8 @@ a formal footnote-style block distinct from `links`. That is the **single**
 bibliography for the puzzle and its lesson. Cluster, term, and bridge
 `info` do not author citations; leftover nested citations still play, and
 fold up to the puzzle when a draft enters the editor. Leftover
-`learningIntroduction.citations` fold the same way. When a learning
+Legacy `learningIntroduction.citations` fold the same way. They are not part
+of the current lesson schema. When a learning
 introduction exists, play shows the puzzle list under a **References**
 heading in the Lesson dialog (not on the persistent board); without a
 lesson, it shows on the board. Lesson further-reading
@@ -104,7 +105,7 @@ order. The same behavior applies to node hover/tap panels, overview
 information surfaces, and cluster hover. A citation renders as its own
 small block below that content, one line per citation, in authored order.
 In the Lesson dialog, citations appear under a **References** heading
-(below any "Sources and further reading" links).
+(below any "Further reading" links).
 
 Terms and bridges no longer receive an automatic Wikipedia search when no link
 is authored. That missing-link fallback is deprecated:

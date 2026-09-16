@@ -220,6 +220,11 @@ export async function run() {
       resourceSchema.properties.relatedPuzzles.description,
       /boardOrder is external metadata/
     );
+    assert.equal(
+      resourceSchema.properties.learningIntroduction.properties.citations,
+      undefined,
+      "lesson citations must use the puzzle-level bibliography"
+    );
     assert.match(JSON.stringify(resourceSchema), /25/);
     assert.ok(!resourceSchema.required.includes("bridges"));
 
@@ -243,6 +248,10 @@ export async function run() {
     );
     assert.equal(
       authoringSchema.result.structuredContent.schema.properties.relatedPuzzles.properties.boardOrder,
+      undefined
+    );
+    assert.equal(
+      authoringSchema.result.structuredContent.schema.properties.learningIntroduction.properties.citations,
       undefined
     );
     assert.ok(

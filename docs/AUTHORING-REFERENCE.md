@@ -1020,7 +1020,7 @@ versioned part of the puzzle.
 `links` is an optional further-reading list using the same entry shape as
 `info.links` (a URL or `wiki:Article Title` string, or `{ href, label? }`).
 Play still reads leftover `sources` (`{ label, href }`) and folds them
-into `links` on ingest; they are not in the authoring schema. Shown under a "Sources and further reading" heading.
+into `links` on ingest; they are not in the authoring schema. Shown under a "Further reading" heading.
 Bibliographic credit is **not** authored on the lesson. Use puzzle
 `info.citations` (title required; see [INFO-LINKS.md](INFO-LINKS.md#citations)).
 When a learning introduction exists, that same list renders at the bottom
