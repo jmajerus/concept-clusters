@@ -13,6 +13,7 @@
 // skip the learning gate, disable Graph/Sets) stays in game.js.
 
 import { validateStarLayoutDocument } from "./starLayoutSchema.js";
+import { layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
 import {
   clearStarLayoutDraft,
   loadStarLayoutDraft,
@@ -142,10 +143,10 @@ export function createLayoutAuthoringController({
     } else {
       layoutMetricOverlapsEl.textContent = String(metrics.overlaps);
     }
-    layoutAuthoringDraftStateEl.textContent = draft
-      ? "Local draft saved"
-      : savesToAuthoringServer && state.puzzle?.starLayout
-        ? "D1 layout saved"
+    layoutAuthoringDraftStateEl.textContent = savesToAuthoringServer && state.puzzle?.starLayout
+      ? "D1 layout saved"
+      : draft
+        ? "Local draft saved"
         : "No local draft";
 
     layoutAuthoringSaveBtn.disabled = !prepared;
@@ -263,8 +264,10 @@ export function createLayoutAuthoringController({
     setLayoutAuthoringStatus("Saving layout to D1…");
     try {
       const saved = await saveLayout({ puzzleId: state.puzzle.id, layout });
-      state.puzzle.starLayout = saved || layout;
-      state.lastSavedStarLayout = state.puzzle.starLayout;
+      const savedStarLayout = layoutForMode(saved, "star") || layout;
+      state.puzzle.layout = saved || layoutDocumentForMode("star", layout);
+      state.puzzle.starLayout = savedStarLayout;
+      state.lastSavedStarLayout = savedStarLayout;
       setLayoutAuthoringStatus("Layout saved to D1.", "good");
     } catch (error) {
       setLayoutAuthoringStatus(`Could not save layout: ${error.message}`, "error");

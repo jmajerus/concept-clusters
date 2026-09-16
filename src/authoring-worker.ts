@@ -27,6 +27,9 @@ import {
   withStorageCanonicalizeFlags
 } from "../modules/authoredPuzzleDocument.js";
 import { loadMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
+import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
+import { validateStarLayoutDocument } from "../modules/starLayoutSchema.js";
+import { layoutForMode } from "../modules/layoutDocument.js";
 import { renderAdminIndexPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
@@ -702,11 +705,42 @@ async function handleAdminRoute(
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
           }), 400);
         }
+        const publishedBefore = await publishedRowOrNull(
+          contentDocuments,
+          "puzzle",
+          puzzleId
+        );
+        const publishLayout = draft.layout || publishedBefore?.layout || undefined;
+        if (publishLayout) {
+          const { puzzle, errors } = puzzleFromAuthoredDocument(authoredDocument, {
+            categoryRegistry
+          });
+          if (!puzzle) {
+            return html(renderContentPublishResultPage({
+              kind: "puzzle",
+              id: puzzleId,
+              error: errors.join("\n") || "Draft is not valid.",
+              backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+            }), 400);
+          }
+          const starLayout = layoutForMode(publishLayout, "star");
+          const layoutValidation = validateStarLayoutDocument(starLayout, puzzle);
+          if (starLayout && !layoutValidation.valid) {
+            return html(renderContentPublishResultPage({
+              kind: "puzzle",
+              id: puzzleId,
+              error: "The saved layout must be reconfirmed after this puzzle edit.\n" +
+                layoutValidation.errors.join("\n"),
+              backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+            }), 400);
+          }
+        }
         const published = await contentDocuments.publish({
           kind: "puzzle",
           id: puzzleId,
           document: documentForStorage(authoredDocument, { categoryRegistry }),
-          actor
+          actor,
+          layout: publishLayout
         });
         if (form.isPublishAndCue) {
           await contentDocuments.setFreezeCue({

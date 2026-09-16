@@ -13,6 +13,10 @@ import {
   assembleStoredDomainDocuments,
   storedDomainDocuments
 } from "./authoringDomains.js";
+import {
+  parseLayoutDocument,
+  serializeLayoutDocument
+} from "./layoutDocument.js";
 
 function parsedJson(text, label) {
   try {
@@ -45,6 +49,9 @@ function fullDraft(row) {
     validation: row.validation_json
       ? parsedJson(row.validation_json, "Stored validation")
       : null,
+    layout: row.layout_json == null
+      ? null
+      : parseLayoutDocument(row.layout_json, "Stored layout"),
     // `assembleStoredDomainDocuments` deliberately rejects JSON-LD here. The
     // nullable-column fallback is for old simplified rows only; interchange
     // documents must be canonicalized before the Worker is released.
@@ -306,6 +313,33 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(JSON.stringify(validation), draftId, owner).run();
     if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
     return validation;
+  }
+
+  async saveLayout({ draftId, layout, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const layoutJson = serializeLayoutDocument(layout);
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET layout_json = ?, updated_at = ?
+      WHERE id = ? AND owner_subject = ?
+    `).bind(layoutJson, now, draftId, owner).run();
+    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+    return this.get({ draftId, actor });
+  }
+
+  async clearLayout({ draftId, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET layout_json = NULL, updated_at = ?
+      WHERE id = ? AND owner_subject = ?
+    `).bind(now, draftId, owner).run();
+    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+    return this.get({ draftId, actor });
   }
 
   async recordCheckoutInstall({ draftId, actor }) {

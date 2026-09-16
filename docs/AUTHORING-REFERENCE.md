@@ -1543,7 +1543,7 @@ renderer fields and should not remove a distinct term to satisfy an internal
 layout threshold. When an honest treatment needs more than 25 nodes, split the
 subject into focused, linked puzzles through `relatedPuzzles`.
 
-## Optional authored Star layouts
+## Optional authored layout overrides
 
 The Star-mode pretty-printer is the default for every puzzle. Only a
 puzzle whose final presentation still needs editorial placement should
@@ -1562,17 +1562,39 @@ that browser's local storage and are specific to the puzzle revision and
 board dimensions. Local storage is only a workspace, never the published
 source of truth.
 
-`Save Layout` is enabled when the solved layout has no line crossings.
+`Save Layout` is enabled when the solved Star layout has no line crossings.
 Overlaps and lines passing through unrelated pills are reported separately so
 an author can make a deliberate judgment about minor edge cases. On the
-authoring server, the button validates and stores the layout in
-the puzzle's `published_documents.star_layout_json` D1 column. The next D1
-play load uses that saved override automatically.
+authoring server, the button validates and stores a mode-neutral layout
+document with the current working copy in `puzzle_drafts.layout_json`; it does
+not publish the puzzle. The draft's D1 play preview uses that saved override
+automatically.
+
+The persisted shape is intentionally small and extensible:
+
+```json
+{
+  "schemaVersion": 1,
+  "modes": {
+    "star": { "...": "validated Star layout" }
+  }
+}
+```
+
+The draft endpoint is `/admin/drafts/<draft-id>/layout.json`; the published
+override endpoint is `/admin/puzzles/<puzzle-id>/layout.json`.
+
+When the puzzle is ready, `Publish` promotes the confirmed layout to the
+puzzle's `published_documents.layout_json` column along with the puzzle
+document. A content-only edit may retain the current live layout; if the
+puzzle geometry changed enough to make it stale, Publish asks the author to
+confirm a new layout first.
 
 The final `Save Layout` control is available only on the D1 authoring server;
 deployed player pages do not offer a layout file export or publication path.
-Cue the puzzle and run the next Freeze; Freeze materializes the saved layout
-on the generated puzzle module, so no separate layout JSON file is needed.
+Cue the published puzzle and run the next Freeze; Freeze materializes the
+published layout on the generated puzzle module, so no separate layout JSON
+file or static registry is needed.
 Run `npm run validate` and the quick `npm test` before committing. Reserve
 `npm run test:extended` for shared
 rendering/layout changes and occasional release-level verification.

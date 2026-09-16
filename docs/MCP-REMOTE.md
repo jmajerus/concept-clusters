@@ -194,14 +194,20 @@ remains the deliberate boundary for overwriting the draft's document.
 The tracked D1 migrations create:
 
 - `puzzle_drafts` for owner, status, current materialized document, revision
-  (OCC token), content hash, last validation result, and the persisted
-  `content_json`, `pedagogy_json`, and protected `provenance_json` projections
-  added by migration `0019_authoring_domains.sql`; and
+  (OCC token), content hash, last validation result, the optional confirmed
+  layout document for unpublished play, and the persisted `content_json`,
+  `pedagogy_json`, and protected `provenance_json` projections added by
+  migrations `0019_authoring_domains.sql` and
+  `0022_puzzle_draft_star_layout.sql` plus the generic-column rename in
+  `0023_rename_layout_json.sql`; and
 - `puzzle_draft_history` for the capped previous-working-copy stack used by
   revert operations; and
 - `content_drafts` for owner-scoped catalogue and category working copies; and
 - `published_documents` plus `published_document_revisions` for the shared
-  live document of each puzzle, catalogue, or category id; and
+  live document of each puzzle, catalogue, or category id. Puzzle rows also
+  carry the confirmed mode-neutral layout document copied from a draft at
+  Publish in `layout_json` (`0021_puzzle_star_layout.sql` created the original
+  column and `0023_rename_layout_json.sql` gives it its generic name); and
 - `draft_assistance_stamps` for append-only MCP assistance audit (scope, role,
   date, client system); this detail is not part of the puzzle document.
 
@@ -309,7 +315,7 @@ and start the authoring Worker:
 
 ```sh
 npm install
-npm run mcp:hosted:migrate:dev
+npm run authoring:d1:migrate:local
 npm run mcp:hosted:dev
 ```
 

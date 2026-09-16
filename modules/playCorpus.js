@@ -117,6 +117,6 @@ export function assemblePlayCorpus({
   };
 }
 
-export function compilePublishedPuzzle(document) {
-  return puzzleFromAuthoredDocument(document);
+export function compilePublishedPuzzle(document, options = {}) {
+  return puzzleFromAuthoredDocument(document, options);
 }

@@ -19,6 +19,10 @@ import {
   partitionAuthoredDocument,
   storedDomainDocuments
 } from "./authoringDomains.js";
+import {
+  layoutDocumentForMode,
+  serializeLayoutDocument
+} from "./layoutDocument.js";
 import { slugify } from "../puzzles/categories.js";
 
 const MAX_DRAFT_DOCUMENT_BYTES = 2 * 1024 * 1024;
@@ -62,9 +66,16 @@ export function createPuzzleDraftStore({ directory }) {
   }
 
   function materializeRecord(record) {
-    if (!record?.domains || typeof record.domains !== "object") return record;
+    if (!record || typeof record !== "object") return record;
+    const layout = record.layout || (record.starLayout
+      ? layoutDocumentForMode("star", record.starLayout)
+      : null);
+    if (!record.domains || typeof record.domains !== "object") {
+      return { ...record, layout };
+    }
     return {
       ...record,
+      layout,
       document: assembleStoredDomainDocuments({
         document: record.document,
         content: storedDomainValue(record, "content", "Stored content domain"),
@@ -133,7 +144,8 @@ export function createPuzzleDraftStore({ directory }) {
       createdAt: now,
       updatedAt: now,
       document: clone(materialized),
-      domains: storedDomainDocuments(materialized)
+      domains: storedDomainDocuments(materialized),
+      layout: null
     };
     await writeRecord(record);
     return publicRecord(record);
@@ -215,6 +227,29 @@ export function createPuzzleDraftStore({ directory }) {
     return clone(validation);
   }
 
+  async function saveLayout({ draftId, layout }) {
+    const current = await readRecord(draftId);
+    const layoutJson = serializeLayoutDocument(layout);
+    const record = {
+      ...current,
+      layout: layoutJson == null ? null : JSON.parse(layoutJson),
+      updatedAt: new Date().toISOString()
+    };
+    await writeRecord(record);
+    return publicRecord(record);
+  }
+
+  async function clearLayout(draftId) {
+    const current = await readRecord(draftId);
+    const record = {
+      ...current,
+      layout: null,
+      updatedAt: new Date().toISOString()
+    };
+    await writeRecord(record);
+    return publicRecord(record);
+  }
+
   async function deleteDraft(draftId) {
     await unlink(pathFor(draftId));
   }
@@ -288,7 +323,13 @@ export function createPuzzleDraftStore({ directory }) {
       .map(entry => readRecord(entry.name.slice(0, -5))));
     return records
       .map(record => {
-        const { document, workingCopyStack, domains, ...metadata } = record;
+        const {
+          document,
+          workingCopyStack,
+          domains,
+          layout: _layout,
+          ...metadata
+        } = record;
         return {
           ...metadata,
           puzzleId: document?.id || null,
@@ -308,6 +349,8 @@ export function createPuzzleDraftStore({ directory }) {
     replaceDraft,
     popWorkingCopy,
     recordValidation,
+    saveLayout,
+    clearLayout,
     markInstalled,
     markUninstalled,
     markSubmitted,

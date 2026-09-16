@@ -105,13 +105,17 @@ export const CATALOGUES = [
           return {
             id,
             document: puzzleDocument(id),
-            starLayout: {
+            layout: {
               schemaVersion: 1,
-              puzzleId: id,
-              puzzleRevision: "fnv1a32:fixture",
-              board: { width: 100, height: 100 },
-              nodes: {},
-              metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+              modes: {
+                star: {
+                  puzzleId: id,
+                  puzzleRevision: "fnv1a32:fixture",
+                  board: { width: 100, height: 100 },
+                  nodes: {},
+                  metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+                }
+              }
             }
           };
         }
@@ -141,7 +145,7 @@ export const CATALOGUES = [
       "utf8"
     );
     assert.match(moduleSource, /definePuzzle/);
-    assert.match(moduleSource, /puzzle\.starLayout/);
+    assert.match(moduleSource, /puzzle\.layout/);
     assert.match(moduleSource, /fnv1a32:fixture/);
 
     // Freeze must use the live registry supplied by D1 when a puzzle's

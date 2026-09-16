@@ -3,6 +3,7 @@
 // git puzzle/catalogue modules.
 
 import { createPuzzleLoader } from "./puzzleLoader.js";
+import { layoutForMode } from "./layoutDocument.js";
 
 export const PLAY_CORPUS_META_NAME = "cc-play-corpus";
 
@@ -22,6 +23,14 @@ export async function loadPublishedPuzzle(entry) {
   }
   if (!response.ok || !body.puzzle) {
     throw new Error(body.error || `HTTP ${response.status}`);
+  }
+  if (body.layout) {
+    const starLayout = layoutForMode(body.layout, "star");
+    return {
+      ...body.puzzle,
+      layout: body.layout,
+      ...(starLayout ? { starLayout } : {})
+    };
   }
   return body.starLayout
     ? { ...body.puzzle, starLayout: body.starLayout }

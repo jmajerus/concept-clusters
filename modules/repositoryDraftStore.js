@@ -13,6 +13,7 @@ function record(draft) {
     updatedAt: draft.updatedAt,
     workingCopyHistoryCount: Number(draft.workingCopyHistoryCount || 0),
     validation: draft.validation ?? null,
+    layout: draft.layout ?? null,
     document: draft.document
   };
 }
@@ -65,6 +66,18 @@ export function createRepositoryDraftStore({ repository, actor }) {
     },
     async recordValidation(draftId, validation) {
       return repository.recordValidation({ draftId, validation, actor });
+    },
+    async saveLayout({ draftId, layout }) {
+      if (typeof repository.saveLayout !== "function") {
+        throw new Error("Draft layout storage is not available.");
+      }
+      return record(await repository.saveLayout({ draftId, layout, actor }));
+    },
+    async clearLayout(draftId) {
+      if (typeof repository.clearLayout !== "function") {
+        throw new Error("Draft layout storage is not available.");
+      }
+      return record(await repository.clearLayout({ draftId, actor }));
     },
     async markInstalled(draftId) {
       if (typeof repository.recordCheckoutInstall !== "function") {

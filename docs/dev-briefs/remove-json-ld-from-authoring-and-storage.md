@@ -99,13 +99,14 @@ Both `mcpAuthoringServer.js` (local) and `hostedMcpAuthoringServer.js`
   test copy, "write-time-normalized at create/replace," etc. get cleaned up
   alongside the code they describe.
 
-## The Star layout wrinkle (resolved)
+## The authored layout wrinkle (resolved)
 
-Star layouts are intentionally not part of the simplified puzzle document or
-JSON-LD content. They are validated in their own schema, stored in the D1
-`published_documents.star_layout_json` column, and materialized by Freeze on
-the generated puzzle module as `puzzle.starLayout`. There is no separate
-repository sidecar or static registry to keep synchronized.
+Authored layouts are intentionally not part of the simplified puzzle document
+or JSON-LD content. They are validated in renderer-specific schemas, stored as
+a mode-neutral document in the D1 `layout_json` column, and materialized by
+Freeze on the generated puzzle module as `puzzle.layout` (with the current
+`puzzle.starLayout` compatibility field). There is no separate repository
+sidecar or static registry to keep synchronized.
 
 So "JSON-LD-only" in SIMPLIFIED-PUZZLE-FORMAT.md's "What stays
 JSON-LD-only" section describes an *authoring-input* gap (no simplified-

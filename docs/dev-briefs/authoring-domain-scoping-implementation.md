@@ -245,8 +245,8 @@ npm test
 ```
 
 Review the canonicalization report before applying it. Apply the D1 migrations
-with `npm run mcp:hosted:migrate` only when the destructive snapshot purge and
-the current-row cleanup are understood; deploy afterward with the normal
+with `npm run authoring:d1:migrate:remote` only when the destructive snapshot
+purge and the current-row cleanup are understood; deploy afterward with the normal
 hosted release process. The public canonical-content guidance remains the
 authoritative description of the corpus migration sequence.
 

@@ -1017,7 +1017,12 @@ export function createAuthoringMcpServer({
           document: documentForStorage(draft.document, {
             categoryRegistry: taxonomy.categoryRegistry
           }),
-          actor
+          actor,
+          // A layout is a presentation artifact, not part of the MCP
+          // document domain. If this draft has one, promote it with the
+          // document; otherwise the repository may retain the current live
+          // layout for a content-only edit.
+          layout: draft.layout || undefined
         });
       } else {
         publicationErrors = validation.errors;

@@ -21,8 +21,12 @@ import {
   PLAY_CORPUS_PATH
 } from "./playCorpus.js";
 import { validateStarLayoutDocument } from "./starLayoutSchema.js";
+import {
+  layoutForMode,
+  normalizeLayoutDocument
+} from "./layoutDocument.js";
 
-const STAR_LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/star-layout(?:\.json)?$/;
+const LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/;
 
 function json(res, body, status = 200) {
   res.writeHead(status, {
@@ -72,7 +76,7 @@ async function readJsonBody(req) {
   for await (const chunk of req) {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     size += buffer.length;
-    if (size > 900_000) throw new Error("Star layout request is too large");
+    if (size > 900_000) throw new Error("Layout request is too large");
     chunks.push(buffer);
   }
   const text = Buffer.concat(chunks).toString("utf8").trim();
@@ -139,7 +143,7 @@ export function createLocalPlayCorpusHandler({
       html(res, htmlWithPlayCorpusMeta(markup));
       return true;
     }
-    const layoutMatch = urlPath.match(STAR_LAYOUT_ROUTE);
+    const layoutMatch = urlPath.match(LAYOUT_ROUTE);
     if (layoutMatch) {
       if (!requestIsSameOriginIfSpecified(req)) {
         json(res, { error: "Layout writes must be same-origin." }, 403);
@@ -147,6 +151,15 @@ export function createLocalPlayCorpusHandler({
       }
       await ensureSeeded();
       const id = decodeURIComponent(layoutMatch[1]);
+      let body = null;
+      if (req.method === "PUT") {
+        try {
+          body = await readJsonBody(req);
+        } catch (error) {
+          json(res, { error: error instanceof Error ? error.message : String(error) }, 400);
+          return true;
+        }
+      }
       let published;
       try {
         published = await contentDocuments.getPublished({ kind: "puzzle", id });
@@ -159,7 +172,7 @@ export function createLocalPlayCorpusHandler({
         json(res, {
           id,
           revision: published.revision,
-          layout: published.starLayout || null
+          layout: published.layout || null
         });
         return true;
       }
@@ -170,11 +183,10 @@ export function createLocalPlayCorpusHandler({
       }
       try {
         if (req.method === "DELETE") {
-          const cleared = await contentDocuments.clearPuzzleLayout({ id });
+          const cleared = await contentDocuments.clearLayout({ id });
           json(res, { id, revision: cleared.revision, layout: null });
           return true;
         }
-        const body = await readJsonBody(req);
         const layout = body && Object.prototype.hasOwnProperty.call(body, "layout")
           ? body.layout
           : body;
@@ -187,16 +199,20 @@ export function createLocalPlayCorpusHandler({
           }, 400);
           return true;
         }
-        const validation = validateStarLayoutDocument(layout, puzzle);
-        if (!validation.valid) {
-          json(res, { error: "Star layout is invalid", id, errors: validation.errors }, 400);
-          return true;
+        const layoutDocument = normalizeLayoutDocument(layout);
+        const starLayout = layoutForMode(layoutDocument, "star");
+        if (starLayout) {
+          const validation = validateStarLayoutDocument(starLayout, puzzle);
+          if (!validation.valid) {
+            json(res, { error: "Layout is invalid", id, errors: validation.errors }, 400);
+            return true;
+          }
         }
-        const saved = await contentDocuments.savePuzzleLayout({ id, layout });
+        const saved = await contentDocuments.saveLayout({ id, layout: layoutDocument });
         json(res, {
           id,
           revision: saved.revision,
-          layout: saved.starLayout || layout
+          layout: saved.layout || layoutDocument
         });
       } catch (error) {
         json(res, { error: error instanceof Error ? error.message : String(error) }, 400);
@@ -250,7 +266,10 @@ export function createLocalPlayCorpusHandler({
         id,
         revision: published.revision,
         puzzle,
-        ...(published.starLayout ? { starLayout: published.starLayout } : {})
+        ...(published.layout ? { layout: published.layout } : {}),
+        ...(published.layout
+          ? { starLayout: layoutForMode(published.layout, "star") }
+          : {})
       });
       return true;
     }
@@ -277,7 +296,7 @@ export function createDefaultLocalPlayCorpusHandler({
     const isIndex = urlPath === "/" || urlPath === "/index.html";
     const isPlay = urlPath === PLAY_CORPUS_PATH
       || /^\/play\/puzzles\/[^/]+\.json$/.test(urlPath);
-    const isLayout = STAR_LAYOUT_ROUTE.test(urlPath);
+    const isLayout = LAYOUT_ROUTE.test(urlPath);
     if (!isIndex && !isPlay && !isLayout) return false;
     try {
       workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });
