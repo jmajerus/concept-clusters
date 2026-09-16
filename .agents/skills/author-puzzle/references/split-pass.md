@@ -9,7 +9,7 @@ Re-read `inventories/<parent-id>.json`. Do **not** re-survey the subject.
 
 Turn sizing conversation into a durable **`plans/<parent-id>-split-plan.json`**
 before any MCP draft writes. The plan records the seam, board allocation, trim
-decisions, and `relatedPuzzles` wiring.
+decisions, external board sequence, and `relatedPuzzles` wiring.
 
 ## When to run
 
@@ -71,8 +71,9 @@ Skip this pass when `plan-boards.mjs` reports `single-board`.
 
    Per board:
    - loss ledger (`ledgers/<board-id>-fit.json`)
-   - include `relatedPuzzles` from the split plan on the **first** board (and
-     reciprocal link on the sequel when useful)
+   - copy only the split plan's `relatedPuzzles.info` and `relatedPuzzles.entries`
+     into the **first** board (and a reciprocal link on the sequel when useful);
+     never copy plan metadata such as `boardOrder` into the puzzle document
    - MCP via planner steps only — never both boards in one burst
 
 ## Split plan shape
@@ -96,9 +97,9 @@ Save as `plans/<parent-id>-split-plan.json`. See
       "expectedNodes": 18
     }
   ],
+  "boardOrder": ["first-board-slug", "second-board-slug"],
   "relatedPuzzles": {
     "info": { "text": "What the linked sequence teaches together." },
-    "order": ["first-board-slug", "second-board-slug"],
     "entries": [
       {
         "id": "second-board-slug",
@@ -122,8 +123,9 @@ Save as `plans/<parent-id>-split-plan.json`. See
 - Every inventory `candidateTerms` entry is either on that board (via its
   distinction), listed in `sharedTerms`, or in some board's `trim` with reason.
 - `expectedNodes` includes bridge nodes the board will carry.
-- `relatedPuzzles.order` lists board ids in play order; `entries` links forward
-  from the first board (sequel boards may link back optionally on complete).
+- `boardOrder` lists board ids in fit/play order. It is split-plan metadata,
+  not part of a puzzle document. `relatedPuzzles.entries` links forward from
+  the first board (sequel boards may link back optionally on complete).
 
 ## Loss ledger additions for splits
 

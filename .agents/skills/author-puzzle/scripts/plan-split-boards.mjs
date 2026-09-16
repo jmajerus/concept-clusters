@@ -72,9 +72,9 @@ function loadPlan(path) {
 }
 
 function boardOrder(plan) {
-  const fromRelated = plan.relatedPuzzles?.order;
-  if (Array.isArray(fromRelated) && fromRelated.length) {
-    return fromRelated.filter(id => plan.boards.some(board => board.id === id));
+  const fromPlan = plan.boardOrder;
+  if (Array.isArray(fromPlan) && fromPlan.length) {
+    return fromPlan.filter(id => plan.boards.some(board => board.id === id));
   }
   return plan.boards.map(board => board.id);
 }

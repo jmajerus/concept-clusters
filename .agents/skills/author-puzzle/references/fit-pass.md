@@ -29,8 +29,10 @@ resulting node count; do not set renderer fields.
 6. If the inventory is above 25 nodes, a split plan must already exist;
    do **not** drop a distinct term merely to stay at 16. Canvas size is
    derived on save.
-7. For splits: include `relatedPuzzles` from the split plan on the first board;
-   use `destinationPuzzleId` on ledger `deferred` entries.
+7. For splits: copy only `relatedPuzzles.info` and `relatedPuzzles.entries`
+   from the split plan onto the first board; `boardOrder` is external plan
+   metadata and must not appear in the puzzle document. Use `destinationPuzzleId`
+   on ledger `deferred` entries.
 8. Write `ledgers/<id>-fit.json` (loss ledger) **before** `save_puzzle_draft`.
 9. MCP (sequential on stdio): `get_authoring_guidance` phase `core`, then
    `get_authoring_schema` phase `core`, then `review`.

@@ -76,6 +76,11 @@ needs more than 25 nodes, split it into relatedPuzzles rather than compressing
 the lesson onto one board. Bridge terms are ordinary authored concepts; there is
 no separate pedagogical-role field.
 
+When a split plan is involved, the puzzle document receives only the
+player-facing \`relatedPuzzles.info\` and \`relatedPuzzles.entries\`. The plan's
+\`boardOrder\` is external metadata and must not be placed inside \`relatedPuzzles\`
+or copied into the puzzle document.
+
 Repository-owned timestamps, revision numbers, and cache-invalidation keys
 are not authoring fields; the server derives them.
 
@@ -304,7 +309,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   cross-link forward (and reciprocally when useful) per the split plan even
   when both boards land in separate PRs. For unrelated batches drafted into
   the same catalogue, publish independently and rely on the catalogue for
-  discovery instead of cross-linking.
+  discovery instead of cross-linking. The field is exactly \`{ info?, entries }\`:
+  do not add \`order\` or \`boardOrder\`; a split plan's top-level \`boardOrder\` is
+  external metadata, while the entries array is the player-facing next-choice
+  order.
 - tags is an optional array of freeform strings -- deliberately informal,
   no vocabulary or registry, just words the puzzle should be findable by
   in the Library search box (which matches tags alongside title, category,

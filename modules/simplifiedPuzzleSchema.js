@@ -220,7 +220,9 @@ const RelatedPuzzlesSchema = z.object({
     reason: z.string().min(1),
     via: z.array(z.string().min(1)).optional()
   }).strict()).min(1)
-}).strict();
+}).strict().describe(
+  "Player-facing next-puzzle links only. Split-plan boardOrder is external metadata; do not add order or boardOrder here."
+);
 
 // Matches modules/learningIntroductionValidationCore.js. Only `content.text`
 // is offered here (not `content.src`) -- hosted drafts must embed Markdown

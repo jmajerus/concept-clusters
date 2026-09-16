@@ -31,6 +31,13 @@ function runPlanner(args, env = {}) {
 }
 
 export async function run() {
+  const examplePlan = JSON.parse(readFileSync(join(ROOT, EXAMPLE_PLAN), "utf8"));
+  assert.deepEqual(examplePlan.boardOrder, [
+    "light-wave-and-particle-evidence",
+    "matter-waves-and-quantum-outcomes"
+  ]);
+  assert.equal(examplePlan.relatedPuzzles.order, undefined);
+
   const plan = runPlanner([
     "--plan", EXAMPLE_PLAN,
     "--pass", "fit",

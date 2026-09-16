@@ -399,6 +399,21 @@ export async function run() {
     assert.equal(puzzle.learningIntroduction.content.text, "# Hello\nSome markdown.");
   }
 
+  // Split-plan sequencing is external metadata, not a puzzle-document field.
+  {
+    const result = SimplifiedPuzzleInputSchema.safeParse(validPuzzle({
+      relatedPuzzles: {
+        info: { text: "A linked sequence." },
+        order: ["cognitive-load-theory", "energy-flow"],
+        entries: [{ id: "energy-flow", reason: "shares a theme" }]
+      }
+    }));
+    assert.equal(result.success, false);
+    assert.ok(result.error.issues.some(issue =>
+      issue.path.join(".") === "relatedPuzzles" && issue.message.includes("order")
+    ));
+  }
+
   {
     const input = validPuzzle({
       learningIntroduction: {

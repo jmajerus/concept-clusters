@@ -39,14 +39,14 @@
       "expectedNodes": 17
     }
   ],
+  "boardOrder": [
+    "light-wave-and-particle-evidence",
+    "matter-waves-and-quantum-outcomes"
+  ],
   "relatedPuzzles": {
     "info": {
       "text": "Wave and particle descriptions for light and matter: classical models and light evidence first, then matter-wave experiments and the quantum framework linking amplitudes to localized outcomes."
     },
-    "order": [
-      "light-wave-and-particle-evidence",
-      "matter-waves-and-quantum-outcomes"
-    ],
     "entries": [
       {
         "id": "matter-waves-and-quantum-outcomes",

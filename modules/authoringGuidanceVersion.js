@@ -71,7 +71,9 @@
 // 5.5: same review bar; repository-owned timestamps and revision metadata are
 // infrastructure fields, never simplified authoring fields. Lesson progress
 // invalidation is derived from the introduction content.
+// 5.6: same review bar; split-plan boardOrder is external sequencing metadata.
+// Puzzle documents carry only the player-facing relatedPuzzles info and entries.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 5
+  minor: 6
 });

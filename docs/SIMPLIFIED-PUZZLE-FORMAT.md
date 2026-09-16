@@ -93,7 +93,9 @@ optional, as are:
 
 - `lenses` (see below), `lensMode` (`sequential` | `assignment` | `quiz`,
   default sequential), `preSolve` (boolean).
-- `relatedPuzzles`: `{info?, entries: [{id, reason, via?}]}`.
+- `relatedPuzzles`: `{info?, entries: [{id, reason, via?}]}`. This is the
+  player-facing link set only; split-plan `boardOrder` is external metadata,
+  and neither `order` nor `boardOrder` belongs inside this field.
 - `learningIntroduction`: `{requirement: "optional"|"recommended"|"required",
   title?, summary?, estimatedMinutes?, content: {text}, links?:
   (same shape as info.links), citations?}`. Nested cluster/term/bridge `info` is

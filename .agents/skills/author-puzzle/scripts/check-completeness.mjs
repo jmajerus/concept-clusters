@@ -326,21 +326,21 @@ function checkSplitPlan(plan, inventory) {
     }
   }
 
-  const order = plan.relatedPuzzles?.order;
+  const order = plan.boardOrder;
   if (Array.isArray(order) && order.length) {
     const boardIds = new Set(boards.map(b => b.id).filter(Boolean));
     for (const id of order) {
       if (!boardIds.has(id)) {
         blocking.push({
-          id: "plan-related-order",
-          message: `relatedPuzzles.order lists "${id}" which is not a board id in this plan.`
+          id: "plan-board-order",
+          message: `boardOrder lists "${id}" which is not a board id in this plan.`
         });
       }
     }
   } else if (boards.length > 1) {
     advisory.push({
-      id: "plan-related-order-missing",
-      message: "Multi-board plan should set relatedPuzzles.order for play sequence."
+      id: "plan-board-order-missing",
+      message: "Multi-board plan should set top-level boardOrder for play sequence."
     });
   }
 
@@ -398,7 +398,7 @@ function checkSplit(inventory, planPath) {
     advisory,
     coverage,
     stopGate: ok
-      ? "Split plan OK. Proceed to fit each board (loss ledger + relatedPuzzles from plan)."
+      ? "Split plan OK. Proceed to fit each board (loss ledger + relatedPuzzles info/entries from plan; boardOrder stays external)."
       : "FAILED. Fix split plan before fit."
   };
 }

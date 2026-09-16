@@ -205,6 +205,21 @@ export async function run() {
       undefined,
       "renderer layout fields should stay out of the MCP schema"
     );
+    assert.equal(
+      resourceSchema.properties.relatedPuzzles.properties.order,
+      undefined,
+      "split-plan sequencing must stay out of puzzle documents"
+    );
+    assert.equal(
+      resourceSchema.properties.relatedPuzzles.properties.boardOrder,
+      undefined,
+      "split-plan sequencing must stay out of puzzle documents"
+    );
+    assert.equal(resourceSchema.properties.relatedPuzzles.additionalProperties, false);
+    assert.match(
+      resourceSchema.properties.relatedPuzzles.description,
+      /boardOrder is external metadata/
+    );
     assert.match(JSON.stringify(resourceSchema), /25/);
     assert.ok(!resourceSchema.required.includes("bridges"));
 
@@ -220,6 +235,14 @@ export async function run() {
     assert.equal(
       authoringSchema.result.structuredContent.schema.properties.bridges.items
         .properties.termRole,
+      undefined
+    );
+    assert.equal(
+      authoringSchema.result.structuredContent.schema.properties.relatedPuzzles.properties.order,
+      undefined
+    );
+    assert.equal(
+      authoringSchema.result.structuredContent.schema.properties.relatedPuzzles.properties.boardOrder,
       undefined
     );
     assert.ok(
@@ -322,6 +345,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
     assert.match(guidance.result.structuredContent.markdown, /provenance is optional structured authoring attribution/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
+    assert.match(guidance.result.structuredContent.markdown, /boardOrder.*external metadata/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
     assert.match(guidance.result.structuredContent.markdown, /publish_to_authoring=true/);
     assert.match(guidance.result.structuredContent.markdown, /confirmed final edit/);

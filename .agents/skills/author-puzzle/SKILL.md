@@ -267,9 +267,11 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
   reload the Kilo MCP connection or start a new session instead of silently
   switching transports. Use the default `mcp-call` transport only when native
   MCP calls are unavailable (including Codex-safe shell execution). Fit **each
-  board** in `split-plan.json` order;
-  wire `relatedPuzzles` from the plan on the first board (reciprocal link on the
-  sequel when useful). **Never fit or complete two boards in one burst.**
+  board** in the split plan's `boardOrder`;
+  copy only `relatedPuzzles.info` and `relatedPuzzles.entries` from the plan
+  onto the first board (reciprocal link on the sequel when useful). `boardOrder`
+  is external plan metadata and must not be copied into the puzzle document.
+  **Never fit or complete two boards in one burst.**
   `mcp-call` starts a distinct stdio client: when the invoking client has an
   actual MCP `clientInfo` and call `_meta`, forward them with
   `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO` and `CONCEPT_CLUSTERS_MCP_CALL_META`

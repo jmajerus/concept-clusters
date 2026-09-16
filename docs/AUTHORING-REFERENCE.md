@@ -671,6 +671,12 @@ relatedPuzzles: {
 }
 ```
 
+The puzzle field is exactly `{ info?, entries }`; it has no `order` or
+`boardOrder` member. When a split plan needs a sequence, that plan keeps its
+top-level `boardOrder` as external metadata. Copy only the player-facing
+`info` and `entries` into the puzzle document; the entries array itself carries
+the next-choice order (`entries[0]` is the default landing).
+
 - **`entries[].id`** must be a real puzzle id, or the same puzzle's own
   forward link to a sibling that will register in a follow-on PR (split
   pairs). `validate.mjs` allows a puzzle to reference ids listed in its

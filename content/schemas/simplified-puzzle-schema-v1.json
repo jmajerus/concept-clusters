@@ -220,6 +220,7 @@
     "preSolve": { "type": "boolean" },
     "relatedPuzzles": {
       "type": "object",
+      "description": "Player-facing next-puzzle links only. Split-plan boardOrder is external metadata; do not add order or boardOrder here.",
       "additionalProperties": false,
       "required": ["entries"],
       "properties": {
