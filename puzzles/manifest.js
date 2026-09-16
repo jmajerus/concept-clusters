@@ -1135,7 +1135,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "climate-and-livelihoods",
       "title": "Climate and livelihoods across regions",
-      "category": "Geography",
+      "category": "Physical Geography",
       "large": true,
       "relatedPuzzles": {
         "info": {
@@ -1206,7 +1206,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "river-basins-and-human-life",
       "title": "River basins and human life",
-      "category": "Geography",
+      "category": "Physical Geography",
       "large": true,
       "relatedPuzzles": {
         "info": {
@@ -12607,7 +12607,10 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "tornadoes",
       "title": "Anatomy of a Tornado",
-      "category": "Anthropology",
+      "category": "Atmospheric Science",
+      "subcategories": {
+        "Atmospheric Science": "meteorology"
+      },
       "large": true,
       "relatedPuzzles": {
         "entries": [
@@ -12661,6 +12664,972 @@ export const PUZZLE_MANIFEST = [
         "rating by aftermath",
         "supercell or not",
         "ingredient intersection"
+      ]
+    }
+  },
+  {
+    "id": "earthquakes-cause",
+    "module": "./geology/earthquakes-cause.js",
+    "browse": {
+      "id": "earthquakes-cause",
+      "title": "Earthquakes I: Why the Ground Breaks",
+      "category": "Geology",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "earthquakes-shaking",
+            "reason": "This board ends where rupture suddenly releases stored strain; Earthquakes II picks up that release as radiated energy and follows it to the shaking people feel and the failures it causes."
+          }
+        ]
+      },
+      "info": {
+        "text": "This board teaches the vocabulary of the earthquake itself: where rupture begins inside a fault, which way the crust breaks under different stresses, and what science can -- and cannot -- promise about the next event.",
+        "links": [
+          {
+            "href": "https://www.usgs.gov/programs/earthquake-hazards/learn-about-earthquake-hazards",
+            "label": "USGS: Learn about earthquake hazards"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Earthquake Hazards Program glossary",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/glossary/earthquake-hazards-program"
+          },
+          {
+            "title": "Fault",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/science/fault-geology"
+          },
+          {
+            "title": "Can you predict earthquakes?",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/faqs/can-you-predict-earthquakes"
+          },
+          {
+            "title": "What is the difference between earthquake early warning, earthquake forecasts, earthquake probabilities, and earthquake prediction?",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/faqs/what-difference-between-earthquake-early-warning-earthquake-forecasts-earthquake-probabilities"
+          },
+          {
+            "title": "What is an earthquake and what causes them to happen?",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/faqs/what-earthquake-and-what-causes-them-happen"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Where rupture begins",
+        "epicenter",
+        "hypocenter",
+        "fault plane",
+        "asperity",
+        "locked fault",
+        "fault creep",
+        "focal depth",
+        "Fault types and stress regimes",
+        "normal fault",
+        "thrust fault",
+        "strike-slip fault",
+        "subduction zone",
+        "Benioff zone",
+        "blind thrust fault",
+        "graben",
+        "Prediction, forecast, early warning",
+        "earthquake prediction",
+        "earthquake forecast",
+        "earthquake early warning",
+        "seismic gap",
+        "sudden slip on a fault"
+      ]
+    }
+  },
+  {
+    "id": "earthquakes-shaking",
+    "module": "./geology/earthquakes-shaking.js",
+    "browse": {
+      "id": "earthquakes-shaking",
+      "title": "Earthquakes II: From Waves to Damage",
+      "category": "Geology",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "earthquakes-cause",
+            "reason": "Play first: Earthquakes I explains what breaks and why; this board assumes the rupture has happened and follows its radiated energy outward."
+          }
+        ]
+      },
+      "info": {
+        "text": "This board follows an earthquake's radiated energy outward: the wave families it becomes, how magnitude and intensity size it, how foreshock-mainshock-aftershock sequences unfold, and the ground hazards that turn shaking into damage.",
+        "links": [
+          {
+            "href": "https://www.usgs.gov/glossary/earthquake-hazards-program",
+            "label": "USGS Earthquake Hazards Program glossary"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Seismic wave",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/science/seismic-wave"
+          },
+          {
+            "title": "Earthquake Hazards Program glossary",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/glossary/earthquake-hazards-program"
+          },
+          {
+            "title": "The Severity of an Earthquake",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://pubs.usgs.gov/gip/earthq4/severitygip.html"
+          },
+          {
+            "title": "Foreshocks, aftershocks - what's the difference?",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/faqs/foreshocks-aftershocks-whats-difference"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "How radiated energy travels",
+        "P-wave",
+        "S-wave",
+        "Love wave",
+        "Rayleigh wave",
+        "body wave",
+        "surface wave",
+        "attenuation",
+        "Sizing: magnitude versus intensity",
+        "Richter scale",
+        "moment magnitude",
+        "Modified Mercalli intensity",
+        "isoseismal line",
+        "Foreshock, mainshock, aftershock",
+        "foreshock",
+        "mainshock",
+        "aftershock",
+        "earthquake swarm",
+        "What shaking does to the ground",
+        "liquefaction",
+        "landslide",
+        "tsunami",
+        "amplification",
+        "the seismogram",
+        "ground motion at the site",
+        "intensity maps of damage"
+      ]
+    }
+  },
+  {
+    "id": "groundwater",
+    "module": "./geography/groundwater.js",
+    "browse": {
+      "id": "groundwater",
+      "title": "Groundwater: The Hidden Reservoir",
+      "category": "Physical Geography",
+      "subcategories": {
+        "Physical Geography": "hydrology"
+      },
+      "large": false,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "groundwater-journey",
+            "reason": "Continue from the reservoir's architecture to the motion itself: the same aquifers now leak to springs and streams as Darcy's law drives water down-gradient."
+          }
+        ]
+      },
+      "info": {
+        "text": "Groundwater is ordinary rock doing two jobs at once: pore space that stores water, and connected pores that move it. This board maps that hidden reservoir — aquifers and aquitards, the pressure regimes confinement creates, and the water table running beneath the landscape like its shadow.",
+        "citations": [
+          {
+            "title": "Physical Geology — 14.1 Groundwater and Aquifers",
+            "author": "Steven Earle",
+            "publisher": "BCcampus Open Publishing",
+            "url": "https://opentextbc.ca/geology/chapter/14-1-groundwater-and-aquifers/"
+          },
+          {
+            "title": "Aquifers and Groundwater",
+            "author": "USGS Water Science School",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/special-topics/water-science-school/science/aquifers-and-groundwater"
+          },
+          {
+            "title": "Physical Geology — 14.2 Groundwater Flow",
+            "author": "Steven Earle",
+            "publisher": "BCcampus Open Publishing",
+            "url": "https://opentextbc.ca/geology/chapter/14-2-groundwater-flow/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Storage vs. Transmission",
+        "porosity",
+        "permeability",
+        "hydraulic conductivity",
+        "Aquifer or Aquitard",
+        "aquifer",
+        "aquitard",
+        "Confinement Regimes",
+        "artesian well",
+        "confined aquifer",
+        "unconfined aquifer",
+        "perched aquifer",
+        "The Water Table and Its Zones",
+        "water table",
+        "saturated zone",
+        "vadose zone",
+        "capillary fringe",
+        "clay",
+        "potentiometric surface"
+      ]
+    }
+  },
+  {
+    "id": "groundwater-journey",
+    "module": "./geography/groundwater-journey.js",
+    "browse": {
+      "id": "groundwater-journey",
+      "title": "Groundwater: The Hidden Journey",
+      "category": "Physical Geography",
+      "subcategories": {
+        "Physical Geography": "hydrology"
+      },
+      "large": false,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "groundwater",
+            "reason": "Play the reservoir first: this journey runs through the aquifers, water table, and pressure regimes that board builds."
+          }
+        ]
+      },
+      "info": {
+        "text": "Groundwater as a moving system: water sinks in at recharge areas, seeps along the decline in hydraulic head at a pace Darcy's law sets, and resurfaces in springs and streambeds — which is why rivers keep running weeks after the rain stops.",
+        "citations": [
+          {
+            "title": "Physical Geology — 14.2 Groundwater Flow",
+            "author": "Steven Earle",
+            "publisher": "BCcampus Open Publishing",
+            "url": "https://opentextbc.ca/geology/chapter/14-2-groundwater-flow/"
+          },
+          {
+            "title": "Rivers Contain Groundwater",
+            "author": "USGS Water Science School",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/water-science-school/science/rivers-contain-groundwater"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Where Water Enters and Leaves",
+        "spring",
+        "recharge",
+        "baseflow",
+        "gaining stream",
+        "losing stream",
+        "The Law of Slow Motion",
+        "Darcy's law",
+        "hydraulic gradient",
+        "hydraulic head",
+        "flow path"
+      ]
+    }
+  },
+  {
+    "id": "hydrology-human-water",
+    "module": "./geography/hydrology-human-water.js",
+    "browse": {
+      "id": "hydrology-human-water",
+      "title": "Human Water: measuring, fearing, managing",
+      "category": "Physical Geography",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "hydrology-water-cycle",
+            "reason": "Start with the physical system this board measures and manages: where water sits and how it moves."
+          },
+          {
+            "id": "hydrology-land-and-groundwater",
+            "reason": "Continue with the structure beneath the numbers: drainage networks on the surface, aquifers underneath."
+          }
+        ]
+      },
+      "info": {
+        "text": "The human face of hydrology: how gauges and water budgets turn rivers and rain into numbers, how floods and droughts arrive when the balance tips, and how dams, canals, and wells engineer the cycle — sometimes faster than it can refill.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Water_resources",
+            "label": "Wikipedia: Water resources"
+          },
+          {
+            "href": "https://en.wikipedia.org/wiki/Hydrology",
+            "label": "Wikipedia: Hydrology"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Hydrology — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Hydrology"
+          },
+          {
+            "title": "Water balance — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Water_balance"
+          },
+          {
+            "title": "Flood — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Flood"
+          },
+          {
+            "title": "Water resources — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Water_resources"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Measuring — putting numbers on water",
+        "stream gauge",
+        "water balance",
+        "discharge",
+        "stage",
+        "hydrograph",
+        "rating curve",
+        "hyetograph",
+        "Extremes — too much and too little",
+        "flood",
+        "drought",
+        "flash flood",
+        "100-year flood",
+        "water scarcity",
+        "Managing — engineered water",
+        "dam",
+        "irrigation",
+        "aqueduct",
+        "desalination",
+        "groundwater overdraft",
+        "levee",
+        "frequency analysis",
+        "flood control"
+      ]
+    }
+  },
+  {
+    "id": "hydrology-land-and-groundwater",
+    "module": "./geography/hydrology-land-and-groundwater.js",
+    "browse": {
+      "id": "hydrology-land-and-groundwater",
+      "title": "Catchments & Groundwater: how land holds and routes water",
+      "category": "Physical Geography",
+      "large": false,
+      "lensMode": "sequential",
+      "info": {
+        "text": "The structure beneath the cycle: how ridgelines fence drainage basins and tributaries build branching networks — and how rock below the water table stores water like a sponge, lets it flow where pores connect, and leaks it back to daylight in springs.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Drainage_basin",
+            "label": "Wikipedia: Drainage basin"
+          },
+          {
+            "href": "https://en.wikipedia.org/wiki/Aquifer",
+            "label": "Wikipedia: Aquifer"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Drainage basin — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Drainage_basin"
+          },
+          {
+            "title": "Aquifer — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Aquifer"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Catchments — how land routes water",
+        "drainage basin",
+        "tributary",
+        "drainage divide",
+        "confluence",
+        "stream order",
+        "floodplain",
+        "endorheic basin",
+        "Groundwater — rock as sponge and pipe",
+        "aquifer",
+        "water table",
+        "groundwater",
+        "porosity",
+        "permeability",
+        "spring",
+        "karst",
+        "baseflow"
+      ]
+    }
+  },
+  {
+    "id": "hydrology-water-cycle",
+    "module": "./geography/hydrology-water-cycle.js",
+    "browse": {
+      "id": "hydrology-water-cycle",
+      "title": "The Water Cycle: pools and fluxes",
+      "category": "Physical Geography",
+      "large": false,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "hydrology-land-and-groundwater",
+            "reason": "Continue from the cycle to the structure it flows through: drainage networks on the surface and aquifers beneath them."
+          },
+          {
+            "id": "hydrology-human-water",
+            "reason": "Finish with the human science: gauges and water budgets, floods and droughts, dams and overdraft."
+          }
+        ]
+      },
+      "info": {
+        "text": "The engine room of hydrology: where Earth's water parks — oceans, ice, soil, and air — and the powered transfers that never let it stay parked, from evaporation skyward to percolation downward.",
+        "links": [
+          {
+            "href": "https://www.usgs.gov/special-topics/water-science-school/science/water-cycle",
+            "label": "USGS Water Science School: Water cycle"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Water cycle — U.S. Geological Survey Water Science School",
+            "publisher": "U.S. Geological Survey",
+            "url": "https://www.usgs.gov/special-topics/water-science-school/science/water-cycle"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Pools — where water sits",
+        "ocean",
+        "lake",
+        "glacier",
+        "snowpack",
+        "soil moisture",
+        "water vapor",
+        "permafrost",
+        "Fluxes — how water moves",
+        "precipitation",
+        "evaporation",
+        "transpiration",
+        "condensation",
+        "infiltration",
+        "runoff",
+        "percolation",
+        "water cycle"
+      ]
+    }
+  },
+  {
+    "id": "mountains-life-of-a-range",
+    "module": "./geology/mountains-life-of-a-range.js",
+    "browse": {
+      "id": "mountains-life-of-a-range",
+      "title": "The Life of a Mountain Range",
+      "category": "Geology",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "mountains-reading-the-range",
+            "reason": "Reading a Range applies the life cycle to whole landscapes: classify a range by the mechanism that built it, then decompose it into folds, thrusts, and fault blocks — the payoff of the two bridges this seam defers."
+          }
+        ]
+      },
+      "info": {
+        "text": "Ranges rise where plates converge, stand because thick low-density crust floats, and fall to weather, gravity, and ice — and each stage of that life cycle writes its own vocabulary into the rocks and landforms of every range on Earth.",
+        "citations": [
+          {
+            "title": "Orogeny — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Orogeny"
+          },
+          {
+            "title": "Isostasy — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Isostasy"
+          },
+          {
+            "title": "Erosion — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Erosion"
+          },
+          {
+            "title": "Glacial landform — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Glacial_landform"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Tectonic Construction",
+        "subduction",
+        "continental collision",
+        "orogeny",
+        "volcanic arc",
+        "terranes",
+        "fold-and-thrust belt",
+        "Buoyant Support",
+        "isostasy",
+        "Moho",
+        "crustal root",
+        "isostatic rebound",
+        "Airy hypothesis",
+        "Denudation — the Downhill Machine",
+        "erosion",
+        "weathering",
+        "mass wasting",
+        "unroofing",
+        "The Glacial Signature",
+        "cirque",
+        "U-shaped valley",
+        "arête",
+        "horn",
+        "hanging valley",
+        "crustal thickening",
+        "rebound under unloading",
+        "the race between uplift and erosion",
+        "ice as the sculptor"
+      ]
+    }
+  },
+  {
+    "id": "mountains-reading-the-range",
+    "module": "./geology/mountains-reading-the-range.js",
+    "browse": {
+      "id": "mountains-reading-the-range",
+      "title": "Reading a Range: Types and Structures",
+      "category": "Geology",
+      "large": false,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "mountains-life-of-a-range",
+            "reason": "Play the life cycle first: this board reads the anatomy — range types and structures — that the cycle of building, buoying, and erosion produces."
+          }
+        ]
+      },
+      "info": {
+        "text": "Ranges are legible twice over: their overall architecture records the tectonic force that raised them, and their internal structures record which way the crust was squeezed or stretched. Learn both readings — five range types, and the folds, faults, and fault blocks they are built from.",
+        "citations": [
+          {
+            "title": "Mountain — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Mountain"
+          },
+          {
+            "title": "Fault (geology) — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Fault_(geology)"
+          },
+          {
+            "title": "Orogeny — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Orogeny"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Built Forms — Range Types",
+        "volcanic mountains",
+        "fold mountains",
+        "fault-block mountains",
+        "dome mountains",
+        "plateau mountains",
+        "Deformation Structures",
+        "anticline",
+        "syncline",
+        "thrust fault",
+        "horst",
+        "graben",
+        "nappe",
+        "ranges are built of structures"
+      ]
+    }
+  },
+  {
+    "id": "rocks-formation-cycle",
+    "module": "./geology/rocks-formation-cycle.js",
+    "browse": {
+      "id": "rocks-formation-cycle",
+      "title": "Rocks: How They Form and Change",
+      "category": "Geology",
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "Learn how the three rock families — igneous, sedimentary, metamorphic — form, and how the rock cycle converts material between them: a rock’s kind is a record of the process that last remade it.",
+        "citations": [
+          {
+            "title": "Igneous rock",
+            "author": "Albert M. Kudo",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/science/igneous-rock"
+          },
+          {
+            "title": "Sedimentary rock",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/science/sedimentary-rock"
+          },
+          {
+            "title": "Metamorphic rock",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/science/metamorphic-rock"
+          },
+          {
+            "title": "Rock cycle",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Rock_cycle"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Igneous — frozen melt",
+        "granite",
+        "basalt",
+        "obsidian",
+        "pumice",
+        "gabbro",
+        "Sedimentary — assembled at the surface",
+        "sandstone",
+        "coal",
+        "shale",
+        "limestone",
+        "conglomerate",
+        "Metamorphic — changed in the solid state",
+        "marble",
+        "slate",
+        "gneiss",
+        "quartzite",
+        "Rock-cycle processes",
+        "weathering",
+        "melting",
+        "deposition",
+        "compaction",
+        "crystallization",
+        "magma",
+        "lithification",
+        "metamorphism",
+        "sediment",
+        "subduction"
+      ]
+    }
+  },
+  {
+    "id": "rocks-reading-evidence",
+    "module": "./geology/rocks-reading-evidence.js",
+    "browse": {
+      "id": "rocks-reading-evidence",
+      "title": "Reading a Rock: Composition, Texture, Minerals",
+      "category": "Geology",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "rocks-formation-cycle",
+            "reason": "Play first: it explains how the three rock families form and interconvert, which this board's evidence vocabulary then helps you identify in the wild."
+          }
+        ]
+      },
+      "info": {
+        "text": "Learn the three evidence axes geologists use to read any rock: where its chemistry sits on the silica spectrum, what its fabric records about how it formed, and which minerals it is built from — so lookalikes like marble and quartzite separate cleanly.",
+        "citations": [
+          {
+            "title": "Felsic rock",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/science/felsic-rock"
+          },
+          {
+            "title": "Texture (geology)",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Texture_(geology)"
+          },
+          {
+            "title": "Mineral (chemical compound)",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/science/mineral-chemical-compound"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Composition — the silica axis",
+        "felsic",
+        "mafic",
+        "intermediate",
+        "ultramafic",
+        "Texture — fabric as a record",
+        "clastic",
+        "foliated",
+        "phaneritic",
+        "aphanitic",
+        "glassy",
+        "vesicular",
+        "Mineral building blocks",
+        "quartz",
+        "mica",
+        "feldspar",
+        "calcite",
+        "olivine",
+        "Bowen's reaction series",
+        "viscosity",
+        "mineral alignment"
+      ]
+    }
+  },
+  {
+    "id": "russian-literature-argument",
+    "module": "./literary-history/russian-literature-argument.js",
+    "browse": {
+      "id": "russian-literature-argument",
+      "title": "The Argument and the End of the Century",
+      "category": "Literary History & Canons",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "russian-literature-invention",
+            "reason": "Play the invention first: the critics and camps on this board measured their age against Onegin, Oblomov, and Gogol's heirs."
+          }
+        ]
+      },
+      "info": {
+        "text": "What the literature argued: the journals and critics who made fiction Russia's only public square, the camps that split over Russia's path and its coming man, the serf question that grounded every argument — and Chekhov's turn away from argument at the century's end.",
+        "citations": [
+          {
+            "title": "The Thick Journal, The New Cambridge History of Russian Literature",
+            "publisher": "Cambridge University Press",
+            "url": "https://www.cambridge.org/core/books/new-cambridge-history-of-russian-literature/thick-journal/9BC24A175DEFCB35B657D8CF4B51D505"
+          },
+          {
+            "title": "Vissarion Grigoryevich Belinsky",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/biography/Vissarion-Grigoryevich-Belinsky"
+          },
+          {
+            "title": "Slavophile",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/topic/Slavophile"
+          },
+          {
+            "title": "Lettres philosophiques",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/topic/Lettres-philosophiques"
+          },
+          {
+            "title": "A Sportsman's Sketches",
+            "publisher": "Wikipedia",
+            "year": "2026",
+            "url": "https://en.wikipedia.org/wiki/A_Sportsman%27s_Sketches"
+          },
+          {
+            "title": "Anton Chekhov",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/biography/Anton-Chekhov"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Critics, journals, and the public square",
+        "Vissarion Belinsky",
+        "The Contemporary",
+        "thick journal",
+        "Natural School",
+        "Nikolai Dobrolyubov",
+        "Russia's question: camps and the new man",
+        "Philosophical Letters",
+        "Slavophiles",
+        "Westernizers",
+        "Bazarov",
+        "What Is to Be Done? (Chernyshevsky)",
+        "Chekhov and the drama of the unstated",
+        "The Seagull",
+        "Uncle Vanya",
+        "Three Sisters",
+        "The Cherry Orchard",
+        "Moscow Art Theatre",
+        "Serfdom and the civic conscience",
+        "A Sportsman's Sketches",
+        "Nikolai Nekrasov",
+        "emancipation of the serfs (1861)",
+        "Notes from the House of the Dead",
+        "Literature as the emancipation debate"
+      ]
+    }
+  },
+  {
+    "id": "russian-literature-invention",
+    "module": "./literary-history/russian-literature-invention.js",
+    "browse": {
+      "id": "russian-literature-invention",
+      "title": "The Invention of Russian Literature",
+      "category": "Literary History & Canons",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "russian-literature-argument",
+            "reason": "The argument presupposes the invention: the critics and camps measured their age against Onegin, Oblomov, and Gogol's heirs. Play the invention first."
+          }
+        ]
+      },
+      "info": {
+        "text": "How Russia invented a literature in a single century: the poetic generation that forged the modern literary language, Gogol's comic discovery of the crushed clerk, the superfluous gentleman who could not act, and the twin summits of the realist novel in Dostoevsky and Tolstoy.",
+        "citations": [
+          {
+            "title": "Russian literature",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/art/Russian-literature"
+          },
+          {
+            "title": "Superfluous man",
+            "publisher": "Wikipedia",
+            "year": "2026",
+            "url": "https://en.wikipedia.org/wiki/Superfluous_man"
+          },
+          {
+            "title": "Nikolay Gogol",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/biography/Nikolay-Gogol"
+          },
+          {
+            "title": "Fyodor Dostoyevsky",
+            "publisher": "Encyclopaedia Britannica",
+            "url": "https://www.britannica.com/biography/Fyodor-Dostoyevsky"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The verse founding",
+        "Eugene Onegin",
+        "Mikhail Lermontov",
+        "Nikolai Karamzin",
+        "Vasily Zhukovsky",
+        "Woe from Wit",
+        "The superfluous man lineage",
+        "Onegin",
+        "Oblomov",
+        "Pechorin",
+        "Rudin",
+        "Gogol's satire and the little man",
+        "Dead Souls",
+        "The Government Inspector",
+        "The Nose",
+        "The Overcoat",
+        "The twin summits of the novel",
+        "Crime and Punishment",
+        "War and Peace",
+        "The Brothers Karamazov",
+        "Anna Karenina",
+        "Out of Gogol's Overcoat",
+        "Superfluous gentleman, little man",
+        "From verse to prose"
+      ]
+    }
+  },
+  {
+    "id": "typography",
+    "module": "./art/typography.js",
+    "browse": {
+      "id": "typography",
+      "title": "Typography: letterforms, families, and spacing",
+      "category": "Art",
+      "large": true,
+      "info": {
+        "text": "Typography is the visual craft of language: letters are built from repeatable parts, faces fall into historical families, and spacing turns characters into readable lines.",
+        "links": [
+          {
+            "href": "wiki:Typography"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Letterform anatomy",
+        "baseline",
+        "x-height",
+        "ascender",
+        "descender",
+        "counter",
+        "stem",
+        "bowl",
+        "Type families",
+        "sans-serif",
+        "script",
+        "old-style serif",
+        "slab serif",
+        "blackletter",
+        "monospace",
+        "Setting and spacing",
+        "point size",
+        "justification",
+        "leading",
+        "kerning",
+        "tracking",
+        "baseline grid",
+        "legibility",
+        "stroke contrast"
       ]
     }
   }
