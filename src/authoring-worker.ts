@@ -401,6 +401,11 @@ async function handleAdminRoute(
       kind: "puzzle",
       includeWithdrawn: true
     });
+    const categoryRegistry = await loadMergedCategoryRegistry({
+      contentDocuments,
+      contentService,
+      actor
+    });
     const publishedById = new Map(publishedRows.map(row => [row.id, row]));
     const freezeAdds = await publishedFreezeAddIds(
       contentDocuments,
@@ -439,7 +444,7 @@ async function handleAdminRoute(
         freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
       }, githubSnapshot);
     });
-    return html(renderDraftListPage(corpus));
+    return html(renderDraftListPage(corpus, { categoryRegistry }));
   }
   const reviewIssuesMatch = pathname.match(/^\/admin\/drafts\/([^/]+)\/review-issues$/);
   if (reviewIssuesMatch) {

@@ -1,4 +1,10 @@
-import { CATEGORIES, categoryIdFor, slugify } from "../puzzles/categories.js";
+import {
+  CATEGORIES,
+  categoryIdFor,
+  categoryMetadataFor,
+  categoryTitleFor,
+  slugify
+} from "../puzzles/categories.js";
 import { isReservedCatalogueId } from "./contentDocumentSeed.js";
 
 export const CUE_FOR_FREEZE_CONFIRM = "cue-for-freeze";
@@ -97,6 +103,31 @@ export function freezePlanSummary(plan = emptyContentFreezePlan()) {
   if (held) suffixes.push(`${held} locally published but not cued`);
   if (missing) suffixes.push("required supporting documents are missing");
   return suffixes.length ? `${cuedText}; ${suffixes.join("; ")}.` : `${cuedText}.`;
+}
+
+function puzzleSubcategoryLabels(document, categoryRegistry) {
+  const subcategories = document?.subcategories;
+  if (!subcategories || typeof subcategories !== "object" || Array.isArray(subcategories)) {
+    return [];
+  }
+  return Object.entries(subcategories).map(([category, id]) =>
+    `${categoryTitleFor(category, categoryRegistry)}: ${categoryMetadataFor(category, categoryRegistry)?.subcategories?.[id]?.title || id}`
+  );
+}
+
+function puzzleDetailsFromRows(rows = [], categoryRegistry = CATEGORIES) {
+  return Object.fromEntries(rows
+    .filter(row => row?.id)
+    .map(row => {
+      const document = row.document || {};
+      return [row.id, {
+        title: document.title || row.title || row.id,
+        category: document.category
+          ? categoryTitleFor(document.category, categoryRegistry)
+          : row.category || "",
+        subcategories: puzzleSubcategoryLabels(document, categoryRegistry)
+      }];
+    }));
 }
 
 /**
@@ -393,6 +424,7 @@ export function planContentFreeze({
       catalogues: heldIds(withoutReserved(publishedCatalogues), automaticCatalogues),
       categories: heldIds(publishedCategories, automaticCategories)
     },
-    dependencies
+    dependencies,
+    puzzleDetails: puzzleDetailsFromRows(publishedPuzzles, categoryRegistry)
   };
 }

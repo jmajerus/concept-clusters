@@ -411,16 +411,30 @@ export async function run() {
   const corpus = listPuzzleCorpusRows({
     gitPuzzles: [
       { id: "git-only", title: "Git Only", category: "Science" },
-      { id: "old-git-puzzle", title: "Git Title", category: "Science" }
+      {
+        id: "old-git-puzzle",
+        title: "Git Title",
+        category: "Science",
+        subcategories: { Science: "lab" }
+      }
     ],
     publishedRows: [{
       id: "old-git-puzzle",
-      document: { title: "Published Title", category: "Science" }
+      document: {
+        title: "Published Title",
+        category: "Science",
+        subcategories: { Science: "published-lab" }
+      }
     }],
     drafts: [{
       draftId: "old-git-puzzle-wip",
       puzzleId: "old-git-puzzle",
-      document: { id: "old-git-puzzle", title: "Working Title", category: "Science" },
+      document: {
+        id: "old-git-puzzle",
+        title: "Working Title",
+        category: "Science",
+        subcategories: { Science: "working-lab" }
+      },
       title: "Working Title",
       status: "draft",
       updatedAt: "2026-01-01T00:00:00.000Z"
@@ -432,6 +446,7 @@ export async function run() {
   assert.equal(overlay.hasWorkingCopy, true);
   assert.equal(overlay.draftId, "old-git-puzzle-wip");
   assert.equal(overlay.title, "Working Title");
+  assert.deepEqual(overlay.subcategories, { Science: "working-lab" });
   assert.equal(overlay.published, true);
   assert.equal(gitOnly.hasWorkingCopy, false);
   assert.equal(gitOnly.inGit, true);

@@ -60,9 +60,24 @@ export function authoringAdminNav() {
     · <a href="/admin/model-suggestions">Model suggestions</a>`;
 }
 
-function freezeKindList(label, ids = []) {
+function freezePuzzleItem(id, detail) {
+  if (!detail) return `<li><code>${escapeHtml(id)}</code></li>`;
+  const title = detail.title ? ` — ${escapeHtml(detail.title)}` : "";
+  const category = detail.category
+    ? escapeHtml(detail.category)
+    : "(unassigned)";
+  const subcategories = Array.isArray(detail.subcategories) && detail.subcategories.length
+    ? detail.subcategories.map(escapeHtml).join("; ")
+    : "(none)";
+  return `<li><code>${escapeHtml(id)}</code>${title}
+    <span class="freeze-puzzle-details">category: ${category} · subcategories: ${subcategories}</span></li>`;
+}
+
+function freezeKindList(label, ids = [], { puzzleDetails = null } = {}) {
   if (!ids.length) return "";
-  const items = ids.map(id => `<li><code>${escapeHtml(id)}</code></li>`).join("");
+  const items = ids.map(id => puzzleDetails
+    ? freezePuzzleItem(id, puzzleDetails[id])
+    : `<li><code>${escapeHtml(id)}</code></li>`).join("");
   return `<div class="freeze-kind">
     <h3>${escapeHtml(label)}</h3>
     <ul>${items}</ul>
@@ -89,21 +104,24 @@ function dependencyList(label, dependencies = []) {
 }
 
 export function renderFreezePlanLists(plan = emptyContentFreezePlan()) {
+  const puzzleDetails = plan.puzzleDetails || null;
   const kinds = [
-    ["Puzzles add", plan.puzzles?.add],
-    ["Puzzles update", plan.puzzles?.update],
-    ["Puzzles remove", plan.puzzles?.remove],
+    ["Puzzles add", plan.puzzles?.add, puzzleDetails],
+    ["Puzzles update", plan.puzzles?.update, puzzleDetails],
+    ["Puzzles remove", plan.puzzles?.remove, puzzleDetails],
     ["Catalogues add", plan.catalogues?.add],
     ["Catalogues update", plan.catalogues?.update],
     ["Catalogues remove", plan.catalogues?.remove],
     ["Categories add", plan.categories?.add],
     ["Categories update", plan.categories?.update],
     ["Categories remove", plan.categories?.remove],
-    ["Puzzles published, not cued", plan.held?.puzzles],
+    ["Puzzles published, not cued", plan.held?.puzzles, puzzleDetails],
     ["Catalogues published, not cued", plan.held?.catalogues],
     ["Categories published, not cued", plan.held?.categories]
   ];
-  return kinds.map(([label, ids]) => freezeKindList(label, ids)).join("")
+  return kinds.map(([label, ids, details]) => freezeKindList(label, ids, {
+    puzzleDetails: details
+  })).join("")
     + dependencyList("Automatically cued supporting documents", plan.dependencies?.automatic)
     + dependencyList("Missing supporting documents — freeze is blocked", plan.dependencies?.missing);
 }
@@ -187,6 +205,8 @@ function renderFreezeSection({
     release pull request together. Missing forward dependencies are automatically cued when D1 has
     a published snapshot not yet in git; a missing, withdrawn, or git-only
     dependency blocks Freeze. Held published boards stay in authoring play only.
+    Puzzle entries below show their category and subcategory assignments;
+    <code>(none)</code> means the puzzle document has no subcategory assignment.
     ${applyHint} Git-seeded snapshots already in this checkout stay out of
     the count until you Cue them.</p>
     ${lists}

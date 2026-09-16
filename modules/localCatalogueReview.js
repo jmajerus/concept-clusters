@@ -1159,14 +1159,20 @@ export function createLocalCatalogueReviewHandler({
     }
 
     if (req.method === "POST" && categoryPage) {
+      const categoryId = decodeURIComponent(categoryPage[1]);
       if (!sameOrigin()) {
-        html(res, "<p>Cross-origin submit is not allowed.</p>", 403);
+        html(res, renderContentLifecycleResultPage({
+          title: "Category was not saved",
+          error: "Cross-origin submit is not allowed.",
+          backHref: `/admin/categories/${encodeURIComponent(categoryId)}`
+        }), 403);
         return true;
       }
-      const categoryId = decodeURIComponent(categoryPage[1]);
+      let action = "";
       try {
         const { json: body, params } = await readRequestPayload(req);
         const confirm = body?.confirm || params.get("confirm");
+        action = confirm;
         const freezeReady = parseFreezeCueConfirm(confirm);
         if (freezeReady !== null) {
           const published = await contentDocuments.setFreezeCue({
@@ -1314,7 +1320,13 @@ export function createLocalCatalogueReviewHandler({
         }
         html(res, "<p>Unknown category action.</p>", 400);
       } catch (error) {
-        html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 400);
+        html(res, renderContentLifecycleResultPage({
+          title: action === SAVE_CATEGORY_CONFIRM
+            ? "Category was not saved"
+            : "Category action failed",
+          error: error instanceof Error ? error.message : String(error),
+          backHref: `/admin/categories/${encodeURIComponent(categoryId)}`
+        }), error.status || 400);
       }
       return true;
     }

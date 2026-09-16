@@ -232,13 +232,26 @@ export async function run() {
   const loaded = await loadContentFreezePlan({
     contentDocuments: {
       async listPublished({ kind }) {
-        if (kind === "puzzle") return [{ id: "brand-new", cuedForFreezeAt: "2026-08-31T00:00:00.000Z" }];
+        if (kind === "puzzle") return [{
+          id: "brand-new",
+          cuedForFreezeAt: "2026-08-31T00:00:00.000Z",
+          document: {
+            title: "Brand New",
+            category: "Biology",
+            subcategories: { Biology: "foundations" }
+          }
+        }];
         return [];
       }
     },
     gitIds: { puzzles: [], catalogues: [], categories: [] }
   });
   assert.deepEqual(loaded.puzzles.add, ["brand-new"]);
+  assert.deepEqual(loaded.puzzleDetails["brand-new"], {
+    title: "Brand New",
+    category: "Biology",
+    subcategories: ["Biology: Foundations"]
+  });
 
   // A category published only in D1 must still resolve puzzle dependencies
   // to its stable id when the freeze plan is built. The static Git registry

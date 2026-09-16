@@ -10,6 +10,13 @@ function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
+function subcategoriesOf(document) {
+  const subcategories = document?.subcategories;
+  return subcategories && typeof subcategories === "object" && !Array.isArray(subcategories)
+    ? clone(subcategories)
+    : null;
+}
+
 export function isReservedCatalogueId(id) {
   return id === "all" || id === "new" || String(id).startsWith(LEVEL_CATALOGUE_ID_PREFIX);
 }
@@ -217,6 +224,7 @@ export function listPuzzleCorpusRows({
       id,
       title: id,
       category: "",
+      subcategories: null,
       hasWorkingCopy: false,
       published: false,
       withdrawn: false,
@@ -256,6 +264,7 @@ export function listPuzzleCorpusRows({
     upsert(puzzle.id, {
       title: puzzle.title || puzzle.id,
       category: puzzle.category || "",
+      subcategories: subcategoriesOf(puzzle),
       inGit: true
     });
   }
@@ -265,6 +274,7 @@ export function listPuzzleCorpusRows({
     upsert(row.id, {
       title: document.title || row.title || row.id,
       category: document.category || "",
+      subcategories: subcategoriesOf(document),
       published: !row.withdrawnAt,
       withdrawn: Boolean(row.withdrawnAt),
       updatedAt: row.updatedAt || ""
@@ -276,6 +286,7 @@ export function listPuzzleCorpusRows({
     const draftId = draft.draftId || puzzleId;
     const title = draft.title || draft.document?.title || puzzleId;
     const category = draft.document?.category || "";
+    const subcategories = subcategoriesOf(draft.document);
     const existing = byId.get(puzzleId);
     const extras = extraDraftFields(draft);
     if (existing?.hasWorkingCopy && existing.draftId && existing.draftId !== draftId) {
@@ -284,6 +295,7 @@ export function listPuzzleCorpusRows({
         ...extras,
         title,
         category: category || existing.category,
+        subcategories,
         hasWorkingCopy: true,
         draftId,
         published: false,
@@ -296,6 +308,7 @@ export function listPuzzleCorpusRows({
       ...extras,
       title,
       category: category || existing?.category || "",
+      subcategories,
       hasWorkingCopy: true,
       draftId,
       status: draft.status || "",

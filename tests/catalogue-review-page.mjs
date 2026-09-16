@@ -165,6 +165,7 @@ export async function run() {
   assert.match(biology, /Registered browse partitions/);
   assert.match(biology, /name="new_subcategory_id"/);
   assert.match(biology, /name="remove_subcategory"/);
+  assert.match(biology, /Remove on save/);
   assert.match(biology, /Remove from authoring play/);
   assert.match(biology, /Delete working copy/);
   assert.match(biology, /<select name="domain">/);

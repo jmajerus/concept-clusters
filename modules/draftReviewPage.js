@@ -858,6 +858,7 @@ function normalizeCorpusItem(item, categoryRegistry = CATEGORIES) {
   const id = item.id || item.puzzleId || item.draftId;
   const hasWorkingCopy = item.hasWorkingCopy === true
     || (item.hasWorkingCopy !== false && Boolean(item.draftId || item.status));
+  const subcategories = item.subcategories ?? item.document?.subcategories ?? null;
   return {
     ...item,
     id,
@@ -867,6 +868,8 @@ function normalizeCorpusItem(item, categoryRegistry = CATEGORIES) {
       item.category || item.document?.category || "Uncategorized",
       categoryRegistry
     ),
+    subcategories,
+    subcategoryLabels: subcategoryLabels(subcategories, categoryRegistry),
     hasWorkingCopy,
     published: item.published === true || item.d1Published === true,
     withdrawn: item.withdrawn === true || item.d1Withdrawn === true,
@@ -921,20 +924,33 @@ function publishedOnlyRows(items) {
 function corpusTableHead(variant, { includeCategory = false } = {}) {
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const categoryColumn = includeCategory ? "<th>Category</th>" : "";
-  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Status</th><th>GitHub</th>${playColumn}<th>Updated</th></tr></thead>`;
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Subcategories</th><th>Status</th><th>GitHub</th>${playColumn}<th>Updated</th></tr></thead>`;
 }
 
 function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const hrefId = item.draftId || item.id;
   const playCell = renderCorpusPlayCell(item, variant);
-  const filter = [item.title, item.id, item.draftId, item.category].filter(Boolean).join(" ");
+  const subcategoryText = item.subcategoryLabels?.length
+    ? item.subcategoryLabels.join("; ")
+    : "(none)";
+  const filter = [
+    item.title,
+    item.id,
+    item.draftId,
+    item.category,
+    ...item.subcategoryLabels
+  ].filter(Boolean).join(" ");
   const categoryCell = includeCategory
     ? `<td>${escapeHtml(item.category || "")}</td>`
     : "";
+  const subcategoryCell = item.subcategoryLabels?.length
+    ? escapeHtml(subcategoryText)
+    : emptyValue();
   return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
+    <td>${subcategoryCell}</td>
     <td>${renderPuzzlePathBadges(item)}</td>
     <td>${renderGithubProductionStatus(item.inGithubProduction)}</td>
     ${playCell}
@@ -1051,7 +1067,11 @@ const CORPUS_FILTER_SCRIPT = `
 
 /**
  * @param {object[]} rows
- * @param {{ variant?: string, githubProduction?: object | null }} [options]
+ * @param {{
+ *   variant?: string,
+ *   githubProduction?: object | null,
+ *   categoryRegistry?: Record<string, any>
+ * }} [options]
  */
 export function renderDraftListPage(rows, {
   variant = "hosted",
@@ -1095,7 +1115,7 @@ export function renderDraftListPage(rows, {
        ${forms}
        <div class="corpus-toolbar">
          <p><label for="puzzle-corpus-search">Filter</label>
-           <input id="puzzle-corpus-search" type="search" placeholder="Title, id, or category"></p>
+           <input id="puzzle-corpus-search" type="search" placeholder="Title, id, category, or subcategory"></p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Show</span>
            <label><input type="radio" name="puzzle-corpus-scope" value="all" checked> All</label>

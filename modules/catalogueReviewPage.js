@@ -402,7 +402,7 @@ function subcategoryFieldset(subId, definition) {
         <p><label>blurb <textarea name="subcategory.${escapeHtml(subId)}.info">${escapeHtml(infoTextOf(definition?.info))}</textarea></label></p>
         <p><label>link <input name="subcategory.${escapeHtml(subId)}.link" value="${escapeHtml(infoLinkOf(definition?.info))}" placeholder="wiki:Topic or https://…"></label></p>
         <p><label>extra link <input name="subcategory.${escapeHtml(subId)}.extraLink" value="${escapeHtml(infoExtraLinkOf(definition?.info))}"></label></p>
-        <p><label><input type="checkbox" name="remove_subcategory" value="${escapeHtml(subId)}"> Remove</label></p>
+        <p><label><input type="checkbox" name="remove_subcategory" value="${escapeHtml(subId)}"> Remove on save</label></p>
       </fieldset>`;
 }
 
@@ -541,7 +541,9 @@ export function renderCategoryEditPage({
       <h2>Subcategories</h2>
       <p class="meta">Registered browse partitions. The id is the stable URL
       slug; titles and blurbs are copy. Puzzle assignment stays on each
-      puzzle. Generated All/Other are not stored here.</p>
+      puzzle. Generated All/Other are not stored here. Check “Remove on save”
+      and submit this form; the server will explain and reject the save if a
+      live puzzle still cites that category/subcategory.</p>
       ${subcategoryFields}
       <fieldset>
         <legend>Add subcategory</legend>

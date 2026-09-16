@@ -231,7 +231,8 @@ export async function run() {
       ...baseDraft,
       draftId: "review-fixture-2",
       status: "submitted",
-      inGithubProduction: false
+      inGithubProduction: false,
+      subcategories: { Biology: "foundations" }
     }
   ]);
   assert.match(listPage, /not in GitHub production/);
@@ -241,6 +242,9 @@ export async function run() {
   assert.doesNotMatch(listPage, />Live</);
   assert.doesNotMatch(listPage, /class="badge">submitted</);
   assert.match(listPage, /<h2>Science<\/h2>/);
+  assert.match(listPage, /<th>Subcategories<\/th>/);
+  assert.match(listPage, /Biology: Foundations/);
+  assert.match(listPage, /placeholder="Title, id, category, or subcategory"/);
   const hostedList = renderDraftListPage([baseDraft], {
     existingPuzzles: [{ id: "energy-flow", title: "Energy Flow" }]
   });

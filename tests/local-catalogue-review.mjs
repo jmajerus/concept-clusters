@@ -26,6 +26,22 @@ function jsonRequest(url, { method = "POST", origin, host, body }) {
   };
 }
 
+function formRequest(url, { method = "POST", origin, host, body }) {
+  const params = new URLSearchParams(body);
+  return {
+    method,
+    url,
+    headers: {
+      origin,
+      host,
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(params.toString());
+    }
+  };
+}
+
 function createResponse() {
   return {
     status: 0,
@@ -297,6 +313,22 @@ export async function run(page) {
   assert.match(biology.body, /name="new_subcategory_id"/);
   assert.match(biology.body, /wiki:Biology/);
 
+  const blockedSubcategory = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/categories/biology", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: 1,
+      title: "Biology",
+      remove_subcategory: ["foundations"]
+    }
+  }), blockedSubcategory), true);
+  assert.equal(blockedSubcategory.status, 400);
+  assert.match(blockedSubcategory.body, /Category was not saved/);
+  assert.match(blockedSubcategory.body, /still cite/);
+  assert.match(blockedSubcategory.body, /href="\/admin\/categories\/biology"/);
+
   const added = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/categories/science", {
     origin: "http://127.0.0.1:8787",
@@ -324,13 +356,36 @@ export async function run(page) {
   assert.match(scienceWithSub.body, /name="subcategory.lab-partition.title"/);
   assert.match(scienceWithSub.body, /value="Lab partition"/);
 
+  const removedSubcategory = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/categories/science", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: 2,
+      title: "Science",
+      "subcategory.lab-partition.title": "Lab partition",
+      "subcategory.lab-partition.info": "",
+      "subcategory.lab-partition.link": "wiki:Science",
+      "subcategory.lab-partition.extraLink": "",
+      remove_subcategory: ["lab-partition"]
+    }
+  }), removedSubcategory), true);
+  assert.equal(removedSubcategory.status, 303);
+  const scienceAfterRemoval = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/categories/science"
+  }, scienceAfterRemoval), true);
+  assert.doesNotMatch(scienceAfterRemoval.body, /name="subcategory.lab-partition.title"/);
+
   const reservedSub = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/categories/science", {
     origin: "http://127.0.0.1:8787",
     host: "127.0.0.1:8787",
     body: {
       confirm: "save-category",
-      expected_revision: 2,
+      expected_revision: 3,
       title: "Science",
       new_subcategory: { id: "other", title: "Other" }
     }

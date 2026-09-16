@@ -58,7 +58,19 @@ export async function run(page) {
       puzzles: { add: ["brand-new"], update: ["keep-me"], remove: ["retired"] },
       catalogues: { add: [], update: [], remove: [] },
       categories: { add: [], update: [], remove: [] },
-      held: { puzzles: ["still-in-review", "held-update"], catalogues: [], categories: [] }
+      held: { puzzles: ["still-in-review", "held-update"], catalogues: [], categories: [] },
+      puzzleDetails: {
+        "brand-new": {
+          title: "Brand New Puzzle",
+          category: "Biology",
+          subcategories: ["Biology: Foundations"]
+        },
+        "keep-me": {
+          title: "Keep Me",
+          category: "Science",
+          subcategories: []
+        }
+      }
     }
   });
   assert.match(pending, /3 changes cued; 2 locally published but not cued/);
@@ -68,6 +80,9 @@ export async function run(page) {
   assert.match(pending, /Puzzles add/);
   assert.match(pending, /Puzzles published, not cued/);
   assert.match(pending, /still-in-review/);
+  assert.match(pending, /Brand New Puzzle/);
+  assert.match(pending, /category: Biology · subcategories: Biology: Foundations/);
+  assert.match(pending, /category: Science · subcategories: \(none\)/);
   assert.match(pending, /value="freeze"/);
   assert.match(pending, /name="additional_context"/);
   assert.doesNotMatch(pending, /Freeze this checkout\?/);
