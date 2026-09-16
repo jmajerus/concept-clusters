@@ -17,6 +17,10 @@ import {
 import { createLocalPlayCorpusHandler } from "../modules/localPlayCorpus.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { createPuzzleLoader } from "../modules/puzzleLoader.js";
+import {
+  expectedStarLayoutNodeKeys,
+  starLayoutRevision
+} from "../modules/starLayoutSchema.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
 export const name = "authoring play corpus: D1 Library navigation without git modules";
@@ -189,6 +193,39 @@ export async function run(page) {
   assert.deepEqual(compiled.puzzle.bridges[0].clusters, [0, 1]);
   assert.deepEqual(compiled.puzzle.provenance, labPuzzle.provenance);
 
+  const layout = {
+    schemaVersion: 1,
+    puzzleId: compiled.puzzle.id,
+    puzzleRevision: starLayoutRevision(compiled.puzzle),
+    board: { width: 1000, height: 500 },
+    nodes: Object.fromEntries(expectedStarLayoutNodeKeys(compiled.puzzle).map((key, index) => [
+      key,
+      { x: 40 + index * 20, y: 40 }
+    ])),
+    metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+  };
+  const saveLayoutResponse = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/star-layout.json",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({ layout }));
+    }
+  }, saveLayoutResponse), true);
+  assert.equal(saveLayoutResponse.status, 200, saveLayoutResponse.body);
+  assert.deepEqual(JSON.parse(saveLayoutResponse.body).layout, layout);
+  assert.deepEqual(
+    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).starLayout,
+    layout
+  );
+  const boardWithLayout = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/play/puzzles/lab-d1-play.json"
+  }, boardWithLayout), true);
+  assert.deepEqual(JSON.parse(boardWithLayout.body).starLayout, layout);
+
   const missing = createResponse();
   assert.equal(await handleRequest({
     method: "GET",
@@ -257,6 +294,35 @@ export async function run(page) {
         "D1 play must use the compiled board rather than the corpus browse record"
       );
       assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
+
+      await page.goto(`${baseURL}/?puzzle=lab-d1-play&author=layout`, {
+        waitUntil: "networkidle"
+      });
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && document.getElementById("layout-authoring")
+        && !document.getElementById("layout-authoring").hidden,
+      null, { timeout: 15000 });
+      assert.equal(await page.textContent("#layout-authoring-export"), "Save Layout");
+      await page.click("#layout-authoring-prepare");
+      await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, {
+        timeout: 15000
+      });
+      await page.click("#layout-authoring-export");
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-status")?.textContent === "Layout saved to D1.",
+      null, { timeout: 15000 });
+      assert.ok(
+        (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).starLayout,
+        "Save Layout did not persist the D1 override"
+      );
+
+      await page.goto(`${baseURL}/?puzzle=lab-d1-play`, { waitUntil: "networkidle" });
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && !document.getElementById("show-solution")?.disabled,
+      null, { timeout: 15000 });
+
       await page.click("#show-solution");
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"

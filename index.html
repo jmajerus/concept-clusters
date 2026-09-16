@@ -108,8 +108,8 @@
         <button id="star-free-strip-export-btn" type="button" hidden>Export strip flag</button>
         <button id="star-seed-beside-title-btn" type="button">Seed beside titles</button>
         <span class="admin-layout-hint">
-          Final layout: Prepare → drag → export →
-          <code>node tools/import-star-layout.mjs &lt;file&gt;</code>.
+          Final layout: Prepare → drag → Save Layout on the authoring server;
+          cue the puzzle for the next Freeze when it is ready for production.
           Cluttered opening: auto when free terms fit neither a top row nor
           a left column; toggle locally, then export to lock the boolean with
           <code>node tools/import-star-free-strip.mjs &lt;file&gt;</code>.
@@ -160,11 +160,10 @@
         </div>
         <p>
           Prepare the generated solution, drag terms and cluster titles until the
-          board looks right, then save a local draft or export JSON. Metrics are
-          guidance (padded near-misses often flag as overlaps); export when you
-          accept the layout. Commit with
-          <code>node tools/import-star-layout.mjs &lt;file&gt;</code>
-          so Show Solution can reuse the curated layout.
+          board looks right, then save a local draft. On the authoring server,
+          Save Layout stores the finished, validated layout in D1. Metrics are
+          guidance (padded near-misses often flag as overlaps). The final save
+          control is available only there.
         </p>
         <div class="layout-authoring-metrics" aria-live="polite">
           <span>Line crossings: <strong id="layout-metric-crossings">—</strong></span>
@@ -175,7 +174,7 @@
           <button id="layout-authoring-prepare">Prepare generated layout</button>
           <button id="layout-authoring-save">Save draft</button>
           <button id="layout-authoring-load">Load draft</button>
-          <button id="layout-authoring-export">Export JSON</button>
+          <button id="layout-authoring-export" hidden>Save Layout</button>
           <button id="layout-authoring-clear">Clear draft</button>
         </div>
       </section>

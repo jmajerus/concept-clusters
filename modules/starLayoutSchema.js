@@ -2,10 +2,10 @@
 //
 // Layouts deliberately live outside puzzle definitions: most puzzles use
 // the runtime pretty-printer, while the few that benefit from editorial
-// placement can add one sparse repository artifact. The same document
-// shape is used for browser-local drafts and committed overrides, so a
-// future online authoring/KV store can replace the storage adapter without
-// changing either the renderer or exported files.
+// placement can add one sparse published override. The same document shape
+// is used for browser-local drafts, D1-backed authoring overrides, and
+// generated player modules, so the renderer does not care where an override
+// was materialized.
 
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 
@@ -83,7 +83,7 @@ function starLayoutPositions(layoutNodes) {
 
 // Player sessions need a position snapshot throughout play, including
 // before the solved-only detangler has geometry metrics to report. Keep
-// that document distinct from repository/authoring layouts, whose metrics
+// that document distinct from published/authoring layouts, whose metrics
 // remain required and validated by validateStarLayoutDocument().
 //
 // viewBoxY captures the Star free-strip's off-board band at the moment of

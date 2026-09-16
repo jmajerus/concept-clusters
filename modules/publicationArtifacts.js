@@ -29,7 +29,8 @@ function variableName(id) {
 export function generatedPuzzleModule(
   puzzle,
   canonicalRelativePath,
-  moduleRelativePath
+  moduleRelativePath,
+  { starLayout = null } = {}
 ) {
   let manifestImport = relative(
     dirname(moduleRelativePath),
@@ -37,10 +38,17 @@ export function generatedPuzzleModule(
   );
   if (!manifestImport.startsWith(".")) manifestImport = `./${manifestImport}`;
   const authoredPuzzle = stripSystemAuthoredMetadata(puzzle);
-  return `// Generated from ${canonicalRelativePath}.\n` +
+  const header = `// Generated from ${canonicalRelativePath}.\n` +
     "// Edit the canonical simplified source rather than editing this file directly.\n\n" +
-    `import { definePuzzle } from "${manifestImport}";\n\n` +
-    `export default definePuzzle(import.meta.url, ${JSON.stringify(authoredPuzzle, null, 2)});\n`;
+    `import { definePuzzle } from "${manifestImport}";\n\n`;
+  if (!starLayout) {
+    return header +
+      `export default definePuzzle(import.meta.url, ${JSON.stringify(authoredPuzzle, null, 2)});\n`;
+  }
+  return header +
+    `const puzzle = definePuzzle(import.meta.url, ${JSON.stringify(authoredPuzzle, null, 2)});\n` +
+    `puzzle.starLayout = ${JSON.stringify(starLayout, null, 2)};\n` +
+    "export default puzzle;\n";
 }
 
 // A brand-new catalogues/<id>.js file's full source, in the same

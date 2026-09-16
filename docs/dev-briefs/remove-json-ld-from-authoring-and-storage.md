@@ -99,24 +99,18 @@ Both `mcpAuthoringServer.js` (local) and `hostedMcpAuthoringServer.js`
   test copy, "write-time-normalized at create/replace," etc. get cleaned up
   alongside the code they describe.
 
-## The Star layout wrinkle (resolved -- no change needed)
+## The Star layout wrinkle (resolved)
 
-Checked `puzzles/layouts/star/`: this was never actually stored as JSON-LD.
-`tools/import-star-layout.mjs` already writes one generated sidecar file
-per curated puzzle (`puzzles/layouts/star/<id>.js`, present only for
-puzzles that got hand-placed layouts -- most don't) plus a generated
-`index.js` that aggregates them into the sparse `STAR_LAYOUTS` lookup map
-`starLayoutRepository.js` reads at runtime. `puzzleJsonLd.js` only *bundles*
-a puzzle's current layout into a portable JSON-LD document as an optional
-export convenience ([puzzleJsonLd.js:70](../../modules/puzzleJsonLd.js#L70))
--- storage was already outside JSON-LD.
+Star layouts are intentionally not part of the simplified puzzle document or
+JSON-LD content. They are validated in their own schema, stored in the D1
+`published_documents.star_layout_json` column, and materialized by Freeze on
+the generated puzzle module as `puzzle.starLayout`. There is no separate
+repository sidecar or static registry to keep synchronized.
 
 So "JSON-LD-only" in SIMPLIFIED-PUZZLE-FORMAT.md's "What stays
 JSON-LD-only" section describes an *authoring-input* gap (no simplified-
-format field asks for layout data), not a storage dependency. Nothing here
-needs to move. Worth a docs pass to stop calling it JSON-LD-only when
-scoping this, since that phrasing is what suggested a trade-off that
-doesn't actually exist. Still worth checking against
+format field asks for layout data), not a storage dependency. Still worth
+checking against
 [[project_star_free_node_layout]] once that layout direction settles, since
 a jigsaw-scatter direction could change what data Star curation needs to
 carry -- but that's independent of this brief.

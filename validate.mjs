@@ -17,7 +17,6 @@ import {
   slugify
 } from "./puzzles/categories.js";
 import { PUZZLES } from "./puzzles/index.js";
-import { STAR_LAYOUTS } from "./puzzles/layouts/star/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 
 let ok = true;
@@ -154,14 +153,10 @@ for (const id of SHOWCASE_PUZZLE_IDS) {
   if (!allPuzzleIds.has(id)) fail("showcase.js", `"${id}" is not a real puzzle id`);
 }
 
-for (const [puzzleId, layout] of Object.entries(STAR_LAYOUTS)) {
-  const puzzle = PUZZLES.find(candidate => candidate.id === puzzleId);
-  if (!puzzle) {
-    fail(`star layout:"${puzzleId}"`, "does not match a real puzzle id");
-    continue;
-  }
-  validateStarLayoutDocument(layout, puzzle).errors
-    .forEach(error => fail(`star layout:"${puzzleId}"`, error));
+for (const puzzle of PUZZLES) {
+  if (!puzzle.starLayout) continue;
+  validateStarLayoutDocument(puzzle.starLayout, puzzle).errors
+    .forEach(error => fail(`star layout:"${puzzle.id}"`, error));
 }
 
 console.log(ok ? `ALL CHECKS PASSED (${PUZZLES.length} puzzles)` : "CHECKS FAILED");

@@ -138,7 +138,8 @@ export async function applyContentFreeze({
     queueWrite(files, modulePath, generatedPuzzleModule(
       publishedShape.puzzle,
       canonicalRelative,
-      relativePath(repositoryRoot, modulePath)
+      relativePath(repositoryRoot, modulePath),
+      { starLayout: published.starLayout || null }
     ));
     if (existing && existing !== modulePath) {
       await remember(existing);

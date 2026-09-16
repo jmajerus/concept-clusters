@@ -1562,23 +1562,22 @@ that browser's local storage and are specific to the puzzle revision and
 board dimensions. Local storage is only a workspace, never the published
 source of truth.
 
-`Export JSON` is enabled when the solved layout has no line crossings or
-overlapping pills. Lines passing through unrelated pills are reported
-separately so an author can make a deliberate judgment about minor edge
-cases. Import the downloaded file with:
+`Save Layout` is enabled when the solved layout has no line crossings.
+Overlaps and lines passing through unrelated pills are reported separately so
+an author can make a deliberate judgment about minor edge cases. On the
+authoring server, the button validates and stores the layout in
+the puzzle's `published_documents.star_layout_json` D1 column. The next D1
+play load uses that saved override automatically.
 
-```bash
-node tools/import-star-layout.mjs ~/Downloads/revolutions-modern-world-star-layout.json
-```
-
-The importer validates the schema, puzzle fingerprint, exact node set,
-board bounds, and hard geometry metrics, then writes
-`puzzles/layouts/star/<puzzle-id>.js` and regenerates the sparse registry.
+The final `Save Layout` control is available only on the D1 authoring server;
+deployed player pages do not offer a layout file export or publication path.
+Cue the puzzle and run the next Freeze; Freeze materializes the saved layout
+on the generated puzzle module, so no separate layout JSON file is needed.
 Run `npm run validate` and the quick `npm test` before committing. Reserve
-`npm run test:extended` for shared rendering/layout changes and occasional
-release-level verification.
+`npm run test:extended` for shared
+rendering/layout changes and occasional release-level verification.
 
-At runtime, the second `Show solution` click uses a matching repository
+At runtime, the second `Show solution` click uses a matching published
 layout when one exists. A missing, stale, wrong-sized, or geometrically
 unsafe override falls back to the algorithmic pretty-printer. This keeps
 custom layout data optional and prevents a puzzle edit from silently

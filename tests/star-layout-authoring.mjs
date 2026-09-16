@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { importStarLayout } from "../tools/import-star-layout.mjs";
 
-export const name = "star layout authoring: local drafts export and curated overrides apply";
+export const name = "star layout authoring: local drafts and curated overrides apply";
 export const tier = "extended";
 
 export async function run(page, baseURL) {
@@ -21,6 +17,7 @@ export async function run(page, baseURL) {
   assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
   await page.click("#star-layout-author-btn");
   await page.waitForURL(/author=layout/);
+  await page.waitForFunction(() => !document.getElementById("layout-authoring")?.hidden);
   assert.match(page.url(), /puzzle=models-of-the-divided-mind/);
   assert.match(page.url(), /author=layout/);
   assert.equal(await page.getAttribute("#layout-authoring", "hidden"), null);
@@ -29,19 +26,24 @@ export async function run(page, baseURL) {
     `${baseURL}/index.html?puzzle=fundamental-forces&author=layout`
   );
 
+  await page.waitForFunction(() => !document.getElementById("layout-authoring")?.hidden);
   assert.equal(await page.getAttribute("#layout-authoring", "hidden"), null);
   assert.equal(await page.isDisabled("#mode-graph"), true);
   assert.equal(await page.isDisabled("#mode-sets"), true);
   assert.equal(await page.evaluate(() => window.CC.mode), "star");
-  assert.equal(await page.isDisabled("#layout-authoring-export"), true);
+  assert.notEqual(
+    await page.getAttribute("#layout-authoring-export", "hidden"),
+    null,
+    "static player must not expose a layout publication button"
+  );
 
   await page.click("#layout-authoring-prepare");
   await page.waitForFunction(() => window.CC.state.solutionLayout === "pretty");
   assert.equal(await page.textContent("#layout-metric-crossings"), "0");
   assert.equal(await page.textContent("#layout-metric-overlaps"), "0");
-  assert.equal(await page.isDisabled("#layout-authoring-export"), false);
 
-  // Author judgment wins: a padded AABB near-miss must not hard-block export.
+  // Author judgment wins: a padded AABB near-miss is advisory rather than a
+  // hard block on a valid layout save.
   await page.evaluate(() => {
     const terms = [...document.querySelectorAll(".node")]
       .map(element => element.__data__)
@@ -56,7 +58,6 @@ export async function run(page, baseURL) {
     window.CC.state.getStarLayoutMetrics().overlaps >= 1 &&
     document.getElementById("layout-metric-overlaps").textContent.includes("/")
   );
-  assert.equal(await page.isDisabled("#layout-authoring-export"), false);
   assert.match(
     await page.textContent("#layout-metric-overlaps"),
     /\d+ \(.+ \/ .+\)/
@@ -69,7 +70,6 @@ export async function run(page, baseURL) {
     window.CC.state.solutionLayout === "pretty" &&
     window.CC.state.getStarLayoutMetrics().overlaps === 0
   );
-  assert.equal(await page.isDisabled("#layout-authoring-export"), false);
 
   const term = page.locator(".node").filter({ hasText: "electric charge" }).first();
   const box = await term.boundingBox();
@@ -129,48 +129,18 @@ export async function run(page, baseURL) {
   });
   assert.ok(storedDraft, "author drag did not persist a local draft");
 
-  const exportState = await page.evaluate(() => ({
-    disabled: document.getElementById("layout-authoring-export").disabled,
-    metrics: window.CC.state.getStarLayoutMetrics()
-  }));
-  assert.equal(
-    exportState.disabled,
-    false,
-    `author drag made the layout unsafe to export: ${JSON.stringify(exportState.metrics)}`
-  );
-  const [download] = await Promise.all([
-    page.waitForEvent("download"),
-    page.click("#layout-authoring-export")
-  ]);
-  const downloadPath = await download.path();
-  const exported = JSON.parse(await readFile(downloadPath, "utf8"));
-  assert.equal(exported.puzzleId, "fundamental-forces");
-  assert.equal(exported.metrics.lineCrossings, 0);
-  assert.equal(exported.metrics.overlaps, 0);
-  await importStarLayout(downloadPath, { checkOnly: true });
-  const importRoot = await mkdtemp(join(tmpdir(), "cc-star-layout-import-"));
-  try {
-    const imported = await importStarLayout(downloadPath, { repositoryRoot: importRoot });
-    assert.ok(
-      (await readFile(imported.outputPath, "utf8")).includes(exported.puzzleRevision),
-      "importer did not write the validated layout"
-    );
-    assert.ok(
-      (await readFile(join(importRoot, "puzzles/layouts/star/index.js"), "utf8"))
-        .includes("fundamental-forces.js"),
-      "importer did not regenerate the sparse registry"
-    );
-  } finally {
-    await rm(importRoot, { recursive: true, force: true });
-  }
-
-  // The exported document is also representative of a committed sparse
-  // override. Mutate the live module registry only for this test, reset the
-  // puzzle, and verify that the ordinary second pass selects it.
-  await page.evaluate(async layout => {
-    const repository = await import("./modules/starLayoutRepository.js");
-    repository.STAR_LAYOUTS[layout.puzzleId] = layout;
-  }, exported);
+  // A captured document is representative of a committed override. Attach it
+  // to the runtime puzzle object as Freeze does, reset the puzzle, and verify
+  // that the ordinary second pass selects it. Static pages can inspect and
+  // edit a local draft, but cannot publish it.
+  const curatedLayout = await page.evaluate(() => {
+    const layout = window.CC.state.captureStarLayout();
+    window.CC.state.puzzle.starLayout = layout;
+    return layout;
+  });
+  assert.equal(curatedLayout.puzzleId, "fundamental-forces");
+  assert.equal(curatedLayout.metrics.lineCrossings, 0);
+  assert.equal(curatedLayout.metrics.overlaps, 0);
   await page.click("#reset");
   await page.click("#layout-authoring-prepare");
   await page.waitForFunction(() =>

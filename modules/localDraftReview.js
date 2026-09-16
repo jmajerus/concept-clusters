@@ -1039,10 +1039,18 @@ export function createLocalDraftReviewHandler({
           }, 400);
           return true;
         }
+        const published = await publishedRowOrNull(
+          contentDocuments,
+          "puzzle",
+          puzzle.id
+        );
+        const playPuzzle = published?.starLayout
+          ? { ...puzzle, starLayout: published.starLayout }
+          : puzzle;
         json(res, {
           draftId,
           revision: record.revision,
-          puzzle
+          puzzle: playPuzzle
         });
       } catch (error) {
         if (!isMissingDraft(error)) throw error;

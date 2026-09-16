@@ -13,12 +13,16 @@ import {
 import { HttpD1Error } from "./httpD1Database.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { isSameOriginRequest } from "./draftReviewSubmit.js";
 import {
   assemblePlayCorpus,
   compilePublishedPuzzle,
   htmlWithPlayCorpusMeta,
   PLAY_CORPUS_PATH
 } from "./playCorpus.js";
+import { validateStarLayoutDocument } from "./starLayoutSchema.js";
+
+const STAR_LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/star-layout(?:\.json)?$/;
 
 function json(res, body, status = 200) {
   res.writeHead(status, {
@@ -39,6 +43,45 @@ function html(res, body, status = 200) {
 function puzzleIdsFromService(contentService) {
   const list = contentService?.puzzles || contentService?.state?.puzzles || [];
   return list.map(puzzle => puzzle?.id).filter(Boolean);
+}
+
+function requestIsSameOriginIfSpecified(req) {
+  const headers = req.headers || {};
+  const origin = headers.origin || headers.Origin || "";
+  const referer = headers.referer || headers.Referer || "";
+  if (!origin && !referer) return true;
+  return isSameOriginRequest({
+    origin,
+    referer,
+    host: headers.host || headers.Host || ""
+  });
+}
+
+async function readJsonBody(req) {
+  if (!req || typeof req[Symbol.asyncIterator] !== "function") {
+    const body = req?.body ?? {};
+    if (typeof body !== "string" && !Buffer.isBuffer(body)) return body;
+    try {
+      return JSON.parse(Buffer.from(body).toString("utf8"));
+    } catch (error) {
+      throw new Error(`Request body is not valid JSON: ${error.message}`);
+    }
+  }
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    if (size > 900_000) throw new Error("Star layout request is too large");
+    chunks.push(buffer);
+  }
+  const text = Buffer.concat(chunks).toString("utf8").trim();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Request body is not valid JSON: ${error.message}`);
+  }
 }
 
 export async function buildPlayCorpusPayload({
@@ -96,6 +139,70 @@ export function createLocalPlayCorpusHandler({
       html(res, htmlWithPlayCorpusMeta(markup));
       return true;
     }
+    const layoutMatch = urlPath.match(STAR_LAYOUT_ROUTE);
+    if (layoutMatch) {
+      if (!requestIsSameOriginIfSpecified(req)) {
+        json(res, { error: "Layout writes must be same-origin." }, 403);
+        return true;
+      }
+      await ensureSeeded();
+      const id = decodeURIComponent(layoutMatch[1]);
+      let published;
+      try {
+        published = await contentDocuments.getPublished({ kind: "puzzle", id });
+      } catch (error) {
+        if (!(error instanceof ContentDocumentNotFoundError)) throw error;
+        json(res, { error: "Unknown puzzle", id }, 404);
+        return true;
+      }
+      if (req.method === "GET" || req.method === "HEAD") {
+        json(res, {
+          id,
+          revision: published.revision,
+          layout: published.starLayout || null
+        });
+        return true;
+      }
+      if (req.method !== "PUT" && req.method !== "DELETE") return false;
+      if (published.withdrawnAt) {
+        json(res, { error: "Puzzle withdrawn from authoring play", id }, 409);
+        return true;
+      }
+      try {
+        if (req.method === "DELETE") {
+          const cleared = await contentDocuments.clearPuzzleLayout({ id });
+          json(res, { id, revision: cleared.revision, layout: null });
+          return true;
+        }
+        const body = await readJsonBody(req);
+        const layout = body && Object.prototype.hasOwnProperty.call(body, "layout")
+          ? body.layout
+          : body;
+        const { puzzle, errors } = compilePublishedPuzzle(published.document);
+        if (!puzzle) {
+          json(res, {
+            error: "Published puzzle document is not valid simplified content",
+            id,
+            errors
+          }, 400);
+          return true;
+        }
+        const validation = validateStarLayoutDocument(layout, puzzle);
+        if (!validation.valid) {
+          json(res, { error: "Star layout is invalid", id, errors: validation.errors }, 400);
+          return true;
+        }
+        const saved = await contentDocuments.savePuzzleLayout({ id, layout });
+        json(res, {
+          id,
+          revision: saved.revision,
+          layout: saved.starLayout || layout
+        });
+      } catch (error) {
+        json(res, { error: error instanceof Error ? error.message : String(error) }, 400);
+      }
+      return true;
+    }
     if (req.method !== "GET" && req.method !== "HEAD") return false;
     const puzzleMatch = urlPath.match(/^\/play\/puzzles\/([^/]+)\.json$/);
     if (urlPath === PLAY_CORPUS_PATH) {
@@ -142,7 +249,8 @@ export function createLocalPlayCorpusHandler({
       json(res, {
         id,
         revision: published.revision,
-        puzzle
+        puzzle,
+        ...(published.starLayout ? { starLayout: published.starLayout } : {})
       });
       return true;
     }
@@ -169,12 +277,13 @@ export function createDefaultLocalPlayCorpusHandler({
     const isIndex = urlPath === "/" || urlPath === "/index.html";
     const isPlay = urlPath === PLAY_CORPUS_PATH
       || /^\/play\/puzzles\/[^/]+\.json$/.test(urlPath);
-    if (!isIndex && !isPlay) return false;
+    const isLayout = STAR_LAYOUT_ROUTE.test(urlPath);
+    if (!isIndex && !isPlay && !isLayout) return false;
     try {
       workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });
       const resolved = await workspacePromise;
       if (!resolved.contentDocuments) {
-        if (isPlay) json(res, { error: "D1 content documents are not configured." }, 503);
+        if (isPlay || isLayout) json(res, { error: "D1 content documents are not configured." }, 503);
         else html(res, "<p>D1 content documents are not configured.</p>", 503);
         return true;
       }

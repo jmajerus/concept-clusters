@@ -1,5 +1,5 @@
 // Star-mode layout authoring UI: the ?author=layout panel (prepare,
-// local drafts, validated export) and the ?admin layout actions
+// local drafts, validated save) and the ?admin layout actions
 // (jump into authoring, local free-strip / seed-beside-title tries).
 //
 // Production and the authoring-server player both gate the actions with
@@ -55,7 +55,8 @@ export function createLayoutAuthoringController({
   getState,
   getMode,
   getBoard,
-  showSolution
+  showSolution,
+  saveLayout = null
 }) {
   const layoutAuthoringEl = document.getElementById("layout-authoring");
   const layoutAuthoringDraftStateEl = document.getElementById("layout-authoring-draft-state");
@@ -73,8 +74,15 @@ export function createLayoutAuthoringController({
   const starFreeStripBtn = document.getElementById("star-free-strip-btn");
   const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
   const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
+  const savesToAuthoringServer = typeof saveLayout === "function";
+  let savingLayout = false;
 
   layoutAuthoringEl.hidden = !layoutAuthoringMode;
+  // Published layout overrides belong to the D1 authoring server. Static
+  // player pages can still preview and keep a browser-local draft, but must
+  // not present a file-export path that authors could mistake for publishing.
+  layoutAuthoringExportBtn.hidden = !savesToAuthoringServer;
+  layoutAuthoringExportBtn.textContent = "Save Layout";
 
   function isConstructView() {
     return !!globalThis.document?.body?.classList.contains("authoring-construct");
@@ -134,16 +142,20 @@ export function createLayoutAuthoringController({
     } else {
       layoutMetricOverlapsEl.textContent = String(metrics.overlaps);
     }
-    layoutAuthoringDraftStateEl.textContent = draft ? "Local draft saved" : "No local draft";
+    layoutAuthoringDraftStateEl.textContent = draft
+      ? "Local draft saved"
+      : savesToAuthoringServer && state.puzzle?.starLayout
+        ? "D1 layout saved"
+        : "No local draft";
 
     layoutAuthoringSaveBtn.disabled = !prepared;
     layoutAuthoringLoadBtn.disabled = !prepared || !draft;
     layoutAuthoringClearBtn.disabled = !draft;
     // Metrics are advisory. Curated authoring exists because automated
     // geometry (especially the padded overlap pad) is not the final word —
-    // export when the author is ready; only true line crossings still fail
+    // save when the author is ready; only true line crossings still fail
     // schema validation on click.
-    layoutAuthoringExportBtn.disabled = !prepared;
+    layoutAuthoringExportBtn.disabled = !prepared || savingLayout;
   }
 
   function captureAndSaveAuthorDraft({ announce = false } = {}) {
@@ -185,12 +197,12 @@ export function createLayoutAuthoringController({
         const metrics = preparingState.getStarLayoutMetrics();
         if (metrics.lineCrossings > 0) {
           setLayoutAuthoringStatus(
-            "Generated layout ready — line crossings block export; drag to clear them before exporting.",
+            "Generated layout ready — line crossings block Save Layout; drag to clear them before saving.",
             "error"
           );
         } else if (metrics.edgeNodeIntersections > 0 || metrics.overlaps > 0) {
           setLayoutAuthoringStatus(
-            "Generated layout ready — overlaps/through-pills are advisory; drag to tidy if you want, or export when it looks right.",
+            "Generated layout ready — overlaps/through-pills are advisory; drag to tidy if you want, or save when it looks right.",
             "good"
           );
         }
@@ -230,7 +242,7 @@ export function createLayoutAuthoringController({
     setLayoutAuthoringStatus(cleared ? "Local draft cleared." : "Draft could not be cleared.");
     updateLayoutAuthoringPanel();
   });
-  layoutAuthoringExportBtn.addEventListener("click", () => {
+  layoutAuthoringExportBtn.addEventListener("click", async () => {
     if (!authoringPrepared()) return;
     const state = getState();
     const { width, height } = boardSize();
@@ -245,9 +257,21 @@ export function createLayoutAuthoringController({
       updateLayoutAuthoringPanel();
       return;
     }
-    downloadJson(`${state.puzzle.id}-star-layout.json`, layout);
-    state.lastExportedStarLayout = layout;
-    setLayoutAuthoringStatus("Repository-ready JSON exported.", "good");
+    if (!savesToAuthoringServer) return;
+    savingLayout = true;
+    updateLayoutAuthoringPanel();
+    setLayoutAuthoringStatus("Saving layout to D1…");
+    try {
+      const saved = await saveLayout({ puzzleId: state.puzzle.id, layout });
+      state.puzzle.starLayout = saved || layout;
+      state.lastSavedStarLayout = state.puzzle.starLayout;
+      setLayoutAuthoringStatus("Layout saved to D1.", "good");
+    } catch (error) {
+      setLayoutAuthoringStatus(`Could not save layout: ${error.message}`, "error");
+    } finally {
+      savingLayout = false;
+      updateLayoutAuthoringPanel();
+    }
   });
 
   function syncStarFreeStripButtons() {
@@ -344,8 +368,8 @@ export function createLayoutAuthoringController({
     syncStarFreeStripButtons();
     if (!layoutAuthoringMode || !state) return;
     // The renderer calls this after generated/curated placement and after
-    // every literal author drag. Local storage is draft-only; repository
-    // publication still requires the explicit validated export/import step.
+    // every literal author drag. Local storage is draft-only; the explicit
+    // save action is the publication step when this is the D1 player.
     state.onAuthorLayoutChanged = reason => {
       if (reason === "drag") captureAndSaveAuthorDraft();
       else updateLayoutAuthoringPanel();

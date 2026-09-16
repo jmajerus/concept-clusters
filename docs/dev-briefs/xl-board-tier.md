@@ -44,7 +44,7 @@ on one surface.
 | `game.js` `BOARD_SIZE` | `standard` 640×460, `wide` 960×620; Circle wide 960×720 |
 | `game.js` `applyBoardSize()` | `large` preserves expanded canvas across modes |
 | `modules/puzzleGraph.js` | Cluster-order search; factorial, capped at 6 clusters |
-| Star layout (`puzzles/layouts/star/`, import tool) | Manual override when auto layout fails |
+| Star layout (D1-backed override, materialized by Freeze) | Manual override when auto layout fails |
 | `tests/jsonld-engine.mjs` | Node-cap validation tests |
 | Authoring docs | [AUTHORING-REFERENCE.md](../AUTHORING-REFERENCE.md) “Puzzle size (`large`)” |
 

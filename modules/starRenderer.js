@@ -19,7 +19,7 @@ import { pillWidth, bridgePoints, computeClusterOrder } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import {
-  repositoryStarLayoutFor,
+  publishedStarLayoutFor,
   starFreeStripEnabled,
   starFreeStripCapacityNeeded,
   starSeedBesideTitleEnabled
@@ -1147,7 +1147,7 @@ export function createStarRenderer({
 
           const original = capturePositions();
           const originalLayout = evaluateLayout();
-          const curatedLayout = repositoryStarLayoutFor(puzzle, W, H);
+          const curatedLayout = publishedStarLayoutFor(puzzle, W, H);
           if (curatedLayout) {
             const curatedTargets = targetMapForLayout(curatedLayout);
             allLayoutNodes.forEach(node => {
@@ -1156,10 +1156,10 @@ export function createStarRenderer({
             });
             const curatedGeometry = evaluateLayout();
             restorePositions(original);
-            // Repository validation catches stale/malformed data. Live
+            // Published-layout validation catches stale/malformed data. Live
             // geometry only rejects real line crossings — residual through-
             // pills / padded overlaps / unrelated-title clearance were the
-            // author's call when they exported the override.
+            // author's call when they saved the override.
             if (curatedGeometry.crossingCount === 0) {
               if (!await animateLayout(curatedTargets)) return { cancelled: true };
               allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
@@ -1336,7 +1336,7 @@ export function createStarRenderer({
         // pass players like, without the long pre-show). A live player
         // completion keeps their arrangement and only uncrosses in place.
         const curatedLayout = state.completedViaShowSolution
-          ? repositoryStarLayoutFor(puzzle, W, H)
+          ? publishedStarLayoutFor(puzzle, W, H)
           : null;
         if (curatedLayout) {
           const preview = capturePositions();

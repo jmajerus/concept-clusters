@@ -23,7 +23,9 @@ export async function loadPublishedPuzzle(entry) {
   if (!response.ok || !body.puzzle) {
     throw new Error(body.error || `HTTP ${response.status}`);
   }
-  return body.puzzle;
+  return body.starLayout
+    ? { ...body.puzzle, starLayout: body.starLayout }
+    : body.puzzle;
 }
 
 export async function loadPlayCorpus(corpusUrl, { fetchImpl = fetch } = {}) {

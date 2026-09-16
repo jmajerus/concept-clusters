@@ -41,9 +41,8 @@ indices are baked directly into rendering and game logic:
   style positional array lookups.
 - Curated Star layouts (`modules/starLayoutSchema.js`) key node identity by
   index too: a node's stable id is literally `` `cluster:${ci}` ``, built
-  from the cluster's position in the array. Every hand-curated Star layout
-  in the repository would need re-keying, not just the puzzle content
-  files.
+  from the cluster's position in the array. Any D1-backed Star layout would
+  need re-keying, not just the puzzle content files.
 
 A real migration would require, at minimum:
 

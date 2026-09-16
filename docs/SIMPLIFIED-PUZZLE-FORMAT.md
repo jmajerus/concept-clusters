@@ -160,13 +160,12 @@ the puzzle's `lensMode` -- that consistency is checked downstream (see
 
 **Star layout curation** -- positional/visual placement data for the Star
 board mode, authored through its own dedicated schema
-(`modules/starLayoutSchema.js`) and a maintainer-run tool
-(`tools/import-star-layout.mjs`), not part of puzzle content or this
-format's field set. It has never lived in JSON-LD either -- storage is a
-sparse, generated per-puzzle registry under `puzzles/layouts/star/`, present
-only for puzzles that got hand-placed final layouts; algorithmic layout is
-the default for everything else. Everything else a puzzle can express, this
-format can author directly.
+(`modules/starLayoutSchema.js`), not part of puzzle content or this format's
+field set. On the D1-backed authoring server, `?author=layout` saves the
+validated document to `published_documents.star_layout_json`, and Freeze
+materializes it in the generated puzzle module. Deployed player pages do not
+offer a layout file export; algorithmic layout is the default for everything
+else. Everything else a puzzle can express, this format can author directly.
 
 ## Validation layers
 

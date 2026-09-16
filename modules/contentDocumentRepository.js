@@ -32,6 +32,30 @@ function parsedJson(text, label) {
   }
 }
 
+function optionalParsedJson(text, label) {
+  if (text == null || text === "") return null;
+  return typeof text === "string" ? parsedJson(text, label) : text;
+}
+
+const MAX_STAR_LAYOUT_JSON_BYTES = 900_000;
+
+function serializeStarLayout(layout) {
+  if (!layout || typeof layout !== "object" || Array.isArray(layout)) {
+    throw new Error("Star layout must be a JSON object");
+  }
+  let json;
+  try {
+    json = JSON.stringify(layout);
+  } catch (error) {
+    throw new Error(`Star layout could not be serialized: ${error.message}`);
+  }
+  if (typeof json !== "string") throw new Error("Star layout must serialize to JSON");
+  if (new TextEncoder().encode(json).byteLength > MAX_STAR_LAYOUT_JSON_BYTES) {
+    throw new Error("Star layout is too large to store");
+  }
+  return json;
+}
+
 function changes(result) {
   return Number(result?.meta?.changes || 0);
 }
@@ -60,6 +84,9 @@ function publishedRecord(row) {
     parsedJson(row.document, "Published document"),
     "Published document"
   );
+  const starLayout = row.kind === "puzzle"
+    ? optionalParsedJson(row.star_layout_json, "Stored Star layout")
+    : null;
   return {
     kind: row.kind,
     id: row.id,
@@ -80,7 +107,8 @@ function publishedRecord(row) {
     // same fold before serialization below.
     document: row.kind === "puzzle"
       ? stripSystemAuthoredMetadata(document)
-      : document
+      : document,
+    ...(starLayout ? { starLayout } : {})
   };
 }
 
@@ -327,6 +355,34 @@ export class D1ContentDocumentRepository {
     `).bind(kind, id).first();
     if (!row) throw new ContentDocumentNotFoundError(kind, id);
     return publishedRecord(row);
+  }
+
+  async savePuzzleLayout({ id, layout }) {
+    assertDraftId(id);
+    const current = await this.getPublished({ kind: "puzzle", id });
+    if (current.withdrawnAt) throw new Error(`Cannot save a layout for withdrawn puzzle "${id}"`);
+    const layoutJson = serializeStarLayout(layout);
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE published_documents
+      SET star_layout_json = ?, updated_at = ?
+      WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
+    `).bind(layoutJson, now, id).run();
+    if (changes(result) !== 1) throw new ContentDocumentNotFoundError("puzzle", id);
+    return this.getPublished({ kind: "puzzle", id });
+  }
+
+  async clearPuzzleLayout({ id }) {
+    assertDraftId(id);
+    await this.getPublished({ kind: "puzzle", id });
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE published_documents
+      SET star_layout_json = NULL, updated_at = ?
+      WHERE kind = 'puzzle' AND id = ?
+    `).bind(now, id).run();
+    if (changes(result) !== 1) throw new ContentDocumentNotFoundError("puzzle", id);
+    return this.getPublished({ kind: "puzzle", id });
   }
 
   async listPublished({ kind, includeWithdrawn = false } = {}) {
@@ -679,6 +735,32 @@ export function createMemoryContentDocumentRepository() {
         .filter(row => includeWithdrawn || !row.withdrawnAt)
         .sort((left, right) => String(left.title || left.id).localeCompare(right.title || right.id));
     },
+    async savePuzzleLayout({ id, layout }) {
+      assertDraftId(id);
+      const current = await repository.getPublished({ kind: "puzzle", id });
+      if (current.withdrawnAt) throw new Error(`Cannot save a layout for withdrawn puzzle "${id}"`);
+      const layoutJson = serializeStarLayout(layout);
+      const key = publishedKey("puzzle", id);
+      const row = published.get(key);
+      published.set(key, {
+        ...row,
+        star_layout_json: layoutJson,
+        updated_at: new Date().toISOString()
+      });
+      return repository.getPublished({ kind: "puzzle", id });
+    },
+    async clearPuzzleLayout({ id }) {
+      assertDraftId(id);
+      await repository.getPublished({ kind: "puzzle", id });
+      const key = publishedKey("puzzle", id);
+      const row = published.get(key);
+      published.set(key, {
+        ...row,
+        star_layout_json: null,
+        updated_at: new Date().toISOString()
+      });
+      return repository.getPublished({ kind: "puzzle", id });
+    },
     async seedPublishedIfAbsent({ kind, id, document }) {
       await repository.seedPublishedManyIfAbsent([{ kind, id, document }]);
       return repository.getPublished({ kind, id });
@@ -705,6 +787,7 @@ export function createMemoryContentDocumentRepository() {
           last_agent_reviewed_at: now,
           last_human_reviewed_at: null,
           withdrawn_at: null,
+          star_layout_json: null,
           cued_for_freeze_at: now,
           cued_for_freeze_by: "git-seed"
         };
@@ -735,6 +818,7 @@ export function createMemoryContentDocumentRepository() {
         last_agent_reviewed_at: existing?.last_agent_reviewed_at || now,
         last_human_reviewed_at: existing?.last_human_reviewed_at || null,
         withdrawn_at: null,
+        star_layout_json: existing?.star_layout_json || null,
         cued_for_freeze_at: null,
         cued_for_freeze_by: null
       };

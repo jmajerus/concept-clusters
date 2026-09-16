@@ -102,7 +102,18 @@ export const CATALOGUES = [
     const documents = {
       async getPublished({ kind, id }) {
         if (kind === "puzzle" && id === "freeze-add-fixture") {
-          return { id, document: puzzleDocument(id) };
+          return {
+            id,
+            document: puzzleDocument(id),
+            starLayout: {
+              schemaVersion: 1,
+              puzzleId: id,
+              puzzleRevision: "fnv1a32:fixture",
+              board: { width: 100, height: 100 },
+              nodes: {},
+              metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+            }
+          };
         }
         throw new Error(`unexpected ${kind} ${id}`);
       }
@@ -130,6 +141,8 @@ export const CATALOGUES = [
       "utf8"
     );
     assert.match(moduleSource, /definePuzzle/);
+    assert.match(moduleSource, /puzzle\.starLayout/);
+    assert.match(moduleSource, /fnv1a32:fixture/);
 
     // Freeze must use the live registry supplied by D1 when a puzzle's
     // category has no static Git entry yet; slugging the display title would

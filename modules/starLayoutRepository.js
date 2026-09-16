@@ -1,13 +1,13 @@
-import { STAR_LAYOUTS } from "../puzzles/layouts/star/index.js";
 import { STAR_FREE_STRIP } from "../puzzles/layouts/star/free-strip.js";
 import { pillWidth } from "./puzzleGraph.js";
 import { validateStarLayoutDocument } from "./starLayoutSchema.js";
 
-export function repositoryStarLayoutFor(puzzle, width, height) {
-  const layout = STAR_LAYOUTS[puzzle.id];
+export function publishedStarLayoutFor(puzzle, width, height) {
+  const layout = puzzle?.starLayout;
   if (!layout) return null;
   const result = validateStarLayoutDocument(layout, puzzle, { width, height });
-  return result.valid ? layout : null;
+  if (result.valid) return layout;
+  return null;
 }
 
 // Editorial boolean: when true, Star opens with a Circle-style free-term
@@ -119,4 +119,4 @@ export function starSeedBesideTitleEnabled(puzzle, options = {}) {
   return false;
 }
 
-export { STAR_LAYOUTS, STAR_FREE_STRIP };
+export { STAR_FREE_STRIP };
