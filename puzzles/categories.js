@@ -221,12 +221,25 @@ export const CATEGORIES = {
       link: "wiki:Public health"
     }
   },
-  "Geography": {
+  "Physical Geography": {
+    slug: "geography",
     domain: "earth-environment",
     info: {
       text: "How location, environment, movement, and human activity create spatial patterns and distinctive regions.",
       link: "wiki:Geography"
-    }
+    },
+    subcategories: {
+      hydrology: {
+        title: "Hydrology",
+        info: {
+          text: "How water moves through the Earth system: where it is stored, how it flows underground and over land, and how the invisible reservoir connects to every stream and well.",
+          link: "wiki:Hydrology"
+        }
+      }
+    },
+    previousTitles: [
+      "Geography"
+    ]
   },
   "Art": {
     domain: "art-design",
@@ -386,6 +399,21 @@ export const CATEGORIES = {
           link: "wiki:Religious text"
         }
       }
+    }
+  },
+  Geology: {
+    slug: "geology",
+    domain: "earth-environment",
+    info: {
+      text: "Geology is the scientific study of the Earth, its solid materials, its structure, and the processes that change it over time.",
+      link: "wiki:Geography"
+    }
+  },
+  "Literary History & Canons": {
+    slug: "literary-history",
+    domain: "literature-classics",
+    info: {
+      text: "How distinct historical eras, regional movements, and language traditions forge unique literary identities and redefine what literature can do."
     }
   }
 };

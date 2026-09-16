@@ -1,0 +1,146 @@
+{
+  "id": "groundwater-journey",
+  "title": "Groundwater: The Hidden Journey",
+  "category": "geography",
+  "subcategories": {
+    "geography": "hydrology"
+  },
+  "info": {
+    "text": "Groundwater as a moving system: water sinks in at recharge areas, seeps along the decline in hydraulic head at a pace Darcy's law sets, and resurfaces in springs and streambeds — which is why rivers keep running weeks after the rain stops.",
+    "citations": [
+      {
+        "title": "Physical Geology — 14.2 Groundwater Flow",
+        "author": "Steven Earle",
+        "publisher": "BCcampus Open Publishing",
+        "url": "https://opentextbc.ca/geology/chapter/14-2-groundwater-flow/"
+      },
+      {
+        "title": "Rivers Contain Groundwater",
+        "author": "USGS Water Science School",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://www.usgs.gov/water-science-school/science/rivers-contain-groundwater"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "recharge-and-discharge",
+      "name": "Where Water Enters and Leaves",
+      "color": "teal",
+      "fact": "An aquifer is a through-flow system, not a buried lake. Water enters at recharge areas, where precipitation soaks down through soil and rock, and leaves wherever the saturated ground meets the surface — seeping from springs, wetlands, and streambeds. Many rivers are fed from below; a few leak down into the aquifer instead.",
+      "seeds": [
+        "spring",
+        "recharge"
+      ],
+      "floatingTerms": [
+        "baseflow",
+        "gaining stream",
+        "losing stream"
+      ],
+      "terms": [
+        "spring",
+        "recharge",
+        "baseflow",
+        "gaining stream",
+        "losing stream"
+      ],
+      "termInfo": {
+        "spring": "A natural outlet where groundwater surfaces — a hillside break, a fault seam, or the valley floor where the water table meets the land.",
+        "recharge": "Water crossing the surface downward into the saturated zone. It is slow to arrive and slow to replace: some of today's recharge entered the ground centuries ago.",
+        "baseflow": "The groundwater share of a stream's flow — what keeps channels wet between storms. Pumping an aquifer down shows up first here.",
+        "gaining stream": "A reach where the water table sits above the bed, so groundwater seeps upward through it and the stream grows as it flows.",
+        "losing stream": "A reach where the bed sits above the water table, so the stream leaks downward — recharging the very aquifer it flows over. The same reach can gain in wet seasons and lose in dry ones."
+      }
+    },
+    {
+      "id": "flow-mechanics",
+      "name": "The Law of Slow Motion",
+      "color": "blue",
+      "fact": "Groundwater rarely rushes — it seeps through pores at a speed set by Darcy's law: hydraulic conductivity times the hydraulic gradient. The gradient slopes down the decline in hydraulic head, the water's stored energy — and because head, not hill slope, drives the motion, the final approach to a river valley is often upward.",
+      "seeds": [
+        "Darcy's law",
+        "hydraulic gradient"
+      ],
+      "floatingTerms": [
+        "hydraulic head"
+      ],
+      "terms": [
+        "Darcy's law",
+        "hydraulic gradient",
+        "hydraulic head"
+      ],
+      "termInfo": {
+        "Darcy's law": "Henry Darcy's 1856 finding, from filtering water through a sand column, that seepage scales with the head decline per distance: double the slope, double the flow. It remains hydrogeology's working equation.",
+        "hydraulic gradient": "How fast hydraulic head falls per unit distance along the path — the seepage slope. It can point uphill in elevation: head is energy, not altitude.",
+        "hydraulic head": "The stored mechanical energy of groundwater, read as the level water rises to inside a well. Flow always runs from high head to low — even when that means climbing."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "down-gradient-journey",
+      "term": "flow path",
+      "clusters": [
+        "recharge-and-discharge",
+        "flow-mechanics"
+      ],
+      "fact": "Every drop of groundwater rides a flow path: it sinks in at a recharge area, works down the hydraulic gradient along the steepest decline in head, and leaves the system at a spring or streambed. The pace varies enormously — meters per day in open gravel, a few centimeters per century in tight clay — and the final leg is often upward, into a gaining stream.",
+      "info": "The full arc of the system: recharge area → slow seepage down-gradient → discharge at the surface."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "uphill-to-the-river",
+      "prompt": "A hillside spring sits higher than the river beside it, yet water beneath the hill can reach the river by moving upward. Which two terms explain upward groundwater flow?",
+      "explanation": "Groundwater obeys hydraulic head — stored energy — rather than elevation. It flows down the hydraulic gradient, the decline in head, and beneath a valley that decline can point straight up. Darcy's law then sets how fast the water moves, not where it goes; a flow path is the route this logic traces, not the rule behind it.",
+      "targets": [
+        "hydraulic head",
+        "hydraulic gradient"
+      ],
+      "reasons": {
+        "hydraulic head": "Stored energy — the quantity that actually falls along the flow, and it can fall while elevation rises.",
+        "hydraulic gradient": "The decline in head per distance: descending it is what can look like climbing in elevation."
+      }
+    },
+    {
+      "id": "the-dry-week-river",
+      "prompt": "Weeks after the last storm, this river is still running. Which two terms explain where its water is coming from?",
+      "explanation": "The channel lies below the water table, so it is a gaining stream — groundwater seeps up through the bed, and that groundwater share of the flow is baseflow. Springs and losing streams are different arrangements of the same water table, and recharge describes water entering, not leaving, the aquifer.",
+      "targets": [
+        "baseflow",
+        "gaining stream"
+      ],
+      "reasons": {
+        "baseflow": "The groundwater-fed share of streamflow — the part that persists between storms.",
+        "gaining stream": "The reach geometry that lets the aquifer feed the channel from below."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "groundwater",
+        "reason": "Play the reservoir first: this journey runs through the aquifers, water table, and pressure regimes that board builds."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The water you never see",
+    "summary": "How groundwater travels from rainfall to river — and why rivers keep flowing between storms.",
+    "estimatedMinutes": 2,
+    "content": {
+      "text": "Almost all of Earth's unfrozen fresh water is not in rivers or lakes at all — it is underground, filling the tiny gaps between grains of sand, gravel, and cracked rock. It is tempting to picture that water sitting still, or racing through caverns like an underground river. Nearly always it does neither: it creeps through pores at a walking pace or slower, sometimes just centimeters per century.\r\n\r\nThis lesson follows that hidden motion. Water soaks in beneath a hillside, drifts for years along a course set by the water's stored energy rather than the slope of the land, and finally seeps up into the bed of a river — the quiet subsidy that keeps rivers running long after the rain has stopped."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}
