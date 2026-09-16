@@ -174,6 +174,27 @@ export async function run() {
   assert.match(source, /"Physical Geography": \{/);
   assert.match(source, /previousTitles: \[\n\s+"Geography"\n\s+\]/);
 
+  // The checked-in registry may still contain a quoted identifier from an
+  // older generator. Freeze must replace it just as it replaces a bare key;
+  // otherwise both entries share slug "geography" and validation resolves
+  // the puzzle against the stale entry first.
+  const quotedLegacy = `export const CATEGORIES = {
+  "Geography": { slug: "geography" }
+};
+`;
+  const quotedReplacement = replaceCategorySource(quotedLegacy, {
+    name: "Physical Geography",
+    previousNames: ["Geography"],
+    metadata: {
+      slug: "geography",
+      subcategories: { hydrology: { title: "Hydrology", info: {} } },
+      previousTitles: ["Geography"]
+    }
+  });
+  assert.doesNotMatch(quotedReplacement, /\n  "Geography":/);
+  assert.match(quotedReplacement, /"Physical Geography": \{/);
+  assert.match(quotedReplacement, /hydrology:/);
+
   const duplicateNames = `export const CATEGORIES = {
   Geography: { slug: "geography" },
   "Physical Geography": { slug: "geography", previousTitles: ["Geography"] }

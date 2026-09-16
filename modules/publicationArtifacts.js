@@ -182,9 +182,24 @@ export function registerCategorySource(source, { name, metadata }) {
 }
 
 function categoryEntrySpan(source, name) {
-  const keyText = IDENTIFIER_KEY.test(name) ? name : JSON.stringify(name);
-  const needle = `\n  ${keyText}: `;
-  const start = source.indexOf(needle);
+  // Older hand-authored registries quoted every key, including identifiers
+  // such as `Geography`; newer generated entries leave valid identifiers bare.
+  // Match both forms so a renamed category replaces its retired key instead
+  // of being appended as a second entry with the same stable slug.
+  const keyTexts = [
+    ...(IDENTIFIER_KEY.test(name) ? [name] : []),
+    JSON.stringify(name)
+  ];
+  let start = -1;
+  let needle = "";
+  for (const keyText of keyTexts) {
+    const candidate = `\n  ${keyText}: `;
+    const candidateStart = source.indexOf(candidate);
+    if (candidateStart >= 0 && (start < 0 || candidateStart < start)) {
+      start = candidateStart;
+      needle = candidate;
+    }
+  }
   if (start < 0) return null;
   const objectStart = source.indexOf("{", start + needle.length);
   if (objectStart < 0) return null;
