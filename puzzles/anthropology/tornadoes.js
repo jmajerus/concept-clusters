@@ -6,7 +6,10 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "tornadoes",
   "title": "Anatomy of a Tornado",
-  "category": "anthropology",
+  "category": "atmospheric-science",
+  "subcategories": {
+    "atmospheric-science": "meteorology"
+  },
   "large": true,
   "info": {
     "text": "What a tornado actually is — a wind vortex rather than a cloud — how a rotating supercell manufactures it, where the word's boundary runs, and how radar, spotters, and damage surveys see and rate it.",

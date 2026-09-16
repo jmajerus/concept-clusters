@@ -1,0 +1,242 @@
+{
+  "id": "russian-literature-invention",
+  "title": "The Invention of Russian Literature",
+  "category": "literary-history",
+  "large": true,
+  "info": {
+    "text": "How Russia invented a literature in a single century: the poetic generation that forged the modern literary language, Gogol's comic discovery of the crushed clerk, the superfluous gentleman who could not act, and the twin summits of the realist novel in Dostoevsky and Tolstoy.",
+    "citations": [
+      {
+        "title": "Russian literature",
+        "publisher": "Encyclopaedia Britannica",
+        "url": "https://www.britannica.com/art/Russian-literature"
+      },
+      {
+        "title": "Superfluous man",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Superfluous_man"
+      },
+      {
+        "title": "Nikolay Gogol",
+        "publisher": "Encyclopaedia Britannica",
+        "url": "https://www.britannica.com/biography/Nikolay-Gogol"
+      },
+      {
+        "title": "Fyodor Dostoyevsky",
+        "publisher": "Encyclopaedia Britannica",
+        "url": "https://www.britannica.com/biography/Fyodor-Dostoyevsky"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "verse-founding",
+      "name": "The verse founding",
+      "color": "teal",
+      "fact": "In one generation — Karamzin's language reform, Zhukovsky's Romantic imports, Griboyedov's verse comedy, Pushkin's Onegin stanza, Lermontov's demon-poems — Russian poetry forged the modern literary language the century's prose would inherit.",
+      "seeds": [
+        "Eugene Onegin",
+        "Mikhail Lermontov"
+      ],
+      "floatingTerms": [
+        "Nikolai Karamzin",
+        "Vasily Zhukovsky",
+        "Woe from Wit"
+      ],
+      "terms": [
+        "Eugene Onegin",
+        "Mikhail Lermontov",
+        "Nikolai Karamzin",
+        "Vasily Zhukovsky",
+        "Woe from Wit"
+      ],
+      "termInfo": {
+        "Eugene Onegin": "Pushkin's novel in verse (1833), written in his invented 14-line Onegin stanza — the 'encyclopedia of Russian life' whose bored hero lends the superfluous man his first name.",
+        "Mikhail Lermontov": "Russia's second great poet, exiled to the Caucasus for a poem denouncing Pushkin's death; The Demon and A Hero of Our Time made the Byronic antihero Russian before he died in a duel at 26.",
+        "Nikolai Karamzin": "Sentimentalist prose pioneer and historian whose early-1800s language reform — salon Russian over Church Slavonic — began building the modern literary medium; Pushkin's generation finished what he started.",
+        "Vasily Zhukovsky": "The founding poet of Russian Romanticism, largely through translations of German and English ballads; he mentored Pushkin and later read Pushkin's drafts aloud to the tsar.",
+        "Woe from Wit": "Griboyedov's comedy in verse (written 1824): Chatsky returns from abroad to mock Moscow society and is declared mad for it. Kept off stage and press for decades, it circulated in thousands of manuscript copies and seeded half of today's Russian idioms."
+      },
+      "info": "Every prose writer of the century built on this poetic ground: the reformed language, the Romantic imports, the verse comedy, and the novel in verse."
+    },
+    {
+      "id": "superfluous-man",
+      "name": "The superfluous man lineage",
+      "color": "blue",
+      "fact": "From Onegin (1825) to Oblomov (1859), critics traced one diagnostic type: the gifted, educated idler capable of everything except action.",
+      "seeds": [
+        "Onegin",
+        "Oblomov"
+      ],
+      "floatingTerms": [
+        "Pechorin",
+        "Rudin"
+      ],
+      "terms": [
+        "Onegin",
+        "Oblomov",
+        "Pechorin",
+        "Rudin"
+      ],
+      "termInfo": {
+        "Oblomov": "Goncharov's gentle sloth (1859), who cannot rise from his sofa or leave his dressing gown; the critic Dobrolyubov made his name a common noun for social paralysis.",
+        "Onegin": "The original: a dandy who rejects love, kills his friend in a duel out of boredom, and finds purpose a decade too late.",
+        "Pechorin": "The hero of Lermontov's A Hero of Our Time (1840): an officer whose diary coolly dissects the energies he wastes on other people's lives. Lermontov offered him as a portrait of the generation, and readers took the offense personally.",
+        "Rudin": "Turgenev's first novel (1856): a magnificent orator whose fire fails at the first practical test — until the epilogue sends him to die on a Paris barricade, finally an act."
+      },
+      "info": "Not a plot but a diagnosis: critics used this recurring hero — gifted, educated, incapable of action — to read a society that talked instead of living."
+    },
+    {
+      "id": "gogol-little-man",
+      "name": "Gogol's satire and the little man",
+      "color": "amber",
+      "fact": "Gogol turned prose loose on officialdom and, inside the laughter, discovered the minor clerk as a tragic subject — the Petersburg strain of Russian fiction.",
+      "seeds": [
+        "Dead Souls",
+        "The Government Inspector"
+      ],
+      "floatingTerms": [
+        "The Nose",
+        "The Overcoat"
+      ],
+      "terms": [
+        "Dead Souls",
+        "The Government Inspector",
+        "The Nose",
+        "The Overcoat"
+      ],
+      "termInfo": {
+        "Dead Souls": "Gogol's picaresque (1842): the schemer Chichikov tours the provinces buying serfs who have died but still count on the tax rolls — a mortgage fraud as a national x-ray. Only the first part of his planned trilogy was finished.",
+        "The Government Inspector": "The 1836 comedy that made Gogol famous overnight: a provincial town mistakes a passing idler for the dreaded revizor and bribes him to the hilt. The censor banned it; Nicholas I lifted the ban himself — reportedly because it caught everyone but him.",
+        "The Nose": "A Petersburg clerk's nose leaves his face and rides about as a state councillor (1836) — Gogol's most purely absurd grotesque, and unashamed of it.",
+        "The Overcoat": "Akaky Akakievich saves for a new overcoat, is robbed of it, and dies of official indifference — the founding text of the 'little man', which Dostoevsky's generation adopted as a starting point."
+      },
+      "info": "Gogol's Petersburg: officialdom satirized from inside, and the copying clerk promoted to tragic hero — the humane counter-tradition of Russian fiction."
+    },
+    {
+      "id": "twin-summits",
+      "name": "The twin summits of the novel",
+      "color": "magenta",
+      "fact": "The high realist novel peaked twice in a single generation: Dostoevsky's polyphonic drama of ideas set against Tolstoy's epic-panoramic narration.",
+      "seeds": [
+        "Crime and Punishment",
+        "War and Peace"
+      ],
+      "floatingTerms": [
+        "The Brothers Karamazov",
+        "Anna Karenina"
+      ],
+      "terms": [
+        "Crime and Punishment",
+        "War and Peace",
+        "The Brothers Karamazov",
+        "Anna Karenina"
+      ],
+      "termInfo": {
+        "Anna Karenina": "Tolstoy, 1877: Anna's fall through society's hypocrisy runs beside Levin's search for a life that can be lived honestly — two answers to one question.",
+        "Crime and Punishment": "Dostoevsky, 1866: Raskolnikov murders to prove his theory of extraordinary men, then discovers theory is no armor against Sonya, Siberia, and his own conscience.",
+        "The Brothers Karamazov": "Dostoevsky's last novel (1880): a parricide trial that doubles as a trial of the God-question, with the Grand Inquisitor at its center. Dostoevsky died the year after finishing it.",
+        "War and Peace": "Tolstoy, 1869: five families through Napoleon's invasion — private life flowing on like a river while the great commanders insist otherwise."
+      },
+      "info": "Two incompatible modes of realism in one generation: Dostoevsky's novels stage a collision of ideas in which no voice wins; Tolstoy's sweep across a whole society from above."
+    }
+  ],
+  "bridges": [
+    {
+      "id": "out-of-gogols-overcoat",
+      "term": "Out of Gogol's Overcoat",
+      "clusters": [
+        "gogol-little-man",
+        "twin-summits"
+      ],
+      "fact": "They said of Dostoevsky's generation that all had come 'from under Gogol's Overcoat': the pitied clerk deepens into Marmeladov and Raskolnikov's Petersburg.",
+      "info": "The saying is a paraphrase of a remark attributed to Dostoevsky; the real line it names runs through Poor Folk, Notes from Underground, and onward to Chekhov's humble heroes."
+    },
+    {
+      "id": "two-helpless-types",
+      "term": "Superfluous gentleman, little man",
+      "clusters": [
+        "superfluous-man",
+        "gogol-little-man"
+      ],
+      "fact": "The 1840s read Russia through paired helpless types: the superfluous gentleman like Onegin and Oblomov who will not act, and Gogol's crushed little clerks like Akaky Akakievich who cannot.",
+      "info": "Dostoevsky's debut novel Poor Folk (1846) joins the types outright — a clerk and a fallen gentlewoman corresponding across the Table of Ranks — and made Belinsky hail the 24-year-old as Gogol's successor."
+    },
+    {
+      "id": "verse-to-prose",
+      "term": "From verse to prose",
+      "clusters": [
+        "verse-founding",
+        "gogol-little-man"
+      ],
+      "fact": "Pushkin's novel in verse capped the poetic age — then his own Belkin Tales turned to prose, and Belinsky dated the change from poetry to prose to Gogol: the century's center of gravity moved from poem to story to novel.",
+      "info": "Pushkin demanded 'conciseness and precision' of Russian prose in 1822 and met the standard himself in the Belkin Tales (1830); Belinsky made the hand-off canon in his essays of 1842–46."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "duel",
+      "prompt": "The duel was the era's ritual of honor, and it runs straight through this board. Three of these are men who faced it — one died by it in life, two pulled the trigger in fiction. Which three?",
+      "explanation": "The duel is the Byronic inheritance made ritual: Russian literature rehearsed it until it claimed its greatest poet. Onegin kills Lensky in a duel he despises; Pechorin engineers one with the duped cadet Grushnitsky; Lermontov died at Pyatigorsk in 1841, aged 26. Excluded on purpose: War and Peace stages one (Pierre fires on Dolokhov) but the novel is not a duelist; The Brothers Karamazov's duel is proposed and never fought; Rudin dies on a barricade, not at ten paces.",
+      "label": "The duel",
+      "targets": [
+        "Onegin",
+        "Pechorin",
+        "Mikhail Lermontov"
+      ],
+      "reasons": {
+        "Mikhail Lermontov": "Died in a duel at Pyatigorsk in 1841, aged 26 — the fate his heroes kept rehearsing.",
+        "Onegin": "Kills his friend Lensky in a duel he despises — boredom supplies the honor.",
+        "Pechorin": "Engineers a duel with the duped cadet Grushnitsky — and lets the reader watch himself cheat."
+      }
+    },
+    {
+      "id": "censor",
+      "prompt": "The censor was the era's most powerful editor. Which of these works was actually banned, blocked, or published only under official order?",
+      "explanation": "Three works here ran into the censor and lost — or were saved by the tsar overruling his own censors. Not everything controversial was banned: Crime and Punishment and Anna Karenina appeared legally in journals, and The Nose and The Overcoat passed without a fight. Lermontov was punished as a person — exile for one poem — not for any of the works named here.",
+      "label": "The censor's board",
+      "targets": [
+        "Woe from Wit",
+        "The Government Inspector",
+        "Dead Souls"
+      ],
+      "reasons": {
+        "Dead Souls": "The Moscow censor banned it — the title seemed to mock the church's teaching about the soul — until Nicholas I ordered it through (1842).",
+        "The Government Inspector": "Banned outright by the censor's committee in 1836; Nicholas I overruled it and let the play open.",
+        "Woe from Wit": "The censorship kept the full text off stage and out of print until 1862; Russia read it in manuscript for a generation."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "russian-literature-argument",
+        "reason": "The argument presupposes the invention: the critics and camps measured their age against Onegin, Oblomov, and Gogol's heirs. Play the invention first."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "How Russia got a literature",
+    "estimatedMinutes": 2,
+    "content": {
+      "text": "Modern Russian literature is young. At the start of the nineteenth century, educated Russia still spoke and wrote French by preference, and critics could seriously argue that the language had no literature worth the name. Within eighty years, the novels of Tolstoy and Dostoevsky had become the worldwide measure of the form — the fastest rise of any national literature in the modern period, achieved on paper, under a censor's eye.\r\n\r\nWhat follows is the making: the reform of the literary language, the poetic generation that proved Russian could carry a European modernity, the comic discovery of the minor clerk as a hero, the idle gentleman critics used to diagnose their society, and the two novelists who brought the realist novel to its summit. A second set follows the public argument those writers went on to start."
+    },
+    "links": [
+      {
+        "href": "https://www.britannica.com/art/Russian-literature",
+        "label": "Britannica: Russian literature"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

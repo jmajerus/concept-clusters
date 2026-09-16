@@ -1,0 +1,218 @@
+// Generated from content/puzzles/hydrology-human-water.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "hydrology-human-water",
+  "title": "Human Water: measuring, fearing, managing",
+  "category": "geography",
+  "large": true,
+  "info": {
+    "text": "The human face of hydrology: how gauges and water budgets turn rivers and rain into numbers, how floods and droughts arrive when the balance tips, and how dams, canals, and wells engineer the cycle — sometimes faster than it can refill.",
+    "links": [
+      {
+        "href": "https://en.wikipedia.org/wiki/Water_resources",
+        "label": "Wikipedia: Water resources"
+      },
+      {
+        "href": "https://en.wikipedia.org/wiki/Hydrology",
+        "label": "Wikipedia: Hydrology"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Hydrology — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Hydrology"
+      },
+      {
+        "title": "Water balance — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Water_balance"
+      },
+      {
+        "title": "Flood — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Flood"
+      },
+      {
+        "title": "Water resources — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Water_resources"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "quantification",
+      "name": "Measuring — putting numbers on water",
+      "color": "teal",
+      "fact": "Hydrology becomes a science when water gets numbers: gauges record how high and how fast, hydrographs and rating curves turn records into data, and the water balance makes inflow, outflow, and storage add up.",
+      "terms": [
+        "stream gauge",
+        "water balance",
+        "discharge",
+        "stage",
+        "hydrograph",
+        "rating curve",
+        "hyetograph"
+      ],
+      "seeds": [
+        "stream gauge",
+        "water balance"
+      ],
+      "termInfo": {
+        "stream gauge": "A fixed instrument at a river cross-section that continuously records the water level, from which flow is computed.",
+        "water balance": "The accounting equation P = Q + ET + ΔS — precipitation equals streamflow plus evapotranspiration plus the change in storage; also called a water budget.",
+        "discharge": "The volume of water passing a cross-section per unit time — how much river there is, measured in m³/s or ft³/s.",
+        "stage": "The height of the water surface above a reference point at the gauge — how high the river sits right now.",
+        "hydrograph": "A plot of discharge or stage over time; its rising limb is the storm's arrival at the gauge.",
+        "rating curve": "The site-specific calibration that converts a gauge's recorded stage into discharge.",
+        "hyetograph": "A plot of rainfall intensity over time — the input side of the storm that a hydrograph answers."
+      }
+    },
+    {
+      "id": "extremes",
+      "name": "Extremes — too much and too little",
+      "color": "blue",
+      "fact": "When the balance tips, water makes headlines: channels overflow their banks, sudden downpours outrun the ground, rains fail for growing seasons — and the '100-year flood' puts a number on how often to expect the worst.",
+      "terms": [
+        "flood",
+        "drought",
+        "flash flood",
+        "100-year flood",
+        "water scarcity"
+      ],
+      "seeds": [
+        "flood",
+        "drought"
+      ],
+      "termInfo": {
+        "flood": "An overflow of water that submerges usually-dry land — from river channels overtopping their banks to areal flooding of saturated ground.",
+        "drought": "A prolonged precipitation deficit against demand — the too-little extreme, slow to start and slow to end.",
+        "flash flood": "A rapid, localized flood on steep or impermeable ground, where flow can rise from trickle to torrent in minutes.",
+        "100-year flood": "A discharge sized so it has about a 1% chance in any given year — an average recurrence interval, not a schedule.",
+        "water scarcity": "The persistent failure of fresh water to meet demand — physical when the water is short, economic when the infrastructure is."
+      }
+    },
+    {
+      "id": "management",
+      "name": "Managing — engineered water",
+      "color": "amber",
+      "fact": "Humans reach into the water cycle with structures and strategies: dams store, aqueducts move, canals irrigate, desalination plants conjure fresh water from the sea — and pumping harder than rain refills is how aquifers get drawn down.",
+      "terms": [
+        "dam",
+        "irrigation",
+        "aqueduct",
+        "desalination",
+        "groundwater overdraft",
+        "levee"
+      ],
+      "seeds": [
+        "dam",
+        "irrigation"
+      ],
+      "termInfo": {
+        "dam": "A barrier that stores a river's flow behind it, trading downstream flooding and sediment for water supply, flood control, and power.",
+        "irrigation": "Deliberate application of water to grow crops — agriculture is the largest human use of fresh water worldwide.",
+        "aqueduct": "A conduit that moves water across the landscape from where it falls to where people want it.",
+        "desalination": "Removing salt from seawater to make fresh water — a rainfall-independent but energy-hungry source.",
+        "groundwater overdraft": "Pumping an aquifer faster than recharge refills it — the water table falls, wells run dry, and land can subside.",
+        "levee": "An embankment raised along a channel to keep floodwater off the land behind it."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "frequency-analysis",
+      "term": "frequency analysis",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "A '100-year flood' is not a once-per-century promise: it is a discharge with an estimated 1% chance in any given year, read from long gauge records — every hazard's risk number comes from frequency analysis of the measurement record.",
+      "info": {
+        "text": "Statistical hydrology analyzes records of rainfall and river flow to estimate how often rare events occur; the return period is an average, not a schedule.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Return_period",
+            "label": "Wikipedia: Return period"
+          }
+        ]
+      }
+    },
+    {
+      "id": "flood-control",
+      "term": "flood control",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Flood control is engineering's answer to the too-much-water extreme: dams hold the peak back, levees wall the channel in — structures built because the flood keeps coming, and sometimes overwhelmed when it comes bigger.",
+      "info": {
+        "text": "Human changes — wetland loss, urban paving, levees that squeeze channels — often increase flood intensity and frequency even as they try to manage it.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Flood_control",
+            "label": "Wikipedia: Flood control"
+          }
+        ]
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "two-readings-one-gauge",
+      "prompt": "Two numbers come off the same stream gauge at the same instant: one tells you how high the water sits, the other how much is moving past. Which terms are they?",
+      "explanation": "Stage is the water-surface height at the gauge; discharge is the volume per time moving past — the rating curve converts one into the other. The hydrograph and hyetograph are plots over time, not instant readings.",
+      "targets": [
+        "stage",
+        "discharge"
+      ]
+    },
+    {
+      "id": "hold-the-water-back",
+      "prompt": "Two of the engineered structures exist chiefly to keep floodwater off the land. Which are they?",
+      "explanation": "Dams store the flood peak and levees wall the channel in. Aqueducts and desalination serve water supply, not flood defense — and irrigation spreads water rather than stopping it.",
+      "targets": [
+        "dam",
+        "levee"
+      ]
+    },
+    {
+      "id": "pumping-mistake",
+      "prompt": "Which term names the management failure of pumping an aquifer faster than rainfall refills it?",
+      "explanation": "Overdraft is the named condition: the water table falls and wells run dry. Irrigation is a use that can cause it, but exceeding the aquifer's yield is overdraft.",
+      "targets": [
+        "groundwater overdraft"
+      ]
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "hydrology-water-cycle",
+        "reason": "Start with the physical system this board measures and manages: where water sits and how it moves."
+      },
+      {
+        "id": "hydrology-land-and-groundwater",
+        "reason": "Continue with the structure beneath the numbers: drainage networks on the surface, aquifers underneath."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "summary": "Water as a measured, contested, and engineered resource.",
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Water is the resource people measure most obsessively and argue about most fiercely. Hydrology turns rivers, rain, and aquifers into numbers — how much, how fast, how often — and those numbers decide when cities flood, when crops fail, and how much a reservoir must hold.\r\n\r\nThe human half of that science runs on instruments and ambition: gauges and budgets that make water countable, extremes that break the rules of thumb, and engineering that reshapes the cycle itself."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+});

@@ -215,6 +215,20 @@ import thermodynamics from "./physics/thermodynamics.js";
 import tropicalCycloneMachine from "./atmospheric-science/tropical-cyclone-machine.js";
 import tropicalCycloneThreat from "./atmospheric-science/tropical-cyclone-threat.js";
 import tornadoes from "./anthropology/tornadoes.js";
+import earthquakesCause from "./geology/earthquakes-cause.js";
+import earthquakesShaking from "./geology/earthquakes-shaking.js";
+import groundwater from "./geography/groundwater.js";
+import groundwaterJourney from "./geography/groundwater-journey.js";
+import hydrologyHumanWater from "./geography/hydrology-human-water.js";
+import hydrologyLandAndGroundwater from "./geography/hydrology-land-and-groundwater.js";
+import hydrologyWaterCycle from "./geography/hydrology-water-cycle.js";
+import mountainsLifeOfARange from "./geology/mountains-life-of-a-range.js";
+import mountainsReadingTheRange from "./geology/mountains-reading-the-range.js";
+import rocksFormationCycle from "./geology/rocks-formation-cycle.js";
+import rocksReadingEvidence from "./geology/rocks-reading-evidence.js";
+import russianLiteratureArgument from "./literary-history/russian-literature-argument.js";
+import russianLiteratureInvention from "./literary-history/russian-literature-invention.js";
+import typography from "./art/typography.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -440,6 +454,20 @@ export const PUZZLES = [
   tropicalCycloneMachine,
   tropicalCycloneThreat,
   tornadoes,
+  earthquakesCause,
+  earthquakesShaking,
+  groundwater,
+  groundwaterJourney,
+  hydrologyHumanWater,
+  hydrologyLandAndGroundwater,
+  hydrologyWaterCycle,
+  mountainsLifeOfARange,
+  mountainsReadingTheRange,
+  rocksFormationCycle,
+  rocksReadingEvidence,
+  russianLiteratureArgument,
+  russianLiteratureInvention,
+  typography,
 ];
 
 export default PUZZLES;

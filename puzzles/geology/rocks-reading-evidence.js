@@ -1,0 +1,205 @@
+// Generated from content/puzzles/rocks-reading-evidence.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "rocks-reading-evidence",
+  "title": "Reading a Rock: Composition, Texture, Minerals",
+  "category": "geology",
+  "large": true,
+  "info": {
+    "text": "Learn the three evidence axes geologists use to read any rock: where its chemistry sits on the silica spectrum, what its fabric records about how it formed, and which minerals it is built from — so lookalikes like marble and quartzite separate cleanly.",
+    "citations": [
+      {
+        "title": "Felsic rock",
+        "publisher": "Encyclopaedia Britannica",
+        "url": "https://www.britannica.com/science/felsic-rock"
+      },
+      {
+        "title": "Texture (geology)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Texture_(geology)"
+      },
+      {
+        "title": "Mineral (chemical compound)",
+        "publisher": "Encyclopaedia Britannica",
+        "url": "https://www.britannica.com/science/mineral-chemical-compound"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "composition-axis",
+      "name": "Composition — the silica axis",
+      "color": "teal",
+      "fact": "Chemistry sorts igneous rock by silica content: felsic rocks (over 66% silica) are pale and stiff, intermediate sits between, mafic (45–55%) are dark and dense, and ultramafic (under 45%) are mantle material.",
+      "terms": [
+        "felsic",
+        "mafic",
+        "intermediate",
+        "ultramafic"
+      ],
+      "seeds": [
+        "felsic",
+        "mafic"
+      ],
+      "termInfo": {
+        "felsic": "Silica-rich igneous rock (over 66% SiO₂): pale, stiff magmas — granite and rhyolite are the type examples. The word compresses feldspar + silica.",
+        "mafic": "Magnesium- and iron-rich igneous rock (45–55% silica): dark, dense, runny lavas — basalt and gabbro. The word compresses magnesium + ferric.",
+        "intermediate": "Between felsic and mafic (55–66% silica); typical of volcanoes above subduction zones — andesite and diorite.",
+        "ultramafic": "Under 45% silica: iron- and magnesium-dominated mantle rock such as peridotite — darker and denser still."
+      }
+    },
+    {
+      "id": "texture",
+      "name": "Texture — fabric as a record",
+      "color": "blue",
+      "fact": "Physical fabric records how a rock formed: coarse interlocking crystals cooled slowly at depth, fine grains or glass quenched fast at the surface, gas bubbles froze into voids, broken fragments record violent origins, and aligned layers record squeezing.",
+      "terms": [
+        "clastic",
+        "foliated",
+        "phaneritic",
+        "aphanitic",
+        "glassy",
+        "vesicular"
+      ],
+      "seeds": [
+        "clastic",
+        "foliated"
+      ],
+      "termInfo": {
+        "clastic": "Built from broken fragments glued together — gravel, sand, or mud; fragment roundness and sorting record how far the debris traveled.",
+        "foliated": "Layered or banded fabric made when directed pressure aligns platy minerals; the grade runs from slate through schist to gneiss.",
+        "phaneritic": "Coarse igneous texture with crystals visible to the naked eye — the signature of slow cooling at depth (granite, gabbro).",
+        "aphanitic": "Fine igneous texture whose crystals are too small to see without a lens — the signature of rapid cooling at the surface (basalt).",
+        "glassy": "No crystals at all: the melt chilled faster than atoms could order themselves, making natural glass (obsidian).",
+        "vesicular": "Riddled with frozen gas bubbles — pumice and scoria; a record of gas escaping stiff, cooling lava."
+      }
+    },
+    {
+      "id": "minerals",
+      "name": "Mineral building blocks",
+      "color": "amber",
+      "fact": "Rocks are aggregates of minerals, and the assemblage is the fingerprint: quartz marks silica-rich granite and sandstone, calcite builds limestone and marble, olivine comes from the mantle, and micas line shales and schists.",
+      "terms": [
+        "quartz",
+        "mica",
+        "feldspar",
+        "calcite",
+        "olivine"
+      ],
+      "seeds": [
+        "quartz",
+        "mica"
+      ],
+      "termInfo": {
+        "quartz": "Silica mineral (SiO₂), highly resistant; the leftover mineral when a magma has silica to spare, and the mainstay of mature sandstones.",
+        "mica": "Platy, sheet-forming minerals (muscovite, biotite); their aligned sheets are what foliation is made of.",
+        "feldspar": "The most abundant mineral family in Earth’s crust — plagioclase and alkali feldspar dominate felsic rocks.",
+        "calcite": "Calcium carbonate; the mineral of limestone and marble, and the great carbonate exception to silicate rocks (it fizzes in dilute acid).",
+        "olivine": "Green magnesium-iron silicate; the first mineral to crystallize from mantle melts and a marker of ultramafic rock."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-bowens",
+      "term": "Bowen's reaction series",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "As magma cools, minerals crystallize in a predictable order: olivine first at the mafic end, then pyroxenes and calcium feldspars, with quartz last as the silica leftover — tying each mineral to its silica class.",
+      "info": "Norman L. Bowen established the order experimentally in the 1920s; it explains why quartz and olivine almost never share a rock."
+    },
+    {
+      "id": "bridge-viscosity",
+      "term": "viscosity",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Silica-rich melt is stiff: felsic lava can freeze to glass or blow frothy bubbles before crystals grow, while runny mafic lava degasses and grows only tiny grains — chemistry written straight into fabric.",
+      "info": "Viscosity rises with silica: stiff felsic lavas trap gas and erupt explosively; runny mafic lavas pour out as flood basalts."
+    },
+    {
+      "id": "bridge-alignment",
+      "term": "mineral alignment",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Foliation is micas and other platy minerals lined up by directed stress, and grain size is mineral growth — the fabric you see is minerals arranged, so reading texture is reading mineralogy.",
+      "info": "Stroke a foliated rock and you can feel the platy minerals’ preferred direction — a pressure gauge frozen into stone."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "silica-surplus",
+      "prompt": "Two markers of silica surplus: which mineral only crystallizes when melt has silica left over, and which class is defined by more than 66% silica?",
+      "explanation": "Quartz is the last mineral of Bowen’s series — the leftover after every other silicate takes its share — and felsic is the compositional name for rock with silica to spare. The plausible near-misses are bounded: feldspar is silica-hungry but a mainstream crust mineral that consumes silica mid-series rather than marking surplus, and mafic is the opposite, silica-poor end.",
+      "targets": [
+        "quartz",
+        "felsic"
+      ],
+      "reasons": {
+        "quartz": "Crystallizes last in Bowen’s series, only when silica remains after other minerals take theirs.",
+        "felsic": "By definition more than 66% silica (feldspar + silica)."
+      }
+    },
+    {
+      "id": "platy-fabric",
+      "prompt": "Foliation is one mineral aligned and one fabric named: which platy mineral’s sheets line up under directed pressure, and which term names that aligned fabric?",
+      "explanation": "Micas grow as sheets; directed stress lines those sheets up, and the resulting penetrative layering is foliation — the fabric that grades from slate through schist to gneiss. Feldspar does not qualify because its blocky framework crystals have no sheets to align, and clastic names a fragment-glued fabric that records transport instead of alignment.",
+      "targets": [
+        "mica",
+        "foliated"
+      ],
+      "reasons": {
+        "mica": "Sheet-silicate crystals rotate and align under differential stress.",
+        "foliated": "The name for the penetrative planar fabric that alignment produces."
+      }
+    },
+    {
+      "id": "fast-quench",
+      "prompt": "Two textures, one cause: which two are both signatures of fast cooling — crystals kept too small to see, and crystals never allowed to form?",
+      "explanation": "Rapid surface cooling stunts crystal growth (aphanitic basalt); instant quenching skips crystallization entirely (glassy obsidian). Phaneritic is slow cooling’s coarse opposite, and vesicularity records escaping gas rather than cooling speed, so neither qualifies.",
+      "targets": [
+        "aphanitic",
+        "glassy"
+      ],
+      "reasons": {
+        "aphanitic": "Crystals nucleated but stayed microscopic — fast surface cooling.",
+        "glassy": "Quenched faster than atoms could order: pure natural glass."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "rocks-formation-cycle",
+        "reason": "Play first: it explains how the three rock families form and interconvert, which this board's evidence vocabulary then helps you identify in the wild."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "Reading rocks like a geologist",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Pick up any rock and it is telling you two stories at once: what it is made of, and what happened to it. Geologists read the first story in minerals — quartz, feldspar, calcite, olivine, mica — each a distinct crystal with its own chemistry and habits. The second story is written in fabric: crystal size, gas bubbles, layering, and cemented fragments all record conditions such as cooling speed, explosive eruption, transport by water, or directed squeezing deep in the crust.\r\n\r\nChemistry and fabric are not independent. Silica content controls how stiff a magma is; stiffness decides whether lava grows crystals or freezes to glass; and the minerals that do crystallize follow a fixed order as the melt cools, from green olivine at the iron-rich end to quartz as the silica-rich leftover. Read those signatures and even lookalike pairs — marble versus quartzite, basalt versus its coarse twin — separate cleanly."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "default"
+      }
+    ]
+  }
+});

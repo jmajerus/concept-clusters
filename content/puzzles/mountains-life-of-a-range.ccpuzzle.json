@@ -1,0 +1,307 @@
+{
+  "id": "mountains-life-of-a-range",
+  "title": "The Life of a Mountain Range",
+  "category": "geology",
+  "large": true,
+  "info": {
+    "text": "Ranges rise where plates converge, stand because thick low-density crust floats, and fall to weather, gravity, and ice — and each stage of that life cycle writes its own vocabulary into the rocks and landforms of every range on Earth.",
+    "citations": [
+      {
+        "title": "Orogeny — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Orogeny"
+      },
+      {
+        "title": "Isostasy — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Isostasy"
+      },
+      {
+        "title": "Erosion — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Erosion"
+      },
+      {
+        "title": "Glacial landform — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Glacial_landform"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "tectonic-construction",
+      "name": "Tectonic Construction",
+      "color": "teal",
+      "fact": "Ranges rise where plates converge: subduction drags crust downward and feeds volcanic chains, continental collisions crumple and thicken the crust, and stray fragments accrete onto the margin — stringing mountains into long belts along plate boundaries and old sutures rather than scattering them at random.",
+      "seeds": [
+        "subduction",
+        "continental collision"
+      ],
+      "floatingTerms": [
+        "orogeny",
+        "volcanic arc",
+        "terranes",
+        "fold-and-thrust belt"
+      ],
+      "terms": [
+        "subduction",
+        "continental collision",
+        "orogeny",
+        "volcanic arc",
+        "terranes",
+        "fold-and-thrust belt"
+      ],
+      "termInfo": {
+        "continental collision": {
+          "text": "Two continents meeting after the ocean between them closes — neither can sink, so the crust crumples, thickens, and stacks into ranges like the Himalaya."
+        },
+        "fold-and-thrust belt": {
+          "text": "The outer edge of a convergence zone, where layers fold and slide along shallow thrust faults, stacking thin sheets of crust one over another."
+        },
+        "orogeny": {
+          "text": "A mountain-building event at a convergent plate margin — the crumpling and uplift that turns two converging plates into a range; an \"orogen\" is the deformed belt it leaves behind."
+        },
+        "subduction": {
+          "text": "One plate diving beneath another: it drags crust down, feeds the magma that builds volcanic chains, and its megathrusts are Earth's largest faults."
+        },
+        "terranes": {
+          "text": "Crustal fragments — island arcs, seamount plateaus, continental slivers — rafted in by plate motion and plastered onto a continent's margin, each a small addition to the growing belt."
+        },
+        "volcanic arc": {
+          "text": "The chain of volcanoes that forms above a subducting plate, where melting at depth feeds magma rising through the overriding plate — the Andes, the Cascades."
+        }
+      },
+      "info": {
+        "text": "Mountain building happens at convergent margins; the different settings — ocean-continent subduction, continent-continent collision, and stray-fragment accretion — produce different styles of belt."
+      }
+    },
+    {
+      "id": "buoyant-support",
+      "name": "Buoyant Support",
+      "color": "blue",
+      "fact": "Mountains are not held up by rock strength — they float. Thick, low-density crust sinks a root into the denser mantle until it displaces its own weight, so elevation tracks crustal thickness: the deepest crustal roots sit under the highest ranges.",
+      "seeds": [
+        "isostasy",
+        "Moho"
+      ],
+      "floatingTerms": [
+        "crustal root",
+        "isostatic rebound",
+        "Airy hypothesis"
+      ],
+      "terms": [
+        "isostasy",
+        "Moho",
+        "crustal root",
+        "isostatic rebound",
+        "Airy hypothesis"
+      ],
+      "termInfo": {
+        "Airy hypothesis": {
+          "text": "The classic root model of isostasy: crustal blocks float like icebergs, so higher ranges must have deeper roots — elevation is paid for in root depth."
+        },
+        "Moho": {
+          "text": "The Mohorovičić discontinuity, the crust–mantle boundary. It averages about 35 km deep but plunges beneath mountain belts — mapping the Moho is mapping the root."
+        },
+        "crustal root": {
+          "text": "The deep, low-density root beneath a range: under the Himalaya the crust plunges to roughly 70 km, more than double its ordinary thickness, buoyantly holding the peaks up."
+        },
+        "isostasy": {
+          "text": "The flotation balance that holds crust at a height set by its thickness and density — thick, light crust rides high, which is why ranges stand where the crust is thickest."
+        },
+        "isostatic rebound": {
+          "text": "The upward correction when weight is removed — strip the top off a range, or melt an ice sheet, and the buoyed crust rises; Scandinavia is still rebounding from its vanished ice."
+        }
+      },
+      "info": {
+        "text": "Think of crust as ice floating in water: thickness and density set how high it rides, and the mantle is the fluid it displaces."
+      }
+    },
+    {
+      "id": "denudation",
+      "name": "Denudation — the Downhill Machine",
+      "color": "amber",
+      "fact": "Gravity and weather conspire to level every range: weathering crumbles rock in place, mass wasting slides the debris downhill, and erosion carries it away — stripping the range until its once-buried core stands exposed at the surface.",
+      "seeds": [
+        "erosion",
+        "weathering"
+      ],
+      "floatingTerms": [
+        "mass wasting",
+        "unroofing"
+      ],
+      "terms": [
+        "erosion",
+        "weathering",
+        "mass wasting",
+        "unroofing"
+      ],
+      "termInfo": {
+        "erosion": {
+          "text": "The transport of weathered debris away by water, ice, wind, and gravity — the removal that actually lowers the range, grain by grain."
+        },
+        "mass wasting": {
+          "text": "Gravity moving rock and soil downslope on its own — landslides, rockfall, creep; the steepest slopes adjust fastest."
+        },
+        "unroofing": {
+          "text": "Long-term erosional stripping that exposes a range's deep interior: granites and metamorphic rocks once buried many kilometers now stand at the summits."
+        },
+        "weathering": {
+          "text": "The in-place breakdown of rock by water, air, and life — physical shattering and chemical decay — that weakens the range before anything moves the debris."
+        }
+      },
+      "info": {
+        "text": "A three-part assembly line: weathering weakens the rock, mass wasting moves it downslope, erosion hauls it away — and unroofing is what is left to see after enough time."
+      }
+    },
+    {
+      "id": "glacial-signature",
+      "name": "The Glacial Signature",
+      "color": "magenta",
+      "fact": "Where ice works on high peaks it leaves unmistakable fingerprints: glaciers bite bowl-shaped cirques into the flanks, sharpen ridges into knife-edge arêtes and pyramidal horns, and carve river valleys into deep U-shaped troughs.",
+      "seeds": [
+        "cirque",
+        "U-shaped valley"
+      ],
+      "floatingTerms": [
+        "arête",
+        "horn",
+        "hanging valley"
+      ],
+      "terms": [
+        "cirque",
+        "U-shaped valley",
+        "arête",
+        "horn",
+        "hanging valley"
+      ],
+      "termInfo": {
+        "arête": {
+          "text": "A knife-edge ridge sharpened where two glaciers erode toward each other from opposite sides."
+        },
+        "cirque": {
+          "text": "The bowl-shaped hollow gnawed into a mountainside where an alpine glacier is born; when the ice melts it leaves an armchair of rock, often holding a lake."
+        },
+        "hanging valley": {
+          "text": "A side valley left perched high above the main trough, its stream arriving as a waterfall — its smaller glacier never cut as deep as the trunk glacier."
+        },
+        "horn": {
+          "text": "A pyramidal peak ringed by cirques and bounded by arêtes — the Matterhorn is the type example."
+        },
+        "U-shaped valley": {
+          "text": "A river valley a glacier re-carved: ice rips out walls and floor, turning a V into a broad U — flooded by the sea afterward, it becomes a fjord."
+        }
+      },
+      "info": {
+        "text": "Alpine glaciers are born in cirques; everything else in this cluster is what repeated glaciation does to the ridges and valleys around them."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "crustal-thickening",
+      "term": "crustal thickening",
+      "clusters": [
+        "tectonic-construction",
+        "buoyant-support"
+      ],
+      "fact": "Mountain building thickens the crust, and buoyancy converts that thickness into height: crust plunges to roughly 70 km beneath the Himalaya, and it is this buoyant root — not rock strength — that holds the range up.",
+      "info": "Construction supplies the root; buoyancy sets the height. Thickness into elevation is the whole isostasy story in one step."
+    },
+    {
+      "id": "rebound-under-unloading",
+      "term": "rebound under unloading",
+      "clusters": [
+        "buoyant-support",
+        "denudation"
+      ],
+      "fact": "Demolition feeds back into elevation: as erosion strips a range, the crust loses weight, so the buoyed root rises and lifts the range to be eroded again — one reason mountains stay high for tens of millions of years after tectonics stops.",
+      "info": "Demolition is a feedback: removing weight is itself uplift. The same balance that makes ranges stand also slows their fall."
+    },
+    {
+      "id": "race-between-uplift-and-erosion",
+      "term": "the race between uplift and erosion",
+      "clusters": [
+        "tectonic-construction",
+        "denudation"
+      ],
+      "fact": "A range exists only where construction outpaces destruction: while plates keep converging the pile grows, but once convergence stops, erosion wins and unroofing exposes the orogen's deep metamorphic core — the worn-down Appalachians are exactly such a root.",
+      "info": "Every range is a running score between convergence and denudation; the Appalachians are a fossil score, with erosion winning slowly."
+    },
+    {
+      "id": "ice-as-the-sculptor",
+      "term": "ice as the sculptor",
+      "clusters": [
+        "denudation",
+        "glacial-signature"
+      ],
+      "fact": "The glacial toolkit is denudation's work in frozen form: the same lowering that water does gently, glacier ice does brutally at altitude — biting cirques, planing U-shaped troughs, and leaving arêtes and horns as evidence of where the ice reached.",
+      "info": "Same demolition machine, different agent: swap water for ice and the landscape's shape vocabulary changes completely."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "isostasy-prediction",
+      "prompt": "Isostasy makes a testable prediction about the crust beneath the highest ranges. Which three terms state the prediction, the reasoning behind it, and how we check it?",
+      "explanation": "The crustal root is the prediction itself, the Airy hypothesis is the iceberg reasoning that produces it, and the Moho's plunge beneath ranges is the observable check — seismic mapping shows the boundary more than twice as deep under the Himalaya as average crust.",
+      "targets": [
+        "crustal root",
+        "Airy hypothesis",
+        "Moho"
+      ],
+      "reasons": {
+        "Airy hypothesis": "The reasoning: blocks float like icebergs, so height is paid for in root depth.",
+        "Moho": "The check: the crust–mantle boundary maps the root's actual shape.",
+        "crustal root": "The prediction: the crust under high ranges extends far deeper than normal."
+      }
+    },
+    {
+      "id": "carved-from-both-sides",
+      "prompt": "Two of the glacial landforms exist only because ice eroded toward a ridge from at least two sides at once. Which two?",
+      "explanation": "An arête is the wall left between two glaciers eroding toward each other, and a horn is where several cirques cut inward from all around a peak. A cirque needs only its single glacier; the two valley forms are cut by trunk ice, not converging walls.",
+      "targets": [
+        "arête",
+        "horn"
+      ],
+      "reasons": {
+        "arête": "The knife edge between two glaciers eroding toward each other.",
+        "horn": "The pyramidal peak where cirques and arêtes meet from several sides."
+      }
+    },
+    {
+      "id": "lift-without-tectonics",
+      "prompt": "One term on this board names a process that raises mountains long after plate collision has stopped. Which one?",
+      "explanation": "Isostatic rebound: erosion removes weight, so the buoyed crust rises to be eroded again — a feedback that keeps ranges standing for tens of millions of years without any tectonic push. The crustal root is static support, not motion, and orogeny itself requires convergence.",
+      "targets": [
+        "isostatic rebound"
+      ],
+      "reasons": {
+        "isostatic rebound": "The buoyed crust rises whenever weight — ice, or the range's own stripped summit — is removed."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "mountains-reading-the-range",
+        "reason": "Reading a Range applies the life cycle to whole landscapes: classify a range by the mechanism that built it, then decompose it into folds, thrusts, and fault blocks — the payoff of the two bridges this seam defers."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "The Temporary Middle",
+    "summary": "Mountains are the transient middle of a build-support-demolish cycle, and every stage of the cycle leaves evidence you can learn to read.",
+    "estimatedMinutes": 2,
+    "content": {
+      "text": "Mountains look permanent, but they are the temporary middle of a story. Plates converge and thicken the crust; buoyancy holds the thickened crust high; water, ice, and gravity carry it all away grain by grain — and the crust rises a little in reply, which is why the story takes tens to hundreds of millions of years rather than a geological instant.\n\nEvery stage leaves evidence. A range's rocks record how deeply they were once buried, its landforms record the ice that carved them, and the range's very existence means construction has been outpacing destruction until only recently. Mountain geology is the reading of that record."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

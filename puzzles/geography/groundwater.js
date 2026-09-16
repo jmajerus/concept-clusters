@@ -1,0 +1,195 @@
+// Generated from content/puzzles/groundwater.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "groundwater",
+  "title": "Groundwater: The Hidden Reservoir",
+  "category": "geography",
+  "subcategories": {
+    "geography": "hydrology"
+  },
+  "info": {
+    "text": "Groundwater is ordinary rock doing two jobs at once: pore space that stores water, and connected pores that move it. This board maps that hidden reservoir — aquifers and aquitards, the pressure regimes confinement creates, and the water table running beneath the landscape like its shadow.",
+    "citations": [
+      {
+        "title": "Physical Geology — 14.1 Groundwater and Aquifers",
+        "author": "Steven Earle",
+        "publisher": "BCcampus Open Publishing",
+        "url": "https://opentextbc.ca/geology/chapter/14-1-groundwater-and-aquifers/"
+      },
+      {
+        "title": "Aquifers and Groundwater",
+        "author": "USGS Water Science School",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://www.usgs.gov/special-topics/water-science-school/science/aquifers-and-groundwater"
+      },
+      {
+        "title": "Physical Geology — 14.2 Groundwater Flow",
+        "author": "Steven Earle",
+        "publisher": "BCcampus Open Publishing",
+        "url": "https://opentextbc.ca/geology/chapter/14-2-groundwater-flow/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "storage-vs-transmission",
+      "name": "Storage vs. Transmission",
+      "color": "teal",
+      "fact": "For groundwater, rock has to do two separate jobs: hold water in open pore space, and let it move through connected pores. The properties that measure these jobs are independent — one material can be superb at storing water and useless at moving it.",
+      "terms": [
+        "porosity",
+        "permeability",
+        "hydraulic conductivity"
+      ],
+      "seeds": [
+        "porosity",
+        "permeability"
+      ],
+      "termInfo": {
+        "porosity": "The fraction of a rock's volume that is open space — pores between grains, cracks, and voids. It sets how much water a material can hold: sand runs roughly 25–50%, and clay can exceed half its volume.",
+        "permeability": "How well those open spaces connect into pathways. Storage without connection is a warehouse with no doors — permeability is what lets water actually leave.",
+        "hydraulic conductivity": "The working number that combines a material's permeability with water's own properties — the K in every flow calculation. Gravel passes water meters per day; clay, centimeters per century."
+      }
+    },
+    {
+      "id": "bodies-named-by-transmission",
+      "name": "Aquifer or Aquitard",
+      "color": "blue",
+      "fact": "A water-bearing layer earns the name aquifer only if it both stores water and transmits it readily to wells and springs. A layer that holds plenty of water but passes it too slowly is an aquitard — the underground system's built-in barrier.",
+      "terms": [
+        "aquifer",
+        "aquitard"
+      ],
+      "seeds": [
+        "aquifer"
+      ],
+      "termInfo": {
+        "aquifer": "A rock or sediment layer that both stores water and yields it readily to wells and springs — sand, gravel, and porous sandstone make the classic ones, and they are the reservoirs people actually pump.",
+        "aquitard": "A layer saturated with water that transmits it too slowly to yield usefully — clay and shale beds that seal, leak slowly, and keep the water beneath them under pressure."
+      }
+    },
+    {
+      "id": "confinement-regimes",
+      "name": "Confinement Regimes",
+      "color": "amber",
+      "fact": "The geology above a water-bearing layer sets its pressure story: open to the atmosphere, squeezed between sealing layers, or perched on a local lens — and each regime hides its own 'level' that a well will find.",
+      "terms": [
+        "artesian well",
+        "confined aquifer",
+        "unconfined aquifer",
+        "perched aquifer"
+      ],
+      "seeds": [
+        "artesian well",
+        "confined aquifer"
+      ],
+      "termInfo": {
+        "unconfined aquifer": "An aquifer whose upper surface is the water table itself — open to the atmosphere, rising in wet seasons and falling in dry ones, the first casualty of drought and pumping.",
+        "confined aquifer": "An aquifer trapped between aquitards, so its water is under pressure greater than the atmosphere's — the level in a well stands above the top of the aquifer itself, sometimes far above.",
+        "perched aquifer": "A small local saturation resting on a lens of low-permeability material above the main water table — a puddle in the rocks, easily drained, easily mistaken for the real reservoir below.",
+        "artesian well": "A well into a confined aquifer whose pressure pushes water up without pumping — and where the potentiometric surface climbs above ground level, the well flows at the surface all by itself."
+      }
+    },
+    {
+      "id": "the-water-table-and-its-zones",
+      "name": "The Water Table and Its Zones",
+      "color": "magenta",
+      "fact": "Descending from the surface you pass moist but unsaturated material, then a fringe held up by surface tension, then material whose every pore holds water. The boundary between damp and saturated is the water table — and it tends to mirror the shape of the land above it.",
+      "terms": [
+        "water table",
+        "saturated zone",
+        "vadose zone",
+        "capillary fringe"
+      ],
+      "seeds": [
+        "water table",
+        "saturated zone"
+      ],
+      "termInfo": {
+        "water table": "The level below which the ground is fully saturated — where the water in a shallow well stands. Lakes, marshes, and rivers are often just places where it meets the surface, and it copies the landscape above it in gentle outline.",
+        "vadose zone": "The unsaturated material between the surface and the water table, where water clings to grains under tension and plant roots drink — moist, but not yet groundwater.",
+        "capillary fringe": "The thin band just above the water table where pores are pulled completely full of water against gravity by surface tension — saturated, yet held too tightly to pump.",
+        "saturated zone": "Everything below the water table, where every pore and crack holds water — the reservoir itself, whose upper reaches feed wells and whose depths can be locked in by aquitards."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "aquifer-composition",
+      "term": "clay",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Clay is the decisive counterexample on storage versus transmission: up to 60% of its volume is pore space — superb storage — yet its pores are so tiny and poorly connected that water creeps through at centimeters per century. A material that holds water but yields none of it is the classic aquitard, which is why an aquifer needs both properties.",
+      "info": "Why both properties matter: storage without transmission is a warehouse with no doors."
+    },
+    {
+      "id": "which-surface-in-a-well",
+      "term": "potentiometric surface",
+      "clusters": [
+        2,
+        3
+      ],
+      "fact": "Drill into an unconfined aquifer and the water stands at the water table itself; drill into a confined aquifer and pressure pushes the level higher, to the potentiometric surface — and where that surface rises above ground level, the well flows unaided as an artesian well.",
+      "info": "Two regimes, two 'levels': the water table is a real surface you can cap a well at; the potentiometric surface is where pressure would carry the water if the rock let it."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "connections-not-caverns",
+      "prompt": "An aquifer needs two things from its rock. Which of these terms is about how well the pores connect, rather than how much room there is?",
+      "explanation": "Permeability is the connection story — pores linked into pathways — and hydraulic conductivity is that same idea made into a measurable number. Porosity is the room story and says nothing about whether water can leave, which is why clay, with enormous room and almost no connection, makes an aquitard rather than an aquifer.",
+      "targets": [
+        "permeability",
+        "hydraulic conductivity"
+      ],
+      "reasons": {
+        "permeability": "The property of interconnected pathways — whether the water can move at all.",
+        "hydraulic conductivity": "The measured coefficient of that same connectivity, ready to use in flow calculations."
+      }
+    },
+    {
+      "id": "the-well-that-failed",
+      "prompt": "A hillside well strikes water at 12 meters and the driller calls it done. Two dry years later the well is empty, while wells down in the valley haven't moved. What did the driller hit?",
+      "explanation": "A shallow strike above the valley floor is the classic signature of a perched aquifer — a local saturation resting on a clay or shale lens, disconnected from the regional reservoir below. It fills fast and fails fast in dry years. The valley wells stand in the real, steady water table; a confined aquifer, by contrast, would have announced itself with a rising, possibly flowing level under pressure.",
+      "targets": [
+        "perched aquifer"
+      ],
+      "reasons": {
+        "perched aquifer": "A disconnected local saturation perched above the main water table — shallow, small, and the first thing to go dry."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "groundwater-journey",
+        "reason": "Continue from the reservoir's architecture to the motion itself: the same aquifers now leak to springs and streams as Darcy's law drives water down-gradient."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The reservoir beneath your feet",
+    "summary": "Where groundwater actually lives — in ordinary rock pores, not caverns — and the two properties that govern it.",
+    "estimatedMinutes": 2,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "When people picture water underground, they picture a cave with a river in it. Almost never is that the reality. Nearly all groundwater is invisible water sitting in the same pores between sand grains that air occupies above the water table — the rock is a sponge, and the sponge is full.\r\n\r\nThat picture explains most of what follows. How much water rock holds and how readily it gives that water up are separate questions with separate answers, which is why some soaked layers refuse to yield. And somewhere below your feet there is a surface — the water table — below which every pore is wet. Wells, springs, droughts, and contamination all build on that one picture."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+});
