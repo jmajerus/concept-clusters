@@ -149,6 +149,13 @@ export class D1DraftRepository extends DraftRepository {
     const documentJson = serializeDraftDocument(materialized);
     const domains = storedDomainDocuments(materialized);
     const contentHash = await draftContentHash(documentJson);
+    // A canonical round-trip (for example, an MCP client sending back the
+    // document it just read) is not a document edit. Preserve the OCC token
+    // and validation result rather than manufacturing a revision merely
+    // because the caller used the write endpoint.
+    if (current.document === documentJson && current.content_hash === contentHash) {
+      return this.get({ draftId, actor });
+    }
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts

@@ -694,6 +694,12 @@ export async function run() {
       }
     });
     assert.equal(simplifiedCreated.result.structuredContent.normalization, undefined);
+    assert.equal(simplifiedCreated.result.structuredContent.draft.revision, 1);
+    assert.equal(
+      simplifiedCreated.result.structuredContent.draft.document.category,
+      "science",
+      "creation should return the canonical category id at revision 1"
+    );
     const simplifiedDraft = await request("tools/call", {
       name: "get_puzzle_draft",
       arguments: { draft_id: "mcp-simplified-fixture" }
@@ -707,11 +713,33 @@ export async function run() {
       "alpha"
     );
     assert.equal(
+      simplifiedDraft.result.structuredContent.draft.document.category,
+      "science",
+      "MCP reads should keep the canonical category id, not the display title"
+    );
+    assert.equal(
       simplifiedDraft.result.structuredContent.draft.document.bridges[0].termRole,
       undefined,
       "legacy bridge term metadata should be removed at the authoring boundary"
     );
     assert.deepEqual(simplifiedDraft.result.structuredContent.flags, []);
+
+    // Sending a canonical document back unchanged is not a document edit and
+    // must not create a fake revision between two real authoring passes.
+    const canonicalNoopSave = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-simplified-fixture",
+        expected_revision: simplifiedDraft.result.structuredContent.draft.revision,
+        document: simplifiedDraft.result.structuredContent.draft.document
+      }
+    });
+    assert.equal(canonicalNoopSave.result.isError, undefined);
+    assert.equal(
+      canonicalNoopSave.result.structuredContent.draft.revision,
+      simplifiedDraft.result.structuredContent.draft.revision,
+      "an unchanged canonical save should preserve the revision"
+    );
 
     // Leftover link fields already in storage fold on get; the stored
     // record is not rewritten until the next save.
@@ -740,6 +768,7 @@ export async function run() {
       arguments: { draft_id: "mcp-legacy-links-fixture" }
     });
     const leftoverDocument = leftoverLoaded.result.structuredContent.draft.document;
+    assert.equal(leftoverDocument.category, "science");
     assert.deepEqual(leftoverDocument.info.links, [
       { href: "wiki:Ethos" },
       { href: "wiki:Pathos" }

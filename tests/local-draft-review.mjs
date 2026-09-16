@@ -98,6 +98,13 @@ export async function run() {
       draftId: "incomplete-review-fixture",
       document: incomplete
     });
+    const unchangedInitial = await draftStore.replaceDraft({
+      draftId: "incomplete-review-fixture",
+      document: incomplete,
+      expectedRevision: 1
+    });
+    assert.equal(unchangedInitial.revision, 1);
+    assert.equal(unchangedInitial.workingCopyHistoryCount, 0);
 
     const energyPuzzle = contentService.state.puzzles.find(puzzle => puzzle.id === "energy-flow");
     const energyDraft = {

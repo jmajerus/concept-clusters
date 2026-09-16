@@ -44,6 +44,15 @@ describe("D1 draft repository", () => {
     expect(saved.document.title).toBe("D1 draft fixture revised");
     expect(saved.revision).toBe(2);
 
+    const unchanged = await repository.save({
+      draftId: "d1-draft-fixture",
+      expectedRevision: 2,
+      document: saved.document,
+      actor
+    });
+    expect(unchanged.revision).toBe(2);
+    expect(unchanged.workingCopyHistoryCount).toBe(1);
+
     await expect(repository.save({
       draftId: "d1-draft-fixture",
       expectedRevision: 1,

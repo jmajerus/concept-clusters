@@ -149,6 +149,11 @@ export function createPuzzleDraftStore({ directory }) {
     }
     const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
     const contentHash = await draftContentHash(materialized);
+    // A canonical round-trip is not a document edit. In particular, the
+    // graphical authoring client may read display-form category titles and
+    // send them back through documentForStorage; once canonicalized, that
+    // should preserve the current revision instead of consuming one.
+    if (contentHash === current.contentHash) return publicRecord(current);
     const stack = historyOf(current);
     if (contentHash !== current.contentHash) {
       stack.push({

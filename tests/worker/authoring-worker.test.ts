@@ -485,9 +485,16 @@ describe("hosted authoring Worker", () => {
       }
     });
     const simplifiedCreation = await rpcJson(simplifiedCreated) as {
-      result: { structuredContent: { normalization?: unknown } };
+      result: {
+        structuredContent: {
+          normalization?: unknown;
+          draft: { revision: number; document: { category: string } };
+        };
+      };
     };
     expect(simplifiedCreation.result.structuredContent.normalization).toBeUndefined();
+    expect(simplifiedCreation.result.structuredContent.draft.revision).toBe(1);
+    expect(simplifiedCreation.result.structuredContent.draft.document.category).toBe("science");
 
     const simplifiedValidated = await rpc({
       jsonrpc: "2.0",

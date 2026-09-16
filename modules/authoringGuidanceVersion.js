@@ -73,7 +73,9 @@
 // invalidation is derived from the introduction content.
 // 5.6: same review bar; split-plan boardOrder is external sequencing metadata.
 // Puzzle documents carry only the player-facing relatedPuzzles info and entries.
+// 5.7: same review bar; MCP draft reads and writes use canonical stable
+// category ids rather than the web editor's display-title projection.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 6
+  minor: 7
 });

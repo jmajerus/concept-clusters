@@ -792,7 +792,7 @@ export function createAuthoringMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from a supplied complete document or a minimal skeleton. A complete simplified puzzle may be authored and saved in this one call; get_authoring_schema and phased guidance are optional, never prerequisites. This input is deliberately permissive because drafts may also be incomplete. Set seed_from_published=true with puzzle_id to copy a published (or git-seeded) snapshot into a working copy without overwriting an existing draft.",
+      "Create a private durable draft from a supplied complete document or a minimal skeleton. The server canonicalizes the supplied document before assigning revision 1, and the response is already in that canonical authoring shape; no follow-up normalization save is needed. A complete simplified puzzle may be authored and saved in this one call; get_authoring_schema and phased guidance are optional, never prerequisites. This input is deliberately permissive because drafts may also be incomplete. Set seed_from_published=true with puzzle_id to copy a published (or git-seeded) snapshot into a working copy without overwriting an existing draft.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),

@@ -46,9 +46,9 @@ with drafts generally being allowed to stay temporarily invalid between saves.
 JSON-LD is rejected rather than stored in that fallback path.
 
 Puzzle `category`, `categories[]`, and `subcategories` keys are stable
-category ids; category titles are display metadata. Legacy title references
-are converted at the authoring boundary for compatibility, but new clients
-should always send ids.
+category ids; category titles are display metadata. MCP draft reads return
+those canonical ids as well. Legacy title references are converted at the
+authoring boundary for compatibility, but new clients should always send ids.
 
 The MCP resource
 `concept-clusters://schemas/simplified-puzzle-v1` exposes the complete,

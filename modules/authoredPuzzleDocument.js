@@ -244,11 +244,15 @@ export function documentForEditor(document, { categoryRegistry = null } = {}) {
 }
 
 // MCP authors receive the simplified content shape, not renderer bookkeeping.
+// Keep this projection on the canonical storage side of the boundary: the
+// schema and guidance tell agents to use stable category ids, so an MCP read
+// must not turn those ids back into display titles and then make the next save
+// look like a migration. The web/editor paths use documentForEditor instead.
 // The board-layout flag is derived again on every storage/publication boundary
 // and is intentionally omitted from reads so clients make decisions from the
 // lesson content and the single 25-node hard limit.
 export function documentForMcp(document, options = {}) {
-  const authored = documentForEditor(document, options);
+  const authored = documentForStorage(document, options);
   if (!authored || typeof authored !== "object" || Array.isArray(authored)) {
     return authored;
   }

@@ -12,9 +12,10 @@ checkout only.
 interchange format, not an authoring or draft-storage format.
 
 Puzzle `category`, `categories[]`, and `subcategories` keys are stable
-category ids; category titles are display metadata. The server still reads
-legacy title references while the corpus migration is being rolled out, but
-new clients should always send ids.
+category ids; category titles are display metadata. MCP draft reads return
+those canonical ids as well. The server still reads legacy title references
+while the corpus migration is being rolled out, but new clients should always
+send ids.
 
 The MCP resource
 `concept-clusters://schemas/simplified-puzzle-v1` is the complete,

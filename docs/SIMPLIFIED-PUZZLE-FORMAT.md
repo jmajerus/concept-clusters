@@ -18,6 +18,10 @@ genuinely doesn't fit here.
 current draft authoring or storage path; see [JSON-LD.md](./JSON-LD.md) for
 the retained on-demand interchange format.
 
+MCP draft reads return this same canonical authoring shape. In particular,
+category references remain stable ids; display titles are supplied by the
+taxonomy/editor UI and are not a second document representation for agents.
+
 ## Why this exists
 
 Two different things silently drift out of sync if an author has to

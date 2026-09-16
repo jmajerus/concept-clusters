@@ -84,6 +84,11 @@ or copied into the puzzle document.
 Repository-owned timestamps, revision numbers, and cache-invalidation keys
 are not authoring fields; the server derives them.
 
+The MCP draft read/write contract uses the canonical stored shape: keep
+category, categories, and subcategories on stable ids, and use the current
+field names returned by the schema. Display titles belong to the web editor;
+do not rewrite an MCP document into display form before saving it back.
+
 These are validity limits for a completed document, not composition targets.
 Before mapping the material, do not choose or announce a cluster count,
 terms-per-cluster range, or bridge count just to stay within them.
