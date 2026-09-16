@@ -53,6 +53,9 @@ import {
 import {
   DraftFieldError,
   draftFieldRedirectPath,
+  draftEditorPublicationRedirectPath,
+  draftListPublicationRedirectPath,
+  draftPublicationNoticeFromSearch,
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
@@ -843,13 +846,21 @@ export function createLocalDraftReviewHandler({
               cued: true
             });
           }
-          html(res, renderContentPublishResultPage({
-            kind: "puzzle",
-            id: puzzleId,
-            published,
-            cued: form.isPublishAndCue,
-            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
-          }));
+          const location = form.isPublishAndCue
+            ? draftListPublicationRedirectPath({
+              puzzleId,
+              cued: true
+            })
+            : draftEditorPublicationRedirectPath({
+              draftId,
+              puzzleId,
+              revision: published.revision
+            });
+          res.writeHead(303, {
+            Location: location,
+            "Cache-Control": "no-store"
+          });
+          res.end();
         } catch (error) {
           if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
             html(res, `<p>${escapeHtml(error.message)}</p>`, 404);
@@ -921,8 +932,15 @@ export function createLocalDraftReviewHandler({
             actor: publicationActor,
             cued: form.isCueForFreeze
           });
+          const location = form.isCueForFreeze
+            ? draftListPublicationRedirectPath({
+              puzzleId,
+              notice: "cued",
+              cued: true
+            })
+            : draftFieldRedirectPath(draftId);
           res.writeHead(303, {
-            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            Location: location,
             "Cache-Control": "no-store"
           });
           res.end();
@@ -1051,6 +1069,10 @@ export function createLocalDraftReviewHandler({
           publishedRows = await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true });
         }
       }
+      const notice = draftPublicationNoticeFromSearch(
+        requestUrl.searchParams,
+        publishedRows
+      );
       const listed = await draftStore.listDrafts({ includeDocument: true });
       const publishedById = new Map(publishedRows.map(row => [row.id, row]));
       const freezeAdds = freezeAddIdsFromPublishedRows(publishedRows, gitPuzzleIds);
@@ -1095,6 +1117,7 @@ export function createLocalDraftReviewHandler({
       html(res, renderDraftListPage(corpus, {
         variant: "local",
         githubProduction: githubSnapshot,
+        notice,
         categoryRegistry: await loadMergedCategoryRegistry({
           contentDocuments,
           contentService,
@@ -1178,7 +1201,12 @@ export function createLocalDraftReviewHandler({
         actor: publicationActor || null,
         customModelSuggestions,
         relatedPuzzleOptions: [...(contentService.knownPuzzleIds || [])],
-        categoryRegistry
+        categoryRegistry,
+        notice: draftPublicationNoticeFromSearch(
+          requestUrl.searchParams,
+          publishedRow,
+          { requireRevision: true }
+        )
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

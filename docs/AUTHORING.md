@@ -22,8 +22,8 @@ agent context is deliberately progressive:
    problem.
 5. Call `get_workflow_guidance` only when entering pull-request review
    or MCP catalogue/category tools (`topic: "catalogue"`). On the LAN
-   authoring server, humans Publish on `/admin/drafts`, `/admin/categories`,
-   and `/admin/catalogues`.
+   authoring server, humans use Publish/Cue on `/admin/drafts`,
+   `/admin/categories`, and `/admin/catalogues`.
 6. Consult a specific section of the [authoring
    reference](AUTHORING-REFERENCE.md) only for an unusual field, edge case, or
    validation problem that the focused MCP material does not answer.
@@ -79,10 +79,13 @@ Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
 review. Play is a clean player preview of the working copy
 (`/?draft=<id>&view=play`); Open board (`/?draft=<id>`) is Construct.
 Neither writes git. Add `&admin` for layout tools. **Publish** writes the
-shared D1 document; it is enabled only when the working copy is not already
-that snapshot. **Revert to published** appears only when the working copy
-differs from the D1 row. **Cue** that snapshot when it should join the next
-freeze; **Hold** keeps it in authoring play only. **Freeze** on `/admin`
+shared D1 document and leaves the editor open; it is enabled only when the
+working copy is not already that snapshot. **Revert to published** appears
+only when the working copy differs from the D1 row. **Cue** means “I’m done
+with this”: it marks that published snapshot for the next freeze and returns
+to `/admin/drafts`. **Publish & Cue** does both operations and returns to the
+puzzle list. **Hold** keeps it in authoring play and leaves the editor open.
+**Freeze** on `/admin`
 writes cued snapshots and any missing published forward dependencies into this
 git checkout; the Freeze plan labels automatic inclusions. **Remove from authoring
 play** withdraws that published row; **Delete working copy** removes only

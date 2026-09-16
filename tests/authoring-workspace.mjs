@@ -34,10 +34,11 @@ export async function run() {
     "http://authoring.lan:8787/admin/drafts"
   );
   assert.equal(localDraftReviewHint({ AUTHORING_DRAFT_REVIEW_URL: "http://x/admin/drafts" }), "");
-  assert.match(
+  assert.doesNotMatch(
     localAuthoringGuidance({ AUTHORING_DRAFT_REVIEW_URL: "http://authoring.lan:8787" }),
-    /http:\/\/authoring\.lan:8787\/admin\/drafts\/<draftId>/
+    /(?:admin\/drafts|Open board|click Publish)/
   );
+  assert.match(localAuthoringGuidance(), /MCP has no\s+Cue or Freeze operation/);
   assert.doesNotMatch(
     localAuthoringGuidance({ AUTHORING_DRAFT_REVIEW_URL: "http://authoring.lan:8787" }),
     /needs npm run dev/

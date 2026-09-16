@@ -745,6 +745,49 @@ export function draftFieldRedirectPath(draftId) {
   return `/admin/drafts/${encodeURIComponent(draftId)}`;
 }
 
+export function draftListPublicationRedirectPath({
+  puzzleId,
+  cued = false,
+  notice = "published"
+} = {}) {
+  const query = new URLSearchParams({ notice });
+  if (puzzleId) query.set("puzzle_id", puzzleId);
+  if (cued) query.set("cued", "1");
+  return `/admin/drafts?${query}`;
+}
+
+export function draftEditorPublicationRedirectPath({
+  draftId,
+  puzzleId,
+  revision
+} = {}) {
+  const query = new URLSearchParams({ notice: "published" });
+  if (puzzleId) query.set("puzzle_id", puzzleId);
+  if (Number.isInteger(Number(revision))) query.set("revision", String(revision));
+  return `${draftFieldRedirectPath(draftId)}?${query}`;
+}
+
+export function draftPublicationNoticeFromSearch(searchParams, rows, {
+  requireRevision = false
+} = {}) {
+  const action = searchParams.get("notice");
+  if (!action || !["published", "cued"].includes(action)) return null;
+  const id = searchParams.get("puzzle_id");
+  const candidates = Array.isArray(rows) ? rows : [rows];
+  const row = candidates.find(item => item?.id === id);
+  if (!row || !id) return null;
+  const revision = Number(row.revision);
+  if (!Number.isInteger(revision)) return null;
+  if (requireRevision && Number(searchParams.get("revision")) !== revision) return null;
+  return {
+    kind: "puzzle",
+    id,
+    revision,
+    action,
+    cued: action === "cued" || searchParams.get("cued") === "1"
+  };
+}
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"

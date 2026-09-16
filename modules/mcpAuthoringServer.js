@@ -10,9 +10,7 @@ import {
 } from "./localAuthoringWorkspace.js";
 import {
   LOCAL_AUTHORING_GUIDANCE,
-  localAuthoringGuidance,
-  localDraftReviewHint,
-  localDraftReviewUrl
+  localAuthoringGuidance
 } from "./authoringDesignGuidance.js";
 import { resolveLocalDraftActor } from "./localD1Config.js";
 import { createAuthoringMcpServer } from "./hostedMcpAuthoringServer.js";
@@ -130,8 +128,6 @@ export function createConceptClustersMcpServer({
     contentService: localContentService(contentService),
     actor,
     serverName: "concept-clusters-authoring",
-    reviewUrl: localDraftReviewUrl(),
-    reviewHint: localDraftReviewHint(),
     clientProbeLogRoot: repositoryRoot,
     clientProbeTransport: "stdio",
     // A normal stdio server resolves its D1 adapter lazily from env, so

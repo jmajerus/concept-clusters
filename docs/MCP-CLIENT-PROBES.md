@@ -174,8 +174,8 @@ add a matching fingerprint in `modules/mcpClientIdentity.js` (same `id` key).
 **Credit/byline policy:** `modules/authoringSettings.js` — templates, max
 length, default author, preferred render (`directed` / `compact`), and accept
 patterns for known bylines (authoring-only; not ops/deploy).
-The drafts page derives the player-facing byline from puzzle-level
-`provenance` when it can. A human may still retain or edit an opaque
+The player-facing byline derives from puzzle-level `provenance` when it can.
+A human may still retain or edit an opaque
 `learningIntroduction.credit` line when no derived byline is available, e.g.:
 
 `By Cursor, with editorial direction by Jane Doe`

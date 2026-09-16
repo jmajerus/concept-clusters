@@ -3,7 +3,9 @@ import { createCatalogueSkeleton } from "./catalogueAuthorEngine.js";
 import {
   catalogueAdminPath,
   catalogueAuthorQuery,
+  contentPublicationNoticePath,
   isMetaCatalogueDocument,
+  PUBLISH_AND_CUE_CONFIRM,
   renderCatalogueListPage,
   renderCategoryEditPage,
   renderCategoryListPage,
@@ -491,6 +493,23 @@ function listCategoryRows(published, working) {
   return rows.sort((left, right) => String(left.title).localeCompare(String(right.title)));
 }
 
+function publicationNoticeFromSearch(searchParams, kind, rows) {
+  const action = searchParams.get("notice");
+  if (!action || !["published", "cued"].includes(action)) return null;
+  const id = searchParams.get(kind === "category" ? "category_id" : "catalogue_id");
+  const candidates = Array.isArray(rows) ? rows : [rows];
+  const row = candidates.find(item => item?.id === id);
+  const revision = Number(row?.revision);
+  if (!row || !id || !Number.isInteger(revision)) return null;
+  return {
+    kind,
+    id,
+    revision,
+    action,
+    cued: action === "cued" || searchParams.get("cued") === "1"
+  };
+}
+
 function gitCategoryExists(contentService, categoryId) {
   const categories = contentService?.categories || contentService?.state?.categories || {};
   return Object.entries(categories).some(([name, meta]) =>
@@ -632,7 +651,8 @@ export function createLocalCatalogueReviewHandler({
   }
 
   return async function handleLocalCatalogueReview(req, res) {
-    const urlPath = (req.url || "").split("?")[0];
+    const requestUrl = new URL(req.url || "/", "http://local.invalid");
+    const urlPath = requestUrl.pathname;
     if (!urlPath.startsWith("/admin/catalogues") && !urlPath.startsWith("/admin/categories")) {
       return false;
     }
@@ -662,7 +682,9 @@ export function createLocalCatalogueReviewHandler({
       html(res, renderCatalogueListPage(decorateFreezeAdd(
         listCatalogueRows(published, working),
         gitIdsFromContentService(contentService).catalogues
-      )));
+      ), {
+        notice: publicationNoticeFromSearch(requestUrl.searchParams, "catalogue", published)
+      }));
       return true;
     }
 
@@ -683,7 +705,9 @@ export function createLocalCatalogueReviewHandler({
       html(res, renderCategoryListPage(decorateFreezeAdd(
         decorateCoverageCounts(listCategoryRows(published, working), summaries),
         gitIdsFromContentService(contentService).categories
-      )));
+      ), {
+        notice: publicationNoticeFromSearch(requestUrl.searchParams, "category", published)
+      }));
       return true;
     }
 
@@ -908,6 +932,7 @@ export function createLocalCatalogueReviewHandler({
           revision: record.revision,
           ...publication,
           cuedForFreeze: isCuedForFreeze(published),
+          notice: publicationNoticeFromSearch(requestUrl.searchParams, "catalogue", published),
           leafCatalogues: choices.filter(item => item.kind !== "meta"),
           relatedCatalogues: choices
         }));
@@ -940,10 +965,19 @@ export function createLocalCatalogueReviewHandler({
             json(res, published, 200);
             return true;
           }
+          const destination = freezeReady
+            ? contentPublicationNoticePath("/admin/catalogues", {
+              kind: "catalogue",
+              id: catalogueId,
+              revision: published.revision,
+              notice: "cued",
+              cued: true
+            })
+            : isMetaCatalogueDocument(published.document)
+            ? catalogueAdminPath(catalogueId)
+            : catalogueAuthorQuery(catalogueId);
           res.writeHead(303, {
-            Location: isMetaCatalogueDocument(published.document)
-              ? catalogueAdminPath(catalogueId)
-              : "/admin/catalogues",
+            Location: destination,
             "Cache-Control": "no-store"
           });
           res.end();
@@ -1060,7 +1094,8 @@ export function createLocalCatalogueReviewHandler({
           res.end();
           return true;
         }
-        if (confirm === PUBLISH_CONFIRM) {
+        if (confirm === PUBLISH_CONFIRM || confirm === PUBLISH_AND_CUE_CONFIRM) {
+          const publishAndCue = confirm === PUBLISH_AND_CUE_CONFIRM;
           const record = await loadOrSeedCatalogue(catalogueId);
           assertPublishableTitle(record.document, "Catalogue");
           const currentPublished = await publishedCatalogue(catalogueId);
@@ -1071,24 +1106,39 @@ export function createLocalCatalogueReviewHandler({
             });
             return true;
           }
-          const published = await contentDocuments.publish({
+          let published = await contentDocuments.publish({
             kind: "catalogue",
             id: catalogueId,
             document: record.document,
             actor
           });
+          if (publishAndCue) {
+            published = await contentDocuments.setFreezeCue({
+              kind: "catalogue",
+              id: catalogueId,
+              actor,
+              cued: true
+            });
+          }
           if (wantsJson(req, body)) {
             json(res, published, 200);
             return true;
           }
-          html(res, renderContentPublishResultPage({
-            kind: "catalogue",
-            id: catalogueId,
-            published,
-            backHref: isMetaCatalogueDocument(record.document)
-              ? catalogueAdminPath(catalogueId)
-              : catalogueAuthorQuery(catalogueId)
-          }));
+          const destination = publishAndCue
+            ? "/admin/catalogues"
+            : isMetaCatalogueDocument(record.document)
+            ? catalogueAdminPath(catalogueId)
+            : catalogueAuthorQuery(catalogueId);
+          res.writeHead(303, {
+            Location: contentPublicationNoticePath(destination, {
+              kind: "catalogue",
+              id: catalogueId,
+              revision: published.revision,
+              cued: publishAndCue
+            }),
+            "Cache-Control": "no-store"
+          });
+          res.end();
           return true;
         }
         if (confirm === REVERT_CONFIRM) {
@@ -1150,7 +1200,8 @@ export function createLocalCatalogueReviewHandler({
           published: Boolean(published),
           withdrawn: Boolean(published?.withdrawnAt),
           freezeAdd: flags.freezeAdd,
-          cuedForFreeze: flags.cuedForFreeze
+          cuedForFreeze: flags.cuedForFreeze,
+          notice: publicationNoticeFromSearch(requestUrl.searchParams, "category", published)
         }));
       } catch (error) {
         html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 404);
@@ -1185,8 +1236,17 @@ export function createLocalCatalogueReviewHandler({
             json(res, published, 200);
             return true;
           }
+          const destination = freezeReady
+            ? contentPublicationNoticePath("/admin/categories", {
+              kind: "category",
+              id: categoryId,
+              revision: published.revision,
+              notice: "cued",
+              cued: true
+            })
+            : `/admin/categories/${encodeURIComponent(categoryId)}`;
           res.writeHead(303, {
-            Location: `/admin/categories/${encodeURIComponent(categoryId)}`,
+            Location: destination,
             "Cache-Control": "no-store"
           });
           res.end();
@@ -1264,21 +1324,41 @@ export function createLocalCatalogueReviewHandler({
           res.end();
           return true;
         }
-        if (confirm === PUBLISH_CONFIRM) {
+        if (confirm === PUBLISH_CONFIRM || confirm === PUBLISH_AND_CUE_CONFIRM) {
+          const publishAndCue = confirm === PUBLISH_AND_CUE_CONFIRM;
           const record = await loadOrSeedCategory(categoryId);
           assertPublishableTitle(record.document, "Category");
-          const published = await contentDocuments.publish({
+          let published = await contentDocuments.publish({
             kind: "category",
             id: categoryId,
             document: record.document,
             actor
           });
-          html(res, renderContentPublishResultPage({
-            kind: "category",
-            id: categoryId,
-            published,
-            backHref: `/admin/categories/${encodeURIComponent(categoryId)}`
-          }));
+          if (publishAndCue) {
+            published = await contentDocuments.setFreezeCue({
+              kind: "category",
+              id: categoryId,
+              actor,
+              cued: true
+            });
+          }
+          if (wantsJson(req, body)) {
+            json(res, published, 200);
+            return true;
+          }
+          const destination = publishAndCue
+            ? "/admin/categories"
+            : `/admin/categories/${encodeURIComponent(categoryId)}`;
+          res.writeHead(303, {
+            Location: contentPublicationNoticePath(destination, {
+              kind: "category",
+              id: categoryId,
+              revision: published.revision,
+              cued: publishAndCue
+            }),
+            "Cache-Control": "no-store"
+          });
+          res.end();
           return true;
         }
         if (confirm === REVERT_CONFIRM) {

@@ -31,9 +31,10 @@ catalogue rows; their entries are other catalogues.
 row after validation, and appends `published_document_revisions`. It does
 not write `main` and does not open a GitHub pull request. After Publish
 the author may **Cue** that snapshot for the next freeze, or **Hold** it
-in authoring play. Cue is not “finished” or “reviewed”: hold a complete
-board until other puzzles (a new catalogue, for example) can ship
-together. Reviewers are optional and are not asked to sign off. Authors
+in authoring play. **Cue** means “I’m done with this” and is the author’s
+completion signal, not a separate review or sign-off gate. **Hold** a complete
+board when other puzzles (a new catalogue, for example) should ship together.
+Reviewers are optional and are not asked to sign off. Authors
 may record an optional `provenance.reviewedBy` name on the drafts page so
 the lesson byline can say “reviewed by …”; that is attribution, not a
 gate. Freeze’s git patch starts with ids the author cued. It then

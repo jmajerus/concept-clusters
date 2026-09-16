@@ -441,17 +441,32 @@ export async function run() {
       host: "127.0.0.1:8787",
       body: "confirm=publish"
     }), published), true);
-    assert.equal(published.status, 200);
-    assert.match(published.body, /Published/);
+    assert.equal(published.status, 303);
+    assert.equal(
+      published.headers.Location,
+      "/admin/drafts/energy-flow-review?notice=published&puzzle_id=energy-flow&revision=1"
+    );
     const afterPublishGet = createResponse();
     assert.equal(await handlePublish({
       method: "GET",
-      url: "/admin/drafts/energy-flow-review"
+      url: published.headers.Location
     }, afterPublishGet), true);
     assert.equal(afterPublishGet.status, 200);
-    assert.match(afterPublishGet.body, /value="publish" disabled/);
-    assert.doesNotMatch(afterPublishGet.body, /value="revert-published"/);
-    assert.match(afterPublishGet.body, /value="unpublish"/);
+    assert.match(afterPublishGet.body, /role="status"/);
+    assert.match(afterPublishGet.body, /Published[\s\S]*energy-flow[\s\S]*D1 revision 1/);
+    assert.doesNotMatch(afterPublishGet.body, /<h1>Puzzles<\/h1>/);
+    assert.doesNotMatch(afterPublishGet.body, /<h1>Published<\/h1>/);
+    assert.match(afterPublishGet.body, />Cue</);
+    const afterPublishList = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts"
+    }, afterPublishList), true);
+    assert.equal(afterPublishList.status, 200);
+    assert.doesNotMatch(afterPublishList.body, /role="status"/);
+    assert.match(afterPublishGet.body, /git-bundled production player is unchanged/);
+    assert.match(afterPublishGet.body, /badge-ok">authoring play/);
+    assert.match(afterPublishGet.body, />held</);
     const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
     assert.equal(live.document.id, "energy-flow");
     assert.equal(live.cuedForFreezeAt, null);
@@ -480,6 +495,19 @@ export async function run() {
       body: "confirm=cue-for-freeze"
     }), markedReady), true);
     assert.equal(markedReady.status, 303);
+    assert.equal(
+      markedReady.headers.Location,
+      "/admin/drafts?notice=cued&puzzle_id=energy-flow&cued=1"
+    );
+    const afterCueGet = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: markedReady.headers.Location
+    }, afterCueGet), true);
+    assert.equal(afterCueGet.status, 200);
+    assert.match(afterCueGet.body, /<h1>Puzzles<\/h1>/);
+    assert.match(afterCueGet.body, /role="status"/);
+    assert.match(afterCueGet.body, /Cued[\s\S]*energy-flow[\s\S]*D1 revision 1/);
     const ready = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
     assert.ok(ready.cuedForFreezeAt);
 

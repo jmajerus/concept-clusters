@@ -29,8 +29,15 @@ auth prompt on loopback; an all-interface bind requires `ADMIN_KEY` for
 read-only review of stdio MCP's D1 drafts at
 `http://127.0.0.1:8787/admin/drafts` (or that public URL), an authoring
 index at `/admin`, catalogues at `/admin/catalogues`, and categories at
-`/admin/categories` — see [MCP.md](MCP.md). Wrangler does not start unless
-you ask for Worker mode.
+`/admin/categories` — see [AUTHORING.md](AUTHORING.md) and
+[CATALOGUES.md](CATALOGUES.md). Wrangler does not start unless you ask for
+Worker mode.
+
+The server's lease and authoring scratch state live outside version control:
+by default under `<repo>/.concept-clusters/authoring/` (already gitignored),
+or under `AUTHORING_DATA_DIR` when configured. Use
+`node tools/authoring-workspace.mjs` to print the resolved paths. Review logs
+and other scratch files belong there, not in the MCP protocol workspace.
 
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:
@@ -77,7 +84,7 @@ checkout, and a clean CI checkout would have passed straight through it.
 | `puzzles/categories.js` | Optional category `info`, stable subcategory registries, and category-relative membership helpers — see "Categories and subcategories" in [AUTHORING.md](AUTHORING.md) |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned canonical simplified puzzle sources plus JSON-LD interchange/context and JSON Schema contracts — see [CANONICAL-CONTENT.md](CANONICAL-CONTENT.md) and [JSON-LD.md](JSON-LD.md) |
-| `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [MCP.md](MCP.md#authoring-workspace) |
+| `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [Local development](DEVELOPMENT.md#local-development) |
 | `d1/migrations/` | Versioned schema for hosted authoring drafts, content documents, and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
@@ -127,8 +134,8 @@ anything ever imports from it directly):
 | `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel) and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
-| `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Published only = no private draft), Publish (gated on unpublished D1 diff), Revert when the working copy differs, Cue/Hold, local Open board / Play, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
-| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
+| `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Published only = no private draft), Publish (stays on editor), Publish & Cue, Revert when the working copy differs, Cue/Hold (Cue returns to list), local Open board / Play, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
+| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, Publish & Cue, Cue/Hold, withdraw) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; puzzle corpus merge; lazy working-copy open; MCP catalogue draft upsert | `contentDocumentRepository.js` |
 | `contentDocumentCitations.js` | Puzzle citations that guard subcategory-id deletion and category withdrawal (category title renames keep their stable id) | `puzzles/categories.js` |
@@ -140,10 +147,10 @@ anything ever imports from it directly):
 | `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
 | `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
 | `authoringPuzzleSearch.js` | MCP search: git ∪ published D1 ∪ owner drafts; `full_text` searches prose without a `text:` prefix | `librarySearch.js`, `puzzleBrowse.js` |
-| `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Revert, withdraw, delete working copy | `contentDocumentRepository.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
+| `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Publish & Cue, Cue/Hold, Revert, withdraw, delete working copy | `contentDocumentRepository.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
-| `draftReviewSubmit.js` | Same-origin POST helper for Publish, Cue/Hold, Revert, withdraw, and delete from `/admin/drafts/<id>` | — |
+| `draftReviewSubmit.js` | Same-origin POST helper for Publish, Publish & Cue, Cue/Hold, Revert, withdraw, and delete from `/admin/drafts/<id>` | — |
 | `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, and GitHub-production snapshot | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js`, `githubProductionManifest.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
 | `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |

@@ -86,8 +86,9 @@ are not authoring fields; the server derives them.
 
 The MCP draft read/write contract uses the canonical stored shape: keep
 category, categories, and subcategories on stable ids, and use the current
-field names returned by the schema. Display titles belong to the web editor;
-do not rewrite an MCP document into display form before saving it back.
+field names returned by the schema. Display titles are resolved metadata, not
+replacements for those ids; do not rewrite an MCP document into a display
+form before saving it back.
 
 These are validity limits for a completed document, not composition targets.
 Before mapping the material, do not choose or announce a cluster count,
@@ -271,9 +272,9 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   the two-character sequence backslash-n; the tool serializer encodes newlines.
   A body stored as one line with \`\\n\` tokens renders as a single paragraph.
   learningIntroduction.credit is a legacy stored byline only when provenance
-  cannot derive L1. Prefer provenance; do not write credit. The human sets
-  collaboration on the drafts page when they take editorial lead; the byline
-  is derived read-only from provenance.
+  cannot derive L1. Prefer provenance; do not write credit. Collaboration is
+  human-owned metadata when a human has taken editorial lead; the byline is
+  derived from provenance.
   Prefer links (same shape as info.links) for further-reading on the lesson.
   Bibliographic references are a single puzzle-level list on info.citations
   (same { author?, title, publisher?, year?, pages?, url? } shape) -- never
@@ -293,15 +294,15 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   (human / ai / aiPrimary for mixed); set
   \`collaboration: "humanPrimary"\` when a human has taken editorial lead.
   Optional \`reviewedBy\` is a human-owned reviewer name for the lesson
-  byline, not a contributor and not a sign-off. Leave it unset; the author
-  fills it on the drafts page. Do not invent a reviewer.
+  byline, not a contributor and not a sign-off. Leave it unset unless a real
+  human reviewer exists. Do not invent a reviewer.
   Do not invent humans, write byline strings, or add roles/scopes/dates.
   Omit provenance when unsure. The server may already stamp a generative
   contributor from the MCP host.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
-  entry needs a puzzle id and a reason written as a reason to click that
+  entry needs a puzzle id and a reason written as a reason to choose that
   specific puzzle, not a restatement of what it's about. The id may be a
   split sibling that is not registered yet (separate PR); validation treats
   ids listed in this puzzle's own entries as known. Prefer targets outside
@@ -502,22 +503,18 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 - Keep provenance optional — the server may already have stamped the MCP host;
   agents can send bare contributor names and kinds/mode are inferred. Do not write
   learningIntroduction.credit; the lesson byline is derived from provenance
-  (humans override collaboration and may name a reviewer on the drafts page).
+  (humans may override collaboration and name a real reviewer).
   Do not invent a reviewer name. Do not treat roles or per-scope assistance
   entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse
   benefits from a stable subject split.
-- Validate the complete accumulated document, then pause for the human to
-  review \`/admin/drafts/<id>\`. Open board (\`/?puzzle=<draftId>\`) is
-  Construct. Play (\`/?puzzle=<draftId>&play\`) is a clean player
-  preview of the working copy when the document compiles — same chrome as
-  \`/\`; add \`&admin\` for layout tools. Neither writes git. They Publish
-  on that page to write the shared D1 row. Set \`publish_to_authoring=true\`
-  on \`save_puzzle_draft\` only for a confirmed final edit, to publish a
-  valid document to authoring play in that same call; it remains held and
-  is not cued for Freeze. Set
+- Validate the complete accumulated document. If the caller explicitly
+  requests authoring publication, set \`publish_to_authoring=true\` on
+  \`save_puzzle_draft\` for a confirmed final edit; this publishes a valid
+  document to authoring play in that same call, but it remains held and is
+  not cued for Freeze. Cue and Freeze are outside MCP. Set
   \`category\` / \`categories\` / \`subcategories\` on this document; register
   new category metadata with create_category; add or remove catalogue
   membership with get_catalogue then update_catalogue (or update_meta_catalogue
@@ -538,7 +535,7 @@ A puzzle's category association is on the puzzle document: stable category id in
 optional \`categories\`, and optional \`subcategories\`. Save those with
 save_puzzle_draft. Register category metadata (title, domain, blurb,
 subcategory definitions) with create_category / update_category — the same D1
-working copies \`/admin/categories\` uses. Call list_categories / get_category
+working-copy store used by the authoring service. Call list_categories / get_category
 first; those include live D1 rows, not only git.
 
 A catalogue is a curated selection with a real audience, theme, or learning
@@ -550,9 +547,10 @@ create_catalogue and update_catalogue receive the complete ordinary-catalogue do
 and write D1 working copies. They do not open a GitHub pull request. Updating
 replaces the whole entries list, so preserve every entry that should remain.
 Entry puzzle ids must already exist in authoring play or git. Preview tools
-validate that document and never write. The human Publishes on
-\`/admin/catalogues\` and \`/admin/categories\`. To edit an existing meta
-catalogue, call get_catalogue and send its complete \`kind: "meta"\` document
+validate that document and never write. Set publish_to_authoring=true only
+when a valid catalogue or category write is explicitly confirmed; it remains
+held and is not cued for Freeze. To edit an existing meta catalogue, call
+get_catalogue and send its complete \`kind: "meta"\` document
 to update_meta_catalogue. Meta entries are existing non-meta catalogue ids;
 relatedCatalogues may point at any existing catalogue (send \`null\` to clear
 it). MCP does not create or delete meta catalogues.`
@@ -585,8 +583,6 @@ export function completeAuthoringGuidance({
 }
 
 export const LOCAL_DRAFT_REVIEW_URL = "http://127.0.0.1:8787/admin/drafts";
-export const HOSTED_DRAFT_REVIEW_URL =
-  "https://concept-clusters-authoring.jmajerus.workers.dev/admin/drafts";
 
 function envProcess() {
   return typeof process !== "undefined" && process.env ? process.env : {};
@@ -613,37 +609,14 @@ export function localDraftReviewHint(env = envProcess()) {
     : " (needs npm run dev)";
 }
 
-// Same pause on local stdio and hosted MCP. Only the review URL (and an
-// optional local-dev hint) differs; do not reintroduce a "submit immediately"
-// instruction on one side.
-export function submitAfterDraftReviewInstructions({
-  reviewUrl,
-  reviewHint = ""
-} = {}) {
-  return (
-    `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
-    "-- for design-copy review only, NOT for play; unpublished boards are constructed (`/?puzzle=`) " +
-    "and played (`/?puzzle=&play`) on the LAN authoring checkout, never on Cloudflare -- " +
-    "and wait until they have reviewed that page. " +
-    "They click Publish there to write the shared D1 row. save_puzzle_draft's publish_to_authoring=true does the same write in one call for a confirmed final edit -- only when they've asked for that; the default is still to pause here. " +
-    "The drafts page is design-copy review; LAN Open board (`/?puzzle=`) is Construct; Play (`/?puzzle=&play`) is the clean working-copy preview; Publish is the human gate into authoring play. Humans can build the board without MCP; agents may propose edits to the same document. "
-  );
-}
-
-export function submitAfterDraftReviewMechanics({
-  reviewUrl,
-  reviewHint = ""
-} = {}) {
-  return `After validate_puzzle_draft passes, pause so the human can read the draft
-at ${reviewUrl}/<draftId>${reviewHint}. Publish on that page writes the shared
-D1 row. save_puzzle_draft's publish_to_authoring=true does the same write in
-one call for a confirmed final edit -- only when they've asked for that; the
-default is still to pause here. Unpublished boards are constructed
-(\`/?puzzle=\`) and played (\`/?puzzle=&play\`) on the LAN authoring
-checkout, not on Cloudflare. The drafts page is
-design-copy review; LAN Open board (\`/?puzzle=\`) is Construct; Play
-(\`/?puzzle=&play\`) is the clean working-copy preview; Publish is the
-human gate into authoring play.`;
+export function mcpPublicationBoundaryGuidance() {
+  return `After validate_puzzle_draft passes, the MCP workflow is complete. If
+the caller explicitly requests authoring publication, set
+\`publish_to_authoring=true\` on a confirmed final edit; this promotes the
+valid document to a held D1 authoring snapshot in the same call. MCP has no
+Cue or Freeze operation. Cue and Freeze are outside MCP; the optional
+publication remains held until a separate human-controlled authoring workflow
+cues it.`;
 }
 
 export function localAuthoringGuidance(env = envProcess()) {
@@ -655,16 +628,11 @@ export function localAuthoringGuidance(env = envProcess()) {
     workflowMechanics: `Discover existing subjects with list_categories before choosing category ids.
 Drafts may be temporarily invalid. Save with save_puzzle_draft, then
 validate and address every error. Do not write learningIntroduction.credit;
-the human sets that byline on the drafts page if they want one.
+human-owned attribution is supplied separately when needed.
 Set stable category ids in category / categories / subcategories on the puzzle document. Register
-new category metadata with create_category (same D1 rows /admin/categories
-uses). Add or remove catalogue membership with get_catalogue then
-update_catalogue; those write D1 working copies. The human Publishes on
-/admin/drafts, /admin/categories, and /admin/catalogues.
-${submitAfterDraftReviewMechanics({
-  reviewUrl: localDraftReviewUrl(env),
-  reviewHint: localDraftReviewHint(env)
-})} Stdio MCP stores
+new category metadata with create_category. Add or remove catalogue membership
+with get_catalogue then update_catalogue; those write D1 working copies.
+${mcpPublicationBoundaryGuidance()} Stdio MCP stores
 drafts in the same D1 database hosted MCP uses, scoped to
 AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject).
 Nothing but Freeze writes this checkout; merging its pull request stays a
@@ -685,27 +653,20 @@ export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({
 Drafts may be temporarily invalid. Retrieve the latest draft, save with
 expected_revision, then validate and address every error.
 When you draft or materially regenerate content with generative AI, do not
-write learningIntroduction.credit; the human sets that byline on the drafts
-page if they want one.
+write learningIntroduction.credit; human-owned attribution is supplied
+separately when needed.
 Set stable category ids in category / categories / subcategories on the puzzle document. Register
 new category metadata with create_category; its optional domain must be one
 of the ids list_categories/get_category report (a small fixed vocabulary).
 Add or remove ordinary catalogue membership with get_catalogue then
 update_catalogue. For a meta catalogue, use get_catalogue then
 update_meta_catalogue.
-The human Publishes on /admin/drafts, /admin/categories, and /admin/catalogues.
 Hosted learning introductions embed Markdown in
 learningIntroduction.content.text with real line breaks in that string;
 packaged files and binary assets are introduced during repository publication.
-${submitAfterDraftReviewMechanics({ reviewUrl: HOSTED_DRAFT_REVIEW_URL })} Merging
-the pull request stays a separate human action in GitHub, so submitting doesn't
-publish anything by itself. Hosted authoring has no git checkout and does not
-write the base branch; the player-facing Worker is not auto-deployed on push.
-Pull-request CI runs structural validate and Worker unit tests -- not the
-full Playwright browser suite. Hosted puzzle PRs omit
-puzzles/index.js so concurrent submissions do not conflict on GitHub; CI and
-a post-merge sync register on-disk modules into the index. If play or taxonomy
-issues appear after import, diagnose locally with \`npm run validate\` and
-optionally \`npm test\` (a dedicated MCP diagnostic tool for on-demand checks
-may be added later).`
+${mcpPublicationBoundaryGuidance()} Hosted authoring has no git checkout and
+does not write the base branch; the player-facing Worker is not auto-deployed
+on push. If play or taxonomy issues appear after a release, diagnose locally
+with \`npm run validate\` and optionally \`npm test\` (a dedicated MCP
+diagnostic tool for on-demand checks may be added later).`
 });

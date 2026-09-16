@@ -53,6 +53,36 @@ export async function run() {
   assert.match(draftPage, /value="delete-draft"/);
   assert.match(draftPage, /badge-warn">working copy</);
   assert.doesNotMatch(draftPage, /badge-ok">authoring play</);
+  const publishedNoticeList = renderDraftListPage([{ ...baseDraft }], {
+    notice: {
+      kind: "puzzle",
+      id: "review-fixture",
+      revision: 2,
+      cued: true
+    }
+  });
+  assert.match(publishedNoticeList, /<h1>Puzzles<\/h1>/);
+  assert.match(publishedNoticeList, /role="status"/);
+  assert.match(publishedNoticeList, /Published.*review-fixture[\s\S]*D1 revision 2/);
+  assert.match(publishedNoticeList, /Cued for the next freeze/);
+  assert.match(publishedNoticeList, /git-bundled production player is unchanged/);
+  assert.doesNotMatch(publishedNoticeList, /<h1>Published<\/h1>/);
+  const cuedNoticeList = renderDraftListPage([{ ...baseDraft }], {
+    notice: {
+      kind: "puzzle",
+      id: "review-fixture",
+      revision: 2,
+      action: "cued",
+      cued: true
+    }
+  });
+  assert.match(cuedNoticeList, /Cued[\s\S]*review-fixture[\s\S]*D1 revision 2/);
+  assert.doesNotMatch(cuedNoticeList, /<strong>Published<\/strong>/);
+  const publishedNoticeEditor = renderDraftPage({ ...baseDraft }, {
+    notice: { kind: "puzzle", id: "review-fixture", revision: 2 }
+  });
+  assert.match(publishedNoticeEditor, /role="status"/);
+  assert.match(publishedNoticeEditor, /Published[\s\S]*review-fixture[\s\S]*D1 revision 2/);
   const freezePage = renderDraftPage({
     ...baseDraft,
     d1Published: true,

@@ -1070,13 +1070,15 @@ const CORPUS_FILTER_SCRIPT = `
  * @param {{
  *   variant?: string,
  *   githubProduction?: object | null,
- *   categoryRegistry?: Record<string, any>
+ *   categoryRegistry?: Record<string, any>,
+ *   notice?: object | null
  * }} [options]
  */
 export function renderDraftListPage(rows, {
   variant = "hosted",
   githubProduction = null,
-  categoryRegistry = CATEGORIES
+  categoryRegistry = CATEGORIES,
+  notice = null
 } = {}) {
   const items = (rows || []).map(item => normalizeCorpusItem(item, categoryRegistry));
   const workingCount = items.filter(isWorkingCopyStatus).length;
@@ -1103,6 +1105,7 @@ export function renderDraftListPage(rows, {
     : "<p>No puzzles in authoring play yet.</p>";
   const body = `<div class="puzzle-corpus">
        <h1>Puzzles</h1>
+       ${renderPublicationNotice(notice)}
        <p class="meta">${authoringAdminNav()}</p>
        <p class="meta">${listIntro(variant)}</p>
        ${githubRefresh}
@@ -1214,14 +1217,14 @@ function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
        <code>/?puzzle=</code> in Construct. Play is a clean player preview
        (<code>/?puzzle=&amp;play</code>), the same chrome as
        <code>/</code>; add <code>&amp;admin</code> for layout tools.
-       Publish writes the shared D1 row. Cue that snapshot on this page
-       when it should join the next freeze; Freeze on
+       Publish writes the shared D1 row. Cue means you are done with this
+       puzzle and returns to the list; Freeze on
        <a href="/admin">Admin</a> is the only thing that writes git.`;
   }
   return `This page is for design copy. Play unpublished boards on the LAN
      authoring checkout (<code>/?puzzle=</code>), not on Cloudflare. Publish
-     writes the shared D1 row. Cue that snapshot when it should join the
-     next freeze; Freeze on the LAN Admin page writes git. Hosted authoring
+     writes the shared D1 row. Cue means you are done with this puzzle and
+     returns to the list; Freeze on the LAN Admin page writes git. Hosted authoring
      has no git checkout.`;
 }
 
@@ -1685,12 +1688,42 @@ function renderDiffSummary(diff) {
   </aside>`;
 }
 
+function renderPublicationNotice(notice) {
+  if (!notice || notice.kind !== "puzzle" || !notice.id ||
+      !Number.isInteger(notice.revision)) {
+    return "";
+  }
+  const action = notice.action || "published";
+  const cued = notice.cued || action === "cued";
+  const message = action === "cued"
+    ? `<strong>Cued</strong> <code>${escapeHtml(notice.id)}</code>
+    as D1 revision ${escapeHtml(String(notice.revision))} for the next freeze.`
+    : `<strong>Published</strong> <code>${escapeHtml(notice.id)}</code>
+    as D1 revision ${escapeHtml(String(notice.revision))}.${cued ? " Cued for the next freeze." : ""}`;
+  return `<div class="validation validation-ok" role="status">
+    ${message}
+    <p class="meta">The git-bundled production player is unchanged until a
+    future Freeze.</p>
+  </div>
+  <script>
+    if (window.history && window.history.replaceState) {
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete("notice");
+          cleanUrl.searchParams.delete("cued");
+          cleanUrl.searchParams.delete("puzzle_id");
+          cleanUrl.searchParams.delete("revision");
+          window.history.replaceState(null, "", cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    }
+  </script>`;
+}
+
 export function renderDraftPage(draft, {
   variant = "hosted",
   actor = null,
   customModelSuggestions = [],
   relatedPuzzleOptions = [],
-  categoryRegistry
+  categoryRegistry,
+  notice = null
 } = {}) {
   // No git-only default: in the authoring environment D1 is the upstream
   // source of truth and the first, overriding choice, never a fallback.
@@ -1717,6 +1750,7 @@ export function renderDraftPage(draft, {
   const body = `
     <p class="meta">${authoringAdminNav()}</p>
     <h1>${escapeHtml(document.title || draft.title || draft.draftId)}</h1>
+    ${renderPublicationNotice(notice)}
     ${renderWas(titleChange)}
     ${renderCopyField({
       edit, section: "puzzle", field: "title",

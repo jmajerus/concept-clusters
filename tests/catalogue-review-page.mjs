@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   catalogueAdminPath,
   catalogueAuthorQuery,
+  contentPublicationNoticePath,
   renderCatalogueListPage,
   renderCategoryEditPage,
   renderCategoryListPage,
@@ -15,6 +16,25 @@ export async function run() {
   assert.equal(
     catalogueAuthorQuery("getting-started"),
     "/?catalogue=getting-started&view=author"
+  );
+  assert.equal(
+    contentPublicationNoticePath("/admin/categories", {
+      kind: "category",
+      id: "biology",
+      revision: 2,
+      cued: true
+    }),
+    "/admin/categories?notice=published&category_id=biology&revision=2&cued=1"
+  );
+  assert.equal(
+    contentPublicationNoticePath("/admin/categories", {
+      kind: "category",
+      id: "biology",
+      revision: 2,
+      notice: "cued",
+      cued: true
+    }),
+    "/admin/categories?notice=cued&category_id=biology&revision=2&cued=1"
   );
 
   const list = renderCatalogueListPage([
@@ -37,6 +57,23 @@ export async function run() {
   assert.match(list, /Meta catalogue/);
   assert.doesNotMatch(list, /Export to player/);
   assert.doesNotMatch(list, /meta catalogues stay out/);
+  const publishedCatalogueList = renderCatalogueListPage([
+    { id: "published-catalogue", title: "Published catalogue", published: true, entryCount: 2, kind: "leaf" }
+  ], {
+    notice: { kind: "catalogue", id: "published-catalogue", revision: 2, cued: true }
+  });
+  assert.match(publishedCatalogueList, /<h1>Catalogues<\/h1>/);
+  assert.match(publishedCatalogueList, /role="status"/);
+  assert.match(publishedCatalogueList, /Published[\s\S]*published-catalogue[\s\S]*D1 revision 2/);
+  assert.match(publishedCatalogueList, /Cued for the next freeze/);
+  assert.doesNotMatch(publishedCatalogueList, /<h1>Published<\/h1>/);
+  const cuedCatalogueList = renderCatalogueListPage([
+    { id: "cued-catalogue", title: "Cued catalogue", published: true, entryCount: 1, kind: "leaf" }
+  ], {
+    notice: { kind: "catalogue", id: "cued-catalogue", revision: 4, action: "cued", cued: true }
+  });
+  assert.match(cuedCatalogueList, /Cued[\s\S]*cued-catalogue[\s\S]*D1 revision 4/);
+  assert.doesNotMatch(cuedCatalogueList, /<strong>Published<\/strong>/);
 
   const metaPage = renderMetaCatalogueEditPage({
     id: "holding-it-together",
@@ -57,7 +94,8 @@ export async function run() {
   assert.match(metaPage, /Remove from authoring play/);
   assert.match(metaPage, /Freeze on/);
   assert.match(metaPage, /This working copy is already the published D1 snapshot/);
-  assert.match(metaPage, /<button type="submit" disabled>Publish<\/button>/);
+  assert.match(metaPage, /name="confirm" value="publish" disabled>Publish<\/button>/);
+  assert.match(metaPage, /value="publish-and-cue" class="secondary" disabled[\s\S]*>Publish &amp; Cue<\/button>/);
   assert.doesNotMatch(metaPage, /value="revert-published"/);
 
   const changedMetaPage = renderMetaCatalogueEditPage({
@@ -73,7 +111,8 @@ export async function run() {
     }
   });
   assert.match(changedMetaPage, /This working copy has unpublished changes/);
-  assert.match(changedMetaPage, /<button type="submit">Publish<\/button>/);
+  assert.match(changedMetaPage, /name="confirm" value="publish">Publish<\/button>/);
+  assert.match(changedMetaPage, /value="publish-and-cue" class="secondary"[\s\S]*>Publish &amp; Cue<\/button>/);
   assert.match(changedMetaPage, /value="revert-published"/);
 
   const withdrawnMetaPage = renderMetaCatalogueEditPage({
@@ -89,7 +128,8 @@ export async function run() {
     }
   });
   assert.match(withdrawnMetaPage, /withdrawn.*Republish this working copy/s);
-  assert.match(withdrawnMetaPage, /<button type="submit">Republish<\/button>/);
+  assert.match(withdrawnMetaPage, /name="confirm" value="publish">Republish<\/button>/);
+  assert.match(withdrawnMetaPage, /value="publish-and-cue" class="secondary"[\s\S]*>Republish &amp; Cue<\/button>/);
   assert.doesNotMatch(withdrawnMetaPage, /value="revert-published"/);
 
   const published = renderContentPublishResultPage({
@@ -123,6 +163,22 @@ export async function run() {
   assert.match(categories, />—</, "a category with no puzzleCount data (null) shows an em dash, not 0");
   assert.match(categories, /confirm" value="create-category"/);
   assert.match(categories, /registered subcategories/);
+  const publishedCategoryList = renderCategoryListPage([
+    { id: "published-category", title: "Published category", published: true, puzzleCount: 1, subcategories: [] }
+  ], {
+    notice: { kind: "category", id: "published-category", revision: 3, cued: true }
+  });
+  assert.match(publishedCategoryList, /<h1>Categories<\/h1>/);
+  assert.match(publishedCategoryList, /role="status"/);
+  assert.match(publishedCategoryList, /Published[\s\S]*published-category[\s\S]*D1 revision 3/);
+  assert.match(publishedCategoryList, /Cued for the next freeze/);
+  const cuedCategoryList = renderCategoryListPage([
+    { id: "cued-category", title: "Cued category", published: true, puzzleCount: 0, subcategories: [] }
+  ], {
+    notice: { kind: "category", id: "cued-category", revision: 5, action: "cued", cued: true }
+  });
+  assert.match(cuedCategoryList, /Cued[\s\S]*cued-category[\s\S]*D1 revision 5/);
+  assert.doesNotMatch(cuedCategoryList, /<strong>Published<\/strong>/);
 
   // Domain column, and the same grouping/order the live "all" page uses:
   // domains alphabetical by title, domain-less categories last under
@@ -171,6 +227,8 @@ export async function run() {
   assert.match(biology, /<select name="domain">/);
   assert.match(biology, /name="link"/);
   assert.match(biology, /stable join used by puzzle/);
+  assert.match(biology, /name="confirm" value="publish">Publish<\/button>/);
+  assert.match(biology, /value="publish-and-cue" class="secondary"[\s\S]*>Publish &amp; Cue<\/button>/);
   const biologyNew = renderCategoryEditPage({
     id: "lab-subject",
     revision: 1,

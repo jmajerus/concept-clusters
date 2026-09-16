@@ -403,18 +403,20 @@ directly at the start of an authoring conversation:
 > Before drafting anything, call `get_authoring_guidance` and follow its
 > design judgment throughout this session.
 
-When the work later enters pull-request review or MCP catalogue/category
-tools, call `get_workflow_guidance` with that topic.
+When the work later enters MCP catalogue/category tools, call
+`get_workflow_guidance` with `topic: "catalogue"`.
 Catalogue and category membership is D1: `create_category` /
 `update_category` / `create_catalogue` / `update_catalogue` /
-`update_meta_catalogue`, then the human
-Publishes on `/admin/categories` or `/admin/catalogues`. Call
+`update_meta_catalogue`. Those tools write D1 working copies; an explicit
+`publish_to_authoring: true` promotes a valid write to a held published
+snapshot. Cue and Freeze remain outside MCP. Call
 `get_workflow_guidance` with `topic: "catalogue"` only when using those
 tools. This
 keeps operational instructions out of the initial context until that
 workflow is actually in use. Local stdio and hosted MCP expose the same
-guidance and workflow tools; only local stdio adds checkout preview and
-installation.
+guidance and workflow tools; neither MCP surface exposes checkout preview or
+installation. The separate HTML authoring workflow is documented in
+[AUTHORING.md](AUTHORING.md) and [CATALOGUES.md](CATALOGUES.md).
 
 If the client offers persistent custom or system instructions — Claude.ai's
 Custom Instructions or Project instructions, a custom GPT's instructions,
@@ -431,18 +433,18 @@ it each time.
 | Draft creation and saving | Writes private draft state to D1; `save_puzzle_draft` requires `expected_revision` |
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
-| Publication | After the human reviews `/admin/drafts/<id>`, **Publish** writes the shared D1 row; `save_puzzle_draft` with `publish_to_authoring: true` does the same write in one call, for a confirmed final edit. A GitHub pull request for a single draft is opened from that same page by a human, not by MCP; the review-loop tools help work it once one is open. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
-| Categories and catalogues | Writes D1 working copies. The human Publishes on `/admin/categories` and `/admin/catalogues`. |
+| Publication | `save_puzzle_draft` with `publish_to_authoring: true` can promote a confirmed valid save to a held shared D1 snapshot. MCP exposes no Cue, Freeze, pull-request, or merge operation; hosted authoring has no git checkout and does not write `main` |
+| Categories and catalogues | Writes D1 working copies; `publish_to_authoring: true` can promote a valid write to a held shared D1 snapshot. Cue and Freeze remain outside MCP |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
 
 Drafts are isolated by the authenticated Cloudflare Access subject. A client
 connected as a different identity cannot see another author's drafts.
 
-Treat Publish as the human gate into authoring play, not a git ship.
-Play unpublished boards on the LAN authoring checkout
-(`/?draft=<id>&view=play`).
-A GitHub pull request is leftover MCP export. Humans Cue and Freeze on LAN
-`/admin` when they are ready to snapshot authoring play into git.
+MCP has no visual editor, buttons, or page navigation. Its tool-level workflow
+ends with a saved/validated draft and, when explicitly requested, an optional
+held D1 publication. The separate HTML authoring workflow and LAN Freeze
+process are documented in [AUTHORING.md](AUTHORING.md) and
+[CATALOGUES.md](CATALOGUES.md).
 
 ## Troubleshooting
 

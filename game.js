@@ -2132,8 +2132,29 @@ async function loadCatalogueOverlay(catalogueId) {
   setMessage("Loading catalogue…");
   try {
     if (!catalogueStudio) throw new Error("Catalogue studio is not available");
-    await catalogueStudio.load(catalogueId);
+    const routeParams = new URLSearchParams(location.search);
+    const revision = Number.parseInt(routeParams.get("revision") || "", 10);
+    const publicationNotice = routeParams.get("notice") === "published"
+      && routeParams.get("catalogue_id") === catalogueId
+      && Number.isInteger(revision) && revision > 0
+      ? `Published ${catalogueId} as D1 revision ${revision}.${
+        routeParams.get("cued") === "1" ? " Cued for the next freeze." : ""
+      }`
+      : "";
+    await catalogueStudio.load(catalogueId, { message: publicationNotice });
     if (generation !== puzzleLoadGeneration) return;
+    if (publicationNotice) {
+      const cleanUrl = new URL(location.href);
+      cleanUrl.searchParams.delete("notice");
+      cleanUrl.searchParams.delete("catalogue_id");
+      cleanUrl.searchParams.delete("revision");
+      cleanUrl.searchParams.delete("cued");
+      history.replaceState(
+        history.state,
+        "",
+        cleanUrl.pathname + cleanUrl.search + cleanUrl.hash
+      );
+    }
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;
     setMessage(error instanceof Error ? error.message : String(error), "error");

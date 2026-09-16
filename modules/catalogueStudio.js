@@ -119,8 +119,9 @@ export function createCatalogueStudio({
     }
     body += `
       <form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
-        <input type="hidden" name="confirm" value="publish">
-        <p><button type="submit"${canPublish ? "" : " disabled"}>${withdrawn ? "Republish" : "Publish"}</button></p>
+        <p><button type="submit" name="confirm" value="publish"${canPublish ? "" : " disabled"}>${withdrawn ? "Republish" : "Publish"}</button>
+        <button type="submit" name="confirm" value="publish-and-cue" class="secondary"${canPublish ? "" : " disabled"}
+          title="Publish and cue this snapshot for the next freeze in one step.">${withdrawn ? "Republish" : "Publish"} &amp; Cue</button></p>
       </form>
       ${activePublished && differsFromPublished
         ? `<form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
@@ -134,13 +135,14 @@ export function createCatalogueStudio({
                cuedForFreeze ? "hold-from-freeze" : "cue-for-freeze"
              }">
              <p><button type="submit" class="play-button secondary">${
-               cuedForFreeze ? "Hold from Freeze" : "Cue for Freeze"
+               cuedForFreeze ? "Hold from Freeze" : "Cue"
              }</button></p>
            </form>`
         : ""}
       <p class="meta"><a href="/admin/catalogues">All catalogues</a>
-      · ${lifecycleHint} Publish writes the shared D1 row. Cue the published snapshot and
-      Freeze from <a href="/admin">Admin</a> to update the git-bundled player.</p>`;
+      · ${lifecycleHint} Publish writes the shared D1 row. Cue means you are
+      done with this snapshot and returns to the catalogue list; Freeze from
+      <a href="/admin">Admin</a> updates the git-bundled player.</p>`;
     return body;
   }
 

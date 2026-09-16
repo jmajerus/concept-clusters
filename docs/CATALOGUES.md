@@ -19,11 +19,15 @@ On `npm run dev` and the hosted authoring Worker, `/admin/catalogues`
 lists leaf and meta catalogues from D1. Leaf catalogues edit as Library
 cards at `/?catalogue=<id>&view=author`. Meta catalogues edit at
 `/admin/catalogues/<id>`; their entries are other catalogues.
-**Publish** writes the shared D1 row. Create a catalogue or category from
-those lists. **Remove from authoring play** withdraws the published row
-(git seed will not restore it). **Delete working copy** removes only the
-owner’s draft. **Cue** the published snapshot, then **Freeze** from `/admin`
-to update the git-bundled player. Freeze automatically includes a missing
+**Publish** writes the shared D1 row and leaves the current editor open.
+Create a catalogue or category from those lists. **Cue** means “I’m done with
+this”: it marks the published snapshot for the next freeze and returns to the
+relevant catalogue or category list. **Publish & Cue** combines both
+operations and also returns to the list. **Hold** leaves the snapshot in
+authoring play and keeps the editor open. **Remove from authoring play**
+withdraws the published row (git seed will not restore it). **Delete working
+copy** removes only the owner’s draft. **Freeze** from `/admin`
+updates the git-bundled player. Freeze automatically includes a missing
 published leaf catalogue, puzzle, or category that the cued document needs;
 the Admin plan shows the parent for each inclusion. Derived catalogues (`all`, `new`, `level-*`)
 stay out of that list. A **new on next freeze** badge marks a published

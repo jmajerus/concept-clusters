@@ -5,6 +5,8 @@ import {
 } from "./contentFreezePlan.js";
 import { DOMAINS, RESERVED_DOMAIN_IDS } from "../puzzles/categories.js";
 
+export const PUBLISH_AND_CUE_CONFIRM = "publish-and-cue";
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
@@ -98,7 +100,8 @@ export function renderFreezeCueForm(action, {
   return `<form class="submit-pr" method="post" action="${escapeHtml(action)}">
     <input type="hidden" name="confirm" value="${CUE_FOR_FREEZE_CONFIRM}">
     <h2>Freeze cue</h2>
-    <p class="meta">Cue includes this snapshot in the next freeze. Hold
+    <p class="meta">Cue includes this snapshot in the next freeze and
+    means you are done with this editor, so it returns to the list. Hold
     (the default after Publish) keeps it in authoring play only. Finished
     or reviewed is not the same as cued.</p>
     <p><button type="submit">Cue</button></p>
@@ -163,6 +166,54 @@ export function renderContentLifecycleResultPage({
   return pageShell(heading, body);
 }
 
+export function contentPublicationNoticePath(path, {
+  kind,
+  id,
+  revision,
+  cued = false,
+  notice = "published"
+} = {}) {
+  const query = new URLSearchParams({ notice });
+  const idKey = kind === "category" ? "category_id" : "catalogue_id";
+  if (id) query.set(idKey, String(id));
+  if (Number.isInteger(Number(revision))) query.set("revision", String(revision));
+  if (cued) query.set("cued", "1");
+  return path + (path.includes("?") ? "&" : "?") + query.toString();
+}
+
+export function renderContentPublicationNotice(notice) {
+  if (!notice || !["catalogue", "category"].includes(notice.kind) || !notice.id ||
+      !Number.isInteger(notice.revision)) {
+    return "";
+  }
+  const idKey = notice.kind === "category" ? "category_id" : "catalogue_id";
+  const action = notice.action || "published";
+  const cued = notice.cued || action === "cued";
+  const message = action === "cued"
+    ? '  <strong>Cued</strong> <code>' + escapeHtml(notice.id) + '</code>'
+      + ' as D1 revision ' + escapeHtml(String(notice.revision)) + ' for the next freeze.'
+    : '  <strong>Published</strong> <code>' + escapeHtml(notice.id) + '</code>'
+      + ' as D1 revision ' + escapeHtml(String(notice.revision)) + '.'
+      + (cued ? ' Cued for the next freeze.' : '');
+  return [
+    '<div class="validation validation-ok" role="status">',
+    message,
+    '  <p class="meta">The git-bundled production player is unchanged until a',
+    '  future Freeze.</p>',
+    '</div>',
+    '<script>',
+    '  if (window.history && window.history.replaceState) {',
+    '    const cleanUrl = new URL(window.location.href);',
+    '    cleanUrl.searchParams.delete("notice");',
+    '    cleanUrl.searchParams.delete("' + idKey + '");',
+    '    cleanUrl.searchParams.delete("revision");',
+    '    cleanUrl.searchParams.delete("cued");',
+    '    window.history.replaceState(null, "", cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);',
+    '  }',
+    '</script>'
+  ].join("\n");
+}
+
 function catalogueChoiceOptions(choices, excludeIds = []) {
   const skip = new Set(excludeIds);
   return (choices || [])
@@ -174,7 +225,7 @@ function catalogueChoiceOptions(choices, excludeIds = []) {
     .join("");
 }
 
-export function renderCatalogueListPage(catalogues) {
+export function renderCatalogueListPage(catalogues, { notice = null } = {}) {
   const rows = catalogues.map(item => `<tr>
     <td><a href="${escapeHtml(catalogueEditHref(item))}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
@@ -201,12 +252,14 @@ export function renderCatalogueListPage(catalogues) {
        </table>`
     : "<p>No editable catalogues yet.</p>";
   const body = `<h1>Catalogues</h1>
+    ${renderContentPublicationNotice(notice)}
     <p class="meta">Documents in D1. Leaf catalogues edit as Library cards
     (\`/?catalogue=&amp;view=author\`). Meta catalogues edit here
     (\`/admin/catalogues/&lt;id&gt;\`); their entries are other catalogues.
     <strong>Publish</strong> writes the shared D1 row.
-    Cue a published snapshot, then <strong>Freeze</strong> from Admin to update
-    the git-bundled player. Derived catalogues (All Puzzles,
+    Cue a published snapshot when you are done; that returns to this list.
+    Then <strong>Freeze</strong> from Admin to update the git-bundled player.
+    Derived catalogues (All Puzzles,
     New, level-*) stay out of this list.
     <span class="badge badge-new">new on next freeze</span> marks a published
     D1 row that git does not have yet and that you cued. <span class="badge">held</span>
@@ -275,7 +328,8 @@ export function renderMetaCatalogueEditPage({
   cuedForFreeze = false,
   readyForFreeze = false,
   leafCatalogues = [],
-  relatedCatalogues = []
+  relatedCatalogues = [],
+  notice = null
 } = {}) {
   const entries = Array.isArray(document?.entries) ? document.entries : [];
   const related = Array.isArray(document?.relatedCatalogues?.entries)
@@ -294,7 +348,10 @@ export function renderMetaCatalogueEditPage({
     : activePublished
     ? "This working copy has unpublished changes. Publish to replace the D1 snapshot."
     : "This working copy has not been published to D1 yet.";
+  const publishLabel = withdrawn ? "Republish" : "Publish";
+  const publishDisabled = canPublish ? "" : " disabled";
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
+    ${renderContentPublicationNotice(notice)}
     <p class="meta"><code>${escapeHtml(id)}</code>
     · meta catalogue
     · draft revision ${escapeHtml(String(revision))}
@@ -305,8 +362,9 @@ export function renderMetaCatalogueEditPage({
     <p class="meta">Entries are other catalogues, one level deep. Nested
     leaves stay off the top-level Library list unless a leaf itself sets
     <code>showInLibrary</code>. Puzzle assignment is not edited here.
-    Cue this snapshot, then Freeze on <a href="/admin">Admin</a> to write
-    the git module, including <code>kind: meta</code>.</p>
+    Cue means you are done with this editor and returns to the catalogue list.
+    Freeze on <a href="/admin">Admin</a> writes the git module, including
+    <code>kind: meta</code>.</p>
     <p class="meta">${lifecycleHint}</p>
     <form class="category-edit" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
       <input type="hidden" name="confirm" value="save-catalogue">
@@ -345,8 +403,9 @@ export function renderMetaCatalogueEditPage({
       <p><button type="submit">Save working copy</button></p>
     </form>
     <form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
-      <input type="hidden" name="confirm" value="publish">
-      <p><button type="submit"${canPublish ? "" : " disabled"}>${withdrawn ? "Republish" : "Publish"}</button></p>
+      <p><button type="submit" name="confirm" value="publish"${publishDisabled}>${publishLabel}</button>
+      <button type="submit" name="confirm" value="${PUBLISH_AND_CUE_CONFIRM}" class="secondary"${publishDisabled}
+        title="Publish and cue this snapshot for the next freeze in one step.">${publishLabel} &amp; Cue</button></p>
     </form>
     ${activePublished && differsFromPublished
       ? `<form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
@@ -456,7 +515,7 @@ function subcategoryListCell(subcategories) {
   }).join(" · ");
 }
 
-export function renderCategoryListPage(categories) {
+export function renderCategoryListPage(categories, { notice = null } = {}) {
   function categoryRow(item) {
     return `<tr>
     <td><a href="/admin/categories/${encodeURIComponent(item.id)}">${escapeHtml(item.title || item.id)}</a></td>
@@ -482,11 +541,13 @@ export function renderCategoryListPage(categories) {
        </table>`
     : "<p>No categories yet.</p>";
   const body = `<h1>Categories</h1>
+    ${renderContentPublicationNotice(notice)}
     <p class="meta">Shared taxonomy documents in D1. Title, domain, blurb, and
     registered subcategories. Puzzle membership stays derived.
     <span class="badge badge-new">new on next freeze</span> marks a published
     D1 row that git does not have yet and that you cued.
-    <span class="badge">held</span> stays in authoring play until you cue it.
+    <span class="badge">held</span> stays in authoring play until you cue it;
+    Cue means you are done and returns to this list.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/categories">
       <h2>New category</h2>
@@ -511,13 +572,16 @@ export function renderCategoryEditPage({
   withdrawn = false,
   freezeAdd = false,
   cuedForFreeze = false,
-  readyForFreeze = false
+  readyForFreeze = false,
+  notice = null
 }) {
   const subcategories = subcategoryEntries(document);
   const subcategoryFields = subcategories.length
     ? subcategories.map(([subId, definition]) => subcategoryFieldset(subId, definition)).join("\n")
     : "<p class=\"meta\">No subcategories registered on this category yet.</p>";
+  const publishLabel = withdrawn ? "Republish" : "Publish";
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
+    ${renderContentPublicationNotice(notice)}
     <p class="meta"><code>${escapeHtml(id)}</code>
     · draft revision ${escapeHtml(String(revision))}
     · ${withdrawn
@@ -557,8 +621,9 @@ export function renderCategoryEditPage({
       <p><button type="submit">Save working copy</button></p>
     </form>
     <form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">
-      <input type="hidden" name="confirm" value="publish">
-      <p><button type="submit">Publish</button></p>
+      <p><button type="submit" name="confirm" value="publish">${publishLabel}</button>
+      <button type="submit" name="confirm" value="${PUBLISH_AND_CUE_CONFIRM}" class="secondary"
+        title="Publish and cue this snapshot for the next freeze in one step.">${publishLabel} &amp; Cue</button></p>
     </form>
     ${published
       ? `<form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">

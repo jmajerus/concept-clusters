@@ -5,10 +5,9 @@ import { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import { DOMAINS } from "../puzzles/categories.js";
 import {
-  HOSTED_DRAFT_REVIEW_URL,
   authoringGuidanceResult,
   authoringWorkflowGuidanceResult,
-  submitAfterDraftReviewInstructions
+  mcpPublicationBoundaryGuidance
 } from "./authoringDesignGuidance.js";
 import {
   AUTHORING_PHASES,
@@ -309,10 +308,7 @@ function track(analytics, toolName, handler) {
   };
 }
 
-function serverInstructions({
-  reviewUrl,
-  reviewHint = ""
-}) {
+function serverInstructions() {
   return "Use one accumulating simplified-puzzle draft. You may build a complete simplified document and " +
     "create it in one create_puzzle_draft call; guidance and phase schemas are optional aids, not prerequisites " +
     "or approval gates. Make individual MCP calls one at a time, not in parallel (some stdio hosts, including " +
@@ -329,8 +325,8 @@ function serverInstructions({
     "or relate instead of opening a parallel puzzle. search_puzzles covers the authoring corpus " +
     "and your drafts (a draft overlays the same id). Set full_text=true to search facts, lessons, " +
     "and other prose without a text: prefix. " +
-    "To edit an existing published puzzle, open it from /admin/drafts or call " +
-    "create_puzzle_draft with seed_from_published=true and that puzzle_id; do not open a " +
+    "To edit an existing published puzzle, call create_puzzle_draft with " +
+    "seed_from_published=true and that puzzle_id; do not open a " +
     "blank skeleton for a live id. " +
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
     "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
@@ -338,11 +334,7 @@ function serverInstructions({
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
-    "Always validate_puzzle_draft before authoring play. Puzzle D1 Publish is on `/admin/drafts/<id>`, or save_puzzle_draft with publish_to_authoring=true on a confirmed final edit. " +
-    submitAfterDraftReviewInstructions({
-      reviewUrl,
-      reviewHint
-    }) +
+    mcpPublicationBoundaryGuidance() + " " +
     "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category, catalogue, or puzzle draft write to promote it to authoring play without cueing Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category.";
 }
 
@@ -353,8 +345,6 @@ export function createAuthoringMcpServer({
   contentDocuments = null,
   analytics,
   serverName = "concept-clusters-hosted-authoring",
-  reviewUrl = HOSTED_DRAFT_REVIEW_URL,
-  reviewHint = "",
   clientProbeLogRoot = null,
   clientProbeTransport = "hosted",
   contentDocumentsConfigured = true
@@ -504,10 +494,7 @@ export function createAuthoringMcpServer({
       version: AUTHORING_MCP_SERVER_VERSION
     },
     {
-      instructions: serverInstructions({
-        reviewUrl,
-        reviewHint
-      })
+      instructions: serverInstructions()
     }
   );
 
@@ -929,7 +916,7 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server preserves the other domains and rejects fields owned by another domain; pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server preserves the other domains and rejects fields owned by another domain; pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
@@ -1072,7 +1059,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_puzzle_drafts", {
     title: "List puzzle drafts",
-    description: "List private working-copy metadata for the authenticated owner. Optional status is leftover PR-ledger state (draft/submitted/…), not the publish-path badges on /admin/drafts.",
+    description: "List private working-copy metadata for the authenticated owner. Optional status is leftover PR-ledger state (draft/submitted/…), not current publication state.",
     inputSchema: z.object({
       status: z.enum(["draft", "review", "submitted", "published", "archived"]).optional(),
       limit: z.number().int().min(1).max(200).default(100)
@@ -1274,7 +1261,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Save a new catalogue working copy to D1 (same rows /admin/catalogues uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Entry puzzle ids must already exist in authoring play or git. Call list_catalogues first.",
+    description: "Save a new catalogue working copy to D1. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Entry puzzle ids must already exist in authoring play or git. Call list_catalogues first.",
     inputSchema: catalogueWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1324,7 +1311,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_catalogue", {
     title: "Update catalogue",
-    description: "Save the complete catalogue document to the D1 working copy (same rows /admin/catalogues uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Call get_catalogue first, then send it back with membership, title, or info changes.",
+    description: "Save the complete catalogue document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Call get_catalogue first, then send it back with membership, title, or info changes.",
     inputSchema: catalogueWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1354,7 +1341,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_meta_catalogue", {
     title: "Update meta catalogue",
-    description: "Save a complete EXISTING meta-catalogue document to the D1 working copy (same rows /admin/catalogues uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Its entries are existing non-meta catalogue ids, not puzzle ids. Call get_catalogue first and send the returned document back with changes; set relatedCatalogues to null to clear it. This tool cannot create or delete meta catalogues, and does not open a GitHub pull request.",
+    description: "Save a complete EXISTING meta-catalogue document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Its entries are existing non-meta catalogue ids, not puzzle ids. Call get_catalogue first and send the returned document back with changes; set relatedCatalogues to null to clear it. This tool cannot create or delete meta catalogues, and does not open a GitHub pull request.",
     inputSchema: metaCatalogueWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_meta_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1384,7 +1371,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_category", {
     title: "Create category",
-    description: "Save a new category working copy to D1 (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. The category id is the stable join used by puzzle category/category[] references; title is display copy. Does not open a GitHub pull request.",
+    description: "Save a new category working copy to D1. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. The category id is the stable join used by puzzle category/category[] references; title is display copy. Does not open a GitHub pull request.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_category", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1413,7 +1400,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_category", {
     title: "Update category",
-    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. The category id is the stable join used by puzzles; title is display copy. Renaming a title does not require puzzle rewrites, while previousTitles remains a read-compatibility ledger.",
+    description: "Save the complete category document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. The category id is the stable join used by puzzles; title is display copy. Renaming a title does not require puzzle rewrites, while previousTitles remains a read-compatibility ledger.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_category", safe(async ({ publish_to_authoring, ...document }) => {

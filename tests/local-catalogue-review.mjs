@@ -228,6 +228,91 @@ export async function run(page) {
   assert.equal(createdMeta.status, 201);
   assert.equal(JSON.parse(createdMeta.body).location, catalogueAdminPath("lab-meta-fixture"));
 
+  const publishMeta = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/catalogues/lab-meta-fixture", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "publish" }
+  }), publishMeta), true);
+  assert.equal(publishMeta.status, 303);
+  assert.equal(
+    publishMeta.headers.Location,
+    "/admin/catalogues/lab-meta-fixture?notice=published&catalogue_id=lab-meta-fixture&revision=1"
+  );
+  const publishMetaPage = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: publishMeta.headers.Location
+  }, publishMetaPage), true);
+  assert.equal(publishMetaPage.status, 200);
+  assert.match(publishMetaPage.body, /role="status"/);
+  assert.match(publishMetaPage.body, /Published[\s\S]*lab-meta-fixture[\s\S]*D1 revision 1/);
+  assert.match(publishMetaPage.body, />Cue</);
+
+  const cueMeta = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/catalogues/lab-meta-fixture", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "cue-for-freeze" }
+  }), cueMeta), true);
+  assert.equal(cueMeta.status, 303);
+  assert.equal(
+    cueMeta.headers.Location,
+    "/admin/catalogues?notice=cued&catalogue_id=lab-meta-fixture&revision=1&cued=1"
+  );
+  const cueMetaList = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: cueMeta.headers.Location
+  }, cueMetaList), true);
+  assert.equal(cueMetaList.status, 200);
+  assert.match(cueMetaList.body, /role="status"/);
+  assert.match(cueMetaList.body, /Cued[\s\S]*lab-meta-fixture[\s\S]*D1 revision 1/);
+
+  const holdMeta = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/catalogues/lab-meta-fixture", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "hold-from-freeze" }
+  }), holdMeta), true);
+  assert.equal(holdMeta.status, 303);
+  assert.equal(holdMeta.headers.Location, catalogueAdminPath("lab-meta-fixture"));
+
+  const editMeta = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/catalogues/lab-meta-fixture", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-catalogue",
+      expected_revision: 1,
+      title: "Lab meta fixture updated"
+    }
+  }), editMeta), true);
+  assert.equal(editMeta.status, 303);
+
+  const publishAndCueMeta = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/catalogues/lab-meta-fixture", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "publish-and-cue" }
+  }), publishAndCueMeta), true);
+  assert.equal(publishAndCueMeta.status, 303);
+  assert.equal(
+    publishAndCueMeta.headers.Location,
+    "/admin/catalogues?notice=published&catalogue_id=lab-meta-fixture&revision=2&cued=1"
+  );
+  const catalogueNoticeList = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: publishAndCueMeta.headers.Location
+  }, catalogueNoticeList), true);
+  assert.equal(catalogueNoticeList.status, 200);
+  assert.match(catalogueNoticeList.body, /<h1>Catalogues<\/h1>/);
+  assert.match(catalogueNoticeList.body, /role="status"/);
+  assert.match(catalogueNoticeList.body, /Published[\s\S]*lab-meta-fixture[\s\S]*D1 revision 2/);
+  assert.match(catalogueNoticeList.body, /Cued for the next freeze/);
+  assert.doesNotMatch(catalogueNoticeList.body, /<h1>Published<\/h1>/);
+
   const created = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/catalogues", {
     origin: "http://127.0.0.1:8787",
@@ -406,9 +491,19 @@ export async function run(page) {
       yield Buffer.from("confirm=publish");
     }
   }, categoryPublished), true);
-  assert.equal(categoryPublished.status, 200);
-  assert.match(categoryPublished.body, /Published/);
-  assert.match(categoryPublished.body, /git-bundled production player is unchanged/);
+  assert.equal(categoryPublished.status, 303);
+  assert.equal(
+    categoryPublished.headers.Location,
+    "/admin/categories/science?notice=published&category_id=science&revision=2"
+  );
+  const categoryPublishedPage = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: categoryPublished.headers.Location
+  }, categoryPublishedPage), true);
+  assert.match(categoryPublishedPage.body, /role="status"/);
+  assert.match(categoryPublishedPage.body, /Published[\s\S]*science[\s\S]*D1 revision 2/);
+  assert.match(categoryPublishedPage.body, />Cue</);
 
   // "science" was published with domain sciences-mathematics above -- the
   // list page must read it back out of the published row's nested `document`
@@ -453,7 +548,11 @@ export async function run(page) {
       yield Buffer.from("confirm=publish");
     }
   }, publishLabSubject), true);
-  assert.equal(publishLabSubject.status, 200);
+  assert.equal(publishLabSubject.status, 303);
+  assert.equal(
+    publishLabSubject.headers.Location,
+    "/admin/categories/lab-subject?notice=published&category_id=lab-subject&revision=1"
+  );
 
   const labReview = createResponse();
   assert.equal(await handleRequest({
@@ -462,6 +561,18 @@ export async function run(page) {
   }, labReview), true);
   assert.match(labReview.body, /held/);
   assert.match(labReview.body, />Cue</);
+
+  const editLabSubject = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/categories/lab-subject", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: 1,
+      title: "Lab Subject updated"
+    }
+  }), editLabSubject), true);
+  assert.equal(editLabSubject.status, 303);
 
   const markLabSubject = createResponse();
   assert.equal(await handleRequest({
@@ -477,6 +588,41 @@ export async function run(page) {
     }
   }, markLabSubject), true);
   assert.equal(markLabSubject.status, 303);
+  assert.equal(
+    markLabSubject.headers.Location,
+    "/admin/categories?notice=cued&category_id=lab-subject&revision=1&cued=1"
+  );
+  const markedLabSubjectList = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: markLabSubject.headers.Location
+  }, markedLabSubjectList), true);
+  assert.equal(markedLabSubjectList.status, 200);
+  assert.match(markedLabSubjectList.body, /role="status"/);
+  assert.match(markedLabSubjectList.body, /Cued[\s\S]*lab-subject[\s\S]*D1 revision 1/);
+
+  const publishAndCueLabSubject = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/categories/lab-subject", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "publish-and-cue" }
+  }), publishAndCueLabSubject), true);
+  assert.equal(publishAndCueLabSubject.status, 303);
+  assert.equal(
+    publishAndCueLabSubject.headers.Location,
+    "/admin/categories?notice=published&category_id=lab-subject&revision=2&cued=1"
+  );
+  const categoryNoticeList = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: publishAndCueLabSubject.headers.Location
+  }, categoryNoticeList), true);
+  assert.equal(categoryNoticeList.status, 200);
+  assert.match(categoryNoticeList.body, /<h1>Categories<\/h1>/);
+  assert.match(categoryNoticeList.body, /role="status"/);
+  assert.match(categoryNoticeList.body, /Published[\s\S]*lab-subject[\s\S]*D1 revision 2/);
+  assert.match(categoryNoticeList.body, /Cued for the next freeze/);
+  assert.doesNotMatch(categoryNoticeList.body, /<h1>Published<\/h1>/);
 
   const labFreeze = createResponse();
   assert.equal(await handleRequest({
@@ -507,7 +653,7 @@ export async function run(page) {
     host: "127.0.0.1:8787",
     body: {
       confirm: "save-category",
-      expected_revision: 1,
+      expected_revision: 2,
       title: "Lab Subject Renamed",
       domain: "sciences-mathematics"
     }
@@ -611,6 +757,18 @@ export async function run(page) {
     }
   }, markLeaf), true);
   assert.equal(markLeaf.status, 303);
+  assert.equal(
+    markLeaf.headers.Location,
+    "/admin/catalogues?notice=cued&catalogue_id=lab-catalogue-fixture&revision=1&cued=1"
+  );
+  const markedLeafList = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: markLeaf.headers.Location
+  }, markedLeafList), true);
+  assert.equal(markedLeafList.status, 200);
+  assert.match(markedLeafList.body, /role="status"/);
+  assert.match(markedLeafList.body, /Cued[\s\S]*lab-catalogue-fixture[\s\S]*D1 revision 1/);
 
   const freezeList = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, freezeList), true);
@@ -680,6 +838,10 @@ async function exerciseCatalogueEditor(page, handleRequest) {
       false
     );
     assert.equal(
+      await page.locator('#catalogue-studio button[name="confirm"][value="publish-and-cue"]').count(),
+      1
+    );
+    assert.equal(
       await page.locator('#catalogue-studio input[value="revert-published"]').count(),
       1
     );
@@ -705,7 +867,7 @@ async function exerciseCatalogueEditor(page, handleRequest) {
     await page.click("form.new-catalogue button[type=\"submit\"]");
     await page.waitForSelector("#catalogue-studio:not([hidden])");
     assert.match(await page.locator("#overview-list").innerText(), /No puzzles yet/);
-    assert.equal(await page.locator("#catalogue-studio button[type=\"submit\"]").count(), 1);
+    assert.equal(await page.locator("#catalogue-studio button[type=\"submit\"]").count(), 2);
     assert.doesNotMatch(
       await page.locator("#catalogue-studio").innerText(),
       /Export to player/

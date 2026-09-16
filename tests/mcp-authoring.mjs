@@ -95,6 +95,8 @@ export async function run() {
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
     assert.equal(initialized.result.serverInfo.version, AUTHORING_MCP_SERVER_VERSION);
+    assert.doesNotMatch(initialized.result.instructions, /admin\/drafts|Open board|click Publish/);
+    assert.match(initialized.result.instructions, /Cue and Freeze are outside MCP/);
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -358,7 +360,11 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
     assert.match(guidance.result.structuredContent.markdown, /publish_to_authoring=true/);
     assert.match(guidance.result.structuredContent.markdown, /confirmed final edit/);
-    assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
+    assert.doesNotMatch(
+      guidance.result.structuredContent.markdown,
+      /admin\/drafts|Open board|click Publish/
+    );
+    assert.match(guidance.result.structuredContent.markdown, /Cue and Freeze are outside MCP/);
     assert.match(guidance.result.structuredContent.markdown, /at most 25 total\s+nodes/);
     assert.match(guidance.result.structuredContent.markdown, /hunt for the weakest\s+term to drop/);
     assert.doesNotMatch(

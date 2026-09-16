@@ -158,10 +158,11 @@ authoring Worker uses. Configure the stdio server environment with:
   If both are set, they must match.
 
 `CLOUDFLARE_D1_DATABASE_ID` defaults to `wrangler.authoring.jsonc`'s
-`AUTHORING_DB` id. Set `GITHUB_TOKEN` (or `GH_TOKEN`) plus
+`AUTHORING_DB` id. GitHub credentials are used by the LAN Freeze publisher,
+not by the MCP tools: configure `GITHUB_TOKEN` (or `GH_TOKEN`) plus
 `GITHUB_OWNER`/`GITHUB_REPOSITORY`, or authenticate with `gh` against a
-GitHub origin remote, so a draft's pull request can be opened from
-`/admin/drafts/<id>`. `GITHUB_BASE_BRANCH` defaults to `main`.
+GitHub origin remote, when that checkout will create release pull requests.
+`GITHUB_BASE_BRANCH` defaults to `main`.
 
 The optional official MCP Inspector can exercise the tools interactively:
 
@@ -174,12 +175,12 @@ npx @modelcontextprotocol/inspector \
 
 For a client that asks for confirmation on every write, prefer the one-shot
 path: research and compose the complete simplified document, then call
-`create_puzzle_draft` once with `draft_id` and `document`. Validate it and let
-the human Publish it from the drafts page. If later revisions are necessary,
-call `get_puzzle_draft` followed by one `save_puzzle_draft` using its current
-revision. The server imposes no phase gate or approval token on either draft
-write; any confirmation dialog is the MCP client’s policy and cannot be
-overridden by this Worker.
+`create_puzzle_draft` once with `draft_id` and `document`. Validate it and
+return the draft id and revision for whatever human publication workflow the
+team uses. If later revisions are necessary, call `get_puzzle_draft` followed
+by one `save_puzzle_draft` using its current revision. The server imposes no
+phase gate or approval token on either draft write; any confirmation dialog is
+the MCP client’s policy and cannot be overridden by this Worker.
 
 The following progressive workflow remains useful for agents that need it:
 
@@ -187,9 +188,9 @@ The following progressive workflow remains useful for agents that need it:
    call `create_puzzle_draft` with a skeleton (`puzzle_id`, `title`,
    `   category`) or a supplied document. To edit a puzzle that predates D1
    drafts, call `create_puzzle_draft` with `seed_from_published: true` and
-   that `puzzle_id`, or open it from `/admin/drafts`. Do not open a blank
-   skeleton for a live id. You can still pass `get_puzzle`'s document into
-   `create_puzzle_draft` if you already have it.
+   that `puzzle_id`. Do not open a blank skeleton for a live id. You can still
+   pass `get_puzzle`'s document into `create_puzzle_draft` if you already have
+   it.
 2. Optionally call both authoring tools with `phase: "core"`. Build the identity,
    clusters, terms, facts, bridges, info, links, and citations.
    Capture exact citation details when research finds them; do not defer a
@@ -206,16 +207,10 @@ The following progressive workflow remains useful for agents that need it:
    that were already authored.
 6. Call `validate_puzzle_draft` and correct every reported error against the
    complete accumulated document.
-7. Stop after `validate_puzzle_draft`. Give the human the local drafts URL
-   (`http://127.0.0.1:8787/admin/drafts/<id>` by default, or
-   `AUTHORING_DRAFT_REVIEW_URL/<id>` when that env is set). The page is
-   served by `npm run dev` against a checkout, so **Play**
-   (`/?draft=&view=play`) is a clean player preview of the working copy
-   without writing git. **Open board** (`/?draft=`) is Construct. They
-   review design copy there, then Play. They click **Publish** to write
-   the shared D1 row. `save_puzzle_draft` accepts `publish_to_authoring: true`
-   to do the same write in that same call, on a confirmed final edit --
-   only when they've asked for that; the default is still to stop here.
+7. Stop after `validate_puzzle_draft`. MCP has no publication-cue or Freeze
+   operation. If explicitly requested, `save_puzzle_draft` accepts
+   `publish_to_authoring: true` to promote a confirmed valid save to a held
+   D1 authoring snapshot in the same call; it does not Cue that snapshot.
    Set `category` /
    `categories` / `subcategories` on the draft; register metadata with
    `create_category`; add or remove catalogue membership with
@@ -224,14 +219,14 @@ The following progressive workflow remains useful for agents that need it:
    promote a valid category or catalogue working copy to authoring play in
    the same call. It remains held; only a human Cues and Freezes it.
 
-`preview_import` and `install_puzzle` (checkout installation without going
-through `/admin/drafts`) were removed: they wrote the checkout directly,
-at cross purposes with D1 being the source of truth. Admin Freeze is now
-the only thing that writes `puzzles/`, `catalogues/`, and `content/`.
+`preview_import` and `install_puzzle` (checkout installation) were removed:
+they wrote the checkout directly, at cross purposes with D1 being the source
+of truth. Admin Freeze is now the only thing that writes `puzzles/`,
+`catalogues/`, and `content/`.
 
 Validation is intentionally available at any point. A stored draft may be
-incomplete or temporarily invalid; D1 Publish and GitHub-PR export require
-a complete valid puzzle.
+incomplete or temporarily invalid; D1 authoring publication and LAN Freeze
+require a complete valid puzzle.
 
 ## Tools
 
@@ -247,8 +242,7 @@ a complete valid puzzle.
 (one row per id; a draft overlays the active authoring document). Set
 `full_text: true` to search facts, lessons, and other prose without a
 `text:` prefix. Structured title/term/tag matching stays the default for
-gap-fill checks. LAN Library search on `npm run dev` uses the same corpus
-and searches prose on every query.
+gap-fill checks.
 
 JSON-LD interchange (reading a puzzle/catalogue as portable JSON-LD,
 exporting one without writing a file) isn't on this MCP tool surface --
@@ -278,73 +272,14 @@ existing draft.
 `CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
 It is not the default, and it is not a sync path into D1.
 
-## Authoring workspace
+## Publication boundary
 
-The local drafts server (`npm run dev`) is a checkout-backed workspace:
-Admin Freeze writes this tree, and `/admin/drafts` is available on the
-LAN if you bind off loopback. Hosted MCP still owns D1 drafts; it has no
-working tree and does not write git or GitHub.
-
-Operational files that used to dirty git (review cadence log, inventories,
-split plans, loss ledgers, proposal scratch) live in a data directory
-outside version control:
-
-- default: `<repo>/.concept-clusters/authoring/` (already gitignored)
-- override: `AUTHORING_DATA_DIR` (a Proxmox volume, NFS share, etc.)
-
-`node tools/authoring-workspace.mjs` prints the resolved paths and the
-drafts URL. `suggest-review.mjs --record` writes `review-log.json` there,
-migrating the old `.agents/skills/review-puzzle/review-log.json` once if
-needed.
-
-A persistent LAN box typically sets:
-
-```
-AUTHORING_LISTEN_HOST=0.0.0.0
-AUTHORING_DRAFT_REVIEW_URL=http://<lan-host>:8787/admin/drafts
-AUTHORING_DATA_DIR=/var/lib/concept-clusters-authoring
-```
-
-That bind has no Access gate — treat it as a home-network / VPN service.
-Cursor on a laptop should load the same `.env` (or the same
-`AUTHORING_DRAFT_REVIEW_URL` / `AUTHORING_DATA_DIR`) so MCP and skill
-scripts agree with the box.
-
-While `npm run dev` is running, `/admin` on that server is the authoring
-index (drafts, catalogues, categories). Those same D1 drafts are readable as HTML
-at `/admin/drafts` (`http://127.0.0.1:8787` by default). Worker mode
-(`npm run dev -- --worker`) serves the same page from Node in front of
-Wrangler. After you review design copy, **Play** (`/?draft=&view=play`)
-is a clean player preview of the working copy; add `&admin` for layout
-tools. **Open board** (`/?draft=`) is Construct. **Publish** writes the
-shared D1 document. **Cue** that snapshot for the next freeze; **Freeze**
-on `/admin` validates the generated git snapshot and opens or updates the
-release PR (Confirm after the change count). Leaf catalogues are edited at `/admin/catalogues`
-(`/?catalogue=&view=author`). **Publish**
-there writes D1; **Cue** and **Freeze** on `/admin` update the player bundle.
-Freeze automatically includes missing published forward dependencies and shows
-why in its plan. MCP `create_catalogue` / `update_catalogue` / `create_category` /
-`update_category` write the same D1 drafts; their optional
-`publish_to_authoring` flag also writes the held D1 published snapshot. Copy can
-be edited on the drafts page, or restored to published wording on a marked
-change. Structural puzzle changes still go through the construct canvas or
-the authoring conversation.
-
-Status is the publish path: **working copy** → **authoring
-play** (**held**, **cued**, or **new on next freeze**) → **GitHub
-production**. Nothing but Admin Freeze writes the checkout, and nothing
-opens a pull request for a single draft any more -- Freeze's batch pull
-request is the only one. The
-GitHub column is whether that id is in origin’s `puzzles/manifest.js`
-joined with the last freeze patch (add/update minus remove), assuming that
-freeze merges. LAN **Freeze** validates the cued snapshots, creates or updates a
-single release PR, and accepts optional additional PR context while retaining
-the generated change list. **Refresh from GitHub** on LAN `/admin` fetches origin into
-that snapshot without freezing. Freeze still fetches origin; a failed fetch
-does not fail the freeze. Hosted `/admin/drafts` stays origin-only until the
-merge actually lands. Show **Working copies** matches the working copy badge
-(not yet in authoring play). **Drafts** is never in GitHub production.
-**Published only** is authoring play with no private draft.
+MCP writes D1 working copies and, when explicitly requested, can promote a
+valid save to a held published D1 snapshot with
+`publish_to_authoring: true`. MCP has no Cue or Freeze operation; those are
+human-controlled lifecycle steps outside the protocol. For the separate HTML
+authoring workflow, see [AUTHORING.md](AUTHORING.md) and
+[CATALOGUES.md](CATALOGUES.md).
 
 ## Removed MCP surfaces
 
@@ -352,7 +287,7 @@ merge actually lands. Show **Working copies** matches the working copy badge
 MCP-callable path that opened or previewed a dedicated GitHub pull request
 for a single puzzle draft -- were removed once D1 Publish + Cue + Freeze
 fully covered a single puzzle draft's path to production too. A human still
-opens Freeze's batch pull request from `/admin`; no MCP tool opens or
+initiates the batch release process; no MCP tool opens or
 previews a pull request any more.
 
 `preview_import` and `install_puzzle` -- an MCP-callable checkout

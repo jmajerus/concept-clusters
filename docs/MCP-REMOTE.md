@@ -8,16 +8,16 @@ and model APIs, see
 [Connecting AI clients to the hosted MCP server](MCP-CLIENTS.md).
 
 ```text
-Local stdio MCP ── D1 drafts ── D1 Publish (authoring play) ── Cue + Freeze ── GitHub
-Remote HTTP MCP  ── D1 drafts ── D1 Publish (authoring play) ── Cue + Freeze ── GitHub
+Local stdio MCP ── D1 drafts ── optional held publication
+Remote HTTP MCP  ── D1 drafts ── optional held publication
+Human authoring workflow ───────────────────── Cue + LAN Freeze ── GitHub
 ```
 
 The lifecycle boundary is intentional. Authoring D1 is the source of truth
 for play and working copies. Git freeze is a snapshot out of that store.
-Authoring D1 seeds published puzzle snapshots from git for LAN play; a
-working copy is created when you open a puzzle from `/admin/drafts` or
-`create_puzzle_draft` with `seed_from_published`. Production play still
-loads git.
+Authoring D1 seeds published puzzle snapshots from git for LAN play; an MCP
+working copy is created by `create_puzzle_draft`, optionally with
+`seed_from_published`. Production play still loads git.
 
 A draft is one mutable row: an integer `revision` is an optimistic-concurrency
 token for multi-pass saves (`expected_revision` on `save_puzzle_draft`), not a
@@ -141,10 +141,10 @@ Neither surface exposes checkout installation any more (`preview_import` /
 `install_puzzle` were removed as cross-purposed with D1 being the source of
 truth); Admin Freeze is the only thing that writes the checkout.
 
-Design-copy review happens on `/admin/drafts` (same pause as local stdio
-MCP). **Publish** on that page writes the shared D1 document; so does
-`save_puzzle_draft` with `publish_to_authoring: true` on a confirmed final
-edit, in the same call (see below) -- it remains held, not cued for Freeze.
+The MCP endpoint is tool-only: it has no visual editor, buttons, page
+navigation, or Cue/Freeze operation. `save_puzzle_draft` with
+`publish_to_authoring: true` can promote a confirmed valid edit to a held
+published D1 snapshot in the same call (see below), but it does not Cue it.
 Hosted authoring has no git checkout and does not write the base branch;
 this repo does not auto-deploy the player-facing Worker on push. Only LAN
 Freeze writes git and opens the release pull request that eventually
@@ -184,16 +184,6 @@ it accepts their complete `kind: "meta"` document, where entries are existing
 non-meta catalogue ids. It neither creates nor deletes meta catalogues and
 does not open a pull request.
 
-The pull request is also the playable review boundary. An author may use its
-branch preview to play the exact generated puzzle in every layout and lens
-mode before deciding whether to merge it. A pull request that reveals a weak
-conceptual or visual result need not be published: close it, delete its branch
-if desired, revise the D1 draft, and submit again -- that produces a fresh
-pull request, since a closed one no longer counts as open. Resubmitting
-*without* closing it first updates the same still-open pull request instead.
-The pull-request body records the source D1 draft ID and content hash so the
-playable result remains traceable to the reviewed authoring state.
-
 Semantic review and revision proposals do not require additional MCP tools.
 The connected model can compose them from `get_puzzle_draft`,
 `validate_puzzle_draft`, and `get_authoring_guidance`; `save_puzzle_draft`
@@ -207,8 +197,8 @@ The tracked D1 migrations create:
   (OCC token), content hash, last validation result, and the persisted
   `content_json`, `pedagogy_json`, and protected `provenance_json` projections
   added by migration `0019_authoring_domains.sql`; and
-- `puzzle_draft_history` for the capped previous-working-copy stack the
-  drafts page pops; and
+- `puzzle_draft_history` for the capped previous-working-copy stack used by
+  revert operations; and
 - `content_drafts` for owner-scoped catalogue and category working copies; and
 - `published_documents` plus `published_document_revisions` for the shared
   live document of each puzzle, catalogue, or category id; and
@@ -221,13 +211,11 @@ A matching complete save replaces the current document; a matching focused
 save replaces only the selected domain, reassembles the complete document, and
 then bumps the integer. A stale token fails closed. Distinct saves push the
 previous working copy onto a
-capped D1 stack (`puzzle_draft_history`). The drafts page
-**Revert to last working copy** button pops one save at a time. Set
-`publish_to_authoring: true` on a confirmed final edit to also publish the
-saved document to authoring play in that same call -- the same D1 write
-**Publish** on `/admin/drafts/<id>` performs. Only a valid document
-publishes (an invalid one still saves; the response reports why nothing was
-published); either way it remains held, not cued for Freeze.
+capped D1 stack (`puzzle_draft_history`). A revert operation pops one save at
+a time. Set `publish_to_authoring: true` on a confirmed final edit to also
+publish the saved document to authoring play in that same call. Only a valid
+document publishes (an invalid one still saves; the response reports why
+nothing was published); either way it remains held, not cued for Freeze.
 `create_puzzle_draft` does not take this flag -- publish only a document
 that has actually been reviewed and saved.
 
@@ -247,46 +235,18 @@ application limits hosted draft documents to 1,250,000 bytes, leaving useful
 headroom below D1's two-megabyte value and row limit. Binary or unusually
 large instructional assets belong in R2 or the repository, not a draft row.
 
-## Reviewing a draft's content before submission
+## Human publication boundary
 
-`GET /admin/drafts` (list, most recently updated first) and
-`GET /admin/drafts/<id>` (one draft, formatted for reading) render a draft's
-actual content as HTML -- clusters, bridges, lenses, related puzzles, and
-the full learning introduction text, plus the last `validate_puzzle_draft`
-result at the top. Copy can be edited on this page, or restored to
-published wording on a marked change. Structural changes still go through
-the authoring conversation. The page can POST to **Publish** (shared D1 row),
-**Cue** / **Hold**, Revert, withdraw, or delete the working copy. Puzzle
-drafts no longer Export or Install. Freeze is LAN `/admin` only. Routes
-require the same Cloudflare Access authentication as `/mcp` and are
-scoped to the authenticated owner's own drafts, same as every other draft
-tool.
+MCP tool calls end at draft creation, saving, validation, and optional
+`publish_to_authoring`. The endpoint has no visual review surface, page
+navigation, Cue, or Freeze operation. `publish_to_authoring` promotes a valid
+save to held D1 authoring play; it does not mark the snapshot cued.
 
-The GitHub column is whether that puzzle id is in the base-branch
-`puzzles/manifest.js` on GitHub (what the player boots). Hosted authoring
-has no Freeze, so it does not join a pending freeze patch; the Worker
-fetches that file once per isolate and caches it. LAN `/admin/drafts`
-projects origin ∪ the last freeze assuming merge. **Refresh from GitHub**
-on LAN `/admin` fetches origin without freezing. A failed fetch omits the
-badge instead of claiming every row is out of production. D1 `submitted` is
-leftover PR-ledger state from the retired per-puzzle submission path,
-unreachable by any current write path, and not shown.
-
-This exists because the pull request is a poor tool for the kind of
-review that actually matters most for *copy* -- disagreements concentrate
-in prose (facts, term notes, the learning introduction), not board
-mechanics the game engine already validates structurally, and reading
-prose in a PR diff means checking out the branch and playing through the
-puzzle just to proofread text. This page is that copy review. Play is a
-clean player preview on the LAN authoring checkout
-(`/?draft=&view=play`). LAN **Freeze** on `/admin` is the git ship path: it
-creates or updates one release PR from all cued snapshots and accepts optional
-human context alongside its generated summary. Cloudflare is production after
-that PR merges and deploys. Hosted MCP
-instructions match local stdio: after `validate_puzzle_draft` passes, pause,
-give the human `/admin/drafts/<id>`, and wait until they have reviewed it.
-There is no hosted freeze apply: this Worker has no git working tree. Play
-unpublished boards on the LAN box, not here.
+The separate HTML authoring workflow, including review controls and list
+navigation, is documented in [AUTHORING.md](AUTHORING.md) and
+[CATALOGUES.md](CATALOGUES.md). The hosted Worker has no git working tree, so
+only LAN Freeze can prepare a release snapshot; merging remains a separate
+GitHub action.
 
 ## Authoring activity
 

@@ -367,7 +367,10 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/publish_to_authoring=true/);
     expect(guidance.result.structuredContent.markdown).toMatch(/confirmed final edit/);
-    expect(guidance.result.structuredContent.markdown).toMatch(/admin\/drafts/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/Cue and Freeze are outside MCP/);
+    expect(guidance.result.structuredContent.markdown)
+      .not.toMatch(/admin\/drafts|Open board|click Publish/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/hunt for the weakest\s+term to drop/);
     expect(guidance.result.structuredContent.markdown)
@@ -1019,8 +1022,50 @@ describe("hosted authoring Worker", () => {
       env,
       createExecutionContext()
     );
-    expect(published.status).toBe(200);
-    expect(await published.text()).toContain("Published");
+    expect(published.status).toBe(303);
+    expect(published.headers.get("Location"))
+      .toBe("/admin/drafts/admin-review-fixture?notice=published&puzzle_id=admin-review-fixture&revision=1");
+
+    const publishedPage = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture?notice=published&puzzle_id=admin-review-fixture&revision=1"),
+      env,
+      createExecutionContext()
+    );
+    expect(publishedPage.status).toBe(200);
+    const publishedBody = await publishedPage.text();
+    expect(publishedBody).toContain('role="status"');
+    expect(publishedBody).toMatch(/Published[\s\S]*admin-review-fixture[\s\S]*D1 revision/);
+    expect(publishedBody).toContain("git-bundled production player is unchanged");
+    expect(publishedBody).not.toContain("<h1>Puzzles</h1>");
+    expect(publishedBody).toContain(">Cue</button>");
+    expect(publishedBody).toContain("authoring play");
+    expect(publishedBody).toContain(">held</span>");
+
+    const cued = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=cue-for-freeze"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(cued.status).toBe(303);
+    expect(cued.headers.get("Location"))
+      .toBe("/admin/drafts?notice=cued&puzzle_id=admin-review-fixture&cued=1");
+
+    const cuedPage = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts?notice=cued&puzzle_id=admin-review-fixture&cued=1"),
+      env,
+      createExecutionContext()
+    );
+    expect(cuedPage.status).toBe(200);
+    const cuedBody = await cuedPage.text();
+    expect(cuedBody).toContain("<h1>Puzzles</h1>");
+    expect(cuedBody).toMatch(/Cued[\s\S]*admin-review-fixture[\s\S]*D1 revision 1/);
 
     const unpublished = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {

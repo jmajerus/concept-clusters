@@ -33,6 +33,9 @@ import { diffPublishedDraft, publishedDocumentFromService } from "../modules/dra
 import {
   DraftFieldError,
   draftFieldRedirectPath,
+  draftEditorPublicationRedirectPath,
+  draftListPublicationRedirectPath,
+  draftPublicationNoticeFromSearch,
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
@@ -401,6 +404,10 @@ async function handleAdminRoute(
       kind: "puzzle",
       includeWithdrawn: true
     });
+    const notice = draftPublicationNoticeFromSearch(
+      url.searchParams,
+      publishedRows
+    );
     const categoryRegistry = await loadMergedCategoryRegistry({
       contentDocuments,
       contentService,
@@ -444,7 +451,7 @@ async function handleAdminRoute(
         freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
       }, githubSnapshot);
     });
-    return html(renderDraftListPage(corpus, { categoryRegistry }));
+    return html(renderDraftListPage(corpus, { categoryRegistry, notice }));
   }
   const reviewIssuesMatch = pathname.match(/^\/admin\/drafts\/([^/]+)\/review-issues$/);
   if (reviewIssuesMatch) {
@@ -651,7 +658,7 @@ async function handleAdminRoute(
         return html(`<p>${escapeHtml(message)}</p>`, 400);
       }
     }
-    if (form.isPublish || form.isRevertPublished) {
+    if (form.isPublish || form.isPublishAndCue || form.isRevertPublished) {
       try {
         const draft = await repository.get({ draftId, actor });
         const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
@@ -701,12 +708,31 @@ async function handleAdminRoute(
           document: documentForStorage(authoredDocument, { categoryRegistry }),
           actor
         });
-        return html(renderContentPublishResultPage({
-          kind: "puzzle",
-          id: puzzleId,
-          published,
-          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
-        }));
+        if (form.isPublishAndCue) {
+          await contentDocuments.setFreezeCue({
+            kind: "puzzle",
+            id: puzzleId,
+            actor,
+            cued: true
+          });
+        }
+        const location = form.isPublishAndCue
+          ? draftListPublicationRedirectPath({
+            puzzleId,
+            cued: true
+          })
+          : draftEditorPublicationRedirectPath({
+            draftId,
+            puzzleId,
+            revision: published.revision
+          });
+        return new Response(null, {
+          status: 303,
+          headers: {
+            Location: location,
+            "Cache-Control": "no-store"
+          }
+        });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         return html(renderContentPublishResultPage({
@@ -764,9 +790,16 @@ async function handleAdminRoute(
           actor,
           cued: form.isCueForFreeze
         });
+        const location = form.isCueForFreeze
+          ? draftListPublicationRedirectPath({
+            puzzleId,
+            notice: "cued",
+            cued: true
+          })
+          : draftFieldRedirectPath(draftId);
         return new Response(null, {
           status: 303,
-          headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+          headers: { Location: location, "Cache-Control": "no-store" }
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -920,7 +953,12 @@ async function handleAdminRoute(
       actor,
       customModelSuggestions,
       relatedPuzzleOptions: [...contentService.knownPuzzleIds],
-      categoryRegistry
+      categoryRegistry,
+      notice: draftPublicationNoticeFromSearch(
+        url.searchParams,
+        publishedRow,
+        { requireRevision: true }
+      )
     }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);

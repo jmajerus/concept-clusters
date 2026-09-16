@@ -267,8 +267,8 @@ export async function run() {
     await close();
   }
 
-  // save_puzzle_draft's publish_to_authoring flag: the same D1 write
-  // Publish on /admin/drafts/<id> performs, for a confirmed final edit.
+  // save_puzzle_draft's publish_to_authoring flag promotes a confirmed final
+  // edit to the same held D1 authoring snapshot as the human workflow.
   // Superseded submit_puzzle_for_publication and preview_repository_import.
   const publishFixtureId = "mcp-taxonomy-publish-fixture";
   const publishFixtureDocument = {
