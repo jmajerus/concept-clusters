@@ -12,14 +12,8 @@ function clone(value) {
 
 export function categorySummaries(
   puzzles,
-  categories,
-  { registeredPuzzles = puzzles } = {}
+  categories
 ) {
-  const publishedCategoryIds = new Set(
-    registeredPuzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
-      .map(category => categoryIdFor(category, categories))
-      .filter(Boolean)
-  );
   const names = new Set([
     ...Object.keys(categories),
     ...puzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
@@ -44,10 +38,10 @@ export function categorySummaries(
     return {
       name,
       slug: metadata?.slug || categoryIdFor(name, categories) || slugify(name),
-      // A published puzzle reference is itself category registration. A
-      // separate category document only enriches that registered category
-      // with display metadata and subcategory definitions.
-      registered: !!metadata || publishedCategoryIds.has(categoryIdFor(name, categories)),
+      // A published category-editor document (or a Git category in a
+      // checkout-aware caller) registers the category. Synthetic puzzle
+      // references are deliberately visible for repair but stay unregistered.
+      registered: !!metadata && metadata.registered !== false && metadata.inferred !== true,
       puzzleCount: members.length,
       primaryPuzzleCount: members.filter(puzzle =>
         categoryIdFor(primaryCategoryForPuzzle(puzzle, categories), categories) ===

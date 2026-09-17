@@ -153,16 +153,21 @@ Freeze writes git and opens the release pull request that eventually
 reaches production; merging that pull request stays a separate human
 action, so Freeze does not update the bundled player by itself.
 
-`list_categories` and `get_category` expose categories registered by published
-D1 puzzle references, with any explicit D1 category metadata layered on top.
-Their summaries include slugs, puzzle counts, and configured subcategories.
-Publication is registration: a category named by a published puzzle exists in
-the live taxonomy even when no separate category document has been created.
+`list_categories` and `get_category` read the category editor's D1 working
+copies and published rows, with D1 puzzle rows used only for puzzle counts and
+membership. A published D1 category document is the registration event and is
+authoritative even when no puzzle references it yet. Their summaries include
+slugs, puzzle counts, and configured subcategories. Never use
+`puzzles/categories.js` or another Git checkout to decide whether a live
+category exists. An unresolved category string found in a published D1 puzzle
+may still be shown for repair, but it is explicitly `registered: false` until
+the category document is published.
 
-When a category needs display metadata (title, introductory `info`, optional
-domain, or subcategory definitions), use `create_category` or
-`update_category` as a D1 working copy. Set the puzzle document's `category`
-to that category's stable id. `create_category`, `update_category`,
+When a category is new or needs display metadata (title, introductory `info`,
+optional domain, or subcategory definitions), use `create_category` or
+`update_category` as a D1 working copy and publish that category document
+before authoring puzzles that reference it. Set the puzzle document's
+`category` to that category's stable id. `create_category`, `update_category`,
 `create_catalogue`, `update_catalogue`, `update_meta_catalogue`, and
 `save_puzzle_draft` accept `publish_to_authoring: true` to promote their
 valid D1 working copy in the same call. That publishes it held, never cued:

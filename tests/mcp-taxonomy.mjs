@@ -149,6 +149,17 @@ export async function run() {
   const contentService = createHostedAuthoringContentService();
   await seedPublishedCatalogues(contentDocuments, contentService.catalogues);
   await seedPublishedCategories(contentDocuments, contentService.categories);
+  await contentDocuments.publish({
+    kind: "category",
+    id: "botany",
+    document: {
+      id: "botany",
+      title: "Botany",
+      domain: "life-sciences",
+      info: { text: "The study of plants." }
+    },
+    actor
+  });
   const gitPuzzleId = contentService.puzzles[0].id;
   const gitPuzzle = contentService.puzzles[0];
   await contentDocuments.seedPublishedIfAbsent({
@@ -222,18 +233,38 @@ export async function run() {
     assert.equal(createdCategory.published.id, "lab-subject");
     assert.equal(createdCategory.published.cuedForFreezeAt, null);
 
+    const unpublishedCategory = await call("create_category", {
+      id: "draft-only-subject",
+      title: "Draft Only Subject",
+      domain: "sciences-mathematics",
+      info: { text: "Not registered until its category document is published." }
+    });
+    assert.equal(unpublishedCategory.valid, true);
+    assert.equal(unpublishedCategory.published, null);
+
     const categories = await call("list_categories");
+    const botany = categories.categories.find(item => item.name === "Botany");
+    assert.ok(
+      botany,
+      "list_categories must include a category published by the category editor before any puzzle references it"
+    );
+    assert.equal(botany.slug, "botany");
+    assert.equal(botany.registered, true);
+    assert.equal(botany.puzzleCount, 0);
+    const draftOnly = categories.categories.find(item => item.name === "Draft Only Subject");
+    assert.ok(draftOnly, "list_categories should expose the owner's D1 working copy");
+    assert.equal(draftOnly.registered, false);
     assert.ok(
       categories.categories.some(item => item.name === "Lab Subject"),
       "list_categories should include the D1 category working copy"
     );
     const zoology = categories.categories.find(item => item.name === "zoology");
-    assert.ok(zoology, "a published puzzle reference should expose its category");
-    assert.equal(zoology.registered, true);
+    assert.ok(zoology, "a published puzzle reference should expose an unresolved category");
+    assert.equal(zoology.registered, false);
     assert.equal(zoology.slug, "zoology");
     const inferredCategory = await call("get_category", { name: "zoology" });
     assert.equal(inferredCategory.category.name, "zoology");
-    assert.equal(inferredCategory.category.registered, true);
+    assert.equal(inferredCategory.category.registered, false);
     assert.deepEqual(inferredCategory.document, {
       id: "zoology",
       title: "zoology"
@@ -243,6 +274,12 @@ export async function run() {
     assert.equal(loadedCategory.category.name, "Lab Subject");
     assert.equal(loadedCategory.document.id, "lab-subject");
     assert.equal(loadedCategory.document.title, "Lab Subject");
+
+    const publishedCategory = await call("get_category", { name: "botany" });
+    assert.equal(publishedCategory.category.name, "Botany");
+    assert.equal(publishedCategory.category.registered, true);
+    assert.equal(publishedCategory.document.id, "botany");
+    assert.equal(publishedCategory.document.title, "Botany");
 
     const updatedCategory = await call("update_category", {
       ...loadedCategory.document,
