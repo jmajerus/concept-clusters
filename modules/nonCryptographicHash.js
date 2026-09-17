@@ -12,7 +12,12 @@ const UINT32 = 0x100000000;
 const TEXT_ENCODER = new TextEncoder();
 
 function textBytes(value) {
-  const text = typeof value === "string" ? value : JSON.stringify(value);
+  let text;
+  try {
+    text = typeof value === "string" ? value : JSON.stringify(value);
+  } catch {
+    throw new Error("Hash input must be JSON-serializable");
+  }
   if (typeof text !== "string") {
     throw new Error("Hash input must be JSON-serializable");
   }

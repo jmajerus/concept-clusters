@@ -12,4 +12,14 @@ export async function run() {
     nonCryptographicHash(JSON.stringify({ a: 1 }))
   );
   assert.notEqual(nonCryptographicHash("a"), nonCryptographicHash("b"));
+  assert.throws(
+    () => nonCryptographicHash(1n),
+    /Hash input must be JSON-serializable/
+  );
+  const circular = {};
+  circular.self = circular;
+  assert.throws(
+    () => nonCryptographicHash(circular),
+    /Hash input must be JSON-serializable/
+  );
 }
