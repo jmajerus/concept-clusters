@@ -45,6 +45,7 @@ import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import { publishedRowOrNull } from "./contentDocumentRepository.js";
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
+import { CATEGORY_REGISTRATION_MODES } from "./categoryDiscovery.js";
 import {
   filterAuthoringPuzzles,
   mergeAuthoringSearchPuzzles,
@@ -693,7 +694,8 @@ export function createAuthoringMcpServer({
       includeGit: false,
       registeredPuzzles: taxonomy.publishedPuzzles
         .map(row => row.document)
-        .filter(Boolean)
+        .filter(Boolean),
+      registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
     });
     return success(`Found ${categories.length} categories.`, { categories });
   })));
@@ -714,7 +716,8 @@ export function createAuthoringMcpServer({
       includeGit: false,
       registeredPuzzles: taxonomy.publishedPuzzles
         .map(row => row.document)
-        .filter(Boolean)
+        .filter(Boolean),
+      registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
     });
     const document = categoryInputDocument({
       name,

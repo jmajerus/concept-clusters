@@ -3,7 +3,11 @@ import {
   categoryIdFor,
   slugify
 } from "../puzzles/categories.js";
-import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
+import {
+  CATEGORY_REGISTRATION_MODES,
+  categorySummaries,
+  categorySummary
+} from "./categoryDiscovery.js";
 import {
   validateCatalogueCreation,
   validateCatalogueUpdate,
@@ -113,7 +117,12 @@ export function mergeCategoryRegistry(gitCategories = {}, categoryRows = []) {
     const prior = Object.entries(registry).find(([name, metadata]) =>
       (metadata?.slug || slugify(name)) === entry.slug
     )?.[1];
-    if (prior?.registered === true && entry.registered === false) {
+    if (
+      prior &&
+      prior.registered !== false &&
+      prior.inferred !== true &&
+      entry.registered === false
+    ) {
       // An owner's unpublished draft may overlay a published category. Keep
       // the category registered while exposing the draft's latest metadata.
       entry.registered = true;
@@ -371,7 +380,11 @@ export async function loadMergedCategoryRegistry({
   contentDocuments,
   contentService,
   actor,
-  includeGit = true,
+  // A live content-document repository is the upstream source for authoring
+  // reads, including the human admin editor. Keep Git as the explicit
+  // fallback only for callers that have no D1 adapter (legacy/file-backed
+  // local workspaces and checkout-aware utilities can still pass true).
+  includeGit = typeof contentDocuments?.listPublished !== "function",
   publishedPuzzles = []
 } = {}) {
   const [publishedCategories, categoryDrafts] = await Promise.all([
@@ -414,7 +427,8 @@ export function listCategorySummaries({
   publishedCategories = [],
   categoryDrafts = [],
   includeGit = true,
-  registeredPuzzles = puzzles
+  registeredPuzzles = puzzles,
+  registrationMode = CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
 } = {}) {
   const registry = listMergedCategoryRegistry({
     contentService,
@@ -422,7 +436,10 @@ export function listCategorySummaries({
     categoryDrafts,
     includeGit
   });
-  return categorySummaries(puzzles, registry, { registeredPuzzles });
+  return categorySummaries(puzzles, registry, {
+    registeredPuzzles,
+    registrationMode
+  });
 }
 
 export function getMergedCategory({
@@ -432,7 +449,8 @@ export function getMergedCategory({
   publishedCategories = [],
   categoryDrafts = [],
   includeGit = true,
-  registeredPuzzles = puzzles
+  registeredPuzzles = puzzles,
+  registrationMode = CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
 } = {}) {
   const registry = listMergedCategoryRegistry({
     contentService,
@@ -442,9 +460,15 @@ export function getMergedCategory({
   });
   const resolved = resolveCategoryName(registry, name);
   if (!resolved) {
-    return categorySummary(puzzles, registry, name, { registeredPuzzles });
+    return categorySummary(puzzles, registry, name, {
+      registeredPuzzles,
+      registrationMode
+    });
   }
-  return categorySummary(puzzles, registry, resolved, { registeredPuzzles });
+  return categorySummary(puzzles, registry, resolved, {
+    registeredPuzzles,
+    registrationMode
+  });
 }
 
 export function categoryInputDocument({

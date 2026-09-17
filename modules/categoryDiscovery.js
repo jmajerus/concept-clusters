@@ -10,10 +10,26 @@ function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
+export const CATEGORY_REGISTRATION_MODES = Object.freeze({
+  PUZZLE_REFERENCE: "puzzle-reference",
+  PUBLISHED_DOCUMENT: "published-document"
+});
+
 export function categorySummaries(
   puzzles,
-  categories
+  categories,
+  {
+    registeredPuzzles = puzzles,
+    registrationMode = CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
+  } = {}
 ) {
+  const puzzleRegisteredCategoryIds = registrationMode === CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
+    ? new Set(
+      registeredPuzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
+        .map(category => categoryIdFor(category, categories))
+        .filter(Boolean)
+    )
+    : new Set();
   const names = new Set([
     ...Object.keys(categories),
     ...puzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
@@ -39,9 +55,12 @@ export function categorySummaries(
       name,
       slug: metadata?.slug || categoryIdFor(name, categories) || slugify(name),
       // A published category-editor document (or a Git category in a
-      // checkout-aware caller) registers the category. Synthetic puzzle
-      // references are deliberately visible for repair but stay unregistered.
-      registered: !!metadata && metadata.registered !== false && metadata.inferred !== true,
+      // checkout-aware caller) registers the category in published-document
+      // mode. The default preserves the legacy Git-backed contract, where a
+      // published puzzle reference is enough to register a category.
+      registered: (
+        !!metadata && metadata.registered !== false && metadata.inferred !== true
+      ) || puzzleRegisteredCategoryIds.has(categoryIdFor(name, categories)),
       puzzleCount: members.length,
       primaryPuzzleCount: members.filter(puzzle =>
         categoryIdFor(primaryCategoryForPuzzle(puzzle, categories), categories) ===

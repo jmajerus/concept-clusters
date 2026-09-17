@@ -285,8 +285,8 @@ function badge(label, tone = "neutral") {
 // categoryRegistry is required, deliberately no git-only default: in the
 // authoring environment D1 is the upstream source of truth and the first,
 // overriding choice, never a fallback. A default here would let a future
-// call site silently render against stale/incomplete git-only data if it
-// forgot to thread the live (git ∪ D1-published ∪ D1-draft) registry
+// call site silently render against stale/incomplete Git data if it forgot to
+// thread the live D1 category-document registry
 // through -- the same failure mode this whole function exists to fix, just
 // deferred and invisible until it happened again.
 function subcategoryLabels(subcategories, categoryRegistry) {
@@ -826,8 +826,32 @@ function renderGithubRefreshForm(snapshot) {
   </section>`;
 }
 
-function renderNewPuzzleForm() {
-  const options = Object.keys(CATEGORIES).map(name =>
+function categoryIsRegistered(name, categoryRegistry) {
+  const metadata = categoryRegistry?.[name];
+  return !!metadata && metadata.registered !== false && metadata.inferred !== true;
+}
+
+function registeredCategoryNames(categoryRegistry) {
+  return Object.keys(categoryRegistry || {})
+    .filter(name => categoryIsRegistered(name, categoryRegistry))
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function categoryNamesForDocument(document, categoryRegistry) {
+  return [...new Set([
+    primaryCategoryForPuzzle(document, categoryRegistry),
+    ...(Array.isArray(document?.categories) ? document.categories : [])
+  ].map(value => categoryTitleFor(value, categoryRegistry)).filter(Boolean))];
+}
+
+function categoryChoiceLabel(name, categoryRegistry) {
+  return categoryIsRegistered(name, categoryRegistry)
+    ? name
+    : `${name} (not registered)`;
+}
+
+function renderNewPuzzleForm(categoryRegistry = CATEGORIES) {
+  const options = registeredCategoryNames(categoryRegistry).map(name =>
     `<option value="${escapeHtml(name)}"></option>`
   ).join("");
   return `<form class="new-puzzle" method="post" action="/admin/drafts">
@@ -1098,7 +1122,7 @@ export function renderDraftListPage(rows, {
       includeCategory: true
     })
     : "";
-  const forms = variant === "local" ? renderNewPuzzleForm() : "";
+  const forms = variant === "local" ? renderNewPuzzleForm(categoryRegistry) : "";
   const githubRefresh = variant === "local" ? renderGithubRefreshForm(githubProduction) : "";
   const empty = items.length
     ? ""
@@ -1399,9 +1423,10 @@ function renderClassificationEditor({
   if (!edit?.draftId) return "";
   if (!categoryRegistry) {
     throw new Error(
-      "renderClassificationEditor requires the live categoryRegistry (git ∪ D1-published ∪ " +
-      "D1-draft) -- in the authoring environment D1 is the upstream source of truth and must " +
-      "never be silently skipped in favor of the static git-only CATEGORIES import."
+      "renderClassificationEditor requires the live categoryRegistry (D1-published category " +
+      "documents plus preserved current values) -- in the authoring environment D1 is the " +
+      "upstream source of truth and must never be silently skipped in favor of the static " +
+      "git-only CATEGORIES import."
     );
   }
   const slot = copyHidden(edit, { section: "puzzle", field: "classification" });
@@ -1415,20 +1440,20 @@ function renderClassificationEditor({
   // default as the puzzle's new category, silently overwriting the real
   // one. See also the badge row in renderDraftPage, same fix.
   //
-  // categoryRegistry must be the live merged registry (git ∪ D1-published ∪
-  // D1-draft) -- localDraftReview.js threads through the same one it already
-  // computes for validation. Without it, a category or subcategory created
-  // through D1 authoring and not yet frozen into git would be invisible
-  // here: missing from the dropdown entirely (not just unselected), and its
-  // subcategory selector would never appear at all, even after registering
-  // one via update_category.
+  // categoryRegistry must be the live D1 registry that localDraftReview.js
+  // already computes for validation. Published category documents are the
+  // only new choices; a draft or unresolved value already on this puzzle is
+  // kept visible so saving another field cannot silently erase it.
   const primaryCategory = categoryTitleFor(
     primaryCategoryForPuzzle(document, categoryRegistry),
     categoryRegistry
   );
-  const categoryNames = Object.keys(categoryRegistry).sort((left, right) => left.localeCompare(right));
+  const registeredNames = registeredCategoryNames(categoryRegistry);
+  const currentNames = categoryNamesForDocument(document, categoryRegistry);
+  const categoryNames = [...new Set([...registeredNames, ...currentNames])]
+    .sort((left, right) => left.localeCompare(right));
   const options = categoryNames.map(name =>
-    `<option value="${escapeHtml(name)}"${name === primaryCategory ? " selected" : ""}>${escapeHtml(name)}</option>`
+    `<option value="${escapeHtml(name)}"${name === primaryCategory ? " selected" : ""}>${escapeHtml(categoryChoiceLabel(name, categoryRegistry))}</option>`
   ).join("");
   // Checkboxes, not <select multiple>: a plain click on a native multi-select
   // *replaces* the selection, so an already-selected secondary could only
@@ -1437,7 +1462,7 @@ function renderClassificationEditor({
     const isPrimary = name === primaryCategory;
     const checked = !isPrimary && (document.categories || [])
       .some(value => categoryIdFor(value, categoryRegistry) === categoryIdFor(name, categoryRegistry));
-    return `<label class="secondary-category${isPrimary ? " is-primary" : ""}"><input${slot.form} type="checkbox" name="${slot.prefix}categories" value="${escapeHtml(name)}"${checked ? " checked" : ""}${isPrimary ? " disabled" : ""} data-secondary-category> ${escapeHtml(name)}</label>`;
+    return `<label class="secondary-category${isPrimary ? " is-primary" : ""}"><input${slot.form} type="checkbox" name="${slot.prefix}categories" value="${escapeHtml(name)}"${checked ? " checked" : ""}${isPrimary ? " disabled" : ""} data-secondary-category> ${escapeHtml(categoryChoiceLabel(name, categoryRegistry))}</label>`;
   }).join("");
   // One selector per registry category that defines subcategories; the
   // <classification-editor> element shows only those for the primary and
@@ -1448,19 +1473,32 @@ function renderClassificationEditor({
   const selectedCategories = new Set([primaryCategory, ...(document.categories || [])]
     .map(value => categoryTitleFor(value, categoryRegistry))
     .filter(Boolean));
-  const subcategoryRows = categoryNames.map(category => {
-    const entries = Object.entries(categoryMetadataFor(category, categoryRegistry)?.subcategories || {});
-    if (!entries.length) return "";
-    const active = selectedCategories.has(category);
+  const subcategoryRowCategories = new Set();
+  const subcategoryRows = [...new Set([...registeredNames, ...currentNames])].map(category => {
+    const registered = categoryIsRegistered(category, categoryRegistry);
+    const allEntries = Object.entries(categoryMetadataFor(category, categoryRegistry)?.subcategories || {});
     const chosen = subcategoryIdForPuzzle(document, category, categoryRegistry) || "";
+    // For an unregistered category, or an assignment no longer present in
+    // the published document, expose only the current value. It can be
+    // preserved or cleared, but it cannot turn an unpublished/stale value
+    // into a new selectable assignment.
+    const entries = registered
+      ? allEntries
+      : allEntries.filter(([id]) => id === chosen);
+    if (chosen && !entries.some(([id]) => id === chosen)) {
+      entries.push([chosen, { title: `${chosen} (not registered)` }]);
+    }
+    if (!entries.length) return "";
+    subcategoryRowCategories.add(category);
+    const active = selectedCategories.has(category);
     const disabled = active ? "" : " disabled";
-    return `<label data-subcategory-for="${escapeHtml(category)}"${active ? "" : " hidden"}>${escapeHtml(category)} subcategory <select${slot.form} name="${slot.prefix}subcategoryId"${disabled}>
+    return `<label data-subcategory-for="${escapeHtml(category)}"${active ? "" : " hidden"}>${escapeHtml(categoryChoiceLabel(category, categoryRegistry))} subcategory <select${slot.form} name="${slot.prefix}subcategoryId"${disabled}>
       <option value="">None</option>${entries.map(([id, item]) =>
         `<option value="${escapeHtml(id)}"${id === chosen ? " selected" : ""}>${escapeHtml(item.title)}</option>`
       ).join("")}</select><input${slot.form} type="hidden" name="${slot.prefix}subcategoryCategory" value="${escapeHtml(category)}"${disabled}></label>`;
   }).join("");
   const anySubcategoryActive = [...selectedCategories].some(category =>
-    Object.keys(categoryMetadataFor(category, categoryRegistry)?.subcategories || {}).length
+    subcategoryRowCategories.has(category)
   );
   const related = document.relatedPuzzles?.entries || [];
   const relatedListId = `related-puzzles-${escapeHtml(edit.draftId)}`;
@@ -1738,7 +1776,7 @@ export function renderDraftPage(draft, {
   // See renderClassificationEditor.
   if (!categoryRegistry) {
     throw new Error(
-      "renderDraftPage requires the live categoryRegistry (git ∪ D1-published ∪ D1-draft)."
+      "renderDraftPage requires the live categoryRegistry (D1-published category documents plus preserved current values)."
     );
   }
   const document = draft.document || {};

@@ -6,7 +6,14 @@ import {
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
-import { mergeCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
+import {
+  loadMergedCategoryRegistry,
+  mergeCategoryRegistry
+} from "../modules/authoringMcpTaxonomy.js";
+import {
+  CATEGORY_REGISTRATION_MODES,
+  categorySummaries
+} from "../modules/categoryDiscovery.js";
 import { validateCategoryDocument } from "../modules/categoryValidation.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
@@ -143,6 +150,47 @@ export async function run() {
   );
   assert.equal(registry["Lab Subject"].slug, "lab-subject");
   assert.equal(registry.Science.slug, "science");
+
+  // A Git category may not carry an explicit `registered` flag. A D1 draft
+  // overlay must not turn that established Git category into an unregistered
+  // selector merely because the draft row is marked unregistered.
+  const gitOverlay = mergeCategoryRegistry(
+    { Biology: { slug: "biology" } },
+    [{
+      _mcpRegistered: false,
+      document: { id: "biology", title: "Biology" }
+    }]
+  );
+  assert.equal(gitOverlay.Biology.registered, true);
+
+  // Keep the legacy Git/puzzle-reference contract available to shared content
+  // services while MCP and D1 authoring callers opt into document-only mode.
+  const unresolvedPuzzle = [{ id: "unresolved", category: "zoology" }];
+  assert.equal(
+    categorySummaries(unresolvedPuzzle, {})[0].registered,
+    true
+  );
+  assert.equal(
+    categorySummaries(unresolvedPuzzle, {}, {
+      registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
+    })[0].registered,
+    false
+  );
+
+  const d1OnlyDocuments = createMemoryContentDocumentRepository();
+  await d1OnlyDocuments.publish({
+    kind: "category",
+    id: "d1-only",
+    document: { id: "d1-only", title: "D1 Only" },
+    actor: { subject: "registry-test" }
+  });
+  const d1OnlyRegistry = await loadMergedCategoryRegistry({
+    contentDocuments: d1OnlyDocuments,
+    contentService: { categories: { "Git Only": { slug: "git-only" } } },
+    actor: { subject: "registry-test" }
+  });
+  assert.ok(d1OnlyRegistry["D1 Only"]);
+  assert.equal(d1OnlyRegistry["Git Only"], undefined);
 
   const actor = { subject: "taxonomy-author" };
   const contentDocuments = createMemoryContentDocumentRepository();
