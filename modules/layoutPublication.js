@@ -1,7 +1,7 @@
 // Shared publication-time validation for presentation layout overrides.
 // Layouts are stored alongside, but outside, the authored puzzle document.
 
-import { layoutForMode } from "./layoutDocument.js";
+import { LAYOUT_MODES, normalizeLayoutDocument } from "./layoutDocument.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
 import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
@@ -12,10 +12,17 @@ export function validatePublishedPuzzleLayout({
   layout,
   categoryRegistry = undefined
 } = {}) {
+  const normalized = normalizeLayoutDocument(layout);
+  const unsupportedModes = Object.keys(normalized?.modes || {})
+    .filter(mode => !LAYOUT_MODES.includes(mode));
+  if (unsupportedModes.length) {
+    return {
+      valid: false,
+      errors: unsupportedModes.map(mode => `Unsupported layout mode "${mode}"`)
+    };
+  }
   const layouts = [
-    ["star", layoutForMode(layout, "star")],
-    ["graph", layoutForMode(layout, "graph")],
-    ["sets", layoutForMode(layout, "sets")]
+    ...LAYOUT_MODES.map(mode => [mode, normalized?.modes?.[mode] || null])
   ].filter(([, value]) => value);
   if (!layouts.length) return { valid: true, errors: [] };
 

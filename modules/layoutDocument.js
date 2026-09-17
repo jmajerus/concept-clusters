@@ -5,6 +5,7 @@
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 
 export const LAYOUT_DOCUMENT_SCHEMA_VERSION = 1;
+export const LAYOUT_MODES = Object.freeze(["star", "graph", "sets"]);
 const MAX_LAYOUT_JSON_BYTES = 900_000;
 
 function revisionSignature(puzzle) {
@@ -43,6 +44,10 @@ function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
+export function emptyLayoutDocument() {
+  return { schemaVersion: LAYOUT_DOCUMENT_SCHEMA_VERSION, modes: {} };
+}
+
 /**
  * Normalize the persisted layout envelope. Older development rows contain a
  * bare Star layout; reading those rows as a one-mode envelope keeps the
@@ -76,16 +81,23 @@ export function layoutDocumentForMode(mode, value, existing = null) {
   if (typeof mode !== "string" || !mode.trim()) {
     throw new Error("Layout mode is required");
   }
+  if (!LAYOUT_MODES.includes(mode)) {
+    throw new Error(`Unsupported layout mode "${mode}"`);
+  }
   const current = normalizeLayoutDocument(existing);
   const modes = { ...(current?.modes || {}) };
   if (value == null) delete modes[mode];
   else modes[mode] = clone(value);
-  return Object.keys(modes).length
-    ? {
-        schemaVersion: LAYOUT_DOCUMENT_SCHEMA_VERSION,
-        modes
-      }
-    : null;
+  if (Object.keys(modes).length) {
+    return {
+      schemaVersion: LAYOUT_DOCUMENT_SCHEMA_VERSION,
+      modes
+    };
+  }
+  // An explicit empty envelope distinguishes "all layout modes were
+  // cleared" from "this draft has never had a layout". That distinction is
+  // needed when a draft starts from a published layout snapshot.
+  return current ? emptyLayoutDocument() : null;
 }
 
 export function parseLayoutDocument(text, label = "Stored layout") {

@@ -351,11 +351,14 @@ export function createGraphRenderer({
       };
     };
 
-    const applyGraphLayout = layout => {
+    const applyGraphLayout = (layout, options = {}) => {
       const validation = validateGraphLayoutDocument(
         layout,
         puzzle,
-        { width: W, height: H }
+        { width: W, height: H },
+        {
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
+        }
       );
       if (!validation.valid) return validation;
       sim.stop();
@@ -503,7 +506,10 @@ export function createGraphRenderer({
       validate: (layout, options = {}) => validateGraphLayoutDocument(
         layout,
         puzzle,
-        { width: options.width ?? W, height: options.height ?? H }
+        { width: options.width ?? W, height: options.height ?? H },
+        {
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
+        }
       ),
       metrics: graphLayoutMetrics,
       autoLayout: prettyPrintGraphLayout

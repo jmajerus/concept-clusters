@@ -27,6 +27,7 @@ import {
 } from "../modules/circleLayoutSchema.js";
 import { expectedGraphLayoutNodeKeys } from "../modules/graphLayoutSchema.js";
 import {
+  emptyLayoutDocument,
   layoutDocumentForMode,
   parseLayoutDocument
 } from "../modules/layoutDocument.js";
@@ -111,7 +112,18 @@ export async function run(page) {
       key,
       { x: 500, y: 280, pinned: true }
     ])),
-    metrics: { lineCrossings: 0, hardOverlaps: 0 }
+    metrics: {
+      hardOverlaps: 0,
+      circleOverlaps: 0,
+      headingOverlaps: 0,
+      bridgeCircleOverlaps: 0,
+      bridgeHeadingOverlaps: 0,
+      bridgeBridgeOverlaps: 0,
+      boundsViolations: 0,
+      lineCrossings: 0,
+      lineHeadingIntersections: 0,
+      lineCircleIntersections: 0
+    }
   };
   assert.throws(
     () => parseLayoutDocument("{"),
@@ -304,6 +316,35 @@ export async function run(page) {
   assert.deepEqual(mergedPublishedLayout.modes.graph, graphLayout);
   assert.deepEqual(mergedPublishedLayout.modes.sets, circleLayout);
 
+  for (const [mode, modeLayout] of [
+    ["graph", { ...graphLayout, metrics: { ...graphLayout.metrics, lineCrossings: 1 } }],
+    ["sets", { ...circleLayout, metrics: { ...circleLayout.metrics, lineCrossings: 1 } }]
+  ]) {
+    const rejected = createResponse();
+    assert.equal(await handleRequest({
+      method: "PUT",
+      url: `/admin/puzzles/lab-d1-play/layout.json?mode=${mode}`,
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({ mode, layout: modeLayout }));
+      }
+    }, rejected), true);
+    assert.equal(rejected.status, 400, rejected.body);
+    assert.match(rejected.body, /zero line crossings/);
+  }
+
+  const unsupportedMode = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json?mode=bogus",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({ mode: "bogus", layout: graphLayout }));
+    }
+  }, unsupportedMode), true);
+  assert.equal(unsupportedMode.status, 400, unsupportedMode.body);
+  assert.match(unsupportedMode.body, /Unsupported layout mode/);
+
   const clearGraph = createResponse();
   assert.equal(await handleRequest({
     method: "DELETE",
@@ -355,6 +396,27 @@ export async function run(page) {
     assert.deepEqual(existingDraftLayout.modes.star, layout);
     assert.deepEqual(existingDraftLayout.modes.graph, graphLayout);
     assert.deepEqual(existingDraftLayout.modes.sets, circleLayout);
+
+    for (const mode of ["star", "sets", "graph"]) {
+      const clearDraftMode = createResponse();
+      assert.equal(await handleExistingDraft({
+        method: "DELETE",
+        url: `/admin/drafts/lab-d1-play-draft/layout.json?mode=${mode}`,
+        headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
+      }, clearDraftMode), true);
+      assert.equal(clearDraftMode.status, 200, clearDraftMode.body);
+    }
+    assert.deepEqual(
+      (await draftStore.getDraft("lab-d1-play-draft")).layout,
+      emptyLayoutDocument()
+    );
+    const clearedDraftLayout = createResponse();
+    assert.equal(await handleExistingDraft({
+      method: "GET",
+      url: "/admin/drafts/lab-d1-play-draft/layout.json",
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
+    }, clearedDraftLayout), true);
+    assert.deepEqual(JSON.parse(clearedDraftLayout.body).layout, emptyLayoutDocument());
   } finally {
     await rm(existingDraftDirectory, { recursive: true, force: true });
   }

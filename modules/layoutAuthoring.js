@@ -131,6 +131,10 @@ export function createLayoutAuthoringController({
     return currentAdapter()?.metrics?.() || null;
   }
 
+  function metricTotal(metrics, names) {
+    return names.reduce((total, name) => total + (Number(metrics?.[name]) || 0), 0);
+  }
+
   function localDraftFor(state) {
     const { width, height } = boardSize();
     return loadLayoutDraft(
@@ -164,12 +168,12 @@ export function createLayoutAuthoringController({
     const prepared = authoringPrepared();
     const draft = localDraftFor(state);
     const metrics = prepared ? layoutMetrics() : null;
-    const lineObstructions = metrics && (
-      metrics.edgeNodeIntersections ??
-      metrics.lineHeadingIntersections ??
-      metrics.lineCircleIntersections ??
-      0
-    );
+    const lineObstructions = metrics && metricTotal(metrics, [
+      "edgeNodeIntersections",
+      "edgeTitleIntersections",
+      "lineHeadingIntersections",
+      "lineCircleIntersections"
+    ]);
     const overlaps = metrics?.overlaps ?? metrics?.hardOverlaps ?? 0;
 
     layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
@@ -254,10 +258,12 @@ export function createLayoutAuthoringController({
             `Generated layout ready — ${validation.errors.join("; ")} Drag to repair the layout before saving.`,
             "error"
           );
-        } else if ((metrics.edgeNodeIntersections ||
-          metrics.lineHeadingIntersections ||
-          metrics.lineCircleIntersections ||
-          0) > 0 || (metrics.overlaps || metrics.hardOverlaps || 0) > 0) {
+        } else if (metricTotal(metrics, [
+          "edgeNodeIntersections",
+          "edgeTitleIntersections",
+          "lineHeadingIntersections",
+          "lineCircleIntersections"
+        ]) > 0 || metricTotal(metrics, ["overlaps", "hardOverlaps"]) > 0) {
           setLayoutAuthoringStatus(
             "Generated layout ready — overlaps/through-pills are advisory; drag to tidy if you want, or save when it looks right.",
             "good"

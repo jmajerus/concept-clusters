@@ -46,6 +46,7 @@ import {
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
+  emptyLayoutDocument,
   layoutDocumentForMode,
   layoutForMode,
   normalizeLayoutDocument
@@ -446,7 +447,7 @@ export function createLocalDraftReviewHandler({
           "puzzle",
           record.document?.id
         );
-        const inheritedLayout = record.layout || published?.layout || null;
+        const inheritedLayout = record.layout ?? published?.layout ?? null;
         if (req.method === "GET" || req.method === "HEAD") {
           json(res, {
             draftId,
@@ -463,7 +464,12 @@ export function createLocalDraftReviewHandler({
               draftId,
               layout: layoutDocumentForMode(mode, null, inheritedLayout)
             })
-            : await draftStore.clearLayout(draftId);
+            : inheritedLayout
+              ? await draftStore.saveLayout({
+                draftId,
+                layout: emptyLayoutDocument()
+              })
+              : await draftStore.clearLayout(draftId);
           json(res, {
             draftId,
             revision: cleared.revision,
@@ -954,7 +960,7 @@ export function createLocalDraftReviewHandler({
             "puzzle",
             puzzleId
           );
-          const publishLayout = record.layout || publishedBefore?.layout || undefined;
+          const publishLayout = record.layout ?? publishedBefore?.layout ?? undefined;
           const layoutValidation = validatePublishedPuzzleLayout({
             document: authoredDocument,
             layout: publishLayout,
@@ -1183,7 +1189,7 @@ export function createLocalDraftReviewHandler({
           "puzzle",
           puzzle.id
         );
-        const layout = record.layout || published?.layout;
+        const layout = record.layout ?? published?.layout;
         const starLayout = layoutForMode(layout, "star");
         const playPuzzle = layout
           ? { ...puzzle, layout, ...(starLayout ? { starLayout } : {}) }

@@ -5,6 +5,18 @@
 import { layoutRevision } from "./layoutDocument.js";
 
 export const CIRCLE_LAYOUT_SCHEMA_VERSION = 1;
+const REQUIRED_CIRCLE_METRICS = [
+  "hardOverlaps",
+  "circleOverlaps",
+  "headingOverlaps",
+  "bridgeCircleOverlaps",
+  "bridgeHeadingOverlaps",
+  "bridgeBridgeOverlaps",
+  "boundsViolations",
+  "lineCrossings",
+  "lineHeadingIntersections",
+  "lineCircleIntersections"
+];
 
 function isObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -23,7 +35,11 @@ export function validateCircleLayoutDocument(
   layout,
   puzzle,
   expectedBoard = null,
-  { bridgeTerms = null, requireBridges = true } = {}
+  {
+    bridgeTerms = null,
+    requireBridges = true,
+    allowUnsafe = false
+  } = {}
 ) {
   const errors = [];
   if (!isObject(layout)) {
@@ -89,8 +105,22 @@ export function validateCircleLayoutDocument(
     validatePoints(layout.bridges, allBridgeKeys, bridgeKeys, "bridges");
   }
 
-  if (layout.metrics != null && !isObject(layout.metrics)) {
+  if (layout.metrics == null) {
+    if (!allowUnsafe) errors.push("Circle layout metrics are required");
+  } else if (!isObject(layout.metrics)) {
     errors.push("Circle layout metrics must be an object");
+  } else {
+    REQUIRED_CIRCLE_METRICS.forEach(name => {
+      const value = layout.metrics[name];
+      if (value == null) {
+        if (!allowUnsafe) errors.push(`Circle layout metrics.${name} is required`);
+      } else if (!Number.isInteger(value) || value < 0) {
+        errors.push(`Circle layout metrics.${name} must be a non-negative integer`);
+      }
+    });
+    if (!allowUnsafe && layout.metrics.lineCrossings !== 0) {
+      errors.push("Circle layouts must have zero line crossings");
+    }
   }
 
   return { valid: errors.length === 0, errors };

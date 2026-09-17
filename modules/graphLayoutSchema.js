@@ -7,6 +7,11 @@
 import { layoutRevision } from "./layoutDocument.js";
 
 export const GRAPH_LAYOUT_SCHEMA_VERSION = 1;
+const REQUIRED_GRAPH_METRICS = [
+  "lineCrossings",
+  "edgeNodeIntersections",
+  "overlaps"
+];
 
 function isObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -22,7 +27,8 @@ export function expectedGraphLayoutNodeKeys(puzzle) {
 export function validateGraphLayoutDocument(
   layout,
   puzzle,
-  expectedBoard = null
+  expectedBoard = null,
+  { allowUnsafe = false } = {}
 ) {
   const errors = [];
   if (!isObject(layout)) {
@@ -69,16 +75,21 @@ export function validateGraphLayoutDocument(
     });
   }
 
-  if (layout.metrics != null) {
-    if (!isObject(layout.metrics)) {
-      errors.push("Graph layout metrics must be an object");
-    } else {
-      ["lineCrossings", "edgeNodeIntersections", "overlaps"].forEach(name => {
-        if (layout.metrics[name] != null &&
-            (!Number.isInteger(layout.metrics[name]) || layout.metrics[name] < 0)) {
-          errors.push(`Graph layout metrics.${name} must be a non-negative integer`);
-        }
-      });
+  if (layout.metrics == null) {
+    if (!allowUnsafe) errors.push("Graph layout metrics are required");
+  } else if (!isObject(layout.metrics)) {
+    errors.push("Graph layout metrics must be an object");
+  } else {
+    REQUIRED_GRAPH_METRICS.forEach(name => {
+      const value = layout.metrics[name];
+      if (value == null) {
+        if (!allowUnsafe) errors.push(`Graph layout metrics.${name} is required`);
+      } else if (!Number.isInteger(value) || value < 0) {
+        errors.push(`Graph layout metrics.${name} must be a non-negative integer`);
+      }
+    });
+    if (!allowUnsafe && layout.metrics.lineCrossings !== 0) {
+      errors.push("Graph layouts must have zero line crossings");
     }
   }
 

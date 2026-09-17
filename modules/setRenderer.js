@@ -1408,14 +1408,15 @@ export function createSetRenderer({
       };
     }
 
-    function applyCircleLayout(layout) {
+    function applyCircleLayout(layout, options = {}) {
       const validation = validateCircleLayoutDocument(
         layout,
         puzzle,
         { width: getW(), height: getH() },
         {
           bridgeTerms: connectedBridges(state).map(node => node.word),
-          requireBridges: false
+          requireBridges: false,
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
         }
       );
       if (!validation.valid) return validation;
@@ -1672,7 +1673,8 @@ export function createSetRenderer({
         { width: options.width ?? getW(), height: options.height ?? getH() },
         {
           bridgeTerms: connectedBridges(state).map(node => node.word),
-          requireBridges: false
+          requireBridges: false,
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
         }
       ),
       metrics: circleLayoutMetrics,
