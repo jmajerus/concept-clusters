@@ -131,8 +131,14 @@ function assertPublishableTitle(document, kind) {
 function cataloguePublicationState(record, published) {
   const withdrawn = Boolean(published?.withdrawnAt);
   const activePublished = Boolean(published && !withdrawn);
+  // Hash algorithms are an implementation detail of the two records. Compare
+  // the canonical documents when both are available so a new draft seeded
+  // from a legacy SHA-256 published row is not falsely marked as edited.
+  const documentsDiffer = record?.document && published?.document
+    ? JSON.stringify(record.document) !== JSON.stringify(published.document)
+    : record?.contentHash !== published?.contentHash;
   const differsFromPublished = activePublished
-    && record?.contentHash !== published.contentHash;
+    && documentsDiffer;
   return {
     published: activePublished,
     withdrawn,

@@ -15,13 +15,17 @@ import {
   starLayoutRevision
 } from "../modules/starLayoutSchema.js";
 import { layoutDocumentForMode } from "../modules/layoutDocument.js";
+import {
+  seedPublishedCatalogues,
+  seedPublishedCategories
+} from "../modules/contentDocumentSeed.js";
 
 export const name = "MCP authoring: D1 categories and catalogues without GitHub";
 
 function stubDraftRepository() {
   return {
     async list() { return []; },
-    async get() { throw new Error("unused"); }
+    async get({ draftId }) { throw new Error(`Unknown draft: ${draftId}`); }
   };
 }
 
@@ -143,6 +147,8 @@ export async function run() {
   const actor = { subject: "taxonomy-author" };
   const contentDocuments = createMemoryContentDocumentRepository();
   const contentService = createHostedAuthoringContentService();
+  await seedPublishedCatalogues(contentDocuments, contentService.catalogues);
+  await seedPublishedCategories(contentDocuments, contentService.categories);
   const gitPuzzleId = contentService.puzzles[0].id;
   const gitPuzzle = contentService.puzzles[0];
   await contentDocuments.seedPublishedIfAbsent({
@@ -156,7 +162,7 @@ export async function run() {
     document: {
       id: "d1-only-board",
       title: "D1 only",
-      category: "Science",
+      category: "zoology",
       clusters: [],
       bridges: []
     }
@@ -168,16 +174,41 @@ export async function run() {
     contentDocuments,
     actor
   });
-  const { call, close } = await connect(server);
+  const { request, call, close } = await connect(server);
 
   try {
     const puzzleList = await call("list_puzzles");
+    assert.deepEqual(
+      new Set(puzzleList.puzzles.map(puzzle => puzzle.id)),
+      new Set([gitPuzzleId, "d1-only-board"]),
+      "MCP puzzle discovery must not leak Git-only puzzles"
+    );
     assert.equal(
       puzzleList.puzzles.find(puzzle => puzzle.id === gitPuzzleId)?.title,
       "D1 primary title"
     );
     const loadedPuzzle = await call("get_puzzle", { puzzle_id: gitPuzzleId });
     assert.equal(loadedPuzzle.document.title, "D1 primary title");
+
+    const resources = await request("resources/list", {});
+    const puzzleResource = resources.result.resources.find(resource =>
+      resource.uri === `concept-clusters://puzzles/${gitPuzzleId}`
+    );
+    assert.ok(puzzleResource, "published puzzle resources should enumerate D1 rows");
+    const resourceRead = await request("resources/read", { uri: puzzleResource.uri });
+    assert.equal(JSON.parse(resourceRead.result.contents[0].text).title, "D1 primary title");
+
+    const gitOnlyId = contentService.puzzles.find(puzzle => puzzle.id !== gitPuzzleId).id;
+    const gitOnly = await call("get_puzzle", { puzzle_id: gitOnlyId });
+    assert.equal(gitOnly.error.includes("published D1 puzzle document"), true);
+    assert.match(gitOnly.error, /does not fall back to Git/i);
+    const gitOnlySeed = await call("create_puzzle_draft", {
+      draft_id: gitOnlyId,
+      puzzle_id: gitOnlyId,
+      seed_from_published: true
+    });
+    assert.match(gitOnlySeed.error, /published D1 puzzle document/i);
+    assert.match(gitOnlySeed.error, /does not fall back to Git/i);
 
     const createdCategory = await call("create_category", {
       id: "lab-subject",
@@ -196,6 +227,17 @@ export async function run() {
       categories.categories.some(item => item.name === "Lab Subject"),
       "list_categories should include the D1 category working copy"
     );
+    const zoology = categories.categories.find(item => item.name === "zoology");
+    assert.ok(zoology, "a published puzzle reference should expose its category");
+    assert.equal(zoology.registered, true);
+    assert.equal(zoology.slug, "zoology");
+    const inferredCategory = await call("get_category", { name: "zoology" });
+    assert.equal(inferredCategory.category.name, "zoology");
+    assert.equal(inferredCategory.category.registered, true);
+    assert.deepEqual(inferredCategory.document, {
+      id: "zoology",
+      title: "zoology"
+    });
 
     const loadedCategory = await call("get_category", { name: "lab-subject" });
     assert.equal(loadedCategory.category.name, "Lab Subject");
@@ -290,6 +332,21 @@ export async function run() {
     assert.ok(unknown.errors.some(error => /no-such-puzzle-id/.test(error)));
   } finally {
     await close();
+  }
+
+  const noD1Server = createHostedMcpAuthoringServer({
+    draftRepository: stubDraftRepository(),
+    contentService,
+    actor: { subject: "no-d1-author" }
+  });
+  const noD1Session = await connect(noD1Server);
+  try {
+    const noD1List = await noD1Session.call("list_puzzles");
+    assert.match(noD1List.error, /requires the D1 content-document repository/i);
+    assert.match(noD1List.error, /not a runtime fallback|not.*fallback/i);
+  } finally {
+    await noD1Session.close();
+    await noD1Server.close();
   }
 
   // save_puzzle_draft's publish_to_authoring flag promotes a confirmed final

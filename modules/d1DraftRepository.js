@@ -87,7 +87,7 @@ export class D1DraftRepository extends DraftRepository {
     const materialized = assembleStoredDomainDocuments({ document });
     const documentJson = serializeDraftDocument(materialized);
     const domains = storedDomainDocuments(materialized);
-    const contentHash = await draftContentHash(documentJson);
+    const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     try {
       await this.database.prepare(`
@@ -154,15 +154,14 @@ export class D1DraftRepository extends DraftRepository {
     }
     const materialized = assembleStoredDomainDocuments({ document });
     const documentJson = serializeDraftDocument(materialized);
-    const domains = storedDomainDocuments(materialized);
-    const contentHash = await draftContentHash(documentJson);
-    // A canonical round-trip (for example, an MCP client sending back the
-    // document it just read) is not a document edit. Preserve the OCC token
-    // and validation result rather than manufacturing a revision merely
-    // because the caller used the write endpoint.
-    if (current.document === documentJson && current.content_hash === contentHash) {
+    // Compare the canonical blob before hashing. This preserves no-op saves
+    // for rows created with the previous SHA-256 marker and avoids any hash
+    // work for the common read-edit-save-without-edits path.
+    if (current.document === documentJson) {
       return this.get({ draftId, actor });
     }
+    const domains = storedDomainDocuments(materialized);
+    const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts
@@ -189,7 +188,7 @@ export class D1DraftRepository extends DraftRepository {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
       );
     }
-    if (contentHash !== current.content_hash) {
+    if (current.document !== documentJson) {
       const seqRow = await this.database.prepare(`
         SELECT MAX(seq) AS seq FROM puzzle_draft_history WHERE draft_id = ?
       `).bind(draftId).first();
@@ -239,7 +238,7 @@ export class D1DraftRepository extends DraftRepository {
     const materialized = assembleStoredDomainDocuments({ document: restored });
     const documentJson = serializeDraftDocument(materialized);
     const domains = storedDomainDocuments(materialized);
-    const contentHash = await draftContentHash(documentJson);
+    const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts

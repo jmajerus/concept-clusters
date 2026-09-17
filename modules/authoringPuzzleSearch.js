@@ -1,7 +1,8 @@
 // Category-scoped puzzle discovery for authoring MCP. Reuses library search
 // ranking (title, terms, tags, optional full text) so agents can check
-// coverage before opening a gap-fill draft. The searchable corpus is git,
-// then live published D1, then the owner's drafts (one row per id).
+// coverage before opening a gap-fill draft. The MCP caller supplies published
+// D1 rows and the owner's drafts; the generic merge function still accepts a
+// Git collection for checkout-aware non-MCP callers.
 
 import {
   categoriesForPuzzle,
@@ -178,9 +179,9 @@ function matchDetail(puzzle, rawQuery, rank, options) {
 }
 
 /**
- * Search git, published D1, and owner drafts for overlap before gap-fill
- * authoring, or for copy/fact lookup when fullText is true. Prefer category
- * (or catalogue_id) so results stay teachable-neighbor sized.
+ * Search the supplied published/D1 and owner-draft collections for overlap
+ * before gap-fill authoring, or for copy/fact lookup when fullText is true.
+ * Prefer category (or catalogue_id) so results stay teachable-neighbor sized.
  */
 export function searchAuthoringPuzzles(
   puzzles,

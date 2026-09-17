@@ -7,6 +7,11 @@ validation, and catalogue and category authoring. Neither surface writes
 git or GitHub directly -- that is Admin Freeze, on the LAN authoring
 checkout only.
 
+All live MCP content and taxonomy reads come from published or owner-scoped
+D1 rows. Git is an explicit bootstrap/Freeze-import source only; it is never a
+silent fallback for `list_*`, `search_puzzles`, `get_*`, resources, validation
+membership, or `seed_from_published`.
+
 `document` uses the simplified schema described in
 [SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md). JSON-LD is an
 interchange format, not an authoring or draft-storage format.
@@ -183,7 +188,10 @@ the MCP client’s policy and cannot be overridden by this Worker.
 
 The following progressive workflow remains useful for agents that need it:
 
-1. Call `list_categories` to reuse the published taxonomy. For a new board,
+1. Call `list_categories` to reuse the published taxonomy when appropriate. A
+   genuinely new subject may use a new stable URL-safe category id; publishing
+   the puzzle registers it, so do not move it to a parent category merely
+   because that id is not listed yet. For a new board,
    call `create_puzzle_draft` with a skeleton (`puzzle_id`, `title`,
    `   category`) or a supplied document. To edit a puzzle that predates D1
    drafts, call `create_puzzle_draft` with `seed_from_published: true` and
@@ -211,8 +219,9 @@ The following progressive workflow remains useful for agents that need it:
    `publish_to_authoring: true` to promote a confirmed valid save to a held
    D1 authoring snapshot in the same call; it does not Cue that snapshot.
    Set `category` /
-   `categories` / `subcategories` on the draft; register metadata with
-   `create_category`; add or remove catalogue membership with
+   `categories` / `subcategories` on the draft; publication registers each
+   referenced category, while `create_category` or `update_category` adds
+   optional metadata and subcategory definitions; add or remove catalogue membership with
    `get_catalogue` then `update_catalogue` (or `update_meta_catalogue` for a
    meta catalogue). Those tools accept `publish_to_authoring: true` to
    promote a valid category or catalogue working copy to authoring play in
@@ -263,10 +272,12 @@ use `D1DraftRepository` over Cloudflare's D1 HTTP API. Rows are
 scoped to `AUTHORING_OWNER_SUBJECT`, which must be the same Access `sub`
 hosted MCP authenticated as, so a Cursor draft is the same row Claude sees.
 
-Git remains the published record. D1 holds unpublished working state.
-`create_puzzle_draft` with `seed_from_published: true` copies a published
-(or git-seeded) snapshot into that working state without overwriting an
-existing draft.
+Published D1 is the runtime record read by both MCP surfaces; D1 also holds
+unpublished working state. Git-to-D1 publication is an explicit bootstrap or
+Freeze/import step, not a read fallback. `create_puzzle_draft` with
+`seed_from_published: true` copies an existing published D1 snapshot into that
+working state without overwriting an existing draft. If the D1 row is absent,
+the call fails and asks for the explicit bootstrap/import.
 
 `CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
 It is not the default, and it is not a sync path into D1.
@@ -290,8 +301,8 @@ initiates the batch release process; no MCP tool opens or
 previews a pull request any more.
 
 `preview_import` and `install_puzzle` -- an MCP-callable checkout
-install/uninstall path with a SHA-256 approval token over the affected
-paths, target file state, and proposed contents -- were removed as
+install/uninstall path with a deterministic approval fingerprint over the
+affected paths, target file state, and proposed contents -- were removed as
 cross-purposed with D1 being the source of truth. `repositoryPublicationService.js`
 still backs `tools/content-jsonld.mjs`'s `content:import` CLI command (see
 [JSON-LD.md](JSON-LD.md)), with the same transactional write, rollback, and

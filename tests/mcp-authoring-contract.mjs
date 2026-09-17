@@ -9,6 +9,7 @@ import {
 import { createConceptClustersMcpServer } from "../modules/mcpAuthoringServer.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
+import { seededMcpContentDocuments } from "./mcp-fixtures.mjs";
 
 export const name = "MCP authoring: local and hosted shared contract parity";
 
@@ -77,12 +78,17 @@ async function inspect(server, clientName) {
 export async function run() {
   const directory = await mkdtemp(join(tmpdir(), "concept-clusters-contract-"));
   try {
+    const contentService = createHostedAuthoringContentService();
+    const contentDocuments = await seededMcpContentDocuments(contentService);
     const local = await inspect(createConceptClustersMcpServer({
+      contentService,
+      contentDocuments,
       draftDirectory: directory
     }), "local-contract-test");
     const hosted = await inspect(createHostedMcpAuthoringServer({
       draftRepository: {},
-      contentService: createHostedAuthoringContentService(),
+      contentService,
+      contentDocuments,
       publicationService: {},
       actor: { subject: "hosted-contract-test" }
     }), "hosted-contract-test");

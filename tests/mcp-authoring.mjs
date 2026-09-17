@@ -13,6 +13,7 @@ import { createContentInterchangeService } from "../modules/contentInterchangeSe
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { AUTHORING_MCP_SERVER_VERSION } from "../modules/authoringSchemaResource.js";
+import { seededMcpContentDocuments } from "./mcp-fixtures.mjs";
 
 export const name = "MCP authoring: tools, drafts, validation, and approval-gated preview";
 
@@ -62,8 +63,10 @@ export async function run() {
   const directory = await mkdtemp(join(tmpdir(), "concept-clusters-mcp-"));
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const content = createContentInterchangeService();
+  const contentDocuments = await seededMcpContentDocuments(content);
   const server = createConceptClustersMcpServer({
     contentService: content,
+    contentDocuments,
     draftDirectory: directory
   });
   let nextId = 1;

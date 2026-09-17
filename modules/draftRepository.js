@@ -1,7 +1,10 @@
+import { nonCryptographicHash } from "./nonCryptographicHash.js";
+
 export const MAX_HOSTED_DRAFT_BYTES = 1_250_000;
 // Distinct working-copy saves keep this many previous blobs for the
 // drafts-page undo button. OCC revision is a separate counter.
 export const MAX_WORKING_COPY_HISTORY = 40;
+const TEXT_ENCODER = new TextEncoder();
 
 const DRAFT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -59,7 +62,7 @@ export function serializeDraftDocument(document) {
   } catch (error) {
     throw new Error(`Draft document is not JSON-serializable: ${error.message}`);
   }
-  if (new TextEncoder().encode(text).byteLength > MAX_HOSTED_DRAFT_BYTES) {
+  if (TEXT_ENCODER.encode(text).byteLength > MAX_HOSTED_DRAFT_BYTES) {
     throw new Error(
       `Hosted draft document exceeds ${MAX_HOSTED_DRAFT_BYTES} bytes`
     );
@@ -67,17 +70,11 @@ export function serializeDraftDocument(document) {
   return text;
 }
 
-export async function draftContentHash(documentOrText) {
+export function draftContentHash(documentOrText) {
   const text = typeof documentOrText === "string"
     ? documentOrText
     : serializeDraftDocument(documentOrText);
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(text)
-  );
-  return `sha256:${[...new Uint8Array(digest)]
-    .map(byte => byte.toString(16).padStart(2, "0"))
-    .join("")}`;
+  return nonCryptographicHash(text);
 }
 
 // JavaScript has no interface declarations, so this base class is the

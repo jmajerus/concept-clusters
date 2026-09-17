@@ -5,10 +5,32 @@ import {
 } from "@modelcontextprotocol/server";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { DraftNotFoundError } from "../modules/draftRepository.js";
+import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 
 export const name = "MCP authoring analytics: one tracked data point per tool call";
 
-function fakeDependencies() {
+async function fakeDependencies() {
+  const contentDocuments = createMemoryContentDocumentRepository();
+  await contentDocuments.seedPublishedIfAbsent({
+    kind: "puzzle",
+    id: "energy-flow",
+    document: {
+      id: "energy-flow",
+      title: "Energy Flow",
+      category: "science",
+      clusters: [],
+      bridges: []
+    }
+  });
+  await contentDocuments.seedPublishedIfAbsent({
+    kind: "catalogue",
+    id: "public-health-learning-path",
+    document: {
+      id: "public-health-learning-path",
+      title: "Public Health Learning Path",
+      entries: [{ id: "energy-flow" }]
+    }
+  });
   return {
     draftRepository: {
       async get() { throw new DraftNotFoundError("missing-draft"); }
@@ -18,6 +40,7 @@ function fakeDependencies() {
       listPuzzles: () => [{ id: "energy-flow" }],
       getCatalogueDocument: id => ({ id, title: "Fixture", entries: [] })
     },
+    contentDocuments,
     publicationService: {}
   };
 }
@@ -57,7 +80,7 @@ export async function run() {
   const dataPoints = [];
   const analytics = { writeDataPoint: dp => dataPoints.push(dp) };
   const server = createHostedMcpAuthoringServer({
-    ...fakeDependencies(),
+    ...(await fakeDependencies()),
     actor: { subject: "test-author" },
     analytics
   });
@@ -130,7 +153,7 @@ export async function run() {
   // No analytics binding (e.g. local dev without one configured) must
   // never break a tool call -- it's a silent no-op, not an error path.
   const bare = createHostedMcpAuthoringServer({
-    ...fakeDependencies(),
+    ...(await fakeDependencies()),
     actor: { subject: "test-author" }
   });
   const bareClient = await connect(bare);

@@ -103,6 +103,7 @@ import * as infoLinks from "./info-links.mjs";
 import * as librarySearch from "./library-search.mjs";
 import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
+import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 
 const allTests = [
   mcpAuthoringDomains,
@@ -115,7 +116,8 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment
+  geometryVisibleSegment,
+  nonCryptographicHash
 ];
 
 // Keep this list intentional rather than making every new test quick by
@@ -130,7 +132,8 @@ const quickTests = [
   nodeCaseAudit,
   learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,
   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore, authoringDomains, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
-  librarySearchEngine, geometryVisibleSegment, categoryReferenceMigration, contentCanonicalization
+  librarySearchEngine, geometryVisibleSegment, categoryReferenceMigration, contentCanonicalization,
+  nonCryptographicHash
 ];
 
 const flag = process.argv[2];

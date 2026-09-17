@@ -82,6 +82,7 @@ export function createConceptClustersMcpServer({
   publicationDirectory = null,
   contentService = createContentInterchangeService({ repositoryRoot }),
   draftStore = null,
+  contentDocuments = null,
   draftActor = null,
   d1Database = null,
   env = process.env
@@ -119,7 +120,7 @@ export function createConceptClustersMcpServer({
   const sharedDraftRepository = lazyRepository(async () =>
     (await workspace()).draftRepository
   );
-  const sharedContentDocuments = lazyContentDocuments(async () =>
+  const sharedContentDocuments = contentDocuments || lazyContentDocuments(async () =>
     (await workspace()).contentDocuments
   );
   const server = createAuthoringMcpServer({
@@ -132,8 +133,9 @@ export function createConceptClustersMcpServer({
     clientProbeTransport: "stdio",
     // A normal stdio server resolves its D1 adapter lazily from env, so
     // d1Database is usually null here even though content documents are
-    // available. Only the explicit file-backed remnant store is git-only.
-    contentDocumentsConfigured: !remnantDraftStore
+    // available. A file-backed draft remnant without an explicit D1 content
+    // repository is intentionally unavailable for live MCP content reads.
+    contentDocumentsConfigured: Boolean(contentDocuments) || !remnantDraftStore
   });
 
   return server;

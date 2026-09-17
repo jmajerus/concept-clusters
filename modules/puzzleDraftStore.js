@@ -140,7 +140,7 @@ export function createPuzzleDraftStore({ directory }) {
       draftId,
       revision: 1,
       status: "draft",
-      contentHash: await draftContentHash(materialized),
+      contentHash: draftContentHash(materialized),
       createdAt: now,
       updatedAt: now,
       document: clone(materialized),
@@ -160,22 +160,22 @@ export function createPuzzleDraftStore({ directory }) {
       );
     }
     const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
-    const contentHash = await draftContentHash(materialized);
     // A canonical round-trip is not a document edit. In particular, the
     // graphical authoring client may read display-form category titles and
     // send them back through documentForStorage; once canonicalized, that
     // should preserve the current revision instead of consuming one.
-    if (contentHash === current.contentHash) return publicRecord(current);
+    if (JSON.stringify(current.document) === JSON.stringify(materialized)) {
+      return publicRecord(current);
+    }
+    const contentHash = draftContentHash(materialized);
     const stack = historyOf(current);
-    if (contentHash !== current.contentHash) {
-      stack.push({
-        document: clone(current.document),
-        contentHash: current.contentHash,
-        savedAt: new Date().toISOString()
-      });
-      if (stack.length > MAX_WORKING_COPY_HISTORY) {
-        stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
-      }
+    stack.push({
+      document: clone(current.document),
+      contentHash: current.contentHash,
+      savedAt: new Date().toISOString()
+    });
+    if (stack.length > MAX_WORKING_COPY_HISTORY) {
+      stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
     }
     const record = {
       ...current,
@@ -206,7 +206,7 @@ export function createPuzzleDraftStore({ directory }) {
     const record = {
       ...current,
       revision: current.revision + 1,
-      contentHash: await draftContentHash(materialized),
+      contentHash: draftContentHash(materialized),
       updatedAt: new Date().toISOString(),
       document: clone(materialized),
       domains: storedDomainDocuments(materialized),
@@ -261,7 +261,7 @@ export function createPuzzleDraftStore({ directory }) {
   async function markInstalled(draftId) {
     const current = await readRecord(draftId);
     const now = new Date().toISOString();
-    const contentHash = current.contentHash || await draftContentHash(current.document);
+    const contentHash = current.contentHash || draftContentHash(current.document);
     const record = {
       ...current,
       status: "installed",

@@ -113,9 +113,10 @@ D1 plus your working copies — by category or by recent working-copy update,
 the same way catalogues list published ∪ drafts. Opening a published-only
 row starts a working copy
 from the published snapshot (seeded from git if D1 has none) and does not
-overwrite a draft you already have. MCP `create_puzzle_draft` with
-`seed_from_published: true` is the same open. `list_puzzle_drafts` stays
-your working copies; search covers the corpus. Do not bulk-insert working
+overwrite a draft you already have. MCP reads are stricter: its
+`create_puzzle_draft` with `seed_from_published: true` requires the published
+D1 row and never performs the Git seed itself. `list_puzzle_drafts` stays
+your working copies; search covers the D1 corpus. Do not bulk-insert working
 copies for the whole library.
 
 ### Direct repository editing

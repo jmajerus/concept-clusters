@@ -253,7 +253,7 @@ export class D1ContentDocumentRepository {
     assertDraftId(id);
     const owner = normalizeDraftActor(actor);
     const documentJson = serializeDraftDocument({ ...document, id });
-    const contentHash = await draftContentHash(documentJson);
+    const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     try {
       await this.database.prepare(`
@@ -281,7 +281,7 @@ export class D1ContentDocumentRepository {
     }
     const owner = normalizeDraftActor(actor);
     const documentJson = serializeDraftDocument({ ...document, id });
-    const contentHash = await draftContentHash(documentJson);
+    const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE content_drafts
@@ -483,7 +483,7 @@ export class D1ContentDocumentRepository {
       assertDraftId(item.id);
       const sourceDocument = documentForPublishedStorage(item.kind, item.document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
-      const contentHash = await draftContentHash(documentJson);
+      const contentHash = draftContentHash(documentJson);
       const layoutJson = item.kind === "puzzle"
         ? serializeLayoutDocument(item.layout)
         : null;
@@ -526,7 +526,7 @@ export class D1ContentDocumentRepository {
     const publishedBy = normalizeDraftActor(actor).subject;
     const sourceDocument = documentForPublishedStorage(kind, document);
     const documentJson = serializeDraftDocument({ ...sourceDocument, id });
-    const contentHash = await draftContentHash(documentJson);
+    const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     const existing = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? AND id = ?
@@ -667,7 +667,7 @@ export function createMemoryContentDocumentRepository() {
         owner_subject: owner.subject,
         title: titleOf(document),
         document: documentJson,
-        content_hash: await draftContentHash(documentJson),
+        content_hash: draftContentHash(documentJson),
         revision: 1,
         created_at: now,
         updated_at: now
@@ -695,7 +695,7 @@ export function createMemoryContentDocumentRepository() {
         ...current,
         title: titleOf(document),
         document: documentJson,
-        content_hash: await draftContentHash(documentJson),
+        content_hash: draftContentHash(documentJson),
         revision: Number(current.revision) + 1,
         updated_at: now
       });
@@ -781,7 +781,7 @@ export function createMemoryContentDocumentRepository() {
           id: item.id,
           title: titleOf(sourceDocument),
           document: documentJson,
-          content_hash: await draftContentHash(documentJson),
+          content_hash: draftContentHash(documentJson),
           revision: 1,
           published_by: "git-seed",
           published_at: now,
@@ -819,7 +819,7 @@ export function createMemoryContentDocumentRepository() {
         id,
         title: titleOf(sourceDocument),
         document: documentJson,
-        content_hash: await draftContentHash(documentJson),
+        content_hash: draftContentHash(documentJson),
         revision: nextRevision,
         published_by: publishedBy,
         published_at: now,
