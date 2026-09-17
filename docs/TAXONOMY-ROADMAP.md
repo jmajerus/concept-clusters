@@ -81,7 +81,7 @@ Consequences worth stating plainly:
   and presentation concern only.
 - Nothing about a puzzle's `id`, share links, or `?category=` URLs changes.
 
-## The twelve domains
+## The eleven domains
 
 Descriptions are scope statements for authors deciding where something
 belongs, not player-facing copy. Wikipedia links are **candidates
@@ -92,7 +92,7 @@ than leaving the term unlinked").
 
 | # | Domain | Scope | Link candidate |
 |---|---|---|---|
-| 1 | 📐 Sciences & Mathematics | Physics, chemistry, astronomy, and the mathematics and methods common to them. | `wiki:Natural science` |
+| 1 | 🌱📐 Sciences & Mathematics | Biology, physics, chemistry, astronomy, and the mathematics and methods common to them. | `wiki:Natural science` |
 | 2 | 💻🛠️ Computing & Engineering | Computation, algorithms, and software; designed systems, materials, control, and robotics; and the data science and analytics running through both. | `wiki:Computer science` |
 | 3 | ⚕️ Health & Medicine | Anatomy, physiology, clinical reasoning, nutrition, and population health. | `wiki:Medicine` |
 | 4 | 🧠 Social Sciences | Psychology, sociology, anthropology, economics as behavior, politics. | `wiki:Social science` |
@@ -103,7 +103,6 @@ than leaving the term unlinked").
 | 9 | 💼 Business & Management | Marketing, finance, accounting, leadership, organizational design. | `wiki:Business administration` |
 | 10 | 📚 Education & Teaching | Pedagogy, instructional design, assessment, study skills, training. | `wiki:Education` |
 | 11 | 🌍 Earth & Environment | Geology, climate, oceanography, ecology, geography, environmental policy. | `wiki:Earth science` |
-| 12 | 🌱 Life Sciences | Biology and its subfields — botany, zoology, microbiology, genomics, bioinformatics — as distinct from the clinical and population-health focus of Health & Medicine. | `wiki:Biology` |
 
 ### Sciences & Mathematics and Computing & Engineering were five domains
 
@@ -128,18 +127,6 @@ than to have invented a narrow one nothing yet fills. Revisit this once
 enough distinct content exists on either side to justify finer domains
 again, the same trigger already governing the two categories below that
 are expected to split.
-
-**Update (2026-09-16): Biology has split out into its own Life Sciences
-domain**, at 13 puzzle memberships across four subcategories (foundations,
-genomics, bioinformatics, multiomics) — the trigger described above.
-Passes the admission test below on both counts: a real institutional home
-(biology departments/schools are as standard as physics or chemistry ones),
-and more than ten nameable puzzles, with botany, zoology, and microbiology
-categories planned to follow under the same domain. Sciences & Mathematics
-keeps physics, chemistry, astronomy, and math. Health & Medicine is
-unaffected — Bioethics, Public Health, and Physiology & Medicine stay
-there, since that domain's scope is clinical and population health rather
-than biology itself.
 
 ### Notes on the less obvious four
 
@@ -326,7 +313,7 @@ to fill headings — puzzles that exist because a domain looked empty rather
 than because the topic had genuine cluster structure. That is the opposite
 of every design rule in AUTHORING.md.
 
-Treat the twelve domains as **a vocabulary committed to now and a
+Treat the eleven domains as **a vocabulary committed to now and a
 navigation layer switched on late.** The vocabulary costs nothing and
 prevents renaming later; the navigation is worth building only once it is
 describing something real.
