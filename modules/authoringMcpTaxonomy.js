@@ -1,4 +1,8 @@
-import { slugify } from "../puzzles/categories.js";
+import {
+  categoriesForPuzzle,
+  categoryIdFor,
+  slugify
+} from "../puzzles/categories.js";
 import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import {
   validateCatalogueCreation,
@@ -109,13 +113,50 @@ export function mergeCategoryRegistry(gitCategories = {}, categoryRows = []) {
   return registry;
 }
 
-export function existingCategoryRecords(gitCategories = {}, categoryRows = []) {
+// Publication is category registration.  A published puzzle can therefore
+// supply the first live reference to a category; a separate category row is
+// optional metadata layered on top of it.  Keep the registry title-keyed for
+// the existing category helpers, using the stable puzzle reference as the
+// synthetic slug when no metadata row exists yet.
+export function mergePublishedCategoryReferences(registry = {}, publishedPuzzles = []) {
+  const merged = { ...registry };
+  for (const puzzle of publishedPuzzles) {
+    const references = categoriesForPuzzle(puzzle, {});
+    for (const reference of references) {
+      const id = categoryIdFor(reference, merged) || slugify(reference);
+      if (!id) continue;
+      const alreadyPresent = Object.entries(merged).some(([title, metadata]) =>
+        (metadata?.slug || slugify(title)) === id
+      );
+      if (!alreadyPresent) merged[reference] = { slug: id };
+    }
+  }
+  return merged;
+}
+
+export function existingCategoryRecords(
+  gitCategories = {},
+  categoryRows = [],
+  publishedPuzzles = []
+) {
   const byId = new Map();
+  for (const puzzle of publishedPuzzles) {
+    for (const category of categoriesForPuzzle(puzzle, gitCategories)) {
+      const id = categoryIdFor(category, gitCategories) || slugify(category);
+      if (!id) continue;
+      byId.set(id, {
+        id,
+        title: category,
+        metadataRegistered: false
+      });
+    }
+  }
   for (const [name, meta] of Object.entries(gitCategories)) {
     const id = meta?.slug || slugify(name);
     byId.set(id, {
       id,
       title: name,
+      metadataRegistered: true,
       ...(meta?.previousTitles?.length ? { previousTitles: [...meta.previousTitles] } : {})
     });
   }
@@ -125,6 +166,7 @@ export function existingCategoryRecords(gitCategories = {}, categoryRows = []) {
     byId.set(document.id, {
       id: document.id,
       title: document.title,
+      metadataRegistered: true,
       ...(document.previousTitles?.length
         ? { previousTitles: [...document.previousTitles] }
         : {})
@@ -234,7 +276,8 @@ export async function loadCatalogueDocument({
   contentDocuments,
   contentService,
   actor,
-  catalogueId
+  catalogueId,
+  allowGitFallback = true
 }) {
   const draft = await draftRowOrNull(contentDocuments, "catalogue", catalogueId, actor);
   if (draft?.document) {
@@ -247,6 +290,12 @@ export async function loadCatalogueDocument({
       document: clone(published.document),
       revision: published.revision
     };
+  }
+  if (!allowGitFallback) {
+    throw new Error(
+      `No published D1 catalogue document exists for "${catalogueId}". ` +
+      "MCP does not fall back to Git; run the explicit D1 bootstrap/import first."
+    );
   }
   if (typeof contentService?.getCatalogueDocument === "function") {
     return {
@@ -262,10 +311,11 @@ export async function loadCatalogueDocument({
 export function listMergedCatalogues({
   contentService,
   publishedCatalogues = [],
-  catalogueDrafts = []
+  catalogueDrafts = [],
+  includeGit = true
 } = {}) {
   return mergeCatalogueDocuments({
-    gitCatalogues: gitCataloguesFromService(contentService),
+    gitCatalogues: includeGit ? gitCataloguesFromService(contentService) : [],
     publishedRows: publishedCatalogues,
     drafts: catalogueDrafts
   });
@@ -274,26 +324,31 @@ export function listMergedCatalogues({
 export function listMergedCategoryRegistry({
   contentService,
   publishedCategories = [],
-  categoryDrafts = []
+  categoryDrafts = [],
+  includeGit = true,
+  publishedPuzzles = []
 } = {}) {
-  return mergeCategoryRegistry(
-    gitCategoriesFromService(contentService),
+  return mergePublishedCategoryReferences(mergeCategoryRegistry(
+    includeGit ? gitCategoriesFromService(contentService) : {},
     [...publishedCategories, ...categoryDrafts]
-  );
+  ), publishedPuzzles);
 }
 
 // Standalone category-only fetch for callers that need the live merged
-// registry (git ∪ D1 published ∪ D1 draft) without the catalogue/puzzle
-// rows loadTaxonomyRows also gathers -- e.g. a puzzle draft page's
-// validate-on-load, which only cares about category/subcategory ids.
+// registry without the catalogue/puzzle rows loadTaxonomyRows also gathers --
+// e.g. a puzzle draft page's validate-on-load, which only cares about
+// category/subcategory ids. `includeGit` remains available to non-MCP
+// checkout-aware callers; MCP passes false so D1 is its only live source.
 /**
- * @param {{ contentDocuments?: any, contentService?: any, actor?: any }} options
+ * @param {{ contentDocuments?: any, contentService?: any, actor?: any, includeGit?: boolean }} options
  * @returns {Promise<Record<string, any>>}
  */
 export async function loadMergedCategoryRegistry({
   contentDocuments,
   contentService,
-  actor
+  actor,
+  includeGit = true,
+  publishedPuzzles = []
 } = {}) {
   const [publishedCategories, categoryDrafts] = await Promise.all([
     listRows(contentDocuments, "listPublished", {
@@ -309,18 +364,23 @@ export async function loadMergedCategoryRegistry({
   return listMergedCategoryRegistry({
     contentService,
     publishedCategories: publishedCategories.filter(row => !row.withdrawnAt),
-    categoryDrafts
+    categoryDrafts,
+    includeGit,
+    publishedPuzzles
   });
 }
 
 export function listMergedCategoryRecords({
   contentService,
   publishedCategories = [],
-  categoryDrafts = []
+  categoryDrafts = [],
+  includeGit = true,
+  publishedPuzzles = []
 } = {}) {
   return existingCategoryRecords(
-    gitCategoriesFromService(contentService),
-    [...publishedCategories, ...categoryDrafts]
+    includeGit ? gitCategoriesFromService(contentService) : {},
+    [...publishedCategories, ...categoryDrafts],
+    publishedPuzzles
   );
 }
 
@@ -328,14 +388,17 @@ export function listCategorySummaries({
   contentService,
   puzzles,
   publishedCategories = [],
-  categoryDrafts = []
+  categoryDrafts = [],
+  includeGit = true,
+  registeredPuzzles = puzzles
 } = {}) {
   const registry = listMergedCategoryRegistry({
     contentService,
     publishedCategories,
-    categoryDrafts
+    categoryDrafts,
+    includeGit
   });
-  return categorySummaries(puzzles, registry);
+  return categorySummaries(puzzles, registry, { registeredPuzzles });
 }
 
 export function getMergedCategory({
@@ -343,32 +406,44 @@ export function getMergedCategory({
   puzzles,
   name,
   publishedCategories = [],
-  categoryDrafts = []
+  categoryDrafts = [],
+  includeGit = true,
+  registeredPuzzles = puzzles
 } = {}) {
   const registry = listMergedCategoryRegistry({
     contentService,
     publishedCategories,
-    categoryDrafts
+    categoryDrafts,
+    includeGit
   });
   const resolved = resolveCategoryName(registry, name);
   if (!resolved) {
-    return categorySummary(puzzles, registry, name);
+    return categorySummary(puzzles, registry, name, { registeredPuzzles });
   }
-  return categorySummary(puzzles, registry, resolved);
+  return categorySummary(puzzles, registry, resolved, { registeredPuzzles });
 }
 
 export function categoryInputDocument({
   name,
   contentService,
   publishedCategories = [],
-  categoryDrafts = []
+  categoryDrafts = [],
+  includeGit = true,
+  registeredPuzzles = []
 } = {}) {
   const registry = listMergedCategoryRegistry({
     contentService,
     publishedCategories,
-    categoryDrafts
+    categoryDrafts,
+    includeGit
   });
-  const title = resolveCategoryName(registry, name);
+  let title = resolveCategoryName(registry, name);
+  if (!title) {
+    const categoryId = categoryIdFor(name, registry);
+    title = registeredPuzzles
+      .flatMap(puzzle => categoriesForPuzzle(puzzle, registry))
+      .find(category => categoryIdFor(category, registry) === categoryId) || null;
+  }
   if (!title) return null;
   const slug = registry[title]?.slug || slugify(title);
   const draft = categoryDrafts.find(row =>

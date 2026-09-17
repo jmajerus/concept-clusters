@@ -4,8 +4,9 @@
 // `category` as its primary disciplinary home and may add `categories` when
 // more than one discipline materially structures it.
 //
-// Category metadata is purely additive: an unregistered category still works,
-// but has no authored subtitle on its overview screen.
+// Category metadata is purely additive: publishing a puzzle reference
+// registers the category, while a metadata entry supplies its authored
+// subtitle, domain, and subcategory definitions.
 //
 // Shape: { slug, info, subcategories }, all optional. Subcategory object keys
 // are stable category ids; their titles are display copy. A puzzle assignment
@@ -709,8 +710,8 @@ export function subcategoryById(category, subcategoryId, registry = CATEGORIES) 
   return definition ? { id: subcategoryId, ...definition } : null;
 }
 
-// null for an unregistered category (e.g. "Film") -- that's expected, not
-// an error; see the "Other subjects" bucket in overviewRenderer.js.
+// null for a category without authored metadata (e.g. "Film") -- that's
+// expected, not an error; see the "Other subjects" bucket in overviewRenderer.js.
 export function domainForCategory(category, registry = CATEGORIES) {
   return categoryMetadataFor(category, registry)?.domain || null;
 }

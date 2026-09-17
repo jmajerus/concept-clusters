@@ -10,7 +10,16 @@ function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
-export function categorySummaries(puzzles, categories) {
+export function categorySummaries(
+  puzzles,
+  categories,
+  { registeredPuzzles = puzzles } = {}
+) {
+  const publishedCategoryIds = new Set(
+    registeredPuzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
+      .map(category => categoryIdFor(category, categories))
+      .filter(Boolean)
+  );
   const names = new Set([
     ...Object.keys(categories),
     ...puzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
@@ -35,7 +44,10 @@ export function categorySummaries(puzzles, categories) {
     return {
       name,
       slug: metadata?.slug || categoryIdFor(name, categories) || slugify(name),
-      registered: !!metadata,
+      // A published puzzle reference is itself category registration. A
+      // separate category document only enriches that registered category
+      // with display metadata and subcategory definitions.
+      registered: !!metadata || publishedCategoryIds.has(categoryIdFor(name, categories)),
       puzzleCount: members.length,
       primaryPuzzleCount: members.filter(puzzle =>
         categoryIdFor(primaryCategoryForPuzzle(puzzle, categories), categories) ===
@@ -48,8 +60,8 @@ export function categorySummaries(puzzles, categories) {
   });
 }
 
-export function categorySummary(puzzles, categories, name) {
-  const category = categorySummaries(puzzles, categories)
+export function categorySummary(puzzles, categories, name, options = {}) {
+  const category = categorySummaries(puzzles, categories, options)
     .find(item => item.name === categoryTitleFor(name, categories));
   if (!category) {
     throw new Error(

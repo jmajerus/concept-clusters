@@ -143,9 +143,12 @@ export function createHostedAuthoringContentService({
 
   /**
    * @param {any} document
-   * @param {{ categoryRegistry?: Record<string, any> }} options
+   * @param {{ categoryRegistry?: Record<string, any>, knownPuzzleIds?: Iterable<string> }} options
    */
-  function validatePuzzleDraft(document, { categoryRegistry = categories } = {}) {
+  function validatePuzzleDraft(
+    document,
+    { categoryRegistry = categories, knownPuzzleIds: validationPuzzleIds = null } = {}
+  ) {
     // Safety net: a draft may have been saved with input that didn't
     // convert (create/save store it as given rather than rejecting).
     // Re-running the same conversion here means this reports formatted,
@@ -167,7 +170,7 @@ export function createHostedAuthoringContentService({
     if (!puzzle) return { valid: false, errors: conversionErrors, flags: [] };
     const errors = [...conversionErrors];
     try {
-      const relatedIds = new Set(knownPuzzleIds);
+      const relatedIds = new Set(validationPuzzleIds || knownPuzzleIds);
       relatedIds.add(puzzle.id);
       for (const entry of puzzle.relatedPuzzles?.entries || []) {
         if (entry?.id) relatedIds.add(entry.id);

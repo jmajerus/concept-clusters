@@ -1,4 +1,5 @@
 import { GIT_SEED_ACTOR, isPendingFreezeCue } from "./contentFreezePlan.js";
+import { nonCryptographicHash } from "./nonCryptographicHash.js";
 
 function stablePlan(plan = {}) {
   const kinds = ["puzzles", "catalogues", "categories"];
@@ -9,12 +10,7 @@ function stablePlan(plan = {}) {
   }]));
 }
 
-async function hash(value) {
-  const bytes = new TextEncoder().encode(JSON.stringify(value));
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return `sha256:${[...new Uint8Array(digest)]
-    .map(byte => byte.toString(16).padStart(2, "0")).join("")}`;
-}
+const hash = value => nonCryptographicHash(value);
 
 function changesFor(plan = {}) {
   const verbs = [["add", "Add"], ["update", "Update"], ["remove", "Remove"]];
@@ -103,7 +99,7 @@ export function createFreezePublicationService({ github, repository }) {
       const plan = stablePlan(freeze.plan);
       const changes = Array.isArray(freeze.changes) ? freeze.changes : [];
       if (!changes.length) throw new Error("Freeze did not produce any Git changes");
-      const planHash = await hash({ plan, changes });
+      const planHash = hash({ plan, changes });
       const summary = freezeCommitSummary(plan);
       const context = String(additionalContext || "").trim();
       let active = await repository.findActive();

@@ -26,7 +26,7 @@ describe("D1 draft repository", () => {
       document,
       actor
     });
-    expect(created.contentHash).toMatch(/^sha256:/);
+    expect(created.contentHash).toMatch(/^fnv1a64:/);
     expect(created.title).toBe("D1 draft fixture");
     expect(created.revision).toBe(1);
 

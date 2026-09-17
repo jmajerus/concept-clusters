@@ -17,7 +17,9 @@ export function createLocalDraftRepository(draftStore) {
       return {
         ...record,
         id: record.draftId,
-        contentHash: await draftContentHash(record.document)
+        // Keep an installed legacy SHA-256 marker stable until the draft is
+        // edited. New or hashless records use the synchronous fingerprint.
+        contentHash: record.contentHash || draftContentHash(record.document)
       };
     },
     async save({ draftId, document, expectedRevision }) {

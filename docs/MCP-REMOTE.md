@@ -13,18 +13,20 @@ Remote HTTP MCP  ── D1 drafts ── optional held publication
 Human authoring workflow ───────────────────── Cue + LAN Freeze ── GitHub
 ```
 
-The lifecycle boundary is intentional. Authoring D1 is the source of truth
-for play and working copies. Git freeze is a snapshot out of that store.
-Authoring D1 seeds published puzzle snapshots from git for LAN play; an MCP
-working copy is created by `create_puzzle_draft`, optionally with
-`seed_from_published`. Production play still loads git.
+The lifecycle boundary is intentional. Authoring D1 is the sole runtime source
+of truth for MCP reads, play, and working copies. Git Freeze is a snapshot out
+of that store. Git-to-D1 seeding is an explicit bootstrap/import operation;
+MCP never silently falls back to Git or seeds a missing row while answering a
+read. An MCP working copy is created by `create_puzzle_draft`, optionally with
+`seed_from_published`, but that option requires the puzzle already to have a
+published D1 row. Production play still loads Git.
 
 A draft is one mutable row: an integer `revision` is an optimistic-concurrency
 token for multi-pass saves (`expected_revision` on `save_puzzle_draft`), not a
 ledger of old documents. Real publication history is Git, once a Cue and a
 Freeze carry a puzzle's authoring-play snapshot into a release pull request.
-D1's job is only to hold the current working state of something not yet
-frozen.
+D1 holds the current working state and the held published authoring-play
+snapshot of something not yet frozen.
 
 An agent may compose an entire simplified puzzle and store it in one
 `create_puzzle_draft` call. Guidance/schema phases are optional aids, not
@@ -151,29 +153,26 @@ Freeze writes git and opens the release pull request that eventually
 reaches production; merging that pull request stays a separate human
 action, so Freeze does not update the bundled player by itself.
 
-`list_categories` and `get_category` expose both categories with explicit
-registry metadata and categories inferred from published puzzles. Their
-summaries include slugs, puzzle counts, and any configured subcategories.
+`list_categories` and `get_category` expose categories registered by published
+D1 puzzle references, with any explicit D1 category metadata layered on top.
+Their summaries include slugs, puzzle counts, and configured subcategories.
+Publication is registration: a category named by a published puzzle exists in
+the live taxonomy even when no separate category document has been created.
 
-When a draft is the first puzzle in a genuinely new category,
-`create_category` registers its metadata (title, introductory `info`, optional
-slug, optional subcategory definitions) as a D1 working copy. Set the puzzle
-document's `category` to that category's stable id. `create_category`, `update_category`,
+When a category needs display metadata (title, introductory `info`, optional
+domain, or subcategory definitions), use `create_category` or
+`update_category` as a D1 working copy. Set the puzzle document's `category`
+to that category's stable id. `create_category`, `update_category`,
 `create_catalogue`, `update_catalogue`, `update_meta_catalogue`, and
 `save_puzzle_draft` accept `publish_to_authoring: true` to promote their
 valid D1 working copy in the same call. That publishes it held, never cued:
 a human still chooses Cue and Freeze before production.
 
 `create_catalogue` / `preview_catalogue_creation` and their update
-counterparts `update_catalogue` / `preview_update_catalogue` likewise treat
-the configured GitHub base branch as authority for entry membership and
-existing catalogue ids: a puzzle counts if `content/puzzles/<id>.ccpuzzle.json`
-exists on that commit, or if it is already registered in `puzzles/index.js`.
-Agents linking a catalogue to recently merged puzzles should use known ids
-rather than waiting for the Worker-bundled `list_puzzles` snapshot to
-redeploy -- this is what makes `update_catalogue` usable to add a puzzle to
-a catalogue authored ahead of it, right after the Freeze that includes that
-puzzle merges, without an authoring Worker redeploy in between.
+counterparts `update_catalogue` / `preview_update_catalogue` use published D1
+puzzle ids and catalogue rows. Import or publish the needed D1 rows before
+linking a catalogue; the MCP endpoint does not consult the Git checkout for
+membership validation.
 `update_catalogue` sends the catalogue's whole
 `{id, title, info, entries}` document, not a single-entry patch: it
 replaces the entries list wholesale, so an omitted existing entry is

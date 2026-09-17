@@ -520,8 +520,9 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   \`save_puzzle_draft\` for a confirmed final edit; this publishes a valid
   document to authoring play in that same call, but it remains held and is
   not cued for Freeze. Cue and Freeze are outside MCP. Set
-  \`category\` / \`categories\` / \`subcategories\` on this document; register
-  new category metadata with create_category; add or remove catalogue
+  \`category\` / \`categories\` / \`subcategories\` on this document; publication
+  registers each referenced category, while create_category or update_category
+  adds optional category metadata and subcategories; add or remove catalogue
   membership with get_catalogue then update_catalogue (or update_meta_catalogue
   when editing a meta catalogue). Publication review
   evaluates the whole puzzle, not merely this metadata pass.`;
@@ -538,20 +539,21 @@ export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
 
 A puzzle's category association is on the puzzle document: stable category id in \`category\`,
 optional \`categories\`, and optional \`subcategories\`. Save those with
-save_puzzle_draft. Register category metadata (title, domain, blurb,
-subcategory definitions) with create_category / update_category — the same D1
+save_puzzle_draft; publication registers each referenced category. Add category
+metadata (title, domain, blurb, subcategory definitions) with create_category /
+update_category — the same D1
 working-copy store used by the authoring service. Call list_categories / get_category
-first; those include live D1 rows, not only git.
+first; those read the live D1 taxonomy. Git is not an MCP fallback.
 
 A catalogue is a curated selection with a real audience, theme, or learning
 purpose, not another name for a category. Call list_catalogues before creating
-one, and get_catalogue before updating one. Those reads prefer your D1 working
-copy, then the D1 published row, then git.
+one, and get_catalogue before updating one. Those reads use your D1 working
+copy or the D1 published row. Git is not an MCP fallback.
 
 create_catalogue and update_catalogue receive the complete ordinary-catalogue document
 and write D1 working copies. They do not open a GitHub pull request. Updating
 replaces the whole entries list, so preserve every entry that should remain.
-Entry puzzle ids must already exist in authoring play or git. Preview tools
+Entry puzzle ids must already exist in published D1. Preview tools
 validate that document and never write. Set publish_to_authoring=true only
 when a valid catalogue or category write is explicitly confirmed; it remains
 held and is not cued for Freeze. To edit an existing meta catalogue, call
@@ -630,12 +632,16 @@ export function localAuthoringGuidance(env = envProcess()) {
       "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. JSON-LD " +
       "is interchange-only (content:export/import) and is not accepted as a " +
       "stored draft. Author in the simplified format get_authoring_schema documents.",
-    workflowMechanics: `Discover existing subjects with list_categories before choosing category ids.
+    workflowMechanics: `Use list_categories to reuse existing subjects when appropriate. A genuinely
+new subject does not need a category document first: choose a stable URL-safe
+category id and publication registers it. Do not move a puzzle to a parent
+category solely because the new id is not yet listed.
 Drafts may be temporarily invalid. Save with save_puzzle_draft, then
 validate and address every error. Do not write learningIntroduction.credit;
 human-owned attribution is supplied separately when needed.
-Set stable category ids in category / categories / subcategories on the puzzle document. Register
-new category metadata with create_category. Add or remove catalogue membership
+Set stable category ids in category / categories / subcategories on the puzzle document. Publication
+registers each referenced category; use create_category or update_category for optional
+category metadata. Add or remove catalogue membership
 with get_catalogue then update_catalogue; those write D1 working copies.
 ${mcpPublicationBoundaryGuidance()} Stdio MCP stores
 drafts in the same D1 database hosted MCP uses, scoped to
@@ -654,14 +660,18 @@ export const LOCAL_AUTHORING_GUIDANCE = localAuthoringGuidance();
 
 export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   formatNotes: "This is the only supported authoring shape.",
-  workflowMechanics: `Discover existing subjects with list_categories before choosing category ids.
+  workflowMechanics: `Use list_categories to reuse existing subjects when appropriate. A genuinely
+new subject does not need a category document first: choose a stable URL-safe
+category id and publication registers it. Do not move a puzzle to a parent
+category solely because the new id is not yet listed.
 Drafts may be temporarily invalid. Retrieve the latest draft, save with
 expected_revision, then validate and address every error.
 When you draft or materially regenerate content with generative AI, do not
 write learningIntroduction.credit; human-owned attribution is supplied
 separately when needed.
-Set stable category ids in category / categories / subcategories on the puzzle document. Register
-new category metadata with create_category; its optional domain must be one
+Set stable category ids in category / categories / subcategories on the puzzle document. Publication
+registers each referenced category; use create_category or update_category for optional
+category metadata; its optional domain must be one
 of the ids list_categories/get_category report (a small fixed vocabulary).
 Add or remove ordinary catalogue membership with get_catalogue then
 update_catalogue. For a meta catalogue, use get_catalogue then

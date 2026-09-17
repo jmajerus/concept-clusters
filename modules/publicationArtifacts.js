@@ -1,4 +1,5 @@
 import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
+import { nonCryptographicHash } from "./nonCryptographicHash.js";
 
 function dirname(path) {
   const index = path.lastIndexOf("/");
@@ -285,7 +286,7 @@ export function unregisterCategorySource(source, name, previousNames = []) {
   return next;
 }
 
-export async function publicationApprovalToken({
+export function publicationApprovalToken({
   baseCommitSha = null,
   changes,
   options = {}
@@ -299,11 +300,5 @@ export async function publicationApprovalToken({
       content: change.content
     }))
   });
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(payload)
-  );
-  return `sha256:${[...new Uint8Array(digest)]
-    .map(byte => byte.toString(16).padStart(2, "0"))
-    .join("")}`;
+  return nonCryptographicHash(payload);
 }

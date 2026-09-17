@@ -127,7 +127,7 @@ anything ever imports from it directly):
 | `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |
 | `categoryValidation.js` | Repository-aware subcategory registry and assignment validation | `contentValidation.js`, `puzzles/categories.js` |
 | `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
-| `repositoryPublicationService.js` | Deterministic import plans, approval hashes, file preconditions, transactional publication, rollback, and live registry updates; backs `tools/content-jsonld.mjs`'s `content:import` only, not MCP | `contentInterchangeService.js`, Node filesystem/process APIs |
+| `repositoryPublicationService.js` | Deterministic import plans, approval fingerprints, file preconditions, transactional publication, rollback, and live registry updates; backs `tools/content-jsonld.mjs`'s `content:import` only, not MCP | `contentInterchangeService.js`, Node filesystem/process APIs |
 | `puzzleDraftStore.js` | File-backed draft remnant for tests; not the stdio default | Node filesystem APIs |
 | `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch` | `fetch` |
 | `localD1Config.js` | Account, database, token, and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
@@ -146,7 +146,7 @@ anything ever imports from it directly):
 | `playCorpus.js` | Assemble Library browse (with search prose) and owner drafts from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
 | `localPlayCorpus.js` | LAN play corpus and published layout save route; inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js`, `layoutDocument.js` |
 | `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
-| `authoringPuzzleSearch.js` | MCP search: git ∪ published D1 ∪ owner drafts; `full_text` searches prose without a `text:` prefix | `librarySearch.js`, `puzzleBrowse.js` |
+| `authoringPuzzleSearch.js` | MCP search: published D1 ∪ owner drafts; checkout-aware callers may also supply Git; `full_text` searches prose without a `text:` prefix | `librarySearch.js`, `puzzleBrowse.js` |
 | `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Publish & Cue, Cue/Hold, Revert, withdraw, delete working copy | `contentDocumentRepository.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
@@ -159,7 +159,7 @@ anything ever imports from it directly):
 | `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the GitHub production snapshot of `puzzles/manifest.js` | Node filesystem APIs |
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/draft services | official MCP server SDK, Zod, shared services |
-| `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
+| `draftRepository.js` | Runtime-neutral draft repository contract, limits, fingerprints, errors, and in-memory reference implementation | `nonCryptographicHash.js` |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document, optional draft layout document, `expectedRevision` OCC, and a capped working-copy undo stack | D1 binding, `draftRepository.js`, `layoutDocument.js` |
 | `hostedAuthoringContentService.js` | Worker-safe published-content discovery, JSON-LD validation, guidance, and Git-transition previews | puzzle/catalogue registries and runtime-neutral validators |
 | `hostedMcpAuthoringServer.js` | Focused authenticated hosted tool/resource surface | official MCP server SDK, draft/content services |

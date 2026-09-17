@@ -294,7 +294,7 @@ describe("hosted authoring Worker", () => {
     const creation = await rpcJson(created) as {
       result: { structuredContent: { draft: { contentHash: string } } };
     };
-    expect(creation.result.structuredContent.draft.contentHash).toMatch(/^sha256:/);
+    expect(creation.result.structuredContent.draft.contentHash).toMatch(/^fnv1a64:/);
 
     const validated = await rpc({
       jsonrpc: "2.0",

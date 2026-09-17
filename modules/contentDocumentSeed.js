@@ -375,15 +375,29 @@ export function openPuzzleWorkingCopyLocation(puzzleId, { variant = "hosted" } =
  * @param {{
  *   contentDocuments?: object | null,
  *   contentService?: object | null,
+ *   allowGitFallback?: boolean,
  *   puzzleId: string
  * }} args
  */
 export async function resolvePuzzleDocumentForDraft({
   contentDocuments = null,
   contentService = null,
-  puzzleId
+  puzzleId,
+  allowGitFallback = true
 }) {
   if (contentDocuments) {
+    try {
+      const published = await contentDocuments.getPublished?.({
+        kind: "puzzle",
+        id: puzzleId
+      });
+      if (published?.document && !published.withdrawnAt) {
+        return clone(published.document);
+      }
+    } catch (error) {
+      if (!(error instanceof ContentDocumentNotFoundError)) throw error;
+    }
+    if (!allowGitFallback) return null;
     const seeded = await seedPublishedPuzzleIfAbsent(
       contentDocuments,
       contentService,
@@ -391,6 +405,7 @@ export async function resolvePuzzleDocumentForDraft({
     );
     if (seeded?.document) return clone(seeded.document);
   }
+  if (!allowGitFallback) return null;
   if (!contentService?.getPuzzleDocument) return null;
   try {
     const document = await contentService.getPuzzleDocument(puzzleId);
@@ -409,7 +424,9 @@ export async function resolvePuzzleDocumentForDraft({
  *   contentDocuments?: object | null,
  *   contentService?: object | null,
  *   categoryRegistry?: object | null,
- *   puzzleId: string
+ *   allowGitFallback?: boolean,
+ *   draftId?: string,
+ *   puzzleId?: string
  * }} args
  * @returns {Promise<{ draft: { draftId?: string, puzzleId?: string, revision?: number, document?: Record<string, any> }, created: boolean }>}
  */
@@ -419,6 +436,7 @@ export async function loadOrSeedPuzzleDraft({
   contentDocuments = null,
   contentService = null,
   categoryRegistry = null,
+  allowGitFallback = true,
   draftId,
   puzzleId
 }) {
@@ -428,6 +446,7 @@ export async function loadOrSeedPuzzleDraft({
     contentDocuments,
     contentService,
     categoryRegistry,
+    allowGitFallback,
     puzzleId: draftId || puzzleId
   });
 }
@@ -439,6 +458,7 @@ export async function loadOrSeedPuzzleDraft({
  *   contentDocuments?: object | null,
  *   contentService?: object | null,
  *   categoryRegistry?: object | null,
+ *   allowGitFallback?: boolean,
  *   puzzleId: string
  * }} args
  * @returns {Promise<{ draft: { draftId?: string, puzzleId?: string, revision?: number, document?: Record<string, any> }, created: boolean }>}
@@ -449,6 +469,7 @@ export async function openPuzzleWorkingCopy({
   contentDocuments = null,
   contentService = null,
   categoryRegistry = null,
+  allowGitFallback = true,
   puzzleId
 }) {
   if (typeof getDraft !== "function" || typeof createDraft !== "function") {
@@ -464,10 +485,15 @@ export async function openPuzzleWorkingCopy({
   const sourceDocument = await resolvePuzzleDocumentForDraft({
     contentDocuments,
     contentService,
-    puzzleId: id
+    puzzleId: id,
+    allowGitFallback
   });
   if (!sourceDocument) {
-    throw Object.assign(new Error(`Unknown puzzle: ${id}`), { status: 404 });
+    const message = allowGitFallback
+      ? `Unknown puzzle: ${id}`
+      : `No published D1 puzzle document exists for "${id}". ` +
+        "MCP does not fall back to Git; run the explicit D1 bootstrap/import first.";
+    throw Object.assign(new Error(message), { status: 404 });
   }
   // Published rows feeding the authoring workflow are already simplified.
   // JSON-LD belongs at the explicit interchange boundary; do not silently

@@ -1,7 +1,7 @@
 // This file retains its historical name, but createAuthoringMcpServer is the
 // runtime-neutral canonical tool/resource registry used by both hosted HTTP
 // and local stdio MCP. Keep Node-only checkout behavior in mcpAuthoringServer.
-import { McpServer } from "@modelcontextprotocol/server";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import { DOMAINS } from "../puzzles/categories.js";
 import {
@@ -47,7 +47,6 @@ import { publishedRowOrNull } from "./contentDocumentRepository.js";
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   filterAuthoringPuzzles,
-  gitPuzzlesFromService,
   mergeAuthoringSearchPuzzles,
   searchAuthoringPuzzles
 } from "./authoringPuzzleSearch.js";
@@ -62,7 +61,6 @@ import {
   listMergedCategoryRecords,
   listMergedCategoryRegistry,
   loadCatalogueDocument,
-  loadMergedCategoryRegistry,
   loadTaxonomyRows,
   previewCatalogueWrite,
   previewCategoryWrite,
@@ -337,7 +335,7 @@ function serverInstructions() {
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
     mcpPublicationBoundaryGuidance() + " " +
-    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category, catalogue, or puzzle draft write to promote it to authoring play without cueing Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category.";
+    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Publishing the puzzle registers each referenced category; an absent category metadata row is not a reason to move the puzzle to a parent category or call create_category. Use create_category or update_category only to add or revise optional category metadata and subcategories. Those writes are D1 working copies; set publish_to_authoring=true on a valid category, catalogue, or puzzle draft write to promote it to authoring play without cueing Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
 
 export function createAuthoringMcpServer({
@@ -354,6 +352,17 @@ export function createAuthoringMcpServer({
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
+
+  function requireD1ContentDocuments(operation = "read") {
+    if (contentDocumentsConfigured === false ||
+        typeof contentDocuments?.listPublished !== "function") {
+      throw new Error(
+        `MCP ${operation} requires the D1 content-document repository. ` +
+        "Git is not a runtime fallback; run the explicit D1 bootstrap/import first."
+      );
+    }
+    return contentDocuments;
+  }
 
   async function persistContentDocument(kind, document, publishToAuthoring = false) {
     if (typeof contentDocuments?.createDraft !== "function") {
@@ -387,29 +396,36 @@ export function createAuthoringMcpServer({
   }
 
   async function taxonomyContext() {
+    requireD1ContentDocuments("content reads");
     const rows = await loadTaxonomyRows(contentDocuments, actor);
-    const gitPuzzles = gitPuzzlesFromService(contentService);
     return {
       ...rows,
-      gitPuzzles,
       puzzleIds: knownPuzzleIds({
-        gitPuzzles,
         publishedPuzzles: rows.publishedPuzzles
       }),
       catalogues: cataloguesForValidation(listMergedCatalogues({
-        contentService,
+        contentService: null,
         publishedCatalogues: rows.publishedCatalogues,
-        catalogueDrafts: rows.catalogueDrafts
+        catalogueDrafts: rows.catalogueDrafts,
+        includeGit: false
       })),
       categoryRegistry: listMergedCategoryRegistry({
-        contentService,
+        contentService: null,
         publishedCategories: rows.publishedCategories,
-        categoryDrafts: rows.categoryDrafts
+        categoryDrafts: rows.categoryDrafts,
+        includeGit: false,
+        publishedPuzzles: rows.publishedPuzzles
+          .map(row => row.document)
+          .filter(Boolean)
       }),
       existingCategories: listMergedCategoryRecords({
-        contentService,
+        contentService: null,
         publishedCategories: rows.publishedCategories,
-        categoryDrafts: rows.categoryDrafts
+        categoryDrafts: rows.categoryDrafts,
+        includeGit: false,
+        publishedPuzzles: rows.publishedPuzzles
+          .map(row => row.document)
+          .filter(Boolean)
       })
     };
   }
@@ -418,18 +434,12 @@ export function createAuthoringMcpServer({
   // forward needs the merged registry but none of taxonomyContext's
   // puzzle/catalogue rows.
   async function categoryRegistry() {
-    // The legacy file-backed stdio MCP has no D1 content repository. Keep its
-    // category reads git-only instead of probing the lazy D1 adapter;
-    // configured hosted/D1 callers still load the live merged registry.
-    if (contentDocumentsConfigured === false) {
-      return listMergedCategoryRegistry({ contentService });
-    }
-    return loadMergedCategoryRegistry({ contentDocuments, contentService, actor });
+    requireD1ContentDocuments("category reads");
+    return (await taxonomyContext()).categoryRegistry;
   }
 
   async function authoringPuzzles({ categoryRegistry = null } = {}) {
     return mergeAuthoringSearchPuzzles({
-      gitPuzzles: gitPuzzlesFromService(contentService),
       publishedRows: await publishedPuzzleRows(),
       drafts: await ownerDrafts(),
       categoryRegistry
@@ -438,7 +448,6 @@ export function createAuthoringMcpServer({
 
   async function publishedAuthoringPuzzles({ categoryRegistry = null } = {}) {
     return mergeAuthoringSearchPuzzles({
-      gitPuzzles: gitPuzzlesFromService(contentService),
       publishedRows: await publishedPuzzleRows(),
       categoryRegistry
     });
@@ -447,8 +456,13 @@ export function createAuthoringMcpServer({
   async function publishedPuzzleDocument(puzzleId, categoryRegistry = null) {
     const published = (await publishedPuzzleRows())
       .find(row => row.id === puzzleId && row.document);
-    const document = published?.document || contentService.getPuzzleDocument(puzzleId);
-    return documentForMcp(document, { categoryRegistry });
+    if (!published) {
+      throw new Error(
+        `No published D1 puzzle document exists for "${puzzleId}". ` +
+        "MCP does not fall back to Git; run the explicit D1 bootstrap/import first."
+      );
+    }
+    return documentForMcp(published.document, { categoryRegistry });
   }
 
   function puzzleListSummary(puzzle) {
@@ -475,8 +489,8 @@ export function createAuthoringMcpServer({
   const tracked = (toolName, handler) => track(analytics, toolName, handler);
 
   async function publishedPuzzleRows() {
-    if (typeof contentDocuments?.listPublished !== "function") return [];
-    const rows = await contentDocuments.listPublished({ kind: "puzzle" });
+    const d1 = requireD1ContentDocuments("puzzle reads");
+    const rows = await d1.listPublished({ kind: "puzzle" });
     return Array.isArray(rows) ? rows : [];
   }
 
@@ -531,30 +545,36 @@ export function createAuthoringMcpServer({
     })
   );
 
-  for (const puzzle of contentService.puzzles || []) {
-    server.registerResource(
-      `puzzle-${puzzle.id}`,
-      `concept-clusters://puzzles/${puzzle.id}`,
-      {
-        title: puzzle.title,
-        description: `Published puzzle document for ${puzzle.title}, in the simplified authoring format.`,
-        mimeType: "application/json"
-      },
-      async uri => ({
-        contents: [{
-          uri: uri.href,
-          mimeType: "application/json",
-          text: JSON.stringify(
-            documentForMcp(await contentService.getPuzzleDocument(puzzle.id), {
-              categoryRegistry: await categoryRegistry()
-            }),
-            null,
-            2
-          )
-        }]
+  server.registerResource(
+    "published-puzzle",
+    new ResourceTemplate("concept-clusters://puzzles/{puzzle_id}", {
+      list: async () => ({
+        resources: (await publishedPuzzleRows()).map(row => ({
+          uri: `concept-clusters://puzzles/${row.id}`,
+          name: `puzzle-${row.id}`,
+          title: row.document?.title || row.id,
+          description: `Published D1 puzzle document for ${row.document?.title || row.id}, in the simplified authoring format.`,
+          mimeType: "application/json"
+        }))
       })
-    );
-  }
+    }),
+    {
+      title: "Published D1 puzzle",
+      description: "A published puzzle document read from D1. Git is not a fallback.",
+      mimeType: "application/json"
+    },
+    async (uri, variables) => ({
+      contents: [{
+        uri: uri.href,
+        mimeType: "application/json",
+        text: JSON.stringify(
+          await publishedPuzzleDocument(variables.puzzle_id, await categoryRegistry()),
+          null,
+          2
+        )
+      }]
+    })
+  );
 
   server.registerTool("probe_mcp_client", {
     title: "Probe MCP client identity",
@@ -627,7 +647,6 @@ export function createAuthoringMcpServer({
   }) => {
     const taxonomy = await taxonomyContext();
     const puzzles = mergeAuthoringSearchPuzzles({
-      gitPuzzles: taxonomy.gitPuzzles,
       publishedRows: taxonomy.publishedPuzzles,
       drafts: await ownerDrafts(),
       categoryRegistry: taxonomy.categoryRegistry
@@ -661,39 +680,51 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_categories", {
     title: "List categories",
-    description: "List the subject taxonomy with slugs, metadata-registration state, subcategories, and puzzle counts. Includes live D1 working copies and published rows, not only git.",
+    description: "List the subject taxonomy with registration state, optional metadata, subcategories, and puzzle counts from D1 working copies and published rows. A published puzzle reference registers its category; Git is not a runtime fallback.",
     inputSchema: z.object({}),
     annotations: READ_ONLY
   }, tracked("list_categories", safe(async () => {
     const taxonomy = await taxonomyContext();
     const categories = listCategorySummaries({
-      contentService,
+      contentService: null,
       puzzles: await authoringPuzzles({ categoryRegistry: taxonomy.categoryRegistry }),
       publishedCategories: taxonomy.publishedCategories,
-      categoryDrafts: taxonomy.categoryDrafts
+      categoryDrafts: taxonomy.categoryDrafts,
+      includeGit: false,
+      registeredPuzzles: taxonomy.publishedPuzzles
+        .map(row => row.document)
+        .filter(Boolean)
     });
     return success(`Found ${categories.length} categories.`, { categories });
   })));
 
   server.registerTool("get_category", {
     title: "Get category",
-    description: "Return one category's navigation metadata, subcategories, and puzzle counts, plus the D1/git document in update_category's input shape. Name may be the display title or stable category id.",
+    description: "Return one category's navigation metadata, subcategories, and puzzle counts, plus the D1 document in update_category's input shape. Name may be the display title or stable category id.",
     inputSchema: z.object({ name: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_category", safe(async ({ name }) => {
     const taxonomy = await taxonomyContext();
     const category = getMergedCategory({
-      contentService,
+      contentService: null,
       puzzles: await authoringPuzzles({ categoryRegistry: taxonomy.categoryRegistry }),
       name,
       publishedCategories: taxonomy.publishedCategories,
-      categoryDrafts: taxonomy.categoryDrafts
+      categoryDrafts: taxonomy.categoryDrafts,
+      includeGit: false,
+      registeredPuzzles: taxonomy.publishedPuzzles
+        .map(row => row.document)
+        .filter(Boolean)
     });
     const document = categoryInputDocument({
       name,
-      contentService,
+      contentService: null,
       publishedCategories: taxonomy.publishedCategories,
-      categoryDrafts: taxonomy.categoryDrafts
+      categoryDrafts: taxonomy.categoryDrafts,
+      includeGit: false,
+      registeredPuzzles: taxonomy.publishedPuzzles
+        .map(row => row.document)
+        .filter(Boolean)
     });
     return success(`Loaded category ${name}.`, {
       category,
@@ -713,15 +744,17 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_catalogue", {
     title: "Get catalogue",
-    description: "Return one catalogue document. Prefers your D1 working copy, then the D1 published row, then git. Ordinary catalogues return update_catalogue's input shape; meta catalogues return update_meta_catalogue's input shape.",
+    description: "Return one catalogue document. Prefers your D1 working copy, then the D1 published row. Git is not a runtime fallback. Ordinary catalogues return update_catalogue's input shape; meta catalogues return update_meta_catalogue's input shape.",
     inputSchema: z.object({ catalogue_id: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_catalogue", safe(async ({ catalogue_id }) => {
+    requireD1ContentDocuments("catalogue reads");
     const loaded = await loadCatalogueDocument({
       contentDocuments,
-      contentService,
+      contentService: null,
       actor,
-      catalogueId: catalogue_id
+      catalogueId: catalogue_id,
+      allowGitFallback: false
     });
     return success(`Loaded catalogue ${catalogue_id}.`, {
       catalogueId: catalogue_id,
@@ -739,9 +772,10 @@ export function createAuthoringMcpServer({
   }, tracked("list_catalogues", safe(async () => {
     const taxonomy = await taxonomyContext();
     const catalogues = listMergedCatalogues({
-      contentService,
+      contentService: null,
       publishedCatalogues: taxonomy.publishedCatalogues,
-      catalogueDrafts: taxonomy.catalogueDrafts
+      catalogueDrafts: taxonomy.catalogueDrafts,
+      includeGit: false
     }).map(catalogueSummaryOf);
     return success(`Found ${catalogues.length} catalogues.`, { catalogues });
   })));
@@ -781,7 +815,7 @@ export function createAuthoringMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from a supplied complete document or a minimal skeleton. The server canonicalizes the supplied document before assigning revision 1, and the response is already in that canonical authoring shape; no follow-up normalization save is needed. A complete simplified puzzle may be authored and saved in this one call; get_authoring_schema and phased guidance are optional, never prerequisites. This input is deliberately permissive because drafts may also be incomplete. Set seed_from_published=true with puzzle_id to copy a published (or git-seeded) snapshot into a working copy without overwriting an existing draft.",
+      "Create a private durable draft from a supplied complete document or a minimal skeleton. The server canonicalizes the supplied document before assigning revision 1, and the response is already in that canonical authoring shape; no follow-up normalization save is needed. A complete simplified puzzle may be authored and saved in this one call; get_authoring_schema and phased guidance are optional, never prerequisites. This input is deliberately permissive because drafts may also be incomplete. Set seed_from_published=true with puzzle_id to copy a published D1 snapshot into a working copy without overwriting an existing draft. Git is not a runtime fallback.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -831,6 +865,7 @@ export function createAuthoringMcpServer({
         }),
         contentDocuments,
         contentService,
+        allowGitFallback: false,
         categoryRegistry: await categoryRegistry(),
         puzzleId
       });
@@ -1009,7 +1044,8 @@ export function createAuthoringMcpServer({
       }
       const taxonomy = await taxonomyContext();
       const validation = await contentService.validatePuzzleDraft(draft.document, {
-        categoryRegistry: taxonomy.categoryRegistry
+        categoryRegistry: taxonomy.categoryRegistry,
+        knownPuzzleIds: taxonomy.puzzleIds
       });
       if (validation.valid) {
         const puzzleId = typeof draft.document?.id === "string" ? draft.document.id : draft.puzzleId;
@@ -1120,7 +1156,8 @@ export function createAuthoringMcpServer({
     const validation = withStorageCanonicalizeFlags(
       stored.document,
       await contentService.validatePuzzleDraft(stored.document, {
-        categoryRegistry: taxonomy.categoryRegistry
+        categoryRegistry: taxonomy.categoryRegistry,
+        knownPuzzleIds: taxonomy.puzzleIds
       }),
       { categoryRegistry: taxonomy.categoryRegistry }
     );
@@ -1197,7 +1234,8 @@ export function createAuthoringMcpServer({
     if (action === "complete") {
       const taxonomy = await taxonomyContext();
       const validation = await contentService.validatePuzzleDraft(stored.document, {
-        categoryRegistry: taxonomy.categoryRegistry
+        categoryRegistry: taxonomy.categoryRegistry,
+        knownPuzzleIds: taxonomy.puzzleIds
       });
       if (!validation.valid) {
         throw new Error(`Draft ${draft_id} is not valid; fix and validate it before recording a review.`);
@@ -1266,7 +1304,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("preview_catalogue_creation", {
     title: "Preview catalogue creation",
-    description: "Optional: validate a new catalogue document against authoring play and git puzzle ids without writing. create_catalogue runs the same checks, so this isn't a required precondition.",
+    description: "Optional: validate a new catalogue document against D1 published puzzle ids without writing. create_catalogue runs the same checks, so this isn't a required precondition.",
     inputSchema: catalogueDocumentSchema,
     annotations: READ_ONLY
   }, tracked("preview_catalogue_creation", safe(async args => {
@@ -1286,7 +1324,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Save a new catalogue working copy to D1. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Entry puzzle ids must already exist in authoring play or git. Call list_catalogues first.",
+    description: "Save a new catalogue working copy to D1. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Entry puzzle ids must already exist in published D1. Call list_catalogues first.",
     inputSchema: catalogueWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1316,7 +1354,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("preview_update_catalogue", {
     title: "Preview catalogue update",
-    description: "Optional: validate a complete replacement document for an EXISTING catalogue without writing. Send the whole entries list, not just what changed. Entry puzzle ids must exist in authoring play or git. Meta catalogues aren't supported yet.",
+    description: "Optional: validate a complete replacement document for an EXISTING catalogue without writing. Send the whole entries list, not just what changed. Entry puzzle ids must exist in published D1. Meta catalogues aren't supported yet.",
     inputSchema: catalogueDocumentSchema,
     annotations: READ_ONLY
   }, tracked("preview_update_catalogue", safe(async args => {
@@ -1396,7 +1434,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_category", {
     title: "Create category",
-    description: "Save a new category working copy to D1. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. The category id is the stable join used by puzzle category/category[] references; title is display copy. Does not open a GitHub pull request.",
+    description: "Save optional metadata for a category in a D1 working copy. Publishing a puzzle reference is what registers the category; this tool adds display metadata, domain, info, or subcategory definitions. Set publish_to_authoring=true to publish that valid metadata copy to authoring play in the same call; it remains held and is not cued for Freeze. The category id is the stable join used by puzzle category/category[] references; title is display copy. Does not open a GitHub pull request.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_category", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1418,7 +1456,7 @@ export function createAuthoringMcpServer({
     return success(
       published
         ? `Saved and published category ${record.id} to authoring play; it is held from Freeze.`
-        : `Saved category working copy ${record.id}. Set puzzle.category to "${record.id}" if this puzzle belongs here; the category title is display copy.`,
+        : `Saved category metadata working copy ${record.id}. Publishing a puzzle with category "${record.id}" registers it; the category title is display copy.`,
       { valid: true, errors: [], category: record, published }
     );
   })));

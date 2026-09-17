@@ -157,7 +157,7 @@ export function createRepositoryPublicationService({
       original: await currentFile(path),
       content
     })));
-    const token = await publicationApprovalToken({ changes });
+    const token = publicationApprovalToken({ changes });
     return {
       action: existing ? "replace" : "create",
       puzzle,

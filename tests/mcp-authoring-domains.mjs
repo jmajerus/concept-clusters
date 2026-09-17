@@ -8,6 +8,7 @@ import {
 } from "@modelcontextprotocol/server";
 import { createConceptClustersMcpServer } from "../modules/mcpAuthoringServer.js";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
+import { seededMcpContentDocuments } from "./mcp-fixtures.mjs";
 
 export const name = "MCP authoring domains: focused reads and scoped saves";
 
@@ -50,8 +51,11 @@ async function sessionFor(server) {
 
 export async function run() {
   const directory = await mkdtemp(join(tmpdir(), "concept-clusters-domains-"));
+  const content = createContentInterchangeService();
+  const contentDocuments = await seededMcpContentDocuments(content, { puzzleIds: [] });
   const server = createConceptClustersMcpServer({
-    contentService: createContentInterchangeService(),
+    contentService: content,
+    contentDocuments,
     draftDirectory: directory
   });
   const session = await sessionFor(server);
