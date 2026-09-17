@@ -1,6 +1,6 @@
 // Light-DOM custom element for the classification section on /admin/drafts.
 // The server renders a subcategory <select> for every registry category
-// that defines subcategories, each tagged with its category name; this
+// that defines selectable subcategories, each tagged with its category name; this
 // element shows only the ones whose category is the current primary or a
 // ticked secondary, and disables the rest so they do not submit. Without
 // JavaScript every selector is visible and the server still rejects a

@@ -4,9 +4,10 @@
 // `category` as its primary disciplinary home and may add `categories` when
 // more than one discipline materially structures it.
 //
-// Category metadata is purely additive: publishing a puzzle reference
-// registers the category, while a metadata entry supplies its authored
-// subtitle, domain, and subcategory definitions.
+// In the live authoring store, a published category-editor document is what
+// registers a category. This Git registry remains the production/legacy
+// snapshot; checkout-aware compatibility helpers may still infer registration
+// from a published puzzle reference when they explicitly use that mode.
 //
 // Shape: { slug, info, subcategories }, all optional. Subcategory object keys
 // are stable category ids; their titles are display copy. A puzzle assignment

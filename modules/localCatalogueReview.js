@@ -40,10 +40,13 @@ import { isSameOriginRequest } from "./draftReviewSubmit.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
-import { categorySummaries } from "./categoryDiscovery.js";
 import {
-  gitCategoriesFromService,
+  CATEGORY_REGISTRATION_MODES,
+  categorySummaries
+} from "./categoryDiscovery.js";
+import {
   loadMergedCategoryRegistry,
+  listMergedCategoryRegistry,
   mergeCategoryRegistry
 } from "./authoringMcpTaxonomy.js";
 
@@ -700,14 +703,19 @@ export function createLocalCatalogueReviewHandler({
         contentDocuments.listDrafts({ kind: "category", actor, includeDocument: true }),
         livePuzzleDocuments()
       ]);
-      // Same identity categorySummaries itself resolves puzzles against: git
-      // ∪ D1-published ∪ D1-draft categories, keyed by title (git's registry
-      // key; a D1 row's `id` is a separate lowercase slug).
-      const registry = mergeCategoryRegistry(
-        gitCategoriesFromService(contentService),
-        [...published, ...working]
-      );
-      const summaries = categorySummaries(puzzles, registry);
+      // The category editor is the bootstrap/import path for the static
+      // snapshot. Once rows exist in D1, the puzzle editor and this page use
+      // the same published-category-document registration semantics.
+      const registry = listMergedCategoryRegistry({
+        contentService: null,
+        publishedCategories: published.filter(row => !row.withdrawnAt),
+        categoryDrafts: working,
+        includeGit: false,
+        publishedPuzzles: puzzles
+      });
+      const summaries = categorySummaries(puzzles, registry, {
+        registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
+      });
       html(res, renderCategoryListPage(decorateFreezeAdd(
         decorateCoverageCounts(listCategoryRows(published, working), summaries),
         gitIdsFromContentService(contentService).categories

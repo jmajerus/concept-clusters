@@ -144,10 +144,10 @@ export function validateCategoryDocument(
     ? existing.find(item => item.title === title && item.id !== id)
     : null;
   if (mode === "create") {
-    // A published puzzle reference registers the category even when no
-    // metadata document exists yet. `create_category` may still add that
-    // optional metadata; only a category that already has metadata is a
-    // duplicate create.
+    // An unresolved published-puzzle reference may be surfaced so an agent
+    // can repair it, but only a category document is registration. Allow
+    // create_category to publish the missing document for that reference;
+    // only a category that already has metadata is a duplicate create.
     if (matchById && matchById.metadataRegistered !== false) {
       errors.push(`Category "${id}" already exists`);
     }
