@@ -10,16 +10,26 @@ function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
+export const CATEGORY_REGISTRATION_MODES = Object.freeze({
+  PUZZLE_REFERENCE: "puzzle-reference",
+  PUBLISHED_DOCUMENT: "published-document"
+});
+
 export function categorySummaries(
   puzzles,
   categories,
-  { registeredPuzzles = puzzles } = {}
+  {
+    registeredPuzzles = puzzles,
+    registrationMode = CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
+  } = {}
 ) {
-  const publishedCategoryIds = new Set(
-    registeredPuzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
-      .map(category => categoryIdFor(category, categories))
-      .filter(Boolean)
-  );
+  const puzzleRegisteredCategoryIds = registrationMode === CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
+    ? new Set(
+      registeredPuzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
+        .map(category => categoryIdFor(category, categories))
+        .filter(Boolean)
+    )
+    : new Set();
   const names = new Set([
     ...Object.keys(categories),
     ...puzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
@@ -44,10 +54,13 @@ export function categorySummaries(
     return {
       name,
       slug: metadata?.slug || categoryIdFor(name, categories) || slugify(name),
-      // A published puzzle reference is itself category registration. A
-      // separate category document only enriches that registered category
-      // with display metadata and subcategory definitions.
-      registered: !!metadata || publishedCategoryIds.has(categoryIdFor(name, categories)),
+      // A published category-editor document (or a Git category in a
+      // checkout-aware caller) registers the category in published-document
+      // mode. The default preserves the legacy Git-backed contract, where a
+      // published puzzle reference is enough to register a category.
+      registered: (
+        !!metadata && metadata.registered !== false && metadata.inferred !== true
+      ) || puzzleRegisteredCategoryIds.has(categoryIdFor(name, categories)),
       puzzleCount: members.length,
       primaryPuzzleCount: members.filter(puzzle =>
         categoryIdFor(primaryCategoryForPuzzle(puzzle, categories), categories) ===

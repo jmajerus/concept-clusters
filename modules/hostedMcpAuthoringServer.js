@@ -45,6 +45,7 @@ import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import { publishedRowOrNull } from "./contentDocumentRepository.js";
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
+import { CATEGORY_REGISTRATION_MODES } from "./categoryDiscovery.js";
 import {
   filterAuthoringPuzzles,
   mergeAuthoringSearchPuzzles,
@@ -335,7 +336,7 @@ function serverInstructions() {
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
     mcpPublicationBoundaryGuidance() + " " +
-    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Publishing the puzzle registers each referenced category; an absent category metadata row is not a reason to move the puzzle to a parent category or call create_category. Use create_category or update_category only to add or revise optional category metadata and subcategories. Those writes are D1 working copies; set publish_to_authoring=true on a valid category, catalogue, or puzzle draft write to promote it to authoring play without cueing Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
+    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and publishing remains held from Cue/Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
 
 export function createAuthoringMcpServer({
@@ -680,7 +681,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_categories", {
     title: "List categories",
-    description: "List the subject taxonomy with registration state, optional metadata, subcategories, and puzzle counts from D1 working copies and published rows. A published puzzle reference registers its category; Git is not a runtime fallback.",
+    description: "List the subject taxonomy from D1 category-editor working copies and published rows, with registration state, metadata, subcategories, and puzzle counts. A published D1 category document is registered even when no puzzle references it yet. Git, including puzzles/categories.js, is not a runtime fallback.",
     inputSchema: z.object({}),
     annotations: READ_ONLY
   }, tracked("list_categories", safe(async () => {
@@ -693,14 +694,15 @@ export function createAuthoringMcpServer({
       includeGit: false,
       registeredPuzzles: taxonomy.publishedPuzzles
         .map(row => row.document)
-        .filter(Boolean)
+        .filter(Boolean),
+      registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
     });
     return success(`Found ${categories.length} categories.`, { categories });
   })));
 
   server.registerTool("get_category", {
     title: "Get category",
-    description: "Return one category's navigation metadata, subcategories, and puzzle counts, plus the D1 document in update_category's input shape. Name may be the display title or stable category id.",
+    description: "Return one D1 category's navigation metadata, subcategories, and puzzle counts, plus the published or working-copy document in update_category's input shape. A category-editor publication is authoritative even when Git has no matching entry. Name may be the display title or stable category id.",
     inputSchema: z.object({ name: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_category", safe(async ({ name }) => {
@@ -714,7 +716,8 @@ export function createAuthoringMcpServer({
       includeGit: false,
       registeredPuzzles: taxonomy.publishedPuzzles
         .map(row => row.document)
-        .filter(Boolean)
+        .filter(Boolean),
+      registrationMode: CATEGORY_REGISTRATION_MODES.PUBLISHED_DOCUMENT
     });
     const document = categoryInputDocument({
       name,
@@ -782,7 +785,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft.",
+    description: "Return complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
   }, tracked("get_authoring_guidance", safe(async ({ phase }) => success(
@@ -1434,7 +1437,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_category", {
     title: "Create category",
-    description: "Save optional metadata for a category in a D1 working copy. Publishing a puzzle reference is what registers the category; this tool adds display metadata, domain, info, or subcategory definitions. Set publish_to_authoring=true to publish that valid metadata copy to authoring play in the same call; it remains held and is not cued for Freeze. The category id is the stable join used by puzzle category/category[] references; title is display copy. Does not open a GitHub pull request.",
+    description: "Create a category document in a D1 working copy. Publishing that category document registers the category; set publish_to_authoring=true to publish the valid document to authoring play in the same call, before authoring puzzles that reference it. The published row is authoritative even when Git, including puzzles/categories.js, has no matching entry. The category id is the stable join used by puzzle category/category[] references; title is display copy. The publication remains held and is not cued for Freeze. Does not open a GitHub pull request.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_category", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1456,7 +1459,7 @@ export function createAuthoringMcpServer({
     return success(
       published
         ? `Saved and published category ${record.id} to authoring play; it is held from Freeze.`
-        : `Saved category metadata working copy ${record.id}. Publishing a puzzle with category "${record.id}" registers it; the category title is display copy.`,
+        : `Saved category working copy ${record.id}. Publish this category document before relying on it as registered live taxonomy; the category id is the stable join used by puzzle references.`,
       { valid: true, errors: [], category: record, published }
     );
   })));

@@ -4,6 +4,7 @@ import {
   renderDraftPage as renderDraftPageRaw,
   renderPuzzleReviewIssuesPage
 } from "../modules/draftReviewPage.js";
+import { listMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 
@@ -188,6 +189,62 @@ export async function run() {
   assert.match(twoRegistryPage, /<label data-subcategory-for="Ethnobotany">Ethnobotany subcategory <select[^>]*name="c\d+\.subcategoryId">/);
   assert.match(twoRegistryPage, /<label data-subcategory-for="Meteorology" hidden>Meteorology subcategory <select[^>]*name="c\d+\.subcategoryId" disabled>/);
   assert.match(twoRegistryPage, /name="c\d+\.subcategoryCategory" value="Meteorology" disabled>/);
+
+  // The live admin registry is D1-only when a content-document adapter is
+  // present. A published category document is selectable even with no puzzle
+  // membership; a category draft is visible to authoring reads but must not
+  // become a new puzzle classification choice.
+  const d1CategoryRegistry = listMergedCategoryRegistry({
+    contentService: null,
+    includeGit: false,
+    publishedCategories: [{
+      id: "botany",
+      document: {
+        id: "botany",
+        title: "Botany",
+        subcategories: { horticulture: { title: "Horticulture" } }
+      }
+    }],
+    categoryDrafts: [{
+      id: "draft-only",
+      document: {
+        id: "draft-only",
+        title: "Draft Only",
+        subcategories: { provisional: { title: "Provisional" } }
+      }
+    }]
+  });
+  const d1List = renderDraftListPage([], {
+    variant: "local",
+    categoryRegistry: d1CategoryRegistry
+  });
+  assert.match(d1List, /<option value="Botany"><\/option>/);
+  assert.doesNotMatch(d1List, /<option value="Draft Only"><\/option>/);
+  const d1Page = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      category: "botany",
+      subcategories: { botany: "horticulture" }
+    }
+  }, { categoryRegistry: d1CategoryRegistry });
+  assert.match(d1Page, /<option value="Botany" selected>Botany<\/option>/);
+  assert.match(d1Page, /Botany subcategory/);
+  assert.match(d1Page, /<option value="horticulture" selected>Horticulture<\/option>/);
+  assert.doesNotMatch(d1Page, /value="Draft Only"/);
+
+  // Existing unresolved assignments remain editable/preservable, but do not
+  // make the unresolved category or subcategory an available new choice.
+  const unresolvedPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      category: "zoology",
+      subcategories: { zoology: "field-biology" }
+    }
+  }, { categoryRegistry: d1CategoryRegistry });
+  assert.match(unresolvedPage, /<option value="zoology" selected>zoology \(not registered\)<\/option>/);
+  assert.match(unresolvedPage, /<option value="field-biology" selected>field-biology \(not registered\)<\/option>/);
   assert.match(liveRegistryPage, /<span class="badge[^"]*">Ethnobotany: Plant Lore<\/span>/);
 
   const identicalPlay = renderDraftPage({

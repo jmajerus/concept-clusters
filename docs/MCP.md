@@ -188,10 +188,14 @@ the MCP client’s policy and cannot be overridden by this Worker.
 
 The following progressive workflow remains useful for agents that need it:
 
-1. Call `list_categories` to reuse the published taxonomy when appropriate. A
-   genuinely new subject may use a new stable URL-safe category id; publishing
-   the puzzle registers it, so do not move it to a parent category merely
-   because that id is not listed yet. For a new board,
+1. Call `list_categories` or `get_category` for the live D1 taxonomy. A
+   genuinely new subject should first be created and published in the category
+   editor (or with `create_category` / `update_category` and
+   `publish_to_authoring: true`); that published category document is the
+   registration event, even if no puzzle references it yet. Do not infer
+   absence from `puzzles/categories.js` or another Git checkout, and do not
+   move a puzzle to a parent category because a static Git view omits a
+   category that is published in D1. For a new board,
    call `create_puzzle_draft` with a skeleton (`puzzle_id`, `title`,
    `   category`) or a supplied document. To edit a puzzle that predates D1
    drafts, call `create_puzzle_draft` with `seed_from_published: true` and
@@ -219,9 +223,10 @@ The following progressive workflow remains useful for agents that need it:
    `publish_to_authoring: true` to promote a confirmed valid save to a held
    D1 authoring snapshot in the same call; it does not Cue that snapshot.
    Set `category` /
-   `categories` / `subcategories` on the draft; publication registers each
-   referenced category, while `create_category` or `update_category` adds
-   optional metadata and subcategory definitions; add or remove catalogue membership with
+   `categories` / `subcategories` on the draft after its category-editor
+   document is published to D1. That category publication is the registration
+   event; `create_category` or `update_category` creates or revises the
+   category document. Add or remove catalogue membership with
    `get_catalogue` then `update_catalogue` (or `update_meta_catalogue` for a
    meta catalogue). Those tools accept `publish_to_authoring: true` to
    promote a valid category or catalogue working copy to authoring play in

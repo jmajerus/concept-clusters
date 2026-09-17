@@ -3,7 +3,11 @@ import {
   categoryIdFor,
   slugify
 } from "../puzzles/categories.js";
-import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
+import {
+  CATEGORY_REGISTRATION_MODES,
+  categorySummaries,
+  categorySummary
+} from "./categoryDiscovery.js";
 import {
   validateCatalogueCreation,
   validateCatalogueUpdate,
@@ -100,10 +104,30 @@ export function mergeCategoryRegistry(gitCategories = {}, categoryRows = []) {
     const document = row?.document;
     const entry = categoryRegistryEntryFromDocument(document);
     if (!document?.title || !document?.id || !entry) continue;
+    if (row?._mcpRegistered === true) entry.registered = true;
+    if (row?._mcpRegistered === false) entry.registered = false;
+    if (row?._mcpInferred === true) {
+      entry.registered = false;
+      entry.inferred = true;
+    }
     // D1 is authoritative for a category id.  A rename keeps the same slug,
     // so remove the retired Git/D1 key before overlaying the live document;
     // otherwise taxonomy listings expose both names and alias resolution can
     // be suppressed by the stale entry.
+    const prior = Object.entries(registry).find(([name, metadata]) =>
+      (metadata?.slug || slugify(name)) === entry.slug
+    )?.[1];
+    if (
+      prior &&
+      prior.registered !== false &&
+      prior.inferred !== true &&
+      entry.registered === false
+    ) {
+      // An owner's unpublished draft may overlay a published category. Keep
+      // the category registered while exposing the draft's latest metadata.
+      entry.registered = true;
+      delete entry.inferred;
+    }
     for (const [name, metadata] of Object.entries(registry)) {
       const existingId = metadata?.slug || slugify(name);
       if (existingId === entry.slug) delete registry[name];
@@ -113,11 +137,10 @@ export function mergeCategoryRegistry(gitCategories = {}, categoryRows = []) {
   return registry;
 }
 
-// Publication is category registration.  A published puzzle can therefore
-// supply the first live reference to a category; a separate category row is
-// optional metadata layered on top of it.  Keep the registry title-keyed for
-// the existing category helpers, using the stable puzzle reference as the
-// synthetic slug when no metadata row exists yet.
+// Keep unresolved puzzle references visible for authoring repair, but do not
+// mistake a puzzle field for category registration. Registration comes from a
+// published category-editor document; the synthetic entry is explicitly
+// marked unregistered until that document exists.
 export function mergePublishedCategoryReferences(registry = {}, publishedPuzzles = []) {
   const merged = { ...registry };
   for (const puzzle of publishedPuzzles) {
@@ -128,7 +151,9 @@ export function mergePublishedCategoryReferences(registry = {}, publishedPuzzles
       const alreadyPresent = Object.entries(merged).some(([title, metadata]) =>
         (metadata?.slug || slugify(title)) === id
       );
-      if (!alreadyPresent) merged[reference] = { slug: id };
+      if (!alreadyPresent) {
+        merged[reference] = { slug: id, registered: false, inferred: true };
+      }
     }
   }
   return merged;
@@ -328,9 +353,17 @@ export function listMergedCategoryRegistry({
   includeGit = true,
   publishedPuzzles = []
 } = {}) {
+  const publishedRows = publishedCategories.map(row => ({
+    ...row,
+    _mcpRegistered: true
+  }));
+  const draftRows = categoryDrafts.map(row => ({
+    ...row,
+    _mcpRegistered: false
+  }));
   return mergePublishedCategoryReferences(mergeCategoryRegistry(
     includeGit ? gitCategoriesFromService(contentService) : {},
-    [...publishedCategories, ...categoryDrafts]
+    [...publishedRows, ...draftRows]
   ), publishedPuzzles);
 }
 
@@ -347,7 +380,11 @@ export async function loadMergedCategoryRegistry({
   contentDocuments,
   contentService,
   actor,
-  includeGit = true,
+  // A live content-document repository is the upstream source for authoring
+  // reads, including the human admin editor. Keep Git as the explicit
+  // fallback only for callers that have no D1 adapter (legacy/file-backed
+  // local workspaces and checkout-aware utilities can still pass true).
+  includeGit = typeof contentDocuments?.listPublished !== "function",
   publishedPuzzles = []
 } = {}) {
   const [publishedCategories, categoryDrafts] = await Promise.all([
@@ -390,7 +427,8 @@ export function listCategorySummaries({
   publishedCategories = [],
   categoryDrafts = [],
   includeGit = true,
-  registeredPuzzles = puzzles
+  registeredPuzzles = puzzles,
+  registrationMode = CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
 } = {}) {
   const registry = listMergedCategoryRegistry({
     contentService,
@@ -398,7 +436,10 @@ export function listCategorySummaries({
     categoryDrafts,
     includeGit
   });
-  return categorySummaries(puzzles, registry, { registeredPuzzles });
+  return categorySummaries(puzzles, registry, {
+    registeredPuzzles,
+    registrationMode
+  });
 }
 
 export function getMergedCategory({
@@ -408,7 +449,8 @@ export function getMergedCategory({
   publishedCategories = [],
   categoryDrafts = [],
   includeGit = true,
-  registeredPuzzles = puzzles
+  registeredPuzzles = puzzles,
+  registrationMode = CATEGORY_REGISTRATION_MODES.PUZZLE_REFERENCE
 } = {}) {
   const registry = listMergedCategoryRegistry({
     contentService,
@@ -418,9 +460,15 @@ export function getMergedCategory({
   });
   const resolved = resolveCategoryName(registry, name);
   if (!resolved) {
-    return categorySummary(puzzles, registry, name, { registeredPuzzles });
+    return categorySummary(puzzles, registry, name, {
+      registeredPuzzles,
+      registrationMode
+    });
   }
-  return categorySummary(puzzles, registry, resolved, { registeredPuzzles });
+  return categorySummary(puzzles, registry, resolved, {
+    registeredPuzzles,
+    registrationMode
+  });
 }
 
 export function categoryInputDocument({
