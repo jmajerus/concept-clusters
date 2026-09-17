@@ -159,9 +159,10 @@ the puzzle's `lensMode` -- that consistency is checked downstream (see
 ## What's authored elsewhere
 
 **Layout curation** -- positional/visual placement data for a renderer,
-authored through its own dedicated schema (the current Star schema is
-`modules/starLayoutSchema.js`), not part of puzzle content or this format's
-field set. On the D1-backed authoring server, `?author=layout` saves a
+authored through its own dedicated schema (`modules/starLayoutSchema.js`,
+`modules/graphLayoutSchema.js`, and `modules/circleLayoutSchema.js`), not part
+of puzzle content or this format's field set. On the D1-backed authoring
+server, `?author=layout&mode=graph|star|sets` saves a
 mode-neutral layout document to the current working copy's
 `puzzle_drafts.layout_json`; publishing the puzzle promotes it to
 `published_documents.layout_json`, and Freeze materializes it in the generated

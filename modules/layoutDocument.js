@@ -2,8 +2,38 @@
 // Individual renderers own the shape and validation of their mode payload;
 // this module only owns the common container and legacy Star normalization.
 
+import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
+
 export const LAYOUT_DOCUMENT_SCHEMA_VERSION = 1;
 const MAX_LAYOUT_JSON_BYTES = 900_000;
+
+function revisionSignature(puzzle) {
+  return JSON.stringify({
+    id: puzzle.id,
+    large: derivedLarge(puzzleNodeCount(puzzle)),
+    clusters: puzzle.clusters.map(cluster => ({
+      name: cluster.name,
+      terms: cluster.terms
+    })),
+    bridges: puzzle.bridges.map(bridge => ({
+      term: bridge.term,
+      clusters: bridge.clusters,
+      idealTerms: bridge.idealTerms || null
+    }))
+  });
+}
+
+// Shared invalidation token for every renderer's authored layout. It is a
+// content fingerprint, not a security primitive: changing labels, cluster
+// order, bridge topology, or ideal endpoints makes old coordinates stale.
+export function layoutRevision(puzzle) {
+  let hash = 0x811c9dc5;
+  for (const char of revisionSignature(puzzle)) {
+    hash ^= char.codePointAt(0);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return `fnv1a32:${hash.toString(16).padStart(8, "0")}`;
+}
 
 function isObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -43,6 +73,9 @@ export function layoutForMode(layout, mode) {
 }
 
 export function layoutDocumentForMode(mode, value, existing = null) {
+  if (typeof mode !== "string" || !mode.trim()) {
+    throw new Error("Layout mode is required");
+  }
   const current = normalizeLayoutDocument(existing);
   const modes = { ...(current?.modes || {}) };
   if (value == null) delete modes[mode];

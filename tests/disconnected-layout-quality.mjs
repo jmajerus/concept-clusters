@@ -68,7 +68,7 @@ export async function run(page, baseURL) {
       assert.equal(metrics.lineCrossings, 0, "Graph left crossed connections");
       assert.deepEqual(await visibleBodyOverlaps(page, false), []);
     } else if (mode === "star") {
-      const metrics = await page.evaluate(() => CC.state.getStarLayoutMetrics());
+      const metrics = await page.evaluate(() => CC.state.layoutAdapter.metrics());
       assert.equal(metrics.overlaps, 0, "Star left overlapping terms or titles");
       assert.equal(metrics.lineCrossings, 0, "Star left crossed connections");
       assert.equal(metrics.edgeNodeIntersections, 0, "Star drew a connection through a node");

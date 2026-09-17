@@ -31,7 +31,7 @@ export const CATEGORIES = {
     }
   },
   "Biology": {
-    domain: "sciences-mathematics",
+    domain: "life-sciences",
     info: {
       text: "How living systems store information, build and regulate themselves, reproduce, vary, and change over time.",
       link: "wiki:Biology"
@@ -434,7 +434,11 @@ export const DOMAINS = {
   // docs/TAXONOMY-ROADMAP.md.
   "sciences-mathematics": {
     title: "Sciences & Mathematics",
-    info: { text: "The natural and formal sciences: biology, physics, chemistry, astronomy, and the mathematics and methods common to them." }
+    info: { text: "The formal and physical sciences: physics, chemistry, astronomy, and the mathematics and methods common to them." }
+  },
+  "life-sciences": {
+    title: "Life Sciences",
+    info: { text: "Biology and its subfields: how living systems store information, build and regulate themselves, reproduce, vary, and change over time." }
   },
   "computing-engineering": {
     title: "Computing & Engineering",

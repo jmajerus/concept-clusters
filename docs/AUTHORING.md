@@ -79,8 +79,9 @@ Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
 review. Play is a clean player preview of the working copy
 (`/?draft=<id>&view=play`); Open board (`/?draft=<id>`) is Construct.
 Neither writes git. Add `&admin` for layout tools. In `?author=layout`,
-`Save Layout` stores the confirmed layout override on the working copy; it does
-not publish the puzzle. **Publish** writes the
+`Save Layout` stores the confirmed layout override for the selected Graph,
+Star, or Circle mode on the working copy; it does not publish the puzzle.
+**Publish** writes the
 shared D1 document and leaves the editor open; it is enabled only when the
 working copy is not already that snapshot. **Revert to published** appears
 only when the working copy differs from the D1 row. **Cue** means “I’m done
@@ -352,4 +353,4 @@ Use the [authoring reference](AUTHORING-REFERENCE.md) for:
 - learning-introduction packaging;
 - all lens modes and diagnostics;
 - category and subcategory registration;
-- size limits, authored Star layouts, and cluster colors.
+- size limits, authored mode-specific layouts, and cluster colors.

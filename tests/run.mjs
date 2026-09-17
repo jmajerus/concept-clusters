@@ -27,6 +27,7 @@ import * as canonicalBridgeEndpoints from "./canonical-bridge-endpoints.mjs";
 import * as starDetangle from "./star-detangle.mjs";
 import * as starPrettyPrint from "./star-pretty-print.mjs";
 import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
+import * as layoutAuthoringModes from "./layout-authoring-modes.mjs";
 import * as starFreeStrip from "./star-free-strip.mjs";
 import * as playerSessions from "./player-sessions.mjs";
 import * as circlePrettyPrint from "./circle-pretty-print.mjs";
@@ -106,7 +107,7 @@ import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 const allTests = [
   mcpAuthoringDomains,
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
-  starDetangle, starPrettyPrint, starLayoutAuthoring, starFreeStrip, playerSessions,
+  starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,

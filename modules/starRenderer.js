@@ -419,6 +419,12 @@ export function createStarRenderer({
       sim.alpha(0.6).restart();
     };
 
+    // Star's detailed geometry evaluator is built lazily with the detangler
+    // because it is also the detangler's search model. Keep the live metrics
+    // function private to this renderer and expose only its result through
+    // the shared layout adapter below.
+    let authoringLayoutMetrics = null;
+
     // Show Solution starts the same complete force-directed board a human
     // would see. The detangler waits for that board to settle, freezes it,
     // and then performs a short series of literal endpoint drags. A move
@@ -1097,41 +1103,11 @@ export function createStarRenderer({
           ? layout.minVisibleBridgeLeg
           : null
       });
+      authoringLayoutMetrics = () => layoutMetrics(evaluateLayout());
       const targetMapForLayout = layout => new Map(
         [...starLayoutTargetMap(layout, allLayoutNodes)]
           .map(([node, target]) => [node, clampTarget(node, target)])
       );
-
-      // Authoring hooks stay renderer-owned because this closure is the one
-      // place that knows about title nodes as well as terms. game.js only
-      // coordinates the panel/storage; it never reconstructs Star geometry.
-      state.getStarLayoutMetrics = () => layoutMetrics(evaluateLayout());
-      state.captureStarLayout = () => createStarLayoutDocument({
-        puzzle,
-        width: W,
-        height: H,
-        layoutNodes: allLayoutNodes,
-        metrics: state.getStarLayoutMetrics()
-      });
-      state.applyStarLayout = async layout => {
-        const validation = validateStarLayoutDocument(
-          layout,
-          puzzle,
-          { width: W, height: H },
-          { allowUnsafe: true }
-        );
-        if (!validation.valid) return validation;
-        sim.stop();
-        allLayoutNodes.forEach(node => {
-          node.fx = null; node.fy = null;
-          node.vx = 0; node.vy = 0;
-        });
-        const applied = await animateLayout(targetMapForLayout(layout));
-        if (!applied) return { valid: false, errors: ["layout application was cancelled"] };
-        const metrics = state.getStarLayoutMetrics();
-        state.onAuthorLayoutChanged?.("apply");
-        return { valid: true, errors: [], metrics };
-      };
 
       state.prettyPrint = () => {
         if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
@@ -1632,7 +1608,7 @@ export function createStarRenderer({
     // node can still be nudged. Before solve (and in ordinary play) the
     // existing force-release behavior remains unchanged.
     const frozenPlacement = () =>
-      (state.layoutAuthoring && state.made === state.need && state.captureStarLayout) ||
+      (state.layoutAuthoring && state.made === state.need && state.layoutAdapter?.mode === "star") ||
       lensLayoutEditable(state);
     const starDrag = () => d3.drag()
       .filter(event => {
@@ -1657,7 +1633,7 @@ export function createStarRenderer({
       .on("end", (e, d) => {
         const authoring = state.layoutAuthoring &&
           state.made === state.need &&
-          state.captureStarLayout;
+          state.layoutAdapter?.mode === "star";
         d.fx = null;
         d.fy = null;
         if (authoring || lensLayoutEditable(state)) {
@@ -1923,7 +1899,16 @@ export function createStarRenderer({
     // term-only and container/bridge representations.
     state.layoutAdapter = {
       mode: "star",
-      capture() {
+      capture(options = {}) {
+        if (options.purpose === "authoring") {
+          return createStarLayoutDocument({
+            puzzle,
+            width: W,
+            height: H,
+            layoutNodes: allLayoutNodes,
+            metrics: state.layoutAdapter.metrics()
+          });
+        }
         return createStarPlayerLayoutDocument({
           puzzle,
           width: W,
@@ -1933,7 +1918,39 @@ export function createStarRenderer({
           viewBoxY: freeStripActive ? -liveStripHeight : 0
         });
       },
-      apply(layout) {
+      apply(layout, options = {}) {
+        if (options.purpose === "authoring") {
+          const validation = validateStarLayoutDocument(
+            layout,
+            puzzle,
+            { width: options.width ?? W, height: options.height ?? H },
+            { allowUnsafe: options.allowUnsafe === true }
+          );
+          if (!validation.valid) return validation;
+          sim.stop();
+          allLayoutNodes.forEach(node => {
+            node.fx = null; node.fy = null;
+            node.vx = 0; node.vy = 0;
+          });
+          const targets = new Map(
+            [...starLayoutTargetMap(layout, allLayoutNodes)]
+              .map(([node, target]) => [node, {
+                x: Math.max(node.w / 2 + 6, Math.min(W - node.w / 2 - 6, target.x)),
+                y: Math.max(22, Math.min(H - 22, target.y))
+              }])
+          );
+          return animatePositionTargets({
+            targets,
+            duration: layoutTransitionDuration(850),
+            render: renderPositions,
+            isCurrent: () => getState() === state && getSim() === sim
+          }).then(applied => {
+            if (!applied) return { valid: false, errors: ["layout application was cancelled"] };
+            const metrics = state.layoutAdapter.metrics();
+            state.onAuthorLayoutChanged?.("apply");
+            return { valid: true, errors: [], metrics };
+          });
+        }
         const validation = validateStarPlayerLayoutDocument(
           layout,
           puzzle,
@@ -1955,6 +1972,29 @@ export function createStarRenderer({
         renderPositions();
         state.paint();
         return { valid: true, errors: [] };
+      },
+      validate(layout, options = {}) {
+        if (options.purpose === "authoring") {
+          return validateStarLayoutDocument(
+            layout,
+            puzzle,
+            { width: options.width ?? W, height: options.height ?? H },
+            { allowUnsafe: options.allowUnsafe === true }
+          );
+        }
+        return validateStarPlayerLayoutDocument(layout, puzzle, {
+          width: options.width ?? W,
+          height: options.height ?? H
+        });
+      },
+      metrics() {
+        return authoringLayoutMetrics?.() || {
+          lineCrossings: 0,
+          edgeNodeIntersections: 0,
+          edgeTitleIntersections: 0,
+          overlaps: 0,
+          overlappingPairs: []
+        };
       },
       autoLayout: state.detangle
     };

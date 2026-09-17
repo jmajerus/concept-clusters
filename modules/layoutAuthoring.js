@@ -1,24 +1,23 @@
-// Star-mode layout authoring UI: the ?author=layout panel (prepare,
-// local drafts, validated save) and the ?admin layout actions
-// (jump into authoring, local free-strip / seed-beside-title tries).
+// Mode-neutral layout authoring UI: the ?author=layout panel (prepare,
+// local drafts, validated save) and the Star-only ?admin layout actions
+// (local free-strip / seed-beside-title tries).
 //
 // Production and the authoring-server player both gate the actions with
 // ?admin so a reviewer at `/` sees the same chrome as production.
 //
 // Schema, draft storage, and committed overrides live in
-// starLayoutSchema.js / starLayoutStore.js / starLayoutRepository.js.
+// layoutDocument.js / layoutStore.js / starLayoutRepository.js.
 // This module is the browser controller over those, using the same
 // factory-with-injected-dependencies convention as createOverviewRenderer
-// and createAppNavigation. Player-loop policy (force Star, skip sessions,
-// skip the learning gate, disable Graph/Sets) stays in game.js.
+// and createAppNavigation. Player-loop policy (skip sessions and the
+// learning gate) stays in game.js.
 
-import { validateStarLayoutDocument } from "./starLayoutSchema.js";
 import { layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
 import {
-  clearStarLayoutDraft,
-  loadStarLayoutDraft,
-  saveStarLayoutDraft
-} from "./starLayoutStore.js";
+  clearLayoutDraft,
+  loadLayoutDraft,
+  saveLayoutDraft
+} from "./layoutStore.js";
 import {
   repositoryStarFreeStrip,
   starFreeStripEnabled,
@@ -68,10 +67,10 @@ export function createLayoutAuthoringController({
   const layoutAuthoringPrepareBtn = document.getElementById("layout-authoring-prepare");
   const layoutAuthoringSaveBtn = document.getElementById("layout-authoring-save");
   const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
-  const layoutAuthoringExportBtn = document.getElementById("layout-authoring-export");
+  const layoutAuthoringSaveLayoutBtn = document.getElementById("layout-authoring-save-layout");
   const layoutAuthoringClearBtn = document.getElementById("layout-authoring-clear");
   const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
-  const starLayoutAuthorBtn = document.getElementById("star-layout-author-btn");
+  const layoutAuthorBtn = document.getElementById("layout-author-btn");
   const starFreeStripBtn = document.getElementById("star-free-strip-btn");
   const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
   const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
@@ -82,8 +81,8 @@ export function createLayoutAuthoringController({
   // Published layout overrides belong to the D1 authoring server. Static
   // player pages can still preview and keep a browser-local draft, but must
   // not present a file-export path that authors could mistake for publishing.
-  layoutAuthoringExportBtn.hidden = !savesToAuthoringServer;
-  layoutAuthoringExportBtn.textContent = "Save Layout";
+  layoutAuthoringSaveLayoutBtn.hidden = !savesToAuthoringServer;
+  layoutAuthoringSaveLayoutBtn.textContent = "Save Layout";
 
   function isConstructView() {
     return !!globalThis.document?.body?.classList.contains("authoring-construct");
@@ -110,13 +109,47 @@ export function createLayoutAuthoringController({
     return { width: board.width, height: board.height };
   }
 
+  function currentAdapter() {
+    const state = getState();
+    const adapter = state?.layoutAdapter;
+    return adapter?.mode === getMode() ? adapter : null;
+  }
+
+  function captureAuthorLayout() {
+    return currentAdapter()?.capture?.({ purpose: "authoring" }) || null;
+  }
+
+  function validateAuthorLayout(layout, { allowUnsafe = false } = {}) {
+    return currentAdapter()?.validate?.(layout, {
+      purpose: "authoring",
+      allowUnsafe,
+      ...boardSize()
+    }) || { valid: false, errors: ["The selected renderer cannot validate layouts"] };
+  }
+
+  function layoutMetrics() {
+    return currentAdapter()?.metrics?.() || null;
+  }
+
+  function localDraftFor(state) {
+    const { width, height } = boardSize();
+    return loadLayoutDraft(
+      storage,
+      state.puzzle,
+      getMode(),
+      width,
+      height,
+      { validate: currentAdapter()?.validate }
+    );
+  }
+
   function authoringPrepared() {
     const state = getState();
     return layoutAuthoringMode &&
-      getMode() === "star" &&
       state &&
       state.made === state.need &&
-      typeof state.captureStarLayout === "function";
+      !!currentAdapter() &&
+      typeof currentAdapter().capture === "function";
   }
 
   function setLayoutAuthoringStatus(text, tone = "") {
@@ -129,21 +162,27 @@ export function createLayoutAuthoringController({
     const state = getState();
     if (!layoutAuthoringMode || !state) return;
     const prepared = authoringPrepared();
-    const { width, height } = boardSize();
-    const draft = loadStarLayoutDraft(storage, state.puzzle, width, height);
-    const metrics = prepared ? state.getStarLayoutMetrics() : null;
+    const draft = localDraftFor(state);
+    const metrics = prepared ? layoutMetrics() : null;
+    const lineObstructions = metrics && (
+      metrics.edgeNodeIntersections ??
+      metrics.lineHeadingIntersections ??
+      metrics.lineCircleIntersections ??
+      0
+    );
+    const overlaps = metrics?.overlaps ?? metrics?.hardOverlaps ?? 0;
 
     layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
-    layoutMetricPillCrossingsEl.textContent = metrics ? metrics.edgeNodeIntersections : "—";
+    layoutMetricPillCrossingsEl.textContent = metrics ? lineObstructions : "—";
     if (!metrics) {
       layoutMetricOverlapsEl.textContent = "—";
-    } else if (metrics.overlaps > 0 && metrics.overlappingPairs?.length) {
+    } else if (overlaps > 0 && metrics.overlappingPairs?.length) {
       layoutMetricOverlapsEl.textContent =
-        `${metrics.overlaps} (${metrics.overlappingPairs.join("; ")})`;
+        `${overlaps} (${metrics.overlappingPairs.join("; ")})`;
     } else {
-      layoutMetricOverlapsEl.textContent = String(metrics.overlaps);
+      layoutMetricOverlapsEl.textContent = String(overlaps);
     }
-    layoutAuthoringDraftStateEl.textContent = savesToAuthoringServer && state.puzzle?.starLayout
+    layoutAuthoringDraftStateEl.textContent = savesToAuthoringServer && layoutForMode(state.puzzle?.layout, getMode())
       ? "D1 layout saved"
       : draft
         ? "Local draft saved"
@@ -154,17 +193,25 @@ export function createLayoutAuthoringController({
     layoutAuthoringClearBtn.disabled = !draft;
     // Metrics are advisory. Curated authoring exists because automated
     // geometry (especially the padded overlap pad) is not the final word —
-    // save when the author is ready; only true line crossings still fail
-    // schema validation on click.
-    layoutAuthoringExportBtn.disabled = !prepared || savingLayout;
+    // save when the author is ready; the selected renderer's schema
+    // validation remains the final save guard.
+    layoutAuthoringSaveLayoutBtn.disabled = !prepared || savingLayout;
   }
 
   function captureAndSaveAuthorDraft({ announce = false } = {}) {
     if (!authoringPrepared()) return null;
     const state = getState();
     const { width, height } = boardSize();
-    const layout = state.captureStarLayout();
-    const result = saveStarLayoutDraft(storage, layout, state.puzzle, width, height);
+    const layout = captureAuthorLayout();
+    const result = saveLayoutDraft(
+      storage,
+      layout,
+      state.puzzle,
+      getMode(),
+      width,
+      height,
+      { validate: currentAdapter()?.validate }
+    );
     if (announce) {
       setLayoutAuthoringStatus(
         result.valid ? "Draft saved locally." : result.errors.join("; "),
@@ -181,12 +228,17 @@ export function createLayoutAuthoringController({
     layoutAuthoringPrepareBtn.disabled = true;
     setLayoutAuthoringStatus("Preparing the generated solution…");
     try {
+      let generatedLayoutPromise = null;
       if (preparingState.made !== preparingState.need) {
         showSolution();
-      } else if (!preparingState.captureStarLayout && preparingState.detangle) {
-        preparingState.detangle();
+      } else if (preparingState.layoutAdapter?.autoLayout) {
+        generatedLayoutPromise = preparingState.layoutAdapter.autoLayout();
+      } else if (preparingState.detangle) {
+        generatedLayoutPromise = preparingState.detangle();
       }
+      if (generatedLayoutPromise?.then) await generatedLayoutPromise;
       if (preparingState.detanglePromise) await preparingState.detanglePromise;
+      if (preparingState.prettyPrintPromise) await preparingState.prettyPrintPromise;
       if (getState() !== preparingState) return;
       if (preparingState.solutionLayout === "animated" && preparingState.prettyPrint) {
         await preparingState.prettyPrint();
@@ -195,13 +247,17 @@ export function createLayoutAuthoringController({
       setLayoutAuthoringStatus("Generated layout ready — drag any node to edit it.", "good");
       updateLayoutAuthoringPanel();
       if (authoringPrepared()) {
-        const metrics = preparingState.getStarLayoutMetrics();
-        if (metrics.lineCrossings > 0) {
+        const metrics = layoutMetrics();
+        const validation = validateAuthorLayout(captureAuthorLayout());
+        if (!validation.valid) {
           setLayoutAuthoringStatus(
-            "Generated layout ready — line crossings block Save Layout; drag to clear them before saving.",
+            `Generated layout ready — ${validation.errors.join("; ")} Drag to repair the layout before saving.`,
             "error"
           );
-        } else if (metrics.edgeNodeIntersections > 0 || metrics.overlaps > 0) {
+        } else if ((metrics.edgeNodeIntersections ||
+          metrics.lineHeadingIntersections ||
+          metrics.lineCircleIntersections ||
+          0) > 0 || (metrics.overlaps || metrics.hardOverlaps || 0) > 0) {
           setLayoutAuthoringStatus(
             "Generated layout ready — overlaps/through-pills are advisory; drag to tidy if you want, or save when it looks right.",
             "good"
@@ -221,14 +277,19 @@ export function createLayoutAuthoringController({
   layoutAuthoringLoadBtn.addEventListener("click", async () => {
     if (!authoringPrepared()) return;
     const state = getState();
-    const { width, height } = boardSize();
-    const layout = loadStarLayoutDraft(storage, state.puzzle, width, height);
+    const layout = localDraftFor(state);
     if (!layout) {
       setLayoutAuthoringStatus("No compatible local draft was found.", "error");
       updateLayoutAuthoringPanel();
       return;
     }
-    const result = await state.applyStarLayout(layout);
+    // Local drafts are scratch space, so preserve the Star-era behavior of
+    // allowing an author to load an in-progress crossing and repair it on
+    // the board. The explicit D1 Save Layout validation remains strict.
+    const result = await state.layoutAdapter.apply(layout, {
+      purpose: "authoring",
+      allowUnsafe: true
+    });
     setLayoutAuthoringStatus(
       result.valid ? "Local draft loaded." : result.errors.join("; "),
       result.valid ? "good" : "error"
@@ -239,20 +300,15 @@ export function createLayoutAuthoringController({
     const state = getState();
     if (!state) return;
     const { width, height } = boardSize();
-    const cleared = clearStarLayoutDraft(storage, state.puzzle, width, height);
+    const cleared = clearLayoutDraft(storage, state.puzzle, getMode(), width, height);
     setLayoutAuthoringStatus(cleared ? "Local draft cleared." : "Draft could not be cleared.");
     updateLayoutAuthoringPanel();
   });
-  layoutAuthoringExportBtn.addEventListener("click", async () => {
+  layoutAuthoringSaveLayoutBtn.addEventListener("click", async () => {
     if (!authoringPrepared()) return;
     const state = getState();
-    const { width, height } = boardSize();
-    const layout = state.captureStarLayout();
-    const validation = validateStarLayoutDocument(
-      layout,
-      state.puzzle,
-      { width, height }
-    );
+    const layout = captureAuthorLayout();
+    const validation = validateAuthorLayout(layout);
     if (!validation.valid) {
       setLayoutAuthoringStatus(validation.errors.join("; "), "error");
       updateLayoutAuthoringPanel();
@@ -263,11 +319,15 @@ export function createLayoutAuthoringController({
     updateLayoutAuthoringPanel();
     setLayoutAuthoringStatus("Saving layout to D1…");
     try {
-      const saved = await saveLayout({ puzzleId: state.puzzle.id, layout });
-      const savedStarLayout = layoutForMode(saved, "star") || layout;
-      state.puzzle.layout = saved || layoutDocumentForMode("star", layout);
-      state.puzzle.starLayout = savedStarLayout;
-      state.lastSavedStarLayout = savedStarLayout;
+      const mode = getMode();
+      const saved = await saveLayout({ puzzleId: state.puzzle.id, mode, layout });
+      const savedModeLayout = layoutForMode(saved, mode) || layout;
+      state.puzzle.layout = saved || layoutDocumentForMode(mode, layout);
+      if (mode === "star") {
+        state.puzzle.starLayout = savedModeLayout;
+        state.lastSavedStarLayout = savedModeLayout;
+      }
+      state.lastSavedLayout = savedModeLayout;
       setLayoutAuthoringStatus("Layout saved to D1.", "good");
     } catch (error) {
       setLayoutAuthoringStatus(`Could not save layout: ${error.message}`, "error");
@@ -309,12 +369,12 @@ export function createLayoutAuthoringController({
   }
 
   if (adminMode && !layoutAuthoringMode) {
-    starLayoutAuthorBtn.addEventListener("click", () => {
+    layoutAuthorBtn?.addEventListener("click", () => {
       const state = getState();
       if (!state?.puzzle) return;
       const params = new URLSearchParams(location.search);
       params.set("author", "layout");
-      params.set("mode", "star");
+      params.set("mode", getMode());
       // Layout authoring is its own mode; drop &admin so the meta dump does
       // not compete with the authoring panel. Catalogue context stays so the
       // admin can return to the same collection afterward. A draft overlay

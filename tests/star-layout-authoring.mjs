@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-export const name = "star layout authoring: local drafts and curated overrides apply";
+export const name = "layout authoring: generic controls and Star overrides apply";
 export const tier = "extended";
 
 export async function run(page, baseURL) {
@@ -15,11 +15,12 @@ export async function run(page, baseURL) {
     `${baseURL}/index.html?puzzle=models-of-the-divided-mind&admin&mode=star`
   );
   assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
-  await page.click("#star-layout-author-btn");
+  await page.click("#layout-author-btn");
   await page.waitForURL(/author=layout/);
   await page.waitForFunction(() => !document.getElementById("layout-authoring")?.hidden);
   assert.match(page.url(), /puzzle=models-of-the-divided-mind/);
   assert.match(page.url(), /author=layout/);
+  assert.match(page.url(), /mode=star/);
   assert.equal(await page.getAttribute("#layout-authoring", "hidden"), null);
 
   await page.goto(
@@ -29,10 +30,11 @@ export async function run(page, baseURL) {
   await page.waitForFunction(() => !document.getElementById("layout-authoring")?.hidden);
   assert.equal(await page.getAttribute("#layout-authoring", "hidden"), null);
   assert.equal(await page.isDisabled("#mode-graph"), true);
+  assert.equal(await page.isDisabled("#mode-star"), true);
   assert.equal(await page.isDisabled("#mode-sets"), true);
   assert.equal(await page.evaluate(() => window.CC.mode), "star");
   assert.notEqual(
-    await page.getAttribute("#layout-authoring-export", "hidden"),
+    await page.getAttribute("#layout-authoring-save-layout", "hidden"),
     null,
     "static player must not expose a layout publication button"
   );
@@ -55,7 +57,7 @@ export async function run(page, baseURL) {
     window.CC.state.onAuthorLayoutChanged?.("placement");
   });
   await page.waitForFunction(() =>
-    window.CC.state.getStarLayoutMetrics().overlaps >= 1 &&
+    window.CC.state.layoutAdapter.metrics().overlaps >= 1 &&
     document.getElementById("layout-metric-overlaps").textContent.includes("/")
   );
   assert.match(
@@ -68,7 +70,7 @@ export async function run(page, baseURL) {
   await page.click("#layout-authoring-prepare");
   await page.waitForFunction(() =>
     window.CC.state.solutionLayout === "pretty" &&
-    window.CC.state.getStarLayoutMetrics().overlaps === 0
+    window.CC.state.layoutAdapter.metrics().overlaps === 0
   );
 
   const term = page.locator(".node").filter({ hasText: "electric charge" }).first();
@@ -124,7 +126,7 @@ export async function run(page, baseURL) {
 
   const storedDraft = await page.evaluate(() => {
     const key = Object.keys(localStorage)
-      .find(candidate => candidate.startsWith("ccStarLayoutDraft:v1:fundamental-forces:"));
+      .find(candidate => candidate.startsWith("ccLayoutDraft:v1:star:fundamental-forces:"));
     return key ? localStorage.getItem(key) : null;
   });
   assert.ok(storedDraft, "author drag did not persist a local draft");
@@ -134,8 +136,11 @@ export async function run(page, baseURL) {
   // that the ordinary second pass selects it. Static pages can inspect and
   // edit a local draft, but cannot publish it.
   const curatedLayout = await page.evaluate(() => {
-    const layout = window.CC.state.captureStarLayout();
-    window.CC.state.puzzle.starLayout = layout;
+    const layout = window.CC.state.layoutAdapter.capture({ purpose: "authoring" });
+    window.CC.state.puzzle.layout = {
+      schemaVersion: 1,
+      modes: { star: layout }
+    };
     return layout;
   });
   assert.equal(curatedLayout.puzzleId, "fundamental-forces");
@@ -156,7 +161,7 @@ export async function run(page, baseURL) {
   assert.equal(
     await page.evaluate(() => {
       const key = Object.keys(localStorage)
-        .find(candidate => candidate.startsWith("ccStarLayoutDraft:v1:fundamental-forces:"));
+        .find(candidate => candidate.startsWith("ccLayoutDraft:v1:star:fundamental-forces:"));
       return key ? localStorage.getItem(key) : null;
     }),
     storedDraft

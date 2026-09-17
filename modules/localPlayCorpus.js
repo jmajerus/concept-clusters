@@ -20,8 +20,9 @@ import {
   htmlWithPlayCorpusMeta,
   PLAY_CORPUS_PATH
 } from "./playCorpus.js";
-import { validateStarLayoutDocument } from "./starLayoutSchema.js";
+import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
+  layoutDocumentForMode,
   layoutForMode,
   normalizeLayoutDocument
 } from "./layoutDocument.js";
@@ -137,6 +138,7 @@ export function createLocalPlayCorpusHandler({
 
   return async function handleLocalPlayCorpus(req, res) {
     const urlPath = (req.url || "").split("?")[0];
+    const requestUrl = new URL(req.url || "/", "http://local.invalid");
     if (req.method === "GET" && (urlPath === "/" || urlPath === "/index.html")) {
       const markup = indexHtml
         ?? await readFile(join(repositoryRoot, "index.html"), "utf8");
@@ -183,13 +185,27 @@ export function createLocalPlayCorpusHandler({
       }
       try {
         if (req.method === "DELETE") {
-          const cleared = await contentDocuments.clearLayout({ id });
-          json(res, { id, revision: cleared.revision, layout: null });
+          const mode = requestUrl.searchParams.get("mode");
+          if (!mode) {
+            const cleared = await contentDocuments.clearLayout({ id });
+            json(res, { id, revision: cleared.revision, layout: null });
+            return true;
+          }
+          const saved = await contentDocuments.saveLayout({
+            id,
+            layout: layoutDocumentForMode(mode, null, published.layout)
+          });
+          json(res, {
+            id,
+            revision: saved.revision,
+            layout: saved.layout || null
+          });
           return true;
         }
         const layout = body && Object.prototype.hasOwnProperty.call(body, "layout")
           ? body.layout
           : body;
+        const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
         const { puzzle, errors } = compilePublishedPuzzle(published.document);
         if (!puzzle) {
           json(res, {
@@ -199,14 +215,19 @@ export function createLocalPlayCorpusHandler({
           }, 400);
           return true;
         }
-        const layoutDocument = normalizeLayoutDocument(layout);
-        const starLayout = layoutForMode(layoutDocument, "star");
-        if (starLayout) {
-          const validation = validateStarLayoutDocument(starLayout, puzzle);
-          if (!validation.valid) {
-            json(res, { error: "Layout is invalid", id, errors: validation.errors }, 400);
-            return true;
-          }
+        const modePayload = mode && layout?.modes
+          ? layoutForMode(layout, mode)
+          : layout;
+        const layoutDocument = mode
+          ? layoutDocumentForMode(mode, modePayload, published.layout)
+          : normalizeLayoutDocument(layout);
+        const validation = validatePublishedPuzzleLayout({
+          document: published.document,
+          layout: layoutDocument
+        });
+        if (!validation.valid) {
+          json(res, { error: "Layout is invalid", id, errors: validation.errors }, 400);
+          return true;
         }
         const saved = await contentDocuments.saveLayout({ id, layout: layoutDocument });
         json(res, {

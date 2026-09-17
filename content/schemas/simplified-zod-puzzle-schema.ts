@@ -222,9 +222,9 @@ export const SimplifiedPuzzleInputSchema = z.object({
   }).strict().optional(),
 
   // Pass-through publication metadata -- not semantically validated, just
-  // carried through unchanged. `layouts` (Star layout curation) isn't
-  // offered here: it's positional/visual curation with its own dedicated
-  // schema (modules/starLayoutSchema.js), not puzzle content.
+  // carried through unchanged. `layout` (renderer layout curation) isn't
+  // offered here: it's positional/visual curation with dedicated renderer
+  // schemas, not puzzle content.
   creator: z.string().min(1).optional(),
   license: z.string().min(1).optional(),
   derivedFrom: z.string().min(1).optional(),

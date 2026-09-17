@@ -56,7 +56,11 @@ export async function run(page, baseURL) {
   await page.click("#mode-star");
   assert.equal(await page.evaluate(() => CC.mode), "star");
   assert.equal(await page.evaluate(() => CC.state.layoutAdapter.mode), "star");
-  assert.equal(typeof await page.evaluate(() => CC.state.layoutAdapter.capture), "undefined");
+  assert.equal(
+    await page.evaluate(() => typeof CC.state.layoutAdapter.capture),
+    "function",
+    "Star mode did not publish its shared capture adapter"
+  );
   assert.ok(await makeOneCorrectMove(page), "could not make a correct move");
 
   // The authoring and Circle suites exercise real pointer drags. This test

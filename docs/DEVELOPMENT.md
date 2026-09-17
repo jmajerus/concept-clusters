@@ -116,7 +116,7 @@ anything ever imports from it directly):
 | `layoutTransition.js` | `afterNextPaint`/`animatePositionTargets`/shared easing and reduced-motion timing | browser animation APIs only |
 | `puzzleGraph.js` | `pillWidth`/`buildNodesAndLinks` | `termInfo.js` |
 | `analyticsClient.js` | `trackEvent`/`trackPuzzleLoad`/`trackPuzzleCompleted` | nothing — takes `mode`/state as explicit parameters instead of closing over game.js's own reassignable variables |
-| `playerSessionStore.js` | Versioned per-puzzle local progress records | `starLayoutSchema.js` for the puzzle revision fingerprint |
+| `playerSessionStore.js` | Versioned per-puzzle local progress records | `layoutDocument.js` for the puzzle revision fingerprint |
 | `puzzleManifest.js` | Non-serializing puzzle module origins plus package-scoped local resource resolution | browser/Node URL APIs only |
 | `learningIntroduction.js` | Learning-introduction normalization, gating, and lazy Markdown loading | `puzzleManifest.js` |
 | `learningIntroductionStore.js` | Content-fingerprint-aware read/skipped acknowledgement records | nothing — caller supplies storage |
@@ -136,7 +136,7 @@ anything ever imports from it directly):
 | `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel) and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
 | `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Published only = no private draft), Publish (stays on editor), Publish & Cue, Revert when the working copy differs, Cue/Hold (Cue returns to list), local Open board / Play, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, Publish & Cue, Cue/Hold, withdraw) | `authoringAdminIndex.js` |
-| `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` and puzzle layout persistence | `draftRepository.js`, `layoutDocument.js`, `starLayoutSchema.js` |
+| `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` and puzzle layout persistence | `draftRepository.js`, `layoutDocument.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; puzzle corpus merge; lazy working-copy open; MCP catalogue draft upsert | `contentDocumentRepository.js` |
 | `contentDocumentCitations.js` | Puzzle citations that guard subcategory-id deletion and category withdrawal (category title renames keep their stable id) | `puzzles/categories.js` |
 | `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries; list-row freeze-add decorations | `contentDocumentSeed.js`, `puzzles/categories.js` |
@@ -144,7 +144,7 @@ anything ever imports from it directly):
 | `githubRepositoryClient.js` | GitHub REST/GraphQL client (branches, commits, trees, blobs, pull requests); Freeze's only consumer, since the per-puzzle GitHub PR path it also used to serve was removed | `fetch` |
 | `freezePublicationService.js` | Create or update one tracked GitHub release PR from the current Freeze plan; reconcile merged cues as git-seeded production | `d1FreezePublicationRepository.js`, `githubRepositoryClient.js` |
 | `playCorpus.js` | Assemble Library browse (with search prose) and owner drafts from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
-| `localPlayCorpus.js` | LAN play corpus and published layout save route; inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js`, `layoutDocument.js`, `starLayoutSchema.js` |
+| `localPlayCorpus.js` | LAN play corpus and published layout save route; inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js`, `layoutDocument.js` |
 | `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
 | `authoringPuzzleSearch.js` | MCP search: git ∪ published D1 ∪ owner drafts; `full_text` searches prose without a `text:` prefix | `librarySearch.js`, `puzzleBrowse.js` |
 | `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Publish & Cue, Cue/Hold, Revert, withdraw, delete working copy | `contentDocumentRepository.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
@@ -173,7 +173,9 @@ anything ever imports from it directly):
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
 | `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM; authoring play searches facts/lessons/drafts | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
-| `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` layout actions | `layoutDocument.js`, `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
+| `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the mode-neutral `?author=layout` panel and `?admin` layout action, while keeping free-strip controls Star-only | `layoutDocument.js`, `layoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
+| `layoutApi.js` | Browser save/clear client; sends the selected renderer mode and receives the merged layout envelope | `layoutDocument.js`, D1 authoring routes |
+| `graphLayoutSchema.js` / `circleLayoutSchema.js` | Renderer-independent validation for authored Graph/Circle documents | `layoutDocument.js` revision fingerprint |
 | `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct inspectors; `/?draft=&view=play` hides the studio | `authorEngine.js`, `authoringBoard.js` |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
@@ -214,8 +216,11 @@ the current round, selection/reveal phase, and selected term words.
 Connection pairs use term text rather than transient numeric node ids;
 the compact numeric representation remains exclusive to share URLs.
 
-All three modes implement the complete renderer layout-adapter contract
-(`capture`, `apply`, and `autoLayout`). Star resumes term and cluster-title
+All three modes implement the renderer layout-adapter contract
+(`capture`, `apply`, `validate`, `metrics`, and `autoLayout`). The same
+adapter serves player sessions and layout authoring; an authoring purpose
+selects the renderer's authored document shape while the default preserves the
+player-session snapshot shape. Star resumes term and cluster-title
 positions, Graph resumes its term positions and player pins, and Circle
 resumes cluster centers and connected bridge pills (ordinary terms remain
 deterministically positioned inside their circle).

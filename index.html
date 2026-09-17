@@ -98,12 +98,12 @@
            creator/license/etc.) for whichever puzzle is loaded. Revealed
            by &admin in the URL, mirroring &author=layout's gating below. -->
       <section id="puzzle-meta" hidden aria-label="Puzzle metadata (admin)"></section>
-      <!-- Admin-only Star layout tools (?admin on production and on the
+      <!-- Admin-only layout tools (?admin on production and on the
            authoring server). Sits outside .mode-row so a learning-gated
            lesson does not hide it. Opens ?author=layout for the current
            puzzle or draft. -->
       <div id="admin-layout-actions" hidden>
-        <button id="star-layout-author-btn" type="button">Edit Star layout</button>
+        <button id="layout-author-btn" type="button">Edit layout</button>
         <button id="star-free-strip-btn" type="button">Use free-term strip</button>
         <button id="star-free-strip-export-btn" type="button" hidden>Export strip flag</button>
         <button id="star-seed-beside-title-btn" type="button">Seed beside titles</button>
@@ -153,7 +153,7 @@
       <section id="layout-authoring" hidden aria-labelledby="layout-authoring-title">
         <div class="layout-authoring-heading">
           <div>
-            <strong id="layout-authoring-title">Star layout authoring</strong>
+            <strong id="layout-authoring-title">Layout authoring</strong>
             <span id="layout-authoring-draft-state"></span>
           </div>
           <span id="layout-authoring-status" role="status"></span>
@@ -167,14 +167,14 @@
         </p>
         <div class="layout-authoring-metrics" aria-live="polite">
           <span>Line crossings: <strong id="layout-metric-crossings">—</strong></span>
-          <span>Lines through pills: <strong id="layout-metric-pill-crossings">—</strong></span>
+          <span>Line obstructions: <strong id="layout-metric-pill-crossings">—</strong></span>
           <span>Overlaps: <strong id="layout-metric-overlaps">—</strong></span>
         </div>
         <div class="layout-authoring-actions">
           <button id="layout-authoring-prepare">Prepare generated layout</button>
           <button id="layout-authoring-save">Save draft</button>
           <button id="layout-authoring-load">Load draft</button>
-          <button id="layout-authoring-export" hidden>Save Layout</button>
+          <button id="layout-authoring-save-layout" hidden>Save Layout</button>
           <button id="layout-authoring-clear">Clear draft</button>
         </div>
       </section>

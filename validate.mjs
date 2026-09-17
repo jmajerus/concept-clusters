@@ -6,6 +6,9 @@ import {
 } from "./modules/contentValidation.js";
 import { validateLearningIntroduction } from "./modules/learningIntroductionValidation.js";
 import { LEVEL_CATALOGUE_ID_PREFIX } from "./modules/catalogueRegistry.js";
+import { validateCircleLayoutDocument } from "./modules/circleLayoutSchema.js";
+import { validateGraphLayoutDocument } from "./modules/graphLayoutSchema.js";
+import { layoutDocumentForMode, layoutForMode } from "./modules/layoutDocument.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import { validateSubcategoryAssignments } from "./modules/categoryValidation.js";
 import {
@@ -154,9 +157,20 @@ for (const id of SHOWCASE_PUZZLE_IDS) {
 }
 
 for (const puzzle of PUZZLES) {
-  if (!puzzle.starLayout) continue;
-  validateStarLayoutDocument(puzzle.starLayout, puzzle).errors
-    .forEach(error => fail(`star layout:"${puzzle.id}"`, error));
+  const layout = puzzle.layout || (puzzle.starLayout
+    ? layoutDocumentForMode("star", puzzle.starLayout)
+    : null);
+  if (!layout) continue;
+  for (const [mode, validate] of [
+    ["star", validateStarLayoutDocument],
+    ["graph", validateGraphLayoutDocument],
+    ["sets", validateCircleLayoutDocument]
+  ]) {
+    const modeLayout = layoutForMode(layout, mode);
+    if (!modeLayout) continue;
+    validate(modeLayout, puzzle).errors
+      .forEach(error => fail(`${mode} layout:"${puzzle.id}"`, error));
+  }
 }
 
 console.log(ok ? `ALL CHECKS PASSED (${PUZZLES.length} puzzles)` : "CHECKS FAILED");
