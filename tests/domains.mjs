@@ -25,11 +25,13 @@ export async function run(page, baseURL) {
   // subjects") until it was given a home under Art & Design alongside Art
   // and Music, matching the roadmap's own note that "film... will likely
   // arrive as sibling categories" there.
-  assert.equal(Object.keys(DOMAINS).length, 11);
+  assert.equal(Object.keys(DOMAINS).length, 12);
   assert.equal(domainForCategory("Computer Science"), "computing-engineering");
   assert.equal(domainForCategory("Engineering"), "computing-engineering");
   assert.equal(domainForCategory("Science"), "sciences-mathematics");
-  assert.equal(domainForCategory("Biology"), "sciences-mathematics");
+  // Biology split into its own Life Sciences domain once its puzzle count
+  // justified it -- see docs/TAXONOMY-ROADMAP.md's 2026-09-16 update.
+  assert.equal(domainForCategory("Biology"), "life-sciences");
   assert.equal(domainForCategory("Physics"), "sciences-mathematics");
   assert.equal(domainForCategory("Math"), "sciences-mathematics");
   assert.equal(domainForCategory("Music"), "art-design");
@@ -131,7 +133,7 @@ export async function run(page, baseURL) {
       "#overview-list .domain-group-heading"
     )).map(element => element.textContent)
   );
-  assert.equal(allGroups.length, 12, "11 represented domains plus Other subjects");
+  assert.equal(allGroups.length, 13, "12 represented domains plus Other subjects");
   assert.equal(allGroups.at(-1), "Other subjects");
   // Trivia currently has exactly 5 puzzles -- at INLINE_PUZZLE_LIST_THRESHOLD
   // (overviewRenderer.js) -- but All Puzzles is an ordered catalogue like
