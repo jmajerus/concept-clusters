@@ -1545,14 +1545,15 @@ subject into focused, linked puzzles through `relatedPuzzles`.
 
 ## Optional authored layout overrides
 
-The Star-mode pretty-printer is the default for every puzzle. Only a
-puzzle whose final presentation still needs editorial placement should
-add a custom override.
+Each renderer's pretty-printer is the default for every puzzle. Only a puzzle
+whose final presentation still needs editorial placement should add a custom
+override.
 
-Open the puzzle locally with both Star and layout-authoring mode selected:
+Open the puzzle locally with the desired mode and layout-authoring mode
+selected (`graph`, `star`, or `sets`; `sets` is labelled Circle):
 
 ```text
-http://localhost:8787/?puzzle=revolutions-modern-world&mode=star&author=layout
+http://localhost:8787/?puzzle=revolutions-modern-world&mode=sets&author=layout
 ```
 
 The authoring panel can prepare the generated solution, after which
@@ -1562,15 +1563,16 @@ that browser's local storage and are specific to the puzzle revision and
 board dimensions. Local storage is only a workspace, never the published
 source of truth.
 
-`Save Layout` is enabled when the solved Star layout has no line crossings.
-Overlaps and lines passing through unrelated pills are reported separately so
-an author can make a deliberate judgment about minor edge cases. On the
-authoring server, a draft opened from a working copy validates and stores a
-mode-neutral layout document with that copy in `puzzle_drafts.layout_json`; it
-does not publish the puzzle. The draft's D1 play preview uses that saved
-override automatically. When there is no draft overlay, the same button uses
-the published endpoint and updates only `published_documents.layout_json` for
-the puzzle; it does not publish a new document revision.
+`Save Layout` is enabled for the selected renderer after its generated layout
+has been prepared. Line crossings are blocking validation errors where the
+renderer reports them; other geometry metrics are guidance for author
+judgment. On the authoring server, a draft opened from a working copy
+validates and stores a mode-neutral layout document with that copy in
+`puzzle_drafts.layout_json`; it does not publish the puzzle. The draft's D1
+play preview uses that saved override automatically. When there is no draft
+overlay, the same button uses the published endpoint and updates only the
+selected mode inside `published_documents.layout_json`; it does not publish a
+new document revision or discard overrides for the other modes.
 
 The persisted shape is intentionally small and extensible:
 
@@ -1578,7 +1580,9 @@ The persisted shape is intentionally small and extensible:
 {
   "schemaVersion": 1,
   "modes": {
-    "star": { "...": "validated Star layout" }
+    "star": { "...": "validated Star layout" },
+    "graph": { "...": "validated Graph layout" },
+    "sets": { "...": "validated Circle layout" }
   }
 }
 ```

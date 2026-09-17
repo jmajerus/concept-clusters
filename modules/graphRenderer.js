@@ -6,8 +6,9 @@
 /* global d3 */
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { bridgePoints } from "./puzzleGraph.js";
-import { starLayoutRevision } from "./starLayoutSchema.js";
-import { computePrettyGraphLayout } from "./graphLayout.js";
+import { layoutForMode, layoutRevision } from "./layoutDocument.js";
+import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
+import { computePrettyGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
 import {
   afterNextPaint,
   animatePositionTargets,
@@ -166,6 +167,9 @@ export function createGraphRenderer({
         if (lensLayoutEditable(state)) renderPositions();
       })
       .on("end", (e, d) => {
+        const authoring = state.layoutAuthoring &&
+          state.made === state.need &&
+          state.layoutAdapter?.mode === "graph";
         if (state.made === state.need) {
           // On a solved board, a drag is an explicit layout preference.
           // Keep it pinned so both a later polish pass and session restore
@@ -184,7 +188,8 @@ export function createGraphRenderer({
         } else if (!e.active) {
           sim.alphaTarget(0);
         }
-        state.onPlayerLayoutChanged?.("player");
+        if (authoring) state.onAuthorLayoutChanged?.("drag");
+        else state.onPlayerLayoutChanged?.("player");
       });
 
     const nodeG = nodeLayer.selectAll("g").data(nodes).join("g")
@@ -324,6 +329,8 @@ export function createGraphRenderer({
       renderPositions();
     };
 
+    const graphLayoutMetrics = () => scoreGraphGeometry(nodes, links, W, H);
+
     const captureGraphLayout = () => {
       const positions = {};
       nodes.forEach(node => {
@@ -336,39 +343,23 @@ export function createGraphRenderer({
       return {
         schemaVersion: 1,
         puzzleId: puzzle.id,
-        puzzleRevision: starLayoutRevision(puzzle),
+        puzzleRevision: layoutRevision(puzzle),
         board: { width: W, height: H },
         nodes: positions,
+        metrics: graphLayoutMetrics(),
         solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null
       };
     };
 
-    const validateGraphLayout = layout => {
-      const errors = [];
-      if (!layout || typeof layout !== "object" || Array.isArray(layout)) {
-        return { valid: false, errors: ["Graph layout must be an object"] };
-      }
-      if (layout.schemaVersion !== 1) errors.push("Graph layout schemaVersion must be 1");
-      if (layout.puzzleId !== puzzle.id) errors.push(`Graph layout puzzleId must be "${puzzle.id}"`);
-      if (layout.puzzleRevision !== starLayoutRevision(puzzle)) {
-        errors.push("Graph layout puzzle revision is stale");
-      }
-      if (layout.board?.width !== W || layout.board?.height !== H) {
-        errors.push("Graph layout board size does not match");
-      }
-      nodes.forEach(node => {
-        const point = layout.nodes?.[`term:${node.word}`];
-        if (!point || !Number.isFinite(Number(point.x)) || !Number.isFinite(Number(point.y))) {
-          errors.push(`term:${node.word} must have finite x/y coordinates`);
-        } else if (point.x < 0 || point.x > W || point.y < 0 || point.y > H) {
-          errors.push(`term:${node.word} lies outside the board`);
+    const applyGraphLayout = (layout, options = {}) => {
+      const validation = validateGraphLayoutDocument(
+        layout,
+        puzzle,
+        { width: W, height: H },
+        {
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
         }
-      });
-      return { valid: errors.length === 0, errors };
-    };
-
-    const applyGraphLayout = layout => {
-      const validation = validateGraphLayout(layout);
+      );
       if (!validation.valid) return validation;
       sim.stop();
       nodes.forEach(node => {
@@ -412,6 +403,48 @@ export function createGraphRenderer({
         // the button apparently inert until the search finished.
         await afterNextPaint();
         if (getState() !== state) return { cancelled: true };
+        const curatedLayout = layoutForMode(puzzle.layout, "graph");
+        const curatedValidation = curatedLayout
+          ? validateGraphLayoutDocument(curatedLayout, puzzle, { width: W, height: H })
+          : null;
+        if (curatedValidation?.valid) {
+          const curatedTargets = new Map(nodes.map(node => [
+            node,
+            curatedLayout.nodes[`term:${node.word}`]
+          ]));
+          svg.classed("graph-polishing", true);
+          const animated = await animatePositionTargets({
+            targets: curatedTargets,
+            duration: layoutTransitionDuration(750),
+            render: renderPositions,
+            isCurrent: () => getState() === state,
+            resetVelocity: true
+          });
+          svg.classed("graph-polishing", false);
+          if (!animated || getState() !== state) return { cancelled: true };
+          sim.stop();
+          nodes.forEach(node => {
+            const target = curatedTargets.get(node);
+            node.x = Number(target.x);
+            node.y = Number(target.y);
+            node.fx = target.pinned ? node.x : null;
+            node.fy = target.pinned ? node.y : null;
+            node.vx = 0;
+            node.vy = 0;
+          });
+          renderPositions();
+          state.graphLayoutStats = graphLayoutMetrics();
+          state.solutionLayout = "pretty";
+          updateSolutionHint();
+          setMessage(
+            state.completedViaShowSolution
+              ? "Solution shown — Graph layout polished."
+              : "Graph layout polished.",
+            "good"
+          );
+          state.onPlayerLayoutChanged?.("automatic");
+          return state.graphLayoutStats;
+        }
         const candidate = computePrettyGraphLayout({
           d3, puzzle, nodes, links: state.links, width: W, height: H
         });
@@ -470,6 +503,15 @@ export function createGraphRenderer({
       mode: "graph",
       capture: captureGraphLayout,
       apply: applyGraphLayout,
+      validate: (layout, options = {}) => validateGraphLayoutDocument(
+        layout,
+        puzzle,
+        { width: options.width ?? W, height: options.height ?? H },
+        {
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
+        }
+      ),
+      metrics: graphLayoutMetrics,
       autoLayout: prettyPrintGraphLayout
     };
     // A solved mode switch can stop this simulation for pretty-printing

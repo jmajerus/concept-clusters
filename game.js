@@ -36,7 +36,7 @@ import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
-import { saveLayout } from "./modules/starLayoutApi.js";
+import { saveLayout } from "./modules/layoutApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
 import { createCatalogueStudio, bindCatalogueCardDrag } from "./modules/catalogueStudio.js";
@@ -282,11 +282,9 @@ function trackPuzzleCompleted(puzzleId, mode, stats) {
 // handler.
 const VALID_MODES = ["graph", "star", "sets"];
 const urlMode = pageParams.get("mode");
-let mode = layoutAuthoringMode
-  ? "star"
-  : VALID_MODES.includes(urlMode)
-    ? urlMode
-    : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "star");
+let mode = VALID_MODES.includes(urlMode)
+  ? urlMode
+  : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "star");
 const modeGraphBtn = document.getElementById("mode-graph");
 const modeStarBtn = document.getElementById("mode-star");
 const modeSetsBtn = document.getElementById("mode-sets");
@@ -300,6 +298,7 @@ puzzleStatsBtn.hidden = !adminMode;
 if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.togglePuzzleStats());
 if (layoutAuthoringMode) {
   modeGraphBtn.disabled = true;
+  modeStarBtn.disabled = true;
   modeSetsBtn.disabled = true;
 }
 
@@ -360,7 +359,7 @@ function updateModeControls() {
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
   modeGraphBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
-  modeStarBtn.disabled = lensPreparing || layoutBusy;
+  modeStarBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
   modeSetsBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy || authoringStudio?.isConstruct();
   updateDragHint();
 }
@@ -547,7 +546,7 @@ function restorePlayerSession(session) {
 
 function setMode(newMode) {
   if (authoringStudio?.isConstruct() && newMode === "sets") return;
-  if (layoutAuthoringMode && newMode !== "star") return;
+  if (layoutAuthoringMode && newMode !== mode) return;
   if (state?.phase === "lens-preparing") return;
   const switchingLensPhase = lensPhaseActive(state);
   clearTimeout(playerLayoutSaveTimer);
@@ -1787,11 +1786,10 @@ layoutAuthoring = createLayoutAuthoringController({
 window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 
 // ---------- layout authoring ----------
-// The ?author=layout panel and ?admin Star layout actions live in
+// The ?author=layout panel and ?admin layout actions live in
 // modules/layoutAuthoring.js. Same gate on production and on the
 // authoring server: reviewers at `/` see the player, not these tools.
-// Player-loop policy (force Star, skip sessions, skip the learning
-// gate) stays here.
+// Player-loop policy (skip sessions and the learning gate) stays here.
 
 // Sets mode draws containers *and* the terms inside them, and Star mode
 // routes every connection through a cluster's title hub rather than

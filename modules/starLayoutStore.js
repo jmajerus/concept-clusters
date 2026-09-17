@@ -2,6 +2,12 @@ import {
   starLayoutRevision,
   validateStarLayoutDocument
 } from "./starLayoutSchema.js";
+import {
+  clearLayoutDraft,
+  layoutDraftKey,
+  loadLayoutDraft,
+  saveLayoutDraft
+} from "./layoutStore.js";
 
 const PREFIX = "ccStarLayoutDraft:v1";
 
@@ -50,3 +56,13 @@ export function clearStarLayoutDraft(storage, puzzle, width, height) {
     return false;
   }
 }
+
+// New mode-neutral helpers. Keep the legacy Star-keyed wrappers above so an
+// existing local Star workspace remains readable while authoring expands to
+// Graph and Circle.
+export {
+  clearLayoutDraft,
+  layoutDraftKey,
+  loadLayoutDraft,
+  saveLayoutDraft
+};

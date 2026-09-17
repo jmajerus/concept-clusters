@@ -35,7 +35,7 @@ export async function run(page, baseURL) {
     assert.equal(stats.lineCrossings, 0, `${puzzleId}: detangler left a line-to-line crossing`);
     if (puzzleId === "the-birth-of-the-drive") {
       const clearance = await page.evaluate(() => {
-        const metrics = window.CC.state.getStarLayoutMetrics();
+        const metrics = window.CC.state.layoutAdapter.metrics();
         const termNodes = [...document.querySelectorAll("#board g.node")].map(el => el.__data__);
         const titleNodes = [...document.querySelectorAll("#board g.title-node")].map(el => el.__data__);
         const titlesByCi = Object.fromEntries(titleNodes.map(title => [title.ci, title]));
@@ -74,7 +74,7 @@ export async function run(page, baseURL) {
     }
     if (puzzleId === "models-of-the-divided-mind") {
       const quality = await page.evaluate(() => {
-        const metrics = window.CC.state.getStarLayoutMetrics();
+        const metrics = window.CC.state.layoutAdapter.metrics();
         const termNodes = [...document.querySelectorAll("#board g.node")].map(el => el.__data__);
         const titleNodes = [...document.querySelectorAll("#board g.title-node")].map(el => el.__data__);
         const titlesByCi = Object.fromEntries(titleNodes.map(title => [title.ci, title]));

@@ -1,4 +1,4 @@
-import { starLayoutRevision } from "./starLayoutSchema.js";
+import { layoutRevision } from "./layoutDocument.js";
 import { normalizedLensMode } from "./lensEngine.js";
 
 export const PLAYER_SESSION_SCHEMA_VERSION = 1;
@@ -15,8 +15,8 @@ export function playerSessionKey(puzzle) {
 // Preserve the historical revision for puzzles without lenses; append a
 // small deterministic lens fingerprint only where that state exists.
 function playerSessionRevision(puzzle) {
-  const layoutRevision = starLayoutRevision(puzzle);
-  if (!puzzle.lenses?.length) return layoutRevision;
+  const revision = layoutRevision(puzzle);
+  if (!puzzle.lenses?.length) return revision;
   let hash = 0x811c9dc5;
   const lensStateRevision = puzzle.lensMode === "assignment"
     ? { lensMode: puzzle.lensMode, lenses: puzzle.lenses }
@@ -25,7 +25,7 @@ function playerSessionRevision(puzzle) {
     hash ^= char.codePointAt(0);
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
-  return `${layoutRevision}:lenses:${hash.toString(16).padStart(8, "0")}`;
+  return `${revision}:lenses:${hash.toString(16).padStart(8, "0")}`;
 }
 
 function validMove(move) {

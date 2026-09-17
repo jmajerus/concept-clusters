@@ -17,7 +17,7 @@ import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { openPuzzleWorkingCopy } from "../modules/contentDocumentSeed.js";
-import { layoutDocumentForMode } from "../modules/layoutDocument.js";
+import { layoutDocumentForMode, layoutRevision } from "../modules/layoutDocument.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
@@ -793,11 +793,33 @@ export async function run() {
     // A layout-only edit of an already published working copy must still
     // enable Publish and promote the layout, even when the document itself is
     // unchanged.
-    const layoutOnly = layoutDocumentForMode("circle", {
+    const layoutOnlyPuzzle = playPayload.puzzle;
+    const layoutOnly = layoutDocumentForMode("sets", {
       schemaVersion: 1,
-      puzzleId: "energy-flow",
-      puzzleRevision: "layout-only",
-      board: { width: 640, height: 460 }
+      puzzleId: layoutOnlyPuzzle.id,
+      puzzleRevision: layoutRevision(layoutOnlyPuzzle),
+      board: { width: 640, height: 460 },
+      stripHeight: 16,
+      circles: Object.fromEntries(layoutOnlyPuzzle.clusters.map((cluster, index) => [
+        `cluster:${index}`,
+        { x: 110 + index * 120, y: 220 }
+      ])),
+      bridges: Object.fromEntries(layoutOnlyPuzzle.bridges.map((bridge, index) => [
+        `term:${bridge.term}`,
+        { x: 320 + index * 12, y: 220 }
+      ])),
+      metrics: {
+        hardOverlaps: 0,
+        circleOverlaps: 0,
+        headingOverlaps: 0,
+        bridgeCircleOverlaps: 0,
+        bridgeHeadingOverlaps: 0,
+        bridgeBridgeOverlaps: 0,
+        boundsViolations: 0,
+        lineCrossings: 0,
+        lineHeadingIntersections: 0,
+        lineCircleIntersections: 0
+      }
     });
     const savedLayoutOnly = createResponse();
     assert.equal(await handlePublish(jsonRequest(

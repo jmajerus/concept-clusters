@@ -45,8 +45,9 @@ import {
 } from "./contentDocumentSeed.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
-import { validateStarLayoutDocument } from "./starLayoutSchema.js";
 import {
+  emptyLayoutDocument,
+  layoutDocumentForMode,
   layoutForMode,
   normalizeLayoutDocument
 } from "./layoutDocument.js";
@@ -436,17 +437,39 @@ export function createLocalDraftReviewHandler({
       const draftId = decodeURIComponent(layoutMatch[1]);
       try {
         const record = await draftStore.getDraft(draftId);
+        // A newly opened working copy has no layout column of its own yet.
+        // Treat the current published envelope as its starting snapshot so a
+        // first Graph/Circle save cannot replace an existing Star override.
+        // Once the draft has saved a layout, that full snapshot remains the
+        // draft's authority for subsequent mode updates and clears.
+        const published = await publishedRowOrNull(
+          contentDocuments,
+          "puzzle",
+          record.document?.id
+        );
+        const inheritedLayout = record.layout ?? published?.layout ?? null;
         if (req.method === "GET" || req.method === "HEAD") {
           json(res, {
             draftId,
             revision: record.revision,
-            layout: record.layout || null
+            layout: inheritedLayout
           });
           return true;
         }
         if (req.method !== "PUT" && req.method !== "DELETE") return false;
         if (req.method === "DELETE") {
-          const cleared = await draftStore.clearLayout(draftId);
+          const mode = requestUrl.searchParams.get("mode");
+          const cleared = mode
+            ? await draftStore.saveLayout({
+              draftId,
+              layout: layoutDocumentForMode(mode, null, inheritedLayout)
+            })
+            : inheritedLayout
+              ? await draftStore.saveLayout({
+                draftId,
+                layout: emptyLayoutDocument()
+              })
+              : await draftStore.clearLayout(draftId);
           json(res, {
             draftId,
             revision: cleared.revision,
@@ -458,7 +481,13 @@ export function createLocalDraftReviewHandler({
         const submitted = body && Object.prototype.hasOwnProperty.call(body, "layout")
           ? body.layout
           : body;
-        const layout = normalizeLayoutDocument(submitted);
+        const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
+        const modePayload = mode && submitted?.modes
+          ? layoutForMode(submitted, mode)
+          : submitted;
+        const layout = mode
+          ? layoutDocumentForMode(mode, modePayload, inheritedLayout)
+          : normalizeLayoutDocument(submitted);
         const categoryRegistry = await loadMergedCategoryRegistry({
           contentDocuments,
           contentService,
@@ -475,17 +504,18 @@ export function createLocalDraftReviewHandler({
           }, 400);
           return true;
         }
-        const starLayout = layoutForMode(layout, "star");
-        if (starLayout) {
-          const validation = validateStarLayoutDocument(starLayout, puzzle);
-          if (!validation.valid) {
-            json(res, {
-              error: "Layout is invalid",
-              draftId,
-              errors: validation.errors
-            }, 400);
-            return true;
-          }
+        const validation = validatePublishedPuzzleLayout({
+          document: documentForEditor(record.document, { categoryRegistry }),
+          layout,
+          categoryRegistry
+        });
+        if (!validation.valid) {
+          json(res, {
+            error: "Layout is invalid",
+            draftId,
+            errors: validation.errors
+          }, 400);
+          return true;
         }
         const saved = await draftStore.saveLayout({ draftId, layout });
         json(res, {
@@ -930,7 +960,7 @@ export function createLocalDraftReviewHandler({
             "puzzle",
             puzzleId
           );
-          const publishLayout = record.layout || publishedBefore?.layout || undefined;
+          const publishLayout = record.layout ?? publishedBefore?.layout ?? undefined;
           const layoutValidation = validatePublishedPuzzleLayout({
             document: authoredDocument,
             layout: publishLayout,
@@ -1159,7 +1189,7 @@ export function createLocalDraftReviewHandler({
           "puzzle",
           puzzle.id
         );
-        const layout = record.layout || published?.layout;
+        const layout = record.layout ?? published?.layout;
         const starLayout = layoutForMode(layout, "star");
         const playPuzzle = layout
           ? { ...puzzle, layout, ...(starLayout ? { starLayout } : {}) }

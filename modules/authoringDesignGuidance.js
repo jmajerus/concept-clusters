@@ -101,8 +101,9 @@ modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
 authorable here; call \`get_authoring_schema\` for the complete machine-readable
 field contract.
 Layout curation is authored separately from puzzle content, through
-\`?author=layout\` on the D1-backed authoring server. \`Save Layout\` stores the
-validated, mode-neutral override with the working copy; \`Publish\` transfers
+\`?author=layout&mode=graph|star|sets\` on the D1-backed authoring server.
+\`Save Layout\` stores the selected renderer's validated, mode-neutral
+override with the working copy; \`Publish\` transfers
 that confirmed artifact to the shared puzzle row, and Freeze materializes it in
 the generated player module. This is the sole layout publication path; deployed
 player pages do not expose file export.`;

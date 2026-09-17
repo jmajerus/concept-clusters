@@ -22,6 +22,12 @@ import {
   starLayoutRevision
 } from "../modules/starLayoutSchema.js";
 import {
+  expectedCircleLayoutBridgeKeys,
+  expectedCircleLayoutClusterKeys
+} from "../modules/circleLayoutSchema.js";
+import { expectedGraphLayoutNodeKeys } from "../modules/graphLayoutSchema.js";
+import {
+  emptyLayoutDocument,
   layoutDocumentForMode,
   parseLayoutDocument
 } from "../modules/layoutDocument.js";
@@ -80,6 +86,44 @@ export async function run(page) {
       { x: 40 + index * 20, y: 40 }
     ])),
     metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+  };
+  const graphLayout = {
+    schemaVersion: 1,
+    puzzleId: puzzle.id,
+    puzzleRevision: starLayoutRevision(puzzle),
+    board: { width: 1000, height: 500 },
+    nodes: Object.fromEntries(expectedGraphLayoutNodeKeys(puzzle).map((key, index) => [
+      key,
+      { x: 80 + index * 24, y: 180, pinned: true }
+    ])),
+    metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 }
+  };
+  const circleLayout = {
+    schemaVersion: 1,
+    puzzleId: puzzle.id,
+    puzzleRevision: starLayoutRevision(puzzle),
+    board: { width: 1000, height: 500 },
+    stripHeight: 54,
+    circles: Object.fromEntries(expectedCircleLayoutClusterKeys(puzzle).map((key, index) => [
+      key,
+      { x: index ? 720 : 280, y: 280, pinned: true }
+    ])),
+    bridges: Object.fromEntries(expectedCircleLayoutBridgeKeys(puzzle).map(key => [
+      key,
+      { x: 500, y: 280, pinned: true }
+    ])),
+    metrics: {
+      hardOverlaps: 0,
+      circleOverlaps: 0,
+      headingOverlaps: 0,
+      bridgeCircleOverlaps: 0,
+      bridgeHeadingOverlaps: 0,
+      bridgeBridgeOverlaps: 0,
+      boundsViolations: 0,
+      lineCrossings: 0,
+      lineHeadingIntersections: 0,
+      lineCircleIntersections: 0
+    }
   };
   assert.throws(
     () => parseLayoutDocument("{"),
@@ -249,6 +293,134 @@ export async function run(page) {
   assert.deepEqual(JSON.parse(boardWithLayout.body).layout, layoutDocumentForMode("star", layout));
   assert.deepEqual(JSON.parse(boardWithLayout.body).starLayout, layout);
 
+  // The browser sends one renderer payload at a time. The route must merge
+  // it into the existing envelope so adding Graph and Circle overrides never
+  // erases the already-confirmed Star layout.
+  for (const [mode, modeLayout] of [["graph", graphLayout], ["sets", circleLayout]]) {
+    const response = createResponse();
+    assert.equal(await handleRequest({
+      method: "PUT",
+      url: `/admin/puzzles/lab-d1-play/layout.json?mode=${mode}`,
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({ mode, layout: modeLayout }));
+      }
+    }, response), true);
+    assert.equal(response.status, 200, response.body);
+  }
+  const mergedPublishedLayout = (await repo.getPublished({
+    kind: "puzzle",
+    id: "lab-d1-play"
+  })).layout;
+  assert.deepEqual(mergedPublishedLayout.modes.star, layout);
+  assert.deepEqual(mergedPublishedLayout.modes.graph, graphLayout);
+  assert.deepEqual(mergedPublishedLayout.modes.sets, circleLayout);
+
+  for (const [mode, modeLayout] of [
+    ["graph", { ...graphLayout, metrics: { ...graphLayout.metrics, lineCrossings: 1 } }],
+    ["sets", { ...circleLayout, metrics: { ...circleLayout.metrics, lineCrossings: 1 } }]
+  ]) {
+    const rejected = createResponse();
+    assert.equal(await handleRequest({
+      method: "PUT",
+      url: `/admin/puzzles/lab-d1-play/layout.json?mode=${mode}`,
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({ mode, layout: modeLayout }));
+      }
+    }, rejected), true);
+    assert.equal(rejected.status, 400, rejected.body);
+    assert.match(rejected.body, /zero line crossings/);
+  }
+
+  const unsupportedMode = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json?mode=bogus",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({ mode: "bogus", layout: graphLayout }));
+    }
+  }, unsupportedMode), true);
+  assert.equal(unsupportedMode.status, 400, unsupportedMode.body);
+  assert.match(unsupportedMode.body, /Unsupported layout mode/);
+
+  const clearGraph = createResponse();
+  assert.equal(await handleRequest({
+    method: "DELETE",
+    url: "/admin/puzzles/lab-d1-play/layout.json?mode=graph",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
+  }, clearGraph), true);
+  assert.equal(clearGraph.status, 200, clearGraph.body);
+  const afterGraphClear = (await repo.getPublished({
+    kind: "puzzle",
+    id: "lab-d1-play"
+  })).layout;
+  assert.equal(afterGraphClear.modes.graph, undefined);
+  assert.deepEqual(afterGraphClear.modes.star, layout);
+  assert.deepEqual(afterGraphClear.modes.sets, circleLayout);
+
+  // A working copy starts without its own layout column. Its first selected
+  // mode save must inherit the published envelope, or publishing that draft
+  // would accidentally drop the other already-confirmed modes.
+  const existingDraftDirectory = await mkdtemp(
+    join(tmpdir(), "cc-play-corpus-existing-layout-")
+  );
+  try {
+    const draftStore = createPuzzleDraftStore({ directory: existingDraftDirectory });
+    await draftStore.createDraft({
+      draftId: "lab-d1-play-draft",
+      document: labPuzzle
+    });
+    const handleExistingDraft = createLocalDraftReviewHandler({
+      draftStore,
+      contentDocuments: repo,
+      publicationActor: actor,
+      repositoryRoot: root
+    });
+    const saveExistingGraph = createResponse();
+    assert.equal(await handleExistingDraft({
+      method: "PUT",
+      url: "/admin/drafts/lab-d1-play-draft/layout.json?mode=graph",
+      headers: {
+        host: "127.0.0.1:8787",
+        origin: "http://127.0.0.1:8787",
+        "content-type": "application/json"
+      },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({ mode: "graph", layout: graphLayout }));
+      }
+    }, saveExistingGraph), true);
+    assert.equal(saveExistingGraph.status, 200, saveExistingGraph.body);
+    const existingDraftLayout = (await draftStore.getDraft("lab-d1-play-draft")).layout;
+    assert.deepEqual(existingDraftLayout.modes.star, layout);
+    assert.deepEqual(existingDraftLayout.modes.graph, graphLayout);
+    assert.deepEqual(existingDraftLayout.modes.sets, circleLayout);
+
+    for (const mode of ["star", "sets", "graph"]) {
+      const clearDraftMode = createResponse();
+      assert.equal(await handleExistingDraft({
+        method: "DELETE",
+        url: `/admin/drafts/lab-d1-play-draft/layout.json?mode=${mode}`,
+        headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
+      }, clearDraftMode), true);
+      assert.equal(clearDraftMode.status, 200, clearDraftMode.body);
+    }
+    assert.deepEqual(
+      (await draftStore.getDraft("lab-d1-play-draft")).layout,
+      emptyLayoutDocument()
+    );
+    const clearedDraftLayout = createResponse();
+    assert.equal(await handleExistingDraft({
+      method: "GET",
+      url: "/admin/drafts/lab-d1-play-draft/layout.json",
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
+    }, clearedDraftLayout), true);
+    assert.deepEqual(JSON.parse(clearedDraftLayout.body).layout, emptyLayoutDocument());
+  } finally {
+    await rm(existingDraftDirectory, { recursive: true, force: true });
+  }
+
   const unpublishedDraftDirectory = await mkdtemp(
     join(tmpdir(), "cc-play-corpus-unpublished-layout-")
   );
@@ -274,6 +446,15 @@ export async function run(page) {
           { x: 40 + index * 20, y: 40 }
         ])
       )
+    };
+    const unpublishedGraphLayout = {
+      ...graphLayout,
+      puzzleId: unpublishedPuzzle.id,
+      puzzleRevision: starLayoutRevision(unpublishedPuzzle),
+      nodes: Object.fromEntries(expectedGraphLayoutNodeKeys(unpublishedPuzzle).map((key, index) => [
+        key,
+        { x: 80 + index * 24, y: 180, pinned: true }
+      ]))
     };
     const handleUnpublishedDraft = createLocalDraftReviewHandler({
       draftStore,
@@ -301,6 +482,25 @@ export async function run(page) {
       (await draftStore.getDraft("lab-unpublished-layout-draft")).layout,
       layoutDocumentForMode("star", unpublishedLayout)
     );
+    const saveUnpublishedGraph = createResponse();
+    assert.equal(await handleUnpublishedDraft({
+      method: "PUT",
+      url: "/admin/drafts/lab-unpublished-layout-draft/layout.json?mode=graph",
+      headers: {
+        host: "127.0.0.1:8787",
+        origin: "http://127.0.0.1:8787",
+        "content-type": "application/json"
+      },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({ mode: "graph", layout: unpublishedGraphLayout }));
+      }
+    }, saveUnpublishedGraph), true);
+    assert.equal(saveUnpublishedGraph.status, 200, saveUnpublishedGraph.body);
+    const unpublishedMergedLayout = (await draftStore.getDraft(
+      "lab-unpublished-layout-draft"
+    )).layout;
+    assert.deepEqual(unpublishedMergedLayout.modes.star, unpublishedLayout);
+    assert.deepEqual(unpublishedMergedLayout.modes.graph, unpublishedGraphLayout);
     await assert.rejects(
       repo.getPublished({ kind: "puzzle", id: "lab-unpublished-layout" }),
       /Unknown puzzle/
@@ -311,7 +511,7 @@ export async function run(page) {
       method: "GET",
       url: "/admin/drafts/lab-unpublished-layout-draft/play.json"
     }, unpublishedPlay), true);
-    assert.deepEqual(JSON.parse(unpublishedPlay.body).puzzle.layout, layoutDocumentForMode("star", unpublishedLayout));
+    assert.deepEqual(JSON.parse(unpublishedPlay.body).puzzle.layout, unpublishedMergedLayout);
     assert.deepEqual(JSON.parse(unpublishedPlay.body).puzzle.starLayout, unpublishedLayout);
 
     const publishUnpublished = createResponse();
@@ -330,7 +530,7 @@ export async function run(page) {
     assert.equal(publishUnpublished.status, 303, publishUnpublished.body);
     assert.deepEqual(
       (await repo.getPublished({ kind: "puzzle", id: "lab-unpublished-layout" })).layout,
-      layoutDocumentForMode("star", unpublishedLayout)
+      unpublishedMergedLayout
     );
     await repo.unpublish({ kind: "puzzle", id: "lab-unpublished-layout", actor });
   } finally {
@@ -405,7 +605,7 @@ export async function run(page) {
       await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, {
         timeout: 15000
       });
-      await page.click("#layout-authoring-export");
+      await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
         document.getElementById("layout-authoring-status")?.textContent === "Layout saved to D1.",
       null, { timeout: 15000 });
@@ -443,12 +643,12 @@ export async function run(page) {
         && document.getElementById("layout-authoring")
         && !document.getElementById("layout-authoring").hidden,
       null, { timeout: 15000 });
-      assert.equal(await page.textContent("#layout-authoring-export"), "Save Layout");
+      assert.equal(await page.textContent("#layout-authoring-save-layout"), "Save Layout");
       await page.click("#layout-authoring-prepare");
       await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, {
         timeout: 15000
       });
-      await page.click("#layout-authoring-export");
+      await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
         document.getElementById("layout-authoring-status")?.textContent === "Layout saved to D1.",
       null, { timeout: 15000 });

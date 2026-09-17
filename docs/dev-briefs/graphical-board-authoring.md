@@ -40,8 +40,8 @@ Reuse Graph-mode motor skill; do not reuse play `handleTap`.
 - Seeds: first term in a cluster by default; toggle on the selected node.
 
 Construction defaults to **Star** so cluster titles show membership;
-Graph remains available. `?author=layout` stays Star geometry, not
-structure.
+Graph and Circle remain available. `?author=layout&mode=<mode>` edits the
+selected renderer's presentation geometry, not puzzle structure.
 
 ## Document and compile
 

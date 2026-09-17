@@ -43,7 +43,8 @@ import {
 import { pillWidth, bridgePoints } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
-import { starLayoutRevision } from "./starLayoutSchema.js";
+import { layoutForMode, layoutRevision } from "./layoutDocument.js";
+import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
 import {
   afterNextPaint,
   animatePositionTargets,
@@ -1088,6 +1089,9 @@ export function createSetRenderer({
         if (lensLayoutEditable(state)) repositionAll();
       })
       .on("end", function (e, d) {
+        const authoring = state.layoutAuthoring &&
+          state.made === state.need &&
+          state.layoutAdapter?.mode === "sets";
         d3.select(this).classed("dragging", false); svg.classed("dragging", false);
         if (lensLayoutEditable(state)) {
           state.setSim.stop();
@@ -1100,7 +1104,8 @@ export function createSetRenderer({
         // placement convention this mode has always had for drags),
         // rather than releasing it back to the simulation the way
         // Graph mode's own drag does for individual terms.
-        state.onPlayerLayoutChanged?.("player");
+        if (authoring) state.onAuthorLayoutChanged?.("drag");
+        else state.onPlayerLayoutChanged?.("player");
       });
 
     clusterLayer.selectAll("g.set-cluster")
@@ -1188,6 +1193,9 @@ export function createSetRenderer({
         if (lensLayoutEditable(state)) repositionAll();
       })
       .on("end", function (e, d) {
+        const authoring = state.layoutAuthoring &&
+          state.made === state.need &&
+          state.layoutAdapter?.mode === "sets";
         d3.select(this).classed("dragging", false);
         svg.classed("dragging", false);
         if (lensLayoutEditable(state)) {
@@ -1213,7 +1221,8 @@ export function createSetRenderer({
           handleTap(d);
           setTimeout(() => el.focus(), 0);
         } else {
-          state.onPlayerLayoutChanged?.("player");
+          if (authoring) state.onAuthorLayoutChanged?.("drag");
+          else state.onPlayerLayoutChanged?.("player");
         }
       });
 
@@ -1352,6 +1361,23 @@ export function createSetRenderer({
       });
     }
 
+    function circleLayoutMetrics() {
+      const currentState = getState();
+      const { csNodes, clusterBoxes } = currentState.setLayout;
+      const bridgePointsByWord = new Map(
+        connectedBridges(currentState).map(node => [node.word, { x: node.x, y: node.y }])
+      );
+      return scoreCircleCandidate(
+        puzzle,
+        csNodes.map(node => ({ id: node.id, r: node.r, x: node.x, y: node.y })),
+        bridgePointsByWord,
+        clusterBoxes,
+        currentState.setLayout.stripHeight,
+        getW(),
+        getH()
+      ).metrics;
+    }
+
     function captureCircleLayout() {
       const circles = {};
       state.setLayout.csNodes.forEach(node => {
@@ -1372,46 +1398,27 @@ export function createSetRenderer({
       return {
         schemaVersion: 1,
         puzzleId: puzzle.id,
-        puzzleRevision: starLayoutRevision(puzzle),
+        puzzleRevision: layoutRevision(puzzle),
         board: { width: getW(), height: getH() },
         stripHeight: state.setLayout.stripHeight,
         circles,
         bridges,
+        metrics: circleLayoutMetrics(),
         solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null
       };
     }
 
-    function validateCircleLayout(layout) {
-      const errors = [];
-      if (!layout || typeof layout !== "object" || Array.isArray(layout)) {
-        return { valid: false, errors: ["Circle layout must be an object"] };
-      }
-      if (layout.schemaVersion !== 1) errors.push("Circle layout schemaVersion must be 1");
-      if (layout.puzzleId !== puzzle.id) errors.push(`Circle layout puzzleId must be "${puzzle.id}"`);
-      if (layout.puzzleRevision !== starLayoutRevision(puzzle)) errors.push("Circle layout puzzle revision is stale");
-      if (layout.board?.width !== getW() || layout.board?.height !== getH()) {
-        errors.push("Circle layout board size does not match");
-      }
-      const validPoint = (point, key) => {
-        if (!point || !Number.isFinite(Number(point.x)) || !Number.isFinite(Number(point.y))) {
-          errors.push(`${key} must have finite x/y coordinates`);
-          return;
+    function applyCircleLayout(layout, options = {}) {
+      const validation = validateCircleLayoutDocument(
+        layout,
+        puzzle,
+        { width: getW(), height: getH() },
+        {
+          bridgeTerms: connectedBridges(state).map(node => node.word),
+          requireBridges: false,
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
         }
-        if (point.x < 0 || point.x > getW() || point.y < 0 || point.y > getH()) {
-          errors.push(`${key} lies outside the board`);
-        }
-      };
-      state.setLayout.csNodes.forEach(node => {
-        validPoint(layout.circles?.[`cluster:${node.id}`], `cluster:${node.id}`);
-      });
-      connectedBridges(state).forEach(node => {
-        validPoint(layout.bridges?.[`term:${node.word}`], `term:${node.word}`);
-      });
-      return { valid: errors.length === 0, errors };
-    }
-
-    function applyCircleLayout(layout) {
-      const validation = validateCircleLayout(layout);
+      );
       if (!validation.valid) return validation;
       state.setSim.stop();
       state.setLayout.stripHeight = Number(layout.stripHeight) || STRIP_MARGIN;
@@ -1467,6 +1474,69 @@ export function createSetRenderer({
         if (document.fonts?.ready) await document.fonts.ready;
         if (getState() !== state) return { cancelled: true };
         refreshHeadingWidths();
+        const curatedLayout = layoutForMode(puzzle.layout, "sets");
+        const curatedValidation = curatedLayout
+          ? validateCircleLayoutDocument(curatedLayout, puzzle, { width: W, height: H })
+          : null;
+        if (curatedValidation?.valid) {
+          const targets = new Map([
+            ...state.setLayout.csNodes.map(node => [
+              node,
+              curatedLayout.circles[`cluster:${node.id}`]
+            ]),
+            ...connectedBridges(state)
+              .filter(node => curatedLayout.bridges?.[`term:${node.word}`])
+              .map(node => [node, curatedLayout.bridges[`term:${node.word}`]])
+          ]);
+          svg.classed("circle-polishing", true);
+          const animated = await animatePositionTargets({
+            targets,
+            duration: layoutTransitionDuration(750),
+            render: repositionAll,
+            isCurrent: () => getState() === state,
+            resetVelocity: true
+          });
+          if (!animated || getState() !== state) {
+            svg.classed("circle-polishing", false);
+            return { cancelled: true };
+          }
+          state.setSim.stop();
+          state.setLayout.stripHeight = Number(curatedLayout.stripHeight) || STRIP_MARGIN;
+          state.setLayout.csNodes.forEach(node => {
+            const point = curatedLayout.circles[`cluster:${node.id}`];
+            node.x = Number(point.x);
+            node.y = Number(point.y);
+            node.fx = point.pinned ? node.x : null;
+            node.fy = point.pinned ? node.y : null;
+            node.vx = 0;
+            node.vy = 0;
+          });
+          connectedBridges(state).forEach(node => {
+            const point = curatedLayout.bridges[`term:${node.word}`];
+            if (!point) return;
+            node.x = Number(point.x);
+            node.y = Number(point.y);
+            node.fx = point.pinned ? node.x : null;
+            node.fy = point.pinned ? node.y : null;
+            node.vx = 0;
+            node.vy = 0;
+          });
+          state.solutionLayout = "pretty";
+          repositionAll();
+          await afterNextPaint();
+          svg.classed("circle-polishing", false);
+          if (getState() !== state) return { cancelled: true };
+          state.circleLayoutStats = circleLayoutMetrics();
+          updateSolutionHint();
+          setMessage(
+            state.completedViaShowSolution
+              ? "Solution shown — Circle layout polished."
+              : "Circle layout polished.",
+            "good"
+          );
+          state.onPlayerLayoutChanged?.("automatic");
+          return state.circleLayoutStats;
+        }
         const candidate = computePrettyCircleLayout();
         if (!candidate || getState() !== state) return { cancelled: true };
         const targets = new Map([
@@ -1597,6 +1667,17 @@ export function createSetRenderer({
       mode: "sets",
       capture: captureCircleLayout,
       apply: applyCircleLayout,
+      validate: (layout, options = {}) => validateCircleLayoutDocument(
+        layout,
+        puzzle,
+        { width: options.width ?? getW(), height: options.height ?? getH() },
+        {
+          bridgeTerms: connectedBridges(state).map(node => node.word),
+          requireBridges: false,
+          allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
+        }
+      ),
+      metrics: circleLayoutMetrics,
       autoLayout: prettyPrintCircleLayout
     };
 

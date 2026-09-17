@@ -7,38 +7,13 @@
 // generated player modules, so the renderer does not care where an override
 // was materialized.
 
-import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
+import { layoutRevision } from "./layoutDocument.js";
 
 export const STAR_LAYOUT_SCHEMA_VERSION = 1;
 
-function revisionSignature(puzzle) {
-  return JSON.stringify({
-    id: puzzle.id,
-    large: derivedLarge(puzzleNodeCount(puzzle)),
-    clusters: puzzle.clusters.map(cluster => ({
-      name: cluster.name,
-      terms: cluster.terms
-    })),
-    bridges: puzzle.bridges.map(bridge => ({
-      term: bridge.term,
-      clusters: bridge.clusters,
-      idealTerms: bridge.idealTerms || null
-    }))
-  });
-}
-
-// Small deterministic content fingerprint. This is an invalidation token,
-// not a security primitive: changing a label, cluster order, bridge topology,
-// or ideal endpoint makes an old layout inapplicable instead of quietly
-// attaching its coordinates to the wrong board.
-export function starLayoutRevision(puzzle) {
-  let hash = 0x811c9dc5;
-  for (const char of revisionSignature(puzzle)) {
-    hash ^= char.codePointAt(0);
-    hash = Math.imul(hash, 0x01000193) >>> 0;
-  }
-  return `fnv1a32:${hash.toString(16).padStart(8, "0")}`;
-}
+// Kept as a compatibility export for existing Star fixtures and consumers;
+// the revision itself belongs to the renderer-neutral layout document.
+export const starLayoutRevision = layoutRevision;
 
 export function starLayoutNodeKey(node) {
   return node.isTitleNode ? `cluster:${node.ci}` : `term:${node.word}`;

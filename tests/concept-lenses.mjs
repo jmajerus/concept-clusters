@@ -340,7 +340,7 @@ export async function run(page, baseURL) {
   );
   await solveToFirstLens(page);
   const programmerStarMetrics = await page.evaluate(() =>
-    CC.state.getStarLayoutMetrics()
+    CC.state.layoutAdapter.metrics()
   );
   assert.equal(programmerStarMetrics.lineCrossings, 0);
   assert.equal(programmerStarMetrics.edgeNodeIntersections, 0);
@@ -387,7 +387,7 @@ export async function run(page, baseURL) {
     "board status overlay stayed up after lenses started"
   );
   assert.equal(
-    await page.evaluate(() => CC.state.getStarLayoutMetrics().lineCrossings),
+    await page.evaluate(() => CC.state.layoutAdapter.metrics().lineCrossings),
     0,
     "player-solved Star board entered lenses with a locked-in line crossing"
   );
