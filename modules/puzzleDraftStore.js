@@ -14,6 +14,7 @@ import {
   draftContentHash
 } from "./draftRepository.js";
 import {
+  applyAuthoredDomain,
   assembleAuthoredDocument,
   assembleStoredDomainDocuments,
   partitionAuthoredDocument,
@@ -71,13 +72,14 @@ export function createPuzzleDraftStore({ directory }) {
       ? layoutDocumentForMode("star", record.starLayout)
       : null);
     if (!record.domains || typeof record.domains !== "object") {
-      return { ...record, layout };
+      return { ...record, layout, documentStale: Boolean(record.documentStale) };
     }
     return {
       ...record,
       layout,
+      documentStale: Boolean(record.documentStale),
       document: assembleStoredDomainDocuments({
-        document: record.document,
+        document: record.documentStale ? undefined : record.document,
         content: storedDomainValue(record, "content", "Stored content domain"),
         pedagogy: storedDomainValue(record, "pedagogy", "Stored pedagogy domain"),
         provenance: storedDomainValue(record, "provenance", "Stored provenance domain")
@@ -120,6 +122,7 @@ export function createPuzzleDraftStore({ directory }) {
     const { workingCopyStack, domains, ...rest } = record;
     return clone({
       ...rest,
+      documentStale: Boolean(record.documentStale),
       workingCopyHistoryCount: historyOf({ workingCopyStack }).length
     });
   }
@@ -164,7 +167,8 @@ export function createPuzzleDraftStore({ directory }) {
     // graphical authoring client may read display-form category titles and
     // send them back through documentForStorage; once canonicalized, that
     // should preserve the current revision instead of consuming one.
-    if (JSON.stringify(current.document) === JSON.stringify(materialized)) {
+    if (JSON.stringify(current.document) === JSON.stringify(materialized)
+        && !current.documentStale) {
       return publicRecord(current);
     }
     const contentHash = draftContentHash(materialized);
@@ -183,8 +187,81 @@ export function createPuzzleDraftStore({ directory }) {
       contentHash,
       updatedAt: new Date().toISOString(),
       document: clone(materialized),
+      documentStale: false,
       domains: storedDomainDocuments(materialized),
       workingCopyStack: stack
+    };
+    await writeRecord(record);
+    return publicRecord(record);
+  }
+
+  async function replaceDomain({
+    draftId,
+    domain,
+    projection,
+    expectedRevision = null,
+    provenance = undefined
+  }) {
+    const current = await readRecord(draftId);
+    if (expectedRevision !== null && current.revision !== expectedRevision) {
+      throw new Error(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
+      );
+    }
+    let nextDocument = applyAuthoredDomain(current.document, domain, projection);
+    if (provenance !== undefined) {
+      nextDocument = { ...nextDocument, provenance };
+    } else if (Object.prototype.hasOwnProperty.call(current.document, "provenance")) {
+      nextDocument = { ...nextDocument, provenance: current.document.provenance };
+    }
+    const materialized = assembleAuthoredDocument(partitionAuthoredDocument(nextDocument));
+    if (JSON.stringify(current.document) === JSON.stringify(materialized)) {
+      return publicRecord(current);
+    }
+    assertDocumentSize(materialized);
+    const contentHash = draftContentHash(materialized);
+    const stack = historyOf(current);
+    stack.push({
+      document: clone(current.document),
+      contentHash: current.contentHash,
+      savedAt: new Date().toISOString()
+    });
+    if (stack.length > MAX_WORKING_COPY_HISTORY) {
+      stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
+    }
+    // Persist only the selected domain column (and provenance) and mark the
+    // document cache stale. Reads still assemble a complete document via
+    // materializeRecord.
+    const nextDomains = storedDomainDocuments(materialized);
+    const record = {
+      ...current,
+      revision: current.revision + 1,
+      contentHash,
+      updatedAt: new Date().toISOString(),
+      document: clone(current.document),
+      documentStale: true,
+      domains: {
+        ...(current.domains || {}),
+        [domain]: nextDomains[domain],
+        provenance: nextDomains.provenance
+      },
+      workingCopyStack: stack
+    };
+    await writeRecord(record);
+    return publicRecord(materializeRecord(record));
+  }
+
+  async function materializeDraft(draftId) {
+    const current = await readRecord(draftId);
+    if (!current.documentStale) return publicRecord(current);
+    const materialized = current.document;
+    const record = {
+      ...current,
+      document: clone(materialized),
+      documentStale: false,
+      domains: storedDomainDocuments(materialized),
+      contentHash: draftContentHash(materialized),
+      updatedAt: new Date().toISOString()
     };
     await writeRecord(record);
     return publicRecord(record);
@@ -347,6 +424,8 @@ export function createPuzzleDraftStore({ directory }) {
     getDraft,
     listDrafts,
     replaceDraft,
+    replaceDomain,
+    materializeDraft,
     popWorkingCopy,
     recordValidation,
     saveLayout,

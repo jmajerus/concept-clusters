@@ -317,8 +317,14 @@ export async function run() {
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.idealTerms);
     assert.ok(phasedSchemas.pedagogy.schema.properties.lenses);
     assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction);
-    assert.ok(phasedSchemas.publication.schema.properties.provenance);
+    assert.equal(phasedSchemas.core.domain, "content");
+    assert.equal(phasedSchemas.pedagogy.domain, "pedagogy");
+    assert.equal(phasedSchemas.publication.domain, "pedagogy");
+    assert.equal(phasedSchemas.review.domain, undefined);
+    assert.equal(phasedSchemas.publication.schema.properties.provenance, undefined);
     assert.ok(phasedSchemas.publication.schema.properties.relatedPuzzles);
+    assert.match(phasedSchemas.core.schema.description, /write domain "content"/);
+    assert.match(phasedSchemas.review.schema.description, /domain=pedagogy/);
 
     // A draft that passes validate_puzzle_draft can still be a bad puzzle --
     // the guidance has to carry the design judgment (not just schema facts)

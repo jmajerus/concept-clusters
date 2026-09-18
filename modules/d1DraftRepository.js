@@ -10,7 +10,9 @@ import {
   serializeDraftDocument
 } from "./draftRepository.js";
 import {
+  applyAuthoredDomain,
   assembleStoredDomainDocuments,
+  AUTHORING_WRITE_DOMAINS,
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
@@ -37,12 +39,47 @@ function metadata(row) {
     installedContentHash: row.installed_content_hash || null,
     baseCommitSha: row.base_commit_sha,
     createdAt: row.created_at,
-    updatedAt: row.updated_at
+    updatedAt: row.updated_at,
+    documentStale: Number(row.document_stale || 0) === 1
   };
 }
 
+function domainPayloads(row) {
+  return {
+    content: row.content_json == null
+      ? null
+      : parsedJson(row.content_json, "Stored content domain"),
+    pedagogy: row.pedagogy_json == null
+      ? null
+      : parsedJson(row.pedagogy_json, "Stored pedagogy domain"),
+    provenance: row.provenance_json == null
+      ? null
+      : parsedJson(row.provenance_json, "Stored provenance domain")
+  };
+}
+
+function assembleRowDocument(row) {
+  const domains = domainPayloads(row);
+  const hasDomainColumns = domains.content != null
+    || domains.pedagogy != null
+    || domains.provenance != null;
+  // Domain columns are authoritative when present. A stale `document` cache is
+  // ignored as a source of truth; it remains only as a fallback for pre-domain
+  // rows that never received projection columns.
+  if (hasDomainColumns) {
+    return assembleStoredDomainDocuments({
+      document: Number(row.document_stale || 0) === 1
+        ? undefined
+        : parsedJson(row.document, "Stored draft"),
+      ...domains
+    });
+  }
+  return assembleStoredDomainDocuments({
+    document: parsedJson(row.document, "Stored draft")
+  });
+}
+
 function fullDraft(row) {
-  const storedDocument = parsedJson(row.document, "Stored draft");
   return {
     ...metadata(row),
     workingCopyHistoryCount: Number(row.working_copy_history_count || 0),
@@ -52,26 +89,42 @@ function fullDraft(row) {
     layout: row.layout_json == null
       ? null
       : parseLayoutDocument(row.layout_json, "Stored layout"),
-    // `assembleStoredDomainDocuments` deliberately rejects JSON-LD here. The
-    // nullable-column fallback is for old simplified rows only; interchange
-    // documents must be canonicalized before the Worker is released.
-    document: assembleStoredDomainDocuments({
-      document: storedDocument,
-      content: row.content_json == null
-        ? null
-        : parsedJson(row.content_json, "Stored content domain"),
-      pedagogy: row.pedagogy_json == null
-        ? null
-        : parsedJson(row.pedagogy_json, "Stored pedagogy domain"),
-      provenance: row.provenance_json == null
-        ? null
-        : parsedJson(row.provenance_json, "Stored provenance domain")
-    })
+    document: assembleRowDocument(row)
   };
 }
 
 function changes(result) {
   return Number(result?.meta?.changes || 0);
+}
+
+async function pushWorkingCopyHistory(database, {
+  draftId,
+  previousDocumentJson,
+  previousContentHash,
+  now
+}) {
+  if (!previousDocumentJson) return;
+  const seqRow = await database.prepare(`
+    SELECT MAX(seq) AS seq FROM puzzle_draft_history WHERE draft_id = ?
+  `).bind(draftId).first();
+  const nextSeq = Number(seqRow?.seq || 0) + 1;
+  await database.prepare(`
+    INSERT INTO puzzle_draft_history (
+      draft_id, seq, document, content_hash, saved_at
+    ) VALUES (?, ?, ?, ?, ?)
+  `).bind(
+    draftId,
+    nextSeq,
+    previousDocumentJson,
+    previousContentHash,
+    now
+  ).run();
+  if (nextSeq > MAX_WORKING_COPY_HISTORY) {
+    await database.prepare(`
+      DELETE FROM puzzle_draft_history
+      WHERE draft_id = ? AND seq <= ?
+    `).bind(draftId, nextSeq - MAX_WORKING_COPY_HISTORY).run();
+  }
 }
 
 export class D1DraftRepository extends DraftRepository {
@@ -89,33 +142,46 @@ export class D1DraftRepository extends DraftRepository {
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
+    const bindFresh = [
+      draftId,
+      typeof materialized.id === "string" ? materialized.id : null,
+      owner.subject,
+      typeof materialized.title === "string" ? materialized.title : null,
+      documentJson,
+      contentHash,
+      baseCommitSha,
+      now,
+      now,
+      domains.content,
+      domains.pedagogy,
+      domains.provenance
+    ];
     try {
       await this.database.prepare(`
         INSERT INTO puzzle_drafts (
           id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
-          created_at, updated_at, revision,
+          created_at, updated_at, revision, document_stale,
           content_json, pedagogy_json, provenance_json
-        ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?)
-      `).bind(
-        draftId,
-        typeof materialized.id === "string" ? materialized.id : null,
-        owner.subject,
-        typeof materialized.title === "string" ? materialized.title : null,
-        documentJson,
-        contentHash,
-        baseCommitSha,
-        now,
-        now,
-        domains.content,
-        domains.pedagogy,
-        domains.provenance
-      ).run();
+        ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?)
+      `).bind(...bindFresh).run();
     } catch (error) {
       if (String(error?.message || error).includes("UNIQUE constraint failed")) {
         throw new DraftConflictError(`Draft "${draftId}" already exists`);
       }
-      throw error;
+      // Older local D1 DBs may lack document_stale until migrate; retry without it.
+      if (/document_stale|no such column/i.test(String(error?.message || error))) {
+        await this.database.prepare(`
+          INSERT INTO puzzle_drafts (
+            id, puzzle_id, owner_subject, title, status,
+            document, content_hash, base_commit_sha,
+            created_at, updated_at, revision,
+            content_json, pedagogy_json, provenance_json
+          ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?)
+        `).bind(...bindFresh).run();
+      } else {
+        throw error;
+      }
     }
     return this.get({ draftId, actor });
   }
@@ -143,8 +209,7 @@ export class D1DraftRepository extends DraftRepository {
     }
     const owner = normalizeDraftActor(actor);
     const current = await this.database.prepare(`
-      SELECT document, content_hash, revision
-      FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
     `).bind(draftId, owner.subject).first();
     if (!current) throw new DraftNotFoundError(draftId);
     if (Number(current.revision) !== expectedRevision) {
@@ -154,10 +219,8 @@ export class D1DraftRepository extends DraftRepository {
     }
     const materialized = assembleStoredDomainDocuments({ document });
     const documentJson = serializeDraftDocument(materialized);
-    // Compare the canonical blob before hashing. This preserves no-op saves
-    // for rows created with the previous SHA-256 marker and avoids any hash
-    // work for the common read-edit-save-without-edits path.
-    if (current.document === documentJson) {
+    const previousAssembled = serializeDraftDocument(assembleRowDocument(current));
+    if (previousAssembled === documentJson && Number(current.document_stale || 0) !== 1) {
       return this.get({ draftId, actor });
     }
     const domains = storedDomainDocuments(materialized);
@@ -167,6 +230,7 @@ export class D1DraftRepository extends DraftRepository {
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
+          document_stale = 0,
           content_json = ?, pedagogy_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
@@ -188,29 +252,135 @@ export class D1DraftRepository extends DraftRepository {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
       );
     }
-    if (current.document !== documentJson) {
-      const seqRow = await this.database.prepare(`
-        SELECT MAX(seq) AS seq FROM puzzle_draft_history WHERE draft_id = ?
-      `).bind(draftId).first();
-      const nextSeq = Number(seqRow?.seq || 0) + 1;
-      await this.database.prepare(`
-        INSERT INTO puzzle_draft_history (
-          draft_id, seq, document, content_hash, saved_at
-        ) VALUES (?, ?, ?, ?, ?)
-      `).bind(
+    if (previousAssembled !== documentJson) {
+      await pushWorkingCopyHistory(this.database, {
         draftId,
-        nextSeq,
-        current.document,
-        current.content_hash,
+        previousDocumentJson: previousAssembled,
+        previousContentHash: current.content_hash,
         now
-      ).run();
-      if (nextSeq > MAX_WORKING_COPY_HISTORY) {
-        await this.database.prepare(`
-          DELETE FROM puzzle_draft_history
-          WHERE draft_id = ? AND seq <= ?
-        `).bind(draftId, nextSeq - MAX_WORKING_COPY_HISTORY).run();
-      }
+      });
     }
+    return this.get({ draftId, actor });
+  }
+
+  /**
+   * Replace one agent write-domain column. Does not rewrite the materialized
+   * `document` cache; sets document_stale so complete-document consumers
+   * assemble from domain columns (and materialize() can refresh the cache).
+   */
+  async saveDomain({
+    draftId,
+    domain,
+    projection,
+    actor,
+    expectedRevision,
+    provenance = undefined
+  }) {
+    assertDraftId(draftId);
+    if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
+      throw new Error("saveDomain requires domain content or pedagogy");
+    }
+    if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
+      throw new Error("expectedRevision must be a positive integer");
+    }
+    const owner = normalizeDraftActor(actor);
+    const current = await this.database.prepare(`
+      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner.subject).first();
+    if (!current) throw new DraftNotFoundError(draftId);
+    if (Number(current.revision) !== expectedRevision) {
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${Number(current.revision)}`
+      );
+    }
+    const previousDocument = assembleRowDocument(current);
+    const previousAssembled = serializeDraftDocument(previousDocument);
+    let nextDocument = applyAuthoredDomain(previousDocument, domain, projection);
+    if (provenance !== undefined) {
+      nextDocument = { ...nextDocument, provenance };
+    } else if (Object.prototype.hasOwnProperty.call(previousDocument, "provenance")) {
+      nextDocument = { ...nextDocument, provenance: previousDocument.provenance };
+    }
+    const materialized = assembleStoredDomainDocuments({ document: nextDocument });
+    const nextAssembled = serializeDraftDocument(materialized);
+    if (previousAssembled === nextAssembled) {
+      return this.get({ draftId, actor });
+    }
+    const domains = storedDomainDocuments(materialized);
+    const contentHash = draftContentHash(nextAssembled);
+    const now = new Date().toISOString();
+    const domainJson = domain === "content" ? domains.content : domains.pedagogy;
+    const domainColumn = domain === "content" ? "content_json" : "pedagogy_json";
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET puzzle_id = ?, title = ?, content_hash = ?,
+          revision = revision + 1, validation_json = NULL, updated_at = ?,
+          document_stale = 1,
+          ${domainColumn} = ?, provenance_json = ?
+      WHERE id = ? AND owner_subject = ? AND revision = ?
+    `).bind(
+      typeof materialized.id === "string" ? materialized.id : null,
+      typeof materialized.title === "string" ? materialized.title : null,
+      contentHash,
+      now,
+      domainJson,
+      domains.provenance,
+      draftId,
+      owner.subject,
+      expectedRevision
+    ).run();
+    if (changes(result) !== 1) {
+      const latest = await this.get({ draftId, actor });
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
+      );
+    }
+    await pushWorkingCopyHistory(this.database, {
+      draftId,
+      previousDocumentJson: previousAssembled,
+      previousContentHash: current.content_hash,
+      now
+    });
+    return this.get({ draftId, actor });
+  }
+
+  /**
+   * Refresh the materialized `document` cache from durable domain columns
+   * without bumping revision. Used before publish and when a complete
+   * snapshot is explicitly requested.
+   */
+  async materialize({ draftId, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor);
+    const current = await this.database.prepare(`
+      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner.subject).first();
+    if (!current) throw new DraftNotFoundError(draftId);
+    if (Number(current.document_stale || 0) !== 1) {
+      return this.get({ draftId, actor });
+    }
+    const materialized = assembleRowDocument(current);
+    const documentJson = serializeDraftDocument(materialized);
+    const domains = storedDomainDocuments(materialized);
+    const contentHash = draftContentHash(documentJson);
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET document = ?, content_hash = ?, document_stale = 0,
+          content_json = ?, pedagogy_json = ?, provenance_json = ?,
+          updated_at = ?
+      WHERE id = ? AND owner_subject = ?
+    `).bind(
+      documentJson,
+      contentHash,
+      domains.content,
+      domains.pedagogy,
+      domains.provenance,
+      now,
+      draftId,
+      owner.subject
+    ).run();
+    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
     return this.get({ draftId, actor });
   }
 
@@ -244,6 +414,7 @@ export class D1DraftRepository extends DraftRepository {
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
+          document_stale = 0,
           content_json = ?, pedagogy_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(

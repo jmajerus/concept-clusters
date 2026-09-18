@@ -68,12 +68,14 @@ normalizes modern provenance when a complete client supplies it. Focused
 writes cannot replace provenance or system metadata. Human-owned lesson credit
 is similarly kept outside the focused pedagogy write surface.
 
-For puzzle drafts, D1 stores the complete materialized document alongside
-projections for the three authored domains. The projections reduce the
-context and write payload seen by focused MCP calls; the materialized document
-keeps current publication and player-facing paths independent of the domain
-model. The system domain remains in D1 columns and response metadata rather
-than being duplicated in a `system` document field.
+For puzzle drafts, D1 stores projections for the three authored domains as the
+durable write surface. The complete `document` column is a materialized cache
+refreshed on complete saves and on validate/publish (`materialize`). Focused
+domain saves update only the selected projection and mark the cache stale;
+reads assemble from the domain columns. The materialized document keeps
+publication and player-facing paths independent of the domain model. The
+system domain remains in D1 columns and response metadata rather than being
+duplicated in a `system` document field.
 
 ## Projections and sub-schemas
 
@@ -107,12 +109,14 @@ must never cause an incomplete agent response to be mistaken for a complete
 document.
 
 The current implementation provides the first building blocks: focused
-`content` and `pedagogy` projections, and phase-specific schema guidance. A
-future refinement can make those dimensions composable, deriving domain and
-pass sub-schemas from the canonical schema plus a field-ownership map. That
-would let an agent learn only the structure needed for its current pass while
-keeping field definitions, cross-domain references, and final invariants
-centralized.
+`content` and `pedagogy` projections, phase-specific schema guidance, and a
+shared [field-ownership map](dev-briefs/authoring-domain-scoping-implementation.md#projection-and-sub-schema-refinement)
+(`modules/authoringFieldOwnership.js`) that both domain partition and phase
+schemas consume. Phase schemas bind to a write domain when they are a pure
+subset (`core` → content; `pedagogy` / `publication` → pedagogy); `review`
+remains a cross-domain inspection view. A future refinement can make pass
+writes themselves composable (patch vs whole-domain replace), so a narrow
+phase-shaped response is never mistaken for a complete domain replacement.
 
 ## Canonicalization, batch migration, and history
 

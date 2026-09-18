@@ -275,7 +275,10 @@ describe("hosted authoring Worker", () => {
     expect(phaseSchemas.review.schema.properties.bridges.items?.properties.relationKind)
       .toBeDefined();
     expect(phaseSchemas.pedagogy.schema.properties.lenses).toBeDefined();
-    expect(phaseSchemas.publication.schema.properties.provenance).toBeDefined();
+    expect(phaseSchemas.publication.schema.properties.provenance).toBeUndefined();
+    expect(phaseSchemas.publication.domain).toBe("pedagogy");
+    expect(phaseSchemas.core.domain).toBe("content");
+    expect(phaseSchemas.review.domain).toBeUndefined();
 
     const created = await rpc({
       jsonrpc: "2.0",
@@ -679,6 +682,61 @@ describe("hosted authoring Worker", () => {
       actor: { subject: "local-author" }
     });
     expect(populated.document).toEqual(document);
+
+    const beforeDomainSave = await env.AUTHORING_DB.prepare(
+      "SELECT document, document_stale FROM puzzle_drafts WHERE id = ?"
+    ).bind("domain-projection-fixture").first() as {
+      document: string;
+      document_stale: number;
+    };
+    expect(Number(beforeDomainSave.document_stale || 0)).toBe(0);
+    const contentProjection = JSON.parse(row.content_json);
+    await repository.saveDomain({
+      draftId: "domain-projection-fixture",
+      domain: "content",
+      projection: { ...contentProjection, title: "Domain column retitled" },
+      actor: { subject: "local-author" },
+      expectedRevision: populated.revision
+    });
+    const afterDomainSave = await env.AUTHORING_DB.prepare(
+      "SELECT document, document_stale, content_json FROM puzzle_drafts WHERE id = ?"
+    ).bind("domain-projection-fixture").first() as {
+      document: string;
+      document_stale: number;
+      content_json: string;
+    };
+    expect(Number(afterDomainSave.document_stale)).toBe(1);
+    expect(afterDomainSave.document).toBe(beforeDomainSave.document);
+    expect(JSON.parse(afterDomainSave.content_json).title).toBe("Domain column retitled");
+    const assembled = await repository.get({
+      draftId: "domain-projection-fixture",
+      actor: { subject: "local-author" }
+    });
+    expect(assembled.document.title).toBe("Domain column retitled");
+    expect(assembled.document.lenses).toHaveLength(1);
+    expect(assembled.documentStale).toBe(true);
+    const materialized = await repository.materialize({
+      draftId: "domain-projection-fixture",
+      actor: { subject: "local-author" }
+    });
+    expect(materialized.documentStale).toBe(false);
+    expect(materialized.document.title).toBe("Domain column retitled");
+    const afterMaterialize = await env.AUTHORING_DB.prepare(
+      "SELECT document, document_stale FROM puzzle_drafts WHERE id = ?"
+    ).bind("domain-projection-fixture").first() as {
+      document: string;
+      document_stale: number;
+    };
+    expect(Number(afterMaterialize.document_stale)).toBe(0);
+    expect(JSON.parse(afterMaterialize.document).title).toBe("Domain column retitled");
+
+    // Restore a fresh create-shaped row for the legacy-null-projection cases.
+    await repository.save({
+      draftId: "domain-projection-fixture",
+      document,
+      actor: { subject: "local-author" },
+      expectedRevision: materialized.revision
+    });
 
     // A row written before migration 0019 has no projections. The complete
     // legacy simplified blob remains sufficient to reconstruct the same

@@ -29,6 +29,26 @@ export function createLocalDraftRepository(draftStore) {
         expectedRevision
       });
     },
+    async saveDomain({ draftId, domain, projection, expectedRevision, provenance }) {
+      if (typeof draftStore.replaceDomain !== "function") {
+        // Remnant stores without column-level updates fall back to a full
+        // replace after the caller has already merged the projection.
+        throw new Error("Draft store does not support saveDomain");
+      }
+      return draftStore.replaceDomain({
+        draftId,
+        domain,
+        projection,
+        expectedRevision,
+        provenance
+      });
+    },
+    async materialize({ draftId }) {
+      if (typeof draftStore.materializeDraft !== "function") {
+        return this.get({ draftId });
+      }
+      return draftStore.materializeDraft(draftId);
+    },
     async list({ status = null, limit = 100, includeDocument = false } = {}) {
       const records = await draftStore.listDrafts({ includeDocument });
       return records

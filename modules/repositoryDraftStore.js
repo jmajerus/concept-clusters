@@ -48,6 +48,25 @@ export function createRepositoryDraftStore({ repository, actor }) {
         expectedRevision
       }));
     },
+    async replaceDomain({ draftId, domain, projection, expectedRevision, provenance }) {
+      if (typeof repository.saveDomain !== "function") {
+        throw new Error("Draft repository does not support saveDomain");
+      }
+      return record(await repository.saveDomain({
+        draftId,
+        domain,
+        projection,
+        actor,
+        expectedRevision,
+        provenance
+      }));
+    },
+    async materializeDraft(draftId) {
+      if (typeof repository.materialize !== "function") {
+        return getDraft(draftId);
+      }
+      return record(await repository.materialize({ draftId, actor }));
+    },
     async popWorkingCopy({ draftId, expectedRevision }) {
       if (typeof repository.popWorkingCopy !== "function") {
         throw new Error("Working-copy history is not available.");

@@ -502,19 +502,22 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
 const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 
 - Add only useful discovery and stewardship metadata: tags, secondary category
-  assignments, level, related puzzles, attribution, licensing, and language.
+  assignments, level, related puzzles, licensing, and language.
   Most are optional; omission is better than filler. The server supplies
-  timestamps and revision metadata.
-- Keep provenance optional — the server may already have stamped the MCP host;
-  agents can send bare contributor names and kinds/mode are inferred. Do not write
-  learningIntroduction.credit; the lesson byline is derived from provenance
-  (humans may override collaboration and name a real reviewer).
+  timestamps, revision metadata, and contributor provenance; this pass does
+  not author provenance.
+- Do not write learningIntroduction.credit; the lesson byline is derived from
+  provenance (humans may override collaboration and name a real reviewer).
   Do not invent a reviewer name. Do not treat roles or per-scope assistance
   entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse
   benefits from a stable subject split.
+- This pass binds to write domain pedagogy: retrieve get_puzzle_draft with
+  domain=pedagogy, preserve lenses and learningIntroduction already present,
+  and save that same domain. Do not send a publication-only object as a
+  whole-domain replacement.
 - Validate the complete accumulated document. If the caller explicitly
   requests authoring publication, set \`publish_to_authoring=true\` on
   \`save_puzzle_draft\` for a confirmed final edit; this publishes a valid
