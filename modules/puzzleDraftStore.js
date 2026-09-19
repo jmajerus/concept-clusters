@@ -14,6 +14,7 @@ import {
   draftContentHash
 } from "./draftRepository.js";
 import {
+  applyAuthoredDomain,
   assembleAuthoredDocument,
   assembleStoredDomainDocuments,
   partitionAuthoredDocument,
@@ -49,9 +50,20 @@ function assertDocumentSize(document) {
 export function createPuzzleDraftStore({ directory }) {
   if (!directory) throw new Error("draft directory is required");
 
+  // Serialize mutations per draft so optimistic revision checks are meaningful
+  // within a process. Cross-process races are out of scope for this local store.
+  const mutationChains = new Map();
+
   function pathFor(id) {
     assertDraftId(id);
     return join(directory, `${id}.json`);
+  }
+
+  function withDraftMutation(draftId, fn) {
+    const previous = mutationChains.get(draftId) || Promise.resolve();
+    const run = previous.then(fn, fn);
+    mutationChains.set(draftId, run.then(() => undefined, () => undefined));
+    return run;
   }
 
   function storedDomainValue(record, key, label) {
@@ -70,22 +82,36 @@ export function createPuzzleDraftStore({ directory }) {
     const layout = record.layout || (record.starLayout
       ? layoutDocumentForMode("star", record.starLayout)
       : null);
+    const documentStale = Boolean(record.documentStale);
     if (!record.domains || typeof record.domains !== "object") {
-      return { ...record, layout };
+      if (documentStale) {
+        throw new Error(
+          `Draft ${record.draftId || "unknown"} is stale but missing durable domain projections`
+        );
+      }
+      return { ...record, layout, documentStale };
+    }
+    const content = storedDomainValue(record, "content", "Stored content domain");
+    const pedagogy = storedDomainValue(record, "pedagogy", "Stored pedagogy domain");
+    if (documentStale && (content == null || pedagogy == null)) {
+      throw new Error(
+        `Draft ${record.draftId || "unknown"} is stale but missing durable content/pedagogy projections`
+      );
     }
     return {
       ...record,
       layout,
+      documentStale,
       document: assembleStoredDomainDocuments({
-        document: record.document,
-        content: storedDomainValue(record, "content", "Stored content domain"),
-        pedagogy: storedDomainValue(record, "pedagogy", "Stored pedagogy domain"),
+        document: documentStale ? undefined : record.document,
+        content,
+        pedagogy,
         provenance: storedDomainValue(record, "provenance", "Stored provenance domain")
       })
     };
   }
 
-  async function readRecord(id) {
+  async function readRawRecord(id) {
     const path = pathFor(id);
     let text;
     try {
@@ -95,10 +121,18 @@ export function createPuzzleDraftStore({ directory }) {
       throw error;
     }
     try {
-      return materializeRecord(JSON.parse(text));
+      const parsed = JSON.parse(text);
+      return {
+        ...parsed,
+        documentStale: Boolean(parsed.documentStale)
+      };
     } catch (error) {
       throw new Error(`Draft ${id} is not valid JSON: ${error.message}`);
     }
+  }
+
+  async function readRecord(id) {
+    return materializeRecord(await readRawRecord(id));
   }
 
   async function writeRecord(record) {
@@ -120,6 +154,7 @@ export function createPuzzleDraftStore({ directory }) {
     const { workingCopyStack, domains, ...rest } = record;
     return clone({
       ...rest,
+      documentStale: Boolean(record.documentStale),
       workingCopyHistoryCount: historyOf({ workingCopyStack }).length
     });
   }
@@ -127,131 +162,231 @@ export function createPuzzleDraftStore({ directory }) {
   async function createDraft({ draftId, document }) {
     assertDraftId(draftId);
     assertDocumentSize(document);
-    try {
-      await readFile(pathFor(draftId), "utf8");
-      throw new Error(`Draft "${draftId}" already exists`);
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
-    }
-    const now = new Date().toISOString();
-    const domains = partitionAuthoredDocument(document);
-    const materialized = assembleAuthoredDocument(domains);
-    const record = {
-      draftId,
-      revision: 1,
-      status: "draft",
-      contentHash: draftContentHash(materialized),
-      createdAt: now,
-      updatedAt: now,
-      document: clone(materialized),
-      domains: storedDomainDocuments(materialized),
-      layout: null
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+    return withDraftMutation(draftId, async () => {
+      try {
+        await readFile(pathFor(draftId), "utf8");
+        throw new Error(`Draft "${draftId}" already exists`);
+      } catch (error) {
+        if (error.code !== "ENOENT") throw error;
+      }
+      const now = new Date().toISOString();
+      const domains = partitionAuthoredDocument(document);
+      const materialized = assembleAuthoredDocument(domains);
+      const record = {
+        draftId,
+        revision: 1,
+        status: "draft",
+        contentHash: draftContentHash(materialized),
+        createdAt: now,
+        updatedAt: now,
+        document: clone(materialized),
+        documentStale: false,
+        domains: storedDomainDocuments(materialized),
+        layout: null
+      };
+      await writeRecord(record);
+      return publicRecord(record);
+    });
   }
 
   async function replaceDraft({ draftId, document, expectedRevision = null }) {
     assertDocumentSize(document);
-    const current = await readRecord(draftId);
-    if (expectedRevision !== null && current.revision !== expectedRevision) {
-      throw new Error(
-        `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
-      );
-    }
-    const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
-    // A canonical round-trip is not a document edit. In particular, the
-    // graphical authoring client may read display-form category titles and
-    // send them back through documentForStorage; once canonicalized, that
-    // should preserve the current revision instead of consuming one.
-    if (JSON.stringify(current.document) === JSON.stringify(materialized)) {
-      return publicRecord(current);
-    }
-    const contentHash = draftContentHash(materialized);
-    const stack = historyOf(current);
-    stack.push({
-      document: clone(current.document),
-      contentHash: current.contentHash,
-      savedAt: new Date().toISOString()
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (expectedRevision !== null && raw.revision !== expectedRevision) {
+        throw new Error(
+          `Draft revision conflict: expected ${expectedRevision}, current revision is ${raw.revision}`
+        );
+      }
+      const current = materializeRecord(raw);
+      const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
+      // A canonical round-trip is not a document edit. In particular, the
+      // graphical authoring client may read display-form category titles and
+      // send them back through documentForStorage; once canonicalized, that
+      // should preserve the current revision instead of consuming one.
+      if (JSON.stringify(current.document) === JSON.stringify(materialized)
+          && !raw.documentStale) {
+        return publicRecord(current);
+      }
+      const contentHash = draftContentHash(materialized);
+      const stack = historyOf(raw);
+      stack.push({
+        document: clone(current.document),
+        contentHash: raw.contentHash,
+        savedAt: new Date().toISOString()
+      });
+      if (stack.length > MAX_WORKING_COPY_HISTORY) {
+        stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
+      }
+      const record = {
+        ...raw,
+        revision: raw.revision + 1,
+        contentHash,
+        updatedAt: new Date().toISOString(),
+        document: clone(materialized),
+        documentStale: false,
+        domains: storedDomainDocuments(materialized),
+        workingCopyStack: stack
+      };
+      await writeRecord(record);
+      return publicRecord(record);
     });
-    if (stack.length > MAX_WORKING_COPY_HISTORY) {
-      stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
-    }
-    const record = {
-      ...current,
-      revision: current.revision + 1,
-      contentHash,
-      updatedAt: new Date().toISOString(),
-      document: clone(materialized),
-      domains: storedDomainDocuments(materialized),
-      workingCopyStack: stack
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+  }
+
+  async function replaceDomain({
+    draftId,
+    domain,
+    projection,
+    expectedRevision = null,
+    provenance = undefined
+  }) {
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (expectedRevision !== null && raw.revision !== expectedRevision) {
+        throw new Error(
+          `Draft revision conflict: expected ${expectedRevision}, current revision is ${raw.revision}`
+        );
+      }
+      const current = materializeRecord(raw);
+      let nextDocument = applyAuthoredDomain(current.document, domain, projection);
+      if (provenance !== undefined) {
+        nextDocument = { ...nextDocument, provenance };
+      } else if (Object.prototype.hasOwnProperty.call(current.document, "provenance")) {
+        nextDocument = { ...nextDocument, provenance: current.document.provenance };
+      }
+      const materialized = assembleAuthoredDocument(partitionAuthoredDocument(nextDocument));
+      if (JSON.stringify(current.document) === JSON.stringify(materialized)) {
+        return publicRecord(current);
+      }
+      assertDocumentSize(materialized);
+      const contentHash = draftContentHash(materialized);
+      const stack = historyOf(raw);
+      stack.push({
+        document: clone(current.document),
+        contentHash: raw.contentHash,
+        savedAt: new Date().toISOString()
+      });
+      if (stack.length > MAX_WORKING_COPY_HISTORY) {
+        stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
+      }
+      // Persist the selected domain column (and provenance). On the first
+      // focused save for a pre-domain row, seed sibling projections from the
+      // assembled document so marking the cache stale does not drop them.
+      // Keep the on-disk document blob unchanged until materializeDraft().
+      const nextDomains = storedDomainDocuments(materialized);
+      const domains = raw.domains && typeof raw.domains === "object"
+        ? {
+          ...raw.domains,
+          [domain]: nextDomains[domain],
+          provenance: nextDomains.provenance
+        }
+        : nextDomains;
+      const record = {
+        ...raw,
+        revision: raw.revision + 1,
+        contentHash,
+        updatedAt: new Date().toISOString(),
+        document: clone(raw.document),
+        documentStale: true,
+        domains,
+        workingCopyStack: stack
+      };
+      await writeRecord(record);
+      return publicRecord(materializeRecord(record));
+    });
+  }
+
+  async function materializeDraft(draftId) {
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (!raw.documentStale) return publicRecord(materializeRecord(raw));
+      const materialized = materializeRecord(raw).document;
+      const record = {
+        ...raw,
+        document: clone(materialized),
+        documentStale: false,
+        domains: storedDomainDocuments(materialized),
+        contentHash: draftContentHash(materialized),
+        updatedAt: new Date().toISOString()
+      };
+      await writeRecord(record);
+      return publicRecord(record);
+    });
   }
 
   async function popWorkingCopy({ draftId, expectedRevision = null }) {
-    const current = await readRecord(draftId);
-    if (expectedRevision !== null && current.revision !== expectedRevision) {
-      throw new Error(
-        `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (expectedRevision !== null && raw.revision !== expectedRevision) {
+        throw new Error(
+          `Draft revision conflict: expected ${expectedRevision}, current revision is ${raw.revision}`
+        );
+      }
+      const stack = historyOf(raw);
+      const previous = stack.pop();
+      if (!previous) throw new DraftEmptyHistoryError(draftId);
+      const materialized = assembleAuthoredDocument(
+        partitionAuthoredDocument(previous.document)
       );
-    }
-    const stack = historyOf(current);
-    const previous = stack.pop();
-    if (!previous) throw new DraftEmptyHistoryError(draftId);
-    const materialized = assembleAuthoredDocument(
-      partitionAuthoredDocument(previous.document)
-    );
-    const record = {
-      ...current,
-      revision: current.revision + 1,
-      contentHash: draftContentHash(materialized),
-      updatedAt: new Date().toISOString(),
-      document: clone(materialized),
-      domains: storedDomainDocuments(materialized),
-      workingCopyStack: stack
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+      const record = {
+        ...raw,
+        revision: raw.revision + 1,
+        contentHash: draftContentHash(materialized),
+        updatedAt: new Date().toISOString(),
+        document: clone(materialized),
+        documentStale: false,
+        domains: storedDomainDocuments(materialized),
+        workingCopyStack: stack
+      };
+      await writeRecord(record);
+      return publicRecord(record);
+    });
   }
 
   async function recordValidation(draftId, validation) {
-    const current = await readRecord(draftId);
-    const record = {
-      ...current,
-      validation: clone(validation),
-      updatedAt: new Date().toISOString()
-    };
-    await writeRecord(record);
-    return clone(validation);
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      const record = {
+        ...raw,
+        validation: clone(validation),
+        updatedAt: new Date().toISOString()
+      };
+      await writeRecord(record);
+      return clone(validation);
+    });
   }
 
   async function saveLayout({ draftId, layout }) {
-    const current = await readRecord(draftId);
-    const layoutJson = serializeLayoutDocument(layout);
-    const record = {
-      ...current,
-      layout: layoutJson == null ? null : JSON.parse(layoutJson),
-      updatedAt: new Date().toISOString()
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      const layoutJson = serializeLayoutDocument(layout);
+      const record = {
+        ...raw,
+        layout: layoutJson == null ? null : JSON.parse(layoutJson),
+        updatedAt: new Date().toISOString()
+      };
+      await writeRecord(record);
+      return publicRecord(materializeRecord(record));
+    });
   }
 
   async function clearLayout(draftId) {
-    const current = await readRecord(draftId);
-    const record = {
-      ...current,
-      layout: null,
-      updatedAt: new Date().toISOString()
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      const record = {
+        ...raw,
+        layout: null,
+        updatedAt: new Date().toISOString()
+      };
+      await writeRecord(record);
+      return publicRecord(materializeRecord(record));
+    });
   }
 
   async function deleteDraft(draftId) {
-    await unlink(pathFor(draftId));
+    return withDraftMutation(draftId, async () => {
+      await unlink(pathFor(draftId));
+    });
   }
 
   // Records a checkout install against this draft. Unused now that
@@ -259,51 +394,58 @@ export function createPuzzleDraftStore({ directory }) {
   // checkout); kept as a draftStore capability, not wired to any caller.
   // Does not bump revision: publication is not a document edit.
   async function markInstalled(draftId) {
-    const current = await readRecord(draftId);
-    const now = new Date().toISOString();
-    const contentHash = current.contentHash || draftContentHash(current.document);
-    const record = {
-      ...current,
-      status: "installed",
-      contentHash,
-      installedAt: now,
-      installedContentHash: contentHash,
-      updatedAt: now
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      const current = materializeRecord(raw);
+      const now = new Date().toISOString();
+      const contentHash = raw.contentHash || draftContentHash(current.document);
+      const record = {
+        ...raw,
+        status: "installed",
+        contentHash,
+        installedAt: now,
+        installedContentHash: contentHash,
+        updatedAt: now
+      };
+      await writeRecord(record);
+      return publicRecord(materializeRecord(record));
+    });
   }
 
   async function markUninstalled(draftId) {
-    const current = await readRecord(draftId);
-    if (current.status !== "installed" && !current.installedContentHash) {
-      return publicRecord(current);
-    }
-    const now = new Date().toISOString();
-    const record = {
-      ...current,
-      status: "draft",
-      installedAt: null,
-      installedContentHash: null,
-      updatedAt: now
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (raw.status !== "installed" && !raw.installedContentHash) {
+        return publicRecord(materializeRecord(raw));
+      }
+      const now = new Date().toISOString();
+      const record = {
+        ...raw,
+        status: "draft",
+        installedAt: null,
+        installedContentHash: null,
+        updatedAt: now
+      };
+      await writeRecord(record);
+      return publicRecord(materializeRecord(record));
+    });
   }
 
   // Records that submitting this draft opened or updated a GitHub pull
   // request. Does not bump revision: publication is not a document edit.
   async function markSubmitted(draftId) {
-    const current = await readRecord(draftId);
-    const now = new Date().toISOString();
-    const record = {
-      ...current,
-      status: "submitted",
-      submittedAt: now,
-      updatedAt: now
-    };
-    await writeRecord(record);
-    return publicRecord(record);
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      const now = new Date().toISOString();
+      const record = {
+        ...raw,
+        status: "submitted",
+        submittedAt: now,
+        updatedAt: now
+      };
+      await writeRecord(record);
+      return publicRecord(materializeRecord(record));
+    });
   }
 
   async function getDraft(draftId) {
@@ -347,6 +489,8 @@ export function createPuzzleDraftStore({ directory }) {
     getDraft,
     listDrafts,
     replaceDraft,
+    replaceDomain,
+    materializeDraft,
     popWorkingCopy,
     recordValidation,
     saveLayout,

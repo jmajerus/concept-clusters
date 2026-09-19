@@ -4,6 +4,7 @@ import { draftContentHash } from "./draftRepository.js";
 import { createHttpD1Database } from "./httpD1Database.js";
 import { resolveLocalD1Config, resolveLocalDraftActor } from "./localD1Config.js";
 import { createRepositoryDraftStore } from "./repositoryDraftStore.js";
+import { applyAuthoredDomain } from "./authoringDomains.js";
 
 export const LOCAL_PUBLICATION_ACTOR = Object.freeze({ subject: "local" });
 
@@ -28,6 +29,46 @@ export function createLocalDraftRepository(draftStore) {
         document,
         expectedRevision
       });
+    },
+    async saveDomain({ draftId, domain, projection, expectedRevision, provenance }) {
+      if (typeof draftStore.replaceDomain === "function") {
+        return draftStore.replaceDomain({
+          draftId,
+          domain,
+          projection,
+          expectedRevision,
+          provenance
+        });
+      }
+      // Remnant stores without column-level updates: merge then full replace.
+      const current = await draftStore.getDraft(draftId);
+      let nextDocument = applyAuthoredDomain(current.document, domain, projection);
+      if (provenance !== undefined) {
+        nextDocument = { ...nextDocument, provenance };
+      } else if (Object.prototype.hasOwnProperty.call(current.document, "provenance")) {
+        nextDocument = {
+          ...nextDocument,
+          provenance: current.document.provenance
+        };
+      }
+      return draftStore.replaceDraft({
+        draftId,
+        document: nextDocument,
+        expectedRevision
+      });
+    },
+    async materialize({ draftId }) {
+      if (typeof draftStore.materializeDraft !== "function") {
+        return this.get({ draftId });
+      }
+      return draftStore.materializeDraft(draftId);
+    },
+    async supports(method) {
+      if (method === "saveDomain" || method === "materialize") return true;
+      if (method === "popWorkingCopy") {
+        return typeof draftStore.popWorkingCopy === "function";
+      }
+      return typeof this[method] === "function";
     },
     async list({ status = null, limit = 100, includeDocument = false } = {}) {
       const records = await draftStore.listDrafts({ includeDocument });

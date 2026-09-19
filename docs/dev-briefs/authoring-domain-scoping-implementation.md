@@ -13,7 +13,8 @@ order, and verification commands.
 
 | Area | Source of truth |
 |---|---|
-| Domain constants, projections, merge rules, protected fields | `modules/authoringDomains.js` |
+| Field ownership, phase pass bindings, protected/derived/retired kinds | `modules/authoringFieldOwnership.js` |
+| Domain constants, projections, merge rules, protected fields | `modules/authoringDomains.js` (consumes the ownership map) |
 | Authored-document normalization and storage boundary | `modules/authoredPuzzleDocument.js` |
 | Hosted MCP read/write contract | `modules/hostedMcpAuthoringServer.js` |
 | Draft projections and D1 persistence | `modules/d1DraftRepository.js` and migration `0019_authoring_domains` |
@@ -51,27 +52,32 @@ fields.
 
 ## Projection and sub-schema refinement
 
-The implementation currently has two related but separate focus mechanisms:
+The implementation currently has two related but separate focus mechanisms,
+backed by one ownership map:
 
+- `modules/authoringFieldOwnership.js` records, for each root / cluster /
+  bridge field, its owning domain, whether it may appear as read-only
+  context, whether it is a stable identity, and whether it is authored,
+  protected, derived, or retired.
 - `projectAuthoredDocument()` defines the data and ownership boundary for a
-  domain read or write; and
+  domain read or write from that map; and
 - `get_authoring_schema` supplies focused guidance and schemas for the
-  `core`, `review`, `pedagogy`, and `publication` phases. Those responses set
+  `core`, `review`, `pedagogy`, and `publication` phases from
+  `AUTHORING_PHASE_PASSES` in the same module. Those responses set
   `preserveExisting: true`; they are task views, not independently complete
-  replacement documents.
+  replacement documents. Pure passes also set `domain` to the matching write
+  domain (`core` → `content`; `pedagogy` / `publication` → `pedagogy`).
+  `review` omits `domain` because it mixes content inspection with pedagogy
+  bridge annotations. Protected fields such as `provenance` are not listed
+  on any agent-facing phase pass.
 
-The intended next refinement is to make these dimensions composable. The
-canonical simplified schema should remain the source of truth, supplemented
-by a centrally maintained ownership/context registry that records, for each
-field:
+The ownership map is checked at load time (`assertPhasePassesConsistent`) so
+a phase cannot advertise a field its bound write domain would reject.
 
-- its owning domain;
-- whether it may be exposed as read-only context to another domain;
-- the stable identity used when it is referenced across domains; and
-- whether it is authored, protected, or derived.
-
-From that metadata, infrastructure can derive or validate a domain projection
-and then narrow it to a pass sub-schema. A pass sub-schema is an agent-facing
+The intended next refinement is to make the write path itself composable.
+From the ownership metadata, infrastructure can still derive a domain
+projection and then accept a narrow pass sub-schema as a **patch** rather
+than a whole-domain replacement. A pass sub-schema is an agent-facing
 contract, not a valid standalone puzzle document. It should contain only the
 fields the pass may change, while cross-domain context should be supplied
 separately and marked read-only. The agent should not have to reproduce a
@@ -102,20 +108,22 @@ Infrastructure can resolve those identities against the retained content
 projection, reject unknown or conflicting references, and apply the
 pedagogical annotations before validating the assembled document.
 
-Open decisions for this refinement are the ownership/context metadata shape,
-whether sub-schemas are generated or checked against a hand-authored
-registry, how domain and phase selectors are represented in the authoring
-API, and how sub-schema versions are tied to the canonical schema.
+Open decisions for the write-path refinement are how domain and phase
+selectors are represented together on save, and how sub-schema versions are
+tied to the canonical schema.
 
 ## D1 storage
 
-Migration `0019_authoring_domains` adds `content_json`, `pedagogy_json`, and
-`provenance_json` to `puzzle_drafts`. The existing `document` column remains a
-materialized complete simplified document used by validation, publication,
-rendering, and Freeze. The projections are the focused-read/write storage;
-they are not a new player or Freeze format.
+For puzzle drafts, D1 stores durable domain projections (`content_json`,
+`pedagogy_json`, `provenance_json`) as the authored source of truth. The
+`document` column is a materialized complete simplified snapshot used by
+validation, publication, rendering, and Freeze. Focused MCP domain saves update
+the corresponding projection column and mark `document_stale` without rewriting
+the cache; `get` assembles from domain columns, and validate/publish call
+`materialize()` to refresh the snapshot. The projections are not a new player
+or Freeze format.
 
-The new projection columns are nullable for rollout. If all three are absent,
+The projection columns remain nullable for rollout. If all three are absent,
 `D1DraftRepository` can fall back to an older simplified complete document and
 the next successful write materializes the projections. This fallback is not
 valid for JSON-LD or retired fields. `content_drafts` and

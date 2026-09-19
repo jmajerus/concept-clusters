@@ -104,16 +104,20 @@ accumulating draft:
 3. `pedagogy` owns lenses and learning introductions. They may be authored at
    different times: revisiting this phase to add a later introduction must
    preserve lenses already present unless they independently need revision.
-4. `publication` adds only useful discovery, attribution, and publication
-   metadata before validation and submission.
+4. `publication` adds only useful discovery and publication metadata
+   (categories, tags, level, related puzzles, license fields). Attribution
+   stays in protected `provenance` and is not part of this phase schema.
 
 Before every later pass, call `get_puzzle_draft`, edit the latest document or
 selected domain, preserve all fields outside the selected domain, and send the
-full latest selected projection when saving. A phase schema is a focused field
-projection, not a standalone replacement schema or an independent validator;
-the complete schema resource remains canonical. Phases can be revisited in any
-order when their concern needs further work; they are not one-way lifecycle
-gates.
+full latest selected projection when saving. Focused `get_authoring_schema`
+responses bind pure phases to a write `domain` (`core` → `content`;
+`pedagogy` / `publication` → `pedagogy`); `review` omits `domain` because it
+mixes content inspection with pedagogy bridge annotations. A phase schema is a
+focused field projection, not a standalone replacement schema or an independent
+validator; the complete schema resource remains canonical. Phases can be
+revisited in any order when their concern needs further work; they are not
+one-way lifecycle gates.
 
 ## What is implemented
 
@@ -201,9 +205,11 @@ The tracked D1 migrations create:
   (OCC token), content hash, last validation result, the optional confirmed
   layout document for unpublished play, and the persisted `content_json`,
   `pedagogy_json`, and protected `provenance_json` projections added by
-  migrations `0019_authoring_domains.sql` and
-  `0022_puzzle_draft_star_layout.sql` plus the generic-column rename in
-  `0023_rename_layout_json.sql`; and
+  migration `0019_authoring_domains`. Focused domain saves update the selected
+  projection and set `document_stale` (migration `0024_document_stale`) without
+  rewriting the materialized `document` cache; validate and publish rematerialize.
+  Layout storage comes from `0022_puzzle_draft_star_layout.sql` plus the
+  generic-column rename in `0023_rename_layout_json.sql`; and
 - `puzzle_draft_history` for the capped previous-working-copy stack used by
   revert operations; and
 - `content_drafts` for owner-scoped catalogue and category working copies; and

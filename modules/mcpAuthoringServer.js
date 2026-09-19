@@ -39,7 +39,12 @@ function localContentService(contentService) {
 }
 
 function lazyRepository(resolveRepository) {
-  return Object.fromEntries([
+  let resolved;
+  const resolve = async () => {
+    if (!resolved) resolved = await resolveRepository();
+    return resolved;
+  };
+  const required = [
     "create",
     "get",
     "save",
@@ -47,10 +52,31 @@ function lazyRepository(resolveRepository) {
     "delete",
     "recordValidation",
     "recordAssistanceStamp"
-  ].map(method => [method, async (...args) => {
-    const repository = await resolveRepository();
+  ];
+  const optional = ["saveDomain", "materialize", "popWorkingCopy"];
+  const facade = Object.fromEntries(required.map(method => [method, async (...args) => {
+    const repository = await resolve();
     return repository[method](...args);
   }]));
+  // Optional methods stay absent from typeof checks unless the resolved
+  // repository implements them. Callers that need a capability probe use
+  // supports() instead of typeof on the facade itself.
+  for (const method of optional) {
+    facade[method] = async (...args) => {
+      const repository = await resolve();
+      if (typeof repository[method] !== "function") {
+        const error = new Error(`DraftRepository.${method} is not implemented`);
+        error.code = "DRAFT_METHOD_UNSUPPORTED";
+        throw error;
+      }
+      return repository[method](...args);
+    };
+  }
+  facade.supports = async method => {
+    const repository = await resolve();
+    return typeof repository[method] === "function";
+  };
+  return facade;
 }
 
 function lazyContentDocuments(resolveRepository) {

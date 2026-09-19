@@ -83,10 +83,20 @@ export function draftContentHash(documentOrText) {
 // matching the draft's current generation. The integer is an OCC token.
 // Distinct saves also push the previous blob onto a capped working-copy
 // stack; popWorkingCopy restores the latest and discards the current one.
+//
+// saveDomain() updates one agent write-domain column without rewriting the
+// materialized `document` cache (document_stale). materialize() refreshes
+// that cache from the durable domain columns.
 export class DraftRepository {
   async create(_input) { throw new Error("DraftRepository.create is not implemented"); }
   async get(_input) { throw new Error("DraftRepository.get is not implemented"); }
   async save(_input) { throw new Error("DraftRepository.save is not implemented"); }
+  async saveDomain(_input) {
+    throw new Error("DraftRepository.saveDomain is not implemented");
+  }
+  async materialize(_input) {
+    throw new Error("DraftRepository.materialize is not implemented");
+  }
   async popWorkingCopy(_input) {
     throw new Error("DraftRepository.popWorkingCopy is not implemented");
   }

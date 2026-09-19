@@ -2,100 +2,28 @@
 // simplified puzzle document that the player and publication paths consume.
 // A domain projection reduces an agent's context and write payload; the
 // canonical document is materialized again at the infrastructure boundary.
+//
+// Field membership comes from authoringFieldOwnership.js so domain
+// projections and phase schemas stay aligned.
 
-export const AUTHORING_DOMAINS = Object.freeze([
-  "content",
-  "pedagogy",
-  "provenance",
-  "system"
-]);
+import {
+  AUTHORING_DOMAINS,
+  AUTHORING_READ_DOMAINS,
+  AUTHORING_WRITE_DOMAINS,
+  DERIVED_ROOT_FIELDS,
+  PEDAGOGY_BRIDGE_FIELDS,
+  PEDAGOGY_ROOT_FIELDS,
+  PROTECTED_ROOT_FIELDS,
+  RETIRED_ROOT_FIELDS,
+  SYSTEM_ROOT_FIELDS
+} from "./authoringFieldOwnership.js";
 
-// `complete` is the backwards-compatible whole-document contract. The other
-// two values are the only agent-facing write domains. Provenance and system
-// remain infrastructure/human controlled and are never accepted as agent
-// domains.
-export const AUTHORING_READ_DOMAINS = Object.freeze([
-  "complete",
-  "content",
-  "pedagogy"
-]);
-export const AUTHORING_WRITE_DOMAINS = Object.freeze(["content", "pedagogy"]);
-
-// These values describe the repository state around a document, not the
-// document an agent is being asked to author.  The portable JSON-LD adapter
-// still knows how to read/write their interchange names, but current
-// simplified authoring never stores them inline.
-export const SYSTEM_ROOT_FIELDS = new Set([
-  "schemaVersion",
-  "publicationState",
-  "validatedAt",
-  "createdAt",
-  "updatedAt",
-  "owner",
-  "ownerSubject",
-  "owner_subject",
-  "revision",
-  "contentHash",
-  "content_hash",
-  "system",
-  "context",
-  "domains",
-  "domain",
-  "draftId",
-  "draft_id",
-  "status",
-  "validation",
-  "workingCopyHistoryCount",
-  "installedContentHash",
-  "baseCommitSha",
-  "publishedAt",
-  "publishedBy",
-  "withdrawnAt",
-  "cuedForFreezeAt",
-  "cuedForFreezeBy",
-  "lastAgentReviewedAt",
-  "lastHumanReviewedAt",
-  // JSON-LD publication aliases for D1's row-owned lifecycle values.
-  "dateCreated",
-  "dateModified",
-  "version"
-]);
-
-const RETIRED_ROOT_FIELDS = new Set(["generativeAssistance"]);
-
-const PEDAGOGY_ROOT_FIELDS = new Set([
-  "categories",
-  "subcategories",
-  "tags",
-  "level",
-  "lenses",
-  "lensMode",
-  "preSolve",
-  "relatedPuzzles",
-  "learningIntroduction",
-  "creator",
-  "license",
-  "derivedFrom",
-  "language"
-]);
-
-// These are relationship annotations layered onto a bridge's authored core.
-// The agent-facing pedagogy projection keeps the familiar `bridges` shape but
-// contains only identity plus these fields. The storage/domain boundary does
-// not duplicate bridge facts or cluster membership.
-const PEDAGOGY_BRIDGE_FIELDS = new Set([
-  "conceptId",
-  "relationKind",
-  "direction",
-  "idealTerms"
-]);
-
-const PROTECTED_ROOT_FIELDS = new Set([
-  "provenance",
-  ...SYSTEM_ROOT_FIELDS
-]);
-
-const DERIVED_ROOT_FIELDS = new Set(["large"]);
+export {
+  AUTHORING_DOMAINS,
+  AUTHORING_READ_DOMAINS,
+  AUTHORING_WRITE_DOMAINS,
+  SYSTEM_ROOT_FIELDS
+};
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -533,6 +461,70 @@ export function assembleStoredDomainDocuments({
   });
 }
 
+/**
+ * Assemble the authored puzzle from a raw puzzle_drafts row. Domain columns
+ * are authoritative when present; a stale `document` cache is ignored as a
+ * source of truth so maintenance tools do not rewrite from an outdated blob.
+ * Stale rows must carry both durable write-domain projections; the legacy
+ * document fallback is reserved for non-stale (pre-domain or synchronized) rows.
+ */
+export function assembleAuthoredDocumentFromDraftRow(row, {
+  parseJson = (text, label) => {
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      throw new Error(`${label} contains invalid JSON: ${error.message}`);
+    }
+  }
+} = {}) {
+  if (!row || typeof row !== "object") {
+    throw new Error("Draft row must be an object");
+  }
+  const content = row.content_json == null
+    ? null
+    : parseJson(row.content_json, "Stored content domain");
+  const pedagogy = row.pedagogy_json == null
+    ? null
+    : parseJson(row.pedagogy_json, "Stored pedagogy domain");
+  const provenance = row.provenance_json == null
+    ? null
+    : parseJson(row.provenance_json, "Stored provenance domain");
+  const stale = Number(row.document_stale || 0) === 1;
+  if (stale) {
+    if (content == null || pedagogy == null) {
+      throw new Error(
+        "Stale draft row is missing durable content/pedagogy projections"
+      );
+    }
+    return assembleStoredDomainDocuments({
+      document: undefined,
+      content,
+      pedagogy,
+      provenance
+    });
+  }
+  if (content != null || pedagogy != null || provenance != null) {
+    return assembleStoredDomainDocuments({
+      document: row.document == null
+        ? undefined
+        : (typeof row.document === "string"
+          ? parseJson(row.document, "Stored draft")
+          : row.document),
+      content,
+      pedagogy,
+      provenance
+    });
+  }
+  if (row.document == null) {
+    throw new Error("Draft row has neither domain columns nor a document");
+  }
+  return assembleStoredDomainDocuments({
+    document: typeof row.document === "string"
+      ? parseJson(row.document, "Stored draft")
+      : row.document
+  });
+}
+
 export default {
   AUTHORING_DOMAINS,
   AUTHORING_READ_DOMAINS,
@@ -546,5 +538,6 @@ export default {
   applyAuthoredDomain,
   storedDomainDocuments,
   assembleStoredDomainDocuments,
+  assembleAuthoredDocumentFromDraftRow,
   stripSystemAuthoredMetadata
 };

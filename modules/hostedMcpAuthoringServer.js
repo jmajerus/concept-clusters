@@ -30,7 +30,8 @@ import {
 } from "./authoredPuzzleDocument.js";
 import {
   applyAuthoredDomain,
-  AUTHORING_READ_DOMAINS
+  AUTHORING_READ_DOMAINS,
+  projectAuthoredDocument
 } from "./authoringDomains.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
 import {
@@ -263,6 +264,14 @@ const CATALOGUE_DOCUMENT_TOOLS = new Set([
   "preview_update_catalogue",
   "update_catalogue"
 ]);
+
+async function repositorySupports(repository, method) {
+  if (!repository) return false;
+  if (typeof repository.supports === "function") {
+    return Boolean(await repository.supports(method));
+  }
+  return typeof repository[method] === "function";
+}
 
 function analyticsTarget(toolName, args) {
   const puzzleId = args?.draft_id || args?.puzzle_id ||
@@ -956,7 +965,7 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server preserves the other domains and rejects fields owned by another domain; pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected provenance are preserved. Pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility and refreshes the materialized document. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
@@ -1029,12 +1038,25 @@ export function createAuthoringMcpServer({
       domain,
       log: stampLog("save_puzzle_draft", draft_id, stored)
     });
-    const draft = await draftRepository.save({
-      draftId: draft_id,
-      expectedRevision: expected_revision,
-      document: stamped,
-      actor
-    });
+    let draft;
+    if (domain !== "complete" && await repositorySupports(draftRepository, "saveDomain")) {
+      const projection = projectAuthoredDocument(stamped, domain).document;
+      draft = await draftRepository.saveDomain({
+        draftId: draft_id,
+        domain,
+        projection,
+        provenance: stamped.provenance,
+        expectedRevision: expected_revision,
+        actor
+      });
+    } else {
+      draft = await draftRepository.save({
+        draftId: draft_id,
+        expectedRevision: expected_revision,
+        document: stamped,
+        actor
+      });
+    }
     persistAuthoringAssistanceStamp(
       stampRecord && { ...stampRecord, draftId: draft_id },
       { analytics, recordStamp }
@@ -1044,6 +1066,9 @@ export function createAuthoringMcpServer({
     if (publish_to_authoring) {
       if (typeof contentDocuments?.publish !== "function") {
         throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
+      }
+      if (await repositorySupports(draftRepository, "materialize")) {
+        draft = await draftRepository.materialize({ draftId: draft_id, actor });
       }
       const taxonomy = await taxonomyContext();
       const validation = await contentService.validatePuzzleDraft(draft.document, {
@@ -1154,6 +1179,9 @@ export function createAuthoringMcpServer({
     }),
     annotations: WRITE
   }, tracked("validate_puzzle_draft", safe(async ({ draft_id }) => {
+    if (await repositorySupports(draftRepository, "materialize")) {
+      await draftRepository.materialize({ draftId: draft_id, actor });
+    }
     const stored = await draftRepository.get({ draftId: draft_id, actor });
     const taxonomy = await taxonomyContext();
     const validation = withStorageCanonicalizeFlags(
