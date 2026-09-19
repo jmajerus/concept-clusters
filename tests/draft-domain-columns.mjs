@@ -80,6 +80,14 @@ export async function run() {
     assert.equal(afterPedagogy.document.bridges[0].relationKind, "continuity");
     assert.equal(afterPedagogy.document.title, "Content retitled");
 
+    // Second focused save must leave the raw document cache untouched.
+    const afterPedagogyDisk = JSON.parse(
+      await readFile(join(directory, "column-level.json"), "utf8")
+    );
+    assert.equal(afterPedagogyDisk.documentStale, true);
+    assert.equal(afterPedagogyDisk.document.title, "Column level");
+    assert.match(afterPedagogyDisk.domains.pedagogy, /"relationKind":"continuity"/);
+
     const materialized = await store.materializeDraft("column-level");
     assert.equal(materialized.documentStale, false);
     assert.equal(materialized.document.title, "Content retitled");
@@ -140,6 +148,69 @@ export async function run() {
     assert.equal(afterPop.documentStale, false);
     assert.equal(afterPop.document.title, "Column level");
     assert.equal(afterPop.document.lenses[0].id, "lens");
+
+    // Concurrent focused saves with the same expectedRevision: one wins, one conflicts.
+    const raceBase = await store.createDraft({
+      draftId: "race-domain",
+      document: { ...document, id: "race-domain", title: "Race" }
+    });
+    const contentProjection = {
+      id: "race-domain",
+      title: "Race content",
+      category: "science",
+      clusters: document.clusters,
+      bridges: document.bridges.map(({ id, term, clusters, fact }) => ({
+        id, term, clusters, fact
+      }))
+    };
+    const pedagogyProjection = {
+      bridges: [{ id: "b", term: "Bridge", relationKind: "analogy" }],
+      lenses: [{ id: "lens", prompt: "Race", explanation: "E" }]
+    };
+    const raced = await Promise.allSettled([
+      store.replaceDomain({
+        draftId: "race-domain",
+        domain: "content",
+        projection: contentProjection,
+        expectedRevision: raceBase.revision
+      }),
+      store.replaceDomain({
+        draftId: "race-domain",
+        domain: "pedagogy",
+        projection: pedagogyProjection,
+        expectedRevision: raceBase.revision
+      })
+    ]);
+    const fulfilled = raced.filter(result => result.status === "fulfilled");
+    const rejected = raced.filter(result => result.status === "rejected");
+    assert.equal(fulfilled.length, 1);
+    assert.equal(rejected.length, 1);
+    assert.match(String(rejected[0].reason?.message || rejected[0].reason), /revision conflict/i);
+
+    // Stale rows missing a write-domain projection fail closed.
+    const { assembleAuthoredDocumentFromDraftRow } = await import(
+      "../modules/authoringDomains.js"
+    );
+    assert.throws(
+      () => assembleAuthoredDocumentFromDraftRow({
+        document_stale: 1,
+        document: JSON.stringify(document),
+        content_json: JSON.stringify({ id: "x", title: "Only content" }),
+        pedagogy_json: null,
+        provenance_json: null
+      }),
+      /missing durable content\/pedagogy/
+    );
+    assert.throws(
+      () => assembleAuthoredDocumentFromDraftRow({
+        document_stale: 1,
+        document: JSON.stringify(document),
+        content_json: null,
+        pedagogy_json: null,
+        provenance_json: null
+      }),
+      /missing durable content\/pedagogy/
+    );
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

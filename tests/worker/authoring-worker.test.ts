@@ -799,7 +799,8 @@ describe("hosted authoring Worker", () => {
     try {
       await env.AUTHORING_DB.prepare(`
         UPDATE puzzle_drafts
-        SET document = ?, content_json = NULL, pedagogy_json = NULL, provenance_json = NULL
+        SET document = ?, content_json = NULL, pedagogy_json = NULL,
+            provenance_json = NULL, document_stale = 0
         WHERE id = ? AND owner_subject = ?
       `).bind(
         JSON.stringify({
@@ -818,7 +819,7 @@ describe("hosted authoring Worker", () => {
       await env.AUTHORING_DB.prepare(`
         UPDATE puzzle_drafts
         SET document = ?, content_hash = ?, content_json = NULL,
-            pedagogy_json = NULL, provenance_json = NULL
+            pedagogy_json = NULL, provenance_json = NULL, document_stale = 0
         WHERE id = ? AND owner_subject = ?
       `).bind(
         originalRow.document,

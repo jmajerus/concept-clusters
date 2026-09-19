@@ -465,6 +465,8 @@ export function assembleStoredDomainDocuments({
  * Assemble the authored puzzle from a raw puzzle_drafts row. Domain columns
  * are authoritative when present; a stale `document` cache is ignored as a
  * source of truth so maintenance tools do not rewrite from an outdated blob.
+ * Stale rows must carry both durable write-domain projections; the legacy
+ * document fallback is reserved for non-stale (pre-domain or synchronized) rows.
  */
 export function assembleAuthoredDocumentFromDraftRow(row, {
   parseJson = (text, label) => {
@@ -487,17 +489,27 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
   const provenance = row.provenance_json == null
     ? null
     : parseJson(row.provenance_json, "Stored provenance domain");
-  const hasDomainColumns = content != null || pedagogy != null || provenance != null;
   const stale = Number(row.document_stale || 0) === 1;
-  if (hasDomainColumns) {
+  if (stale) {
+    if (content == null || pedagogy == null) {
+      throw new Error(
+        "Stale draft row is missing durable content/pedagogy projections"
+      );
+    }
     return assembleStoredDomainDocuments({
-      document: stale ? undefined : (
-        row.document == null
-          ? undefined
-          : (typeof row.document === "string"
-            ? parseJson(row.document, "Stored draft")
-            : row.document)
-      ),
+      document: undefined,
+      content,
+      pedagogy,
+      provenance
+    });
+  }
+  if (content != null || pedagogy != null || provenance != null) {
+    return assembleStoredDomainDocuments({
+      document: row.document == null
+        ? undefined
+        : (typeof row.document === "string"
+          ? parseJson(row.document, "Stored draft")
+          : row.document),
       content,
       pedagogy,
       provenance
