@@ -153,7 +153,10 @@ I would call the field `lenses`, rather than `postSolveQuiz`, because it identif
 
 ## Guardrails for authoring a lens
 
-The same discipline behind “no trap words” should apply here. Each lens needs a defensible answer set.
+The same discipline behind “no trap words” should apply here. For ordinary
+topic puzzles, each lens needs a defensible answer set; in the
+`vocabulary-context` profile, close near-neighbors are intentional, but the
+sentence must still resolve to one best contextual fit.
 
 A strong lens should:
 
@@ -587,6 +590,39 @@ independent of the puzzle's own cluster/bridge structure — that the board
 can illustrate once revealed? If the only available “facts” just restate
 which cluster a term already belongs to, a sequential or assignment lens is
 probably the better fit.
+
+## Vocabulary lenses
+
+Vocabulary-in-context puzzles use the board itself as the answer bank, but
+they are lexical-disambiguation lessons rather than simple matching
+exercises. Their clusters are tight synonym or near-synonym neighborhoods:
+terms may overlap in broad meaning while differing in frequency, duration,
+agency, intent, register, intensity, connotation, collocation, grammatical
+frame, or another real usage axis. Close relatedness is intentional; the
+author must still make each completed lens resolve to one best fit.
+
+A vocabulary lens is a sequential round with one natural fill-in-the-blank
+prompt and one target term already present on the board. The surrounding
+sentence should supply the cue that makes the target more precise or natural
+than its nearest neighbors. The explanation should teach that usage boundary,
+especially when a neighboring term is a plausible near-miss. The answer is
+not repeated in a second multiple-choice list.
+
+When one spelling carries distinct meanings, author that spelling once as a
+bridge between the relevant clusters. Separate contextual sentences can then
+be separate lenses targeting the same bridge term when that contrast is the
+lesson; it is not a required homonym template. Other lenses may target
+ordinary cluster terms, and a bridge may be used once or not at all. The
+ordinary two-to-six cluster range remains unchanged, and a cluster can be
+useful as a distractor for one lens without requiring a special decoy type.
+
+`preSolve` remains an optional per-puzzle choice. It can suit an elementary
+Vocabulary board whose grouping is obvious, while an advanced near-synonym
+board should normally leave the clustering challenge intact.
+
+Multiple blanks in one lens are intentionally deferred. The current target
+list is an unordered set, so it cannot express which answer fills which
+blank; a future implementation would need explicit slot-to-term mappings.
 
 ## Author-forced pre-solve
 

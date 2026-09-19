@@ -326,6 +326,26 @@ export async function run() {
     assert.match(phasedSchemas.core.schema.description, /write domain "content"/);
     assert.match(phasedSchemas.review.schema.description, /domain=pedagogy/);
 
+    const vocabularySchema = await request("tools/call", {
+      name: "get_authoring_schema",
+      arguments: { phase: "pedagogy", profile: "vocabulary-context" }
+    });
+    assert.equal(
+      vocabularySchema.result.structuredContent.profile,
+      "vocabulary-context"
+    );
+    assert.equal(vocabularySchema.result.structuredContent.domain, "pedagogy");
+    assert.equal(vocabularySchema.result.structuredContent.profileMode, "advisory");
+    assert.deepEqual(
+      vocabularySchema.result.structuredContent.profileStorageDomains,
+      ["content", "pedagogy"]
+    );
+    assert.ok(vocabularySchema.result.structuredContent.schema.properties.lenses);
+    assert.match(
+      vocabularySchema.result.structuredContent.profileSummary,
+      /Near-synonym clusters/
+    );
+
     // A draft that passes validate_puzzle_draft can still be a bad puzzle --
     // the guidance has to carry the design judgment (not just schema facts)
     // for that to mean anything to an authoring AI with no other way to
@@ -359,6 +379,10 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /binary bridge's optional direction/);
     assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
     assert.match(guidance.result.structuredContent.markdown, /Trivia category specifically leans/);
+    assert.doesNotMatch(
+      guidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction \("Before You Begin"\)/);
     assert.match(guidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(guidance.result.structuredContent.markdown, /two-character sequence/);
@@ -398,6 +422,10 @@ export async function run() {
       coreGuidance.result.structuredContent.markdown,
       /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i
     );
+    assert.doesNotMatch(
+      coreGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
     const reviewGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
@@ -408,6 +436,10 @@ export async function run() {
     assert.doesNotMatch(
       reviewGuidance.result.structuredContent.markdown,
       /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i
+    );
+    assert.doesNotMatch(
+      reviewGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
     );
     assert.match(reviewGuidance.result.structuredContent.markdown, /silently replace text/);
     const pedagogyGuidance = await request("tools/call", {
@@ -423,6 +455,82 @@ export async function run() {
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
+    assert.doesNotMatch(
+      pedagogyGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
+
+    const vocabularyCompleteGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { profile: "vocabulary-context" }
+    });
+    assert.equal(
+      vocabularyCompleteGuidance.result.structuredContent.profile,
+      "vocabulary-context"
+    );
+    assert.match(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context profile/
+    );
+    assert.match(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /Request profile=vocabulary-context with phase=core/
+    );
+    assert.doesNotMatch(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /## Vocabulary-in-context core pass|## Design judgment|Dutch tilt/
+    );
+
+    const vocabularyCoreGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "core", profile: "vocabulary-context" }
+    });
+    assert.equal(
+      vocabularyCoreGuidance.result.structuredContent.profile,
+      "vocabulary-context"
+    );
+    assert.match(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /shared semantic center/
+    );
+    assert.match(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /overlap is the material/
+    );
+    assert.doesNotMatch(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /## Design judgment|search_puzzles|Dutch tilt/
+    );
+
+    const vocabularyReviewGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "review", profile: "vocabulary-context" }
+    });
+    assert.match(
+      vocabularyReviewGuidance.result.structuredContent.markdown,
+      /one most natural or precise fit/
+    );
+    assert.match(
+      vocabularyReviewGuidance.result.structuredContent.markdown,
+      /two equally good\s+answers/
+    );
+
+    const vocabularyPedagogyGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "pedagogy", profile: "vocabulary-context" }
+    });
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /contextual usage decision/
+    );
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /one blank and one target term/
+    );
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /preSolve as a per-puzzle judgment/
+    );
     const catalogueWorkflow = await request("tools/call", {
       name: "get_workflow_guidance",
       arguments: { topic: "catalogue" }

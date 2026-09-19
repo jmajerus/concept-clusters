@@ -13,6 +13,10 @@ import {
   fillAuthoringTemplate,
   preferredLessonCreditExample
 } from "./authoringSettings.js";
+import {
+  authoringProfileDescriptor,
+  VOCABULARY_CONTEXT_PROFILE
+} from "./authoringProfiles.js";
 
 const CREDIT_PREFERRED_EXAMPLE = preferredLessonCreditExample(AUTHORING_SETTINGS);
 const CREDIT_HUMAN_EXAMPLE = fillAuthoringTemplate(
@@ -110,9 +114,10 @@ player pages do not expose file export.`;
 
 export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema validity)
 
-- No trap words: every term must belong unambiguously to its declared
-  cluster(s). Ambiguity is noise here, not challenge -- if two clusters
-  could both plausibly claim a term, the term is wrong, not clever.
+- No trap words: every term must have a deliberate, defensible home in its
+  declared cluster(s). If two clusters could both plausibly claim a term,
+  that is noise rather than challenge; resolve the ownership or rewrite the
+  distinction before publication.
 - Seed pairs are the orienting clue: choose the two most instantly
   recognizable terms in each cluster as its seeds, leaving the least
   obvious term as the "aha" the player has to work out. A cluster pared
@@ -409,8 +414,10 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   clusters, their facts, and their terms. Each cluster needs two
   immediately recognizable seeds and one to five floating terms -- or,
   for a minimum-size two-term cluster only, one seed and one floating
-  term. No trap
-  words: every term must belong unambiguously to its declared cluster.
+  term. No trap words: every term must have a deliberate, defensible home in
+  its declared cluster. If two clusters could both plausibly claim a term,
+  that is noise rather than challenge; resolve the ownership or rewrite the
+  distinction before publication.
   Size by distinct concepts. Do not drop a genuine term to fit a rendering
   threshold. If the map needs more than 25 nodes, split it into relatedPuzzles.
 - Carry approved inventory connections onto the board as bridges. Do not
@@ -531,6 +538,137 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   when editing a meta catalogue). Publication review
   evaluates the whole puzzle, not merely this metadata pass.`;
 
+const VOCABULARY_CONTEXT_PROFILE_OVERVIEW = `## Vocabulary-in-context profile
+
+This profile is for lexical-disambiguation puzzles: the board gathers tight
+synonym or near-synonym neighborhoods, and the lenses teach why a particular
+context prefers one neighboring term over another. It is not a simple matching
+exercise with a sentence appended afterward. Close relatedness is intentional;
+the author must still make each completed lens resolve to one best fit.
+
+The profile is advisory. It does not create a new storage domain, change the
+canonical schema, impose a cluster count, or require the homonym-bridge
+pattern. Content still belongs to the content domain and lenses still belong
+to the pedagogy domain.`;
+
+const VOCABULARY_CONTEXT_PROFILE_GUIDANCE = Object.freeze({
+  core: `## Vocabulary-in-context core pass
+
+- Begin with a distinction inventory, not a target cluster count. Identify the
+  shared semantic center of each synonym neighborhood and the usage axes that
+  separate its members: frequency, duration, agency, intent, register,
+  intensity, connotation, collocation, grammatical frame, or another real
+  distinction.
+- Choose genuine near-neighbors. A term may overlap broadly with its cluster
+  mates; that overlap is the material the learner is meant to refine. Do not
+  manufacture unrelated terms merely to make the board easy to sort, and do
+  not treat every broad synonym as interchangeable in every context.
+- Use the cluster fact to state the shared meaning and the relevant boundary.
+  Use term information when an individual term needs a sharper usage note.
+  Seeds should orient the learner to the neighborhood; floating terms can
+  carry the subtler distinctions that the lenses will revisit.
+- A bridge is optional and must represent a genuine connection. A homonym or
+  homograph may be authored once as an ordinary bridge term shared by the
+  relevant clusters, but that pattern is not required and must not become the
+  profile's template.
+
+The core pass remains a content-domain pass: save clusters, terms, facts, and
+bridge cores with domain=content.`,
+  review: `## Vocabulary-in-context review pass
+
+- Review each cluster as a semantic neighborhood, not merely as a topic. Can
+  the author state what the terms share and what usage boundary makes each one
+  worth retaining? Close meaning is expected; accidental duplicate work is
+  not.
+- For every planned lens, substitute the nearest board neighbors into the
+  sentence. The desired result is one most natural or precise fit plus
+  meaningful near-misses—not arbitrary distractors and not two equally good
+  answers.
+- Check that the sentence supplies the deciding cue through natural context,
+  collocation, syntax, register, or situation. A dictionary definition hidden
+  in the prompt is a matching exercise, not a useful lens.
+- Make the explanation name the distinction that decided the answer. When a
+  neighboring term is especially plausible, explain why the target is more
+  precise rather than claiming that the neighbor is simply unrelated.
+- A repeated target is acceptable when separate lenses teach separate usages,
+  including separate senses of a bridge term. Repetition alone is not a
+  reason to merge lenses or add a second blank.
+
+This pass may inspect both domains, but any bridge annotations still save
+through domain=pedagogy and the content core remains owned by domain=content.`,
+  pedagogy: `## Vocabulary-in-context pedagogy pass
+
+- Treat each lens as a contextual usage decision. Write a natural sentence
+  with one blank whose surrounding situation makes one board term the best fit
+  among its near-synonyms. The learner should have to notice the usage
+  distinction, not merely recognize a definition.
+- Keep the first form to one blank and one target term. The target may be any
+  playable board term, and the same term may be targeted by multiple lenses
+  when each context teaches something different. Do not repeat the target as
+  a separate multiple-choice option list.
+- In the explanation or target reason, name the cue and the boundary it
+  activates: for example, intermittent occurrence rather than general
+  unpredictability, personal whim rather than lack of order, or formal
+  register rather than ordinary frequency. Avoid explanations that only say
+  the target belongs to the topic.
+- Do not force every lens to span clusters, use a bridge, or cover every term.
+  Choose lenses for real usage distinctions and order several lenses as a
+  progression when the material supports one.
+- Use lensMode=sequential by default for this open contextual reclassification
+  flow. Leave preSolve as a per-puzzle judgment: use it when the grouping is
+  genuinely obvious and the contextual distinction is the lesson; leave the
+  clustering challenge intact for advanced near-synonym boards.
+- Multiple blanks and structured slot mapping remain deferred. Do not encode
+  several unordered answers in one target list.
+
+This pass remains a pedagogy-domain pass: retrieve the pedagogy projection and
+save lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
+  publication: `## Vocabulary-in-context publication pass
+
+- Keep Vocabulary as the stable taxonomy category when the puzzle belongs in
+  that cross-disciplinary collection, but do not add an authoring-profile
+  field merely to repeat the category. The profile is an MCP guidance context,
+  not a third document domain.
+- Publish only useful discovery metadata. Do not flatten the puzzle into a
+  generic quiz description: its purpose is to teach precise usage among close
+  lexical neighbors.`
+});
+
+const PROFILE_PHASE_PREAMBLE = `# Vocabulary-in-context authoring
+
+This is one pass over one accumulating simplified-puzzle draft. Retrieve the
+latest draft before editing, preserve every field from earlier passes, and
+change only what this pass improves. The selected profile is the design
+contract for this pass; use the canonical schema for field validity and save
+through the phase's existing write domain. Always validate the complete draft
+before publication.`;
+
+const VOCABULARY_CONTEXT_COMPLETE_GUIDANCE = [
+  VOCABULARY_CONTEXT_PROFILE_OVERVIEW,
+  `## Focused profile passes
+
+Request profile=vocabulary-context with phase=core, review, pedagogy, or
+publication for the focused brief. Core owns semantic neighborhoods and
+bridge cores in content; review checks usage distinctions across the
+accumulated draft; pedagogy authors contextual lenses and learning
+introductions; publication adds ordinary discovery metadata. This complete
+response is intentionally a routing overview; it does not repeat every phase
+brief.`
+].join("\n\n");
+
+function profileGuidance(profile, phase) {
+  const descriptor = authoringProfileDescriptor(profile);
+  if (descriptor.id !== VOCABULARY_CONTEXT_PROFILE) {
+    throw new Error(`No guidance is registered for authoring profile ${profile}`);
+  }
+  if (phase === "complete") return VOCABULARY_CONTEXT_COMPLETE_GUIDANCE;
+  const guidance = VOCABULARY_CONTEXT_PROFILE_GUIDANCE[phase];
+  if (!guidance) {
+    throw new Error(`No guidance is registered for phase ${phase}`);
+  }
+  return `${PROFILE_PHASE_PREAMBLE}\n\n${guidance}`;
+}
+
 export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
   core: `${PHASE_PREAMBLE}\n\n${CORE_PHASE_GUIDANCE}`,
   review: `${PHASE_PREAMBLE}\n\n${REVIEW_PHASE_GUIDANCE}`,
@@ -572,13 +710,24 @@ export function authoringWorkflowGuidanceResult(topic) {
   return { topic, markdown: AUTHORING_WORKFLOW_GUIDANCE[topic] };
 }
 
-export function authoringGuidanceResult(phase, completeGuidance) {
-  if (phase === "complete") return { markdown: completeGuidance };
+export function authoringGuidanceResult(phase, completeGuidance, profile = null) {
+  const markdown = profile
+    ? profileGuidance(profile, phase)
+    : phase === "complete"
+      ? completeGuidance
+      : AUTHORING_PHASE_GUIDANCE[phase];
+  if (phase === "complete") {
+    return {
+      ...(profile ? { profile } : {}),
+      markdown
+    };
+  }
   return {
     phase,
     complete: false,
     preserveExisting: true,
-    markdown: AUTHORING_PHASE_GUIDANCE[phase]
+    ...(profile ? { profile } : {}),
+    markdown
   };
 }
 

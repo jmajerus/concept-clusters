@@ -306,6 +306,16 @@ export const CATEGORIES = {
       link: "wiki:Trivia"
     }
   },
+  // Deliberately domain-less alongside Trivia: Vocabulary focuses on words
+  // in context and the distinctions between their uses, rather than on one
+  // disciplinary home. Vocabulary lenses use the existing sequential lens
+  // flow; this is authoring guidance, not a registry-enforced mode.
+  "Vocabulary": {
+    info: {
+      text: "How context, usage, and neighboring meanings determine what a word means.",
+      link: "wiki:Vocabulary"
+    }
+  },
   "Political Science": {
     domain: "social-sciences",
     info: {

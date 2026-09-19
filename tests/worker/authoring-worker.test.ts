@@ -280,6 +280,38 @@ describe("hosted authoring Worker", () => {
     expect(phaseSchemas.core.domain).toBe("content");
     expect(phaseSchemas.review.domain).toBeUndefined();
 
+    const vocabularySchemaResponse = await rpc({
+      jsonrpc: "2.0",
+      id: "schema-vocabulary-context",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_schema",
+        arguments: { phase: "pedagogy", profile: "vocabulary-context" }
+      }
+    });
+    const vocabularySchema = await rpcJson(vocabularySchemaResponse) as {
+      result: {
+        structuredContent: {
+          profile: string;
+          profileMode: string;
+          profileStorageDomains: string[];
+          profileSummary: string;
+          domain: string;
+          schema: { properties: Record<string, unknown> };
+        };
+      };
+    };
+    expect(vocabularySchema.result.structuredContent.profile)
+      .toBe("vocabulary-context");
+    expect(vocabularySchema.result.structuredContent.profileMode).toBe("advisory");
+    expect(vocabularySchema.result.structuredContent.profileStorageDomains)
+      .toEqual(["content", "pedagogy"]);
+    expect(vocabularySchema.result.structuredContent.profileSummary)
+      .toMatch(/Near-synonym clusters/);
+    expect(vocabularySchema.result.structuredContent.domain).toBe("pedagogy");
+    expect(vocabularySchema.result.structuredContent.schema.properties.lenses)
+      .toBeDefined();
+
     const created = await rpc({
       jsonrpc: "2.0",
       id: 3,
@@ -359,6 +391,8 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/binary bridge's optional direction/);
     expect(guidance.result.structuredContent.markdown).toMatch(/lensMode can be "quiz"/);
     expect(guidance.result.structuredContent.markdown).toMatch(/Trivia category specifically leans/);
+    expect(guidance.result.structuredContent.markdown)
+      .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
     expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction \("Before You Begin"\)/);
     expect(guidance.result.structuredContent.markdown).toMatch(/real\s+line breaks/);
     expect(guidance.result.structuredContent.markdown).toMatch(/two-character sequence/);
@@ -404,6 +438,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/Carry approved inventory connections/);
     expect(coreGuidance.result.structuredContent.markdown)
       .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
     const reviewGuided = await rpc({
       jsonrpc: "2.0",
       id: "guidance-review",
@@ -417,6 +453,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/more than 25 nodes/);
     expect(reviewGuidance.result.structuredContent.markdown)
       .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
+    expect(reviewGuidance.result.structuredContent.markdown)
+      .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
     expect(reviewGuidance.result.structuredContent.markdown)
       .toMatch(/silently replace text/);
     const pedagogyGuided = await rpc({
@@ -440,6 +478,86 @@ describe("hosted authoring Worker", () => {
       .toMatch(/real\s+line breaks/);
     expect(pedagogyGuidance.result.structuredContent.markdown)
       .toMatch(/learningIntroduction\.credit/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
+
+    const vocabularyCompleteGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-vocabulary-complete",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { profile: "vocabulary-context" }
+      }
+    });
+    const vocabularyCompleteGuidance = await rpcJson(vocabularyCompleteGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(vocabularyCompleteGuidance.result.structuredContent.profile)
+      .toBe("vocabulary-context");
+    expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
+      .toMatch(/Vocabulary-in-context profile/);
+    expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
+      .toMatch(/Request profile=vocabulary-context with phase=core/);
+    expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
+      .not.toMatch(/## Vocabulary-in-context core pass|## Design judgment|Dutch tilt/);
+
+    const vocabularyCoreGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-vocabulary-core",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "core", profile: "vocabulary-context" }
+      }
+    });
+    const vocabularyCoreGuidance = await rpcJson(vocabularyCoreGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(vocabularyCoreGuidance.result.structuredContent.profile)
+      .toBe("vocabulary-context");
+    expect(vocabularyCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/shared semantic center/);
+    expect(vocabularyCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/overlap is the material/);
+    expect(vocabularyCoreGuidance.result.structuredContent.markdown)
+      .not.toMatch(/## Design judgment|search_puzzles|Dutch tilt/);
+
+    const vocabularyReviewGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-vocabulary-review",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "review", profile: "vocabulary-context" }
+      }
+    });
+    const vocabularyReviewGuidance = await rpcJson(vocabularyReviewGuided) as {
+      result: { structuredContent: { markdown: string } };
+    };
+    expect(vocabularyReviewGuidance.result.structuredContent.markdown)
+      .toMatch(/one most natural or precise fit/);
+    expect(vocabularyReviewGuidance.result.structuredContent.markdown)
+      .toMatch(/two equally good\s+answers/);
+
+    const vocabularyPedagogyGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-vocabulary-pedagogy",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "pedagogy", profile: "vocabulary-context" }
+      }
+    });
+    const vocabularyPedagogyGuidance = await rpcJson(vocabularyPedagogyGuided) as {
+      result: { structuredContent: { markdown: string } };
+    };
+    expect(vocabularyPedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/contextual usage decision/);
+    expect(vocabularyPedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/one blank and one target term/);
+    expect(vocabularyPedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/preSolve as a per-puzzle judgment/);
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;

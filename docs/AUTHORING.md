@@ -140,12 +140,14 @@ question ambiguous.
 
 ### No trap words
 
-Every term must belong unambiguously to its declared cluster or clusters.
-Difficulty should come from recognizing concepts, not guessing which plausible
-interpretation the author intended. This is especially important in fiction,
-memoir, poetry, and other domains whose source vocabulary has fluid boundaries:
-prefer a precise analytical mechanism over an evocative phrase that could fit
-several groups.
+Every term must have a deliberate, defensible home in its declared cluster or
+clusters. Difficulty should come from recognizing concepts, not guessing which
+plausible interpretation the author intended. Specialized profiles such as
+`vocabulary-context` may intentionally use close semantic neighbors, but their
+lenses must still produce one best contextual fit rather than an unresolved
+tie. This is especially important in fiction, memoir, poetry, and other domains
+whose source vocabulary has fluid boundaries: prefer a precise analytical
+mechanism over an evocative phrase that could fit several groups.
 
 Cold-read every board from the player's available evidence. In Star mode, a
 cluster term initially has its wording, its hub name, and any `termInfo`—not the
@@ -264,6 +266,16 @@ cluster plus every bridge already touching it—the board may already display
 that answer without requiring judgment.
 
 See the complete [Concept Lens reference](AUTHORING-REFERENCE.md#concept-lenses).
+
+For the `vocabulary-context` authoring profile, treat clusters as tight
+synonym or near-synonym neighborhoods rather than ordinary topic groups.
+Broad semantic overlap is intentional; the author should identify the usage
+axis that separates the terms and make it visible in the cluster fact, term
+information, or lens explanation. A lens should be a natural contextual
+best-fit decision with one answer, not a definition-matching exercise. Close
+near-misses are useful, while two equally natural completions are unresolved
+ambiguity. The profile spans the existing content and pedagogy authoring
+domains and does not create a third document domain.
 
 ### Learning introductions
 

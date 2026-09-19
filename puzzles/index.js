@@ -229,6 +229,7 @@ import rocksReadingEvidence from "./geology/rocks-reading-evidence.js";
 import russianLiteratureArgument from "./literary-history/russian-literature-argument.js";
 import russianLiteratureInvention from "./literary-history/russian-literature-invention.js";
 import typography from "./art/typography.js";
+import homonymsInContext from "./vocabulary/homonyms-in-context.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -468,6 +469,7 @@ export const PUZZLES = [
   russianLiteratureArgument,
   russianLiteratureInvention,
   typography,
+  homonymsInContext,
 ];
 
 export default PUZZLES;

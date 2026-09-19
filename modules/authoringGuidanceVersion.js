@@ -75,7 +75,17 @@
 // Puzzle documents carry only the player-facing relatedPuzzles info and entries.
 // 5.7: same review bar; MCP draft reads and writes use canonical stable
 // category ids rather than the web editor's display-title projection.
+// 5.8: same review bar; Vocabulary authoring uses sequential single-target
+// cloze lenses and a single shared bridge term for homonym/homograph axes;
+// multi-blank slot mapping remains deferred.
+// 5.9: same review bar; Vocabulary preSolve is explicitly per-puzzle, and
+// repeated bridge-context lenses are an optional pattern rather than a form.
+// 5.10: same review bar; the vocabulary-context profile treats tight
+// near-synonym neighborhoods and contextual best-fit lenses as lexical
+// disambiguation, not simple matching, with phase-specific MCP guidance.
+// 5.11: same review bar; profile-selected guidance is isolated from generic
+// guidance, with a compact complete overview and one focused brief per phase.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 7
+  minor: 11
 });
