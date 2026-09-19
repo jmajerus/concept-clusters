@@ -4,14 +4,19 @@ import {
   AUTHORING_PHASES,
   assertPhasePassesConsistent
 } from "./authoringFieldOwnership.js";
+import {
+  AUTHORING_PROFILES,
+  authoringProfileDescriptor
+} from "./authoringProfiles.js";
 import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.17.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.18.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
+export { AUTHORING_PROFILES };
 export const SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI =
   "concept-clusters://schemas/simplified-puzzle-v1";
 export const SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE = "application/schema+json";
@@ -117,11 +122,23 @@ function phaseSchema(phase) {
   return schema;
 }
 
-export function simplifiedPuzzleSchemaResult(phase = "complete") {
+function withProfile(result, profile) {
+  if (!profile) return result;
+  const descriptor = authoringProfileDescriptor(profile);
+  return {
+    ...result,
+    profile: descriptor.id,
+    profileSummary: descriptor.summary,
+    profileMode: descriptor.mode,
+    profileStorageDomains: descriptor.storageDomains
+  };
+}
+
+export function simplifiedPuzzleSchemaResult(phase = "complete", profile = null) {
   if (phase !== "complete") {
     const pass = AUTHORING_PHASE_PASSES[phase];
     if (!pass) throw new Error(`Unknown authoring phase: ${phase}`);
-    return {
+    return withProfile({
       format: "simplified-puzzle",
       version: SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
       phase,
@@ -131,13 +148,13 @@ export function simplifiedPuzzleSchemaResult(phase = "complete") {
       resourceUri: SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
       schemaId: SIMPLIFIED_PUZZLE_SCHEMA.$id,
       schema: phaseSchema(phase)
-    };
+    }, profile);
   }
-  return {
+  return withProfile({
     format: "simplified-puzzle",
     version: SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
     resourceUri: SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
     schemaId: SIMPLIFIED_PUZZLE_SCHEMA.$id,
     schema: SIMPLIFIED_PUZZLE_SCHEMA
-  };
+  }, profile);
 }

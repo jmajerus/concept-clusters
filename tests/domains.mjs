@@ -16,7 +16,7 @@ async function waitForOverview(page, title) {
 }
 
 export async function run(page, baseURL) {
-  // Every registered category has a domain drawn from the fixed
+  // Most registered categories have a domain drawn from the fixed
   // vocabulary. Sciences, Mathematics, Computer Science, Data Science, and
   // Engineering were originally five separate domains, consolidated to two
   // for parity with how broadly Social Sciences/Humanities/Art & Design
@@ -36,10 +36,11 @@ export async function run(page, baseURL) {
   assert.equal(domainForCategory("Math"), "sciences-mathematics");
   assert.equal(domainForCategory("Music"), "art-design");
   assert.equal(domainForCategory("Film"), "art-design");
-  // Trivia is the one deliberate exception: registered (so it has an
-  // authored subtitle) but permanently domain-less, since trivia cuts
-  // across every discipline rather than belonging to one.
+  // Trivia and Vocabulary are deliberate exceptions: registered (so they
+  // have authored subtitles) but permanently domain-less, since both cut
+  // across disciplinary homes rather than belonging to one.
   assert.equal(domainForCategory("Trivia"), null);
+  assert.equal(domainForCategory("Vocabulary"), null);
   assert.equal(domainForCategory("not-a-real-category"), null);
 
   // Literature & Classics is registered so Literary Theory & Poetics can
@@ -119,11 +120,11 @@ export async function run(page, baseURL) {
     "a single category's own overview has no domain headings of its own"
   );
 
-  // Trivia is the only currently-registered category with no domain, and
-  // it's meant to stay that way permanently (see the comment above
-  // Trivia's registration in puzzles/categories.js) -- so "All Puzzles",
-  // the broadest catalogue there is, always shows exactly one "Other
-  // subjects" card, positioned after every real domain heading (see
+  // Trivia and Vocabulary are the currently-registered categories with no
+  // domain, and they're meant to stay that way permanently (see the
+  // registrations in puzzles/categories.js) -- so "All Puzzles", the
+  // broadest catalogue there is, always shows one "Other subjects" group,
+  // positioned after every real domain heading (see
   // docs/TAXONOMY-ROADMAP.md: "must not render as empty headings" --
   // the flip side being it must render whenever it's genuinely non-empty).
   await page.goto(`${baseURL}/index.html?catalogue=all`);
@@ -135,12 +136,10 @@ export async function run(page, baseURL) {
   );
   assert.equal(allGroups.length, 13, "12 represented domains plus Other subjects");
   assert.equal(allGroups.at(-1), "Other subjects");
-  // Trivia currently has exactly 5 puzzles -- at INLINE_PUZZLE_LIST_THRESHOLD
-  // (overviewRenderer.js) -- but All Puzzles is an ordered catalogue like
-  // any other by default (isOrderedCatalogue doesn't special-case the two
-  // synthetic catalogues), so per-category inlining doesn't apply here
-  // either: Trivia stays a .category-card, the sole content grouped
-  // under "Other subjects".
+  // All Puzzles is an ordered catalogue like any other by default
+  // (isOrderedCatalogue doesn't special-case the two synthetic catalogues),
+  // so per-category inlining doesn't apply here either: both categories stay
+  // .category-card entries grouped under "Other subjects".
   const otherCards = await page.evaluate(() => {
     const headings = Array.from(document.querySelectorAll(".domain-group-heading"));
     const other = headings.find(h => h.textContent === "Other subjects");
@@ -148,7 +147,7 @@ export async function run(page, baseURL) {
       other.nextElementSibling.querySelectorAll(".category-card")
     ).map(card => card.dataset.category);
   });
-  assert.deepEqual(otherCards, ["trivia"]);
+  assert.deepEqual(otherCards, ["trivia", "vocabulary"]);
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

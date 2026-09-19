@@ -12,6 +12,7 @@ import {
 import {
   AUTHORING_PHASES,
   AUTHORING_MCP_SERVER_VERSION,
+  AUTHORING_PROFILES,
   SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
   SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
   SIMPLIFIED_PUZZLE_SCHEMA_TEXT,
@@ -72,7 +73,8 @@ import {
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringDomainSchema = z.enum(AUTHORING_READ_DOMAINS).default("complete");
 const authoringPhaseSchema = z.object({
-  phase: z.enum(AUTHORING_PHASES).default("complete")
+  phase: z.enum(AUTHORING_PHASES).default("complete"),
+  profile: z.enum(AUTHORING_PROFILES).optional()
 });
 const authoringWorkflowTopicSchema = z.object({
   topic: z.enum(["catalogue"])
@@ -341,6 +343,9 @@ function serverInstructions() {
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
     "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
     "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
+    "For a vocabulary-in-context puzzle, pass profile=vocabulary-context to select its compact overview " +
+    "or focused lexical-disambiguation brief; an unprofiled guidance response stays profile-neutral. " +
+    "The profile is advisory and does not create a third write domain. " +
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
@@ -794,23 +799,23 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
+    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Set profile=vocabulary-context to select only that profile's compact overview or focused brief; it does not append profile rules to generic guidance or change the write domain or canonical schema. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, tracked("get_authoring_guidance", safe(async ({ phase }) => success(
+  }, tracked("get_authoring_guidance", safe(async ({ phase, profile }) => success(
     `Loaded ${phase} authoring guidance.`,
-    authoringGuidanceResult(phase, contentService.guidance)
+    authoringGuidanceResult(phase, contentService.guidance, profile)
   ))));
 
   server.registerTool("get_authoring_schema", {
     title: "Get authoring schema",
     description:
-      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Phase projections preserve omitted fields and are not standalone replacement schemas.",
+      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Set profile=vocabulary-context to identify the lexical-disambiguation authoring profile; the returned schema and phase write domain remain canonical. Phase projections preserve omitted fields and are not standalone replacement schemas.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, tracked("get_authoring_schema", safe(async ({ phase }) => success(
+  }, tracked("get_authoring_schema", safe(async ({ phase, profile }) => success(
     `Loaded ${phase} simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
-    simplifiedPuzzleSchemaResult(phase)
+    simplifiedPuzzleSchemaResult(phase, profile)
   ))));
 
   server.registerTool("get_workflow_guidance", {

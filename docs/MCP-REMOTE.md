@@ -69,8 +69,13 @@ revisions, hashes, status, and lesson-progress fingerprints are generated or
 stored by infrastructure rather than supplied by an agent.
 
 The guidance and schema tools accept an optional `phase`: `core`, `review`,
-`pedagogy`, `publication`, or `complete`. Draft reads and writes instead accept
-an optional `domain`: `content`, `pedagogy`, or the backwards-compatible
+`pedagogy`, `publication`, or `complete`. They also accept the optional
+authoring `profile` `vocabulary-context`. An unprofiled guidance response is
+profile-neutral. Supplying a profile selects that profile's compact overview
+for `complete`, or only its focused brief for a named phase; it does not append
+every profile's rules to the generic guidance. The profile is advisory and does
+not create another storage projection or change the phase's write domain. Draft
+reads and writes instead accept an optional `domain`: `content`, `pedagogy`, or the backwards-compatible
 `complete` default. A focused domain is a real write boundary, not just prose
 guidance:
 
@@ -107,6 +112,16 @@ accumulating draft:
 4. `publication` adds only useful discovery and publication metadata
    (categories, tags, level, related puzzles, license fields). Attribution
    stays in protected `provenance` and is not part of this phase schema.
+
+For `profile: "vocabulary-context"`, the core pass treats clusters as tight
+synonym or near-synonym neighborhoods, the review pass tests the nearest
+substitutions for one best contextual fit, and the pedagogy pass authors
+natural single-blank lenses that teach usage distinctions rather than simple
+matching. Close relatedness is intentional; unresolved equal answers are not.
+The profile covers content and pedagogy together, so it does not replace
+either focused write domain. Homonym or homograph bridges remain an optional
+pattern rather than the profile's template, and `preSolve` remains a
+per-puzzle judgment.
 
 Before every later pass, call `get_puzzle_draft`, edit the latest document or
 selected domain, preserve all fields outside the selected domain, and send the
