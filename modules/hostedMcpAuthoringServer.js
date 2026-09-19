@@ -265,6 +265,14 @@ const CATALOGUE_DOCUMENT_TOOLS = new Set([
   "update_catalogue"
 ]);
 
+async function repositorySupports(repository, method) {
+  if (!repository) return false;
+  if (typeof repository.supports === "function") {
+    return Boolean(await repository.supports(method));
+  }
+  return typeof repository[method] === "function";
+}
+
 function analyticsTarget(toolName, args) {
   const puzzleId = args?.draft_id || args?.puzzle_id ||
     (toolName === "create_puzzle_draft" ? args?.document?.id : null);
@@ -1031,7 +1039,7 @@ export function createAuthoringMcpServer({
       log: stampLog("save_puzzle_draft", draft_id, stored)
     });
     let draft;
-    if (domain !== "complete" && typeof draftRepository.saveDomain === "function") {
+    if (domain !== "complete" && await repositorySupports(draftRepository, "saveDomain")) {
       const projection = projectAuthoredDocument(stamped, domain).document;
       draft = await draftRepository.saveDomain({
         draftId: draft_id,
@@ -1059,7 +1067,7 @@ export function createAuthoringMcpServer({
       if (typeof contentDocuments?.publish !== "function") {
         throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
       }
-      if (typeof draftRepository.materialize === "function") {
+      if (await repositorySupports(draftRepository, "materialize")) {
         draft = await draftRepository.materialize({ draftId: draft_id, actor });
       }
       const taxonomy = await taxonomyContext();
@@ -1171,7 +1179,7 @@ export function createAuthoringMcpServer({
     }),
     annotations: WRITE
   }, tracked("validate_puzzle_draft", safe(async ({ draft_id }) => {
-    if (typeof draftRepository.materialize === "function") {
+    if (await repositorySupports(draftRepository, "materialize")) {
       await draftRepository.materialize({ draftId: draft_id, actor });
     }
     const stored = await draftRepository.get({ draftId: draft_id, actor });

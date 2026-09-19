@@ -26,7 +26,7 @@ import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
 import { planCategoryRenamePropagation } from "../modules/categoryRenamePropagation.js";
 import { isCuedForFreeze } from "../modules/contentFreezePlan.js";
-import { storedDomainDocuments } from "../modules/authoringDomains.js";
+import { storedDomainDocuments, assembleAuthoredDocumentFromDraftRow } from "../modules/authoringDomains.js";
 
 const root = join(fileURLToPath(new URL("..", import.meta.url)));
 loadProjectEnv({ repositoryRoot: root });
@@ -78,16 +78,45 @@ export async function loadD1Rows(database) {
     row,
     document: parsedJson(row.document, `content_drafts:${row.kind}`, unresolved)
   }));
-  const puzzleDraftDocuments = puzzleDrafts.map(row => ({
-    source: "d1:puzzle_drafts",
-    table: "puzzle_drafts",
-    kind: "puzzle",
-    id: row.id,
-    revision: Number(row.revision),
-    ownerSubject: row.owner_subject,
-    row,
-    document: parsedJson(row.document, "puzzle_drafts:puzzle", unresolved)
-  }));
+  const puzzleDraftDocuments = puzzleDrafts.map(row => {
+    let document = null;
+    try {
+      document = assembleAuthoredDocumentFromDraftRow(row, {
+        parseJson: (text, label) => {
+          try {
+            return JSON.parse(text);
+          } catch (error) {
+            unresolved.push({
+              source: "d1:puzzle_drafts",
+              kind: "puzzle",
+              id: row.id,
+              reason: `${label} invalid JSON: ${error.message}`
+            });
+            throw error;
+          }
+        }
+      });
+    } catch (error) {
+      if (!unresolved.some(item => item.id === row.id && item.source === "d1:puzzle_drafts")) {
+        unresolved.push({
+          source: "d1:puzzle_drafts",
+          kind: "puzzle",
+          id: row.id,
+          reason: error.message
+        });
+      }
+    }
+    return {
+      source: "d1:puzzle_drafts",
+      table: "puzzle_drafts",
+      kind: "puzzle",
+      id: row.id,
+      revision: Number(row.revision),
+      ownerSubject: row.owner_subject,
+      row,
+      document
+    };
+  }).filter(entry => entry.document);
   return {
     published,
     contentDrafts,
@@ -330,6 +359,9 @@ export async function applyD1Changes(
       const seq = (nextHistory.get(row.id) || 0) + 1;
       nextHistory.set(row.id, seq);
       const domains = storedDomainDocuments(change.after);
+      const previousAssembled = serializeDraftDocument(
+        assembleAuthoredDocumentFromDraftRow(row)
+      );
       operations.push({
         id: `puzzle_draft:${row.id}:${row.owner_subject}`,
         statements: [
@@ -337,6 +369,7 @@ export async function applyD1Changes(
             UPDATE puzzle_drafts
             SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
                 revision = revision + 1, validation_json = NULL, updated_at = ?,
+                document_stale = 0,
                 content_json = ?, pedagogy_json = ?, provenance_json = ?
             WHERE id = ? AND owner_subject = ? AND revision = ?
           `).bind(
@@ -356,7 +389,7 @@ export async function applyD1Changes(
             INSERT INTO puzzle_draft_history
               (draft_id, seq, document, content_hash, saved_at)
             VALUES (?, ?, ?, ?, ?)
-          `).bind(row.id, seq, row.document, row.content_hash, now),
+          `).bind(row.id, seq, previousAssembled, row.content_hash, now),
           ...(seq > MAX_WORKING_COPY_HISTORY
             ? [database.prepare(`
                 DELETE FROM puzzle_draft_history WHERE draft_id = ? AND seq <= ?

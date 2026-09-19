@@ -229,10 +229,17 @@ export function createPuzzleDraftStore({ directory }) {
     if (stack.length > MAX_WORKING_COPY_HISTORY) {
       stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
     }
-    // Persist only the selected domain column (and provenance) and mark the
-    // document cache stale. Reads still assemble a complete document via
-    // materializeRecord.
+    // Persist the selected domain column (and provenance). On the first
+    // focused save for a pre-domain row, seed sibling projections from the
+    // assembled document so marking the cache stale does not drop them.
     const nextDomains = storedDomainDocuments(materialized);
+    const domains = current.domains && typeof current.domains === "object"
+      ? {
+        ...current.domains,
+        [domain]: nextDomains[domain],
+        provenance: nextDomains.provenance
+      }
+      : nextDomains;
     const record = {
       ...current,
       revision: current.revision + 1,
@@ -240,11 +247,7 @@ export function createPuzzleDraftStore({ directory }) {
       updatedAt: new Date().toISOString(),
       document: clone(current.document),
       documentStale: true,
-      domains: {
-        ...(current.domains || {}),
-        [domain]: nextDomains[domain],
-        provenance: nextDomains.provenance
-      },
+      domains,
       workingCopyStack: stack
     };
     await writeRecord(record);
@@ -286,6 +289,7 @@ export function createPuzzleDraftStore({ directory }) {
       contentHash: draftContentHash(materialized),
       updatedAt: new Date().toISOString(),
       document: clone(materialized),
+      documentStale: false,
       domains: storedDomainDocuments(materialized),
       workingCopyStack: stack
     };

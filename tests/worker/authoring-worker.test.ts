@@ -752,6 +752,40 @@ describe("hosted authoring Worker", () => {
     });
     expect(legacy.document).toEqual(document);
 
+    // First focused save on a pre-domain row must seed sibling columns so
+    // marking document_stale does not drop pedagogy when the cache is ignored.
+    await repository.saveDomain({
+      draftId: "domain-projection-fixture",
+      domain: "content",
+      projection: {
+        id: document.id,
+        title: "Legacy domain seed",
+        category: document.category,
+        clusters: document.clusters,
+        bridges: document.bridges.map(({ id, term, clusters, fact }) => ({
+          id, term, clusters, fact
+        }))
+      },
+      actor: { subject: "local-author" },
+      expectedRevision: legacy.revision
+    });
+    const seededRow = await env.AUTHORING_DB.prepare(
+      "SELECT document_stale, content_json, pedagogy_json FROM puzzle_drafts WHERE id = ?"
+    ).bind("domain-projection-fixture").first() as {
+      document_stale: number;
+      content_json: string;
+      pedagogy_json: string;
+    };
+    expect(Number(seededRow.document_stale)).toBe(1);
+    expect(JSON.parse(seededRow.content_json).title).toBe("Legacy domain seed");
+    expect(JSON.parse(seededRow.pedagogy_json).lenses).toHaveLength(1);
+    const seededAssembled = await repository.get({
+      draftId: "domain-projection-fixture",
+      actor: { subject: "local-author" }
+    });
+    expect(seededAssembled.document.title).toBe("Legacy domain seed");
+    expect(seededAssembled.document.lenses).toHaveLength(1);
+
     // JSON-LD rows are not a compatibility case. They must be canonicalized
     // before this Worker is released, so a stray row fails closed rather than
     // becoming an uneditable draft through the nullable-column fallback.

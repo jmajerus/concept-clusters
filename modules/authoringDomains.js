@@ -461,6 +461,58 @@ export function assembleStoredDomainDocuments({
   });
 }
 
+/**
+ * Assemble the authored puzzle from a raw puzzle_drafts row. Domain columns
+ * are authoritative when present; a stale `document` cache is ignored as a
+ * source of truth so maintenance tools do not rewrite from an outdated blob.
+ */
+export function assembleAuthoredDocumentFromDraftRow(row, {
+  parseJson = (text, label) => {
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      throw new Error(`${label} contains invalid JSON: ${error.message}`);
+    }
+  }
+} = {}) {
+  if (!row || typeof row !== "object") {
+    throw new Error("Draft row must be an object");
+  }
+  const content = row.content_json == null
+    ? null
+    : parseJson(row.content_json, "Stored content domain");
+  const pedagogy = row.pedagogy_json == null
+    ? null
+    : parseJson(row.pedagogy_json, "Stored pedagogy domain");
+  const provenance = row.provenance_json == null
+    ? null
+    : parseJson(row.provenance_json, "Stored provenance domain");
+  const hasDomainColumns = content != null || pedagogy != null || provenance != null;
+  const stale = Number(row.document_stale || 0) === 1;
+  if (hasDomainColumns) {
+    return assembleStoredDomainDocuments({
+      document: stale ? undefined : (
+        row.document == null
+          ? undefined
+          : (typeof row.document === "string"
+            ? parseJson(row.document, "Stored draft")
+            : row.document)
+      ),
+      content,
+      pedagogy,
+      provenance
+    });
+  }
+  if (row.document == null) {
+    throw new Error("Draft row has neither domain columns nor a document");
+  }
+  return assembleStoredDomainDocuments({
+    document: typeof row.document === "string"
+      ? parseJson(row.document, "Stored draft")
+      : row.document
+  });
+}
+
 export default {
   AUTHORING_DOMAINS,
   AUTHORING_READ_DOMAINS,
@@ -474,5 +526,6 @@ export default {
   applyAuthoredDomain,
   storedDomainDocuments,
   assembleStoredDomainDocuments,
+  assembleAuthoredDocumentFromDraftRow,
   stripSystemAuthoredMetadata
 };

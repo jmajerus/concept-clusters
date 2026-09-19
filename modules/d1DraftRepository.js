@@ -12,6 +12,7 @@ import {
 import {
   applyAuthoredDomain,
   assembleStoredDomainDocuments,
+  assembleAuthoredDocumentFromDraftRow,
   AUTHORING_WRITE_DOMAINS,
   storedDomainDocuments
 } from "./authoringDomains.js";
@@ -44,39 +45,8 @@ function metadata(row) {
   };
 }
 
-function domainPayloads(row) {
-  return {
-    content: row.content_json == null
-      ? null
-      : parsedJson(row.content_json, "Stored content domain"),
-    pedagogy: row.pedagogy_json == null
-      ? null
-      : parsedJson(row.pedagogy_json, "Stored pedagogy domain"),
-    provenance: row.provenance_json == null
-      ? null
-      : parsedJson(row.provenance_json, "Stored provenance domain")
-  };
-}
-
 function assembleRowDocument(row) {
-  const domains = domainPayloads(row);
-  const hasDomainColumns = domains.content != null
-    || domains.pedagogy != null
-    || domains.provenance != null;
-  // Domain columns are authoritative when present. A stale `document` cache is
-  // ignored as a source of truth; it remains only as a fallback for pre-domain
-  // rows that never received projection columns.
-  if (hasDomainColumns) {
-    return assembleStoredDomainDocuments({
-      document: Number(row.document_stale || 0) === 1
-        ? undefined
-        : parsedJson(row.document, "Stored draft"),
-      ...domains
-    });
-  }
-  return assembleStoredDomainDocuments({
-    document: parsedJson(row.document, "Stored draft")
-  });
+  return assembleAuthoredDocumentFromDraftRow(row, { parseJson: parsedJson });
 }
 
 function fullDraft(row) {
@@ -309,21 +279,29 @@ export class D1DraftRepository extends DraftRepository {
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(nextAssembled);
     const now = new Date().toISOString();
-    const domainJson = domain === "content" ? domains.content : domains.pedagogy;
-    const domainColumn = domain === "content" ? "content_json" : "pedagogy_json";
+    // Seed any missing domain columns from the assembled snapshot so the first
+    // focused save on a pre-domain row does not drop sibling fields when the
+    // document cache is marked stale.
+    const contentJson = domain === "content" || current.content_json == null
+      ? domains.content
+      : current.content_json;
+    const pedagogyJson = domain === "pedagogy" || current.pedagogy_json == null
+      ? domains.pedagogy
+      : current.pedagogy_json;
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
           document_stale = 1,
-          ${domainColumn} = ?, provenance_json = ?
+          content_json = ?, pedagogy_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof materialized.id === "string" ? materialized.id : null,
       typeof materialized.title === "string" ? materialized.title : null,
       contentHash,
       now,
-      domainJson,
+      contentJson,
+      pedagogyJson,
       domains.provenance,
       draftId,
       owner.subject,
@@ -369,7 +347,7 @@ export class D1DraftRepository extends DraftRepository {
       SET document = ?, content_hash = ?, document_stale = 0,
           content_json = ?, pedagogy_json = ?, provenance_json = ?,
           updated_at = ?
-      WHERE id = ? AND owner_subject = ?
+      WHERE id = ? AND owner_subject = ? AND revision = ? AND document_stale = 1
     `).bind(
       documentJson,
       contentHash,
@@ -378,9 +356,18 @@ export class D1DraftRepository extends DraftRepository {
       domains.provenance,
       now,
       draftId,
-      owner.subject
+      owner.subject,
+      Number(current.revision)
     ).run();
-    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+    if (changes(result) !== 1) {
+      const latest = await this.get({ draftId, actor });
+      if (latest.documentStale) {
+        throw new DraftConflictError(
+          `Draft materialization conflict: expected revision ${Number(current.revision)} while stale; current revision is ${latest.revision}`
+        );
+      }
+      return latest;
+    }
     return this.get({ draftId, actor });
   }
 
