@@ -346,6 +346,35 @@ export async function run() {
       /Near-synonym clusters/
     );
 
+    const triviaSchema = await request("tools/call", {
+      name: "get_authoring_schema",
+      arguments: { phase: "core", profile: "trivia-quiz" }
+    });
+    assert.equal(triviaSchema.result.structuredContent.profile, "trivia-quiz");
+    assert.equal(triviaSchema.result.structuredContent.domain, "content");
+    assert.equal(triviaSchema.result.structuredContent.profileMode, "advisory");
+    assert.deepEqual(
+      triviaSchema.result.structuredContent.profileStorageDomains,
+      ["content", "pedagogy"]
+    );
+    assert.ok(triviaSchema.result.structuredContent.schema.properties.clusters);
+    assert.deepEqual(
+      triviaSchema.result.structuredContent.schema.properties.puzzleKind.enum,
+      ["topic-based", "vocabulary-context", "trivia-quiz"]
+    );
+    assert.match(
+      triviaSchema.result.structuredContent.schema.properties.puzzleKind.description,
+      /independent of category and lensMode/
+    );
+    assert.equal(
+      triviaSchema.result.structuredContent.schema.properties.profile,
+      undefined
+    );
+    assert.match(
+      triviaSchema.result.structuredContent.profileSummary,
+      /Co-designed clusters and board terms/
+    );
+
     // A draft that passes validate_puzzle_draft can still be a bad puzzle --
     // the guidance has to carry the design judgment (not just schema facts)
     // for that to mean anything to an authoring AI with no other way to
@@ -355,6 +384,7 @@ export async function run() {
       arguments: {}
     });
     assert.match(guidance.result.structuredContent.markdown, /No trap words/);
+    assert.match(guidance.result.structuredContent.markdown, /puzzleKind/);
     assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
     assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
     assert.doesNotMatch(guidance.result.structuredContent.markdown, /termRole|reference\/connector/);
@@ -378,7 +408,10 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /wiki:Solid/);
     assert.match(guidance.result.structuredContent.markdown, /binary bridge's optional direction/);
     assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
-    assert.match(guidance.result.structuredContent.markdown, /Trivia category specifically leans/);
+    assert.doesNotMatch(
+      guidance.result.structuredContent.markdown,
+      /Trivia category specifically leans|trivia-quiz|quiz-led puzzle type/
+    );
     assert.doesNotMatch(
       guidance.result.structuredContent.markdown,
       /Vocabulary-in-context|lexical-disambiguation|near-synonym/
@@ -426,6 +459,10 @@ export async function run() {
       coreGuidance.result.structuredContent.markdown,
       /Vocabulary-in-context|lexical-disambiguation|near-synonym/
     );
+    assert.doesNotMatch(
+      coreGuidance.result.structuredContent.markdown,
+      /trivia-quiz|quiz-led puzzle type/
+    );
     const reviewGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
@@ -440,6 +477,10 @@ export async function run() {
     assert.doesNotMatch(
       reviewGuidance.result.structuredContent.markdown,
       /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
+    assert.doesNotMatch(
+      reviewGuidance.result.structuredContent.markdown,
+      /trivia-quiz|quiz-led puzzle type/
     );
     assert.match(reviewGuidance.result.structuredContent.markdown, /silently replace text/);
     const pedagogyGuidance = await request("tools/call", {
@@ -458,6 +499,10 @@ export async function run() {
     assert.doesNotMatch(
       pedagogyGuidance.result.structuredContent.markdown,
       /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
+    assert.doesNotMatch(
+      pedagogyGuidance.result.structuredContent.markdown,
+      /trivia-quiz|quiz-led puzzle type/
     );
 
     const vocabularyCompleteGuidance = await request("tools/call", {
@@ -497,6 +542,10 @@ export async function run() {
       vocabularyCoreGuidance.result.structuredContent.markdown,
       /overlap is the material/
     );
+    assert.match(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /puzzleKind to "vocabulary-context"/
+    );
     assert.doesNotMatch(
       vocabularyCoreGuidance.result.structuredContent.markdown,
       /## Design judgment|search_puzzles|Dutch tilt/
@@ -531,6 +580,122 @@ export async function run() {
       vocabularyPedagogyGuidance.result.structuredContent.markdown,
       /preSolve as a per-puzzle judgment/
     );
+
+    const triviaCompleteGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaCompleteGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaCompleteGuidance.result.structuredContent.markdown,
+      /Trivia-quiz profile/
+    );
+    assert.match(
+      triviaCompleteGuidance.result.structuredContent.markdown,
+      /Request profile=trivia-quiz with phase=core/
+    );
+    assert.doesNotMatch(
+      triviaCompleteGuidance.result.structuredContent.markdown,
+      /## Trivia-quiz core pass|## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaCoreGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "core", profile: "trivia-quiz" }
+    });
+    assert.equal(triviaCoreGuidance.result.structuredContent.profile, "trivia-quiz");
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /Inventory question-worthy facts and relationships alongside candidate\s+board terms/
+    );
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /Do not build an arbitrary sort and append unrelated recall/
+    );
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /puzzleKind to "trivia-quiz"/
+    );
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /does not require category=trivia/
+    );
+    assert.doesNotMatch(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaReviewGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "review", profile: "trivia-quiz" }
+    });
+    assert.equal(triviaReviewGuidance.result.structuredContent.profile, "trivia-quiz");
+    assert.match(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /exactly one defensible correct answer/
+    );
+    assert.match(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /Verify every factual premise/
+    );
+    assert.match(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /If preSolve is enabled/
+    );
+    assert.doesNotMatch(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaPedagogyGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "pedagogy", profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaPedagogyGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /Use lensMode=quiz for the quiz-led profile/
+    );
+    assert.match(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /Choose preSolve per puzzle/
+    );
+    assert.match(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /Map each option's targets to every and only board term/
+    );
+    assert.doesNotMatch(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaPublicationGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "publication", profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaPublicationGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaPublicationGuidance.result.structuredContent.markdown,
+      /Trivia is the current domain-less category convention/
+    );
+    assert.match(
+      triviaPublicationGuidance.result.structuredContent.markdown,
+      /Do not infer or require profile=trivia-quiz from\s+category=trivia/
+    );
+    assert.doesNotMatch(
+      triviaPublicationGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
     const catalogueWorkflow = await request("tools/call", {
       name: "get_workflow_guidance",
       arguments: { topic: "catalogue" }

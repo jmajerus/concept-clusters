@@ -37,6 +37,7 @@ import {
   canonicalizePuzzleCategoryReferences,
   slugify
 } from "../puzzles/categories.js";
+import { PUZZLE_KINDS } from "./authoringProfiles.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
@@ -302,6 +303,9 @@ export const SimplifiedPuzzleInputSchema = z.object({
   id: SlugSchema,
   title: z.string().min(1),
   category: CategoryReferenceSchema,
+  puzzleKind: z.enum([...PUZZLE_KINDS]).optional().describe(
+    "Authored puzzle type, independent of category and lensMode. Use topic-based for an ordinary topic-led puzzle, trivia-quiz for a trivia quiz, or vocabulary-context for a near-synonym usage puzzle. Declare the kind for newly authored puzzles; omission is accepted for legacy documents."
+  ),
   categories: z.array(CategoryReferenceSchema).optional(),
   subcategories: z.record(CategoryReferenceSchema, SlugSchema).optional(),
   tags: z.array(z.string().min(1)).optional(),
@@ -504,6 +508,7 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     id: input.id,
     title: input.title,
     category: categoryFields.category,
+    ...(input.puzzleKind ? { puzzleKind: input.puzzleKind } : {}),
     ...(categoryFields.categories ? { categories: [...categoryFields.categories] } : {}),
     ...(categoryFields.subcategories ? { subcategories: clone(categoryFields.subcategories) } : {}),
     ...largeField(puzzleNodeCount({ clusters, bridges })),

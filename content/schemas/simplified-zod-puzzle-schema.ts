@@ -38,6 +38,13 @@ const SlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const CategoryIdSchema = SlugSchema.describe(
   "Stable category id, not the category display title. Legacy titles are read-compatible and converted by the authoring server."
 );
+export const PuzzleKindSchema = z.enum([
+  "topic-based",
+  "trivia-quiz",
+  "vocabulary-context"
+]).describe(
+  "Authored puzzle type, independent of category and lensMode. Declare it on new documents; omission is accepted for legacy puzzles."
+);
 
 // A displayed term (cluster seed/floating term, bridge term) becomes a
 // pill in Star mode sized by pillWidth (modules/puzzleGraph.js) -- width
@@ -144,6 +151,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   id: SlugSchema,
   title: z.string().min(1),
   category: CategoryIdSchema,
+  puzzleKind: PuzzleKindSchema.optional(),
   categories: z.array(CategoryIdSchema).optional(),
   subcategories: z.record(CategoryIdSchema, SlugSchema).optional(),
   tags: z.array(z.string().min(1)).optional(),

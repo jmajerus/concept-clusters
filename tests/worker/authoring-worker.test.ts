@@ -278,6 +278,7 @@ describe("hosted authoring Worker", () => {
     expect(phaseSchemas.publication.schema.properties.provenance).toBeUndefined();
     expect(phaseSchemas.publication.domain).toBe("pedagogy");
     expect(phaseSchemas.core.domain).toBe("content");
+    expect(phaseSchemas.core.schema.properties.puzzleKind).toBeDefined();
     expect(phaseSchemas.review.domain).toBeUndefined();
 
     const vocabularySchemaResponse = await rpc({
@@ -311,6 +312,44 @@ describe("hosted authoring Worker", () => {
     expect(vocabularySchema.result.structuredContent.domain).toBe("pedagogy");
     expect(vocabularySchema.result.structuredContent.schema.properties.lenses)
       .toBeDefined();
+
+    const triviaSchemaResponse = await rpc({
+      jsonrpc: "2.0",
+      id: "schema-trivia-quiz",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_schema",
+        arguments: { phase: "core", profile: "trivia-quiz" }
+      }
+    });
+    const triviaSchema = await rpcJson(triviaSchemaResponse) as {
+      result: {
+        structuredContent: {
+          profile: string;
+          profileMode: string;
+          profileStorageDomains: string[];
+          profileSummary: string;
+          domain: string;
+          schema: { properties: Record<string, unknown> };
+        };
+      };
+    };
+    expect(triviaSchema.result.structuredContent.profile).toBe("trivia-quiz");
+    expect(triviaSchema.result.structuredContent.profileMode).toBe("advisory");
+    expect(triviaSchema.result.structuredContent.profileStorageDomains)
+      .toEqual(["content", "pedagogy"]);
+    expect(triviaSchema.result.structuredContent.profileSummary)
+      .toMatch(/Co-designed clusters and board terms/);
+    expect(triviaSchema.result.structuredContent.domain).toBe("content");
+    expect(triviaSchema.result.structuredContent.schema.properties.clusters)
+      .toBeDefined();
+    expect(
+      (triviaSchema.result.structuredContent.schema.properties.puzzleKind as {
+        enum?: string[];
+      }).enum
+    ).toEqual(["topic-based", "vocabulary-context", "trivia-quiz"]);
+    expect(triviaSchema.result.structuredContent.schema.properties.profile)
+      .toBeUndefined();
 
     const created = await rpc({
       jsonrpc: "2.0",
@@ -390,7 +429,8 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/wiki:Solid/);
     expect(guidance.result.structuredContent.markdown).toMatch(/binary bridge's optional direction/);
     expect(guidance.result.structuredContent.markdown).toMatch(/lensMode can be "quiz"/);
-    expect(guidance.result.structuredContent.markdown).toMatch(/Trivia category specifically leans/);
+    expect(guidance.result.structuredContent.markdown)
+      .not.toMatch(/Trivia category specifically leans|trivia-quiz|quiz-led puzzle type/);
     expect(guidance.result.structuredContent.markdown)
       .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
     expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction \("Before You Begin"\)/);
@@ -431,6 +471,7 @@ describe("hosted authoring Worker", () => {
     expect(coreGuidance.result.structuredContent.phase).toBe("core");
     expect(coreGuidance.result.structuredContent.preserveExisting).toBe(true);
     expect(coreGuidance.result.structuredContent.markdown).toMatch(/one accumulating/);
+    expect(coreGuidance.result.structuredContent.markdown).toMatch(/puzzleKind/);
     expect(coreGuidance.result.structuredContent.markdown).toMatch(/exact citation shape/);
     expect(coreGuidance.result.structuredContent.markdown)
       .toMatch(/do not plan to rediscover/);
@@ -440,6 +481,8 @@ describe("hosted authoring Worker", () => {
       .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
     expect(coreGuidance.result.structuredContent.markdown)
       .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .not.toMatch(/trivia-quiz|quiz-led puzzle type/);
     const reviewGuided = await rpc({
       jsonrpc: "2.0",
       id: "guidance-review",
@@ -455,6 +498,8 @@ describe("hosted authoring Worker", () => {
       .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
     expect(reviewGuidance.result.structuredContent.markdown)
       .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
+    expect(reviewGuidance.result.structuredContent.markdown)
+      .not.toMatch(/trivia-quiz|quiz-led puzzle type/);
     expect(reviewGuidance.result.structuredContent.markdown)
       .toMatch(/silently replace text/);
     const pedagogyGuided = await rpc({
@@ -480,6 +525,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/learningIntroduction\.credit/);
     expect(pedagogyGuidance.result.structuredContent.markdown)
       .not.toMatch(/Vocabulary-in-context|lexical-disambiguation|near-synonym/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .not.toMatch(/trivia-quiz|quiz-led puzzle type/);
 
     const vocabularyCompleteGuided = await rpc({
       jsonrpc: "2.0",
@@ -521,6 +568,8 @@ describe("hosted authoring Worker", () => {
     expect(vocabularyCoreGuidance.result.structuredContent.markdown)
       .toMatch(/overlap is the material/);
     expect(vocabularyCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/puzzleKind to "vocabulary-context"/);
+    expect(vocabularyCoreGuidance.result.structuredContent.markdown)
       .not.toMatch(/## Design judgment|search_puzzles|Dutch tilt/);
 
     const vocabularyReviewGuided = await rpc({
@@ -558,6 +607,120 @@ describe("hosted authoring Worker", () => {
       .toMatch(/one blank and one target term/);
     expect(vocabularyPedagogyGuidance.result.structuredContent.markdown)
       .toMatch(/preSolve as a per-puzzle judgment/);
+
+    const triviaCompleteGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-trivia-quiz-complete",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { profile: "trivia-quiz" }
+      }
+    });
+    const triviaCompleteGuidance = await rpcJson(triviaCompleteGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(triviaCompleteGuidance.result.structuredContent.profile)
+      .toBe("trivia-quiz");
+    expect(triviaCompleteGuidance.result.structuredContent.markdown)
+      .toMatch(/Trivia-quiz profile/);
+    expect(triviaCompleteGuidance.result.structuredContent.markdown)
+      .toMatch(/Request profile=trivia-quiz with phase=core/);
+    expect(triviaCompleteGuidance.result.structuredContent.markdown)
+      .not.toMatch(/## Trivia-quiz core pass|## Design judgment|Dutch tilt|Vocabulary-in-context/);
+
+    const triviaCoreGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-trivia-quiz-core",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "core", profile: "trivia-quiz" }
+      }
+    });
+    const triviaCoreGuidance = await rpcJson(triviaCoreGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(triviaCoreGuidance.result.structuredContent.profile)
+      .toBe("trivia-quiz");
+    expect(triviaCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/Inventory question-worthy facts and relationships alongside candidate\s+board terms/);
+    expect(triviaCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/Do not build an arbitrary sort and append unrelated recall/);
+    expect(triviaCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/puzzleKind to "trivia-quiz"/);
+    expect(triviaCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/does not require category=trivia/);
+    expect(triviaCoreGuidance.result.structuredContent.markdown)
+      .not.toMatch(/## Design judgment|Dutch tilt|Vocabulary-in-context/);
+
+    const triviaReviewGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-trivia-quiz-review",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "review", profile: "trivia-quiz" }
+      }
+    });
+    const triviaReviewGuidance = await rpcJson(triviaReviewGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(triviaReviewGuidance.result.structuredContent.profile)
+      .toBe("trivia-quiz");
+    expect(triviaReviewGuidance.result.structuredContent.markdown)
+      .toMatch(/exactly one defensible correct answer/);
+    expect(triviaReviewGuidance.result.structuredContent.markdown)
+      .toMatch(/Verify every factual premise/);
+    expect(triviaReviewGuidance.result.structuredContent.markdown)
+      .toMatch(/If preSolve is enabled/);
+    expect(triviaReviewGuidance.result.structuredContent.markdown)
+      .not.toMatch(/## Design judgment|Dutch tilt|Vocabulary-in-context/);
+
+    const triviaPedagogyGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-trivia-quiz-pedagogy",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "pedagogy", profile: "trivia-quiz" }
+      }
+    });
+    const triviaPedagogyGuidance = await rpcJson(triviaPedagogyGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(triviaPedagogyGuidance.result.structuredContent.profile)
+      .toBe("trivia-quiz");
+    expect(triviaPedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/Use lensMode=quiz for the quiz-led profile/);
+    expect(triviaPedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/Choose preSolve per puzzle/);
+    expect(triviaPedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/Map each option's targets to every and only board term/);
+    expect(triviaPedagogyGuidance.result.structuredContent.markdown)
+      .not.toMatch(/## Design judgment|Dutch tilt|Vocabulary-in-context/);
+
+    const triviaPublicationGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-trivia-quiz-publication",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "publication", profile: "trivia-quiz" }
+      }
+    });
+    const triviaPublicationGuidance = await rpcJson(triviaPublicationGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(triviaPublicationGuidance.result.structuredContent.profile)
+      .toBe("trivia-quiz");
+    expect(triviaPublicationGuidance.result.structuredContent.markdown)
+      .toMatch(/Trivia is the current domain-less category convention/);
+    expect(triviaPublicationGuidance.result.structuredContent.markdown)
+      .toMatch(/Do not infer or require profile=trivia-quiz from\s+category=trivia/);
+    expect(triviaPublicationGuidance.result.structuredContent.markdown)
+      .not.toMatch(/## Design judgment|Dutch tilt|Vocabulary-in-context/);
+
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;
@@ -738,6 +901,7 @@ describe("hosted authoring Worker", () => {
       id: "domain-projection-fixture",
       title: "Domain projection fixture",
       category: "Science",
+      puzzleKind: "trivia-quiz",
       info: { text: "Core information." },
       clusters: [
         { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
@@ -786,6 +950,7 @@ describe("hosted authoring Worker", () => {
       "SELECT document FROM puzzle_drafts WHERE id = ?"
     ).bind("domain-projection-fixture").first() as { document: string }).document);
     expect(content.clusters).toHaveLength(2);
+    expect(content.puzzleKind).toBe("trivia-quiz");
     expect(content.bridges[0].relationKind).toBeUndefined();
     expect(pedagogy.lenses).toHaveLength(1);
     expect(pedagogy.bridges[0].relationKind).toBe("contrast");

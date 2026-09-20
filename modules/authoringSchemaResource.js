@@ -6,6 +6,7 @@ import {
 } from "./authoringFieldOwnership.js";
 import {
   AUTHORING_PROFILES,
+  PUZZLE_KINDS,
   authoringProfileDescriptor
 } from "./authoringProfiles.js";
 import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
@@ -13,10 +14,11 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.18.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.20.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
+export { PUZZLE_KINDS };
 export const SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI =
   "concept-clusters://schemas/simplified-puzzle-v1";
 export const SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE = "application/schema+json";

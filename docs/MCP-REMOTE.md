@@ -70,14 +70,18 @@ stored by infrastructure rather than supplied by an agent.
 
 The guidance and schema tools accept an optional `phase`: `core`, `review`,
 `pedagogy`, `publication`, or `complete`. They also accept the optional
-authoring `profile` `vocabulary-context`. An unprofiled guidance response is
-profile-neutral. Supplying a profile selects that profile's compact overview
-for `complete`, or only its focused brief for a named phase; it does not append
-every profile's rules to the generic guidance. The profile is advisory and does
-not create another storage projection or change the phase's write domain. Draft
-reads and writes instead accept an optional `domain`: `content`, `pedagogy`, or the backwards-compatible
-`complete` default. A focused domain is a real write boundary, not just prose
-guidance:
+authoring profile: `vocabulary-context` or `trivia-quiz`. An unprofiled
+guidance response is profile-neutral. Supplying a profile selects that
+profile's compact overview for `complete`, or only its focused brief for a
+named phase; it does not append every profile's rules to generic guidance.
+The profile selects guidance; the agent records the authored type in the
+document's `puzzleKind` field (`topic-based`, `trivia-quiz`, or
+`vocabulary-context`). It is independent of taxonomy and lens mode, belongs to
+the existing `content` domain, and creates no new storage projection. Legacy
+documents may omit it. Draft reads and writes also accept an optional
+`domain`: `content`, `pedagogy`, or the
+backwards-compatible `complete` default. A focused domain is a real write
+boundary, not just prose guidance:
 
 - `domain: "content"` returns the core puzzle document.
 - `domain: "pedagogy"` returns the annotation/learning metadata and a
@@ -122,6 +126,14 @@ The profile covers content and pedagogy together, so it does not replace
 either focused write domain. Homonym or homograph bridges remain an optional
 pattern rather than the profile's template, and `preSolve` remains a
 per-puzzle judgment.
+
+For `profile: "trivia-quiz"`, clusters, board terms, and quiz lenses are
+co-designed: groups supply meaningful scope, evidence, or comparison frames
+for factual questions about the curated material. `lensMode: "quiz"` is the
+normal form; `preSolve` is still a per-puzzle choice when clustering is either
+obvious or worth preserving as a challenge. The domain-less `Trivia` category
+is the current browse convention for cross-disciplinary material, not the
+profile selector; the profile can be used with a disciplinary category.
 
 Before every later pass, call `get_puzzle_draft`, edit the latest document or
 selected domain, preserve all fields outside the selected domain, and send the

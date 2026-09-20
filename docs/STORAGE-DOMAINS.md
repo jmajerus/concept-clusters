@@ -47,9 +47,10 @@ JSON.
 
 An authoring profile is a different axis from a storage domain. For example,
 the `vocabulary-context` profile spans the existing `content` and `pedagogy`
-domains: its near-synonym clusters and bridge cores remain content, while its
-context-sensitive lenses remain pedagogy. The profile supplies focused MCP
-guidance and does not justify a third projection or a duplicated field owner.
+domains: its near-synonym clusters, bridge cores, and authored `puzzleKind`
+remain content, while its context-sensitive lenses remain pedagogy. The MCP
+profile selects guidance; the document field records the authored type.
+Neither requires a third projection or a duplicated field owner.
 
 The boundary is about ownership, not an assertion that every field needs to
 remain authored. A partitioning review is also a good time to ask whether a

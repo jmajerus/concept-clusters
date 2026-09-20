@@ -7,6 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "homonyms-in-context",
   "title": "Homonyms in Context",
   "category": "vocabulary",
+  "puzzleKind": "vocabulary-context",
   "info": {
     "text": "Use the surrounding sentence to distinguish two unrelated meanings of the same spelling."
   },

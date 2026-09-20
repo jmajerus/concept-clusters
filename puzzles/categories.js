@@ -289,17 +289,13 @@ export const CATEGORIES = {
       link: "wiki:Film theory"
     }
   },
-  // Deliberately domain-less, unlike every other entry above: trivia cuts
-  // across every discipline rather than belonging to one, so this
-  // permanently lives in the "Other subjects" bucket on the browse screen
-  // rather than being a placeholder awaiting a home the way Film and Data
-  // Science briefly, accidentally were.
+  // Deliberately domain-less: cross-disciplinary fact collections need a
+  // browse home, currently the "Other subjects" bucket. This is a taxonomy
+  // convention, not a puzzle type or a placeholder awaiting a discipline.
   //
-  // Puzzles here also lean toward a preferred shape -- preSolve: true and
-  // lensMode: "quiz" -- since trivia is usually about testing specific
-  // recall rather than discovering how terms cluster. See
-  // modules/authoringDesignGuidance.js: a lean for an author to weigh,
-  // not a constraint this registry enforces.
+  // This is the current cross-disciplinary browse convention, not a puzzle
+  // type selector. Quiz-led puzzles use the explicit trivia-quiz authoring
+  // profile whether they live here or under a more specific category.
   "Trivia": {
     info: {
       text: "Specific, memorable facts worth knowing on their own, not organized under any one discipline.",

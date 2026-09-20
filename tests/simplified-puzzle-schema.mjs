@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { validateJsonLdProfile } from "../modules/jsonLdProfile.js";
 import { validatePuzzleContent } from "../modules/contentValidation.js";
 import { puzzleFromJsonLd } from "../modules/puzzleJsonLd.js";
+import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import {
   isJsonLdShaped,
   normalizeAuthoredPuzzleDocument,
@@ -58,6 +59,27 @@ export async function run() {
       validatePuzzleContent(puzzle, { knownPuzzleIds: new Set([puzzle.id]) }),
       []
     );
+  }
+
+  // The authored kind survives simplified/runtime/JSON-LD round-trips, while
+  // omission remains valid for legacy documents and unknown kinds are rejected.
+  {
+    const kinds = ["topic-based", "vocabulary-context", "trivia-quiz"];
+    for (const puzzleKind of kinds) {
+      const simplified = SimplifiedPuzzleInputSchema.parse(validPuzzle({ puzzleKind }));
+      const runtime = puzzleFromSimplified(simplified);
+      assert.equal(runtime.puzzleKind, puzzleKind);
+      assert.equal(puzzleToSimplified(runtime).puzzleKind, puzzleKind);
+      const { document, errors } = normalizeAuthoredPuzzleDocument(simplified);
+      assert.deepEqual(errors, []);
+      assert.equal(document.puzzleKind, puzzleKind);
+      assert.equal(puzzleFromJsonLd(document).puzzleKind, puzzleKind);
+    }
+    assert.equal(
+      SimplifiedPuzzleInputSchema.safeParse(validPuzzle({ puzzleKind: "other" })).success,
+      false
+    );
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(validPuzzle()).success, true);
   }
 
   // Seeds need not lead terms -- only a subset relationship is required.

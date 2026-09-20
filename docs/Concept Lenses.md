@@ -484,10 +484,12 @@ Checking is available immediately, so a player may leave genuinely uncertain con
 ## Quiz lenses
 
 Implemented. `puzzles/trivia/film-classics.js` is a full worked example —
-built specifically to exercise this mode, and living under the
-deliberately domain-less "Trivia" category precisely because its facts
-are unverified film-history recall rather than citable content sourced
-the way this project's other puzzles are (see the file's header comment). `modules/lensEngine.js`, `modules/lensValidation.js`, `game.js`,
+built specifically to exercise this mode. Its domain-less `Trivia` category
+is the current cross-disciplinary browse convention; the document records its
+quiz-led type as `puzzleKind: "trivia-quiz"`, independently of category, while
+the matching MCP profile selects focused authoring guidance. The
+genre clusters supply the comparison frame for its actor-count lenses.
+`modules/lensEngine.js`, `modules/lensValidation.js`, `game.js`,
 and `styles.css` carry the implementation; `modules/playerSessionStore.js`
 has its own independent phase allowlist for persisted sessions (bitten once
 here — `lens-quiz-answering` initially only existed in `lensEngine.js`'s

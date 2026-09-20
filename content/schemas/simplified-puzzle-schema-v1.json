@@ -83,6 +83,11 @@
     "id": { "$ref": "#/$defs/slug" },
     "title": { "type": "string", "minLength": 1 },
     "category": { "$ref": "#/$defs/categoryId" },
+    "puzzleKind": {
+      "type": "string",
+      "enum": ["topic-based", "vocabulary-context", "trivia-quiz"],
+      "description": "Authored puzzle type, independent of category and lensMode. Declare it on new documents; omission is accepted for legacy puzzles."
+    },
     "categories": { "type": "array", "items": { "$ref": "#/$defs/categoryId" } },
     "subcategories": { "type": "object", "propertyNames": { "$ref": "#/$defs/categoryId" }, "additionalProperties": { "$ref": "#/$defs/slug" } },
     "tags": { "type": "array", "items": { "type": "string", "minLength": 1 } },

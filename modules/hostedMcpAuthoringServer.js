@@ -343,9 +343,10 @@ function serverInstructions() {
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
     "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
     "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
-    "For a vocabulary-in-context puzzle, pass profile=vocabulary-context to select its compact overview " +
-    "or focused lexical-disambiguation brief; an unprofiled guidance response stays profile-neutral. " +
-    "The profile is advisory and does not create a third write domain. " +
+    "Select profile=vocabulary-context for near-synonym usage puzzles or profile=trivia-quiz for quiz-led " +
+    "puzzles whose clusters and questions are co-designed; set the corresponding puzzleKind in the authored " +
+    "document. puzzleKind is independent of category and lensMode, belongs to content, and creates no new " +
+    "write domain. Unprofiled guidance stays profile-neutral. " +
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
@@ -799,7 +800,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Set profile=vocabulary-context to select only that profile's compact overview or focused brief; it does not append profile rules to generic guidance or change the write domain or canonical schema. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
+    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Set profile=vocabulary-context or profile=trivia-quiz to select only that profile's compact overview or focused brief; record the authored type in the document's puzzleKind field. Profiles are independent of category and do not append rules to generic guidance or change the write domain. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
   }, tracked("get_authoring_guidance", safe(async ({ phase, profile }) => success(
@@ -810,7 +811,7 @@ export function createAuthoringMcpServer({
   server.registerTool("get_authoring_schema", {
     title: "Get authoring schema",
     description:
-      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Set profile=vocabulary-context to identify the lexical-disambiguation authoring profile; the returned schema and phase write domain remain canonical. Phase projections preserve omitted fields and are not standalone replacement schemas.",
+      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Set profile=vocabulary-context or profile=trivia-quiz to select focused guidance; the canonical document schema includes the authored puzzleKind field, and category does not select the profile. Phase projections preserve omitted fields and are not standalone replacement schemas.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
   }, tracked("get_authoring_schema", safe(async ({ phase, profile }) => success(

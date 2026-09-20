@@ -14,6 +14,7 @@ const document = {
   id: "domain-fixture",
   title: "Domain fixture",
   category: "science",
+  puzzleKind: "vocabulary-context",
   large: true,
   info: { text: "Core information" },
   clusters: [{
@@ -51,11 +52,13 @@ export async function run() {
   assert.equal(domains.content.bridges[0].relationKind, undefined);
   assert.equal(domains.pedagogy.bridges[0].fact, undefined);
   assert.deepEqual(domains.provenance, document.provenance);
+  assert.equal(domains.content.puzzleKind, "vocabulary-context");
 
   const content = projectAuthoredDocument(document, "content");
   assert.equal(content.document.provenance, undefined);
   assert.equal(content.document.lenses, undefined);
   assert.equal(content.document.large, undefined);
+  assert.equal(content.document.puzzleKind, "vocabulary-context");
   assert.equal(content.document.bridges[0].direction, undefined);
 
   const pedagogy = projectAuthoredDocument(document, "pedagogy");
@@ -64,6 +67,7 @@ export async function run() {
   assert.equal(pedagogy.document.bridges[0].relationKind, "contrast");
   assert.equal(pedagogy.document.learningIntroduction.credit, undefined);
   assert.equal(pedagogy.context.provenance, undefined);
+  assert.equal(pedagogy.context.puzzleKind, "vocabulary-context");
   assert.equal(pedagogy.context.bridges[0].fact, "Shared fact");
 
   const contentEdit = applyAuthoredDomain(document, "content", {
@@ -71,6 +75,7 @@ export async function run() {
     title: "Edited content"
   });
   assert.equal(contentEdit.title, "Edited content");
+  assert.equal(contentEdit.puzzleKind, "vocabulary-context");
   assert.deepEqual(contentEdit.provenance, document.provenance);
   assert.equal(contentEdit.bridges[0].relationKind, "contrast");
 
@@ -123,6 +128,13 @@ export async function run() {
       clusters: document.clusters
     }),
     /belongs to the content domain/
+  );
+  assert.throws(
+    () => applyAuthoredDomain(document, "pedagogy", {
+      ...pedagogy.document,
+      puzzleKind: "trivia-quiz"
+    }),
+    /puzzleKind belongs to the content domain/
   );
   assert.throws(
     () => applyAuthoredDomain(document, "pedagogy", {

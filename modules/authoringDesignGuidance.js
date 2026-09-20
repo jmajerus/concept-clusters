@@ -15,6 +15,7 @@ import {
 } from "./authoringSettings.js";
 import {
   authoringProfileDescriptor,
+  TRIVIA_QUIZ_PROFILE,
   VOCABULARY_CONTEXT_PROFILE
 } from "./authoringProfiles.js";
 
@@ -37,6 +38,7 @@ for it. A minimal example:
   "id": "cognitive-load-theory",
   "title": "Cognitive Load Theory",
   "category": "cognitive-science",
+  "puzzleKind": "topic-based",
   "clusters": [
     {
       "id": "intrinsic-load",
@@ -87,6 +89,11 @@ or copied into the puzzle document.
 
 Repository-owned timestamps, revision numbers, and cache-invalidation keys
 are not authoring fields; the server derives them.
+
+Declare puzzleKind on newly authored puzzles using a value from the canonical
+schema. It records the authored puzzle type independently of category and
+lensMode. Existing documents may omit it; the MCP profile selects focused
+guidance but is not a substitute for this document field.
 
 The MCP draft read/write contract uses the canonical stored shape: keep
 category, categories, and subcategories on stable ids, and use the current
@@ -227,13 +234,6 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   conclusion once the terms are named, making the lens the real point of
   the puzzle -- a narrow, deliberate exception, not something to reach for
   by default.
-- The Trivia category specifically leans toward lensMode: "quiz" and
-  preSolve: true: trivia is usually about testing specific factual recall
-  rather than discovering how terms cluster, so the sort is often a
-  foregone conclusion once the terms are named and the quiz is the real
-  content. Treat this as a lean for that one category, not a rule -- a
-  Trivia puzzle built around a genuine categorical distinction should
-  still use open clustering when that's the more honest structure.
 - Fit each lens to a learning objective worth a second look at the
   board. A focused question whose honest answers are one, two, or three
   terms is instructional -- that is a complete lens, not a stub to pad
@@ -404,6 +404,9 @@ gates: revisit any phase whenever that part of the puzzle needs more work.`;
 
 const CORE_PHASE_GUIDANCE = `## Core and research pass
 
+- Set puzzleKind to reflect the requested authored type. It is content
+  metadata, separate from the taxonomy category and lensMode; use the
+  canonical schema for its valid values.
 - Before shaping a gap-fill draft, call search_puzzles with 2-3 planned
   anchor terms scoped to the target category. If an existing puzzle already
   covers the distinction, extend or relate instead of opening a parallel board.
@@ -546,14 +549,17 @@ context prefers one neighboring term over another. It is not a simple matching
 exercise with a sentence appended afterward. Close relatedness is intentional;
 the author must still make each completed lens resolve to one best fit.
 
-The profile is advisory. It does not create a new storage domain, change the
-canonical schema, impose a cluster count, or require the homonym-bridge
-pattern. Content still belongs to the content domain and lenses still belong
+The profile is advisory. It does not create a new storage domain, impose a
+cluster count, or require the homonym-bridge pattern. Record the authored type
+as puzzleKind: "vocabulary-context"; category remains a separate taxonomy
+choice. Content still belongs to the content domain and lenses still belong
 to the pedagogy domain.`;
 
 const VOCABULARY_CONTEXT_PROFILE_GUIDANCE = Object.freeze({
   core: `## Vocabulary-in-context core pass
 
+- Set puzzleKind to "vocabulary-context" in the puzzle document. This is
+  authored content metadata; choose category independently for discovery.
 - Begin with a distinction inventory, not a target cluster count. Identify the
   shared semantic center of each synonym neighborhood and the usage axes that
   separate its members: frequency, duration, agency, intent, register,
@@ -626,43 +632,164 @@ save lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`
   publication: `## Vocabulary-in-context publication pass
 
 - Keep Vocabulary as the stable taxonomy category when the puzzle belongs in
-  that cross-disciplinary collection, but do not add an authoring-profile
-  field merely to repeat the category. The profile is an MCP guidance context,
-  not a third document domain.
+  that cross-disciplinary collection. Preserve the authored
+  puzzleKind: "vocabulary-context" independently of that category; the
+  profile argument selects guidance, while the kind is content metadata, not a
+  third document domain.
 - Publish only useful discovery metadata. Do not flatten the puzzle into a
   generic quiz description: its purpose is to teach precise usage among close
   lexical neighbors.`
 });
 
-const PROFILE_PHASE_PREAMBLE = `# Vocabulary-in-context authoring
+const TRIVIA_QUIZ_PROFILE_OVERVIEW = `## Trivia-quiz profile
+
+This profile identifies a quiz-led puzzle type. Clusters, board terms, and
+quiz lenses are designed together: the grouping supplies the question's scope,
+evidence, or comparison frame, rather than serving as an arbitrary prelude to
+unrelated recall.
+
+Use lensMode=quiz as the normal form. preSolve=true often fits when grouping is
+obvious and the quiz is the real work, but keep the clustering challenge when
+it contributes meaningful play. The profile imposes no cluster or lens count,
+does not require cross-cluster questions, and is independent of taxonomy. The
+domain-less Trivia category is the current browse convention for
+cross-disciplinary material, not the profile selector; this profile may fit a
+puzzle filed under a disciplinary category.
+
+The MCP profile argument selects focused guidance; the puzzle document records
+the authored type as puzzleKind: "trivia-quiz". That field belongs to content
+and creates no new write domain. Clusters and facts remain in content; quiz
+lenses remain in pedagogy.`;
+
+const TRIVIA_QUIZ_PROFILE_GUIDANCE = Object.freeze({
+  core: `## Trivia-quiz core pass
+
+- Set puzzleKind to "trivia-quiz" in the puzzle document. This authored type is
+  independent of the taxonomy category.
+- Inventory question-worthy facts and relationships alongside candidate
+  board terms. Shape the clusters and the intended quiz questions together so
+  the groups provide useful scope, comparison sets, or denominators for the
+  questions. Do not build an arbitrary sort and append unrelated recall.
+- Give each cluster a meaningful inclusion rule and a fact that explains it.
+  A group may organize items by genre, period, role, or another defensible
+  dimension; choose the structure that makes the intended questions clearer,
+  not a target cluster count or a symmetric-looking layout.
+- Select a board inventory that supports interesting questions about its
+  items or relationships within and across groups. Not every lens must span
+  clusters, and no cluster needs its own question. Do not add terms merely as
+  quiz fodder when they do not belong in the board's subject.
+- Treat trivia claims as factual claims: verify them and preserve exact
+  citations when research finds supporting sources. A cross-cluster person,
+  work, or pattern may be a genuine bridge, but bridges are optional and must
+  not be invented to connect the whole board.
+
+This is a content-domain pass: save the clusters, terms, facts, and genuine
+bridge cores with domain=content. The category is chosen separately during
+publication; selecting this profile does not require category=trivia.`,
+  review: `## Trivia-quiz review pass
+
+- Check that each cluster is a coherent, defensible group and that its fact
+  gives the grouping a meaningful role in the puzzle's question design. If a
+  question is unchanged when the board and its groupings are removed, decide
+  whether it is useful here or is detached recall that belongs elsewhere.
+- Verify every factual premise in each prompt, answer option, and explanation.
+  Check dates, roles, counts, and scope carefully; preserve citations for
+  supported claims. A trivia-style puzzle is not an exemption from accuracy.
+- Read every multiple-choice lens against the complete option set. There must
+  be exactly one defensible correct answer; distractors may be plausible but
+  must be clearly wrong under the wording and evidence given.
+- Where options map to board terms, compare each target set against the full
+  board: include all and only the terms the option describes. Ensure cluster
+  membership or cluster facts do not accidentally reveal a different answer
+  than the lens explanation claims.
+- Review the lens sequence as a whole. Prefer distinct, complementary
+  questions that build a picture of the board over repeated counts or a list
+  of unrelated facts. If preSolve is enabled, confirm the grouping really is
+  obvious and that several substantive quiz rounds carry the experience;
+  three is a useful heuristic, not a fixed minimum.
+
+This pass may inspect both domains; save content changes with domain=content
+and quiz-lens changes with domain=pedagogy.`,
+  pedagogy: `## Trivia-quiz pedagogy pass
+
+- Use lensMode=quiz for the quiz-led profile. Each lens should ask a clear
+  factual question about the curated board or a relevant relationship among
+  its items; do not append questions that merely happen to share a broad
+  subject.
+- Make exactly one option correct. Use plausible distractors that test the
+  intended distinction rather than obscure wording. Explain why the answer is
+  correct and address the most tempting alternative when that helps teach.
+- Map each option's targets to every and only board term supported by that
+  answer. The question may concern a relationship not printed on the board,
+  but the selected films, people, events, or other terms should make the
+  question's connection to the board evident.
+- Order lenses as a purposeful sequence—for example, identification followed
+  by a within-group comparison and then a cross-group relationship when those
+  questions genuinely fit. Do not force any one question pattern or pad the
+  sequence to a template.
+- Choose preSolve per puzzle. Use it when the sort is a foregone conclusion
+  and the quiz sequence is the meaningful play; leave clustering open when
+  its categories themselves reward discovery. If preSolve is on, several
+  substantial lenses are important so the puzzle does not collapse to one
+  isolated question.
+
+This is a pedagogy-domain pass: retrieve the pedagogy projection and save
+lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
+  publication: `## Trivia-quiz publication pass
+
+- Choose category for discovery and disciplinary home, independently of this
+  profile. Trivia is the current domain-less category convention for
+  cross-disciplinary fact collections; use a disciplinary category when that
+  is the better browse home. Do not infer or require profile=trivia-quiz from
+  category=trivia, and do not change category just to select this profile.
+- Preserve puzzleKind: "trivia-quiz" as the authored puzzle type; the MCP
+  profile selects guidance but does not replace the document field. Publish
+  only useful discovery metadata for the actual puzzle.`
+});
+
+const PROFILE_PHASE_PREAMBLE = `# Progressive profile authoring
 
 This is one pass over one accumulating simplified-puzzle draft. Retrieve the
 latest draft before editing, preserve every field from earlier passes, and
-change only what this pass improves. The selected profile is the design
-contract for this pass; use the canonical schema for field validity and save
-through the phase's existing write domain. Always validate the complete draft
-before publication.`;
+change only what this pass improves. The selected profile chooses focused
+guidance; for new documents, record the matching authored type in puzzleKind.
+Use the canonical schema for field validity and save through the phase's
+existing write domain. Always
+validate the complete draft before publication.`;
 
-const VOCABULARY_CONTEXT_COMPLETE_GUIDANCE = [
-  VOCABULARY_CONTEXT_PROFILE_OVERVIEW,
-  `## Focused profile passes
-
-Request profile=vocabulary-context with phase=core, review, pedagogy, or
+const AUTHORING_PROFILE_GUIDANCE = Object.freeze({
+  [VOCABULARY_CONTEXT_PROFILE]: Object.freeze({
+    overview: VOCABULARY_CONTEXT_PROFILE_OVERVIEW,
+    phases: VOCABULARY_CONTEXT_PROFILE_GUIDANCE,
+    routing: `Request profile=vocabulary-context with phase=core, review, pedagogy, or
 publication for the focused brief. Core owns semantic neighborhoods and
 bridge cores in content; review checks usage distinctions across the
 accumulated draft; pedagogy authors contextual lenses and learning
-introductions; publication adds ordinary discovery metadata. This complete
-response is intentionally a routing overview; it does not repeat every phase
-brief.`
-].join("\n\n");
+introductions; publication adds ordinary discovery metadata.`
+  }),
+  [TRIVIA_QUIZ_PROFILE]: Object.freeze({
+    overview: TRIVIA_QUIZ_PROFILE_OVERVIEW,
+    phases: TRIVIA_QUIZ_PROFILE_GUIDANCE,
+    routing: `Request profile=trivia-quiz with phase=core, review, pedagogy, or
+publication for the focused brief. Core co-designs the board and its question
+space; review checks factual accuracy, group coherence, and answer mappings;
+pedagogy authors the quiz sequence; publication chooses taxonomy independently.`
+  })
+});
 
 function profileGuidance(profile, phase) {
   const descriptor = authoringProfileDescriptor(profile);
-  if (descriptor.id !== VOCABULARY_CONTEXT_PROFILE) {
+  const profileDefinition = AUTHORING_PROFILE_GUIDANCE[descriptor.id];
+  if (!profileDefinition) {
     throw new Error(`No guidance is registered for authoring profile ${profile}`);
   }
-  if (phase === "complete") return VOCABULARY_CONTEXT_COMPLETE_GUIDANCE;
-  const guidance = VOCABULARY_CONTEXT_PROFILE_GUIDANCE[phase];
+  if (phase === "complete") {
+    return [
+      profileDefinition.overview,
+      `## Focused profile passes\n\n${profileDefinition.routing} This complete response is intentionally a routing overview; it does not repeat every phase brief.`
+    ].join("\n\n");
+  }
+  const guidance = profileDefinition.phases[phase];
   if (!guidance) {
     throw new Error(`No guidance is registered for phase ${phase}`);
   }

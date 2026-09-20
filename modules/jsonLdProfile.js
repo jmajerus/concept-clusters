@@ -1,3 +1,5 @@
+import { PUZZLE_KINDS } from "./authoringProfiles.js";
+
 export const CONCEPT_CLUSTERS_CONTEXT = "https://concept-clusters.org/context/v1";
 export const CONTENT_SCHEMA_VERSION = "1.0";
 export const JSON_LD_MEDIA_TYPE = "application/ld+json";
@@ -86,6 +88,9 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
   // canonical stable id and a legacy display title are valid here. Repository
   // import/authoring storage canonicalizes the value before persistence.
   if (!nonEmpty(document.category)) errors.push("category must be a non-empty string");
+  if (document.puzzleKind !== undefined && !PUZZLE_KINDS.includes(document.puzzleKind)) {
+    errors.push(`puzzleKind must be one of ${PUZZLE_KINDS.map(kind => `"${kind}"`).join(", ")}`);
+  }
   if (document.subcategories !== undefined) {
     if (!isObject(document.subcategories)) {
       errors.push("subcategories must be an object keyed by category");

@@ -57,6 +57,7 @@ conversion, if this puzzle is ever exported for portable interchange (see
   "id": "cognitive-load-theory",
   "title": "Cognitive Load Theory",
   "category": "cognitive-science",
+  "puzzleKind": "topic-based",
   "clusters": [
     {
       "id": "intrinsic-load",
@@ -89,7 +90,10 @@ publication all work from directly, with no JSON-LD conversion in between.
 
 ## Field reference
 
-**Puzzle** — `id`, `title`, `category` required. `categories` (array,
+**Puzzle** — `id`, `title`, `category` required. `puzzleKind` records the
+authored type, independently of category and `lensMode`: `topic-based`,
+`trivia-quiz`, or `vocabulary-context`. Declare it on new documents; omission
+is accepted for legacy puzzles. `categories` (array,
 primary first), `subcategories` (`{categoryId: subcategoryId}`), `tags`,
 `info` (string, or `{text?, links?, citations?}` at puzzle
 level; nested info is `{text?, links?}`) are

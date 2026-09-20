@@ -275,7 +275,19 @@ information, or lens explanation. A lens should be a natural contextual
 best-fit decision with one answer, not a definition-matching exercise. Close
 near-misses are useful, while two equally natural completions are unresolved
 ambiguity. The profile spans the existing content and pedagogy authoring
-domains and does not create a third document domain.
+domains and does not create a third document domain. Set the authored type to
+`puzzleKind: "vocabulary-context"`; category remains a separate taxonomy
+choice.
+
+For the `trivia-quiz` authoring profile, design the clusters and quiz lenses
+together. The groups should give factual questions useful scope or comparison
+frames, rather than act as an arbitrary prelude to unrelated recall. Use
+`lensMode: "quiz"` as the normal form, but choose `preSolve` per puzzle: skip
+the sort only when it contributes little; preserve it when the categories
+reward discovery. The `Trivia` category is the current browse convention for
+cross-disciplinary material, not the profile selector. Persist the authored
+type as `puzzleKind: "trivia-quiz"`; use a disciplinary category whenever it
+is the better browse home.
 
 ### Learning introductions
 

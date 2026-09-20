@@ -134,6 +134,7 @@ export function puzzleToSimplified(
     id: source.id,
     title: source.title,
     category: source.category,
+    ...(source.puzzleKind ? { puzzleKind: source.puzzleKind } : {}),
     ...(source.categories ? { categories: [...source.categories] } : {}),
     ...(source.subcategories ? { subcategories: clone(source.subcategories) } : {}),
     ...largeField(puzzleNodeCount(source)),

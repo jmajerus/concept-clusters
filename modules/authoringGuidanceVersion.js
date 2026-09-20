@@ -85,7 +85,11 @@
 // disambiguation, not simple matching, with phase-specific MCP guidance.
 // 5.11: same review bar; profile-selected guidance is isolated from generic
 // guidance, with a compact complete overview and one focused brief per phase.
+// 5.12: same review bar; the trivia-quiz profile co-designs cluster groupings
+// and factual quiz lenses, independent of the conventional Trivia category.
+// 5.13: same review bar; new documents declare content-owned puzzleKind,
+// independently of taxonomy and lens mode, while legacy omission remains valid.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 11
+  minor: 13
 });

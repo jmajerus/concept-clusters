@@ -45,6 +45,7 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
   id: { domain: "content", kind: "authored", identity: true, contextFor: ["pedagogy"] },
   title: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   category: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
+  puzzleKind: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   info: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   clusters: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   // Root `bridges` is split: content owns the core shape; pedagogy owns
@@ -149,7 +150,9 @@ export const BRIDGE_FIELD_OWNERSHIP = Object.freeze({
 export const AUTHORING_PHASE_PASSES = Object.freeze({
   core: Object.freeze({
     writeDomain: "content",
-    root: Object.freeze(["id", "title", "category", "info", "clusters", "bridges"]),
+    root: Object.freeze([
+      "id", "title", "category", "puzzleKind", "info", "clusters", "bridges"
+    ]),
     clusters: Object.freeze([
       "id", "name", "fact", "seeds", "floatingTerms", "terms", "termInfo", "info"
     ]),
@@ -157,7 +160,7 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
   }),
   review: Object.freeze({
     writeDomain: null,
-    root: Object.freeze(["clusters", "bridges"]),
+    root: Object.freeze(["puzzleKind", "clusters", "bridges"]),
     clusters: Object.freeze([
       "id", "name", "fact", "seeds", "floatingTerms", "terms", "termInfo", "info"
     ]),
