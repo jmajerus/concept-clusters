@@ -40,6 +40,10 @@ const document = {
     credit: "By Jane Doe",
     content: { text: "Introduction" }
   },
+  creator: "Human creator",
+  license: "CC-BY-4.0",
+  derivedFrom: "source-puzzle",
+  language: "en",
   provenance: {
     collaboration: "aiPrimary",
     contributors: ["Codex", "Jane Doe"]
@@ -58,6 +62,10 @@ export async function run() {
   assert.equal(content.document.provenance, undefined);
   assert.equal(content.document.lenses, undefined);
   assert.equal(content.document.large, undefined);
+  for (const field of ["creator", "license", "derivedFrom"]) {
+    assert.equal(content.document[field], undefined);
+  }
+  assert.equal(content.document.language, undefined);
   assert.equal(content.document.puzzleKind, "vocabulary-context");
   assert.equal(content.document.bridges[0].direction, undefined);
 
@@ -66,6 +74,10 @@ export async function run() {
   assert.equal(pedagogy.document.bridges[0].fact, undefined);
   assert.equal(pedagogy.document.bridges[0].relationKind, "contrast");
   assert.equal(pedagogy.document.learningIntroduction.credit, undefined);
+  for (const field of ["creator", "license", "derivedFrom"]) {
+    assert.equal(pedagogy.document[field], undefined);
+  }
+  assert.equal(pedagogy.document.language, "en");
   assert.equal(pedagogy.context.provenance, undefined);
   assert.equal(pedagogy.context.puzzleKind, "vocabulary-context");
   assert.equal(pedagogy.context.bridges[0].fact, "Shared fact");
@@ -78,6 +90,9 @@ export async function run() {
   assert.equal(contentEdit.puzzleKind, "vocabulary-context");
   assert.deepEqual(contentEdit.provenance, document.provenance);
   assert.equal(contentEdit.bridges[0].relationKind, "contrast");
+  for (const field of ["creator", "license", "derivedFrom", "language"]) {
+    assert.equal(contentEdit[field], document[field]);
+  }
 
   const pedagogyEdit = applyAuthoredDomain(document, "pedagogy", {
     ...pedagogy.document,
@@ -88,6 +103,9 @@ export async function run() {
   assert.deepEqual(pedagogyEdit.lenses, []);
   assert.equal(pedagogyEdit.bridges[0].relationKind, "contrast");
   assert.equal(pedagogyEdit.learningIntroduction.credit, "By Jane Doe");
+  for (const field of ["creator", "license", "derivedFrom", "language"]) {
+    assert.equal(pedagogyEdit[field], document[field]);
+  }
   assert.equal(contentEdit.large, true);
 
   const { info: _contentInfo, ...contentWithoutInfo } = content.document;
@@ -151,7 +169,7 @@ export async function run() {
         credit: "By an untrusted editor"
       }
     }),
-    /learningIntroduction\.credit is protected/
+    /learningIntroduction\.credit is human-managed/
   );
 
   const withUnannotatedBridge = {

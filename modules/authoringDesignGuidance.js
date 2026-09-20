@@ -38,7 +38,6 @@ for it. A minimal example:
   "id": "cognitive-load-theory",
   "title": "Cognitive Load Theory",
   "category": "cognitive-science",
-  "puzzleKind": "topic-based",
   "clusters": [
     {
       "id": "intrinsic-load",
@@ -90,10 +89,10 @@ or copied into the puzzle document.
 Repository-owned timestamps, revision numbers, and cache-invalidation keys
 are not authoring fields; the server derives them.
 
-Declare puzzleKind on newly authored puzzles using a value from the canonical
-schema. It records the authored puzzle type independently of category and
-lensMode. Existing documents may omit it; the MCP profile selects focused
-guidance but is not a substitute for this document field.
+Omit puzzleKind for the default topic-based kind. For a specialized authored
+type, follow the matching profile and record its type explicitly; the profile
+selects focused guidance but is not a substitute for the field. Puzzle kind
+remains independent of category and lensMode.
 
 The MCP draft read/write contract uses the canonical stored shape: keep
 category, categories, and subcategories on stable ids, and use the current
@@ -281,34 +280,21 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   dialog already shows title; do not repeat it as the first line. Do not write
   the two-character sequence backslash-n; the tool serializer encodes newlines.
   A body stored as one line with \`\\n\` tokens renders as a single paragraph.
-  learningIntroduction.credit is a legacy stored byline only when provenance
-  cannot derive L1. Prefer provenance; do not write credit. Collaboration is
-  human-owned metadata when a human has taken editorial lead; the byline is
-  derived from provenance.
+  learningIntroduction.credit is a legacy human-managed byline; do not include
+  it in MCP documents. The MCP server keeps protected attribution outside the
+  agent-authored document and stamps an identifiable client when possible.
   Prefer links (same shape as info.links) for further-reading on the lesson.
   Bibliographic references are a single puzzle-level list on info.citations
   (same { author?, title, publisher?, year?, pages?, url? } shape) -- never
   a second list on the lesson. When a learningIntroduction exists, play
   shows that list under References in the Lesson dialog; otherwise it
   shows on the board. Do not duplicate references across surfaces.
-- provenance is optional structured authoring attribution, not the lesson
-  footnote. Prefer \`{ contributors: ["Cursor", "Jane Doe"] }\`; the server
-  stamps a generative contributor from the MCP call-frame host on draft
-  create/save when it can identify one. Do not write learningIntroduction.credit;
-  the player byline is derived from provenance. Do not put AI credit in
-  citations.
-- Known AI host names
-  (authoringHosts.js) are inferred as generative; other names as human.
-  Storage keeps names (+ collaboration); kind is omitted when derivable and
-  provider is never stored, so draft reads stay cheap. Collaboration defaults
-  (human / ai / aiPrimary for mixed); set
-  \`collaboration: "humanPrimary"\` when a human has taken editorial lead.
-  Optional \`reviewedBy\` is a human-owned reviewer name for the lesson
-  byline, not a contributor and not a sign-off. Leave it unset unless a real
-  human reviewer exists. Do not invent a reviewer.
-  Do not invent humans, write byline strings, or add roles/scopes/dates.
-  Omit provenance when unsure. The server may already stamp a generative
-  contributor from the MCP host.
+- Do not submit \`provenance\`, \`creator\`, \`license\`, or \`derivedFrom\` in
+  MCP puzzle documents. They are protected metadata outside the agent authoring
+  contract; the server preserves existing values and records an identifiable
+  MCP client when possible. Human editorial workflows manage attribution and
+  rights metadata. Do not invent people, write byline strings, or add
+  roles/scopes/dates. Do not put AI credit in citations.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
@@ -404,9 +390,9 @@ gates: revisit any phase whenever that part of the puzzle needs more work.`;
 
 const CORE_PHASE_GUIDANCE = `## Core and research pass
 
-- Set puzzleKind to reflect the requested authored type. It is content
-  metadata, separate from the taxonomy category and lensMode; use the
-  canonical schema for its valid values.
+- Omit puzzleKind for the default topic-based kind. For a specialized type,
+  follow the selected profile and record its authored type explicitly. It is
+  content metadata, separate from taxonomy category and lensMode.
 - Before shaping a gap-fill draft, call search_puzzles with 2-3 planned
   anchor terms scoped to the target category. If an existing puzzle already
   covers the distinction, extend or relate instead of opening a parallel board.
@@ -500,8 +486,8 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   shows title; do not repeat it as the first line. Do not write the
   two-character sequence backslash-n; the tool serializer encodes newlines. A
   body stored as one line with \`\\n\` tokens renders as a single paragraph.
-  learningIntroduction.credit is a human-owned lesson byline; leave it unset.
-  Do not put credit in content.text.
+  Do not include the human-managed legacy field learningIntroduction.credit.
+  Do not put byline text in content.text.
   Never add dateCreated, dateModified, version, or
   learningIntroduction.revision; those are infrastructure-derived values.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
@@ -512,14 +498,13 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
 const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 
 - Add only useful discovery and stewardship metadata: tags, secondary category
-  assignments, level, related puzzles, licensing, and language.
+  assignments, level, related puzzles, and language.
   Most are optional; omission is better than filler. The server supplies
-  timestamps, revision metadata, and contributor provenance; this pass does
-  not author provenance.
-- Do not write learningIntroduction.credit; the lesson byline is derived from
-  provenance (humans may override collaboration and name a real reviewer).
-  Do not invent a reviewer name. Do not treat roles or per-scope assistance
-  entries as required publication metadata.
+  timestamps, revision metadata, and MCP-client attribution; protected
+  provenance and rights metadata are not authored in this pass.
+- Do not include learningIntroduction.credit, provenance, creator, license, or
+  derivedFrom in an MCP document. Do not invent a reviewer name or treat roles
+  or per-scope assistance entries as publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse
@@ -920,8 +905,8 @@ not infer its absence from puzzles/categories.js or another Git checkout, and
 do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
 Drafts may be temporarily invalid. Save with save_puzzle_draft, then
-validate and address every error. Do not write learningIntroduction.credit;
-human-owned attribution is supplied separately when needed.
+validate and address every error. MCP maintains protected attribution and
+editorial metadata outside the agent document; existing values are preserved.
 Set stable category ids in category / categories / subcategories on the puzzle document. Use
 create_category or update_category with publish_to_authoring=true to publish the
 category document before the puzzle references it. Add or remove catalogue membership
@@ -950,10 +935,9 @@ not infer its absence from puzzles/categories.js or another Git checkout, and
 do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
 Drafts may be temporarily invalid. Retrieve the latest draft, save with
-expected_revision, then validate and address every error.
-When you draft or materially regenerate content with generative AI, do not
-write learningIntroduction.credit; human-owned attribution is supplied
-separately when needed.
+expected_revision, then validate and address every error. MCP maintains
+protected attribution and editorial metadata outside the agent document;
+existing values are preserved.
 Set stable category ids in category / categories / subcategories on the puzzle document. Use
 create_category or update_category with publish_to_authoring=true to publish the
 category document before the puzzle references it; its optional domain must be one

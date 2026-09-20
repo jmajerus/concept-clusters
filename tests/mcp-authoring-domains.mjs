@@ -80,8 +80,7 @@ export async function run() {
             fact: "Shared fact",
             relationKind: "contrast"
           }],
-          lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }],
-          provenance: { contributors: ["Jane Doe"] }
+          lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }]
         }
       }
     });
@@ -154,7 +153,7 @@ export async function run() {
     assert.equal(complete.puzzleKind, "vocabulary-context");
     assert.equal(complete.bridges[0].fact, "Shared fact");
     assert.equal(complete.bridges[0].relationKind, "continuity");
-    assert.equal(complete.provenance.collaboration, "human");
+    assert.equal(complete.provenance, undefined);
 
     const rejected = await session.request("tools/call", {
       name: "save_puzzle_draft",

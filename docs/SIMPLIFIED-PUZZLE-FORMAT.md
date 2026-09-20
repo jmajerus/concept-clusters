@@ -1,17 +1,17 @@
 # Simplified puzzle format
 
-This is the only input format for the authoring MCP tools
-(`create_puzzle_draft`, `save_puzzle_draft`), and
-the canonical shape of everything downstream of them: drafts,
+This is the input format for the authoring MCP tools
+(`create_puzzle_draft`, `save_puzzle_draft`) and the canonical simplified
+content shape downstream of them: drafts,
 `content/puzzles/*.ccpuzzle.json` files, and generated `puzzles/**/*.js`
-modules. It's the same puzzle content a `puzzles/*.js` module already
-carries, minus the identity-bookkeeping problem JSON-LD's `@id`/`@type`
-ceremony has -- not a cut-down subset of what a puzzle can express.
-Everything a puzzle's *content* can do, this format can author:
+modules. Protected provenance and human-managed editorial metadata may also
+exist in stored documents, but are intentionally outside the MCP agent
+projection and preserved by the authoring server. It's the same puzzle
+content a `puzzles/*.js` module already carries, minus the identity-bookkeeping
+problem JSON-LD's `@id`/`@type` ceremony has -- not a cut-down subset of what a
+puzzle can express. Everything a puzzle's *content* can do, this format can author:
 multi-cluster bridges, bridge direction, ideal terms, all three lens modes,
-related puzzles, learning introductions, and provenance.
-See "What's authored elsewhere" at the bottom for the one thing that
-genuinely doesn't fit here.
+related puzzles, and learning introductions.
 
 `document` in those tools accepts this format. A document with a top-level
 `@context` belongs to the explicit JSON-LD interchange tools, not to the
@@ -57,7 +57,6 @@ conversion, if this puzzle is ever exported for portable interchange (see
   "id": "cognitive-load-theory",
   "title": "Cognitive Load Theory",
   "category": "cognitive-science",
-  "puzzleKind": "topic-based",
   "clusters": [
     {
       "id": "intrinsic-load",
@@ -92,8 +91,9 @@ publication all work from directly, with no JSON-LD conversion in between.
 
 **Puzzle** — `id`, `title`, `category` required. `puzzleKind` records the
 authored type, independently of category and `lensMode`: `topic-based`,
-`trivia-quiz`, or `vocabulary-context`. Declare it on new documents; omission
-is accepted for legacy puzzles. `categories` (array,
+`trivia-quiz`, or `vocabulary-context`. Omit it for the default
+`topic-based` kind; set it explicitly for the two specialized kinds.
+`categories` (array,
 primary first), `subcategories` (`{categoryId: subcategoryId}`), `tags`,
 `info` (string, or `{text?, links?, citations?}` at puzzle
 level; nested info is `{text?, links?}`) are
@@ -108,10 +108,12 @@ optional, as are:
   title?, summary?, estimatedMinutes?, content: {text}, links?:
   (same shape as info.links), citations?}`. Nested cluster/term/bridge `info` is
   `{text?, links?}` — bibliography stays on the puzzle.
-- `provenance` (optional structured authoring attribution; see
-  `get_authoring_guidance` for when to set this).
-- Optional publication metadata: `creator`, `license`, `derivedFrom`, and
-  `language`. These are editorial fields, not repository lifecycle state.
+- `language` (optional publication metadata).
+
+The MCP agent schema does not include `provenance`, `creator`, `license`,
+`derivedFrom`, or the legacy `learningIntroduction.credit` byline. The server
+preserves existing values and stamps recognized MCP clients where possible;
+human editorial workflows maintain attribution and rights information.
 
 The authoring document does not contain `dateCreated`, `dateModified`,
 `version`, or a learning-introduction `revision`. Timestamps, revision tokens,

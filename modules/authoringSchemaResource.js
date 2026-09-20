@@ -2,6 +2,7 @@ import * as z from "zod/v4";
 import {
   AUTHORING_PHASE_PASSES,
   AUTHORING_PHASES,
+  MCP_EXCLUDED_ROOT_FIELDS,
   assertPhasePassesConsistent
 } from "./authoringFieldOwnership.js";
 import {
@@ -14,7 +15,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.20.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.21.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
@@ -42,12 +43,18 @@ const generatedSimplifiedPuzzleSchema = z.toJSONSchema(SimplifiedPuzzleInputSche
 // limit rather than a rendering switch.
 const generatedAuthoringProperties = Object.fromEntries(
   Object.entries(generatedSimplifiedPuzzleSchema.properties)
-    .filter(([name]) => name !== "large")
+    .filter(([name]) => name !== "large" && !MCP_EXCLUDED_ROOT_FIELDS.has(name))
 );
+if (generatedAuthoringProperties.learningIntroduction?.properties) {
+  generatedAuthoringProperties.learningIntroduction = structuredClone(
+    generatedAuthoringProperties.learningIntroduction
+  );
+  delete generatedAuthoringProperties.learningIntroduction.properties.credit;
+}
 export const SIMPLIFIED_PUZZLE_SCHEMA = Object.freeze({
   ...generatedSimplifiedPuzzleSchema,
   description:
-    "Complete simplified puzzle authoring contract. Use provenance for attribution; legacy attribution is folded by the compatibility boundary and is not an authoring field. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
+    "MCP agent authoring contract for puzzle content and pedagogy. Protected attribution and human-managed editorial metadata are maintained outside this document; language remains optional authored metadata. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
   // Zod deliberately keeps these input fields permissive so a legacy title
   // can be canonicalized before parsing. The discoverable authoring contract
   // should nevertheless teach clients to send the new stable-id shape.

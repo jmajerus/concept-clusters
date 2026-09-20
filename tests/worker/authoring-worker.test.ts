@@ -203,6 +203,20 @@ describe("hosted authoring Worker", () => {
       result: { contents: Array<{ text: string }> };
     };
     const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      expect(resourceSchema.properties[field]).toBeUndefined();
+    }
+    for (const field of [
+      "dateCreated", "dateModified", "version", "createdAt", "updatedAt",
+      "validatedAt", "publicationState", "owner", "revision"
+    ]) {
+      expect(resourceSchema.properties[field]).toBeUndefined();
+    }
+    expect(resourceSchema.properties.language).toBeDefined();
+    expect(resourceSchema.properties.learningIntroduction.properties.credit)
+      .toBeUndefined();
+    expect(resourceSchema.properties.learningIntroduction.properties.revision)
+      .toBeUndefined();
     expect(resourceSchema.properties.bridges.items.properties.termRole)
       .toBeUndefined();
     expect(resourceSchema.properties.large)
@@ -225,6 +239,7 @@ describe("hosted authoring Worker", () => {
             required: string[];
             properties: Record<string, unknown> & {
               bridges: { items: { properties: Record<string, unknown> } };
+              learningIntroduction: { properties: Record<string, unknown> };
             };
           };
         };
@@ -235,6 +250,14 @@ describe("hosted authoring Worker", () => {
       .toBe(schemaResource?.uri);
     expect(authoringSchema.result.structuredContent.schema.properties.bridges
       .items.properties.termRole).toBeUndefined();
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      expect(authoringSchema.result.structuredContent.schema.properties[field])
+        .toBeUndefined();
+    }
+    expect(authoringSchema.result.structuredContent.schema.properties.language)
+      .toBeDefined();
+    expect(authoringSchema.result.structuredContent.schema.properties.learningIntroduction
+      .properties.credit).toBeUndefined();
     expect(authoringSchema.result.structuredContent.schema.required)
       .not.toContain("bridges");
 
@@ -242,6 +265,7 @@ describe("hosted authoring Worker", () => {
       phase: string;
       complete: boolean;
       preserveExisting: boolean;
+      domain?: string;
       schema: {
         description: string;
         properties: Record<string, {
@@ -276,6 +300,10 @@ describe("hosted authoring Worker", () => {
       .toBeDefined();
     expect(phaseSchemas.pedagogy.schema.properties.lenses).toBeDefined();
     expect(phaseSchemas.publication.schema.properties.provenance).toBeUndefined();
+    for (const field of ["creator", "license", "derivedFrom"]) {
+      expect(phaseSchemas.publication.schema.properties[field]).toBeUndefined();
+    }
+    expect(phaseSchemas.publication.schema.properties.language).toBeDefined();
     expect(phaseSchemas.publication.domain).toBe("pedagogy");
     expect(phaseSchemas.core.domain).toBe("content");
     expect(phaseSchemas.core.schema.properties.puzzleKind).toBeDefined();
@@ -438,7 +466,9 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/two-character sequence/);
     expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction\.credit/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/provenance is optional structured authoring attribution/);
+      .toMatch(/Do not submit.*provenance.*creator.*license.*derivedFrom/s);
+    expect(guidance.result.structuredContent.markdown)
+      .not.toMatch(/provenance is optional structured authoring attribution/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
     expect(guidance.result.structuredContent.markdown)
@@ -851,7 +881,7 @@ describe("hosted authoring Worker", () => {
     expect(brokenValidation.result.structuredContent.flags).toEqual([]);
   });
 
-  it("retains server-managed provenance when an MCP save omits it", async () => {
+  it("hides protected metadata from MCP and preserves it when an MCP save replaces content", async () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const document = {
       id: "retained-provenance-fixture",
@@ -862,6 +892,15 @@ describe("hosted authoring Worker", () => {
         { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
       ],
       bridges: [],
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "A short human-authored introduction." },
+        credit: "Curriculum team acknowledgement"
+      },
+      creator: "Human creator",
+      license: "CC-BY-4.0",
+      derivedFrom: "source-puzzle",
+      language: "en",
       provenance: { collaboration: "ai", contributors: [{ name: "Claude" }] }
     };
     await repository.create({
@@ -870,29 +909,140 @@ describe("hosted authoring Worker", () => {
       actor: { subject: "local-author" }
     });
 
-    // A client that has not received optional provenance sends its otherwise
-    // complete document back without it. That must not mean "delete credit".
-    const { provenance: _ignored, ...withoutProvenance } = document;
-    const saved = await rpc({
+    const rejectedCreate = await rpc({
       jsonrpc: "2.0",
-      id: 30,
+      id: "reject-protected-create",
+      method: "tools/call",
+      params: {
+        name: "create_puzzle_draft",
+        arguments: {
+          draft_id: "mcp-protected-create-fixture",
+          document: {
+            id: "mcp-protected-create-fixture",
+            title: "Protected create fixture",
+            category: "Science",
+            clusters: [],
+            bridges: [],
+            license: "MIT"
+          }
+        }
+      }
+    });
+    const rejectedCreatePayload = await rpcJson(rejectedCreate) as {
+      result: { isError?: boolean; content: Array<{ text: string }> };
+    };
+    expect(rejectedCreatePayload.result.isError).toBe(true);
+    expect(rejectedCreatePayload.result.content[0].text).toContain("license");
+
+    const loaded = await rpc({
+      jsonrpc: "2.0",
+      id: 29,
+      method: "tools/call",
+      params: {
+        name: "get_puzzle_draft",
+        arguments: { draft_id: "retained-provenance-fixture" }
+      }
+    });
+    type AgentDocument = Record<string, unknown> & {
+      learningIntroduction: Record<string, unknown>;
+    };
+    const loadedPayload = await rpcJson(loaded) as {
+      result: { structuredContent: { draft: { revision: number; document: AgentDocument } } };
+    };
+    const loadedDraft = loadedPayload.result.structuredContent.draft;
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      expect(loadedDraft.document[field]).toBeUndefined();
+    }
+    expect(loadedDraft.document.language).toBe("en");
+    expect(loadedDraft.document.learningIntroduction.credit).toBeUndefined();
+
+    const protectedFields: Array<[string, unknown]> = [
+      ["provenance", document.provenance],
+      ["creator", document.creator],
+      ["license", document.license],
+      ["derivedFrom", document.derivedFrom]
+    ];
+    for (const [field, value] of protectedFields) {
+      const rejected = await rpc({
+        jsonrpc: "2.0",
+        id: `reject-${field}`,
+        method: "tools/call",
+        params: {
+          name: "save_puzzle_draft",
+          arguments: {
+            draft_id: "retained-provenance-fixture",
+            expected_revision: loadedDraft.revision,
+            document: { ...loadedDraft.document, [field]: value }
+          }
+        }
+      });
+      const rejectedPayload = await rpcJson(rejected) as {
+        result: { isError?: boolean; content: Array<{ text: string }> };
+      };
+      expect(rejectedPayload.result.isError).toBe(true);
+      expect(rejectedPayload.result.content[0].text).toContain(field);
+    }
+    const rejectedCredit = await rpc({
+      jsonrpc: "2.0",
+      id: "reject-credit",
       method: "tools/call",
       params: {
         name: "save_puzzle_draft",
         arguments: {
           draft_id: "retained-provenance-fixture",
-          expected_revision: 1,
-          document: { ...withoutProvenance, title: "Saved without provenance" }
+          expected_revision: loadedDraft.revision,
+          document: {
+            ...loadedDraft.document,
+            learningIntroduction: {
+              ...loadedDraft.document.learningIntroduction,
+              credit: "By an agent"
+            }
+          }
+        }
+      }
+    });
+    const rejectedCreditPayload = await rpcJson(rejectedCredit) as {
+      result: { isError?: boolean; content: Array<{ text: string }> };
+    };
+    expect(rejectedCreditPayload.result.isError).toBe(true);
+    expect(rejectedCreditPayload.result.content[0].text)
+      .toContain("learningIntroduction.credit");
+
+    const saved = await rpc({
+      jsonrpc: "2.0",
+      id: 31,
+      method: "tools/call",
+      params: {
+        name: "save_puzzle_draft",
+        arguments: {
+          draft_id: "retained-provenance-fixture",
+          expected_revision: loadedDraft.revision,
+          document: { ...loadedDraft.document, title: "Saved without protected metadata" }
         }
       }
     });
     expect(saved.status).toBe(200);
     const payload = await rpcJson(saved) as {
-      result: { structuredContent: { draft: { document: { provenance?: unknown } } } };
+      result: { structuredContent: { draft: { document: AgentDocument } } };
     };
-    expect(payload.result.structuredContent.draft.document.provenance).toEqual(
-      { collaboration: "ai", contributors: [{ name: "Claude" }] }
-    );
+    const returnedDocument = payload.result.structuredContent.draft.document;
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      expect(returnedDocument[field]).toBeUndefined();
+    }
+    expect(returnedDocument.learningIntroduction.credit).toBeUndefined();
+    expect(returnedDocument.language).toBe("en");
+
+    const stored = await repository.get({
+      draftId: "retained-provenance-fixture",
+      actor: { subject: "local-author" }
+    });
+    expect(stored.document.creator).toBe("Human creator");
+    expect(stored.document.license).toBe("CC-BY-4.0");
+    expect(stored.document.derivedFrom).toBe("source-puzzle");
+    expect(stored.document.provenance).toEqual(document.provenance);
+    expect(stored.document.learningIntroduction.credit)
+      .toBe("Curriculum team acknowledgement");
+    expect(stored.document.language).toBe("en");
   });
 
   it("materializes authoring domains, reads legacy simplified rows, and rejects JSON-LD", async () => {

@@ -31,6 +31,7 @@ import {
   projectAuthoredDocument,
   stripSystemAuthoredMetadata
 } from "./authoringDomains.js";
+import { MCP_EXCLUDED_ROOT_FIELDS } from "./authoringFieldOwnership.js";
 
 export { createPuzzleSkeleton };
 
@@ -258,12 +259,18 @@ export function documentForMcp(document, options = {}) {
   }
   const result = { ...authored };
   delete result.large;
+  for (const key of MCP_EXCLUDED_ROOT_FIELDS) delete result[key];
+  if (result.learningIntroduction && typeof result.learningIntroduction === "object" &&
+      !Array.isArray(result.learningIntroduction)) {
+    const introduction = { ...result.learningIntroduction };
+    delete introduction.credit;
+    result.learningIntroduction = introduction;
+  }
   return result;
 }
 
-// Focused MCP domain projection. The complete document path remains the
-// compatibility contract; a domain projection is an explicit opt-in that
-// keeps protected provenance/system data out of the agent's context.
+// Focused MCP domain projection. Both complete and focused projections keep
+// protected attribution/editorial and system metadata out of agent context.
 export function documentForMcpDomain(document, domain, options = {}) {
   const authored = documentForEditor(document, options);
   const projection = projectAuthoredDocument(authored, domain);

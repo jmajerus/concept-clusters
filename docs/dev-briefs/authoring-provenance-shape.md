@@ -1,9 +1,9 @@
 # Authoring provenance shape
 
-**Status: implemented in schema/runtime as optional `provenance`; the active
-simplified/MCP contract is provenance-only. JSON-LD remains a future
-interchange format, while current draft authoring/storage uses simplified
-documents directly.**
+**Status: implemented in the internal schema/runtime as optional `provenance`.
+The current MCP agent-facing schema omits it: the server stamps an identifiable
+MCP client where possible, while human editorial workflows maintain or correct
+document attribution. JSON-LD remains an explicit interchange format.**
 
 Compact structured authoring provenance for human and generative-AI input to a
 digital work product (Concept Clusters puzzles first). The saved shape is the
@@ -24,7 +24,7 @@ Axis 2 — collaboration   how human and AI relate (one of four modes)
 ```
 
 ```js
-// Agent-cheap write (kinds inferred on read):
+// Human/editorial update (kinds inferred on read):
 provenance: { contributors: ["Cursor", "Jane Doe"] }
 
 // Stored / canonical form (lean — kind inferred when known):
@@ -37,11 +37,12 @@ provenance: {
 }
 ```
 
-The entire `provenance` object is optional on the work product.
+The entire `provenance` object is optional on the work product. It remains in
+the internal document model, but MCP agents neither receive nor author it.
 
 ### Axis 1 — contributors
 
-Agents may send **bare names** (cheapest):
+Human/editorial workflows may enter **bare names** (cheapest):
 
 ```js
 contributors: ["Cursor", "Jane Doe"]
@@ -68,9 +69,9 @@ participate in stamping, storage keying, API responses, or byline rendering,
 and neither is persisted on a puzzle document or assistance-stamp audit
 record.
 
-**Storage stays lean** so `get_puzzle_draft` round-trips stay cheap: omit
-`kind` when it matches inference. Keep an explicit `kind` only to override
-inference; model detail is embedded in the contributor name when known.
+**Storage stays lean:** omit `kind` when it matches inference. Keep an explicit
+`kind` only to override inference; model detail is embedded in the contributor
+name when known.
 
 ### Axis 2 — collaboration mode
 
@@ -80,9 +81,9 @@ Optional on write. When omitted, inferred from contributor kinds:
 |---|---|
 | humans only | `human` |
 | generative only | `ai` |
-| both | `aiPrimary` (agent-from-scratch default; set `humanPrimary` when a human leads) |
+| both | `aiPrimary` (server-stamped AI-draft default; human editors may set `humanPrimary` when a human leads) |
 
-Set `collaboration: "aiPrimary"` explicitly when AI was the primary producer.
+Human editors may set `collaboration: "aiPrimary"` explicitly when AI was the primary producer.
 Stored form always includes collaboration + contributor names; kinds are
 derived on read for L1/L2 and validation.
 
@@ -100,7 +101,7 @@ Never invent a placeholder person or system to satisfy a mode.
 |---|---|---|---|
 | **L0** | Minimal UI | No | Omit |
 | **L1** | Lesson / player byline | No — app derives | Short string from mode + names (see below) |
-| **L2** | Admin / review / **agent contract** | **Yes — only** | Show `collaboration` + contributor names/kinds; no dates, roles, or scopes |
+| **L2** | Admin / review | No — human/editorial only | Show `collaboration` + contributor names/kinds; no dates, roles, or scopes |
 | **L3** | Export / JSON-LD / audit | No | Full object; optional additive detail; dates only if stamped |
 
 Richness is **derived from present fields**, not a stored tier flag. Callers may
@@ -125,7 +126,19 @@ When the author has set optional `reviewedBy`, L1 appends
 inference, and it is not a sign-off the reviewer has to click. Authors set
 it on `/admin/drafts`. Agents must not invent a reviewer name.
 
-## Agent contract = L2 only (cheap writes)
+## MCP agent boundary (current)
+
+The shapes below describe stored provenance and human/editorial maintenance;
+they are not part of the MCP puzzle document. MCP reads omit `provenance`, and
+MCP writes cannot supply or replace it. The server records an identifiable
+client where possible and preserves existing attribution; `/admin/drafts` is
+the human surface for corrections. MCP agents also do not receive or write the
+legacy `learningIntroduction.credit` byline or protected `creator`, `license`,
+and `derivedFrom` fields. Those fields remain separate from `provenance` in
+stored documents; this boundary change does not migrate them into a new
+settings object. `language` remains agent-authored metadata.
+
+## Human/editorial maintenance
 
 Prefer:
 
@@ -133,14 +146,14 @@ Prefer:
 provenance: { contributors: ["Cursor", "Jane Doe"] }
 ```
 
-Agents may:
+Human editors may:
 
 - List contributor names (strings); kinds are inferred from known AI hosts.
 - Omit `collaboration` unless they need `humanPrimary` (human editorial lead).
   Mixed names default to `aiPrimary`.
 - Leave `provenance` unset when unsure.
 
-Agents must not:
+Do not ask MCP agents to:
 
 - Choose L0 / L1 / L3 or byline templates.
 - Write player-facing byline strings (today’s `learningIntroduction.credit`).
@@ -149,8 +162,9 @@ Agents must not:
 - Emit role/scope contribution matrices.
 
 Prefer server host-stamps to seed a generative contributor; add human names
-when known. On `/admin/drafts`, humans override `collaboration` (e.g. to
-`humanPrimary`); that refresh also rewrites the lesson byline from L1.
+when known through `/admin/drafts`. Human editors may override
+`collaboration` (e.g. to `humanPrimary`); that refresh also rewrites the lesson
+byline from L1.
 
 ## L3 optional detail (not agent surface)
 
@@ -180,7 +194,8 @@ Intended end state:
 | Today’s `learningIntroduction.credit` | **Retire** after interchange bump (legacy L1 string) |
 | Retired client-attribution array | **Folded into** generative `contributors` (+ mode); no longer part of current documents |
 
-New authoring and MCP guidance speaks only in `provenance` terms. The corpus
+Current MCP guidance identifies provenance as outside the agent contract;
+human/editorial guidance describes the internal provenance shape. The corpus
 canonicalization pass has completed for the retired client-attribution array;
 current documents no longer carry it, and current authoring rejects it rather
 than treating it as a second input contract. JSON-LD remains available only
@@ -211,9 +226,9 @@ through the explicit interchange boundary.
 
 ## Adoption sequence
 
-1. **This brief + optional field** — vocabulary locked; `provenance` accepted
-   on simplified/runtime documents; MCP stamps generative contributors;
-   agents taught L2 only in publication/pedagogy guidance.
+1. **This brief + optional field** — vocabulary locked; internal simplified
+   documents retain `provenance`; MCP stamps identifiable clients and keeps
+   provenance outside agent read/write payloads.
 2. **Canonicalize fold (completed)** — `canonicalizeDocumentProvenance` and
    the corpus migration moved any retired client-attribution data that could
    be recovered into `provenance`. When L1 can render, **deletes** stored
