@@ -43,7 +43,7 @@ export const PuzzleKindSchema = z.enum([
   "trivia-quiz",
   "vocabulary-context"
 ]).describe(
-  "Authored puzzle type, independent of category and lensMode. Declare it on new documents; omission is accepted for legacy puzzles."
+  "Authored puzzle type, independent of category and lensMode. Omit for the default topic-based kind; explicitly use trivia-quiz for a trivia quiz or vocabulary-context for a near-synonym usage puzzle."
 );
 
 // A displayed term (cluster seed/floating term, bridge term) becomes a

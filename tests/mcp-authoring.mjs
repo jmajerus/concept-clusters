@@ -188,6 +188,11 @@ export async function run() {
         .description,
       /catalogue and category/
     );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "get_authoring_guidance")
+        .description,
+      /omit puzzleKind for the default topic-based type and set it only for a specialized authored type/i
+    );
 
     const resourceList = await request("resources/list", {});
     const schemaResource = resourceList.result.resources.find(resource =>
@@ -200,6 +205,30 @@ export async function run() {
       uri: schemaResource.uri
     });
     const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      assert.equal(
+        resourceSchema.properties[field],
+        undefined,
+        `${field} must stay outside the MCP puzzle schema`
+      );
+    }
+    for (const field of [
+      "dateCreated", "dateModified", "version", "createdAt", "updatedAt",
+      "validatedAt", "publicationState", "owner", "revision"
+    ]) {
+      assert.equal(resourceSchema.properties[field], undefined);
+    }
+    assert.ok(resourceSchema.properties.language, "language remains agent-authored");
+    assert.equal(
+      resourceSchema.properties.learningIntroduction.properties.credit,
+      undefined,
+      "human-managed lesson credit must stay outside the MCP schema"
+    );
+    assert.equal(
+      resourceSchema.properties.learningIntroduction.properties.revision,
+      undefined,
+      "lesson progress revision is infrastructure-managed"
+    );
     assert.equal(
       resourceSchema.properties.bridges.items.properties.termRole,
       undefined,
@@ -238,6 +267,15 @@ export async function run() {
       arguments: {}
     });
     assert.equal(authoringSchema.result.structuredContent.version, "1");
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      assert.equal(authoringSchema.result.structuredContent.schema.properties[field], undefined);
+    }
+    assert.ok(authoringSchema.result.structuredContent.schema.properties.language);
+    assert.equal(
+      authoringSchema.result.structuredContent.schema.properties.learningIntroduction
+        .properties.credit,
+      undefined
+    );
     assert.equal(
       authoringSchema.result.structuredContent.resourceUri,
       schemaResource.uri
@@ -305,10 +343,9 @@ export async function run() {
         .properties.text.description,
       /real line breaks/
     );
-    assert.match(
-      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties
-        .credit.description,
-      /must not write this field/
+    assert.equal(
+      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.credit,
+      undefined
     );
     assert.equal(phasedSchemas.core.schema.properties.large, undefined);
     assert.equal(phasedSchemas.review.schema.properties.large, undefined);
@@ -322,6 +359,10 @@ export async function run() {
     assert.equal(phasedSchemas.publication.domain, "pedagogy");
     assert.equal(phasedSchemas.review.domain, undefined);
     assert.equal(phasedSchemas.publication.schema.properties.provenance, undefined);
+    for (const field of ["creator", "license", "derivedFrom"]) {
+      assert.equal(phasedSchemas.publication.schema.properties[field], undefined);
+    }
+    assert.ok(phasedSchemas.publication.schema.properties.language);
     assert.ok(phasedSchemas.publication.schema.properties.relatedPuzzles);
     assert.match(phasedSchemas.core.schema.description, /write domain "content"/);
     assert.match(phasedSchemas.review.schema.description, /domain=pedagogy/);
@@ -420,7 +461,8 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(guidance.result.structuredContent.markdown, /two-character sequence/);
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
-    assert.match(guidance.result.structuredContent.markdown, /provenance is optional structured authoring attribution/);
+    assert.match(guidance.result.structuredContent.markdown, /Do not submit.*provenance.*creator.*license.*derivedFrom/s);
+    assert.doesNotMatch(guidance.result.structuredContent.markdown, /provenance is optional structured authoring attribution/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /boardOrder.*external metadata/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);

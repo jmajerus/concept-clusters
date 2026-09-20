@@ -306,10 +306,10 @@ on it; otherwise prefer `recommended` or `optional`.
 
 Instructional content should point toward richer resources rather than trying
 to teach everything inline. Preserve exact citations discovered during
-research instead of planning to reconstruct them later. Keep authoring
-assistance as compact attribution in the puzzle-level `provenance` shape—not
-an edit log or a citation. The server may add the identified MCP host; see
-[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
+research instead of planning to reconstruct them later. MCP agents do not
+receive or write puzzle-level `provenance`; the server stamps an identifiable
+MCP client where possible, and human editors correct attribution when needed.
+See [authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
 
 See [learning introductions](AUTHORING-REFERENCE.md#learning-introductions)
 and [provenance](AUTHORING-REFERENCE.md#provenance).
@@ -360,8 +360,9 @@ Before validation and human review, check the complete puzzle as one lesson:
 - The complete board stays at or below 25 total nodes; layout is derived.
 - The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
-- `provenance` reflects known human and generative contributors; leave it
-  unset when attribution is unknown.
+- Do not include provenance or human-managed byline/rights metadata in an MCP
+  document. Human editors can review attribution separately; direct repository
+  work should preserve known provenance rather than invent it.
 
 Then run `validate_puzzle_draft` for MCP drafts or `node validate.mjs` for a
 direct repository edit. Structural validation is necessary, but the judgments

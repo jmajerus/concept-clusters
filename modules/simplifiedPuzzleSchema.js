@@ -169,10 +169,10 @@ const LensSchema = z.object({
   options: z.array(LensOptionSchema).optional()
 }).strict();
 
-// Two-axis authoring provenance (docs/dev-briefs/authoring-provenance-shape.md).
-// Agents may send bare contributor names; kinds and collaboration are inferred
-// (known AI hosts from authoringHosts.js → generative; mixed → aiPrimary).
-// Normalize persists a lean shape (name + non-derivable overrides only).
+// Two-axis stored-document provenance (docs/dev-briefs/authoring-provenance-shape.md).
+// The MCP authoring schema filters this field out; infrastructure stamps a
+// recognized client and human/editorial paths maintain attribution. Normalize
+// persists a lean shape (name + non-derivable overrides only).
 const ProvenanceContributorInputSchema = z.union([
   z.string().min(1),
   z.object({
@@ -197,8 +197,8 @@ const ProvenanceSchema = z.object({
   // them if they ever reach it directly -- but canonicalizeDocumentProvenance
   // (authoredDocumentForSchema, ahead of every parse of this schema) already
   // folds any surviving top-level value onto the sole generative contributor
-  // and strips it before this schema ever sees it, so an older agent call or
-  // previously-stored document still round-trips without failing validation.
+  // and strips it before this schema ever sees it, so a legacy or previously
+  // stored document still round-trips without failing validation.
   speed: z.enum(["fast", "normal", "max", "ultracode"]).optional(),
   reviewedBy: z.string().max(AUTHORING_PROVENANCE_REVIEWED_BY_MAX).optional()
     .describe("Author-owned reviewer name for the lesson byline. Leave unset; the human fills this on the drafts page. Do not invent a reviewer.")
@@ -304,7 +304,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   title: z.string().min(1),
   category: CategoryReferenceSchema,
   puzzleKind: z.enum([...PUZZLE_KINDS]).optional().describe(
-    "Authored puzzle type, independent of category and lensMode. Use topic-based for an ordinary topic-led puzzle, trivia-quiz for a trivia quiz, or vocabulary-context for a near-synonym usage puzzle. Declare the kind for newly authored puzzles; omission is accepted for legacy documents."
+    "Authored puzzle type, independent of category and lensMode. Omit for the default topic-based kind; explicitly use trivia-quiz for a trivia quiz or vocabulary-context for a near-synonym usage puzzle."
   ),
   categories: z.array(CategoryReferenceSchema).optional(),
   subcategories: z.record(CategoryReferenceSchema, SlugSchema).optional(),

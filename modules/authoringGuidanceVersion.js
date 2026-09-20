@@ -89,7 +89,9 @@
 // and factual quiz lenses, independent of the conventional Trivia category.
 // 5.13: same review bar; new documents declare content-owned puzzleKind,
 // independently of taxonomy and lens mode, while legacy omission remains valid.
+// 5.14: topic-based becomes the implicit puzzleKind; MCP omits protected
+// attribution, lesson byline, creator, license, and source-lineage metadata.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 13
+  minor: 14
 });

@@ -62,11 +62,17 @@ should use the schema resource or tool, rather than `tools/list` alone, to
 discover nested authoring fields such as `bridges[].relationKind` and
 `bridges[].direction`.
 Bridge terms are ordinary authored concepts; there is no separate role field.
-Attribution uses optional puzzle-level `provenance`. JSON-LD remains available
-through the explicit interchange CLI, but current draft inputs and D1 rows use
-the simplified shape directly. Repository-owned timestamps, document
-revisions, hashes, status, and lesson-progress fingerprints are generated or
-stored by infrastructure rather than supplied by an agent.
+Puzzle `provenance`, the legacy lesson byline, and human-managed `creator`,
+`license`, and `derivedFrom` fields are outside the MCP document schema. The
+server preserves existing values and stamps a recognized MCP client where
+possible; human editorial workflows handle corrections. They remain separate
+from `provenance` internally; this boundary does not migrate them into a new
+settings object. `language` remains optional agent-authored metadata. JSON-LD
+remains available through the explicit interchange CLI, but current draft
+inputs and D1 rows use the simplified shape directly. Repository-owned
+timestamps, document revisions, hashes, status, and lesson-progress
+fingerprints are generated or stored by infrastructure rather than supplied
+by an agent.
 
 The guidance and schema tools accept an optional `phase`: `core`, `review`,
 `pedagogy`, `publication`, or `complete`. They also accept the optional
@@ -74,11 +80,11 @@ authoring profile: `vocabulary-context` or `trivia-quiz`. An unprofiled
 guidance response is profile-neutral. Supplying a profile selects that
 profile's compact overview for `complete`, or only its focused brief for a
 named phase; it does not append every profile's rules to generic guidance.
-The profile selects guidance; the agent records the authored type in the
-document's `puzzleKind` field (`topic-based`, `trivia-quiz`, or
-`vocabulary-context`). It is independent of taxonomy and lens mode, belongs to
-the existing `content` domain, and creates no new storage projection. Legacy
-documents may omit it. Draft reads and writes also accept an optional
+The profile selects guidance; omit `puzzleKind` for the default `topic-based`
+kind and set it explicitly for `trivia-quiz` or `vocabulary-context`. It is
+independent of taxonomy and lens mode, belongs to the existing `content`
+domain, and creates no new storage projection. Draft reads and writes also
+accept an optional
 `domain`: `content`, `pedagogy`, or the
 backwards-compatible `complete` default. A focused domain is a real write
 boundary, not just prose guidance:
@@ -86,16 +92,16 @@ boundary, not just prose guidance:
 - `domain: "content"` returns the core puzzle document.
 - `domain: "pedagogy"` returns the annotation/learning metadata and a
   read-only `context` containing content needed to refer to it.
-- `domain: "complete"` preserves the existing whole-document contract.
+- `domain: "complete"` preserves the whole authored-content compatibility
+  contract while protected metadata remains hidden and server-preserved.
 
 Focused draft responses carry only `draftId`, `revision`, the selected domain,
-and its document/context. Provenance and system metadata stay outside the
-focused payload. A focused save replaces the selected projection, preserves
-the other domains, materializes the complete document, and then follows the
-same validation/publication path as a complete save. Omitting an optional
-field from the selected projection removes it. The legacy human-owned
-`learningIntroduction.credit` is omitted from pedagogy responses, preserved
-when that introduction remains present, and rejected if supplied explicitly.
+and its document/context. Protected attribution/editorial values and system
+metadata stay outside every agent document. Saves preserve those values while
+replacing authored fields, materialize the complete document, and follow the
+same validation/publication path. Omitting an optional field from the selected
+projection removes it. The legacy human-owned `learningIntroduction.credit`
+is not exposed and is preserved when its introduction remains present.
 `repair: true` is accepted for complete or content saves, not pedagogy saves,
 because it repairs content-domain fields. The save still requires
 `expected_revision`.
@@ -114,8 +120,8 @@ accumulating draft:
    different times: revisiting this phase to add a later introduction must
    preserve lenses already present unless they independently need revision.
 4. `publication` adds only useful discovery and publication metadata
-   (categories, tags, level, related puzzles, license fields). Attribution
-   stays in protected `provenance` and is not part of this phase schema.
+   (categories, tags, level, related puzzles, and language). Attribution and
+   rights metadata stay protected and are not part of the agent schema.
 
 For `profile: "vocabulary-context"`, the core pass treats clusters as tight
 synonym or near-synonym neighborhoods, the review pass tests the nearest

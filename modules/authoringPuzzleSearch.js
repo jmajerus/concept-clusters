@@ -17,7 +17,10 @@ import {
   puzzleMatchRank
 } from "./librarySearch.js";
 import { puzzleSearchTerms } from "./puzzleBrowse.js";
-import { documentForEditor } from "./authoredPuzzleDocument.js";
+import {
+  documentForEditor,
+  redactMcpExcludedDocumentFields
+} from "./authoredPuzzleDocument.js";
 
 const MATCH_KIND = Object.freeze({
   [PUZZLE_MATCH.TITLE]: "title",
@@ -46,7 +49,9 @@ export function puzzleForAuthoringSearch(source, {
   categoryRegistry = null
 } = {}) {
   if (!source || typeof source !== "object") return null;
-  const puzzle = documentForEditor(clone(source), { categoryRegistry });
+  const puzzle = redactMcpExcludedDocumentFields(
+    documentForEditor(clone(source), { categoryRegistry })
+  );
   const puzzleId = id || puzzle.id;
   if (!puzzleId) return null;
   puzzle.id = puzzleId;
