@@ -817,7 +817,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Set profile=vocabulary-context or profile=trivia-quiz to select only that profile's compact overview or focused brief; record the authored type in the document's puzzleKind field. Profiles are independent of category and do not append rules to generic guidance or change the write domain. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
+    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Set profile=vocabulary-context or profile=trivia-quiz to select only that profile's compact overview or focused brief; omit puzzleKind for the default topic-based type and set it only for a specialized authored type. Profiles are independent of category and do not append rules to generic guidance or change the write domain. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
   }, tracked("get_authoring_guidance", safe(async ({ phase, profile }) => success(

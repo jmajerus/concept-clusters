@@ -106,6 +106,31 @@ export async function run() {
   });
   assert.equal(publishedHit.matches[0]?.source, "published");
 
+  const hiddenCreditToken = "zxqv-opaque-credit-search-token";
+  const legacyCreditDrafts = mergeAuthoringSearchPuzzles({
+    drafts: [{
+      draftId: "legacy-credit-search",
+      puzzleId: "legacy-credit-search",
+      document: {
+        id: "legacy-credit-search",
+        title: "Legacy credit search fixture",
+        category: "Science",
+        clusters: [],
+        learningIntroduction: {
+          requirement: "optional",
+          content: { text: "Ordinary lesson content." },
+          credit: `Opaque human byline ${hiddenCreditToken}`
+        }
+      }
+    }]
+  });
+  assert.equal(legacyCreditDrafts[0]?.learningIntroduction?.credit, undefined);
+  const hiddenCreditSearch = searchAuthoringPuzzles(legacyCreditDrafts, CATEGORIES, {
+    query: hiddenCreditToken,
+    fullText: true
+  });
+  assert.deepEqual(hiddenCreditSearch.matches, []);
+
   const renamed = mergeAuthoringSearchPuzzles({
     gitPuzzles: [{
       id: "renamed-search-fixture",

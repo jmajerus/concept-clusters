@@ -188,6 +188,11 @@ export async function run() {
         .description,
       /catalogue and category/
     );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "get_authoring_guidance")
+        .description,
+      /omit puzzleKind for the default topic-based type and set it only for a specialized authored type/i
+    );
 
     const resourceList = await request("resources/list", {});
     const schemaResource = resourceList.result.resources.find(resource =>

@@ -244,20 +244,14 @@ export function documentForEditor(document, { categoryRegistry = null } = {}) {
   return categoryRegistry ? displayPuzzleCategoryTitles(folded, categoryRegistry) : folded;
 }
 
-// MCP authors receive the simplified content shape, not renderer bookkeeping.
-// Keep this projection on the canonical storage side of the boundary: the
-// schema and guidance tell agents to use stable category ids, so an MCP read
-// must not turn those ids back into display titles and then make the next save
-// look like a migration. The web/editor paths use documentForEditor instead.
-// The board-layout flag is derived again on every storage/publication boundary
-// and is intentionally omitted from reads so clients make decisions from the
-// lesson content and the single 25-node hard limit.
-export function documentForMcp(document, options = {}) {
-  const authored = documentForStorage(document, options);
-  if (!authored || typeof authored !== "object" || Array.isArray(authored)) {
-    return authored;
+// Shared MCP field filter for document reads and search inputs. Search keeps
+// the editor's display-category projection, but must not index metadata that
+// document reads redact because full-text matches can return prose snippets.
+export function redactMcpExcludedDocumentFields(document) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    return document;
   }
-  const result = { ...authored };
+  const result = { ...document };
   delete result.large;
   for (const key of MCP_EXCLUDED_ROOT_FIELDS) delete result[key];
   if (result.learningIntroduction && typeof result.learningIntroduction === "object" &&
@@ -267,6 +261,17 @@ export function documentForMcp(document, options = {}) {
     result.learningIntroduction = introduction;
   }
   return result;
+}
+
+// MCP authors receive the simplified content shape, not renderer bookkeeping.
+// Keep the document projection on the canonical storage side of the boundary:
+// the schema and guidance tell agents to use stable category ids, so an MCP
+// read must not turn those ids back to display titles and make the next save
+// look like a migration. The web/editor paths use documentForEditor instead.
+// The derived board-layout flag is intentionally omitted from reads so clients
+// make decisions from lesson content and the single 25-node hard limit.
+export function documentForMcp(document, options = {}) {
+  return redactMcpExcludedDocumentFields(documentForStorage(document, options));
 }
 
 // Focused MCP domain projection. Both complete and focused projections keep
