@@ -250,33 +250,64 @@ const ClusterSchema = z.object({
   name: z.string().min(1),
   color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted.
   fact: z.string().min(1),
-  // Normally exactly two -- the orienting clue pair. A single seed is the
-  // exceptional case, allowed only for a minimum-size two-term cluster
-  // (1 seed + 1 floatingTerm), so that term stays the one unresolved "aha"
-  // instead of collapsing to a fully pre-solved, decorative cluster.
-  seeds: z.array(TermSchema).min(1).max(2),
-  floatingTerms: z.array(TermSchema).min(1).max(5),
-  // Explicit display order override. Authors never set this -- it exists
-  // solely so canonical storage can preserve a cluster's exact term order
-  // when that order doesn't happen to be seeds-then-floatingTerms (true for
-  // puzzles migrated from hand-authored JSON-LD, where seed position within
-  // the visible term list was a deliberate editorial choice). Must be a
-  // reordering of exactly seeds+floatingTerms, checked by puzzleFromSimplified.
+  // Multi-cluster puzzles can ask the player to build groups from seeds and
+  // floating terms. A one-cluster Vocabulary puzzle instead authors its
+  // complete term list directly; the root refinement below selects exactly
+  // one of those shapes based on puzzleKind and cluster count.
+  seeds: z.array(TermSchema).min(1).max(2).optional(),
+  floatingTerms: z.array(TermSchema).min(1).max(5).optional(),
+  // In a one-cluster Vocabulary puzzle this is its complete term list. For
+  // seed/floating shapes it can preserve the display order when it differs
+  // from seeds-then-floatingTerms (notably in migrated JSON-LD); that form
+  // must contain exactly the seed and floating terms, checked by
+  // puzzleFromSimplified.
   terms: z.array(TermSchema).min(2).max(7).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()
-}).strict().refine(
-  cluster => new Set([...cluster.seeds, ...cluster.floatingTerms]).size ===
-    cluster.seeds.length + cluster.floatingTerms.length,
-  { message: "seeds and floatingTerms must not repeat a term" }
-).refine(
+}).strict().superRefine((cluster, context) => {
+  const hasSeeds = cluster.seeds !== undefined;
+  const hasFloatingTerms = cluster.floatingTerms !== undefined;
+  if (hasSeeds !== hasFloatingTerms) {
+    context.addIssue({
+      code: "custom",
+      path: [hasSeeds ? "floatingTerms" : "seeds"],
+      message: "seeds and floatingTerms must be supplied together"
+    });
+    return;
+  }
+  if (!hasSeeds) {
+    if (!cluster.terms) {
+      context.addIssue({
+        code: "custom",
+        path: ["terms"],
+        message: "provide a terms list when seeds and floatingTerms are omitted"
+      });
+    } else if (new Set(cluster.terms).size !== cluster.terms.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["terms"],
+        message: "terms must not repeat a term"
+      });
+    }
+    return;
+  }
+
+  if (new Set([...cluster.seeds, ...cluster.floatingTerms]).size !==
+      cluster.seeds.length + cluster.floatingTerms.length) {
+    context.addIssue({
+      code: "custom",
+      message: "seeds and floatingTerms must not repeat a term"
+    });
+  }
   // A single seed is the minimum-size exception: it only makes sense
-  // alongside exactly one floatingTerm (2 terms total). Two seeds plus a
-  // lone floating term, or one seed plus several floating terms, would
-  // change the seed:floating ratio in ways nobody asked for here.
-  cluster => cluster.seeds.length === 2 || cluster.floatingTerms.length === 1,
-  { message: "a cluster with one seed must have exactly one floatingTerm" }
-);
+  // alongside exactly one floatingTerm (2 terms total).
+  if (cluster.seeds.length === 1 && cluster.floatingTerms.length !== 1) {
+    context.addIssue({
+      code: "custom",
+      message: "a cluster with one seed must have exactly one floatingTerm"
+    });
+  }
+});
 
 // clusters here are the OTHER clusters' string ids (2, or 3 for a ternary
 // bridge), resolved to positional indices by puzzleFromSimplified() below --
@@ -315,7 +346,12 @@ export const SimplifiedPuzzleInputSchema = z.object({
   large: z.boolean().optional().describe(LARGE_DESCRIPTION),
   info: PuzzleInfoValueSchema.optional(),
   unplacedTerms: UnplacedTermsSchema.optional(),
-  clusters: z.array(ClusterSchema).min(2).max(6),
+  // Ordinary topic/trivia sorting needs at least two groups. Vocabulary
+  // contexts may use one tight synonym neighborhood when the lenses carry
+  // the contextual-disambiguation work.
+  clusters: z.array(ClusterSchema).min(1).max(6).describe(
+    "One cluster is allowed only when puzzleKind is vocabulary-context; all other kinds require two to six clusters."
+  ),
   bridges: z.array(BridgeSchema).default([]),
   lenses: z.array(LensSchema).optional(),
   lensMode: z.enum(["sequential", "assignment", "quiz"]).optional(),
@@ -332,7 +368,51 @@ export const SimplifiedPuzzleInputSchema = z.object({
   license: z.string().min(1).optional(),
   derivedFrom: z.string().min(1).optional(),
   language: z.string().min(1).optional()
-}).strict();
+}).strict().superRefine((input, context) => {
+  if (input.puzzleKind !== "vocabulary-context" && input.clusters.length < 2) {
+    context.addIssue({
+      code: "custom",
+      path: ["clusters"],
+      message: "must contain at least two clusters unless puzzleKind is vocabulary-context"
+    });
+  }
+
+  const singleVocabularyCluster = input.puzzleKind === "vocabulary-context" &&
+    input.clusters.length === 1;
+  input.clusters.forEach((cluster, index) => {
+    const hasSeedSplit = cluster.seeds !== undefined || cluster.floatingTerms !== undefined;
+    if (singleVocabularyCluster && hasSeedSplit) {
+      context.addIssue({
+        code: "custom",
+        path: ["clusters", index],
+        message: "a single-cluster vocabulary puzzle uses terms only; omit seeds and floatingTerms"
+      });
+    } else if (!singleVocabularyCluster && !hasSeedSplit) {
+      context.addIssue({
+        code: "custom",
+        path: ["clusters", index],
+        message: "clusters require seeds and floatingTerms except for a single-cluster vocabulary puzzle"
+      });
+    }
+  });
+
+  if (singleVocabularyCluster) {
+    if (input.preSolve !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["preSolve"],
+        message: "preSolve is automatic for a single-cluster vocabulary puzzle; omit it"
+      });
+    }
+    if (input.bridges.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["bridges"],
+        message: "a single-cluster vocabulary puzzle cannot contain bridges"
+      });
+    }
+  }
+});
 
 function isObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -344,6 +424,52 @@ function isObject(value) {
 // jsonLdProfile.js requires it).
 export function isJsonLdShaped(input) {
   return isObject(input) && "@context" in input;
+}
+
+// Older one-cluster Vocabulary documents used the general seeds/floatingTerms
+// shape and could store an explicit preSolve choice. Fold valid instances to
+// the current flat list at compatibility boundaries; the strict input schema
+// itself still requires authors to use `terms` and omit preSolve.
+export function canonicalizeSingleClusterVocabularyShape(document) {
+  if (!isObject(document) || document.puzzleKind !== "vocabulary-context" ||
+      !Array.isArray(document.clusters) || document.clusters.length !== 1) {
+    return document;
+  }
+  const cluster = document.clusters[0];
+  if (!isObject(cluster)) return document;
+  if (Object.hasOwn(document, "preSolve") && typeof document.preSolve !== "boolean") {
+    return document;
+  }
+
+  const hasSeeds = Object.hasOwn(cluster, "seeds");
+  const hasFloatingTerms = Object.hasOwn(cluster, "floatingTerms");
+  let nextCluster = cluster;
+  if (hasSeeds || hasFloatingTerms) {
+    if (!hasSeeds || !hasFloatingTerms || !Array.isArray(cluster.seeds) ||
+        !Array.isArray(cluster.floatingTerms) ||
+        (Object.hasOwn(cluster, "terms") && !Array.isArray(cluster.terms))) {
+      return document;
+    }
+    const members = [...cluster.seeds, ...cluster.floatingTerms];
+    const terms = Object.hasOwn(cluster, "terms") ? cluster.terms : members;
+    const sameMembers = new Set(members).size === members.length &&
+      new Set(terms).size === terms.length &&
+      terms.length === members.length &&
+      members.every(term => terms.includes(term)) &&
+      terms.every(term => members.includes(term));
+    if (!sameMembers) return document;
+    nextCluster = { ...cluster, terms: [...terms] };
+    delete nextCluster.seeds;
+    delete nextCluster.floatingTerms;
+  }
+
+  if (nextCluster === cluster && !Object.hasOwn(document, "preSolve")) return document;
+  const next = {
+    ...document,
+    clusters: nextCluster === cluster ? document.clusters : [nextCluster]
+  };
+  delete next.preSolve;
+  return next;
 }
 
 // `termRole` belonged to an earlier bridge schema. Keep old drafts and
@@ -453,6 +579,8 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
   const categoryFields = canonicalizePuzzleCategoryReferences(input, categoryRegistry);
   const clusterIds = deriveClusterIds(input.clusters);
   const clusterIndexById = new Map(clusterIds.map((id, index) => [id, index]));
+  const singleVocabularyCluster = input.puzzleKind === "vocabulary-context" &&
+    input.clusters.length === 1;
 
   // Collect every explicitly-given color up front so an early cluster never
   // steals a color a later cluster asked for explicitly -- assigning
@@ -464,7 +592,11 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
   let nextAutoColor = 0;
 
   const clusters = input.clusters.map((cluster, index) => {
-    const defaultTerms = [...cluster.seeds, ...cluster.floatingTerms];
+    const isFlatVocabularyCluster = singleVocabularyCluster &&
+      cluster.seeds === undefined && cluster.floatingTerms === undefined;
+    const defaultTerms = isFlatVocabularyCluster
+      ? [...cluster.terms]
+      : [...cluster.seeds, ...cluster.floatingTerms];
     if (cluster.terms) {
       const sameMembers = new Set(cluster.terms).size === defaultTerms.length &&
         defaultTerms.every(term => cluster.terms.includes(term)) &&
@@ -481,13 +613,21 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
       color: cluster.color || availableColors[nextAutoColor++ % availableColors.length],
       fact: cluster.fact,
       terms: cluster.terms ? [...cluster.terms] : defaultTerms,
-      seeds: [...cluster.seeds],
+      // The player runtime's graph representation uses seed nodes as initial
+      // anchors. Single-cluster Vocabulary does not ask the author to choose
+      // those anchors: derive them here, then auto-solve the board before its
+      // contextual lenses begin. puzzleToSimplified collapses this runtime
+      // detail back to the authored `terms` list.
+      seeds: isFlatVocabularyCluster
+        ? defaultTerms.slice(0, defaultTerms.length === 2 ? 1 : 2)
+        : [...cluster.seeds],
       ...(cluster.termInfo ? { termInfo: clone(cluster.termInfo) } : {}),
       ...(cluster.info ? { info: clone(cluster.info) } : {})
     };
   });
 
   const bridges = input.bridges.map(bridge => convertBridge(bridge, clusterIndexById));
+  const automaticallyPreSolved = singleVocabularyCluster && input.lenses?.length > 0;
 
   const learningIntroduction = input.learningIntroduction ? {
     requirement: input.learningIntroduction.requirement,
@@ -519,7 +659,9 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     bridges,
     ...(input.lenses ? { lenses: clone(input.lenses) } : {}),
     ...(input.lensMode ? { lensMode: input.lensMode } : {}),
-    ...(input.preSolve !== undefined ? { preSolve: input.preSolve } : {}),
+    ...(automaticallyPreSolved
+      ? { preSolve: true }
+      : input.preSolve !== undefined ? { preSolve: input.preSolve } : {}),
     ...(input.relatedPuzzles ? { relatedPuzzles: clone(input.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(input.provenance ? { provenance: clone(input.provenance) } : {}),
@@ -572,7 +714,10 @@ export function authoredDocumentForSchema(input, { categoryRegistry = CATEGORIES
 // the schema parse so MCP can advertise `links` only.
 export function normalizeAuthoredPuzzleDocument(input, options = {}) {
   if (isJsonLdShaped(input)) return { document: input, errors: [] };
-  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input, options));
+  const compatibleInput = canonicalizeSingleClusterVocabularyShape(input);
+  const parsed = SimplifiedPuzzleInputSchema.safeParse(
+    authoredDocumentForSchema(compatibleInput, options)
+  );
   if (!parsed.success) return { document: null, errors: formatZodIssues(parsed.error) };
   try {
     return {
@@ -598,7 +743,10 @@ export function puzzleFromAuthoredDocument(input, options = {}) {
       ]
     };
   }
-  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input, options));
+  const compatibleInput = canonicalizeSingleClusterVocabularyShape(input);
+  const parsed = SimplifiedPuzzleInputSchema.safeParse(
+    authoredDocumentForSchema(compatibleInput, options)
+  );
   if (!parsed.success) return { puzzle: null, errors: formatZodIssues(parsed.error) };
   try {
     return { puzzle: puzzleFromSimplified(parsed.data, options), errors: [] };

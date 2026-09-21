@@ -158,7 +158,9 @@ export const SimplifiedPuzzleInputSchema = z.object({
   large: z.boolean().optional(),
   info: PuzzleInfoValueSchema.optional(),
 
-  // Clusters definition
+  // A single-cluster Vocabulary puzzle uses a flat terms list and is
+  // automatically pre-solved. Other puzzle kinds (and multi-cluster
+  // Vocabulary) use seeds/floatingTerms because grouping is playable.
   clusters: z
     .array(
       z.object({
@@ -166,20 +168,56 @@ export const SimplifiedPuzzleInputSchema = z.object({
         name: z.string().min(1),
         color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted
         fact: z.string().min(1), // Teaching note
-        seeds: z.array(TermSchema).min(1).max(2), // Normally 2; 1 only for a minimum-size 2-term cluster
-        floatingTerms: z.array(TermSchema).min(1).max(5), // Floating terms (2-7 total with seeds)
+        seeds: z.array(TermSchema).min(1).max(2).optional(),
+        floatingTerms: z.array(TermSchema).min(1).max(5).optional(),
+        // Complete term list for a one-cluster vocabulary puzzle; for other
+        // cluster shapes this can also preserve an explicit display order.
+        terms: z.array(TermSchema).min(2).max(7).optional(),
         termInfo: z.record(z.string().min(1), InfoValueSchema).optional(), // string or {text,links}
         info: InfoValueSchema.optional()
-      }).strict().refine(
-        cluster => new Set([...cluster.seeds, ...cluster.floatingTerms]).size ===
-          cluster.seeds.length + cluster.floatingTerms.length,
-        { message: "seeds and floatingTerms must not repeat a term" }
-      ).refine(
-        cluster => cluster.seeds.length === 2 || cluster.floatingTerms.length === 1,
-        { message: "a cluster with one seed must have exactly one floatingTerm" }
-      )
+      }).strict().superRefine((cluster, context) => {
+        const hasSeeds = cluster.seeds !== undefined;
+        const hasFloatingTerms = cluster.floatingTerms !== undefined;
+        if (hasSeeds !== hasFloatingTerms) {
+          context.addIssue({
+            code: "custom",
+            path: [hasSeeds ? "floatingTerms" : "seeds"],
+            message: "seeds and floatingTerms must be supplied together"
+          });
+          return;
+        }
+        if (!hasSeeds) {
+          if (!cluster.terms) {
+            context.addIssue({
+              code: "custom",
+              path: ["terms"],
+              message: "provide a terms list when seeds and floatingTerms are omitted"
+            });
+          } else if (new Set(cluster.terms).size !== cluster.terms.length) {
+            context.addIssue({
+              code: "custom",
+              path: ["terms"],
+              message: "terms must not repeat a term"
+            });
+          }
+          return;
+        }
+        if (new Set([...cluster.seeds, ...cluster.floatingTerms]).size !==
+            cluster.seeds.length + cluster.floatingTerms.length) {
+          context.addIssue({
+            code: "custom",
+            message: "seeds and floatingTerms must not repeat a term"
+          });
+        }
+        if (cluster.seeds.length === 1 && cluster.floatingTerms.length !== 1) {
+          context.addIssue({
+            code: "custom",
+            message: "a cluster with one seed must have exactly one floatingTerm"
+          });
+        }
+      })
     )
-    .min(2)
+    .min(1)
     .max(6), // Runtime cap -- modules/contentValidation.js
 
   // Bridges definition -- no minimum; bridges are optional and need not
@@ -237,6 +275,50 @@ export const SimplifiedPuzzleInputSchema = z.object({
   license: z.string().min(1).optional(),
   derivedFrom: z.string().min(1).optional(),
   language: z.string().min(1).optional()
-}).strict();
+}).strict().superRefine((input, context) => {
+  // Matches modules/simplifiedPuzzleSchema.js: one cluster is permitted only
+  // for vocabulary-context; ordinary topic/trivia puzzles need at least two.
+  if (input.puzzleKind !== "vocabulary-context" && input.clusters.length < 2) {
+    context.addIssue({
+      code: "custom",
+      path: ["clusters"],
+      message: "must contain at least two clusters unless puzzleKind is vocabulary-context"
+    });
+  }
+  const singleVocabularyCluster = input.puzzleKind === "vocabulary-context" &&
+    input.clusters.length === 1;
+  input.clusters.forEach((cluster, index) => {
+    const hasSeedSplit = cluster.seeds !== undefined || cluster.floatingTerms !== undefined;
+    if (singleVocabularyCluster && hasSeedSplit) {
+      context.addIssue({
+        code: "custom",
+        path: ["clusters", index],
+        message: "a single-cluster vocabulary puzzle uses terms only; omit seeds and floatingTerms"
+      });
+    } else if (!singleVocabularyCluster && !hasSeedSplit) {
+      context.addIssue({
+        code: "custom",
+        path: ["clusters", index],
+        message: "clusters require seeds and floatingTerms except for a single-cluster vocabulary puzzle"
+      });
+    }
+  });
+  if (singleVocabularyCluster) {
+    if (input.preSolve !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["preSolve"],
+        message: "preSolve is automatic for a single-cluster vocabulary puzzle; omit it"
+      });
+    }
+    if (input.bridges.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["bridges"],
+        message: "a single-cluster vocabulary puzzle cannot contain bridges"
+      });
+    }
+  }
+});
 
 export type SimplifiedPuzzleInput = z.infer<typeof SimplifiedPuzzleInputSchema>;

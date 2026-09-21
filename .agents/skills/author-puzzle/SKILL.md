@@ -1,6 +1,6 @@
 ---
 name: author-puzzle
-description: Author a Concept Clusters puzzle using an inventory-first workflow, local MCP validation, and human gates before grid fitting. Map sourced distinctions, candidate terms, and genuine connections before selecting any cluster, term, or bridge count/range. Default is inventory (concept map, sourced, no board limits), then plan (sizing/split when needed), fit (translate to simplified JSON with a loss ledger), then complete (notes and lenses). At every stop gate, prompt the human with numbered options — never require magic phrases. For splits, run plan-split-boards.mjs once per board and present its humanPrompt. Use when asked to author, draft, write, create, continue, fill, or fit a puzzle.
+description: Author a Concept Clusters puzzle with local MCP validation and human review gates. Default to inventory → plan (when needed) → fit → complete for open-ended topics and multi-board work. For bounded vocabulary-context requests, use one integrated design cycle that co-designs the near-synonym cluster and contextual lenses, checks every playable term against every lens, and saves one complete draft. At the final stop gate, prompt the human with numbered options. Use when asked to author, draft, write, create, continue, fill, or fit a puzzle.
 disable-model-invocation: true
 ---
 
@@ -40,7 +40,8 @@ Never write those into `docs/`, `.agents/`, or `/tmp`.
 | proceed to plan / sizing / split | **plan** | none — skill refs only | `--level split` + `plan-boards.mjs` |
 | proceed to fit (see below) | **fit** | `core` then `review` | `--level fit` + `--ledger` |
 | continue / fill / notes / lenses / complete | **complete** | `review` (if needed) then `pedagogy` | `--level complete` |
-| all-in-one / full pass | **discouraged** — use inventory → plan → fit → complete | — | — |
+| full bounded near-synonym puzzle / `profile=vocabulary-context` | **integrated** | profile `core` + `pedagogy`, then profile `review` after drafting lenses; full schema | `--level integrated` |
+| all-in-one / full pass for other puzzle kinds | **discouraged** — use inventory → plan → fit → complete | — | — |
 
 **Proceed to fit** when the human signals approval — not only magic phrases. Any
 clear imperative counts: `inventory approved`, `continue to fit`, `create the
@@ -54,9 +55,11 @@ and the human has **not** yet asked you to proceed. After inventory approval,
 run `plan-boards.mjs`: `single-board` means go to fit (no split-plan file);
 over 25 means the plan gate.
 
-**Why inventory-first:** the human may not know the subject. The first durable
-artifact must be a sourced concept map, not a grid-shaped draft. Board limits
-enter only on the fit pass, with a visible loss ledger.
+**Why inventory-first:** for an open-ended subject, the human may not know its
+conceptual structure. The first durable artifact is a sourced concept map, not
+a grid-shaped draft. Board limits enter only on the fit pass, with a visible
+loss ledger. The bounded Vocabulary-context cycle below is an explicit
+exception: its concept map, term set, and lenses are designed together.
 
 **Why fit before complete:** rewriting clusters after 16 term notes and lenses
 wastes the expensive half. Complete assumes the board is human-approved.
@@ -71,23 +74,27 @@ wastes the expensive half. Complete assumes the board is human-approved.
    or direct create/fit instruction — see table above). Never re-prompt for
    wording when the user already told you to create or fit. Re-read
    `inventories/<id>.json`; do not re-survey the subject.
-6. **Fit and complete passes must not write term notes or lenses** until the complete pass (notes/lenses listed in checker `deferred` on fit).
+6. **Staged fit must not write term notes or lenses** until the complete pass
+   (notes/lenses listed in checker `deferred` on fit). The integrated
+   Vocabulary-context cycle is the explicit exception: author the terms, notes,
+   and lenses together and validate them as one complete design.
 7. **Complete pass must clear every `blocking` gap** from `--level complete` before record/stop.
 
 ## Stop-gate report
 
 Reply with only:
 
-- `id`, `title`, draft `status` (if any), `revision` (if any), active pass (`inventory`, `plan`, `fit`, or `complete`)
+- `id`, `title`, draft `status` (if any), `revision` (if any), active pass (`inventory`, `plan`, `fit`, `complete`, or `integrated`)
 - coverage summary from the checker
 - for inventory: path `inventories/<id>.json` (no drafts URL yet)
 - for plan: paths `plans/<id>-split-plan.json` and inventory; `plan-boards.mjs` summary line
-- for fit/complete: drafts URL from `node tools/authoring-workspace.mjs` (`draftReviewUrl/<draftId>`)
+- for fit/complete/integrated: drafts URL from `node tools/authoring-workspace.mjs` (`draftReviewUrl/<draftId>`)
 - one line:
   - inventory — `Inventory ready. Waiting on concept-map review.`
   - plan — `Split plan ready. Waiting on board-plan approval or fit.`
   - fit — `Fit ready. Waiting on board review (see loss ledger).`
   - complete — `Validated. Waiting on /admin/drafts.`
+  - integrated — `Integrated Vocabulary draft validated. Waiting on /admin/drafts.`
 - **What's next?** — numbered options from [Human gates](#human-gates-prompt-dont-wait-for-magic-words) below, or `humanPrompt` from `plan-split-boards.mjs` when a split is in play (print headline, question, and options; include `defaultReply`).
 
 ## Human gates (prompt; don't wait for magic words)
@@ -145,6 +152,15 @@ What's next?
 3. Publish and cue for freeze when ready (or next board in a split)
 ```
 
+### Integrated Vocabulary gate
+
+```
+What's next?
+1. Revise the playable terms, cluster framing, or lenses
+2. Approve — open the drafts page to review the complete puzzle
+3. Publish and cue for freeze when ready
+```
+
 ## Do not load
 
 Unless blocked on a specific field or error:
@@ -181,6 +197,48 @@ node .agents/skills/author-puzzle/scripts/suggest-subject.mjs
 Honor the picker's `mode`. Edit [category-backlog.json](category-backlog.json) by hand to add or retire gaps — never put backlog entries into `puzzles/categories.js` until the first puzzle lands.
 
 State the pick in one sentence (`mode`, category, optional sub, seed).
+
+### Vocabulary-context integrated cycle
+
+Use this route when the request explicitly selects `vocabulary-context` and
+asks for a bounded, complete puzzle (especially when it supplies anchor terms
+or asks for one synonym cluster). If the user asks only for an inventory, or
+the subject is open-ended, likely to exceed 25 nodes, or likely to split across
+boards, use the staged workflow instead.
+
+1. Retrieve profile guidance with `profile=vocabulary-context`: the overview
+   and `core` before composing; `pedagogy` while drafting lenses; then `review`
+   after the candidate lenses exist. Retrieve the **complete** authoring schema
+   with the same profile, not a core-only phase projection. Make MCP calls one
+   at a time.
+2. Research the requested neighborhood and its usage distinctions. Choose the
+   taxonomy category independently, and use `list_categories` / `search_puzzles`
+   where the normal workflow requires them. Keep this focused: the distinction
+   inventory is an internal design aid, not a separate inventory artifact or
+   human approval gate.
+3. Co-design the cluster(s) and lenses. Keep only genuine near-synonyms; a
+   single cluster is valid for this kind and needs no invented foil cluster.
+   For one cluster, put the complete 2-7 term set in `terms`; omit `seeds`,
+   `floatingTerms`, `bridges`, and `preSolve`. The game automatically
+   pre-solves that cluster before its lenses. Use seeds/floating terms and a
+   per-puzzle `preSolve` choice only when multiple clusters make sorting
+   meaningful. Include sourced puzzle and term information in the same
+   complete working document.
+4. After drafting lenses, substitute **every playable term** into every blank.
+   Confirm one most natural or precise fit, and explain why plausible neighbors
+   are less precise. Check part of speech and inflection so an accidental form
+   mismatch does not give away an answer; use syntax or collocation as a cue
+   only when it serves the intended usage distinction. Repeat this review after
+   lens revisions.
+5. Run the integrated completeness checker, then create the entire new draft in
+   one `create_puzzle_draft` call. Do not create a cluster-only skeleton and
+   save lenses in a later pass. Run `validate_puzzle_draft`, record the authored
+   review, and stop at the final human copy-review gate. Never publish unless
+   the human asks.
+
+```sh
+node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level integrated working/<id>.json
+```
 
 ### 1. Inventory pass (default `/author-puzzle`)
 

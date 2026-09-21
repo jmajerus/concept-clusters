@@ -92,6 +92,8 @@ export function puzzleToJsonLd(
     : withProvenance;
   const clusterIds = stableLocalIds(categorySource.clusters, "cluster", cluster => cluster.name);
   const bridgeIds = stableLocalIds(categorySource.bridges, "bridge", bridge => bridge.term);
+  const automaticallyPreSolved = categorySource.puzzleKind === "vocabulary-context" &&
+    categorySource.clusters.length === 1 && categorySource.lenses?.length > 0;
   const clusters = categorySource.clusters.map((cluster, index) => copyExtensions(cluster, {
     "@id": `#${clusterIds[index]}`,
     "@type": JSON_LD_TYPES.cluster,
@@ -169,7 +171,7 @@ export function puzzleToJsonLd(
     ...(categorySource.info ? { info: clone(categorySource.info) } : {}),
     ...(categorySource.relatedPuzzles ? { relatedPuzzles: relatedToJsonLd(categorySource.relatedPuzzles) } : {}),
     ...(categorySource.lensMode ? { lensMode: categorySource.lensMode } : {}),
-    ...(categorySource.preSolve ? { preSolve: true } : {}),
+    ...(categorySource.preSolve || automaticallyPreSolved ? { preSolve: true } : {}),
     ...(categorySource.lenses ? { lenses: categorySource.lenses.map(lens => ({
       "@id": `#lens-${lens.id}`,
       "@type": JSON_LD_TYPES.lens,
@@ -210,6 +212,8 @@ export function puzzleFromJsonLd(document) {
     ...(cluster.termInfo ? { termInfo: clone(cluster.termInfo) } : {}),
     ...(cluster.info ? { info: clone(cluster.info) } : {})
   }, new Set(["@id", "@type", "id", "name", "color", "fact", "terms", "seeds", "termInfo", "info"])));
+  const automaticallyPreSolved = document.puzzleKind === "vocabulary-context" &&
+    document.clusters.length === 1 && document.lenses?.length > 0;
 
   const bridges = document.bridges.map(bridge => {
     const indices = bridge.clusters.map(reference => clusterIndexById.get(referenceId(reference)));
@@ -253,7 +257,7 @@ export function puzzleFromJsonLd(document) {
     ...(document.info ? { info: clone(document.info) } : {}),
     ...(document.relatedPuzzles ? { relatedPuzzles: relatedFromJsonLd(document.relatedPuzzles) } : {}),
     ...(document.lensMode ? { lensMode: document.lensMode } : {}),
-    ...(document.preSolve ? { preSolve: true } : {}),
+    ...(document.preSolve || automaticallyPreSolved ? { preSolve: true } : {}),
     ...(document.lenses ? { lenses: document.lenses.map(({ "@id": _id, "@type": _type, ...lens }) => clone(lens)) } : {}),
     ...(document.learningIntroduction ? { learningIntroduction: clone(document.learningIntroduction) } : {}),
     clusters,

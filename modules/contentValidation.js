@@ -268,7 +268,8 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   errors.push(...validateAuthoringProvenance(puzzle.provenance));
   if (!Array.isArray(puzzle.clusters)) return [...errors, "clusters must be an array"];
   if (!Array.isArray(puzzle.bridges)) return [...errors, "bridges must be an array"];
-  if (puzzle.clusters.length < 2 || puzzle.clusters.length > 6) {
+  const minimumClusters = puzzle.puzzleKind === "vocabulary-context" ? 1 : 2;
+  if (puzzle.clusters.length < minimumClusters || puzzle.clusters.length > 6) {
     fail(`bad cluster count (${puzzle.clusters.length})`);
   }
   const totalNodes = puzzleNodeCount(puzzle);
