@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
+Skill rev `1bfa1447` · 2026-09-21
+
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. The human Publishes on `/admin/drafts`, or
 `save_puzzle_draft` with `publish_to_authoring: true` does the same write
@@ -201,17 +203,14 @@ Unless blocked on a specific field or error:
 
 ## Workflow
 
-### 0. Choose the default subject (unprofiled request only)
+**Route first** — decide from the invocation before running anything:
 
-Only when `/author-puzzle` names no subject and no profile.
+- `profile=` and no subject → [Profile-only selection](#profile-only-selection), then the integrated cycle
+- `profile=` with a subject → [Integrated cycle](#integrated-cycle-vocabulary-context-and-trivia-quiz)
+- subject, no profile → [1. Inventory pass](#1-inventory-pass-default-author-puzzle)
+- nothing → [Generic subject picker](#generic-subject-picker-no-subject-no-profile), then the inventory pass
 
-```sh
-node .agents/skills/author-puzzle/scripts/suggest-subject.mjs
-```
-
-Honor the picker's `mode`. Edit [category-backlog.json](category-backlog.json) by hand to add or retire gaps — never put backlog entries into `puzzles/categories.js` until the first puzzle lands.
-
-State the pick in one sentence (`mode`, category, optional sub, seed).
+`suggest-subject.mjs` is reachable only through the last line.
 
 ### Profile-only selection
 
@@ -293,6 +292,18 @@ node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --aut
 - Lenses: factual quiz questions; research and cite every factual claim.
 - Verify: every question has exactly one defensible answer, and its targets
   match the board.
+
+### Generic subject picker (no subject, no profile)
+
+Reachable only through the route block above.
+
+```sh
+node .agents/skills/author-puzzle/scripts/suggest-subject.mjs
+```
+
+Honor the picker's `mode`. Edit [category-backlog.json](category-backlog.json) by hand to add or retire gaps — never put backlog entries into `puzzles/categories.js` until the first puzzle lands.
+
+State the pick in one sentence (`mode`, category, optional sub, seed).
 
 ### 1. Inventory pass (default `/author-puzzle`)
 

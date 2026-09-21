@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # Review a Concept Clusters puzzle
 
+Skill rev `bbf4bcdc` · 2026-09-21
+
 Run **one** planner. Treat its JSON as the contract. Do not improvise a search.
 
 ```sh
