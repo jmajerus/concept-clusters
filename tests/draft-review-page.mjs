@@ -348,7 +348,7 @@ export async function run() {
   assert.match(hostedList, /Working copies/);
   assert.match(hostedList, /value="modified"> Modified/);
   assert.match(hostedList, /value="cued"> Cued/);
-  assert.doesNotMatch(hostedList, /value="published"/, "Published only gave way to Modified");
+  assert.match(hostedList, /value="published"> Published only/);
   assert.match(hostedList, /value="drafts"/);
   assert.match(hostedList, /By category/);
   assert.match(hostedList, /value="recent"/);

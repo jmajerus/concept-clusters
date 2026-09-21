@@ -821,7 +821,8 @@ function listIntro(variant) {
        anything changed since the last Freeze: a working copy, or authoring
        play badged held, cued, or new to git (an unbadged authoring-play row
        is exactly what the last Freeze shipped). <strong>Cued</strong> is the
-       subset already cued for the next Freeze. By category browses the
+       subset already cued for the next Freeze. <strong>Published only</strong>
+       is authoring play with no private draft. By category browses the
        corpus. Recent gathers working copies by last
        update. Open a row to review copy; that starts a working copy if you
        do not already have one. New puzzle opens a blank board. Play
@@ -832,8 +833,9 @@ function listIntro(variant) {
        path. Hosted GitHub is origin only. Show Working copies is the working
        copy badge; Drafts is never in GitHub production; Modified is anything
        changed since the last Freeze (a working copy, or authoring play held,
-       cued, or new to git); Cued is the subset cued for the next Freeze. By
-       category browses the corpus.
+       cued, or new to git); Cued is the subset cued for the next Freeze;
+       Published only is authoring play with no private draft. By category
+       browses the corpus.
        Recent gathers working copies by last update. Open a row to review
        copy; that starts a working copy if you do not already have one.
        Play unpublished boards on the LAN authoring checkout, not here.`
@@ -1119,6 +1121,7 @@ const CORPUS_FILTER_SCRIPT = `
     syncHash(arrange);
     root.querySelectorAll("tr[data-puzzle-id]").forEach(function (row) {
       var hay = (row.getAttribute("data-filter") || "").toLowerCase();
+      var hasDraft = row.getAttribute("data-has-draft") === "1";
       var working = row.getAttribute("data-working-copy") === "1";
       var modified = row.getAttribute("data-modified") === "1";
       var cued = row.getAttribute("data-cued") === "1";
@@ -1128,7 +1131,8 @@ const CORPUS_FILTER_SCRIPT = `
         || (scope === "working" && working)
         || (scope === "drafts" && github === "0")
         || (scope === "modified" && modified)
-        || (scope === "cued" && cued);
+        || (scope === "cued" && cued)
+        || (scope === "published" && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
     });
     root.querySelectorAll(".corpus-group").forEach(function (group) {
@@ -1208,6 +1212,7 @@ export function renderDraftListPage(rows, {
            <label title="Never in GitHub production"><input type="radio" name="puzzle-corpus-scope" value="drafts"> Drafts</label>
            <label title="Changed since the last Freeze: a working copy, or in authoring play as held, cued, or new to git"><input type="radio" name="puzzle-corpus-scope" value="modified"> Modified</label>
            <label title="In authoring play and cued for the next Freeze"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
+           <label title="In authoring play, no private draft (the Published only group under Recent)"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
          </p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Arrange</span>
