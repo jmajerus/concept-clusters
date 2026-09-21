@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"

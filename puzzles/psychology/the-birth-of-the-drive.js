@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
@@ -25,7 +28,7 @@ export default definePuzzle(import.meta.url, {
   },
   "clusters": [
     {
-      "id": "cluster-topographical-mind-primary-process",
+      "id": "topographical-mind-primary-process",
       "name": "Topographical Mind & Primary Process",
       "color": "teal",
       "fact": "Freud's first spatial model splits mental life into Conscious, Preconscious, and Unconscious systems. Down in the unconscious, thought runs on primary process: no contradiction, no negation, no linear time -- just condensation and displacement moving a wish toward disguised expression.",
@@ -80,7 +83,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "cluster-economic-model-drive-dynamics",
+      "id": "economic-model-drive-dynamics",
       "name": "Economic Model & Drive Dynamics",
       "color": "blue",
       "fact": "Freud's economic model treats the psyche as a quantity of force rather than a place: drives generate tension that seeks discharge, and psychic life is largely the story of that tension moving, binding, and being spent.",
@@ -145,7 +148,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "cluster-repression-symptom-formation",
+      "id": "repression-symptom-formation",
       "name": "Repression & Symptom Formation",
       "color": "amber",
       "fact": "A drive impulse that threatens conscious stability gets repressed -- but repressed energy cannot be destroyed, only held down at a cost, and it inevitably returns in a disguised, distorted form.",

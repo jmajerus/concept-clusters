@@ -6,6 +6,9 @@
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "large": true,
   "info": {
     "text": "How Lacanian thought relates image, language, and what resists symbolization.",
@@ -21,22 +24,6 @@
       "name": "The Imaginary",
       "color": "teal",
       "fact": "The Imaginary organizes the ego through images and identifications that promise unity while also producing alienation and rivalry.",
-      "seeds": [
-        "mirror stage",
-        "ideal ego"
-      ],
-      "floatingTerms": [
-        "specular image",
-        "bodily unity",
-        "rivalry"
-      ],
-      "terms": [
-        "mirror stage",
-        "specular image",
-        "ideal ego",
-        "bodily unity",
-        "rivalry"
-      ],
       "termInfo": {
         "mirror stage": {
           "text": "The moment an infant recognizes its reflection as one coordinated whole, forming an idealized body-image ahead of its actual motor control.",
@@ -85,29 +72,29 @@
             "href": "wiki:The Imaginary (psychoanalysis)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "mirror stage",
+        "ideal ego"
+      ],
+      "floatingTerms": [
+        "specular image",
+        "bodily unity",
+        "rivalry"
+      ],
+      "terms": [
+        "mirror stage",
+        "specular image",
+        "ideal ego",
+        "bodily unity",
+        "rivalry"
+      ]
     },
     {
       "id": "the-symbolic",
       "name": "The Symbolic",
       "color": "blue",
       "fact": "The Symbolic is the order of language, law, and social structure in which signifiers position the speaking subject.",
-      "seeds": [
-        "signifier",
-        "big Other"
-      ],
-      "floatingTerms": [
-        "symbolic law",
-        "ego ideal",
-        "Name-of-the-Father"
-      ],
-      "terms": [
-        "signifier",
-        "big Other",
-        "symbolic law",
-        "ego ideal",
-        "Name-of-the-Father"
-      ],
       "termInfo": {
         "signifier": {
           "text": "A word, sound, or mark that stands for a concept through its relation to other signifiers, not by a direct link to the thing itself — the basic unit the Symbolic order is built from.",
@@ -156,29 +143,29 @@
             "href": "wiki:The Symbolic"
           }
         ]
-      }
+      },
+      "seeds": [
+        "signifier",
+        "big Other"
+      ],
+      "floatingTerms": [
+        "symbolic law",
+        "ego ideal",
+        "Name-of-the-Father"
+      ],
+      "terms": [
+        "signifier",
+        "big Other",
+        "symbolic law",
+        "ego ideal",
+        "Name-of-the-Father"
+      ]
     },
     {
       "id": "the-real",
       "name": "The Real",
       "color": "amber",
       "fact": "The Real names what cannot be fully absorbed into image or language, appearing as impossibility, rupture, contingency, and excessive enjoyment.",
-      "seeds": [
-        "impossibility",
-        "jouissance"
-      ],
-      "floatingTerms": [
-        "resistance to symbolization",
-        "traumatic encounter",
-        "contingency"
-      ],
-      "terms": [
-        "impossibility",
-        "resistance to symbolization",
-        "jouissance",
-        "traumatic encounter",
-        "contingency"
-      ],
       "termInfo": {
         "impossibility": {
           "text": "Lacan's own shorthand for the Real: what can never be fully captured in language or pictured as a coherent image.",
@@ -227,7 +214,23 @@
             "href": "wiki:The Real"
           }
         ]
-      }
+      },
+      "seeds": [
+        "impossibility",
+        "jouissance"
+      ],
+      "floatingTerms": [
+        "resistance to symbolization",
+        "traumatic encounter",
+        "contingency"
+      ],
+      "terms": [
+        "impossibility",
+        "resistance to symbolization",
+        "jouissance",
+        "traumatic encounter",
+        "contingency"
+      ]
     }
   ],
   "bridges": [

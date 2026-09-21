@@ -6,6 +6,9 @@
     "psychology",
     "history-society"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "tags": [
     "war",
     "genocide"
@@ -32,22 +35,6 @@
       "name": "Ordinary Men",
       "color": "brown",
       "fact": "At the battalion's first mass shooting, at Jozefow on July 13, 1942, Major Wilhelm Trapp offered any of his nearly five hundred men who didn't feel up to the task a chance to step out; after a tense pause, one man did, followed by ten or twelve more. Most stayed in the killing squads -- worried, some later admitted, about being seen as a coward by their comrades rather than about the offer itself, which several later claimed not to have heard at all.",
-      "seeds": [
-        "conformity to the group",
-        "the option to refuse"
-      ],
-      "floatingTerms": [
-        "career pressure",
-        "Reserve Police Battalion 101",
-        "the minority who refused"
-      ],
-      "terms": [
-        "conformity to the group",
-        "the option to refuse",
-        "career pressure",
-        "Reserve Police Battalion 101",
-        "the minority who refused"
-      ],
       "termInfo": {
         "Reserve Police Battalion 101": {
           "text": "A German Order Police unit of reservists -- mostly working-class men in their thirties and forties, many too old for regular military service -- that became a major perpetrator of mass shootings in occupied Poland.",
@@ -87,27 +74,29 @@
             "href": "wiki:Reserve Police Battalion 101"
           }
         ]
-      }
+      },
+      "seeds": [
+        "conformity to the group",
+        "the option to refuse"
+      ],
+      "floatingTerms": [
+        "career pressure",
+        "Reserve Police Battalion 101",
+        "the minority who refused"
+      ],
+      "terms": [
+        "conformity to the group",
+        "the option to refuse",
+        "career pressure",
+        "Reserve Police Battalion 101",
+        "the minority who refused"
+      ]
     },
     {
       "id": "the-ratchet",
       "name": "The Ratchet",
       "color": "magenta",
       "fact": "Browning's own conclusion, after tracking the battalion across more than a dozen further actions: most men found each subsequent killing easier to carry out than the one before, not because what they were doing weighed any less, but because the resistance it would have taken to refuse again had already worn down the first time they didn't.",
-      "seeds": [
-        "incremental participation",
-        "eroding resistance"
-      ],
-      "floatingTerms": [
-        "escalating commitment",
-        "undiminished responsibility"
-      ],
-      "terms": [
-        "incremental participation",
-        "eroding resistance",
-        "escalating commitment",
-        "undiminished responsibility"
-      ],
       "termInfo": {
         "eroding resistance": {
           "text": "The capacity to refuse doesn't switch off all at once -- it wears down with each repetition, distinct from the moral weight of what's being done, which doesn't wear down the same way.",
@@ -149,7 +138,21 @@
             "href": "wiki:Escalation of commitment"
           }
         ]
-      }
+      },
+      "seeds": [
+        "incremental participation",
+        "eroding resistance"
+      ],
+      "floatingTerms": [
+        "escalating commitment",
+        "undiminished responsibility"
+      ],
+      "terms": [
+        "incremental participation",
+        "eroding resistance",
+        "escalating commitment",
+        "undiminished responsibility"
+      ]
     }
   ],
   "bridges": [

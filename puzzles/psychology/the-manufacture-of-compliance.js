@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "history-society"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "tags": [
     "war",
     "genocide"
@@ -150,7 +153,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "moral-disengagement",
       "term": "moral disengagement",
       "clusters": [
         0,
@@ -178,7 +180,6 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "the-persistence-of-choice",
       "term": "the persistence of choice",
       "clusters": [
         0,

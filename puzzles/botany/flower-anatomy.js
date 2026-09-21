@@ -1,0 +1,211 @@
+// Generated from content/puzzles/flower-anatomy.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "flower-anatomy",
+  "title": "Anatomy of a Flower",
+  "category": "botany",
+  "large": true,
+  "info": {
+    "text": "A flower is a compressed reproductive shoot: four whorls of modified leaves, each part doing one job — shielding the bud, advertising for pollinators, making pollen, or receiving it. Naming a part means knowing what it is for.",
+    "links": [
+      {
+        "href": "https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure",
+        "label": "OpenStax Biology 2e — Reproductive Development and Structure"
+      },
+      {
+        "href": "https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization",
+        "label": "OpenStax Biology 2e — Pollination and Fertilization"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Biology 2e, §32.1 Reproductive Development and Structure",
+        "publisher": "OpenStax",
+        "year": "2018",
+        "url": "https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure"
+      },
+      {
+        "title": "Biology 2e, §32.2 Pollination and Fertilization",
+        "publisher": "OpenStax",
+        "year": "2018",
+        "url": "https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization"
+      },
+      {
+        "title": "Flower",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Flower"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "perianth",
+      "name": "The sterile envelope",
+      "color": "teal",
+      "fact": "The two outer whorls make no gametes: sepals wrapped the bud while it formed, then petals opened into the flower's billboard. Calyx and corolla are the collective names for those two whorls, and perianth covers both together.",
+      "terms": [
+        "petal",
+        "sepal",
+        "tepal",
+        "calyx",
+        "corolla",
+        "perianth"
+      ],
+      "seeds": [
+        "petal",
+        "sepal"
+      ],
+      "termInfo": {
+        "calyx": "The collective name for all of a flower's sepals — the outermost of the four whorls.",
+        "corolla": "The collective name for all of a flower's petals — the showy second whorl.",
+        "perianth": "The calyx plus the corolla: all the sterile, non-reproductive parts of the flower taken together.",
+        "petal": "A modified leaf in the showy second whorl, advertising the flower to pollinators. All the petals together are the corolla.",
+        "sepal": "The green, leaf-like part of the outermost whorl (the calyx) that enclosed and protected the flower while it was still a bud.",
+        "tepal": "What the outer parts are called when sepals and petals look alike and cannot be told apart — lilies and tulips are the classic examples."
+      },
+      "info": "The parts you can see from outside: one whorl protected the bud, the other now does the advertising."
+    },
+    {
+      "id": "stamen",
+      "name": "The male machinery",
+      "color": "blue",
+      "fact": "The male parts, together called the androecium: each stamen is a filament topped by an anther, where pollen grains — the carriers of male gametes — are produced.",
+      "terms": [
+        "pollen",
+        "stamen",
+        "anther",
+        "filament"
+      ],
+      "seeds": [
+        "pollen",
+        "stamen"
+      ],
+      "termInfo": {
+        "anther": "The sac at the top of the stamen where pollen grains are produced and held until they are carried off.",
+        "filament": "The thin stalk that holds the anther up, positioning the pollen where a pollinator or a breeze can reach it.",
+        "pollen": "Tiny grains, each a whole male gametophyte, that carry sperm to the female organs. Animal-pollinated flowers make it sticky; wind-pollinated flowers make it in clouds.",
+        "stamen": "The male part of a flower: a stalk topped by a pollen-producing anther. All of a flower's stamens together are the androecium."
+      },
+      "info": "Follow the pollen: whatever makes it and whatever lifts it into the world belongs here."
+    },
+    {
+      "id": "carpel",
+      "name": "The female machinery",
+      "color": "amber",
+      "fact": "The female parts, together called the gynoecium: a sticky stigma catches pollen, the style raises it above the ovary, and the ovary encloses the ovules. One carpel or several fused carpels make up the pistil.",
+      "terms": [
+        "ovary",
+        "pistil",
+        "stigma",
+        "style",
+        "ovule",
+        "carpel"
+      ],
+      "seeds": [
+        "ovary",
+        "pistil"
+      ],
+      "termInfo": {
+        "carpel": "One unit of the female organ: a folded structure bearing a stigma, style, and ovary. A pistil may be a single carpel or several fused together.",
+        "ovary": "The swollen base of the carpel housing the ovules; after fertilization it develops into the fruit.",
+        "ovule": "The structure inside the ovary that contains the egg; after fertilization it matures into the seed.",
+        "pistil": "The female organ as a whole — one carpel, or several carpels fused into one structure with a shared style and stigma.",
+        "stigma": "The sticky or feathery tip of the carpel that catches pollen — the landing pad of pollination.",
+        "style": "The stalk between stigma and ovary that a pollen tube must grow down to deliver sperm."
+      },
+      "info": "The flower's center: catch the pollen, deliver it down, and house the ovules below."
+    }
+  ],
+  "bridges": [
+    {
+      "term": "Pollination",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "The handoff these two clusters exist for: pollen made in the anther must physically reach the stigma, and each cluster's shape and timing are built to make that transfer succeed.",
+      "info": "A flower cannot walk, so its male gametes travel instead — by wind, water, or an animal courier. The whole architecture of the reproductive whorls is built around that anther-to-stigma trip."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "collective-whorl-names",
+      "prompt": "Two of these are collective names — one for a single whorl of sterile parts, the other for the whorl just inside it. Which two?",
+      "explanation": "The calyx is all the sepals taken together; the corolla is all the petals. Perianth is collective too, but it spans both sterile whorls at once, and a tepal is a single part on flowers where the two whorls look alike — which is also why petal and sepal name parts, not whorls.",
+      "color": "amber",
+      "targets": [
+        "calyx",
+        "corolla"
+      ],
+      "reasons": {
+        "calyx": "The collective name for the sepal whorl — the outer whorl of sterile parts.",
+        "corolla": "The collective name for the petal whorl — the whorl just inside the calyx."
+      }
+    },
+    {
+      "id": "raised-into-position",
+      "prompt": "One part lifts the pollen supply up where a visitor can take it; another lifts the pollen's landing pad up where the visitor will brush it. Which two parts do the lifting?",
+      "explanation": "The filament hoists the anther; the style hoists the stigma. Both are stalks in service of the same handoff — the anther is what gets lifted, not the lifter, the stigma is the pad itself, not the thing raising it, and the ovary sits below holding ovules rather than lifting anything.",
+      "color": "cyan",
+      "targets": [
+        "filament",
+        "style"
+      ],
+      "reasons": {
+        "filament": "The stalk that lifts the anther — the pollen supply — into a visitor's path.",
+        "style": "The stalk that raises the stigma — the pollen's landing pad — where a visitor will brush it."
+      }
+    },
+    {
+      "id": "after-fertilization-fates",
+      "prompt": "Once fertilization succeeds, two structures inside the female organ are transformed: one becomes the seed, the other becomes the fruit. Which two?",
+      "explanation": "Each ovule matures into a seed, and the ovary that housed the ovules develops into the fruit. The stigma and style are the receiving architecture, spent once their work is done, and a carpel or pistil houses the parts — it is not itself what transforms.",
+      "color": "magenta",
+      "targets": [
+        "ovule",
+        "ovary"
+      ],
+      "reasons": {
+        "ovary": "The swollen base housing the ovules — it develops into the fruit.",
+        "ovule": "The structure containing the egg — it matures into the seed."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "flower-pollination-fruit",
+        "reason": "Play after naming the parts to see how each whorl's job pays off in seed and fruit — and how real flowers bend the template."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "What a flower actually is",
+    "summary": "A flower is a compressed reproductive shoot built in rings — learn the rings and every name attaches to a job.",
+    "estimatedMinutes": 2,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "A flower is not decoration. It is a reproductive organ — a compressed shoot whose parts are modified leaves arranged in rings — and every familiar piece, from the showy petals to the dust of pollen, is doing one specific job in a single project: getting male and female gametes together.\r\n\r\nBotanists read a flower from the outside in: a green protective ring, a colorful advertising ring, and inside those, the organs that make pollen and ovules. Once you can name the rings and each part's address, the wildly varied flowers of the world — from lilies to tulips to the humble grass — stop being a tangle of vocabulary and become one plan with variations."
+    },
+    "links": [
+      {
+        "href": "https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure",
+        "label": "OpenStax Biology 2e — Reproductive Development and Structure"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+});

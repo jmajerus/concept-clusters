@@ -1,0 +1,121 @@
+{
+  "id": "unyielding-neighbors",
+  "title": "Refusing to Yield",
+  "category": "vocabulary",
+  "puzzleKind": "vocabulary-context",
+  "tags": [
+    "synonyms",
+    "usage",
+    "adjectives"
+  ],
+  "level": "intermediate",
+  "info": {
+    "text": "Five near-synonyms for refusing to budge, discriminated along the lines of Merriam-Webster's synonym notes: all mean unwilling to alter a predetermined course or purpose, but each resists something different — temptation, principle, compromise, entreaty, or conscience.",
+    "links": [
+      "https://www.merriam-webster.com/thesaurus/adamant",
+      "https://www.merriam-webster.com/thesaurus/obdurate"
+    ]
+  },
+  "clusters": [
+    {
+      "id": "refusing-to-yield",
+      "name": "Refusing to Yield",
+      "color": "teal",
+      "fact": "All five adjectives describe unwillingness to alter a predetermined course or purpose. They differ in what does the resisting: adamant is personal resolve immovable by temptation or entreaty; inflexible is adherence to fixed principles or rules; intransigent is refusal to compromise in a dispute; inexorable is resistance to persuasion taken to the point of an unstoppable force or process; obdurate is hardness of heart against moral appeals or pleas for mercy.",
+      "termInfo": {
+        "adamant": {
+          "text": "Utter immovability in the face of temptation or entreaty; personal resolve that will not be moved."
+        },
+        "inexorable": {
+          "text": "Not to be persuaded or moved by entreaty; uniquely also describes things and processes that advance relentlessly and cannot be stopped."
+        },
+        "inflexible": {
+          "text": "Unyielding adherence to rigidly fixed principles, purposes, or rules; the most general and neutral member of the set."
+        },
+        "intransigent": {
+          "text": "Refusal to compromise or negotiate; a stance taken in a dispute or bargaining position."
+        },
+        "obdurate": {
+          "text": "Hardness of heart; insensitivity to moral persuasion, pity, or appeals for mercy."
+        }
+      },
+      "info": {
+        "text": "All five words describe refusing to change course. Tell them apart by what resists what: personal resolve, fixed principle, compromise, persuasion, or conscience."
+      },
+      "terms": [
+        "adamant",
+        "inflexible",
+        "intransigent",
+        "inexorable",
+        "obdurate"
+      ]
+    }
+  ],
+  "bridges": [],
+  "lenses": [
+    {
+      "id": "adamant-resolve",
+      "prompt": "After three hours of pleading from the producers, the director remained ____ that the film would end without a voice-over.",
+      "explanation": "Temptation-or-entreaty resistance is adamant's boundary: the director's personal resolve will not move despite hours of pleading. Inflexible would point to a fixed rule, intransigent to a negotiation, inexorable to an unstoppable process, and obdurate to hard-heartedness — none of which the artistic-decision context supports.",
+      "targets": [
+        "adamant"
+      ],
+      "reasons": {
+        "adamant": "Personal resolve immovable by temptation or entreaty is exactly what the pleading context tests."
+      }
+    },
+    {
+      "id": "inflexible-rule",
+      "prompt": "The club's treasurer was polite but ____ about the dues deadline: no exceptions, because the rule left her no discretion.",
+      "explanation": "A fixed rule that leaves no discretion is the cue for inflexible: the treasurer bends to no one because the principle, not her will, decides. Adamant would make it personal stubbornness, intransigent would need a negotiation, inexorable an unstoppable force, and obdurate a moral failing.",
+      "targets": [
+        "inflexible"
+      ],
+      "reasons": {
+        "inflexible": "Adherence to a rigidly fixed rule is inflexible's discriminating clause."
+      }
+    },
+    {
+      "id": "intransigent-bargain",
+      "prompt": "The union delegation walked out after management called them ____ for refusing any compromise on the two-tier wage.",
+      "explanation": "Refusal of any compromise in bargaining is intransigent's home ground: the cue is the two-tier wage dispute. Adamant would describe sheer personal resolve, inflexible a general rigidity, inexorable an unstoppable advance, and obdurate hardness toward a moral plea — but here the issue is compromise at the table.",
+      "targets": [
+        "intransigent"
+      ],
+      "reasons": {
+        "intransigent": "Refusal to compromise or negotiate is the distinction this bargaining context activates."
+      }
+    },
+    {
+      "id": "inexorable-advance",
+      "prompt": "The cross-examiner was ____: objections were noted for the record, but the questioning advanced point by point toward the admission.",
+      "explanation": "Relentless forward motion despite resistance is inexorable's signature: the questioning advances point by point like a force that cannot be stopped. Adamant or inflexible would describe only the examiner's personal rigidity, intransigent would need a compromise on offer, and obdurate would require a moral appeal being shrugged off.",
+      "targets": [
+        "inexorable"
+      ],
+      "reasons": {
+        "inexorable": "An unstoppable process that cannot be diverted is inexorable's extended sense."
+      }
+    },
+    {
+      "id": "obdurate-heart",
+      "prompt": "The parole board called the applicant ____ after he shrugged off the victims' statements and asked only about his release date.",
+      "explanation": "Shrugging off the victims' statements — a moral appeal — and asking only about oneself is hardness of heart, which is obdurate's boundary. Adamant would be mere resolve, inflexible devotion to principle, intransigent refusal to bargain, and inexorable relentlessness; only obdurate names insensitivity to pity and mercy.",
+      "targets": [
+        "obdurate"
+      ],
+      "reasons": {
+        "obdurate": "Hardness of heart against moral persuasion and appeals for mercy is obdurate's discriminating clause."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Muse Code"
+      }
+    ]
+  }
+}

@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "business-organizations",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "large": true,
   "tags": [
     "book",

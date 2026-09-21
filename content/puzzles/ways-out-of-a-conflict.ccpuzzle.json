@@ -2,10 +2,10 @@
   "id": "ways-out-of-a-conflict",
   "title": "Ways out of a conflict",
   "category": "psychology",
+  "large": true,
   "tags": [
     "book"
   ],
-  "large": true,
   "info": {
     "text": "Susan Heitler's framework for conflict resolution therapy, which treats the strategies people use to end conflicts as the same small set whether the conflict is between two people or inside one. The five strategies -- fight, submit, flee, freeze, problem-solve -- are Pruitt and Rubin's; the claim that they run inward as well as outward is Heitler's own. The book dates from 1990 and its clinical categories reflect that; what has held up, and what this puzzle is built from, is the structural account.",
     "citations": [
@@ -31,20 +31,6 @@
       "name": "Fighting",
       "color": "teal",
       "fact": "Contending means trying to impose your preferred solution on the other party -- by insisting, blaming, criticizing, shouting, or force. Heitler's move is to notice that the same strategy runs inward with no second party required. Projection attacks in someone else what a person cannot bear to see in themselves; self-criticism attacks their own thoughts and feelings directly. The target changes. The strategy does not. Two people both contending produces arguments, and can escalate from there.",
-      "seeds": [
-        "blaming",
-        "criticizing"
-      ],
-      "floatingTerms": [
-        "projection",
-        "self-criticism"
-      ],
-      "terms": [
-        "blaming",
-        "criticizing",
-        "projection",
-        "self-criticism"
-      ],
       "termInfo": {
         "blaming": {
           "text": "Assigning the problem to the other party: 'If you hadn't...' It settles the question of cause before anyone has looked into it."
@@ -59,25 +45,27 @@
           "text": "Attacking one's own thoughts or feelings. The contending strategy turned inward, with both parties inside one person."
         }
       },
-      "info": "Trying to impose your preferred solution -- on the other party, or on the part of yourself that disagrees."
+      "info": "Trying to impose your preferred solution -- on the other party, or on the part of yourself that disagrees.",
+      "seeds": [
+        "blaming",
+        "criticizing"
+      ],
+      "floatingTerms": [
+        "projection",
+        "self-criticism"
+      ],
+      "terms": [
+        "blaming",
+        "criticizing",
+        "projection",
+        "self-criticism"
+      ]
     },
     {
       "id": "cluster-submit",
       "name": "Yielding",
       "color": "blue",
       "fact": "Yielding lowers your aspirations and settles for less than you would have liked. It ends the conflict immediately and at a cost that is invisible in the moment, because the person paying it is the only one who knows what was on the table. From outside it can look like generosity, flexibility, or an easy temperament, which is part of why it can run for years without anyone naming it.",
-      "seeds": [
-        "giving in",
-        "lowering aspirations"
-      ],
-      "floatingTerms": [
-        "denying own preferences"
-      ],
-      "terms": [
-        "giving in",
-        "lowering aspirations",
-        "denying own preferences"
-      ],
       "termInfo": {
         "denying own preferences": {
           "text": "Ceasing to register what you want at all, rather than wanting it and conceding. The version that is hardest to notice from inside."
@@ -89,27 +77,25 @@
           "text": "Settling for less than you would have liked, and treating the reduced version as what you wanted."
         }
       },
-      "info": "Ending the conflict by lowering your own aspirations and settling for less than you wanted."
+      "info": "Ending the conflict by lowering your own aspirations and settling for less than you wanted.",
+      "seeds": [
+        "giving in",
+        "lowering aspirations"
+      ],
+      "floatingTerms": [
+        "denying own preferences"
+      ],
+      "terms": [
+        "giving in",
+        "lowering aspirations",
+        "denying own preferences"
+      ]
     },
     {
       "id": "cluster-flee",
       "name": "Fleeing",
       "color": "amber",
       "fact": "Withdrawing leaves the scene of the conflict -- physically, by ceasing to talk, or by moving the conversation somewhere else. Turned inward it becomes leaving the scene of a thought: denial blocks an uncomfortable reality out of awareness, and obsessional thinking crowds it out with something absorbing and safe. Two people both fleeing produces a household where nothing is ever discussed and nobody can say what is wrong.",
-      "seeds": [
-        "changing the topic",
-        "denial"
-      ],
-      "floatingTerms": [
-        "leaving the scene",
-        "obsessional thinking"
-      ],
-      "terms": [
-        "changing the topic",
-        "leaving the scene",
-        "denial",
-        "obsessional thinking"
-      ],
       "termInfo": {
         "changing the topic": {
           "text": "Leaving the conflict without leaving the room. Cheaper than walking out and harder to object to."
@@ -124,25 +110,27 @@
           "text": "Preoccupation with compelling but safe thoughts that crowd out frightening ones. Somewhere to go without moving."
         }
       },
-      "info": "Leaving the scene of the conflict -- the room, the conversation, or the thought."
+      "info": "Leaving the scene of the conflict -- the room, the conversation, or the thought.",
+      "seeds": [
+        "changing the topic",
+        "denial"
+      ],
+      "floatingTerms": [
+        "leaving the scene",
+        "obsessional thinking"
+      ],
+      "terms": [
+        "changing the topic",
+        "leaving the scene",
+        "denial",
+        "obsessional thinking"
+      ]
     },
     {
       "id": "cluster-freeze",
       "name": "Waiting",
       "color": "magenta",
       "fact": "Inaction waits for the other party's next move. It is the hardest of the four to recognise as a strategy, because from inside it feels like not doing anything -- which is exactly what it is, and exactly why it functions as an exit. Nothing is decided and nobody has to decide it. Two parties both waiting produces a negotiation that never concludes and a tension that never resolves.",
-      "seeds": [
-        "procrastination",
-        "passivity"
-      ],
-      "floatingTerms": [
-        "waiting for the other's move"
-      ],
-      "terms": [
-        "procrastination",
-        "passivity",
-        "waiting for the other's move"
-      ],
       "termInfo": {
         "passivity": {
           "text": "Doing nothing in the hope that the situation will improve on its own."
@@ -154,27 +142,25 @@
           "text": "Choosing to let the other party act first, which leaves the outcome to whoever tires of waiting."
         }
       },
-      "info": "Waiting for the other party's next move rather than making one."
+      "info": "Waiting for the other party's next move rather than making one.",
+      "seeds": [
+        "procrastination",
+        "passivity"
+      ],
+      "floatingTerms": [
+        "waiting for the other's move"
+      ],
+      "terms": [
+        "procrastination",
+        "passivity",
+        "waiting for the other's move"
+      ]
     },
     {
       "id": "cluster-problem-solve",
       "name": "Problem-solving",
       "color": "olive",
       "fact": "Problem-solving pursues alternatives that satisfy both sides, and Heitler's components of it are all things you could check in a transcript: whether people say what they want, whether they take in what was said, whether airtime and volume run roughly even, and whether anyone ever states back what the two of them have arrived at. Notice what these have in common. Every one of them takes time -- which is the reason the other four keep winning.",
-      "seeds": [
-        "saying what is wanted",
-        "receptive listening"
-      ],
-      "floatingTerms": [
-        "symmetry",
-        "summarizing statement"
-      ],
-      "terms": [
-        "saying what is wanted",
-        "receptive listening",
-        "symmetry",
-        "summarizing statement"
-      ],
       "termInfo": {
         "receptive listening": {
           "text": "Taking in what the other person said and building on it, rather than continuing your own train of thought or hunting for what is wrong in theirs."
@@ -189,7 +175,21 @@
           "text": "Roughly even airtime, volume, speaking rate, and turns in the speaking and listening roles. Asymmetry shows up in a recording before it shows up in anyone's account of the conversation."
         }
       },
-      "info": "Pursuing alternatives that satisfy both sides, and the observable components that make that possible."
+      "info": "Pursuing alternatives that satisfy both sides, and the observable components that make that possible.",
+      "seeds": [
+        "saying what is wanted",
+        "receptive listening"
+      ],
+      "floatingTerms": [
+        "symmetry",
+        "summarizing statement"
+      ],
+      "terms": [
+        "saying what is wanted",
+        "receptive listening",
+        "symmetry",
+        "summarizing statement"
+      ]
     }
   ],
   "bridges": [
@@ -327,6 +327,14 @@
       {
         "id": "evolution-of-cooperation",
         "reason": "Heitler opens from negotiation theory and the prisoner's dilemma; see what the same escape problem looks like when the parties are strangers rather than intimates."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
       }
     ]
   }

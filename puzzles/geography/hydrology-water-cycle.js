@@ -7,6 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "hydrology-water-cycle",
   "title": "The Water Cycle: pools and fluxes",
   "category": "geography",
+  "subcategories": {
+    "geography": "hydrology"
+  },
   "info": {
     "text": "The engine room of hydrology: where Earth's water parks — oceans, ice, soil, and air — and the powered transfers that never let it stay parked, from evaporation skyward to percolation downward.",
     "links": [

@@ -6,6 +6,9 @@
     "psychology",
     "history-society"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "large": true,
   "tags": [
     "war",
@@ -46,22 +49,6 @@
       "name": "The Engineered Override",
       "color": "amber",
       "fact": "Twentieth-century militaries systematically raised killing rates by replacing moral deliberation with conditioned reflex: human-shaped targets that dropped when hit drilled the firing response into the body; repeated exposure wore down the emotional cost; a legitimate chain of command supplied the authorization to fire without individual moral weighing.",
-      "seeds": [
-        "operant conditioning",
-        "desensitization"
-      ],
-      "floatingTerms": [
-        "authorization",
-        "target discrimination",
-        "mechanical distance"
-      ],
-      "terms": [
-        "operant conditioning",
-        "desensitization",
-        "authorization",
-        "target discrimination",
-        "mechanical distance"
-      ],
       "termInfo": {
         "authorization": {
           "text": "Acting against one's own resistance because a legitimate authority gave the order — the same dynamic Stanley Milgram documented: moral responsibility migrates to whoever issued the command.",
@@ -111,31 +98,29 @@
             "href": "wiki:Operant conditioning"
           }
         ]
-      }
+      },
+      "seeds": [
+        "operant conditioning",
+        "desensitization"
+      ],
+      "floatingTerms": [
+        "authorization",
+        "target discrimination",
+        "mechanical distance"
+      ],
+      "terms": [
+        "operant conditioning",
+        "desensitization",
+        "authorization",
+        "target discrimination",
+        "mechanical distance"
+      ]
     },
     {
       "id": "the-organic-ratchet",
       "name": "The Organic Ratchet",
       "color": "brown",
       "fact": "Browning's finding was not that the men of Reserve Police Battalion 101 were ideologically driven or specially selected — it was that ordinary social pressure and the logic of prior participation did most of the work: once a man had not refused the first time, each subsequent time became easier, not because what was being done weighed less, but because the resistance refusing would have required had already worn down.",
-      "seeds": [
-        "the option to refuse",
-        "eroding resistance"
-      ],
-      "floatingTerms": [
-        "conformity to the group",
-        "incremental participation",
-        "escalating commitment",
-        "the minority who refused"
-      ],
-      "terms": [
-        "the option to refuse",
-        "eroding resistance",
-        "conformity to the group",
-        "incremental participation",
-        "escalating commitment",
-        "the minority who refused"
-      ],
       "termInfo": {
         "conformity to the group": {
           "text": "Pressure to match the behavior of one's comrades rather than stand out — several men later admitted they took part because they didn't want to be seen as a coward, not because they believed the killing was right.",
@@ -193,29 +178,31 @@
             "href": "wiki:Reserve Police Battalion 101"
           }
         ]
-      }
+      },
+      "seeds": [
+        "the option to refuse",
+        "eroding resistance"
+      ],
+      "floatingTerms": [
+        "conformity to the group",
+        "incremental participation",
+        "escalating commitment",
+        "the minority who refused"
+      ],
+      "terms": [
+        "the option to refuse",
+        "eroding resistance",
+        "conformity to the group",
+        "incremental participation",
+        "escalating commitment",
+        "the minority who refused"
+      ]
     },
     {
       "id": "the-seductive-pull",
       "name": "The Seductive Pull",
       "color": "olive",
       "fact": "Hedges argues that war does not only have to be imposed — it is also chosen, because it supplies what ordinary life withholds: meaning, belonging, a cause worth dying for, and an intoxicating intensity that functions as a drug. The myth sustains the pull even when the reality is organized murder; nationalism supplies the enemy that makes the cause feel righteous.",
-      "seeds": [
-        "war as a drug",
-        "the plague of nationalism"
-      ],
-      "floatingTerms": [
-        "the myth of war",
-        "mythmakers",
-        "escape from meaninglessness"
-      ],
-      "terms": [
-        "war as a drug",
-        "the plague of nationalism",
-        "the myth of war",
-        "mythmakers",
-        "escape from meaninglessness"
-      ],
       "termInfo": {
         "escape from meaninglessness": "War's appeal to people who feel their ordinary lives lack purpose — refugees, the disenfranchised, and bored youth in comfortable societies alike are, in Hedges' account, all susceptible to it.",
         "mythmakers": "Hedges' list of who manufactures and sustains the myth: historians, war correspondents, filmmakers, novelists, and the state itself.",
@@ -251,31 +238,29 @@
             "href": "wiki:War Is a Force That Gives Us Meaning"
           }
         ]
-      }
+      },
+      "seeds": [
+        "war as a drug",
+        "the plague of nationalism"
+      ],
+      "floatingTerms": [
+        "the myth of war",
+        "mythmakers",
+        "escape from meaninglessness"
+      ],
+      "terms": [
+        "war as a drug",
+        "the plague of nationalism",
+        "the myth of war",
+        "mythmakers",
+        "escape from meaninglessness"
+      ]
     },
     {
       "id": "the-excusing-frame",
       "name": "The Excusing Frame",
       "color": "teal",
       "fact": "Bandura's moral disengagement framework names the cognitive moves that let people commit harmful acts without experiencing themselves as having violated their own moral standards: the harm is reframed as serving a worthy purpose, its language is sanitized, agency is relocated to authority or dispersed across participants, and the target is stripped of the human standing that would make the harm feel real.",
-      "seeds": [
-        "moral justification",
-        "dehumanization"
-      ],
-      "floatingTerms": [
-        "euphemistic labeling",
-        "obedience defense",
-        "divided agency",
-        "cultural distance"
-      ],
-      "terms": [
-        "moral justification",
-        "dehumanization",
-        "euphemistic labeling",
-        "obedience defense",
-        "divided agency",
-        "cultural distance"
-      ],
       "termInfo": {
         "cultural distance": {
           "text": "Framing an enemy as racially, ethnically, or culturally other — making them feel less like a specific person and more like a category — which reduces the psychological cost of harming them.",
@@ -333,7 +318,25 @@
             "href": "wiki:Moral disengagement"
           }
         ]
-      }
+      },
+      "seeds": [
+        "moral justification",
+        "dehumanization"
+      ],
+      "floatingTerms": [
+        "euphemistic labeling",
+        "obedience defense",
+        "divided agency",
+        "cultural distance"
+      ],
+      "terms": [
+        "moral justification",
+        "dehumanization",
+        "euphemistic labeling",
+        "obedience defense",
+        "divided agency",
+        "cultural distance"
+      ]
     }
   ],
   "bridges": [

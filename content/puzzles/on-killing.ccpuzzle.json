@@ -6,24 +6,27 @@
     "psychology",
     "political-science"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
+  "large": true,
   "tags": [
     "book",
     "war"
   ],
-  "large": true,
   "info": {
     "text": "Dave Grossman's argument that human beings carry a deep, documented resistance to killing their own kind -- and what it costs, psychologically, to train a soldier out of it.",
+    "links": [
+      {
+        "href": "wiki:On Killing"
+      }
+    ],
     "citations": [
       {
         "title": "On Killing: The Psychological Cost of Learning to Kill in War and Society",
         "author": "Grossman, Dave",
         "publisher": "Back Bay Books",
         "year": "1996"
-      }
-    ],
-    "links": [
-      {
-        "href": "wiki:On Killing"
       }
     ]
   },
@@ -33,20 +36,6 @@
       "name": "The Resistance to Killing",
       "color": "olive",
       "fact": "Across military history, most participants in close, face-to-face combat did not fire to kill -- an instinctive resistance to killing one's own kind so strong that, like the posturing and submission signals that let animals of the same species fight without dying, much of what looks like combat is aimed at avoiding a kill, not accomplishing one.",
-      "seeds": [
-        "instinctive resistance",
-        "posturing"
-      ],
-      "floatingTerms": [
-        "ratio of fire",
-        "submission signals"
-      ],
-      "terms": [
-        "instinctive resistance",
-        "posturing",
-        "ratio of fire",
-        "submission signals"
-      ],
       "termInfo": {
         "posturing": {
           "text": "Displaying aggression -- size, noise, threat -- without actually attacking, the way many animals, and much of historical hand-to-hand combat, settle contests without a kill.",
@@ -67,27 +56,27 @@
             "href": "wiki:Agonistic behaviour"
           }
         ]
-      }
+      },
+      "seeds": [
+        "instinctive resistance",
+        "posturing"
+      ],
+      "floatingTerms": [
+        "ratio of fire",
+        "submission signals"
+      ],
+      "terms": [
+        "instinctive resistance",
+        "posturing",
+        "ratio of fire",
+        "submission signals"
+      ]
     },
     {
       "id": "mechanisms-of-distance",
       "name": "Mechanisms of Distance",
       "color": "blue",
       "fact": "The emotional cost of killing falls as the distance from the victim grows -- whether that distance is physical range, a perceived cultural gulf, a belief in the cause's moral legitimacy, or a scope, screen, or machine standing between the killer and the target.",
-      "seeds": [
-        "physical distance",
-        "cultural distance"
-      ],
-      "floatingTerms": [
-        "moral distance",
-        "mechanical distance"
-      ],
-      "terms": [
-        "physical distance",
-        "cultural distance",
-        "moral distance",
-        "mechanical distance"
-      ],
       "termInfo": {
         "cultural distance": {
           "text": "Framing an enemy as racially, ethnically, or culturally other -- making them feel less like a specific person and more like a category.",
@@ -111,27 +100,27 @@
       },
       "info": {
         "text": "How range, perceived cultural difference, belief in a cause's rightness, and intervening technology each let a person put figurative or literal space between themselves and someone they kill."
-      }
+      },
+      "seeds": [
+        "physical distance",
+        "cultural distance"
+      ],
+      "floatingTerms": [
+        "moral distance",
+        "mechanical distance"
+      ],
+      "terms": [
+        "physical distance",
+        "cultural distance",
+        "moral distance",
+        "mechanical distance"
+      ]
     },
     {
       "id": "training-to-overcome-resistance",
       "name": "Training to Overcome Resistance",
       "color": "amber",
       "fact": "Twentieth-century militaries replaced static bullseye targets with realistic, human-shaped targets that dropped when hit, drilling soldiers through operant conditioning to fire reflexively; repeated exposure produced desensitization, and a legitimate chain of command gave soldiers authorization to fire without individually weighing each shot.",
-      "seeds": [
-        "operant conditioning",
-        "desensitization"
-      ],
-      "floatingTerms": [
-        "authorization",
-        "target discrimination"
-      ],
-      "terms": [
-        "operant conditioning",
-        "desensitization",
-        "authorization",
-        "target discrimination"
-      ],
       "termInfo": {
         "authorization": {
           "text": "Acting against one's own resistance simply because a legitimate authority gave the order -- the same dynamic Stanley Milgram documented in his obedience experiments.",
@@ -168,27 +157,27 @@
             "href": "wiki:Operant conditioning"
           }
         ]
-      }
+      },
+      "seeds": [
+        "operant conditioning",
+        "desensitization"
+      ],
+      "floatingTerms": [
+        "authorization",
+        "target discrimination"
+      ],
+      "terms": [
+        "operant conditioning",
+        "desensitization",
+        "authorization",
+        "target discrimination"
+      ]
     },
     {
       "id": "the-cost-of-killing",
       "name": "The Cost of Killing",
       "color": "brown",
       "fact": "Grossman traces a predictable emotional sequence after killing -- exhilaration, then guilt, then rationalization and acceptance -- that plays out even in soldiers who believe the killing was justified, and that across a fighting force shows up as psychiatric casualties: breakdowns caused not by wounds but by killing and its aftermath.",
-      "seeds": [
-        "guilt",
-        "exhilaration"
-      ],
-      "floatingTerms": [
-        "rationalization",
-        "psychiatric casualties"
-      ],
-      "terms": [
-        "guilt",
-        "exhilaration",
-        "rationalization",
-        "psychiatric casualties"
-      ],
       "termInfo": {
         "guilt": {
           "text": "A moral emotion that occurs when a person believes they have violated their own or a shared standard of conduct.",
@@ -217,7 +206,21 @@
       },
       "info": {
         "text": "The emotional and psychological toll that killing exacts on the person who does it, independent of whether the killing was necessary or justified."
-      }
+      },
+      "seeds": [
+        "guilt",
+        "exhilaration"
+      ],
+      "floatingTerms": [
+        "rationalization",
+        "psychiatric casualties"
+      ],
+      "terms": [
+        "guilt",
+        "exhilaration",
+        "rationalization",
+        "psychiatric casualties"
+      ]
     }
   ],
   "bridges": [
@@ -257,13 +260,13 @@
       ],
       "fact": "As twentieth-century training raised the share of soldiers who would actually fire on the enemy from roughly 15 to 20 percent in World War II to over 90 percent in Vietnam, the rate of psychiatric breakdown rose in step -- suppressing the resistance did not remove its cost, it postponed it.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "the-cost-of-killing": "psychiatric casualties"
+      },
       "direction": {
         "kind": "through",
         "from": "training-to-overcome-resistance",
         "to": "the-cost-of-killing"
-      },
-      "idealTerms": {
-        "the-cost-of-killing": "psychiatric casualties"
       }
     }
   ],

@@ -6,6 +6,9 @@
     "political-science",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "tags": [
     "book"
   ],
@@ -26,20 +29,6 @@
       "name": "Against Instinctivism",
       "color": "blue",
       "fact": "Fromm's book opens as a book-length reply to Konrad Lorenz's On Aggression: the claim that human destructiveness is an inherited biological drive, pressure that accumulates and must be discharged like water building up in a reservoir. Fromm accepts a small kernel of the instinct account -- the biologically-defensive aggression humans share with other animals -- and rejects the rest as a category error that cannot explain what actually needs explaining.",
-      "seeds": [
-        "Konrad Lorenz",
-        "benign aggression"
-      ],
-      "floatingTerms": [
-        "instinctivism",
-        "hydraulic model"
-      ],
-      "terms": [
-        "Konrad Lorenz",
-        "benign aggression",
-        "instinctivism",
-        "hydraulic model"
-      ],
       "termInfo": {
         "Konrad Lorenz": {
           "text": "Austrian ethologist whose On Aggression (1963) framed human destructiveness as an inherited biological drive analogous to those observed in other animals. Fromm's Anatomy is the book-length reply.",
@@ -60,13 +49,42 @@
             "href": "wiki:On Aggression"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Konrad Lorenz",
+        "benign aggression"
+      ],
+      "floatingTerms": [
+        "instinctivism",
+        "hydraulic model"
+      ],
+      "terms": [
+        "Konrad Lorenz",
+        "benign aggression",
+        "instinctivism",
+        "hydraulic model"
+      ]
     },
     {
       "id": "passions-of-destruction",
       "name": "Passions of Destruction",
       "color": "amber",
       "fact": "Fromm's positive account of specifically-human destructiveness: not a drive to be discharged, but a character orientation, developed over a life rather than inherited. Its two major forms are sadism, the passion for absolute control over another living being, and necrophilia, the attraction to death, decay, and the non-alive. Together with narcissism and incestuous-symbiotic fixation, necrophilia forms what Fromm calls the syndrome of decay -- the extreme diagnostic shape of malignant aggression, whose everyday expression is the love of the mechanical.",
+      "termInfo": {
+        "love of the mechanical": "Fromm's concrete gloss on the necrophilic sensibility -- attraction to machines, cleanliness, systems, and the non-alive, coupled with unease at what is organic, wet, or growing. The everyday face of necrophilia when it isn't producing atrocities.",
+        "malignant aggression": "Aggression that is character-rooted rather than instinctual, specifically human, and untied to any biological purpose -- Fromm's umbrella term for the destructive orientations no animal shows.",
+        "necrophilia": "Fromm's technical use: a character orientation drawn to death, decay, mechanization, and the non-alive, attracted to what can be controlled precisely because it does not live. Distinct from the clinical sexual disorder that shares the name.",
+        "sadism": "Fromm's late-work use: the passion for absolute and unrestricted control over another living being, so complete it turns the other into a thing. In Anatomy Fromm develops this as one of the two major forms of character-rooted destructiveness.",
+        "syndrome of decay": "Fromm's clinical syndrome combining necrophilia, malignant narcissism, and incestuous-symbiotic fixation -- three character traits that develop together and reinforce each other into an extreme destructive orientation."
+      },
+      "info": {
+        "text": "Fromm's positive account of character-rooted, specifically human destructiveness: the two orientations, sadism and necrophilia, whose sustained cruelty no instinct account can explain.",
+        "links": [
+          {
+            "href": "wiki:Erich Fromm"
+          }
+        ]
+      },
       "seeds": [
         "necrophilia",
         "sadism"
@@ -82,40 +100,13 @@
         "malignant aggression",
         "syndrome of decay",
         "love of the mechanical"
-      ],
-      "termInfo": {
-        "love of the mechanical": "Fromm's concrete gloss on the necrophilic sensibility -- attraction to machines, cleanliness, systems, and the non-alive, coupled with unease at what is organic, wet, or growing. The everyday face of necrophilia when it isn't producing atrocities.",
-        "malignant aggression": "Aggression that is character-rooted rather than instinctual, specifically human, and untied to any biological purpose -- Fromm's umbrella term for the destructive orientations no animal shows.",
-        "necrophilia": "Fromm's technical use: a character orientation drawn to death, decay, mechanization, and the non-alive, attracted to what can be controlled precisely because it does not live. Distinct from the clinical sexual disorder that shares the name.",
-        "sadism": "Fromm's late-work use: the passion for absolute and unrestricted control over another living being, so complete it turns the other into a thing. In Anatomy Fromm develops this as one of the two major forms of character-rooted destructiveness.",
-        "syndrome of decay": "Fromm's clinical syndrome combining necrophilia, malignant narcissism, and incestuous-symbiotic fixation -- three character traits that develop together and reinforce each other into an extreme destructive orientation."
-      },
-      "info": {
-        "text": "Fromm's positive account of character-rooted, specifically human destructiveness: the two orientations, sadism and necrophilia, whose sustained cruelty no instinct account can explain.",
-        "links": [
-          {
-            "href": "wiki:Erich Fromm"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "biophilia",
       "name": "Biophilia",
       "color": "teal",
       "fact": "Against necrophilia Fromm sets biophilia: the character oriented toward life, growth, and the integration of what has been separated. Not the mere absence of destructive impulses but a specific developmental achievement, describable as its own clinical syndrome -- the syndrome of growth -- opposite in structure to the syndrome of decay.",
-      "seeds": [
-        "biophilia",
-        "syndrome of growth"
-      ],
-      "floatingTerms": [
-        "integration"
-      ],
-      "terms": [
-        "biophilia",
-        "syndrome of growth",
-        "integration"
-      ],
       "termInfo": {
         "biophilia": "Fromm's term for the character orientation drawn toward life, growth, and the integration of what has been separated; the developmental counter-pole to necrophilia. (Distinct from E. O. Wilson's later 1984 biophilia hypothesis, which borrowed the word and gave it a different meaning.)",
         "integration": "In Fromm's usage, the biophilic tendency to combine and unite what has been separated -- the psyche's own parts, one's relationships with others, one's engagement with the living world. Opposed to necrophilia's tendency toward fragmentation and mechanization.",
@@ -128,7 +119,19 @@
             "href": "wiki:Erich Fromm"
           }
         ]
-      }
+      },
+      "seeds": [
+        "biophilia",
+        "syndrome of growth"
+      ],
+      "floatingTerms": [
+        "integration"
+      ],
+      "terms": [
+        "biophilia",
+        "syndrome of growth",
+        "integration"
+      ]
     }
   ],
   "bridges": [

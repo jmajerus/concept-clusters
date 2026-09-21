@@ -1,0 +1,221 @@
+// Generated from content/puzzles/anatomy-of-villains.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "anatomy-of-villains",
+  "title": "The Anatomy of Villains: Iago and Macbeth",
+  "category": "literary-history",
+  "tags": [
+    "Shakespeare",
+    "tragedy",
+    "villains",
+    "literary criticism"
+  ],
+  "info": {
+    "text": "Two of Shakespeare's most-studied villains, examined side by side for what actually drives them — and what doesn't.",
+    "citations": [
+      {
+        "title": "Othello, the Moor of Venice",
+        "author": "Shakespeare, William",
+        "year": "c. 1603"
+      },
+      {
+        "title": "Macbeth",
+        "author": "Shakespeare, William",
+        "year": "c. 1606"
+      },
+      {
+        "title": "Marginal note on Othello, in his lectures on Shakespeare",
+        "author": "Coleridge, Samuel Taylor",
+        "year": "1818–1819"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "iago",
+      "name": "Iago",
+      "color": "teal",
+      "fact": "Iago rotates through professional resentment, sexual jealousy, and simple hatred as explanations for his plot, discarding each once it's served its purpose — the cruelty he inflicts is out of all proportion to any single motive he names.",
+      "terms": [
+        "Honest Iago",
+        "Passed Over for Promotion",
+        "Motiveless Malignity",
+        "The Green-Eyed Monster",
+        "Calculated Improvisation"
+      ],
+      "seeds": [
+        "Honest Iago",
+        "Passed Over for Promotion"
+      ],
+      "termInfo": {
+        "Motiveless Malignity": {
+          "text": "Samuel Taylor Coleridge's phrase, from a marginal note on Othello, for malice that outruns any single motive offered to explain it.",
+          "links": [
+            {
+              "href": "wiki:Iago"
+            }
+          ]
+        },
+        "The Green-Eyed Monster": {
+          "text": "Iago's own warning to Othello about jealousy — a phrase that became a byword for the emotion he is busy manufacturing.",
+          "links": [
+            {
+              "href": "wiki:Jealousy"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The scheming ensign at the center of Shakespeare's Othello.",
+        "links": [
+          {
+            "href": "wiki:Iago"
+          }
+        ]
+      }
+    },
+    {
+      "id": "macbeth",
+      "name": "Macbeth",
+      "color": "blue",
+      "fact": "Told he will be king, Macbeth doesn't simply wait for the prophecy to come true — ambition converts a possibility into a plan, and the plan into a murder he then spends the rest of the play trying to make safe.",
+      "terms": [
+        "Vaulting Ambition",
+        "The Witches' Prophecy",
+        "Lady Macbeth's Incitement",
+        "Regicide",
+        "Hallucinatory Guilt",
+        "Nihilistic Despair"
+      ],
+      "seeds": [
+        "Vaulting Ambition",
+        "The Witches' Prophecy"
+      ],
+      "termInfo": {
+        "Lady Macbeth's Incitement": {
+          "text": "Macbeth's wife goads him toward regicide, questioning his resolve until he commits to the murder.",
+          "links": [
+            {
+              "href": "wiki:Lady Macbeth"
+            }
+          ]
+        },
+        "Regicide": {
+          "links": [
+            {
+              "href": "wiki:Regicide"
+            }
+          ]
+        },
+        "The Witches' Prophecy": {
+          "text": "The prophecy delivered by the Weird Sisters, promising Macbeth the throne — a claim that starts as an observation and ends as a plan.",
+          "links": [
+            {
+              "href": "wiki:Three Witches"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The Scottish general at the center of Shakespeare's Macbeth.",
+        "links": [
+          {
+            "href": "wiki:Macbeth (character)"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "Free Will and Fate",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Macbeth's own words deny any outside \"spur\" to his ambition, even as the witches' prophecy and Lady Macbeth's taunts visibly drive him forward — Iago's plot has no equivalent external engine at all, making his malice the more purely self-authored of the two.",
+      "relationKind": "contrast",
+      "idealTerms": [
+        null,
+        "Vaulting Ambition"
+      ]
+    },
+    {
+      "term": "Soliloquy",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Both villains confide their truest selves only to the audience, never to another character on stage — but Iago's soliloquies are gleeful strategy sessions, while Macbeth's curdle into confessions of dread.",
+      "info": {
+        "text": "A speech delivered when a character believes no one else can hear, giving the audience privileged access to what they actually think.",
+        "links": [
+          {
+            "href": "wiki:Soliloquy"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "outside-macbeths-will",
+      "prompt": "Which concept comes from outside Macbeth's own will?",
+      "explanation": "Macbeth explicitly denies needing an outside \"spur\" to act — his ambition is his own, even though prophecy and his wife's taunts both press him toward the crown.",
+      "targets": [
+        "The Witches' Prophecy",
+        "Lady Macbeth's Incitement"
+      ],
+      "reasons": {
+        "Lady Macbeth's Incitement": "Lady Macbeth actively goads and shames Macbeth into acting, applying pressure from outside his own resolve.",
+        "The Witches' Prophecy": "The prophecy is spoken to Macbeth by an external supernatural force, before he has taken any action of his own."
+      }
+    },
+    {
+      "id": "private-to-the-audience",
+      "prompt": "Which concept does the audience learn only in a moment no other character witnesses?",
+      "explanation": "Shakespeare grants the audience privileged, solitary access to each villain's truest thoughts — even though one plot is a comic-toned scheme and the other a tragic unraveling, both truths surface only in soliloquy.",
+      "targets": [
+        "Motiveless Malignity",
+        "Vaulting Ambition",
+        "Hallucinatory Guilt",
+        "Nihilistic Despair"
+      ],
+      "reasons": {
+        "Hallucinatory Guilt": "Macbeth's visions of the dagger and of Banquo's ghost surface in moments of private torment.",
+        "Motiveless Malignity": "Iago's private admissions to the audience reveal how thin and shifting his stated motives really are.",
+        "Nihilistic Despair": "Macbeth's final reckoning with meaninglessness is delivered alone, after learning of his wife's death.",
+        "Vaulting Ambition": "Macbeth admits, alone on stage, that his own ambition — not outside necessity — is what drives him forward."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Two Kinds of Villain",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Shakespeare grants an unusual privilege in his tragedies: soliloquies that let a character's true reasoning reach the audience and no one else on stage. Two of his most-studied villains make a useful pair for examining how that reasoning actually works.\n\nIn *Othello*, the soldier Iago sets out to destroy his commanding officer, offering a rotating set of grievances — a passed-over promotion, a rumor of infidelity, plain resentment — that never quite account for the scale of what he does. The critic Samuel Taylor Coleridge described the resulting gap between Iago's cruelty and his stated reasons as a malice that outruns any single motive offered for it.\n\nIn *Macbeth*, a celebrated soldier receives a prophecy that he will be king, and one conversation with his wife turns that possibility into a plan for murder. Macbeth, unlike Iago, names his own ambition outright, in a private moment where he admits he needs no outside push to act — even as prophecy and persuasion visibly surround him.\n\nAs you read, notice which villain keeps needing new reasons, and which one never really needed one."
+    },
+    "links": [
+      {
+        "href": "https://shakespeare-navigators.ewu.edu/othello/motiveless.html",
+        "label": "Coleridge's note on Othello, in context"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)",
+        "model": "Claude Sonnet 5",
+        "reasoning": "high"
+      }
+    ]
+  }
+});

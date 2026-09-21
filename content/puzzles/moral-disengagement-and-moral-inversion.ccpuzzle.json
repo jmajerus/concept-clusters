@@ -6,6 +6,9 @@
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "large": true,
   "info": {
     "text": "The difference between mechanisms that excuse harmful conduct and a deeper inversion in which cruelty, domination, or betrayal of restraint is treated as morally admirable.",
@@ -21,20 +24,6 @@
       "name": "Reframing harmful conduct",
       "color": "teal",
       "fact": "Harm can be morally disengaged from self-condemnation by presenting it as justified, naming it euphemistically, comparing it with something worse, or minimizing its consequences.",
-      "seeds": [
-        "moral justification",
-        "euphemistic labeling"
-      ],
-      "floatingTerms": [
-        "advantageous comparison",
-        "consequence minimization"
-      ],
-      "terms": [
-        "moral justification",
-        "euphemistic labeling",
-        "advantageous comparison",
-        "consequence minimization"
-      ],
       "termInfo": {
         "moral justification": {
           "text": "Presentation of harmful conduct as serving a worthy, necessary, defensive, or socially beneficial purpose.",
@@ -75,27 +64,27 @@
             "href": "wiki:Moral disengagement"
           }
         ]
-      }
+      },
+      "seeds": [
+        "moral justification",
+        "euphemistic labeling"
+      ],
+      "floatingTerms": [
+        "advantageous comparison",
+        "consequence minimization"
+      ],
+      "terms": [
+        "moral justification",
+        "euphemistic labeling",
+        "advantageous comparison",
+        "consequence minimization"
+      ]
     },
     {
       "id": "displacing-responsibility",
       "name": "Displacing responsibility",
       "color": "blue",
       "fact": "Responsibility is displaced when authority is treated as the true agent, action is fragmented among participants, blame is assigned to the victim, or the target is denied full human standing.",
-      "seeds": [
-        "victim blaming",
-        "dehumanization"
-      ],
-      "floatingTerms": [
-        "obedience defense",
-        "divided agency"
-      ],
-      "terms": [
-        "obedience defense",
-        "divided agency",
-        "victim blaming",
-        "dehumanization"
-      ],
       "termInfo": {
         "obedience defense": {
           "text": "A claim that compliance with authority removes or substantially replaces the actor's own responsibility to judge the action.",
@@ -136,27 +125,27 @@
             "href": "wiki:Moral disengagement"
           }
         ]
-      }
+      },
+      "seeds": [
+        "victim blaming",
+        "dehumanization"
+      ],
+      "floatingTerms": [
+        "obedience defense",
+        "divided agency"
+      ],
+      "terms": [
+        "obedience defense",
+        "divided agency",
+        "victim blaming",
+        "dehumanization"
+      ]
     },
     {
       "id": "inverting-moral-value",
       "name": "Inverting moral value",
       "color": "amber",
       "fact": "Moral inversion goes beyond excusing harm: it treats cruelty or domination as admirable and recasts empathy or restraint as weakness, corruption, or betrayal.",
-      "seeds": [
-        "cruelty as strength",
-        "empathy as weakness"
-      ],
-      "floatingTerms": [
-        "domination as order",
-        "restraint as betrayal"
-      ],
-      "terms": [
-        "cruelty as strength",
-        "domination as order",
-        "empathy as weakness",
-        "restraint as betrayal"
-      ],
       "termInfo": {
         "cruelty as strength": {
           "text": "A value judgment that treats willingness to inflict, tolerate, or celebrate suffering as evidence of resolve.",
@@ -197,27 +186,27 @@
             "href": "wiki:Value theory"
           }
         ]
-      }
+      },
+      "seeds": [
+        "cruelty as strength",
+        "empathy as weakness"
+      ],
+      "floatingTerms": [
+        "domination as order",
+        "restraint as betrayal"
+      ],
+      "terms": [
+        "cruelty as strength",
+        "domination as order",
+        "empathy as weakness",
+        "restraint as betrayal"
+      ]
     },
     {
       "id": "restoring-moral-orientation",
       "name": "Restoring moral orientation",
       "color": "magenta",
       "fact": "Moral orientation is restored by naming conduct accurately, retaining personal responsibility, affirming dignity that cannot be forfeited, and judging responses proportionately.",
-      "seeds": [
-        "personal responsibility",
-        "unconditional dignity"
-      ],
-      "floatingTerms": [
-        "accurate naming",
-        "proportional judgment"
-      ],
-      "terms": [
-        "accurate naming",
-        "personal responsibility",
-        "unconditional dignity",
-        "proportional judgment"
-      ],
       "termInfo": {
         "accurate naming": {
           "text": "Language that describes conduct and consequence without sanitizing, exaggerating, or disguising morally relevant features.",
@@ -258,7 +247,21 @@
             "href": "wiki:Moral psychology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "personal responsibility",
+        "unconditional dignity"
+      ],
+      "floatingTerms": [
+        "accurate naming",
+        "proportional judgment"
+      ],
+      "terms": [
+        "accurate naming",
+        "personal responsibility",
+        "unconditional dignity",
+        "proportional judgment"
+      ]
     }
   ],
   "bridges": [

@@ -7,6 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "hydrology-land-and-groundwater",
   "title": "Catchments & Groundwater: how land holds and routes water",
   "category": "geography",
+  "subcategories": {
+    "geography": "hydrology"
+  },
   "info": {
     "text": "The structure beneath the cycle: how ridgelines fence drainage basins and tributaries build branching networks — and how rock below the water table stores water like a sponge, lets it flow where pores connect, and leaks it back to daylight in springs.",
     "links": [

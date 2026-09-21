@@ -6,23 +6,26 @@
     "business-organizations",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
+  "large": true,
   "tags": [
     "book"
   ],
-  "large": true,
   "info": {
     "text": "Kets de Vries and Miller's claim that a company's whole structure and culture can come to mirror the neurotic style of the small group of executives, often just one person, running it -- four of the five styles they identified are on this board; the fifth, schizoid, is not.",
+    "links": [
+      {
+        "href": "wiki:Manfred F.R. Kets de Vries"
+      }
+    ],
     "citations": [
       {
         "title": "The Neurotic Organization: Diagnosing and Changing Counterproductive Styles of Management",
         "author": "Manfred F. R. Kets de Vries and Danny Miller",
         "publisher": "Jossey-Bass",
         "year": "1984"
-      }
-    ],
-    "links": [
-      {
-        "href": "wiki:Manfred F.R. Kets de Vries"
       }
     ]
   },
@@ -32,6 +35,13 @@
       "name": "The Paranoid Organization",
       "color": "teal",
       "fact": "In the paranoid organization, a suspicious, mistrustful leader who scans constantly for hidden threats and enemies shapes a whole culture in his image: power concentrates at the top so nothing can happen without the leader's awareness, and elaborate information systems exist less to inform strategy than to confirm the leader's hypervigilance was justified all along.",
+      "termInfo": {
+        "hypervigilance": "Constant scanning for hidden threats, whether or not real evidence of one exists -- the trait the paranoid leader's information systems exist to serve.",
+        "information systems": "Elaborate monitoring and reporting structures that function less to inform decisions than to confirm the suspicions that motivated building them in the first place."
+      },
+      "info": {
+        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
+      },
       "seeds": [
         "suspicion",
         "centralized control"
@@ -45,20 +55,20 @@
         "hypervigilance",
         "centralized control",
         "information systems"
-      ],
-      "termInfo": {
-        "hypervigilance": "Constant scanning for hidden threats, whether or not real evidence of one exists -- the trait the paranoid leader's information systems exist to serve.",
-        "information systems": "Elaborate monitoring and reporting structures that function less to inform decisions than to confirm the suspicions that motivated building them in the first place."
-      },
-      "info": {
-        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
-      }
+      ]
     },
     {
       "id": "cluster-compulsive",
       "name": "The Compulsive Organization",
       "color": "amber",
       "fact": "The compulsive organization mirrors a leader's perfectionism and need for total control: elaborate formal procedures and ritualized evaluation exist to eliminate any outcome the leader hasn't already anticipated, hierarchy hardens into whatever the org chart literally says rather than how work actually gets done, and a fixation on internal order produces tunnel vision toward what's changing outside.",
+      "termInfo": {
+        "ritualized procedure": "Formal evaluation and process followed so exactly that adherence itself, not the outcome, becomes the measure of success.",
+        "tunnel vision": "A fixation on internal order and control so consuming that changes in the world outside the organization go unnoticed until they can no longer be ignored."
+      },
+      "info": {
+        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
+      },
       "seeds": [
         "perfectionism",
         "rigid hierarchy"
@@ -72,20 +82,20 @@
         "ritualized procedure",
         "rigid hierarchy",
         "tunnel vision"
-      ],
-      "termInfo": {
-        "ritualized procedure": "Formal evaluation and process followed so exactly that adherence itself, not the outcome, becomes the measure of success.",
-        "tunnel vision": "A fixation on internal order and control so consuming that changes in the world outside the organization go unnoticed until they can no longer be ignored."
-      },
-      "info": {
-        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
-      }
+      ]
     },
     {
       "id": "cluster-dramatic",
       "name": "The Dramatic Organization",
       "color": "magenta",
       "fact": "The dramatic organization forms around a leader whose need for admiration and taste for bold, impulsive risk-taking becomes the organization's whole operating style: authority overcentralizes in a single charismatic figure, and the firm expands in dramatic, unplanned leaps driven more by the leader's appetite for the next big move than by careful analysis.",
+      "termInfo": {
+        "overcentralization": "Authority collapsed almost entirely into one charismatic figure, leaving the organization structurally dependent on that person's continued presence and energy.",
+        "unplanned expansion": "Growth pursued in dramatic leaps driven by a leader's appetite for the next bold move, ahead of the analysis that would normally justify it."
+      },
+      "info": {
+        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
+      },
       "seeds": [
         "need for admiration",
         "impulsive risk-taking"
@@ -99,20 +109,20 @@
         "impulsive risk-taking",
         "overcentralization",
         "unplanned expansion"
-      ],
-      "termInfo": {
-        "overcentralization": "Authority collapsed almost entirely into one charismatic figure, leaving the organization structurally dependent on that person's continued presence and energy.",
-        "unplanned expansion": "Growth pursued in dramatic leaps driven by a leader's appetite for the next bold move, ahead of the analysis that would normally justify it."
-      },
-      "info": {
-        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
-      }
+      ]
     },
     {
       "id": "cluster-depressive",
       "name": "The Depressive Organization",
       "color": "blue",
       "fact": "The depressive organization, often left in the wake of a departed founder or dominant leader, settles into passivity and a pervasive loss of confidence: initiative gives way to bureaucratic inertia, and the firm turns insular, more concerned with avoiding further failure than pursuing anything new.",
+      "termInfo": {
+        "insularity": "A turn inward, away from customers, competitors, and any outside source of new direction, in favor of the organization's own familiar and unthreatening routines.",
+        "loss of confidence": "A pervasive sense that initiative isn't worth the risk of further failure, which becomes self-fulfilling as it spreads from the leader through the rest of the firm."
+      },
+      "info": {
+        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
+      },
       "seeds": [
         "passivity",
         "bureaucratic inertia"
@@ -126,14 +136,7 @@
         "loss of confidence",
         "bureaucratic inertia",
         "insularity"
-      ],
-      "termInfo": {
-        "insularity": "A turn inward, away from customers, competitors, and any outside source of new direction, in favor of the organization's own familiar and unthreatening routines.",
-        "loss of confidence": "A pervasive sense that initiative isn't worth the risk of further failure, which becomes self-fulfilling as it spreads from the leader through the rest of the firm."
-      },
-      "info": {
-        "text": "One of five neurotic organizational styles Kets de Vries and Miller identified, each traced to a corresponding personality pattern in the leader running the firm."
-      }
+      ]
     }
   ],
   "bridges": [
@@ -183,14 +186,14 @@
         "text": "How one style's unsustainable excess becomes the precondition for the next style's collapse."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-dramatic": "unplanned expansion",
+        "cluster-depressive": "loss of confidence"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-dramatic",
         "to": "cluster-depressive"
-      },
-      "idealTerms": {
-        "cluster-dramatic": "unplanned expansion",
-        "cluster-depressive": "loss of confidence"
       }
     }
   ],

@@ -6,11 +6,19 @@
     "business-organizations",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "tags": [
     "book"
   ],
   "info": {
     "text": "Howard Schwartz's account of organizational narcissism: how identifying with a fantasy of institutional perfection can require an organization to suppress the very evidence that would tell it the fantasy is false.",
+    "links": [
+      {
+        "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
+      }
+    ],
     "citations": [
       {
         "title": "On the Psychodynamics of Organizational Disaster: The Case of the Space Shuttle Challenger",
@@ -32,11 +40,6 @@
         "year": "1987",
         "pages": "41-54"
       }
-    ],
-    "links": [
-      {
-        "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
-      }
     ]
   },
   "clusters": [
@@ -45,6 +48,12 @@
       "name": "The Organization Ideal",
       "color": "teal",
       "fact": "Schwartz's organization ideal is a collective substitute for Freud's ego ideal -- the internal standard everyone measures short of and feels shame about. Identifying with an organization imagined as perfect offers a shortcut back to the earliest fantasy of all, what Schwartz calls the return to narcissism: being the effortless center of a loving world. Since no real organization is actually perfect, the fantasy survives by treating advancement as attainment -- believing that whoever sits higher in the hierarchy is, by definition, closer to the ideal.",
+      "termInfo": {
+        "advancement as attainment": "The belief, required to keep the organization ideal alive despite the organization's real imperfections, that people further up the hierarchy have gotten measurably closer to the ideal than the people below them.",
+        "ego ideal": "Freud's term for the internalized image of who one ought to be -- a standard the self measures against and typically falls short of, generating shame. Schwartz's organization ideal offers a way to borrow this function from a collective fantasy instead of bearing it individually.",
+        "return to narcissism": "Schwartz's name, after Freud, for the earliest and most primitive fantasy available to the psyche: being at the center of a loving world with no need or lack unmet. Impossible to actually achieve as an adult, but available as fantasy through identification with something imagined as perfect."
+      },
+      "info": "Schwartz's claim that organizations offer members a collective fantasy of perfection to identify with, in place of the individual ego ideal they can never fully live up to on their own.",
       "seeds": [
         "organization ideal",
         "ego ideal"
@@ -58,19 +67,26 @@
         "ego ideal",
         "return to narcissism",
         "advancement as attainment"
-      ],
-      "termInfo": {
-        "advancement as attainment": "The belief, required to keep the organization ideal alive despite the organization's real imperfections, that people further up the hierarchy have gotten measurably closer to the ideal than the people below them.",
-        "ego ideal": "Freud's term for the internalized image of who one ought to be -- a standard the self measures against and typically falls short of, generating shame. Schwartz's organization ideal offers a way to borrow this function from a collective fantasy instead of bearing it individually.",
-        "return to narcissism": "Schwartz's name, after Freud, for the earliest and most primitive fantasy available to the psyche: being at the center of a loving world with no need or lack unmet. Impossible to actually achieve as an adult, but available as fantasy through identification with something imagined as perfect."
-      },
-      "info": "Schwartz's claim that organizations offer members a collective fantasy of perfection to identify with, in place of the individual ego ideal they can never fully live up to on their own."
+      ]
     },
     {
       "id": "cluster-organizational-totalitarianism",
       "name": "Organizational Totalitarianism",
       "color": "amber",
       "fact": "When the organization ideal is threatened, Schwartz argued, organizations can respond with organizational totalitarianism: repressing dissent and punishing anyone who names the gap between the fantasy and the facts. The people doing the actual physical work usually keep some real contact with it; the further a role sits from that contact -- and the more invested it is in the ideal -- the more prone it is to loss of reality testing, dismissing or withholding whatever information doesn't fit.",
+      "termInfo": {
+        "distance from reality": "How structurally and physically removed a role is from the actual work being done -- which Schwartz found correlated with how much reality-testing capacity that role retained. Engineers close to the hardware kept more of it than executives further from it.",
+        "loss of reality testing": "The abandonment of ordinary reality-checking -- comparing belief against evidence -- in favor of maintaining the organization ideal, which Schwartz found concentrated most heavily among those furthest from the work itself and most invested in its perfection.",
+        "repressed dissent": "Disagreement or bad news treated as a threat to be silenced rather than information to be evaluated, since acknowledging it would mean acknowledging the organization ideal is false."
+      },
+      "info": {
+        "text": "Schwartz's account of what an organization does to defend the organization ideal once it's been threatened by disconfirming evidence or dissent.",
+        "links": [
+          {
+            "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
+          }
+        ]
+      },
       "seeds": [
         "organizational totalitarianism",
         "repressed dissent"
@@ -84,20 +100,7 @@
         "loss of reality testing",
         "repressed dissent",
         "distance from reality"
-      ],
-      "termInfo": {
-        "distance from reality": "How structurally and physically removed a role is from the actual work being done -- which Schwartz found correlated with how much reality-testing capacity that role retained. Engineers close to the hardware kept more of it than executives further from it.",
-        "loss of reality testing": "The abandonment of ordinary reality-checking -- comparing belief against evidence -- in favor of maintaining the organization ideal, which Schwartz found concentrated most heavily among those furthest from the work itself and most invested in its perfection.",
-        "repressed dissent": "Disagreement or bad news treated as a threat to be silenced rather than information to be evaluated, since acknowledging it would mean acknowledging the organization ideal is false."
-      },
-      "info": {
-        "text": "Schwartz's account of what an organization does to defend the organization ideal once it's been threatened by disconfirming evidence or dissent.",
-        "links": [
-          {
-            "href": "http://www.sba.oakland.edu/faculty/schwartz/Challenger.htm"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [
@@ -113,14 +116,14 @@
         "text": "The same person can occupy either role -- one still testing belief against evidence, one committed to protecting the ideal -- and which role is active determines which cluster's logic governs the decision."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-organization-ideal": "advancement as attainment",
+        "cluster-organizational-totalitarianism": "distance from reality"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-organization-ideal",
         "to": "cluster-organizational-totalitarianism"
-      },
-      "idealTerms": {
-        "cluster-organization-ideal": "advancement as attainment",
-        "cluster-organizational-totalitarianism": "distance from reality"
       }
     }
   ],

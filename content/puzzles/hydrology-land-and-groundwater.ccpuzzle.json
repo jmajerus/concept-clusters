@@ -2,6 +2,9 @@
   "id": "hydrology-land-and-groundwater",
   "title": "Catchments & Groundwater: how land holds and routes water",
   "category": "geography",
+  "subcategories": {
+    "geography": "hydrology"
+  },
   "info": {
     "text": "The structure beneath the cycle: how ridgelines fence drainage basins and tributaries build branching networks — and how rock below the water table stores water like a sponge, lets it flow where pores connect, and leaks it back to daylight in springs.",
     "links": [
@@ -31,6 +34,15 @@
       "name": "Catchments — how land routes water",
       "color": "teal",
       "fact": "Every drop that falls lands inside a drainage basin: ridgeline divides wall it off, tributaries merge into a branching network, and in closed basins the water never reaches the sea at all.",
+      "termInfo": {
+        "drainage basin": "All the land whose surface water converges to a single outlet — also called a watershed or catchment.",
+        "tributary": "A stream that feeds a larger one, building the drainage network's branching tree.",
+        "drainage divide": "The line of high ground separating one basin's water from the next — the catchment's boundary.",
+        "confluence": "The point where two streams join into one.",
+        "stream order": "A channel's rank in the network's hierarchy: headwater streams are order 1, and the order grows where streams join.",
+        "floodplain": "Flat land beside a channel, built from the river's own deposits and regularly drowned when the river overflows.",
+        "endorheic basin": "A closed basin with no outlet to the ocean — water leaves only by evaporation or by sinking underground."
+      },
       "seeds": [
         "drainage basin",
         "tributary"
@@ -50,22 +62,22 @@
         "stream order",
         "floodplain",
         "endorheic basin"
-      ],
-      "termInfo": {
-        "drainage basin": "All the land whose surface water converges to a single outlet — also called a watershed or catchment.",
-        "tributary": "A stream that feeds a larger one, building the drainage network's branching tree.",
-        "drainage divide": "The line of high ground separating one basin's water from the next — the catchment's boundary.",
-        "confluence": "The point where two streams join into one.",
-        "stream order": "A channel's rank in the network's hierarchy: headwater streams are order 1, and the order grows where streams join.",
-        "floodplain": "Flat land beside a channel, built from the river's own deposits and regularly drowned when the river overflows.",
-        "endorheic basin": "A closed basin with no outlet to the ocean — water leaves only by evaporation or by sinking underground."
-      }
+      ]
     },
     {
       "id": "subsurface",
       "name": "Groundwater — rock as sponge and pipe",
       "color": "blue",
       "fact": "Below the water table, rock and sediment hold water in their pores like a sponge: porous, permeable layers store it as aquifers, caves in soluble rock drain it fast, and springs are where the sponge leaks daylight.",
+      "termInfo": {
+        "aquifer": "A rock or sediment layer that stores and yields usable water — the world's underground sponge.",
+        "water table": "The surface below which the ground is saturated — the level where water stands in an unpumped well.",
+        "groundwater": "Water filling the pores and fractures below Earth's surface — about 30% of the world's fresh water.",
+        "porosity": "The fraction of the rock that is open space — how much water the rock can hold.",
+        "permeability": "How easily water moves through connected pores — how well the rock lets water flow.",
+        "spring": "A place where groundwater emerges naturally at the surface.",
+        "karst": "Landscape of soluble limestone riddled with caves and sinkholes, where groundwater travels through fast conduits."
+      },
       "seeds": [
         "aquifer",
         "water table"
@@ -85,16 +97,7 @@
         "permeability",
         "spring",
         "karst"
-      ],
-      "termInfo": {
-        "aquifer": "A rock or sediment layer that stores and yields usable water — the world's underground sponge.",
-        "water table": "The surface below which the ground is saturated — the level where water stands in an unpumped well.",
-        "groundwater": "Water filling the pores and fractures below Earth's surface — about 30% of the world's fresh water.",
-        "porosity": "The fraction of the rock that is open space — how much water the rock can hold.",
-        "permeability": "How easily water moves through connected pores — how well the rock lets water flow.",
-        "spring": "A place where groundwater emerges naturally at the surface.",
-        "karst": "Landscape of soluble limestone riddled with caves and sinkholes, where groundwater travels through fast conduits."
-      }
+      ]
     }
   ],
   "bridges": [

@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "bioethics"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "tags": [
     "book",
     "genocide"

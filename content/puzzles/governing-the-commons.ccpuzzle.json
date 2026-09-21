@@ -12,17 +12,17 @@
   ],
   "info": {
     "text": "Elinor Ostrom's account of how communities sharing a finite resource have governed it for centuries without privatising it and without an outside enforcer -- and the features those arrangements turn out to have in common.",
-    "citations": [
-      {
-        "author": "Ostrom, Elinor",
-        "title": "Governing the Commons: The Evolution of Institutions for Collective Action",
-        "publisher": "Cambridge University Press",
-        "year": "1990"
-      }
-    ],
     "links": [
       {
         "href": "https://www.beyondintractability.org/bksum/ostrom-governing"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Governing the Commons: The Evolution of Institutions for Collective Action",
+        "author": "Ostrom, Elinor",
+        "publisher": "Cambridge University Press",
+        "year": "1990"
       }
     ]
   },
@@ -32,20 +32,6 @@
       "name": "The trap",
       "color": "teal",
       "fact": "Hardin's herdsmen share a pasture. Each gains the full benefit of adding an animal and bears only a fraction of the cost of overgrazing, so the field is destroyed by people behaving reasonably. The argument is sound. What Ostrom disputed was its application: the pasture in the parable has no members, no rules, and no way to keep anyone out, which is not a commons but an open-access resource. Hardin later said he had meant unmanaged commons. By then the parable had done its work, and the two conclusions drawn from it -- privatise the resource, or hand it to the state -- had hardened into the only options on the table.",
-      "seeds": [
-        "tragedy of the commons",
-        "free riding"
-      ],
-      "floatingTerms": [
-        "common-pool resource",
-        "open access"
-      ],
-      "terms": [
-        "tragedy of the commons",
-        "free riding",
-        "common-pool resource",
-        "open access"
-      ],
       "termInfo": {
         "common-pool resource": {
           "text": "A resource where keeping people out is difficult and one person's use subtracts from what is left -- a fishery, an aquifer, a pasture. The difficulty of exclusion is what makes it a governance problem rather than a property problem."
@@ -72,25 +58,27 @@
             "href": "https://ostromworkshop.indiana.edu/courses-teaching/teaching-tools/tragedy-commons/index.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "tragedy of the commons",
+        "free riding"
+      ],
+      "floatingTerms": [
+        "common-pool resource",
+        "open access"
+      ],
+      "terms": [
+        "tragedy of the commons",
+        "free riding",
+        "common-pool resource",
+        "open access"
+      ]
     },
     {
       "id": "cluster-rules",
       "name": "Drawing the lines",
       "color": "blue",
       "fact": "Three of Ostrom's principles concern who decides and what they decide. The group has to know its own edges. Its rules have to fit the particular resource rather than a template that worked somewhere else. And -- the one most often absent from schemes designed from outside -- the people living under the rules have to be able to change them. An arrangement failing that third condition tends to fail the second within a few years, because conditions shift and nobody with standing to notice can act on it.",
-      "seeds": [
-        "clearly defined boundaries",
-        "congruence with local conditions"
-      ],
-      "floatingTerms": [
-        "collective-choice arrangements"
-      ],
-      "terms": [
-        "clearly defined boundaries",
-        "congruence with local conditions",
-        "collective-choice arrangements"
-      ],
       "termInfo": {
         "clearly defined boundaries": {
           "text": "Who may draw from the resource, and what the resource includes. Without this nobody can tell an authorised use from an unauthorised one, and nothing else on the list can function."
@@ -104,25 +92,25 @@
       },
       "info": {
         "text": "The principles governing who is in the group, what the rules say, and who gets to change them."
-      }
+      },
+      "seeds": [
+        "clearly defined boundaries",
+        "congruence with local conditions"
+      ],
+      "floatingTerms": [
+        "collective-choice arrangements"
+      ],
+      "terms": [
+        "clearly defined boundaries",
+        "congruence with local conditions",
+        "collective-choice arrangements"
+      ]
     },
     {
       "id": "cluster-enforcement",
       "name": "Making the rules hold",
       "color": "amber",
       "fact": "A rule nobody checks is a suggestion. Ostrom's enduring cases monitored themselves -- the monitors were users, or answerable to users, rather than an inspectorate sent from outside -- and they punished first offences lightly. That last detail is easy to skip past and does a great deal of work: a heavy penalty for a first lapse makes reporting your neighbour so costly that people stop, and the rule dies quietly while still on the books.",
-      "seeds": [
-        "monitoring",
-        "graduated sanctions"
-      ],
-      "floatingTerms": [
-        "conflict-resolution mechanisms"
-      ],
-      "terms": [
-        "monitoring",
-        "graduated sanctions",
-        "conflict-resolution mechanisms"
-      ],
       "termInfo": {
         "conflict-resolution mechanisms": {
           "text": "Somewhere cheap and quick to take a dispute. Rules generate disagreements about their application, and without a low-cost forum those disagreements become reasons to abandon the whole arrangement."
@@ -136,25 +124,25 @@
       },
       "info": {
         "text": "The principles that turn a rule on paper into one people actually keep."
-      }
+      },
+      "seeds": [
+        "monitoring",
+        "graduated sanctions"
+      ],
+      "floatingTerms": [
+        "conflict-resolution mechanisms"
+      ],
+      "terms": [
+        "monitoring",
+        "graduated sanctions",
+        "conflict-resolution mechanisms"
+      ]
     },
     {
       "id": "cluster-outside",
       "name": "The world outside",
       "color": "magenta",
       "fact": "Two of the principles are not about the group at all, but about what surrounds it. Local arrangements need an outside authority that will not overrule them, and Ostrom's cases usually survived because governments left them alone rather than because governments helped. Where a resource is too large for one group, the answer she found was not a bigger authority but layers of smaller ones, each governing what it can actually see.",
-      "seeds": [
-        "recognition of the right to organize",
-        "nested enterprises"
-      ],
-      "floatingTerms": [
-        "polycentric governance"
-      ],
-      "terms": [
-        "recognition of the right to organize",
-        "nested enterprises",
-        "polycentric governance"
-      ],
       "termInfo": {
         "nested enterprises": {
           "text": "For larger systems, governance in layers -- small units for local decisions, wider units for whatever crosses their boundaries -- rather than one body over the whole."
@@ -168,7 +156,19 @@
       },
       "info": {
         "text": "What a commons needs from the world beyond it, and what happens when the resource is too big for one group."
-      }
+      },
+      "seeds": [
+        "recognition of the right to organize",
+        "nested enterprises"
+      ],
+      "floatingTerms": [
+        "polycentric governance"
+      ],
+      "terms": [
+        "recognition of the right to organize",
+        "nested enterprises",
+        "polycentric governance"
+      ]
     }
   ],
   "bridges": [
@@ -184,14 +184,14 @@
         "text": "The problem of making a promise to restrain yourself believable enough that others will act on it. One of the three core problems Ostrom sets out."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-trap": "free riding",
+        "cluster-enforcement": "monitoring"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-trap",
         "to": "cluster-enforcement"
-      },
-      "idealTerms": {
-        "cluster-trap": "free riding",
-        "cluster-enforcement": "monitoring"
       }
     },
     {
@@ -206,14 +206,14 @@
         "text": "Following a rule willingly, but conditional on evidence that others are doing the same."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-rules": "collective-choice arrangements",
+        "cluster-enforcement": "graduated sanctions"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-rules",
         "to": "cluster-enforcement"
-      },
-      "idealTerms": {
-        "cluster-rules": "collective-choice arrangements",
-        "cluster-enforcement": "graduated sanctions"
       }
     },
     {
@@ -285,5 +285,13 @@
         "monitoring": "In a two-player game you see every move the other makes. Here someone has to be assigned to look."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

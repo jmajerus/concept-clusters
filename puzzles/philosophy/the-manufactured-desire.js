@@ -9,10 +9,12 @@ export default definePuzzle(import.meta.url, {
   "category": "philosophy",
   "categories": [
     "philosophy",
+    "psychology",
     "sociology"
   ],
   "subcategories": {
-    "philosophy": "political-philosophy"
+    "philosophy": "political-philosophy",
+    "psychology": "psychoanalysis"
   },
   "large": true,
   "tags": [
@@ -52,9 +54,7 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "false needs": {
-          "text": "Desires manufactured by advertising and social pressure that promise psychological relief but leave the underlying void untouched."
-        },
+        "false needs": "Desires manufactured by advertising and social pressure that promise psychological relief but leave the underlying void untouched.",
         "instrumental rationality": {
           "text": "A logic that reduces everything, including culture, to efficiency and calculation toward profit.",
           "links": [
@@ -63,12 +63,8 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "mass standardization": {
-          "text": "The underlying condition pseudo-individualization is designed to disguise: cultural goods produced to predictable, repeatable formulas."
-        },
-        "pseudo-individualization": {
-          "text": "Minor, cosmetic variation added to standardized products so mass sameness can be experienced as personal choice."
-        }
+        "mass standardization": "The underlying condition pseudo-individualization is designed to disguise: cultural goods produced to predictable, repeatable formulas.",
+        "pseudo-individualization": "Minor, cosmetic variation added to standardized products so mass sameness can be experienced as personal choice."
       },
       "info": {
         "links": [
@@ -95,9 +91,7 @@ export default definePuzzle(import.meta.url, {
         "sign-value"
       ],
       "termInfo": {
-        "commodification of experience": {
-          "text": "Even memory, travel, and relationship converted into displayable, purchasable content."
-        },
+        "commodification of experience": "Even memory, travel, and relationship converted into displayable, purchasable content.",
         "hyperreality": {
           "text": "A condition where media representations and models feel more real, and more meaningful, than the physical reality they were drawn from.",
           "links": [
@@ -106,9 +100,7 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "sign-value": {
-          "text": "Baudrillard's term for value derived from what an object signals about status or identity, distinct from its use or exchange value."
-        },
+        "sign-value": "Baudrillard's term for value derived from what an object signals about status or identity, distinct from its use or exchange value.",
         "simulacra and simulation": {
           "text": "The point where a copy of something no longer refers to any original, and circulates as more convincing than reality itself.",
           "links": [
@@ -151,12 +143,8 @@ export default definePuzzle(import.meta.url, {
         "interpellation"
       ],
       "termInfo": {
-        "compulsory positivity": {
-          "text": "A cultural doctrine that reframes doubt, dissatisfaction, or structural complaint as a personal attitude defect."
-        },
-        "curated lifestyle": {
-          "text": "Personality, hobbies, and emotional life reshaped into a coherent, purchasable, displayable identity."
-        },
+        "compulsory positivity": "A cultural doctrine that reframes doubt, dissatisfaction, or structural complaint as a personal attitude defect.",
+        "curated lifestyle": "Personality, hobbies, and emotional life reshaped into a coherent, purchasable, displayable identity.",
         "ideological state apparatus": {
           "text": "Althusser's term for institutions -- schools, media, family, religion -- that shape belief and behavior without physical coercion.",
           "links": [
@@ -173,9 +161,7 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "performative authenticity": {
-          "text": "Authenticity itself pressured into becoming something visibly performed and maintained, rather than simply lived."
-        }
+        "performative authenticity": "Authenticity itself pressured into becoming something visibly performed and maintained, rather than simply lived."
       },
       "info": {
         "links": [
@@ -302,7 +288,7 @@ export default definePuzzle(import.meta.url, {
     "estimatedMinutes": 5,
     "content": {
       "mediaType": "text/markdown",
-      "text": "# Selling a cure for a wound it needs open\n\nHaving watched Freud map the drive and Jung confront the shadow, a different question opens up: what happens when an entire economic system gets access to that same internal void -- and finds a way to profit from it?\n\n## An industry for culture itself\n\nWriting in the mid-twentieth century, two critical theorists argued that art and entertainment had been absorbed into factory logic: cultural products designed to reach the widest possible audience with the least possible friction. To keep audiences from noticing how uniform the results actually were, the system leans on a specific trick -- small, cosmetic variation dressed up as personal choice, so a mass-produced object can still feel like *your* object.\n\n## When the image outruns the thing\n\nA later generation of theorists tracked what happens as this logic keeps developing. Commodities stop being valued mainly for what they do, and start being valued for what they signal -- status, identity, belonging. Eventually the signals detach from anything they were originally standing in for, and the image itself becomes more persuasive, and more consumed, than whatever reality it was supposed to represent.\n\n## Being addressed, and answering\n\nA third strand asks how any of this gets a person to go along willingly. Institutions -- media, schools, advertising, family -- do not usually need force. They address a person as a particular kind of subject (\"as a successful professional,\" \"as a conscious consumer\"), and the person, recognizing the address, answers to it and starts acting accordingly. In a media environment built for constant self-presentation, that address increasingly asks for a curated, positive, marketable self -- and treats anything short of that as a personal failing rather than a reasonable reaction to real conditions.\n\n## A question to hold onto\n\nNone of these three traditions claim capitalism invented human anxiety. Their shared claim is narrower and, in a way, more unsettling: that a real internal void gets identified, and then kept carefully open, because keeping it open is what keeps the whole system in business.\n\n> **Reflection:** If a felt need can be manufactured, how would you go about telling a manufactured need apart from a need that simply, and independently, happens to exist?\n"
+      "text": "# Selling a cure for a wound it needs open\r\n\r\nHaving watched Freud map the drive and Jung confront the shadow, a different question opens up: what happens when an entire economic system gets access to that same internal void -- and finds a way to profit from it?\r\n\r\n## An industry for culture itself\r\n\r\nWriting in the mid-twentieth century, two critical theorists argued that art and entertainment had been absorbed into factory logic: cultural products designed to reach the widest possible audience with the least possible friction. To keep audiences from noticing how uniform the results actually were, the system leans on a specific trick -- small, cosmetic variation dressed up as personal choice, so a mass-produced object can still feel like *your* object.\r\n\r\n## When the image outruns the thing\r\n\r\nA later generation of theorists tracked what happens as this logic keeps developing. Commodities stop being valued mainly for what they do, and start being valued for what they signal -- status, identity, belonging. Eventually the signals detach from anything they were originally standing in for, and the image itself becomes more persuasive, and more consumed, than whatever reality it was supposed to represent.\r\n\r\n## Being addressed, and answering\r\n\r\nA third strand asks how any of this gets a person to go along willingly. Institutions -- media, schools, advertising, family -- do not usually need force. They address a person as a particular kind of subject (\"as a successful professional,\" \"as a conscious consumer\"), and the person, recognizing the address, answers to it and starts acting accordingly. In a media environment built for constant self-presentation, that address increasingly asks for a curated, positive, marketable self -- and treats anything short of that as a personal failing rather than a reasonable reaction to real conditions.\r\n\r\n## A question to hold onto\r\n\r\nNone of these three traditions claim capitalism invented human anxiety. Their shared claim is narrower and, in a way, more unsettling: that a real internal void gets identified, and then kept carefully open, because keeping it open is what keeps the whole system in business.\r\n\r\n> **Reflection:** If a felt need can be manufactured, how would you go about telling a manufactured need apart from a need that simply, and independently, happens to exist?\r\n"
     }
   },
   "provenance": {

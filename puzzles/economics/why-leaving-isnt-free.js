@@ -46,15 +46,9 @@ export default definePuzzle(import.meta.url, {
         "mobility costs"
       ],
       "termInfo": {
-        "imperfect information": {
-          "text": "Not knowing, with any confidence, what else is actually on offer -- what other employers pay, or whether a posted wage would survive the interview."
-        },
-        "mobility costs": {
-          "text": "What a move itself costs beyond the job search -- relocating, retraining, disrupting a household built around the current arrangement."
-        },
-        "search frictions": {
-          "text": "The time and effort required just to find out whether a better job exists, before any question of taking it arises."
-        }
+        "imperfect information": "Not knowing, with any confidence, what else is actually on offer -- what other employers pay, or whether a posted wage would survive the interview.",
+        "mobility costs": "What a move itself costs beyond the job search -- relocating, retraining, disrupting a household built around the current arrangement.",
+        "search frictions": "The time and effort required just to find out whether a better job exists, before any question of taking it arises."
       },
       "info": "What actually stands between a worker and a better-paying job elsewhere -- the costs the textbook model assumes away."
     },
@@ -73,15 +67,9 @@ export default definePuzzle(import.meta.url, {
         "wage markdown"
       ],
       "termInfo": {
-        "employer concentration": {
-          "text": "How few employers a worker is realistically choosing among in their own local labor market -- the more concentrated, the wider the room to underpay."
-        },
-        "labor supply elasticity": {
-          "text": "How sharply a firm's workforce shrinks in response to a wage cut. A market with true competition has a very high number here; Manning's evidence puts most real labor markets far below it."
-        },
-        "wage markdown": {
-          "text": "The gap between what a worker is paid and what they actually produce, directly attributable to how costly leaving is. Estimated in the literature at anywhere from fifteen to fifty percent."
-        }
+        "employer concentration": "How few employers a worker is realistically choosing among in their own local labor market -- the more concentrated, the wider the room to underpay.",
+        "labor supply elasticity": "How sharply a firm's workforce shrinks in response to a wage cut. A market with true competition has a very high number here; Manning's evidence puts most real labor markets far below it.",
+        "wage markdown": "The gap between what a worker is paid and what they actually produce, directly attributable to how costly leaving is. Estimated in the literature at anywhere from fifteen to fifty percent."
       },
       "info": "What the friction is worth to an employer, measured directly rather than assumed away."
     },
@@ -100,15 +88,9 @@ export default definePuzzle(import.meta.url, {
         "thin markets"
       ],
       "termInfo": {
-        "gender wage gap": {
-          "text": "Part of the gap tracks directly to measured differences in labor supply elasticity -- not a difference in ambition, but in how costly a move actually is."
-        },
-        "quit elasticity": {
-          "text": "How sensitive the quit rate is to a change in wages, used to infer the labor supply elasticity a firm actually faces -- the empirical fingerprint monopsony leaves behind."
-        },
-        "thin markets": {
-          "text": "Occupations studied precisely because so few employers exist locally -- nurses, teachers, a single mill town's one real employer -- where the room to underpay shows up largest and most measurably."
-        }
+        "gender wage gap": "Part of the gap tracks directly to measured differences in labor supply elasticity -- not a difference in ambition, but in how costly a move actually is.",
+        "quit elasticity": "How sensitive the quit rate is to a change in wages, used to infer the labor supply elasticity a firm actually faces -- the empirical fingerprint monopsony leaves behind.",
+        "thin markets": "Occupations studied precisely because so few employers exist locally -- nurses, teachers, a single mill town's one real employer -- where the room to underpay shows up largest and most measurably."
       },
       "info": "Where the theory shows up hardest in the data, and on whom."
     },
@@ -127,15 +109,9 @@ export default definePuzzle(import.meta.url, {
         "the minimum-wage puzzle"
       ],
       "termInfo": {
-        "the competitive benchmark": {
-          "text": "The textbook assumption Manning built his book against: that workers can move instantly and costlessly, so any employer paying below the market wage loses its entire workforce at once."
-        },
-        "the minimum-wage puzzle": {
-          "text": "The finding, repeated across real minimum-wage increases, that employment often does not fall the way the competitive model predicts -- because the wage it is raising was already marked down."
-        },
-        "the one-cent question": {
-          "text": "Manning's opening thought experiment: if an employer cut every wage by one cent, how many workers would actually leave? The real answer -- not many, not immediately -- is the whole book in miniature."
-        }
+        "the competitive benchmark": "The textbook assumption Manning built his book against: that workers can move instantly and costlessly, so any employer paying below the market wage loses its entire workforce at once.",
+        "the minimum-wage puzzle": "The finding, repeated across real minimum-wage increases, that employment often does not fall the way the competitive model predicts -- because the wage it is raising was already marked down.",
+        "the one-cent question": "Manning's opening thought experiment: if an employer cut every wage by one cent, how many workers would actually leave? The real answer -- not many, not immediately -- is the whole book in miniature."
       },
       "info": "What changes, against the textbook model, once frictions and the room they create are taken seriously."
     }
@@ -149,9 +125,7 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "If workers could move to a better-paying job instantly and for nothing, a firm's labor supply would be a flat line at the market wage -- cut it by a cent and the building empties. Manning's point is that the line is never flat, because frictions tilt it upward: the harder it is to leave, the more a firm can underpay before it loses anyone at all. The friction is not a side detail. It is where the employer's leverage actually comes from.",
-      "info": {
-        "text": "How the cost of leaving translates directly into how far below the competitive wage an employer can pay and still keep the workforce."
-      },
+      "info": "How the cost of leaving translates directly into how far below the competitive wage an employer can pay and still keep the workforce.",
       "relationKind": "dynamic",
       "idealTerms": [
         "search frictions",
@@ -191,9 +165,7 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "If a wage is already sitting below what the worker actually produces -- marked down by exactly as much as the friction allows -- then a minimum wage set between the marked-down wage and the true competitive one does not price anyone out of a job. It simply claws back part of what the friction let the employer keep. That is the standard model's blind spot: it has no room for a wage that was too low to begin with.",
-      "info": {
-        "text": "Why a wage floor set inside the markdown can raise pay without costing jobs, against the textbook prediction that any floor above the market wage destroys employment."
-      },
+      "info": "Why a wage floor set inside the markdown can raise pay without costing jobs, against the textbook prediction that any floor above the market wage destroys employment.",
       "relationKind": "contrast",
       "idealTerms": [
         "wage markdown",
@@ -249,5 +221,13 @@ export default definePuzzle(import.meta.url, {
         "thin markets": "Nurses, teachers, and single-employer towns -- the specific occupations researchers studied because the theory should show up largest there."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

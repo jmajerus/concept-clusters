@@ -6,23 +6,26 @@
     "political-science",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "large": true,
   "tags": [
     "book"
   ],
   "info": {
     "text": "How the American Psychological Association's own ethics guidance came to permit psychologist participation in national-security interrogations -- and how a small group of dissenting psychologists spent a decade proving it, forcing a formal reversal.",
+    "links": [
+      {
+        "href": "wiki:American Psychological Association"
+      }
+    ],
     "citations": [
       {
         "title": "Doing Harm: How the World's Largest Psychological Association Lost Its Way in the War on Terror",
         "author": "Eidelson, Roy J.",
         "publisher": "McGill-Queen's University Press",
         "year": "2023"
-      }
-    ],
-    "links": [
-      {
-        "href": "wiki:American Psychological Association"
       }
     ]
   },
@@ -32,22 +35,6 @@
       "name": "The Ethics Machinery",
       "color": "teal",
       "fact": "The 2005 PENS Task Force approved a four-part standard for psychologist participation in interrogations -- 'safe, legal, ethical, effective' -- of which only two of the criteria addressed ethics at all, while a parallel Ethics Code provision let psychologists defer to 'governing legal authority' whenever it conflicted with their own professional obligations.",
-      "seeds": [
-        "PENS Task Force",
-        "Safe, Legal, Ethical, Effective"
-      ],
-      "floatingTerms": [
-        "Ethics Code Standard 1.02",
-        "Military-Majority Membership",
-        "Casebook Promise"
-      ],
-      "terms": [
-        "PENS Task Force",
-        "Safe, Legal, Ethical, Effective",
-        "Ethics Code Standard 1.02",
-        "Military-Majority Membership",
-        "Casebook Promise"
-      ],
       "termInfo": {
         "Casebook Promise": {
           "text": "A promised follow-up document meant to give psychologists concrete, teachable examples of the ethics guidance in practice -- repeatedly cited to defer criticism, and never written.",
@@ -97,27 +84,29 @@
             "href": "https://www.apa.org/news/press/releases/2005/07/pens"
           }
         ]
-      }
+      },
+      "seeds": [
+        "PENS Task Force",
+        "Safe, Legal, Ethical, Effective"
+      ],
+      "floatingTerms": [
+        "Ethics Code Standard 1.02",
+        "Military-Majority Membership",
+        "Casebook Promise"
+      ],
+      "terms": [
+        "PENS Task Force",
+        "Safe, Legal, Ethical, Effective",
+        "Ethics Code Standard 1.02",
+        "Military-Majority Membership",
+        "Casebook Promise"
+      ]
     },
     {
       "id": "collusion",
       "name": "The Collusion",
       "color": "amber",
       "fact": "Internal correspondence later showed the task force's own ethics director coordinating behind the scenes with Pentagon-affiliated members to keep the document's language vague enough not to restrict the Department of Defense, then working to suppress the ethics complaints and council motions that might have exposed it.",
-      "seeds": [
-        "Stephen Behnke",
-        "Department of Defense"
-      ],
-      "floatingTerms": [
-        "Council Manipulation",
-        "Ethics Complaint Suppression"
-      ],
-      "terms": [
-        "Stephen Behnke",
-        "Department of Defense",
-        "Council Manipulation",
-        "Ethics Complaint Suppression"
-      ],
       "termInfo": {
         "Council Manipulation": {
           "text": "An independent investigation's finding that the ethics director undertook sustained behind-the-scenes efforts to influence the APA's governing council against member motions restricting interrogation involvement.",
@@ -159,29 +148,27 @@
             "href": "https://www.apa.org/independent-review/revised-report.pdf"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Stephen Behnke",
+        "Department of Defense"
+      ],
+      "floatingTerms": [
+        "Council Manipulation",
+        "Ethics Complaint Suppression"
+      ],
+      "terms": [
+        "Stephen Behnke",
+        "Department of Defense",
+        "Council Manipulation",
+        "Ethics Complaint Suppression"
+      ]
     },
     {
       "id": "reckoning",
       "name": "The Reckoning",
       "color": "magenta",
       "fact": "A task force member who had raised objections from the start eventually released the entire internal correspondence archive rather than continue waiting for promised reforms, giving a small coalition of psychologists the documentation that a later independent investigation would confirm and that finally moved the association's own governing council to reverse course.",
-      "seeds": [
-        "Jean Maria Arrigo",
-        "Hoffman Report"
-      ],
-      "floatingTerms": [
-        "Coalition for an Ethical Psychology",
-        "National Security Interrogation Ban",
-        "Forced Departures"
-      ],
-      "terms": [
-        "Jean Maria Arrigo",
-        "Hoffman Report",
-        "Coalition for an Ethical Psychology",
-        "National Security Interrogation Ban",
-        "Forced Departures"
-      ],
       "termInfo": {
         "Coalition for an Ethical Psychology": {
           "text": "The small group of psychologists, including Arrigo, who spent roughly a decade documenting the task force's flaws and pressing for an independent investigation and formal reversal.",
@@ -231,7 +218,23 @@
             "href": "https://www.buzzfeednews.com/article/peteraldhous/the-dissidents"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Jean Maria Arrigo",
+        "Hoffman Report"
+      ],
+      "floatingTerms": [
+        "Coalition for an Ethical Psychology",
+        "National Security Interrogation Ban",
+        "Forced Departures"
+      ],
+      "terms": [
+        "Jean Maria Arrigo",
+        "Hoffman Report",
+        "Coalition for an Ethical Psychology",
+        "National Security Interrogation Ban",
+        "Forced Departures"
+      ]
     }
   ],
   "bridges": [
