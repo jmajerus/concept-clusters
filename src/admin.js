@@ -1,7 +1,7 @@
 /**
  * Admin dashboard handler — mirrors the pattern from the author's other
  * project, Letter Punk (src/admin.js there), adapted to this project's
- * event schema (puzzle_load / puzzle_completed / link_health_*).
+ * event schema (puzzle_load / puzzle_completed; link_health_* now lives in the authoring dataset).
  *
  * Auth flow:
  *   1. GET /admin?key=SECRET  → validates key, sets HttpOnly session cookie,
@@ -206,19 +206,22 @@ async function fetchStats(env) {
       LIMIT 30
     `),
 
-    // Most recent weekly link-health cron run.
+    // Most recent weekly link-health cron run. The cron lives on the
+    // authoring Worker (it reads the published corpus from D1), so these
+    // rows are in that Worker's dataset, not this one's.
     queryFn(`
       SELECT double1 AS checked, double2 AS issues_found, "timestamp" AS ran_at
-      FROM ${ANALYTICS_DATASET}
+      FROM ${AUTHORING_ANALYTICS_DATASET}
       WHERE blob1 = 'link_health_run'
       ORDER BY ran_at DESC
       LIMIT 1
     `),
 
-    // Individual link-health findings, last 30 days.
+    // Individual link-health findings, last 30 days. blob4 lists the
+    // published puzzles that carry the title.
     queryFn(`
-      SELECT blob2 AS title, blob3 AS status, "timestamp" AS found_at
-      FROM ${ANALYTICS_DATASET}
+      SELECT blob2 AS title, blob3 AS status, blob4 AS puzzles, "timestamp" AS found_at
+      FROM ${AUTHORING_ANALYTICS_DATASET}
       WHERE blob1 = 'link_health_issue'
         AND timestamp >= NOW() - INTERVAL '30' DAY
       ORDER BY found_at DESC
@@ -371,7 +374,7 @@ function renderDashboard(stats, warningMissing) {
   <h2>Link health</h2>
   <div class="section">
     ${renderLinkHealthLatest(stats?.linkHealthLatest)}
-    ${stats?.linkHealthIssues?.length ? renderTable(stats.linkHealthIssues, ["title", "status", "found_at"]) : ""}
+    ${stats?.linkHealthIssues?.length ? renderTable(stats.linkHealthIssues, ["title", "status", "puzzles", "found_at"]) : ""}
   </div>
 
   <h2>MCP authoring activity</h2>

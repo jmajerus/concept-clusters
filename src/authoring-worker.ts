@@ -21,6 +21,8 @@ import {
 import { GitHubRepositoryClient } from "../modules/githubRepositoryClient.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
+import { checkDocumentWikiLinks, runWikiLinkHealth, wikiLinkFlags } from "../modules/wikiLinkCheck.js";
+import { createD1WikiLinkCheckStore } from "../modules/wikiLinkCheckStore.js";
 import {
   documentForEditor,
   documentForStorage,
@@ -941,11 +943,19 @@ async function handleAdminRoute(
     // what an MCP client would see if this were persisted and read back.
     // Stamped pageOnly so renderFlags can badge them as such -- see
     // draftReviewPage.js.
+    // Wikipedia link problems join the same page-only channel (see
+    // wikiLinkCheck.js): D1 is the cache, a short timeout keeps the page
+    // responsive, and an outage shows as one flag rather than an error.
+    const linkReport = await checkDocumentWikiLinks(document, {
+      store: createD1WikiLinkCheckStore(env.AUTHORING_DB),
+      timeoutMs: 4000
+    });
     const validation = {
       ...baseValidation,
       flags: [
         ...(baseValidation.flags || []),
-        ...contentService.computeUserOnlyFlags(document).map(flag => ({ ...flag, pageOnly: true }))
+        ...contentService.computeUserOnlyFlags(document).map(flag => ({ ...flag, pageOnly: true })),
+        ...wikiLinkFlags(linkReport).map(flag => ({ ...flag, pageOnly: true }))
       ]
     };
     const freezeAdds = await publishedFreezeAddIds(
@@ -994,7 +1004,55 @@ async function handleAdminRoute(
   }
 }
 
+// Weekly Wikipedia link health over the published corpus. The trigger is
+// wrangler.authoring.jsonc triggers.crons, Monday 06:00 UTC: weekly is
+// plenty, since article renames and merges are rare and daily would just
+// burn quota. (That file is read with plain JSON.parse by
+// modules/localD1Config.js, so it carries no comments; this is where the
+// schedule is explained.) Titles come from D1's published puzzles, so the set can
+// never go stale the way the old bundled manifest did; results land in
+// wiki_link_checks for the draft page and check_puzzle_links to reuse, and a
+// heartbeat plus per-issue data points go to Analytics Engine so "no issues"
+// and "the cron stopped firing" stay distinguishable on the dashboard.
+async function scheduledLinkHealth(env: Env): Promise<void> {
+  const write = (dataPoint: AnalyticsEngineDataPoint) => {
+    try {
+      env.ANALYTICS?.writeDataPoint(dataPoint);
+    } catch {
+      // Analytics is observability, never a reason to fail the run.
+    }
+  };
+  try {
+    const report = await runWikiLinkHealth({
+      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      store: createD1WikiLinkCheckStore(env.AUTHORING_DB)
+    });
+    for (const issue of report.issues) {
+      write({
+        blobs: ["link_health_issue", issue.title.slice(0, 200), issue.status, issue.puzzles.join(",").slice(0, 200)],
+        doubles: [issue.puzzles.length],
+        indexes: [issue.title.slice(0, 96)]
+      });
+    }
+    write({
+      blobs: ["link_health_run", report.unavailable || ""],
+      doubles: [report.checked, report.issues.length, report.puzzles],
+      indexes: ["link_health"]
+    });
+  } catch (error) {
+    write({
+      blobs: ["link_health_error", String(error instanceof Error ? error.message : error).slice(0, 200)],
+      doubles: [0],
+      indexes: ["link_health"]
+    });
+  }
+}
+
 export default {
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(scheduledLinkHealth(env));
+  },
+
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const isAdminRoute = url.pathname === "/admin"
@@ -1038,7 +1096,8 @@ export default {
           contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
           contentService,
           actor: authenticated.actor,
-          analytics: env.ANALYTICS
+          analytics: env.ANALYTICS,
+          wikiLinkStore: createD1WikiLinkCheckStore(env.AUTHORING_DB)
         }),
         {
           route: "/mcp",

@@ -8,16 +8,18 @@ import { createHostedAuthoringContentService } from "../modules/hostedAuthoringC
 import { resolveWikipediaTitles } from "../modules/wikipediaTitles.js";
 import {
   checkDocumentWikiLinks,
-  clearWikiLinkResolutionCache,
   collectDocumentWikiLinks,
+  runWikiLinkHealth,
   wikiLinkFlags,
   WIKI_LINK_FLAG_IDS
 } from "../modules/wikiLinkCheck.js";
+import { createMemoryWikiLinkCheckStore } from "../modules/wikiLinkCheckStore.js";
+import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { mapDraftDetail } from "../modules/localDraftReview.js";
 import { renderDraftPage } from "../modules/draftReviewPage.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 
-export const name = "wiki link check: collector, Wikipedia resolution, flags, MCP tool";
+export const name = "wiki link check: collector, Wikipedia resolution, D1-backed memory, flags, cron run, MCP tool";
 
 // What Wikipedia's query API answers for the fixture below, in its own
 // formatversion=2 shape: one normalisation, one redirect, one missing page,
@@ -101,8 +103,6 @@ const fixture = {
 };
 
 export async function run() {
-  clearWikiLinkResolutionCache();
-
   // ---- collector: every authored wiki: link, located, section stripped ----
   const refs = collectDocumentWikiLinks(fixture);
   assert.deepEqual(refs.map(ref => [ref.where, ref.title]), [
@@ -132,7 +132,7 @@ export async function run() {
   assert.deepEqual(resolved.get("ATP"), { exists: true, disambiguation: true, resolvedTitle: null });
   assert.deepEqual(resolved.get("Gram stain"), { exists: true, disambiguation: false, resolvedTitle: null });
 
-  // ---- document check: statuses per link, cache absorbs the second run ----
+  // ---- document check: statuses per link; no store means every call asks ----
   const checkCalls = [];
   const report = await checkDocumentWikiLinks(fixture, { fetch: wikipediaStub(checkCalls) });
   assert.equal(report.unavailable, null);
@@ -145,12 +145,36 @@ export async function run() {
   assert.equal(byTitle["Teichoic acids of Gram-positives"].status, "missing");
   assert.equal(byTitle.ATP.status, "disambiguation");
   assert.equal(checkCalls.length, 1);
-  const again = await checkDocumentWikiLinks(fixture, { fetch: wikipediaStub(checkCalls) });
-  assert.equal(checkCalls.length, 1, "titles resolved within the TTL are not asked again");
-  assert.deepEqual(again.results, report.results);
+  await checkDocumentWikiLinks(fixture, { fetch: wikipediaStub(checkCalls) });
+  assert.equal(checkCalls.length, 2, "without a store there is nothing to remember by");
+
+  // ---- store: fresh rows are trusted, stale ones re-asked, results written back ----
+  const store = createMemoryWikiLinkCheckStore();
+  const storeCalls = [];
+  const t0 = Date.parse("2026-09-22T10:00:00Z");
+  const first = await checkDocumentWikiLinks(fixture, { fetch: wikipediaStub(storeCalls), store, now: () => t0 });
+  assert.equal(storeCalls.length, 1);
+  assert.equal(store.size(), 8, "every resolved title is remembered");
+  const second = await checkDocumentWikiLinks(fixture, { fetch: wikipediaStub(storeCalls), store, now: () => t0 + 60_000 });
+  assert.equal(storeCalls.length, 1, "a minute later nothing is asked again");
+  assert.deepEqual(second.results, first.results);
+  const partial = { ...fixture, info: { text: "x", links: ["wiki:Gram stain", "wiki:Bacteria"] } };
+  await checkDocumentWikiLinks(partial, { fetch: wikipediaStub(storeCalls), store, now: () => t0 + 60_000 });
+  assert.equal(storeCalls.length, 2);
+  assert.deepEqual(new URL(storeCalls[1].url).searchParams.get("titles").split("|"), ["Bacteria"],
+    "only the title the store had never seen is asked");
+  const stale = await checkDocumentWikiLinks(fixture, {
+    fetch: wikipediaStub(storeCalls), store, now: () => t0 + 25 * 60 * 60 * 1000
+  });
+  assert.equal(storeCalls.length, 3, "a day later the rows are stale and are re-asked");
+  assert.equal(stale.checked, 8);
+  const offlineWithStore = await checkDocumentWikiLinks(fixture, {
+    fetch: async () => { throw new Error("offline"); }, store, now: () => t0 + 25 * 60 * 60 * 1000 + 1000
+  });
+  assert.equal(offlineWithStore.unavailable, null, "fresh rows answer without the network");
+  assert.equal(offlineWithStore.checked, 8);
 
   // ---- unavailable network: one honest flag, no fabricated results ----
-  clearWikiLinkResolutionCache();
   const offline = await checkDocumentWikiLinks(fixture, {
     fetch: async () => { throw new Error("getaddrinfo ENOTFOUND en.wikipedia.org"); }
   });
@@ -172,8 +196,46 @@ export async function run() {
   assert.match(flags[2].message, /no Wikipedia article at that title/);
   assert.match(flags[3].message, /disambiguation page/);
 
+  // ---- cron run: every live published puzzle, issues grouped by title ----
+  const contentDocuments = createMemoryContentDocumentRepository();
+  const actor = { subject: "link-check-tests" };
+  await contentDocuments.publish({ kind: "puzzle", id: "gram-stain-fixture", document: fixture, actor });
+  await contentDocuments.publish({
+    kind: "puzzle", id: "second-board", actor,
+    document: { ...fixture, id: "second-board", title: "Second", learningIntroduction: undefined,
+      clusters: [{ id: "c", name: "C", fact: "f", seeds: ["a", "b"], floatingTerms: ["c"],
+        termInfo: { a: { text: "t", links: ["wiki:ATP"] } } }], bridges: [] }
+  });
+  await contentDocuments.publish({
+    kind: "puzzle", id: "withdrawn-board", actor,
+    document: { ...fixture, id: "withdrawn-board", title: "Gone",
+      clusters: [{ id: "c", name: "C", fact: "f", seeds: ["a", "b"], floatingTerms: ["c"],
+        termInfo: { a: { text: "t", links: ["wiki:Withdrawn Only Title"] } } }], bridges: [], learningIntroduction: undefined }
+  });
+  await contentDocuments.unpublish({ kind: "puzzle", id: "withdrawn-board", actor });
+  const cronStore = createMemoryWikiLinkCheckStore();
+  // Stamped in the future, as clock skew between the cron and a laptop can
+  // produce: a refresh run must still re-ask rather than trust it.
+  await cronStore.write(new Map([["Gram stain", { exists: true, disambiguation: false, resolvedTitle: null }]]), { now: t0 + 7 * 24 * 60 * 60 * 1000 });
+  const cronCalls = [];
+  const health = await runWikiLinkHealth({
+    contentDocuments, store: cronStore, fetch: wikipediaStub(cronCalls), now: () => t0 + 1000
+  });
+  assert.equal(health.puzzles, 2, "withdrawn boards are not part of the corpus");
+  assert.equal(health.unavailable, null);
+  const asked = new URL(cronCalls[0].url).searchParams.get("titles").split("|");
+  assert.ok(asked.includes("Gram stain"), "the weekly run refreshes even titles the store already has");
+  assert.ok(!asked.includes("Withdrawn Only Title"));
+  assert.equal(health.checked, 8);
+  assert.deepEqual(health.issues.map(issue => [issue.status, issue.title, issue.puzzles]), [
+    ["disambiguation", "ATP", ["gram-stain-fixture", "second-board"]],
+    ["missing", "Teichoic acids of Gram-positives", ["gram-stain-fixture"]],
+    ["redirect", "Lugol's iodine", ["gram-stain-fixture"]],
+    ["redirect", "porin (protein)", ["gram-stain-fixture"]]
+  ]);
+  assert.equal(cronStore.size(), 8);
+
   // ---- draft page: link flags are page-only and rendered in their own block ----
-  clearWikiLinkResolutionCache();
   const contentService = createHostedAuthoringContentService();
   const detail = await mapDraftDetail({
     draftId: "gram-stain-fixture",
@@ -204,9 +266,9 @@ export async function run() {
   assert.ok(!offlineDetail.validation.flags?.some(flag => flag.id.startsWith("wiki-link-")),
     "no checker, no link flags, no network");
 
-  // ---- MCP tool: draft_id and puzzle_id, exactly one required ----
-  clearWikiLinkResolutionCache();
+  // ---- MCP tool: draft_id and puzzle_id, exactly one required; store honoured ----
   const mcpCalls = [];
+  const mcpStore = createMemoryWikiLinkCheckStore();
   const server = createHostedMcpAuthoringServer({
     draftRepository: {
       async list() { return []; },
@@ -217,7 +279,8 @@ export async function run() {
     },
     contentService,
     actor: { subject: "link-check-tests" },
-    fetch: wikipediaStub(mcpCalls)
+    fetch: wikipediaStub(mcpCalls),
+    wikiLinkStore: mcpStore
   });
   const session = await connect(server);
   try {
@@ -228,6 +291,9 @@ export async function run() {
     assert.equal(result.problems.length, 4);
     assert.equal(result.unavailable, null);
     assert.equal(mcpCalls.length, 1);
+    assert.equal(mcpStore.size(), 8, "the tool writes what it learned to the store");
+    await session.call("check_puzzle_links", { draft_id: "gram-stain-fixture" });
+    assert.equal(mcpCalls.length, 1, "and reads it back next time");
 
     const both = await session.request("tools/call", {
       name: "check_puzzle_links",

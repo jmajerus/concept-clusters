@@ -41,23 +41,19 @@
 // confidently wrong suggestion is worse than no suggestion for someone
 // who isn't expected to double-check it.)
 //
-// Results are cached in wiki-link-cache.json (committed) so re-running
-// this doesn't re-query titles already checked. Wikipedia's API accepts
-// up to 50 titles per request, so a full fresh run is a handful of
-// requests, not one per term.
-//
-// Also (re)writes src/link-manifest.json — the flat list of every
-// currently-referenced title, bundled into the Cloudflare Worker so its
-// weekly cron can re-check the same titles for drift (a Wikipedia
-// rename/merge after this was last run) without needing the puzzles/
-// registry itself at runtime. Written every run, not just on change,
-// so it can never silently go stale relative to the cache.
+// Resolutions are remembered in D1's wiki_link_checks table (see
+// modules/wikiLinkCheckStore.js) — the same rows the authoring worker's
+// weekly cron, the draft page, and check_puzzle_links use — so re-running
+// this doesn't re-query titles checked in the last week, and a 429 midway
+// loses nothing already written. Without D1 configured (.env, see
+// modules/localD1Config.js) it still runs, asking Wikipedia for everything.
+// Wikipedia's API accepts up to 50 titles per request, so even a full
+// fresh run is a handful of requests, not one per term.
 //
 // Usage:
-//   node tools/check-wiki-links.mjs           # check, using the cache
+//   node tools/check-wiki-links.mjs           # check, trusting recent D1 rows
 //   node tools/check-wiki-links.mjs --force   # re-check every title
 
-import { writeFileSync, existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { PUZZLES } from "../puzzles/index.js";
@@ -65,11 +61,26 @@ import { CATEGORIES } from "../puzzles/categories.js";
 import { CATALOGUES } from "../catalogues/index.js";
 import { authoredLinks, parseWikiShorthand } from "../modules/termInfo.js";
 import { resolveWikipediaTitles } from "../modules/wikipediaTitles.js";
+import { createD1WikiLinkCheckStore } from "../modules/wikiLinkCheckStore.js";
+import { createHttpD1Database } from "../modules/httpD1Database.js";
+import { loadProjectEnv } from "../modules/loadProjectEnv.js";
+import { resolveLocalD1Config, LocalD1ConfigError } from "../modules/localD1Config.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-const cachePath = join(__dirname, "wiki-link-cache.json");
 const force = process.argv.includes("--force");
+const STORE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+loadProjectEnv();
+let store = null;
+try {
+  store = createD1WikiLinkCheckStore(createHttpD1Database(
+    await resolveLocalD1Config({ repositoryRoot: root })
+  ));
+} catch (err) {
+  if (!(err instanceof LocalD1ConfigError)) throw err;
+  console.log("D1 is not configured; checking every title live and remembering nothing.");
+}
 
 // ---- collect every title actually referenced, with enough context to
 // explain each one in plain language later ----
@@ -147,11 +158,12 @@ for (const catalogue of CATALOGUES) {
 
 const uniqueTitles = [...new Set(checks.map(c => c.title))];
 
-writeFileSync(join(root, "src", "link-manifest.json"), JSON.stringify(uniqueTitles, null, 2) + "\n");
-
-// ---- load cache, figure out what actually needs a network round-trip ----
-const cache = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, "utf8")) : {};
-const toQuery = force ? uniqueTitles : uniqueTitles.filter(t => !(t in cache));
+// ---- trust recent D1 rows, figure out what actually needs a round-trip ----
+const now = Date.now();
+const remembered = store && !force
+  ? await store.readFresh(uniqueTitles, { maxAgeMs: STORE_MAX_AGE_MS, now })
+  : new Map();
+const toQuery = uniqueTitles.filter(t => !remembered.has(t));
 
 console.log(
   `Checking ${uniqueTitles.length} title(s) referenced in puzzles/ against Wikipedia` +
@@ -202,22 +214,29 @@ async function queryExistence(titles) {
 }
 
 const BATCH_SIZE = 50;
-const results = { ...cache };
+const results = {};
+for (const [title, r] of remembered) results[title] = r;
 let unreachable = null;
 
 for (let i = 0; i < toQuery.length && !unreachable; i += BATCH_SIZE) {
   const batch = toQuery.slice(i, i + BATCH_SIZE);
   try {
     const batchResults = await queryExistence(batch);
+    const written = new Map();
     for (const [title, r] of Object.entries(batchResults)) {
-      results[title] = { ...r, checkedAt: new Date().toISOString() };
+      results[title] = r;
+      written.set(title, {
+        exists: r.exists,
+        disambiguation: r.disambiguation,
+        resolvedTitle: r.resolvedTitle && r.resolvedTitle !== title ? r.resolvedTitle : null
+      });
     }
+    // Written per batch, so a 429 on batch four keeps batches one to three.
+    if (store) await store.write(written, { now });
   } catch (err) {
     unreachable = err;
   }
 }
-
-writeFileSync(cachePath, JSON.stringify(results, null, 2) + "\n");
 
 if (unreachable) {
   console.log(`\n${unreachable.friendly ? unreachable.message : `Something went wrong: ${unreachable.message}`}`);

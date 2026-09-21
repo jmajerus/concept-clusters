@@ -385,7 +385,10 @@ export function createAuthoringMcpServer({
   clientProbeLogRoot = null,
   clientProbeTransport = "hosted",
   contentDocumentsConfigured = true,
-  fetch: fetchImpl = globalThis.fetch
+  fetch: fetchImpl = globalThis.fetch,
+  // Durable Wikipedia resolutions (wikiLinkCheckStore.js). Null means every
+  // check_puzzle_links call asks Wikipedia afresh.
+  wikiLinkStore = null
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -1257,7 +1260,7 @@ export function createAuthoringMcpServer({
     const document = draft_id
       ? (await draftRepository.get({ draftId: draft_id, actor })).document
       : await publishedPuzzleDocument(puzzle_id);
-    const report = await checkDocumentWikiLinks(document, { fetch: fetchImpl });
+    const report = await checkDocumentWikiLinks(document, { fetch: fetchImpl, store: wikiLinkStore });
     const counts = { ok: 0, redirect: 0, missing: 0, disambiguation: 0 };
     for (const result of report.results) counts[result.status] += 1;
     const problems = report.results.filter(result => result.status !== "ok");

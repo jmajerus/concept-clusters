@@ -149,6 +149,22 @@ export function createConceptClustersMcpServer({
   const sharedContentDocuments = contentDocuments || lazyContentDocuments(async () =>
     (await workspace()).contentDocuments
   );
+  // The D1 adapter is resolved lazily from env like the repositories above;
+  // a file-backed remnant workspace has no store and checks live each time.
+  const sharedWikiLinkStore = {
+    async readFresh(...args) {
+      const store = (await workspace()).wikiLinkStore;
+      return store ? store.readFresh(...args) : new Map();
+    },
+    async write(...args) {
+      const store = (await workspace()).wikiLinkStore;
+      if (store) await store.write(...args);
+    },
+    async readAll() {
+      const store = (await workspace()).wikiLinkStore;
+      return store ? store.readAll() : new Map();
+    }
+  };
   const server = createAuthoringMcpServer({
     draftRepository: sharedDraftRepository,
     contentDocuments: sharedContentDocuments,
@@ -157,6 +173,7 @@ export function createConceptClustersMcpServer({
     serverName: "concept-clusters-authoring",
     clientProbeLogRoot: repositoryRoot,
     clientProbeTransport: "stdio",
+    wikiLinkStore: sharedWikiLinkStore,
     // A normal stdio server resolves its D1 adapter lazily from env, so
     // d1Database is usually null here even though content documents are
     // available. A file-backed draft remnant without an explicit D1 content

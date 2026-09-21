@@ -2,8 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   // Cloudflare Worker with static assets — serves the site (same static
   // files as the former Pages deployment) plus /api/event for gameplay
-  // analytics, a weekly cron for Wikipedia link-health monitoring, and
-  // /admin for a dashboard over both (see src/admin.js — needs the
+  // analytics and /admin for a dashboard over them (see src/admin.js — needs the
   // ADMIN_KEY and API_TOKEN secrets set via `wrangler secret put`,
   // documented there).
   // Deploy: npx wrangler deploy
@@ -27,11 +26,5 @@
   },
   "analytics_engine_datasets": [
     { "binding": "ANALYTICS", "dataset": "concept_clusters_events" }
-  ],
-  "triggers": {
-    // Weekly is plenty — Wikipedia article renames/merges are rare
-    // enough that daily would just burn free-tier quota for no benefit.
-    // Monday 06:00 UTC.
-    "crons": ["0 6 * * 1"]
-  }
+  ]
 }

@@ -355,8 +355,10 @@ export function createLocalDraftReviewHandler({
   repositoryRoot,
   // Wikipedia link check for the draft page's flags. Pass null to render
   // offline; the default keeps the page responsive on a slow network by
-  // giving up after a few seconds and saying so in one flag.
-  checkWikiLinks = document => checkDocumentWikiLinks(document, { timeoutMs: 4000 })
+  // giving up after a few seconds and saying so in one flag. A store makes
+  // D1 the cache so a title checked anywhere recently is not asked again.
+  wikiLinkStore = null,
+  checkWikiLinks = document => checkDocumentWikiLinks(document, { timeoutMs: 4000, store: wikiLinkStore })
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -1449,7 +1451,8 @@ export function createDefaultLocalDraftReviewHandler({
         contentService,
         contentDocuments: resolved.contentDocuments,
         repositoryRoot,
-        publicationActor: resolved.actor
+        publicationActor: resolved.actor,
+        wikiLinkStore: resolved.wikiLinkStore || null
       });
       return handleRequest(req, res);
     } catch (error) {

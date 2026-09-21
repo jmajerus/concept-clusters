@@ -1,15 +1,15 @@
 // Cloudflare Worker serving the static site (env.ASSETS from site/) plus
-// gameplay analytics, a weekly Wikipedia link-health check, and an admin
-// dashboard over both. Analytics writes are opt-out-safe: a missing
-// binding, malformed payload, or network hiccup degrades to a no-op.
+// gameplay analytics and an admin dashboard over them. Analytics writes are
+// opt-out-safe: a missing binding, malformed payload, or network hiccup
+// degrades to a no-op. The weekly Wikipedia link-health check lives in the
+// authoring Worker (src/authoring-worker.ts), which has the D1 binding the
+// published corpus is read from.
 //
 // Local MCP /admin/drafts and the authoring /admin index are not handled
 // here. `npm run dev -- --worker` serves those routes from Node in front
 // of this Worker so they can use the same D1 HTTP client and Access owner
 // as stdio MCP. Player analytics /admin remains this Worker's dashboard.
 
-import linkManifest from "./link-manifest.json";
-import { resolveWikipediaTitles } from "../modules/wikipediaTitles.js";
 import { handleAdmin } from "./admin.js";
 
 const ALLOWED_EVENTS = new Set(["puzzle_load", "puzzle_completed"]);
@@ -26,9 +26,6 @@ export default {
     return env.ASSETS.fetch(request);
   },
 
-  async scheduled(event, env, ctx) {
-    ctx.waitUntil(checkLinkHealth(env));
-  }
 };
 
 // ---- gameplay analytics ----
@@ -93,73 +90,4 @@ function buildDataPoint(event, data, geo) {
   }
 
   return null;
-}
-
-// ---- weekly link-health check ----
-// The same forward-resolution + disambiguation-detection logic as
-// tools/check-wiki-links.mjs (see that file for the reasoning behind
-// each step — this is a direct port, not a reimplementation), run
-// against link-manifest.json rather than importing puzzles/ directly,
-// keeping this cron decoupled from puzzle content and the Worker
-// bundle free of it. Only titles that have drifted since the manifest
-// was last regenerated — a Wikipedia rename, merge, or new
-// disambiguation — get logged; there's no cache to update here, just
-// week-over-week drift detection.
-
-async function checkLinkHealth(env) {
-  const BATCH_SIZE = 50;
-  let checked = 0;
-  const issues = [];
-
-  for (let i = 0; i < linkManifest.length; i += BATCH_SIZE) {
-    const batch = linkManifest.slice(i, i + BATCH_SIZE);
-    try {
-      const results = await queryExistence(batch);
-      checked += batch.length;
-      for (const [title, r] of Object.entries(results)) {
-        if (!r.exists || r.disambiguation) {
-          issues.push({ title, status: r.exists ? "disambiguation" : "missing" });
-        }
-      }
-    } catch (err) {
-      writeDataPoint(env, {
-        blobs: ["link_health_error", String(err?.message ?? err).slice(0, 200)],
-        doubles: [0],
-        indexes: ["link_health"]
-      });
-    }
-  }
-
-  for (const issue of issues) {
-    writeDataPoint(env, {
-      blobs: ["link_health_issue", issue.title.slice(0, 200), issue.status],
-      doubles: [1],
-      indexes: [issue.title.slice(0, 96)]
-    });
-  }
-
-  // A heartbeat every run, issues or not — so "no issues logged" and
-  // "the cron silently stopped firing" don't look identical from the
-  // Analytics Engine side.
-  writeDataPoint(env, {
-    blobs: ["link_health_run"],
-    doubles: [checked, issues.length],
-    indexes: ["link_health"]
-  });
-}
-
-function writeDataPoint(env, dataPoint) {
-  if (env.ANALYTICS) env.ANALYTICS.writeDataPoint(dataPoint);
-}
-
-async function queryExistence(titles) {
-  const resolved = await resolveWikipediaTitles(titles);
-  const results = {};
-  for (const title of titles) {
-    const r = resolved.get(title);
-    results[title] = r
-      ? { exists: r.exists, disambiguation: r.disambiguation }
-      : { exists: false, disambiguation: false };
-  }
-  return results;
 }

@@ -10,3 +10,4 @@ node_modules/
 
 # Localflare generated files
 .localflare/
+tools/wiki-link-cache.json

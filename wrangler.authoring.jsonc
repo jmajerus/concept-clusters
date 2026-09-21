@@ -25,6 +25,9 @@
   "analytics_engine_datasets": [
     { "binding": "ANALYTICS", "dataset": "concept_clusters_authoring_events" }
   ],
+  "triggers": {
+    "crons": ["0 6 * * 1"]
+  },
   "vars": {
     "AUTHORING_HOSTNAME": "concept-clusters-authoring.jmajerus.workers.dev",
     "AUTHORING_DEV_SUBJECT": "local-author",
