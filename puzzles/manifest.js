@@ -1094,6 +1094,9 @@ export const PUZZLE_MANIFEST = [
         "Psychology",
         "Philosophy"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": true,
       "info": {
         "text": "How Lacanian thought relates image, language, and what resists symbolization.",
@@ -3161,6 +3164,9 @@ export const PUZZLE_MANIFEST = [
         "Psychology",
         "Philosophy"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": true,
       "relatedPuzzles": {
         "info": {
@@ -5645,9 +5651,6 @@ export const PUZZLE_MANIFEST = [
       "id": "finite-and-infinite-games",
       "title": "Finite and infinite games",
       "category": "Philosophy",
-      "tags": [
-        "book"
-      ],
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -5662,14 +5665,6 @@ export const PUZZLE_MANIFEST = [
         "links": [
           {
             "href": "wiki:Finite and Infinite Games"
-          }
-        ],
-        "citations": [
-          {
-            "title": "Finite and Infinite Games: A Vision of Life as Play and Possibility",
-            "author": "Carse, James P.",
-            "publisher": "Free Press",
-            "year": "1986"
           }
         ]
       },
@@ -5990,6 +5985,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "catalogue:wholeness-and-its-discontents"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": true,
       "info": {
         "text": "Freud's earliest mapping of the psyche: where a wish lives, how much force it carries, and what happens to it when the ego will not let it through.",
@@ -6045,6 +6043,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "catalogue:wholeness-and-its-discontents"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": true,
       "info": {
         "text": "Carl Jung's analytical psychology: how a universal, inherited layer of the psyche, a social mask, and a rejected shadow interact -- and why Jung treats integrating the shadow as growth rather than failure.",
@@ -6100,18 +6101,15 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "catalogue:wholeness-and-its-discontents"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Wholeness and Its Discontents: how the promise of a unified self keeps breaking down, from early psychoanalysis to consumer culture, and what becomes possible when division is treated as a condition rather than a defect."
-        },
         "entries": [
           {
             "id": "lacans-three-registers",
-            "reason": "For the Lacanian scaffolding underneath McGowan's critique here -- the Imaginary, the Symbolic, and the Real -- play the dedicated Lacan puzzle.",
-            "via": [
-              "lacan"
-            ]
+            "reason": "For the Lacanian scaffolding underneath McGowan's critique here -- the Imaginary, the Symbolic, and the Real -- play the dedicated Lacan puzzle."
           }
         ]
       },
@@ -6168,13 +6166,15 @@ export const PUZZLE_MANIFEST = [
       "category": "Philosophy",
       "categories": [
         "Philosophy",
+        "Psychology",
         "Sociology"
       ],
       "tags": [
         "catalogue:wholeness-and-its-discontents"
       ],
       "subcategories": {
-        "Philosophy": "political-philosophy"
+        "Philosophy": "political-philosophy",
+        "Psychology": "psychoanalysis"
       },
       "large": true,
       "info": {
@@ -6229,20 +6229,15 @@ export const PUZZLE_MANIFEST = [
         "catalogue:wholeness-and-its-discontents"
       ],
       "subcategories": {
-        "Philosophy": "political-philosophy"
+        "Philosophy": "political-philosophy",
+        "Psychology": "psychoanalysis"
       },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Wholeness and Its Discontents: how the promise of a unified self keeps breaking down, from early psychoanalysis to consumer culture, and what becomes possible when division is treated as a condition rather than a defect."
-        },
         "entries": [
           {
             "id": "lacans-three-registers",
-            "reason": "Go deeper into the Imaginary, the Symbolic, and the Real -- the Lacanian scaffolding this puzzle's ontology of the split subject is built on.",
-            "via": [
-              "lacan"
-            ]
+            "reason": "Go deeper into the Imaginary, the Symbolic, and the Real -- the Lacanian scaffolding this puzzle's ontology of the split subject is built on."
           }
         ]
       },
@@ -6749,6 +6744,9 @@ export const PUZZLE_MANIFEST = [
         "book",
         "psychodynamics"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": true,
       "info": {
         "text": "Wilfred Bion's claim that every working group is shadowed by an unconscious one -- reacting to a shared fantasy of rescue, threat, or salvation instead of pursuing its actual task.",
@@ -6807,6 +6805,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": false,
       "info": {
         "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation.",
@@ -6875,6 +6876,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": false,
       "info": {
         "text": "Larry Hirschhorn's account of how groups turn real work-risk into something bearable through boundaries, what they fall back on when that fails, and why postindustrial organizations lose the old bureaucratic defenses that used to do this work automatically.",
@@ -6928,6 +6932,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": false,
       "relatedPuzzles": {
         "info": {
@@ -7003,6 +7010,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": true,
       "info": {
         "text": "Kets de Vries and Miller's claim that a company's whole structure and culture can come to mirror the neurotic style of the small group of executives, often just one person, running it -- four of the five styles they identified are on this board; the fifth, schizoid, is not.",
@@ -7385,6 +7395,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "psychoanalysis"
+      },
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -8124,6 +8137,9 @@ export const PUZZLE_MANIFEST = [
         "book",
         "war"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": true,
       "relatedPuzzles": {
         "entries": [
@@ -8195,6 +8211,9 @@ export const PUZZLE_MANIFEST = [
         "book",
         "war"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": true,
       "relatedPuzzles": {
         "entries": [
@@ -9239,6 +9258,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": true,
       "info": {
         "text": "How the American Psychological Association's own ethics guidance came to permit psychologist participation in national-security interrogations -- and how a small group of dissenting psychologists spent a decade proving it, forcing a formal reversal.",
@@ -11315,6 +11337,9 @@ export const PUZZLE_MANIFEST = [
         "war",
         "genocide"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -11495,6 +11520,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -11662,6 +11690,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -12028,6 +12059,9 @@ export const PUZZLE_MANIFEST = [
         "war",
         "genocide"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": true,
       "relatedPuzzles": {
         "entries": [
@@ -12147,6 +12181,9 @@ export const PUZZLE_MANIFEST = [
         "book",
         "genocide"
       ],
+      "subcategories": {
+        "Psychology": "moral-psychology"
+      },
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -12965,6 +13002,9 @@ export const PUZZLE_MANIFEST = [
       "id": "hydrology-human-water",
       "title": "Human Water: measuring, fearing, managing",
       "category": "Physical Geography",
+      "subcategories": {
+        "Physical Geography": "hydrology"
+      },
       "large": true,
       "lensMode": "sequential",
       "relatedPuzzles": {
@@ -13048,6 +13088,9 @@ export const PUZZLE_MANIFEST = [
       "id": "hydrology-land-and-groundwater",
       "title": "Catchments & Groundwater: how land holds and routes water",
       "category": "Physical Geography",
+      "subcategories": {
+        "Physical Geography": "hydrology"
+      },
       "large": false,
       "lensMode": "sequential",
       "info": {
@@ -13105,6 +13148,9 @@ export const PUZZLE_MANIFEST = [
       "id": "hydrology-water-cycle",
       "title": "The Water Cycle: pools and fluxes",
       "category": "Physical Geography",
+      "subcategories": {
+        "Physical Geography": "hydrology"
+      },
       "large": false,
       "lensMode": "sequential",
       "relatedPuzzles": {
@@ -13658,6 +13704,289 @@ export const PUZZLE_MANIFEST = [
         "interest",
         "account",
         "bank"
+      ]
+    }
+  },
+  {
+    "id": "anatomy-of-villains",
+    "module": "./literary-history/anatomy-of-villains.js",
+    "browse": {
+      "id": "anatomy-of-villains",
+      "title": "The Anatomy of Villains: Iago and Macbeth",
+      "category": "Literary History & Canons",
+      "tags": [
+        "Shakespeare",
+        "tragedy",
+        "villains",
+        "literary criticism"
+      ],
+      "large": false,
+      "info": {
+        "text": "Two of Shakespeare's most-studied villains, examined side by side for what actually drives them — and what doesn't.",
+        "citations": [
+          {
+            "title": "Othello, the Moor of Venice",
+            "author": "Shakespeare, William",
+            "year": "c. 1603"
+          },
+          {
+            "title": "Macbeth",
+            "author": "Shakespeare, William",
+            "year": "c. 1606"
+          },
+          {
+            "title": "Marginal note on Othello, in his lectures on Shakespeare",
+            "author": "Coleridge, Samuel Taylor",
+            "year": "1818–1819"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Iago",
+        "Honest Iago",
+        "Passed Over for Promotion",
+        "Motiveless Malignity",
+        "The Green-Eyed Monster",
+        "Calculated Improvisation",
+        "Macbeth",
+        "Vaulting Ambition",
+        "The Witches' Prophecy",
+        "Lady Macbeth's Incitement",
+        "Regicide",
+        "Hallucinatory Guilt",
+        "Nihilistic Despair",
+        "Free Will and Fate",
+        "Soliloquy"
+      ]
+    }
+  },
+  {
+    "id": "flower-anatomy",
+    "module": "./botany/flower-anatomy.js",
+    "browse": {
+      "id": "flower-anatomy",
+      "title": "Anatomy of a Flower",
+      "category": "Botany",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "flower-pollination-fruit",
+            "reason": "Play after naming the parts to see how each whorl's job pays off in seed and fruit — and how real flowers bend the template."
+          }
+        ]
+      },
+      "info": {
+        "text": "A flower is a compressed reproductive shoot: four whorls of modified leaves, each part doing one job — shielding the bud, advertising for pollinators, making pollen, or receiving it. Naming a part means knowing what it is for.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure",
+            "label": "OpenStax Biology 2e — Reproductive Development and Structure"
+          },
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization",
+            "label": "OpenStax Biology 2e — Pollination and Fertilization"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Biology 2e, §32.1 Reproductive Development and Structure",
+            "publisher": "OpenStax",
+            "year": "2018",
+            "url": "https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure"
+          },
+          {
+            "title": "Biology 2e, §32.2 Pollination and Fertilization",
+            "publisher": "OpenStax",
+            "year": "2018",
+            "url": "https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization"
+          },
+          {
+            "title": "Flower",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Flower"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The sterile envelope",
+        "petal",
+        "sepal",
+        "tepal",
+        "calyx",
+        "corolla",
+        "perianth",
+        "The male machinery",
+        "pollen",
+        "stamen",
+        "anther",
+        "filament",
+        "The female machinery",
+        "ovary",
+        "pistil",
+        "stigma",
+        "style",
+        "ovule",
+        "carpel",
+        "Pollination"
+      ]
+    }
+  },
+  {
+    "id": "flower-pollination-fruit",
+    "module": "./botany/flower-pollination-fruit.js",
+    "browse": {
+      "id": "flower-pollination-fruit",
+      "title": "How Flowers Work",
+      "category": "Botany",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "flower-anatomy",
+            "reason": "Start here if the flower's parts are new — this board follows that machinery through pollination, fertilization, and fruit."
+          }
+        ]
+      },
+      "info": {
+        "text": "After the parts are built, the work starts: moving pollen by wind or animal courier, double fertilization inside the ovule, and the packaging of seed and fruit — while real flowers vary the template by dropping whorls and splitting the sexes.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization",
+            "label": "OpenStax Biology 2e — Pollination and Fertilization"
+          },
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure",
+            "label": "OpenStax Biology 2e — Reproductive Development and Structure"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Biology 2e, §32.2 Pollination and Fertilization",
+            "publisher": "OpenStax",
+            "year": "2018",
+            "url": "https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization"
+          },
+          {
+            "title": "Biology 2e, §32.1 Reproductive Development and Structure",
+            "publisher": "OpenStax",
+            "year": "2018",
+            "url": "https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure"
+          },
+          {
+            "title": "Flower",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Flower"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Moving the pollen",
+        "nectar",
+        "wind pollination",
+        "nectar guide",
+        "cross-pollination",
+        "self-pollination",
+        "pollinator syndrome",
+        "After fertilization",
+        "seed",
+        "fruit",
+        "pollen tube",
+        "double fertilization",
+        "endosperm",
+        "embryo",
+        "Variations on the template",
+        "complete flower",
+        "imperfect flower",
+        "perfect flower",
+        "monoecious",
+        "dioecious",
+        "incomplete flower",
+        "Outcrossing by design"
+      ]
+    }
+  },
+  {
+    "id": "unyielding-neighbors",
+    "module": "./vocabulary/unyielding-neighbors.js",
+    "browse": {
+      "id": "unyielding-neighbors",
+      "title": "Refusing to Yield",
+      "category": "Vocabulary",
+      "tags": [
+        "synonyms",
+        "usage",
+        "adjectives"
+      ],
+      "level": "intermediate",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "Five near-synonyms for refusing to budge, discriminated along the lines of Merriam-Webster's synonym notes: all mean unwilling to alter a predetermined course or purpose, but each resists something different — temptation, principle, compromise, entreaty, or conscience.",
+        "links": [
+          "https://www.merriam-webster.com/thesaurus/adamant",
+          "https://www.merriam-webster.com/thesaurus/obdurate"
+        ]
+      },
+      "_searchTerms": [
+        "Refusing to Yield",
+        "adamant",
+        "inflexible",
+        "intransigent",
+        "inexorable",
+        "obdurate"
+      ]
+    }
+  },
+  {
+    "id": "yielding-neighbors",
+    "module": "./vocabulary/yielding-neighbors.js",
+    "browse": {
+      "id": "yielding-neighbors",
+      "title": "Learning to Yield",
+      "category": "Vocabulary",
+      "tags": [
+        "synonyms",
+        "usage",
+        "adjectives"
+      ],
+      "level": "intermediate",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "Five near-synonyms for giving way, discriminated along the lines of Merriam-Webster's synonym notes: all describe willingness to yield, but each answers to something different — control, handling, suggestion, rules, or silence.",
+        "links": [
+          {
+            "href": "https://www.merriam-webster.com/dictionary/tractable"
+          },
+          {
+            "href": "https://www.merriam-webster.com/dictionary/docile"
+          }
+        ]
+      },
+      "_searchTerms": [
+        "Learning to Yield",
+        "amenable",
+        "acquiescent",
+        "compliant",
+        "docile",
+        "tractable"
       ]
     }
   }
