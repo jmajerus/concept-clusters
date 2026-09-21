@@ -340,7 +340,7 @@ describe("hosted authoring Worker", () => {
     expect(vocabularySchema.result.structuredContent.profileStorageDomains)
       .toEqual(["content", "pedagogy"]);
     expect(vocabularySchema.result.structuredContent.profileSummary)
-      .toMatch(/Near-synonym clusters/);
+      .toMatch(/near-synonym clusters/i);
     expect(vocabularySchema.result.structuredContent.domain).toBe("pedagogy");
     expect(vocabularySchema.result.structuredContent.schema.properties.lenses)
       .toBeDefined();
