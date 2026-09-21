@@ -106,7 +106,10 @@
 // 5.19: same review bar; the no-preselected-counts rule now reaches
 // profile-routed agents through the profile preamble (it lived only in the
 // generic format guidance since the 5.11 isolation).
+// 5.20: same review bar; workflow mechanics now name the create / save /
+// validate call shapes (document, draft_id, domain) so a client without the
+// tool schemas in view does not have to read server source to find them.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 19
+  minor: 20
 });

@@ -165,7 +165,7 @@ export async function run() {
 
   // Keep the legacy Git/puzzle-reference contract available to shared content
   // services while MCP and D1 authoring callers opt into document-only mode.
-  const unresolvedPuzzle = [{ id: "unresolved", category: "zoology" }];
+  const unresolvedPuzzle = [{ id: "unresolved", category: "xenobiology" }];
   assert.equal(
     categorySummaries(unresolvedPuzzle, {})[0].registered,
     true
@@ -197,14 +197,17 @@ export async function run() {
   const contentService = createHostedAuthoringContentService();
   await seedPublishedCatalogues(contentDocuments, contentService.catalogues);
   await seedPublishedCategories(contentDocuments, contentService.categories);
+  // Fixture names deliberately absent from puzzles/categories.js: a real
+  // category landing in git later must not silently change what this test
+  // asserts (Botany and Zoology did exactly that in the 2026-09-21 Freeze).
   await contentDocuments.publish({
     kind: "category",
-    id: "botany",
+    id: "lab-botany",
     document: {
-      id: "botany",
-      title: "Botany",
+      id: "lab-botany",
+      title: "Lab Botany",
       domain: "life-sciences",
-      info: { text: "The study of plants." }
+      info: { text: "The study of plants, lab fixture." }
     },
     actor
   });
@@ -221,7 +224,7 @@ export async function run() {
     document: {
       id: "d1-only-board",
       title: "D1 only",
-      category: "zoology",
+      category: "xenobiology",
       clusters: [],
       bridges: []
     }
@@ -291,12 +294,12 @@ export async function run() {
     assert.equal(unpublishedCategory.published, null);
 
     const categories = await call("list_categories");
-    const botany = categories.categories.find(item => item.name === "Botany");
+    const botany = categories.categories.find(item => item.name === "Lab Botany");
     assert.ok(
       botany,
       "list_categories must include a category published by the category editor before any puzzle references it"
     );
-    assert.equal(botany.slug, "botany");
+    assert.equal(botany.slug, "lab-botany");
     assert.equal(botany.registered, true);
     assert.equal(botany.puzzleCount, 0);
     const draftOnly = categories.categories.find(item => item.name === "Draft Only Subject");
@@ -306,16 +309,16 @@ export async function run() {
       categories.categories.some(item => item.name === "Lab Subject"),
       "list_categories should include the D1 category working copy"
     );
-    const zoology = categories.categories.find(item => item.name === "zoology");
+    const zoology = categories.categories.find(item => item.name === "xenobiology");
     assert.ok(zoology, "a published puzzle reference should expose an unresolved category");
     assert.equal(zoology.registered, false);
-    assert.equal(zoology.slug, "zoology");
-    const inferredCategory = await call("get_category", { name: "zoology" });
-    assert.equal(inferredCategory.category.name, "zoology");
+    assert.equal(zoology.slug, "xenobiology");
+    const inferredCategory = await call("get_category", { name: "xenobiology" });
+    assert.equal(inferredCategory.category.name, "xenobiology");
     assert.equal(inferredCategory.category.registered, false);
     assert.deepEqual(inferredCategory.document, {
-      id: "zoology",
-      title: "zoology"
+      id: "xenobiology",
+      title: "xenobiology"
     });
 
     const loadedCategory = await call("get_category", { name: "lab-subject" });
@@ -323,11 +326,11 @@ export async function run() {
     assert.equal(loadedCategory.document.id, "lab-subject");
     assert.equal(loadedCategory.document.title, "Lab Subject");
 
-    const publishedCategory = await call("get_category", { name: "botany" });
-    assert.equal(publishedCategory.category.name, "Botany");
+    const publishedCategory = await call("get_category", { name: "lab-botany" });
+    assert.equal(publishedCategory.category.name, "Lab Botany");
     assert.equal(publishedCategory.category.registered, true);
-    assert.equal(publishedCategory.document.id, "botany");
-    assert.equal(publishedCategory.document.title, "Botany");
+    assert.equal(publishedCategory.document.id, "lab-botany");
+    assert.equal(publishedCategory.document.title, "Lab Botany");
 
     const updatedCategory = await call("update_category", {
       ...loadedCategory.document,

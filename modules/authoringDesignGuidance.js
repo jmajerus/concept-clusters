@@ -962,8 +962,11 @@ publish a genuinely new subject before authoring puzzles that reference it. Do
 not infer its absence from puzzles/categories.js or another Git checkout, and
 do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
-Drafts may be temporarily invalid. Save with save_puzzle_draft, then
-validate and address every error. MCP maintains protected attribution and
+Drafts may be temporarily invalid. Open one with create_puzzle_draft (the
+puzzle goes in the document argument); save later passes with
+save_puzzle_draft (draft_id plus document, optionally domain for a content-
+or pedagogy-only pass), then validate_puzzle_draft (draft_id) and address
+every error. MCP maintains protected attribution and
 editorial metadata outside the agent document; existing values are preserved.
 Set stable category ids in category / categories / subcategories on the puzzle document. Use
 create_category or update_category with publish_to_authoring=true to publish the

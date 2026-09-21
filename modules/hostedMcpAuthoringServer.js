@@ -842,7 +842,7 @@ export function createAuthoringMcpServer({
   server.registerTool("get_workflow_guidance", {
     title: "Get workflow guidance",
     description:
-      "Return focused operational guidance for catalogue and category authoring. Request it only when entering that workflow.",
+      "Return focused operational guidance for catalogue and category authoring (topic: catalogue). Request it only when entering that workflow. Puzzle authoring has no topic here: call get_authoring_guidance instead.",
     inputSchema: authoringWorkflowTopicSchema,
     annotations: READ_ONLY
   }, tracked("get_workflow_guidance", safe(async ({ topic }) => success(
