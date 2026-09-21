@@ -25,6 +25,7 @@ import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInf
 import {
   CATEGORIES,
   canonicalizePuzzleCategoryReferences,
+  categoryIdFor,
   categoryTitleFor
 } from "../puzzles/categories.js";
 import {
@@ -105,10 +106,25 @@ export function normalizeAuthoredDocument(document, options = {}) {
 // records. A previous title that is also some category's *current* title
 // is never an alias (the live title wins), so a reused name can't be
 // silently rewritten to the category that used to hold it.
+// Names an alias must never shadow: every live title and every live id.
+// A category created as "microbiology" and later retitled "Microbiology"
+// records its own id in previousTitles; treating that as retired would
+// flag every puzzle that cites the canonical id the MCP contract requires.
+function liveCategoryNames(categoryRegistry) {
+  const names = new Set();
+  for (const [title, meta] of Object.entries(categoryRegistry)) {
+    names.add(title.trim());
+    const id = categoryIdFor(title, categoryRegistry);
+    if (id) names.add(id);
+    if (typeof meta?.slug === "string" && meta.slug.trim()) names.add(meta.slug.trim());
+  }
+  return names;
+}
+
 export function categoryTitleAliases(categoryRegistry) {
   const aliases = new Map();
   if (!categoryRegistry || typeof categoryRegistry !== "object") return aliases;
-  const current = new Set(Object.keys(categoryRegistry).map(title => title.trim()));
+  const current = liveCategoryNames(categoryRegistry);
   const conflicts = new Set();
   for (const [title, meta] of Object.entries(categoryRegistry)) {
     for (const previous of meta?.previousTitles || []) {
@@ -131,7 +147,7 @@ export function categoryTitleAliases(categoryRegistry) {
 export function categoryTitleAliasConflicts(categoryRegistry) {
   const conflicts = new Map();
   if (!categoryRegistry || typeof categoryRegistry !== "object") return conflicts;
-  const current = new Set(Object.keys(categoryRegistry).map(title => title.trim()));
+  const current = liveCategoryNames(categoryRegistry);
   for (const [title, meta] of Object.entries(categoryRegistry)) {
     for (const previous of meta?.previousTitles || []) {
       const normalizedPrevious = typeof previous === "string" ? previous.trim() : "";

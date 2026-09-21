@@ -77,6 +77,24 @@ export async function run() {
   });
   assert.deepEqual([...aliases.entries()], [["Geography", "Physical Geography"]]);
 
+  // Nor a live id: a category created lowercase and retitled records its own
+  // id as a previous title, and the canonical id must stay canonical.
+  assert.deepEqual(
+    [...categoryTitleAliases({
+      Microbiology: { slug: "microbiology", previousTitles: ["microbiology"] },
+      "Physical Geography": { previousTitles: ["physical-geography", "Geography"] }
+    }).entries()],
+    [["Geography", "Physical Geography"]]
+  );
+  assert.deepEqual(
+    [...categoryTitleAliasConflicts({
+      Microbiology: { slug: "microbiology", previousTitles: ["microbiology"] },
+      Other: { previousTitles: ["microbiology"] }
+    }).entries()],
+    [],
+    "a live id is not a conflict candidate either"
+  );
+
   const conflicts = categoryTitleAliasConflicts({
     One: { previousTitles: ["Old"] },
     Two: { previousTitles: ["Old"] }
