@@ -27,7 +27,7 @@ The MCP resource
 versioned JSON Schema for simplified input. Clients that do not inspect MCP
 resources can call `get_authoring_schema` for the same schema as structured
 tool output. With no arguments, that tool and `get_authoring_guidance` retain
-their complete backward-compatible responses. Passing `phase: "core"`,
+their complete no-phase responses. Passing `phase: "core"`,
 `"review"`, `"pedagogy"`, or `"publication"` returns a much smaller working
 projection for that pass. A projection is not a standalone format: apply it to
 one accumulating draft and preserve fields from every earlier pass.
@@ -36,19 +36,25 @@ temporarily invalid simplified drafts remain writable; that permissiveness
 should not be mistaken for the absence of a field contract.
 Bridge terms have no separate pedagogical-role field; describe their
 relationship in `fact`, optional `info`, and (when useful) `relationKind`.
-Puzzle attribution uses optional puzzle-level `provenance`; JSON-LD is an
-explicit interchange format, not part of the active authoring schema or draft
-storage path. Repository-owned timestamps, document revisions, hashes, status,
-and lesson-progress fingerprints are supplied by infrastructure and are not
-fields an agent has to author.
+Puzzle `provenance`, the legacy lesson byline, and human-managed `creator`,
+`license`, and `derivedFrom` fields are outside the MCP document schema. The
+server preserves existing values and stamps a recognized MCP client where
+possible; human editorial workflows handle corrections. These fields remain
+separate from `provenance` internally; this boundary does not migrate them into
+a new provenance settings object. `language` remains optional agent-authored
+metadata. JSON-LD is an explicit interchange format, not part of the active
+authoring schema or draft storage path. Repository-owned timestamps, document
+revisions, hashes, status, and lesson-progress fingerprints are supplied by
+infrastructure and are not fields an agent has to author.
 
 For smaller authoring payloads, `get_puzzle_draft` and
 `save_puzzle_draft` accept `domain: "content"` or `domain: "pedagogy"`.
 Content is the core puzzle write surface. Pedagogy is the annotation, learning,
 and discovery-metadata write surface and includes content as read-only
-`context`. Focused responses omit provenance and system metadata and retain
-only the draft id and revision needed for the next save. Omitting `domain`
-remains the complete-document compatibility path.
+`context`. Focused responses omit protected attribution/editorial metadata
+and system metadata, retaining only the draft id and revision needed for the
+next save. The complete-document compatibility path also omits protected
+fields and preserves them on save.
 
 ## How guidance reaches an agent
 

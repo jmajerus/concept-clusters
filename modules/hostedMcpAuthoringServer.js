@@ -12,6 +12,7 @@ import {
 import {
   AUTHORING_PHASES,
   AUTHORING_MCP_SERVER_VERSION,
+  AUTHORING_PROFILES,
   SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
   SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
   SIMPLIFIED_PUZZLE_SCHEMA_TEXT,
@@ -31,6 +32,7 @@ import {
 import {
   applyAuthoredDomain,
   AUTHORING_READ_DOMAINS,
+  assertNoAgentProtectedFields,
   projectAuthoredDocument
 } from "./authoringDomains.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
@@ -39,7 +41,7 @@ import {
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
-import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
+import { MCP_EXCLUDED_ROOT_FIELDS } from "./authoringFieldOwnership.js";
 import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
@@ -72,7 +74,8 @@ import {
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringDomainSchema = z.enum(AUTHORING_READ_DOMAINS).default("complete");
 const authoringPhaseSchema = z.object({
-  phase: z.enum(AUTHORING_PHASES).default("complete")
+  phase: z.enum(AUTHORING_PHASES).default("complete"),
+  profile: z.enum(AUTHORING_PROFILES).optional()
 });
 const authoringWorkflowTopicSchema = z.object({
   topic: z.enum(["catalogue"])
@@ -226,20 +229,35 @@ function safe(handler) {
   };
 }
 
-// save_puzzle_draft replaces a complete document, but provenance is server
-// maintained and intentionally optional for MCP authors. A client that reads
-// a simplified document without that optional field must not accidentally
-// erase existing attribution on its next save. Supplying modern provenance
-// remains an explicit replacement.
-function retainStoredProvenance(document, previousDocument) {
-  if (!document || typeof document !== "object" ||
-      Object.hasOwn(document, "provenance")) {
+// Complete MCP reads omit human-/infrastructure-managed document metadata.
+// Preserve it when an agent saves the remaining authored fields so legacy
+// values are neither exposed nor accidentally erased by a round trip.
+function retainMcpExcludedMetadata(document, previousDocument) {
+  if (!document || typeof document !== "object" || Array.isArray(document) ||
+      !previousDocument || typeof previousDocument !== "object" ||
+      Array.isArray(previousDocument)) {
     return document;
   }
-  const previous = canonicalizeDocumentProvenance(previousDocument);
-  return previous?.provenance
-    ? { ...document, provenance: previous.provenance }
-    : document;
+  let next = document;
+  for (const key of MCP_EXCLUDED_ROOT_FIELDS) {
+    if (Object.hasOwn(document, key) || !Object.hasOwn(previousDocument, key)) continue;
+    if (next === document) next = { ...document };
+    next[key] = previousDocument[key];
+  }
+  const introduction = document.learningIntroduction;
+  const previousIntroduction = previousDocument.learningIntroduction;
+  if (introduction && typeof introduction === "object" && !Array.isArray(introduction) &&
+      previousIntroduction && typeof previousIntroduction === "object" &&
+      !Array.isArray(previousIntroduction) &&
+      !Object.hasOwn(introduction, "credit") &&
+      Object.hasOwn(previousIntroduction, "credit")) {
+    if (next === document) next = { ...document };
+    next.learningIntroduction = {
+      ...introduction,
+      credit: previousIntroduction.credit
+    };
+  }
+  return next;
 }
 
 // One data point per tool call: tool in blob2, optional authoring phase in
@@ -341,6 +359,11 @@ function serverInstructions() {
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
     "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
     "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
+    "Select profile=vocabulary-context for near-synonym usage puzzles or profile=trivia-quiz for quiz-led " +
+    "puzzles whose clusters and questions are co-designed; set the corresponding puzzleKind for either " +
+    "specialized type. Omit puzzleKind for the default topic-based type. puzzleKind is independent of " +
+    "category and lensMode, belongs to content, and creates no new " +
+    "write domain. Unprofiled guidance stays profile-neutral. " +
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
@@ -794,23 +817,23 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
+    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Set profile=vocabulary-context or profile=trivia-quiz to select only that profile's compact overview or focused brief; omit puzzleKind for the default topic-based type and set it only for a specialized authored type. Profiles are independent of category and do not append rules to generic guidance or change the write domain. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, tracked("get_authoring_guidance", safe(async ({ phase }) => success(
+  }, tracked("get_authoring_guidance", safe(async ({ phase, profile }) => success(
     `Loaded ${phase} authoring guidance.`,
-    authoringGuidanceResult(phase, contentService.guidance)
+    authoringGuidanceResult(phase, contentService.guidance, profile)
   ))));
 
   server.registerTool("get_authoring_schema", {
     title: "Get authoring schema",
     description:
-      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Phase projections preserve omitted fields and are not standalone replacement schemas.",
+      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Set profile=vocabulary-context or profile=trivia-quiz to select focused guidance; the canonical document schema includes the authored puzzleKind field, and category does not select the profile. Phase projections preserve omitted fields and are not standalone replacement schemas.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, tracked("get_authoring_schema", safe(async ({ phase }) => success(
+  }, tracked("get_authoring_schema", safe(async ({ phase, profile }) => success(
     `Loaded ${phase} simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
-    simplifiedPuzzleSchemaResult(phase)
+    simplifiedPuzzleSchemaResult(phase, profile)
   ))));
 
   server.registerTool("get_workflow_guidance", {
@@ -892,6 +915,7 @@ export function createAuthoringMcpServer({
         }
       );
     }
+    assertNoAgentProtectedFields(args.document, "MCP puzzle document");
     // A freshly-built skeleton (no args.document) is always the simplified
     // shape and always temporarily invalid (empty clusters/bridges) -- no
     // point normalizing it, it stores unchanged either way.
@@ -938,10 +962,12 @@ export function createAuthoringMcpServer({
   server.registerTool("get_puzzle_draft", {
     title: "Get puzzle draft",
     description:
-      "Return a private draft's current state. The default complete domain is " +
-      "backwards-compatible; request content or pedagogy to receive only that " +
-      "agent-facing write domain. Pedagogy includes content as read-only context. " +
-      "Provenance and system metadata are never included in focused projections.",
+      "Return a private draft's current state. The default complete domain " +
+      "includes all agent-authored puzzle content and pedagogy; request content " +
+      "or pedagogy to receive only that write domain. Pedagogy includes content " +
+      "as read-only context. " +
+      "Protected attribution/editorial and system metadata are omitted from all " +
+      "agent-facing document projections.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       domain: authoringDomainSchema
@@ -965,7 +991,7 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the complete document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected provenance are preserved. Pedagogy receives content as read-only context. The complete domain remains available for backwards compatibility and refreshes the materialized document. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. Pedagogy receives content as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
@@ -983,6 +1009,7 @@ export function createAuthoringMcpServer({
     repair,
     publish_to_authoring
   }, ctx) => {
+    assertNoAgentProtectedFields(document, "MCP puzzle document");
     if (domain === "pedagogy" && repair) {
       throw new Error(
         "repair=true is only supported for complete or content domain saves"
@@ -996,6 +1023,8 @@ export function createAuthoringMcpServer({
       const previous = await draftRepository.get({ draftId: draft_id, actor });
       previousDocument = documentForEditor(previous.document);
       document = applyAuthoredDomain(previousDocument, domain, repairedInput.document);
+    } else {
+      previousDocument = (await draftRepository.get({ draftId: draft_id, actor })).document;
     }
     const repaired = {
       document: domain === "complete" ? repairedInput.document : document,
@@ -1029,7 +1058,7 @@ export function createAuthoringMcpServer({
     } catch {
       // Ignore -- save() re-validates the draft and revision authoritatively.
     }
-    const retained = retainStoredProvenance(stored, previousDocument);
+    const retained = retainMcpExcludedMetadata(stored, previousDocument);
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {
       ctx,
       server,

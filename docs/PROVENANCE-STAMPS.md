@@ -77,11 +77,13 @@ For example:
 }
 ```
 
-The author may supply model or configuration information that the invocation
-boundary cannot verify. `reviewedBy`, when present, is an author-owned lesson
-byline and is not another contributor. Focused agent writes cannot replace
-the provenance domain; human editorial workflows remain responsible for
-human-owned lesson credit and review attribution.
+MCP agents neither receive nor submit the document `provenance` object. The
+server seeds attribution from an identifiable MCP client where possible;
+human editorial workflows may correct contributor names, collaboration, or
+model details that the invocation boundary cannot verify. `reviewedBy`, when
+present, is an author-owned lesson byline and is not another contributor.
+Human editorial workflows also maintain legacy lesson credit and review
+attribution.
 
 ## Assistance stamps
 
@@ -89,7 +91,7 @@ An assistance stamp is assembled by the server rather than self-reported by
 the agent. It can contain:
 
 - the tool and target draft or puzzle;
-- server capture time and the supplied authoring role and date;
+- server capture time and server-assigned authoring role and date;
 - authenticated owner and actor context when available;
 - the focused authoring scope;
 - recognized client identity; and

@@ -1,8 +1,9 @@
 # Storage Domains: Write-Domain Scoping in Concept Clusters
 
 *Status: the first production slice is implemented. `content` and `pedagogy`
-are the focused agent-write domains; the complete document contract remains
-available for compatibility. Finer-grained partitioning remains future work.*
+are the focused agent-write domains; the complete authored-content form remains
+available for compatibility, while protected metadata is hidden and preserved.
+Finer-grained partitioning remains future work.*
 
 This document describes the design and the reader-visible behavior of the
 Concept Clusters authoring boundary. The repository-level migration and
@@ -45,6 +46,14 @@ discovery and lesson structure. Provenance is a compact document-level record,
 while system state belongs to the repository envelope rather than to authored
 JSON.
 
+An authoring profile is a different axis from a storage domain. For example,
+the `vocabulary-context` profile spans the existing `content` and `pedagogy`
+domains: its near-synonym clusters, bridge cores, and specialized `puzzleKind`
+remain content, while its context-sensitive lenses remain pedagogy. Omit
+`puzzleKind` for the default topic-based type. The MCP profile selects guidance;
+the document field records specialized authored types.
+Neither requires a third projection or a duplicated field owner.
+
 The boundary is about ownership, not an assertion that every field needs to
 remain authored. A partitioning review is also a good time to ask whether a
 field is semantic, human-controlled, or derivable. For example, a
@@ -61,12 +70,17 @@ focused save replaces the selected projection, preserves the protected
 domains, and lets the infrastructure reassemble a complete document for
 validation, publication, rendering, and Freeze.
 
-The `complete` path remains available for existing clients and workflows and
-is intentionally broader. Repository state remains infrastructure-controlled;
-the server preserves existing provenance when a complete save omits it and
-normalizes modern provenance when a complete client supplies it. Focused
-writes cannot replace provenance or system metadata. Human-owned lesson credit
-is similarly kept outside the focused pedagogy write surface.
+The `complete` path remains available for existing clients and workflows, but
+it does not expose or accept protected attribution, legacy lesson credit, or
+human-managed creator/license/source-lineage fields. The server preserves
+those values across complete and focused saves and stamps a recognized MCP
+client where possible. Human editorial workflows remain responsible for
+curating attribution and rights metadata. System metadata is likewise outside
+the authored document and cannot be replaced by an agent.
+
+The creator, license, and source-lineage values stay in the existing pedagogy
+storage projection for compatibility; they are not moved into the separate
+`provenance_json` record. `language` remains authored and agent-editable.
 
 For puzzle drafts, D1 stores projections for the three authored domains as the
 durable write surface. The complete `document` column is a materialized cache

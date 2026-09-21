@@ -205,8 +205,9 @@ function todayStamp() {
  * is still logged there for internal telemetry regardless of role or
  * substantiality, since that log is not player- or contributor-facing.
  *
- * Does not touch learningIntroduction.credit (human-owned). Same host updates
- * in place; a different host becomes an additional contributor.
+ * Does not author or overwrite learningIntroduction.credit; the shared
+ * canonicalizer may fold a parseable legacy byline into provenance. Same host
+ * updates in place; a different host becomes an additional contributor.
  */
 export function stampDocumentAssistanceFromMcp(document, {
   ctx = null,

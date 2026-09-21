@@ -140,12 +140,14 @@ question ambiguous.
 
 ### No trap words
 
-Every term must belong unambiguously to its declared cluster or clusters.
-Difficulty should come from recognizing concepts, not guessing which plausible
-interpretation the author intended. This is especially important in fiction,
-memoir, poetry, and other domains whose source vocabulary has fluid boundaries:
-prefer a precise analytical mechanism over an evocative phrase that could fit
-several groups.
+Every term must have a deliberate, defensible home in its declared cluster or
+clusters. Difficulty should come from recognizing concepts, not guessing which
+plausible interpretation the author intended. Specialized profiles such as
+`vocabulary-context` may intentionally use close semantic neighbors, but their
+lenses must still produce one best contextual fit rather than an unresolved
+tie. This is especially important in fiction, memoir, poetry, and other domains
+whose source vocabulary has fluid boundaries: prefer a precise analytical
+mechanism over an evocative phrase that could fit several groups.
 
 Cold-read every board from the player's available evidence. In Star mode, a
 cluster term initially has its wording, its hub name, and any `termInfo`—not the
@@ -265,6 +267,28 @@ that answer without requiring judgment.
 
 See the complete [Concept Lens reference](AUTHORING-REFERENCE.md#concept-lenses).
 
+For the `vocabulary-context` authoring profile, treat clusters as tight
+synonym or near-synonym neighborhoods rather than ordinary topic groups.
+Broad semantic overlap is intentional; the author should identify the usage
+axis that separates the terms and make it visible in the cluster fact, term
+information, or lens explanation. A lens should be a natural contextual
+best-fit decision with one answer, not a definition-matching exercise. Close
+near-misses are useful, while two equally natural completions are unresolved
+ambiguity. The profile spans the existing content and pedagogy authoring
+domains and does not create a third document domain. Set the authored type to
+`puzzleKind: "vocabulary-context"`; category remains a separate taxonomy
+choice.
+
+For the `trivia-quiz` authoring profile, design the clusters and quiz lenses
+together. The groups should give factual questions useful scope or comparison
+frames, rather than act as an arbitrary prelude to unrelated recall. Use
+`lensMode: "quiz"` as the normal form, but choose `preSolve` per puzzle: skip
+the sort only when it contributes little; preserve it when the categories
+reward discovery. The `Trivia` category is the current browse convention for
+cross-disciplinary material, not the profile selector. Persist the authored
+type as `puzzleKind: "trivia-quiz"`; use a disciplinary category whenever it
+is the better browse home.
+
 ### Learning introductions
 
 A learning introduction is optional, but a short orienting note is often
@@ -282,10 +306,10 @@ on it; otherwise prefer `recommended` or `optional`.
 
 Instructional content should point toward richer resources rather than trying
 to teach everything inline. Preserve exact citations discovered during
-research instead of planning to reconstruct them later. Keep authoring
-assistance as compact attribution in the puzzle-level `provenance` shape—not
-an edit log or a citation. The server may add the identified MCP host; see
-[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
+research instead of planning to reconstruct them later. MCP agents do not
+receive or write puzzle-level `provenance`; the server stamps an identifiable
+MCP client where possible, and human editors correct attribution when needed.
+See [authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
 
 See [learning introductions](AUTHORING-REFERENCE.md#learning-introductions)
 and [provenance](AUTHORING-REFERENCE.md#provenance).
@@ -336,8 +360,9 @@ Before validation and human review, check the complete puzzle as one lesson:
 - The complete board stays at or below 25 total nodes; layout is derived.
 - The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
-- `provenance` reflects known human and generative contributors; leave it
-  unset when attribution is unknown.
+- Do not include provenance or human-managed byline/rights metadata in an MCP
+  document. Human editors can review attribution separately; direct repository
+  work should preserve known provenance rather than invent it.
 
 Then run `validate_puzzle_draft` for MCP drafts or `node validate.mjs` for a
 direct repository edit. Structural validation is necessary, but the judgments

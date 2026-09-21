@@ -45,6 +45,7 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
   id: { domain: "content", kind: "authored", identity: true, contextFor: ["pedagogy"] },
   title: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   category: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
+  puzzleKind: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   info: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   clusters: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   // Root `bridges` is split: content owns the core shape; pedagogy owns
@@ -60,9 +61,9 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
   preSolve: { domain: "pedagogy", kind: "authored" },
   relatedPuzzles: { domain: "pedagogy", kind: "authored" },
   learningIntroduction: { domain: "pedagogy", kind: "authored" },
-  creator: { domain: "pedagogy", kind: "authored" },
-  license: { domain: "pedagogy", kind: "authored" },
-  derivedFrom: { domain: "pedagogy", kind: "authored" },
+  creator: { domain: "pedagogy", kind: "protected" },
+  license: { domain: "pedagogy", kind: "protected" },
+  derivedFrom: { domain: "pedagogy", kind: "protected" },
   language: { domain: "pedagogy", kind: "authored" },
 
   provenance: { domain: "provenance", kind: "protected" },
@@ -149,7 +150,9 @@ export const BRIDGE_FIELD_OWNERSHIP = Object.freeze({
 export const AUTHORING_PHASE_PASSES = Object.freeze({
   core: Object.freeze({
     writeDomain: "content",
-    root: Object.freeze(["id", "title", "category", "info", "clusters", "bridges"]),
+    root: Object.freeze([
+      "id", "title", "category", "puzzleKind", "info", "clusters", "bridges"
+    ]),
     clusters: Object.freeze([
       "id", "name", "fact", "seeds", "floatingTerms", "terms", "termInfo", "info"
     ]),
@@ -157,7 +160,7 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
   }),
   review: Object.freeze({
     writeDomain: null,
-    root: Object.freeze(["clusters", "bridges"]),
+    root: Object.freeze(["puzzleKind", "clusters", "bridges"]),
     clusters: Object.freeze([
       "id", "name", "fact", "seeds", "floatingTerms", "terms", "termInfo", "info"
     ]),
@@ -175,10 +178,11 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
   }),
   publication: Object.freeze({
     writeDomain: "pedagogy",
-    // Provenance is protected; agents do not author it through this pass.
+    // Protected creator/license/derivedFrom values stay in storage but are
+    // not exposed through MCP authoring passes.
     root: Object.freeze([
       "categories", "subcategories", "tags", "level", "relatedPuzzles",
-      "creator", "license", "derivedFrom", "language"
+      "language"
     ])
   })
 });
@@ -199,6 +203,22 @@ export const SYSTEM_ROOT_FIELDS = fieldsMatching(
 export const PEDAGOGY_ROOT_FIELDS = fieldsMatching(
   ROOT_FIELD_OWNERSHIP,
   meta => meta.domain === "pedagogy" && meta.kind === "authored"
+);
+
+// Includes human-/infrastructure-managed metadata kept in the pedagogy
+// storage projection. Agent-facing projections and writes use the narrower
+// PEDAGOGY_ROOT_FIELDS set above.
+export const PEDAGOGY_STORED_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.domain === "pedagogy" && meta.kind !== "retired"
+);
+
+// Document fields whose values are maintained outside the MCP agent contract.
+// Infrastructure-owned system values are separately carried by the draft
+// envelope and do not belong in this set.
+export const MCP_EXCLUDED_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.kind === "protected" && meta.domain !== "system"
 );
 
 export const PEDAGOGY_BRIDGE_FIELDS = fieldsMatching(
@@ -320,6 +340,8 @@ export default {
   AUTHORING_PHASE_PASSES,
   SYSTEM_ROOT_FIELDS,
   PEDAGOGY_ROOT_FIELDS,
+  PEDAGOGY_STORED_ROOT_FIELDS,
+  MCP_EXCLUDED_ROOT_FIELDS,
   PEDAGOGY_BRIDGE_FIELDS,
   CONTENT_BRIDGE_FIELDS,
   BRIDGE_IDENTITY_FIELDS,

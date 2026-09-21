@@ -13632,6 +13632,34 @@ export const PUZZLE_MANIFEST = [
         "stroke contrast"
       ]
     }
+  },
+  {
+    "id": "homonyms-in-context",
+    "module": "./vocabulary/homonyms-in-context.js",
+    "browse": {
+      "id": "homonyms-in-context",
+      "title": "Homonyms in Context",
+      "category": "Vocabulary",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "Use the surrounding sentence to distinguish two unrelated meanings of the same spelling."
+      },
+      "_searchTerms": [
+        "River Edge",
+        "shore",
+        "levee",
+        "floodplain",
+        "embankment",
+        "Financial Institution",
+        "deposit",
+        "loan",
+        "interest",
+        "account",
+        "bank"
+      ]
+    }
   }
 ];
 

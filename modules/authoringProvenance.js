@@ -2,10 +2,10 @@
 // Model of record: collaboration mode + contributor names, plus each
 // generative contributor's own optional model/reasoning/switch and an
 // author-owned document-level reviewedBy. Kind is derived on read when
-// a name matches authoringHosts.js; provider data is never retained. Agents
-// therefore
-// round-trip a lean document on get_puzzle_draft. Player bylines are L1
-// projections; agents are taught L2 only. Dates/roles/scopes stay L3 / unused.
+// a name matches authoringHosts.js; provider data is never retained. This is
+// an internal stored-document model, not the MCP agent contract: MCP reads
+// omit it, and writes reject it while the server stamps a recognized client.
+// Player bylines are L1 projections. Dates/roles/scopes stay L3 / unused.
 import {
   AUTHORING_SETTINGS,
   fillAuthoringTemplate,
@@ -873,7 +873,7 @@ export function canonicalizeDocumentProvenance(document, {
       provenance = upsertGenerativeProvenance(provenance, { system: host });
     }
     // Bylines that name editorial direction imply humanPrimary, not the
-    // agent-from-scratch default (aiPrimary).
+    // automatic mixed-contributor default (aiPrimary).
     const editorialByline = parsed &&
       ["directed", "compact", "legacyAssist"].includes(parsed.acceptId);
     if (editorialByline && provenance) {

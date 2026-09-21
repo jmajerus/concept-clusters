@@ -9,6 +9,7 @@ import {
   lensNodeClass,
   lensPhaseActive,
   lensQuizResult,
+  lensResult,
   lensSpansClusters,
   normalizedLensMode,
   quizOptionForNode,
@@ -312,6 +313,31 @@ export async function run() {
     lensCompletionMessage(spanning),
     /^You completed the map and examined it through 1 cross-cutting lens\.$/
   );
+
+  // Vocabulary's first shape: one shared bridge term can answer separate
+  // contextual prompts in sequential lenses. The bridge is one playable
+  // node, not a duplicated option list, and each lens still has one target.
+  const homonym = {
+    id: "homonyms-in-context",
+    lensMode: "sequential",
+    clusters: [
+      { terms: ["shore", "levee"] },
+      { terms: ["deposit", "loan"] }
+    ],
+    bridges: [{ term: "bank", clusters: [0, 1] }],
+    lenses: [
+      { id: "river", prompt: "By the river?", explanation: "e", targets: ["bank"] },
+      { id: "finance", prompt: "For a loan?", explanation: "e", targets: ["bank"] }
+    ]
+  };
+  assert.deepEqual(validatePuzzleLenses(homonym), []);
+  assert.equal(lensSpansClusters(homonym, homonym.lenses[0]), false);
+  assert.deepEqual(lensResult(homonym.lenses[0], new Set(["bank"])), {
+    correct: ["bank"],
+    missed: [],
+    extra: [],
+    targetCount: 1
+  });
 
   assert.match(
     lensCompletionMessage(quizPuzzle()),

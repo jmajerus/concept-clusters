@@ -12,6 +12,11 @@
     "id": { "$ref": "#/$defs/slug" },
     "title": { "$ref": "#/$defs/nonEmpty" },
     "category": { "$ref": "#/$defs/categoryReference" },
+    "puzzleKind": {
+      "type": "string",
+      "enum": ["topic-based", "vocabulary-context", "trivia-quiz"],
+      "description": "Authored puzzle type, independent of category and lensMode."
+    },
     "categories": { "type": "array", "items": { "$ref": "#/$defs/categoryReference" }, "uniqueItems": true },
     "subcategories": {
       "type": "object",

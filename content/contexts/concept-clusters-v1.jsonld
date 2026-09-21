@@ -9,6 +9,7 @@
     "title": "schema:name",
     "name": "schema:name",
     "category": "cc:primaryCategory",
+    "puzzleKind": "cc:puzzleKind",
     "categories": { "@id": "cc:categories", "@container": "@list" },
     "subcategories": { "@id": "cc:subcategories", "@container": "@index" },
     "clusters": { "@id": "cc:clusters", "@container": "@list" },

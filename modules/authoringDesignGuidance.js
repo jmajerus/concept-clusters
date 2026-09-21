@@ -13,6 +13,11 @@ import {
   fillAuthoringTemplate,
   preferredLessonCreditExample
 } from "./authoringSettings.js";
+import {
+  authoringProfileDescriptor,
+  TRIVIA_QUIZ_PROFILE,
+  VOCABULARY_CONTEXT_PROFILE
+} from "./authoringProfiles.js";
 
 const CREDIT_PREFERRED_EXAMPLE = preferredLessonCreditExample(AUTHORING_SETTINGS);
 const CREDIT_HUMAN_EXAMPLE = fillAuthoringTemplate(
@@ -84,6 +89,11 @@ or copied into the puzzle document.
 Repository-owned timestamps, revision numbers, and cache-invalidation keys
 are not authoring fields; the server derives them.
 
+Omit puzzleKind for the default topic-based kind. For a specialized authored
+type, follow the matching profile and record its type explicitly; the profile
+selects focused guidance but is not a substitute for the field. Puzzle kind
+remains independent of category and lensMode.
+
 The MCP draft read/write contract uses the canonical stored shape: keep
 category, categories, and subcategories on stable ids, and use the current
 field names returned by the schema. Display titles are resolved metadata, not
@@ -110,9 +120,10 @@ player pages do not expose file export.`;
 
 export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema validity)
 
-- No trap words: every term must belong unambiguously to its declared
-  cluster(s). Ambiguity is noise here, not challenge -- if two clusters
-  could both plausibly claim a term, the term is wrong, not clever.
+- No trap words: every term must have a deliberate, defensible home in its
+  declared cluster(s). If two clusters could both plausibly claim a term,
+  that is noise rather than challenge; resolve the ownership or rewrite the
+  distinction before publication.
 - Seed pairs are the orienting clue: choose the two most instantly
   recognizable terms in each cluster as its seeds, leaving the least
   obvious term as the "aha" the player has to work out. A cluster pared
@@ -222,13 +233,6 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   conclusion once the terms are named, making the lens the real point of
   the puzzle -- a narrow, deliberate exception, not something to reach for
   by default.
-- The Trivia category specifically leans toward lensMode: "quiz" and
-  preSolve: true: trivia is usually about testing specific factual recall
-  rather than discovering how terms cluster, so the sort is often a
-  foregone conclusion once the terms are named and the quiz is the real
-  content. Treat this as a lean for that one category, not a rule -- a
-  Trivia puzzle built around a genuine categorical distinction should
-  still use open clustering when that's the more honest structure.
 - Fit each lens to a learning objective worth a second look at the
   board. A focused question whose honest answers are one, two, or three
   terms is instructional -- that is a complete lens, not a stub to pad
@@ -276,34 +280,21 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   dialog already shows title; do not repeat it as the first line. Do not write
   the two-character sequence backslash-n; the tool serializer encodes newlines.
   A body stored as one line with \`\\n\` tokens renders as a single paragraph.
-  learningIntroduction.credit is a legacy stored byline only when provenance
-  cannot derive L1. Prefer provenance; do not write credit. Collaboration is
-  human-owned metadata when a human has taken editorial lead; the byline is
-  derived from provenance.
+  learningIntroduction.credit is a legacy human-managed byline; do not include
+  it in MCP documents. The MCP server keeps protected attribution outside the
+  agent-authored document and stamps an identifiable client when possible.
   Prefer links (same shape as info.links) for further-reading on the lesson.
   Bibliographic references are a single puzzle-level list on info.citations
   (same { author?, title, publisher?, year?, pages?, url? } shape) -- never
   a second list on the lesson. When a learningIntroduction exists, play
   shows that list under References in the Lesson dialog; otherwise it
   shows on the board. Do not duplicate references across surfaces.
-- provenance is optional structured authoring attribution, not the lesson
-  footnote. Prefer \`{ contributors: ["Cursor", "Jane Doe"] }\`; the server
-  stamps a generative contributor from the MCP call-frame host on draft
-  create/save when it can identify one. Do not write learningIntroduction.credit;
-  the player byline is derived from provenance. Do not put AI credit in
-  citations.
-- Known AI host names
-  (authoringHosts.js) are inferred as generative; other names as human.
-  Storage keeps names (+ collaboration); kind is omitted when derivable and
-  provider is never stored, so draft reads stay cheap. Collaboration defaults
-  (human / ai / aiPrimary for mixed); set
-  \`collaboration: "humanPrimary"\` when a human has taken editorial lead.
-  Optional \`reviewedBy\` is a human-owned reviewer name for the lesson
-  byline, not a contributor and not a sign-off. Leave it unset unless a real
-  human reviewer exists. Do not invent a reviewer.
-  Do not invent humans, write byline strings, or add roles/scopes/dates.
-  Omit provenance when unsure. The server may already stamp a generative
-  contributor from the MCP host.
+- Do not submit \`provenance\`, \`creator\`, \`license\`, or \`derivedFrom\` in
+  MCP puzzle documents. They are protected metadata outside the agent authoring
+  contract; the server preserves existing values and records an identifiable
+  MCP client when possible. Human editorial workflows manage attribution and
+  rights metadata. Do not invent people, write byline strings, or add
+  roles/scopes/dates. Do not put AI credit in citations.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
@@ -399,6 +390,9 @@ gates: revisit any phase whenever that part of the puzzle needs more work.`;
 
 const CORE_PHASE_GUIDANCE = `## Core and research pass
 
+- Omit puzzleKind for the default topic-based kind. For a specialized type,
+  follow the selected profile and record its authored type explicitly. It is
+  content metadata, separate from taxonomy category and lensMode.
 - Before shaping a gap-fill draft, call search_puzzles with 2-3 planned
   anchor terms scoped to the target category. If an existing puzzle already
   covers the distinction, extend or relate instead of opening a parallel board.
@@ -409,8 +403,10 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   clusters, their facts, and their terms. Each cluster needs two
   immediately recognizable seeds and one to five floating terms -- or,
   for a minimum-size two-term cluster only, one seed and one floating
-  term. No trap
-  words: every term must belong unambiguously to its declared cluster.
+  term. No trap words: every term must have a deliberate, defensible home in
+  its declared cluster. If two clusters could both plausibly claim a term,
+  that is noise rather than challenge; resolve the ownership or rewrite the
+  distinction before publication.
   Size by distinct concepts. Do not drop a genuine term to fit a rendering
   threshold. If the map needs more than 25 nodes, split it into relatedPuzzles.
 - Carry approved inventory connections onto the board as bridges. Do not
@@ -490,8 +486,8 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   shows title; do not repeat it as the first line. Do not write the
   two-character sequence backslash-n; the tool serializer encodes newlines. A
   body stored as one line with \`\\n\` tokens renders as a single paragraph.
-  learningIntroduction.credit is a human-owned lesson byline; leave it unset.
-  Do not put credit in content.text.
+  Do not include the human-managed legacy field learningIntroduction.credit.
+  Do not put byline text in content.text.
   Never add dateCreated, dateModified, version, or
   learningIntroduction.revision; those are infrastructure-derived values.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
@@ -502,14 +498,13 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
 const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 
 - Add only useful discovery and stewardship metadata: tags, secondary category
-  assignments, level, related puzzles, licensing, and language.
+  assignments, level, related puzzles, and language.
   Most are optional; omission is better than filler. The server supplies
-  timestamps, revision metadata, and contributor provenance; this pass does
-  not author provenance.
-- Do not write learningIntroduction.credit; the lesson byline is derived from
-  provenance (humans may override collaboration and name a real reviewer).
-  Do not invent a reviewer name. Do not treat roles or per-scope assistance
-  entries as required publication metadata.
+  timestamps, revision metadata, and MCP-client attribution; protected
+  provenance and rights metadata are not authored in this pass.
+- Do not include learningIntroduction.credit, provenance, creator, license, or
+  derivedFrom in an MCP document. Do not invent a reviewer name or treat roles
+  or per-scope assistance entries as publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse
@@ -530,6 +525,261 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   membership with get_catalogue then update_catalogue (or update_meta_catalogue
   when editing a meta catalogue). Publication review
   evaluates the whole puzzle, not merely this metadata pass.`;
+
+const VOCABULARY_CONTEXT_PROFILE_OVERVIEW = `## Vocabulary-in-context profile
+
+This profile is for lexical-disambiguation puzzles: the board gathers tight
+synonym or near-synonym neighborhoods, and the lenses teach why a particular
+context prefers one neighboring term over another. It is not a simple matching
+exercise with a sentence appended afterward. Close relatedness is intentional;
+the author must still make each completed lens resolve to one best fit.
+
+The profile is advisory. It does not create a new storage domain, impose a
+cluster count, or require the homonym-bridge pattern. Record the authored type
+as puzzleKind: "vocabulary-context"; category remains a separate taxonomy
+choice. Content still belongs to the content domain and lenses still belong
+to the pedagogy domain.`;
+
+const VOCABULARY_CONTEXT_PROFILE_GUIDANCE = Object.freeze({
+  core: `## Vocabulary-in-context core pass
+
+- Set puzzleKind to "vocabulary-context" in the puzzle document. This is
+  authored content metadata; choose category independently for discovery.
+- Begin with a distinction inventory, not a target cluster count. Identify the
+  shared semantic center of each synonym neighborhood and the usage axes that
+  separate its members: frequency, duration, agency, intent, register,
+  intensity, connotation, collocation, grammatical frame, or another real
+  distinction.
+- Choose genuine near-neighbors. A term may overlap broadly with its cluster
+  mates; that overlap is the material the learner is meant to refine. Do not
+  manufacture unrelated terms merely to make the board easy to sort, and do
+  not treat every broad synonym as interchangeable in every context.
+- Use the cluster fact to state the shared meaning and the relevant boundary.
+  Use term information when an individual term needs a sharper usage note.
+  Seeds should orient the learner to the neighborhood; floating terms can
+  carry the subtler distinctions that the lenses will revisit.
+- A bridge is optional and must represent a genuine connection. A homonym or
+  homograph may be authored once as an ordinary bridge term shared by the
+  relevant clusters, but that pattern is not required and must not become the
+  profile's template.
+
+The core pass remains a content-domain pass: save clusters, terms, facts, and
+bridge cores with domain=content.`,
+  review: `## Vocabulary-in-context review pass
+
+- Review each cluster as a semantic neighborhood, not merely as a topic. Can
+  the author state what the terms share and what usage boundary makes each one
+  worth retaining? Close meaning is expected; accidental duplicate work is
+  not.
+- For every planned lens, substitute the nearest board neighbors into the
+  sentence. The desired result is one most natural or precise fit plus
+  meaningful near-misses—not arbitrary distractors and not two equally good
+  answers.
+- Check that the sentence supplies the deciding cue through natural context,
+  collocation, syntax, register, or situation. A dictionary definition hidden
+  in the prompt is a matching exercise, not a useful lens.
+- Make the explanation name the distinction that decided the answer. When a
+  neighboring term is especially plausible, explain why the target is more
+  precise rather than claiming that the neighbor is simply unrelated.
+- A repeated target is acceptable when separate lenses teach separate usages,
+  including separate senses of a bridge term. Repetition alone is not a
+  reason to merge lenses or add a second blank.
+
+This pass may inspect both domains, but any bridge annotations still save
+through domain=pedagogy and the content core remains owned by domain=content.`,
+  pedagogy: `## Vocabulary-in-context pedagogy pass
+
+- Treat each lens as a contextual usage decision. Write a natural sentence
+  with one blank whose surrounding situation makes one board term the best fit
+  among its near-synonyms. The learner should have to notice the usage
+  distinction, not merely recognize a definition.
+- Keep the first form to one blank and one target term. The target may be any
+  playable board term, and the same term may be targeted by multiple lenses
+  when each context teaches something different. Do not repeat the target as
+  a separate multiple-choice option list.
+- In the explanation or target reason, name the cue and the boundary it
+  activates: for example, intermittent occurrence rather than general
+  unpredictability, personal whim rather than lack of order, or formal
+  register rather than ordinary frequency. Avoid explanations that only say
+  the target belongs to the topic.
+- Do not force every lens to span clusters, use a bridge, or cover every term.
+  Choose lenses for real usage distinctions and order several lenses as a
+  progression when the material supports one.
+- Use lensMode=sequential by default for this open contextual reclassification
+  flow. Leave preSolve as a per-puzzle judgment: use it when the grouping is
+  genuinely obvious and the contextual distinction is the lesson; leave the
+  clustering challenge intact for advanced near-synonym boards.
+- Multiple blanks and structured slot mapping remain deferred. Do not encode
+  several unordered answers in one target list.
+
+This pass remains a pedagogy-domain pass: retrieve the pedagogy projection and
+save lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
+  publication: `## Vocabulary-in-context publication pass
+
+- Keep Vocabulary as the stable taxonomy category when the puzzle belongs in
+  that cross-disciplinary collection. Preserve the authored
+  puzzleKind: "vocabulary-context" independently of that category; the
+  profile argument selects guidance, while the kind is content metadata, not a
+  third document domain.
+- Publish only useful discovery metadata. Do not flatten the puzzle into a
+  generic quiz description: its purpose is to teach precise usage among close
+  lexical neighbors.`
+});
+
+const TRIVIA_QUIZ_PROFILE_OVERVIEW = `## Trivia-quiz profile
+
+This profile identifies a quiz-led puzzle type. Clusters, board terms, and
+quiz lenses are designed together: the grouping supplies the question's scope,
+evidence, or comparison frame, rather than serving as an arbitrary prelude to
+unrelated recall.
+
+Use lensMode=quiz as the normal form. preSolve=true often fits when grouping is
+obvious and the quiz is the real work, but keep the clustering challenge when
+it contributes meaningful play. The profile imposes no cluster or lens count,
+does not require cross-cluster questions, and is independent of taxonomy. The
+domain-less Trivia category is the current browse convention for
+cross-disciplinary material, not the profile selector; this profile may fit a
+puzzle filed under a disciplinary category.
+
+The MCP profile argument selects focused guidance; the puzzle document records
+the authored type as puzzleKind: "trivia-quiz". That field belongs to content
+and creates no new write domain. Clusters and facts remain in content; quiz
+lenses remain in pedagogy.`;
+
+const TRIVIA_QUIZ_PROFILE_GUIDANCE = Object.freeze({
+  core: `## Trivia-quiz core pass
+
+- Set puzzleKind to "trivia-quiz" in the puzzle document. This authored type is
+  independent of the taxonomy category.
+- Inventory question-worthy facts and relationships alongside candidate
+  board terms. Shape the clusters and the intended quiz questions together so
+  the groups provide useful scope, comparison sets, or denominators for the
+  questions. Do not build an arbitrary sort and append unrelated recall.
+- Give each cluster a meaningful inclusion rule and a fact that explains it.
+  A group may organize items by genre, period, role, or another defensible
+  dimension; choose the structure that makes the intended questions clearer,
+  not a target cluster count or a symmetric-looking layout.
+- Select a board inventory that supports interesting questions about its
+  items or relationships within and across groups. Not every lens must span
+  clusters, and no cluster needs its own question. Do not add terms merely as
+  quiz fodder when they do not belong in the board's subject.
+- Treat trivia claims as factual claims: verify them and preserve exact
+  citations when research finds supporting sources. A cross-cluster person,
+  work, or pattern may be a genuine bridge, but bridges are optional and must
+  not be invented to connect the whole board.
+
+This is a content-domain pass: save the clusters, terms, facts, and genuine
+bridge cores with domain=content. The category is chosen separately during
+publication; selecting this profile does not require category=trivia.`,
+  review: `## Trivia-quiz review pass
+
+- Check that each cluster is a coherent, defensible group and that its fact
+  gives the grouping a meaningful role in the puzzle's question design. If a
+  question is unchanged when the board and its groupings are removed, decide
+  whether it is useful here or is detached recall that belongs elsewhere.
+- Verify every factual premise in each prompt, answer option, and explanation.
+  Check dates, roles, counts, and scope carefully; preserve citations for
+  supported claims. A trivia-style puzzle is not an exemption from accuracy.
+- Read every multiple-choice lens against the complete option set. There must
+  be exactly one defensible correct answer; distractors may be plausible but
+  must be clearly wrong under the wording and evidence given.
+- Where options map to board terms, compare each target set against the full
+  board: include all and only the terms the option describes. Ensure cluster
+  membership or cluster facts do not accidentally reveal a different answer
+  than the lens explanation claims.
+- Review the lens sequence as a whole. Prefer distinct, complementary
+  questions that build a picture of the board over repeated counts or a list
+  of unrelated facts. If preSolve is enabled, confirm the grouping really is
+  obvious and that several substantive quiz rounds carry the experience;
+  three is a useful heuristic, not a fixed minimum.
+
+This pass may inspect both domains; save content changes with domain=content
+and quiz-lens changes with domain=pedagogy.`,
+  pedagogy: `## Trivia-quiz pedagogy pass
+
+- Use lensMode=quiz for the quiz-led profile. Each lens should ask a clear
+  factual question about the curated board or a relevant relationship among
+  its items; do not append questions that merely happen to share a broad
+  subject.
+- Make exactly one option correct. Use plausible distractors that test the
+  intended distinction rather than obscure wording. Explain why the answer is
+  correct and address the most tempting alternative when that helps teach.
+- Map each option's targets to every and only board term supported by that
+  answer. The question may concern a relationship not printed on the board,
+  but the selected films, people, events, or other terms should make the
+  question's connection to the board evident.
+- Order lenses as a purposeful sequence—for example, identification followed
+  by a within-group comparison and then a cross-group relationship when those
+  questions genuinely fit. Do not force any one question pattern or pad the
+  sequence to a template.
+- Choose preSolve per puzzle. Use it when the sort is a foregone conclusion
+  and the quiz sequence is the meaningful play; leave clustering open when
+  its categories themselves reward discovery. If preSolve is on, several
+  substantial lenses are important so the puzzle does not collapse to one
+  isolated question.
+
+This is a pedagogy-domain pass: retrieve the pedagogy projection and save
+lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
+  publication: `## Trivia-quiz publication pass
+
+- Choose category for discovery and disciplinary home, independently of this
+  profile. Trivia is the current domain-less category convention for
+  cross-disciplinary fact collections; use a disciplinary category when that
+  is the better browse home. Do not infer or require profile=trivia-quiz from
+  category=trivia, and do not change category just to select this profile.
+- Preserve puzzleKind: "trivia-quiz" as the authored puzzle type; the MCP
+  profile selects guidance but does not replace the document field. Publish
+  only useful discovery metadata for the actual puzzle.`
+});
+
+const PROFILE_PHASE_PREAMBLE = `# Progressive profile authoring
+
+This is one pass over one accumulating simplified-puzzle draft. Retrieve the
+latest draft before editing, preserve every field from earlier passes, and
+change only what this pass improves. The selected profile chooses focused
+guidance; for new documents, record the matching authored type in puzzleKind.
+Use the canonical schema for field validity and save through the phase's
+existing write domain. Always
+validate the complete draft before publication.`;
+
+const AUTHORING_PROFILE_GUIDANCE = Object.freeze({
+  [VOCABULARY_CONTEXT_PROFILE]: Object.freeze({
+    overview: VOCABULARY_CONTEXT_PROFILE_OVERVIEW,
+    phases: VOCABULARY_CONTEXT_PROFILE_GUIDANCE,
+    routing: `Request profile=vocabulary-context with phase=core, review, pedagogy, or
+publication for the focused brief. Core owns semantic neighborhoods and
+bridge cores in content; review checks usage distinctions across the
+accumulated draft; pedagogy authors contextual lenses and learning
+introductions; publication adds ordinary discovery metadata.`
+  }),
+  [TRIVIA_QUIZ_PROFILE]: Object.freeze({
+    overview: TRIVIA_QUIZ_PROFILE_OVERVIEW,
+    phases: TRIVIA_QUIZ_PROFILE_GUIDANCE,
+    routing: `Request profile=trivia-quiz with phase=core, review, pedagogy, or
+publication for the focused brief. Core co-designs the board and its question
+space; review checks factual accuracy, group coherence, and answer mappings;
+pedagogy authors the quiz sequence; publication chooses taxonomy independently.`
+  })
+});
+
+function profileGuidance(profile, phase) {
+  const descriptor = authoringProfileDescriptor(profile);
+  const profileDefinition = AUTHORING_PROFILE_GUIDANCE[descriptor.id];
+  if (!profileDefinition) {
+    throw new Error(`No guidance is registered for authoring profile ${profile}`);
+  }
+  if (phase === "complete") {
+    return [
+      profileDefinition.overview,
+      `## Focused profile passes\n\n${profileDefinition.routing} This complete response is intentionally a routing overview; it does not repeat every phase brief.`
+    ].join("\n\n");
+  }
+  const guidance = profileDefinition.phases[phase];
+  if (!guidance) {
+    throw new Error(`No guidance is registered for phase ${phase}`);
+  }
+  return `${PROFILE_PHASE_PREAMBLE}\n\n${guidance}`;
+}
 
 export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
   core: `${PHASE_PREAMBLE}\n\n${CORE_PHASE_GUIDANCE}`,
@@ -572,13 +822,24 @@ export function authoringWorkflowGuidanceResult(topic) {
   return { topic, markdown: AUTHORING_WORKFLOW_GUIDANCE[topic] };
 }
 
-export function authoringGuidanceResult(phase, completeGuidance) {
-  if (phase === "complete") return { markdown: completeGuidance };
+export function authoringGuidanceResult(phase, completeGuidance, profile = null) {
+  const markdown = profile
+    ? profileGuidance(profile, phase)
+    : phase === "complete"
+      ? completeGuidance
+      : AUTHORING_PHASE_GUIDANCE[phase];
+  if (phase === "complete") {
+    return {
+      ...(profile ? { profile } : {}),
+      markdown
+    };
+  }
   return {
     phase,
     complete: false,
     preserveExisting: true,
-    markdown: AUTHORING_PHASE_GUIDANCE[phase]
+    ...(profile ? { profile } : {}),
+    markdown
   };
 }
 
@@ -644,8 +905,8 @@ not infer its absence from puzzles/categories.js or another Git checkout, and
 do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
 Drafts may be temporarily invalid. Save with save_puzzle_draft, then
-validate and address every error. Do not write learningIntroduction.credit;
-human-owned attribution is supplied separately when needed.
+validate and address every error. MCP maintains protected attribution and
+editorial metadata outside the agent document; existing values are preserved.
 Set stable category ids in category / categories / subcategories on the puzzle document. Use
 create_category or update_category with publish_to_authoring=true to publish the
 category document before the puzzle references it. Add or remove catalogue membership
@@ -674,10 +935,9 @@ not infer its absence from puzzles/categories.js or another Git checkout, and
 do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
 Drafts may be temporarily invalid. Retrieve the latest draft, save with
-expected_revision, then validate and address every error.
-When you draft or materially regenerate content with generative AI, do not
-write learningIntroduction.credit; human-owned attribution is supplied
-separately when needed.
+expected_revision, then validate and address every error. MCP maintains
+protected attribution and editorial metadata outside the agent document;
+existing values are preserved.
 Set stable category ids in category / categories / subcategories on the puzzle document. Use
 create_category or update_category with publish_to_authoring=true to publish the
 category document before the puzzle references it; its optional domain must be one

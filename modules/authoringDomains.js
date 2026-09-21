@@ -11,8 +11,10 @@ import {
   AUTHORING_READ_DOMAINS,
   AUTHORING_WRITE_DOMAINS,
   DERIVED_ROOT_FIELDS,
+  MCP_EXCLUDED_ROOT_FIELDS,
   PEDAGOGY_BRIDGE_FIELDS,
   PEDAGOGY_ROOT_FIELDS,
+  PEDAGOGY_STORED_ROOT_FIELDS,
   PROTECTED_ROOT_FIELDS,
   RETIRED_ROOT_FIELDS,
   SYSTEM_ROOT_FIELDS
@@ -52,6 +54,27 @@ export function assertNoRetiredAuthoringFields(document, label = "Authored docum
     if (hasOwn(document, key)) {
       throw new Error(`${label} contains retired field ${key}; remove it before continuing`);
     }
+  }
+  return document;
+}
+
+/**
+ * MCP agents do not author protected attribution/editorial fields. The
+ * storage and human-editor paths may still retain these values, so reject
+ * them at the agent write boundary instead of silently accepting edits.
+ */
+export function assertNoAgentProtectedFields(document, label = "MCP document") {
+  if (!isObject(document)) return document;
+  for (const key of MCP_EXCLUDED_ROOT_FIELDS) {
+    if (hasOwn(document, key)) {
+      throw new Error(`${label}.${key} is protected and outside the MCP authoring contract`);
+    }
+  }
+  const introduction = document.learningIntroduction;
+  if (isObject(introduction) && hasOwn(introduction, "credit")) {
+    throw new Error(
+      `${label}.learningIntroduction.credit is human-managed and outside the MCP authoring contract`
+    );
   }
   return document;
 }
@@ -201,7 +224,7 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
     if (key === "bridges") continue;
     if (key === "provenance") {
       provenance = clone(value);
-    } else if (PEDAGOGY_ROOT_FIELDS.has(key)) {
+    } else if (PEDAGOGY_STORED_ROOT_FIELDS.has(key)) {
       pedagogy[key] = clone(value);
     } else {
       // Keep unknown authored fields in content for forward compatibility.
@@ -305,6 +328,7 @@ export function projectAuthoredDocument(document, domain = "complete") {
 
 function assertDomainPayload(domain, incoming) {
   assertObject(incoming, `${domain} domain document`);
+  assertNoAgentProtectedFields(incoming, `${domain} domain document`);
   assertNoRetiredAuthoringFields(incoming, `${domain} domain document`);
   for (const key of Object.keys(incoming)) {
     if (PROTECTED_ROOT_FIELDS.has(key)) {
@@ -350,12 +374,6 @@ function assertDomainPayload(domain, incoming) {
     });
   }
 
-  if (domain === "pedagogy" && isObject(incoming.learningIntroduction) &&
-      hasOwn(incoming.learningIntroduction, "credit")) {
-    throw new Error(
-      "learningIntroduction.credit is protected and cannot be written through the pedagogy domain"
-    );
-  }
 }
 
 function assertPedagogyBridgeIdentities(contentBridges, incomingBridges) {
@@ -408,7 +426,12 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     // field), while the other logical domains remain untouched.
     next.content = clone(incoming);
   } else {
-    next.pedagogy = clone(incoming);
+    const preservedProtected = Object.fromEntries(
+      [...PEDAGOGY_STORED_ROOT_FIELDS]
+        .filter(key => PROTECTED_ROOT_FIELDS.has(key) && hasOwn(current.pedagogy, key))
+        .map(key => [key, clone(current.pedagogy[key])])
+    );
+    next.pedagogy = { ...clone(incoming), ...preservedProtected };
     if (hasOwn(incoming, "bridges")) {
       next.pedagogy.bridges = splitDomainBridges(incoming.bridges);
     }

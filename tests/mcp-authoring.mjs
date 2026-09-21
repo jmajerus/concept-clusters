@@ -188,6 +188,11 @@ export async function run() {
         .description,
       /catalogue and category/
     );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "get_authoring_guidance")
+        .description,
+      /omit puzzleKind for the default topic-based type and set it only for a specialized authored type/i
+    );
 
     const resourceList = await request("resources/list", {});
     const schemaResource = resourceList.result.resources.find(resource =>
@@ -200,6 +205,30 @@ export async function run() {
       uri: schemaResource.uri
     });
     const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      assert.equal(
+        resourceSchema.properties[field],
+        undefined,
+        `${field} must stay outside the MCP puzzle schema`
+      );
+    }
+    for (const field of [
+      "dateCreated", "dateModified", "version", "createdAt", "updatedAt",
+      "validatedAt", "publicationState", "owner", "revision"
+    ]) {
+      assert.equal(resourceSchema.properties[field], undefined);
+    }
+    assert.ok(resourceSchema.properties.language, "language remains agent-authored");
+    assert.equal(
+      resourceSchema.properties.learningIntroduction.properties.credit,
+      undefined,
+      "human-managed lesson credit must stay outside the MCP schema"
+    );
+    assert.equal(
+      resourceSchema.properties.learningIntroduction.properties.revision,
+      undefined,
+      "lesson progress revision is infrastructure-managed"
+    );
     assert.equal(
       resourceSchema.properties.bridges.items.properties.termRole,
       undefined,
@@ -238,6 +267,15 @@ export async function run() {
       arguments: {}
     });
     assert.equal(authoringSchema.result.structuredContent.version, "1");
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      assert.equal(authoringSchema.result.structuredContent.schema.properties[field], undefined);
+    }
+    assert.ok(authoringSchema.result.structuredContent.schema.properties.language);
+    assert.equal(
+      authoringSchema.result.structuredContent.schema.properties.learningIntroduction
+        .properties.credit,
+      undefined
+    );
     assert.equal(
       authoringSchema.result.structuredContent.resourceUri,
       schemaResource.uri
@@ -305,10 +343,9 @@ export async function run() {
         .properties.text.description,
       /real line breaks/
     );
-    assert.match(
-      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties
-        .credit.description,
-      /must not write this field/
+    assert.equal(
+      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.credit,
+      undefined
     );
     assert.equal(phasedSchemas.core.schema.properties.large, undefined);
     assert.equal(phasedSchemas.review.schema.properties.large, undefined);
@@ -322,9 +359,62 @@ export async function run() {
     assert.equal(phasedSchemas.publication.domain, "pedagogy");
     assert.equal(phasedSchemas.review.domain, undefined);
     assert.equal(phasedSchemas.publication.schema.properties.provenance, undefined);
+    for (const field of ["creator", "license", "derivedFrom"]) {
+      assert.equal(phasedSchemas.publication.schema.properties[field], undefined);
+    }
+    assert.ok(phasedSchemas.publication.schema.properties.language);
     assert.ok(phasedSchemas.publication.schema.properties.relatedPuzzles);
     assert.match(phasedSchemas.core.schema.description, /write domain "content"/);
     assert.match(phasedSchemas.review.schema.description, /domain=pedagogy/);
+
+    const vocabularySchema = await request("tools/call", {
+      name: "get_authoring_schema",
+      arguments: { phase: "pedagogy", profile: "vocabulary-context" }
+    });
+    assert.equal(
+      vocabularySchema.result.structuredContent.profile,
+      "vocabulary-context"
+    );
+    assert.equal(vocabularySchema.result.structuredContent.domain, "pedagogy");
+    assert.equal(vocabularySchema.result.structuredContent.profileMode, "advisory");
+    assert.deepEqual(
+      vocabularySchema.result.structuredContent.profileStorageDomains,
+      ["content", "pedagogy"]
+    );
+    assert.ok(vocabularySchema.result.structuredContent.schema.properties.lenses);
+    assert.match(
+      vocabularySchema.result.structuredContent.profileSummary,
+      /Near-synonym clusters/
+    );
+
+    const triviaSchema = await request("tools/call", {
+      name: "get_authoring_schema",
+      arguments: { phase: "core", profile: "trivia-quiz" }
+    });
+    assert.equal(triviaSchema.result.structuredContent.profile, "trivia-quiz");
+    assert.equal(triviaSchema.result.structuredContent.domain, "content");
+    assert.equal(triviaSchema.result.structuredContent.profileMode, "advisory");
+    assert.deepEqual(
+      triviaSchema.result.structuredContent.profileStorageDomains,
+      ["content", "pedagogy"]
+    );
+    assert.ok(triviaSchema.result.structuredContent.schema.properties.clusters);
+    assert.deepEqual(
+      triviaSchema.result.structuredContent.schema.properties.puzzleKind.enum,
+      ["topic-based", "vocabulary-context", "trivia-quiz"]
+    );
+    assert.match(
+      triviaSchema.result.structuredContent.schema.properties.puzzleKind.description,
+      /independent of category and lensMode/
+    );
+    assert.equal(
+      triviaSchema.result.structuredContent.schema.properties.profile,
+      undefined
+    );
+    assert.match(
+      triviaSchema.result.structuredContent.profileSummary,
+      /Co-designed clusters and board terms/
+    );
 
     // A draft that passes validate_puzzle_draft can still be a bad puzzle --
     // the guidance has to carry the design judgment (not just schema facts)
@@ -335,6 +425,7 @@ export async function run() {
       arguments: {}
     });
     assert.match(guidance.result.structuredContent.markdown, /No trap words/);
+    assert.match(guidance.result.structuredContent.markdown, /puzzleKind/);
     assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
     assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
     assert.doesNotMatch(guidance.result.structuredContent.markdown, /termRole|reference\/connector/);
@@ -358,12 +449,20 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /wiki:Solid/);
     assert.match(guidance.result.structuredContent.markdown, /binary bridge's optional direction/);
     assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
-    assert.match(guidance.result.structuredContent.markdown, /Trivia category specifically leans/);
+    assert.doesNotMatch(
+      guidance.result.structuredContent.markdown,
+      /Trivia category specifically leans|trivia-quiz|quiz-led puzzle type/
+    );
+    assert.doesNotMatch(
+      guidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction \("Before You Begin"\)/);
     assert.match(guidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(guidance.result.structuredContent.markdown, /two-character sequence/);
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
-    assert.match(guidance.result.structuredContent.markdown, /provenance is optional structured authoring attribution/);
+    assert.match(guidance.result.structuredContent.markdown, /Do not submit.*provenance.*creator.*license.*derivedFrom/s);
+    assert.doesNotMatch(guidance.result.structuredContent.markdown, /provenance is optional structured authoring attribution/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /boardOrder.*external metadata/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
@@ -398,6 +497,14 @@ export async function run() {
       coreGuidance.result.structuredContent.markdown,
       /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i
     );
+    assert.doesNotMatch(
+      coreGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
+    assert.doesNotMatch(
+      coreGuidance.result.structuredContent.markdown,
+      /trivia-quiz|quiz-led puzzle type/
+    );
     const reviewGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
@@ -408,6 +515,14 @@ export async function run() {
     assert.doesNotMatch(
       reviewGuidance.result.structuredContent.markdown,
       /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i
+    );
+    assert.doesNotMatch(
+      reviewGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
+    assert.doesNotMatch(
+      reviewGuidance.result.structuredContent.markdown,
+      /trivia-quiz|quiz-led puzzle type/
     );
     assert.match(reviewGuidance.result.structuredContent.markdown, /silently replace text/);
     const pedagogyGuidance = await request("tools/call", {
@@ -423,6 +538,206 @@ export async function run() {
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
+    assert.doesNotMatch(
+      pedagogyGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context|lexical-disambiguation|near-synonym/
+    );
+    assert.doesNotMatch(
+      pedagogyGuidance.result.structuredContent.markdown,
+      /trivia-quiz|quiz-led puzzle type/
+    );
+
+    const vocabularyCompleteGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { profile: "vocabulary-context" }
+    });
+    assert.equal(
+      vocabularyCompleteGuidance.result.structuredContent.profile,
+      "vocabulary-context"
+    );
+    assert.match(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /Vocabulary-in-context profile/
+    );
+    assert.match(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /Request profile=vocabulary-context with phase=core/
+    );
+    assert.doesNotMatch(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /## Vocabulary-in-context core pass|## Design judgment|Dutch tilt/
+    );
+
+    const vocabularyCoreGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "core", profile: "vocabulary-context" }
+    });
+    assert.equal(
+      vocabularyCoreGuidance.result.structuredContent.profile,
+      "vocabulary-context"
+    );
+    assert.match(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /shared semantic center/
+    );
+    assert.match(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /overlap is the material/
+    );
+    assert.match(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /puzzleKind to "vocabulary-context"/
+    );
+    assert.doesNotMatch(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /## Design judgment|search_puzzles|Dutch tilt/
+    );
+
+    const vocabularyReviewGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "review", profile: "vocabulary-context" }
+    });
+    assert.match(
+      vocabularyReviewGuidance.result.structuredContent.markdown,
+      /one most natural or precise fit/
+    );
+    assert.match(
+      vocabularyReviewGuidance.result.structuredContent.markdown,
+      /two equally good\s+answers/
+    );
+
+    const vocabularyPedagogyGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "pedagogy", profile: "vocabulary-context" }
+    });
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /contextual usage decision/
+    );
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /one blank and one target term/
+    );
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /preSolve as a per-puzzle judgment/
+    );
+
+    const triviaCompleteGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaCompleteGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaCompleteGuidance.result.structuredContent.markdown,
+      /Trivia-quiz profile/
+    );
+    assert.match(
+      triviaCompleteGuidance.result.structuredContent.markdown,
+      /Request profile=trivia-quiz with phase=core/
+    );
+    assert.doesNotMatch(
+      triviaCompleteGuidance.result.structuredContent.markdown,
+      /## Trivia-quiz core pass|## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaCoreGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "core", profile: "trivia-quiz" }
+    });
+    assert.equal(triviaCoreGuidance.result.structuredContent.profile, "trivia-quiz");
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /Inventory question-worthy facts and relationships alongside candidate\s+board terms/
+    );
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /Do not build an arbitrary sort and append unrelated recall/
+    );
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /puzzleKind to "trivia-quiz"/
+    );
+    assert.match(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /does not require category=trivia/
+    );
+    assert.doesNotMatch(
+      triviaCoreGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaReviewGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "review", profile: "trivia-quiz" }
+    });
+    assert.equal(triviaReviewGuidance.result.structuredContent.profile, "trivia-quiz");
+    assert.match(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /exactly one defensible correct answer/
+    );
+    assert.match(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /Verify every factual premise/
+    );
+    assert.match(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /If preSolve is enabled/
+    );
+    assert.doesNotMatch(
+      triviaReviewGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaPedagogyGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "pedagogy", profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaPedagogyGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /Use lensMode=quiz for the quiz-led profile/
+    );
+    assert.match(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /Choose preSolve per puzzle/
+    );
+    assert.match(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /Map each option's targets to every and only board term/
+    );
+    assert.doesNotMatch(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
+    const triviaPublicationGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "publication", profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaPublicationGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaPublicationGuidance.result.structuredContent.markdown,
+      /Trivia is the current domain-less category convention/
+    );
+    assert.match(
+      triviaPublicationGuidance.result.structuredContent.markdown,
+      /Do not infer or require profile=trivia-quiz from\s+category=trivia/
+    );
+    assert.doesNotMatch(
+      triviaPublicationGuidance.result.structuredContent.markdown,
+      /## Design judgment|Dutch tilt|Vocabulary-in-context/
+    );
+
     const catalogueWorkflow = await request("tools/call", {
       name: "get_workflow_guidance",
       arguments: { topic: "catalogue" }

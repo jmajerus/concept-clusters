@@ -7,6 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "film-classics",
   "title": "Film Classics",
   "category": "trivia",
+  "puzzleKind": "trivia-quiz",
   "large": true,
   "info": {
     "text": "Four genres that defined classic Hollywood, told through representative films from each."

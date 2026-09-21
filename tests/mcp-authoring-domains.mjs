@@ -68,6 +68,7 @@ export async function run() {
           id: "domain-mcp",
           title: "Domain MCP",
           category: "Science",
+          puzzleKind: "vocabulary-context",
           clusters: [
             { id: "alpha", name: "Alpha", fact: "Alpha", seeds: ["a", "b"], floatingTerms: ["c"] },
             { id: "beta", name: "Beta", fact: "Beta", seeds: ["d", "e"], floatingTerms: ["f"] }
@@ -79,8 +80,7 @@ export async function run() {
             fact: "Shared fact",
             relationKind: "contrast"
           }],
-          lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }],
-          provenance: { contributors: ["Jane Doe"] }
+          lenses: [{ id: "lens", prompt: "Prompt", explanation: "Explanation" }]
         }
       }
     });
@@ -99,6 +99,7 @@ export async function run() {
     assert.equal(contentDraft.document.provenance, undefined);
     assert.equal(contentDraft.document.lenses, undefined);
     assert.equal(contentDraft.document.bridges[0].relationKind, undefined);
+    assert.equal(contentDraft.document.puzzleKind, "vocabulary-context");
 
     const pedagogyRead = await session.request("tools/call", {
       name: "get_puzzle_draft",
@@ -112,6 +113,8 @@ export async function run() {
     assert.equal(pedagogyDraft.document.provenance, undefined);
     assert.equal(pedagogyDraft.document.bridges[0].relationKind, "contrast");
     assert.equal(pedagogyDraft.context.clusters[0].name, "Alpha");
+    assert.equal(pedagogyDraft.context.puzzleKind, "vocabulary-context");
+    assert.equal(pedagogyDraft.document.puzzleKind, undefined);
     assert.equal(pedagogyDraft.context.provenance, undefined);
 
     const contentSave = await session.request("tools/call", {
@@ -147,9 +150,10 @@ export async function run() {
     });
     const complete = completeRead.result.structuredContent.draft.document;
     assert.equal(complete.title, "Content-edited MCP");
+    assert.equal(complete.puzzleKind, "vocabulary-context");
     assert.equal(complete.bridges[0].fact, "Shared fact");
     assert.equal(complete.bridges[0].relationKind, "continuity");
-    assert.equal(complete.provenance.collaboration, "human");
+    assert.equal(complete.provenance, undefined);
 
     const rejected = await session.request("tools/call", {
       name: "save_puzzle_draft",

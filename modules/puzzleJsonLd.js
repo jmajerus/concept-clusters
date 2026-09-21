@@ -15,7 +15,7 @@ import {
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
 const PUZZLE_KEYS = new Set([
-  "@context", "@id", "@type", "schemaVersion", "id", "title", "category",
+  "@context", "@id", "@type", "schemaVersion", "id", "title", "category", "puzzleKind",
   "categories", "subcategories", "large", "info", "relatedPuzzles", "lensMode", "lenses",
   "preSolve", "tags", "level",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
@@ -160,6 +160,7 @@ export function puzzleToJsonLd(
     id: categorySource.id,
     title: categorySource.title,
     category: categorySource.category,
+    ...(categorySource.puzzleKind ? { puzzleKind: categorySource.puzzleKind } : {}),
     ...(categorySource.categories ? { categories: [...categorySource.categories] } : {}),
     ...(categorySource.subcategories ? { subcategories: clone(categorySource.subcategories) } : {}),
     ...largeField(puzzleNodeCount(categorySource)),
@@ -244,6 +245,7 @@ export function puzzleFromJsonLd(document) {
     id: document.id,
     title: document.title,
     category: document.category,
+    ...(document.puzzleKind ? { puzzleKind: document.puzzleKind } : {}),
     ...(document.categories ? { categories: [...document.categories] } : {}),
     ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {}),
     ...(document.tags ? { tags: [...document.tags] } : {}),
