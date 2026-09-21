@@ -18,6 +18,11 @@ function subcategoriesOf(document) {
     : null;
 }
 
+function categoriesOf(document) {
+  const categories = document?.categories;
+  return Array.isArray(categories) ? categories.filter(value => typeof value === "string") : null;
+}
+
 export function isReservedCatalogueId(id) {
   return id === "all" || id === "new" || String(id).startsWith(LEVEL_CATALOGUE_ID_PREFIX);
 }
@@ -239,6 +244,7 @@ export function listPuzzleCorpusRows({
       id,
       title: id,
       category: "",
+      categories: null,
       subcategories: null,
       hasWorkingCopy: false,
       published: false,
@@ -279,6 +285,7 @@ export function listPuzzleCorpusRows({
     upsert(puzzle.id, {
       title: puzzle.title || puzzle.id,
       category: puzzle.category || "",
+      categories: categoriesOf(puzzle),
       subcategories: subcategoriesOf(puzzle),
       inGit: true
     });
@@ -289,6 +296,7 @@ export function listPuzzleCorpusRows({
     upsert(row.id, {
       title: document.title || row.title || row.id,
       category: document.category || "",
+      categories: categoriesOf(document),
       subcategories: subcategoriesOf(document),
       published: !row.withdrawnAt,
       withdrawn: Boolean(row.withdrawnAt),
@@ -301,6 +309,7 @@ export function listPuzzleCorpusRows({
     const draftId = draft.draftId || puzzleId;
     const title = draft.title || draft.document?.title || puzzleId;
     const category = draft.document?.category || "";
+    const categories = categoriesOf(draft.document);
     const subcategories = subcategoriesOf(draft.document);
     const existing = byId.get(puzzleId);
     const extras = extraDraftFields(draft);
@@ -310,6 +319,7 @@ export function listPuzzleCorpusRows({
         ...extras,
         title,
         category: category || existing.category,
+        categories,
         subcategories,
         hasWorkingCopy: true,
         draftId,
@@ -323,6 +333,7 @@ export function listPuzzleCorpusRows({
       ...extras,
       title,
       category: category || existing?.category || "",
+      categories,
       subcategories,
       hasWorkingCopy: true,
       draftId,

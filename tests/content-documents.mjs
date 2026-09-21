@@ -423,6 +423,7 @@ export async function run() {
       document: {
         title: "Published Title",
         category: "Science",
+        categories: ["Science", "Math"],
         subcategories: { Science: "published-lab" }
       }
     }],
@@ -433,6 +434,7 @@ export async function run() {
         id: "old-git-puzzle",
         title: "Working Title",
         category: "Science",
+        categories: ["Science", "Math", "Physics"],
         subcategories: { Science: "working-lab" }
       },
       title: "Working Title",
@@ -447,7 +449,10 @@ export async function run() {
   assert.equal(overlay.draftId, "old-git-puzzle-wip");
   assert.equal(overlay.title, "Working Title");
   assert.deepEqual(overlay.subcategories, { Science: "working-lab" });
+  assert.deepEqual(overlay.categories, ["Science", "Math", "Physics"],
+    "working copy overlays the published secondary categories");
   assert.equal(overlay.published, true);
+  assert.equal(gitOnly.categories, null);
   assert.equal(gitOnly.hasWorkingCopy, false);
   assert.equal(gitOnly.inGit, true);
 }

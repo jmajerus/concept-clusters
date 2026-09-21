@@ -296,6 +296,18 @@ function subcategoryLabels(subcategories, categoryRegistry) {
   );
 }
 
+// Secondary memberships as titles, primary excluded. The corpus list groups
+// and sorts on the primary only (one row per puzzle); this is the only
+// place the list shows the other categories a puzzle belongs to.
+function secondaryCategoryLabels(primary, categories, categoryRegistry) {
+  if (!Array.isArray(categories)) return [];
+  const primaryId = categoryIdFor(primary, categoryRegistry);
+  return [...new Set(categories
+    .filter(value => typeof value === "string" && value.trim())
+    .filter(value => categoryIdFor(value, categoryRegistry) !== primaryId)
+    .map(value => categoryTitleFor(value, categoryRegistry)))];
+}
+
 function subcategoryBadges(subcategories, categoryRegistry) {
   return subcategoryLabels(subcategories, categoryRegistry).map(label => badge(label)).join("");
 }
@@ -883,15 +895,16 @@ function normalizeCorpusItem(item, categoryRegistry = CATEGORIES) {
   const hasWorkingCopy = item.hasWorkingCopy === true
     || (item.hasWorkingCopy !== false && Boolean(item.draftId || item.status));
   const subcategories = item.subcategories ?? item.document?.subcategories ?? null;
+  const primary = item.category || item.document?.category || "Uncategorized";
+  const categories = item.categories ?? item.document?.categories ?? null;
   return {
     ...item,
     id,
     draftId: item.draftId || (hasWorkingCopy ? id : null),
     title: item.title || id,
-    category: categoryTitleFor(
-      item.category || item.document?.category || "Uncategorized",
-      categoryRegistry
-    ),
+    category: categoryTitleFor(primary, categoryRegistry),
+    categories,
+    secondaryCategoryLabels: secondaryCategoryLabels(primary, categories, categoryRegistry),
     subcategories,
     subcategoryLabels: subcategoryLabels(subcategories, categoryRegistry),
     hasWorkingCopy,
@@ -948,7 +961,7 @@ function publishedOnlyRows(items) {
 function corpusTableHead(variant, { includeCategory = false } = {}) {
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const categoryColumn = includeCategory ? "<th>Category</th>" : "";
-  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Subcategories</th><th>Status</th><th>GitHub</th>${playColumn}<th>Updated</th></tr></thead>`;
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Secondary categories</th><th>Subcategories</th><th>Status</th><th>GitHub</th>${playColumn}<th>Updated</th></tr></thead>`;
 }
 
 function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
@@ -962,11 +975,15 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
     item.id,
     item.draftId,
     item.category,
+    ...(item.secondaryCategoryLabels || []),
     ...item.subcategoryLabels
   ].filter(Boolean).join(" ");
   const categoryCell = includeCategory
     ? `<td>${escapeHtml(item.category || "")}</td>`
     : "";
+  const secondaryCategoryCell = item.secondaryCategoryLabels?.length
+    ? escapeHtml(item.secondaryCategoryLabels.join(", "))
+    : emptyValue();
   const subcategoryCell = item.subcategoryLabels?.length
     ? escapeHtml(subcategoryText)
     : emptyValue();
@@ -974,6 +991,7 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
+    <td>${secondaryCategoryCell}</td>
     <td>${subcategoryCell}</td>
     <td>${renderPuzzlePathBadges(item)}</td>
     <td>${renderGithubProductionStatus(item.inGithubProduction)}</td>

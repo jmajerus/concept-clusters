@@ -319,6 +319,7 @@ export async function run() {
       draftId: "review-fixture-2",
       status: "submitted",
       inGithubProduction: false,
+      categories: ["Science", "Biology", "Chemistry"],
       subcategories: { Biology: "foundations" }
     }
   ]);
@@ -329,6 +330,11 @@ export async function run() {
   assert.doesNotMatch(listPage, />Live</);
   assert.doesNotMatch(listPage, /class="badge">submitted</);
   assert.match(listPage, /<h2>Science<\/h2>/);
+  assert.match(listPage, /<th>Secondary categories<\/th>/);
+  assert.match(listPage, /<td>Biology, Chemistry<\/td>/,
+    "secondary categories listed as titles, primary excluded");
+  assert.match(listPage, /data-filter="[^"]*Chemistry[^"]*"/,
+    "secondary categories take part in the filter");
   assert.match(listPage, /<th>Subcategories<\/th>/);
   assert.match(listPage, /Biology: Foundations/);
   assert.match(listPage, /placeholder="Title, id, category, or subcategory"/);
