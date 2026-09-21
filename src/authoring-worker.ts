@@ -1034,9 +1034,14 @@ async function scheduledLinkHealth(env: Env): Promise<void> {
         indexes: [issue.title.slice(0, 96)]
       });
     }
+    // doubles: checked, issues, puzzles, then the per-status breakdown the
+    // dashboard's "last run" line shows (ok, redirect, missing, disambiguation).
     write({
       blobs: ["link_health_run", report.unavailable || ""],
-      doubles: [report.checked, report.issues.length, report.puzzles],
+      doubles: [
+        report.checked, report.issues.length, report.puzzles,
+        report.counts.ok, report.counts.redirect, report.counts.missing, report.counts.disambiguation
+      ],
       indexes: ["link_health"]
     });
   } catch (error) {

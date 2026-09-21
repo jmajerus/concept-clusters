@@ -210,7 +210,9 @@ async function fetchStats(env) {
     // authoring Worker (it reads the published corpus from D1), so these
     // rows are in that Worker's dataset, not this one's.
     queryFn(`
-      SELECT double1 AS checked, double2 AS issues_found, "timestamp" AS ran_at
+      SELECT double1 AS checked, double2 AS issues_found, double3 AS puzzles,
+             double4 AS ok, double5 AS redirect, double6 AS missing, double7 AS disambiguation,
+             blob2 AS unavailable, "timestamp" AS ran_at
       FROM ${AUTHORING_ANALYTICS_DATASET}
       WHERE blob1 = 'link_health_run'
       ORDER BY ran_at DESC
@@ -315,10 +317,18 @@ function renderTable(rows, columns, labels = columns) {
 function renderLinkHealthLatest(rows) {
   const row = rows?.[0];
   if (!row) return '<p class="empty">No cron run recorded yet (runs weekly, Monday 06:00 UTC).</p>';
+  if (row.unavailable) {
+    return `<p class="stat-line">Last run <strong>${escapeHtml(row.ran_at)}</strong> —
+      <span class="warn-text">not checked: ${escapeHtml(row.unavailable)}</span>.</p>`;
+  }
   const issues = Number(row.issues_found);
   const tone = issues > 0 ? "warn-text" : "ok-text";
+  // Breakdown doubles arrived with the D1-backed cron; an older row has none.
+  const breakdown = row.ok != null
+    ? ` <span class="breakdown">(${escapeHtml(row.ok)} ok · ${escapeHtml(row.redirect)} redirect · ${escapeHtml(row.missing)} missing · ${escapeHtml(row.disambiguation)} disambiguation, across ${escapeHtml(row.puzzles)} published puzzles)</span>`
+    : "";
   return `<p class="stat-line">Last run <strong>${escapeHtml(row.ran_at)}</strong> — checked ${escapeHtml(row.checked)} titles, found
-    <span class="${tone}">${issues} issue${issues === 1 ? "" : "s"}</span>.</p>`;
+    <span class="${tone}">${issues} issue${issues === 1 ? "" : "s"}</span>.${breakdown}</p>`;
 }
 
 function renderDashboard(stats, warningMissing) {
@@ -341,6 +351,7 @@ function renderDashboard(stats, warningMissing) {
     h1 { margin: 0 0 4px; font-size: 1.5rem; color: #8fb4ff; }
     h2 { margin: 32px 0 10px; font-size: 1.05rem; color: #9cc8d5; text-transform: uppercase; letter-spacing: .1em; }
     .meta { color: #7c8794; font-size: .85rem; margin-bottom: 24px; }
+    .breakdown { color: #7c8794; font-size: .85rem; }
     table { width: 100%; border-collapse: collapse; font-size: .9rem; }
     th { background: #1c212a; color: #9cc8d5; text-align: left; padding: 8px 12px; font-weight: 600; letter-spacing: .06em; font-size: .8rem; text-transform: uppercase; }
     td { padding: 7px 12px; border-bottom: 1px solid #232a35; }

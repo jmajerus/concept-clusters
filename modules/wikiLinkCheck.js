@@ -185,6 +185,7 @@ export async function checkDocumentWikiLinks(document, options = {}) {
  * @returns {Promise<{
  *   puzzles: number,
  *   checked: number,
+ *   counts: { ok: number, redirect: number, missing: number, disambiguation: number },
  *   unavailable: string | null,
  *   issues: Array<{ title: string, status: string, resolvedTitle: string | null, puzzles: string[] }>
  * }>}
@@ -207,8 +208,10 @@ export async function runWikiLinkHealth({ contentDocuments, store, fetch: fetchI
     now
   });
   const issues = [];
+  const counts = { ok: 0, redirect: 0, missing: 0, disambiguation: 0 };
   for (const [title, resolution] of resolutions) {
     const status = statusOf(resolution);
+    counts[status] += 1;
     if (status === "ok") continue;
     issues.push({
       title,
@@ -218,7 +221,7 @@ export async function runWikiLinkHealth({ contentDocuments, store, fetch: fetchI
     });
   }
   issues.sort((left, right) => left.status.localeCompare(right.status) || left.title.localeCompare(right.title));
-  return { puzzles: rows.length, checked: resolutions.size, unavailable, issues };
+  return { puzzles: rows.length, checked: resolutions.size, counts, unavailable, issues };
 }
 
 /** Human-facing flags for the draft review page, one per problem link. */

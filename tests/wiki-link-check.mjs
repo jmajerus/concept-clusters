@@ -227,6 +227,8 @@ export async function run() {
   assert.ok(asked.includes("Gram stain"), "the weekly run refreshes even titles the store already has");
   assert.ok(!asked.includes("Withdrawn Only Title"));
   assert.equal(health.checked, 8);
+  assert.deepEqual(health.counts, { ok: 4, redirect: 2, missing: 1, disambiguation: 1 },
+    "the run reports the breakdown the dashboard heartbeat carries");
   assert.deepEqual(health.issues.map(issue => [issue.status, issue.title, issue.puzzles]), [
     ["disambiguation", "ATP", ["gram-stain-fixture", "second-board"]],
     ["missing", "Teichoic acids of Gram-positives", ["gram-stain-fixture"]],
