@@ -64,12 +64,12 @@ import { PUZZLES } from "../puzzles/index.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import { CATALOGUES } from "../catalogues/index.js";
 import { authoredLinks, parseWikiShorthand } from "../modules/termInfo.js";
+import { resolveWikipediaTitles } from "../modules/wikipediaTitles.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const cachePath = join(__dirname, "wiki-link-cache.json");
 const force = process.argv.includes("--force");
-const USER_AGENT = "concept-clusters-link-check/1.0 (local puzzle-authoring tool)";
 
 // ---- collect every title actually referenced, with enough context to
 // explain each one in plain language later ----
@@ -158,10 +158,14 @@ console.log(
   (toQuery.length ? ` — ${toQuery.length} of them for the first time.` : ", all previously checked (nothing new).")
 );
 
-async function wikiFetch(url) {
+// Resolution itself lives in modules/wikipediaTitles.js (shared with the
+// weekly Worker cron and the MCP / draft-page check, so there is one
+// definition of "does this title resolve"). This wrapper keeps the
+// author-facing error messages: the shared resolver throws plain errors.
+async function friendlyFetch(url, init) {
   let res;
   try {
-    res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    res = await fetch(url, init);
   } catch {
     const err = new Error("Couldn't reach Wikipedia — check your internet connection and try again.");
     err.friendly = true;
@@ -176,50 +180,23 @@ async function wikiFetch(url) {
     err.friendly = true;
     throw err;
   }
-  return res.json();
+  return res;
 }
 
-// Resolve forward — from each ORIGINAL input title, through normalization
-// then redirects, to the page it ends up at — rather than working backward
-// from returned pages. Two different input titles can legitimately land on
-// the same page (a bare "latent function" happens to redirect to the exact
-// article "manifest function" is curated to link to); reverse-mapping from
-// page to a single "original" title silently drops one of them in that
-// case, which is exactly what happened here until this was rewritten.
 async function queryExistence(titles) {
-  // formatversion=2 matters, not just style: the legacy default format
-  // represents `missing` as an empty string, not a JSON boolean — which
-  // is falsy in JS, meaning `!page.missing` reads a genuinely-missing
-  // page as "exists" (confirmed: a deliberately nonsense title came
-  // back marked as existing until this was added).
-  //
-  // prop=pageprops is in the same request (not a separate one) — a
-  // disambiguation page carries a `disambiguation` pageprop, which is
-  // how "exists" is distinguished from "exists and is actually useful".
-  const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join("|"))}&redirects=1&prop=pageprops&format=json&formatversion=2`;
-  const data = await wikiFetch(url);
-  const q = data.query || {};
-  const normalizedTo = new Map((q.normalized || []).map(n => [n.from, n.to]));
-  const redirectTo = new Map((q.redirects || []).map(r => [r.from, r.to]));
-  const pageByTitle = new Map(Object.values(q.pages || {}).map(p => [p.title, p]));
-
+  const resolved = await resolveWikipediaTitles(titles, { fetch: friendlyFetch });
   const results = {};
   for (const title of titles) {
-    const afterNormalize = normalizedTo.get(title) ?? title;
-    const finalTitle = redirectTo.get(afterNormalize) ?? afterNormalize;
-    const page = pageByTitle.get(finalTitle);
-    // No matching page (shouldn't normally happen) is conservatively
-    // marked unresolved rather than silently dropped.
-    results[title] = page
-      ? {
-          exists: !page.missing,
-          disambiguation: !!(page.pageprops && "disambiguation" in page.pageprops),
-          // The exact title after normalization/redirects — what an
-          // explicit `link:` override should actually name, instead of
-          // leaning on Wikipedia's own search-time redirect to get there.
-          resolvedTitle: page.missing ? null : finalTitle
-        }
-      : { exists: false, disambiguation: false, resolvedTitle: null };
+    const r = resolved.get(title) || { exists: false, disambiguation: false, resolvedTitle: null };
+    results[title] = {
+      exists: r.exists,
+      disambiguation: r.disambiguation,
+      // The exact title after normalization/redirects — what an explicit
+      // `link:` override should actually name. The shared resolver reports
+      // it only when it differs; the cache file keeps the older "always
+      // present when the page exists" shape.
+      resolvedTitle: r.exists ? (r.resolvedTitle ?? title) : null
+    };
   }
   return results;
 }

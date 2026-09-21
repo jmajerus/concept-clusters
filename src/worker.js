@@ -9,9 +9,9 @@
 // as stdio MCP. Player analytics /admin remains this Worker's dashboard.
 
 import linkManifest from "./link-manifest.json";
+import { resolveWikipediaTitles } from "../modules/wikipediaTitles.js";
 import { handleAdmin } from "./admin.js";
 
-const USER_AGENT = "concept-clusters-worker/1.0 (https://concept-clusters.jmajerus.workers.dev)";
 const ALLOWED_EVENTS = new Set(["puzzle_load", "puzzle_completed"]);
 
 export default {
@@ -153,22 +153,12 @@ function writeDataPoint(env, dataPoint) {
 }
 
 async function queryExistence(titles) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join("|"))}&redirects=1&prop=pageprops&format=json&formatversion=2`;
-  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) throw new Error(`Wikipedia API returned HTTP ${res.status}`);
-  const data = await res.json();
-  const q = data.query || {};
-  const normalizedTo = new Map((q.normalized || []).map(n => [n.from, n.to]));
-  const redirectTo = new Map((q.redirects || []).map(r => [r.from, r.to]));
-  const pageByTitle = new Map(Object.values(q.pages || {}).map(p => [p.title, p]));
-
+  const resolved = await resolveWikipediaTitles(titles);
   const results = {};
   for (const title of titles) {
-    const afterNormalize = normalizedTo.get(title) ?? title;
-    const finalTitle = redirectTo.get(afterNormalize) ?? afterNormalize;
-    const page = pageByTitle.get(finalTitle);
-    results[title] = page
-      ? { exists: !page.missing, disambiguation: !!(page.pageprops && "disambiguation" in page.pageprops) }
+    const r = resolved.get(title);
+    results[title] = r
+      ? { exists: r.exists, disambiguation: r.disambiguation }
       : { exists: false, disambiguation: false };
   }
   return results;

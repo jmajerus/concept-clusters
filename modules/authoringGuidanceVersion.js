@@ -109,7 +109,10 @@
 // 5.20: same review bar; workflow mechanics now name the create / save /
 // validate call shapes (document, draft_id, domain) so a client without the
 // tool schemas in view does not have to read server source to find them.
+// 5.21: same review bar; wiki: link verification now names the
+// check_puzzle_links tool instead of leaving "verify before writing" to
+// whatever the client can reach.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 20
+  minor: 21
 });

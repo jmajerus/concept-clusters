@@ -340,7 +340,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   categories don't need this; add it only when the category-browse screen
   would genuinely benefit from the extra level, not as routine polish.
 - Verify a wiki: link before writing it, don't infer it from the title
-  alone: a short or common-word title often has an unrelated Wikipedia
+  alone. check_puzzle_links (draft_id or puzzle_id) asks Wikipedia about
+  every wiki: link on the board and reports ok / redirect / missing /
+  disambiguation; run it once the draft is saved rather than trusting
+  recall. A redirect still works in play, but link the title it lands
+  on. As for inferring from the title: a short or common-word title often has an unrelated Wikipedia
   article at that exact name (a unit, a person, an ordinary noun --
   "consumers" resolving to the economics article instead of the
   food-chain one is a real example from this project). A confidently

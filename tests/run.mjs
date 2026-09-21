@@ -108,6 +108,7 @@ import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
+import * as wikiLinkCheck from "./wiki-link-check.mjs";
 
 const allTests = [
   mcpAuthoringDomains,
@@ -122,7 +123,8 @@ const allTests = [
   contentCanonicalization,
   geometryVisibleSegment,
   nonCryptographicHash,
-  skillRevisionStamp
+  skillRevisionStamp,
+  wikiLinkCheck
 ];
 
 // Keep this list intentional rather than making every new test quick by
@@ -139,7 +141,8 @@ const quickTests = [
   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
   librarySearchEngine, geometryVisibleSegment, categoryReferenceMigration, contentCanonicalization,
   nonCryptographicHash,
-  skillRevisionStamp
+  skillRevisionStamp,
+  wikiLinkCheck
 ];
 
 const flag = process.argv[2];

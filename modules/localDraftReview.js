@@ -78,6 +78,7 @@ import {
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
+import { checkDocumentWikiLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
 import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
@@ -199,7 +200,8 @@ export async function mapDraftDetail(record, {
   matchesCheckout = null,
   publishedDocument = null,
   publishedLayout = null,
-  categoryRegistry = undefined
+  categoryRegistry = undefined,
+  checkWikiLinks = null
 }) {
   const puzzleId = typeof record.document?.id === "string"
     ? record.document.id
@@ -224,16 +226,38 @@ export async function mapDraftDetail(record, {
     publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
     layoutDiffersFromPublished,
     validation: contentService
-      ? await withUserOnlyFlags(
-        contentService,
+      ? await withWikiLinkFlags(
+        checkWikiLinks,
         document,
-        withStorageCanonicalizeFlags(
-          record.document,
-          await contentService.validatePuzzleDraft(document, { categoryRegistry }),
-          { categoryRegistry }
+        await withUserOnlyFlags(
+          contentService,
+          document,
+          withStorageCanonicalizeFlags(
+            record.document,
+            await contentService.validatePuzzleDraft(document, { categoryRegistry }),
+            { categoryRegistry }
+          )
         )
       )
       : null
+  };
+}
+
+// Wikipedia link problems (missing, disambiguation, redirect) join the
+// page-only flags the same way the structural notes do: shown to the human
+// reviewer, never persisted, never part of what MCP validation returns.
+// The checker is injected so the page can render without network access
+// (tests, offline dev) and so the review handler decides the timeout.
+async function withWikiLinkFlags(checkWikiLinks, document, validation) {
+  if (typeof checkWikiLinks !== "function") return validation;
+  const flags = wikiLinkFlags(await checkWikiLinks(document));
+  if (!flags.length) return validation;
+  return {
+    ...validation,
+    flags: [
+      ...(validation.flags || []),
+      ...flags.map(flag => ({ ...flag, pageOnly: true }))
+    ]
   };
 }
 
@@ -328,7 +352,11 @@ export function createLocalDraftReviewHandler({
   contentService = null,
   contentDocuments = null,
   publicationActor = null,
-  repositoryRoot
+  repositoryRoot,
+  // Wikipedia link check for the draft page's flags. Pass null to render
+  // offline; the default keeps the page responsive on a slow network by
+  // giving up after a few seconds and saying so in one flag.
+  checkWikiLinks = document => checkDocumentWikiLinks(document, { timeoutMs: 4000 })
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -1325,7 +1353,8 @@ export function createLocalDraftReviewHandler({
         publishedLayout: publishedRow && !publishedRow.withdrawnAt
           ? publishedRow.layout
           : null,
-        categoryRegistry
+        categoryRegistry,
+        checkWikiLinks
       });
       const githubSnapshot = await loadOrHydrateGithubProductionManifest({
         repositoryRoot

@@ -3,6 +3,7 @@
 // and local stdio MCP. Keep Node-only checkout behavior in mcpAuthoringServer.
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
+import { checkDocumentWikiLinks } from "./wikiLinkCheck.js";
 import { DOMAINS } from "../puzzles/categories.js";
 import {
   authoringGuidanceResult,
@@ -383,7 +384,8 @@ export function createAuthoringMcpServer({
   serverName = "concept-clusters-hosted-authoring",
   clientProbeLogRoot = null,
   clientProbeTransport = "hosted",
-  contentDocumentsConfigured = true
+  contentDocumentsConfigured = true,
+  fetch: fetchImpl = globalThis.fetch
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -1235,6 +1237,42 @@ export function createAuthoringMcpServer({
         : `Draft ${draft_id} has ${validation.errors.length} errors.`,
       { draftId: draft_id, ...validation }
     );
+  })));
+
+  server.registerTool("check_puzzle_links", {
+    title: "Check puzzle links",
+    description:
+      "Verify every wiki: link in a draft (draft_id) or a published puzzle (puzzle_id) against Wikipedia: " +
+      "ok, redirect (with the title actually reached), missing, or disambiguation. Network-dependent and " +
+      "separate from validate_puzzle_draft on purpose; run it before treating a board's links as checked. " +
+      "Redirects still work in play but the canonical title is usually the better link.",
+    inputSchema: z.object({
+      draft_id: draftIdSchema.optional(),
+      puzzle_id: draftIdSchema.optional()
+    }).refine(value => Boolean(value.draft_id) !== Boolean(value.puzzle_id), {
+      message: "provide exactly one of draft_id or puzzle_id"
+    }),
+    annotations: READ_ONLY
+  }, tracked("check_puzzle_links", safe(async ({ draft_id, puzzle_id }) => {
+    const document = draft_id
+      ? (await draftRepository.get({ draftId: draft_id, actor })).document
+      : await publishedPuzzleDocument(puzzle_id);
+    const report = await checkDocumentWikiLinks(document, { fetch: fetchImpl });
+    const counts = { ok: 0, redirect: 0, missing: 0, disambiguation: 0 };
+    for (const result of report.results) counts[result.status] += 1;
+    const problems = report.results.filter(result => result.status !== "ok");
+    const summary = report.unavailable
+      ? `Links not checked: ${report.unavailable}.`
+      : `${report.checked} wiki: link${report.checked === 1 ? "" : "s"} checked: ` +
+        `${counts.ok} ok, ${counts.redirect} redirect, ${counts.missing} missing, ${counts.disambiguation} disambiguation.`;
+    return success(summary, {
+      ...(draft_id ? { draftId: draft_id } : { puzzleId: puzzle_id }),
+      checked: report.checked,
+      counts,
+      unavailable: report.unavailable,
+      problems,
+      results: report.results
+    });
   })));
 
   const agentReviewInput = z.object({

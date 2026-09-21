@@ -562,9 +562,13 @@ function renderValidation(validation, variant = "hosted") {
 // never a pass/fail verdict -- see puzzleSymmetryFlags.js. Absent entirely
 // when there's nothing to flag, same convention as every other optional
 // section on this page.
+const WIKI_LINK_FLAG_PREFIX = "wiki-link-";
+
 function renderFlags(flags, edit = null) {
   if (!Array.isArray(flags) || flags.length === 0) return "";
-  const structuralNotes = flags.filter(flag => flag.pageOnly);
+  const isLinkFlag = flag => typeof flag.id === "string" && flag.id.startsWith(WIKI_LINK_FLAG_PREFIX);
+  const linkFlags = flags.filter(flag => flag.pageOnly && isLinkFlag(flag));
+  const structuralNotes = flags.filter(flag => flag.pageOnly && !isLinkFlag(flag));
   const authoringFlags = flags.filter(flag => !flag.pageOnly);
   const items = authoringFlags.map(flag =>
     `<li>${escapeHtml(flag.message)}</li>`
@@ -591,7 +595,16 @@ function renderFlags(flags, edit = null) {
          ${canonicalSave}
        </div>`
     : "";
-  return `${authoringFlagBlock}${structuralNoteBlock}`;
+  // Link problems are shown open, not folded into the structural notes: a
+  // missing article or a disambiguation page is a defect the player will
+  // hit, and a redirect is a one-line fix worth seeing once.
+  const linkFlagBlock = linkFlags.length
+    ? `<div class="validation validation-flags validation-links">
+         <p>🔗 ${linkFlags.length} Wikipedia link${linkFlags.length === 1 ? "" : "s"} to look at (checked live for this page; not an MCP flag):</p>
+         <ul>${linkFlags.map(flag => `<li>${escapeHtml(flag.message)}</li>`).join("")}</ul>
+       </div>`
+    : "";
+  return `${authoringFlagBlock}${linkFlagBlock}${structuralNoteBlock}`;
 }
 
 const PAGE_STYLE = `
@@ -608,6 +621,7 @@ const PAGE_STYLE = `
   .validation-fail { background: #fee2e2; }
   .validation-unknown { background: #fef9c3; }
   .validation-flags { background: #fef3c7; }
+  .validation-links { background: #e0f2fe; }
   .validation-flags ul { margin: 4px 0 0; }
   .validation-flags .canonical-save { margin-top: 10px; }
   .structural-notes { color: #555; font-size: 14px; margin: 16px 0; }
