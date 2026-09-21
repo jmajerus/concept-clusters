@@ -346,7 +346,9 @@ export async function run() {
   assert.doesNotMatch(hostedList, /Open existing puzzle/);
   assert.match(hostedList, /<h1>Puzzles<\/h1>/);
   assert.match(hostedList, /Working copies/);
-  assert.match(hostedList, /Published only/);
+  assert.match(hostedList, /value="modified"> Modified/);
+  assert.match(hostedList, /value="cued"> Cued/);
+  assert.doesNotMatch(hostedList, /value="published"/, "Published only gave way to Modified");
   assert.match(hostedList, /value="drafts"/);
   assert.match(hostedList, /By category/);
   assert.match(hostedList, /value="recent"/);
@@ -378,6 +380,24 @@ export async function run() {
   assert.doesNotMatch(stacked, /badge-warn">working copy</);
   assert.match(stacked, /data-has-draft="1"/);
   assert.match(stacked, /data-working-copy="0"/);
+  assert.match(stacked, /data-modified="1"/, "held means published since the last freeze");
+  assert.match(stacked, /data-cued="0"/);
+
+  // The four states a row can be in for the Modified / Cued scopes.
+  const scopeAttrs = item => {
+    const html = renderDraftListPage([{ ...baseDraft, ...item }]);
+    return [/data-modified="(\d)"/, /data-cued="(\d)"/].map(re => html.match(re)[1]).join("");
+  };
+  assert.equal(scopeAttrs({ published: true, d1Published: true, status: "published", gitSeedCue: true, cuedForFreeze: false }), "00",
+    "unbadged authoring play is exactly what the last Freeze shipped: neither");
+  assert.equal(scopeAttrs({ published: true, d1Published: true, status: "published", gitSeedCue: false, cuedForFreeze: true }), "11",
+    "cued is modified");
+  assert.equal(scopeAttrs({ published: true, d1Published: true, status: "published", freezeAdd: true, cuedForFreeze: true }), "11",
+    "new to git is cued and modified");
+  assert.equal(scopeAttrs({ hasWorkingCopy: true, published: false, status: "draft" }), "10",
+    "a working copy not yet in authoring play is modified, not cued");
+  assert.equal(scopeAttrs({ published: true, d1Published: true, withdrawn: true, cuedForFreeze: true }), "00",
+    "withdrawn rows are out of both scopes");
   assert.doesNotMatch(stacked, /this draft is in this checkout/);
   assert.doesNotMatch(stacked, /published in D1/);
   assert.doesNotMatch(stacked, />Checkout</);

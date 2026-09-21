@@ -817,8 +817,11 @@ function listIntro(variant) {
        Refresh from GitHub on Admin fills that column without freezing.
        Show <strong>Working copies</strong> is the working copy badge: not
        yet in authoring play. <strong>Drafts</strong> is never in GitHub
-       production (needs a GitHub snapshot). <strong>Published only</strong>
-       is authoring play with no private draft. By category browses the
+       production (needs a GitHub snapshot). <strong>Modified</strong> is
+       anything changed since the last Freeze: a working copy, or authoring
+       play badged held, cued, or new to git (an unbadged authoring-play row
+       is exactly what the last Freeze shipped). <strong>Cued</strong> is the
+       subset already cued for the next Freeze. By category browses the
        corpus. Recent gathers working copies by last
        update. Open a row to review copy; that starts a working copy if you
        do not already have one. New puzzle opens a blank board. Play
@@ -827,8 +830,10 @@ function listIntro(variant) {
     : `One path: working copy → Publish (authoring play, held) → Cue → LAN
        Freeze (git) → GitHub production. Status is where this id sits on that
        path. Hosted GitHub is origin only. Show Working copies is the working
-       copy badge; Drafts is never in GitHub production; Published only is
-       authoring play with no private draft. By category browses the corpus.
+       copy badge; Drafts is never in GitHub production; Modified is anything
+       changed since the last Freeze (a working copy, or authoring play held,
+       cued, or new to git); Cued is the subset cued for the next Freeze. By
+       category browses the corpus.
        Recent gathers working copies by last update. Open a row to review
        copy; that starts a working copy if you do not already have one.
        Play unpublished boards on the LAN authoring checkout, not here.`
@@ -896,6 +901,25 @@ function isWorkingCopyStatus(item) {
   return item.withdrawn !== true
     && item.published !== true
     && item.hasWorkingCopy === true;
+}
+
+// Show-scope predicates. A published row carries the freeze flags from
+// contentFreezePlan.js: gitSeedCue means the published snapshot is exactly
+// what the last Freeze shipped (no badge); otherwise it is held, cued, or
+// new to git -- all "modified since the last freeze". A working copy not
+// yet in authoring play is modified too.
+function isPublishedLive(item) {
+  return (item.published === true || item.d1Published === true)
+    && item.withdrawn !== true && item.d1Withdrawn !== true;
+}
+
+function isCuedStatus(item) {
+  return isPublishedLive(item) && item.cuedForFreeze === true;
+}
+
+function isModifiedStatus(item) {
+  if (isWorkingCopyStatus(item)) return true;
+  return isPublishedLive(item) && item.gitSeedCue !== true;
 }
 
 function githubProductionAttr(inGithubProduction) {
@@ -1001,7 +1025,7 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const subcategoryCell = item.subcategoryLabels?.length
     ? escapeHtml(subcategoryText)
     : emptyValue();
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
@@ -1095,14 +1119,16 @@ const CORPUS_FILTER_SCRIPT = `
     syncHash(arrange);
     root.querySelectorAll("tr[data-puzzle-id]").forEach(function (row) {
       var hay = (row.getAttribute("data-filter") || "").toLowerCase();
-      var hasDraft = row.getAttribute("data-has-draft") === "1";
       var working = row.getAttribute("data-working-copy") === "1";
+      var modified = row.getAttribute("data-modified") === "1";
+      var cued = row.getAttribute("data-cued") === "1";
       var github = row.getAttribute("data-github");
       var matchQuery = !query || hay.indexOf(query) !== -1;
       var matchScope = scope === "all"
         || (scope === "working" && working)
         || (scope === "drafts" && github === "0")
-        || (scope === "published" && !hasDraft);
+        || (scope === "modified" && modified)
+        || (scope === "cued" && cued);
       row.hidden = !(matchQuery && matchScope);
     });
     root.querySelectorAll(".corpus-group").forEach(function (group) {
@@ -1180,7 +1206,8 @@ export function renderDraftListPage(rows, {
            <label><input type="radio" name="puzzle-corpus-scope" value="all" checked> All</label>
            <label title="Not yet in authoring play — the working copy badge"><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
            <label title="Never in GitHub production"><input type="radio" name="puzzle-corpus-scope" value="drafts"> Drafts</label>
-           <label title="In authoring play, no private draft"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
+           <label title="Changed since the last Freeze: a working copy, or in authoring play as held, cued, or new to git"><input type="radio" name="puzzle-corpus-scope" value="modified"> Modified</label>
+           <label title="In authoring play and cued for the next Freeze"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
          </p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Arrange</span>
