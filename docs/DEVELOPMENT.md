@@ -91,7 +91,7 @@ checkout, and a clean CI checkout would have passed straight through it.
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
-| `tests/` | Browser-driven regression suite — run with `npm test` (see below) |
+| `tests/` | Regression suite — `npm run test:quick` (node-only, seconds), `npm test` (standard, with browser), `npm run test:extended` (see below) |
 | `tools/check-wiki-links.mjs` | Verifies `termInfo`/bridge/cluster `info` Wikipedia links resolve — run with `npm run check-wiki-links` (see below) |
 | `site/` | Symlinked public tree Wrangler serves as Worker static assets (`wrangler.jsonc` `assets.directory`); keeps `.wrangler/` out of the asset watcher |
 | `src/worker.js` | Cloudflare Worker: serves the static site, plus `/api/event` and `/admin` (see "Deployment & analytics" below) |
@@ -301,13 +301,24 @@ npx playwright install chromium   # only needed once, downloads the browser
 Then, any time:
 
 ```
+npm run test:quick
+```
+
+Node-only, a few seconds: no Chromium, no dev server. Engines, schemas,
+canonicalization, freeze planning, draft-review rendering, MCP tool
+contracts. Run it between edits. A test that touches the browser cannot be
+in this suite -- the runner hands quick tests a page that throws on first
+use, so a misplaced test fails loudly instead of quietly needing Chromium.
+
+```
 npm test
 ```
 
-This starts a throwaway static server and runs the intentionally small,
-high-signal regression set in a headless browser. It is the routine local
-check. The corpus-wide browser sweeps, navigation scenarios, and layout-quality
-searches are reserved for:
+The standard suite: quick plus the routinely affordable browser tests and
+the process-spawning local dev checks, in a throwaway static server and a
+headless browser. About a minute. The pre-commit run. The corpus-wide
+browser sweeps, navigation scenarios, and layout-quality searches are
+reserved for:
 
 ```
 npm run test:extended

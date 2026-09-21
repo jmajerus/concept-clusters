@@ -4,12 +4,20 @@
 // A module can also export `viewport` ({ width, height }) to run at a
 // non-default size — see mobile-layout.mjs for a real example.
 //
-// Two practical suites, selected by CLI flag (`npm test` /
-// `npm run test:extended` — see package.json): `quick` is the explicit,
-// routinely affordable regression set; `extended` is every test. The quick
-// set deliberately excludes corpus-wide browser sweeps, layout-quality
-// searches, and broad navigation scenarios. `npm run test:all` remains a
-// compatibility alias for the extended suite.
+// Three suites, selected by CLI flag (see package.json):
+//   quick    (`npm run test:quick`) -- node-only tests: no Chromium, no dev
+//            server, a few seconds. Engines, schemas, canonicalization,
+//            freeze planning, draft review rendering, MCP tool contracts.
+//            Any test that touches `page` or `baseURL` is out by definition;
+//            the runner hands quick tests a page that throws on first use so
+//            a misplaced test fails loudly instead of silently needing a
+//            browser.
+//   standard (`npm test`) -- quick plus the routinely affordable browser
+//            tests and the process-spawning local dev checks. The everyday
+//            pre-commit run; a minute or so.
+//   extended (`npm run test:extended`) -- every test: corpus-wide browser
+//            sweeps, layout-quality searches, broad navigation scenarios.
+// `npm run test:all` remains a compatibility alias for extended.
 import { chromium } from "playwright";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -127,42 +135,63 @@ const allTests = [
   wikiLinkCheck
 ];
 
-// Keep this list intentional rather than making every new test quick by
-// default. Adding a test to allTests guarantees extended coverage; add it here
-// only when it is both high-signal for routine edits and consistently cheap.
+// Keep these lists intentional rather than making every new test quick or
+// standard by default. Adding a test to allTests guarantees extended
+// coverage; add it to standardTests when it is routinely affordable, and to
+// quickTests only if it never touches the browser or the dev server.
 const quickTests = [
-  mcpAuthoringDomains,
-  mobileLayout,
-  bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
-  lensEngine, learningIntroductionEngine,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
-  nodeCaseAudit,
-  learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,
-  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
-  librarySearchEngine, geometryVisibleSegment, categoryReferenceMigration, contentCanonicalization,
-  nonCryptographicHash,
-  skillRevisionStamp,
-  wikiLinkCheck
+  mcpAuthoringDomains, lensEngine, learningIntroductionEngine, jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema,
+  puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine,
+  catalogueAuthorEngine, catalogueReviewPage, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
+  contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply,
+  freezePublication, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy,
+  mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness,
+  authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore,
+  authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
+  authoringWorkspace, stagingPlayLinks, boot, puzzleManifest, librarySearchEngine, geometryVisibleSegment,
+  categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
+];
+
+const standardTests = [
+  ...quickTests,
+  mobileLayout, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
+  authoringAdminIndex, localCatalogueReview, localDevHttp, localDevHousekeep, playCorpus
 ];
 
 const flag = process.argv[2];
-if (flag && flag !== "--extended" && flag !== "--all") {
-  throw new Error(`Unknown test-suite flag: ${flag}`);
-}
-const which = flag ? "extended" : "quick";
-const suite = flag ? allTests : quickTests;
+const SUITES = {
+  undefined: ["standard", standardTests],
+  "--quick": ["quick", quickTests],
+  "--extended": ["extended", allTests],
+  "--all": ["extended", allTests]
+};
+if (!(flag in SUITES)) throw new Error(`Unknown test-suite flag: ${flag}`);
+const [which, suite] = SUITES[flag];
 console.log(`Running ${which} suite (${suite.length}/${allTests.length} tests)\n`);
 
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-const server = await startServer(root);
-const baseURL = serverURL(server);
-const browser = await chromium.launch();
+// The quick suite is node-only: no server, no browser. A quick test that
+// reaches for the page gets a clear failure, not a hang or a null error.
+const headless = which === "quick";
+const server = headless ? null : await startServer(root);
+const baseURL = headless ? null : serverURL(server);
+const browser = headless ? null : await chromium.launch();
+const noBrowserPage = new Proxy({}, {
+  get(_target, property) {
+    if (property === "then") return undefined;
+    throw new Error(
+      `quick suite has no browser (page.${String(property)} was used); move this test to standardTests`
+    );
+  }
+});
 
 let failed = 0;
 for (const test of suite) {
-  const page = await browser.newPage({ viewport: test.viewport || DEFAULT_VIEWPORT });
+  const page = headless
+    ? noBrowserPage
+    : await browser.newPage({ viewport: test.viewport || DEFAULT_VIEWPORT });
   const start = Date.now();
   try {
     await test.run(page, baseURL);
@@ -172,12 +201,12 @@ for (const test of suite) {
     console.log(`FAIL ${test.name} (${Date.now() - start}ms)`);
     console.log(err.message.split("\n").map(l => `     ${l}`).join("\n"));
   } finally {
-    await page.close();
+    if (!headless) await page.close();
   }
 }
 
-await browser.close();
-server.close();
+if (browser) await browser.close();
+if (server) server.close();
 
 console.log(`\n${suite.length - failed}/${suite.length} passed`);
 process.exit(failed ? 1 : 0);

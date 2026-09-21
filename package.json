@@ -5,6 +5,7 @@
   "description": "A D3.js concept-mapping puzzle game — static site, no build step. See docs/DEVELOPMENT.md.",
   "scripts": {
     "test": "node tests/run.mjs",
+    "test:quick": "node tests/run.mjs --quick",
     "test:extended": "node tests/run.mjs --extended",
     "test:all": "node tests/run.mjs --all",
     "validate": "node validate.mjs && node validate-categories.mjs && node validate-info-links.mjs",

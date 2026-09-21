@@ -461,7 +461,7 @@ remains a deliberate GitHub review action; neither an MCP tool nor the
 Worker can merge a pull request or update `main`.
 
 A future optional MCP diagnostic tool could invoke repository checks
-on demand (validate, targeted content:check, quick `npm test`, and optionally
+on demand (validate, targeted content:check, `npm run test:quick` or `npm test`, and optionally
 `npm run test:extended`) when
 an authoring session hits errors; until then, run those commands locally.
 
