@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { validateJsonLdProfile } from "../modules/jsonLdProfile.js";
 import { validatePuzzleContent } from "../modules/contentValidation.js";
 import { puzzleFromJsonLd } from "../modules/puzzleJsonLd.js";
+import { documentForMcp, storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
+import { buildNodesAndLinks } from "../modules/puzzleGraph.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
+import { selectableConceptWords } from "../modules/lensEngine.js";
+import { SIMPLIFIED_PUZZLE_SCHEMA } from "../modules/authoringSchemaResource.js";
 import {
   isJsonLdShaped,
   normalizeAuthoredPuzzleDocument,
@@ -80,6 +85,168 @@ export async function run() {
       false
     );
     assert.equal(SimplifiedPuzzleInputSchema.safeParse(validPuzzle()).success, true);
+  }
+
+  // A single near-synonym neighborhood is valid only for vocabulary-context.
+  // The same conditional is published to MCP and JSON-LD schema consumers.
+  {
+    const input = validPuzzle({
+      id: "vocabulary-single-cluster",
+      title: "Innate, Intrinsic, Inherent",
+      category: "vocabulary",
+      puzzleKind: "vocabulary-context",
+      info: { text: "Usage context determines which near-synonym is most precise." },
+      clusters: [{
+        id: "near-synonyms",
+        name: "Near Synonyms",
+        fact: "These terms describe what belongs to a person's or thing's nature.",
+        terms: ["innate", "intrinsic", "inherent"],
+        termInfo: {
+          innate: { text: "Present from birth or arising naturally." },
+          intrinsic: { text: "Belonging to a thing's essential nature." },
+          inherent: { text: "Existing as a permanent or essential part." }
+        }
+      }],
+      bridges: [],
+      lenses: [{
+        id: "innate-context",
+        prompt: "The behavior was ___, not learned.",
+        targets: ["innate"],
+        explanation: "Use the intended contextual distinction."
+      }],
+      lensMode: "sequential"
+    });
+    const parsed = SimplifiedPuzzleInputSchema.safeParse(input);
+    assert.equal(parsed.success, true, parsed.success ? "" : JSON.stringify(parsed.error.issues));
+    assert.deepEqual(parsed.data.clusters[0].terms, ["innate", "intrinsic", "inherent"]);
+    for (const preSolve of [true, false]) {
+      const explicitPreSolve = SimplifiedPuzzleInputSchema.safeParse({ ...input, preSolve });
+      assert.equal(explicitPreSolve.success, false);
+      assert.ok(explicitPreSolve.error.issues.some(issue =>
+        issue.path[0] === "preSolve" && /automatic/.test(issue.message)
+      ));
+    }
+    const splitVocabulary = structuredClone(input);
+    delete splitVocabulary.clusters[0].terms;
+    splitVocabulary.clusters[0].seeds = ["innate", "intrinsic"];
+    splitVocabulary.clusters[0].floatingTerms = ["inherent"];
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(splitVocabulary).success, false);
+    for (const puzzleKind of [undefined, "topic-based", "trivia-quiz"]) {
+      const otherKind = { ...input, puzzleKind };
+      if (puzzleKind === undefined) delete otherKind.puzzleKind;
+      assert.equal(SimplifiedPuzzleInputSchema.safeParse(otherKind).success, false);
+    }
+
+    const { document, errors } = normalizeAuthoredPuzzleDocument(input);
+    assert.deepEqual(errors, []);
+    assert.equal(document.preSolve, true);
+    assert.deepEqual(validateJsonLdProfile(document), []);
+    const puzzle = puzzleFromJsonLd(document);
+    assert.equal(puzzle.preSolve, true);
+    assert.deepEqual(
+      validatePuzzleContent(puzzle, { knownPuzzleIds: new Set([puzzle.id]) }),
+      []
+    );
+    const compiled = puzzleFromAuthoredDocument(input);
+    assert.deepEqual(compiled.errors, []);
+    assert.equal(compiled.puzzle.puzzleKind, "vocabulary-context");
+    assert.equal(compiled.puzzle.preSolve, true);
+    assert.equal(compiled.puzzle.clusters.length, 1);
+    assert.deepEqual(compiled.puzzle.clusters[0].terms, input.clusters[0].terms);
+    assert.deepEqual(compiled.puzzle.clusters[0].seeds, ["innate", "intrinsic"]);
+    const authoredRoundTrip = puzzleToSimplified(compiled.puzzle);
+    assert.deepEqual(authoredRoundTrip.clusters[0].terms, input.clusters[0].terms);
+    assert.equal("seeds" in authoredRoundTrip.clusters[0], false);
+    assert.equal("floatingTerms" in authoredRoundTrip.clusters[0], false);
+    assert.equal("preSolve" in authoredRoundTrip, false);
+
+    const legacySingleCluster = structuredClone(input);
+    delete legacySingleCluster.clusters[0].terms;
+    legacySingleCluster.clusters[0].seeds = ["innate", "intrinsic"];
+    legacySingleCluster.clusters[0].floatingTerms = ["inherent"];
+    legacySingleCluster.preSolve = true;
+    const mcpRead = documentForMcp(legacySingleCluster);
+    assert.deepEqual(mcpRead.clusters[0].terms, ["innate", "intrinsic", "inherent"]);
+    assert.equal("seeds" in mcpRead.clusters[0], false);
+    assert.equal("floatingTerms" in mcpRead.clusters[0], false);
+    assert.equal("preSolve" in mcpRead, false);
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(mcpRead).success, true);
+    assert.equal(storedDocumentNeedsCanonicalSave(legacySingleCluster), true);
+    const legacyRuntime = puzzleFromAuthoredDocument(legacySingleCluster);
+    assert.deepEqual(legacyRuntime.errors, []);
+    assert.equal(legacyRuntime.puzzle.preSolve, true);
+    assert.deepEqual(
+      validatePuzzleContent({ ...puzzle, puzzleKind: "topic-based" }, {
+        knownPuzzleIds: new Set([puzzle.id])
+      }),
+      ["bad cluster count (1)"]
+    );
+
+    const graph = buildNodesAndLinks(compiled.puzzle);
+    assert.equal(graph.nodes.length, 3);
+    assert.equal(graph.need, 1);
+    assert.deepEqual(
+      selectableConceptWords(compiled.puzzle),
+      ["innate", "intrinsic", "inherent"]
+    );
+
+    const mcpRule = SIMPLIFIED_PUZZLE_SCHEMA.allOf.find(rule =>
+      rule.if?.properties?.puzzleKind?.const === "vocabulary-context"
+    );
+    const mcpSingleShapeRule = SIMPLIFIED_PUZZLE_SCHEMA.allOf.find(rule =>
+      rule.if?.properties?.clusters?.maxItems === 1
+    );
+    assert.equal(SIMPLIFIED_PUZZLE_SCHEMA.properties.clusters.minItems, 1);
+    assert.equal(mcpRule.then.properties.clusters.minItems, 1);
+    assert.equal(mcpRule.else.properties.clusters.minItems, 2);
+    assert.deepEqual(mcpSingleShapeRule.then.properties.clusters.items.required, ["terms"]);
+    assert.deepEqual(mcpSingleShapeRule.then.not.required, ["preSolve"]);
+    assert.equal(mcpSingleShapeRule.then.properties.bridges.maxItems, 0);
+    assert.deepEqual(
+      mcpSingleShapeRule.else.properties.clusters.items.required,
+      ["seeds", "floatingTerms"]
+    );
+
+    const jsonLdSchema = JSON.parse(readFileSync(
+      new URL("../content/schemas/puzzle-v1.schema.json", import.meta.url),
+      "utf8"
+    ));
+    const jsonLdRule = jsonLdSchema.allOf.find(rule =>
+      rule.if?.properties?.puzzleKind?.const === "vocabulary-context"
+    );
+    assert.equal(jsonLdSchema.properties.clusters.minItems, 1);
+    assert.equal(jsonLdRule.then.properties.clusters.minItems, 1);
+    assert.equal(jsonLdRule.else.properties.clusters.minItems, 2);
+
+    const simplifiedSchema = JSON.parse(readFileSync(
+      new URL("../content/schemas/simplified-puzzle-schema-v1.json", import.meta.url),
+      "utf8"
+    ));
+    const simplifiedRule = simplifiedSchema.allOf.find(rule =>
+      rule.if?.properties?.puzzleKind?.const === "vocabulary-context"
+    );
+    const simplifiedSingleShapeRule = simplifiedSchema.allOf.find(rule =>
+      rule.if?.properties?.clusters?.maxItems === 1
+    );
+    assert.equal(simplifiedSchema.properties.clusters.minItems, 1);
+    assert.equal(simplifiedRule.then.properties.clusters.minItems, 1);
+    assert.equal(simplifiedRule.else.properties.clusters.minItems, 2);
+    assert.deepEqual(simplifiedSingleShapeRule.then.properties.clusters.items.required, ["terms"]);
+    assert.deepEqual(simplifiedSingleShapeRule.then.not.required, ["preSolve"]);
+    assert.equal(simplifiedSingleShapeRule.then.properties.bridges.maxItems, 0);
+    assert.deepEqual(
+      simplifiedSingleShapeRule.else.properties.clusters.items.required,
+      ["seeds", "floatingTerms"]
+    );
+
+    const multiClusterVocabulary = validPuzzle({ puzzleKind: "vocabulary-context" });
+    const flatMultiCluster = structuredClone(multiClusterVocabulary);
+    for (const cluster of flatMultiCluster.clusters) {
+      cluster.terms = [...cluster.seeds, ...cluster.floatingTerms];
+      delete cluster.seeds;
+      delete cluster.floatingTerms;
+    }
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(flatMultiCluster).success, false);
   }
 
   // Seeds need not lead terms -- only a subset relationship is required.

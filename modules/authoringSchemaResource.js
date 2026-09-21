@@ -15,7 +15,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.21.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.22.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
@@ -36,6 +36,54 @@ const generatedSimplifiedPuzzleSchema = z.toJSONSchema(SimplifiedPuzzleInputSche
   // Zod defaults (such as bridges: []) have already been materialized.
   io: "input"
 });
+// Zod refinements enforce this at runtime but are not expressible in the
+// generated schema. Mirror the puzzleKind-specific minimum for MCP clients:
+// a vocabulary-context puzzle may have one cluster; other kinds need two.
+const CLUSTER_COUNT_BY_KIND = Object.freeze({
+  if: {
+    properties: { puzzleKind: { const: "vocabulary-context" } },
+    required: ["puzzleKind"]
+  },
+  then: { properties: { clusters: { minItems: 1 } } },
+  else: { properties: { clusters: { minItems: 2 } } }
+});
+// A one-cluster Vocabulary puzzle has no sorting decision: authors provide
+// one flat `terms` list, omit preSolve, and cannot add a bridge. Every other
+// puzzle keeps the seed/floatingTerms shape. Mirror the root Zod refinement
+// here because those cross-field rules are not emitted by z.toJSONSchema().
+const SINGLE_VOCABULARY_CLUSTER_SHAPE = Object.freeze({
+  if: {
+    properties: {
+      puzzleKind: { const: "vocabulary-context" },
+      clusters: { maxItems: 1 }
+    },
+    required: ["puzzleKind", "clusters"]
+  },
+  then: {
+    properties: {
+      clusters: {
+        items: {
+          required: ["terms"],
+          not: {
+            anyOf: [
+              { required: ["seeds"] },
+              { required: ["floatingTerms"] }
+            ]
+          }
+        }
+      },
+      bridges: { maxItems: 0 }
+    },
+    not: { required: ["preSolve"] }
+  },
+  else: {
+    properties: {
+      clusters: {
+        items: { required: ["seeds", "floatingTerms"] }
+      }
+    }
+  }
+});
 // `large` remains an internal compatibility field on the storage/runtime
 // schema, but its value is derived from node count and is not part of the
 // MCP authoring contract. Keep it out of the discoverable complete schema as
@@ -53,8 +101,13 @@ if (generatedAuthoringProperties.learningIntroduction?.properties) {
 }
 export const SIMPLIFIED_PUZZLE_SCHEMA = Object.freeze({
   ...generatedSimplifiedPuzzleSchema,
+  allOf: [
+    ...(generatedSimplifiedPuzzleSchema.allOf || []),
+    structuredClone(CLUSTER_COUNT_BY_KIND),
+    structuredClone(SINGLE_VOCABULARY_CLUSTER_SHAPE)
+  ],
   description:
-    "MCP agent authoring contract for puzzle content and pedagogy. Protected attribution and human-managed editorial metadata are maintained outside this document; language remains optional authored metadata. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
+    "MCP agent authoring contract for puzzle content and pedagogy. A single-cluster vocabulary-context puzzle uses one flat terms list and is automatically pre-solved before its lenses. Protected attribution and human-managed editorial metadata are maintained outside this document; language remains optional authored metadata. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
   // Zod deliberately keeps these input fields permissive so a legacy title
   // can be canonicalized before parsing. The discoverable authoring contract
   // should nevertheless teach clients to send the new stable-id shape.

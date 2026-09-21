@@ -348,6 +348,9 @@ function serverInstructions() {
     "save_puzzle_draft with the same domain; the server preserves protected provenance and system state " +
     "and materializes the complete document for validation and publication. Pedagogy responses include " +
     "content as read-only context. The complete domain remains available for compatibility. " +
+    "For compact, bounded vocabulary-context requests, co-design the near-synonym cluster and its lenses " +
+    "in one integrated cycle, then substitute every playable term into each drafted lens before saving. " +
+    "Use the staged inventory/plan/fit workflow for open-ended or likely multi-board work. " +
     "Before create_puzzle_draft for a gap-fill or densify subject, call search_puzzles with 2-3 " +
     "planned anchor terms scoped to that category; if a hit already covers the distinction, extend " +
     "or relate instead of opening a parallel puzzle. search_puzzles covers the authoring corpus " +

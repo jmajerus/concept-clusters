@@ -263,7 +263,8 @@ export async function run(page) {
   assert.equal(board.status, 200);
   const compiled = JSON.parse(board.body);
   assert.equal(compiled.puzzle.id, "lab-d1-play");
-  assert.ok(compiled.puzzle.clusters.length >= 2);
+  const minimumClusters = compiled.puzzle.puzzleKind === "vocabulary-context" ? 1 : 2;
+  assert.ok(compiled.puzzle.clusters.length >= minimumClusters);
   assert.deepEqual(compiled.puzzle.bridges[0].clusters, [0, 1]);
   assert.deepEqual(compiled.puzzle.provenance, labPuzzle.provenance);
 
@@ -578,6 +579,28 @@ export async function run(page) {
         title: "Lab browser unpublished"
       }
     });
+    await draftStore.createDraft({
+      draftId: "vocabulary-single-cluster-draft",
+      document: {
+        id: "vocabulary-single-cluster",
+        title: "Single-cluster Vocabulary",
+        category: "science",
+        puzzleKind: "vocabulary-context",
+        clusters: [{
+          id: "near-synonyms",
+          name: "Near Synonyms",
+          fact: "These words overlap in meaning but differ in usage.",
+          terms: ["innate", "intrinsic", "inherent"]
+        }],
+        lenses: [{
+          id: "innate-context",
+          prompt: "The response was ___ rather than learned.",
+          targets: ["innate"],
+          explanation: "Innate describes a quality or response present from birth or arising naturally."
+        }],
+        lensMode: "sequential"
+      }
+    });
     const handleBrowserPlay = createLocalPlayCorpusHandler({
       contentDocuments: repo,
       contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
@@ -593,6 +616,23 @@ export async function run(page) {
     const server = await startServer(root, { handleRequest: handleBrowserRequest });
     const baseURL = serverURL(server);
     try {
+      await page.goto(`${baseURL}/index.html`, { waitUntil: "networkidle" });
+      await page.evaluate(() => localStorage.clear());
+      await page.goto(
+        `${baseURL}/?puzzle=vocabulary-single-cluster-draft&play&mode=graph`,
+        { waitUntil: "networkidle" }
+      );
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "vocabulary-single-cluster" &&
+        CC.state.phase === "lens-selecting",
+      null, { timeout: 15000 });
+      assert.equal(await page.evaluate(() => CC.state.puzzle.preSolve), true);
+      assert.deepEqual(
+        await page.evaluate(() => [CC.state.made, CC.state.need]),
+        [1, 1],
+        "single-cluster Vocabulary should be solved automatically before its lens"
+      );
+
       await page.goto(
         `${baseURL}/?puzzle=lab-browser-unpublished-draft&play&author=layout`,
         { waitUntil: "networkidle" }

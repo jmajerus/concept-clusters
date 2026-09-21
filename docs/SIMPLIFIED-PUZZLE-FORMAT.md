@@ -100,7 +100,8 @@ level; nested info is `{text?, links?}`) are
 optional, as are:
 
 - `lenses` (see below), `lensMode` (`sequential` | `assignment` | `quiz`,
-  default sequential), `preSolve` (boolean).
+  default sequential), `preSolve` (boolean; omit it for a single-cluster
+  Vocabulary puzzle, which is automatically pre-solved before its lenses).
 - `relatedPuzzles`: `{info?, entries: [{id, reason, via?}]}`. This is the
   player-facing link set only; split-plan `boardOrder` is external metadata,
   and neither `order` nor `boardOrder` belongs inside this field.
@@ -121,16 +122,25 @@ hashes, status, and lesson-progress invalidation keys are owned and generated
 by infrastructure (D1 row fields or derived runtime values). JSON-LD export
 may represent the portable equivalents at its explicit interchange boundary.
 
-Two to six `clusters`, zero or more `bridges`.
+Two to six `clusters` for the default topic-based and trivia-quiz kinds;
+`vocabulary-context` permits one to six. A single-cluster vocabulary board is
+appropriate when the near-synonym neighborhood is coherent and contextual
+lenses carry the practice; do not add a second group just to satisfy the default
+minimum. It starts directly at the lens activity because there is no grouping
+decision to make. A bridge still requires at least two clusters, so a
+one-cluster board has no bridges.
 
 **Cluster** — `name`, `fact` required. `id` is optional, derived from `name`
-when omitted. `seeds`: normally two terms; one term only for a minimum-size
-two-term cluster, paired with exactly one `floatingTerm`. `floatingTerms`:
-one to five more terms, disjoint from `seeds`. Together these become the
-cluster's two-to-seven term list. `color` is one of `teal`, `blue`, `amber`,
+when omitted. For a single-cluster `vocabulary-context` puzzle, provide
+`terms` as the complete two-to-seven term list; omit `seeds`, `floatingTerms`,
+`bridges`, and `preSolve`. For other puzzles, `seeds` (normally two terms)
+and `floatingTerms` (one to five more, disjoint from `seeds`) define the
+cluster's two-to-seven terms and its initial sorting challenge. In those
+seeded shapes, `terms` may optionally preserve a different display order.
+`color` is one of `teal`, `blue`, `amber`,
 `magenta`, `olive`, `brown`, `cyan` and auto-assigned, collision-free, when
 omitted. `termInfo` (`{term: infoValue}`) and `info` are optional. Every
-term (a `seeds`/`floatingTerms` entry, or a bridge's `term` below) is
+term (a `terms`/`seeds`/`floatingTerms` entry, or a bridge's `term` below) is
 capped at 40 characters -- it becomes a Star-mode pill sized to fit the
 whole string on one line, and a much longer term bloats its own pill and
 crowds its neighbors.

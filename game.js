@@ -2024,14 +2024,18 @@ function applyLoadedPuzzle(puzzle, index, {
   updateSolutionHint();
   updateLearningIntroduction();
   restorePlayerSession(savedSession);
-  // preSolve: true is a rare, explicit authoring choice -- not a player
-  // action, so it only ever applies to a puzzle with no saved session yet
-  // (a returning player's own progress, however partial, is never
-  // overridden). Reuses exactly the mechanism &solved links already use
-  // (see replayInitialSharedState): showSolution() under restoringSession
-  // to suppress the intermediate progress messages a real click would
-  // produce, then hand off to whichever lens sequence the puzzle defines.
-  if (!authoringConstruct && !savedSession && puzzle.preSolve && state.made !== state.need) {
+  // A single-cluster Vocabulary board has no grouping decision, so it always
+  // opens at its contextual lenses without asking the author to set preSolve.
+  // Other puzzle kinds keep the explicit per-puzzle choice. Neither path is a
+  // player action. Explicit preSolve still waits for a fresh session; the
+  // single-cluster rule may finish an older partial grouping session because
+  // that grouping has no player decision, while already-completed lens state
+  // is preserved. Reuse the same solution replay as &solved links, suppressing
+  // its intermediate progress messages before handing off to the lens flow.
+  const automaticallyPreSolved = puzzle.puzzleKind === "vocabulary-context" &&
+    puzzle.clusters?.length === 1 && puzzle.lenses?.length > 0;
+  if (!authoringConstruct && (!savedSession || automaticallyPreSolved) &&
+      (puzzle.preSolve || automaticallyPreSolved) && state.made !== state.need) {
     state.restoringSession = true;
     try {
       showSolution();

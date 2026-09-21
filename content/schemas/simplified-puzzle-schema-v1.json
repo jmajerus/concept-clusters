@@ -95,12 +95,13 @@
     "info": { "$ref": "#/$defs/puzzleInfo" },
     "clusters": {
       "type": "array",
-      "minItems": 2,
+      "minItems": 1,
       "maxItems": 6,
+      "description": "Vocabulary-context puzzles may have one cluster; topic-based and trivia-quiz puzzles require two to six.",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "fact", "seeds", "floatingTerms"],
+        "required": ["name", "fact"],
         "properties": {
           "id": {
             "$ref": "#/$defs/slug",
@@ -118,13 +119,20 @@
             "minItems": 1,
             "maxItems": 2,
             "items": { "type": "string", "minLength": 1 },
-            "description": "Normally 2. 1 only for a minimum-size 2-term cluster (paired with exactly 1 floatingTerm) -- enforced by refine(), not expressible here."
+            "description": "For puzzles that ask the player to sort terms, normally 2. Required with floatingTerms except on a single-cluster vocabulary-context puzzle."
           },
           "floatingTerms": {
             "type": "array",
             "minItems": 1,
             "maxItems": 5,
             "items": { "type": "string", "minLength": 1 }
+          },
+          "terms": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 7,
+            "items": { "type": "string", "minLength": 1 },
+            "description": "The complete term list for a single-cluster vocabulary-context puzzle; otherwise an optional ordering override for seeds plus floatingTerms."
           },
           "termInfo": { "type": "object", "additionalProperties": { "$ref": "#/$defs/info" } },
           "info": { "$ref": "#/$defs/info" }
@@ -308,5 +316,48 @@
     "license": { "type": "string", "minLength": 1 },
     "derivedFrom": { "type": "string", "minLength": 1 },
     "language": { "type": "string", "minLength": 1 }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "puzzleKind": { "const": "vocabulary-context" } },
+        "required": ["puzzleKind"]
+      },
+      "then": { "properties": { "clusters": { "minItems": 1 } } },
+      "else": { "properties": { "clusters": { "minItems": 2 } } }
+    },
+    {
+      "if": {
+        "properties": {
+          "puzzleKind": { "const": "vocabulary-context" },
+          "clusters": { "maxItems": 1 }
+        },
+        "required": ["puzzleKind", "clusters"]
+      },
+      "then": {
+        "properties": {
+          "clusters": {
+            "items": {
+              "required": ["terms"],
+              "not": {
+                "anyOf": [
+                  { "required": ["seeds"] },
+                  { "required": ["floatingTerms"] }
+                ]
+              }
+            }
+          },
+          "bridges": { "maxItems": 0 }
+        },
+        "not": { "required": ["preSolve"] }
+      },
+      "else": {
+        "properties": {
+          "clusters": {
+            "items": { "required": ["seeds", "floatingTerms"] }
+          }
+        }
+      }
+    }
+  ]
 }

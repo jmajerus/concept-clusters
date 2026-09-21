@@ -279,6 +279,13 @@ domains and does not create a third document domain. Set the authored type to
 `puzzleKind: "vocabulary-context"`; category remains a separate taxonomy
 choice.
 
+A one-cluster Vocabulary puzzle is authored as a single `terms` list, not a
+`seeds`/`floatingTerms` split. The only group has no sorting decision, so the
+player enters its contextual lenses with the cluster already solved; omit
+`preSolve` and do not add a foil group. Multi-cluster Vocabulary puzzles keep
+the ordinary seed/floating-term structure and may still choose `preSolve`
+when sorting is not part of the intended play.
+
 For the `trivia-quiz` authoring profile, design the clusters and quiz lenses
 together. The groups should give factual questions useful scope or comparison
 frames, rather than act as an arbitrary prelude to unrelated recall. Use

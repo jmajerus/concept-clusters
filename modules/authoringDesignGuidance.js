@@ -66,7 +66,9 @@ for it. A minimal example:
 
 A cluster's \`seeds\` (normally two; one only for a minimum-size two-term
 cluster, paired with exactly one \`floatingTerm\`) plus \`floatingTerms\` (one
-to five) become its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
+to five) become its full term list. The default topic-based kind uses two to
+six clusters; use the active specialized profile and schema for its permitted
+range. A bridge's \`clusters\`
 names exactly two cluster \`id\`s (three for a ternary bridge) -- not
 positions, not fragments. Cluster \`id\`, bridge \`id\`, and cluster \`color\`
 are all optional and assigned automatically when omitted (cluster \`id\`
@@ -399,9 +401,11 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   search_puzzles covers the authoring corpus and your drafts (a draft
   overlays the same id). Set full_text=true when looking for a fact, lesson,
   or other prose rather than a title or board term.
-- Establish id, title, primary category, two to six conceptually distinct
-  clusters, their facts, and their terms. Each cluster needs two
-  immediately recognizable seeds and one to five floating terms -- or,
+- Establish id, title, primary category, and two to six conceptually distinct
+  clusters for the default topic-based kind (follow the active specialized
+  profile and schema for its permitted range), with their facts and terms.
+  Each cluster needs two immediately recognizable seeds and one to five
+  floating terms -- or,
   for a minimum-size two-term cluster only, one seed and one floating
   term. No trap words: every term must have a deliberate, defensible home in
   its declared cluster. If two clusters could both plausibly claim a term,
@@ -534,9 +538,19 @@ context prefers one neighboring term over another. It is not a simple matching
 exercise with a sentence appended afterward. Close relatedness is intentional;
 the author must still make each completed lens resolve to one best fit.
 
+For a compact, bounded request, use one integrated design cycle: shape the
+near-synonym neighborhood and its lenses together, then review each drafted
+lens against the complete playable term set. The distinction inventory remains
+a reasoning aid, not a separate artifact or approval gate. Keep the staged
+inventory/plan/fit workflow for open-ended subjects, likely splits, or work that
+needs substantial discovery.
+
 The profile is advisory. It does not create a new storage domain, impose a
-cluster count, or require the homonym-bridge pattern. Record the authored type
-as puzzleKind: "vocabulary-context"; category remains a separate taxonomy
+target cluster count, or require the homonym-bridge pattern. The document format
+permits one cluster for this puzzleKind; that form uses a complete term list
+and is automatically pre-solved before its lenses. Do not add a foil cluster
+merely to meet the default topic-based minimum. Record the authored type as
+puzzleKind: "vocabulary-context"; category remains a separate taxonomy
 choice. Content still belongs to the content domain and lenses still belong
 to the pedagogy domain.`;
 
@@ -550,14 +564,24 @@ const VOCABULARY_CONTEXT_PROFILE_GUIDANCE = Object.freeze({
   separate its members: frequency, duration, agency, intent, register,
   intensity, connotation, collocation, grammatical frame, or another real
   distinction.
+- For a compact, user-scoped puzzle, do this as one integrated cycle with the
+  lens design; do not stop for separate inventory or board-fit approval. A
+  single cluster is valid when the requested terms form one neighborhood and
+  contextual use is the work. Keep the staged workflow for open-ended or
+  multi-board work.
 - Choose genuine near-neighbors. A term may overlap broadly with its cluster
   mates; that overlap is the material the learner is meant to refine. Do not
-  manufacture unrelated terms merely to make the board easy to sort, and do
-  not treat every broad synonym as interchangeable in every context.
+  manufacture unrelated terms merely to make the board easy to sort, or add a
+  contrast cluster solely to meet the default topic-based minimum. Do not treat
+  every broad synonym as interchangeable in every context.
 - Use the cluster fact to state the shared meaning and the relevant boundary.
   Use term information when an individual term needs a sharper usage note.
-  Seeds should orient the learner to the neighborhood; floating terms can
-  carry the subtler distinctions that the lenses will revisit.
+- For exactly one cluster, author the complete two-to-seven term list in
+  the "terms" field; omit "seeds", "floatingTerms", "bridges", and
+  "preSolve". That board
+  has no grouping decision and is automatically solved before its lenses.
+- For multiple clusters, use "seeds" and "floatingTerms" when the initial
+  sorting challenge contributes to play; choose "preSolve" only for that form.
 - A bridge is optional and must represent a genuine connection. A homonym or
   homograph may be authored once as an ordinary bridge term shared by the
   relevant clusters, but that pattern is not required and must not become the
@@ -567,17 +591,24 @@ The core pass remains a content-domain pass: save clusters, terms, facts, and
 bridge cores with domain=content.`,
   review: `## Vocabulary-in-context review pass
 
+- Run this review after the candidate lenses have been drafted, and repeat it
+  after any lens revision. Do not treat a pre-draft review call as review of
+  lenses that do not yet exist.
 - Review each cluster as a semantic neighborhood, not merely as a topic. Can
   the author state what the terms share and what usage boundary makes each one
   worth retaining? Close meaning is expected; accidental duplicate work is
   not.
-- For every planned lens, substitute the nearest board neighbors into the
-  sentence. The desired result is one most natural or precise fit plus
+- For every planned lens, substitute every playable board term into the
+  sentence, not only the nearest neighbor. The desired result is one most
+  natural or precise fit plus
   meaningful near-misses—not arbitrary distractors and not two equally good
   answers.
 - Check that the sentence supplies the deciding cue through natural context,
   collocation, syntax, register, or situation. A dictionary definition hidden
-  in the prompt is a matching exercise, not a useful lens.
+  in the prompt is a matching exercise, not a useful lens. Check part of speech
+  and inflection too: grammar may be a deliberate usage cue, but must not
+  accidentally eliminate alternatives before the intended distinction is
+  considered.
 - Make the explanation name the distinction that decided the answer. When a
   neighboring term is especially plausible, explain why the target is more
   precise rather than claiming that the neighbor is simply unrelated.
@@ -606,14 +637,17 @@ through domain=pedagogy and the content core remains owned by domain=content.`,
   Choose lenses for real usage distinctions and order several lenses as a
   progression when the material supports one.
 - Use lensMode=sequential by default for this open contextual reclassification
-  flow. Leave preSolve as a per-puzzle judgment: use it when the grouping is
-  genuinely obvious and the contextual distinction is the lesson; leave the
-  clustering challenge intact for advanced near-synonym boards.
+  flow. A single-cluster board is automatically pre-solved; do not set
+  preSolve. For multi-cluster Vocabulary boards, leave preSolve as a per-puzzle
+  judgment: use it when the grouping is genuinely obvious and the contextual
+  distinction is the lesson; leave the clustering challenge intact for
+  advanced near-synonym boards.
 - Multiple blanks and structured slot mapping remain deferred. Do not encode
   several unordered answers in one target list.
 
 This pass remains a pedagogy-domain pass: retrieve the pedagogy projection and
-save lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
+save lenses, lensMode, any multi-cluster preSolve choice, and
+learningIntroduction with domain=pedagogy.`,
   publication: `## Vocabulary-in-context publication pass
 
 - Keep Vocabulary as the stable taxonomy category when the puzzle belongs in

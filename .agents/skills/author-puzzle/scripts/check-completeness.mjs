@@ -8,8 +8,8 @@ import { NODE_CAP_LARGE } from "../../../../modules/puzzleBoardSize.js";
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
   console.error(`Usage:
-  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|split|fit|board|complete] [--ledger path] [--plan path] <document.json>
-  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|split|fit|board|complete] [--ledger path] [--plan path] < document.json
+  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|split|fit|board|complete|integrated] [--ledger path] [--plan path] <document.json>
+  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|split|fit|board|complete|integrated] [--ledger path] [--plan path] < document.json
 
 Levels:
   inventory  concept map only (authoring data dir inventories/<id>.json). No puzzle JSON.
@@ -17,6 +17,7 @@ Levels:
   fit        board structure + loss ledger (--ledger authoring data dir ledgers/<id>-fit.json).
   board      clusters/terms/bridges. Notes/lenses deferred.
   complete   (default) puzzle info, term notes, bridge help, ≥1 lens
+  integrated Complete Vocabulary-context cycle: board structure + all complete-pass fields, no loss ledger or intermediate gate.
 
 Exit 0 only when blocking gaps are empty. Print JSON either way.`);
   process.exit(message ? 1 : 0);
@@ -32,8 +33,8 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === "--level") {
       const value = argv[++i];
-      if (!["inventory", "split", "fit", "board", "complete"].includes(value)) {
-        usage(`Unknown --level "${value}". Use inventory, split, fit, board, or complete.`);
+      if (!["inventory", "split", "fit", "board", "complete", "integrated"].includes(value)) {
+        usage(`Unknown --level "${value}". Use inventory, split, fit, board, complete, or integrated.`);
       }
       level = value;
     } else if (arg === "--ledger") {
@@ -574,6 +575,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (level === "split") return checkSplit(document, planPath);
 
   const boardOnly = level === "board" || level === "fit";
+  const checkBoardStructure = boardOnly || level === "integrated";
   const blocking = [];
   const advisory = [];
   const deferred = [];
@@ -591,6 +593,27 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!document.title) blocking.push({ id: "missing-title", message: "Document has no title." });
   if (!document.category && !(Array.isArray(document.categories) && document.categories.length)) {
     blocking.push({ id: "missing-category", message: "Document has no category." });
+  }
+  if (level === "integrated" && document.puzzleKind !== "vocabulary-context") {
+    blocking.push({
+      id: "integrated-profile",
+      message: "The integrated design cycle is reserved for puzzleKind vocabulary-context."
+    });
+  }
+  if (level === "integrated" && document.puzzleKind === "vocabulary-context" &&
+      clusters.length === 1) {
+    if (Object.hasOwn(document, "preSolve")) {
+      blocking.push({
+        id: "pre-solve-automatic",
+        message: "A single-cluster Vocabulary puzzle is automatically pre-solved; omit preSolve."
+      });
+    }
+    if (bridges.length) {
+      blocking.push({
+        id: "single-cluster-bridges",
+        message: "A single-cluster Vocabulary puzzle cannot contain bridges."
+      });
+    }
   }
 
   if (!hasInfoText(document.info)) {
@@ -633,7 +656,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
       if (boardOnly) deferred.push(gap);
       else blocking.push(gap);
     }
-    if (boardOnly) {
+    if (checkBoardStructure) {
       if (!cluster.name || !cluster.fact) {
         blocking.push({
           id: "cluster-structure",
@@ -641,28 +664,48 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
           message: `Cluster "${cluster.id || "?"}" needs name and fact.`
         });
       }
-      const seeds = cluster.seeds || [];
-      if (seeds.length < 1 || seeds.length > 2) {
-        blocking.push({
-          id: "cluster-seeds",
-          clusterId: cluster.id || null,
-          message: `Cluster "${cluster.id || "?"}" needs one or two seeds.`
-        });
-      }
-      const floating = cluster.floatingTerms || [];
-      if (floating.length < 1 || floating.length > 5) {
-        blocking.push({
-          id: "cluster-floating",
-          clusterId: cluster.id || null,
-          message: `Cluster "${cluster.id || "?"}" needs 1-5 floatingTerms.`
-        });
-      }
-      if (seeds.length === 1 && floating.length !== 1) {
-        blocking.push({
-          id: "cluster-seeds",
-          clusterId: cluster.id || null,
-          message: `Cluster "${cluster.id || "?"}" has one seed, so it needs exactly one floatingTerm (two terms total).`
-        });
+      const singleVocabularyCluster = document.puzzleKind === "vocabulary-context" &&
+        clusters.length === 1;
+      if (singleVocabularyCluster) {
+        const terms = Array.isArray(cluster.terms) ? cluster.terms : [];
+        if (terms.length < 2 || terms.length > 7) {
+          blocking.push({
+            id: "cluster-terms",
+            clusterId: cluster.id || null,
+            message: `Single-cluster Vocabulary needs 2-7 terms in one terms list.`
+          });
+        }
+        if (Object.hasOwn(cluster, "seeds") || Object.hasOwn(cluster, "floatingTerms")) {
+          blocking.push({
+            id: "cluster-term-shape",
+            clusterId: cluster.id || null,
+            message: `Single-cluster Vocabulary uses terms only; omit seeds and floatingTerms.`
+          });
+        }
+      } else {
+        const seeds = cluster.seeds || [];
+        if (seeds.length < 1 || seeds.length > 2) {
+          blocking.push({
+            id: "cluster-seeds",
+            clusterId: cluster.id || null,
+            message: `Cluster "${cluster.id || "?"}" needs one or two seeds.`
+          });
+        }
+        const floating = cluster.floatingTerms || [];
+        if (floating.length < 1 || floating.length > 5) {
+          blocking.push({
+            id: "cluster-floating",
+            clusterId: cluster.id || null,
+            message: `Cluster "${cluster.id || "?"}" needs 1-5 floatingTerms.`
+          });
+        }
+        if (seeds.length === 1 && floating.length !== 1) {
+          blocking.push({
+            id: "cluster-seeds",
+            clusterId: cluster.id || null,
+            message: `Cluster "${cluster.id || "?"}" has one seed, so it needs exactly one floatingTerm (two terms total).`
+          });
+        }
       }
     }
     if (!hasAnyInfoSurface(cluster.info)) {
@@ -707,6 +750,8 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
     stopGate = level === "fit"
       ? "Fit OK. Stop for human board review (term set + loss ledger). Do not write term notes or lenses until the human says continue / fill / complete."
       : "Board OK. Stop for human review of terms and organization. Do not write term notes or lenses until the human says continue / fill / complete.";
+  } else if (level === "integrated") {
+    stopGate = "Integrated Vocabulary cycle OK. Create/save the complete draft, validate_puzzle_draft, record review, then stop-gate for human copy review.";
   } else {
     stopGate = "Completeness OK. validate_puzzle_draft, then --record --authored, then stop-gate report.";
   }
@@ -750,7 +795,7 @@ try {
     planPath: args.planPath
   });
   console.log(JSON.stringify(report, null, 2));
-  process.exit(report.ok ? 0 : 2);
+  process.exitCode = report.ok ? 0 : 2;
 } catch (error) {
   usage(error.message);
 }

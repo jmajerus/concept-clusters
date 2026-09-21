@@ -24,6 +24,13 @@ const document = {
     fact: "Alpha fact",
     seeds: ["one", "two"],
     floatingTerms: ["three"]
+  }, {
+    id: "beta",
+    name: "Beta",
+    color: "blue",
+    fact: "Beta fact",
+    seeds: ["four", "five"],
+    floatingTerms: ["six"]
   }],
   bridges: [{
     id: "shared",

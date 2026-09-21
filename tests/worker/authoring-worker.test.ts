@@ -81,11 +81,15 @@ describe("hosted authoring Worker", () => {
     });
     expect(initialized.status).toBe(200);
     const initialization = await rpcJson(initialized) as {
-      result: { serverInfo: { name: string; version: string } };
+      result: {
+        serverInfo: { name: string; version: string };
+        instructions?: string;
+      };
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
     expect(initialization.result.serverInfo.version).toBe(AUTHORING_MCP_SERVER_VERSION);
+    expect(initialization.result.instructions).toMatch(/one integrated cycle/);
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -341,6 +345,52 @@ describe("hosted authoring Worker", () => {
     expect(vocabularySchema.result.structuredContent.schema.properties.lenses)
       .toBeDefined();
 
+    const completeVocabularySchemaResponse = await rpc({
+      jsonrpc: "2.0",
+      id: "schema-vocabulary-context-complete",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_schema",
+        arguments: { profile: "vocabulary-context" }
+      }
+    });
+    const completeVocabularySchema = await rpcJson(completeVocabularySchemaResponse) as {
+      result: {
+        structuredContent: {
+          schema: {
+            properties: { clusters: { minItems: number } };
+            allOf: Array<{
+              if?: { properties?: {
+                puzzleKind?: { const?: string };
+                clusters?: { maxItems?: number };
+              } };
+              then?: { properties?: {
+                clusters?: { minItems?: number; items?: { required?: string[] } };
+                bridges?: { maxItems?: number };
+              }; not?: { required?: string[] } };
+              else?: { properties?: {
+                clusters?: { minItems?: number; items?: { required?: string[] } };
+              } };
+            }>;
+          };
+        };
+      };
+    };
+    expect(completeVocabularySchema.result.structuredContent.schema.properties.clusters.minItems)
+      .toBe(1);
+    const vocabularyClusterRule = completeVocabularySchema.result.structuredContent.schema.allOf
+      .find(rule => rule.if?.properties?.puzzleKind?.const === "vocabulary-context");
+    const vocabularyShapeRule = completeVocabularySchema.result.structuredContent.schema.allOf
+      .find(rule => rule.if?.properties?.clusters?.maxItems === 1);
+    expect(vocabularyClusterRule?.then?.properties?.clusters?.minItems).toBe(1);
+    expect(vocabularyClusterRule?.else?.properties?.clusters?.minItems).toBe(2);
+    expect(vocabularyShapeRule?.then?.properties?.clusters?.items?.required)
+      .toEqual(["terms"]);
+    expect(vocabularyShapeRule?.then?.not?.required).toEqual(["preSolve"]);
+    expect(vocabularyShapeRule?.then?.properties?.bridges?.maxItems).toBe(0);
+    expect(vocabularyShapeRule?.else?.properties?.clusters?.items?.required)
+      .toEqual(["seeds", "floatingTerms"]);
+
     const triviaSchemaResponse = await rpc({
       jsonrpc: "2.0",
       id: "schema-trivia-quiz",
@@ -575,6 +625,10 @@ describe("hosted authoring Worker", () => {
     expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
       .toMatch(/Vocabulary-in-context profile/);
     expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
+      .toMatch(/one integrated design cycle/);
+    expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
+      .toMatch(/permits one cluster/);
+    expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
       .toMatch(/Request profile=vocabulary-context with phase=core/);
     expect(vocabularyCompleteGuidance.result.structuredContent.markdown)
       .not.toMatch(/## Vocabulary-in-context core pass|## Design judgment|Dutch tilt/);
@@ -600,6 +654,8 @@ describe("hosted authoring Worker", () => {
     expect(vocabularyCoreGuidance.result.structuredContent.markdown)
       .toMatch(/puzzleKind to "vocabulary-context"/);
     expect(vocabularyCoreGuidance.result.structuredContent.markdown)
+      .toMatch(/single cluster is valid/);
+    expect(vocabularyCoreGuidance.result.structuredContent.markdown)
       .not.toMatch(/## Design judgment|search_puzzles|Dutch tilt/);
 
     const vocabularyReviewGuided = await rpc({
@@ -615,9 +671,13 @@ describe("hosted authoring Worker", () => {
       result: { structuredContent: { markdown: string } };
     };
     expect(vocabularyReviewGuidance.result.structuredContent.markdown)
-      .toMatch(/one most natural or precise fit/);
+      .toMatch(/one most\s+natural or precise fit/);
     expect(vocabularyReviewGuidance.result.structuredContent.markdown)
       .toMatch(/two equally good\s+answers/);
+    expect(vocabularyReviewGuidance.result.structuredContent.markdown)
+      .toMatch(/every playable board term/);
+    expect(vocabularyReviewGuidance.result.structuredContent.markdown)
+      .toMatch(/after the candidate lenses have been drafted/);
 
     const vocabularyPedagogyGuided = await rpc({
       jsonrpc: "2.0",
@@ -636,7 +696,9 @@ describe("hosted authoring Worker", () => {
     expect(vocabularyPedagogyGuidance.result.structuredContent.markdown)
       .toMatch(/one blank and one target term/);
     expect(vocabularyPedagogyGuidance.result.structuredContent.markdown)
-      .toMatch(/preSolve as a per-puzzle judgment/);
+      .toMatch(/single-cluster board is automatically pre-solved/);
+    expect(vocabularyPedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/For multi-cluster Vocabulary boards, leave preSolve as a per-puzzle\s+judgment/);
 
     const triviaCompleteGuided = await rpc({
       jsonrpc: "2.0",

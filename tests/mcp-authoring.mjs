@@ -100,6 +100,7 @@ export async function run() {
     assert.equal(initialized.result.serverInfo.version, AUTHORING_MCP_SERVER_VERSION);
     assert.doesNotMatch(initialized.result.instructions, /admin\/drafts|Open board|click Publish/);
     assert.match(initialized.result.instructions, /Cue and Freeze are outside MCP/);
+    assert.match(initialized.result.instructions, /one integrated cycle/);
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -267,6 +268,20 @@ export async function run() {
       arguments: {}
     });
     assert.equal(authoringSchema.result.structuredContent.version, "1");
+    const clusterCountRule = authoringSchema.result.structuredContent.schema.allOf
+      .find(rule => rule.if?.properties?.puzzleKind?.const === "vocabulary-context");
+    const vocabularyShapeRule = authoringSchema.result.structuredContent.schema.allOf
+      .find(rule => rule.if?.properties?.clusters?.maxItems === 1);
+    assert.equal(authoringSchema.result.structuredContent.schema.properties.clusters.minItems, 1);
+    assert.equal(clusterCountRule.then.properties.clusters.minItems, 1);
+    assert.equal(clusterCountRule.else.properties.clusters.minItems, 2);
+    assert.deepEqual(vocabularyShapeRule.then.properties.clusters.items.required, ["terms"]);
+    assert.deepEqual(vocabularyShapeRule.then.not.required, ["preSolve"]);
+    assert.equal(vocabularyShapeRule.then.properties.bridges.maxItems, 0);
+    assert.deepEqual(
+      vocabularyShapeRule.else.properties.clusters.items.required,
+      ["seeds", "floatingTerms"]
+    );
     for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
       assert.equal(authoringSchema.result.structuredContent.schema.properties[field], undefined);
     }
@@ -561,6 +576,14 @@ export async function run() {
     );
     assert.match(
       vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /one integrated design cycle/
+    );
+    assert.match(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
+      /permits one cluster/
+    );
+    assert.match(
+      vocabularyCompleteGuidance.result.structuredContent.markdown,
       /Request profile=vocabulary-context with phase=core/
     );
     assert.doesNotMatch(
@@ -588,6 +611,10 @@ export async function run() {
       vocabularyCoreGuidance.result.structuredContent.markdown,
       /puzzleKind to "vocabulary-context"/
     );
+    assert.match(
+      vocabularyCoreGuidance.result.structuredContent.markdown,
+      /single cluster is valid/
+    );
     assert.doesNotMatch(
       vocabularyCoreGuidance.result.structuredContent.markdown,
       /## Design judgment|search_puzzles|Dutch tilt/
@@ -599,11 +626,19 @@ export async function run() {
     });
     assert.match(
       vocabularyReviewGuidance.result.structuredContent.markdown,
-      /one most natural or precise fit/
+      /one most\s+natural or precise fit/
     );
     assert.match(
       vocabularyReviewGuidance.result.structuredContent.markdown,
       /two equally good\s+answers/
+    );
+    assert.match(
+      vocabularyReviewGuidance.result.structuredContent.markdown,
+      /every playable board term/
+    );
+    assert.match(
+      vocabularyReviewGuidance.result.structuredContent.markdown,
+      /after the candidate lenses have been drafted/
     );
 
     const vocabularyPedagogyGuidance = await request("tools/call", {
@@ -620,7 +655,11 @@ export async function run() {
     );
     assert.match(
       vocabularyPedagogyGuidance.result.structuredContent.markdown,
-      /preSolve as a per-puzzle judgment/
+      /single-cluster board is automatically pre-solved/
+    );
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /For multi-cluster Vocabulary boards, leave preSolve as a per-puzzle\s+judgment/
     );
 
     const triviaCompleteGuidance = await request("tools/call", {

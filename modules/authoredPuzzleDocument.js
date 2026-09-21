@@ -16,6 +16,7 @@ import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
   canonicalizeBridgeTermRoles,
+  canonicalizeSingleClusterVocabularyShape,
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
 import { withDecodedLearningMarkdown } from "./learningIntroduction.js";
@@ -60,13 +61,13 @@ function omitBlankOptionalLearningIntroductionFields(document) {
 // parseable credit can seed human contributors before other folds clone.
 export function canonicalizeAuthoredDocumentFields(document) {
   assertNoRetiredAuthoringFields(document);
-  return stripSystemAuthoredMetadata(omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
+  return stripSystemAuthoredMetadata(canonicalizeSingleClusterVocabularyShape(omitBlankOptionalLearningIntroductionFields(hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
       canonicalizeBridgeTermRoles(
         canonicalizeDocumentProvenance(document)
       )
     )
-  )));
+  ))));
 }
 
 export function documentHasRetiredBridgeTermRole(document) {
@@ -357,7 +358,7 @@ export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
 const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
-    "This stored draft still uses legacy link, citation, provenance, bridge-role, or repository-metadata fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, unclassified bridge terms, and infrastructure-owned lifecycle metadata outside the document). The folded form is already what authoring tools show; storage does not change until you save."
+    "This stored draft still uses legacy link, citation, provenance, bridge-role, Vocabulary seed/floating-term, or repository-metadata fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance, unclassified bridge terms, flat terms for a one-cluster Vocabulary puzzle, and infrastructure-owned lifecycle metadata outside the document). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
 const SAVE_RENAMED_CATEGORIES_FLAG = Object.freeze({

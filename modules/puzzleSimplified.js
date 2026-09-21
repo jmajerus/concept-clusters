@@ -49,13 +49,11 @@ function stableIds(items, labelFor) {
 // canonical content/puzzles/<id>.ccpuzzle.json file, and by content:export
 // as the simplified-shaped sibling of puzzleToJsonLd. Round-trips current
 // authored fields losslessly: bridge/cluster ids are always carried explicitly
-// (never left to re-derivation), and a cluster's terms order is always set
-// explicitly via the `terms` override field (see ClusterSchema in
-// simplifiedPuzzleSchema.js), even when it happens to already equal
-// seeds-then-floatingTerms, so this never depends on floatingTerms order
-// reconstructing anything. Repository-owned timestamps and revision fields
-// are intentionally omitted; the explicit JSON-LD adapter owns their
-// interchange representation.
+// (never left to re-derivation). Multi-cluster terms order is retained with the
+// `terms` override field; a single-cluster Vocabulary puzzle instead returns
+// its authored flat `terms` list and never exposes the runtime seed split.
+// Repository-owned timestamps and revision fields are intentionally omitted;
+// the explicit JSON-LD adapter owns their interchange representation.
 export function puzzleToSimplified(
   puzzle,
   {
@@ -70,19 +68,27 @@ export function puzzleToSimplified(
     : withProvenance;
   const clusterIds = stableIds(source.clusters, cluster => cluster.name);
   const bridgeIds = stableIds(source.bridges, bridge => bridge.term);
+  const singleVocabularyCluster = source.puzzleKind === "vocabulary-context" &&
+    source.clusters.length === 1;
 
   const clusters = source.clusters.map((cluster, index) => {
-    const floatingTerms = cluster.terms.filter(term => !cluster.seeds.includes(term));
-    return {
+    const floatingTerms = cluster.terms.filter(term => !(cluster.seeds || []).includes(term));
+    const common = {
       id: clusterIds[index],
       name: cluster.name,
       color: cluster.color,
       fact: cluster.fact,
-      seeds: [...cluster.seeds],
-      floatingTerms,
-      terms: [...cluster.terms],
       ...(cluster.termInfo ? { termInfo: clone(cluster.termInfo) } : {}),
       ...(cluster.info ? { info: clone(cluster.info) } : {})
+    };
+    if (singleVocabularyCluster) {
+      return { ...common, terms: [...cluster.terms] };
+    }
+    return {
+      ...common,
+      seeds: [...cluster.seeds],
+      floatingTerms,
+      terms: [...cluster.terms]
     };
   });
 
@@ -145,7 +151,8 @@ export function puzzleToSimplified(
     bridges,
     ...(source.lenses ? { lenses: clone(source.lenses) } : {}),
     ...(source.lensMode ? { lensMode: source.lensMode } : {}),
-    ...(source.preSolve !== undefined ? { preSolve: source.preSolve } : {}),
+    ...(!singleVocabularyCluster && source.preSolve !== undefined
+      ? { preSolve: source.preSolve } : {}),
     ...(source.relatedPuzzles ? { relatedPuzzles: clone(source.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(source.provenance ? { provenance: clone(source.provenance) } : {}),

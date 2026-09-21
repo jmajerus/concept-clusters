@@ -91,7 +91,12 @@
 // independently of taxonomy and lens mode, while legacy omission remains valid.
 // 5.14: topic-based becomes the implicit puzzleKind; MCP omits protected
 // attribution, lesson byline, creator, license, and source-lineage metadata.
+// 5.15: vocabulary-context permits one cluster and uses an integrated design
+// cycle for bounded puzzles, with a post-lens substitution review.
+// 5.16: one-cluster Vocabulary uses a flat term list and automatically starts
+// at its lenses; seeds and an explicit preSolve choice remain for multi-cluster
+// puzzles where sorting can contribute meaningful play.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 14
+  minor: 16
 });
