@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-export const name = "Authoring integrated completeness: one-cycle Vocabulary drafts";
+export const name = "Authoring integrated completeness: one-cycle Vocabulary and Trivia drafts";
 
 const CHECKER = ".agents/skills/author-puzzle/scripts/check-completeness.mjs";
 
@@ -38,6 +38,49 @@ function vocabularyPuzzle(overrides = {}) {
   };
 }
 
+function triviaPuzzle(overrides = {}) {
+  return {
+    id: "integrated-trivia",
+    title: "Capital Cities",
+    category: "trivia",
+    puzzleKind: "trivia-quiz",
+    info: { text: "Some capitals are not their country's largest city." },
+    clusters: [{
+      id: "not-largest",
+      name: "Capital is not the largest city",
+      fact: "These countries' capitals are smaller than another city in the country.",
+      seeds: ["Canberra", "Ottawa"],
+      floatingTerms: ["Ankara"],
+      termInfo: {
+        Canberra: { text: "Purpose-built compromise between Sydney and Melbourne." },
+        Ottawa: { text: "Smaller than Toronto and Montreal." },
+        Ankara: { text: "Smaller than Istanbul." }
+      }
+    }, {
+      id: "largest",
+      name: "Capital is the largest city",
+      fact: "These capitals are also their country's most populous city.",
+      seeds: ["Paris", "Tokyo"],
+      floatingTerms: ["Mexico City"],
+      termInfo: {
+        Paris: { text: "Largest city in France." },
+        Tokyo: { text: "Largest city in Japan." },
+        "Mexico City": { text: "Largest city in Mexico." }
+      }
+    }],
+    bridges: [],
+    lenses: [{
+      id: "compromise-capital",
+      prompt: "Which capital was purpose-built as a compromise between two rival cities?",
+      targets: ["Canberra"],
+      explanation: "Canberra was chosen to settle the Sydney-Melbourne rivalry."
+    }],
+    lensMode: "quiz",
+    preSolve: true,
+    ...overrides
+  };
+}
+
 function runIntegrated(document) {
   const directory = mkdtempSync(join(tmpdir(), "cc-integrated-"));
   const path = join(directory, "puzzle.json");
@@ -59,7 +102,19 @@ export async function run() {
   assert.equal(valid.coverage.clusters, 1);
   assert.equal(valid.coverage.termsWithNotes, 3);
   assert.equal(valid.coverage.lenses, 1);
-  assert.match(valid.stopGate, /Integrated Vocabulary cycle OK/);
+  assert.match(valid.stopGate, /Integrated profile cycle OK/);
+
+  const trivia = runIntegrated(triviaPuzzle());
+  assert.equal(trivia.ok, true, JSON.stringify(trivia.blocking));
+  assert.equal(trivia.coverage.clusters, 2);
+  assert.equal(trivia.coverage.termsWithNotes, 6);
+  assert.match(trivia.stopGate, /Integrated profile cycle OK/);
+
+  const triviaMissingSeeds = triviaPuzzle();
+  delete triviaMissingSeeds.clusters[0].seeds;
+  const invalidTriviaBoard = runIntegrated(triviaMissingSeeds);
+  assert.equal(invalidTriviaBoard.ok, false);
+  assert.ok(invalidTriviaBoard.blocking.some(gap => gap.id === "cluster-seeds"));
 
   const wrongKind = runIntegrated(vocabularyPuzzle({ puzzleKind: "topic-based" }));
   assert.equal(wrongKind.ok, false);

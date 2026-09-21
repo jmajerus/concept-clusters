@@ -1,7 +1,7 @@
 interface:
   display_name: "Author Puzzle"
   short_description: "Author and validate Concept Clusters puzzles"
-  default_prompt: "Use $author-puzzle. For bounded vocabulary-context puzzles, co-design the near-synonym board and lenses in one integrated cycle; otherwise use inventory → plan (when needed) → fit → complete. Always substitute every playable term into each Vocabulary lens before saving. Keep the final human review gate and never require magic phrases. For splits, run plan-split-boards.mjs once per board, print humanPrompt verbatim, obey humanNext on their reply."
+  default_prompt: "Use $author-puzzle. With only profile=vocabulary-context or profile=trivia-quiz, treat it as ‘surprise me’: choose a compact subject, create and validate the complete draft, then stop for my review; never publish unless I ask."
 dependencies:
   tools:
     - type: "mcp"

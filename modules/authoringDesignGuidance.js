@@ -697,6 +697,9 @@ const TRIVIA_QUIZ_PROFILE_GUIDANCE = Object.freeze({
   items or relationships within and across groups. Not every lens must span
   clusters, and no cluster needs its own question. Do not add terms merely as
   quiz fodder when they do not belong in the board's subject.
+- Every cluster keeps the seeds/floatingTerms shape. When the puzzle will be
+  pre-solved, the player never sees the seed/floating split, so choose seeds
+  without deliberation.
 - Treat trivia claims as factual claims: verify them and preserve exact
   citations when research finds supporting sources. A cross-cluster person,
   work, or pattern may be a genuine bridge, but bridges are optional and must

@@ -57,7 +57,10 @@ Skip this pass when `plan-boards.mjs` reports `single-board`.
    new session. Do not fall back to `node tools/mcp-call.mjs` just because a
    permission prompt appeared.
    Default **`mcp-call`** is one-shot stdio per tool for clients without native
-   MCP calls (Codex-safe). Fit **one board per burst**; stop at the planner's
+   MCP calls (Codex-safe); when Kilo's own VS Code backend launches the helper,
+   it recognizes Kilo's process markers and stamps the Kilo surface as a
+   low-trust fallback, but only native calls preserve per-call metadata.
+   Fit **one board per burst**; stop at the planner's
    `stopAfter`. Present the planner's **`humanPrompt`** at the gate; on reply,
    follow **`humanNext`** (never ask the human for flags or `--continue`).
 

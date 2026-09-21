@@ -96,7 +96,10 @@
 // 5.16: one-cluster Vocabulary uses a flat term list and automatically starts
 // at its lenses; seeds and an explicit preSolve choice remain for multi-cluster
 // puzzles where sorting can contribute meaningful play.
+// 5.17: same review bar; seeds stay required on every multi-cluster board,
+// and on a pre-solved board they are invisible to the player, so agents pick
+// them without deliberation rather than authoring a terms-only shape.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 16
+  minor: 17
 });

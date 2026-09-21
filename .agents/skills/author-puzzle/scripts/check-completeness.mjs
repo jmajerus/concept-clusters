@@ -4,6 +4,11 @@
 // Reads JSON from a file path or stdin.
 import { readFileSync } from "node:fs";
 import { NODE_CAP_LARGE } from "../../../../modules/puzzleBoardSize.js";
+import { AUTHORING_PROFILES } from "../../../../modules/authoringProfiles.js";
+
+// Specialized puzzleKinds share their identifiers with the MCP authoring
+// profiles; those are the kinds with a one-cycle integrated route.
+const INTEGRATED_PUZZLE_KINDS = AUTHORING_PROFILES;
 
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
@@ -17,7 +22,7 @@ Levels:
   fit        board structure + loss ledger (--ledger authoring data dir ledgers/<id>-fit.json).
   board      clusters/terms/bridges. Notes/lenses deferred.
   complete   (default) puzzle info, term notes, bridge help, ≥1 lens
-  integrated Complete Vocabulary-context cycle: board structure + all complete-pass fields, no loss ledger or intermediate gate.
+  integrated Complete Vocabulary-context or Trivia-quiz cycle: board structure + all complete-pass fields, no loss ledger or intermediate gate.
 
 Exit 0 only when blocking gaps are empty. Print JSON either way.`);
   process.exit(message ? 1 : 0);
@@ -594,10 +599,10 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!document.category && !(Array.isArray(document.categories) && document.categories.length)) {
     blocking.push({ id: "missing-category", message: "Document has no category." });
   }
-  if (level === "integrated" && document.puzzleKind !== "vocabulary-context") {
+  if (level === "integrated" && !INTEGRATED_PUZZLE_KINDS.includes(document.puzzleKind)) {
     blocking.push({
       id: "integrated-profile",
-      message: "The integrated design cycle is reserved for puzzleKind vocabulary-context."
+      message: `The integrated design cycle is reserved for puzzleKind ${INTEGRATED_PUZZLE_KINDS.join(" or ")}.`
     });
   }
   if (level === "integrated" && document.puzzleKind === "vocabulary-context" &&
@@ -751,7 +756,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
       ? "Fit OK. Stop for human board review (term set + loss ledger). Do not write term notes or lenses until the human says continue / fill / complete."
       : "Board OK. Stop for human review of terms and organization. Do not write term notes or lenses until the human says continue / fill / complete.";
   } else if (level === "integrated") {
-    stopGate = "Integrated Vocabulary cycle OK. Create/save the complete draft, validate_puzzle_draft, record review, then stop-gate for human copy review.";
+    stopGate = "Integrated profile cycle OK. Create/save the complete draft, validate_puzzle_draft, record review, then stop-gate for human copy review.";
   } else {
     stopGate = "Completeness OK. validate_puzzle_draft, then --record --authored, then stop-gate report.";
   }
