@@ -8,6 +8,7 @@ import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
+import { loadWikiLinkHealth } from "./wikiLinkCheck.js";
 import {
   emptyContentFreezePlan,
   gitIdsFromContentService,
@@ -154,6 +155,14 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
   return async function handleLocalDevRequest(req, res) {
     const admin = await handleAuthoringAdminIndex(req, res, {
       canApplyFreeze: true,
+      loadLinkHealth: async () => {
+        const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
+        if (!resolved.contentDocuments || !resolved.wikiLinkStore) return null;
+        return loadWikiLinkHealth({
+          contentDocuments: resolved.contentDocuments,
+          store: resolved.wikiLinkStore
+        });
+      },
       loadFreezePlan: async () => {
         try {
           const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });

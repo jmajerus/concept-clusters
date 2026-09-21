@@ -14,6 +14,10 @@ function escapeHtml(value) {
 }
 
 const PAGE_STYLE = `
+  .link-health-warn strong { color: #b45309; }
+  .link-health-ok strong { color: #15803d; }
+  .link-issues > li { margin: 10px 0; }
+  .link-issues ul { margin: 2px 0 0 0; }
   body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; color: #1a1a1a; }
   .meta { color: #666; font-size: 14px; }
   a { color: #2563eb; }
@@ -57,7 +61,74 @@ export function authoringAdminNav() {
     · <a href="/admin/drafts">Puzzles</a>
     · <a href="/admin/catalogues">Catalogues</a>
     · <a href="/admin/categories">Categories</a>
+    · <a href="/admin/link-health">Link health</a>
     · <a href="/admin/model-suggestions">Model suggestions</a>`;
+}
+
+// ---- Wikipedia link health (wikiLinkCheck.js loadWikiLinkHealth) ----
+// The index carries one line; the detail lives on /admin/link-health so a
+// bad week (dozens of titles across many puzzles) never swamps the page
+// people open to freeze.
+
+const LINK_STATUS_LABEL = Object.freeze({
+  missing: "no article at that title",
+  disambiguation: "disambiguation page",
+  redirect: "redirects"
+});
+
+function wikipediaHref(title) {
+  return `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+}
+
+function renderLinkHealthSummary(health) {
+  if (!health) return "";
+  if (!health.checked) {
+    return `<h2>Wikipedia links</h2>
+    <p class="meta">${health.titles} titles referenced by ${health.puzzles} published puzzles, none checked yet.
+    The weekly run (Monday 06:00 UTC), a draft page render, or <code>check_puzzle_links</code> fills this in.</p>`;
+  }
+  const { counts } = health;
+  const problems = counts.missing + counts.disambiguation;
+  const tone = problems ? "warn" : "ok";
+  const detail = health.issues.length
+    ? ` — <a href="/admin/link-health">review ${health.issues.length} title${health.issues.length === 1 ? "" : "s"} across ${health.affectedPuzzles} puzzle${health.affectedPuzzles === 1 ? "" : "s"}</a>`
+    : "";
+  return `<h2>Wikipedia links</h2>
+    <p class="meta link-health link-health-${tone}">${health.checked} of ${health.titles} titles checked across ${health.puzzles} published puzzles,
+    latest ${escapeHtml(String(health.latestCheckedAt || "").slice(0, 10))}${health.unchecked ? ` (${health.unchecked} not yet checked)` : ""}:
+    <strong>${counts.missing} missing · ${counts.disambiguation} disambiguation</strong> · ${counts.redirect} redirect · ${counts.ok} ok${detail}.</p>`;
+}
+
+function renderLinkHealthIssue(issue) {
+  const target = issue.status === "redirect" && issue.resolvedTitle
+    ? ` → <a href="${wikipediaHref(issue.resolvedTitle)}">${escapeHtml(issue.resolvedTitle)}</a>`
+    : "";
+  const references = issue.references.map(ref =>
+    `<li><a href="/admin/drafts/${encodeURIComponent(ref.puzzleId)}">${escapeHtml(ref.puzzleTitle)}</a>
+      <span class="meta">${escapeHtml(ref.where)} · <code>${escapeHtml(ref.link)}</code></span></li>`
+  ).join("");
+  return `<li class="link-issue">
+    <a href="${wikipediaHref(issue.title)}">${escapeHtml(issue.title)}</a>${target}
+    <span class="meta">checked ${escapeHtml(String(issue.checkedAt || "").slice(0, 10))}</span>
+    <ul>${references}</ul>
+  </li>`;
+}
+
+export function renderLinkHealthPage(health) {
+  const groups = ["missing", "disambiguation", "redirect"].map(status => {
+    const issues = (health?.issues || []).filter(issue => issue.status === status);
+    if (!issues.length) return "";
+    return `<h2>${escapeHtml(LINK_STATUS_LABEL[status])} (${issues.length})</h2>
+      <ul class="link-issues">${issues.map(renderLinkHealthIssue).join("")}</ul>`;
+  }).join("");
+  const body = `<h1>Wikipedia link health</h1>
+    <p class="meta">${authoringAdminNav()}</p>
+    ${renderLinkHealthSummary(health).replace(/<h2>Wikipedia links<\/h2>/, "")}
+    <p class="meta">A missing title or a disambiguation page is a link the player will hit and get nothing useful from;
+    fix the title, zoom out to the containing topic, or drop the link. A redirect still works, but the title it lands on is the
+    better link. Each puzzle link opens its draft page, where the same findings appear as flags.</p>
+    ${groups || "<p class=\"meta\">Every checked link resolves to its own article.</p>"}`;
+  return freezeResultShell("Wikipedia link health", body);
 }
 
 function freezePuzzleItem(id, detail) {
@@ -265,12 +336,23 @@ function renderGithubProductionSection({
   </section>`;
 }
 
+/**
+ * @param {{
+ *   freezePlan?: object,
+ *   canApplyFreeze?: boolean,
+ *   canCueAllPublished?: boolean,
+ *   githubProduction?: object | null,
+ *   canRefreshGithubProduction?: boolean,
+ *   linkHealth?: Awaited<ReturnType<import("./wikiLinkCheck.js").loadWikiLinkHealth>> | null
+ * }} [options]
+ */
 export function renderAdminIndexPage({
   freezePlan = emptyContentFreezePlan(),
   canApplyFreeze = false,
   canCueAllPublished = canApplyFreeze,
   githubProduction = null,
-  canRefreshGithubProduction = canApplyFreeze
+  canRefreshGithubProduction = canApplyFreeze,
+  linkHealth = null
 } = {}) {
   const body = `<h1>Admin</h1>
     <p class="meta">Authoring documents in D1. Publish writes the shared live
@@ -278,6 +360,7 @@ export function renderAdminIndexPage({
     ${authoringAdminNav()}</p>
     ${renderFreezeSection({ freezePlan, canApplyFreeze, canCueAllPublished })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
+    ${renderLinkHealthSummary(linkHealth)}
     <table>
       <thead><tr><th>Page</th><th>What it is</th></tr></thead>
       <tbody>
@@ -418,6 +501,8 @@ async function readUrlEncoded(req) {
   return new URLSearchParams(Buffer.concat(chunks).toString("utf8"));
 }
 
+export const LINK_HEALTH_PATH = "/admin/link-health";
+
 export async function handleAuthoringAdminIndex(req, res, {
   freezePlan = emptyContentFreezePlan(),
   canApplyFreeze = false,
@@ -426,9 +511,21 @@ export async function handleAuthoringAdminIndex(req, res, {
   githubProduction = null,
   loadGithubProduction = null,
   refreshGithubProduction = null,
-  cueAllPublished = null
+  cueAllPublished = null,
+  loadLinkHealth = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
+  if (urlPath === LINK_HEALTH_PATH) {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      res.writeHead(405, { Allow: "GET, HEAD", "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end("Method Not Allowed");
+      return true;
+    }
+    const health = loadLinkHealth ? await loadLinkHealth() : null;
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    res.end(req.method === "HEAD" ? "" : renderLinkHealthPage(health));
+    return true;
+  }
   if (!isAuthoringAdminIndexPath(urlPath)) return false;
   if (urlPath === "/admin/") {
     res.writeHead(302, {
@@ -561,6 +658,14 @@ export async function handleAuthoringAdminIndex(req, res, {
     return true;
   }
   const plan = loadFreezePlan ? await loadFreezePlan() : freezePlan;
+  let linkHealth = null;
+  if (loadLinkHealth) {
+    try {
+      linkHealth = await loadLinkHealth();
+    } catch {
+      linkHealth = null;
+    }
+  }
   let snapshot = githubProduction;
   if (loadGithubProduction) {
     try {
@@ -578,7 +683,8 @@ export async function handleAuthoringAdminIndex(req, res, {
     canApplyFreeze,
     canCueAllPublished: typeof cueAllPublished === "function",
     githubProduction: snapshot,
-    canRefreshGithubProduction: typeof refreshGithubProduction === "function"
+    canRefreshGithubProduction: typeof refreshGithubProduction === "function",
+    linkHealth
   }));
   return true;
 }

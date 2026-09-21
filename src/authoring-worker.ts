@@ -21,7 +21,7 @@ import {
 import { GitHubRepositoryClient } from "../modules/githubRepositoryClient.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
-import { checkDocumentWikiLinks, runWikiLinkHealth, wikiLinkFlags } from "../modules/wikiLinkCheck.js";
+import { checkDocumentWikiLinks, loadWikiLinkHealth, runWikiLinkHealth, wikiLinkFlags } from "../modules/wikiLinkCheck.js";
 import { createD1WikiLinkCheckStore } from "../modules/wikiLinkCheckStore.js";
 import {
   documentForEditor,
@@ -30,7 +30,7 @@ import {
 } from "../modules/authoredPuzzleDocument.js";
 import { loadMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { validatePublishedPuzzleLayout } from "../modules/layoutPublication.js";
-import { renderAdminIndexPage } from "../modules/authoringAdminIndex.js";
+import { LINK_HEALTH_PATH, renderAdminIndexPage, renderLinkHealthPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
 import {
@@ -290,7 +290,26 @@ async function handleAdminRoute(
     } catch {
       freezePlan = emptyContentFreezePlan();
     }
-    return html(renderAdminIndexPage({ freezePlan, canApplyFreeze: false }));
+    let linkHealth = null;
+    try {
+      linkHealth = await loadWikiLinkHealth({
+        contentDocuments,
+        store: createD1WikiLinkCheckStore(env.AUTHORING_DB)
+      });
+    } catch {
+      linkHealth = null;
+    }
+    return html(renderAdminIndexPage({ freezePlan, canApplyFreeze: false, linkHealth }));
+  }
+  if (pathname === LINK_HEALTH_PATH) {
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response("Method Not Allowed", { status: 405, headers: { Allow: "GET, HEAD" } });
+    }
+    const health = await loadWikiLinkHealth({
+      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      store: createD1WikiLinkCheckStore(env.AUTHORING_DB)
+    });
+    return html(renderLinkHealthPage(health));
   }
   if (pathname === "/admin/catalogues" || pathname.startsWith("/admin/catalogues/")
     || pathname === "/admin/categories" || pathname.startsWith("/admin/categories/")) {
@@ -1067,7 +1086,8 @@ export default {
       || url.pathname === "/admin/catalogues"
       || url.pathname.startsWith("/admin/catalogues/")
       || url.pathname === "/admin/categories"
-      || url.pathname.startsWith("/admin/categories/");
+      || url.pathname.startsWith("/admin/categories/")
+      || url.pathname === LINK_HEALTH_PATH;
     if (url.pathname !== "/mcp" && !isAdminRoute) return new Response("Not Found", { status: 404 });
     if (!expectedHostname(request, env)) {
       return jsonError(421, "Request hostname is not configured for this Worker");

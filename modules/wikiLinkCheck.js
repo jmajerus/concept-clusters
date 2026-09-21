@@ -256,3 +256,63 @@ export function wikiLinkFlags(report) {
   }
   return flags;
 }
+
+/**
+ * Current link health from what is already known -- no network. Joins every
+ * wiki: link in the live published corpus against the store, so the admin
+ * index can summarise it and /admin/link-health can list each problem title
+ * with the puzzles and surfaces that carry it. Titles the store has never
+ * seen are counted as unchecked (the cron or the next draft-page render
+ * will fill them in).
+ *
+ * @param {{
+ *   contentDocuments: { listPublished: (args: any) => Promise<any[]> },
+ *   store: import("./wikiLinkCheckStore.js").WikiLinkCheckStore
+ * }} options
+ */
+export async function loadWikiLinkHealth({ contentDocuments, store }) {
+  const rows = (await contentDocuments.listPublished({ kind: "puzzle" }))
+    .filter(row => row && !row.withdrawnAt && row.document);
+  const referencesByTitle = new Map();
+  for (const row of rows) {
+    const puzzleTitle = row.document.title || row.id;
+    for (const ref of collectDocumentWikiLinks(row.document)) {
+      if (!referencesByTitle.has(ref.title)) referencesByTitle.set(ref.title, []);
+      referencesByTitle.get(ref.title).push({ puzzleId: row.id, puzzleTitle, where: ref.where, link: ref.link });
+    }
+  }
+  const known = await store.readAll();
+  const counts = { ok: 0, redirect: 0, missing: 0, disambiguation: 0 };
+  const issues = [];
+  let checked = 0;
+  let latestCheckedAt = null;
+  for (const [title, references] of referencesByTitle) {
+    const row = known.get(title);
+    if (!row) continue;
+    checked += 1;
+    if (!latestCheckedAt || row.checkedAt > latestCheckedAt) latestCheckedAt = row.checkedAt;
+    const status = statusOf(row);
+    counts[status] += 1;
+    if (status === "ok") continue;
+    issues.push({
+      title,
+      status,
+      resolvedTitle: row.resolvedTitle,
+      checkedAt: row.checkedAt,
+      references: [...references].sort((left, right) =>
+        left.puzzleId.localeCompare(right.puzzleId) || left.where.localeCompare(right.where))
+    });
+  }
+  const order = { missing: 0, disambiguation: 1, redirect: 2 };
+  issues.sort((left, right) => order[left.status] - order[right.status] || left.title.localeCompare(right.title));
+  return {
+    puzzles: rows.length,
+    titles: referencesByTitle.size,
+    checked,
+    unchecked: referencesByTitle.size - checked,
+    latestCheckedAt,
+    counts,
+    affectedPuzzles: new Set(issues.flatMap(issue => issue.references.map(ref => ref.puzzleId))).size,
+    issues
+  };
+}

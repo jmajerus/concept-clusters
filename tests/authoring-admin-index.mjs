@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   handleAuthoringAdminIndex,
+  renderLinkHealthPage,
   isAuthoringAdminIndexPath,
   renderAdminIndexPage,
   renderFreezeResultPage,
@@ -165,6 +166,65 @@ export async function run(page) {
   const denied = createResponse();
   assert.equal(await handleAuthoringAdminIndex({ method: "POST", url: "/admin" }, denied), true);
   assert.equal(denied.status, 405);
+
+  // Wikipedia link health: one line on the index, the detail on its own page.
+  const linkHealth = {
+    puzzles: 232, titles: 1810, checked: 1800, unchecked: 10, latestCheckedAt: "2026-09-21T21:41:17.266Z",
+    counts: { ok: 1644, redirect: 123, missing: 31, disambiguation: 2 },
+    affectedPuzzles: 61,
+    issues: [
+      { title: "Lacanian Real", status: "missing", resolvedTitle: null, checkedAt: "2026-09-21T21:41:17.266Z",
+        references: [{ puzzleId: "solidarity-in-brokenness", puzzleTitle: "Solidarity in Brokenness", where: 'term "lacanian real void"', link: "wiki:Lacanian Real" }] },
+      { title: "ATP", status: "disambiguation", resolvedTitle: null, checkedAt: "2026-09-21T21:41:17.266Z",
+        references: [{ puzzleId: "energy-flow", puzzleTitle: "Energy flow", where: 'term "ATP"', link: "wiki:ATP" }] },
+      { title: "Heart chamber", status: "redirect", resolvedTitle: "Heart", checkedAt: "2026-09-21T21:41:17.266Z",
+        references: [{ puzzleId: "how-the-heart-pumps", puzzleTitle: "How the heart pumps", where: 'cluster "Chambers"', link: "wiki:Heart chamber" }] }
+    ]
+  };
+  const withHealth = renderAdminIndexPage({ linkHealth });
+  assert.match(withHealth, /<h2>Wikipedia links<\/h2>/);
+  assert.match(withHealth, /1800 of 1810 titles checked across 232 published puzzles/);
+  assert.match(withHealth, /latest 2026-09-21 \(10 not yet checked\)/);
+  assert.match(withHealth, /<strong>31 missing · 2 disambiguation<\/strong> · 123 redirect · 1644 ok/);
+  assert.match(withHealth, /<a href="\/admin\/link-health">review 3 titles across 61 puzzles<\/a>/);
+  assert.doesNotMatch(withHealth, /Lacanian Real/, "the index summarises; it never lists titles");
+  assert.match(withHealth, /link-health-warn/);
+  assert.match(renderAdminIndexPage({ linkHealth: { ...linkHealth, counts: { ...linkHealth.counts, missing: 0, disambiguation: 0 } } }), /link-health-ok/,
+    "redirects alone do not colour the line as a warning");
+  const nothingYet = renderAdminIndexPage({ linkHealth: { ...linkHealth, checked: 0, issues: [] } });
+  assert.match(nothingYet, /none checked yet/);
+  assert.doesNotMatch(renderAdminIndexPage(), /Wikipedia links/, "no loader, no section");
+
+  const healthPage = renderLinkHealthPage(linkHealth);
+  assert.match(healthPage, /<h1>Wikipedia link health<\/h1>/);
+  assert.match(healthPage, /<h2>no article at that title \(1\)<\/h2>/);
+  assert.match(healthPage, /<h2>disambiguation page \(1\)<\/h2>/);
+  assert.match(healthPage, /<h2>redirects \(1\)<\/h2>/);
+  assert.match(healthPage, /href="https:\/\/en\.wikipedia\.org\/wiki\/Heart_chamber">Heart chamber<\/a> → <a href="https:\/\/en\.wikipedia\.org\/wiki\/Heart">Heart<\/a>/);
+  assert.match(healthPage, /<a href="\/admin\/drafts\/solidarity-in-brokenness">Solidarity in Brokenness<\/a>/);
+  assert.match(healthPage, /term &quot;lacanian real void&quot; · <code>wiki:Lacanian Real<\/code>/);
+  assert.match(renderLinkHealthPage({ ...linkHealth, issues: [] }), /Every checked link resolves to its own article/);
+
+  const healthRoute = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin/link-health" }, healthRoute, {
+    loadLinkHealth: async () => linkHealth
+  }), true);
+  assert.equal(healthRoute.status, 200);
+  assert.match(healthRoute.body, /<h1>Wikipedia link health<\/h1>/);
+  const healthPost = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "POST", url: "/admin/link-health" }, healthPost), true);
+  assert.equal(healthPost.status, 405);
+  const indexWithLoader = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin" }, indexWithLoader, {
+    loadLinkHealth: async () => linkHealth
+  }), true);
+  assert.match(indexWithLoader.body, /review 3 titles across 61 puzzles/);
+  const loaderFails = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin" }, loaderFails, {
+    loadLinkHealth: async () => { throw new Error("D1 down"); }
+  }), true);
+  assert.equal(loaderFails.status, 200, "a failing health loader never takes the index down");
+  assert.doesNotMatch(loaderFails.body, /Wikipedia links/);
 
   const freezeBody = {
     method: "POST",

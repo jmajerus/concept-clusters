@@ -9,6 +9,7 @@ import { resolveWikipediaTitles } from "../modules/wikipediaTitles.js";
 import {
   checkDocumentWikiLinks,
   collectDocumentWikiLinks,
+  loadWikiLinkHealth,
   runWikiLinkHealth,
   wikiLinkFlags,
   WIKI_LINK_FLAG_IDS
@@ -236,6 +237,27 @@ export async function run() {
     ["redirect", "porin (protein)", ["gram-stain-fixture"]]
   ]);
   assert.equal(cronStore.size(), 8);
+
+  // ---- admin loader: joins the corpus against the store, no network ----
+  await cronStore.write(new Map([["Never Referenced", { exists: false, disambiguation: false, resolvedTitle: null }]]), { now: t0 });
+  const loaded = await loadWikiLinkHealth({ contentDocuments, store: cronStore });
+  assert.equal(loaded.puzzles, 2);
+  assert.equal(loaded.titles, 8);
+  assert.equal(loaded.checked, 8);
+  assert.equal(loaded.unchecked, 0);
+  assert.deepEqual(loaded.counts, { ok: 4, redirect: 2, missing: 1, disambiguation: 1 });
+  assert.equal(loaded.affectedPuzzles, 2);
+  assert.deepEqual(loaded.issues.map(issue => issue.title), [
+    "Teichoic acids of Gram-positives", "ATP", "Lugol's iodine", "porin (protein)"
+  ], "missing, then disambiguation, then redirects; titles the corpus does not reference are ignored");
+  assert.deepEqual(loaded.issues[1].references.map(ref => [ref.puzzleId, ref.where]), [
+    ["gram-stain-fixture", 'term "ATP"'],
+    ["second-board", 'term "a"']
+  ]);
+  const partlyChecked = await loadWikiLinkHealth({ contentDocuments, store: createMemoryWikiLinkCheckStore() });
+  assert.equal(partlyChecked.checked, 0);
+  assert.equal(partlyChecked.unchecked, 8);
+  assert.equal(partlyChecked.latestCheckedAt, null);
 
   // ---- draft page: link flags are page-only and rendered in their own block ----
   const contentService = createHostedAuthoringContentService();
