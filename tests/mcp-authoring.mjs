@@ -399,7 +399,7 @@ export async function run() {
     assert.ok(vocabularySchema.result.structuredContent.schema.properties.lenses);
     assert.match(
       vocabularySchema.result.structuredContent.profileSummary,
-      /Near-synonym clusters/
+      /Collegiate-level near-synonym clusters/
     );
 
     const triviaSchema = await request("tools/call", {

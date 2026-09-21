@@ -536,7 +536,10 @@ This profile is for lexical-disambiguation puzzles: the board gathers tight
 synonym or near-synonym neighborhoods, and the lenses teach why a particular
 context prefers one neighboring term over another. It is not a simple matching
 exercise with a sentence appended afterward. Close relatedness is intentional;
-the author must still make each completed lens resolve to one best fit.
+the author must still make each completed lens resolve to one best fit. The
+vocabulary is pitched at collegiate level: the neighborhoods a collegiate
+dictionary bothers to discriminate in a synonym paragraph, not everyday words
+whose differences are audible from the words themselves.
 
 For a compact, bounded request, use one integrated design cycle: shape the
 near-synonym neighborhood and its lenses together, then review each drafted
@@ -559,11 +562,22 @@ const VOCABULARY_CONTEXT_PROFILE_GUIDANCE = Object.freeze({
 
 - Set puzzleKind to "vocabulary-context" in the puzzle document. This is
   authored content metadata; choose category independently for discovery.
-- Begin with a distinction inventory, not a target cluster count. Identify the
-  shared semantic center of each synonym neighborhood and the usage axes that
+- Begin with a distinction inventory, not a target cluster or term count.
+  Identify the shared semantic center of each synonym neighborhood and the usage axes that
   separate its members: frequency, duration, agency, intent, register,
   intensity, connotation, collocation, grammatical frame, or another real
   distinction.
+- Pitch the vocabulary at collegiate level: words an educated adult knows but
+  uses imprecisely (careful / meticulous / scrupulous / punctilious; silent /
+  taciturn / reticent / reserved; plausible / credible / specious). Everyday
+  words whose differences are audible from the words themselves (laughter /
+  guffaw / chuckle) teach nothing; choose another neighborhood.
+- When a dictionary synonym discussion exists for the neighborhood
+  (Merriam-Webster's "Choose the Right Synonym", American Heritage's synonym
+  notes), start the distinction inventory there and cite it in info.links. Its
+  shape is the document's shape: the shared-sense sentence is the cluster
+  fact; each word's discriminating clause is that term's termInfo; the clause
+  that decides a lens is its explanation.
 - For a compact, user-scoped puzzle, do this as one integrated cycle with the
   lens design; do not stop for separate inventory or board-fit approval. A
   single cluster is valid when the requested terms form one neighborhood and
@@ -576,10 +590,12 @@ const VOCABULARY_CONTEXT_PROFILE_GUIDANCE = Object.freeze({
   every broad synonym as interchangeable in every context.
 - Use the cluster fact to state the shared meaning and the relevant boundary.
   Use term information when an individual term needs a sharper usage note.
-- For exactly one cluster, author the complete two-to-seven term list in
-  the "terms" field; omit "seeds", "floatingTerms", "bridges", and
-  "preSolve". That board
-  has no grouping decision and is automatically solved before its lenses.
+- For exactly one cluster, author the complete term list in the "terms"
+  field; omit "seeds", "floatingTerms", "bridges", and "preSolve". Two to
+  seven terms is the validity limit, not a target: a dictionary synonym
+  paragraph's group size is a legitimate result, a number picked in advance
+  is not. That board has no grouping decision and is automatically solved
+  before its lenses.
 - For multiple clusters, use "seeds" and "floatingTerms" when the initial
   sorting challenge contributes to play; choose "preSolve" only for that form.
 - A bridge is optional and must represent a genuine connection. A homonym or
@@ -598,6 +614,8 @@ bridge cores with domain=content.`,
   the author state what the terms share and what usage boundary makes each one
   worth retaining? Close meaning is expected; accidental duplicate work is
   not.
+- If a reader who has never had to look up any of the terms could place them
+  all, the neighborhood is pitched too low; choose another.
 - For every planned lens, substitute every playable board term into the
   sentence, not only the nearest neighbor. The desired result is one most
   natural or precise fit plus
@@ -692,7 +710,7 @@ const TRIVIA_QUIZ_PROFILE_GUIDANCE = Object.freeze({
 - Give each cluster a meaningful inclusion rule and a fact that explains it.
   A group may organize items by genre, period, role, or another defensible
   dimension; choose the structure that makes the intended questions clearer,
-  not a target cluster count or a symmetric-looking layout.
+  not a target cluster or term count or a symmetric-looking layout.
 - Select a board inventory that supports interesting questions about its
   items or relationships within and across groups. Not every lens must span
   clusters, and no cluster needs its own question. Do not add terms merely as
@@ -776,8 +794,11 @@ latest draft before editing, preserve every field from earlier passes, and
 change only what this pass improves. The selected profile chooses focused
 guidance; for new documents, record the matching authored type in puzzleKind.
 Use the canonical schema for field validity and save through the phase's
-existing write domain. Always
-validate the complete draft before publication.`;
+existing write domain. Schema limits are validity limits for a completed
+document, not composition targets: do not choose or announce a cluster, term,
+bridge, or lens count before mapping the material; the count is whatever the
+sourced material yields. Always validate the complete draft before
+publication.`;
 
 const AUTHORING_PROFILE_GUIDANCE = Object.freeze({
   [VOCABULARY_CONTEXT_PROFILE]: Object.freeze({

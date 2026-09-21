@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `1bfa1447` · 2026-09-21
+Skill rev `7cce007f` · 2026-09-21
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. The human Publishes on `/admin/drafts`, or
@@ -86,6 +86,9 @@ human-approved.
    the explicit exception: it authors board and lenses together and validates
    the full draft.
 7. **Complete pass must clear every `blocking` gap** from `--level complete` before record/stop.
+8. **Never run a shell command as a placeholder, no-op, or "to think."** If
+   the MCP tool you need is not in your tool list, stop and name the missing
+   tool; do not substitute another call.
 
 ## Stop-gate report
 
@@ -220,11 +223,13 @@ cycle to one complete draft. That authorizes subject selection and draft
 creation without an inventory or topic-approval stop; it does not authorize
 publication. An explicit inventory-only request still uses the staged workflow.
 
-- Pick an unexpected but teachable subject that fits one board; if a candidate
-  is too broad, narrow it rather than expanding to multiple boards.
-  Vocabulary-context needs a tight near-synonym neighborhood with a real usage
-  distinction; Trivia-quiz needs sourceable facts whose groups frame meaningful
-  questions.
+- Pick an unexpected subject that fits one board; if a candidate is too
+  broad, narrow it rather than expanding to multiple boards. Vocabulary-context
+  needs a collegiate-level near-synonym neighborhood — one a collegiate
+  dictionary discriminates in a synonym paragraph (meticulous / scrupulous /
+  punctilious), not everyday words whose differences are audible from the
+  words themselves (laughter / guffaw / chuckle); Trivia-quiz needs sourceable
+  facts whose groups frame meaningful questions.
 - Check `search_puzzles` for existing coverage; if covered, choose another
   subject. Choose an existing category from live `list_categories` /
   `get_category`; never create a category for a surprise pick.
@@ -271,7 +276,8 @@ node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --aut
 **Vocabulary-context deltas**
 
 - Board: genuine near-synonyms only. A single cluster is valid and needs no
-  invented foil cluster: put the complete 2–7 term set in `terms`; omit
+  invented foil cluster: put the complete term set in `terms` (2–7 is the
+  validity limit, not a target); omit
   `seeds`, `floatingTerms`, `bridges`, and `preSolve` (the game pre-solves that
   cluster before its lenses). Use seeds/floating terms and a per-puzzle
   `preSolve` choice only when multiple clusters make sorting meaningful.

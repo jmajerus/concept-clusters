@@ -40,7 +40,7 @@ import {
   segmentIntersectsRect,
   segmentsIntersect as segmentIntersection
 } from "./geometry.js";
-import { pillWidth, bridgePoints } from "./puzzleGraph.js";
+import { pillWidth, bridgePoints, compareWordOrder, memberDisplayOrder } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
@@ -108,11 +108,10 @@ export function createSetRenderer({
     // overlapping. Order is shuffled by a stable hash of each word, not
     // authoring order — otherwise a player who plays many puzzles could
     // learn that earlier list positions tend to belong to earlier clusters.
-    const hash = s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
     const freeNodes = nodes
       .filter(n => !(n.gs.length === 1 && n.connected.length))
       .map(n => ({ id: n.id, w: n.w, word: n.word }))
-      .sort((a, b) => hash(a.word) - hash(b.word));
+      .sort((a, b) => compareWordOrder(a.word, b.word));
 
     const ROW_GAP = 10;
     const stripInnerWidth = W - STRIP_MARGIN * 2;
@@ -717,7 +716,9 @@ export function createSetRenderer({
       const ci = n.gs[0];
       const c = clusterPos(ci);
       const { r } = state.setLayout.clusterBoxes[ci];
-      const terms = state.puzzle.clusters[ci].terms;
+      // Stack in display order, not the document's term order: on a
+      // pre-solved board the latter is usually the lens order.
+      const terms = memberDisplayOrder(state.puzzle.clusters[ci]);
       const ti = terms.indexOf(n.word);
       const startY = -r + HEAD_CONST + PAD_CONST - 4;
       let dy = 0;

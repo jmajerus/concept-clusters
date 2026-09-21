@@ -118,9 +118,13 @@ import {
   lensReviewIsVisible,
   lensQuizResult,
   lensResult,
+  lensSelectInstruction,
+  lensSelectionSummary,
   normalizedLensMode,
   quizOptionForNode,
-  quizOptionsForDisplay
+  quizOptionsForDisplay,
+  sequentialLensResultText,
+  toggleLensSelection
 } from "./modules/lensEngine.js";
 
 const svg = d3.select("#board");
@@ -430,11 +434,8 @@ async function finishLensLayoutAfterModeSwitch(
         "good"
       );
     } else if (switchState.phase === "lens-selecting") {
-      const count = switchState.lensSelections.size;
       setMessage(
-        count
-          ? `${count} ${count === 1 ? "concept" : "concepts"} selected.`
-          : "Select every concept that fits this lens, then check your selections.",
+        lensSelectionSummary(switchState.puzzle, currentLens(switchState), switchState.lensSelections),
         "good"
       );
     } else if (switchState.phase === "lens-quiz-answering") {
@@ -1066,10 +1067,7 @@ function renderLensReview(lens) {
       : `Not quite — the correct answer was ${result.correctOption?.label}.`;
   } else {
     const result = lensResult(lens, state.lensSelections);
-    const extra = result.extra.length;
-    lensResultEl.textContent =
-      `You identified ${result.correct.length} of ${result.targetCount}.` +
-      (extra ? ` ${extra} extra ${extra === 1 ? "selection" : "selections"}.` : "");
+    lensResultEl.textContent = sequentialLensResultText(state.puzzle, lens, result);
   }
   renderLensExplanation(lens);
 }
@@ -1229,7 +1227,7 @@ async function beginLensSequence() {
       ? "Map complete. Assign any badged concepts you recognize, then check your work."
       : state.lensMode === "quiz"
         ? "Map complete. Choose the answer you think is correct, then check it."
-        : "Select every concept that fits this lens, then check your selections.",
+        : lensSelectInstruction(state.puzzle, currentLens(state)),
     "good"
   );
   updateLensInterface();
@@ -2008,13 +2006,9 @@ function applyLoadedPuzzle(puzzle, index, {
   state.assignLens = chooseLensForNode;
   state.toggleLensSelection = node => {
     if (state.phase !== "lens-selecting" || !node?.word) return;
-    if (state.lensSelections.has(node.word)) state.lensSelections.delete(node.word);
-    else state.lensSelections.add(node.word);
-    setMessage(
-      state.lensSelections.size
-        ? `${state.lensSelections.size} ${state.lensSelections.size === 1 ? "concept" : "concepts"} selected.`
-        : "Select every concept that fits this lens, then check your selections."
-    );
+    const lens = currentLens(state);
+    toggleLensSelection(state.puzzle, lens, state.lensSelections, node.word);
+    setMessage(lensSelectionSummary(state.puzzle, lens, state.lensSelections));
     updateLensInterface();
     persistPlayerSession();
   };

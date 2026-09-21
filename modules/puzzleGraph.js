@@ -20,6 +20,46 @@ import { normalizeInfo } from "./termInfo.js";
 // width (worst case leaves ~6px a side, not negative).
 export const pillWidth = word => word.length * 6.3 + 28;
 
+// Stable per-word order that owes nothing to authoring order. Renderers
+// use it wherever a position would otherwise follow the document's term
+// list: the free strip, a solved circle's stack, the first force tick. A
+// term list is an unordered set to the player, so the board must not
+// reveal the order it was typed in -- on a pre-solved board that order is
+// often the lens order, and a player could read the answers off the
+// layout. When a puzzle kind whose order is the lesson arrives (a graded
+// intensity scale, say), it declares that on the cluster and
+// memberDisplayOrder honors the authored order for that cluster alone.
+export const wordOrderHash = word => {
+  let h = 0;
+  for (let i = 0; i < word.length; i++) h = (h * 31 + word.charCodeAt(i)) | 0;
+  return h;
+};
+
+export const compareWordOrder = (a, b) =>
+  wordOrderHash(a) - wordOrderHash(b) || a.localeCompare(b);
+
+export function memberDisplayOrder(cluster) {
+  return [...cluster.terms].sort(compareWordOrder);
+}
+
+// D3 seeds nodes without x/y on a phyllotaxis spiral in array order, and
+// the array is the document's term order. Seed the same spiral in word
+// order instead, centered on the board, so the first tick starts from a
+// layout that is stable across loads and blind to authoring order.
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+export function seedInitialPositions(nodes, { width, height }) {
+  const unplaced = nodes
+    .filter(node => node.x == null || node.y == null || Number.isNaN(node.x))
+    .sort((a, b) => compareWordOrder(a.word, b.word));
+  unplaced.forEach((node, i) => {
+    const radius = 10 * Math.sqrt(0.5 + i);
+    const angle = i * GOLDEN_ANGLE;
+    node.x = width / 2 + radius * Math.cos(angle);
+    node.y = height / 2 + radius * Math.sin(angle);
+  });
+  return nodes;
+}
+
 // A bridge node's <polygon> outline once it's revealing itself as a
 // bridge (partial or done -- see the "bridge" class each renderer only
 // adds in those states, never free/untouched, so a bridge's shape

@@ -136,7 +136,10 @@ when omitted. For a single-cluster `vocabulary-context` puzzle, provide
 `bridges`, and `preSolve`. For other puzzles, `seeds` (normally two terms)
 and `floatingTerms` (one to five more, disjoint from `seeds`) define the
 cluster's two-to-seven terms and its initial sorting challenge. In those
-seeded shapes, `terms` may optionally preserve a different display order.
+seeded shapes, `terms` may optionally list the same terms in a different
+order. Term order is never shown to the player: every renderer lays a
+cluster's members out in a stable word order, so a term list reads as a set
+and a pre-solved board cannot be read in lens order.
 `color` is one of `teal`, `blue`, `amber`,
 `magenta`, `olive`, `brown`, `cyan` and auto-assigned, collision-free, when
 omitted. `termInfo` (`{term: infoValue}`) and `info` are optional. Every

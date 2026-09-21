@@ -5,7 +5,7 @@
 // `svg` selection it's handed.
 /* global d3 */
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
-import { bridgePoints } from "./puzzleGraph.js";
+import { bridgePoints, seedInitialPositions } from "./puzzleGraph.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { computePrettyGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
@@ -78,6 +78,9 @@ export function createGraphRenderer({
     };
     const anchorStrength = d => d.connected.length > 0 ? 0.25 : 0;
 
+    // Seed unplaced terms in word order (see puzzleGraph.js) rather than
+    // letting D3 spiral them out in term-list order.
+    seedInitialPositions(nodes, { width: W, height: H });
     const sim = d3.forceSimulation(nodes)
       .force("link", d3.forceLink(links).id(d => d.id).distance(75).strength(0.8))
       .force("charge", d3.forceManyBody().strength(-240))

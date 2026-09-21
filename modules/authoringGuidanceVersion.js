@@ -99,7 +99,14 @@
 // 5.17: same review bar; seeds stay required on every multi-cluster board,
 // and on a pre-solved board they are invisible to the player, so agents pick
 // them without deliberation rather than authoring a terms-only shape.
+// 5.18: same review bar; vocabulary-context is pitched at collegiate level
+// (neighborhoods a collegiate dictionary discriminates in a synonym
+// paragraph), with the dictionary synonym discussion as anchor source and
+// document template.
+// 5.19: same review bar; the no-preselected-counts rule now reaches
+// profile-routed agents through the profile preamble (it lived only in the
+// generic format guidance since the 5.11 isolation).
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 17
+  minor: 19
 });

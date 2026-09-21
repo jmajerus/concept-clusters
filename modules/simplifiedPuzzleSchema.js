@@ -257,10 +257,11 @@ const ClusterSchema = z.object({
   seeds: z.array(TermSchema).min(1).max(2).optional(),
   floatingTerms: z.array(TermSchema).min(1).max(5).optional(),
   // In a one-cluster Vocabulary puzzle this is its complete term list. For
-  // seed/floating shapes it can preserve the display order when it differs
-  // from seeds-then-floatingTerms (notably in migrated JSON-LD); that form
-  // must contain exactly the seed and floating terms, checked by
-  // puzzleFromSimplified.
+  // seed/floating shapes it may list the same terms in a different order
+  // (notably in migrated JSON-LD); that form must contain exactly the seed
+  // and floating terms, checked by puzzleFromSimplified. Order is not shown
+  // to the player: renderers lay members out in a stable word order
+  // (puzzleGraph.js memberDisplayOrder) so a term list reads as a set.
   terms: z.array(TermSchema).min(2).max(7).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()

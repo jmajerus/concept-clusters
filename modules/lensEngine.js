@@ -53,6 +53,52 @@ export function lensLabel(lens) {
   return lens?.label || lens?.prompt || "";
 }
 
+// A vocabulary-context cloze has one blank and one best fit by genre
+// convention, so its lens may say so and take a single pick. Ordinary
+// sequential lenses stay count-blind: deciding how many terms answer is
+// part of the work, so their copy never reveals the target count.
+export function singleAnswerLens(puzzle, lens) {
+  return puzzle?.puzzleKind === "vocabulary-context" &&
+    normalizedLensMode(puzzle) === "sequential" &&
+    Array.isArray(lens?.targets) && lens.targets.length === 1;
+}
+
+export function lensSelectInstruction(puzzle, lens) {
+  return singleAnswerLens(puzzle, lens)
+    ? "Select the term that best fits the blank, then check it."
+    : "Select every concept that fits this lens, then check your selections.";
+}
+
+export function lensSelectionSummary(puzzle, lens, selections) {
+  const count = selections?.size || 0;
+  if (!count) return lensSelectInstruction(puzzle, lens);
+  if (singleAnswerLens(puzzle, lens)) return `“${[...selections][0]}” selected.`;
+  return `${count} ${count === 1 ? "concept" : "concepts"} selected.`;
+}
+
+// Mutates `selections`. A single-answer lens replaces the current pick
+// instead of accumulating, so the board never shows two picks for one blank.
+export function toggleLensSelection(puzzle, lens, selections, word) {
+  if (selections.has(word)) {
+    selections.delete(word);
+    return;
+  }
+  if (singleAnswerLens(puzzle, lens)) selections.clear();
+  selections.add(word);
+}
+
+export function sequentialLensResultText(puzzle, lens, result) {
+  if (singleAnswerLens(puzzle, lens)) {
+    const best = lens.targets[0];
+    return result.correct.length
+      ? `Correct — ${best}.`
+      : `Not quite — the best fit was ${best}.`;
+  }
+  const extra = result.extra.length;
+  return `You identified ${result.correct.length} of ${result.targetCount}.` +
+    (extra ? ` ${extra} extra ${extra === 1 ? "selection" : "selections"}.` : "");
+}
+
 export function selectableConceptWords(puzzle) {
   if (!puzzle) return [];
   return [

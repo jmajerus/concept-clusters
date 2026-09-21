@@ -10,11 +10,16 @@ import {
   lensPhaseActive,
   lensQuizResult,
   lensResult,
+  lensSelectInstruction,
+  lensSelectionSummary,
   lensSpansClusters,
   normalizedLensMode,
   quizOptionForNode,
   quizOptionsForDisplay,
-  selectableConceptWords
+  selectableConceptWords,
+  sequentialLensResultText,
+  singleAnswerLens,
+  toggleLensSelection
 } from "../modules/lensEngine.js";
 import { lensColorMap } from "../modules/colorPalette.js";
 import { validatePuzzleLenses } from "../modules/lensValidation.js";
@@ -342,5 +347,53 @@ export async function run() {
   assert.match(
     lensCompletionMessage(quizPuzzle()),
     /^You completed the map and examined it through 1 lens\.$/
+  );
+
+  // A vocabulary-context cloze may say it has one answer and takes a single
+  // pick; an ordinary sequential lens with one target stays count-blind.
+  const vocabulary = {
+    id: "refusing-to-yield",
+    puzzleKind: "vocabulary-context",
+    lensMode: "sequential",
+    clusters: [{ terms: ["adamant", "inflexible", "obdurate"] }],
+    bridges: [],
+    lenses: [
+      { id: "resolve", prompt: "The director remained ____.", explanation: "e", targets: ["adamant"] },
+      { id: "pair", prompt: "Two fit here.", explanation: "e", targets: ["adamant", "obdurate"] }
+    ]
+  };
+  const [cloze, pair] = vocabulary.lenses;
+  assert.equal(singleAnswerLens(vocabulary, cloze), true);
+  assert.equal(singleAnswerLens(vocabulary, pair), false);
+  assert.equal(singleAnswerLens(homonym, homonym.lenses[0]), false);
+  assert.match(lensSelectInstruction(vocabulary, cloze), /^Select the term that best fits the blank/);
+  assert.match(lensSelectInstruction(homonym, homonym.lenses[0]), /^Select every concept/);
+
+  const picks = new Set();
+  toggleLensSelection(vocabulary, cloze, picks, "inflexible");
+  toggleLensSelection(vocabulary, cloze, picks, "adamant");
+  assert.deepEqual([...picks], ["adamant"], "single-answer lens replaces the earlier pick");
+  assert.equal(lensSelectionSummary(vocabulary, cloze, picks), "\u201cadamant\u201d selected.");
+  toggleLensSelection(vocabulary, cloze, picks, "adamant");
+  assert.equal(picks.size, 0, "tapping the current pick clears it");
+  assert.match(lensSelectionSummary(vocabulary, cloze, picks), /^Select the term/);
+
+  const both = new Set();
+  toggleLensSelection(vocabulary, pair, both, "adamant");
+  toggleLensSelection(vocabulary, pair, both, "obdurate");
+  assert.equal(both.size, 2, "multi-target vocabulary lens still accumulates");
+  assert.equal(lensSelectionSummary(vocabulary, pair, both), "2 concepts selected.");
+
+  assert.equal(
+    sequentialLensResultText(vocabulary, cloze, lensResult(cloze, new Set(["adamant"]))),
+    "Correct \u2014 adamant."
+  );
+  assert.equal(
+    sequentialLensResultText(vocabulary, cloze, lensResult(cloze, new Set(["obdurate"]))),
+    "Not quite \u2014 the best fit was adamant."
+  );
+  assert.equal(
+    sequentialLensResultText(homonym, homonym.lenses[0], lensResult(homonym.lenses[0], new Set(["bank", "shore"]))),
+    "You identified 1 of 1. 1 extra selection."
   );
 }

@@ -15,7 +15,10 @@
 // module has no DOM elements of its own beyond the `svg` selection it's
 // handed.
 /* global d3 */
-import { pillWidth, bridgePoints, computeClusterOrder } from "./puzzleGraph.js";
+import {
+  pillWidth, bridgePoints, computeClusterOrder, compareWordOrder,
+  memberDisplayOrder, seedInitialPositions
+} from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import {
@@ -114,11 +117,6 @@ export function createStarRenderer({
     const PILL_H = 30;
     const FREE_GAP = 10;
     const STRIP_MARGIN = 12;
-    const wordHash = word => {
-      let h = 0;
-      for (let i = 0; i < word.length; i++) h = (h * 31 + word.charCodeAt(i)) | 0;
-      return h;
-    };
     const clampPoint = (node, point, minY = 22) => ({
       x: Math.max(node.w / 2 + 6, Math.min(W - node.w / 2 - 6, point.x)),
       y: Math.max(minY, Math.min(H - 22, point.y))
@@ -138,7 +136,7 @@ export function createStarRenderer({
     const packFreeStrip = () => {
       const freeNodes = nodes
         .filter(node => !node.connected.length)
-        .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word));
+        .sort((a, b) => compareWordOrder(a.word, b.word));
       if (freeNodes.length === 0) {
         freeStripActive = false;
         liveStripHeight = 0;
@@ -248,7 +246,7 @@ export function createStarRenderer({
         const title = titleNodes[ci];
         const towardPlay = Math.atan2(boardMidY - title.y, boardCx - title.x);
         seeds
-          .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word))
+          .sort((a, b) => compareWordOrder(a.word, b.word))
           .forEach((node, index) => {
             const flank = seeds.length === 1 ? 0 : (index % 2 === 0 ? -1 : 1);
             const tier = Math.floor(index / 2);
@@ -292,6 +290,10 @@ export function createStarRenderer({
       ? [...titleNodes, ...nodes.filter(node => node.connected.length > 0)]
       : [...nodes, ...titleNodes];
 
+    // Classic Star hands unplaced terms to the simulation; seed them in
+    // word order so the cold start (and a pre-solved board, whose terms
+    // are pulled in from wherever they began) never mirrors the term list.
+    seedInitialPositions(nodes, { width: W, height: H });
     const sim = d3.forceSimulation(liveSimNodes())
       .force("clusterPull", d3.forceLink(buildClusterLinks()).distance(70).strength(0.6))
       .force("charge", d3.forceManyBody().strength(-240))
@@ -478,7 +480,7 @@ export function createStarRenderer({
       const outwardSlots = new Map();
       puzzle.clusters.forEach((cluster, ci) => {
         if (bridgeFacingTerms[ci].size < 2) return;
-        const members = cluster.terms
+        const members = memberDisplayOrder(cluster)
           .filter(word => !bridgeFacingTerms[ci].has(word))
           .map(word => nodes.find(node => node.word === word))
           .filter(Boolean);

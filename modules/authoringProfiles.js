@@ -24,7 +24,7 @@ const PROFILE_DESCRIPTORS = Object.freeze({
     id: VOCABULARY_CONTEXT_PROFILE,
     title: "Vocabulary in context",
     summary:
-      "Near-synonym clusters and context-sensitive cloze lenses teach subtle usage distinctions rather than simple matching.",
+      "Collegiate-level near-synonym clusters and context-sensitive cloze lenses teach subtle usage distinctions rather than simple matching.",
     mode: "advisory",
     storageDomains: Object.freeze(["content", "pedagogy"])
   }),
