@@ -4524,9 +4524,6 @@ export const PUZZLE_MANIFEST = [
       },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Place the sequencing workflow between molecular biology and the downstream interpretation of differences."
-        },
         "entries": [
           {
             "id": "from-dna-to-gene-expression",
@@ -4693,9 +4690,6 @@ export const PUZZLE_MANIFEST = [
       },
       "large": false,
       "relatedPuzzles": {
-        "info": {
-          "text": "Follow structured biological records into sequence comparison and reproducible analysis."
-        },
         "entries": [
           {
             "id": "aligning-biological-sequences",
@@ -13987,6 +13981,142 @@ export const PUZZLE_MANIFEST = [
         "compliant",
         "docile",
         "tractable"
+      ]
+    }
+  },
+  {
+    "id": "innate-intrinsic-inherent",
+    "module": "./vocabulary/innate-intrinsic-inherent.js",
+    "browse": {
+      "id": "innate-intrinsic-inherent",
+      "title": "Already There? Innate, Intrinsic, Inherent",
+      "category": "Vocabulary",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "Every word on this board denies that anyone added the property — the question each sentence answers is how it got there: present at birth in a living being, or belonging to the thing's own constitution. Context, register, and grammatical frame decide which word fits.",
+        "citations": [
+          {
+            "title": "Innate — 'Choose the Right Synonym' (innate, inborn, inbred, congenital, hereditary mean not acquired after birth)",
+            "author": "Merriam-Webster.com Dictionary",
+            "publisher": "Merriam-Webster",
+            "year": "2026",
+            "url": "https://www.merriam-webster.com/dictionary/innate"
+          },
+          {
+            "title": "Intrinsic — 'belonging to the essential nature or constitution of a thing'",
+            "author": "Merriam-Webster.com Dictionary",
+            "publisher": "Merriam-Webster",
+            "year": "2026",
+            "url": "https://www.merriam-webster.com/dictionary/intrinsic"
+          },
+          {
+            "title": "Inherent — 'belonging to the basic nature of something or someone'; 'stuck in something else so firmly that they can't be separated'",
+            "author": "Merriam-Webster.com Dictionary",
+            "publisher": "Merriam-Webster",
+            "year": "2026",
+            "url": "https://www.merriam-webster.com/dictionary/inherent"
+          },
+          {
+            "title": "Congenital — 'existing at or dating from birth'",
+            "author": "Merriam-Webster.com Dictionary",
+            "publisher": "Merriam-Webster",
+            "year": "2026",
+            "url": "https://www.merriam-webster.com/dictionary/congenital"
+          }
+        ]
+      },
+      "_searchTerms": [
+        "Already Present",
+        "innate",
+        "intrinsic",
+        "inborn",
+        "congenital",
+        "inherent",
+        "Added From Outside",
+        "extrinsic",
+        "external",
+        "foreign"
+      ]
+    }
+  },
+  {
+    "id": "quiet-neighbors",
+    "module": "./vocabulary/quiet-neighbors.js",
+    "browse": {
+      "id": "quiet-neighbors",
+      "title": "Saying Little",
+      "category": "Vocabulary",
+      "tags": [
+        "synonyms",
+        "usage",
+        "adjectives"
+      ],
+      "level": "intermediate",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "Four near-synonyms for saying little, discriminated along the lines of Merriam-Webster's synonym notes: all describe the quiet, but each is quiet for a different reason — temperament, privacy, caution, or brevity.",
+        "links": [
+          {
+            "href": "https://www.merriam-webster.com/dictionary/taciturn"
+          },
+          {
+            "href": "https://www.merriam-webster.com/dictionary/reserved"
+          }
+        ]
+      },
+      "_searchTerms": [
+        "Saying Little",
+        "taciturn",
+        "reticent",
+        "reserved",
+        "laconic"
+      ]
+    }
+  },
+  {
+    "id": "short-lived-words",
+    "module": "./vocabulary/short-lived-words.js",
+    "browse": {
+      "id": "short-lived-words",
+      "title": "Here and Gone: Seven Words for the Short-Lived",
+      "category": "Vocabulary",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "English has one shared sense spread across seven near-synonyms — lasting or staying only a short time — and it refuses to let any one of them do all the work. The seven differ on how short, what kind of thing is brief (a guest, a condition, a lifespan), and how it leaves (an interruption, a fade, a flight). This board follows Merriam-Webster's 'Choose the Right Synonym' paragraph for transient, which lines up all seven words with one discriminating clause apiece; the lenses put each clause to work in a real sentence.",
+        "links": [
+          {
+            "href": "https://www.merriam-webster.com/dictionary/transient",
+            "label": "Merriam-Webster: Choose the Right Synonym for transient"
+          },
+          {
+            "href": "https://www.etymonline.com/word/ephemeral",
+            "label": "Online Etymology Dictionary: ephemeral"
+          },
+          {
+            "href": "https://www.etymonline.com/word/transient",
+            "label": "Online Etymology Dictionary: transient"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Lasting or Staying Only a Short Time",
+        "transient",
+        "transitory",
+        "ephemeral",
+        "momentary",
+        "fugitive",
+        "fleeting",
+        "evanescent"
       ]
     }
   }
