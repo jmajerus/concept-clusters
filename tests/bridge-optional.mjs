@@ -85,7 +85,7 @@ export async function run(page, baseURL) {
   await page.waitForSelector("#puzzle-title:not(:empty)");
   async function exercisePuzzle(puzzle) {
     await page.evaluate(candidate => {
-      const index = CC.PUZZLES.push(candidate) - 1;
+      const index = CC.registerPuzzle(candidate);
       document.getElementById("puzzle-picker").focus();
       CC.openPuzzle(index);
     }, puzzle);

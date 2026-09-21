@@ -17,8 +17,10 @@ function moduleUrl(modulePath) {
   return new URL(`../puzzles/${normalized}`, import.meta.url);
 }
 
+import { puzzleBrowseFromFull } from "./puzzleBrowse.js";
+
 export function createPuzzleLoader(manifest, { loadPuzzle = null } = {}) {
-  const entries = Array.isArray(manifest) ? manifest : [];
+  const entries = Array.isArray(manifest) ? [...manifest] : [];
   const cache = new Map();
   const browsePuzzles = entries.map(entry => entry.browse);
   const idToEntry = new Map(entries.map(entry => [entry.id, entry]));
@@ -73,12 +75,36 @@ export function createPuzzleLoader(manifest, { loadPuzzle = null } = {}) {
     return index === undefined ? -1 : index;
   }
 
+  // Add a fully-formed puzzle after boot, as if the manifest had listed it:
+  // an entry with the same browse projection the manifest builder writes,
+  // pre-cached so opening it never touches a module. The seam browser tests
+  // use to exercise a fixture board without shipping it as a file. Returns
+  // the new index (or the existing one for a repeated id).
+  function registerPuzzle(puzzle) {
+    if (!puzzle || typeof puzzle.id !== "string" || !puzzle.id) {
+      throw new Error("registerPuzzle needs a puzzle with an id");
+    }
+    const existing = idToIndex.get(puzzle.id);
+    if (existing !== undefined) {
+      cache.set(puzzle.id, puzzle);
+      return existing;
+    }
+    const entry = { id: puzzle.id, module: "(registered at runtime)", browse: puzzleBrowseFromFull(puzzle) };
+    const index = entries.push(entry) - 1;
+    browsePuzzles.push(entry.browse);
+    idToEntry.set(puzzle.id, entry);
+    idToIndex.set(puzzle.id, index);
+    cache.set(puzzle.id, puzzle);
+    return index;
+  }
+
   return {
     entries,
     browsePuzzles,
     loadPuzzleById,
     loadPuzzleAtIndex,
     getLoadedPuzzle,
-    puzzleIndexForId
+    puzzleIndexForId,
+    registerPuzzle
   };
 }

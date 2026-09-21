@@ -2204,6 +2204,9 @@ window.CC = {
   showSolution,
   openPuzzle: (index, options) => appNavigation.openPuzzle(index, options),
   loadPuzzle,
+  // Test seam: register a fixture board at runtime and get its index back,
+  // for CC.openPuzzle(index). See puzzleLoader.registerPuzzle.
+  registerPuzzle: puzzle => puzzleLoader.registerPuzzle(puzzle),
   get puzzleLoader() { return puzzleLoader; },
   get playSource() { return playSource; },
   waitForCurrentPuzzle: () => {
