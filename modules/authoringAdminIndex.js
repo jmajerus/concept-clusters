@@ -123,7 +123,11 @@ export function renderFreezePlanLists(plan = emptyContentFreezePlan()) {
     puzzleDetails: details
   })).join("")
     + dependencyList("Automatically cued supporting documents", plan.dependencies?.automatic)
-    + dependencyList("Missing supporting documents — freeze is blocked", plan.dependencies?.missing);
+    + dependencyList("Missing supporting documents — freeze is blocked", plan.dependencies?.missing)
+    + freezeKindList(
+      "Categories shipping empty — no published puzzle uses them yet (fine; invisible in play until one does)",
+      plan.emptyCategories
+    );
 }
 
 function renderCueAllPublishedButton({

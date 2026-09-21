@@ -12,6 +12,9 @@ const fail = (id, message) => {
   console.log(`${id}: ${message}`);
   ok = false;
 };
+const warn = (id, message) => {
+  console.log(`warning ${id}: ${message}`);
+};
 
 for (const puzzle of PUZZLES) {
   const categories = categoriesForPuzzle(puzzle);
@@ -70,9 +73,11 @@ const usedCategoryIds = new Set(
 for (const name of Object.keys(CATEGORIES)) {
   const id = categoryIdFor(name, CATEGORIES);
   if (!usedCategoryIds.has(id)) {
-    fail(
+    // Same reasoning as validate.mjs: a category registered ahead of its
+    // first puzzle is legitimate, so this is a warning, not a failure.
+    warn(
       `categories.js:"${name}"`,
-      "registered but no puzzle resolves to this category identifier"
+      "registered but no puzzle resolves to this category identifier yet"
     );
   }
 }

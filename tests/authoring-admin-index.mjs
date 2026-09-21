@@ -93,7 +93,8 @@ export async function run(page) {
     freezePlan: {
       puzzles: { add: ["new-science-puzzle"], update: [], remove: [] },
       catalogues: { add: ["science-basics"], update: ["learning-path"], remove: [] },
-      categories: { add: ["science"], update: [], remove: [] },
+      categories: { add: ["science", "zoology"], update: [], remove: [] },
+      emptyCategories: ["zoology"],
       held: { puzzles: [], catalogues: [], categories: [] },
       dependencies: {
         automatic: [{
@@ -108,8 +109,11 @@ export async function run(page) {
       }
     }
   });
-  assert.match(automatic, /4 changes cued \(1 automatic\)/);
+  assert.match(automatic, /5 changes cued \(1 automatic\)/);
   assert.match(automatic, /Automatically cued supporting documents/);
+  assert.match(automatic, /Categories shipping empty[^<]*<\/h3>\s*<ul><li><code>zoology<\/code><\/li>/,
+    "empty category named on the plan, informational");
+  assert.doesNotMatch(automatic, /freeze is blocked/);
   assert.match(automatic, /required by catalogue <code>science-basics<\/code>/);
   assert.match(automatic, /catalogue <code>science-followup<\/code>/);
   assert.match(automatic, />Confirm</);

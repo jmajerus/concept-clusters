@@ -156,6 +156,8 @@ export async function run() {
   ]);
   assert.deepEqual(autoCuePlan.puzzles.add, ["new-science-puzzle"]);
   assert.deepEqual(autoCuePlan.categories.add, ["science"]);
+  assert.deepEqual(autoCuePlan.emptyCategories, [],
+    "a shipping category with a live puzzle behind it is not empty");
   assert.deepEqual(autoCuePlan.held.catalogues, ["see-also"]);
   assert.deepEqual(autoCuePlan.held.puzzles, ["unrelated-puzzle"]);
   assert.deepEqual(autoCuePlan.dependencies.automatic, [
@@ -299,4 +301,25 @@ export async function run() {
   assert.equal(authorFlags.cuedForFreeze, true);
   assert.equal(authorFlags.gitSeedCue, false);
   assert.equal(authorFlags.freezeAdd, true);
+
+  // A category cued ahead of its first puzzle ships to git (validate.mjs
+  // only warns) and the plan names it so the author sees it going empty.
+  const emptyPlan = planContentFreeze({
+    publishedCategories: [
+      { id: "zoology", cuedForFreezeAt: "2026-09-17T00:00:00.000Z", document: { title: "Zoology" } },
+      { id: "botany", cuedForFreezeAt: "2026-09-17T00:00:00.000Z", document: { title: "Botany" } },
+      { id: "science", cuedForFreezeAt: "2026-09-17T00:00:00.000Z", document: { title: "Science" } }
+    ],
+    publishedPuzzles: [
+      { id: "flower-anatomy", document: { category: "botany" } },
+      { id: "withdrawn-fish", withdrawnAt: "2026-09-17T00:00:00.000Z", document: { category: "zoology" } },
+      { id: "cross-listed", document: { category: "botany", categories: ["botany", "science"] } }
+    ],
+    gitCategoryIds: ["science"]
+  });
+  assert.deepEqual(emptyPlan.categories.add, ["botany", "zoology"]);
+  assert.deepEqual(emptyPlan.categories.update, ["science"]);
+  assert.deepEqual(emptyPlan.emptyCategories, ["zoology"],
+    "withdrawn puzzles do not count; secondary membership does");
+  assert.deepEqual(emptyPlan.dependencies.missing, []);
 }

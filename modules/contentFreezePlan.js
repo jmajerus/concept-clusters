@@ -1,5 +1,6 @@
 import {
   CATEGORIES,
+  categoriesForPuzzle,
   categoryIdFor,
   categoryMetadataFor,
   categoryTitleFor,
@@ -56,7 +57,8 @@ export function emptyContentFreezePlan() {
     catalogues: { add: [], update: [], remove: [] },
     categories: { add: [], update: [], remove: [] },
     held: { puzzles: [], catalogues: [], categories: [] },
-    dependencies: { automatic: [], missing: [] }
+    dependencies: { automatic: [], missing: [] },
+    emptyCategories: []
   };
 }
 
@@ -368,6 +370,23 @@ function resolveFreezeDependencies({
   };
 }
 
+// Categories this freeze writes to git that no live published puzzle uses
+// yet. Legitimate (a category is created before its first puzzle, and the
+// player-facing picker enumerates categories from puzzles, so an empty
+// registry entry is invisible in play) but worth seeing on the plan.
+function emptyCategoryIds(categoriesPlan, publishedPuzzles, categoryRegistry) {
+  const shipping = [...categoriesPlan.add, ...categoriesPlan.update];
+  if (!shipping.length) return [];
+  const used = new Set(
+    publishedPuzzles
+      .filter(row => !row?.withdrawnAt)
+      .flatMap(row => categoriesForPuzzle(row?.document || {}, categoryRegistry))
+      .map(category => categoryIdFor(category, categoryRegistry))
+      .filter(Boolean)
+  );
+  return shipping.filter(id => !used.has(id)).sort();
+}
+
 function automaticIdsFor(dependencies, kind) {
   return dependencies.automatic
     .filter(dependency => dependency.kind === kind)
@@ -411,6 +430,7 @@ export function planContentFreeze({
   const automaticPuzzles = automaticIdsFor(dependencies, "puzzle");
   const automaticCatalogues = automaticIdsFor(dependencies, "catalogue");
   const automaticCategories = automaticIdsFor(dependencies, "category");
+  const categories = planKind(publishedCategories, gitCategoryIds, automaticCategories);
   return {
     puzzles: planKind(publishedPuzzles, gitPuzzleIds, automaticPuzzles),
     catalogues: planKind(
@@ -418,7 +438,8 @@ export function planContentFreeze({
       withoutReserved(gitCatalogueIds),
       automaticCatalogues
     ),
-    categories: planKind(publishedCategories, gitCategoryIds, automaticCategories),
+    categories,
+    emptyCategories: emptyCategoryIds(categories, publishedPuzzles, categoryRegistry),
     held: {
       puzzles: heldIds(publishedPuzzles, automaticPuzzles),
       catalogues: heldIds(withoutReserved(publishedCatalogues), automaticCatalogues),

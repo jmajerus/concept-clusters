@@ -27,6 +27,11 @@ const fail = (id, message) => {
   console.log(`${id}: ${message}`);
   ok = false;
 };
+// Printed but never fatal: a state that is legitimate on its own and only
+// worth a glance (a category registered ahead of its first puzzle).
+const warn = (id, message) => {
+  console.log(`warning ${id}: ${message}`);
+};
 
 const puzzleIdCounts = new Map();
 for (const puzzle of PUZZLES) {
@@ -116,8 +121,12 @@ for (const [index, catalogue] of CATALOGUES.entries()) {
   }
 }
 
-// Category metadata is additive, but registered names must be in use and
-// every derived URL slug must remain unambiguous.
+// Category metadata is additive and every derived URL slug must remain
+// unambiguous. A registered category no puzzle uses is only a warning: with
+// D1-first authoring a category is created before its first puzzle and
+// arrives in git ahead of it, and the player-facing picker enumerates
+// categories from the puzzles, so an empty registry entry is invisible in
+// play. The warning keeps a genuinely stale entry from going unnoticed.
 // Persisted puzzle documents use canonical category identifiers, while the
 // registry remains title-keyed for display and backwards compatibility.
 // Resolve both sides to identifiers before checking registry coverage.
@@ -133,7 +142,7 @@ for (const [name, entry] of Object.entries(CATEGORIES)) {
     .forEach(error => fail(`categories.js:"${name}"`, error));
   const id = categoryIdFor(name, CATEGORIES);
   if (!usedCategoryIds.has(id)) {
-    fail(`categories.js:"${name}"`, "registered but no puzzle resolves to this category identifier");
+    warn(`categories.js:"${name}"`, "registered but no puzzle resolves to this category identifier yet");
   }
   if (entry.domain !== undefined && !Object.hasOwn(DOMAINS, entry.domain)) {
     fail(`categories.js:"${name}"`, `domain "${entry.domain}" is not a registered domain`);
