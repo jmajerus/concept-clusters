@@ -377,5 +377,13 @@ export default definePuzzle(import.meta.url, {
         "taking responsibility": "Answers a complaint already made, and breaks the counter-attack loop."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

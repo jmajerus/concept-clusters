@@ -278,5 +278,13 @@ export default definePuzzle(import.meta.url, {
         "monitoring": "In a two-player game you see every move the other makes. Here someone has to be assigned to look."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

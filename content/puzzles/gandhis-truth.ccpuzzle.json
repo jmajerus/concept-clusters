@@ -6,6 +6,9 @@
     "political-science",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "tags": [
     "book"
   ],
@@ -26,18 +29,6 @@
       "name": "The Psychohistorian's Method",
       "color": "teal",
       "fact": "Erikson organizes the entire book around a single, nearly forgotten labor dispute: the 1918 Ahmedabad textile strike he simply calls the event. He reads it as the microscope through which the macroscopic pattern of a life, and of a nation's independence movement, both become visible. Diagnosing Gandhi as a homo religiosus -- a figure whose private crisis turns out to be representative of an entire culture's unresolved one -- is what licenses a single strike to carry that much interpretive weight. Erikson names his own method disciplined subjectivity: the historian's emotional involvement with a subject this large has to be examined and used, not pretended away.",
-      "seeds": [
-        "homo religiosus",
-        "disciplined subjectivity"
-      ],
-      "floatingTerms": [
-        "the event"
-      ],
-      "terms": [
-        "homo religiosus",
-        "disciplined subjectivity",
-        "the event"
-      ],
       "termInfo": {
         "disciplined subjectivity": "Erikson's term for the psychohistorian's own method: rather than pretending to stand outside an emotionally powerful subject, the biographer must consciously examine and use that involvement as part of the evidence.",
         "homo religiosus": "Erikson's category, borrowed from the history of religions, for a figure whose own inner crisis coincides with and comes to represent a whole culture's unresolved crisis. He applies it to both Luther and Gandhi.",
@@ -50,27 +41,25 @@
             "href": "wiki:Psychohistory"
           }
         ]
-      }
+      },
+      "seeds": [
+        "homo religiosus",
+        "disciplined subjectivity"
+      ],
+      "floatingTerms": [
+        "the event"
+      ],
+      "terms": [
+        "homo religiosus",
+        "disciplined subjectivity",
+        "the event"
+      ]
     },
     {
       "id": "the-making-of-the-militant",
       "name": "The Making of the Militant",
       "color": "amber",
       "fact": "Erikson reads Gandhi's South African years (1893-1914) as an extended moratorium: a socially sanctioned delay of adult commitment during which an unresolved identity crisis can be worked out experimentally rather than settled by default. What breaks open in Ahmedabad in 1918 is that moratorium ending -- Gandhi, at 48, finds the historical cause that fuses a private struggle with a public one. Erikson places the shift inside the eight-stage life cycle he had already mapped: developmentally, it is the pivot into generativity, care redirected from private life toward establishing and guiding the next generation.",
-      "seeds": [
-        "identity crisis",
-        "generativity"
-      ],
-      "floatingTerms": [
-        "moratorium",
-        "the eight-stage life cycle"
-      ],
-      "terms": [
-        "identity crisis",
-        "generativity",
-        "moratorium",
-        "the eight-stage life cycle"
-      ],
       "termInfo": {
         "generativity": "The seventh of Erikson's eight psychosocial stages: the capacity to care for and guide the next generation, through parenthood, mentorship, or a broader creative investment in the future. Its failure is stagnation.",
         "identity crisis": "Erikson's term for the developmental task of integrating disparate self-images into a coherent, continuous sense of self; unresolved, it produces role confusion rather than a settled identity.",
@@ -84,27 +73,27 @@
             "href": "wiki:Erikson's stages of psychosocial development"
           }
         ]
-      }
+      },
+      "seeds": [
+        "identity crisis",
+        "generativity"
+      ],
+      "floatingTerms": [
+        "moratorium",
+        "the eight-stage life cycle"
+      ],
+      "terms": [
+        "identity crisis",
+        "generativity",
+        "moratorium",
+        "the eight-stage life cycle"
+      ]
     },
     {
       "id": "truth-as-force",
       "name": "Truth as Force",
       "color": "blue",
       "fact": "Erikson resists letting militant nonviolence -- his own book's subtitle, and reportedly the term Martin Luther King preferred -- stand as the whole story: it names the attitude and the action but not the spiritual claim behind Gandhi's truth. Erikson's own preferred phrase is the leverage of truth, borrowed from mechanics on purpose. Both readings sit on top of ahimsa, the refusal to injure, and satyagraha, Gandhi's own coinage for holding onto truth as a method rather than a mood.",
-      "seeds": [
-        "satyagraha",
-        "ahimsa"
-      ],
-      "floatingTerms": [
-        "militant nonviolence",
-        "leverage of truth"
-      ],
-      "terms": [
-        "satyagraha",
-        "ahimsa",
-        "militant nonviolence",
-        "leverage of truth"
-      ],
       "termInfo": {
         "ahimsa": {
           "text": "The principle of non-injury or nonviolence, drawn from Hindu, Buddhist, and especially Jain ethical traditions, that Gandhi builds satyagraha on top of.",
@@ -133,7 +122,21 @@
             "href": "wiki:Satyagraha"
           }
         ]
-      }
+      },
+      "seeds": [
+        "satyagraha",
+        "ahimsa"
+      ],
+      "floatingTerms": [
+        "militant nonviolence",
+        "leverage of truth"
+      ],
+      "terms": [
+        "satyagraha",
+        "ahimsa",
+        "militant nonviolence",
+        "leverage of truth"
+      ]
     }
   ],
   "bridges": [

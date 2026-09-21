@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "large": true,
   "info": {
     "text": "How Lacanian thought relates image, language, and what resists symbolization.",

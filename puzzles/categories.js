@@ -32,40 +32,75 @@ export const CATEGORIES = {
       link: "wiki:Physics"
     }
   },
-  "Biology": {
+  Biology: {
+    slug: "biology",
     domain: "life-sciences",
     info: {
       text: "How living systems store information, build and regulate themselves, reproduce, vary, and change over time.",
       link: "wiki:Biology"
     },
     subcategories: {
-      "foundations": {
-        title: "Foundations",
-        info: {
-          text: "How cells organize life, reproduce and transmit variation, and how populations change across generations.",
-          link: "wiki:Biology"
-        }
-      },
-      "genomics": {
-        title: "Genomics",
-        info: {
-          text: "How whole genomes are organized, read, assembled, compared, and interpreted—and what their variation can and cannot tell us.",
-          link: "https://www.genome.gov/genetics-glossary/genomics"
-        }
-      },
-      "bioinformatics": {
+      bioinformatics: {
         title: "Bioinformatics",
         info: {
           text: "How biological observations become structured data, how algorithms compare them, and how computational analyses remain interpretable and reproducible.",
           link: "wiki:Bioinformatics"
         }
       },
-      "multiomics": {
+      epigenomics: {
+        title: "Epigenomics",
+        info: {
+          text: "How chemical modifications to DNA and its packaging turn genes on and off without changing the underlying sequence.",
+          link: "wiki:Epigenomics"
+        }
+      },
+      foundations: {
+        title: "Foundations",
+        info: {
+          text: "How cells organize life, reproduce and transmit variation, and how populations change across generations.",
+          link: "wiki:Biology"
+        }
+      },
+      genomics: {
+        title: "Genomics",
+        info: {
+          text: "How whole genomes are organized, read, assembled, compared, and interpreted—and what their variation can and cannot tell us.",
+          link: "https://www.genome.gov/genetics-glossary/genomics"
+        }
+      },
+      metabolomics: {
+        title: "Metabolomics",
+        info: {
+          text: "How small-molecule metabolites are measured and interpreted as the downstream readout of an organism's biochemistry.",
+          link: "wiki:Metabolomics"
+        }
+      },
+      multiomics: {
         title: "Multiomics",
         info: {
-          text: "How genomics, epigenomics, transcriptomics, proteomics, and metabolomics each capture a distinct molecular layer—and how combining those layers reveals life and disease as one connected system rather than isolated datasets.",
-          link: "https://www.illumina.com/company/news-center/feature-articles/multiomics-explained-multiomics.html",
-          extraLink: "wiki:Multiomics"
+          text: "How combining two or more molecular layers—genomic, epigenomic, transcriptomic, proteomic, or metabolomic—reveals a connected system that no single layer shows alone.",
+          link: "wiki:Multiomics"
+        }
+      },
+      phenomics: {
+        title: "Phenomics",
+        info: {
+          text: "How observable traits are systematically measured at scale and linked back to their genetic and molecular causes.",
+          link: "wiki:Phenomics"
+        }
+      },
+      proteomics: {
+        title: "Proteomics",
+        info: {
+          text: "How the full set of proteins a cell or organism produces is identified, measured, and interpreted.",
+          link: "wiki:Proteomics"
+        }
+      },
+      transcriptomics: {
+        title: "Transcriptomics",
+        info: {
+          text: "How genes are transcribed into RNA and processed—and how measuring which transcripts are present reveals what a cell is actually doing.",
+          link: "wiki:Transcriptomics"
         }
       }
     }
@@ -177,12 +212,28 @@ export const CATEGORIES = {
       }
     }
   },
-  "Psychology": {
-    domain: "social-sciences",
+  Psychology: {
     slug: "psychology",
+    domain: "social-sciences",
     info: {
       text: "How the mind develops, perceives, defends itself, and sometimes works against its own interests.",
       link: "wiki:Psychology"
+    },
+    subcategories: {
+      psychoanalysis: {
+        title: "Psychoanalysis",
+        info: {
+          text: "How the mind is shaped by drive, defense, and lack, from Freud and Jung through Lacan, Winnicott, and Bion.",
+          link: "wiki:Psychoanalysis"
+        }
+      },
+      "moral-psychology": {
+        title: "Moral Psychology",
+        info: {
+          text: "How ordinary people come to do, permit, or excuse harm, and what it takes to refuse.",
+          link: "wiki:Moral psychology"
+        }
+      }
     }
   },
   "Sociology": {
@@ -422,6 +473,41 @@ export const CATEGORIES = {
     domain: "literature-classics",
     info: {
       text: "How distinct historical eras, regional movements, and language traditions forge unique literary identities and redefine what literature can do."
+    }
+  },
+  Botany: {
+    slug: "botany",
+    domain: "life-sciences",
+    info: {
+      text: "The scientific branch of biology that focuses on the study of plants, including their structure, growth, reproduction, metabolism, and interactions with the environment.",
+      link: "wiki:Biology"
+    },
+    subcategories: {
+      horticulture: {
+        title: "Horticulture",
+        info: {
+          text: "Horticulture involves the cultivation of garden plants, fruits, vegetables, and ornamental plants.",
+          link: "wiki:Horticulture"
+        }
+      }
+    }
+  },
+  Microbiology: {
+    slug: "microbiology",
+    domain: "life-sciences",
+    info: {
+      text: "the scientific study of microorganisms, which are living things and particles too small to see with the naked eye."
+    },
+    previousTitles: [
+      "microbiology"
+    ]
+  },
+  Zoology: {
+    slug: "zoology",
+    domain: "life-sciences",
+    info: {
+      text: "Zoology is the branch of biology that studies the scientific and structural aspects of animals, including their behavior, classification, and ecosystems.",
+      link: "wiki:Zoology"
     }
   }
 };

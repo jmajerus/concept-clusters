@@ -6,15 +6,23 @@
     "business-organizations",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "tags": [
     "book"
   ],
   "info": {
     "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation.",
+    "links": [
+      {
+        "href": "wiki:Elliott Jaques"
+      }
+    ],
     "citations": [
       {
-        "author": "Jaques, Elliott",
         "title": "Requisite Organization: A Total System for Effective Managerial Organization and Managerial Leadership for the 21st Century",
+        "author": "Jaques, Elliott",
         "publisher": "Cason Hall",
         "year": "1989"
       },
@@ -38,11 +46,6 @@
         "year": "1995",
         "pages": "343-349"
       }
-    ],
-    "links": [
-      {
-        "href": "wiki:Elliott Jaques"
-      }
     ]
   },
   "clusters": [
@@ -51,6 +54,12 @@
       "name": "Social Defence",
       "color": "teal",
       "fact": "In 1955, Jaques argued that institutions do double duty: alongside their stated task, members unconsciously use them to manage primitive anxiety inherited from early psychic life -- splitting the world into good and bad, and projecting the unbearable parts of themselves into roles, rituals, and structures, so that persecutory anxiety (fear of attack) and depressive anxiety (fear of one's own destructiveness) become collective problems instead of private ones.",
+      "termInfo": {
+        "depressive anxiety": "The Kleinian fear that one's own aggression has damaged, or will damage, someone one also loves and depends on -- distinct from persecutory anxiety's fear of being attacked.",
+        "institutionalized ritual": "A routine, procedure, or fixed way of doing a task that persists because it manages anxiety, whether or not it's the most efficient way to get the task done.",
+        "persecutory anxiety": "The Kleinian fear of attack from a bad, threatening object -- in Jaques's application, a dread institutions can structure themselves to absorb on their members' behalf."
+      },
+      "info": "The claim, argued in 1955 and later renounced by its own author, that institutions unconsciously help their members manage primitive anxiety.",
       "seeds": [
         "splitting",
         "projection"
@@ -66,19 +75,26 @@
         "splitting",
         "projection",
         "institutionalized ritual"
-      ],
-      "termInfo": {
-        "depressive anxiety": "The Kleinian fear that one's own aggression has damaged, or will damage, someone one also loves and depends on -- distinct from persecutory anxiety's fear of being attacked.",
-        "institutionalized ritual": "A routine, procedure, or fixed way of doing a task that persists because it manages anxiety, whether or not it's the most efficient way to get the task done.",
-        "persecutory anxiety": "The Kleinian fear of attack from a bad, threatening object -- in Jaques's application, a dread institutions can structure themselves to absorb on their members' behalf."
-      },
-      "info": "The claim, argued in 1955 and later renounced by its own author, that institutions unconsciously help their members manage primitive anxiety."
+      ]
     },
     {
       "id": "cluster-requisite-hierarchy",
       "name": "Requisite Hierarchy",
       "color": "amber",
       "fact": "Decades later, Jaques argued the same hierarchy could be built on an entirely rational footing: matching each level of authority to the actual complexity of the work -- measurable, he claimed, by the longest span of time a person operates on their own judgment before a superior can assess the outcome -- and to accountability that actually matches the authority granted. Get the number of levels right, he found, and pay that people intuitively feel is fair follows almost automatically.",
+      "termInfo": {
+        "manager-once-removed": "A manager's own manager, assigned a specific check on that manager's hiring, promotion, and assessment decisions -- a second, more distant judgment meant to counteract any one manager's bias.",
+        "matched authority and accountability": "Jaques's requirement that a role's formal authority and the accountability it's held to be set at the same level -- holding someone accountable for outcomes they lack the authority to control produces mistrust rather than performance, in his account.",
+        "time-span of discretion": "The longest period a role-holder works on their own judgment before a superior can assess whether the outcome was acceptable -- Jaques's proposed objective measure of how complex a role actually is."
+      },
+      "info": {
+        "text": "Jaques's later claim that the number of hierarchical levels an organization needs is an objective, measurable fact about the complexity of its work, not a matter of taste or tradition.",
+        "links": [
+          {
+            "href": "wiki:Requisite organization"
+          }
+        ]
+      },
       "seeds": [
         "felt-fair pay",
         "levels of work complexity"
@@ -94,20 +110,7 @@
         "time-span of discretion",
         "matched authority and accountability",
         "manager-once-removed"
-      ],
-      "termInfo": {
-        "manager-once-removed": "A manager's own manager, assigned a specific check on that manager's hiring, promotion, and assessment decisions -- a second, more distant judgment meant to counteract any one manager's bias.",
-        "matched authority and accountability": "Jaques's requirement that a role's formal authority and the accountability it's held to be set at the same level -- holding someone accountable for outcomes they lack the authority to control produces mistrust rather than performance, in his account.",
-        "time-span of discretion": "The longest period a role-holder works on their own judgment before a superior can assess whether the outcome was acceptable -- Jaques's proposed objective measure of how complex a role actually is."
-      },
-      "info": {
-        "text": "Jaques's later claim that the number of hierarchical levels an organization needs is an objective, measurable fact about the complexity of its work, not a matter of taste or tradition.",
-        "links": [
-          {
-            "href": "wiki:Requisite organization"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [

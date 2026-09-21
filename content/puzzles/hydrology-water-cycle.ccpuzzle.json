@@ -2,6 +2,9 @@
   "id": "hydrology-water-cycle",
   "title": "The Water Cycle: pools and fluxes",
   "category": "geography",
+  "subcategories": {
+    "geography": "hydrology"
+  },
   "info": {
     "text": "The engine room of hydrology: where Earth's water parks — oceans, ice, soil, and air — and the powered transfers that never let it stay parked, from evaporation skyward to percolation downward.",
     "links": [
@@ -24,6 +27,15 @@
       "name": "Pools — where water sits",
       "color": "teal",
       "fact": "Earth's water parks in reservoirs of every phase: the oceans hold 96% of it as salt water, ice and snow lock freshwater in place, and what is left sits in lakes, soil, air, and rock.",
+      "termInfo": {
+        "ocean": "Holds 96% of Earth's water — saline, and the engine of evaporation that drives the whole cycle.",
+        "lake": "A pool of standing water in a depression, refilled by rivers and precipitation and drained by outflow and evaporation.",
+        "glacier": "A mass of persistent land ice — Earth's largest freshwater store, releasing meltwater each warm season.",
+        "snowpack": "Seasonal snow accumulated at elevation and latitude, storing winter precipitation until it melts into streams.",
+        "soil moisture": "Water held between grains in the upper soil — the pool plants drink from between rains.",
+        "water vapor": "Water as gas in the atmosphere — a small store, but the fastest-turning one.",
+        "permafrost": "Ground frozen for two or more consecutive years, locking water — and carbon — in place; thaw releases both."
+      },
       "seeds": [
         "ocean",
         "lake"
@@ -43,22 +55,22 @@
         "soil moisture",
         "water vapor",
         "permafrost"
-      ],
-      "termInfo": {
-        "ocean": "Holds 96% of Earth's water — saline, and the engine of evaporation that drives the whole cycle.",
-        "lake": "A pool of standing water in a depression, refilled by rivers and precipitation and drained by outflow and evaporation.",
-        "glacier": "A mass of persistent land ice — Earth's largest freshwater store, releasing meltwater each warm season.",
-        "snowpack": "Seasonal snow accumulated at elevation and latitude, storing winter precipitation until it melts into streams.",
-        "soil moisture": "Water held between grains in the upper soil — the pool plants drink from between rains.",
-        "water vapor": "Water as gas in the atmosphere — a small store, but the fastest-turning one.",
-        "permafrost": "Ground frozen for two or more consecutive years, locking water — and carbon — in place; thaw releases both."
-      }
+      ]
     },
     {
       "id": "fluxes",
       "name": "Fluxes — how water moves",
       "color": "blue",
       "fact": "Water never stays parked: the sun lifts it skyward as vapor, clouds return it as precipitation, and gravity carries it across and into the ground — every pool is drained and refilled by these transfers.",
+      "termInfo": {
+        "precipitation": "Water falling from clouds as rain, snow, sleet, or hail — the cycle's delivery step.",
+        "evaporation": "The phase change from liquid to vapor at a water or land surface, powered by the sun.",
+        "transpiration": "Evaporation through plants: roots draw up soil water and leaves release it as vapor.",
+        "condensation": "Vapor turning into liquid droplets as air cools — how clouds form.",
+        "infiltration": "Water entering the soil at the surface — the first step on the way underground.",
+        "runoff": "Water flowing over the land toward channels when rain arrives faster than the ground can absorb it.",
+        "percolation": "Water moving down through soil and rock past the root zone toward the water table."
+      },
       "seeds": [
         "precipitation",
         "evaporation"
@@ -78,16 +90,7 @@
         "infiltration",
         "runoff",
         "percolation"
-      ],
-      "termInfo": {
-        "precipitation": "Water falling from clouds as rain, snow, sleet, or hail — the cycle's delivery step.",
-        "evaporation": "The phase change from liquid to vapor at a water or land surface, powered by the sun.",
-        "transpiration": "Evaporation through plants: roots draw up soil water and leaves release it as vapor.",
-        "condensation": "Vapor turning into liquid droplets as air cools — how clouds form.",
-        "infiltration": "Water entering the soil at the surface — the first step on the way underground.",
-        "runoff": "Water flowing over the land toward channels when rain arrives faster than the ground can absorb it.",
-        "percolation": "Water moving down through soil and rock past the root zone toward the water table."
-      }
+      ]
     }
   ],
   "bridges": [

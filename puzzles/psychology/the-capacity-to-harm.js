@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "history-society"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "large": true,
   "tags": [
     "war",
@@ -321,7 +324,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "othering",
       "term": "othering",
       "clusters": [
         0,
@@ -339,7 +341,6 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "foundation"
     },
     {
-      "id": "exhilaration",
       "term": "exhilaration",
       "clusters": [
         2,

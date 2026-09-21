@@ -6,22 +6,25 @@
     "business-organizations",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "tags": [
     "book"
   ],
   "info": {
     "text": "Larry Hirschhorn's account of how groups turn real work-risk into something bearable through boundaries, what they fall back on when that fails, and why postindustrial organizations lose the old bureaucratic defenses that used to do this work automatically.",
+    "links": [
+      {
+        "href": "https://www.cfar.com/hirschhorn/"
+      }
+    ],
     "citations": [
       {
         "title": "The Workplace Within: Psychodynamics of Organizational Life",
         "author": "Larry Hirschhorn",
         "publisher": "MIT Press",
         "year": "1988"
-      }
-    ],
-    "links": [
-      {
-        "href": "https://www.cfar.com/hirschhorn/"
       }
     ]
   },
@@ -31,6 +34,13 @@
       "name": "Primary Risk and Boundary",
       "color": "teal",
       "fact": "Hirschhorn starts from a distinction Bion and Jaques don't quite make: some anxiety in work is neurotic, produced by unconscious fantasy, but some is primary risk -- the real, unavoidable danger of doing anything that actually matters, whose outcome genuinely isn't guaranteed. Clear task and authority boundaries let a group take on that real risk together instead of dissolving it into defense; a reparative culture goes further, letting members acknowledge both their aggression and their dependency in the same relationship instead of splitting the two apart.",
+      "termInfo": {
+        "authority boundary": "The line marking who has legitimate standing to decide a given question -- distinct from the task boundary, which marks what the work itself does and doesn't include.",
+        "reparative culture": "Hirschhorn's proposed alternative to defensive splitting: a way of relating that lets people acknowledge both aggression and dependency toward the same other person, rather than assigning one to an idealized figure and the other to a devalued one."
+      },
+      "info": {
+        "text": "The real, unavoidable risk in doing meaningful work, and the boundaries that let a group take it on together instead of defending against it."
+      },
       "seeds": [
         "primary risk",
         "task boundary"
@@ -44,20 +54,21 @@
         "task boundary",
         "authority boundary",
         "reparative culture"
-      ],
-      "termInfo": {
-        "authority boundary": "The line marking who has legitimate standing to decide a given question -- distinct from the task boundary, which marks what the work itself does and doesn't include.",
-        "reparative culture": "Hirschhorn's proposed alternative to defensive splitting: a way of relating that lets people acknowledge both aggression and dependency toward the same other person, rather than assigning one to an idealized figure and the other to a devalued one."
-      },
-      "info": {
-        "text": "The real, unavoidable risk in doing meaningful work, and the boundaries that let a group take it on together instead of defending against it."
-      }
+      ]
     },
     {
       "id": "cluster-social-defenses",
       "name": "Social Defenses",
       "color": "amber",
       "fact": "When boundaries fail to hold the anxiety, Hirschhorn catalogs three ways groups defend against it instead of working through it: falling into Bion's basic-assumption behavior, forming a covert coalition -- an unspoken alliance, often crossing the org chart, organized around avoiding a shared threat rather than around the stated task -- or ritualizing a procedure so thoroughly that performing it correctly quietly replaces thinking about what it's for.",
+      "termInfo": {
+        "basic assumption behavior": "Bion's term for a group unconsciously organizing around dependency, fight-flight, or pairing instead of its actual task -- one of three defense types in Hirschhorn's typology, not the whole of it.",
+        "covert coalition": "An unofficial alliance -- sometimes among people who'd otherwise have little in common, including across levels of the hierarchy -- that forms specifically to manage a shared anxiety, and can undermine the group's stated task without ever being named or discussed.",
+        "organizational ritual": "A procedure performed so exactly, and so often, that getting the form right quietly substitutes for asking whether it still serves the task at all."
+      },
+      "info": {
+        "text": "Hirschhorn's typology of what a group falls back on when its boundaries stop containing the anxiety of real work."
+      },
       "seeds": [
         "organizational ritual",
         "denial"
@@ -71,21 +82,21 @@
         "covert coalition",
         "organizational ritual",
         "denial"
-      ],
-      "termInfo": {
-        "basic assumption behavior": "Bion's term for a group unconsciously organizing around dependency, fight-flight, or pairing instead of its actual task -- one of three defense types in Hirschhorn's typology, not the whole of it.",
-        "covert coalition": "An unofficial alliance -- sometimes among people who'd otherwise have little in common, including across levels of the hierarchy -- that forms specifically to manage a shared anxiety, and can undermine the group's stated task without ever being named or discussed.",
-        "organizational ritual": "A procedure performed so exactly, and so often, that getting the form right quietly substitutes for asking whether it still serves the task at all."
-      },
-      "info": {
-        "text": "Hirschhorn's typology of what a group falls back on when its boundaries stop containing the anxiety of real work."
-      }
+      ]
     },
     {
       "id": "cluster-postindustrial-bargain",
       "name": "The Postindustrial Bargain",
       "color": "magenta",
       "fact": "Hirschhorn's larger historical argument is that postindustrial organizations -- flatter, team-based, matrixed, with authority spread across shifting project relationships instead of a fixed chain of command -- strip away the very structural defenses Jaques described. Bureaucratic hierarchy used to absorb anxiety on people's behalf; matrix management and its diffuse, overlapping lines of authority don't. What has to fill that gap, in Hirschhorn's account, is personal authority: the capacity to lead through relationship and demonstrated judgment rather than through the automatic authority a fixed rung on the ladder used to supply.",
+      "termInfo": {
+        "eroded structural defense": "Hirschhorn's claim that flatter, team-based organizations dismantle the rigid bureaucratic roles that used to absorb anxiety on their members' behalf, whether or not anything replaces that function.",
+        "matrix management": "A structure in which employees report along two or more lines at once -- a functional manager and a project manager, say -- trading a single clear chain of command for flexibility.",
+        "personal authority": "Authority earned and continually renewed through relationship, competence, and trust, rather than granted automatically by a fixed position in a hierarchy -- what Hirschhorn argues has to substitute for eroded structural defenses."
+      },
+      "info": {
+        "text": "Hirschhorn's claim that flatter, team-based organizations strip away the old bureaucratic defenses, and what has to replace them."
+      },
       "seeds": [
         "matrix management",
         "postindustrial organization"
@@ -99,15 +110,7 @@
         "matrix management",
         "eroded structural defense",
         "personal authority"
-      ],
-      "termInfo": {
-        "eroded structural defense": "Hirschhorn's claim that flatter, team-based organizations dismantle the rigid bureaucratic roles that used to absorb anxiety on their members' behalf, whether or not anything replaces that function.",
-        "matrix management": "A structure in which employees report along two or more lines at once -- a functional manager and a project manager, say -- trading a single clear chain of command for flexibility.",
-        "personal authority": "Authority earned and continually renewed through relationship, competence, and trust, rather than granted automatically by a fixed position in a hierarchy -- what Hirschhorn argues has to substitute for eroded structural defenses."
-      },
-      "info": {
-        "text": "Hirschhorn's claim that flatter, team-based organizations strip away the old bureaucratic defenses, and what has to replace them."
-      }
+      ]
     }
   ],
   "bridges": [
@@ -140,14 +143,14 @@
         "text": "What happens to the informal defenses once the formal structure that used to make them less necessary breaks down."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-postindustrial-bargain": "eroded structural defense",
+        "cluster-social-defenses": "covert coalition"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-postindustrial-bargain",
         "to": "cluster-social-defenses"
-      },
-      "idealTerms": {
-        "cluster-postindustrial-bargain": "eroded structural defense",
-        "cluster-social-defenses": "covert coalition"
       }
     },
     {

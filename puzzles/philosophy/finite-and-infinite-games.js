@@ -7,22 +7,11 @@ export default definePuzzle(import.meta.url, {
   "id": "finite-and-infinite-games",
   "title": "Finite and infinite games",
   "category": "philosophy",
-  "tags": [
-    "book"
-  ],
   "info": {
     "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going.",
     "links": [
       {
         "href": "wiki:Finite and Infinite Games"
-      }
-    ],
-    "citations": [
-      {
-        "title": "Finite and Infinite Games: A Vision of Life as Play and Possibility",
-        "author": "Carse, James P.",
-        "publisher": "Free Press",
-        "year": "1986"
       }
     ]
   },
@@ -338,6 +327,14 @@ export default definePuzzle(import.meta.url, {
       {
         "id": "game-theory-basics",
         "reason": "Carse's finite play is a philosophical account of something game theory formalizes with precision -- see how strategy, equilibrium, and repeated play work when the rules are exact rather than existential."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
       }
     ]
   }

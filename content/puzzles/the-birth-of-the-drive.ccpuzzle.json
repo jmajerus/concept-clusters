@@ -6,10 +6,13 @@
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
+  "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
   ],
-  "large": true,
   "info": {
     "text": "Freud's earliest mapping of the psyche: where a wish lives, how much force it carries, and what happens to it when the ego will not let it through.",
     "links": [
@@ -20,28 +23,10 @@
   },
   "clusters": [
     {
-      "id": "cluster-topographical-mind-primary-process",
+      "id": "topographical-mind-primary-process",
       "name": "Topographical Mind & Primary Process",
       "color": "teal",
       "fact": "Freud's first spatial model splits mental life into Conscious, Preconscious, and Unconscious systems. Down in the unconscious, thought runs on primary process: no contradiction, no negation, no linear time -- just condensation and displacement moving a wish toward disguised expression.",
-      "seeds": [
-        "primary process thought",
-        "pleasure principle"
-      ],
-      "floatingTerms": [
-        "psychic condensation",
-        "dynamic displacement",
-        "unconscious wish",
-        "preconscious filter"
-      ],
-      "terms": [
-        "primary process thought",
-        "pleasure principle",
-        "psychic condensation",
-        "dynamic displacement",
-        "unconscious wish",
-        "preconscious filter"
-      ],
       "termInfo": {
         "dynamic displacement": {
           "text": "Emotional charge shifted off a dangerous idea and onto a neutral one, so the neutral idea carries feeling that does not belong to it."
@@ -78,31 +63,31 @@
             "href": "wiki:Psychoanalysis"
           }
         ]
-      }
+      },
+      "seeds": [
+        "primary process thought",
+        "pleasure principle"
+      ],
+      "floatingTerms": [
+        "psychic condensation",
+        "dynamic displacement",
+        "unconscious wish",
+        "preconscious filter"
+      ],
+      "terms": [
+        "primary process thought",
+        "pleasure principle",
+        "psychic condensation",
+        "dynamic displacement",
+        "unconscious wish",
+        "preconscious filter"
+      ]
     },
     {
-      "id": "cluster-economic-model-drive-dynamics",
+      "id": "economic-model-drive-dynamics",
       "name": "Economic Model & Drive Dynamics",
       "color": "blue",
       "fact": "Freud's economic model treats the psyche as a quantity of force rather than a place: drives generate tension that seeks discharge, and psychic life is largely the story of that tension moving, binding, and being spent.",
-      "seeds": [
-        "libidinal cathexis",
-        "erogenous zone"
-      ],
-      "floatingTerms": [
-        "bound vs. unbound energy",
-        "drive impulse (Trieb)",
-        "primary narcissism",
-        "economic equilibrium"
-      ],
-      "terms": [
-        "libidinal cathexis",
-        "erogenous zone",
-        "bound vs. unbound energy",
-        "drive impulse (Trieb)",
-        "primary narcissism",
-        "economic equilibrium"
-      ],
       "termInfo": {
         "bound vs. unbound energy": {
           "text": "Unbound energy is free-floating and unstable, seeking instant release; bound energy has been harnessed by psychic structure to do stable work."
@@ -149,31 +134,31 @@
             "href": "wiki:Metapsychology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "libidinal cathexis",
+        "erogenous zone"
+      ],
+      "floatingTerms": [
+        "bound vs. unbound energy",
+        "drive impulse (Trieb)",
+        "primary narcissism",
+        "economic equilibrium"
+      ],
+      "terms": [
+        "libidinal cathexis",
+        "erogenous zone",
+        "bound vs. unbound energy",
+        "drive impulse (Trieb)",
+        "primary narcissism",
+        "economic equilibrium"
+      ]
     },
     {
-      "id": "cluster-repression-symptom-formation",
+      "id": "repression-symptom-formation",
       "name": "Repression & Symptom Formation",
       "color": "amber",
       "fact": "A drive impulse that threatens conscious stability gets repressed -- but repressed energy cannot be destroyed, only held down at a cost, and it inevitably returns in a disguised, distorted form.",
-      "seeds": [
-        "primary repression",
-        "return of the repressed"
-      ],
-      "floatingTerms": [
-        "compromise formation",
-        "reaction formation",
-        "symptom conversion",
-        "counter-cathexis"
-      ],
-      "terms": [
-        "primary repression",
-        "return of the repressed",
-        "compromise formation",
-        "reaction formation",
-        "symptom conversion",
-        "counter-cathexis"
-      ],
       "termInfo": {
         "compromise formation": {
           "text": "A neurosis, slip, or symptom that grants a forbidden wish partial, distorted satisfaction while still disguising it."
@@ -216,7 +201,25 @@
       },
       "info": {
         "text": "How the mind manages an impulse it will not allow into consciousness -- and what happens when that management fails."
-      }
+      },
+      "seeds": [
+        "primary repression",
+        "return of the repressed"
+      ],
+      "floatingTerms": [
+        "compromise formation",
+        "reaction formation",
+        "symptom conversion",
+        "counter-cathexis"
+      ],
+      "terms": [
+        "primary repression",
+        "return of the repressed",
+        "compromise formation",
+        "reaction formation",
+        "symptom conversion",
+        "counter-cathexis"
+      ]
     }
   ],
   "bridges": [
@@ -224,8 +227,8 @@
       "id": "bridge-the-reality-principle",
       "term": "the reality principle",
       "clusters": [
-        "cluster-topographical-mind-primary-process",
-        "cluster-economic-model-drive-dynamics"
+        "topographical-mind-primary-process",
+        "economic-model-drive-dynamics"
       ],
       "fact": "Development forces primary process to compromise: the demand for immediate discharge under the pleasure principle is delayed and reshaped by external reality until the psyche can tolerate holding tension toward a stable equilibrium instead of releasing it at once.",
       "info": {
@@ -236,52 +239,52 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "topographical-mind-primary-process": "pleasure principle",
+        "economic-model-drive-dynamics": "economic equilibrium"
+      },
       "direction": {
         "kind": "through",
-        "from": "cluster-topographical-mind-primary-process",
-        "to": "cluster-economic-model-drive-dynamics"
-      },
-      "idealTerms": {
-        "cluster-topographical-mind-primary-process": "pleasure principle",
-        "cluster-economic-model-drive-dynamics": "economic equilibrium"
+        "from": "topographical-mind-primary-process",
+        "to": "economic-model-drive-dynamics"
       }
     },
     {
       "id": "bridge-subconscious-displacement",
       "term": "subconscious displacement",
       "clusters": [
-        "cluster-topographical-mind-primary-process",
-        "cluster-repression-symptom-formation"
+        "topographical-mind-primary-process",
+        "repression-symptom-formation"
       ],
       "fact": "The same displacement that lets primary process substitute one symbol for another is what allows a repressed wish to sneak past the censor by attaching itself to an innocent stand-in -- condensation and displacement are the actual machinery a compromise formation is built from.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "topographical-mind-primary-process": "dynamic displacement",
+        "repression-symptom-formation": "compromise formation"
+      },
       "direction": {
         "kind": "through",
-        "from": "cluster-topographical-mind-primary-process",
-        "to": "cluster-repression-symptom-formation"
-      },
-      "idealTerms": {
-        "cluster-topographical-mind-primary-process": "dynamic displacement",
-        "cluster-repression-symptom-formation": "compromise formation"
+        "from": "topographical-mind-primary-process",
+        "to": "repression-symptom-formation"
       }
     },
     {
       "id": "bridge-energy-neutralization",
       "term": "energy neutralization",
       "clusters": [
-        "cluster-economic-model-drive-dynamics",
-        "cluster-repression-symptom-formation"
+        "economic-model-drive-dynamics",
+        "repression-symptom-formation"
       ],
       "fact": "Holding a drive below awareness is not free: the ego has to convert some of its own bound energy into counter-cathexis, a permanent expenditure that keeps a repressed impulse pinned down at the cost of energy the rest of the psyche cannot use.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "economic-model-drive-dynamics": "bound vs. unbound energy",
+        "repression-symptom-formation": "counter-cathexis"
+      },
       "direction": {
         "kind": "through",
-        "from": "cluster-economic-model-drive-dynamics",
-        "to": "cluster-repression-symptom-formation"
-      },
-      "idealTerms": {
-        "cluster-economic-model-drive-dynamics": "bound vs. unbound energy",
-        "cluster-repression-symptom-formation": "counter-cathexis"
+        "from": "economic-model-drive-dynamics",
+        "to": "repression-symptom-formation"
       }
     }
   ],

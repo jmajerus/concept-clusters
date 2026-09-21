@@ -12,17 +12,17 @@
   ],
   "info": {
     "text": "Albert Hirschman's account of the two things a dissatisfied customer, member or citizen can do about a declining organisation -- leave, or speak up -- and the third thing that largely decides which of them happens.",
-    "citations": [
-      {
-        "author": "Hirschman, Albert O.",
-        "title": "Exit, Voice, and Loyalty: Responses to Decline in Firms, Organizations, and States",
-        "publisher": "Harvard University Press",
-        "year": "1970"
-      }
-    ],
     "links": [
       {
         "href": "https://www.hup.harvard.edu/books/9780674276604"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Exit, Voice, and Loyalty: Responses to Decline in Firms, Organizations, and States",
+        "author": "Hirschman, Albert O.",
+        "publisher": "Harvard University Press",
+        "year": "1970"
       }
     ]
   },
@@ -32,18 +32,6 @@
       "name": "Decline and recovery",
       "color": "teal",
       "fact": "Hirschman begins from an assumption most analysis skips past: every organisation, given time, develops slack and its output deteriorates. Not through crisis or bad management particularly -- just through the ordinary tendency to stop straining once things are adequate. Decline is the normal condition rather than the exception, which makes the interesting question not how it is avoided but what pulls an organisation back from it.",
-      "seeds": [
-        "slack",
-        "quality deterioration"
-      ],
-      "floatingTerms": [
-        "recuperation"
-      ],
-      "terms": [
-        "slack",
-        "quality deterioration",
-        "recuperation"
-      ],
       "termInfo": {
         "quality deterioration": {
           "text": "A decline in what the organisation actually delivers. Distinct from a price rise, and far harder for anyone to measure or prove."
@@ -57,25 +45,25 @@
       },
       "info": {
         "text": "Hirschman's starting premise: that deterioration is the normal state of organisations, and something has to pull them back."
-      }
+      },
+      "seeds": [
+        "slack",
+        "quality deterioration"
+      ],
+      "floatingTerms": [
+        "recuperation"
+      ],
+      "terms": [
+        "slack",
+        "quality deterioration",
+        "recuperation"
+      ]
     },
     {
       "id": "cluster-leaving",
       "name": "Leaving",
       "color": "blue",
       "fact": "Exit is the economist's mechanism. A customer switches, revenue falls, management notices, quality recovers -- discipline without anyone having to say a word. Its great advantage is that it demands no articulation, no meeting, no confrontation. Its limitation is precisely the same feature: the organisation learns that someone left, and nothing whatever about why.",
-      "seeds": [
-        "exit",
-        "switching"
-      ],
-      "floatingTerms": [
-        "cost of exit"
-      ],
-      "terms": [
-        "exit",
-        "switching",
-        "cost of exit"
-      ],
       "termInfo": {
         "cost of exit": {
           "text": "What leaving would actually cost -- money, time, relationships, accumulated standing. The higher it runs, the less exit disciplines anything."
@@ -89,25 +77,25 @@
       },
       "info": {
         "text": "The market's answer to dissatisfaction: take your custom, or yourself, somewhere else."
-      }
+      },
+      "seeds": [
+        "exit",
+        "switching"
+      ],
+      "floatingTerms": [
+        "cost of exit"
+      ],
+      "terms": [
+        "exit",
+        "switching",
+        "cost of exit"
+      ]
     },
     {
       "id": "cluster-speaking",
       "name": "Speaking up",
       "color": "amber",
       "fact": "Voice is the political scientist's mechanism, and it is costly in exactly the ways exit is cheap. It requires saying something, to someone, at some risk. But it carries information exit cannot: not merely that something is wrong, but what, and what would fix it. Hirschman's argument is that a system relying wholly on exit has optimised for the cheap signal and discarded the useful one.",
-      "seeds": [
-        "voice",
-        "complaint"
-      ],
-      "floatingTerms": [
-        "pressure from within"
-      ],
-      "terms": [
-        "voice",
-        "complaint",
-        "pressure from within"
-      ],
       "termInfo": {
         "complaint": {
           "text": "The individual instance of voice: one customer, one letter, one grievance raised."
@@ -121,25 +109,25 @@
       },
       "info": {
         "text": "The political answer to dissatisfaction: stay where you are and press for the thing to be put right."
-      }
+      },
+      "seeds": [
+        "voice",
+        "complaint"
+      ],
+      "floatingTerms": [
+        "pressure from within"
+      ],
+      "terms": [
+        "voice",
+        "complaint",
+        "pressure from within"
+      ]
     },
     {
       "id": "cluster-no-exit",
       "name": "Where leaving isn't an option",
       "color": "magenta",
       "fact": "Some things cannot be left, or can be left only at ruinous cost. There is no alternative national air supply, no competing police force for your street, no second currency for your savings. Where exit is unavailable the market's mechanism is simply not present, and voice is not one option among two -- it is the only one there is. Hirschman's point is that this describes a great deal more of ordinary life than economic theory had assumed.",
-      "seeds": [
-        "public goods",
-        "the state"
-      ],
-      "floatingTerms": [
-        "no substitute"
-      ],
-      "terms": [
-        "public goods",
-        "the state",
-        "no substitute"
-      ],
       "termInfo": {
         "no substitute": {
           "text": "The condition underlying all of these: nowhere else to go, so dissatisfaction has no exit to drain into."
@@ -153,7 +141,19 @@
       },
       "info": {
         "text": "The situations where the option to leave is absent, and everything therefore rests on speaking up."
-      }
+      },
+      "seeds": [
+        "public goods",
+        "the state"
+      ],
+      "floatingTerms": [
+        "no substitute"
+      ],
+      "terms": [
+        "public goods",
+        "the state",
+        "no substitute"
+      ]
     }
   ],
   "bridges": [
@@ -169,14 +169,14 @@
         "text": "Attachment that makes a member less likely to leave, and therefore more likely to speak up instead."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-leaving": "cost of exit",
+        "cluster-speaking": "voice"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-leaving",
         "to": "cluster-speaking"
-      },
-      "idealTerms": {
-        "cluster-leaving": "cost of exit",
-        "cluster-speaking": "voice"
       }
     },
     {
@@ -270,5 +270,13 @@
         "slack": "There is enough spare capacity to absorb the lost revenue without noticing it."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

@@ -263,5 +263,13 @@ export default definePuzzle(import.meta.url, {
         "slack": "There is enough spare capacity to absorb the lost revenue without noticing it."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

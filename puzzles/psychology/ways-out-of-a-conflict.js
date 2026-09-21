@@ -319,5 +319,13 @@ export default definePuzzle(import.meta.url, {
         "reason": "Heitler opens from negotiation theory and the prisoner's dilemma; see what the same escape problem looks like when the parties are strangers rather than intimates."
       }
     ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
   }
 });

@@ -7,6 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "hydrology-human-water",
   "title": "Human Water: measuring, fearing, managing",
   "category": "geography",
+  "subcategories": {
+    "geography": "hydrology"
+  },
   "large": true,
   "info": {
     "text": "The human face of hydrology: how gauges and water budgets turn rivers and rain into numbers, how floods and droughts arrive when the balance tips, and how dams, canals, and wells engineer the cycle — sometimes faster than it can refill.",

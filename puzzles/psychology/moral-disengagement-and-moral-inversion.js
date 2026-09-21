@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "large": true,
   "info": {
     "text": "The difference between mechanisms that excuse harmful conduct and a deeper inversion in which cruelty, domination, or betrayal of restraint is treated as morally admirable.",

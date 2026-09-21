@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "history-society"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "large": true,
   "tags": [
     "book",

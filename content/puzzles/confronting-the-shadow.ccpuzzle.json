@@ -6,10 +6,13 @@
     "psychology",
     "philosophy"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
+  "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
   ],
-  "large": true,
   "info": {
     "text": "Carl Jung's analytical psychology: how a universal, inherited layer of the psyche, a social mask, and a rejected shadow interact -- and why Jung treats integrating the shadow as growth rather than failure.",
     "links": [
@@ -24,24 +27,6 @@
       "name": "Archetypal Unconscious & Transpersonal Depths",
       "color": "teal",
       "fact": "Beneath personal memory, Jung posits a deeper, inherited stratum shared across human experience -- populated by universal archetypal patterns and capable of erupting into consciousness as autonomous complexes, synchronicity, or a sense of the numinous.",
-      "seeds": [
-        "collective unconscious",
-        "archetypal image"
-      ],
-      "floatingTerms": [
-        "personal unconscious",
-        "autonomous complex",
-        "anima-animus subtext",
-        "numinous experience"
-      ],
-      "terms": [
-        "collective unconscious",
-        "archetypal image",
-        "personal unconscious",
-        "autonomous complex",
-        "anima-animus subtext",
-        "numinous experience"
-      ],
       "termInfo": {
         "anima-animus subtext": {
           "text": "The unconscious contragender element Jung held every individual to carry, shaping how the opposite psychic pole is experienced and projected.",
@@ -88,31 +73,31 @@
             "href": "wiki:Analytical psychology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "collective unconscious",
+        "archetypal image"
+      ],
+      "floatingTerms": [
+        "personal unconscious",
+        "autonomous complex",
+        "anima-animus subtext",
+        "numinous experience"
+      ],
+      "terms": [
+        "collective unconscious",
+        "archetypal image",
+        "personal unconscious",
+        "autonomous complex",
+        "anima-animus subtext",
+        "numinous experience"
+      ]
     },
     {
       "id": "cluster-persona-ego-adaptation",
       "name": "Persona & Ego Adaptation",
       "color": "blue",
       "fact": "Ego consciousness cannot show its raw interior to the world without chaos or ostracism, so it builds a persona: a tailored social front useful for adaptation, but dangerous the moment it gets mistaken for the whole self.",
-      "seeds": [
-        "persona mask",
-        "ego consciousness"
-      ],
-      "floatingTerms": [
-        "curated identity",
-        "social conformity",
-        "psychic inflation",
-        "identified role"
-      ],
-      "terms": [
-        "persona mask",
-        "ego consciousness",
-        "curated identity",
-        "social conformity",
-        "psychic inflation",
-        "identified role"
-      ],
       "termInfo": {
         "curated identity": {
           "text": "A persona given deliberate, specific shape and presentation."
@@ -145,31 +130,31 @@
       },
       "info": {
         "text": "The social front the ego builds to meet the world, and what happens when that front is mistaken for the whole self."
-      }
+      },
+      "seeds": [
+        "persona mask",
+        "ego consciousness"
+      ],
+      "floatingTerms": [
+        "curated identity",
+        "social conformity",
+        "psychic inflation",
+        "identified role"
+      ],
+      "terms": [
+        "persona mask",
+        "ego consciousness",
+        "curated identity",
+        "social conformity",
+        "psychic inflation",
+        "identified role"
+      ]
     },
     {
       "id": "cluster-the-shadow-integrative-dynamics",
       "name": "The Shadow & Integrative Dynamics",
       "color": "amber",
       "fact": "Whatever the persona rejects does not vanish -- it coalesces into the shadow. Jung's wager is that psychological maturity requires confronting and integrating that shadow rather than exiling it, and that the alternative is projection, inflation, or involuntary reversal.",
-      "seeds": [
-        "shadow self",
-        "shadow projection"
-      ],
-      "floatingTerms": [
-        "enantiodromia",
-        "active imagination",
-        "individuation process",
-        "transcendent function"
-      ],
-      "terms": [
-        "shadow self",
-        "shadow projection",
-        "enantiodromia",
-        "active imagination",
-        "individuation process",
-        "transcendent function"
-      ],
       "termInfo": {
         "active imagination": {
           "text": "A technique for deliberately dialoguing with dream figures or shadow material rather than being ambushed by them.",
@@ -217,7 +202,25 @@
       },
       "info": {
         "text": "What the persona rejects, and what changes when it is confronted rather than exiled."
-      }
+      },
+      "seeds": [
+        "shadow self",
+        "shadow projection"
+      ],
+      "floatingTerms": [
+        "enantiodromia",
+        "active imagination",
+        "individuation process",
+        "transcendent function"
+      ],
+      "terms": [
+        "shadow self",
+        "shadow projection",
+        "enantiodromia",
+        "active imagination",
+        "individuation process",
+        "transcendent function"
+      ]
     }
   ],
   "bridges": [
@@ -237,14 +240,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-archetypal-unconscious-transpersonal-depths": "autonomous complex",
+        "cluster-persona-ego-adaptation": "psychic inflation"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-archetypal-unconscious-transpersonal-depths",
         "to": "cluster-persona-ego-adaptation"
-      },
-      "idealTerms": {
-        "cluster-archetypal-unconscious-transpersonal-depths": "autonomous complex",
-        "cluster-persona-ego-adaptation": "psychic inflation"
       }
     },
     {
@@ -256,14 +259,14 @@
       ],
       "fact": "The exact traits a person cannot stand in others are very often the traits their own persona has exiled into shadow -- intense, irrational hostility toward someone else is one of the most reliable signs of an unacknowledged projection.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-persona-ego-adaptation": "identified role",
+        "cluster-the-shadow-integrative-dynamics": "shadow projection"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-persona-ego-adaptation",
         "to": "cluster-the-shadow-integrative-dynamics"
-      },
-      "idealTerms": {
-        "cluster-persona-ego-adaptation": "identified role",
-        "cluster-the-shadow-integrative-dynamics": "shadow projection"
       }
     },
     {

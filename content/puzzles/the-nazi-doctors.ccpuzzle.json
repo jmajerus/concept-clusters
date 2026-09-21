@@ -6,6 +6,9 @@
     "psychology",
     "bioethics"
   ],
+  "subcategories": {
+    "psychology": "moral-psychology"
+  },
   "tags": [
     "book",
     "genocide"
@@ -27,18 +30,6 @@
       "name": "Medicalized Killing",
       "color": "amber",
       "fact": "The Nazi state conceived of itself as a biological organism whose health required the elimination of racial infection. Racial hygiene provided the pseudo-scientific framework; the classification of life unworthy of life turned that framework into a medical judgment with lethal consequences; and Aktion T4 — the killing of disabled people by their own physicians — proved the institutional pathway and trained the personnel who would later operate the death camps.",
-      "seeds": [
-        "racial hygiene",
-        "life unworthy of life"
-      ],
-      "floatingTerms": [
-        "Aktion T4"
-      ],
-      "terms": [
-        "racial hygiene",
-        "life unworthy of life",
-        "Aktion T4"
-      ],
       "termInfo": {
         "Aktion T4": {
           "text": "The forced killing of an estimated 275,000 disabled people by their own physicians, beginning in 1939. It served as both institutional precedent and personnel pipeline: T4 doctors, administrators, and gas-chamber technicians transferred directly to the death camps.",
@@ -72,27 +63,25 @@
             "href": "wiki:The Nazi Doctors"
           }
         ]
-      }
+      },
+      "seeds": [
+        "racial hygiene",
+        "life unworthy of life"
+      ],
+      "floatingTerms": [
+        "Aktion T4"
+      ],
+      "terms": [
+        "racial hygiene",
+        "life unworthy of life",
+        "Aktion T4"
+      ]
     },
     {
       "id": "the-auschwitz-self",
       "name": "The Auschwitz Self",
       "color": "blue",
       "fact": "Lifton's central finding from interviewing Nazi doctors is that they did not become fundamentally different people. Through doubling — the formation of a functionally autonomous second self adapted to the killing environment — a doctor could perform selections by day and return to an intact family life, professional identity, and private moral self that he experienced as his real one. Psychic numbing, the diminished capacity to feel that Lifton first identified in Hiroshima survivors, was the emotional mechanism that allowed the Auschwitz self to function without being overwhelmed.",
-      "seeds": [
-        "doubling",
-        "the Auschwitz self"
-      ],
-      "floatingTerms": [
-        "psychic numbing",
-        "the prior self"
-      ],
-      "terms": [
-        "doubling",
-        "the Auschwitz self",
-        "psychic numbing",
-        "the prior self"
-      ],
       "termInfo": {
         "doubling": {
           "text": "Lifton's central concept: the division of the self into two functioning wholes, so that a part-self acts as an entire self. Distinct from splitting or dissociation — both selves remain connected, and the person moves between them rather than losing awareness of either.",
@@ -127,7 +116,21 @@
             "href": "wiki:The Nazi Doctors"
           }
         ]
-      }
+      },
+      "seeds": [
+        "doubling",
+        "the Auschwitz self"
+      ],
+      "floatingTerms": [
+        "psychic numbing",
+        "the prior self"
+      ],
+      "terms": [
+        "doubling",
+        "the Auschwitz self",
+        "psychic numbing",
+        "the prior self"
+      ]
     }
   ],
   "bridges": [
