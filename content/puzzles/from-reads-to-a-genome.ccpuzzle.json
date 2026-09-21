@@ -5,13 +5,13 @@
   "subcategories": {
     "biology": "genomics"
   },
+  "large": true,
   "tags": [
     "biology",
     "genomics",
     "DNA sequencing",
     "bioinformatics"
   ],
-  "large": true,
   "info": {
     "text": "Sequencers usually measure fragments, not an intact chromosome from end to end. Reconstructing a useful genome therefore joins sample preparation and base calling to computational assembly, quality evidence, and biological annotation.",
     "citations": [
@@ -34,24 +34,10 @@
   },
   "clusters": [
     {
-      "id": "cluster-preparing-dna-fragments",
+      "id": "preparing-dna-fragments",
       "name": "Preparing DNA fragments",
       "color": "teal",
       "fact": "DNA is extracted, fragmented when needed, and joined to platform-specific adapters to create a sequencing library that an instrument can read.",
-      "seeds": [
-        "DNA extraction",
-        "library preparation"
-      ],
-      "floatingTerms": [
-        "fragmentation",
-        "adapter"
-      ],
-      "terms": [
-        "DNA extraction",
-        "fragmentation",
-        "adapter",
-        "library preparation"
-      ],
       "termInfo": {
         "DNA extraction": {
           "text": "The isolation of DNA from cells or other biological material for downstream measurement.",
@@ -73,7 +59,7 @@
           "text": "A designed oligonucleotide joined to sample DNA so fragments can be amplified, identified, or read by a sequencing platform.",
           "links": [
             {
-              "href": "wiki:Adapter (genetic engineering)"
+              "href": "wiki:Adapter (genetics)"
             }
           ]
         },
@@ -85,25 +71,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "DNA extraction",
+        "library preparation"
+      ],
+      "floatingTerms": [
+        "fragmentation",
+        "adapter"
+      ],
+      "terms": [
+        "DNA extraction",
+        "fragmentation",
+        "adapter",
+        "library preparation"
+      ]
     },
     {
-      "id": "cluster-reading-instrument-signals",
+      "id": "reading-instrument-signals",
       "name": "Reading instrument signals",
       "color": "blue",
       "fact": "A sequencing instrument detects signals from prepared molecules, base calling translates those signals into nucleotide letters, and quality scores retain uncertainty in each call.",
-      "seeds": [
-        "base calling",
-        "base quality"
-      ],
-      "floatingTerms": [
-        "sequencing instrument"
-      ],
-      "terms": [
-        "sequencing instrument",
-        "base calling",
-        "base quality"
-      ],
       "termInfo": {
         "sequencing instrument": {
           "text": "A platform that measures physical or chemical signals associated with nucleotide sequence.",
@@ -129,27 +117,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "base calling",
+        "base quality"
+      ],
+      "floatingTerms": [
+        "sequencing instrument"
+      ],
+      "terms": [
+        "sequencing instrument",
+        "base calling",
+        "base quality"
+      ]
     },
     {
-      "id": "cluster-reconstructing-longer-sequence",
+      "id": "reconstructing-longer-sequence",
       "name": "Reconstructing longer sequence",
       "color": "amber",
       "fact": "Assembly algorithms use overlaps and other linking evidence to form continuous contigs, order them into scaffolds, and estimate a consensus sequence despite repeats and gaps.",
-      "seeds": [
-        "read overlap",
-        "contig"
-      ],
-      "floatingTerms": [
-        "scaffold",
-        "consensus sequence"
-      ],
-      "terms": [
-        "read overlap",
-        "contig",
-        "scaffold",
-        "consensus sequence"
-      ],
       "termInfo": {
         "read overlap": {
           "text": "A matching sequence shared by reads that can support their placement relative to one another.",
@@ -183,27 +169,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "read overlap",
+        "contig"
+      ],
+      "floatingTerms": [
+        "scaffold",
+        "consensus sequence"
+      ],
+      "terms": [
+        "read overlap",
+        "contig",
+        "scaffold",
+        "consensus sequence"
+      ]
     },
     {
-      "id": "cluster-annotating-biological-features",
+      "id": "annotating-biological-features",
       "name": "Annotating biological features",
       "color": "magenta",
       "fact": "Annotation adds hypotheses and evidence about genes, repeats, and function to assembled coordinates; a genome browser presents those layers without making them identical to the sequence itself.",
-      "seeds": [
-        "gene model",
-        "functional annotation"
-      ],
-      "floatingTerms": [
-        "repeat annotation",
-        "genome browser"
-      ],
-      "terms": [
-        "gene model",
-        "repeat annotation",
-        "functional annotation",
-        "genome browser"
-      ],
       "termInfo": {
         "gene model": {
           "text": "A representation of a gene's predicted or supported exon, transcript, and coding structure on an assembly.",
@@ -225,7 +211,7 @@
           "text": "Associating genes or other features with evidence about products, roles, pathways, or homology.",
           "links": [
             {
-              "href": "wiki:Genome annotation"
+              "href": "wiki:DNA annotation"
             }
           ]
         },
@@ -237,17 +223,31 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "gene model",
+        "functional annotation"
+      ],
+      "floatingTerms": [
+        "repeat annotation",
+        "genome browser"
+      ],
+      "terms": [
+        "gene model",
+        "repeat annotation",
+        "functional annotation",
+        "genome browser"
+      ]
     }
   ],
   "bridges": [
     {
-      "id": "bridge-sequencing-read",
+      "id": "sequencing-read",
       "term": "sequencing read",
       "clusters": [
-        "cluster-preparing-dna-fragments",
-        "cluster-reading-instrument-signals",
-        "cluster-reconstructing-longer-sequence"
+        "preparing-dna-fragments",
+        "reading-instrument-signals",
+        "reconstructing-longer-sequence"
       ],
       "fact": "A sequencing read is the fragmentary sequence record passed from signal interpretation into alignment or assembly.",
       "info": {
@@ -260,17 +260,17 @@
       },
       "relationKind": "foundation",
       "idealTerms": {
-        "cluster-preparing-dna-fragments": "library preparation",
-        "cluster-reading-instrument-signals": "base calling",
-        "cluster-reconstructing-longer-sequence": "read overlap"
+        "preparing-dna-fragments": "library preparation",
+        "reading-instrument-signals": "base calling",
+        "reconstructing-longer-sequence": "read overlap"
       }
     },
     {
-      "id": "bridge-coverage",
+      "id": "coverage",
       "term": "coverage",
       "clusters": [
-        "cluster-reading-instrument-signals",
-        "cluster-reconstructing-longer-sequence"
+        "reading-instrument-signals",
+        "reconstructing-longer-sequence"
       ],
       "fact": "Coverage measures how much sequence evidence supports genomic positions; adequate depth helps distinguish a reproducible consensus from isolated measurement error.",
       "info": {
@@ -283,17 +283,17 @@
       },
       "relationKind": "evaluation",
       "idealTerms": {
-        "cluster-reading-instrument-signals": "base quality",
-        "cluster-reconstructing-longer-sequence": "consensus sequence"
+        "reading-instrument-signals": "base quality",
+        "reconstructing-longer-sequence": "consensus sequence"
       }
     },
     {
-      "id": "bridge-long-read",
+      "id": "long-read",
       "term": "long read",
       "clusters": [
-        "cluster-preparing-dna-fragments",
-        "cluster-reading-instrument-signals",
-        "cluster-reconstructing-longer-sequence"
+        "preparing-dna-fragments",
+        "reading-instrument-signals",
+        "reconstructing-longer-sequence"
       ],
       "fact": "Long-read technologies generate longer fragments that can span repeats and reduce ambiguity during assembly, though read length is only one dimension of data quality.",
       "info": {
@@ -306,17 +306,17 @@
       },
       "relationKind": "foundation",
       "idealTerms": {
-        "cluster-preparing-dna-fragments": "library preparation",
-        "cluster-reading-instrument-signals": "sequencing instrument",
-        "cluster-reconstructing-longer-sequence": "scaffold"
+        "preparing-dna-fragments": "library preparation",
+        "reading-instrument-signals": "sequencing instrument",
+        "reconstructing-longer-sequence": "scaffold"
       }
     },
     {
-      "id": "bridge-genome-assembly",
+      "id": "genome-assembly",
       "term": "genome assembly",
       "clusters": [
-        "cluster-reconstructing-longer-sequence",
-        "cluster-annotating-biological-features"
+        "reconstructing-longer-sequence",
+        "annotating-biological-features"
       ],
       "fact": "The assembly provides the sequence and coordinate framework on which gene, repeat, and functional annotations are placed.",
       "info": {
@@ -328,14 +328,14 @@
         ]
       },
       "relationKind": "foundation",
+      "idealTerms": {
+        "reconstructing-longer-sequence": "scaffold",
+        "annotating-biological-features": "gene model"
+      },
       "direction": {
         "kind": "through",
-        "from": "cluster-reconstructing-longer-sequence",
-        "to": "cluster-annotating-biological-features"
-      },
-      "idealTerms": {
-        "cluster-reconstructing-longer-sequence": "scaffold",
-        "cluster-annotating-biological-features": "gene model"
+        "from": "reconstructing-longer-sequence",
+        "to": "annotating-biological-features"
       }
     }
   ],
@@ -420,9 +420,6 @@
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Place the sequencing workflow between molecular biology and the downstream interpretation of differences."
-    },
     "entries": [
       {
         "id": "from-dna-to-gene-expression",

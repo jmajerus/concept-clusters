@@ -235,6 +235,9 @@ import flowerAnatomy from "./botany/flower-anatomy.js";
 import flowerPollinationFruit from "./botany/flower-pollination-fruit.js";
 import unyieldingNeighbors from "./vocabulary/unyielding-neighbors.js";
 import yieldingNeighbors from "./vocabulary/yielding-neighbors.js";
+import innateIntrinsicInherent from "./vocabulary/innate-intrinsic-inherent.js";
+import quietNeighbors from "./vocabulary/quiet-neighbors.js";
+import shortLivedWords from "./vocabulary/short-lived-words.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -480,6 +483,9 @@ export const PUZZLES = [
   flowerPollinationFruit,
   unyieldingNeighbors,
   yieldingNeighbors,
+  innateIntrinsicInherent,
+  quietNeighbors,
+  shortLivedWords,
 ];
 
 export default PUZZLES;

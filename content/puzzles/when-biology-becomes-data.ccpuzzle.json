@@ -18,6 +18,11 @@
   ],
   "info": {
     "text": "Computational biology begins before an algorithm runs. A specimen and assay must remain connected to encoded measurements, stable identifiers, coordinate conventions, and metadata—or a technically valid file can lose its biological meaning.",
+    "links": [
+      {
+        "href": "wiki:Bioinformatics"
+      }
+    ],
     "citations": [
       {
         "title": "Exploring biological sequences",
@@ -30,33 +35,14 @@
         "year": "2025",
         "url": "https://www.ebi.ac.uk/training/events/principles-research-data-management/"
       }
-    ],
-    "links": [
-      {
-        "href": "wiki:Bioinformatics"
-      }
     ]
   },
   "clusters": [
     {
-      "id": "cluster-from-material-to-measurement",
+      "id": "from-material-to-measurement",
       "name": "From material to measurement",
       "color": "teal",
       "fact": "A specimen supplies biological material, an assay measures it, sequence calls encode molecular letters, and quality scores retain uncertainty in those calls.",
-      "seeds": [
-        "specimen",
-        "assay"
-      ],
-      "floatingTerms": [
-        "nucleotide sequence",
-        "quality score"
-      ],
-      "terms": [
-        "specimen",
-        "assay",
-        "nucleotide sequence",
-        "quality score"
-      ],
       "termInfo": {
         "specimen": {
           "text": "A physical biological sample or portion of an organism used for observation or testing.",
@@ -90,27 +76,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "specimen",
+        "assay"
+      ],
+      "floatingTerms": [
+        "nucleotide sequence",
+        "quality score"
+      ],
+      "terms": [
+        "specimen",
+        "assay",
+        "nucleotide sequence",
+        "quality score"
+      ]
     },
     {
-      "id": "cluster-encoding-common-sequence-records",
+      "id": "encoding-common-sequence-records",
       "name": "Encoding common sequence records",
       "color": "blue",
       "fact": "Bioinformatics formats preserve different information: FASTA stores sequences, FASTQ adds qualities, SAM/BAM stores alignments, and VCF records variants against a reference.",
-      "seeds": [
-        "FASTA",
-        "FASTQ"
-      ],
-      "floatingTerms": [
-        "SAM/BAM",
-        "VCF"
-      ],
-      "terms": [
-        "FASTA",
-        "FASTQ",
-        "SAM/BAM",
-        "VCF"
-      ],
       "termInfo": {
         "FASTA": {
           "text": "A text format with a description line followed by nucleotide or amino-acid sequence.",
@@ -144,27 +130,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "FASTA",
+        "FASTQ"
+      ],
+      "floatingTerms": [
+        "SAM/BAM",
+        "VCF"
+      ],
+      "terms": [
+        "FASTA",
+        "FASTQ",
+        "SAM/BAM",
+        "VCF"
+      ]
     },
     {
-      "id": "cluster-preserving-identity-and-context",
+      "id": "preserving-identity-and-context",
       "name": "Preserving identity and context",
       "color": "amber",
       "fact": "Stable accessions, descriptive metadata, controlled vocabularies, and provenance make biological records findable, connectable, and interpretable beyond the laboratory that created them.",
-      "seeds": [
-        "accession",
-        "metadata"
-      ],
-      "floatingTerms": [
-        "controlled vocabulary",
-        "provenance"
-      ],
-      "terms": [
-        "accession",
-        "metadata",
-        "controlled vocabulary",
-        "provenance"
-      ],
       "termInfo": {
         "accession": {
           "text": "A stable identifier assigned to a record deposited in a biological data resource.",
@@ -198,16 +184,30 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "accession",
+        "metadata"
+      ],
+      "floatingTerms": [
+        "controlled vocabulary",
+        "provenance"
+      ],
+      "terms": [
+        "accession",
+        "metadata",
+        "controlled vocabulary",
+        "provenance"
+      ]
     }
   ],
   "bridges": [
     {
-      "id": "bridge-sample-identifier",
+      "id": "sample-identifier",
       "term": "sample identifier",
       "clusters": [
-        "cluster-from-material-to-measurement",
-        "cluster-preserving-identity-and-context"
+        "from-material-to-measurement",
+        "preserving-identity-and-context"
       ],
       "fact": "A sample identifier connects encoded measurements and metadata back to the same biological source, provided its scope and assignment remain unambiguous.",
       "info": {
@@ -220,38 +220,38 @@
       },
       "relationKind": "foundation",
       "idealTerms": {
-        "cluster-from-material-to-measurement": "specimen",
-        "cluster-preserving-identity-and-context": "metadata"
+        "from-material-to-measurement": "specimen",
+        "preserving-identity-and-context": "metadata"
       }
     },
     {
-      "id": "bridge-coordinate-system",
+      "id": "coordinate-system",
       "term": "coordinate system",
       "clusters": [
-        "cluster-from-material-to-measurement",
-        "cluster-encoding-common-sequence-records"
+        "from-material-to-measurement",
+        "encoding-common-sequence-records"
       ],
       "fact": "A coordinate system connects a biological position to its file representation; reference version, indexing convention, and interval boundaries must agree before positions can be safely compared.",
       "info": {
         "text": "The reference and indexing conventions used to identify positions or intervals in a biological sequence.",
         "links": [
           {
-            "href": "wiki:Genome coordinate system"
+            "href": "https://genome-blog.gi.ucsc.edu/blog/2016/12/12/the-ucsc-genome-browser-coordinate-counting-systems/"
           }
         ]
       },
       "relationKind": "foundation",
       "idealTerms": {
-        "cluster-from-material-to-measurement": "nucleotide sequence",
-        "cluster-encoding-common-sequence-records": "VCF"
+        "from-material-to-measurement": "nucleotide sequence",
+        "encoding-common-sequence-records": "VCF"
       }
     },
     {
-      "id": "bridge-schema",
+      "id": "schema",
       "term": "schema",
       "clusters": [
-        "cluster-encoding-common-sequence-records",
-        "cluster-preserving-identity-and-context"
+        "encoding-common-sequence-records",
+        "preserving-identity-and-context"
       ],
       "fact": "A schema makes the fields and relationships in a record explicit, allowing software to validate structure while metadata supplies the domain meaning of those fields.",
       "info": {
@@ -264,8 +264,8 @@
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
-        "cluster-encoding-common-sequence-records": "SAM/BAM",
-        "cluster-preserving-identity-and-context": "controlled vocabulary"
+        "encoding-common-sequence-records": "SAM/BAM",
+        "preserving-identity-and-context": "controlled vocabulary"
       }
     }
   ],
@@ -292,52 +292,43 @@
       }
     },
     {
-      "id": "choosing-a-format",
-      "prompt": "Which concepts show that the right representation depends on what must be preserved?",
-      "explanation": "FASTA represents sequences, FASTQ pairs reads with qualities, SAM/BAM records alignments, and VCF records variants. Coordinate and schema conventions determine how each record is interpreted.",
+      "id": "each-format-adds-one-thing",
+      "prompt": "Which concepts form a sequence of formats that each preserve more than the one before it?",
+      "explanation": "Each format keeps what the previous one already recorded and adds exactly one more thing worth preserving: FASTQ keeps FASTA's sequence and adds a per-base quality value, SAM/BAM keeps that and adds where each read aligns, and VCF sets the read-level detail aside to instead record a difference from a reference.",
       "targets": [
         "FASTA",
         "FASTQ",
         "SAM/BAM",
-        "VCF",
-        "coordinate system",
-        "schema"
+        "VCF"
       ],
       "reasons": {
-        "FASTA": "It stores named nucleotide or protein sequences with little required structure beyond identifiers and letters.",
-        "FASTQ": "It preserves both read sequence and per-base quality values.",
-        "SAM/BAM": "It represents reads and their alignments, with BAM providing a binary encoding.",
-        "VCF": "It represents genomic variant records relative to reference coordinates.",
-        "coordinate system": "It defines what a reported position means.",
-        "schema": "It defines the fields, types, and relationships expected in a representation."
+        "FASTA": "It is the baseline: a named sequence with no quality, alignment, or reference-relative information yet attached.",
+        "FASTQ": "It adds a per-base quality value on top of everything FASTA already records.",
+        "SAM/BAM": "It adds alignment position and mapping information on top of a read's sequence and quality.",
+        "VCF": "It represents a difference from a reference coordinate, a distinct kind of record that presumes alignment already happened."
       }
     },
     {
-      "id": "keeping-records-joinable",
-      "prompt": "Which concepts allow records from different files, tools, or repositories to remain connected and interpretable?",
-      "explanation": "Identifiers connect records, metadata supplies context, controlled terms reduce naming drift, provenance traces transformations, and schemas state how fields fit together.",
+      "id": "three-ways-to-stay-joinable",
+      "prompt": "Which concepts keep records connected across files and repositories through exact identity, which do it through consistent vocabulary, and which do it by recording context or history instead?",
+      "explanation": "Accession and sample identifier both link by exact reference, but to different things -- a deposited record versus the biological sample behind it. Controlled vocabulary instead keeps equivalent concepts findable despite different local wording. Metadata and provenance take a third route, supplying the surrounding context and processing history a bare identifier or term can't carry.",
       "targets": [
         "accession",
-        "metadata",
-        "controlled vocabulary",
-        "provenance",
         "sample identifier",
-        "schema"
+        "controlled vocabulary",
+        "metadata",
+        "provenance"
       ],
       "reasons": {
-        "accession": "It gives a deposited database record a stable reference.",
-        "metadata": "It supplies searchable biological and experimental context.",
-        "controlled vocabulary": "It makes equivalent concepts less dependent on local wording.",
-        "provenance": "It connects derived records to their sources and processing history.",
-        "sample identifier": "It links measurements back to the biological sample they describe.",
-        "schema": "It makes record structure explicit enough for software to validate and combine data."
+        "accession": "It links by exact reference to a deposited database record.",
+        "sample identifier": "It links by exact reference to the biological sample a measurement came from, a different anchor than accession.",
+        "controlled vocabulary": "It keeps equivalent concepts findable across sources through shared terms rather than a shared identifier.",
+        "metadata": "It supplies the searchable biological and experimental context an identifier or term alone doesn't carry.",
+        "provenance": "It supplies processing history -- a record's origins and transformations -- rather than identity or vocabulary."
       }
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Follow structured biological records into sequence comparison and reproducible analysis."
-    },
     "entries": [
       {
         "id": "aligning-biological-sequences",

@@ -1,0 +1,201 @@
+// Generated from content/puzzles/short-lived-words.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "short-lived-words",
+  "title": "Here and Gone: Seven Words for the Short-Lived",
+  "category": "vocabulary",
+  "puzzleKind": "vocabulary-context",
+  "info": {
+    "text": "English has one shared sense spread across seven near-synonyms — lasting or staying only a short time — and it refuses to let any one of them do all the work. The seven differ on how short, what kind of thing is brief (a guest, a condition, a lifespan), and how it leaves (an interruption, a fade, a flight). This board follows Merriam-Webster's 'Choose the Right Synonym' paragraph for transient, which lines up all seven words with one discriminating clause apiece; the lenses put each clause to work in a real sentence.",
+    "links": [
+      {
+        "href": "https://www.merriam-webster.com/dictionary/transient",
+        "label": "Merriam-Webster: Choose the Right Synonym for transient"
+      },
+      {
+        "href": "https://www.etymonline.com/word/ephemeral",
+        "label": "Online Etymology Dictionary: ephemeral"
+      },
+      {
+        "href": "https://www.etymonline.com/word/transient",
+        "label": "Online Etymology Dictionary: transient"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "short-lived",
+      "name": "Lasting or Staying Only a Short Time",
+      "color": "teal",
+      "fact": "All seven words mean lasting or staying only a short time. What separates them is not the topic but the kind of brevity: how brief, what kind of thing, and how it departs.",
+      "terms": [
+        "transient",
+        "transitory",
+        "ephemeral",
+        "momentary",
+        "fugitive",
+        "fleeting",
+        "evanescent"
+      ],
+      "seeds": [
+        "transient",
+        "transitory"
+      ],
+      "termInfo": {
+        "transient": "Applies to what is actually short in its duration or stay — especially what passes through a place with only a brief stop: transient guests, a city's transient population, a transient increase in blood pressure. From Latin transire, 'to go across.' In engineering it is the term of art for a brief signal disturbance that interrupts a steady state and then vanishes.",
+        "transitory": "Applies to what is by its nature or essence bound to change, pass, or come to an end — a stage or condition rather than a visit: fame in the movies is transitory, a transitory phase of development. Formal register.",
+        "ephemeral": "Implies striking brevity of life or duration. Originally a medical term, 'lasting but one day,' of diseases and lifespans; extended to short-lived insects and flowers — mayflies, cherry blossoms — and now to media meant to disappear.",
+        "momentary": "Suggests coming and going quickly and therefore being merely a brief interruption of a more enduring state: my feelings of guilt were only momentary, a momentary lapse. The shortest span in the set.",
+        "fugitive": "Implies passing so quickly as to make apprehending difficult — and pictures the brevity as flight: let a fugitive smile flit across his face, fugitive thoughts. Literary register, shared with the older sense of one who flees.",
+        "fleeting": "Also implies passing so quickly as to make apprehending difficult, but in everyday rather than literary dress: fleeting glimpses, fleeting moments of joy.",
+        "evanescent": "Suggests a quick vanishing with an airy or fragile quality — something that thins away like vapor instead of stopping: an evanescent touch of whimsy, evanescent color at dusk. In physics, a field that dies away exponentially rather than propagating."
+      },
+      "info": {
+        "text": "This is Merriam-Webster's full synonym paragraph for transient, one discriminating clause per word. The paragraph is the board: the shared-sense sentence is the cluster fact, and each word's clause is its usage note.",
+        "links": [
+          {
+            "href": "https://www.merriam-webster.com/dictionary/transient",
+            "label": "Choose the Right Synonym for transient"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [],
+  "lenses": [
+    {
+      "id": "lapse-instant",
+      "prompt": "A ___ lapse in concentration cost the goalkeeper the match: for a single instant he took his eye off the ball, and the state of focus he had held all game was gone.",
+      "explanation": "One instant carved out of a sustained state is momentary's cue — a brief interruption of something ongoing, and \"momentary lapse\" is the established phrase. Fleeting would describe a lapse's whole brief life rather than a single instant inside unbroken concentration; transient measures a stay or event's duration as a whole; evanescent suggests a gradual fade that an instant vanish cannot supply.",
+      "label": "The lapse",
+      "definition": "A brief interruption of an enduring state — the shortest span in the set.",
+      "targets": [
+        "momentary"
+      ],
+      "reasons": {
+        "momentary": "Names a brief interruption of a more enduring state — one instant carved out of sustained concentration; 'momentary lapse' is the established collocation."
+      }
+    },
+    {
+      "id": "mayfly-evening",
+      "prompt": "Adult mayflies are famously ___: many live and mate on a single evening and are gone by dawn, their whole reproductive life over before the week is out.",
+      "explanation": "A creature's famously short lifespan is ephemeral's cue: it literally meant \"lasting but one day,\" first of lifespans and diseases, then of short-lived insects and flowers. Momentary understates a whole evening; transient speaks of passing through a place, not of a life nearly over; fleeting stresses swift passage rather than the shortness of a lifespan; evanescent adds a vapor-like fading this life-and-death story does not turn on.",
+      "label": "The mayfly",
+      "definition": "Striking brevity of a lifespan — the word's original 'lasting but one day.'",
+      "targets": [
+        "ephemeral"
+      ],
+      "reasons": {
+        "ephemeral": "Its oldest sense is literally 'lasting but one day,' first of lifespans and diseases, then of short-lived insects and flowers — the mayfly is the textbook case."
+      }
+    },
+    {
+      "id": "harvest-workers",
+      "prompt": "The valley's ___ population triples every summer: harvest workers arrive in June, sleep in hired cabins, and are gone by October, to be replaced the next season by strangers with the same route.",
+      "explanation": "People staying briefly in a place is transient's core case — M-W illustrates it with a city's transient population. Momentary cannot stretch to a four-month season; ephemeral speaks of lifespans, not visitors; transitory describes conditions bound by nature to end, not a shifting group of people; fleeting suggests a passage too quick to catch rather than a seasonal rhythm of arrival and departure.",
+      "label": "The harvest workers",
+      "definition": "Brief stay in a place — people passing through.",
+      "targets": [
+        "transient"
+      ],
+      "reasons": {
+        "transient": "Its core sense is passing through a place with only a brief stay — M-W's own illustration is a city's transient population; people briefly in a place are its case."
+      }
+    },
+    {
+      "id": "stage-of-grief",
+      "prompt": "Grief, the counselor explained, is ___: a stage everyone must pass through and give up in time, painful precisely because no one can make it permanent.",
+      "explanation": "A condition bound by its nature to give way is transitory's cue: it applies to what is bound to change, pass, or come to an end, and the counselor's point is that no one can make the stage permanent. Transient would only say this instance happens to be short; momentary wildly understates months; ephemeral fits things of brief natural life, not inner conditions; fleeting implies something over before it can be grasped.",
+      "label": "The stage",
+      "definition": "A condition bound by its nature to give way — a stage, not a visit.",
+      "targets": [
+        "transitory"
+      ],
+      "reasons": {
+        "transitory": "Applies to what is by its nature or essence bound to change, pass, or come to an end — exactly the counselor's point about a stage that cannot be made permanent."
+      }
+    },
+    {
+      "id": "dusk-gold",
+      "prompt": "The gold in the western sky was ___: it kept thinning toward violet for a full minute, the way mist dissolves, and no one watching could name the moment it stopped being gold.",
+      "explanation": "A gradual, vapor-like fade spread across a full minute is evanescent's cue — vanishing with an airy, fragile quality rather than stopping. Momentary is contradicted outright by the minute; fleeting implies a quickness too fast to watch, while this fading is slow enough to observe; fugitive would picture the color fleeing rather than thinning away; transient only reports the display was short-lived.",
+      "label": "The dusk light",
+      "definition": "A gradual, vapor-like vanishing rather than a stop.",
+      "targets": [
+        "evanescent"
+      ],
+      "reasons": {
+        "evanescent": "Suggests vanishing with an airy or fragile quality — a thinning away like vapor across a span, exactly the mist-like fade described."
+      }
+    },
+    {
+      "id": "platform-glimpse",
+      "prompt": "She caught one ___ glimpse of her brother's face through the carriage window before the train gathered speed, and then the platform was empty.",
+      "explanation": "Plain narrative prose calls for the everyday word for a passage too quick to grasp: \"fleeting glimpse\" is the natural, unmarked collocation. Fugitive would be a literary elevation picturing escape; momentary would frame the glimpse as an interruption of something ongoing, when the glimpse's whole existence is the quick passage; transient measures stays and durations, not acts of perception.",
+      "label": "The glimpse",
+      "definition": "Everyday quickness too brief to catch — the unmarked choice.",
+      "targets": [
+        "fleeting"
+      ],
+      "reasons": {
+        "fleeting": "The everyday word for a passage too quick to grasp; 'fleeting glimpse' is the natural, unmarked collocation for plain narrative prose."
+      }
+    },
+    {
+      "id": "half-fled-thoughts",
+      "prompt": "The essayist keeps circling back to her ___ impressions — thoughts that seem to escape the mind the instant she reaches for them, already half-fled by the time they are caught.",
+      "explanation": "The sentence builds its own flight figure — thoughts that \"escape\" and are \"half-fled\" — and fugitive is the literary word whose underlying figure is flight. Fleeting shares the too-quick-to-grasp sense but in everyday dress, without the pursuit; evanescent would make the thoughts fade like vapor rather than dart away; transient says only that the impressions were brief.",
+      "label": "The half-fled thoughts",
+      "definition": "Literary brevity figured as flight.",
+      "targets": [
+        "fugitive"
+      ],
+      "reasons": {
+        "fugitive": "The literary choice, and the sentence builds its own cue: escape and half-fled are the flight figure the word carries; M-W's illustration is 'let a fugitive smile flit across his face.'"
+      }
+    },
+    {
+      "id": "relay-spike",
+      "prompt": "The oscilloscope recorded a ___ voltage spike the instant the relay opened; within milliseconds the circuit returned to its steady state, and the disturbance left no trace in the readings.",
+      "explanation": "Register decides: a brief circuit disturbance that interrupts a steady state is the engineering term of art, transient — M-W's noun sense is \"a temporary oscillation that occurs in a circuit because of a sudden change of voltage.\" Momentary is an ordinary duration word, not technical register; evanescent belongs to physics for fields decaying at a boundary; fleeting sounds informal in a log; transitory marks conditions bound to end, not signal disturbances.",
+      "label": "The voltage spike",
+      "definition": "The engineering term of art — register decides.",
+      "targets": [
+        "transient"
+      ],
+      "reasons": {
+        "transient": "The term of art: in electrical engineering a transient is a brief disturbance — M-W's noun sense is 'a temporary oscillation that occurs in a circuit because of a sudden change of voltage' — that interrupts a steady state and vanishes."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "preSolve": true,
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "One sense, seven words",
+    "summary": "Seven near-synonyms share the sense 'lasting or staying only a short time' — and each spends that brevity differently: how short, what kind of thing, and how it leaves.",
+    "estimatedMinutes": 5,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Every language needs a way to say *this will not last* — but English refuses to let one word do all the work. Seven near-synonyms share the sense **lasting or staying only a short time**, and they sort out along three questions:\r\n\r\n1. **How short?** An instant carved out of something ongoing (*momentary*), a season of passing through (*transient*), or a lifespan on the edge of over (*ephemeral*).\r\n2. **What kind of thing?** A visitor in a place (*transient*), a condition bound by its nature to end (*transitory*), or a life or fashion with brevity built in (*ephemeral*).\r\n3. **How does it leave?** Interrupting a steady state (*momentary*), thinning away like vapor (*evanescent*), or fleeing before it can be caught (*fleeting* in everyday prose, *fugitive* in literary dress).\r\n\r\nMerriam-Webster's 'Choose the Right Synonym' paragraph for *transient* lines up all seven with one discriminating clause apiece — this board is that paragraph, and the sentences you are about to read put each clause to work. The habit it trains is the dictionary editor's habit: when two words look interchangeable, ask *what exactly is brief here, and how does it go?*"
+    },
+    "links": [
+      {
+        "href": "https://www.merriam-webster.com/dictionary/transient",
+        "label": "Merriam-Webster: Choose the Right Synonym for transient"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "default"
+      }
+    ]
+  }
+});
