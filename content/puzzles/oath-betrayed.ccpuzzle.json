@@ -32,26 +32,12 @@
       "name": "The Written Line",
       "color": "teal",
       "fact": "Medicine entered the war-on-terror interrogation context with a written, pre-existing, unambiguous prohibition already in place: the 1975 World Medical Association Declaration of Tokyo barred physician participation in torture or degrading treatment regardless of victim, circumstance, or the urgency claimed by authority — and the AMA's own ethics code incorporated the same bar.",
-      "seeds": [
-        "Declaration of Tokyo",
-        "Nuremberg Code"
-      ],
-      "floatingTerms": [
-        "AMA Code of Ethics",
-        "Prohibition on Participation"
-      ],
-      "terms": [
-        "Declaration of Tokyo",
-        "Nuremberg Code",
-        "AMA Code of Ethics",
-        "Prohibition on Participation"
-      ],
       "termInfo": {
         "AMA Code of Ethics": {
           "text": "The American Medical Association's own ethics code, which incorporates the prohibition against physician participation in torture and specifically bars physicians from using their skills to facilitate interrogation in ways that harm detainees.",
           "links": [
             {
-              "href": "wiki:AMA Code of Medical Ethics"
+              "href": "wiki:Medical ethics"
             }
           ]
         },
@@ -80,27 +66,27 @@
             "href": "https://www.wma.net/policies-post/wma-declaration-of-tokyo-guidelines-for-physicians-concerning-torture-and-other-cruel-inhuman-or-degrading-treatment-or-punishment-in-relation-to-detention-and-imprisonment/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Declaration of Tokyo",
+        "Nuremberg Code"
+      ],
+      "floatingTerms": [
+        "AMA Code of Ethics",
+        "Prohibition on Participation"
+      ],
+      "terms": [
+        "Declaration of Tokyo",
+        "Nuremberg Code",
+        "AMA Code of Ethics",
+        "Prohibition on Participation"
+      ]
     },
     {
       "id": "the-enforcement-failure",
       "name": "The Enforcement Failure",
       "color": "amber",
       "fact": "Physicians for Human Rights documented that CIA-affiliated physicians and psychologists monitored detainees' physiological responses to waterboarding and calibrated technique accordingly — a direct Nuremberg Code violation in PHR's framing, because measuring harm to refine a method is human subject research. The mechanism that should have acted on the Declaration of Tokyo's clear bar never did, partly because the relevant actors were CIA employees or contractors rather than AMA members, placing them outside the body whose code they were violating.",
-      "seeds": [
-        "Physiological Monitoring",
-        "Experiments in Torture"
-      ],
-      "floatingTerms": [
-        "No Enforcement Mechanism",
-        "Non-Member Shield"
-      ],
-      "terms": [
-        "Physiological Monitoring",
-        "Experiments in Torture",
-        "No Enforcement Mechanism",
-        "Non-Member Shield"
-      ],
       "termInfo": {
         "Experiments in Torture": {
           "text": "Physicians for Human Rights' 2010 report finding that the CIA's medical monitoring of detainees during enhanced interrogation amounted to human subject research conducted without consent — a Nuremberg Code violation — and calling for a federal investigation.",
@@ -142,7 +128,21 @@
             "href": "https://phr.org/our-work/resources/experiments-in-torture/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Physiological Monitoring",
+        "Experiments in Torture"
+      ],
+      "floatingTerms": [
+        "No Enforcement Mechanism",
+        "Non-Member Shield"
+      ],
+      "terms": [
+        "Physiological Monitoring",
+        "Experiments in Torture",
+        "No Enforcement Mechanism",
+        "Non-Member Shield"
+      ]
     }
   ],
   "bridges": [

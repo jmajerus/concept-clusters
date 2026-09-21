@@ -39,7 +39,7 @@ export default definePuzzle(import.meta.url, {
   },
   "clusters": [
     {
-      "id": "cluster-preparing-dna-fragments",
+      "id": "preparing-dna-fragments",
       "name": "Preparing DNA fragments",
       "color": "teal",
       "fact": "DNA is extracted, fragmented when needed, and joined to platform-specific adapters to create a sequencing library that an instrument can read.",
@@ -74,7 +74,7 @@ export default definePuzzle(import.meta.url, {
           "text": "A designed oligonucleotide joined to sample DNA so fragments can be amplified, identified, or read by a sequencing platform.",
           "links": [
             {
-              "href": "wiki:Adapter (genetic engineering)"
+              "href": "wiki:Adapter (genetics)"
             }
           ]
         },
@@ -89,7 +89,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "cluster-reading-instrument-signals",
+      "id": "reading-instrument-signals",
       "name": "Reading instrument signals",
       "color": "blue",
       "fact": "A sequencing instrument detects signals from prepared molecules, base calling translates those signals into nucleotide letters, and quality scores retain uncertainty in each call.",
@@ -130,7 +130,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "cluster-reconstructing-longer-sequence",
+      "id": "reconstructing-longer-sequence",
       "name": "Reconstructing longer sequence",
       "color": "amber",
       "fact": "Assembly algorithms use overlaps and other linking evidence to form continuous contigs, order them into scaffolds, and estimate a consensus sequence despite repeats and gaps.",
@@ -180,7 +180,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "cluster-annotating-biological-features",
+      "id": "annotating-biological-features",
       "name": "Annotating biological features",
       "color": "magenta",
       "fact": "Annotation adds hypotheses and evidence about genes, repeats, and function to assembled coordinates; a genome browser presents those layers without making them identical to the sequence itself.",
@@ -215,7 +215,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Associating genes or other features with evidence about products, roles, pathways, or homology.",
           "links": [
             {
-              "href": "wiki:Genome annotation"
+              "href": "wiki:DNA annotation"
             }
           ]
         },
@@ -232,7 +232,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "bridge-sequencing-read",
+      "id": "sequencing-read",
       "term": "sequencing read",
       "clusters": [
         0,
@@ -256,7 +256,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "bridge-coverage",
+      "id": "coverage",
       "term": "coverage",
       "clusters": [
         1,
@@ -278,7 +278,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "bridge-long-read",
+      "id": "long-read",
       "term": "long read",
       "clusters": [
         0,
@@ -302,7 +302,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "bridge-genome-assembly",
+      "id": "genome-assembly",
       "term": "genome assembly",
       "clusters": [
         2,
@@ -410,9 +410,6 @@ export default definePuzzle(import.meta.url, {
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Place the sequencing workflow between molecular biology and the downstream interpretation of differences."
-    },
     "entries": [
       {
         "id": "from-dna-to-gene-expression",

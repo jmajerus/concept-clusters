@@ -52,7 +52,7 @@ export default definePuzzle(import.meta.url, {
           "text": "The American Medical Association's own ethics code, which incorporates the prohibition against physician participation in torture and specifically bars physicians from using their skills to facilitate interrogation in ways that harm detainees.",
           "links": [
             {
-              "href": "wiki:AMA Code of Medical Ethics"
+              "href": "wiki:Medical ethics"
             }
           ]
         },
@@ -144,7 +144,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "calibration-as-research",
       "term": "calibration as research",
       "clusters": [
         0,
