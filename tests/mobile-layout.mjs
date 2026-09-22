@@ -12,6 +12,7 @@
 // anywhere on the page is worth catching here, not just that one spot.
 import assert from "node:assert/strict";
 
+export const heavy = true; // among the longest browser tests; the runner starts it first
 export const name = "mobile-layout: no horizontal overflow on a 320px viewport";
 export const viewport = { width: 320, height: 700 };
 

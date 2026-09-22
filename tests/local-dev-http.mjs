@@ -15,6 +15,7 @@ import {
 import { localDevLeasePath } from "../modules/localDevHousekeep.js";
 import { PUZZLE_MANIFEST } from "../puzzles/manifest.js";
 
+export const heavy = true; // among the longest browser tests; the runner starts it first
 export const name = "local HTTP bootstrap: one npm run dev entry, optional Worker";
 
 function freePort() {

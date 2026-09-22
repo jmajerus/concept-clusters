@@ -318,7 +318,11 @@ npm test
 The standard suite is the quick suite plus the routinely affordable browser
 tests and process-spawning local-dev checks, in a throwaway static server and
 headless browser. Its target is under roughly 60 seconds and it is the
-pre-commit run. The corpus-wide browser sweeps, navigation scenarios, and
+pre-commit run; in practice about 20 seconds, because the browser tests run
+four at a time (`--lanes=N`, or `TEST_LANES=N`; `--lanes=1` is the old
+one-at-a-time order, for chasing a suspected cross-test interaction). The
+suite is bounded below by its longest single test, so shortening the suite
+now means shortening `playCorpus`, not adding lanes. The corpus-wide browser sweeps, navigation scenarios, and
 layout-quality searches are reserved for:
 
 ```

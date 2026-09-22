@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { validatePuzzleContent } from "../modules/contentValidation.js";
 
+export const heavy = true; // among the longest browser tests; the runner starts it first
 export const name = "optional bridges: disconnected puzzles work in every board mode";
 
 const fixture = {

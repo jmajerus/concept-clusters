@@ -33,6 +33,7 @@ import {
 } from "../modules/layoutDocument.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
+export const heavy = true; // among the longest browser tests; the runner starts it first
 export const name = "authoring play corpus: D1 Library navigation without git modules";
 
 const actor = { subject: "local-author" };

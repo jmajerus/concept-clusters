@@ -229,6 +229,13 @@ const SUITES = {
 
 let suiteFlag = "--standard";
 let side = null;
+// Browser and process-spawning tests mostly wait on I/O, so several can be
+// in flight at once in this one Node process; each gets its own page in its
+// own context, the static server is stateless, and the spawning tests pick
+// free ports and kill only their own children. `--lanes=1` (or TEST_LANES=1)
+// restores the old one-at-a-time order when chasing a suspected
+// cross-test interaction.
+let lanes = Number(process.env.TEST_LANES) || 4;
 const args = process.argv.slice(2);
 for (let index = 0; index < args.length; index++) {
   const arg = args[index];
@@ -248,6 +255,11 @@ for (let index = 0; index < args.length; index++) {
   if (arg.startsWith("--side=")) {
     if (side !== null) throw new Error("Specify --side only once");
     side = arg.slice("--side=".length);
+    continue;
+  }
+  if (arg.startsWith("--lanes=")) {
+    lanes = Number(arg.slice("--lanes=".length));
+    if (!Number.isInteger(lanes) || lanes < 1) throw new Error("--lanes needs a positive integer");
     continue;
   }
   throw new Error(`Unknown test-runner argument: ${arg}`);
@@ -273,9 +285,6 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 // The quick suite is node-only: no server, no browser. A quick test that
 // reaches for the page gets a clear failure, not a hang or a null error.
 const headless = which === "quick";
-const server = headless ? null : await startServer(root);
-const baseURL = headless ? null : serverURL(server);
-const browser = headless ? null : await chromium.launch();
 const noBrowserPage = new Proxy({}, {
   get(_target, property) {
     if (property === "then") return undefined;
@@ -285,11 +294,18 @@ const noBrowserPage = new Proxy({}, {
   }
 });
 
+// Node-only tests run first, one at a time, while the server and Chromium
+// come up behind them; the rest drain from one queue across the lanes,
+// heaviest first (a test exports `heavy = true`) so the longest one is not
+// the last to start.
+const nodeOnly = new Set(quickTests);
+const phaseOne = selectedTests.filter(test => nodeOnly.has(test));
+const phaseTwo = selectedTests.filter(test => !nodeOnly.has(test))
+  .sort((left, right) => Number(Boolean(right.heavy)) - Number(Boolean(left.heavy)));
+
+const suiteStart = Date.now();
 let failed = 0;
-for (const test of selectedTests) {
-  const page = headless
-    ? noBrowserPage
-    : await browser.newPage({ viewport: test.viewport || DEFAULT_VIEWPORT });
+async function runOne(test, page, baseURL) {
   const start = Date.now();
   try {
     await test.run(page, baseURL);
@@ -298,13 +314,39 @@ for (const test of selectedTests) {
     failed++;
     console.log(`FAIL ${test.name} (${Date.now() - start}ms)`);
     console.log(err.message.split("\n").map(l => `     ${l}`).join("\n"));
-  } finally {
-    if (!headless) await page.close();
   }
+}
+
+const browserReady = headless || !phaseTwo.length
+  ? null
+  : Promise.all([startServer(root), chromium.launch()]);
+
+for (const test of phaseOne) await runOne(test, noBrowserPage, null);
+
+let server = null;
+let browser = null;
+if (browserReady) {
+  [server, browser] = await browserReady;
+  const baseURL = serverURL(server);
+  const queue = [...phaseTwo];
+  const laneCount = Math.min(lanes, queue.length);
+  await Promise.all(Array.from({ length: laneCount }, async () => {
+    while (queue.length) {
+      const test = queue.shift();
+      const page = await browser.newPage({ viewport: test.viewport || DEFAULT_VIEWPORT });
+      try {
+        await runOne(test, page, baseURL);
+      } finally {
+        await page.close();
+      }
+    }
+  }));
 }
 
 if (browser) await browser.close();
 if (server) server.close();
 
-console.log(`\n${selectedTests.length - failed}/${selectedTests.length} passed`);
+const seconds = ((Date.now() - suiteStart) / 1000).toFixed(1);
+console.log(`\n${selectedTests.length - failed}/${selectedTests.length} passed in ${seconds}s${
+  browserReady ? ` (${Math.min(lanes, phaseTwo.length)} lane${lanes === 1 ? "" : "s"})` : ""}`);
 process.exit(failed ? 1 : 0);
