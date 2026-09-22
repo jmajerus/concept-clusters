@@ -1439,7 +1439,10 @@ export function createSetRenderer({
         circles,
         bridges,
         metrics: circleLayoutMetrics(),
-        solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null
+        solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null,
+        // See graph capture: a solved-board snapshot is reused on the
+        // next visit instead of running Circle's layout search again.
+        capturedSolved: state.made === state.need
       };
     }
 

@@ -35,6 +35,11 @@ async function sessionFor(page) {
   }, PUZZLE_ID);
 }
 
+async function openPuzzle(page, url) {
+  await page.goto(url);
+  await page.waitForFunction(() => window.CC?.state);
+}
+
 export async function run(page, baseURL) {
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
@@ -42,7 +47,7 @@ export async function run(page, baseURL) {
 
   await page.goto(`${baseURL}/index.html`);
   await page.evaluate(() => localStorage.clear());
-  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
+  await openPuzzle(page, `${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
 
   assert.equal(await page.evaluate(() => CC.state.layoutAdapter.mode), "graph");
   assert.equal(
@@ -94,9 +99,62 @@ export async function run(page, baseURL) {
   assert.ok(saved.layouts.star.nodes[`term:${draggedWord}`], "Star session omitted the dragged term");
   assert.ok(saved.layouts.graph, "Graph layout was not captured before the mode switch");
 
+  // A layout already captured on a solved board is the arrangement to
+  // return to. Switching back must not start another layout search, and
+  // the saved coordinates — including a later player drag — must stick.
+  const rememberedGraph = await page.evaluate(word => {
+    const key = Object.keys(localStorage)
+      .find(candidate => candidate.startsWith("ccPlayerSession:v1:"));
+    const backup = localStorage.getItem(key);
+    const session = JSON.parse(backup);
+    const point = { x: 120, y: 140, pinned: true };
+    session.layouts.graph.nodes[`term:${word}`] = point;
+    session.layouts.graph.solutionLayout = null;
+    session.layouts.graph.capturedSolved = true;
+    localStorage.setItem(key, JSON.stringify(session));
+    const made = CC.state.made;
+    CC.state.made = CC.state.need;
+    CC.state.completedViaShowSolution = true;
+    CC.state.solutionLayout = null;
+    return { key, backup, made };
+  }, draggedWord);
+  await page.click("#mode-graph");
+  const graphRecall = await page.evaluate(word => {
+    const node = CC.state.nodes.find(candidate => candidate.word === word);
+    return {
+      searching: !!(
+        CC.state.modeSwitchLayoutPromise ||
+        CC.state.modeSwitchPolishing ||
+        CC.state.solutionLayout === "polishing" ||
+        CC.state.solutionLayout === "animating"
+      ),
+      x: node.x,
+      y: node.y,
+      fx: node.fx,
+      fy: node.fy
+    };
+  }, draggedWord);
+  assert.equal(graphRecall.searching, false, "Returning to a solved Graph layout started a new search");
+  assert.ok(
+    Math.hypot(graphRecall.x - 120, graphRecall.y - 140) < 0.2,
+    "Returning to Graph did not keep the saved coordinates"
+  );
+  assert.equal(graphRecall.fx, 120);
+  assert.equal(graphRecall.fy, 140);
+  await page.evaluate(({ key, backup, made }) => {
+    const original = JSON.parse(backup);
+    CC.state.made = made;
+    CC.state.completedViaShowSolution = false;
+    CC.state.solutionLayout = null;
+    CC.state.layoutAdapter.apply(original.layouts.graph);
+    localStorage.setItem(key, backup);
+  }, rememberedGraph);
+  await page.click("#mode-star");
+  assert.equal(await page.evaluate(() => CC.mode), "star");
+
   // A plain return resumes the per-puzzle mode, semantic progress, and
   // exact Star snapshot.
-  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
+  await openPuzzle(page,`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
   // pagehide captures the final visible position just before navigation,
   // which may be a few force ticks newer than the earlier storage read.
   const resumedSession = await sessionFor(page);
@@ -126,7 +184,7 @@ export async function run(page, baseURL) {
     const circle = CC.state.setLayout.csNodes[0];
     return { x: circle.x, y: circle.y };
   });
-  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
+  await openPuzzle(page,`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
   const circleSession = await sessionFor(page);
   assert.equal(await page.evaluate(() => CC.mode), "sets");
   assert.equal(await page.evaluate(() => CC.state.made), 1);
@@ -147,7 +205,7 @@ export async function run(page, baseURL) {
 
   // URL mode and shared-state intent win over the local session without
   // corrupting it during reconstruction.
-  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
+  await openPuzzle(page,`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
   assert.equal(await page.evaluate(() => CC.mode), "graph");
   assert.equal(await page.evaluate(() => CC.state.made), 1);
   const savedGraphPoint = saved.layouts.graph.nodes[`term:${draggedWord}`];
@@ -162,11 +220,11 @@ export async function run(page, baseURL) {
     ) < 0.2,
     "Graph layout did not restore its saved coordinates"
   );
-  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&moves=`);
+  await openPuzzle(page,`${baseURL}/index.html?puzzle=${PUZZLE_ID}&moves=`);
   assert.equal(await page.evaluate(() => CC.state.made), 0);
 
   // Start Over clears progress and every saved per-mode layout.
-  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
+  await openPuzzle(page,`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
   await page.click("#reset");
   const reset = await sessionFor(page);
   assert.deepEqual(reset.moves, []);
@@ -185,7 +243,7 @@ export async function run(page, baseURL) {
       session.layouts.star?.solutionLayout === "animated";
   }, PUZZLE_ID);
   const completed = await sessionFor(page);
-  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
+  await openPuzzle(page,`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
   assert.equal(await page.evaluate(() => CC.mode), "star");
   assert.equal(
     await page.evaluate(() => CC.state.made === CC.state.need),

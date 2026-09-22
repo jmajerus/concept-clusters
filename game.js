@@ -391,10 +391,11 @@ async function finishSolvedLayoutAfterModeSwitch(switchState, switchMode) {
 
 async function finishLensLayoutAfterModeSwitch(
   switchState,
-  switchMode
+  switchMode,
+  { preserveLayout = false } = {}
 ) {
   try {
-    if (switchState.solutionLayout !== "pretty") {
+    if (!preserveLayout && switchState.solutionLayout !== "pretty") {
       await finishSolvedLayoutAfterModeSwitch(switchState, switchMode);
     }
   } finally {
@@ -561,24 +562,41 @@ function setMode(newMode) {
     buildForMode();
     const session = loadPlayerSession(localStorage, state.puzzle);
     const layout = session?.layouts?.[mode];
+    let restoredLayout = null;
     if (layout &&
         state.layoutAdapter?.mode === mode &&
         typeof state.layoutAdapter.apply === "function") {
-      state.layoutAdapter.apply(layout);
+      const applied = state.layoutAdapter.apply(layout);
+      if (applied?.valid) restoredLayout = layout;
     }
+    // A layout captured on an already-solved board — including one the
+    // player has since dragged — is this mode's arrangement. Reuse it.
+    // A snapshot from before the solve does not count: the first solved
+    // visit to a mode still runs that mode's layout pass once.
+    const keepRestoredLayout = !!restoredLayout && (
+      state.solutionLayout === "pretty" ||
+      (state.made === state.need && restoredLayout.capturedSolved === true)
+    );
     // "Show solution" is a decision about the puzzle, not just the
-    // renderer that happened to be visible when it was clicked. A newly
-    // selected mode still needs its own geometry, so immediately run that
-    // renderer's final layout pass instead of exposing a crossed solved
-    // board and making the player press the same control again.
+    // renderer that happened to be visible when it was clicked. A mode
+    // that does not yet have a solved layout still needs its own
+    // geometry, so run that renderer's final layout pass instead of
+    // exposing a crossed solved board and making the player press the
+    // same control again.
     if (switchingLensPhase) {
       state.modeSwitchLayoutPromise = finishLensLayoutAfterModeSwitch(
         state,
-        mode
+        mode,
+        { preserveLayout: keepRestoredLayout }
       );
-    } else if (state.solutionLayout === "pretty") {
+    } else if (keepRestoredLayout) {
+      state.modeSwitchLayoutPromise = null;
       updateSolutionHint();
-      setMessage(polishedLayoutMessage(mode), "good");
+      if (state.solutionLayout === "pretty") {
+        setMessage(polishedLayoutMessage(mode), "good");
+      } else if (state.completedViaShowSolution) {
+        setMessage("Solution shown.", "good");
+      }
     } else if (state.completedViaShowSolution &&
         state.made === state.need &&
         state.solutionLayout !== "pretty") {

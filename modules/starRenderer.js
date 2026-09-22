@@ -1926,14 +1926,19 @@ export function createStarRenderer({
             metrics: state.layoutAdapter.metrics()
           });
         }
-        return createStarPlayerLayoutDocument({
-          puzzle,
-          width: W,
-          height: H,
-          layoutNodes: allLayoutNodes,
-          solutionLayout: state.solutionLayout,
-          viewBoxY: freeStripActive ? -liveStripHeight : 0
-        });
+        return {
+          ...createStarPlayerLayoutDocument({
+            puzzle,
+            width: W,
+            height: H,
+            layoutNodes: allLayoutNodes,
+            solutionLayout: state.solutionLayout,
+            viewBoxY: freeStripActive ? -liveStripHeight : 0
+          }),
+          // See graph capture: a solved-board snapshot is reused on the
+          // next visit instead of running Star's layout search again.
+          capturedSolved: state.made === state.need
+        };
       },
       apply(layout, options = {}) {
         if (options.purpose === "authoring") {

@@ -357,7 +357,11 @@ export function createGraphRenderer({
         board: { width: W, height: H },
         nodes: positions,
         metrics: graphLayoutMetrics(),
-        solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null
+        solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null,
+        // Distinguishes a layout the player already saw on a solved board
+        // from a snapshot taken while the puzzle was still in progress.
+        // Mode switches reuse the former instead of searching again.
+        capturedSolved: state.made === state.need
       };
     };
 
