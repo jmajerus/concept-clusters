@@ -26,6 +26,7 @@ import {
   bridgeArrowPoints,
   bridgeNodeAriaLabel
 } from "./bridgeDirection.js";
+import { singleClusterTermHome } from "./lensLayout.js";
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -56,10 +57,16 @@ export function createGraphRenderer({
     // binary bridges and the ternary pilot with the same rule.
     const nClusters = puzzle.clusters.length;
     const ringR = Math.min(W, H) * 0.33;
-    const anchors = Array.from({ length: nClusters }, (_, i) => {
-      const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
-      return [W / 2 + ringR * Math.cos(angle), H / 2 + ringR * Math.sin(angle)];
-    });
+    // One cluster has no ring to sit on. Home it in the lower left, the
+    // same point the polished search seeds, so the gather and the polish
+    // are one neighborhood instead of a slide across the board.
+    const loneHome = nClusters === 1 ? singleClusterTermHome(W, H) : null;
+    const anchors = loneHome
+      ? [[loneHome.x, loneHome.y]]
+      : Array.from({ length: nClusters }, (_, i) => {
+        const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
+        return [W / 2 + ringR * Math.cos(angle), H / 2 + ringR * Math.sin(angle)];
+      });
     const anchorOf = d => {
       // Free nodes have zero anchor strength, so the fallback only needs
       // to be valid; once a node has confirmed memberships, use exactly
@@ -467,7 +474,7 @@ export function createGraphRenderer({
         if (!animated || getState() !== state) return { cancelled: true };
         sim.stop();
         nodes.forEach(node => {
-          const target = candidate.positions.get(node.id);
+          const target = targets.get(node);
           node.x = target.x;
           node.y = target.y;
           node.vx = 0;

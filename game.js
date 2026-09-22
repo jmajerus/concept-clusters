@@ -28,7 +28,7 @@ import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
-import { derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
+import { BOARD_CANVAS, boardCanvas, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
@@ -128,35 +128,15 @@ import {
 } from "./modules/lensEngine.js";
 
 const svg = d3.select("#board");
-// Board coordinate space (viewBox units, not CSS px). Large puzzles get
-// a bigger space plus the .wrap.wide CSS class, which only actually widens
-// the layout on viewports large enough for the extra room to matter. A puzzle
-// explicitly marked `large` keeps the expanded coordinate space even when the
-// SVG has to scale it down responsively: replacing it with the standard canvas
-// does not make labels more legible if the resulting geometry overlaps.
-const BOARD_SIZE = {
-  standard: [640, 460],
-  wide: [960, 620],
-  // A dense "large" puzzle (several clusters, each with several long
-  // terms) can need more room than 960x720 has: computePrettyCircleLayout's
-  // own placement search is a discrete order/rotation/scale search over
-  // that fixed canvas, and for two real puzzles -- control-and-exit (4
-  // clusters, 5-6 terms each, some 20+ characters) and after-the-click (4
-  // clusters, 5 terms each, one circle notably larger than the rest) --
-  // no candidate anywhere in that search fits without at least one hard
-  // overlap, confirmed exhaustively for the first and by direct
-  // measurement for the second. 960x720 doesn't have enough room for
-  // those circle sizes at once, regardless of ordering or rotation --
-  // one puzzle's failure was a circle-circle collision, the other's was
-  // a bridge squeezed between two large opposing circles, so the fix is
-  // the same underlying one (more room), not a per-symptom patch. This
-  // is the smallest size confirmed to resolve both (960->1050,
-  // 720->780, ~9%); #board renders at width:100% of its container, so
-  // more viewBox units without a matching container change does make
-  // everything marginally smaller on screen, but at this size that
-  // wasn't visually distinguishable in a direct comparison.
-  circleWide: [1050, 780]
-};
+// Board coordinate space (viewBox units, not CSS px). The size comes from
+// the puzzle (see boardCanvas): a compact board for a small node count,
+// the standard canvas for an ordinary Graph board, and a wider one when
+// several clusters need room to uncross. Circle's large tier stays on the
+// 1050×780 canvas — 960×720 was not enough for control-and-exit or
+// after-the-click. .wrap.wide only accompanies a wider canvas, and only
+// matters when the viewport can use the extra width. A large puzzle keeps
+// its expanded canvas on a narrow viewport too: shrinking the viewBox
+// there overlaps labels instead of making them easier to read.
 let W, H;
 const wrapEl = document.querySelector(".wrap");
 const msgEl = document.getElementById("message");
@@ -1813,37 +1793,22 @@ window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 // authoring server: reviewers at `/` see the player, not these tools.
 // Player-loop policy (skip sessions and the learning gate) stays here.
 
-// Sets mode draws containers *and* the terms inside them, and Star mode
-// routes every connection through a cluster's title hub rather than
-// point-to-point (so a bridge fans one line into each of its cluster
-// hubs) -- both need more room than
-// Graph mode's per-term board regardless of whether the puzzle itself
-// uses the wide canvas, and for different reasons from each other, not
-// the same one. The `wide` class only actually widens the layout when
-// the viewport has room for it (max-width is a ceiling) -- measure
-// rather than assume, so a small screen falls back to the standard
-// coordinate space instead of rendering things at a cramped scale.
-// Graph mode never requests it on its own (only via derived node count) --
-// its one-line-per-node layout stays comfortable at the standard size
-// regardless of bridge count, and it's deliberately left as the mode
-// that works everywhere, on every puzzle, even on the narrowest screen
-// that can't fit the wide board at all -- switching modes, not hunting
-// for a puzzle-by-puzzle size metric, is the fallback for that visitor.
-// Node count 17-25 is a layout requirement, so preserve that canvas at
-// every viewport instead of invalidating the reason the board is wide.
 function puzzleUsesLargeBoard(puzzle) {
   return derivedLarge(puzzleNodeCount(puzzle));
 }
 
 function applyBoardSize(puzzle) {
-  const isLarge = puzzleUsesLargeBoard(puzzle);
-  const wantsWide = isLarge || mode === "sets" || mode === "star";
-  wrapEl.classList.toggle("wide", wantsWide);
-  const gotWideRoom = wantsWide && wrapEl.getBoundingClientRect().width >= 900;
-  const useExpandedCanvas = isLarge || gotWideRoom;
-  [W, H] = useExpandedCanvas
-    ? (mode === "sets" ? BOARD_SIZE.circleWide : BOARD_SIZE.wide)
-    : BOARD_SIZE.standard;
+  const chosen = boardCanvas(puzzle, mode);
+  const expanded = chosen.width > BOARD_CANVAS.standard.width;
+  wrapEl.classList.toggle("wide", expanded);
+  // A narrow viewport cannot show the wider container, so a non-large
+  // puzzle falls back to the standard canvas. A large puzzle keeps the
+  // expanded viewBox anyway: that size is what keeps its labels apart.
+  const narrow = expanded && wrapEl.getBoundingClientRect().width < 900;
+  const size = expanded && narrow && !puzzleUsesLargeBoard(puzzle)
+    ? BOARD_CANVAS.standard
+    : chosen;
+  [W, H] = [size.width, size.height];
   svg.attr("viewBox", `0 0 ${W} ${H}`);
 }
 

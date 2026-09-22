@@ -62,6 +62,7 @@ import {
   bridgeArrowPoints,
   bridgeNodeAriaLabel
 } from "./bridgeDirection.js";
+import { singleClusterCircleHome } from "./lensLayout.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption — reserved for any term named in ANY bridge's
@@ -148,9 +149,13 @@ export function createSetRenderer({
     const ringR = Math.min(W, H - stripHeight) * 0.3;
     const csNodes = puzzle.clusters.map((c, i) => {
       const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
+      const home = nClusters === 1
+        ? singleClusterCircleHome(clusterBoxes[i].r, W, H, stripHeight + 24)
+        : null;
       return {
         id: i, isClusterNode: true, r: clusterBoxes[i].r,
-        x: W / 2 + ringR * Math.cos(angle), y: boardMidY + ringR * Math.sin(angle)
+        x: home?.x ?? W / 2 + ringR * Math.cos(angle),
+        y: home?.y ?? boardMidY + ringR * Math.sin(angle)
       };
     });
 
@@ -184,8 +189,11 @@ export function createSetRenderer({
     csNodes.forEach((node, i) => {
       if (node.fx != null) return;
       const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
-      node.x = W / 2 + ringR * Math.cos(angle);
-      node.y = boardMidY + ringR * Math.sin(angle);
+      const home = n === 1
+        ? singleClusterCircleHome(node.r, W, H, STRIP_MARGIN + 24)
+        : null;
+      node.x = home?.x ?? W / 2 + ringR * Math.cos(angle);
+      node.y = home?.y ?? boardMidY + ringR * Math.sin(angle);
       node.vx = 0;
       node.vy = 0;
     });
@@ -511,6 +519,32 @@ export function createSetRenderer({
     const pinnedCircles = new Set(csNodes.filter(node => node.fx != null).map(node => node.id));
     const completedBridges = connectedBridges(state).filter(isDone);
     const pinnedBridges = new Set(completedBridges.filter(node => node.fx != null).map(node => node.word));
+    // A lone circle has no angular order to search. Rest it in the lower
+    // left when that fits; otherwise the ring search below can still find
+    // a clean spot, and the polish animation goes there in one motion.
+    if (n === 1 && completedBridges.length === 0 && !pinnedCircles.has(0)) {
+      const home = singleClusterCircleHome(csNodes[0].r, W, H, stripHeight + 24);
+      const circle = { id: csNodes[0].id, r: csNodes[0].r, ...home };
+      const evaluated = scoreCircleCandidate(
+        puzzle,
+        [circle],
+        new Map(),
+        clusterBoxes,
+        stripHeight,
+        W,
+        H
+      );
+      if (evaluated.metrics.hardOverlaps === 0) {
+        return {
+          score: evaluated.score,
+          metrics: evaluated.metrics,
+          circles: [circle],
+          bridges: new Map(),
+          order: [0],
+          rotation: Math.atan2(home.y - centerY, home.x - W / 2)
+        };
+      }
+    }
     const orders = permutations(Array.from({ length: n - 1 }, (_, i) => i + 1))
       .map(rest => [0, ...rest]);
     const rotations = Array.from({ length: Math.max(8, n * 4) }, (_, i) =>
