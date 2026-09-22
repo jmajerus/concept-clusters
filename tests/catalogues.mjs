@@ -254,12 +254,14 @@ export async function run(page, baseURL) {
     8
   );
 
-  // Marking it unordered flips the whole screen: the "All puzzles" card
-  // returns, and "Browse by subject" goes back to per-category groups --
-  // both of which inline here, since per-category inlining is only
-  // available for an unordered catalogue in the first place and both
-  // categories (History & Society 2, Media & Information Literacy 6)
-  // sit at or below INLINE_PUZZLE_LIST_THRESHOLD. The card case (a
+  // Marking it unordered flips the whole screen: "Browse by subject"
+  // goes back to per-category groups -- both of which inline here,
+  // since per-category inlining is only available for an unordered
+  // catalogue in the first place and both categories (History & Society
+  // 2, Media & Information Literacy 6) sit at or below
+  // INLINE_PUZZLE_LIST_THRESHOLD -- and because every category inlines,
+  // the "All puzzles" card stays away too (everyCategoryInlines): it
+  // would lead to the same puzzles under the same headings. The card case (a
   // category above the threshold staying a card in an unordered
   // catalogue, and its hover info) is covered by tests/domains.mjs's
   // Humanities domain catalogue. Mutating the live registry object and
@@ -273,7 +275,7 @@ export async function run(page, baseURL) {
   await waitForOverview(page, "Library");
   await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
   await waitForOverview(page, "Media Literacy and Civic Reasoning");
-  assert.equal(await page.locator('[data-catalogue-view="all"]').isVisible(), true);
+  assert.equal(await page.locator('[data-catalogue-view="all"]').count(), 0);
   assert.equal(await page.locator("#overview-list .category-card[data-category]").count(), 0);
   const inlineGroups = await page.evaluate(() =>
     Array.from(document.querySelectorAll("#overview-list .category-group-heading"))

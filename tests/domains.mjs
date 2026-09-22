@@ -233,8 +233,15 @@ export async function run(page, baseURL) {
     ["Media & Information Literacy"]
   );
   assert.equal(await page.locator("#overview-list [data-puzzle-id]").count(), 10);
+  // ...and with every puzzle already on screen, no "All puzzles" card
+  // either (everyCategoryInlines); the view=all route still resolves.
+  assert.equal(await page.locator(".catalogue-all-card").count(), 0);
+  await page.goto(`${baseURL}/index.html?catalogue=domain-communication-media&view=all`);
+  await waitForOverview(page, "All puzzles in Communication & Media");
   await page.goto(`${baseURL}/index.html?catalogue=domain-humanities`);
   await waitForOverview(page, "Humanities");
+  // Humanities keeps two cards, so its "All puzzles" card stays.
+  assert.equal(await page.locator(".catalogue-all-card").count(), 1);
 
   // Its flat list groups by category (like All Puzzles) with no domain
   // headings, every member exactly once.

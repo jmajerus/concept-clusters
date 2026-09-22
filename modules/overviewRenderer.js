@@ -366,6 +366,29 @@ export function createOverviewRenderer({
     return categoriesForCatalogue(catalogue, puzzles).length === 1;
   }
 
+  // The one inline decision, shared by renderCategoryCards (per card)
+  // and everyCategoryInlines (whole screen) so they can't disagree.
+  function categoryInlines(catalogue, count) {
+    return isSoleCategory(catalogue) || count <= INLINE_PUZZLE_LIST_THRESHOLD;
+  }
+
+  // Whether the "Browse by subject" section below will inline every
+  // category -- only possible for an unordered catalogue (ordered ones
+  // never inline per category; see the renderDomainGroupedCategoryCards
+  // call site). When it does, the "All puzzles in this catalogue" card
+  // would lead to the same puzzles under the same category headings
+  // (view=all is category-grouped too) as are already on screen, so
+  // renderCatalogueOverviewList skips it.
+  function everyCategoryInlines(catalogue, members) {
+    if (isOrderedCatalogue(catalogue)) return false;
+    return categoriesForCatalogue(catalogue, puzzles).every(name =>
+      categoryInlines(
+        catalogue,
+        members.filter(puzzle => puzzleBelongsToCategory(puzzle, name)).length
+      )
+    );
+  }
+
   function renderCategoryCards(
     container,
     categoryNames,
@@ -374,7 +397,6 @@ export function createOverviewRenderer({
     catalogue = null
   ) {
     container.innerHTML = "";
-    const inlineAll = !!catalogue && isSoleCategory(catalogue);
     categoryNames.forEach(name => {
       const info = normalizeInfo(CATEGORIES[name]?.info);
       const categoryPuzzles = availablePuzzles
@@ -387,7 +409,7 @@ export function createOverviewRenderer({
       // the catalogue is ordered (see the call site's own comment --
       // inlining a small category here has no way to reflect its
       // puzzles' actual position in an ordered sequence).
-      if (catalogue && (inlineAll || count <= INLINE_PUZZLE_LIST_THRESHOLD)) {
+      if (catalogue && categoryInlines(catalogue, count)) {
         const heading = document.createElement("h5");
         heading.className = "overview-section-heading category-group-heading";
         heading.textContent = name;
@@ -1159,11 +1181,13 @@ export function createOverviewRenderer({
         entriesForPuzzles(catalogue, members),
         index => openPuzzle(index, { catalogue, originCategory: null })
       );
-    } else {
+    } else if (!everyCategoryInlines(catalogue, members)) {
       // A real catalogue only reaches this branch when it's explicitly
       // unordered (ordered: false) -- an ordered one is always inlined
       // above (wholeCatalogueInlined), so "editorial order" would be the
-      // wrong claim to make about whatever's left here. The two
+      // wrong claim to make about whatever's left here -- and when at
+      // least one of its categories stays a card (otherwise every puzzle
+      // is already inline below, see everyCategoryInlines). The two
       // synthetic catalogues reach it regardless of their own (default
       // true) ordered status, for the same reason they're excluded from
       // wholeCatalogueInlined: neither has a real editorial sequence --

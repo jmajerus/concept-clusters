@@ -190,6 +190,13 @@ one category per domain still offers a real choice between cards. Today
 this is what a single-category domain catalogue (Business & Management,
 Communication & Media) is. See isSoleCategory in `overviewRenderer.js`.
 
+When every category of an unordered catalogue inlines (all at or below
+the threshold, or the sole category), the "All puzzles in this
+catalogue" card is skipped too: `view=all` is category-grouped as well,
+so it would lead to the same puzzles under the same headings already on
+screen. See everyCategoryInlines in `overviewRenderer.js`. The route
+itself still works by URL.
+
 When the catalogue-level list is inlined (any ordered catalogue), the
 "Browse by subject" section itself becomes "By subject": a plain-text
 reference index (category name, then that category's puzzle titles,
