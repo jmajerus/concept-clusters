@@ -1548,25 +1548,22 @@ body.boot-failed #context-nav {
 }
 .overview-section-heading.domain-group-heading {
   margin-top: 6px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--domain-heading);
 }
-/* One level below domain-group-heading -- category within domain, on the
-   All Puzzles page (see renderAllPuzzlesGrouped) -- and, on a domain
-   catalogue's overview, the heading over an inlined category's puzzles,
-   where it sits beside .category-card folders and is that category's
-   only identity. Same --domain-heading color as those folders and as
-   the domain heading, so "blue = a subject, not a puzzle" holds
-   everywhere. 13px, one step up from the 12px it had as a muted tier,
-   so it holds its own next to the 15px folder titles; the domain
-   heading above it on All Puzzles went to 14px to keep its step. */
+/* A category's name looks the same wherever it appears: as a
+   .category-card title (folder, closed) or as this heading over its
+   inlined puzzles (folder, open) -- same display face, 15px, weight,
+   and --domain-heading color, so a domain catalogue's overview reads as
+   one list of subjects, some expanded, rather than two kinds of thing.
+   On All Puzzles it sits one tier below .domain-group-heading, which is
+   a step larger for exactly that reason. */
 .overview-section-heading.category-group-heading {
   margin-top: 4px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--domain-heading);
 }
 /* Plain-text reference index (see renderSubjectSummary in
