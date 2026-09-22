@@ -1601,7 +1601,8 @@ deployed player pages do not offer a layout file export or publication path.
 Cue the published puzzle and run the next Freeze; Freeze materializes the
 published layout on the generated puzzle module, so no separate layout JSON
 file or static registry is needed.
-Run `npm run validate` and `npm test` (the standard suite; `npm run test:quick` is the seconds-long node-only loop between edits) before committing. Reserve
+Run `npm run validate` and `npm test` (the standard suite; `npm run test:quick` is the node-only loop between edits) before committing. Use
+`npm run test:authoring` for the authoring-side standard slice and reserve
 `npm run test:extended` for shared
 rendering/layout changes and occasional release-level verification.
 

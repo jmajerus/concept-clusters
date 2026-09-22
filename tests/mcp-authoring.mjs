@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { once } from "node:events";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -55,7 +54,17 @@ async function verifyStdioEntrypoint() {
     assert.match(stderr, /ready on stdio/i);
   } finally {
     child.kill("SIGINT");
-    await once(child, "exit");
+    // Attach the listener before checking the status: the child can exit
+    // synchronously after SIGINT, which otherwise leaves `once("exit")`
+    // waiting forever for an event that already happened.
+    await new Promise(resolve => {
+      const onExit = () => {
+        child.off("exit", onExit);
+        resolve();
+      };
+      child.once("exit", onExit);
+      if (child.exitCode !== null || child.signalCode !== null) onExit();
+    });
   }
 }
 

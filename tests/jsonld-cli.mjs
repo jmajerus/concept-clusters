@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -21,7 +21,10 @@ export async function run() {
     assert.equal(result.status, 0, result.stderr);
     const puzzle = JSON.parse(await readFile(puzzlePath, "utf8"));
     assert.equal(puzzle["@type"], "Puzzle");
-    assert.ok(puzzle.clusters.every(cluster => cluster["@id"].startsWith("#cluster-")));
+    // A node's fragment id is mechanically "#" + id (jsonLdProfile.js
+    // nodeFragmentId); the older "#cluster-" namespace was a mis-derived
+    // convention the profile retired.
+    assert.ok(puzzle.clusters.every(cluster => cluster["@id"] === `#${cluster.id}`));
     assert.ok(puzzle.bridges.every(bridge =>
       bridge.clusters.every(reference => typeof reference["@id"] === "string")
     ));
@@ -75,6 +78,9 @@ export async function run() {
       recursive: true,
       filter: source => ![".git", "node_modules", ".wrangler"].includes(basename(source))
     });
+    // The copy skips node_modules; the tools it runs import zod and friends,
+    // so point the copy at this checkout's install instead of duplicating it.
+    await symlink(join(process.cwd(), "node_modules"), join(repository, "node_modules"), "dir");
     result = command(["import", fixturePath], repository);
     assert.equal(result.status, 0, result.stderr);
     assert.match(
@@ -111,18 +117,25 @@ export async function run() {
     assert.match(result.stdout, /puzzles\/art\/why-art-changes-what-it-sees\.js/);
     assert.doesNotMatch(result.stdout, /puzzles\/art\/where-meaning-comes-from\.js/);
 
+    // An invalid import must leave the repository untouched. The import's
+    // pre-write semantic validation now covers what used to be caught only
+    // by the post-write repository check (the older "Science!" slug-collision
+    // fixture stopped colliding once category references became ids: that
+    // title now canonicalizes to the real science category), so what this
+    // exercises is the rejection itself and that nothing was written.
     const rollbackFixture = {
       ...fixture,
       "@id": "urn:concept-clusters:puzzle:jsonld-rollback-fixture",
       id: "jsonld-rollback-fixture",
       title: "JSON-LD rollback fixture",
-      category: "Science!"
+      subcategories: { science: "no-such-subcategory" }
     };
     const rollbackPath = join(directory, "jsonld-rollback-fixture.ccpuzzle.jsonld");
     await writeFile(rollbackPath, `${JSON.stringify(rollbackFixture, null, 2)}\n`);
     result = command(["import", rollbackPath], repository);
-    assert.equal(result.status, 1, "post-write validation should reject the category slug collision");
-    assert.match(result.stderr, /Repository validation failed/);
+    assert.equal(result.status, 1, "validation should reject the unregistered subcategory");
+    assert.match(result.stderr, /validation failed/);
+    assert.match(result.stderr, /no-such-subcategory/);
     await assert.rejects(
       readFile(join(repository, "puzzles/science/jsonld-rollback-fixture.js"), "utf8"),
       error => error.code === "ENOENT"

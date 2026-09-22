@@ -6,18 +6,19 @@
 //
 // Three suites, selected by CLI flag (see package.json):
 //   quick    (`npm run test:quick`) -- node-only tests: no Chromium, no dev
-//            server, a few seconds. Engines, schemas, canonicalization,
-//            freeze planning, draft review rendering, MCP tool contracts.
-//            Any test that touches `page` or `baseURL` is out by definition;
-//            the runner hands quick tests a page that throws on first use so
-//            a misplaced test fails loudly instead of silently needing a
-//            browser.
+//            server. Engines, schemas, canonicalization, freeze planning,
+//            draft review rendering, and MCP tool contracts. The target is
+//            under roughly 15 seconds.
 //   standard (`npm test`) -- quick plus the routinely affordable browser
 //            tests and the process-spawning local dev checks. The everyday
-//            pre-commit run; a minute or so.
+//            pre-commit run; the target is under roughly 60 seconds.
 //   extended (`npm run test:extended`) -- every test: corpus-wide browser
 //            sweeps, layout-quality searches, broad navigation scenarios.
 // `npm run test:all` remains a compatibility alias for extended.
+//
+// Every suite also accepts `--side=play`, `--side=authoring`, or
+// `--side=shared`. Play and authoring slices include shared tests; the shared
+// slice is available when only cross-cutting infrastructure is relevant.
 import { chromium } from "playwright";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -158,16 +159,109 @@ const standardTests = [
   authoringAdminIndex, localCatalogueReview, localDevHttp, localDevHousekeep, playCorpus
 ];
 
-const flag = process.argv[2];
+// Side ownership is intentionally kept here, next to the suite membership,
+// so adding a test cannot silently make one side's command incomplete. A
+// shared test is included in both play and authoring slices because it checks
+// a contract consumed by both surfaces.
+const sideTests = {
+  play: new Set([
+    smoke, solution, layoutSanity, mobileLayout, sharing,
+    bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
+    starDetangle, starPrettyPrint, playerSessions,
+    circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
+    conceptLenses, lensEngine, lensAssignment, lensQuiz,
+    catalogues, metaCatalogues, learningIntroduction,
+    learningIntroductionEngine, learningLevel,
+    multiCategory, subcategories, domains, infoLinks,
+    librarySearch, librarySearchEngine, boot, puzzleManifest,
+    starFreeStrip, playCorpus, geometryVisibleSegment
+  ]),
+  authoring: new Set([
+    mcpAuthoringDomains, starLayoutAuthoring, layoutAuthoringModes,
+    starFreeStrip, puzzleSymmetryFlags, nodeCaseAudit, contentServices,
+    authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage,
+    authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit,
+    localDraftReview, localCatalogueReview, contentDocuments,
+    contentDocumentCitations, categoryRenamePreviousTitles,
+    categoryRenamePropagation, contentFreezePlan, contentFreezeApply,
+    freezePublication, githubProductionManifest, mcpAuthoring,
+    mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy,
+    mcpClientIdentity, mcpCallInvocation, authoringProvenance,
+    modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness,
+    authoringFitCompleteness, authoringIntegratedCompleteness,
+    authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner,
+    authoringAssistanceLog, authoringChangeScore, authoringDomains,
+    authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
+    localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks,
+    localDevHttp, localDevHousekeep, playCorpus, domains, wikiLinkCheck
+  ]),
+  shared: new Set([
+    contentValidation,
+    jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema,
+    categoryReferenceMigration, contentCanonicalization,
+    nonCryptographicHash, skillRevisionStamp,
+    puzzleBoardSize, geometryVisibleSegment, wikiLinkCheck
+  ])
+};
+
+const classifiedTests = new Set([
+  ...sideTests.play,
+  ...sideTests.authoring,
+  ...sideTests.shared
+]);
+const unclassifiedTests = allTests.filter(test => !classifiedTests.has(test));
+if (unclassifiedTests.length) {
+  throw new Error(
+    `Missing side classification for: ${unclassifiedTests.map(test => test.name).join(", ")}`
+  );
+}
+
 const SUITES = {
-  undefined: ["standard", standardTests],
   "--quick": ["quick", quickTests],
+  "--standard": ["standard", standardTests],
   "--extended": ["extended", allTests],
   "--all": ["extended", allTests]
 };
-if (!(flag in SUITES)) throw new Error(`Unknown test-suite flag: ${flag}`);
-const [which, suite] = SUITES[flag];
-console.log(`Running ${which} suite (${suite.length}/${allTests.length} tests)\n`);
+
+let suiteFlag = "--standard";
+let side = null;
+const args = process.argv.slice(2);
+for (let index = 0; index < args.length; index++) {
+  const arg = args[index];
+  if (Object.hasOwn(SUITES, arg)) {
+    if (suiteFlag !== "--standard" && suiteFlag !== arg) {
+      throw new Error(`Choose only one test suite: ${args.join(" ")}`);
+    }
+    suiteFlag = arg;
+    continue;
+  }
+  if (arg === "--side") {
+    if (side !== null) throw new Error("Specify --side only once");
+    side = args[++index];
+    if (!side) throw new Error("--side requires play, authoring, or shared");
+    continue;
+  }
+  if (arg.startsWith("--side=")) {
+    if (side !== null) throw new Error("Specify --side only once");
+    side = arg.slice("--side=".length);
+    continue;
+  }
+  throw new Error(`Unknown test-runner argument: ${arg}`);
+}
+
+if (side !== null && !Object.hasOwn(sideTests, side)) {
+  throw new Error(`Unknown test side: ${side}; use play, authoring, or shared`);
+}
+
+const [which, suite] = SUITES[suiteFlag];
+const selectedTests = side === null
+  ? suite
+  : suite.filter(test => sideTests[side].has(test) ||
+      (side !== "shared" && sideTests.shared.has(test)));
+if (!selectedTests.length) {
+  throw new Error(`${which} suite has no tests for the ${side} side`);
+}
+console.log(`Running ${which}${side ? ` (${side} side)` : ""} suite (${selectedTests.length}/${suite.length} tests)\n`);
 
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -188,7 +282,7 @@ const noBrowserPage = new Proxy({}, {
 });
 
 let failed = 0;
-for (const test of suite) {
+for (const test of selectedTests) {
   const page = headless
     ? noBrowserPage
     : await browser.newPage({ viewport: test.viewport || DEFAULT_VIEWPORT });
@@ -208,5 +302,5 @@ for (const test of suite) {
 if (browser) await browser.close();
 if (server) server.close();
 
-console.log(`\n${suite.length - failed}/${suite.length} passed`);
+console.log(`\n${selectedTests.length - failed}/${selectedTests.length} passed`);
 process.exit(failed ? 1 : 0);

@@ -151,7 +151,13 @@ for (const [name, entry] of Object.entries(CATEGORIES)) {
 validateSubcategoryAssignments(PUZZLES, CATEGORIES)
   .forEach(error => fail(error.scope, error.message));
 const categorySlugOwners = new Map();
-for (const id of usedCategoryIds) {
+// Every registered category, not only the used ones: a collision with a
+// category registered ahead of its first puzzle is still a collision.
+const registeredCategoryIds = new Set([
+  ...usedCategoryIds,
+  ...Object.keys(CATEGORIES).map(name => categoryIdFor(name, CATEGORIES))
+]);
+for (const id of registeredCategoryIds) {
   const slug = categorySlugFor(id);
   const owner = categorySlugOwners.get(slug);
   if (owner) {

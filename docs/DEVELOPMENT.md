@@ -91,7 +91,7 @@ checkout, and a clean CI checkout would have passed straight through it.
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
-| `tests/` | Regression suite — `npm run test:quick` (node-only, seconds), `npm test` (standard, with browser), `npm run test:extended` (see below) |
+| `tests/` | Regression suite — `npm run test:quick` (node-only), `npm test` / `npm run test:standard` (standard, with browser), `npm run test:extended` (see below) |
 | `tools/check-wiki-links.mjs` | Verifies `termInfo`/bridge/cluster `info` Wikipedia links resolve — run with `npm run check-wiki-links` (see below) |
 | `site/` | Symlinked public tree Wrangler serves as Worker static assets (`wrangler.jsonc` `assets.directory`); keeps `.wrangler/` out of the asset watcher |
 | `src/worker.js` | Cloudflare Worker: serves the static site, plus `/api/event` and `/admin` (see "Deployment & analytics" below) |
@@ -298,27 +298,28 @@ npm install
 npx playwright install chromium   # only needed once, downloads the browser
 ```
 
-Then, any time:
+Then, any time, use the quick node-only loop:
 
 ```
 npm run test:quick
 ```
 
-Node-only, a few seconds: no Chromium, no dev server. Engines, schemas,
-canonicalization, freeze planning, draft-review rendering, MCP tool
-contracts. Run it between edits. A test that touches the browser cannot be
-in this suite -- the runner hands quick tests a page that throws on first
-use, so a misplaced test fails loudly instead of quietly needing Chromium.
+No Chromium or dev server is needed. Engines, schemas, canonicalization,
+freeze planning, draft-review rendering, and MCP tool contracts run here.
+The target is under roughly 15 seconds. A test that touches the browser
+cannot be in this suite — the runner hands quick tests a page that throws on
+first use, so a misplaced test fails loudly instead of quietly needing
+Chromium.
 
 ```
 npm test
 ```
 
-The standard suite: quick plus the routinely affordable browser tests and
-the process-spawning local dev checks, in a throwaway static server and a
-headless browser. About a minute. The pre-commit run. The corpus-wide
-browser sweeps, navigation scenarios, and layout-quality searches are
-reserved for:
+The standard suite is the quick suite plus the routinely affordable browser
+tests and process-spawning local-dev checks, in a throwaway static server and
+headless browser. Its target is under roughly 60 seconds and it is the
+pre-commit run. The corpus-wide browser sweeps, navigation scenarios, and
+layout-quality searches are reserved for:
 
 ```
 npm run test:extended
@@ -328,6 +329,17 @@ Run the extended suite when changing shared rendering, layout algorithms,
 navigation/session behavior, the test runner itself, or before a release—not
 after every content or documentation edit. `npm run test:all` is retained as
 an alias for compatibility.
+
+The standard suite can also be partitioned by the surface being changed:
+
+```
+npm run test:play       # play-side standard tests plus shared infrastructure
+npm run test:authoring  # authoring-side standard tests plus shared infrastructure
+npm run test:shared     # only shared infrastructure
+```
+
+The same filter works with any tier, for example
+`npm run test:extended -- --side=play`.
 
 Puzzle PRs are gated by `npm run validate`, JSON-LD `content:check`, and the
 Worker unit suite in

@@ -33,7 +33,14 @@ function runtimeShape(puzzle) {
 export async function run() {
   const ids = new Set(PUZZLES.map(puzzle => puzzle.id));
   for (const puzzle of PUZZLES) {
-    assert.deepEqual(validatePuzzleContent(puzzle, { knownPuzzleIds: ids }), [], puzzle.id);
+    // Same leniency as validate.mjs: a puzzle may list a split sibling that
+    // is not registered yet (a D1 draft awaiting its own freeze), so its own
+    // relatedPuzzles ids count as known for its own validation.
+    const knownPuzzleIds = new Set(ids);
+    for (const entry of puzzle.relatedPuzzles?.entries || []) {
+      if (entry?.id) knownPuzzleIds.add(entry.id);
+    }
+    assert.deepEqual(validatePuzzleContent(puzzle, { knownPuzzleIds }), [], puzzle.id);
     const document = puzzleToJsonLd(puzzle);
     assert.equal(document["@context"], CONCEPT_CLUSTERS_CONTEXT);
     assert.deepEqual(validateJsonLdProfile(document), [], puzzle.id);
@@ -184,8 +191,10 @@ export async function run() {
 
   const artPuzzle = PUZZLES.find(puzzle => puzzle.id === "how-a-picture-directs-the-eye");
   const artDocument = puzzleToJsonLd(artPuzzle);
-  assert.deepEqual(artDocument.subcategories, { Art: "visual-form" });
-  assert.deepEqual(puzzleFromJsonLd(artDocument).subcategories, { Art: "visual-form" });
+  // Subcategory assignments are keyed by category id since the category
+  // identifier migration; the title-keyed form is read-compatible only.
+  assert.deepEqual(artDocument.subcategories, { art: "visual-form" });
+  assert.deepEqual(puzzleFromJsonLd(artDocument).subcategories, { art: "visual-form" });
   // tags is exercised for every real puzzle already by the round-trip
   // loop above (any of PUZZLES tagged "book" included); these target
   // specifically what that loop can't: rejecting a malformed shape.
@@ -262,16 +271,21 @@ export async function run() {
   // Meta catalogues (kind: "meta", entries are other catalogues' ids) are
   // a runtime-only concept -- deliberately no JSON-LD support for them,
   // see docs/CATALOGUES.md.
+  // The catalogue profile carries content only; runtime-only fields
+  // (kind, ordered, showInLibrary, relatedCatalogues) are preserved from the
+  // existing catalogue on import rather than expressed in JSON-LD -- see
+  // catalogueValidation.js -- so a round trip is compared without them.
+  const profileContent = ({ kind, ordered, showInLibrary, relatedCatalogues, ...content }) => content;
   for (const catalogue of CATALOGUES.filter(item => item.kind !== "meta")) {
     assert.deepEqual(validateCatalogueContent(catalogue, { puzzleIds: ids }), [], catalogue.id);
     const manifest = catalogueToJsonLd(catalogue);
     assert.deepEqual(validateJsonLdProfile(manifest), [], catalogue.id);
-    assert.deepEqual(catalogueFromJsonLd(manifest).catalogue, catalogue);
+    assert.deepEqual(catalogueFromJsonLd(manifest).catalogue, profileContent(catalogue), catalogue.id);
 
     const bundle = catalogueBundleToJsonLd(catalogue, PUZZLES, { categories: CATEGORIES });
     assert.deepEqual(validateJsonLdProfile(bundle), [], catalogue.id);
     const imported = catalogueFromJsonLd(bundle);
-    assert.deepEqual(imported.catalogue, catalogue);
+    assert.deepEqual(imported.catalogue, profileContent(catalogue), catalogue.id);
     assert.deepEqual(
       imported.puzzles.map(puzzle => puzzle.id),
       catalogue.entries.map(entry => entry.id)
@@ -314,6 +328,8 @@ export async function run() {
     [],
     "17 nodes with large: true should still pass"
   );
+  // The one-board ceiling is 25 nodes (puzzleBoardSize.js, raised from 24):
+  // 25 is still one board; the 26th node is the one that asks for a split.
   const twentyFiveNodePuzzle = {
     ...seventeenNodePuzzle,
     clusters: nodeCapClusters.map(cluster => ({
@@ -321,10 +337,21 @@ export async function run() {
       terms: [...cluster.terms, `${cluster.name}-extra`, `${cluster.name}-more`]
     }))
   };
+  assert.deepEqual(
+    validatePuzzleContent(twentyFiveNodePuzzle, { knownPuzzleIds: new Set(["node-cap-fixture"]) }),
+    [],
+    "25 nodes is the ceiling, not over it"
+  );
+  const twentySixNodePuzzle = {
+    ...twentyFiveNodePuzzle,
+    clusters: twentyFiveNodePuzzle.clusters.map((cluster, index) => index === 0
+      ? { ...cluster, terms: [...cluster.terms, `${cluster.name}-one-too-many`] }
+      : cluster)
+  };
   assert.ok(
-    validatePuzzleContent(twentyFiveNodePuzzle, {
+    validatePuzzleContent(twentySixNodePuzzle, {
       knownPuzzleIds: new Set(["node-cap-fixture"])
     }).some(error => error.includes("split into relatedPuzzles rather than dropping essential terms")),
-    "25 nodes should tell the author to split, not drop terms"
+    "26 nodes should tell the author to split, not drop terms"
   );
 }

@@ -83,7 +83,12 @@ for (const name of Object.keys(CATEGORIES)) {
 }
 
 const slugOwners = new Map();
-for (const id of usedCategoryIds) {
+// Every registered category, not only the used ones (see validate.mjs).
+const registeredCategoryIds = new Set([
+  ...usedCategoryIds,
+  ...Object.keys(CATEGORIES).map(name => categoryIdFor(name, CATEGORIES))
+]);
+for (const id of registeredCategoryIds) {
   const slug = categorySlugFor(id);
   const owner = slugOwners.get(slug);
   if (owner && owner !== id) {

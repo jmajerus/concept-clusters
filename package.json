@@ -6,8 +6,12 @@
   "scripts": {
     "test": "node tests/run.mjs",
     "test:quick": "node tests/run.mjs --quick",
+    "test:standard": "node tests/run.mjs --standard",
     "test:extended": "node tests/run.mjs --extended",
     "test:all": "node tests/run.mjs --all",
+    "test:play": "node tests/run.mjs --standard --side=play",
+    "test:authoring": "node tests/run.mjs --standard --side=authoring",
+    "test:shared": "node tests/run.mjs --standard --side=shared",
     "validate": "node validate.mjs && node validate-categories.mjs && node validate-info-links.mjs",
     "check-wiki-links": "node tools/check-wiki-links.mjs",
     "skills:stamp": "node tools/stamp-skill-revision.mjs",
