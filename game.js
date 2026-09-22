@@ -18,7 +18,7 @@ import {
   subcategoriesForPuzzleSet
 } from "./puzzles/categories.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
-import { setCatalogueRegistry } from "./modules/catalogueRegistry.js";
+import { cataloguesForPuzzle, setCatalogueRegistry } from "./modules/catalogueRegistry.js";
 import {
   createCorpusPuzzleLoader,
   loadPlayCorpus,
@@ -914,6 +914,26 @@ function setMessage(text, tone) {
   msgEl.dataset.tone = tone || "";
 }
 
+// Catalogue-card facts for the dialog's About mode and the shared footer:
+// the browse projection's titled category, curated catalogues the puzzle
+// sits in, term count, and the manifest's first-published stamp (absent
+// for D1 overlay plays and runtime-registered fixtures).
+function puzzleAboutFacts(puzzle) {
+  const browse = PUZZLES.find(entry => entry.id === puzzle.id);
+  const entry = puzzleLoader.entries.find(item => item.id === puzzle.id);
+  return {
+    category: browse?.category || categoriesForPuzzle(puzzle)[0] || "",
+    catalogues: cataloguesForPuzzle(puzzle, PUZZLES, CATALOGUES)
+      .map(catalogue => catalogue.title)
+      .filter(Boolean),
+    termCount: puzzleNodeCount(puzzle),
+    published: entry?.published || null
+  };
+}
+
+// One slot, two promises: "Lesson" when the puzzle has an authored
+// introduction (with its read/skip gate), "About" otherwise -- a catalogue
+// card that never gates. The slot itself stays put across puzzles.
 function updateLearningIntroduction() {
   const introduction = state?.learningIntroduction || null;
   const gated = !layoutAuthoringMode && learningIntroductionGate(
@@ -923,16 +943,20 @@ function updateLearningIntroduction() {
   if (state) state.learningGated = gated;
   wrapEl.classList.toggle("learning-gated", gated);
   puzzleViewEl.classList.toggle("learning-gated", gated);
-  learningIntroductionEl.hidden = !introduction;
-  learningReviewBtn.hidden = !introduction || gated;
-  const reviewLabel = state?.learningIntroductionStatus === "read"
-    ? "Review introduction"
-    : "Read the learning introduction";
+  learningIntroductionEl.hidden = !state?.puzzle;
+  learningReviewBtn.hidden = !state?.puzzle || gated;
+  learningReviewBtn.textContent = introduction ? "Lesson" : "About";
+  const reviewLabel = !introduction
+    ? "About this puzzle"
+    : state?.learningIntroductionStatus === "read"
+      ? "Review introduction"
+      : "Read the learning introduction";
   learningReviewBtn.title = reviewLabel;
   learningReviewBtn.setAttribute("aria-label", reviewLabel);
-  learningIntroductionEl.model = introduction ? {
+  learningIntroductionEl.model = state?.puzzle ? {
     puzzle: state.puzzle,
     introduction,
+    about: puzzleAboutFacts(state.puzzle),
     gate: gated,
     status: state.learningIntroductionStatus
   } : null;
