@@ -52,7 +52,11 @@ domains: its near-synonym clusters, bridge cores, and specialized `puzzleKind`
 remain content, while its context-sensitive lenses remain pedagogy. Omit
 `puzzleKind` for the default topic-based type. The MCP profile selects guidance;
 the document field records specialized authored types.
-Neither requires a third projection or a duplicated field owner.
+Neither requires a third projection or a duplicated field owner. The fuller
+argument — including why domain projections and profile/phase sub-schemas
+share a compositional shape but not ownership semantics — is preserved with
+the Integrity Burden paper’s associated documents:
+[Guidance specialization is not a storage partition](https://github.com/jmajerus/write-domain-scoping/blob/main/companions/guidance-specialization-vs-storage-domains.md).
 
 The boundary is about ownership, not an assertion that every field needs to
 remain authored. A partitioning review is also a good time to ask whether a
