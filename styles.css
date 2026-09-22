@@ -13,6 +13,9 @@
      shouldn't read as one. Muted/dark enough to stay a heading, not a UI
      element. */
   --domain-heading: #2f4a73;
+  /* Left accent bar on catalogue-tier container cards (see .catalogue-card):
+     visibly a bar against --rule, but lighter than the subject blue. */
+  --catalogue-accent: #b9c0cf;
   --rule: #e1e4ec;
   --grid: #eceef4;
   --select: #1e2433;
@@ -1308,6 +1311,43 @@ body.authoring-construct #share-status {
    invitation the way "Play" on a puzzle card is. */
 .card-count { flex: none; font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
 
+/* Containers -- any card that opens a list rather than a puzzle board --
+   carry one shared motif: a left accent bar, like a file folder's tab.
+   On a domain catalogue's overview a category card sits directly among
+   inlined puzzle cards with the same border, background, and title, and
+   was getting lost during a quick scan of a long expanded list; the bar
+   is what says "folder, not file". Deliberately the only signal -- no
+   background tint on top of it, which would just be the same message
+   twice. The bar's color says which kind of container: --domain-heading
+   blue for a subject (category, subcategory), the same color as the
+   subject-level headings, with a display-font title to match; a lighter
+   gray for a catalogue-tier container (a Library catalogue card, the
+   "All puzzles in this catalogue" card, a "catalogues containing this
+   category" card), whose title stays the default. The count label stays
+   muted (a fact, not an invitation -- see .card-count above). Puzzle
+   cards are untouched. */
+.category-card,
+.catalogue-card {
+  border-left: 3px solid var(--domain-heading);
+  padding-left: 12px;
+}
+.category-card strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--domain-heading);
+}
+.catalogue-card,
+.catalogue-all-card,
+.catalogue-intersection-card {
+  border-left-color: var(--catalogue-accent);
+}
+.catalogue-all-card strong,
+.catalogue-intersection-card strong {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink);
+}
+
 /* Bolder and darker than a category card's muted count -- this is the
    one meant to read as an invitation, not just information, so a
    recipient with no other context for this screen still has something
@@ -1508,21 +1548,23 @@ body.boot-failed #context-nav {
 }
 .overview-section-heading.domain-group-heading {
   margin-top: 6px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--domain-heading);
 }
-/* One level below domain-group-heading -- category within domain, on the
-   All Puzzles page (see renderAllPuzzlesGrouped). Smaller and muted
-   rather than colored, so the domain heading above it still reads as the
-   more prominent of the two. */
+/* A category's name looks the same wherever it appears: as a
+   .category-card title (folder, closed) or as this heading over its
+   inlined puzzles (folder, open) -- same display face, 15px, weight,
+   and --domain-heading color, so a domain catalogue's overview reads as
+   one list of subjects, some expanded, rather than two kinds of thing.
+   On All Puzzles it sits one tier below .domain-group-heading, which is
+   a step larger for exactly that reason. */
 .overview-section-heading.category-group-heading {
   margin-top: 4px;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--domain-heading);
 }
 /* Plain-text reference index (see renderSubjectSummary in
    overviewRenderer.js) -- a category-group-heading followed by this,
