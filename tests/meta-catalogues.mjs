@@ -116,7 +116,7 @@ export async function run(page, baseURL) {
   await page.locator(`[data-catalogue-id="loyalty-without-exit"]`).click();
   await waitForOverview(page, "Loyalty Without Exit");
   assert.equal(new URL(page.url()).searchParams.get("catalogue"), "loyalty-without-exit");
-  // Loyalty Without Exit has 5 puzzles -- at the inline-expansion threshold
+  // Loyalty Without Exit has 5 puzzles -- within the inline-expansion threshold
   // (see INLINE_PUZZLE_LIST_THRESHOLD in overviewRenderer.js), so its
   // puzzles show directly rather than behind an "All puzzles" card.
   assert.equal(await page.locator(".catalogue-all-card").count(), 0);

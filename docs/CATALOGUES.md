@@ -69,6 +69,42 @@ any unknown id) rather than rendering an empty card -- `level` is opt-in,
 so most puzzles won't have one set for a long time. See
 `catalogueRegistry.js`'s `levelCatalogue`/`levelCatalogues`.
 
+A domain catalogue (`domain-humanities`, `domain-life-sciences`, ...) is
+All Puzzles filtered to one domain of `puzzles/categories.js`'s
+`DOMAINS`: every puzzle with at least one category -- primary or
+additional -- in that domain, so a multidisciplinary puzzle appears under
+several domains by the same mechanism it appears under several
+categories. This is the domain "landing page" TAXONOMY-ROADMAP.md
+deferred, realized as a derived catalogue rather than a new `?domain=`
+route so that progress, breadcrumbs, share links, the header picker, and
+the category partition all come from the existing catalogue plumbing.
+Its title and description are the domain's own; there is no separate
+copy to author. Same rules as a level catalogue: the `domain-` prefix is
+reserved, an empty domain is simply absent (no "other" catalogue for the
+deliberately domain-less Trivia and Vocabulary -- All Puzzles' subject
+list is the only place an "Other subjects" heading belongs), and
+`ordered: false`. Two things are scoped to the domain rather than
+inherited from All Puzzles: `categoriesForCatalogue` lists only the
+domain's own categories (a member cross-listed under a foreign category
+is still a member, but that category isn't one of this catalogue's
+subjects), and `primaryCategoryInCatalogue` files a puzzle under its
+first category *in that domain* -- so the "Browse by subject" cards, the
+flat `view=all` list (grouped by category, like All Puzzles, but with no
+domain headings), the puzzle route, and the breadcrumb all agree. Domain
+cards carry no "New" badge, for the All Puzzles reason: twelve partitions
+of the whole collection would keep it permanently lit. See
+`catalogueRegistry.js`'s `domainCatalogue`/`domainCatalogues`.
+
+The Library screen itself is sectioned rather than one flat card list,
+so a first-time visitor sees the breadth of the collection -- every
+subject area, each with its own count and progress -- before clicking
+anything: All/New/level cards lead unheaded, the domain catalogues
+follow under "Subject areas" (alphabetical by title, the same no-implied-
+ranking rule as the category-browse headings), and the curated catalogues
+close under "Catalogues". See renderLibrarySections in
+overviewRenderer.js. The header picker lists the domain catalogues under
+a "Subject areas" group, the one derived kind it includes.
+
 A Library catalogue card also gets a "New" badge if the catalogue
 itself was recently added -- not just if it contains a new puzzle. This
 relies on `catalogues/index.js`'s `CATALOGUES` array being append-only
@@ -100,7 +136,9 @@ export default {
 
 Required:
 
-- `id`: a unique, URL-safe slug; `all` and `new` are reserved;
+- `id`: a unique, URL-safe slug; `all`, `new`, and the `level-` and
+  `domain-` prefixes are reserved (`isDerivedCatalogueId` in
+  catalogueRegistry.js is the one rule every check shares);
 - `title`: the player-facing catalogue name;
 - `entries`: a nonempty array of canonical puzzle references.
 
@@ -135,8 +173,8 @@ Puzzles alone would mean inlining the entire collection.
 
 An *unordered* catalogue (`ordered: false`) keeps the "All puzzles"
 card -- with no sequence to show at a glance, the flat click-through
-still makes sense. Below `INLINE_PUZZLE_LIST_THRESHOLD` puzzles (5, in
-`overviewRenderer.js`) *within a single category*, the "Browse by
+still makes sense. At or below `INLINE_PUZZLE_LIST_THRESHOLD` puzzles (7,
+in `overviewRenderer.js`) *within a single category*, the "Browse by
 subject" cards below it inline that category's puzzles the same way,
 under a small heading instead of a card leading to its own screen --
 this is unordered-only too: inlining a small category for an ordered
@@ -145,6 +183,19 @@ small, with no regard for where those puzzles actually fall in the
 sequence (this is exactly why the catalogue-level card is skipped
 entirely for an ordered catalogue instead of applying the same
 per-category logic there).
+A catalogue whose partition is a single category inlines it regardless
+of size: one card is a click that can only go one place. Judged on the
+whole partition, not per domain group -- a multi-domain catalogue with
+one category per domain still offers a real choice between cards. Today
+this is what a single-category domain catalogue (Business & Management,
+Communication & Media) is. See isSoleCategory in `overviewRenderer.js`.
+
+When every category of an unordered catalogue inlines (all at or below
+the threshold, or the sole category), the "All puzzles in this
+catalogue" card is skipped too: `view=all` is category-grouped as well,
+so it would lead to the same puzzles under the same headings already on
+screen. See everyCategoryInlines in `overviewRenderer.js`. The route
+itself still works by URL.
 
 When the catalogue-level list is inlined (any ordered catalogue), the
 "Browse by subject" section itself becomes "By subject": a plain-text

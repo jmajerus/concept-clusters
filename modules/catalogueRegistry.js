@@ -1,6 +1,9 @@
 import {
   categoriesForPuzzle,
   categorySlugFor,
+  domainForCategory,
+  DOMAINS,
+  primaryCategoryForPuzzle,
   puzzleBelongsToCategory,
   puzzleLevel,
   PUZZLE_LEVELS,
@@ -30,6 +33,36 @@ export const NEW_PUZZLES_CATALOGUE_ID = "new";
 // validate.mjs and catalogueValidation.js), so an authored catalogue can
 // never collide with one.
 export const LEVEL_CATALOGUE_ID_PREFIX = "level-";
+// Same for domain catalogues ("domain-humanities") -- see domainCatalogue.
+export const DOMAIN_CATALOGUE_ID_PREFIX = "domain-";
+
+// Whether an id belongs to a catalogue derived from PUZZLES at runtime
+// (all, new, level-*, domain-*) rather than authored in catalogues/ or D1.
+// The single source of truth for the reserved-id rule: validation rejects
+// an authored catalogue with such an id, and the D1 seed / freeze plan
+// skip them since there's nothing to store.
+export function isDerivedCatalogueId(id) {
+  if (typeof id !== "string") return false;
+  return id === ALL_PUZZLES_CATALOGUE_ID ||
+    id === NEW_PUZZLES_CATALOGUE_ID ||
+    id.startsWith(LEVEL_CATALOGUE_ID_PREFIX) ||
+    id.startsWith(DOMAIN_CATALOGUE_ID_PREFIX);
+}
+
+// The validation message for an authored catalogue that tries to use a
+// derived id -- shared so validate.mjs and the D1 authoring path agree.
+export function reservedCatalogueIdError(id) {
+  if (id === ALL_PUZZLES_CATALOGUE_ID) {
+    return 'id "all" is reserved for the derived All Puzzles catalogue';
+  }
+  if (id === NEW_PUZZLES_CATALOGUE_ID) {
+    return 'id "new" is reserved for the derived New Puzzles catalogue';
+  }
+  if (String(id).startsWith(LEVEL_CATALOGUE_ID_PREFIX)) {
+    return `id prefix "${LEVEL_CATALOGUE_ID_PREFIX}" is reserved for derived level catalogues`;
+  }
+  return `id prefix "${DOMAIN_CATALOGUE_ID_PREFIX}" is reserved for derived domain catalogues`;
+}
 
 // A fraction of the library rather than a fixed count, so this stays
 // meaningful as the catalog grows instead of shrinking toward
@@ -156,6 +189,55 @@ export function levelCatalogues(puzzles) {
   });
 }
 
+export function domainCatalogueId(domainId) {
+  return `${DOMAIN_CATALOGUE_ID_PREFIX}${domainId}`;
+}
+
+// A domain catalogue is All Puzzles filtered to one domain of
+// puzzles/categories.js's DOMAINS: every puzzle with at least one category
+// (primary or additional) in that domain, so a multidisciplinary puzzle
+// appears under several domains by the same mechanism it appears under
+// several categories (docs/TAXONOMY-ROADMAP.md). This is the domain
+// "landing page" the roadmap deferred -- realized as a derived catalogue
+// rather than a new route kind, so progress, breadcrumbs, share links, and
+// the category partition all come from the existing catalogue plumbing.
+// Title and description are the domain's own, so there's no separate copy
+// to author. `domain` marks the catalogue so categoriesForCatalogue can
+// scope its subject partition to the domain's categories (a cross-listed
+// puzzle would otherwise drag a foreign category card in with it). Same
+// null-when-empty rule as levelCatalogue: domain-less puzzles (Trivia,
+// Vocabulary) get no "other" catalogue -- they stay reachable through All
+// Puzzles, whose subject list is the only place an "Other subjects"
+// heading belongs.
+export function domainCatalogue(domainId, puzzles) {
+  const meta = DOMAINS[domainId];
+  if (!meta) return null;
+  const members = puzzles.filter(puzzle =>
+    categoriesForPuzzle(puzzle).some(name => domainForCategory(name) === domainId)
+  );
+  if (!members.length) return null;
+  return {
+    id: domainCatalogueId(domainId),
+    title: meta.title,
+    info: meta.info,
+    domain: domainId,
+    ordered: false,
+    entries: members.map(puzzle => ({ id: puzzle.id }))
+  };
+}
+
+// Every non-empty domain, alphabetical by title -- the same "no implied
+// ranking between subjects" rule the category-browse headings follow
+// (DOMAINS' declaration order carries no meaning).
+export function domainCatalogues(puzzles) {
+  return Object.keys(DOMAINS)
+    .sort((a, b) => DOMAINS[a].title.localeCompare(DOMAINS[b].title))
+    .flatMap(domainId => {
+      const catalogue = domainCatalogue(domainId, puzzles);
+      return catalogue ? [catalogue] : [];
+    });
+}
+
 // Whether a catalogue's entry order reflects a deliberate editorial
 // sequence worth telling a player to follow, vs. just being the order
 // the author happened to list a themed grouping in. Defaults to true --
@@ -171,6 +253,9 @@ export function catalogueById(id, puzzles, catalogues = getCatalogueRegistry()) 
   if (id === NEW_PUZZLES_CATALOGUE_ID) return newPuzzlesCatalogue(puzzles);
   if (typeof id === "string" && id.startsWith(LEVEL_CATALOGUE_ID_PREFIX)) {
     return levelCatalogue(id.slice(LEVEL_CATALOGUE_ID_PREFIX.length), puzzles);
+  }
+  if (typeof id === "string" && id.startsWith(DOMAIN_CATALOGUE_ID_PREFIX)) {
+    return domainCatalogue(id.slice(DOMAIN_CATALOGUE_ID_PREFIX.length), puzzles);
   }
   return catalogues.find(catalogue => catalogue.id === id) || null;
 }
@@ -243,6 +328,7 @@ export function libraryCatalogues(puzzles, catalogues = getCatalogueRegistry()) 
     allPuzzlesCatalogue(puzzles),
     newPuzzlesCatalogue(puzzles),
     ...levelCatalogues(puzzles),
+    ...domainCatalogues(puzzles),
     ...visible
   ];
 }
@@ -275,11 +361,32 @@ export function catalogueContainsPuzzle(catalogue, puzzleOrId, puzzles, catalogu
     .some(puzzle => puzzle.id === id);
 }
 
+// The category a puzzle files under within a given catalogue's subject
+// partition: its primary category, except inside a domain catalogue,
+// where a cross-listed puzzle's primary category may sit in another
+// domain -- there it's the puzzle's first category in that domain, so
+// the route and the grouped list agree with categoriesForCatalogue.
+export function primaryCategoryInCatalogue(catalogue, puzzle) {
+  if (catalogue?.domain) {
+    return categoriesForPuzzle(puzzle)
+      .find(name => domainForCategory(name) === catalogue.domain) || null;
+  }
+  return primaryCategoryForPuzzle(puzzle);
+}
+
+// A domain catalogue's subject partition is scoped to its own domain's
+// categories: a member cross-listed under a category from another domain
+// is still a member (that's how it got in), but that foreign category
+// isn't one of this catalogue's subjects.
 export function categoriesForCatalogue(catalogue, puzzles, catalogues = getCatalogueRegistry()) {
-  return [...new Set(
+  const names = [...new Set(
     puzzlesForCatalogue(catalogue, puzzles, catalogues)
       .flatMap(categoriesForPuzzle)
-  )].sort((a, b) => a.localeCompare(b));
+  )];
+  const scoped = catalogue?.domain
+    ? names.filter(name => domainForCategory(name) === catalogue.domain)
+    : names;
+  return scoped.sort((a, b) => a.localeCompare(b));
 }
 
 export function puzzlesForCatalogueCategory(catalogue, category, puzzles, catalogues = getCatalogueRegistry()) {

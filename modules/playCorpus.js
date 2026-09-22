@@ -1,5 +1,5 @@
 // Published D1 documents → the same browse / catalogue / category shapes
-// the player already uses. Derived catalogues (all, new, level-*) stay
+// the player already uses. Derived catalogues (all, new, level-*, domain-*) stay
 // computed on the client. Git modules are not consulted here.
 
 import { isReservedCatalogueId } from "./contentDocumentSeed.js";
