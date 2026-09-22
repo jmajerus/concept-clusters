@@ -4,16 +4,20 @@
 // A module can also export `viewport` ({ width, height }) to run at a
 // non-default size — see mobile-layout.mjs for a real example.
 //
-// Three suites, selected by CLI flag (see package.json):
-//   quick    (`npm run test:quick`) -- node-only tests: no Chromium, no dev
-//            server. Engines, schemas, canonicalization, freeze planning,
-//            draft review rendering, and MCP tool contracts. The target is
-//            under roughly 15 seconds.
-//   standard (`npm test`) -- quick plus the routinely affordable browser
-//            tests and the process-spawning local dev checks. The everyday
-//            pre-commit run; the target is under roughly 60 seconds.
-//   extended (`npm run test:extended`) -- every test: corpus-wide browser
-//            sweeps, layout-quality searches, broad navigation scenarios.
+// Three suites, selected by CLI flag (see package.json). Each tier earns
+// its name by its budget, and a tier that blows its budget has to shed a
+// test, not keep the name:
+//   quick    (`npm run test:quick`) -- under roughly 15 seconds. Node-only:
+//            no Chromium, no dev server. Engines, schemas, canonicalization,
+//            freeze planning, draft review rendering, MCP tool contracts.
+//   standard (`npm test`) -- under roughly 60 seconds. Quick plus the
+//            routinely affordable browser tests and the process-spawning
+//            local dev checks. The everyday pre-commit run.
+//   extended (`npm run test:extended`) -- every test, no budget: corpus-wide
+//            browser sweeps, layout-quality searches, broad navigation
+//            scenarios, and the JSON-LD interchange tests (JSON-LD is a
+//            roadmap item, not an operational feature, so its tests are
+//            extended-only by decision, not by cost).
 // `npm run test:all` remains a compatibility alias for extended.
 //
 // Every suite also accepts `--side=play`, `--side=authoring`, or
@@ -141,7 +145,7 @@ const allTests = [
 // coverage; add it to standardTests when it is routinely affordable, and to
 // quickTests only if it never touches the browser or the dev server.
 const quickTests = [
-  mcpAuthoringDomains, lensEngine, learningIntroductionEngine, jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema,
+  mcpAuthoringDomains, lensEngine, learningIntroductionEngine, simplifiedPuzzleSchema,
   puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine,
   catalogueAuthorEngine, catalogueReviewPage, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
   contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply,

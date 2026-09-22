@@ -327,8 +327,13 @@ npm run test:extended
 
 Run the extended suite when changing shared rendering, layout algorithms,
 navigation/session behavior, the test runner itself, or before a release—not
-after every content or documentation edit. `npm run test:all` is retained as
-an alias for compatibility.
+after every content or documentation edit. The JSON-LD interchange tests
+live here only: JSON-LD is a roadmap item, not an operational feature.
+`npm run test:all` is retained as an alias for compatibility.
+
+Each tier earns its name by its budget (quick under ~15 s, standard under
+~60 s). A tier that outgrows its budget sheds a test to the next tier
+rather than keeping the name.
 
 The standard suite can also be partitioned by the surface being changed:
 
