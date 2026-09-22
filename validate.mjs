@@ -5,7 +5,7 @@ import {
   validatePuzzleContent
 } from "./modules/contentValidation.js";
 import { validateLearningIntroduction } from "./modules/learningIntroductionValidation.js";
-import { LEVEL_CATALOGUE_ID_PREFIX } from "./modules/catalogueRegistry.js";
+import { isDerivedCatalogueId, reservedCatalogueIdError } from "./modules/catalogueRegistry.js";
 import { validateCircleLayoutDocument } from "./modules/circleLayoutSchema.js";
 import { validateGraphLayoutDocument } from "./modules/graphLayoutSchema.js";
 import { layoutDocumentForMode, layoutForMode } from "./modules/layoutDocument.js";
@@ -81,14 +81,8 @@ for (const [index, catalogue] of CATALOGUES.entries()) {
     catalogueIds: registeredCatalogueIds,
     metaCatalogueIds
   }).forEach(error => fail(label, error));
-  if (catalogue?.id === "all") {
-    fail(label, 'id "all" is reserved for the derived All Puzzles catalogue');
-  }
-  if (catalogue?.id === "new") {
-    fail(label, 'id "new" is reserved for the derived New Puzzles catalogue');
-  }
-  if (typeof catalogue?.id === "string" && catalogue.id.startsWith(LEVEL_CATALOGUE_ID_PREFIX)) {
-    fail(label, `id prefix "${LEVEL_CATALOGUE_ID_PREFIX}" is reserved for derived level catalogues`);
+  if (isDerivedCatalogueId(catalogue?.id)) {
+    fail(label, reservedCatalogueIdError(catalogue.id));
   }
   if (catalogue?.id) {
     if (catalogueIds.has(catalogue.id)) fail(label, `duplicate id "${catalogue.id}"`);

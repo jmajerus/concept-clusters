@@ -25,11 +25,13 @@ import {
   categoriesForCatalogue,
   childCatalogues,
   entriesForPuzzles,
+  isDerivedCatalogueId,
   isOrderedCatalogue,
   libraryCatalogues,
   newCatalogues,
   newPuzzles,
   parentMetaCatalogueFor,
+  primaryCategoryInCatalogue,
   relatedCatalogues,
   puzzlesForCatalogue,
   puzzlesForCatalogueCategory,
@@ -570,12 +572,18 @@ export function createOverviewRenderer({
   // domain, alphabetical throughout -- domains and categories mirroring
   // the same "alphabetical, not a ranking" principle
   // renderDomainGroupedCategoryCards already establishes above.
+  //
+  // A domain catalogue reuses this with one difference: a puzzle groups
+  // under its first category *in that domain* (its primary category may
+  // belong to another domain -- that's how a cross-listed puzzle got in),
+  // and since every group then shares the catalogue's own domain, the
+  // domain heading is left out rather than repeating the page title.
   function renderAllPuzzlesGrouped(container, catalogue, members, onPick) {
     container.innerHTML = "";
     const byDomain = new Map();
     const other = new Map();
     members.forEach(puzzle => {
-      const category = primaryCategoryForPuzzle(puzzle) || "Uncategorized";
+      const category = primaryCategoryInCatalogue(catalogue, puzzle) || "Uncategorized";
       const domain = domainForCategory(category);
       const groupsByCategory = domain
         ? byDomain.get(domain) || byDomain.set(domain, new Map()).get(domain)
@@ -604,10 +612,12 @@ export function createOverviewRenderer({
     [...byDomain.keys()]
       .sort((a, b) => DOMAINS[a].title.localeCompare(DOMAINS[b].title))
       .forEach(domainId => {
-        const heading = document.createElement("h4");
-        heading.className = "overview-section-heading domain-group-heading";
-        heading.textContent = DOMAINS[domainId].title;
-        container.appendChild(heading);
+        if (!catalogue.domain) {
+          const heading = document.createElement("h4");
+          heading.className = "overview-section-heading domain-group-heading";
+          heading.textContent = DOMAINS[domainId].title;
+          container.appendChild(heading);
+        }
         appendCategoryGroups(byDomain.get(domainId));
       });
     if (other.size) {
@@ -799,7 +809,7 @@ export function createOverviewRenderer({
         originCategory
       )
         ? originCategory
-        : primaryCategoryForPuzzle(puzzle);
+        : primaryCategoryInCatalogue(contextCatalogue, puzzle);
       if (breadcrumbCategory) {
         addBreadcrumb(
           breadcrumbCategory,
@@ -876,11 +886,15 @@ export function createOverviewRenderer({
       // All Puzzles and New Puzzles never carry the badge themselves --
       // All Puzzles would almost always qualify (permanently on,
       // meaningless), and New Puzzles doesn't need to point at itself.
+      // Domain catalogues are excluded for the All Puzzles reason: twelve
+      // partitions of the whole collection, most of them large, would
+      // keep the badge lit on most of the "Subject areas" section.
       // puzzlesForCatalogue resolves a meta catalogue's entries (other
       // catalogues' ids) to its children's puzzles; for a leaf catalogue
       // this is the same set entries.map(id) already gave.
       const hasNew = catalogue.id !== ALL_PUZZLES_CATALOGUE_ID &&
         catalogue.id !== NEW_PUZZLES_CATALOGUE_ID &&
+        !catalogue.domain &&
         (puzzlesForCatalogue(catalogue, puzzles, catalogues).some(puzzle => newPuzzleIds.has(puzzle.id)) ||
           recentCatalogueIds.has(catalogue.id));
       card.innerHTML = `
@@ -996,9 +1010,42 @@ export function createOverviewRenderer({
     };
   }
 
+  // The unsearched Library is sectioned rather than one flat card list,
+  // so a first-time visitor sees the breadth of the collection -- every
+  // subject area, each with its own puzzle count and progress -- before
+  // clicking anything, instead of only after opening All Puzzles. The
+  // whole-collection entry points (All, New, level-*) lead unheaded; the
+  // domain catalogues follow under "Subject areas"; the curated
+  // catalogues close under "Catalogues". Same alphabetical-not-ranked
+  // rule for the domain cards as the category-browse headings.
+  function renderLibrarySections(container) {
+    container.innerHTML = "";
+    const visible = libraryCatalogues(puzzles, catalogues);
+    const appendSection = (title, list) => {
+      if (!list.length) return;
+      if (title) {
+        const heading = document.createElement("h3");
+        heading.className = "overview-section-heading";
+        heading.textContent = title;
+        container.appendChild(heading);
+      }
+      const cards = document.createElement("div");
+      cards.className = "overview-card-list";
+      container.appendChild(cards);
+      renderCatalogueCards(cards, list);
+    };
+    appendSection(null, visible.filter(catalogue =>
+      isDerivedCatalogueId(catalogue.id) && !catalogue.domain
+    ));
+    appendSection("Subject areas", visible.filter(catalogue => catalogue.domain));
+    appendSection("Catalogues", visible.filter(catalogue =>
+      !isDerivedCatalogueId(catalogue.id)
+    ));
+  }
+
   function renderLibraryList(rawQuery) {
     if (!rawQuery) {
-      renderCatalogueCards(overviewListEl, libraryCatalogues(puzzles, catalogues));
+      renderLibrarySections(overviewListEl);
       return;
     }
     const searchOptions = librarySearchOptions();
@@ -1145,6 +1192,22 @@ export function createOverviewRenderer({
       heading.textContent = "Browse by subject";
       container.appendChild(heading);
       container.appendChild(categoryGroups);
+      // Inside a domain catalogue every subject is, by construction, in
+      // that one domain (categoriesForCatalogue scopes it), so the domain
+      // heading would just repeat the page title -- plain category cards.
+      if (catalogue.domain) {
+        const list = document.createElement("div");
+        list.className = "overview-card-list";
+        categoryGroups.appendChild(list);
+        renderCategoryCards(
+          list,
+          categoriesForCatalogue(catalogue, puzzles),
+          members,
+          subject => navigateTo(categoryRoute(catalogue, subject)),
+          catalogue
+        );
+        return;
+      }
       renderDomainGroupedCategoryCards(
         categoryGroups,
         categoriesForCatalogue(catalogue, puzzles),
@@ -1300,12 +1363,9 @@ export function createOverviewRenderer({
       info: {
         text: invalidCatalogue
           ? "That catalogue is unavailable. Choose a collection from the Library."
-          : "Choose the complete collection or a curated catalogue for a particular learning purpose."
+          : "Choose the complete collection, a subject area, or a curated catalogue for a particular learning purpose."
       },
-      renderList: container => renderCatalogueCards(
-        container,
-        libraryCatalogues(puzzles, catalogues)
-      ),
+      renderList: container => renderLibrarySections(container),
       allowInfoFallback: false,
       breadcrumb: { kind: "library" },
       showSearch: true,
@@ -1401,7 +1461,7 @@ export function createOverviewRenderer({
       progress: progressLabel(progress),
       renderList: container => {
         const onPick = index => openPuzzle(index, { catalogue, originCategory: null });
-        if (catalogue.id === ALL_PUZZLES_CATALOGUE_ID) {
+        if (catalogue.id === ALL_PUZZLES_CATALOGUE_ID || catalogue.domain) {
           renderAllPuzzlesGrouped(container, catalogue, members, onPick);
         } else {
           renderPuzzleCards(container, entriesForPuzzles(catalogue, members), onPick);

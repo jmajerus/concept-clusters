@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { domainCatalogues, levelCatalogues, newPuzzles } from "../modules/catalogueRegistry.js";
+import { PUZZLES } from "../puzzles/index.js";
 
 export const name = "catalogues: Library hierarchy, context, history, sharing, and progress";
 
@@ -77,22 +79,28 @@ export async function run(page, baseURL) {
   assert.equal(await page.locator("#puzzle-view").isVisible(), true);
   assert.equal(await page.textContent("#browse-puzzles"), "Library");
 
-  // The global Library control exposes All Puzzles, New Puzzles, and every
-  // curated catalogue that isn't suppressed for being nested under a meta
-  // catalogue (modules/catalogueRegistry.js's libraryCatalogues), with
-  // totals derived from canonical data.
-  const expectedLibraryIds = await page.evaluate(() => {
+  // The global Library control exposes All Puzzles, New Puzzles, the
+  // derived level and domain catalogues, and every curated catalogue that
+  // isn't suppressed for being nested under a meta catalogue
+  // (modules/catalogueRegistry.js's libraryCatalogues), with totals
+  // derived from canonical data.
+  const derivedIds = [
+    ...levelCatalogues(PUZZLES),
+    ...domainCatalogues(PUZZLES)
+  ].map(catalogue => catalogue.id);
+  const expectedLibraryIds = await page.evaluate(derived => {
     const nested = new Set(
       CC.CATALOGUES.filter(c => c.kind === "meta").flatMap(c => c.entries.map(e => e.id))
     );
     return [
       "all",
       "new",
+      ...derived,
       ...CC.CATALOGUES
         .filter(c => c.kind === "meta" || !nested.has(c.id) || c.showInLibrary)
         .map(c => c.id)
     ];
-  });
+  }, derivedIds);
   await page.click("#browse-puzzles");
   await waitForOverview(page, "Library");
   assert.equal(new URL(page.url()).searchParams.has("library"), true);
@@ -183,9 +191,18 @@ export async function run(page, baseURL) {
       .filter(card => card.querySelector(".badge-new"))
       .map(card => card.dataset.catalogueId)
   );
-  assert.deepEqual(actualBadged.sort(), expectedBadged.sort());
+  // A level catalogue carries the badge like any other card when it
+  // contains a new puzzle; domain catalogues never do (see hasNew in
+  // overviewRenderer.js -- twelve partitions of the whole collection
+  // would keep it permanently lit), same as All/New Puzzles.
+  const newIds = new Set(newPuzzles(PUZZLES).map(puzzle => puzzle.id));
+  const badgedLevelIds = levelCatalogues(PUZZLES)
+    .filter(catalogue => catalogue.entries.some(entry => newIds.has(entry.id)))
+    .map(catalogue => catalogue.id);
+  assert.deepEqual(actualBadged.sort(), [...expectedBadged, ...badgedLevelIds].sort());
   assert.equal(await page.locator('[data-catalogue-id="all"] .badge-new').count(), 0);
   assert.equal(await page.locator('[data-catalogue-id="new"] .badge-new').count(), 0);
+  assert.equal(await page.locator('[data-catalogue-id^="domain-"] .badge-new').count(), 0);
 
   // New Puzzles is the last N PUZZLES by array position (append-only, so
   // position already means "newest"), reversed to show newest first --
@@ -348,14 +365,20 @@ export async function run(page, baseURL) {
   const subjectRows = await page.evaluate(() =>
     Object.fromEntries(
       Array.from(document.querySelectorAll("#overview-list .category-group-heading"))
-        .map(heading => [heading.textContent, heading.nextElementSibling.textContent])
+        .map(heading => {
+          const rows = [];
+          for (let row = heading.nextElementSibling;
+            row && row.classList.contains("subject-summary-row");
+            row = row.nextElementSibling) rows.push(row.textContent);
+          return [heading.textContent, rows.join(" | ")];
+        })
     )
   );
   assert.deepEqual(subjectRows, {
     "Business & Organizations": "True Self, False Self",
     "Philosophy": "Political Philosophy: Freedom From, Freedom To",
     "Political Science": "Power Over, Power To• Freedom From, Freedom To",
-    "Psychology": "Power Over, Power To• True Self, False Self"
+    "Psychology": "Power Over, Power To | Psychoanalysis: True Self, False Self"
   });
   await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
   await waitForPuzzle(page, disentanglementsIds[0]);

@@ -3,10 +3,11 @@ import { PUZZLES } from "../puzzles/index.js";
 import { DOMAINS, domainForCategory } from "../puzzles/categories.js";
 import {
   allPuzzlesCatalogue,
+  catalogueById,
   categoriesForCatalogue
 } from "../modules/catalogueRegistry.js";
 
-export const name = "domains: category-browse cards grouped under domain headings";
+export const name = "domains: category-browse cards grouped under domain headings, and domain catalogues";
 
 async function waitForOverview(page, title) {
   await page.waitForFunction(expected =>
@@ -50,7 +51,7 @@ export async function run(page, baseURL) {
   const allCatalogue = allPuzzlesCatalogue(PUZZLES);
   const allCategories = categoriesForCatalogue(allCatalogue, PUZZLES);
   const representedDomains = new Set(
-    allCategories.map(domainForCategory).filter(Boolean)
+    allCategories.map(name => domainForCategory(name)).filter(Boolean)
   );
   assert.ok(representedDomains.has("literature-classics"));
   assert.ok(!Object.hasOwn(DOMAINS, "education-teaching"));
@@ -97,7 +98,7 @@ export async function run(page, baseURL) {
     { kind: "heading", text: "Communication & Media" },
     { kind: "category", text: "Media & Information Literacy" },
     { kind: "heading", text: "Earth & Environment" },
-    { kind: "category", text: "Geography" },
+    { kind: "category", text: "Physical Geography" },
     { kind: "heading", text: "Health & Medicine" },
     { kind: "category", text: "Physiology & Medicine" },
     { kind: "heading", text: "Humanities" },
@@ -148,6 +149,87 @@ export async function run(page, baseURL) {
     ).map(card => card.dataset.category);
   });
   assert.deepEqual(otherCards, ["trivia", "vocabulary"]);
+
+  // --- domain catalogues on the Library --------------------------------
+  // The Library is sectioned: the whole-collection entry points unheaded,
+  // then every represented domain under "Subject areas" (the breadth of
+  // the collection, visible before any click), then curated catalogues.
+  await page.click("#browse-puzzles");
+  await waitForOverview(page, "Library");
+  const librarySections = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list > *")).map(element =>
+      element.classList.contains("overview-section-heading")
+        ? { heading: element.textContent }
+        : { cards: Array.from(element.querySelectorAll(".catalogue-card")).map(card => card.dataset.catalogueId) }
+    )
+  );
+  assert.equal(librarySections[0].cards[0], "all");
+  assert.deepEqual(librarySections[1], { heading: "Subject areas" });
+  const domainCards = librarySections[2].cards;
+  assert.equal(domainCards.length, 12, "every represented domain, none empty");
+  assert.ok(domainCards.every(id => id.startsWith("domain-")));
+  // Alphabetical by title, same no-implied-ranking rule as the headings.
+  const domainTitle = id => DOMAINS[id.slice("domain-".length)].title;
+  assert.deepEqual(
+    domainCards,
+    [...domainCards].sort((a, b) => domainTitle(a).localeCompare(domainTitle(b)))
+  );
+  assert.deepEqual(librarySections[3], { heading: "Catalogues" });
+  assert.ok(librarySections[4].cards.includes("getting-started"));
+  assert.ok(!librarySections[4].cards.some(id => id.startsWith("domain-")));
+  // No "New" badge on a domain card -- same reasoning as All Puzzles.
+  assert.equal(
+    await page.locator('.catalogue-card[data-catalogue-id^="domain-"] .badge-new').count(),
+    0
+  );
+
+  // A domain catalogue's overview: its own title, the domain's own
+  // description, and a subject list scoped to that domain -- no domain
+  // heading (it would repeat the title) and no foreign category dragged
+  // in by a cross-listed member.
+  await page.locator('[data-catalogue-id="domain-humanities"]').click();
+  await waitForOverview(page, "Humanities");
+  assert.equal(new URL(page.url()).searchParams.get("catalogue"), "domain-humanities");
+  assert.equal(await page.locator("#overview-list .domain-group-heading").count(), 0);
+  const humanitiesCards = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list .category-card[data-category]"))
+      .map(card => card.dataset.category)
+  );
+  assert.ok(humanitiesCards.includes("philosophy"));
+  assert.ok(!humanitiesCards.includes("psychology"), "cross-listed member's foreign category stays out");
+  for (const slug of humanitiesCards) {
+    assert.equal(
+      domainForCategory(slug), "humanities",
+      `${slug} shown inside the Humanities catalogue`
+    );
+  }
+
+  // Its flat list groups by category (like All Puzzles) with no domain
+  // headings, every member exactly once.
+  await page.locator(".catalogue-all-card").click();
+  await waitForOverview(page, "All puzzles in Humanities");
+  assert.equal(new URL(page.url()).searchParams.get("view"), "all");
+  assert.equal(await page.locator("#overview-list .domain-group-heading").count(), 0);
+  assert.ok(await page.locator("#overview-list .category-group-heading").count() >= 3);
+  const listedIds = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]")).map(card => card.dataset.puzzleId)
+  );
+  assert.equal(new Set(listedIds).size, listedIds.length, "each member listed once");
+  const humanitiesCatalogue = catalogueById("domain-humanities", PUZZLES);
+  assert.equal(listedIds.length, humanitiesCatalogue.entries.length);
+
+  // The header picker lists domain catalogues under "Subject areas" and
+  // tracks the one being browsed.
+  assert.equal(
+    await page.evaluate(() => document.querySelector("#puzzle-picker").value),
+    "catalogue:domain-humanities"
+  );
+  assert.equal(
+    await page.evaluate(() =>
+      document.querySelector('#puzzle-picker optgroup[label="Subject areas"]').children.length
+    ),
+    12
+  );
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

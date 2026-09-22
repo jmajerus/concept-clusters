@@ -1,5 +1,5 @@
 import { validateCatalogueContent } from "./contentValidation.js";
-import { LEVEL_CATALOGUE_ID_PREFIX } from "./catalogueRegistry.js";
+import { isDerivedCatalogueId, reservedCatalogueIdError } from "./catalogueRegistry.js";
 import { slugify } from "../puzzles/categories.js";
 
 function clone(value) {
@@ -42,14 +42,8 @@ export function validateCatalogueCreation(
   const id = typeof raw?.id === "string" ? raw.id.trim() : "";
 
   if (id) {
-    if (id === "all") {
-      errors.push('id "all" is reserved for the derived All Puzzles catalogue');
-    }
-    if (id === "new") {
-      errors.push('id "new" is reserved for the derived New Puzzles catalogue');
-    }
-    if (id.startsWith(LEVEL_CATALOGUE_ID_PREFIX)) {
-      errors.push(`id prefix "${LEVEL_CATALOGUE_ID_PREFIX}" is reserved for derived level catalogues`);
+    if (isDerivedCatalogueId(id)) {
+      errors.push(reservedCatalogueIdError(id));
     }
     if (catalogues.some(catalogue => catalogue.id === id)) {
       errors.push(`Catalogue "${id}" already exists`);

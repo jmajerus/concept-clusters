@@ -260,7 +260,7 @@ export function renderCatalogueListPage(catalogues, { notice = null } = {}) {
     Cue a published snapshot when you are done; that returns to this list.
     Then <strong>Freeze</strong> from Admin to update the git-bundled player.
     Derived catalogues (All Puzzles,
-    New, level-*) stay out of this list.
+    New, level-*, domain-*) stay out of this list.
     <span class="badge badge-new">new on next freeze</span> marks a published
     D1 row that git does not have yet and that you cued. <span class="badge">held</span>
     stays in authoring play until you cue it — including a finished board

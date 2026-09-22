@@ -1,9 +1,10 @@
 # Taxonomy roadmap
 
-**Status: the "Now" stage below is implemented; everything past it is
-still roadmap.** `domain` exists on `puzzles/categories.js` and groups the
-category-browse screen's cards under headings. There is still no `domain`
-route or landing page. This document records decisions made in advance so
+**Status: the "Now" stage below is implemented, and domain landing pages
+arrived early (2026-09-22) as derived catalogues -- see below; the rest
+is still roadmap.** `domain` exists on `puzzles/categories.js`, groups
+the category-browse screen's cards under headings, and each non-empty
+domain is a derived `domain-<id>` catalogue with its own Library card. This document records decisions made in advance so
 that vocabulary stays stable as the catalog grows, and so that navigation
 can be switched on later without renaming things learners have already
 bookmarked.
@@ -315,9 +316,15 @@ justify.
 statement, estimated time, completion state. Domains begin organizing
 catalogues alongside categories.
 
-**~250+.** Domains become real navigation — `?domain=` routes and landing
-pages. By this point every category has a settled parent, and the tree
-describes structure that already exists.
+**~250+.** Domains become real navigation. **Done at 231 (2026-09-22),
+and not as `?domain=` routes:** each non-empty domain is a derived
+catalogue (`?catalogue=domain-humanities`), the same mechanism as
+`level-*` -- see [CATALOGUES.md](./CATALOGUES.md). A derived catalogue
+gets progress, breadcrumbs, share links, the header picker, and the
+category partition from the existing catalogue plumbing instead of a
+fifth route kind, and the Library's "Subject areas" section shows every
+domain with its count before a single click -- the breadth of the
+collection was previously visible only after opening All Puzzles.
 
 ## The failure mode this staging is designed to avoid
 

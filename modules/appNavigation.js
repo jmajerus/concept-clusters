@@ -1,12 +1,12 @@
 import {
-  primaryCategoryForPuzzle,
   puzzleBelongsToCategory,
   puzzleBelongsToSubcategory
 } from "../puzzles/categories.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
   catalogueById,
-  catalogueContainsPuzzle
+  catalogueContainsPuzzle,
+  primaryCategoryInCatalogue
 } from "./catalogueRegistry.js";
 import {
   parseCatalogueRoute,
@@ -165,7 +165,7 @@ export function createAppNavigation({
       : contextualCategory;
     const routeCategory = requestedCategory || (
       targetCatalogue.id !== ALL_PUZZLES_CATALOGUE_ID
-        ? primaryCategoryForPuzzle(puzzle)
+        ? primaryCategoryInCatalogue(targetCatalogue, puzzle)
         : null
     );
     const requestedSubcategory = subcategory || (
@@ -334,7 +334,7 @@ export function createAppNavigation({
       : null;
     return {
       catalogue: activeCatalogue,
-      originCategory: category || primaryCategoryForPuzzle(puzzle),
+      originCategory: category || primaryCategoryInCatalogue(activeCatalogue, puzzle),
       originSubcategory: subcategory
     };
   }

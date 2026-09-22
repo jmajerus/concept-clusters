@@ -1,5 +1,5 @@
 import { canonicalizePuzzleCategoryReferences, slugify } from "../puzzles/categories.js";
-import { LEVEL_CATALOGUE_ID_PREFIX } from "./catalogueRegistry.js";
+import { isDerivedCatalogueId } from "./catalogueRegistry.js";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
 import { documentForStorage } from "./authoredPuzzleDocument.js";
 import { DraftNotFoundError } from "./draftRepository.js";
@@ -23,8 +23,9 @@ function categoriesOf(document) {
   return Array.isArray(categories) ? categories.filter(value => typeof value === "string") : null;
 }
 
+// Derived catalogues (all, new, level-*, domain-*) have no stored document.
 export function isReservedCatalogueId(id) {
-  return id === "all" || id === "new" || String(id).startsWith(LEVEL_CATALOGUE_ID_PREFIX);
+  return isDerivedCatalogueId(id);
 }
 
 export function catalogueDocumentFromRegistry(catalogue) {

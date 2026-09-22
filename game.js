@@ -18,7 +18,7 @@ import {
   subcategoriesForPuzzleSet
 } from "./puzzles/categories.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
-import { cataloguesForPuzzle, setCatalogueRegistry } from "./modules/catalogueRegistry.js";
+import { cataloguesForPuzzle, domainCatalogues, setCatalogueRegistry } from "./modules/catalogueRegistry.js";
 import {
   createCorpusPuzzleLoader,
   loadPlayCorpus,
@@ -674,11 +674,30 @@ pickerCategories
   });
 if (subcategoryGroup.children.length) pickerEl.appendChild(subcategoryGroup);
 
+// Derived domain catalogues (see domainCatalogues in catalogueRegistry.js)
+// are the one synthetic kind listed here: unlike All/New, each names a
+// real landing page a player might want to jump to. domainCatalogues
+// already returns them alphabetically by title.
+const domainGroup = document.createElement("optgroup");
+domainGroup.label = "Subject areas";
+domainCatalogues(PUZZLES).forEach(catalogue => {
+  const opt = document.createElement("option");
+  opt.value = `catalogue:${catalogue.id}`;
+  opt.textContent = catalogue.title;
+  domainGroup.appendChild(opt);
+  pickerDestinations.set(opt.value, {
+    kind: "catalogue",
+    catalogueId: catalogue.id
+  });
+});
+if (domainGroup.children.length) pickerEl.appendChild(domainGroup);
+
 // Curated catalogues are split by level: meta catalogues collect other
 // catalogues, so grouping and a compact ◈ marker keep that distinction
 // visible both in the open menu and in the select's closed state. Values are
 // prefixed ("catalogue:<id>") to stay unambiguous. Synthetic All/New Puzzles
-// and Library aren't real catalogue objects, so they're deliberately omitted.
+// and Library aren't real catalogue objects, so they're deliberately omitted
+// (domain catalogues are the exception, listed above).
 const catalogueGroup = document.createElement("optgroup");
 catalogueGroup.label = "Catalogues";
 const metaCatalogueGroup = document.createElement("optgroup");
@@ -717,9 +736,9 @@ const CATALOGUE_PICKER_VIEW_KINDS = new Set([
 ]);
 function syncPickerToContext(kind, catalogue, category, subcategory) {
   if (kind === "puzzle") return;
-  const isCuratedCatalogue = !!catalogue &&
-    CATALOGUES.some(entry => entry.id === catalogue.id);
-  if (CATALOGUE_PICKER_VIEW_KINDS.has(kind) && isCuratedCatalogue) {
+  const isListedCatalogue = !!catalogue &&
+    (catalogue.domain || CATALOGUES.some(entry => entry.id === catalogue.id));
+  if (CATALOGUE_PICKER_VIEW_KINDS.has(kind) && isListedCatalogue) {
     pickerEl.value = `catalogue:${catalogue.id}`;
     return;
   }

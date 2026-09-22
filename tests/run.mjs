@@ -58,6 +58,7 @@ import * as simplifiedPuzzleSchema from "./simplified-puzzle-schema.mjs";
 import * as puzzleSymmetryFlags from "./puzzle-symmetry-flags.mjs";
 import * as nodeCaseAudit from "./node-case-audit.mjs";
 import * as learningLevel from "./learning-level.mjs";
+import * as domainCatalogues from "./domain-catalogues.mjs";
 import * as contentServices from "./content-services.mjs";
 import * as authoringBoard from "./authoring-board.mjs";
 import * as catalogueAuthorEngine from "./catalogue-author-engine.mjs";
@@ -147,7 +148,7 @@ const allTests = [
 // quickTests only if it never touches the browser or the dev server.
 const quickTests = [
   mcpAuthoringDomains, lensEngine, learningIntroductionEngine, simplifiedPuzzleSchema,
-  puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine,
+  puzzleSymmetryFlags, nodeCaseAudit, learningLevel, domainCatalogues, contentServices, authoringBoard, authorEngine,
   catalogueAuthorEngine, catalogueReviewPage, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
   contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply,
   freezePublication, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy,
@@ -177,7 +178,7 @@ const sideTests = {
     circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
     conceptLenses, lensEngine, lensAssignment, lensQuiz,
     catalogues, metaCatalogues, learningIntroduction,
-    learningIntroductionEngine, learningLevel,
+    learningIntroductionEngine, learningLevel, domainCatalogues,
     multiCategory, subcategories, domains, infoLinks,
     librarySearch, librarySearchEngine, boot, puzzleManifest,
     starFreeStrip, playCorpus, geometryVisibleSegment, singleClusterLayout
