@@ -1308,6 +1308,27 @@ body.authoring-construct #share-status {
    invitation the way "Play" on a puzzle card is. */
 .card-count { flex: none; font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
 
+/* A category card opens a list, and on a domain catalogue's overview it
+   sits directly among inlined puzzle cards -- a folder among files. With
+   the same border, background, and 14px title as a puzzle card it was
+   getting lost during a quick scan of a long expanded list, so it gets
+   a folder look: a faint tint of --domain-heading (the color already
+   established for subject-level headings), a left accent in the same
+   color, and a display-font title. The count label stays muted (it's a
+   fact, not an invitation -- see .card-count above); the arrow is what
+   says "opens". Puzzle cards are untouched. */
+.category-card {
+  background: rgba(47, 74, 115, 0.05);
+  border-left: 3px solid var(--domain-heading);
+  padding-left: 12px;
+}
+.category-card strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--domain-heading);
+}
+.category-card:hover { background: rgba(47, 74, 115, 0.09); }
+
 /* Bolder and darker than a category card's muted count -- this is the
    one meant to read as an invitation, not just information, so a
    recipient with no other context for this screen still has something
@@ -1514,15 +1535,19 @@ body.boot-failed #context-nav {
   color: var(--domain-heading);
 }
 /* One level below domain-group-heading -- category within domain, on the
-   All Puzzles page (see renderAllPuzzlesGrouped). Smaller and muted
-   rather than colored, so the domain heading above it still reads as the
-   more prominent of the two. */
+   All Puzzles page (see renderAllPuzzlesGrouped) -- and, on a domain
+   catalogue's overview, the heading over an inlined category's puzzles,
+   where it sits beside .category-card folders and is that category's
+   only identity. Same --domain-heading color as those folders and as
+   the domain heading, so "blue = a subject, not a puzzle" holds
+   everywhere; the domain heading above it on All Puzzles still reads as
+   the more prominent of the two by size and letter-spacing. */
 .overview-section-heading.category-group-heading {
   margin-top: 4px;
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
-  color: var(--ink-soft);
+  color: var(--domain-heading);
 }
 /* Plain-text reference index (see renderSubjectSummary in
    overviewRenderer.js) -- a category-group-heading followed by this,
