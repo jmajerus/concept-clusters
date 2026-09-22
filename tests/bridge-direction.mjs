@@ -116,6 +116,63 @@ export async function run(page, baseURL) {
     });
 
     assert.equal(rendered.arrowCount, 2, `${mode}: a completed directed bridge renders two arrows`);
+    if (mode === "sets") {
+      await page.evaluate(() => CC.state.setSim.stop());
+      const box = await page.evaluate(() => {
+        const group = [...document.querySelectorAll("g.node")]
+          .find(element => element.__data__?.word === "lost leverage");
+        const rect = group.querySelector(".bridge-shape").getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      });
+      const before = await page.evaluate(() => {
+        const bridge = CC.state.nodes.find(node => node.word === "lost leverage");
+        return { x: bridge.x, y: bridge.y };
+      });
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2 + 70, box.y + box.height / 2 + 36, { steps: 6 });
+      await page.mouse.up();
+      const followed = await page.evaluate(start => {
+        const bridge = CC.state.nodes.find(node => node.word === "lost leverage");
+        const lines = [...document.querySelectorAll("g.bridge-lines")]
+          .find(group => group.__data__?.term === "lost leverage")
+          .querySelectorAll("line");
+        const distanceToSegment = (px, py, x1, y1, x2, y2) => {
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const lengthSquared = dx * dx + dy * dy || 1;
+          const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
+          return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+        };
+        const arrows = [...document.querySelectorAll("g.bridge-directions")]
+          .find(group => group.__data__?.term === "lost leverage")
+          .querySelectorAll("polygon");
+        return {
+          moved: Math.hypot(bridge.x - start.x, bridge.y - start.y),
+          lineEndsAtBridge: [...lines].every(line =>
+            Math.hypot(
+              Number(line.getAttribute("x2")) - bridge.x,
+              Number(line.getAttribute("y2")) - bridge.y
+            ) < 1
+          ),
+          arrowsOnLines: [...arrows].every(arrow => {
+            const points = arrow.getAttribute("points").split(" ").map(pair => pair.split(",").map(Number));
+            const cx = (points[0][0] + points[1][0] + points[2][0]) / 3;
+            const cy = (points[0][1] + points[1][1] + points[2][1]) / 3;
+            return [...lines].some(line => distanceToSegment(
+              cx, cy,
+              Number(line.getAttribute("x1")),
+              Number(line.getAttribute("y1")),
+              Number(line.getAttribute("x2")),
+              Number(line.getAttribute("y2"))
+            ) < 1.5);
+          })
+        };
+      }, before);
+      assert.ok(followed.moved > 8, "Circle bridge drag did not move the pill");
+      assert.equal(followed.lineEndsAtBridge, true, "Circle bridge lines stayed behind the dragged pill");
+      assert.equal(followed.arrowsOnLines, true, "Circle arrows left the bridge lines after the drag");
+    }
     assert.ok(
       rendered.points.every(points => points && !points.includes("NaN")),
       `${mode}: every arrow has finite geometry`
@@ -175,6 +232,52 @@ export async function run(page, baseURL) {
       `${mode}: a reciprocal bridge renders two opposing arrows on each arm`
     );
   }
+
+  // A canonical arm is drawn to the term inside the circle. Its arrow has
+  // to sit on that line, not on the radius from the circle's center.
+  await page.goto(`${baseURL}/index.html?puzzle=how-light-makes-form&mode=sets&moves=`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  await page.evaluate(() => {
+    const bridge = CC.state.nodes.find(node => node.word === "reflected light");
+    for (const word of ["midtone", "core shadow"]) {
+      CC.handleTap(bridge);
+      CC.handleTap(CC.state.nodes.find(node => node.word === word));
+    }
+    CC.state.setSim.stop();
+    CC.state.paint();
+  });
+  const canonicalArrows = await page.evaluate(() => {
+    const lines = [...document.querySelectorAll("g.bridge-lines")]
+      .find(group => group.__data__?.term === "reflected light")
+      ?.querySelectorAll("line.ideal");
+    const arrows = [...document.querySelectorAll("g.bridge-directions")]
+      .find(group => group.__data__?.term === "reflected light")
+      ?.querySelectorAll("polygon");
+    if (!lines?.length || !arrows?.length) return { lines: lines?.length || 0, arrows: arrows?.length || 0, onLine: false };
+    const distanceToSegment = (px, py, x1, y1, x2, y2) => {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const lengthSquared = dx * dx + dy * dy || 1;
+      const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
+      return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+    };
+    const onLine = [...arrows].every(arrow => {
+      const points = arrow.getAttribute("points").split(" ").map(pair => pair.split(",").map(Number));
+      const cx = (points[0][0] + points[1][0] + points[2][0]) / 3;
+      const cy = (points[0][1] + points[1][1] + points[2][1]) / 3;
+      return [...lines].some(line => distanceToSegment(
+        cx, cy,
+        Number(line.getAttribute("x1")),
+        Number(line.getAttribute("y1")),
+        Number(line.getAttribute("x2")),
+        Number(line.getAttribute("y2"))
+      ) < 1.5);
+    });
+    return { lines: lines.length, arrows: arrows.length, onLine };
+  });
+  assert.equal(canonicalArrows.lines, 2, "canonical bridge did not draw both ideal arms");
+  assert.ok(canonicalArrows.arrows >= 2, "canonical bridge did not draw its direction arrows");
+  assert.equal(canonicalArrows.onLine, true, "canonical arrows sat off their lines");
 
   assert.equal(errors.length, 0, `console errors:\n${errors.join("\n")}`);
 }

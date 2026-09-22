@@ -761,8 +761,15 @@ export function createSetRenderer({
       }
       return { x: c.x, y: c.y + startY + dy + PILL_H_CONST / 2 };
     }
-    // Bridge, connected: the simulation (or a drag pin) owns its position.
-    if (n.connected.length >= 1) return { x: n.x, y: n.y };
+    // Bridge, connected: a drag writes fx/fy immediately and may leave the
+    // simulation stopped (a solved board). Read the pin first so the
+    // lines follow the pill instead of the last settled coordinate.
+    if (n.connected.length >= 1) {
+      return {
+        x: n.fx != null ? n.fx : n.x,
+        y: n.fy != null ? n.fy : n.y
+      };
+    }
     return freePositions.get(n.id);
   }
 
@@ -876,16 +883,48 @@ export function createSetRenderer({
         x2 = p.x - ux * edgeDist;
         y2 = p.y - uy * edgeDist;
       }
+      // The arrow rides the drawn segment. A canonical arm leaves the
+      // circle through the term, not along the radius, so its exterior
+      // end is the circle crossing of that same segment. The radial
+      // boundary sits beside that line.
+      const lineStart = { x: x1, y: y1 };
+      const lineEnd = { x: x2, y: y2 };
       return {
         side: ci, x1, y1, x2, y2,
         ideal: !!(link && link.ideal),
         canonicalResolving: !!(link && link.canonicalResolving),
         partial,
         arrows: partial ? [] : bridgeArmArrows(n, ci),
-        bridgePoint: p,
-        directionPoint: boundaryPoint
+        bridgePoint: lineEnd,
+        directionPoint: circleExitOnSegment(lineStart, lineEnd, c, r) || lineStart
       };
     });
+  }
+
+  // Where the segment from `inside` leaves the circle on its way to
+  // `outside`. A start that is already on or outside the circle is its
+  // own exit, which is the non-canonical arm (drawn from the boundary).
+  function circleExitOnSegment(inside, outside, center, radius) {
+    const sx = inside.x - center.x;
+    const sy = inside.y - center.y;
+    if (sx * sx + sy * sy >= radius * radius - 0.01) {
+      return { x: inside.x, y: inside.y };
+    }
+    const dx = outside.x - inside.x;
+    const dy = outside.y - inside.y;
+    const a = dx * dx + dy * dy;
+    if (a === 0) return null;
+    const b = 2 * (sx * dx + sy * dy);
+    const c0 = sx * sx + sy * sy - radius * radius;
+    const disc = b * b - 4 * a * c0;
+    if (disc < 0) return null;
+    const root = Math.sqrt(disc);
+    const t = [(-b - root) / (2 * a), (-b + root) / (2 * a)]
+      .filter(value => value >= 0 && value <= 1)
+      .sort((left, right) => left - right)
+      .at(-1);
+    if (t == null) return null;
+    return { x: inside.x + dx * t, y: inside.y + dy * t };
   }
 
   // Shared by both the initial render and repositionAll — keyed by side so
@@ -1120,8 +1159,11 @@ export function createSetRenderer({
       .on("drag", (e, d) => {
         const { x, y } = keepClusterOutside(e.x, e.y, d.ci);
         const node = state.setLayout.csNodes[d.ci];
-        node.fx = x; node.fy = y;
-        if (lensLayoutEditable(state)) repositionAll();
+        node.x = node.fx = x;
+        node.y = node.fy = y;
+        node.vx = 0;
+        node.vy = 0;
+        repositionAll();
       })
       .on("end", function (e, d) {
         const authoring = state.layoutAuthoring &&
@@ -1213,6 +1255,7 @@ export function createSetRenderer({
         // Remembered so a tap (see "end" below) can restore it rather than
         // clear it outright — a plain click starting a fresh gesture on an
         // already-dragged pill looks identical to a genuine tap here.
+        d._dragStartX = d.x; d._dragStartY = d.y;
         d._dragStartFx = d.fx; d._dragStartFy = d.fy;
         if (lensLayoutEditable(state)) {
           state.setSim.stop();
@@ -1223,9 +1266,12 @@ export function createSetRenderer({
       .on("drag", function (e, d) {
         d._dragMoved += Math.abs(e.dx) + Math.abs(e.dy);
         const { x, y } = keepOutsideCircles(e.x, e.y);
-        d.fx = x; d.fy = y;
+        d.x = d.fx = x;
+        d.y = d.fy = y;
+        d.vx = 0;
+        d.vy = 0;
         d3.select(this).attr("transform", `translate(${x},${y})`);
-        if (lensLayoutEditable(state)) repositionAll();
+        repositionAll();
       })
       .on("end", function (e, d) {
         const authoring = state.layoutAuthoring &&
@@ -1244,7 +1290,9 @@ export function createSetRenderer({
           // discards this gesture's own negligible drift without
           // erasing a real, previously-dragged pin that a plain tap
           // shouldn't touch.
+          d.x = d._dragStartX; d.y = d._dragStartY;
           d.fx = d._dragStartFx; d.fy = d._dragStartFy;
+          repositionAll();
           // A bridge's tap never goes through a native click (a drag
           // behavior's preventDefault on pointerdown suppresses it,
           // confirmed unreliable to layer a separate click listener
