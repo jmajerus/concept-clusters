@@ -23,3 +23,30 @@ export function derivedLarge(nodeCount) {
 export function largeField(nodeCount) {
   return derivedLarge(nodeCount) ? { large: true } : {};
 }
+
+// ViewBox units, not CSS pixels. The board is width:100% of its container,
+// so a taller viewBox is a taller page and a longer reach to the lens
+// controls under it. Compact puzzles stay on the short canvas. Crowded
+// ones — many nodes, or several clusters whose links can cross — take a
+// wider canvas, and Circle's densest boards take the extra-tall one.
+export const BOARD_CANVAS = {
+  compact: { width: 640, height: 420 },
+  standard: { width: 640, height: 460 },
+  wide: { width: 960, height: 620 },
+  circleWide: { width: 1050, height: 780 }
+};
+
+const COMPACT_NODE_CAP = 8;
+
+export function boardCanvas(puzzle, mode) {
+  const nodes = puzzleNodeCount(puzzle);
+  const clusters = Array.isArray(puzzle?.clusters) ? puzzle.clusters.length : 0;
+  if (nodes > 0 && nodes <= COMPACT_NODE_CAP) return BOARD_CANVAS.compact;
+  if (derivedLarge(nodes)) {
+    return mode === "sets" ? BOARD_CANVAS.circleWide : BOARD_CANVAS.wide;
+  }
+  // Two or more clusters can cross. Star and Circle need the margin for
+  // that; Graph's pills still fit the standard canvas until the large tier.
+  if (mode !== "graph" && clusters >= 2) return BOARD_CANVAS.wide;
+  return BOARD_CANVAS.standard;
+}

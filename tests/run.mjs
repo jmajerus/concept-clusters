@@ -119,6 +119,7 @@ import * as infoLinks from "./info-links.mjs";
 import * as librarySearch from "./library-search.mjs";
 import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
+import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
 import * as wikiLinkCheck from "./wiki-link-check.mjs";
@@ -134,7 +135,7 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment,
+  geometryVisibleSegment, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -154,6 +155,7 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, stagingPlayLinks, boot, puzzleManifest, librarySearchEngine, geometryVisibleSegment,
+  singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
@@ -178,7 +180,7 @@ const sideTests = {
     learningIntroductionEngine, learningLevel,
     multiCategory, subcategories, domains, infoLinks,
     librarySearch, librarySearchEngine, boot, puzzleManifest,
-    starFreeStrip, playCorpus, geometryVisibleSegment
+    starFreeStrip, playCorpus, geometryVisibleSegment, singleClusterLayout
   ]),
   authoring: new Set([
     mcpAuthoringDomains, starLayoutAuthoring, layoutAuthoringModes,

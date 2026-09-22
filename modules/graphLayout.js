@@ -15,6 +15,7 @@ import {
   segmentIntersectsRect,
   segmentsIntersect
 } from "./geometry.js";
+import { singleClusterTermHome } from "./lensLayout.js";
 
 const PILL_H = 30;
 const SEARCH_CLUSTER_CAP = 7;
@@ -40,8 +41,12 @@ function permutationsWithFirstFixed(count) {
   return out;
 }
 
-function clusterAnchors(order, rotation, width, height, scale) {
+function clusterAnchors(order, rotation, width, height, scale, placement = null) {
   const anchors = new Array(order.length);
+  if (placement) {
+    anchors[order[0]] = placement;
+    return anchors;
+  }
   const rx = width * (order.length > 3 ? 0.31 : 0.29) * scale;
   const ry = height * 0.29 * scale;
   order.forEach((clusterIndex, slot) => {
@@ -53,6 +58,47 @@ function clusterAnchors(order, rotation, width, height, scale) {
     };
   });
   return anchors;
+}
+
+// A lone cluster's home, then the same point eased toward the board
+// center. The search keeps the home when it settles cleanly, and only
+// steps inward when that home cannot.
+function loneClusterPlacements(width, height) {
+  const home = singleClusterTermHome(width, height);
+  const angle = Math.atan2(height / 2 - home.y, width / 2 - home.x);
+  return [0, 0.22, 0.45, 0.7].map(blend => ({
+    x: home.x + (width / 2 - home.x) * blend,
+    y: home.y + (height / 2 - home.y) * blend,
+    angle,
+    blend
+  }));
+}
+
+function placeLoneClusterFan(members, hub, anchor, width, height, positions) {
+  const others = members
+    .filter(node => node !== hub)
+    .sort((a, b) => a.word.localeCompare(b.word));
+  const arc = others.reduce((sum, node) => sum + node.w + 22, 0);
+  let radius = others.length ? Math.max(96, arc / Math.PI + 6) : 0;
+  let hubX = anchor.x;
+  let hubY = anchor.y;
+  // A rightward semicircle keeps every spoke clear of the other labels.
+  // If the lower-left home is too close to the bottom for that radius,
+  // lift the hub only as far as the semicircle needs — still left.
+  const room = () => Math.min(hubY - 28, height - hubY - 28, width - hubX - 36);
+  while (others.length && radius > room() && hubY > height * 0.46) hubY -= 6;
+  if (others.length) radius = Math.min(radius, Math.max(72, room()));
+  if (hub) positions.set(hub.id, { x: hubX, y: hubY });
+  let cursor = 0;
+  others.forEach(node => {
+    const mid = cursor + (node.w + 22) / 2;
+    const angle = -Math.PI / 2 + (mid / arc) * Math.PI;
+    cursor += node.w + 22;
+    positions.set(node.id, {
+      x: hubX + Math.cos(angle) * radius,
+      y: hubY + Math.sin(angle) * radius
+    });
+  });
 }
 
 function endpointId(endpoint) {
@@ -73,7 +119,7 @@ function seedCandidate(puzzle, nodes, anchors, width, height) {
   puzzle.clusters.forEach((cluster, ci) => {
     const anchor = anchors[ci];
     const inward = Math.atan2(height / 2 - anchor.y, width / 2 - anchor.x);
-    const hubWord = cluster.seeds[0];
+    const hubWord = cluster.seeds?.[0];
     const members = cluster.terms
       .map(word => nodes.find(node => node.word === word))
       .filter(Boolean);
@@ -111,6 +157,14 @@ function seedCandidate(puzzle, nodes, anchors, width, height) {
         });
       });
     };
+    // On a ring, bridge terms face the board and the rest face away.
+    // A lone cluster opens one fan into the free board, with each spoke
+    // clear of the neighboring pills. A shared arc that is tighter than
+    // the labels collapses under the solver and the spokes cut through them.
+    if (puzzle.clusters.length === 1) {
+      placeLoneClusterFan(members, hub, anchor, width, height, positions);
+      return;
+    }
     placeFan(inwardMembers, inward, 66, Math.min(1.25, inwardMembers.length * 0.48));
     placeFan(outwardMembers, inward + Math.PI, 76, Math.min(1.75, outwardMembers.length * 0.64));
   });
@@ -211,15 +265,18 @@ export function computePrettyGraphLayout({
   const pinned = new Map(nodes
     .filter(node => Number.isFinite(node.fx) && Number.isFinite(node.fy))
     .map(node => [node.id, { x: node.fx, y: node.fy }]));
+  const loneCluster = puzzle.clusters.length === 1;
   const orders = permutationsWithFirstFixed(puzzle.clusters.length);
-  const rotations = Array.from({ length: 12 }, (_, i) =>
-    -Math.PI / 2 + i * Math.PI * 2 / 12
-  );
-  const scales = [0.88, 1];
+  const rotations = loneCluster
+    ? [0]
+    : Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12);
+  const scales = loneCluster ? [1] : [0.88, 1];
+  const placements = loneCluster ? loneClusterPlacements(width, height) : [null];
   let best = null;
 
   orders.forEach(order => rotations.forEach(rotation => scales.forEach(scale => {
-    const anchors = clusterAnchors(order, rotation, width, height, scale);
+    placements.forEach(placement => {
+    const anchors = clusterAnchors(order, rotation, width, height, scale, placement);
     const seeded = seedCandidate(puzzle, nodes, anchors, width, height);
     const clones = nodes.map(node => {
       const point = pinned.get(node.id) || seeded.get(node.id) || {
@@ -242,35 +299,53 @@ export function computePrettyGraphLayout({
       source: byId.get(endpointId(link.source)),
       target: byId.get(endpointId(link.target))
     }));
-    const anchorOf = node => {
+    const sharedAnchor = node => {
       const points = node.gs.map(ci => anchors[ci]);
       return {
         x: points.reduce((sum, point) => sum + point.x, 0) / points.length,
         y: points.reduce((sum, point) => sum + point.y, 0) / points.length
       };
     };
+    // A lone cluster's seed is already the layout. Hold each term on
+    // that spot; pulling everyone to one shared point erases the fan
+    // and the spokes start cutting through pills.
+    const anchorOf = node => loneCluster
+      ? (seeded.get(node.id) || { x: width / 2, y: height / 2 })
+      : sharedAnchor(node);
     const simulation = d3.forceSimulation(clones)
       .randomSource(d3.randomLcg(0.42))
       .force("link", d3.forceLink(cloneLinks).distance(link =>
-        link.source.gs.length > 1 ? 92 : 70
-      ).strength(0.85))
-      .force("charge", d3.forceManyBody().strength(-210))
+        link.source.gs.length > 1 ? 92 : loneCluster ? 110 : 70
+      ).strength(loneCluster ? 0.2 : 0.85))
+      .force("charge", d3.forceManyBody().strength(loneCluster ? -24 : -210))
       .force("collide", d3.forceCollide().radius(node => node.w / 2 + 10).iterations(3))
       .force("x", d3.forceX(node => anchorOf(node).x).strength(node =>
-        node.gs.length > 1 ? 0.08 : 0.16
+        loneCluster ? 0.85 : node.gs.length > 1 ? 0.08 : 0.16
       ))
       .force("y", d3.forceY(node => anchorOf(node).y).strength(node =>
-        node.gs.length > 1 ? 0.08 : 0.16
+        loneCluster ? 0.85 : node.gs.length > 1 ? 0.08 : 0.16
       ))
       .stop();
-    for (let tick = 0; tick < 360; tick++) {
-      simulation.tick();
-      clones.forEach(node => clampNode(node, width, height));
+    let metrics = scoreGraphGeometry(clones, cloneLinks, width, height);
+    const seedIsClean = loneCluster &&
+      metrics.hardOverlaps === 0 &&
+      metrics.lineCrossings === 0 &&
+      metrics.edgeNodeIntersections === 0 &&
+      metrics.boundsViolations === 0;
+    if (!seedIsClean) {
+      for (let tick = 0; tick < (loneCluster ? 120 : 360); tick++) {
+        simulation.tick();
+        clones.forEach(node => clampNode(node, width, height));
+      }
+      metrics = scoreGraphGeometry(clones, cloneLinks, width, height);
     }
     simulation.stop();
-    const metrics = scoreGraphGeometry(clones, cloneLinks, width, height);
-    if (!best || metrics.score < best.metrics.score) {
+    // A clean lower-left home beats an equally clean step toward center.
+    // One real overlap or spoke collision still outweighs that preference.
+    const placed = metrics.score + (placement?.blend || 0) * 4000;
+    if (!best || placed < best.placed) {
       best = {
+        placed,
         metrics,
         order: order.slice(),
         rotation: rounded(rotation),
@@ -281,6 +356,7 @@ export function computePrettyGraphLayout({
         ]))
       };
     }
+    });
   })));
   return best;
 }

@@ -60,6 +60,7 @@ import {
   bridgeArrowPoints,
   bridgeNodeAriaLabel
 } from "./bridgeDirection.js";
+import { singleClusterTermHome } from "./lensLayout.js";
 export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -198,10 +199,15 @@ export function createStarRenderer({
     // Play geometry matches classic Star regardless of strip chrome.
     const boardMidY = H / 2;
     const ringR = Math.min(W, H) * 0.33;
-    const ring = Array.from({ length: nClusters }, (_, i) => {
-      const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
-      return [boardCx + ringR * Math.cos(angle), boardMidY + ringR * Math.sin(angle)];
-    });
+    // A lone title has no ring. Park it in the lower left, matching the
+    // polished search, so the live pull and the later polish agree.
+    const loneHome = nClusters === 1 ? singleClusterTermHome(W, H) : null;
+    const ring = loneHome
+      ? [[loneHome.x, loneHome.y]]
+      : Array.from({ length: nClusters }, (_, i) => {
+        const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
+        return [boardCx + ringR * Math.cos(angle), boardMidY + ringR * Math.sin(angle)];
+      });
 
     // One label per cluster, square-cornered (see the CSS: no `rx`, plain
     // fill:none outline) so it reads as "not a term" at a glance -- kept
@@ -1011,10 +1017,12 @@ export function createStarRenderer({
             (angleOffsets?.get(ci) || 0);
           titleTargets[ci] = fixedTitles
             ? fixedTitles[ci]
-            : {
-                x: W / 2 + ringRadius * Math.cos(angle),
-                y: H / 2 + ringRadius * Math.sin(angle)
-              };
+            : nClusters === 1
+              ? singleClusterTermHome(W, H)
+              : {
+                  x: W / 2 + ringRadius * Math.cos(angle),
+                  y: H / 2 + ringRadius * Math.sin(angle)
+                };
           targets.set(titleNodes[ci], clampTarget(titleNodes[ci], titleTargets[ci]));
         });
 
@@ -1058,7 +1066,12 @@ export function createStarRenderer({
             .filter(word => !portDirections[ci].has(word))
             .map(word => nodes.find(node => node.word === word))
             .filter(Boolean);
-          const outward = Math.atan2(hub.y - H / 2, hub.x - W / 2);
+          // Ring clusters face their ordinary terms outward. A lone
+          // cluster's open space is the rest of the board, so the fan
+          // opens toward center instead of into the corner.
+          const outward = nClusters === 1
+            ? Math.atan2(H / 2 - hub.y, W / 2 - hub.x)
+            : Math.atan2(hub.y - H / 2, hub.x - W / 2);
           const step = Math.min(Math.PI / 4, Math.PI / (ordinary.length + 1));
           ordinary.forEach((node, i) => {
             const angle = outward + (i - (ordinary.length - 1) / 2) * step;
@@ -1224,8 +1237,10 @@ export function createStarRenderer({
           // rotating one cluster center past or away from its neighbor,
           // which also reorients that cluster's ideal endpoints and
           // ordinary fan. Sample those uneven arrangements explicitly.
+          // A lone cluster has no neighbor; sampling those offsets would
+          // walk its title around the board and undo the lower-left home.
           const slotAngle = 2 * Math.PI / nClusters;
-          for (let rotation = 0; rotation < nClusters; rotation++) {
+          if (nClusters > 1) for (let rotation = 0; rotation < nClusters; rotation++) {
             const baseRotation =
               -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
             baseOrder.forEach(ci => {

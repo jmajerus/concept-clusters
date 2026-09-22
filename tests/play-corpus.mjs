@@ -633,6 +633,45 @@ export async function run(page) {
         [1, 1],
         "single-cluster Vocabulary should be solved automatically before its lens"
       );
+      const graphCentroid = await page.evaluate(() => {
+        const box = document.querySelector("#board").viewBox.baseVal;
+        const nodes = CC.state.nodes;
+        const x = nodes.reduce((sum, node) => sum + node.x, 0) / nodes.length;
+        const y = nodes.reduce((sum, node) => sum + node.y, 0) / nodes.length;
+        return { x, y, left: x < box.width / 2, low: y > box.height / 2 };
+      });
+      assert.ok(
+        graphCentroid.left && graphCentroid.low,
+        `graph lone cluster should rest lower-left, got (${graphCentroid.x}, ${graphCentroid.y})`
+      );
+
+      for (const mode of ["star", "sets"]) {
+        await page.goto(
+          `${baseURL}/?puzzle=vocabulary-single-cluster-draft&play&mode=${mode}`,
+          { waitUntil: "networkidle" }
+        );
+        await page.waitForFunction(() =>
+          window.CC?.state?.puzzle?.id === "vocabulary-single-cluster" &&
+          CC.state.phase === "lens-selecting",
+        null, { timeout: 20000 });
+        const place = await page.evaluate(modeName => {
+          const box = document.querySelector("#board").viewBox.baseVal;
+          const point = modeName === "sets"
+            ? CC.state.setLayout.csNodes[0]
+            : null;
+          const x = point
+            ? point.x
+            : CC.state.nodes.reduce((sum, node) => sum + node.x, 0) / CC.state.nodes.length;
+          const y = point
+            ? point.y
+            : CC.state.nodes.reduce((sum, node) => sum + node.y, 0) / CC.state.nodes.length;
+          return { x, y, left: x < box.width / 2, low: y > box.height / 2 };
+        }, mode);
+        assert.ok(
+          place.left && place.low,
+          `${mode} lone cluster should rest lower-left, got (${place.x}, ${place.y})`
+        );
+      }
 
       await page.goto(
         `${baseURL}/?puzzle=lab-browser-unpublished-draft&play&author=layout`,
