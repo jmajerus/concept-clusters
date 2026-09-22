@@ -345,8 +345,26 @@ export function createOverviewRenderer({
   // the call site's own comment) -- an ordered catalogue's whole puzzle
   // list is always shown inline already (wholeCatalogueInlined in
   // renderCatalogueOverviewList), which is the gate that matters there;
-  // count only decides this narrower, per-category case.
-  const INLINE_PUZZLE_LIST_THRESHOLD = 5;
+  // count only decides this narrower, per-category case. Raised from 5
+  // to 7 once the domain catalogues made this the main thing a subject
+  // page is made of: the awkward screen is the *mixed* one (some subjects
+  // cards, some inline lists), and 7 is the smallest value that lets a
+  // whole small domain (Sciences & Mathematics, Earth & Environment, Art
+  // & Design at the time) read as one page with no cards, while a
+  // 10-puzzle category still gets the card whose count summary earns it.
+  const INLINE_PUZZLE_LIST_THRESHOLD = 7;
+
+  // Whether a catalogue's whole subject partition is a single category.
+  // A lone category card is a click that can only go one place, so it
+  // inlines regardless of size -- judged on the catalogue's full
+  // partition, not on the (possibly one-name) domain group
+  // renderDomainGroupedCategoryCards hands renderCategoryCards, since a
+  // multi-domain catalogue with one category per domain still offers a
+  // real choice between cards. Today this is what a single-category
+  // domain catalogue (Business & Management, Communication & Media) is.
+  function isSoleCategory(catalogue) {
+    return categoriesForCatalogue(catalogue, puzzles).length === 1;
+  }
 
   function renderCategoryCards(
     container,
@@ -356,6 +374,7 @@ export function createOverviewRenderer({
     catalogue = null
   ) {
     container.innerHTML = "";
+    const inlineAll = !!catalogue && isSoleCategory(catalogue);
     categoryNames.forEach(name => {
       const info = normalizeInfo(CATEGORIES[name]?.info);
       const categoryPuzzles = availablePuzzles
@@ -368,7 +387,7 @@ export function createOverviewRenderer({
       // the catalogue is ordered (see the call site's own comment --
       // inlining a small category here has no way to reflect its
       // puzzles' actual position in an ordered sequence).
-      if (catalogue && count <= INLINE_PUZZLE_LIST_THRESHOLD) {
+      if (catalogue && (inlineAll || count <= INLINE_PUZZLE_LIST_THRESHOLD)) {
         const heading = document.createElement("h5");
         heading.className = "overview-section-heading category-group-heading";
         heading.textContent = name;

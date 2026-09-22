@@ -255,14 +255,17 @@ export async function run(page, baseURL) {
   );
 
   // Marking it unordered flips the whole screen: the "All puzzles" card
-  // returns, and "Browse by subject" goes back to cards -- Media &
-  // Information Literacy (6 puzzles) stays a card regardless (always
-  // above INLINE_PUZZLE_LIST_THRESHOLD), while History & Society (2
-  // puzzles) now inlines too, since per-category inlining is only
-  // available for an unordered catalogue in the first place. Mutating
-  // the live registry object and re-navigating client-side (not
-  // page.goto, which would reload a fresh, unmutated module instance)
-  // exercises this without a dedicated fixture catalogue.
+  // returns, and "Browse by subject" goes back to per-category groups --
+  // both of which inline here, since per-category inlining is only
+  // available for an unordered catalogue in the first place and both
+  // categories (History & Society 2, Media & Information Literacy 6)
+  // sit at or below INLINE_PUZZLE_LIST_THRESHOLD. The card case (a
+  // category above the threshold staying a card in an unordered
+  // catalogue, and its hover info) is covered by tests/domains.mjs's
+  // Humanities domain catalogue. Mutating the live registry object and
+  // re-navigating client-side (not page.goto, which would reload a
+  // fresh, unmutated module instance) exercises this without a
+  // dedicated fixture catalogue.
   await page.evaluate(() => {
     CC.CATALOGUES.find(c => c.id === "media-literacy-civic-reasoning").ordered = false;
   });
@@ -271,29 +274,24 @@ export async function run(page, baseURL) {
   await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
   await waitForOverview(page, "Media Literacy and Civic Reasoning");
   assert.equal(await page.locator('[data-catalogue-view="all"]').isVisible(), true);
-  const categoryCards = await page.evaluate(() =>
-    Array.from(document.querySelectorAll("#overview-list .overview-card-list .category-card"))
-      .map(card => ({
-        title: card.querySelector("strong").textContent,
-        count: Number(card.querySelector(".card-count").textContent.match(/\d+/)[0])
-      }))
+  assert.equal(await page.locator("#overview-list .category-card[data-category]").count(), 0);
+  const inlineGroups = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list .category-group-heading"))
+      .map(heading => [
+        heading.textContent,
+        heading.nextElementSibling.querySelectorAll("[data-puzzle-id]").length
+      ])
   );
-  assert.deepEqual(
-    Object.fromEntries(categoryCards.map(card => [card.title, card.count])),
-    { "Media & Information Literacy": 6 }
-  );
-  assert.match(
-    await page.locator(".category-group-heading").last().textContent(),
-    /History & Society/
-  );
+  assert.deepEqual(Object.fromEntries(inlineGroups), {
+    "History & Society": 2,
+    "Media & Information Literacy": 6
+  });
 
-  await page.locator('[data-category="media-information-literacy"]').focus();
-  assert.equal(
-    await page.evaluate(() => document.getElementById("term-info").parentElement.id),
-    "puzzle-overview"
+  // The category screen itself is still a real route, reached here by
+  // URL now that nothing on the unordered overview links to it directly.
+  await page.goto(
+    `${baseURL}/index.html?catalogue=media-literacy-civic-reasoning&category=media-information-literacy`
   );
-  assert.match(await page.textContent("#term-info"), /real, sourced, and trustworthy/i);
-  await page.locator('[data-category="media-information-literacy"]').click();
   await waitForOverview(page, "Media & Information Literacy");
   assert.equal(
     new URL(page.url()).searchParams.get("catalogue"),
@@ -453,32 +451,29 @@ export async function run(page, baseURL) {
   );
 
   // Same-document navigation creates meaningful Back/Forward layers.
-  // No real catalogue's categories show as cards by default anymore --
-  // every one is ordered, so its own overview is always fully inlined
-  // (isOrderedCatalogue in overviewRenderer.js) -- so this needs the
-  // same ordered: false mutation used above to get a genuine
-  // intermediate category screen to exercise Back/Forward through.
-  // Client-side Back/Forward (popstate, not a reload) keeps the
-  // mutation in effect the whole way.
+  // No curated catalogue's categories show as cards by default -- every
+  // one is ordered, so its own overview is always fully inlined
+  // (isOrderedCatalogue in overviewRenderer.js) -- but a domain
+  // catalogue is unordered by construction, and Health & Medicine has
+  // three categories with Physiology & Medicine (10 puzzles) above
+  // INLINE_PUZZLE_LIST_THRESHOLD, so it's a genuine intermediate
+  // category screen to exercise Back/Forward through, no mutation needed.
   await page.goto(`${baseURL}/index.html?library`);
   await waitForOverview(page, "Library");
-  await page.evaluate(() => {
-    CC.CATALOGUES.find(c => c.id === "media-literacy-civic-reasoning").ordered = false;
-  });
-  await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
-  await waitForOverview(page, "Media Literacy and Civic Reasoning");
-  await page.locator('[data-category="media-information-literacy"]').click();
-  await waitForOverview(page, "Media & Information Literacy");
-  await page.locator('[data-puzzle-id="quotations-and-attribution"]').click();
-  await waitForPuzzle(page, "quotations-and-attribution");
+  await page.locator('[data-catalogue-id="domain-health-medicine"]').click();
+  await waitForOverview(page, "Health & Medicine");
+  await page.locator('[data-category="physiology-medicine"]').click();
+  await waitForOverview(page, "Physiology & Medicine");
+  await page.locator('[data-puzzle-id="how-the-heart-pumps"]').click();
+  await waitForPuzzle(page, "how-the-heart-pumps");
   await page.goBack();
-  await waitForOverview(page, "Media & Information Literacy");
+  await waitForOverview(page, "Physiology & Medicine");
   await page.goBack();
-  await waitForOverview(page, "Media Literacy and Civic Reasoning");
+  await waitForOverview(page, "Health & Medicine");
   await page.goBack();
   await waitForOverview(page, "Library");
   await page.goForward();
-  await waitForOverview(page, "Media Literacy and Civic Reasoning");
+  await waitForOverview(page, "Health & Medicine");
 
   // The compact global picker lists category and subcategory landing pages,
   // plus real catalogues, but never individual puzzles.
@@ -546,28 +541,26 @@ export async function run(page, baseURL) {
   // Catalogue choices still jump straight to their overviews and remain
   // selected while browsing within that curated context.
 
-  // Fresh page load above means the ordered:false mutation from the
-  // Back/Forward check didn't carry over -- reapply it here to reach a
-  // real category screen (rather than the fully-inlined default) for
-  // the sync check just below.
-  await page.evaluate(() => {
-    CC.CATALOGUES.find(c => c.id === "media-literacy-civic-reasoning").ordered = false;
-  });
-  await page.selectOption("#puzzle-picker", "catalogue:media-literacy-civic-reasoning");
-  await waitForOverview(page, "Media Literacy and Civic Reasoning");
+  // A curated catalogue's overview is fully inlined (ordered), so the
+  // picker-sync-through-a-category check uses the Health & Medicine
+  // domain catalogue, whose Physiology & Medicine is a real card (see
+  // the Back/Forward check above); domain catalogues are listed in the
+  // picker's "Subject areas" group.
+  await page.selectOption("#puzzle-picker", "catalogue:domain-health-medicine");
+  await waitForOverview(page, "Health & Medicine");
   assert.equal(
     new URL(page.url()).searchParams.get("catalogue"),
-    "media-literacy-civic-reasoning"
+    "domain-health-medicine"
   );
   assert.equal(
     await page.locator("#puzzle-picker").inputValue(),
-    "catalogue:media-literacy-civic-reasoning"
+    "catalogue:domain-health-medicine"
   );
-  await page.locator('[data-category="media-information-literacy"]').click();
-  await waitForOverview(page, "Media & Information Literacy");
+  await page.locator('[data-category="physiology-medicine"]').click();
+  await waitForOverview(page, "Physiology & Medicine");
   assert.equal(
     await page.locator("#puzzle-picker").inputValue(),
-    "catalogue:media-literacy-civic-reasoning"
+    "catalogue:domain-health-medicine"
   );
   await page.goto(`${baseURL}/index.html?catalogue=getting-started&view=all`);
   await waitForOverview(page, "All puzzles in Getting Started");

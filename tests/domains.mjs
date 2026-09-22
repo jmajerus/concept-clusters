@@ -75,8 +75,8 @@ export async function run(page, baseURL) {
   // to inline once unordered (none exceed
   // INLINE_PUZZLE_LIST_THRESHOLD), so this exercises domain headings
   // over inline category groups, not cards -- the card case (a category
-  // above the threshold, staying a card even once unordered) is what
-  // tests/catalogues.mjs's Media Literacy and Civic Reasoning covers.
+  // above the threshold, staying a card even once unordered) is checked
+  // on the Humanities domain catalogue below.
   await page.goto(`${baseURL}/index.html?catalogue=concept-lenses`);
   await waitForOverview(page, "Concept Lenses");
   await page.evaluate(() => {
@@ -203,6 +203,38 @@ export async function run(page, baseURL) {
       `${slug} shown inside the Humanities catalogue`
     );
   }
+  // A category above INLINE_PUZZLE_LIST_THRESHOLD stays a card even in
+  // an unordered catalogue (History & Society, 26 puzzles), with the
+  // category's own info on hover/focus; a category at or below it
+  // (Humanities at 6, Religion at 1) inlines under a heading instead.
+  assert.ok(humanitiesCards.includes("history-society"));
+  assert.ok(!humanitiesCards.includes("humanities"));
+  assert.ok(!humanitiesCards.includes("religion"));
+  assert.deepEqual(
+    await page.locator("#overview-list .category-group-heading").allTextContents(),
+    ["Humanities", "Religion"]
+  );
+  await page.locator('[data-category="history-society"]').focus();
+  assert.equal(
+    await page.evaluate(() => document.getElementById("term-info").parentElement.id),
+    "puzzle-overview"
+  );
+  assert.match(await page.textContent("#term-info"), /built, governed, and upended/i);
+
+  // A domain whose partition is a single category inlines it regardless
+  // of size -- Communication & Media's one category has 10 puzzles,
+  // above INLINE_PUZZLE_LIST_THRESHOLD, but a lone card is a click that
+  // can only go one place (isSoleCategory in overviewRenderer.js).
+  await page.goto(`${baseURL}/index.html?catalogue=domain-communication-media`);
+  await waitForOverview(page, "Communication & Media");
+  assert.equal(await page.locator("#overview-list .category-card[data-category]").count(), 0);
+  assert.deepEqual(
+    await page.locator("#overview-list .category-group-heading").allTextContents(),
+    ["Media & Information Literacy"]
+  );
+  assert.equal(await page.locator("#overview-list [data-puzzle-id]").count(), 10);
+  await page.goto(`${baseURL}/index.html?catalogue=domain-humanities`);
+  await waitForOverview(page, "Humanities");
 
   // Its flat list groups by category (like All Puzzles) with no domain
   // headings, every member exactly once.

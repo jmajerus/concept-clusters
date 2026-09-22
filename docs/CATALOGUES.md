@@ -173,8 +173,8 @@ Puzzles alone would mean inlining the entire collection.
 
 An *unordered* catalogue (`ordered: false`) keeps the "All puzzles"
 card -- with no sequence to show at a glance, the flat click-through
-still makes sense. Below `INLINE_PUZZLE_LIST_THRESHOLD` puzzles (5, in
-`overviewRenderer.js`) *within a single category*, the "Browse by
+still makes sense. At or below `INLINE_PUZZLE_LIST_THRESHOLD` puzzles (7,
+in `overviewRenderer.js`) *within a single category*, the "Browse by
 subject" cards below it inline that category's puzzles the same way,
 under a small heading instead of a card leading to its own screen --
 this is unordered-only too: inlining a small category for an ordered
@@ -183,6 +183,12 @@ small, with no regard for where those puzzles actually fall in the
 sequence (this is exactly why the catalogue-level card is skipped
 entirely for an ordered catalogue instead of applying the same
 per-category logic there).
+A catalogue whose partition is a single category inlines it regardless
+of size: one card is a click that can only go one place. Judged on the
+whole partition, not per domain group -- a multi-domain catalogue with
+one category per domain still offers a real choice between cards. Today
+this is what a single-category domain catalogue (Business & Management,
+Communication & Media) is. See isSoleCategory in `overviewRenderer.js`.
 
 When the catalogue-level list is inlined (any ordered catalogue), the
 "Browse by subject" section itself becomes "By subject": a plain-text
