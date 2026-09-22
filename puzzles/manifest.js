@@ -5,6 +5,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "energy-flow",
     "module": "./science/energy-flow.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "energy-flow",
       "title": "Energy flow in living systems",
@@ -33,6 +34,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "math-foundations",
     "module": "./math/math-foundations.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "math-foundations",
       "title": "Math foundations",
@@ -62,6 +64,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "states-of-matter",
     "module": "./science/states-of-matter.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "states-of-matter",
       "title": "States of matter",
@@ -89,6 +92,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "democracy-history",
     "module": "./history-society/democracy-history.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "democracy-history",
       "title": "Democracy through history",
@@ -118,6 +122,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "sentence-structure",
     "module": "./language-arts/sentence-structure.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "sentence-structure",
       "title": "English sentence structure",
@@ -146,6 +151,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "body-systems",
     "module": "./science/body-systems.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "body-systems",
       "title": "Human body systems",
@@ -175,6 +181,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "algebra-basics",
     "module": "./math/algebra-basics.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "algebra-basics",
       "title": "Algebra basics",
@@ -203,6 +210,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "data-probability",
     "module": "./math/data-probability.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "data-probability",
       "title": "Data & probability",
@@ -232,6 +240,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "ancient-civilizations",
     "module": "./history-society/ancient-civilizations.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "ancient-civilizations",
       "title": "Ancient civilizations",
@@ -261,6 +270,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "economic-systems",
     "module": "./history-society/economic-systems.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "economic-systems",
       "title": "Economic systems",
@@ -289,6 +299,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "literary-devices",
     "module": "./language-arts/literary-devices.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "literary-devices",
       "title": "Literary devices",
@@ -317,6 +328,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "poetic-forms",
     "module": "./language-arts/poetic-forms.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "poetic-forms",
       "title": "Poetic forms",
@@ -344,6 +356,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "authoritarian-regimes",
     "module": "./history-society/authoritarian-regimes.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "authoritarian-regimes",
       "title": "20th-century authoritarian regimes",
@@ -372,6 +385,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "psychology-schools",
     "module": "./psychology/psychology-schools.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "psychology-schools",
       "title": "Schools of psychology",
@@ -400,6 +414,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "sociology-paradigms",
     "module": "./sociology/sociology-paradigms.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "sociology-paradigms",
       "title": "Sociological paradigms",
@@ -428,6 +443,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "epistemology-schools",
     "module": "./philosophy/epistemology-schools.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "epistemology-schools",
       "title": "Theories of knowledge",
@@ -454,6 +470,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "fundamental-forces",
     "module": "./science/fundamental-forces.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "fundamental-forces",
       "title": "Fundamental forces of physics",
@@ -489,6 +506,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "philosophy-branches",
     "module": "./philosophy/philosophy-branches.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "philosophy-branches",
       "title": "Branches of philosophy",
@@ -524,6 +542,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "revolutions-modern-world",
     "module": "./history-society/revolutions-modern-world.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "revolutions-modern-world",
       "title": "Revolutions of the modern world",
@@ -559,6 +578,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "media-literacy",
     "module": "./media-information-literacy/media-literacy.js",
+    "published": "2026-07-23",
     "browse": {
       "id": "media-literacy",
       "title": "Misinformation & media literacy",
@@ -585,6 +605,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "social-media-hygiene",
     "module": "./media-information-literacy/social-media-hygiene.js",
+    "published": "2026-07-24",
     "browse": {
       "id": "social-media-hygiene",
       "title": "Social media hygiene",
@@ -614,6 +635,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "quotations-and-attribution",
     "module": "./media-information-literacy/quotations-and-attribution.js",
+    "published": "2026-07-24",
     "browse": {
       "id": "quotations-and-attribution",
       "title": "Quotations and attribution",
@@ -663,6 +685,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "images-out-of-context",
     "module": "./media-information-literacy/images-out-of-context.js",
+    "published": "2026-07-24",
     "browse": {
       "id": "images-out-of-context",
       "title": "Images out of context",
@@ -712,6 +735,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "ai-generated-synthetic-media",
     "module": "./media-information-literacy/ai-generated-synthetic-media.js",
+    "published": "2026-07-24",
     "browse": {
       "id": "ai-generated-synthetic-media",
       "title": "AI-generated and synthetic media",
@@ -753,6 +777,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "breathing-gas-exchange",
     "module": "./physiology-medicine/breathing-gas-exchange.js",
+    "published": "2026-07-24",
     "browse": {
       "id": "breathing-gas-exchange",
       "title": "Breathing and gas exchange",
@@ -782,6 +807,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-the-heart-pumps",
     "module": "./physiology-medicine/how-the-heart-pumps.js",
+    "published": "2026-07-24",
     "browse": {
       "id": "how-the-heart-pumps",
       "title": "How the heart pumps",
@@ -811,6 +837,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "integumentary-system",
     "module": "./physiology-medicine/integumentary-system.js",
+    "published": "2026-07-24",
     "browse": {
       "id": "integumentary-system",
       "title": "The integumentary system",
@@ -839,6 +866,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "maintaining-homeostasis",
     "module": "./physiology-medicine/maintaining-homeostasis.js",
+    "published": "2026-07-25",
     "browse": {
       "id": "maintaining-homeostasis",
       "title": "Maintaining homeostasis",
@@ -903,6 +931,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "interpreting-a-text",
     "module": "./humanities/interpreting-a-text.js",
+    "published": "2026-07-27",
     "browse": {
       "id": "interpreting-a-text",
       "title": "Interpreting a text",
@@ -963,6 +992,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "reading-a-painting",
     "module": "./humanities/reading-a-painting.js",
+    "published": "2026-07-27",
     "browse": {
       "id": "reading-a-painting",
       "title": "Reading a painting",
@@ -1024,6 +1054,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "myth-ritual-and-symbol",
     "module": "./humanities/myth-ritual-and-symbol.js",
+    "published": "2026-07-27",
     "browse": {
       "id": "myth-ritual-and-symbol",
       "title": "Myth, ritual, and symbol",
@@ -1086,6 +1117,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "lacans-three-registers",
     "module": "./psychology/lacans-three-registers.js",
+    "published": "2026-07-27",
     "browse": {
       "id": "lacans-three-registers",
       "title": "Lacan's three registers",
@@ -1135,6 +1167,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "climate-and-livelihoods",
     "module": "./geography/climate-and-livelihoods.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "climate-and-livelihoods",
       "title": "Climate and livelihoods across regions",
@@ -1206,6 +1239,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "river-basins-and-human-life",
     "module": "./geography/river-basins-and-human-life.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "river-basins-and-human-life",
       "title": "River basins and human life",
@@ -1277,6 +1311,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "evidence-and-inference-across-disciplines",
     "module": "./media-information-literacy/evidence-and-inference-across-disciplines.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "evidence-and-inference-across-disciplines",
       "title": "Evidence and inference across disciplines",
@@ -1356,6 +1391,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "revolutions-as-a-process",
     "module": "./history-society/revolutions-as-a-process.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "revolutions-as-a-process",
       "title": "Revolutions as a process",
@@ -1435,6 +1471,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "signals-and-regulation-in-the-body",
     "module": "./physiology-medicine/signals-and-regulation-in-the-body.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "signals-and-regulation-in-the-body",
       "title": "Signals and regulation in the body",
@@ -1509,6 +1546,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "performance-creates-meaning",
     "module": "./humanities/performance-creates-meaning.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "performance-creates-meaning",
       "title": "Performance creates meaning",
@@ -1589,6 +1627,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-web-canon",
     "module": "./computer-science/the-web-canon.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "the-web-canon",
       "title": "The Web Canon",
@@ -1659,6 +1698,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-webs-bargain",
     "module": "./computer-science/the-webs-bargain.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "the-webs-bargain",
       "title": "The Web's Bargain",
@@ -1730,6 +1770,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-programmers-bargain",
     "module": "./computer-science/the-programmers-bargain.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "the-programmers-bargain",
       "title": "The Programmer's Bargain",
@@ -1798,6 +1839,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "language-design-choices",
     "module": "./computer-science/language-design-choices.js",
+    "published": "2026-08-07",
     "browse": {
       "id": "language-design-choices",
       "title": "Language design choices",
@@ -1841,6 +1883,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "research-languages-and-future-directions",
     "module": "./computer-science/research-languages-and-future-directions.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "research-languages-and-future-directions",
       "title": "Research languages and future directions",
@@ -1927,6 +1970,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "from-research-language-to-production",
     "module": "./computer-science/from-research-language-to-production.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "from-research-language-to-production",
       "title": "From research language to production",
@@ -2014,6 +2058,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "designing-for-programmer-ergonomics",
     "module": "./computer-science/designing-for-programmer-ergonomics.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "designing-for-programmer-ergonomics",
       "title": "Designing for programmer ergonomics",
@@ -2112,6 +2157,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "where-failures-stop",
     "module": "./computer-science/where-failures-stop.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "where-failures-stop",
       "title": "Where failures stop",
@@ -2228,6 +2274,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "learning-from-examples",
     "module": "./computer-science/learning-from-examples.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "learning-from-examples",
       "title": "Learning from examples",
@@ -2288,6 +2335,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "neural-networks-layer-by-layer",
     "module": "./computer-science/neural-networks-layer-by-layer.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "neural-networks-layer-by-layer",
       "title": "Neural networks, layer by layer",
@@ -2353,6 +2401,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-language-models-generate-text",
     "module": "./computer-science/how-language-models-generate-text.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "how-language-models-generate-text",
       "title": "How language models generate text",
@@ -2418,6 +2467,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "choice-under-influence",
     "module": "./computer-science/choice-under-influence.js",
+    "published": "2026-07-31",
     "browse": {
       "id": "choice-under-influence",
       "title": "Choice Under Influence",
@@ -2467,6 +2517,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-hidden-transaction",
     "module": "./computer-science/the-hidden-transaction.js",
+    "published": "2026-07-31",
     "browse": {
       "id": "the-hidden-transaction",
       "title": "The Hidden Transaction",
@@ -2518,6 +2569,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "manufactured-pressure",
     "module": "./computer-science/manufactured-pressure.js",
+    "published": "2026-07-31",
     "browse": {
       "id": "manufactured-pressure",
       "title": "Manufactured Pressure",
@@ -2569,6 +2621,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "control-and-exit",
     "module": "./computer-science/control-and-exit.js",
+    "published": "2026-07-31",
     "browse": {
       "id": "control-and-exit",
       "title": "Control and Exit",
@@ -2623,6 +2676,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "after-the-click",
     "module": "./computer-science/after-the-click.js",
+    "published": "2026-07-31",
     "browse": {
       "id": "after-the-click",
       "title": "After the Click",
@@ -2680,6 +2734,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "when-manipulation-becomes-normal",
     "module": "./business-organizations/when-manipulation-becomes-normal.js",
+    "published": "2026-07-31",
     "browse": {
       "id": "when-manipulation-becomes-normal",
       "title": "When Manipulation Becomes Normal",
@@ -2737,6 +2792,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "restoring-honest-choice",
     "module": "./business-organizations/restoring-honest-choice.js",
+    "published": "2026-08-01",
     "browse": {
       "id": "restoring-honest-choice",
       "title": "Restoring Honest Choice",
@@ -2804,6 +2860,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "when-systems-stop-seeing-people",
     "module": "./history-society/when-systems-stop-seeing-people.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "when-systems-stop-seeing-people",
       "title": "When systems stop seeing people",
@@ -2871,6 +2928,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "distortion-and-magnification",
     "module": "./sociology/distortion-and-magnification.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "distortion-and-magnification",
       "title": "Distortion and magnification",
@@ -2942,6 +3000,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "restorative-patterns",
     "module": "./humanities/restorative-patterns.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "restorative-patterns",
       "title": "Restorative patterns",
@@ -3008,6 +3067,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "from-person-to-object",
     "module": "./humanities/from-person-to-object.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "from-person-to-object",
       "title": "From person to object",
@@ -3082,6 +3142,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "when-correction-fails",
     "module": "./history-society/when-correction-fails.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "when-correction-fails",
       "title": "When correction fails",
@@ -3156,6 +3217,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "moral-disengagement-and-moral-inversion",
     "module": "./psychology/moral-disengagement-and-moral-inversion.js",
+    "published": "2026-07-30",
     "browse": {
       "id": "moral-disengagement-and-moral-inversion",
       "title": "Moral disengagement and moral inversion",
@@ -3237,6 +3299,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "closing-the-loop",
     "module": "./engineering/closing-the-loop.js",
+    "published": "2026-07-31",
     "browse": {
       "id": "closing-the-loop",
       "title": "Closing the Loop",
@@ -3283,6 +3346,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "circuit-theory-basics",
     "module": "./engineering/circuit-theory-basics.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "circuit-theory-basics",
       "title": "Circuit Theory Basics",
@@ -3348,6 +3412,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "microcontroller-families",
     "module": "./engineering/microcontroller-families.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "microcontroller-families",
       "title": "Microcontroller Families",
@@ -3414,6 +3479,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "microcontroller-applications",
     "module": "./engineering/microcontroller-applications.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "microcontroller-applications",
       "title": "Microcontroller Applications",
@@ -3480,6 +3546,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "what-public-health-does",
     "module": "./public-health/what-public-health-does.js",
+    "published": "2026-08-01",
     "browse": {
       "id": "what-public-health-does",
       "title": "What Public Health Does",
@@ -3527,6 +3594,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "from-evidence-to-action",
     "module": "./public-health/from-evidence-to-action.js",
+    "published": "2026-08-01",
     "browse": {
       "id": "from-evidence-to-action",
       "title": "From Evidence to Action",
@@ -3593,6 +3661,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "what-survived-the-record",
     "module": "./media-information-literacy/what-survived-the-record.js",
+    "published": "2026-08-01",
     "browse": {
       "id": "what-survived-the-record",
       "title": "What survived the record",
@@ -3688,6 +3757,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "counted-and-modeled",
     "module": "./media-information-literacy/counted-and-modeled.js",
+    "published": "2026-08-01",
     "browse": {
       "id": "counted-and-modeled",
       "title": "Counted and modeled",
@@ -3774,6 +3844,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "before-it-crosses",
     "module": "./science/before-it-crosses.js",
+    "published": "2026-08-01",
     "browse": {
       "id": "before-it-crosses",
       "title": "Before it crosses",
@@ -3857,6 +3928,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "building-atoms-and-ions",
     "module": "./chemistry/building-atoms-and-ions.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "building-atoms-and-ions",
       "title": "Building atoms and ions",
@@ -3930,6 +4002,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "why-atoms-bond",
     "module": "./chemistry/why-atoms-bond.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "why-atoms-bond",
       "title": "Why atoms bond",
@@ -4007,6 +4080,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "reading-chemical-reactions",
     "module": "./chemistry/reading-chemical-reactions.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "reading-chemical-reactions",
       "title": "Reading and balancing chemical equations",
@@ -4080,6 +4154,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "energy-rate-and-equilibrium",
     "module": "./chemistry/energy-rate-and-equilibrium.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "energy-rate-and-equilibrium",
       "title": "Energy, rate, and equilibrium",
@@ -4172,6 +4247,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "inside-the-cell",
     "module": "./biology/inside-the-cell.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "inside-the-cell",
       "title": "Inside the cell",
@@ -4259,6 +4335,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "cell-division-and-inheritance",
     "module": "./biology/cell-division-and-inheritance.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "cell-division-and-inheritance",
       "title": "Cell division and inheritance",
@@ -4346,6 +4423,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-populations-evolve",
     "module": "./biology/how-populations-evolve.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "how-populations-evolve",
       "title": "How populations evolve",
@@ -4434,6 +4512,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "from-dna-to-gene-expression",
     "module": "./biology/from-dna-to-gene-expression.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "from-dna-to-gene-expression",
       "title": "From DNA to gene expression",
@@ -4509,6 +4588,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "from-reads-to-a-genome",
     "module": "./biology/from-reads-to-a-genome.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "from-reads-to-a-genome",
       "title": "From reads to a genome",
@@ -4585,6 +4665,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "reading-genetic-variation",
     "module": "./biology/reading-genetic-variation.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "reading-genetic-variation",
       "title": "Reading genetic variation",
@@ -4670,6 +4751,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "when-biology-becomes-data",
     "module": "./biology/when-biology-becomes-data.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "when-biology-becomes-data",
       "title": "When biology becomes data",
@@ -4751,6 +4833,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "aligning-biological-sequences",
     "module": "./computer-science/aligning-biological-sequences.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "aligning-biological-sequences",
       "title": "Aligning biological sequences",
@@ -4829,6 +4912,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "reproducible-bioinformatics-workflows",
     "module": "./computer-science/reproducible-bioinformatics-workflows.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "reproducible-bioinformatics-workflows",
       "title": "Reproducible bioinformatics workflows",
@@ -4911,6 +4995,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-a-picture-directs-the-eye",
     "module": "./art/how-a-picture-directs-the-eye.js",
+    "published": "2026-08-02",
     "browse": {
       "id": "how-a-picture-directs-the-eye",
       "title": "How a Picture Directs the Eye",
@@ -4972,6 +5057,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-work-of-color",
     "module": "./art/the-work-of-color.js",
+    "published": "2026-08-02",
     "browse": {
       "id": "the-work-of-color",
       "title": "The Work of Color",
@@ -5041,6 +5127,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "why-art-changes-what-it-sees",
     "module": "./art/why-art-changes-what-it-sees.js",
+    "published": "2026-08-02",
     "browse": {
       "id": "why-art-changes-what-it-sees",
       "title": "Why Art Changes What It Sees",
@@ -5113,6 +5200,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "where-meaning-comes-from",
     "module": "./art/where-meaning-comes-from.js",
+    "published": "2026-08-02",
     "browse": {
       "id": "where-meaning-comes-from",
       "title": "Where Meaning Comes From",
@@ -5199,6 +5287,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "what-a-test-result-means",
     "module": "./public-health/what-a-test-result-means.js",
+    "published": "2026-08-03",
     "browse": {
       "id": "what-a-test-result-means",
       "title": "What a Test Result Means",
@@ -5267,6 +5356,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "film-classics",
     "module": "./trivia/film-classics.js",
+    "published": "2026-08-03",
     "browse": {
       "id": "film-classics",
       "title": "Film Classics",
@@ -5305,6 +5395,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "television-landmarks",
     "module": "./trivia/television-landmarks.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "television-landmarks",
       "title": "Television Landmarks",
@@ -5361,6 +5452,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "popular-music-milestones",
     "module": "./trivia/popular-music-milestones.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "popular-music-milestones",
       "title": "Popular Music Milestones",
@@ -5429,6 +5521,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "video-game-history",
     "module": "./trivia/video-game-history.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "video-game-history",
       "title": "Video Game History",
@@ -5486,6 +5579,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "music-theory-basics",
     "module": "./music/music-theory-basics.js",
+    "published": "2026-08-04",
     "browse": {
       "id": "music-theory-basics",
       "title": "Music theory basics",
@@ -5522,6 +5616,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "film-theory-basics",
     "module": "./film/film-theory-basics.js",
+    "published": "2026-08-04",
     "browse": {
       "id": "film-theory-basics",
       "title": "Film theory basics",
@@ -5559,6 +5654,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "data-science-basics",
     "module": "./data-science/data-science-basics.js",
+    "published": "2026-08-05",
     "browse": {
       "id": "data-science-basics",
       "title": "Data science basics",
@@ -5596,6 +5692,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "game-theory-basics",
     "module": "./math/game-theory-basics.js",
+    "published": "2026-08-05",
     "browse": {
       "id": "game-theory-basics",
       "title": "Game theory basics",
@@ -5641,6 +5738,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "finite-and-infinite-games",
     "module": "./philosophy/finite-and-infinite-games.js",
+    "published": "2026-08-05",
     "browse": {
       "id": "finite-and-infinite-games",
       "title": "Finite and infinite games",
@@ -5687,6 +5785,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "evolution-of-cooperation",
     "module": "./economics/evolution-of-cooperation.js",
+    "published": "2026-08-05",
     "browse": {
       "id": "evolution-of-cooperation",
       "title": "The evolution of cooperation",
@@ -5733,6 +5832,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-couples-get-stuck",
     "module": "./psychology/how-couples-get-stuck.js",
+    "published": "2026-08-06",
     "browse": {
       "id": "how-couples-get-stuck",
       "title": "How couples get stuck",
@@ -5791,6 +5891,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "governing-the-commons",
     "module": "./economics/governing-the-commons.js",
+    "published": "2026-08-06",
     "browse": {
       "id": "governing-the-commons",
       "title": "Governing the commons",
@@ -5847,6 +5948,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "ways-out-of-a-conflict",
     "module": "./psychology/ways-out-of-a-conflict.js",
+    "published": "2026-08-06",
     "browse": {
       "id": "ways-out-of-a-conflict",
       "title": "Ways out of a conflict",
@@ -5916,6 +6018,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "classical-narrative-architecture",
     "module": "./literary-theory-poetics/classical-narrative-architecture.js",
+    "published": "2026-08-07",
     "browse": {
       "id": "classical-narrative-architecture",
       "title": "Classical narrative architecture",
@@ -5968,6 +6071,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-birth-of-the-drive",
     "module": "./psychology/the-birth-of-the-drive.js",
+    "published": "2026-08-07",
     "browse": {
       "id": "the-birth-of-the-drive",
       "title": "The Birth of the Drive",
@@ -6026,6 +6130,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "confronting-the-shadow",
     "module": "./psychology/confronting-the-shadow.js",
+    "published": "2026-08-07",
     "browse": {
       "id": "confronting-the-shadow",
       "title": "Confronting the Shadow",
@@ -6084,6 +6189,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "models-of-the-divided-mind",
     "module": "./psychology/models-of-the-divided-mind.js",
+    "published": "2026-08-07",
     "browse": {
       "id": "models-of-the-divided-mind",
       "title": "Models of the Divided Mind",
@@ -6154,6 +6260,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-manufactured-desire",
     "module": "./philosophy/the-manufactured-desire.js",
+    "published": "2026-08-07",
     "browse": {
       "id": "the-manufactured-desire",
       "title": "The Manufactured Desire",
@@ -6211,6 +6318,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "solidarity-in-brokenness",
     "module": "./philosophy/solidarity-in-brokenness.js",
+    "published": "2026-08-07",
     "browse": {
       "id": "solidarity-in-brokenness",
       "title": "Solidarity in Brokenness",
@@ -6275,6 +6383,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "exit-voice-and-loyalty",
     "module": "./economics/exit-voice-and-loyalty.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "exit-voice-and-loyalty",
       "title": "Exit, voice, and loyalty",
@@ -6330,6 +6439,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "why-leaving-isnt-free",
     "module": "./economics/why-leaving-isnt-free.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "why-leaving-isnt-free",
       "title": "Why leaving isn't free",
@@ -6384,6 +6494,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "what-gets-said-in-the-open",
     "module": "./sociology/what-gets-said-in-the-open.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "what-gets-said-in-the-open",
       "title": "What gets said in the open",
@@ -6437,6 +6548,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "what-gets-said-offstage",
     "module": "./sociology/what-gets-said-offstage.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "what-gets-said-offstage",
       "title": "What gets said offstage",
@@ -6502,6 +6614,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "designed-not-to-choose",
     "module": "./psychology/designed-not-to-choose.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "designed-not-to-choose",
       "title": "Designed not to choose",
@@ -6553,6 +6666,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "sound-design-in-film",
     "module": "./film/sound-design-in-film.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "sound-design-in-film",
       "title": "Sound design in film",
@@ -6613,6 +6727,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "film-movements",
     "module": "./film/film-movements.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "film-movements",
       "title": "Film movements: Expressionism, Neorealism, New Wave",
@@ -6666,6 +6781,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "genre-and-spectatorship",
     "module": "./film/genre-and-spectatorship.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "genre-and-spectatorship",
       "title": "Genre and spectatorship",
@@ -6726,6 +6842,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-groups-other-task",
     "module": "./business-organizations/the-groups-other-task.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "the-groups-other-task",
       "title": "The Group's Other Task",
@@ -6788,6 +6905,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-uses-of-hierarchy",
     "module": "./business-organizations/the-uses-of-hierarchy.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "the-uses-of-hierarchy",
       "title": "The Uses of Hierarchy",
@@ -6859,6 +6977,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "when-the-structure-stops-holding",
     "module": "./business-organizations/when-the-structure-stops-holding.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "when-the-structure-stops-holding",
       "title": "When the Structure Stops Holding",
@@ -6915,6 +7034,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "taking-off-the-engineering-hat",
     "module": "./business-organizations/taking-off-the-engineering-hat.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "taking-off-the-engineering-hat",
       "title": "Taking Off the Engineering Hat",
@@ -6993,6 +7113,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-leader-written-large",
     "module": "./business-organizations/the-leader-written-large.js",
+    "published": "2026-08-08",
     "browse": {
       "id": "the-leader-written-large",
       "title": "The Leader Written Large",
@@ -7054,6 +7175,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "diatonic-modes",
     "module": "./music/diatonic-modes.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "diatonic-modes",
       "title": "Diatonic modes",
@@ -7094,6 +7216,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "power-authority-and-the-state",
     "module": "./political-science/power-authority-and-the-state.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "power-authority-and-the-state",
       "title": "Power, Authority, and the State",
@@ -7136,6 +7259,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "separation-of-powers-and-federalism",
     "module": "./political-science/separation-of-powers-and-federalism.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "separation-of-powers-and-federalism",
       "title": "Separation of Powers and Federalism",
@@ -7172,6 +7296,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "power-over-power-to",
     "module": "./political-science/power-over-power-to.js",
+    "published": "2026-08-09",
     "browse": {
       "id": "power-over-power-to",
       "title": "Power Over, Power To",
@@ -7238,6 +7363,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "when-attention-isnt-a-choice",
     "module": "./psychology/when-attention-isnt-a-choice.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "when-attention-isnt-a-choice",
       "title": "When Attention Isn't a Choice",
@@ -7301,6 +7427,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "flow-and-the-autotelic-self",
     "module": "./psychology/flow-and-the-autotelic-self.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "flow-and-the-autotelic-self",
       "title": "Flow and the Autotelic Self",
@@ -7349,6 +7476,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-evolutionary-uses-of-play",
     "module": "./anthropology/the-evolutionary-uses-of-play.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "the-evolutionary-uses-of-play",
       "title": "The Evolutionary Uses of Play",
@@ -7378,6 +7506,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "true-self-false-self",
     "module": "./psychology/true-self-false-self.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "true-self-false-self",
       "title": "True Self, False Self",
@@ -7441,6 +7570,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "freedom-from-freedom-to",
     "module": "./political-science/freedom-from-freedom-to.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "freedom-from-freedom-to",
       "title": "Freedom From, Freedom To",
@@ -7491,6 +7621,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "dose-of-reality",
     "module": "./trivia/dose-of-reality.js",
+    "published": "2026-08-10",
     "browse": {
       "id": "dose-of-reality",
       "title": "Dose of Reality",
@@ -7528,6 +7659,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "power-and-violence",
     "module": "./political-science/power-and-violence.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "power-and-violence",
       "title": "Power and Violence",
@@ -7580,6 +7712,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "hegemony-and-consent",
     "module": "./political-science/hegemony-and-consent.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "hegemony-and-consent",
       "title": "Hegemony and Consent",
@@ -7621,6 +7754,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "three-faces-of-power",
     "module": "./political-science/three-faces-of-power.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "three-faces-of-power",
       "title": "Three Faces of Power",
@@ -7675,6 +7809,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-scaffold-and-the-timetable",
     "module": "./political-science/the-scaffold-and-the-timetable.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "the-scaffold-and-the-timetable",
       "title": "The Scaffold and the Timetable",
@@ -7720,6 +7855,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "power-without-a-center",
     "module": "./political-science/power-without-a-center.js",
+    "published": "2026-08-11",
     "browse": {
       "id": "power-without-a-center",
       "title": "Power Without a Center",
@@ -7765,6 +7901,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-quiet-rebellion",
     "module": "./political-science/the-quiet-rebellion.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "the-quiet-rebellion",
       "title": "The Quiet Rebellion",
@@ -7833,6 +7970,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "higher-law",
     "module": "./political-science/higher-law.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "higher-law",
       "title": "Higher Law",
@@ -7875,6 +8013,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "two-imprisonments",
     "module": "./political-science/two-imprisonments.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "two-imprisonments",
       "title": "Two Imprisonments",
@@ -7917,6 +8056,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "out-of-the-spotlight",
     "module": "./political-science/out-of-the-spotlight.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "out-of-the-spotlight",
       "title": "Out of the Spotlight",
@@ -7960,6 +8100,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-reconversion",
     "module": "./political-science/the-reconversion.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "the-reconversion",
       "title": "The Reconversion",
@@ -8010,6 +8151,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "a-radical-revolution-of-values",
     "module": "./political-science/a-radical-revolution-of-values.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "a-radical-revolution-of-values",
       "title": "A Radical Revolution of Values",
@@ -8052,6 +8194,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-military-industrial-complex",
     "module": "./political-science/the-military-industrial-complex.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "the-military-industrial-complex",
       "title": "The Military-Industrial Complex",
@@ -8119,6 +8262,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "achilles-in-vietnam",
     "module": "./psychology/achilles-in-vietnam.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "achilles-in-vietnam",
       "title": "Achilles in Vietnam",
@@ -8193,6 +8337,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "on-killing",
     "module": "./psychology/on-killing.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "on-killing",
       "title": "On Killing",
@@ -8267,6 +8412,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "war-is-a-force-that-gives-us-meaning",
     "module": "./history-society/war-is-a-force-that-gives-us-meaning.js",
+    "published": "2026-08-12",
     "browse": {
       "id": "war-is-a-force-that-gives-us-meaning",
       "title": "War Is a Force That Gives Us Meaning",
@@ -8338,6 +8484,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-literature-of-refusal",
     "module": "./history-society/the-literature-of-refusal.js",
+    "published": "2026-08-13",
     "browse": {
       "id": "the-literature-of-refusal",
       "title": "The Literature of Refusal",
@@ -8380,6 +8527,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "excusable-not-justifiable",
     "module": "./political-science/excusable-not-justifiable.js",
+    "published": "2026-08-13",
     "browse": {
       "id": "excusable-not-justifiable",
       "title": "Excusable, Not Justifiable",
@@ -8452,6 +8600,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-hobbesian-imperative",
     "module": "./political-science/the-hobbesian-imperative.js",
+    "published": "2026-08-14",
     "browse": {
       "id": "the-hobbesian-imperative",
       "title": "The Hobbesian Imperative",
@@ -8515,6 +8664,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-civilizing-mission",
     "module": "./political-science/the-civilizing-mission.js",
+    "published": "2026-08-15",
     "browse": {
       "id": "the-civilizing-mission",
       "title": "The Civilizing Mission",
@@ -8586,6 +8736,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "manufacturing-consent",
     "module": "./media-information-literacy/manufacturing-consent.js",
+    "published": "2026-08-15",
     "browse": {
       "id": "manufacturing-consent",
       "title": "Manufacturing Consent",
@@ -8653,6 +8804,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "erosion-of-the-floor",
     "module": "./political-science/erosion-of-the-floor.js",
+    "published": "2026-08-16",
     "browse": {
       "id": "erosion-of-the-floor",
       "title": "Erosion of the Floor",
@@ -8700,6 +8852,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "human-out-of-the-loop",
     "module": "./political-science/human-out-of-the-loop.js",
+    "published": "2026-08-15",
     "browse": {
       "id": "human-out-of-the-loop",
       "title": "Human Out of the Loop",
@@ -8736,6 +8889,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "witness-without-a-sword",
     "module": "./political-science/witness-without-a-sword.js",
+    "published": "2026-08-16",
     "browse": {
       "id": "witness-without-a-sword",
       "title": "The Power to Name",
@@ -8782,6 +8936,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-to-sell-a-genocide",
     "module": "./media-information-literacy/how-to-sell-a-genocide.js",
+    "published": "2026-08-17",
     "browse": {
       "id": "how-to-sell-a-genocide",
       "title": "How to Sell a Genocide",
@@ -8859,6 +9014,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "getting-inside-the-room",
     "module": "./political-science/getting-inside-the-room.js",
+    "published": "2026-08-16",
     "browse": {
       "id": "getting-inside-the-room",
       "title": "Getting Inside the Room",
@@ -8937,6 +9093,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-long-game",
     "module": "./political-science/the-long-game.js",
+    "published": "2026-08-17",
     "browse": {
       "id": "the-long-game",
       "title": "The Long Game",
@@ -9007,6 +9164,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "asymmetric-remote-warfare",
     "module": "./political-science/asymmetric-remote-warfare.js",
+    "published": "2026-08-18",
     "browse": {
       "id": "asymmetric-remote-warfare",
       "title": "Asymmetric & Remote Warfare",
@@ -9093,6 +9251,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "golden-shields",
     "module": "./political-science/golden-shields.js",
+    "published": "2026-08-18",
     "browse": {
       "id": "golden-shields",
       "title": "Golden Shields",
@@ -9139,6 +9298,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "as-soon-as-made-ready",
     "module": "./political-science/as-soon-as-made-ready.js",
+    "published": "2026-08-18",
     "browse": {
       "id": "as-soon-as-made-ready",
       "title": "As Soon As Made Ready",
@@ -9184,6 +9344,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "beyond-the-mandate",
     "module": "./political-science/beyond-the-mandate.js",
+    "published": "2026-08-18",
     "browse": {
       "id": "beyond-the-mandate",
       "title": "Beyond the Mandate",
@@ -9241,6 +9402,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "safe-legal-ethical-effective",
     "module": "./political-science/safe-legal-ethical-effective.js",
+    "published": "2026-08-18",
     "browse": {
       "id": "safe-legal-ethical-effective",
       "title": "Safe, Legal, Ethical, Effective",
@@ -9303,6 +9465,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "acids-bases-and-ph",
     "module": "./chemistry/acids-bases-and-ph.js",
+    "published": "2026-08-20",
     "browse": {
       "id": "acids-bases-and-ph",
       "title": "Acids, bases, and pH",
@@ -9374,6 +9537,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "operational-amplifiers",
     "module": "./engineering/operational-amplifiers.js",
+    "published": "2026-08-20",
     "browse": {
       "id": "operational-amplifiers",
       "title": "Operational Amplifiers",
@@ -9488,6 +9652,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "reciprocity-and-kinship-distance",
     "module": "./anthropology/reciprocity-and-kinship-distance.js",
+    "published": "2026-08-20",
     "browse": {
       "id": "reciprocity-and-kinship-distance",
       "title": "Reciprocity and Kinship Distance",
@@ -9545,6 +9710,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "rhetorical-appeals",
     "module": "./language-arts/rhetorical-appeals.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "rhetorical-appeals",
       "title": "Rhetorical appeals",
@@ -9592,6 +9758,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "continuity-editing",
     "module": "./film/continuity-editing.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "continuity-editing",
       "title": "Continuity editing",
@@ -9669,6 +9836,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "meter-grouping-and-division",
     "module": "./music/meter-grouping-and-division.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "meter-grouping-and-division",
       "title": "Meter: grouping and division",
@@ -9711,6 +9879,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-light-makes-form",
     "module": "./art/how-light-makes-form.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "how-light-makes-form",
       "title": "How Light Makes Form",
@@ -9799,6 +9968,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "story-and-discourse",
     "module": "./literary-theory-poetics/story-and-discourse.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "story-and-discourse",
       "title": "Story and discourse",
@@ -9871,6 +10041,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-the-kidney-forms-urine",
     "module": "./physiology-medicine/how-the-kidney-forms-urine.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "how-the-kidney-forms-urine",
       "title": "How the kidney forms urine",
@@ -9963,6 +10134,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "plate-boundary-landforms",
     "module": "./science/plate-boundary-landforms.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "plate-boundary-landforms",
       "title": "Where Plates Meet",
@@ -10015,6 +10187,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "what-the-camera-knows",
     "module": "./film/what-the-camera-knows.js",
+    "published": "2026-08-22",
     "browse": {
       "id": "what-the-camera-knows",
       "title": "What the camera knows",
@@ -10052,6 +10225,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "intermolecular-forces-and-properties",
     "module": "./chemistry/intermolecular-forces-and-properties.js",
+    "published": "2026-08-22",
     "browse": {
       "id": "intermolecular-forces-and-properties",
       "title": "Intermolecular forces and physical properties",
@@ -10133,6 +10307,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-grammar-of-genocide",
     "module": "./political-science/the-grammar-of-genocide.js",
+    "published": "2026-08-19",
     "browse": {
       "id": "the-grammar-of-genocide",
       "title": "The Grammar of Genocide",
@@ -10234,6 +10409,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "deterrence-by-presence",
     "module": "./political-science/deterrence-by-presence.js",
+    "published": "2026-08-19",
     "browse": {
       "id": "deterrence-by-presence",
       "title": "Deterrence by Presence",
@@ -10325,6 +10501,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "theories-of-the-sublime",
     "module": "./literary-theory-poetics/theories-of-the-sublime.js",
+    "published": "2026-08-22",
     "browse": {
       "id": "theories-of-the-sublime",
       "title": "Theories of the sublime",
@@ -10406,6 +10583,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "how-art-represents-space",
     "module": "./art/how-art-represents-space.js",
+    "published": "2026-08-25",
     "browse": {
       "id": "how-art-represents-space",
       "title": "How Art Represents Space",
@@ -10455,6 +10633,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "rites-of-passage",
     "module": "./anthropology/rites-of-passage.js",
+    "published": "2026-08-21",
     "browse": {
       "id": "rites-of-passage",
       "title": "Rites of Passage",
@@ -10524,6 +10703,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "matter-waves-and-quantum-outcomes",
     "module": "./physics/matter-waves-and-quantum-outcomes.js",
+    "published": "2026-08-27",
     "browse": {
       "id": "matter-waves-and-quantum-outcomes",
       "title": "Matter waves and quantum outcomes",
@@ -10599,6 +10779,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "light-wave-and-particle-evidence",
     "module": "./physics/light-wave-and-particle-evidence.js",
+    "published": "2026-08-27",
     "browse": {
       "id": "light-wave-and-particle-evidence",
       "title": "Light: wave and particle evidence",
@@ -10674,6 +10855,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "from-features-to-metabolic-meaning",
     "module": "./biology/from-features-to-metabolic-meaning.js",
+    "published": "2026-08-28",
     "browse": {
       "id": "from-features-to-metabolic-meaning",
       "title": "From Features to Metabolic Meaning",
@@ -10763,6 +10945,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "measuring-the-metabolome",
     "module": "./biology/measuring-the-metabolome.js",
+    "published": "2026-08-28",
     "browse": {
       "id": "measuring-the-metabolome",
       "title": "Measuring the Metabolome",
@@ -10860,6 +11043,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "proteomics-from-peptides-to-proteoforms",
     "module": "./biology/proteomics-from-peptides-to-proteoforms.js",
+    "published": "2026-08-28",
     "browse": {
       "id": "proteomics-from-peptides-to-proteoforms",
       "title": "Proteomics: From Peptides to Proteoforms",
@@ -10949,6 +11133,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "epigenomics",
     "module": "./biology/epigenomics.js",
+    "published": "2026-08-28",
     "browse": {
       "id": "epigenomics",
       "title": "The Epigenome",
@@ -11019,6 +11204,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "consonance",
     "module": "./music/consonance.js",
+    "published": "2026-08-28",
     "browse": {
       "id": "consonance",
       "title": "Consonance",
@@ -11081,6 +11267,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "dissonance-and-its-treatment",
     "module": "./music/dissonance-and-its-treatment.js",
+    "published": "2026-08-28",
     "browse": {
       "id": "dissonance-and-its-treatment",
       "title": "Dissonance and its treatment",
@@ -11179,6 +11366,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "accretive-health-scandal",
     "module": "./bioethics/accretive-health-scandal.js",
+    "published": "2026-08-29",
     "browse": {
       "id": "accretive-health-scandal",
       "title": "The Accretive Health Scandal",
@@ -11319,6 +11507,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-manufacture-of-compliance",
     "module": "./psychology/the-manufacture-of-compliance.js",
+    "published": "2026-09-04",
     "browse": {
       "id": "the-manufacture-of-compliance",
       "title": "The Manufacture of Compliance",
@@ -11386,6 +11575,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "architecture-carving-enclosure",
     "module": "./architecture/architecture-carving-enclosure.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "architecture-carving-enclosure",
       "title": "Carving and Enclosing: Mass, Void, and Threshold",
@@ -11445,6 +11635,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "architecture-moving-through-light",
     "module": "./architecture/architecture-moving-through-light.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "architecture-moving-through-light",
       "title": "Moving Through Light: Path and Proportion",
@@ -11503,6 +11694,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "gandhis-truth",
     "module": "./political-science/gandhis-truth.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "gandhis-truth",
       "title": "Gandhi's Truth",
@@ -11568,6 +11760,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "legible-early",
     "module": "./political-science/legible-early.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "legible-early",
       "title": "Legible Early",
@@ -11620,6 +11813,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "lymphatic-system",
     "module": "./physiology-medicine/lymphatic-system.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "lymphatic-system",
       "title": "The Lymphatic System: Drainage, Surveillance, and Return",
@@ -11673,6 +11867,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "malignant-aggression",
     "module": "./political-science/malignant-aggression.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "malignant-aggression",
       "title": "Malignant Aggression",
@@ -11753,6 +11948,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "muscular-system",
     "module": "./physiology-medicine/muscular-system.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "muscular-system",
       "title": "The muscular system",
@@ -11830,6 +12026,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "oath-betrayed",
     "module": "./bioethics/oath-betrayed.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "oath-betrayed",
       "title": "Oath Betrayed",
@@ -11908,6 +12105,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "reproductive-hormones",
     "module": "./physiology-medicine/reproductive-hormones.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "reproductive-hormones",
       "title": "Reproductive hormones",
@@ -11986,6 +12184,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "sense-and-reference",
     "module": "./linguistics/sense-and-reference.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "sense-and-reference",
       "title": "Sense and Reference",
@@ -12041,6 +12240,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-capacity-to-harm",
     "module": "./psychology/the-capacity-to-harm.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "the-capacity-to-harm",
       "title": "The Capacity to Harm",
@@ -12163,6 +12363,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-nazi-doctors",
     "module": "./psychology/the-nazi-doctors.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "the-nazi-doctors",
       "title": "The Nazi Doctors",
@@ -12232,6 +12433,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "the-poem-of-force",
     "module": "./philosophy/the-poem-of-force.js",
+    "published": "2026-09-08",
     "browse": {
       "id": "the-poem-of-force",
       "title": "The Poem of Force",
@@ -12311,6 +12513,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "religion-ethical-foundations",
     "module": "./anthropology/religion-ethical-foundations.js",
+    "published": "2026-09-11",
     "browse": {
       "id": "religion-ethical-foundations",
       "title": "What Traditions Demand: The Shared Ethics of the World's Religions",
@@ -12364,6 +12567,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "religion-ritual-practice",
     "module": "./religion/religion-ritual-practice.js",
+    "published": "2026-09-11",
     "browse": {
       "id": "religion-ritual-practice",
       "title": "What Bodies Do With Belief: Passage, Time, Practice, and Place",
@@ -12435,6 +12639,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "thermodynamics",
     "module": "./physics/thermodynamics.js",
+    "published": "2026-09-11",
     "browse": {
       "id": "thermodynamics",
       "title": "Thermodynamics: energy, limits, and engines",
@@ -12504,6 +12709,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "tropical-cyclone-machine",
     "module": "./atmospheric-science/tropical-cyclone-machine.js",
+    "published": "2026-09-11",
     "browse": {
       "id": "tropical-cyclone-machine",
       "title": "The Tropical Cyclone Machine",
@@ -12574,6 +12780,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "tropical-cyclone-threat",
     "module": "./atmospheric-science/tropical-cyclone-threat.js",
+    "published": "2026-09-11",
     "browse": {
       "id": "tropical-cyclone-threat",
       "title": "Tracking the Threat",
@@ -12635,6 +12842,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "tornadoes",
     "module": "./anthropology/tornadoes.js",
+    "published": "2026-09-11",
     "browse": {
       "id": "tornadoes",
       "title": "Anatomy of a Tornado",
@@ -12701,6 +12909,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "earthquakes-cause",
     "module": "./geology/earthquakes-cause.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "earthquakes-cause",
       "title": "Earthquakes I: Why the Ground Breaks",
@@ -12784,6 +12993,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "earthquakes-shaking",
     "module": "./geology/earthquakes-shaking.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "earthquakes-shaking",
       "title": "Earthquakes II: From Waves to Damage",
@@ -12866,6 +13076,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "groundwater",
     "module": "./geography/groundwater.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "groundwater",
       "title": "Groundwater: The Hidden Reservoir",
@@ -12936,6 +13147,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "groundwater-journey",
     "module": "./geography/groundwater-journey.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "groundwater-journey",
       "title": "Groundwater: The Hidden Journey",
@@ -12992,6 +13204,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "hydrology-human-water",
     "module": "./geography/hydrology-human-water.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "hydrology-human-water",
       "title": "Human Water: measuring, fearing, managing",
@@ -13078,6 +13291,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "hydrology-land-and-groundwater",
     "module": "./geography/hydrology-land-and-groundwater.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "hydrology-land-and-groundwater",
       "title": "Catchments & Groundwater: how land holds and routes water",
@@ -13138,6 +13352,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "hydrology-water-cycle",
     "module": "./geography/hydrology-water-cycle.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "hydrology-water-cycle",
       "title": "The Water Cycle: pools and fluxes",
@@ -13203,6 +13418,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "mountains-life-of-a-range",
     "module": "./geology/mountains-life-of-a-range.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "mountains-life-of-a-range",
       "title": "The Life of a Mountain Range",
@@ -13277,6 +13493,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "mountains-reading-the-range",
     "module": "./geology/mountains-reading-the-range.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "mountains-reading-the-range",
       "title": "Reading a Range: Types and Structures",
@@ -13333,6 +13550,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "rocks-formation-cycle",
     "module": "./geology/rocks-formation-cycle.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "rocks-formation-cycle",
       "title": "Rocks: How They Form and Change",
@@ -13404,6 +13622,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "rocks-reading-evidence",
     "module": "./geology/rocks-reading-evidence.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "rocks-reading-evidence",
       "title": "Reading a Rock: Composition, Texture, Minerals",
@@ -13470,6 +13689,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "russian-literature-argument",
     "module": "./literary-history/russian-literature-argument.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "russian-literature-argument",
       "title": "The Argument and the End of the Century",
@@ -13554,6 +13774,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "russian-literature-invention",
     "module": "./literary-history/russian-literature-invention.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "russian-literature-invention",
       "title": "The Invention of Russian Literature",
@@ -13628,6 +13849,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "typography",
     "module": "./art/typography.js",
+    "published": "2026-09-16",
     "browse": {
       "id": "typography",
       "title": "Typography: letterforms, families, and spacing",
@@ -13676,6 +13898,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "homonyms-in-context",
     "module": "./vocabulary/homonyms-in-context.js",
+    "published": "2026-09-19",
     "browse": {
       "id": "homonyms-in-context",
       "title": "Homonyms in Context",
@@ -13704,6 +13927,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "anatomy-of-villains",
     "module": "./literary-history/anatomy-of-villains.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "anatomy-of-villains",
       "title": "The Anatomy of Villains: Iago and Macbeth",
@@ -13761,6 +13985,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "flower-anatomy",
     "module": "./botany/flower-anatomy.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "flower-anatomy",
       "title": "Anatomy of a Flower",
@@ -13838,6 +14063,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "flower-pollination-fruit",
     "module": "./botany/flower-pollination-fruit.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "flower-pollination-fruit",
       "title": "How Flowers Work",
@@ -13917,6 +14143,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "unyielding-neighbors",
     "module": "./vocabulary/unyielding-neighbors.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "unyielding-neighbors",
       "title": "Refusing to Yield",
@@ -13950,6 +14177,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "yielding-neighbors",
     "module": "./vocabulary/yielding-neighbors.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "yielding-neighbors",
       "title": "Learning to Yield",
@@ -13987,6 +14215,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "innate-intrinsic-inherent",
     "module": "./vocabulary/innate-intrinsic-inherent.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "innate-intrinsic-inherent",
       "title": "Already There? Innate, Intrinsic, Inherent",
@@ -14044,6 +14273,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "quiet-neighbors",
     "module": "./vocabulary/quiet-neighbors.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "quiet-neighbors",
       "title": "Saying Little",
@@ -14080,6 +14310,7 @@ export const PUZZLE_MANIFEST = [
   {
     "id": "short-lived-words",
     "module": "./vocabulary/short-lived-words.js",
+    "published": "2026-09-21",
     "browse": {
       "id": "short-lived-words",
       "title": "Here and Gone: Seven Words for the Short-Lived",

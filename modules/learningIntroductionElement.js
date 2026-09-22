@@ -17,6 +17,37 @@ function safeExternalUrl(raw) {
   }
 }
 
+// Month granularity: the stamp is git's first-add of the puzzle's files,
+// which runs a few days late for the boards that predate the per-file
+// split, and a player has no use for the day anyway.
+function publishedLabel(published) {
+  const match = /^(\d{4})-(\d{2})-\d{2}$/.exec(published || "");
+  if (!match) return "";
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
+  return `First published ${date.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  })}`;
+}
+
+function aboutEyebrow(about) {
+  return [about?.category, ...(about?.catalogues || [])].filter(Boolean).join(" · ");
+}
+
+// The About card's summary is the puzzle's own info.text. Without one, a
+// purely mechanical line -- never generated prose, and never the cluster
+// facts, which are the reveal a completed board earns.
+function aboutSummary(puzzle, about) {
+  const text = typeof puzzle?.info?.text === "string"
+    ? puzzle.info.text.trim()
+    : typeof puzzle?.info === "string" ? puzzle.info.trim() : "";
+  if (text) return text;
+  const count = about?.termCount;
+  const category = about?.category ? `${about.category} puzzle` : "puzzle";
+  return count ? `A ${category} with ${count} terms.` : `A ${category}.`;
+}
+
 class LearningIntroductionElement extends HTMLElement {
   #model = null;
   #loaded = null;
@@ -181,6 +212,7 @@ class LearningIntroductionElement extends HTMLElement {
             <ul id="citation-list" class="citations"></ul>
           </section>
           <p id="assistance" class="assistance-credit" hidden></p>
+          <p id="published" class="assistance-credit" hidden></p>
           <div class="dialog-actions">
             <button id="finish" class="primary" type="button">Start puzzle</button>
           </div>
@@ -205,7 +237,7 @@ class LearningIntroductionElement extends HTMLElement {
     root.getElementById("finish").addEventListener("click", () => {
       const status = this.#loaded ? "read" : "skipped";
       this.closeLesson();
-      this.#emitStatus(status);
+      if (this.#model?.introduction) this.#emitStatus(status);
     });
     root.getElementById("close").addEventListener("click", () => this.closeLesson());
     root.getElementById("dialog").addEventListener("close", event => {
@@ -233,7 +265,7 @@ class LearningIntroductionElement extends HTMLElement {
     this.#returnFocus = returnFocus;
     const dialog = this.shadowRoot.getElementById("dialog");
     if (!dialog.open) dialog.showModal();
-    if (!this.#loaded && !this.#loading) await this.#load();
+    if (this.#model.introduction && !this.#loaded && !this.#loading) await this.#load();
     return true;
   }
 
@@ -272,6 +304,23 @@ class LearningIntroductionElement extends HTMLElement {
 
   #render() {
     if (!this.isConnected || !this.#model) return;
+    const { introduction, puzzle } = this.#model;
+    const root = this.shadowRoot;
+    if (introduction) this.#renderLesson();
+    else this.#renderAbout();
+    const published = publishedLabel(this.#model.about?.published);
+    const publishedLine = root.getElementById("published");
+    publishedLine.textContent = published;
+    publishedLine.hidden = !published;
+    this.#renderCitations(
+      Array.isArray(puzzle?.info?.citations)
+        ? puzzle.info.citations
+        : (introduction?.citations || [])
+    );
+    this.#renderAssistance(introduction, puzzle);
+  }
+
+  #renderLesson() {
     const { introduction, gate } = this.#model;
     const root = this.shadowRoot;
     this.toggleAttribute("gated", gate);
@@ -284,13 +333,30 @@ class LearningIntroductionElement extends HTMLElement {
       "Build the background knowledge for this puzzle without revealing its solution.";
     root.getElementById("skip").hidden = introduction.requirement === "required";
     root.getElementById("finish").textContent = gate ? "Start puzzle" : "Return to puzzle";
+    root.getElementById("close").setAttribute("aria-label", "Close introduction");
+    root.getElementById("lesson-status").hidden = !!this.#loaded;
     this.#renderSources(authoredLearningLinks(introduction));
-    this.#renderCitations(
-      Array.isArray(this.#model.puzzle?.info?.citations)
-        ? this.#model.puzzle.info.citations
-        : (introduction.citations || [])
-    );
-    this.#renderAssistance(introduction, this.#model.puzzle);
+  }
+
+  // No authored lesson: the same dialog as a catalogue card -- summary,
+  // sources, byline, date. Never gates, never loads, and lists nothing the
+  // board has not already shown.
+  #renderAbout() {
+    const { puzzle, about } = this.#model;
+    const root = this.shadowRoot;
+    this.toggleAttribute("gated", false);
+    root.getElementById("offer").hidden = true;
+    root.getElementById("dialog-meta").textContent = aboutEyebrow(about);
+    root.getElementById("dialog-title").textContent = puzzle?.title || "";
+    root.getElementById("close").setAttribute("aria-label", "Close");
+    root.getElementById("lesson-status").hidden = true;
+    const summary = document.createElement("p");
+    summary.textContent = aboutSummary(puzzle, about);
+    root.getElementById("lesson").replaceChildren(summary);
+    const finish = root.getElementById("finish");
+    finish.textContent = "Return to puzzle";
+    finish.hidden = false;
+    this.#renderSources(authoredLearningLinks(puzzle?.info));
   }
 
   #renderSources(sources) {

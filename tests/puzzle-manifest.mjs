@@ -21,6 +21,15 @@ export async function run() {
   const built = await buildPuzzleManifest({ write: false });
   assert.ok(built.entries.length > 0, "manifest should include puzzles");
   assert.equal(built.entries.length, built.entries.filter(e => e.id && e.module).length);
+  // First-published stamps: every git-tracked puzzle carries one, dates are
+  // ISO days, and a rebuild reproduces the committed ledger rather than
+  // re-deriving (so shallow or history-less checkouts cannot move them).
+  const { PUZZLE_MANIFEST } = await import("../puzzles/manifest.js");
+  const committed = new Map(PUZZLE_MANIFEST.map(entry => [entry.id, entry.published]));
+  for (const entry of built.entries) {
+    assert.match(entry.published || "", /^\d{4}-\d{2}-\d{2}$/, `${entry.id} has no published date`);
+    if (committed.has(entry.id)) assert.equal(entry.published, committed.get(entry.id));
+  }
 
   const { ensurePuzzleRegistry } = await import("../tools/ensure-puzzle-registry.mjs");
   await ensurePuzzleRegistry({ write: false });

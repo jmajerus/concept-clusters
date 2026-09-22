@@ -4,6 +4,10 @@ export const name = "learning introduction: lazy lesson, entry choice, and persi
 
 const PUZZLE_ID = "from-evidence-to-action";
 
+// game.js awaits its manifest import at top level, so `load` can fire
+// before window.CC exists.
+const ready = page => page.waitForFunction(() => window.CC?.state);
+
 export async function run(page, baseURL) {
   const errors = [];
   const lessonRequests = [];
@@ -20,7 +24,7 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
   await page.evaluate(() => localStorage.clear());
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
-
+  await ready(page);
   assert.equal(await page.evaluate(() => CC.state.learningGated), true);
   assert.equal(await page.isVisible("#learning-introduction #offer"), true);
   assert.equal(await page.isVisible("#board"), false);
@@ -35,7 +39,10 @@ export async function run(page, baseURL) {
 
   await page.click("#learning-introduction #read");
   await page.waitForSelector("#learning-introduction #lesson h2");
-  assert.equal(lessonRequests.length, 1);
+  // Canonicalization inlined this lesson (content.text), so reading it is
+  // a render, not a fetch; the request hook stays as a guard against a
+  // stray .intro.md load for an inline lesson.
+  assert.equal(lessonRequests.length, 0);
   assert.match(
     await page.textContent("#learning-introduction #lesson"),
     /A signal is not yet a cause/i
@@ -80,6 +87,7 @@ export async function run(page, baseURL) {
   );
 
   await page.reload();
+  await ready(page);
   assert.equal(await page.evaluate(() => CC.state.learningGated), false);
   assert.equal(await page.textContent("#learning-review"), "Lesson");
   assert.equal(await page.getAttribute("#learning-review", "title"), "Review introduction");
@@ -112,6 +120,7 @@ export async function run(page, baseURL) {
     if (key) localStorage.removeItem(key);
   }, PUZZLE_ID);
   await page.reload();
+  await ready(page);
   assert.equal(await page.evaluate(() => CC.state.learningGated), true);
   await page.click("#learning-introduction #skip");
   assert.equal(await page.evaluate(() => CC.state.learningGated), false);
@@ -122,6 +131,7 @@ export async function run(page, baseURL) {
   );
 
   await page.goto(`${baseURL}/index.html?puzzles=${PUZZLE_ID}`);
+  await page.waitForSelector("#overview-list .card-badges .puzzle-badge");
   assert.deepEqual(
     await page.locator("#overview-list .card-badges .puzzle-badge").allTextContents(),
     ["Large", "Lenses", "Lesson"]
@@ -132,10 +142,48 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
   await page.evaluate(() => localStorage.clear());
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph&solved`);
+  await ready(page);
   assert.equal(await page.evaluate(() => CC.state.learningGated), true);
   assert.equal(await page.evaluate(() => CC.state.made), 0);
   await page.click("#learning-introduction #skip");
   await page.waitForFunction(() => CC.state.made === CC.state.need);
   assert.equal(await page.evaluate(() => CC.state.learningGated), false);
+
+  // No authored lesson: the same slot reads "About", never gates, and opens
+  // a catalogue card -- info.text summary, provenance byline, first-published
+  // month from the manifest -- with no lesson fetch.
+  const lessonFetches = lessonRequests.length;
+  await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=graph`);
+  await page.waitForFunction(() => window.CC?.state?.puzzle?.id === "energy-flow");
+  assert.equal(await page.evaluate(() => CC.state.learningGated), false);
+  assert.equal(await page.isVisible("#board"), true);
+  assert.equal(await page.isVisible("#learning-introduction #offer"), false);
+  assert.equal(await page.textContent("#learning-review"), "About");
+  assert.equal(await page.getAttribute("#learning-review", "title"), "About this puzzle");
+  await page.click("#learning-review");
+  assert.equal(await page.isVisible("#learning-introduction #dialog"), true);
+  assert.equal(
+    await page.textContent("#learning-introduction #dialog-title"),
+    "Energy flow in living systems"
+  );
+  assert.match(await page.textContent("#learning-introduction #dialog-meta"), /^Science/);
+  assert.ok(
+    (await page.textContent("#learning-introduction #lesson")).trim().length > 0,
+    "About card needs a summary"
+  );
+  assert.match(
+    await page.textContent("#learning-introduction #published"),
+    /^First published [A-Z][a-z]+ 20\d\d$/
+  );
+  assert.equal(await page.isVisible("#learning-introduction #lesson-status"), false);
+  assert.equal(lessonRequests.length, lessonFetches, "About mode must not fetch a lesson");
+  await page.click("#learning-introduction #finish");
+  assert.equal(await page.isVisible("#learning-introduction #dialog"), false);
+  assert.equal(
+    await page.evaluate(() => Object.keys(localStorage)
+      .some(key => key.startsWith("ccLearningIntroduction:") && key.endsWith(":energy-flow"))),
+    false,
+    "About mode must not record an introduction status"
+  );
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }
