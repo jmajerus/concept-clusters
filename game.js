@@ -986,17 +986,25 @@ function recordLearningIntroductionStatus(status, puzzleId) {
   state.learningIntroductionStatus = status;
   updateLearningIntroduction();
   if (wasGated && !state.learningGated) {
-    setMessage(
-      status === "read"
-        ? "Introduction complete. Organize the ideas on the board."
-        : "Introduction skipped. You can review it at any time.",
-      "good"
-    );
+    const presolvePending = state.autoPresolvePending === true;
+    const sharedPending = pendingInitialSharedParams;
+    if (!presolvePending && !sharedPending) {
+      setMessage(
+        status === "read"
+          ? "Introduction complete. Organize the ideas on the board."
+          : "Introduction skipped. You can review it at any time.",
+        "good"
+      );
+    }
     titleEl.focus();
-    if (pendingInitialSharedParams) {
+    if (sharedPending) {
       const params = pendingInitialSharedParams;
       pendingInitialSharedParams = null;
+      state.autoPresolvePending = false;
       replayInitialSharedState(params);
+    } else if (presolvePending) {
+      state.autoPresolvePending = false;
+      beginAutomaticPresolve();
     }
   }
 }
@@ -1215,6 +1223,20 @@ function updateLensInterface({ paint = true } = {}) {
   updateModeControls();
   updateSolutionHint();
   if (paint) state.paint?.();
+}
+
+function beginAutomaticPresolve() {
+  if (!state || state.made === state.need) return;
+  state.restoringSession = true;
+  try {
+    showSolution();
+  } finally {
+    state.restoringSession = false;
+  }
+  if (state.lensStartPending) {
+    state.lensStartPending = false;
+    beginLensSequence();
+  }
 }
 
 async function beginLensSequence() {
@@ -2052,20 +2074,15 @@ function applyLoadedPuzzle(puzzle, index, {
   // that grouping has no player decision, while already-completed lens state
   // is preserved. Reuse the same solution replay as &solved links, suppressing
   // its intermediate progress messages before handing off to the lens flow.
+  // While the learning introduction hides the board, wait to start that
+  // replay. Running it underneath display:none finishes and freezes the
+  // Star layout before the player can see it move.
   const automaticallyPreSolved = puzzle.puzzleKind === "vocabulary-context" &&
     puzzle.clusters?.length === 1 && puzzle.lenses?.length > 0;
   if (!authoringConstruct && (!savedSession || automaticallyPreSolved) &&
       (puzzle.preSolve || automaticallyPreSolved) && state.made !== state.need) {
-    state.restoringSession = true;
-    try {
-      showSolution();
-    } finally {
-      state.restoringSession = false;
-    }
-    if (state.lensStartPending) {
-      state.lensStartPending = false;
-      beginLensSequence();
-    }
+    if (state.learningGated) state.autoPresolvePending = true;
+    else beginAutomaticPresolve();
   }
   if (persistInitial && !savedSession) persistPlayerSession();
   layoutAuthoring.onPuzzleLoaded();

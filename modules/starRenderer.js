@@ -60,7 +60,7 @@ import {
   bridgeArrowPoints,
   bridgeNodeAriaLabel
 } from "./bridgeDirection.js";
-import { singleClusterTermHome } from "./lensLayout.js";
+import { loneClusterStarFan, singleClusterTermHome } from "./lensLayout.js";
 export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -385,7 +385,12 @@ export function createStarRenderer({
       if (!state.completedViaShowSolution) {
         state.onPlayerLayoutChanged?.("player");
       }
-      sim.alpha(0.45).restart();
+      // A lone cluster's show-solution burst used to restart the strong
+      // charge here. Terms then sat on the bottom clamp until polish,
+      // which reads as a frozen board. The fan animation owns that move.
+      if (!(nClusters === 1 && state.completedViaShowSolution)) {
+        sim.alpha(0.45).restart();
+      }
     };
 
     // handleTap calls this right after pushing a new link — this mode needs
@@ -424,7 +429,9 @@ export function createStarRenderer({
       }
       sim.nodes(liveSimNodes());
       sim.force("clusterPull").links(buildClusterLinks());
-      sim.alpha(0.6).restart();
+      if (!(nClusters === 1 && state.completedViaShowSolution)) {
+        sim.alpha(0.6).restart();
+      }
     };
 
     // Star's detailed geometry evaluator is built lazily with the detangler
@@ -1167,6 +1174,23 @@ export function createStarRenderer({
             }
           }
 
+          if (nClusters === 1) {
+            const fan = loneClusterStarFan(titleNodes[0], nodes, W, H);
+            const targetMap = new Map([...fan].map(([node, point]) => [node, clampTarget(node, point)]));
+            if (!await animateLayout(targetMap)) return { cancelled: true };
+            allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+            state.prettyPrintStats = {
+              ...layoutMetrics(evaluateLayout()),
+              source: "generated"
+            };
+            state.solutionLayout = "pretty";
+            updateSolutionHint();
+            setMessage("Solution shown — Star layout polished.", "good");
+            state.onAuthorLayoutChanged?.("placement");
+            state.onPlayerLayoutChanged?.("automatic");
+            return state.prettyPrintStats;
+          }
+
           let best = { positions: original, layout: originalLayout, deviation: Infinity };
           const evaluateTargets = targets => {
             allLayoutNodes.forEach(node => {
@@ -1346,6 +1370,15 @@ export function createStarRenderer({
             updateSolutionHint();
             return state.prettyPrint();
           }
+        }
+
+        // Show-solution on a lone cluster otherwise spends the settle
+        // window with terms clamped to the bottom edge. Skip that hold
+        // and go straight to the polished fan.
+        if (nClusters === 1 && state.completedViaShowSolution) {
+          state.solutionLayout = "animated";
+          updateSolutionHint();
+          return state.prettyPrint();
         }
 
         setMessage(
