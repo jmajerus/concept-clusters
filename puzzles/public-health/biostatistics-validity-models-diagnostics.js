@@ -1,0 +1,308 @@
+// Generated from content/puzzles/biostatistics-validity-models-diagnostics.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "biostatistics-validity-models-diagnostics",
+  "title": "Biostatistics: Bias, Models, and Diagnostic Decisions",
+  "category": "public-health",
+  "subcategories": {
+    "public-health": "biostatistics"
+  },
+  "large": true,
+  "info": {
+    "text": "After a biomedical study produces an association, biostatistics asks whether the estimate deserves trust, which model matches the outcome process, and how a diagnostic decision performs. This board treats bias, model choice, and test performance as linked but distinct questions; broader mathematical foundations remain in the separate Math & Statistics space.",
+    "citations": [
+      {
+        "title": "Field Epidemiology Manual: Analyze and Interpret Data",
+        "publisher": "Centers for Disease Control and Prevention",
+        "url": "https://www.cdc.gov/field-epi-manual/php/chapters/analyze-interpret-data.html"
+      },
+      {
+        "title": "Table 16.5: Summary of different methods",
+        "publisher": "NCBI Bookshelf",
+        "url": "https://ncbi.nlm.nih.gov/books/NBK543628/table/ch16.Tab5/?report=objectonly"
+      },
+      {
+        "title": "Evaluating Detection and Diagnostic Decision Support Systems for Bioterrorism Response",
+        "publisher": "Centers for Disease Control and Prevention",
+        "url": "https://wwwnc.cdc.gov/eid/article/10/1/03-0243_article"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "validity-bias-and-causal-interpretation",
+      "name": "Validity, bias, and causal interpretation",
+      "color": "teal",
+      "fact": "Validity asks whether an observed association reflects the phenomenon of interest or an artifact of who entered the study, how variables were measured, or what third factors were left uncontrolled. Selection bias concerns study entry or retention; information bias concerns systematic data differences; measurement error is a mismeasurement mechanism; confounding mixes effects; randomization can balance measured and unmeasured factors in expectation; blinding limits expectation effects; and sensitivity analysis tests how conclusions change under alternative assumptions.",
+      "terms": [
+        "selection bias",
+        "information bias",
+        "measurement error",
+        "confounding",
+        "randomization",
+        "blinding",
+        "sensitivity analysis"
+      ],
+      "seeds": [
+        "selection bias",
+        "confounding"
+      ],
+      "termInfo": {
+        "selection bias": "Systematic distortion caused by how participants enter, remain in, or are lost from a study, changing the observed relation from the source-population relation.",
+        "information bias": "Systematic error in collecting or reporting exposure, outcome, or covariate information that differs in a way related to study groups.",
+        "measurement error": "A discrepancy between a recorded variable value and the underlying value it is meant to represent, which can distort an association.",
+        "confounding": "Mixing of an exposure’s association with an outcome and the association of a third variable related to both.",
+        "randomization": "Assigning interventions or exposure conditions by chance so comparison groups are balanced on average and causal interpretation is strengthened.",
+        "blinding": "Keeping participants, investigators, or outcome assessors unaware of assignment to reduce expectation-driven behavior or assessment.",
+        "sensitivity analysis": "Repeating an analysis under plausible alternative assumptions or specifications to see whether the conclusion is robust."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.cdc.gov/field-epi-manual/php/chapters/analyze-interpret-data.html",
+            "label": "CDC: analyzing and interpreting data"
+          }
+        ]
+      }
+    },
+    {
+      "id": "outcome-shape-and-model-families",
+      "name": "Outcome shape and model families",
+      "color": "blue",
+      "fact": "The outcome and observation process guide model choice. Linear regression describes a continuous outcome; logistic regression a binary outcome; multilevel analysis accounts for grouped observations; survival analysis handles time to an event; the Kaplan-Meier estimator describes event-free survival without a parametric curve; the Cox proportional hazards model compares hazards over time; and censoring records incomplete follow-up.",
+      "terms": [
+        "linear regression",
+        "logistic regression",
+        "multilevel analysis",
+        "survival analysis",
+        "Kaplan-Meier estimator",
+        "Cox proportional hazards model",
+        "censoring"
+      ],
+      "seeds": [
+        "linear regression",
+        "logistic regression"
+      ],
+      "termInfo": {
+        "linear regression": "A model for relating predictors to the mean of a continuous outcome.",
+        "logistic regression": "A model for relating predictors to the probability or odds of a binary outcome.",
+        "multilevel analysis": "An analysis for observations nested in groups that accounts for within-group dependence and between-group variation.",
+        "survival analysis": "A family of methods for time-to-event outcomes that can incorporate incomplete follow-up.",
+        "Kaplan-Meier estimator": "A nonparametric estimate of the probability of remaining event-free over time.",
+        "Cox proportional hazards model": "A semiparametric time-to-event model that relates covariates to hazard under a proportional-hazards assumption.",
+        "censoring": "An observation boundary at which the event time is only known to be beyond or before the recorded follow-up limit."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://ncbi.nlm.nih.gov/books/NBK543628/table/ch16.Tab5/?report=objectonly",
+            "label": "NCBI: summary of statistical methods"
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagnostic-performance-and-thresholds",
+      "name": "Diagnostic performance and thresholds",
+      "color": "amber",
+      "fact": "Diagnostic performance depends on a reference standard and a decision threshold. Sensitivity measures detection among people with the condition, specificity measures correct exclusion among people without it, predictive values describe what a result means in a tested population, likelihood ratios summarize how a result changes odds, and a receiver operating characteristic curve displays the sensitivity-specificity tradeoff across thresholds.",
+      "terms": [
+        "sensitivity",
+        "specificity",
+        "positive predictive value",
+        "negative predictive value",
+        "likelihood ratio",
+        "receiver operating characteristic curve"
+      ],
+      "seeds": [
+        "sensitivity",
+        "specificity"
+      ],
+      "termInfo": {
+        "sensitivity": "The proportion of people with the condition who receive a positive test result.",
+        "specificity": "The proportion of people without the condition who receive a negative test result.",
+        "positive predictive value": "The proportion of positive test results that occur in people who have the condition, which depends on the tested population.",
+        "negative predictive value": "The proportion of negative test results that occur in people who do not have the condition, which depends on the tested population.",
+        "likelihood ratio": "A ratio comparing how likely a particular test result is with the condition present versus absent, summarizing its evidentiary weight.",
+        "receiver operating characteristic curve": "A plot of sensitivity against one minus specificity across decision thresholds, showing the discrimination tradeoff."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://wwwnc.cdc.gov/eid/article/10/1/03-0243_article",
+            "label": "CDC: evaluating detection and diagnostic decision support systems"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "covariate-adjustment",
+      "term": "covariate adjustment",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Covariate adjustment uses a model to compare groups while accounting for measured variables related to exposure and outcome. It can reduce confounding from measured covariates, but it cannot guarantee causal validity or repair unmeasured confounding, poor measurement, or selection bias.",
+      "info": {
+        "text": "Using measured covariates in an analysis to make a comparison conditional on those variables.",
+        "links": [
+          {
+            "href": "https://www.cdc.gov/field-epi-manual/php/chapters/analyze-interpret-data.html",
+            "label": "CDC: analyzing and interpreting data"
+          }
+        ]
+      },
+      "conceptId": "covariate-adjustment",
+      "relationKind": "foundation",
+      "idealTerms": [
+        "confounding",
+        "logistic regression"
+      ]
+    },
+    {
+      "id": "reference-standard",
+      "term": "reference standard",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "A reference standard supplies the comparison used to classify whether a condition is present when diagnostic performance is evaluated. If that standard is imperfect or applied differently across groups, estimates of sensitivity and specificity can inherit bias.",
+      "info": {
+        "text": "The accepted comparison used to determine condition status when evaluating a diagnostic test.",
+        "links": [
+          {
+            "href": "https://wwwnc.cdc.gov/eid/article/10/1/03-0243_article",
+            "label": "CDC: evaluating diagnostic performance"
+          }
+        ]
+      },
+      "conceptId": "reference-standard",
+      "relationKind": "evaluation",
+      "idealTerms": [
+        "measurement error",
+        "sensitivity"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "threats-to-validity",
+      "prompt": "Which concepts are threats that can make an observed association misleading?",
+      "explanation": "Selection bias comes from who enters or remains in the study; information bias comes from systematic data collection or reporting; measurement error is a way a variable can be recorded incorrectly; and confounding mixes the target association with a third factor’s association.",
+      "targets": [
+        "selection bias",
+        "information bias",
+        "measurement error",
+        "confounding"
+      ],
+      "reasons": {
+        "selection bias": "The comparison is distorted by how people enter, remain in, or leave the study.",
+        "information bias": "The information collected or reported differs systematically in a way tied to the study groups.",
+        "measurement error": "The recorded value differs from the underlying value, potentially changing the estimated association.",
+        "confounding": "A third variable related to both exposure and outcome is mixed into the association being interpreted."
+      }
+    },
+    {
+      "id": "safeguards-and-robustness",
+      "prompt": "Which approaches reduce or probe threats to validity?",
+      "explanation": "Randomization creates a comparison by chance assignment, blinding limits expectation effects, and sensitivity analysis asks whether a conclusion survives plausible alternative assumptions. These are safeguards or checks, not names for the threats themselves.",
+      "targets": [
+        "randomization",
+        "blinding",
+        "sensitivity analysis"
+      ],
+      "reasons": {
+        "randomization": "Chance assignment helps balance factors between groups before outcomes occur.",
+        "blinding": "Withholding assignment information can reduce behavior or assessment changes caused by expectations.",
+        "sensitivity analysis": "Repeating the analysis under alternative assumptions probes whether the result is fragile."
+      }
+    },
+    {
+      "id": "models-by-outcome-shape",
+      "prompt": "Which model families match continuous, binary, or grouped outcomes?",
+      "explanation": "Linear regression is suited to a continuous outcome, logistic regression to a binary outcome, and multilevel analysis to observations grouped within higher-level units. Time-to-event data require a different family addressed next.",
+      "targets": [
+        "linear regression",
+        "logistic regression",
+        "multilevel analysis"
+      ],
+      "reasons": {
+        "linear regression": "It models a continuous outcome on its measured scale as a function of predictors.",
+        "logistic regression": "It models the probability or odds of a binary outcome.",
+        "multilevel analysis": "It accounts for dependence and variation created by observations nested in groups."
+      }
+    },
+    {
+      "id": "time-to-event-tools",
+      "prompt": "Which concepts belong to time-to-event analysis?",
+      "explanation": "Survival analysis is the broader family. The Kaplan-Meier estimator describes event-free probability, the Cox model compares hazards using covariates, and censoring marks follow-up that ends before the event is observed.",
+      "targets": [
+        "survival analysis",
+        "Kaplan-Meier estimator",
+        "Cox proportional hazards model",
+        "censoring"
+      ],
+      "reasons": {
+        "survival analysis": "It is the family designed for time until an event, including incomplete follow-up.",
+        "Kaplan-Meier estimator": "It estimates event-free survival over time without requiring a parametric survival curve.",
+        "Cox proportional hazards model": "It relates covariates to the hazard of the event under a proportional-hazards assumption.",
+        "censoring": "It records that the exact event time is not observed within the available follow-up."
+      }
+    },
+    {
+      "id": "test-results-in-context",
+      "prompt": "Which measures describe what a diagnostic test result gets right in a population?",
+      "explanation": "Sensitivity and specificity condition on whether the condition is present or absent. Positive and negative predictive values condition on the test result and therefore change with the condition’s frequency in the tested population.",
+      "targets": [
+        "sensitivity",
+        "specificity",
+        "positive predictive value",
+        "negative predictive value"
+      ],
+      "reasons": {
+        "sensitivity": "It asks how often the test detects the condition among people who have it.",
+        "specificity": "It asks how often the test excludes the condition among people who do not have it.",
+        "positive predictive value": "It asks how often a positive result is correct in the tested population.",
+        "negative predictive value": "It asks how often a negative result is correct in the tested population."
+      }
+    },
+    {
+      "id": "diagnostic-discrimination",
+      "prompt": "Which concepts summarize diagnostic evidence beyond a single correct-or-incorrect rate?",
+      "explanation": "A likelihood ratio summarizes the evidentiary weight of a particular test result, while a receiver operating characteristic curve shows how discrimination changes as the decision threshold moves. Both add structure beyond reporting one sensitivity or specificity value.",
+      "targets": [
+        "likelihood ratio",
+        "receiver operating characteristic curve"
+      ],
+      "reasons": {
+        "likelihood ratio": "It compares the probability of a result under the condition-present and condition-absent states.",
+        "receiver operating characteristic curve": "It displays the sensitivity-specificity tradeoff across possible thresholds."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Trust the Association, Match the Model",
+    "summary": "Move from threats to validity through outcome-specific models and diagnostic performance.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Once a biomedical study has produced an association, two questions remain: could the result be an artifact, and is the analysis suited to the outcome? Bias can enter through who is observed, how variables are measured, or which third factors are left uncontrolled. Safeguards and robustness checks make those threats visible; they do not turn every association into a causal claim.\r\n\r\nThe outcome itself also guides the model. Continuous, binary, grouped, and time-to-event observations need different tools. Diagnostic tests add a second decision problem: performance depends on the reference standard, the threshold, and the population in which the test is used."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Luna)",
+        "reasoning": "max"
+      }
+    ]
+  }
+});

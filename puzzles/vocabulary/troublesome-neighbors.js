@@ -1,0 +1,137 @@
+// Generated from content/puzzles/troublesome-neighbors.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "troublesome-neighbors",
+  "title": "Causing Trouble",
+  "category": "vocabulary",
+  "puzzleKind": "vocabulary-context",
+  "tags": [
+    "synonyms",
+    "usage",
+    "adjectives"
+  ],
+  "level": "intermediate",
+  "info": {
+    "text": "Six near-synonyms for causing trouble, discriminated along the lines of Merriam-Webster's synonym notes: all impose hardship of some kind, but each troubles in a different way — generally, dutifully, weightily, unwieldily, tediously, or harassingly.",
+    "links": [
+      {
+        "href": "https://www.merriam-webster.com/dictionary/onerous"
+      },
+      {
+        "href": "https://www.merriam-webster.com/dictionary/vexatious"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "causing-trouble",
+      "name": "Causing Trouble",
+      "color": "teal",
+      "fact": "All six adjectives describe things that cause trouble. They differ in how the trouble lands: troublesome is the neutral genus, mere difficulty; onerous is the weight of laborious duties; burdensome is an oppressive load that is hard to bear; cumbersome is unwieldiness that is hard to handle; irksome is tedium that irritates; vexatious is annoyance taken to harassment, with a specialized legal sense for proceedings brought to harass rather than to win.",
+      "terms": [
+        "troublesome",
+        "onerous",
+        "burdensome",
+        "cumbersome",
+        "irksome",
+        "vexatious"
+      ],
+      "seeds": [
+        "troublesome",
+        "onerous"
+      ],
+      "termInfo": {
+        "burdensome": "Oppressively heavy; a load — financial, emotional, or otherwise — that is hard to bear.",
+        "cumbersome": "Clumsy and unwieldy; hard to handle, manage, or move through. Alone in this set, it describes awkward procedures and objects as well as difficulties.",
+        "irksome": "Annoying through tedium or monotony; wearing on patience rather than crushing by weight.",
+        "onerous": "Laborious and heavy, especially as a duty or obligation; imposing hardship through what must be done.",
+        "troublesome": "Causing trouble or difficulty in the most general sense; the neutral member of the set, with no special claim about duty, weight, or tedium.",
+        "vexatious": "Causing vexation or annoyance taken to harassment; in law, describing proceedings instituted frivolously to harass rather than to win."
+      },
+      "info": "All six words describe trouble. Tell them apart by how it lands: plain difficulty, heavy duty, oppressive load, unwieldiness, tedium, or harassment."
+    }
+  ],
+  "bridges": [],
+  "lenses": [
+    {
+      "id": "troublesome-tooth",
+      "prompt": "The ____ tooth bothered him for weeks before he finally saw a dentist.",
+      "explanation": "Plain persistent difficulty is troublesome's home ground: a tooth that bothers for weeks is trouble without any special character. Onerous would need a laborious duty, burdensome an oppressive load, cumbersome unwieldiness, irksome tedious monotony rather than ache, and vexatious harassment — none of which a tooth supplies.",
+      "targets": [
+        "troublesome"
+      ],
+      "reasons": {
+        "troublesome": "General persistent difficulty is exactly what this low-grade trouble tests."
+      }
+    },
+    {
+      "id": "onerous-inventory",
+      "prompt": "The executors found the probate inventory ____: six months of cataloguing another man's debts.",
+      "explanation": "A laborious formal duty is onerous's boundary: cataloguing another man's debts for six months is hardship through what must be done. Burdensome would stress the crushing weight rather than the labor, cumbersome would need unwieldy procedure, irksome mere tedium, vexatious harassment, and troublesome would say only that it was difficult.",
+      "targets": [
+        "onerous"
+      ],
+      "reasons": {
+        "onerous": "Laborious heaviness of duty is onerous's discriminating clause."
+      }
+    },
+    {
+      "id": "burdensome-mortgage",
+      "prompt": "After the layoff, the mortgage became ____, a weight she felt before opening the bills.",
+      "explanation": "An oppressive load hard to bear is burdensome's signature: the cue is weight felt before the bills are even opened. Onerous would point to laborious duty rather than crushing load, cumbersome to unwieldiness, irksome to tedium, vexatious to harassment, and troublesome would understate the oppression.",
+      "targets": [
+        "burdensome"
+      ],
+      "reasons": {
+        "burdensome": "An oppressive load hard to bear is the distinction this weight context activates."
+      }
+    },
+    {
+      "id": "cumbersome-process",
+      "prompt": "The reimbursement process was ____: eleven forms, three signatures, and a six-week wait.",
+      "explanation": "Unwieldy procedure is cumbersome's home ground, and it alone in this set describes awkward systems: eleven forms and three signatures are hard to move through, not heavy or tedious per se. Onerous would need laborious duty, burdensome crushing weight, irksome monotonous irritation, vexatious harassment, and troublesome would miss the clumsiness entirely.",
+      "targets": [
+        "cumbersome"
+      ],
+      "reasons": {
+        "cumbersome": "Clumsy unwieldiness hard to handle is cumbersome's extended sense."
+      }
+    },
+    {
+      "id": "irksome-drip",
+      "prompt": "The ____ drip of the faucet kept him awake more surely than any worry.",
+      "explanation": "Tedium that wears on patience is irksome's boundary: a dripping faucet annoys by monotony, not by weight or difficulty. Burdensome would need an oppressive load, onerous a laborious duty, cumbersome unwieldiness, vexatious harassment, and troublesome would describe the sleeplessness rather than the drip's particular power to irritate.",
+      "targets": [
+        "irksome"
+      ],
+      "reasons": {
+        "irksome": "Annoyance through tedium is exactly what the monotonous-drip context tests."
+      }
+    },
+    {
+      "id": "vexatious-filing",
+      "prompt": "The judge dismissed the filing as ____ litigation, meant to harass rather than to win.",
+      "explanation": "Harassment by process is vexatious's specialized legal sense: the filing exists to harass rather than to win, which no other member of this set can say. Troublesome would merely call it difficult, onerous laborious, burdensome heavy, cumbersome unwieldy, and irksome tedious — all missing the bad-faith litigation the judge is naming.",
+      "targets": [
+        "vexatious"
+      ],
+      "reasons": {
+        "vexatious": "Proceedings instituted to harass are vexatious's legal sense."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "preSolve": true,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Muse Code (Spark 1.3)",
+        "reasoning": "high"
+      }
+    ]
+  }
+});

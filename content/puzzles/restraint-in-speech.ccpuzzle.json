@@ -1,0 +1,161 @@
+{
+  "id": "restraint-in-speech",
+  "title": "Holding Back: Five Words for Restraint in Speech",
+  "category": "vocabulary",
+  "puzzleKind": "vocabulary-context",
+  "tags": [
+    "near-synonyms",
+    "usage",
+    "register",
+    "Merriam-Webster",
+    "connotation"
+  ],
+  "level": "advanced",
+  "info": {
+    "text": "Merriam-Webster's thesaurus gives the five adjectives taciturn, reticent, reserved, secretive, and silent one shared sense — \"showing restraint in speaking\" — and then spends a full Synonym Chooser paragraph separating them. The differences are real and worth policing: temperament (taciturn), economy (silent), formality or caution (reserved), reluctance about one's own affairs (reticent), and a will to conceal that shades into deviousness (secretive). Each lens below asks which flavor of not-talking a context is actually describing.",
+    "links": [
+      {
+        "href": "https://www.merriam-webster.com/thesaurus/taciturn",
+        "label": "Merriam-Webster Thesaurus: 'Taciturn' — Synonym Chooser paragraph"
+      }
+    ],
+    "citations": [
+      {
+        "title": "\"Taciturn.\" Merriam-Webster.com Thesaurus (Synonym Chooser)",
+        "publisher": "Merriam-Webster",
+        "year": "2026",
+        "url": "https://www.merriam-webster.com/thesaurus/taciturn"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "speech-restraint",
+      "name": "Restraint in speech",
+      "color": "teal",
+      "fact": "All five adjectives mean \"showing restraint in speaking,\" but each locates the restraint somewhere different: a taciturn person's temperament, a silent person's economy, reserved people's caution or formality, reticent people's reluctance about their own affairs, and secretive people's will to conceal.",
+      "termInfo": {
+        "taciturn": "Implies a temperamental disinclination to speech and usually connotes unsociability (Merriam-Webster: \"a taciturn man, he almost never initiates a conversation\").",
+        "reticent": "Implies a reluctance to speak out or at length, especially about one's own affairs (Merriam-Webster: \"was reticent about his plans\").",
+        "reserved": "Implies reticence and suggests the restraining influence of caution or formality in checking easy informal conversational exchange (Merriam-Webster: \"greetings were brief, formal, and reserved\").",
+        "secretive": "Implies reticence but usually carries a suggestion of deviousness and lack of frankness, or of an often ostentatious will to conceal (Merriam-Webster: \"the secretive research and development division\").",
+        "silent": "Implies a habit of saying no more than is needed (Merriam-Webster: \"the strong, silent type\")."
+      },
+      "info": {
+        "text": "The five discriminating clauses are drawn from Merriam-Webster's Synonym Chooser for taciturn; each term's note follows that clause, and the lenses test where each word draws its boundary.",
+        "links": [
+          {
+            "href": "https://www.merriam-webster.com/thesaurus/taciturn",
+            "label": "Merriam-Webster Thesaurus: 'Taciturn'"
+          }
+        ]
+      },
+      "terms": [
+        "taciturn",
+        "reticent",
+        "reserved",
+        "secretive",
+        "silent"
+      ]
+    }
+  ],
+  "bridges": [],
+  "lenses": [
+    {
+      "id": "lens-taciturn-temperament",
+      "prompt": "A ___ man by all accounts, Mr. Halvorsen never initiated a conversation in thirty years on the same street, and neighbors knew him only by his nod.",
+      "explanation": "The cue is a standing temperament — thirty years, never initiates, contact reduced to a nod — exactly the unsociable disposition Merriam-Webster gives taciturn (\"a temperamental disinclination to speech and usually connotes unsociability\"). Silent is the nearest rival but means a habit of saying no more than needed, a matter of economy when he does speak, not a lifetime's disinclination to speak at all; reserved would require caution or formality as the restraining cause; reticent would point at reluctance about specific topics such as his own affairs; and secretive adds a will to conceal that the nodding neighbor simply lacks.",
+      "targets": [
+        "taciturn"
+      ],
+      "reasons": {
+        "taciturn": "Temperamental, unsociable disinclination to speech — a disposition, not a topic or a motive."
+      }
+    },
+    {
+      "id": "lens-secretive-concealment",
+      "prompt": "Nobody outside the program ever learned what happened inside the ___ facility: no signage, no visitors, and staff under strict orders to deflect every question.",
+      "explanation": "The cue is deliberate, almost ostentatious concealment — scrubbed signage, barred visitors, scripted deflections — which activates secretive's will to hide rather than mere quiet (Merriam-Webster: \"a suggestion of deviousness and lack of frankness or of an often ostentatious will to conceal\"). Taciturn names a person's temperament, so it cannot outfit a building; reticent is reluctance about one's own affairs, while this is an organized policy of hiding; reserved implies formality checking casual exchange; and silent would suggest the facility makes no sound rather than that it hides its business.",
+      "targets": [
+        "secretive"
+      ],
+      "reasons": {
+        "secretive": "An ostentatious will to conceal, not mere quiet — concealment is the operating policy here."
+      }
+    },
+    {
+      "id": "lens-reserved-formality",
+      "prompt": "Their first exchanges were brief, formal, and ___; it took weeks of working together before either of them offered a joke.",
+      "explanation": "The cue is formality between new acquaintances — brief, formal exchange that easy familiarity has not yet thawed — precisely reserved's restraining influence of caution or formality (Merriam-Webster's own illustration: \"greetings were brief, formal, and reserved\"). Taciturn describes a temperament and fits people, not the tone of an exchange; reticent would point to reluctance about particular subjects, especially one's own affairs; silent would make the exchanges wordless, contradicting \"exchanges\"; and secretive imports a concealment motive the situation never suggests.",
+      "targets": [
+        "reserved"
+      ],
+      "reasons": {
+        "reserved": "Caution or formality checking easy informal exchange — situational distance, not temperament or topic."
+      }
+    },
+    {
+      "id": "lens-silent-economy",
+      "prompt": "The strong, ___ type, the sergeant answered every question in exactly the words the regulation required — and no more.",
+      "explanation": "The cue is economy: he does speak, but never beyond necessity — silent's exact habit, \"saying no more than is needed\" — and the fixed collocation is \"the strong, silent type.\" Taciturn is the tempting neighbor, but it adds a temperamental disinclination and unsociability the sergeant lacks: he is fully responsive on demand. Reserved would need formality between people as the cause; reticent would need reluctance about a subject such as his own affairs; and secretive would need a will to conceal rather than plain economy.",
+      "targets": [
+        "silent"
+      ],
+      "reasons": {
+        "silent": "Says no more than is needed — economy of speech without unsociability or concealment."
+      }
+    },
+    {
+      "id": "lens-reticent-own-affairs",
+      "prompt": "After the layoff, Malik grew ___ about his finances — he wasn't hiding anything from anyone, he just changed the subject whenever money came up.",
+      "explanation": "The cue is topical reluctance about his own affairs, with deception explicitly ruled out — reticent's reluctance \"to speak out or at length, especially about one's own affairs.\" Secretive is the designed trap: its clause adds deviousness or a will to conceal, exactly what \"wasn't hiding anything\" cancels. Taciturn would make the disinclination total rather than about money; reserved would need formality or caution toward the other person; and silent would claim he says nothing at all on the subject, when in fact he deflects rather than refuses.",
+      "targets": [
+        "reticent"
+      ],
+      "reasons": {
+        "reticent": "Reluctance about one's own affairs without any intent to deceive — discomfort, not concealment."
+      }
+    },
+    {
+      "id": "lens-reticent-not-secretive",
+      "prompt": "You could call him ___ about his past, but never deceptive: press him directly and he answers fully — he simply never volunteers.",
+      "explanation": "The cue is a contrast that keeps the concealment reading out: full answers on request, nothing volunteered unprompted. Reticent fits because reluctance to speak out about one's own affairs is the whole of its clause; secretive fails because it \"carries a suggestion of deviousness and lack of frankness,\" which \"never deceptive\" and the full answers forbid. Taciturn fails because someone who answers fully when asked has no general disinclination to speech; reserved would require caution or formality as the restraining cause; and silent would require him to keep to the minimum even when asked — the opposite of answering fully.",
+      "targets": [
+        "reticent"
+      ],
+      "reasons": {
+        "reticent": "Never volunteers, but conceals nothing — reluctance about his own affairs, plainly not deviousness."
+      }
+    },
+    {
+      "id": "lens-reserved-not-taciturn",
+      "prompt": "Warm and funny once she's off the clock, Dr. Okafor is noticeably ___ in consultations, keeping patient chat to the polite minimum the clinic expects.",
+      "explanation": "The cue is situational formality in a person whose natural manner is anything but withdrawn — \"warm and funny off the clock\" is the tell. Reserved is the precise fit: caution or formality restraining easy informal exchange, here a professional role. Taciturn is the designed trap because it asserts a temperamental disinclination to speech plus unsociability, which the off-duty warmth refutes; reticent would need reluctance about her own affairs, which the sentence never raises; silent would need a habit of saying no more than needed, though she talks plenty within the protocol; and secretive would import concealment where only politeness operates.",
+      "targets": [
+        "reserved"
+      ],
+      "reasons": {
+        "reserved": "Role-driven formality checking informal exchange — the restraint travels with the setting, not the temperament."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "Not one silence but five",
+    "summary": "English separates kinds of not-talking because the social judgments behind them differ.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "English refuses to let \"not talking\" be one thing. A person may say little because it is in their nature, because they never waste a word, because formality holds them back, because they would rather not discuss their own business, or because they are actively hiding it — and the language keeps a separate adjective for each flavor.\r\n\r\nThe distinctions matter because the judgments attached to them differ. Calling a colleague withdrawn, economical, formal, private, or evasive accuses them of five different things; only the last implies dishonesty, and only the first is really about personality at all. Careful writers therefore watch which situation a sentence actually describes — a lifetime's disposition, a clipped answer, a formal first meeting, an avoided topic, a sealed facility — and reach for the word whose boundary matches it.\r\n\r\nMerriam-Webster's thesaurus gives these five words one shared meaning and then, clause by clause, marks where each one stops and the next begins — a paragraph worth reading closely, because most mix-ups come from borrowing a neighboring word's accusation."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}
