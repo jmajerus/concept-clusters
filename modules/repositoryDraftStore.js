@@ -36,8 +36,13 @@ export function createRepositoryDraftStore({ repository, actor }) {
   }
 
   return {
-    async createDraft({ draftId, document }) {
-      return record(await repository.create({ draftId, document, actor }));
+    async createDraft({ draftId, document, seededFromPublished = false }) {
+      return record(await repository.create({
+        draftId,
+        document,
+        actor,
+        seededFromPublished
+      }));
     },
     getDraft,
     async replaceDraft({ draftId, document, expectedRevision }) {
@@ -80,8 +85,8 @@ export function createRepositoryDraftStore({ repository, actor }) {
     async listDrafts(options = {}) {
       return repository.list({ actor, ...options });
     },
-    async deleteDraft(draftId) {
-      return repository.delete({ draftId, actor });
+    async deleteDraft(draftId, { expectedRevision = null } = {}) {
+      return repository.delete({ draftId, actor, expectedRevision });
     },
     async recordValidation(draftId, validation) {
       return repository.recordValidation({ draftId, validation, actor });

@@ -41,6 +41,55 @@ const baseDraft = {
 };
 
 export async function run() {
+  // The rename form is gated on the server's own liveness answer, not on the
+  // page's publication flags: a withdrawn row or a git-only id is live to the
+  // rename POST, so offering the form for one would guarantee a 409.
+  assert.match(
+    renderDraftPage({ ...baseDraft }),
+    /name="new_id"/,
+    "a never-published draft can still be renamed"
+  );
+  assert.doesNotMatch(
+    renderDraftPage({ ...baseDraft, puzzleIdIsLive: true }),
+    /name="new_id"/,
+    "a live id offers no rename field"
+  );
+  assert.match(
+    renderDraftPage({ ...baseDraft, puzzleIdIsLive: true }),
+    /is published, so other/
+  );
+
+  // A withdrawn id is still spoken for, so a shadow over one keeps its badge
+  // rather than being collapsed into "withdrawn".
+  const withdrawnShadowRow = renderDraftListPage([{
+    id: "withdrawn-shadow",
+    title: "Withdrawn shadow",
+    category: "Science",
+    hasWorkingCopy: true,
+    withdrawn: true,
+    shadowsPublished: true
+  }], { variant: "local" });
+  assert.match(withdrawnShadowRow, /badge">withdrawn<\/span>\s*<span class="badge badge-warn"[^>]*>shadow</);
+
+  // A shadow reads the same diff marks as an edit, so the summary has to say
+  // what they mean here, and the list badges the row that is otherwise
+  // indistinguishable from a legitimate working copy.
+  const shadowPage = renderDraftPage({
+    ...baseDraft,
+    shadowsPublished: true,
+    publishedDiff: {
+      total: 4,
+      counts: { changed: 1, added: 0, removed: 3 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [{ id: "gone" }], changed: {} }
+    }
+  });
+  assert.match(shadowPage, /was not opened from the published puzzle/);
+  assert.match(shadowPage, /not an edit history/);
+  assert.doesNotMatch(shadowPage, /4 changes from the published puzzle/);
+
   // No GitHub snapshot: omit the production badge rather than claiming
   // the puzzle is not in GitHub. D1 `submitted` is not a visible status.
   const draftPage = renderDraftPage({ ...baseDraft, inCurrentBundle: null });

@@ -1222,6 +1222,129 @@ export async function run() {
     });
     assert.equal(deleted.result.structuredContent.deleted, true);
 
+    // A published id cannot be opened as a fresh draft: a from-scratch
+    // document under a live id shadows that board instead of editing it, and
+    // is one Publish away from replacing it. See
+    // docs/dev-briefs/shadow-draft-incident-postmortem.md.
+    const shadowAttempt = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        document: {
+          id: "energy-flow",
+          title: "An unrelated board filed under a live id",
+          category: "Science",
+          clusters: [
+            { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a"], floatingTerms: ["b"] },
+            { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["c"], floatingTerms: ["d"] }
+          ]
+        }
+      }
+    });
+    assert.equal(shadowAttempt.result.isError, true);
+    const shadowText = JSON.stringify(shadowAttempt.result.content);
+    assert.match(shadowText, /already a published puzzle/);
+    assert.match(shadowText, /seed_from_published=true/);
+
+    // The same refusal covers a blank skeleton, which is the exact phrasing
+    // the server instructions have always used ("do not open a blank skeleton
+    // for a live id").
+    const shadowSkeleton = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        puzzle_id: "energy-flow",
+        title: "Blank shadow",
+        category: "Science"
+      }
+    });
+    assert.equal(shadowSkeleton.result.isError, true);
+    assert.match(JSON.stringify(shadowSkeleton.result.content), /already a published puzzle/);
+
+    // A draft_id that differs from a published document.id is refused too:
+    // the row id keys the drafts list, document.id is what Publish writes.
+    const shadowByDocumentId = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "not-published-yet",
+        document: {
+          id: "energy-flow",
+          title: "Shadow by document id",
+          category: "Science",
+          clusters: [
+            { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a"], floatingTerms: ["b"] },
+            { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["c"], floatingTerms: ["d"] }
+          ]
+        }
+      }
+    });
+    assert.equal(shadowByDocumentId.result.isError, true);
+    assert.match(JSON.stringify(shadowByDocumentId.result.content), /already a published puzzle/);
+
+    // An unpublished id is still free to create from scratch.
+    const freshUnpublished = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        puzzle_id: "never-published-board",
+        title: "Never published",
+        category: "Science"
+      }
+    });
+    assert.equal(freshUnpublished.result.isError, undefined);
+    assert.equal(freshUnpublished.result.structuredContent.draft.document.id, "never-published-board");
+
+    // A save never moves a draft's identity: the row would stay keyed by the
+    // old id while a later Publish wrote to the new one. Renaming is a human
+    // action on the drafts page.
+    const driftAttempt = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "never-published-board",
+        expected_revision: freshUnpublished.result.structuredContent.draft.revision,
+        document: {
+          ...freshUnpublished.result.structuredContent.draft.document,
+          id: "renamed-behind-your-back"
+        }
+      }
+    });
+    assert.equal(driftAttempt.result.isError, true);
+    const driftText = JSON.stringify(driftAttempt.result.content);
+    assert.match(driftText, /id is set when a draft is created/);
+    assert.match(driftText, /never-published-board/);
+    assert.match(driftText, /renamed-behind-your-back/);
+    assert.match(driftText, /Rename puzzle/);
+
+    // Dropping the id is drift too: the repository recomputes puzzle_id from
+    // the document, so an omitted id would null it while the row stayed keyed
+    // by draft_id.
+    const { id: _dropped, ...withoutId } =
+      freshUnpublished.result.structuredContent.draft.document;
+    const dropAttempt = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "never-published-board",
+        expected_revision: freshUnpublished.result.structuredContent.draft.revision,
+        document: withoutId
+      }
+    });
+    assert.equal(dropAttempt.result.isError, true);
+    assert.match(JSON.stringify(dropAttempt.result.content), /the save dropped it/);
+
+    // The same save without touching the id is fine.
+    const noDrift = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "never-published-board",
+        expected_revision: freshUnpublished.result.structuredContent.draft.revision,
+        document: {
+          ...freshUnpublished.result.structuredContent.draft.document,
+          title: "Never published, retitled"
+        }
+      }
+    });
+    assert.equal(noDrift.result.isError, undefined);
+    assert.equal(noDrift.result.structuredContent.draft.document.title, "Never published, retitled");
+    assert.equal(noDrift.result.structuredContent.draft.document.id, "never-published-board");
+
+    // And the sanctioned route into a live puzzle still works.
     const seeded = await request("tools/call", {
       name: "create_puzzle_draft",
       arguments: {

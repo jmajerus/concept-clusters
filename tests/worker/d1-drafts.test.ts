@@ -2,7 +2,8 @@ import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 import {
   DraftConflictError,
-  DraftNotFoundError
+  DraftNotFoundError,
+  PublishedIdConflictError
 } from "../../modules/draftRepository.js";
 import { D1DraftRepository } from "../../modules/d1DraftRepository.js";
 import { D1ContentDocumentRepository } from "../../modules/contentDocumentRepository.js";
@@ -225,5 +226,156 @@ describe("D1 draft repository", () => {
       draftId: "d1-delete-fixture",
       actor
     })).rejects.toBeInstanceOf(DraftNotFoundError);
+  });
+
+  // Delete carries the same OCC token save() does, so a rename cannot remove
+  // a source row that moved after it was copied.
+  it("compare-and-deletes against an expected revision", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "occ-delete-author" };
+    const document = {
+      ...content.getPuzzleDocument("energy-flow"),
+      id: "occ-delete-fixture",
+      title: "OCC delete fixture"
+    };
+    const created = await repository.create({
+      draftId: "occ-delete-fixture",
+      document,
+      actor
+    });
+    const saved = await repository.save({
+      draftId: "occ-delete-fixture",
+      document: { ...document, title: "Moved on" },
+      actor,
+      expectedRevision: created.revision
+    });
+    expect(saved.revision).toBe(created.revision + 1);
+
+    await expect(repository.delete({
+      draftId: "occ-delete-fixture",
+      actor,
+      expectedRevision: created.revision
+    })).rejects.toBeInstanceOf(DraftConflictError);
+    // Still there, still the newer content.
+    expect((await repository.get({
+      draftId: "occ-delete-fixture",
+      actor
+    })).document.title).toBe("Moved on");
+
+    await repository.delete({
+      draftId: "occ-delete-fixture",
+      actor,
+      expectedRevision: saved.revision
+    });
+    await expect(repository.get({
+      draftId: "occ-delete-fixture",
+      actor
+    })).rejects.toBeInstanceOf(DraftNotFoundError);
+  });
+
+  // The write-once rule lives at the repository, not at the MCP boundary: the
+  // admin board PUTs a whole document straight to save(), and puzzle_id is
+  // recomputed from that document, so any writer able to move or drop the id
+  // would split the row key from the document identity.
+  it("refuses a save that moves or drops the draft's id", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "write-once-author" };
+    const original = content.getPuzzleDocument("energy-flow");
+    const document = { ...original, id: "write-once-fixture", title: "Write once" };
+
+    const created = await repository.create({
+      draftId: "write-once-fixture",
+      document,
+      actor
+    });
+
+    await expect(repository.save({
+      draftId: "write-once-fixture",
+      document: { ...document, id: "moved-elsewhere" },
+      actor,
+      expectedRevision: created.revision
+    })).rejects.toThrow(/cannot change on a save/);
+
+    const { id: _dropped, ...withoutId } = document;
+    await expect(repository.save({
+      draftId: "write-once-fixture",
+      document: withoutId,
+      actor,
+      expectedRevision: created.revision
+    })).rejects.toThrow(/the save dropped it/);
+
+    // An ordinary save is untouched, and the id is still where it started.
+    const saved = await repository.save({
+      draftId: "write-once-fixture",
+      document: { ...document, title: "Write once, retitled" },
+      actor,
+      expectedRevision: created.revision
+    });
+    expect(saved.document.title).toBe("Write once, retitled");
+    expect(saved.document.id).toBe("write-once-fixture");
+    expect(saved.puzzleId).toBe("write-once-fixture");
+  });
+
+  // The shadow gate lives in the insert itself, not in a check before it, so
+  // there is no window in which a concurrent Publish turns a free id into a
+  // live one between looking and writing. Every caller of the repository is
+  // covered by it, including ones that forget to ask first.
+  it("refuses a fresh draft under a published id, and exempts the seeded route", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "shadow-gate-author" };
+    const published = content.getPuzzleDocument("energy-flow");
+
+    await contentDocuments.publish({
+      kind: "puzzle",
+      id: "gated-live-puzzle",
+      document: { ...published, id: "gated-live-puzzle", title: "Gated live puzzle" },
+      actor
+    });
+
+    // Written from scratch under the live id: refused by the write itself.
+    await expect(repository.create({
+      draftId: "gated-live-puzzle",
+      document: {
+        ...published,
+        id: "gated-live-puzzle",
+        title: "An unrelated board under a live id"
+      },
+      actor
+    })).rejects.toBeInstanceOf(PublishedIdConflictError);
+    await expect(repository.get({
+      draftId: "gated-live-puzzle",
+      actor
+    })).rejects.toBeInstanceOf(DraftNotFoundError);
+
+    // The document id is gated too, not just the row id: a Publish follows
+    // document.id, so a draft filed under a free row id still shadows.
+    await expect(repository.create({
+      draftId: "free-row-id",
+      document: { ...published, id: "gated-live-puzzle" },
+      actor
+    })).rejects.toBeInstanceOf(PublishedIdConflictError);
+
+    // The working copy opened from that board is the one legitimate draft
+    // over a live id, and is marked as such by the seeding helper.
+    const seeded = await repository.create({
+      draftId: "gated-live-puzzle",
+      document: { ...published, id: "gated-live-puzzle", title: "Gated live puzzle" },
+      actor,
+      seededFromPublished: true
+    });
+    expect(seeded.draftId).toBe("gated-live-puzzle");
+    expect(seeded.revision).toBe(1);
+
+    // An unpublished id is still free to create from scratch.
+    const free = await repository.create({
+      draftId: "never-gated-puzzle",
+      document: { ...published, id: "never-gated-puzzle", title: "Never gated" },
+      actor
+    });
+    expect(free.draftId).toBe("never-gated-puzzle");
   });
 });

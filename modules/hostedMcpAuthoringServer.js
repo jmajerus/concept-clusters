@@ -34,6 +34,7 @@ import {
   applyAuthoredDomain,
   AUTHORING_READ_DOMAINS,
   assertNoAgentProtectedFields,
+  assertNoWriteOnceDrift,
   projectAuthoredDocument
 } from "./authoringDomains.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
@@ -48,6 +49,11 @@ import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./author
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import { publishedRowOrNull } from "./contentDocumentRepository.js";
+import {
+  SEEDED_ROUTE_MCP,
+  puzzleIdIsLive,
+  shadowCreateRefusal
+} from "./draftIdRename.js";
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import { CATEGORY_REGISTRATION_MODES } from "./categoryDiscovery.js";
 import {
@@ -506,6 +512,19 @@ export function createAuthoringMcpServer({
     return documentForMcp(published.document, { categoryRegistry });
   }
 
+  // The MCP contract has always said "do not open a blank skeleton for a live
+  // id" -- this enforces it. A draft written from scratch under a published id
+  // shadows that board: it sits beside the live document rather than on top of
+  // it, looks like an ordinary working copy in the drafts list, and is one
+  // Publish away from replacing a finished puzzle with an unrelated one. See
+  // docs/dev-briefs/shadow-draft-incident-postmortem.md. Editing a live puzzle
+  // goes through seed_from_published, which starts from the snapshot; a
+  // wholesale replacement is that same working copy, saved over.
+  async function assertPuzzleIdIsUnpublished(puzzleId) {
+    if (!await puzzleIdIsLive({ contentDocuments, contentService, puzzleId })) return;
+    throw new Error(shadowCreateRefusal(puzzleId, { seeded: SEEDED_ROUTE_MCP }));
+  }
+
   function puzzleListSummary(puzzle) {
     return {
       id: puzzle.id,
@@ -900,12 +919,14 @@ export function createAuthoringMcpServer({
       const puzzleId = args.draft_id || args.puzzle_id;
       const { draft, created } = await openPuzzleWorkingCopy({
         getDraft: id => draftRepository.get({ draftId: id, actor }),
-        createDraft: ({ draftId, document }) => draftRepository.create({
-          draftId,
-          document,
-          actor,
-          baseCommitSha: args.base_commit_sha || null
-        }),
+        createDraft: ({ draftId, document, seededFromPublished }) =>
+          draftRepository.create({
+            draftId,
+            document,
+            actor,
+            seededFromPublished,
+            baseCommitSha: args.base_commit_sha || null
+          }),
         contentDocuments,
         contentService,
         allowGitFallback: false,
@@ -941,6 +962,11 @@ export function createAuthoringMcpServer({
       throw new Error(
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
       );
+    }
+    // Both identities matter: the draft row id is what the drafts list and the
+    // admin URL key on, and document.id is what a later Publish writes to.
+    for (const candidate of new Set([args.draft_id, document.id].filter(Boolean))) {
+      await assertPuzzleIdIsUnpublished(candidate);
     }
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(document, {
       ctx,
@@ -1066,6 +1092,11 @@ export function createAuthoringMcpServer({
     } catch {
       // Ignore -- save() re-validates the draft and revision authoritatively.
     }
+    // Identity is write-once, declared in the field-ownership map rather than
+    // checked by hand here. A domain save is already covered inside
+    // applyAuthoredDomain; this catches the complete-document save, which
+    // does not go through it.
+    assertNoWriteOnceDrift(previousDocument, stored, "MCP puzzle document");
     const retained = retainMcpExcludedMetadata(stored, previousDocument);
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {
       ctx,

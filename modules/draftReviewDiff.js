@@ -260,6 +260,61 @@ export function diffPublishedDraft(published, draft) {
   return { counts, total, fields, clusters, bridges, lenses };
 }
 
+/**
+ * Does this working copy descend from the published board, or is it a
+ * different document filed under the same id?
+ *
+ * Measured as how much of the published board's identity survives into the
+ * draft: clusters, bridges and lenses that are still there under the same
+ * key. An edit keeps nearly all of them and changes their contents -- even a
+ * heavy edit is recognizably the same board. A document written from scratch
+ * under a live id keeps almost none, because its nodes were never derived
+ * from the published ones. That is the shadow case in
+ * docs/dev-briefs/shadow-draft-incident-postmortem.md, where a fresh board
+ * kept 1 of the published board's 9 nodes.
+ *
+ * Deliberately expressed through the same diff the review page already
+ * renders rather than a second notion of "different", and deliberately
+ * structural rather than "revision 1 and differs at all": a second working
+ * copy of a published puzzle can legitimately sit at revision 1 with a field
+ * or two changed, and must not be accused of shadowing it.
+ *
+ * Evidence, not proof. It answers "does this still look like that board?",
+ * so a rewrite so total that it replaces every node will read as a shadow
+ * whether it was one or not.
+ *
+ * @param {{
+ *   published?: object|null,
+ *   draft?: object|null,
+ *   publishedDiff?: object|null,
+ *   threshold?: number
+ * }} [options]
+ * @returns {boolean}
+ */
+export function draftShadowsPublished({
+  published = null,
+  draft = null,
+  publishedDiff = undefined,
+  threshold = 0.5
+} = {}) {
+  if (!published) return false;
+  const diff = publishedDiff === undefined
+    ? diffPublishedDraft(published, draft)
+    : publishedDiff;
+  if (!diff) return false;
+  const nodes = ["clusters", "bridges", "lenses"];
+  const total = nodes.reduce(
+    (sum, name) => sum + (Array.isArray(published[name]) ? published[name].length : 0),
+    0
+  );
+  if (!total) return false;
+  const removed = nodes.reduce(
+    (sum, name) => sum + (diff[name]?.removed?.length || 0),
+    0
+  );
+  return (total - removed) / total < threshold;
+}
+
 export function publishedDocumentFromService(contentService, puzzleId) {
   if (!contentService || typeof puzzleId !== "string") return null;
   if (typeof contentService.getPuzzleDocument !== "function") return null;

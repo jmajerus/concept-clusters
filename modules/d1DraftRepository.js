@@ -1,6 +1,7 @@
 import {
   assertDraftId,
   DraftConflictError,
+  PublishedIdConflictError,
   DraftEmptyHistoryError,
   DraftNotFoundError,
   DraftRepository,
@@ -11,6 +12,7 @@ import {
 } from "./draftRepository.js";
 import {
   applyAuthoredDomain,
+  assertNoWriteOnceDrift,
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,
   AUTHORING_WRITE_DOMAINS,
@@ -104,7 +106,21 @@ export class D1DraftRepository extends DraftRepository {
     this.database = database;
   }
 
-  async create({ draftId, document, actor, baseCommitSha = null }) {
+  /**
+   * `seededFromPublished` is set by the seeding helper, never by a caller:
+   * a working copy opened from a published board is the one draft that may
+   * legitimately exist under a live id. Every other create is gated in the
+   * insert itself rather than by a preceding read, so there is no window in
+   * which a concurrent Publish can turn a free id into a live one between the
+   * check and the write.
+   */
+  async create({
+    draftId,
+    document,
+    actor,
+    baseCommitSha = null,
+    seededFromPublished = false
+  }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor);
     const materialized = assembleStoredDomainDocuments({ document });
@@ -126,32 +142,54 @@ export class D1DraftRepository extends DraftRepository {
       domains.pedagogy,
       domains.provenance
     ];
+    // Both identities are gated: the row id keys the drafts list and the admin
+    // URL, and puzzle_id is what a later Publish writes to.
+    const guardedIds = [draftId, typeof materialized.id === "string" ? materialized.id : draftId];
+    const shadowGate = seededFromPublished
+      ? ""
+      : `WHERE NOT EXISTS (
+          SELECT 1 FROM published_documents WHERE kind = 'puzzle' AND id IN (?, ?)
+        )`;
+    const gateBindings = seededFromPublished ? [] : guardedIds;
+    const insert = columns => `
+      INSERT INTO puzzle_drafts (${columns.names})
+      SELECT ${columns.values}
+      ${shadowGate}
+    `;
+    let result;
     try {
-      await this.database.prepare(`
-        INSERT INTO puzzle_drafts (
-          id, puzzle_id, owner_subject, title, status,
+      result = await this.database.prepare(insert({
+        names: `id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
           created_at, updated_at, revision, document_stale,
-          content_json, pedagogy_json, provenance_json
-        ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?)
-      `).bind(...bindFresh).run();
+          content_json, pedagogy_json, provenance_json`,
+        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?"
+      })).bind(...bindFresh, ...gateBindings).run();
     } catch (error) {
       if (String(error?.message || error).includes("UNIQUE constraint failed")) {
         throw new DraftConflictError(`Draft "${draftId}" already exists`);
       }
       // Older local D1 DBs may lack document_stale until migrate; retry without it.
       if (/document_stale|no such column/i.test(String(error?.message || error))) {
-        await this.database.prepare(`
-          INSERT INTO puzzle_drafts (
-            id, puzzle_id, owner_subject, title, status,
+        result = await this.database.prepare(insert({
+          names: `id, puzzle_id, owner_subject, title, status,
             document, content_hash, base_commit_sha,
             created_at, updated_at, revision,
-            content_json, pedagogy_json, provenance_json
-          ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?)
-        `).bind(...bindFresh).run();
+            content_json, pedagogy_json, provenance_json`,
+          values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?"
+        })).bind(...bindFresh, ...gateBindings).run();
       } else {
         throw error;
       }
+    }
+    // A UNIQUE violation throws above, so the only way to insert nothing is the
+    // shadow gate. Name which id is live, for an error worth reading.
+    if (changes(result) !== 1) {
+      const live = await this.database.prepare(`
+        SELECT id FROM published_documents
+        WHERE kind = 'puzzle' AND id IN (?, ?) LIMIT 1
+      `).bind(...guardedIds).first();
+      throw new PublishedIdConflictError(live?.id || guardedIds[1]);
     }
     return this.get({ draftId, actor });
   }
@@ -188,6 +226,15 @@ export class D1DraftRepository extends DraftRepository {
       );
     }
     const materialized = assembleStoredDomainDocuments({ document });
+    // Enforced at the repository, not at one caller: puzzle_id is recomputed
+    // from the document on every save, so any writer that could move or drop
+    // the id would split the row key from the document identity. The admin
+    // board PUTs a whole document straight to this method.
+    assertNoWriteOnceDrift(
+      assembleRowDocument(current),
+      materialized,
+      "stored draft document"
+    );
     const documentJson = serializeDraftDocument(materialized);
     const previousAssembled = serializeDraftDocument(assembleRowDocument(current));
     if (previousAssembled === documentJson && Number(current.document_stale || 0) !== 1) {
@@ -447,18 +494,46 @@ export class D1DraftRepository extends DraftRepository {
     return result.results.map(includeDocument ? fullDraft : metadata);
   }
 
-  async delete({ draftId, actor }) {
+  /**
+   * `expectedRevision` makes the delete a compare-and-delete, the same OCC
+   * token save() uses. A rename copies a draft and then removes the source,
+   * and without this the removal is unconditional: a save landing between the
+   * copy and the delete would be carried away with the row it was written to.
+   * Callers that simply discard a draft pass nothing and delete regardless.
+   *
+   * @param {{ draftId: string, actor: object, expectedRevision?: number|null }} input
+   * @returns {Promise<void>}
+   */
+  async delete({ draftId, actor, expectedRevision = null }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor).subject;
+    const guarded = Number.isInteger(expectedRevision);
     const result = await this.database.batch([
       this.database.prepare(`
         DELETE FROM puzzle_draft_history WHERE draft_id = ?
       `).bind(draftId),
-      this.database.prepare(`
-        DELETE FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
-      `).bind(draftId, owner)
+      guarded
+        ? this.database.prepare(`
+            DELETE FROM puzzle_drafts
+            WHERE id = ? AND owner_subject = ? AND revision = ?
+          `).bind(draftId, owner, expectedRevision)
+        : this.database.prepare(`
+            DELETE FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+          `).bind(draftId, owner)
     ]);
-    if (changes(result[1]) !== 1) throw new DraftNotFoundError(draftId);
+    if (changes(result[1]) === 1) return;
+    if (guarded) {
+      const row = await this.database.prepare(`
+        SELECT revision FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      `).bind(draftId, owner).first();
+      if (row) {
+        throw new DraftConflictError(
+          `Draft revision conflict: expected ${expectedRevision}, `
+          + `current revision is ${Number(row.revision)}`
+        );
+      }
+    }
+    throw new DraftNotFoundError(draftId);
   }
 
   async recordValidation({ draftId, validation, actor }) {

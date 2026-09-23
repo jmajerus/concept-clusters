@@ -94,8 +94,36 @@ the agent. It can contain:
 - server capture time and server-assigned authoring role and date;
 - authenticated owner and actor context when available;
 - the focused authoring scope;
-- recognized client identity; and
+- client identity, recognized or explicitly unattributed; and
 - model or reasoning hints when the client exposes them.
+
+An **unrecognized client is recorded too, as unnamed but not unknown.**
+Reaching an authoring tool through MCP is itself the evidence of generative
+authorship: a human does not hand-call `create_puzzle_draft`. So the
+collaboration mode is set from that fact regardless of whether the client
+could be named. What an unrecognized client does *not* get is a named
+contributor, because there is no product to print in a byline. It gets the
+unnamed one instead — `generative assistance`, rendering as **"Drafted with
+generative assistance"** through the existing `draftedOnly` template — and
+the audit row records `client.unidentified: true` plus whatever name the
+client presented.
+
+Three rules keep that honest:
+
+- It follows the same credit-worthiness rule as a named contributor: a
+  `drafted` call or a substantial `edited` save, never a trivial one.
+- It is added only when no generative contributor is on record. If a named
+  system is already credited, the board already says an AI made it, and a
+  second entry would invent a collaborator — most likely a phantom of the
+  same system reconnecting through a frame we did not recognize.
+- It is deliberately **not** registered in `authoringHosts.js`. It is the
+  absence of a known host, not a host, and must not appear in the admin host
+  pickers as something selectable.
+
+Until the shadow-draft incident this path wrote nothing at all: an
+unrecognized client's board carried no stamp and no provenance, which left it
+asserting human authorship by default and gave the editor no way to correct
+the record. See the [post-mortem](dev-briefs/shadow-draft-incident-postmortem.md).
 
 Persistence is best-effort and fire-and-forget. A failed audit write must not
 make a valid authoring operation fail. The stamp intentionally does not claim

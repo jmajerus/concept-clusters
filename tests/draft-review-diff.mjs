@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { diffPublishedDraft } from "../modules/draftReviewDiff.js";
+import { diffPublishedDraft, draftShadowsPublished } from "../modules/draftReviewDiff.js";
 
 export const name = "draft review diff: published vs draft marks";
 
@@ -154,4 +154,74 @@ export async function run() {
   assert.ok(!infoSub.fields["info.citations"], "matching citations should not be marked");
 
   assert.equal(diffPublishedDraft(null, published), null);
+
+  // Shadow detection reads the same diff: how much of the published board's
+  // identity survives into the draft. An edit keeps its nodes; a document
+  // written from scratch under a live id keeps almost none.
+  const liveBoard = {
+    id: "short-lived-words",
+    title: "Here and Gone",
+    clusters: [{ id: "short-lived", name: "Short-lived", fact: "Shared sense.", terms: ["a", "b"] }],
+    bridges: [],
+    lenses: [
+      { id: "lapse-instant", prompt: "A ___ lapse.", explanation: "Because." },
+      { id: "mayfly-evening", prompt: "Mayflies are ___.", explanation: "Because." },
+      { id: "harvest-workers", prompt: "The ___ population.", explanation: "Because." },
+      { id: "dusk-gold", prompt: "The gold was ___.", explanation: "Because." }
+    ]
+  };
+
+  // A heavy but genuine edit: every node rewritten, none replaced.
+  const editedHeavily = {
+    ...liveBoard,
+    title: "A different title entirely",
+    clusters: [{ id: "short-lived", name: "Renamed", fact: "Rewritten fact.", terms: ["a", "c"] }],
+    lenses: liveBoard.lenses.map(lens => ({ ...lens, prompt: `${lens.prompt} rewritten` }))
+  };
+  assert.ok(diffPublishedDraft(liveBoard, editedHeavily).total > 0, "a heavy edit still diffs");
+  assert.equal(
+    draftShadowsPublished({ published: liveBoard, draft: editedHeavily }),
+    false,
+    "rewriting every node's contents is still recognizably the same board"
+  );
+
+  // The incident's shape: a fresh board under the same id. It reused the
+  // cluster id, so 1 of 5 nodes survives -- and the lenses, which carried the
+  // board's actual work, are all gone.
+  const shadow = {
+    id: "short-lived-words",
+    title: "Built from scratch",
+    clusters: [{ id: "short-lived", name: "Short-lived", fact: "Different fact.", terms: ["a", "b"] }],
+    bridges: [],
+    lenses: []
+  };
+  assert.equal(
+    draftShadowsPublished({ published: liveBoard, draft: shadow }),
+    true,
+    "a board that keeps 1 of 5 published nodes is a shadow, not an edit"
+  );
+
+  // A one-field change on a second working copy -- the legitimate case that a
+  // naive "revision 1 and differs at all" rule would have accused.
+  const lightlyEdited = {
+    ...liveBoard,
+    clusters: [{ ...liveBoard.clusters[0], fact: "Slightly reworded fact." }]
+  };
+  assert.equal(draftShadowsPublished({ published: liveBoard, draft: lightlyEdited }), false);
+
+  // An already-computed diff is reused rather than recomputed.
+  assert.equal(
+    draftShadowsPublished({
+      published: liveBoard,
+      publishedDiff: diffPublishedDraft(liveBoard, shadow)
+    }),
+    true
+  );
+  // Nothing to compare against is not a shadow.
+  assert.equal(draftShadowsPublished({ published: null, draft: shadow }), false);
+  assert.equal(
+    draftShadowsPublished({ published: { id: "x", clusters: [], bridges: [], lenses: [] }, draft: shadow }),
+    false,
+    "an empty published board has no identity to lose"
+  );
 }

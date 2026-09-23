@@ -10,6 +10,7 @@
 import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
 import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
+import { RENAME_DRAFT_CONFIRM } from "./draftIdRename.js";
 import {
   SAVE_CANONICAL_CONFIRM,
   SAVE_WORKING_COPY_CONFIRM,
@@ -791,18 +792,27 @@ function renderGithubProductionStatus(inGithubProduction) {
     : '<span class="badge">not in GitHub production</span>';
 }
 
+// A shadow working copy is otherwise indistinguishable from a legitimate one
+// in this list: same id, same "authoring play" row, same working-copy badge.
+// That invisibility is what let one sit unnoticed beside a finished board.
+const SHADOW_BADGE = '<span class="badge badge-warn" title="Almost none of the published puzzle survives in this working copy: it is a separate document under the same id, not an edit of the live board. Publishing it would replace the live puzzle.">shadow</span>';
+
 function renderPuzzlePathBadges(item, { detail = false } = {}) {
+  // Computed before the withdrawn branch returns: a withdrawn row's id is
+  // still spoken for (puzzleIdIsLive treats it as live), so a shadow over one
+  // is exactly as worth flagging as a shadow over a live row.
+  const shadow = item.shadowsPublished === true ? ` ${SHADOW_BADGE}` : "";
   if (item.withdrawn === true || item.d1Withdrawn === true) {
-    return '<span class="badge">withdrawn</span>';
+    return `<span class="badge">withdrawn</span>${shadow}`;
   }
   const published = item.published === true || item.d1Published === true;
   if (published) {
-    return `<span class="badge badge-ok">authoring play</span> ${renderPublishedFreezeBadges(item)}`.trim();
+    return `<span class="badge badge-ok">authoring play</span> ${renderPublishedFreezeBadges(item)}${shadow}`.trim();
   }
   const hasWorkingCopy = item.hasWorkingCopy === true
     || (detail && Boolean(item.draftId || item.status || item.document));
   if (hasWorkingCopy || detail) {
-    return '<span class="badge badge-warn">working copy</span>';
+    return `<span class="badge badge-warn">working copy</span>${shadow}`;
   }
   if (item.inGit) return '<span class="badge">in git</span>';
   return "";
@@ -1396,6 +1406,47 @@ function renderSubmitForm(draft, variant = "hosted") {
         <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>
       </div>
     </form>
+  </section>
+  ${renderRenameDraftForm(draft)}`;
+}
+
+// Fixing a puzzle id is rare and human: an agent chose an over-long slug, or
+// the title it was given was misspelled and the slug inherited the typo.
+// Only offered before the puzzle is published, because an id that is live in
+// authoring play or git is an identity other rows may point at.
+//
+// `puzzleIdIsLive` is the server's own answer to that question, computed with
+// the same helper the rename POST uses, so the form is never offered for an
+// id the POST would refuse. It counts withdrawn rows and git-only ids as
+// live, which the page's own publication flags do not.
+function renderRenameDraftForm(draft) {
+  const draftId = draft.draftId;
+  const currentId = typeof draft.document?.id === "string" ? draft.document.id : draftId;
+  if (draft.puzzleIdIsLive === true
+    || draft.d1Published === true
+    || draft.inGithubProduction === true) {
+    return `<section class="submit-pr">
+      <h2>Puzzle id</h2>
+      <p class="meta"><code>${escapeHtml(currentId)}</code> is published, so other
+        puzzles and catalogues may point at it. Remove it from authoring play
+        before changing the id.</p>
+    </section>`;
+  }
+  return `<section class="submit-pr">
+    <h2>Puzzle id</h2>
+    <p class="meta">This puzzle has never been published, so its id can still
+      change. The working copy moves to the new id and its saved-copy history
+      is discarded, so Revert to last working copy will have nothing to go
+      back to. Editing the title does not change the id.</p>
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <input type="hidden" name="confirm" value="${RENAME_DRAFT_CONFIRM}">
+      <p><label>id <input name="new_id" required
+        pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+        value="${escapeHtml(currentId)}"></label></p>
+      <div class="actions">
+        <button type="submit" class="secondary">Rename puzzle</button>
+      </div>
+    </form>
   </section>`;
 }
 
@@ -1780,11 +1831,30 @@ function renderLearningReferences(intro) {
   return labeledLine("links", links || emptyValue());
 }
 
-function renderDiffSummary(diff, { layoutDiffersFromPublished = false } = {}) {
+function renderDiffSummary(diff, {
+  layoutDiffersFromPublished = false,
+  shadowsPublished = false
+} = {}) {
   if (!diff) return "";
   const total = Number(diff.total || 0) + (layoutDiffersFromPublished ? 1 : 0);
   if (!total) {
     return `<aside class="diff-summary diff-summary-none">No changes from the published puzzle.</aside>`;
+  }
+  // A shadow reads the same marks as an ordinary edit, so the summary has to
+  // say what they actually mean here: not an edit history, but the gap
+  // between two unrelated boards filed under one id.
+  if (shadowsPublished) {
+    return `<aside class="diff-summary diff-summary-shadow">
+      <strong>This working copy was not opened from the published puzzle</strong>
+      <span class="meta">${total} difference${total === 1 ? "" : "s"} · almost none of the published board survives here</span>
+      <p class="meta">Nearly every cluster, bridge and lens of the published
+      puzzle is missing from this working copy, so this is a separate document
+      written under the same id rather than an edit of the live one. The marks
+      below are not an edit history — they are the gap between two different
+      boards, and Publish would replace the live puzzle with this. Revert to
+      published discards this and starts from the live board instead. (A
+      rewrite thorough enough to replace every node reads the same way.)</p>
+    </aside>`;
   }
   const bits = [];
   if (diff.counts.changed) bits.push(`${diff.counts.changed} changed`);
@@ -1873,7 +1943,8 @@ export function renderDraftPage(draft, {
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderDiffSummary(diff, {
-      layoutDiffersFromPublished: draft.layoutDiffersFromPublished
+      layoutDiffersFromPublished: draft.layoutDiffersFromPublished,
+      shadowsPublished: draft.shadowsPublished === true
     })}
     ${renderDraftFreshness(draft, variant)}
     ${renderValidation(draft.validation, variant)}

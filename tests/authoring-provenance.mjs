@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  UNIDENTIFIED_GENERATIVE_SYSTEM,
   applyProvenanceCollaboration,
   applyGenerativeContributorModel,
   applyProvenanceClientSetting,
@@ -670,4 +671,65 @@ export async function run() {
   assert.equal(clientSet.provenance.contributors[0].reasoning, "ultra");
   const cleared = applyProvenanceClientSetting(clientSet, { host: "Cursor", field: "reasoning", value: "" });
   assert.equal(cleared.provenance.contributors[0].reasoning, undefined);
+
+  // All four collaboration modes report an impossible choice rather than
+  // quietly substituting one that fits. humanPrimary and aiPrimary used to
+  // fall past the consistency check and get rewritten by inference, which
+  // silently replaced an editor's explicit statement about how a board was
+  // made -- and, for aiPrimary, replaced it with the claim of human
+  // authorship, which is the claim that most needs evidence.
+  const humanOnly = {
+    id: "mode-fixture",
+    provenance: { collaboration: "human", contributors: [{ name: "John Majerus", kind: "human" }] }
+  };
+  assert.throws(
+    () => applyProvenanceCollaboration(humanOnly, { collaboration: "aiPrimary" }),
+    /needs a generative contributor/
+  );
+  assert.throws(
+    () => applyProvenanceCollaboration(humanOnly, {
+      collaboration: "aiPrimary",
+      authorName: "John Majerus"
+    }),
+    /needs a generative contributor/,
+    "an author name supplies a human, never the missing generative side"
+  );
+  assert.throws(
+    () => applyProvenanceCollaboration(humanOnly, { collaboration: "ai" }),
+    /needs a generative contributor/
+  );
+
+  const generativeOnly = {
+    id: "mode-fixture",
+    provenance: { collaboration: "ai", contributors: [{ name: "Cursor" }] }
+  };
+  assert.throws(
+    () => applyProvenanceCollaboration(generativeOnly, { collaboration: "humanPrimary" }),
+    /needs a human contributor/
+  );
+  // Supplying the missing human is still the sanctioned route, and works.
+  assert.equal(
+    applyProvenanceCollaboration(generativeOnly, {
+      collaboration: "humanPrimary",
+      authorName: "John Majerus"
+    }).provenance.collaboration,
+    "humanPrimary"
+  );
+
+  // An unnamed generative contributor satisfies the AI side exactly as a named
+  // one does, so an MCP-written board whose client was never recognized can
+  // still be set to ai or aiPrimary by hand.
+  assert.equal(
+    applyProvenanceCollaboration({
+      id: "mode-fixture",
+      provenance: {
+        collaboration: "human",
+        contributors: [
+          { name: "John Majerus", kind: "human" },
+          { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }
+        ]
+      }
+    }, { collaboration: "aiPrimary" }).provenance.collaboration,
+    "aiPrimary"
+  );
 }

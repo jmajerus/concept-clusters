@@ -75,10 +75,19 @@ import {
   parseSubmitForm,
   readNodeUrlEncoded
 } from "./draftReviewSubmit.js";
+import {
+  DraftRenameError,
+  SEEDED_ROUTE_ADMIN,
+  parseRenameForm,
+  puzzleIdIsLive,
+  renamePuzzleDraftId,
+  shadowCreateRefusal
+} from "./draftIdRename.js";
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { checkDocumentWikiLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
+import { draftShadowsPublished } from "./draftReviewDiff.js";
 import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
@@ -196,6 +205,7 @@ function publishedInContentService(contentService, puzzleId) {
 
 export async function mapDraftDetail(record, {
   contentService = null,
+  contentDocuments = null,
   inCheckout = false,
   matchesCheckout = null,
   publishedDocument = null,
@@ -214,6 +224,9 @@ export async function mapDraftDetail(record, {
   const layoutDiffersFromPublished = Boolean(
     publishedDocument && !valuesEqual(publishedLayout || null, record.layout || null)
   );
+  // One diff, read twice: the summary renders it and the shadow check scores
+  // it. Recomputing would canonicalize and walk the whole board again.
+  const publishedDiff = baseline ? diffPublishedDraft(baseline, document) : null;
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -223,7 +236,16 @@ export async function mapDraftDetail(record, {
     title: record.document?.title || record.title || null,
     document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
-    publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
+    // The same question the rename POST asks, so the page never offers a
+    // rename the server will refuse -- withdrawn rows and git-only ids count
+    // as live there too.
+    puzzleIdIsLive: await puzzleIdIsLive({
+      contentDocuments,
+      contentService,
+      puzzleId
+    }),
+    publishedDiff,
+    shadowsPublished: draftShadowsPublished({ published: baseline, publishedDiff }),
     layoutDiffersFromPublished,
     validation: contentService
       ? await withWikiLinkFlags(
@@ -580,8 +602,8 @@ export function createLocalDraftReviewHandler({
           try {
             const { draft, created } = await openPuzzleWorkingCopy({
               getDraft: draftId => draftStore.getDraft(draftId),
-              createDraft: ({ draftId, document }) =>
-                draftStore.createDraft({ draftId, document }),
+              createDraft: ({ draftId, document, seededFromPublished }) =>
+                draftStore.createDraft({ draftId, document, seededFromPublished }),
               contentDocuments,
               contentService,
               categoryRegistry: await loadMergedCategoryRegistry({
@@ -626,6 +648,14 @@ export function createLocalDraftReviewHandler({
         if (!id || slugify(id) !== id) {
           replyCreateDraft(req, res, body, 400, {
             message: "Puzzle id must be a lowercase URL-safe slug."
+          });
+          return true;
+        }
+        // Same rule create_puzzle_draft enforces over MCP: a blank skeleton
+        // under a live id shadows that board rather than editing it.
+        if (await puzzleIdIsLive({ contentDocuments, contentService, puzzleId: id })) {
+          replyCreateDraft(req, res, body, 409, {
+            message: shadowCreateRefusal(id, { seeded: SEEDED_ROUTE_ADMIN })
           });
           return true;
         }
@@ -1168,6 +1198,39 @@ export function createLocalDraftReviewHandler({
         }
         return true;
       }
+      if (form.isRenameDraft) {
+        try {
+          const { newId } = parseRenameForm(params);
+          const renamed = await renamePuzzleDraftId({
+            draftId,
+            newId,
+            getDraft: id => draftStore.getDraft(id),
+            createDraft: ({ draftId: id, document }) =>
+              draftStore.createDraft({ draftId: id, document }),
+            deleteDraft: (id, options) => draftStore.deleteDraft(id, options),
+            saveLayout: ({ draftId: id, layout }) =>
+              draftStore.saveLayout({ draftId: id, layout }),
+            contentDocuments,
+            contentService
+          });
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(renamed.draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not rename puzzle",
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), error instanceof DraftRenameError ? error.status : 400);
+        }
+        return true;
+      }
       if (form.isDeleteDraft) {
         try {
           await draftStore.deleteDraft(draftId);
@@ -1272,13 +1335,21 @@ export function createLocalDraftReviewHandler({
         const matchesCheckout = inCheckout
           ? draftMatchesCheckout(metadata.document, checkoutDocument)
           : false;
+        const publishedRow = publishedById.get(puzzleId);
         return {
           ...mapDraftListItem(metadata, {
             inCheckout,
             matchesCheckout
           }),
+          // Runs the review page's own diff, and only for the narrow
+          // candidate set (a revision-1 working copy over a published id),
+          // so the list does not pay for a comparison per row.
+          shadowsPublished: draftShadowsPublished({
+            published: publishedRow?.document || null,
+            draft: metadata.document || null
+          }),
           freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
-          ...freezeFlagsFromPublished(publishedById.get(puzzleId), gitPuzzleIds)
+          ...freezeFlagsFromPublished(publishedRow, gitPuzzleIds)
         };
       }));
       const githubSnapshot = await loadOrHydrateGithubProductionManifest({
@@ -1317,8 +1388,8 @@ export function createLocalDraftReviewHandler({
     try {
       const opened = await loadOrSeedPuzzleDraft({
         getDraft: id => draftStore.getDraft(id),
-        createDraft: ({ draftId: id, document }) =>
-          draftStore.createDraft({ draftId: id, document }),
+        createDraft: ({ draftId: id, document, seededFromPublished }) =>
+          draftStore.createDraft({ draftId: id, document, seededFromPublished }),
         contentDocuments,
         contentService,
         categoryRegistry: await loadMergedCategoryRegistry({
@@ -1347,6 +1418,7 @@ export function createLocalDraftReviewHandler({
       });
       const draft = await mapDraftDetail(record, {
         contentService,
+        contentDocuments,
         inCheckout,
         matchesCheckout,
         publishedDocument: publishedRow && !publishedRow.withdrawnAt

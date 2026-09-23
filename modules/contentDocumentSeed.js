@@ -432,7 +432,9 @@ export async function resolvePuzzleDocumentForDraft({
 /**
  * @param {{
  *   getDraft: (id: string) => Promise<object>,
- *   createDraft: (args: { draftId: string, document: object }) => Promise<object>,
+ *   createDraft: (args: {
+ *     draftId: string, document: object, seededFromPublished?: boolean
+ *   }) => Promise<object>,
  *   contentDocuments?: object | null,
  *   contentService?: object | null,
  *   categoryRegistry?: object | null,
@@ -466,7 +468,9 @@ export async function loadOrSeedPuzzleDraft({
 /**
  * @param {{
  *   getDraft: (id: string) => Promise<object>,
- *   createDraft: (args: { draftId: string, document: object }) => Promise<object>,
+ *   createDraft: (args: {
+ *     draftId: string, document: object, seededFromPublished?: boolean
+ *   }) => Promise<object>,
  *   contentDocuments?: object | null,
  *   contentService?: object | null,
  *   categoryRegistry?: object | null,
@@ -512,7 +516,14 @@ export async function openPuzzleWorkingCopy({
   // turn an interchange document into a draft while opening a working copy.
   const document = documentForStorage(sourceDocument, { categoryRegistry });
   try {
-    const draft = await createDraft({ draftId: id, document });
+    // Server-set, never caller-set: this is the one route that legitimately
+    // opens a draft over a published id, and the repository's insert-time
+    // shadow gate keys off it. It is not reachable from a tool schema.
+    const draft = await createDraft({
+      draftId: id,
+      document,
+      seededFromPublished: true
+    });
     return { draft, created: true };
   } catch (error) {
     if (!/already exists/i.test(error?.message || "")) throw error;

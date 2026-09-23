@@ -65,6 +65,46 @@ presentational cluster color may eventually be derived from cluster order
 instead of being part of an agent payload. That would be a schema decision,
 not a silent consequence of partitioning.
 
+## Write-once fields
+
+`kind` in the field-ownership map says *who* may write a field. `writeOnce`
+says *when*: the field is authored as the draft is created and immutable on
+every save afterwards. Today the only one is the document `id`.
+
+It is a third thing, distinct from both neighbours it is easy to confuse it
+with:
+
+- **Not `protected`.** An agent does legitimately choose a new puzzle's slug;
+  protected fields are ones it may never write at all.
+- **Not `identity`.** `identity: true` marks the key used to match a node
+  across versions, and ordinary authoring renames those freely — a cluster id
+  or a bridge term changes during a normal pass. The document id is different
+  because it is the storage key: the repository recomputes `puzzle_id` from
+  the document on every save, so moving it, *or dropping it*, splits the row's
+  identity from the document's.
+
+Enforced by `assertNoWriteOnceDrift` in `authoringDomains.js`, at the storage
+layer rather than at one caller: in `applyAuthoredDomain` for domain writes,
+and in each store's complete-document save (`D1DraftRepository.save`,
+`puzzleDraftStore.replaceDraft`). The MCP boundary checks it too, for an
+earlier and better-labelled error, but the boundary is not where the rule
+lives — the construct board PUTs a whole document straight to the store with
+no MCP in front of it, and that path has to be covered by the same rule.
+
+Domain payloads pass `allowAbsent`, because a projection that omits a field is
+not making a claim about it — a pedagogy payload never carries the id and is
+not dropping it by staying silent.
+
+The violation is a `WriteOnceFieldError` carrying `status: 400`, so the admin
+JSON routes report it as the client error it is instead of rethrowing it as an
+unhandled fault.
+
+The one writer that may move an id is the drafts-page rename, which is a
+deliberate human action, copies the row and checks the target id is free. It
+does not go through an authored write, so it is exempt by construction rather
+than by exception.
+
+
 ## What is implemented
 
 An MCP caller may request `content` or `pedagogy` when reading or saving a

@@ -14,9 +14,11 @@ import {
   ROOT_FIELD_OWNERSHIP,
   RETIRED_ROOT_FIELDS,
   SYSTEM_ROOT_FIELDS,
+  WRITE_ONCE_ROOT_FIELDS,
   assertPhasePassesConsistent
 } from "../modules/authoringFieldOwnership.js";
 import { simplifiedPuzzleSchemaResult } from "../modules/authoringSchemaResource.js";
+import { assertNoWriteOnceDrift } from "../modules/authoringDomains.js";
 import {
   applyAuthoredDomain,
   projectAuthoredDocument
@@ -192,4 +194,32 @@ export async function run() {
   }
 
   assert.deepEqual([...AUTHORING_WRITE_DOMAINS], ["content", "pedagogy"]);
+
+  // Write-once is its own axis, distinct from protected (never agent-written)
+  // and from identity (the matching key, which ordinary authoring renames).
+  assert.deepEqual([...WRITE_ONCE_ROOT_FIELDS], ["id"]);
+  assert.equal(PROTECTED_ROOT_FIELDS.has("id"), false, "an agent does author the id at birth");
+  assert.equal(ROOT_FIELD_OWNERSHIP.id.identity, true);
+
+  const stored = { id: "settled-id", title: "Stored", category: "science" };
+  // Unchanged is fine; so is a draft that has not acquired the field yet.
+  assertNoWriteOnceDrift(stored, { ...stored, title: "Retitled" });
+  assertNoWriteOnceDrift({ title: "No id yet" }, { id: "first-id" });
+  // Moving it is refused, and so is dropping it -- the repository recomputes
+  // storage keys from the document, so an omitted id nulls puzzle_id.
+  assert.throws(
+    () => assertNoWriteOnceDrift(stored, { ...stored, id: "moved-id" }),
+    /cannot change on a save/
+  );
+  assert.throws(
+    () => assertNoWriteOnceDrift(stored, { title: "Dropped the id" }),
+    /the save dropped it/
+  );
+  // A partial payload staying silent is not a claim about the field: a
+  // pedagogy projection never carries the id and is not dropping it.
+  assertNoWriteOnceDrift(stored, { lenses: [] }, "pedagogy domain document", { allowAbsent: true });
+  assert.throws(
+    () => assertNoWriteOnceDrift(stored, { id: "moved-id" }, "content domain document", { allowAbsent: true }),
+    /cannot change on a save/
+  );
 }

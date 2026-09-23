@@ -109,7 +109,10 @@ export async function run() {
         contentHash: "legacy",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        document,
+        // Carries its own id: a stored document's id is write-once, so this
+        // row cannot be seeded with another draft's id and then "corrected"
+        // by a save. That is a rename, not a domain write.
+        document: { ...document, id: "legacy-pre-domain" },
         workingCopyStack: []
       }, null, 2)}\n`,
       "utf8"
