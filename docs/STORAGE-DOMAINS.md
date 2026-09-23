@@ -69,19 +69,24 @@ not a silent consequence of partitioning.
 
 `kind` in the field-ownership map says *who* may write a field. `writeOnce`
 says *when*: the field is authored as the draft is created and immutable on
-every save afterwards. Today the only one is the document `id`.
+later authored saves. Today the only one is the document `id`.
 
-It is a third thing, distinct from both neighbours it is easy to confuse it
-with:
+It is a lifecycle constraint *inside* an owned field, not a fifth storage
+domain and not a replacement for `kind` or `identity`. Those flags stack.
+The document `id` is `authored`, `identity: true`, and `writeOnce: true`: an
+agent chooses it at birth, later saves match on it, and authored writes may
+not move or drop it.
+
+It is distinct from both neighbours it is easy to confuse it with:
 
 - **Not `protected`.** An agent does legitimately choose a new puzzle's slug;
   protected fields are ones it may never write at all.
-- **Not `identity`.** `identity: true` marks the key used to match a node
-  across versions, and ordinary authoring renames those freely — a cluster id
-  or a bridge term changes during a normal pass. The document id is different
-  because it is the storage key: the repository recomputes `puzzle_id` from
-  the document on every save, so moving it, *or dropping it*, splits the row's
-  identity from the document's.
+- **Not `identity` alone.** `identity: true` marks the key used to match a
+  node across versions, and ordinary authoring renames those freely — a
+  cluster id or a bridge term changes during a normal pass. The document id
+  is different because it is also the storage key: the repository recomputes
+  `puzzle_id` from the document on every save, so moving it, *or dropping it*,
+  splits the row's identity from the document's.
 
 Enforced by `assertNoWriteOnceDrift` in `authoringDomains.js`, at the storage
 layer rather than at one caller: in `applyAuthoredDomain` for domain writes,
