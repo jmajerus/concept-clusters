@@ -6,7 +6,15 @@
 import { documentForEditor, documentForStorage } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
-import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting, applyReviewedBy } from "./authoringProvenance.js";
+import {
+  applyProvenanceCollaboration,
+  applyGenerativeContributorModel,
+  applyProvenanceClientSetting,
+  applyReviewedBy,
+  identifyUnnamedGenerativeContributor,
+  soleUnidentifiedGenerativeContributor,
+  generativeHostKey
+} from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
@@ -340,17 +348,51 @@ function parseProvenanceModels(params) {
     .map(({ host, value }) => ({ host, model: value }));
 }
 
+function nonEmptyIdentify(value) {
+  return typeof value === "string" && value.trim() !== "";
+}
+
 function applyProvenanceEditor(document, form) {
   let next = document;
   try {
-    for (const { host, model } of form.models || []) {
-      next = applyGenerativeContributorModel(next, { host, model });
+    // Naming the unnamed placeholder runs before anything keyed on a host, so
+    // later model/reasoning/switch rows address the named contributor.
+    const placeholder = soleUnidentifiedGenerativeContributor(next.provenance);
+    let namedAs = "";
+    const models = [...(form.models || [])];
+    if (placeholder && nonEmptyIdentify(form.identifyHost)) {
+      namedAs = form.identifyHost.trim();
+      // The placeholder's own row posts its model alongside the chosen client.
+      const own = models.findIndex(({ host }) =>
+        generativeHostKey(host) === generativeHostKey(placeholder.name));
+      const model = own >= 0 ? models.splice(own, 1)[0].model : "";
+      next = identifyUnnamedGenerativeContributor(next, { host: namedAs, model });
+    } else if (placeholder) {
+      // Adding a client through the add row, with the placeholder still the
+      // only agent on record, fills the blank rather than inventing a second
+      // collaborator beside it -- there was one agent, now it has a name.
+      const added = models.findIndex(({ host }) =>
+        host && generativeHostKey(host) !== generativeHostKey(placeholder.name));
+      if (added >= 0) {
+        const { host, model } = models.splice(added, 1)[0];
+        namedAs = host;
+        next = identifyUnnamedGenerativeContributor(next, { host, model });
+      }
+    }
+    // A row still addressed to the placeholder now belongs to the named client.
+    const retarget = host => namedAs &&
+      generativeHostKey(host) === generativeHostKey(placeholder?.name || "")
+      ? namedAs
+      : host;
+
+    for (const { host, model } of models) {
+      next = applyGenerativeContributorModel(next, { host: retarget(host), model });
     }
     for (const { host, value } of form.reasonings || []) {
-      next = applyProvenanceClientSetting(next, { host, field: "reasoning", value });
+      next = applyProvenanceClientSetting(next, { host: retarget(host), field: "reasoning", value });
     }
     for (const { host, value } of form.switches || []) {
-      next = applyProvenanceClientSetting(next, { host, field: "switch", value });
+      next = applyProvenanceClientSetting(next, { host: retarget(host), field: "switch", value });
     }
     if (form.collaboration !== undefined && form.collaboration !== "") {
       next = applyProvenanceCollaboration(next, {
@@ -617,6 +659,8 @@ export function parseFieldEditForm(params) {
     models: parseProvenanceModels(params),
     reasonings: parseHostValuePairs(params, "reasoningHost", "reasoningValue"),
     switches: parseHostValuePairs(params, "switchHost", "switchValue"),
+    // Naming the unnamed placeholder: the row posts the client chosen for it.
+    identifyHost: params.get("identifyHost") || "",
     items: isListField(field) ? parseListItems(field, params) : null
     ,classification: field === "classification" ? parseClassification(params) : null
   };

@@ -8,7 +8,10 @@ import {
   persistDraftWorkingCopy,
   persistDraftCanonicalForm
 } from "../modules/draftReviewEdit.js";
-import { resolveLessonByline } from "../modules/authoringProvenance.js";
+import {
+  resolveLessonByline,
+  UNIDENTIFIED_GENERATIVE_SYSTEM
+} from "../modules/authoringProvenance.js";
 
 export const name = "draft review edit: field addressing, revert, and OCC persist";
 
@@ -511,6 +514,64 @@ export async function run() {
   assert.equal(
     resolveLessonByline({ provenance: modelSet.provenance }),
     "Drafted with Cursor (auto)"
+  );
+
+  // Naming the unnamed generative placeholder through the provenance editor.
+  // The blank stands for an agent we know ran but could not name, so filling
+  // it in must replace that entry rather than add a second agent beside it.
+  const unnamedDocument = {
+    ...document,
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }]
+    }
+  };
+  const identified = applyDraftFieldValue(unnamedDocument, {
+    section: "provenance",
+    field: "editor",
+    id: "",
+    term: "",
+    identifyHost: "Claude",
+    // The placeholder's own row posts its model and reasoning alongside the
+    // chosen client; both belong to the run now being named.
+    models: [{ host: UNIDENTIFIED_GENERATIVE_SYSTEM, model: "Opus 5" }],
+    reasonings: [{ host: UNIDENTIFIED_GENERATIVE_SYSTEM, value: "high" }],
+    switches: []
+  }, "");
+  assert.equal(identified.provenance.contributors.length, 1);
+  assert.equal(identified.provenance.contributors[0].name, "Claude (Opus 5)");
+  assert.equal(identified.provenance.contributors[0].reasoning, "high");
+
+  // Choosing a client on the add row while the blank is still the only agent
+  // fills the blank too. Before this, that path produced a puzzle claiming two
+  // agents made it, with no way to remove either.
+  const addedWhileUnnamed = applyDraftFieldValue(unnamedDocument, {
+    section: "provenance",
+    field: "editor",
+    id: "",
+    term: "",
+    models: [{ host: "Claude Code", model: "" }],
+    reasonings: [],
+    switches: []
+  }, "");
+  assert.deepEqual(
+    addedWhileUnnamed.provenance.contributors,
+    [{ name: "Claude Code" }]
+  );
+
+  // Once an agent is named, a genuinely second one still adds as a second.
+  const secondAgent = applyDraftFieldValue(addedWhileUnnamed, {
+    section: "provenance",
+    field: "editor",
+    id: "",
+    term: "",
+    models: [{ host: "Codex", model: "" }],
+    reasonings: [],
+    switches: []
+  }, "");
+  assert.deepEqual(
+    secondAgent.provenance.contributors.map(entry => entry.name),
+    ["Claude Code", "Codex"]
   );
 
   const reasoningSet = applyDraftFieldValue({

@@ -935,6 +935,107 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
   return [...seen.values()];
 }
 
+/** True when this contributor is the unnamed generative placeholder. */
+export function isUnidentifiedGenerativeContributor(entry, settings = AUTHORING_SETTINGS) {
+  const expanded = expandProvenanceContributor(entry, settings);
+  if (!expanded || expanded.kind !== "generative") return false;
+  return generativeHostKey(expanded.name, settings) ===
+    generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM, settings);
+}
+
+/** The unnamed placeholder, when it is the document's only generative entry. */
+export function soleUnidentifiedGenerativeContributor(provenance, settings = AUTHORING_SETTINGS) {
+  const generative = (provenance?.contributors || [])
+    .map(entry => expandProvenanceContributor(entry, settings))
+    .filter(entry => entry?.kind === "generative");
+  if (generative.length !== 1) return null;
+  return isUnidentifiedGenerativeContributor(generative[0], settings) ? generative[0] : null;
+}
+
+/**
+ * Name the agent behind the unnamed generative placeholder (drafts page).
+ *
+ * "generative assistance" is not a contributor -- it is an unfilled blank
+ * about a contributor that certainly existed, since reaching an authoring tool
+ * over MCP is itself the evidence. Naming it therefore completes one record
+ * rather than swapping one party for another, so it replaces in place: same
+ * position, same collaboration mode, no second generative entry to suppress at
+ * render time and no removal step required.
+ *
+ * Only the placeholder can be renamed this way. A host that a client actually
+ * presented is an observation, and a human must not overwrite one by typing
+ * over it -- that correction is remove-then-add, which records it as the claim
+ * it is. (When per-contributor `attested` lands, this restriction can relax to
+ * "anything not attested".)
+ */
+export function identifyUnnamedGenerativeContributor(document, {
+  host,
+  model = "",
+  settings = AUTHORING_SETTINGS
+} = {}) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    throw new Error("document must be an object");
+  }
+  if (!nonEmptyString(host)) throw new Error("host is required");
+
+  const hostLabel = host.trim();
+  if (generativeHostKey(hostLabel, settings) ===
+    generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM, settings)) {
+    throw new Error(
+      "the unnamed placeholder cannot be named as itself; choose a drafting client"
+    );
+  }
+  if (!isKnownGenerativeSystemName(hostLabel, settings)) {
+    // An unknown system must never reach a player-facing byline; the same rule
+    // the MCP boundary applies to a client it does not recognize.
+    throw new Error(`"${hostLabel}" is not a known drafting client`);
+  }
+
+  const contributors = [...(document.provenance?.contributors || [])];
+  const index = contributors.findIndex(entry =>
+    isUnidentifiedGenerativeContributor(entry, settings));
+  if (index < 0) {
+    throw new Error("this document has no unnamed generative contributor to name");
+  }
+
+  const existing = expandProvenanceContributor(contributors[index], settings);
+  const known = knownHostLabelForName(hostLabel, settings);
+  const canonicalHost = known?.system || hostLabel;
+  const modelValue = stripClientTierLabelsFromModel(
+    typeof model === "string" ? model.trim() : ""
+  );
+  // A second entry for the same host would be a duplicate, not a collaborator.
+  const targetKey = generativeHostKey(canonicalHost, settings);
+  const clash = contributors.some((entry, position) => {
+    if (position === index) return false;
+    const other = expandProvenanceContributor(entry, settings);
+    return other?.kind === "generative" &&
+      generativeHostKey(other.name, settings) === targetKey;
+  });
+  if (clash) {
+    throw new Error(`${canonicalHost} is already a contributor on this document`);
+  }
+
+  contributors[index] = compactProvenanceContributor({
+    kind: "generative",
+    name: formatGenerativeContributorLabel(canonicalHost, modelValue, settings),
+    ...(modelValue ? { model: modelValue } : {}),
+    // Whatever was tuned on the placeholder row describes the same run.
+    ...(existing?.reasoning ? { reasoning: existing.reasoning } : {}),
+    ...(existing?.switch ? { switch: existing.switch } : {})
+  }, settings);
+
+  const provenance = normalizeAuthoringProvenance(
+    reconcileCollaboration({ ...document.provenance, contributors }, settings),
+    settings
+  );
+  if (!provenance) throw new Error("naming the contributor left invalid provenance");
+
+  const next = structuredClone(document);
+  next.provenance = provenance;
+  return next;
+}
+
 /**
  * Set or clear the model suffix for one generative host (drafts page).
  * Parentheses are composed server-side; values like "auto" are stored as-is.
