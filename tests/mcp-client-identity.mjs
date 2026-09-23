@@ -19,6 +19,10 @@ import {
   identifyMcpAssistanceClient,
   stampDocumentAssistanceFromMcp
 } from "../modules/mcpClientIdentity.js";
+import {
+  renderProvenanceL1,
+  UNIDENTIFIED_GENERATIVE_SYSTEM
+} from "../modules/authoringProvenance.js";
 
 export const name = "MCP client identity and lesson credit suggestions";
 
@@ -525,4 +529,110 @@ export async function run() {
     ["Claude", "Claude Code"]
   );
 
+  // Reaching an authoring tool over MCP is itself the evidence of generative
+  // authorship -- a human does not hand-call create_puzzle_draft -- so an
+  // unrecognized client is still recorded as AI, just unnamed. It gets no
+  // named contributor (there is no product to name in a byline) but it does
+  // get the unnamed one, so the board never asserts human authorship by
+  // default, and the audit row marks the call unattributed.
+  const unknownFrame = {
+    role: "drafted",
+    log: { tool: "create_puzzle_draft", draftId: "mystery-board", transport: "stdio" },
+    server: {
+      server: {
+        getClientVersion: () => ({ name: "some-unreleased-agent", version: "0.0.1" })
+      }
+    }
+  };
+  assert.equal(identifyMcpAssistanceClient(unknownFrame), null);
+  const unidentified = stampDocumentAssistanceFromMcp({ id: "mystery-board" }, unknownFrame);
+  assert.deepEqual(unidentified.document.provenance, {
+    collaboration: "ai",
+    contributors: [{ name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }]
+  });
+  assert.equal(
+    renderProvenanceL1(unidentified.document.provenance),
+    "Drafted with generative assistance"
+  );
+  assert.equal(unidentified.stampRecord.client.unidentified, true);
+  assert.equal(unidentified.stampRecord.client.system, undefined);
+  assert.equal(unidentified.stampRecord.client.clientName, "some-unreleased-agent");
+  assert.equal(unidentified.stampRecord.tool, "create_puzzle_draft");
+  assert.equal(unidentified.stampRecord.draftId, "mystery-board");
+  assert.equal(unidentified.stampRecord.puzzleId, "mystery-board");
+  assert.equal(unidentified.stampRecord.role, "drafted");
+
+  // A recognized client is unaffected: it still credits and still stamps.
+  const known = stampDocumentAssistanceFromMcp({ id: "known-board" }, {
+    role: "drafted",
+    log: { tool: "create_puzzle_draft", draftId: "known-board" },
+    server: { server: { getClientVersion: () => ({ name: "claude-code" }) } }
+  });
+  assert.equal(known.stampRecord.client.system, "Claude Code");
+  assert.equal(known.stampRecord.client.unidentified, undefined);
+  assert.deepEqual(known.document.provenance.contributors.map(entry => entry.name), ["Claude Code"]);
+
+  // Without a log envelope there is nothing to write to, identified or not.
+  assert.equal(
+    stampDocumentAssistanceFromMcp({ id: "no-log" }, {
+      role: "drafted",
+      server: { server: { getClientVersion: () => ({ name: "some-unreleased-agent" }) } }
+    }).stampRecord,
+    null
+  );
+
+  // The unnamed contributor follows the same credit-worthiness rule as a named
+  // one: a trivial edited save is the same act as a human tweaking a field on
+  // the drafts page, and credits nobody. It is still audited.
+  const trivialUnknown = stampDocumentAssistanceFromMcp({ id: "trivial-board" }, {
+    role: "edited",
+    substantial: false,
+    log: { tool: "save_puzzle_draft", draftId: "trivial-board" },
+    server: { server: { getClientVersion: () => ({ name: "some-unreleased-agent" }) } }
+  });
+  assert.equal(trivialUnknown.document.provenance, undefined);
+  assert.equal(trivialUnknown.stampRecord.client.unidentified, true);
+
+  // An unidentified pass over a human-authored board reads as mixed, and the
+  // human is never displaced.
+  const mixed = stampDocumentAssistanceFromMcp({
+    id: "mixed-board",
+    provenance: { collaboration: "human", contributors: [{ name: "Jane Doe", kind: "human" }] }
+  }, {
+    role: "drafted",
+    log: { tool: "create_puzzle_draft", draftId: "mixed-board" },
+    server: { server: { getClientVersion: () => ({ name: "some-unreleased-agent" }) } }
+  });
+  assert.equal(mixed.document.provenance.collaboration, "aiPrimary");
+  assert.deepEqual(
+    mixed.document.provenance.contributors.map(entry => entry.name),
+    ["Jane Doe", UNIDENTIFIED_GENERATIVE_SYSTEM]
+  );
+
+  // A board that already credits a named system does not also collect the
+  // unnamed one: the AI-authorship fact is already on record, and a second
+  // entry would invent a collaborator -- most likely a phantom of that same
+  // system reconnecting through an unrecognized frame.
+  const alreadyCredited = stampDocumentAssistanceFromMcp({
+    id: "already-credited",
+    provenance: { collaboration: "ai", contributors: [{ name: "Claude Code" }] }
+  }, {
+    role: "drafted",
+    log: { tool: "save_puzzle_draft", draftId: "already-credited" },
+    server: { server: { getClientVersion: () => ({ name: "some-unreleased-agent" }) } }
+  });
+  assert.deepEqual(
+    alreadyCredited.document.provenance.contributors.map(entry => entry.name),
+    ["Claude Code"]
+  );
+  assert.equal(alreadyCredited.stampRecord.client.unidentified, true);
+
+  // The unnamed contributor is not a host: it must never be offered in the
+  // admin host pickers as something selectable.
+  assert.equal(
+    Object.values(AUTHORING_SETTINGS.hosts?.labels || {}).some(label =>
+      label?.system === UNIDENTIFIED_GENERATIVE_SYSTEM
+    ),
+    false
+  );
 }

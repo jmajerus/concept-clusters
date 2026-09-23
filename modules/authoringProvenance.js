@@ -28,6 +28,19 @@ export const AUTHORING_PROVENANCE_COLLABORATION = Object.freeze([
 
 export const AUTHORING_PROVENANCE_KINDS = Object.freeze(["human", "generative"]);
 
+/**
+ * Byline name for a generative contributor whose client could not be
+ * identified. Reaching an authoring tool through MCP is itself the evidence
+ * of generative authorship -- a human does not call create_puzzle_draft by
+ * hand -- so an unrecognized client is still recorded as AI, just unnamed.
+ * Deliberately lowercase and descriptive rather than a product name, so the
+ * byline reads "Drafted with generative assistance". It is intentionally not
+ * registered in authoringHosts.js: it is the absence of a known host, not a
+ * host, and must not appear in the admin host pickers as something
+ * selectable. See docs/dev-briefs/shadow-draft-incident-postmortem.md.
+ */
+export const UNIDENTIFIED_GENERATIVE_SYSTEM = "generative assistance";
+
 /** Client reasoning/effort tier used during drafting (L3; optional). */
 export const AUTHORING_PROVENANCE_REASONING_LEVELS = Object.freeze([
   "default",
@@ -1018,22 +1031,32 @@ export function applyProvenanceCollaboration(document, {
   }
 
   const expanded = expandContributors(provenance.contributors, settings);
+  const hasHuman = expanded.some(c => c.kind === "human");
+  const hasGenerative = expanded.some(c => c.kind === "generative");
   // Honor explicit humanPrimary / aiPrimary when both kinds are present.
   if (
     (collaboration === "humanPrimary" || collaboration === "aiPrimary") &&
-    expanded.some(c => c.kind === "human") &&
-    expanded.some(c => c.kind === "generative")
+    hasHuman &&
+    hasGenerative
   ) {
     provenance = { ...provenance, collaboration };
   }
 
   if (collaboration === "human" || collaboration === "ai") {
     provenance = reconcileCollaboration({ ...provenance, collaboration }, settings);
-    if (provenance.collaboration !== collaboration) {
-      throw new Error(
-        `collaboration "${collaboration}" is inconsistent with current contributors`
-      );
-    }
+  }
+
+  // An explicit human choice is never quietly replaced by one that happens to
+  // fit the contributor list. All four modes report the same way: previously
+  // "human" and "ai" raised this, while "humanPrimary" and "aiPrimary" fell
+  // through and were silently rewritten by inference.
+  if (provenance.collaboration !== collaboration) {
+    const missing = hasGenerative ? "a human contributor" : "a generative contributor";
+    throw new Error(
+      `collaboration "${collaboration}" needs ${missing}, which this document ` +
+      "does not have. Add that contributor first -- the mode is never changed " +
+      "for you to one that fits."
+    );
   }
 
   const next = structuredClone(document);

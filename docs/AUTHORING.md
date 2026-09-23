@@ -92,7 +92,16 @@ puzzle list. **Hold** keeps it in authoring play and leaves the editor open.
 writes cued snapshots and any missing published forward dependencies into this
 git checkout; the Freeze plan labels automatic inclusions. **Remove from authoring
 play** withdraws that published row; **Delete working copy** removes only
-the draft. Cloudflare serves production from git, not a play preview.
+the draft. **Rename puzzle**, under **Puzzle id**, fixes a slug an agent chose
+badly or a title typo it inherited; it is offered only while the puzzle has
+never been published, because a live id is an identity other puzzles and
+catalogues may point at. The working copy moves to the new id and its
+saved-copy history stays behind. Editing the title never changes the id, and
+there is no MCP tool for the rename: it is a human admin fix.
+**New puzzle** refuses an id that is already published, because a blank draft
+under a live id shadows that board instead of editing it; open the published
+puzzle from the list to start a working copy from it.
+Cloudflare serves production from git, not a play preview.
 `/admin/drafts` shows whether each id is in GitHub’s production
 `puzzles/manifest.js` joined with the last freeze (assuming that freeze
 merges). **Refresh from GitHub** on `/admin` (and on the puzzles list)

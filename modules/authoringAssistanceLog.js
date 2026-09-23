@@ -34,7 +34,9 @@ export function buildAssistanceStampRecord({
   provenance = null,
   scopes = ["puzzle"]
 }) {
-  if (!identity?.system) return null;
+  // An unidentified client still gets a row: no system, no provenance credit,
+  // but a durable record that something wrote here and what it called itself.
+  if (!identity?.system && identity?.unidentified !== true) return null;
   return {
     event: "authoring_assistance_stamp",
     capturedAt: new Date().toISOString(),
@@ -45,12 +47,17 @@ export function buildAssistanceStampRecord({
     role,
     date,
     scopes,
-    client: {
-      system: identity.system,
-      ...(identity.model ? { model: identity.model } : {}),
-      ...(identity.hostId ? { hostId: identity.hostId } : {}),
-      ...(identity.clientName ? { clientName: identity.clientName } : {})
-    },
+    client: identity.system
+      ? {
+        system: identity.system,
+        ...(identity.model ? { model: identity.model } : {}),
+        ...(identity.hostId ? { hostId: identity.hostId } : {}),
+        ...(identity.clientName ? { clientName: identity.clientName } : {})
+      }
+      : {
+        unidentified: true,
+        ...(identity.clientName ? { clientName: identity.clientName } : {})
+      },
     ...(provenance?.collaboration
       ? { provenance: { collaboration: provenance.collaboration } }
       : {}),
@@ -64,7 +71,8 @@ export function assistanceStampAnalyticsDataPoint(record) {
     blobs: [
       "authoring_assistance_stamp",
       String(record.tool || "").slice(0, 64),
-      String(record.client?.system || "").slice(0, 128),
+      String(record.client?.system
+        || (record.client?.unidentified ? "unidentified" : "")).slice(0, 128),
       String(record.role || "").slice(0, 16),
       (record.scopes || []).join(",").slice(0, 128),
       String(record.date || "").slice(0, 16)

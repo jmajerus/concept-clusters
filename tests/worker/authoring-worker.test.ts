@@ -2065,7 +2065,15 @@ describe("hosted authoring Worker", () => {
         }
       }
     });
+    // Read the RPC response before asserting on its effects: the draft row is
+    // not durable until the tool call has run to completion, so asserting on
+    // the D1 row while the response is still unread is a race.
+    const nullIdCreation = await rpcJson(created) as {
+      result: { structuredContent: { draft: { draftId: string } } };
+    };
     expect(created.status).toBe(200);
+    expect(nullIdCreation.result.structuredContent.draft.draftId)
+      .toBe("null-puzzle-id-fixture");
     await env.AUTHORING_DB.prepare(
       "UPDATE puzzle_drafts SET status = 'submitted', puzzle_id = NULL WHERE id = ?"
     ).bind("null-puzzle-id-fixture").run();

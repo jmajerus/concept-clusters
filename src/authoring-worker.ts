@@ -70,6 +70,12 @@ import {
   isSameOriginRequest,
   parseSubmitForm
 } from "../modules/draftReviewSubmit.js";
+import {
+  DraftRenameError,
+  parseRenameForm,
+  renamePuzzleDraftId
+} from "../modules/draftIdRename.js";
+import { draftShadowsPublished } from "../modules/draftReviewDiff.js";
 
 const MAX_MCP_REQUEST_BYTES = 1_600_000;
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -448,13 +454,19 @@ async function handleAdminRoute(
       document?: { id?: string };
     }) => {
       const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
-      const fromPublished = freezeFlagsFromPublished(
-        publishedById.get(puzzleId ?? ""),
-        gitPuzzleIds
-      );
+      const publishedRow = publishedById.get(puzzleId ?? "") as
+        { document?: object } | undefined;
+      const fromPublished = freezeFlagsFromPublished(publishedRow, gitPuzzleIds);
       return withGithubProduction({
         ...draft,
         ...fromPublished,
+        // Runs the review page's own diff, and only for the narrow candidate
+        // set (a revision-1 working copy over a published id), so the list
+        // does not pay for a comparison per row.
+        shadowsPublished: draftShadowsPublished({
+          published: publishedRow?.document || null,
+          draft: draft.document || null
+        }),
         freezeAdd: Boolean(fromPublished.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
       }, githubSnapshot);
     });
@@ -894,6 +906,37 @@ async function handleAdminRoute(
         }), 400);
       }
     }
+    if (form.isRenameDraft) {
+      try {
+        const { newId } = parseRenameForm(params);
+        const renamed = await renamePuzzleDraftId({
+          draftId,
+          newId,
+          getDraft: (id: string) => repository.get({ draftId: id, actor }),
+          createDraft: ({ draftId: id, document }: { draftId: string; document: object }) =>
+            repository.create({ draftId: id, document, actor }),
+          deleteDraft: (id: string) => repository.delete({ draftId: id, actor }),
+          saveLayout: ({ draftId: id, layout }: { draftId: string; layout: object }) =>
+            repository.saveLayout({ draftId: id, layout, actor }),
+          contentDocuments,
+          contentService
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: `/admin/drafts/${encodeURIComponent(renamed.draftId)}` }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not rename puzzle",
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), error instanceof DraftRenameError ? error.status : 400);
+      }
+    }
     if (form.isDeleteDraft) {
       try {
         await repository.delete({ draftId, actor });
@@ -947,11 +990,15 @@ async function handleAdminRoute(
     const d1Baseline = publishedRow && !publishedRow.withdrawnAt && publishedRow.document
       ? documentForEditor(publishedRow.document, { categoryRegistry })
       : null;
-    const publishedDiff = d1Baseline
-      ? diffPublishedDraft(d1Baseline, document)
-      : alreadyPublished
-        ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
-        : null;
+    const shadowBaseline = d1Baseline
+      || (alreadyPublished ? contentService.getPuzzleDocument(puzzleId) : null);
+    const publishedDiff = shadowBaseline
+      ? diffPublishedDraft(shadowBaseline, document)
+      : null;
+    const shadowsPublished = draftShadowsPublished({
+      published: shadowBaseline,
+      publishedDiff
+    });
     const baseValidation = withStorageCanonicalizeFlags(
       draft.document,
       await contentService.validatePuzzleDraft(document, { categoryRegistry }),
@@ -1000,6 +1047,7 @@ async function handleAdminRoute(
       inGithubProduction: inGithubProduction(githubSnapshot, puzzleId),
       alreadyPublished,
       publishedDiff,
+      shadowsPublished,
       validation,
       ...publishedFlags,
       lastAgentReviewedAt: publishedRow?.lastAgentReviewedAt || null,

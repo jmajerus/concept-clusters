@@ -48,6 +48,11 @@ import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./author
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import { publishedRowOrNull } from "./contentDocumentRepository.js";
+import {
+  SEEDED_ROUTE_MCP,
+  puzzleIdIsLive,
+  shadowCreateRefusal
+} from "./draftIdRename.js";
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import { CATEGORY_REGISTRATION_MODES } from "./categoryDiscovery.js";
 import {
@@ -506,6 +511,19 @@ export function createAuthoringMcpServer({
     return documentForMcp(published.document, { categoryRegistry });
   }
 
+  // The MCP contract has always said "do not open a blank skeleton for a live
+  // id" -- this enforces it. A draft written from scratch under a published id
+  // shadows that board: it sits beside the live document rather than on top of
+  // it, looks like an ordinary working copy in the drafts list, and is one
+  // Publish away from replacing a finished puzzle with an unrelated one. See
+  // docs/dev-briefs/shadow-draft-incident-postmortem.md. Editing a live puzzle
+  // goes through seed_from_published, which starts from the snapshot; a
+  // wholesale replacement is that same working copy, saved over.
+  async function assertPuzzleIdIsUnpublished(puzzleId) {
+    if (!await puzzleIdIsLive({ contentDocuments, contentService, puzzleId })) return;
+    throw new Error(shadowCreateRefusal(puzzleId, { seeded: SEEDED_ROUTE_MCP }));
+  }
+
   function puzzleListSummary(puzzle) {
     return {
       id: puzzle.id,
@@ -942,6 +960,11 @@ export function createAuthoringMcpServer({
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
       );
     }
+    // Both identities matter: the draft row id is what the drafts list and the
+    // admin URL key on, and document.id is what a later Publish writes to.
+    for (const candidate of new Set([args.draft_id, document.id].filter(Boolean))) {
+      await assertPuzzleIdIsUnpublished(candidate);
+    }
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(document, {
       ctx,
       server,
@@ -1065,6 +1088,22 @@ export function createAuthoringMcpServer({
       substantial = isSubstantialChange(computeChangeScore(previous.document, stored));
     } catch {
       // Ignore -- save() re-validates the draft and revision authoritatively.
+    }
+    // A puzzle's identity does not drift through a content save. Changing
+    // document.id here would leave the draft row keyed by the old id while a
+    // later Publish wrote to the new one -- the two halves of an identity
+    // pulling apart silently. Renaming is a deliberate human action on the
+    // drafts page, which checks the target id is free and moves the row.
+    const previousId = typeof previousDocument?.id === "string"
+      ? previousDocument.id
+      : null;
+    if (previousId && typeof stored.id === "string" && stored.id !== previousId) {
+      throw new Error(
+        `This draft's puzzle id is "${previousId}", and a save cannot change it ` +
+        `to "${stored.id}". Renaming a puzzle is a human admin action on the ` +
+        "drafts page (Puzzle id -> Rename puzzle), which checks the new id is " +
+        "free and moves the working copy to it."
+      );
     }
     const retained = retainMcpExcludedMetadata(stored, previousDocument);
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {

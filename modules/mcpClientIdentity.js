@@ -6,7 +6,9 @@ import {
   upsertGenerativeProvenance,
   canonicalizeDocumentProvenance,
   formatGenerativeContributorLabel,
-  normalizeReasoningLevel
+  normalizeReasoningLevel,
+  contributorsByKind,
+  UNIDENTIFIED_GENERATIVE_SYSTEM
 } from "./authoringProvenance.js";
 import {
   assistanceStampScopes,
@@ -179,6 +181,28 @@ export function identifyMcpAssistanceClient({
   return null;
 }
 
+/**
+ * The raw client label an unidentified host presented, for the audit trail
+ * only. identifyMcpAssistanceClient deliberately returns null for a host it
+ * does not recognize, because an unknown system must never be written into a
+ * puzzle's provenance as a generative contributor -- that is player-facing
+ * byline data. But a write with no attribution at all is worse than one
+ * attributed to "something we did not recognize": before this existed, an
+ * unrecognized client could create drafts in production leaving no stamp and
+ * no provenance, which is exactly why the shadow-draft incident could not be
+ * attributed afterwards. See
+ * docs/dev-briefs/shadow-draft-incident-postmortem.md.
+ */
+export function observedMcpClientLabel({ ctx = null, server = null } = {}) {
+  const info = clientInfoFrom(ctx, server);
+  const name = typeof info?.name === "string" ? info.name.trim() : "";
+  const title = typeof info?.title === "string" ? info.title.trim() : "";
+  const httpUa = ctx?.http?.req?.headers?.get?.("user-agent") || null;
+  return name || title || (typeof httpUa === "string" && httpUa.trim()
+    ? httpUa.trim()
+    : null);
+}
+
 function todayStamp() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -223,21 +247,64 @@ export function stampDocumentAssistanceFromMcp(document, {
     return { document, stampRecord: null };
   }
   const identity = identifyMcpAssistanceClient({ ctx, server, settings });
-  if (!identity?.system) return { document, stampRecord: null };
-
   const base = canonicalizeDocumentProvenance(document, { settings });
   let next = base;
 
   const creditWorthy = role === "drafted" || (role === "edited" && substantial);
   if (creditWorthy) {
-    const provenance = upsertGenerativeProvenance(base.provenance, {
-      system: identity.system,
-      ...(identity.model ? { model: identity.model } : {}),
-      ...(identity.reasoning ? { reasoning: identity.reasoning } : {})
-    });
+    // Arriving here at all is the evidence: a human does not hand-call an
+    // authoring tool over MCP. So a credit-worthy write is recorded as
+    // generative whether or not the client could be named -- an unrecognized
+    // one simply gets the unnamed contributor, which renders as "Drafted with
+    // generative assistance". Recording nothing, as this did before, left an
+    // AI-written board asserting human authorship by default and gave the
+    // editor no way to correct it.
+    const provenance = identity?.system
+      ? upsertGenerativeProvenance(base.provenance, {
+        system: identity.system,
+        ...(identity.model ? { model: identity.model } : {}),
+        ...(identity.reasoning ? { reasoning: identity.reasoning } : {})
+      })
+      // Only when nothing generative is on record yet. If a named system is
+      // already credited, the board already says an AI made it, and adding an
+      // unnamed second entry would invent a collaborator -- most likely a
+      // phantom of the same system reconnecting through a frame we did not
+      // recognize (the mcp-call wrapper without forwarded identity, say).
+      : contributorsByKind(base.provenance, "generative", settings).length
+        ? base.provenance
+        : upsertGenerativeProvenance(base.provenance, {
+          system: UNIDENTIFIED_GENERATIVE_SYSTEM
+        }, settings);
     if (provenance) {
       next = { ...base, provenance };
     }
+  }
+
+  if (!identity?.system) {
+    // No named contributor -- an unrecognized system is not a product we can
+    // name in a byline -- but the call is audited as unattributed, and the
+    // collaboration mode above still tells the truth about how it was made.
+    return {
+      document: next,
+      stampRecord: log
+        ? buildAssistanceStampRecord({
+          identity: {
+            unidentified: true,
+            clientName: observedMcpClientLabel({ ctx, server })
+          },
+          role,
+          date,
+          draftId: log.draftId ?? null,
+          puzzleId: log.puzzleId ??
+            (typeof next.id === "string" ? next.id : null),
+          tool: log.tool ?? null,
+          transport: log.transport ?? null,
+          actor: log.actor ?? null,
+          provenance: next.provenance ?? null,
+          scopes: assistanceStampScopes(next, { domain })
+        })
+        : null
+    };
   }
 
   const stampRecord = log
