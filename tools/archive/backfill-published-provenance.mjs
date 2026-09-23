@@ -23,15 +23,15 @@ import {
   renderProvenanceL1,
   normalizeAuthoringProvenance,
   UNIDENTIFIED_GENERATIVE_SYSTEM
-} from "../modules/authoringProvenance.js";
-import { draftContentHash, serializeDraftDocument } from "../modules/draftRepository.js";
+} from "../../modules/authoringProvenance.js";
+import { draftContentHash, serializeDraftDocument } from "../../modules/draftRepository.js";
 
 const APPLY = process.argv.includes("--apply");
 const EMIT = process.argv.includes("--emit-sql");
 const OUT = process.env.SCRATCH || "/tmp";
 const DB = "concept-clusters-authoring";
 const CONFIG = "wrangler.authoring.jsonc";
-const ROOT = new URL("../", import.meta.url).pathname;
+const ROOT = new URL("../../", import.meta.url).pathname;
 
 function d1(sql) {
   const out = execFileSync("npx", [

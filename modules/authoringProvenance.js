@@ -943,6 +943,16 @@ export function isUnidentifiedGenerativeContributor(entry, settings = AUTHORING_
     generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM, settings);
 }
 
+/** The unnamed placeholder, however many other contributors are credited. */
+export function unidentifiedGenerativeContributor(provenance, settings = AUTHORING_SETTINGS) {
+  for (const entry of provenance?.contributors || []) {
+    if (isUnidentifiedGenerativeContributor(entry, settings)) {
+      return expandProvenanceContributor(entry, settings);
+    }
+  }
+  return null;
+}
+
 /** The unnamed placeholder, when it is the document's only generative entry. */
 export function soleUnidentifiedGenerativeContributor(provenance, settings = AUTHORING_SETTINGS) {
   const generative = (provenance?.contributors || [])
@@ -1004,21 +1014,39 @@ export function identifyUnnamedGenerativeContributor(document, {
   const modelValue = stripClientTierLabelsFromModel(
     typeof model === "string" ? model.trim() : ""
   );
-  // A second entry for the same host would be a duplicate, not a collaborator.
-  const targetKey = generativeHostKey(canonicalHost, settings);
-  const clash = contributors.some((entry, position) => {
-    if (position === index) return false;
+  const composedName = formatGenerativeContributorLabel(canonicalHost, modelValue, settings);
+  // Two separate collisions, both fatal, and neither may be normalized away.
+  //
+  // Same host: a second entry for one client is a duplicate, not a collaborator.
+  //
+  // Same name across kinds: normalization deduplicates contributors by name
+  // regardless of kind, so naming the blank "Claude" on a document with a
+  // *human* contributor named "Claude" merges the two and keeps only the
+  // human -- collaboration drops to "human" and the byline becomes
+  // "By Claude", asserting sole human authorship of an AI-drafted puzzle.
+  // That is the precise failure the unnamed placeholder exists to prevent, so
+  // it is refused here rather than discovered in a byline later.
+  const targetHostKey = generativeHostKey(canonicalHost, settings);
+  const targetNameKey = contributorNameKey(composedName);
+  for (const [position, entry] of contributors.entries()) {
+    if (position === index) continue;
     const other = expandProvenanceContributor(entry, settings);
-    return other?.kind === "generative" &&
-      generativeHostKey(other.name, settings) === targetKey;
-  });
-  if (clash) {
-    throw new Error(`${canonicalHost} is already a contributor on this document`);
+    if (!other) continue;
+    if (other.kind === "generative" &&
+      generativeHostKey(other.name, settings) === targetHostKey) {
+      throw new Error(`${canonicalHost} is already a contributor on this document`);
+    }
+    if (contributorNameKey(other.name) === targetNameKey) {
+      throw new Error(
+        `this document already has a ${other.kind} contributor named "${other.name}"; ` +
+        "naming the agent the same would merge the two and drop one"
+      );
+    }
   }
 
   contributors[index] = compactProvenanceContributor({
     kind: "generative",
-    name: formatGenerativeContributorLabel(canonicalHost, modelValue, settings),
+    name: composedName,
     ...(modelValue ? { model: modelValue } : {}),
     // Whatever was tuned on the placeholder row describes the same run.
     ...(existing?.reasoning ? { reasoning: existing.reasoning } : {}),

@@ -13,6 +13,7 @@ import {
   applyReviewedBy,
   identifyUnnamedGenerativeContributor,
   soleUnidentifiedGenerativeContributor,
+  unidentifiedGenerativeContributor,
   generativeHostKey
 } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
@@ -357,7 +358,12 @@ function applyProvenanceEditor(document, form) {
   try {
     // Naming the unnamed placeholder runs before anything keyed on a host, so
     // later model/reasoning/switch rows address the named contributor.
-    const placeholder = soleUnidentifiedGenerativeContributor(next.provenance);
+    // Explicitly naming the blank works whenever a blank exists. Inferring
+    // intent from the add row only makes sense while the blank is the only
+    // agent on record -- with another client already credited, choosing one
+    // there is genuinely adding a second contributor.
+    const placeholder = unidentifiedGenerativeContributor(next.provenance);
+    const solePlaceholder = soleUnidentifiedGenerativeContributor(next.provenance);
     let namedAs = "";
     const models = [...(form.models || [])];
     if (placeholder && nonEmptyIdentify(form.identifyHost)) {
@@ -367,12 +373,12 @@ function applyProvenanceEditor(document, form) {
         generativeHostKey(host) === generativeHostKey(placeholder.name));
       const model = own >= 0 ? models.splice(own, 1)[0].model : "";
       next = identifyUnnamedGenerativeContributor(next, { host: namedAs, model });
-    } else if (placeholder) {
+    } else if (solePlaceholder) {
       // Adding a client through the add row, with the placeholder still the
       // only agent on record, fills the blank rather than inventing a second
       // collaborator beside it -- there was one agent, now it has a name.
       const added = models.findIndex(({ host }) =>
-        host && generativeHostKey(host) !== generativeHostKey(placeholder.name));
+        host && generativeHostKey(host) !== generativeHostKey(solePlaceholder.name));
       if (added >= 0) {
         const { host, model } = models.splice(added, 1)[0];
         namedAs = host;

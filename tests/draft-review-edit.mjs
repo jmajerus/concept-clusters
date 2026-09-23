@@ -574,6 +574,32 @@ export async function run() {
     ["Claude Code", "Codex"]
   );
 
+  // The select is offered on the blank's row whenever the blank exists, so the
+  // save path has to honour it in that state too. It previously keyed on the
+  // blank being the *only* agent, which meant a document holding both a named
+  // client and the blank rendered a control that silently did nothing -- the
+  // one state where the blank most needed filling in.
+  const blankBesideNamed = applyDraftFieldValue({
+    ...document,
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Codex" }, { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }]
+    }
+  }, {
+    section: "provenance",
+    field: "editor",
+    id: "",
+    term: "",
+    identifyHost: "Cursor",
+    models: [],
+    reasonings: [],
+    switches: []
+  }, "");
+  assert.deepEqual(
+    blankBesideNamed.provenance.contributors.map(entry => entry.name),
+    ["Codex", "Cursor"]
+  );
+
   const reasoningSet = applyDraftFieldValue({
     ...document,
     provenance: {

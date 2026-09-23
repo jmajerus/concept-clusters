@@ -19,6 +19,7 @@ import {
   renderProvenanceL2,
   resolveLessonByline,
   soleUnidentifiedGenerativeContributor,
+  unidentifiedGenerativeContributor,
   splitGenerativeContributorLabel,
   upsertGenerativeProvenance,
   upsertHumanProvenance,
@@ -847,5 +848,57 @@ export async function run() {
       contributors: [{ name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }, { name: "Codex" }]
     }),
     null
+  );
+  // ...but the blank is still findable, and still fillable, in that state.
+  assert.equal(
+    unidentifiedGenerativeContributor({
+      contributors: [{ name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }, { name: "Codex" }]
+    })?.name,
+    UNIDENTIFIED_GENERATIVE_SYSTEM
+  );
+  assert.deepEqual(
+    identifyUnnamedGenerativeContributor({
+      id: "two-agent-board",
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Codex" }, { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }]
+      }
+    }, { host: "Cursor" }).provenance.contributors.map(entry => entry.name),
+    ["Codex", "Cursor"]
+  );
+
+  // A human contributor whose name matches the agent being named.
+  //
+  // normalizeAuthoringProvenance deduplicates by name across kinds, so naming
+  // the blank "Claude" beside a *human* named "Claude" merged the two and kept
+  // only the human: collaboration fell to "human" and the byline became "By
+  // Claude" -- an AI-drafted puzzle asserting sole human authorship, which is
+  // exactly what the placeholder exists to prevent. Refused, not normalized.
+  assert.throws(
+    () => identifyUnnamedGenerativeContributor({
+      id: "namesake-board",
+      provenance: {
+        collaboration: "aiPrimary",
+        contributors: [
+          { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+          { name: "Claude", kind: "human" }
+        ]
+      }
+    }, { host: "Claude" }),
+    /already has a human contributor named "Claude"/
+  );
+  // The same name with a model suffix does not collide, and is allowed.
+  assert.deepEqual(
+    identifyUnnamedGenerativeContributor({
+      id: "namesake-board",
+      provenance: {
+        collaboration: "aiPrimary",
+        contributors: [
+          { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+          { name: "Claude", kind: "human" }
+        ]
+      }
+    }, { host: "Claude", model: "Sonnet 5" }).provenance.contributors.map(entry => entry.name),
+    ["Claude (Sonnet 5)", "Claude"]
   );
 }
