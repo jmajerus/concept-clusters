@@ -34,6 +34,7 @@ import {
   applyAuthoredDomain,
   AUTHORING_READ_DOMAINS,
   assertNoAgentProtectedFields,
+  assertNoWriteOnceDrift,
   projectAuthoredDocument
 } from "./authoringDomains.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
@@ -918,12 +919,14 @@ export function createAuthoringMcpServer({
       const puzzleId = args.draft_id || args.puzzle_id;
       const { draft, created } = await openPuzzleWorkingCopy({
         getDraft: id => draftRepository.get({ draftId: id, actor }),
-        createDraft: ({ draftId, document }) => draftRepository.create({
-          draftId,
-          document,
-          actor,
-          baseCommitSha: args.base_commit_sha || null
-        }),
+        createDraft: ({ draftId, document, seededFromPublished }) =>
+          draftRepository.create({
+            draftId,
+            document,
+            actor,
+            seededFromPublished,
+            baseCommitSha: args.base_commit_sha || null
+          }),
         contentDocuments,
         contentService,
         allowGitFallback: false,
@@ -1089,28 +1092,11 @@ export function createAuthoringMcpServer({
     } catch {
       // Ignore -- save() re-validates the draft and revision authoritatively.
     }
-    // A puzzle's identity does not drift through a content save. Changing
-    // document.id here would leave the draft row keyed by the old id while a
-    // later Publish wrote to the new one -- the two halves of an identity
-    // pulling apart silently. Renaming is a deliberate human action on the
-    // drafts page, which checks the target id is free and moves the row.
-    const previousId = typeof previousDocument?.id === "string"
-      ? previousDocument.id
-      : null;
-    // Dropping the id is drift too, not an exemption from it: the repository
-    // recomputes puzzle_id from the document on every save, so an omitted or
-    // non-string id sets it to null while the row stays keyed by draft_id.
-    if (previousId && stored.id !== previousId) {
-      const attempted = typeof stored.id === "string" && stored.id
-        ? `to "${stored.id}"`
-        : "by dropping it";
-      throw new Error(
-        `This draft's puzzle id is "${previousId}", and a save cannot change it ` +
-        `${attempted}. Renaming a puzzle is a human admin action on the drafts ` +
-        "page (Puzzle id -> Rename puzzle), which checks the new id is free and " +
-        "moves the working copy to it."
-      );
-    }
+    // Identity is write-once, declared in the field-ownership map rather than
+    // checked by hand here. A domain save is already covered inside
+    // applyAuthoredDomain; this catches the complete-document save, which
+    // does not go through it.
+    assertNoWriteOnceDrift(previousDocument, stored, "MCP puzzle document");
     const retained = retainMcpExcludedMetadata(stored, previousDocument);
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {
       ctx,

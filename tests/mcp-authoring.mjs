@@ -1307,7 +1307,7 @@ export async function run() {
     });
     assert.equal(driftAttempt.result.isError, true);
     const driftText = JSON.stringify(driftAttempt.result.content);
-    assert.match(driftText, /puzzle id is/);
+    assert.match(driftText, /id is set when a draft is created/);
     assert.match(driftText, /never-published-board/);
     assert.match(driftText, /renamed-behind-your-back/);
     assert.match(driftText, /Rename puzzle/);
@@ -1326,7 +1326,7 @@ export async function run() {
       }
     });
     assert.equal(dropAttempt.result.isError, true);
-    assert.match(JSON.stringify(dropAttempt.result.content), /by dropping it/);
+    assert.match(JSON.stringify(dropAttempt.result.content), /the save dropped it/);
 
     // The same save without touching the id is fine.
     const noDrift = await request("tools/call", {

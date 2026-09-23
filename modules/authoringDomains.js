@@ -12,6 +12,7 @@ import {
   AUTHORING_WRITE_DOMAINS,
   DERIVED_ROOT_FIELDS,
   MCP_EXCLUDED_ROOT_FIELDS,
+  WRITE_ONCE_ROOT_FIELDS,
   PEDAGOGY_BRIDGE_FIELDS,
   PEDAGOGY_ROOT_FIELDS,
   PEDAGOGY_STORED_ROOT_FIELDS,
@@ -326,6 +327,48 @@ export function projectAuthoredDocument(document, domain = "complete") {
   };
 }
 
+/**
+ * A write-once field is set when the draft is born and never moved by a save.
+ * Enforced here, against the stored document, because the ownership map is
+ * where "who may write this" is declared and this is the one rule that needs
+ * the previous value to check. Dropping the field counts as moving it: the
+ * repository recomputes storage keys from the document, so an omitted id
+ * nulls `puzzle_id` while the row stays keyed by `draft_id` -- the two halves
+ * of an identity pulling apart, which is what this exists to prevent.
+ *
+ * A field still absent from the stored document is not yet set, so a draft
+ * mid-authoring can still acquire one. `allowAbsent` is for partial payloads
+ * (domain projections), where silence about a field is not a claim about it.
+ */
+export function assertNoWriteOnceDrift(
+  currentDocument,
+  incoming,
+  label = "MCP document",
+  { allowAbsent = false } = {}
+) {
+  if (!incoming || typeof incoming !== "object") return;
+  for (const key of WRITE_ONCE_ROOT_FIELDS) {
+    const current = currentDocument?.[key];
+    if (current === undefined) continue;
+    const next = incoming[key];
+    if (next === current) continue;
+    // A domain projection is partial by design: a pedagogy payload does not
+    // carry the id and is not dropping it by staying silent. A complete save
+    // that omits it is a different act, and is drift.
+    if (next === undefined && allowAbsent) continue;
+    const attempted = next === undefined
+      ? "the save dropped it"
+      : `the save supplied ${JSON.stringify(next)}`;
+    throw new Error(
+      `${label}: ${key} is set when a draft is created and cannot change on a `
+      + `save. This draft's ${key} is ${JSON.stringify(current)} and ${attempted}. `
+      + "Changing it is a deliberate human action on the drafts page "
+      + "(Puzzle id -> Rename puzzle), which checks the new id is free and "
+      + "moves the working copy to it."
+    );
+  }
+}
+
 function assertDomainPayload(domain, incoming) {
   assertObject(incoming, `${domain} domain document`);
   assertNoAgentProtectedFields(incoming, `${domain} domain document`);
@@ -411,6 +454,12 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
   }
   assertObject(currentDocument, "Current authored document");
   assertDomainPayload(domain, incoming);
+  assertNoWriteOnceDrift(
+    currentDocument,
+    incoming,
+    `${domain} domain document`,
+    { allowAbsent: true }
+  );
   const current = partitionAuthoredDocument(currentDocument);
   if (domain === "pedagogy") {
     assertPedagogyBridgeIdentities(current.content.bridges, incoming.bridges);

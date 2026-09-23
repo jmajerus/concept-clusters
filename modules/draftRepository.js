@@ -23,6 +23,29 @@ export class DraftNotFoundError extends Error {
   }
 }
 
+/**
+ * A draft may not be created from scratch under an id that is already a
+ * published puzzle: the new row would sit beside the live document rather
+ * than on top of it, invisible in the drafts list and one Publish away from
+ * replacing a finished board. Raised by the repository itself, where the
+ * check and the insert are a single statement, so there is no window between
+ * asking and writing. See docs/dev-briefs/shadow-draft-incident-postmortem.md.
+ *
+ * The one legitimate draft over a published id is a working copy opened from
+ * that board, which the seeding helper marks as such.
+ */
+export class PublishedIdConflictError extends Error {
+  constructor(puzzleId) {
+    super(
+      `"${puzzleId}" is already a published puzzle, so a fresh draft under that `
+      + "id would shadow it rather than edit it. Open a working copy from the "
+      + "published snapshot instead, then save over it."
+    );
+    this.name = "PublishedIdConflictError";
+    this.puzzleId = puzzleId;
+  }
+}
+
 export class DraftEmptyHistoryError extends Error {
   constructor(draftId) {
     super(`Draft "${draftId}" has no previous working copy to revert to`);

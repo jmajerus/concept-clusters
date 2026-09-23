@@ -36,13 +36,27 @@ export const AUTHORING_PHASES = Object.freeze([
  * @property {"content" | "pedagogy" | "provenance" | "system"} domain
  * @property {FieldKind} kind
  * @property {boolean} [identity] stable cross-domain identity for this field
+ * @property {boolean} [writeOnce] authored when the draft is created and
+ *   immutable afterwards. Distinct from `protected` (which an agent may never
+ *   write at all) and from `identity` (which marks the key used to match a
+ *   node across versions, and which ordinary authoring does rename -- a
+ *   cluster id or bridge term changes freely during a pass). A write-once
+ *   field is the document's own identity in storage: an agent picks it when
+ *   the puzzle is born and nothing may move it afterwards except a
+ *   deliberate human rename, which does not go through an authored write.
  * @property {ReadonlyArray<"content" | "pedagogy">} [contextFor]
  *   domains that may receive this field as read-only sibling context
  */
 
 /** @type {Readonly<Record<string, FieldOwnership>>} */
 export const ROOT_FIELD_OWNERSHIP = Object.freeze({
-  id: { domain: "content", kind: "authored", identity: true, contextFor: ["pedagogy"] },
+  id: {
+    domain: "content",
+    kind: "authored",
+    identity: true,
+    writeOnce: true,
+    contextFor: ["pedagogy"]
+  },
   title: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   category: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   puzzleKind: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
@@ -234,6 +248,12 @@ export const CONTENT_BRIDGE_FIELDS = fieldsMatching(
 export const BRIDGE_IDENTITY_FIELDS = fieldsMatching(
   BRIDGE_FIELD_OWNERSHIP,
   meta => meta.identity === true
+);
+
+// Set once when the draft is created, immutable on every write afterwards.
+export const WRITE_ONCE_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.writeOnce === true
 );
 
 export const PROTECTED_ROOT_FIELDS = fieldsMatching(

@@ -134,7 +134,8 @@ signature of this failure. That is a cheap query, and it is the basis of recomme
 
 Ranked by value over cost. **All four are implemented.**
 
-1. **Refuse a non-seeded `create_puzzle_draft` for a published id.** *(Done.)* Look in
+1. **Refuse a non-seeded `create_puzzle_draft` for a published id.** *(Done, and since
+   hardened into an invariant — see below.)* Look in
    `published_documents` (and the git corpus) before creating; on a hit, error with
    "that id is live — pass `seed_from_published=true` to open a working copy from it."
    This is the fix that would have prevented the incident outright, and it converts a
@@ -207,6 +208,51 @@ Wrong on three levels, and all three are now fixed:
    silently reverted, and adding an author name only added another human. Recording the
    unnamed generative contributor dissolves this: the AI side is now populated from the
    MCP pathway itself.
+
+## Hardening: from a check to an invariant
+
+The guards above are reads that precede a write, which leaves a window: a Publish
+landing between the check and the insert would still produce a shadow. With D1 as the
+only creation path, that window can be closed properly rather than documented.
+
+`D1DraftRepository.create` now makes the check part of the write:
+
+```sql
+INSERT INTO puzzle_drafts (...)
+SELECT ?, ?, ...
+WHERE NOT EXISTS (
+  SELECT 1 FROM published_documents WHERE kind = 'puzzle' AND id IN (?, ?)
+)
+```
+
+Zero rows inserted means the id went live, and the repository raises
+`PublishedIdConflictError`. Both identities are gated: the row id, which keys the drafts
+list, and `document.id`, which is what a later Publish writes to.
+
+The one legitimate draft over a live id is a working copy opened from that board, so
+`openPuzzleWorkingCopy` marks its create `seededFromPublished`. That flag is set by
+server code and never appears in a tool schema, so an agent cannot ask for the
+exemption.
+
+What this buys beyond closing the race: every caller of the repository is covered,
+including ones nobody has written yet. The three call-site guards are now
+defence-in-depth and better error messages rather than the only thing standing there.
+
+**Auto-renaming a colliding id was considered and rejected.** Appending a digit would
+prevent the *id* collision while leaving a from-scratch duplicate of a live board under
+a meaningless id, with no error and nothing to notice — and it would break the caller's
+model of what it is working on, which is the incident's own mechanism. It is also the
+same move as the collaboration bug below: substituting the system's guess for an
+explicit statement. Suffixing belongs to an explicit "duplicate this puzzle" action, if
+one is ever wanted, where making another copy is the stated intent.
+
+### Identity as a write-domain rule
+
+The `save_puzzle_draft` guard (recommendation 4) started as a hand-rolled comparison in
+the MCP server. It now lives where the rest of "who may write this" lives: a `writeOnce`
+axis on the field-ownership map, enforced by `assertNoWriteOnceDrift` from
+`applyAuthoredDomain` (covering every store's domain writes) and from the complete-save
+path. See [STORAGE-DOMAINS.md](../STORAGE-DOMAINS.md#write-once-fields).
 
 ## Validation against production
 

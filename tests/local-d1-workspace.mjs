@@ -269,18 +269,21 @@ export async function run() {
     fetchImpl: async (_url, init) => {
       const body = JSON.parse(init.body);
       mcpQueries.push(body);
-      if (String(body.sql).includes("FROM published_documents")
-        || String(body.sql).includes("FROM content_drafts")) {
-        return jsonResponse({
-          success: true,
-          result: [{ success: true, results: [], meta: { changes: 0 } }]
-        });
-      }
+      // The draft insert carries a `FROM published_documents` subquery (the
+      // shadow gate), so it has to be matched before the published-documents
+      // read below or it answers as one and reports zero rows written.
       if (String(body.sql).includes("INSERT INTO puzzle_drafts")) {
         assert.equal(body.params[2], "access-sub-1");
         return jsonResponse({
           success: true,
           result: [{ success: true, results: [], meta: { changes: 1 } }]
+        });
+      }
+      if (String(body.sql).includes("FROM published_documents")
+        || String(body.sql).includes("FROM content_drafts")) {
+        return jsonResponse({
+          success: true,
+          result: [{ success: true, results: [], meta: { changes: 0 } }]
         });
       }
       if (String(body.sql).includes("FROM puzzle_drafts") &&

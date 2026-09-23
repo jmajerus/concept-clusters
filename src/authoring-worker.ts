@@ -389,8 +389,9 @@ async function handleAdminRoute(
       try {
         const { draft } = await openPuzzleWorkingCopy({
           getDraft: (id: string) => repository.get({ draftId: id, actor }),
-          createDraft: ({ draftId, document }: { draftId: string; document: object }) =>
-            repository.create({ draftId, document, actor }),
+          createDraft: ({ draftId, document, seededFromPublished }: {
+            draftId: string; document: object; seededFromPublished?: boolean;
+          }) => repository.create({ draftId, document, actor, seededFromPublished }),
           contentDocuments,
           contentService,
           categoryRegistry: await loadMergedCategoryRegistry({
@@ -970,8 +971,9 @@ async function handleAdminRoute(
     });
     const opened = await loadOrSeedPuzzleDraft({
       getDraft: (id: string) => repository.get({ draftId: id, actor }),
-      createDraft: ({ draftId: id, document }: { draftId: string; document: object }) =>
-        repository.create({ draftId: id, document, actor }),
+      createDraft: ({ draftId: id, document, seededFromPublished }: {
+        draftId: string; document: object; seededFromPublished?: boolean;
+      }) => repository.create({ draftId: id, document, actor, seededFromPublished }),
       contentDocuments,
       contentService,
       categoryRegistry,

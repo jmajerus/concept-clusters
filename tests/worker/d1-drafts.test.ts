@@ -2,7 +2,8 @@ import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 import {
   DraftConflictError,
-  DraftNotFoundError
+  DraftNotFoundError,
+  PublishedIdConflictError
 } from "../../modules/draftRepository.js";
 import { D1DraftRepository } from "../../modules/d1DraftRepository.js";
 import { D1ContentDocumentRepository } from "../../modules/contentDocumentRepository.js";
@@ -225,5 +226,66 @@ describe("D1 draft repository", () => {
       draftId: "d1-delete-fixture",
       actor
     })).rejects.toBeInstanceOf(DraftNotFoundError);
+  });
+
+  // The shadow gate lives in the insert itself, not in a check before it, so
+  // there is no window in which a concurrent Publish turns a free id into a
+  // live one between looking and writing. Every caller of the repository is
+  // covered by it, including ones that forget to ask first.
+  it("refuses a fresh draft under a published id, and exempts the seeded route", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "shadow-gate-author" };
+    const published = content.getPuzzleDocument("energy-flow");
+
+    await contentDocuments.publish({
+      kind: "puzzle",
+      id: "gated-live-puzzle",
+      document: { ...published, id: "gated-live-puzzle", title: "Gated live puzzle" },
+      actor
+    });
+
+    // Written from scratch under the live id: refused by the write itself.
+    await expect(repository.create({
+      draftId: "gated-live-puzzle",
+      document: {
+        ...published,
+        id: "gated-live-puzzle",
+        title: "An unrelated board under a live id"
+      },
+      actor
+    })).rejects.toBeInstanceOf(PublishedIdConflictError);
+    await expect(repository.get({
+      draftId: "gated-live-puzzle",
+      actor
+    })).rejects.toBeInstanceOf(DraftNotFoundError);
+
+    // The document id is gated too, not just the row id: a Publish follows
+    // document.id, so a draft filed under a free row id still shadows.
+    await expect(repository.create({
+      draftId: "free-row-id",
+      document: { ...published, id: "gated-live-puzzle" },
+      actor
+    })).rejects.toBeInstanceOf(PublishedIdConflictError);
+
+    // The working copy opened from that board is the one legitimate draft
+    // over a live id, and is marked as such by the seeding helper.
+    const seeded = await repository.create({
+      draftId: "gated-live-puzzle",
+      document: { ...published, id: "gated-live-puzzle", title: "Gated live puzzle" },
+      actor,
+      seededFromPublished: true
+    });
+    expect(seeded.draftId).toBe("gated-live-puzzle");
+    expect(seeded.revision).toBe(1);
+
+    // An unpublished id is still free to create from scratch.
+    const free = await repository.create({
+      draftId: "never-gated-puzzle",
+      document: { ...published, id: "never-gated-puzzle", title: "Never gated" },
+      actor
+    });
+    expect(free.draftId).toBe("never-gated-puzzle");
   });
 });

@@ -602,8 +602,8 @@ export function createLocalDraftReviewHandler({
           try {
             const { draft, created } = await openPuzzleWorkingCopy({
               getDraft: draftId => draftStore.getDraft(draftId),
-              createDraft: ({ draftId, document }) =>
-                draftStore.createDraft({ draftId, document }),
+              createDraft: ({ draftId, document, seededFromPublished }) =>
+                draftStore.createDraft({ draftId, document, seededFromPublished }),
               contentDocuments,
               contentService,
               categoryRegistry: await loadMergedCategoryRegistry({
@@ -1388,8 +1388,8 @@ export function createLocalDraftReviewHandler({
     try {
       const opened = await loadOrSeedPuzzleDraft({
         getDraft: id => draftStore.getDraft(id),
-        createDraft: ({ draftId: id, document }) =>
-          draftStore.createDraft({ draftId: id, document }),
+        createDraft: ({ draftId: id, document, seededFromPublished }) =>
+          draftStore.createDraft({ draftId: id, document, seededFromPublished }),
         contentDocuments,
         contentService,
         categoryRegistry: await loadMergedCategoryRegistry({

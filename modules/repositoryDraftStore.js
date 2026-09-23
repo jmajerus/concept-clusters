@@ -36,8 +36,13 @@ export function createRepositoryDraftStore({ repository, actor }) {
   }
 
   return {
-    async createDraft({ draftId, document }) {
-      return record(await repository.create({ draftId, document, actor }));
+    async createDraft({ draftId, document, seededFromPublished = false }) {
+      return record(await repository.create({
+        draftId,
+        document,
+        actor,
+        seededFromPublished
+      }));
     },
     getDraft,
     async replaceDraft({ draftId, document, expectedRevision }) {
