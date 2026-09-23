@@ -12,6 +12,7 @@ import {
 } from "./draftRepository.js";
 import {
   applyAuthoredDomain,
+  assertNoWriteOnceDrift,
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,
   AUTHORING_WRITE_DOMAINS,
@@ -225,6 +226,15 @@ export class D1DraftRepository extends DraftRepository {
       );
     }
     const materialized = assembleStoredDomainDocuments({ document });
+    // Enforced at the repository, not at one caller: puzzle_id is recomputed
+    // from the document on every save, so any writer that could move or drop
+    // the id would split the row key from the document identity. The admin
+    // board PUTs a whole document straight to this method.
+    assertNoWriteOnceDrift(
+      assembleRowDocument(current),
+      materialized,
+      "stored draft document"
+    );
     const documentJson = serializeDraftDocument(materialized);
     const previousAssembled = serializeDraftDocument(assembleRowDocument(current));
     if (previousAssembled === documentJson && Number(current.document_stale || 0) !== 1) {

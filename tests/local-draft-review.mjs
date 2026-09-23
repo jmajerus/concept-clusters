@@ -428,6 +428,56 @@ export async function run() {
     assert.equal(fetched.status, 200);
     assert.match(await fetched.text(), /energy-flow-review/);
 
+    // The construct board PUTs a whole document straight to the store, with no
+    // MCP boundary in front of it. The write-once rule lives at the store for
+    // exactly this reason, so Rename puzzle stays the only id-changing path.
+    const boardDraft = await draftStore.getDraft("energy-flow-review");
+    const movedId = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts/energy-flow-review/document", {
+      method: "PUT",
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        expected_revision: boardDraft.revision,
+        document: { ...boardDraft.document, id: "moved-by-the-board" }
+      }
+    }), movedId), true);
+    assert.equal(movedId.status, 400);
+    assert.match(movedId.body, /cannot change on a save/);
+    assert.equal(
+      (await draftStore.getDraft("energy-flow-review")).document.id,
+      boardDraft.document.id,
+      "the stored id is unmoved"
+    );
+
+    const droppedId = createResponse();
+    const { id: _boardId, ...boardWithoutId } = boardDraft.document;
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts/energy-flow-review/document", {
+      method: "PUT",
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: { expected_revision: boardDraft.revision, document: boardWithoutId }
+    }), droppedId), true);
+    assert.equal(droppedId.status, 400);
+    assert.match(droppedId.body, /the save dropped it/);
+
+    // An ordinary board save is untouched.
+    const retitled = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts/energy-flow-review/document", {
+      method: "PUT",
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        expected_revision: boardDraft.revision,
+        document: { ...boardDraft.document, title: "Board retitled" }
+      }
+    }), retitled), true);
+    assert.equal(retitled.status, 200);
+    assert.equal(
+      (await draftStore.getDraft("energy-flow-review")).document.title,
+      "Board retitled"
+    );
+
     const contentDocuments = createMemoryContentDocumentRepository();
     const handlePublish = createLocalDraftReviewHandler({
       draftStore,

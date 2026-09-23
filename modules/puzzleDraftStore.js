@@ -15,6 +15,7 @@ import {
 } from "./draftRepository.js";
 import {
   applyAuthoredDomain,
+  assertNoWriteOnceDrift,
   assembleAuthoredDocument,
   assembleStoredDomainDocuments,
   partitionAuthoredDocument,
@@ -200,6 +201,10 @@ export function createPuzzleDraftStore({ directory }) {
       }
       const current = materializeRecord(raw);
       const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
+      // Enforced at the store, not at one caller: every complete-document
+      // save lands here, including the construct board's PUT of a whole
+      // document, which is not routed through the MCP boundary.
+      assertNoWriteOnceDrift(current.document, materialized, "stored draft document");
       // A canonical round-trip is not a document edit. In particular, the
       // graphical authoring client may read display-form category titles and
       // send them back through documentForStorage; once canonicalized, that

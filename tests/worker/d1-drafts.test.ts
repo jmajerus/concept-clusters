@@ -228,6 +228,50 @@ describe("D1 draft repository", () => {
     })).rejects.toBeInstanceOf(DraftNotFoundError);
   });
 
+  // The write-once rule lives at the repository, not at the MCP boundary: the
+  // admin board PUTs a whole document straight to save(), and puzzle_id is
+  // recomputed from that document, so any writer able to move or drop the id
+  // would split the row key from the document identity.
+  it("refuses a save that moves or drops the draft's id", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "write-once-author" };
+    const original = content.getPuzzleDocument("energy-flow");
+    const document = { ...original, id: "write-once-fixture", title: "Write once" };
+
+    const created = await repository.create({
+      draftId: "write-once-fixture",
+      document,
+      actor
+    });
+
+    await expect(repository.save({
+      draftId: "write-once-fixture",
+      document: { ...document, id: "moved-elsewhere" },
+      actor,
+      expectedRevision: created.revision
+    })).rejects.toThrow(/cannot change on a save/);
+
+    const { id: _dropped, ...withoutId } = document;
+    await expect(repository.save({
+      draftId: "write-once-fixture",
+      document: withoutId,
+      actor,
+      expectedRevision: created.revision
+    })).rejects.toThrow(/the save dropped it/);
+
+    // An ordinary save is untouched, and the id is still where it started.
+    const saved = await repository.save({
+      draftId: "write-once-fixture",
+      document: { ...document, title: "Write once, retitled" },
+      actor,
+      expectedRevision: created.revision
+    });
+    expect(saved.document.title).toBe("Write once, retitled");
+    expect(saved.document.id).toBe("write-once-fixture");
+    expect(saved.puzzleId).toBe("write-once-fixture");
+  });
+
   // The shadow gate lives in the insert itself, not in a check before it, so
   // there is no window in which a concurrent Publish turns a free id into a
   // live one between looking and writing. Every caller of the repository is

@@ -250,9 +250,17 @@ one is ever wanted, where making another copy is the stated intent.
 
 The `save_puzzle_draft` guard (recommendation 4) started as a hand-rolled comparison in
 the MCP server. It now lives where the rest of "who may write this" lives: a `writeOnce`
-axis on the field-ownership map, enforced by `assertNoWriteOnceDrift` from
-`applyAuthoredDomain` (covering every store's domain writes) and from the complete-save
-path. See [STORAGE-DOMAINS.md](../STORAGE-DOMAINS.md#write-once-fields).
+axis on the field-ownership map, enforced by `assertNoWriteOnceDrift`.
+
+Placing it took two passes, and the first was wrong in an instructive way. It went in at
+the MCP boundary and inside `applyAuthoredDomain`, which covers domain writes — but a
+*complete*-document save through `D1DraftRepository.save` or
+`puzzleDraftStore.replaceDraft` went around both, and the construct board PUTs exactly
+that, straight to the store with no MCP in front of it. Since `puzzle_id` is recomputed
+from the document on every save, that route could still have split the row key from the
+document identity. The rule now sits in the stores themselves, which is the same lesson
+as the creation gate: a boundary check protects the callers you thought of.
+See [STORAGE-DOMAINS.md](../STORAGE-DOMAINS.md#write-once-fields).
 
 ## Validation against production
 

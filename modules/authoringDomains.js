@@ -340,6 +340,20 @@ export function projectAuthoredDocument(document, domain = "complete") {
  * mid-authoring can still acquire one. `allowAbsent` is for partial payloads
  * (domain projections), where silence about a field is not a claim about it.
  */
+/**
+ * Carries `status` so the admin JSON routes, which already map a 400-shaped
+ * error to a client error, report this as one rather than rethrowing it as an
+ * unhandled fault.
+ */
+export class WriteOnceFieldError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = "WriteOnceFieldError";
+    this.status = 400;
+    this.field = field;
+  }
+}
+
 export function assertNoWriteOnceDrift(
   currentDocument,
   incoming,
@@ -359,12 +373,13 @@ export function assertNoWriteOnceDrift(
     const attempted = next === undefined
       ? "the save dropped it"
       : `the save supplied ${JSON.stringify(next)}`;
-    throw new Error(
+    throw new WriteOnceFieldError(
       `${label}: ${key} is set when a draft is created and cannot change on a `
       + `save. This draft's ${key} is ${JSON.stringify(current)} and ${attempted}. `
       + "Changing it is a deliberate human action on the drafts page "
       + "(Puzzle id -> Rename puzzle), which checks the new id is free and "
-      + "moves the working copy to it."
+      + "moves the working copy to it.",
+      key
     );
   }
 }
