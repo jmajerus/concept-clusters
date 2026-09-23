@@ -96,7 +96,9 @@ the draft. **Rename puzzle**, under **Puzzle id**, fixes a slug an agent chose
 badly or a title typo it inherited; it is offered only while the puzzle has
 never been published, because a live id is an identity other puzzles and
 catalogues may point at. The working copy moves to the new id and its
-saved-copy history is discarded along with the old row. Editing the title never changes the id, and
+saved-copy history is discarded along with the old row. A rename refuses if
+the draft was edited while it was in flight — for instance by an open
+construct board auto-saving — and moves nothing. Editing the title never changes the id, and
 there is no MCP tool for the rename: it is a human admin fix.
 **New puzzle** refuses an id that is already published, because a blank draft
 under a live id shadows that board instead of editing it; open the published

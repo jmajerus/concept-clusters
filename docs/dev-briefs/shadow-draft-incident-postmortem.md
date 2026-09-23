@@ -262,6 +262,21 @@ document identity. The rule now sits in the stores themselves, which is the same
 as the creation gate: a boundary check protects the callers you thought of.
 See [STORAGE-DOMAINS.md](../STORAGE-DOMAINS.md#write-once-fields).
 
+### The rename's own concurrency
+
+A later review pass found a sharper race than the check-then-write ones declined below,
+and this one was worth fixing. The rename copies a draft from a snapshot read, creates
+the new row, then removed the source **unconditionally**. A save landing between the
+read and the delete meant the copy was stale and the newer edit was destroyed along with
+the row it was written to. Not a spurious row — a lost edit, and reachable in ordinary
+use: the construct board auto-saves, so renaming from the drafts page while a board tab
+is open is enough.
+
+`delete` now carries the same OCC token `save` does, making the removal a
+compare-and-delete against the revision the copy came from. On a conflict the rename
+rolls back the new row and refuses, so the worst outcome becomes a spare draft under the
+new id rather than a destroyed edit.
+
 ## Validation against production
 
 The finished classifier was run over every draft in production D1 created after its

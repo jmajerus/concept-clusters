@@ -917,7 +917,12 @@ async function handleAdminRoute(
           getDraft: (id: string) => repository.get({ draftId: id, actor }),
           createDraft: ({ draftId: id, document }: { draftId: string; document: object }) =>
             repository.create({ draftId: id, document, actor }),
-          deleteDraft: (id: string) => repository.delete({ draftId: id, actor }),
+          deleteDraft: (id: string, options?: { expectedRevision?: number | null }) =>
+            repository.delete({
+              draftId: id,
+              actor,
+              expectedRevision: options?.expectedRevision ?? null
+            }),
           saveLayout: ({ draftId: id, layout }: { draftId: string; layout: object }) =>
             repository.saveLayout({ draftId: id, layout, actor }),
           contentDocuments,

@@ -1207,7 +1207,7 @@ export function createLocalDraftReviewHandler({
             getDraft: id => draftStore.getDraft(id),
             createDraft: ({ draftId: id, document }) =>
               draftStore.createDraft({ draftId: id, document }),
-            deleteDraft: id => draftStore.deleteDraft(id),
+            deleteDraft: (id, options) => draftStore.deleteDraft(id, options),
             saveLayout: ({ draftId: id, layout }) =>
               draftStore.saveLayout({ draftId: id, layout }),
             contentDocuments,

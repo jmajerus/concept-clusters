@@ -6,6 +6,7 @@ import { createContentInterchangeService } from "../modules/contentInterchangeSe
 import { createLocalDraftReviewHandler } from "../modules/localDraftReview.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
+import { renamePuzzleDraftId } from "../modules/draftIdRename.js";
 import { layoutDocumentForMode } from "../modules/layoutDocument.js";
 
 export const name = "draft id rename: admin-only slug fix before publication";
@@ -137,6 +138,49 @@ export async function run() {
     assert.match(collision.body, /already exists/);
     assert.equal((await draftStore.getDraft("occupied-slug")).document.title, "Another draft");
     assert.ok(await draftStore.getDraft("short-slug"));
+    // A rename copies from a snapshot and then removes the source. If a save
+    // lands in between, the copy is stale and an unconditional delete would
+    // carry that edit away with the row it was written to. The removal is a
+    // compare-and-delete, so the rename refuses instead and moves nothing.
+    await draftStore.createDraft({
+      draftId: "raced-rename",
+      document: contentService.createPuzzleSkeleton({
+        id: "raced-rename",
+        title: "Before the race",
+        category: contentService.state.puzzles[0].category
+      })
+    });
+    const beforeRace = await draftStore.getDraft("raced-rename");
+    await draftStore.replaceDraft({
+      draftId: "raced-rename",
+      document: { ...beforeRace.document, title: "Edited mid-rename" },
+      expectedRevision: beforeRace.revision
+    });
+    await assert.rejects(
+      () => renamePuzzleDraftId({
+        draftId: "raced-rename",
+        newId: "raced-rename-renamed",
+        // The stale snapshot a concurrent reader would have been holding.
+        getDraft: async id => (id === "raced-rename"
+          ? beforeRace
+          : draftStore.getDraft(id)),
+        createDraft: ({ draftId: id, document }) =>
+          draftStore.createDraft({ draftId: id, document }),
+        deleteDraft: (id, options) => draftStore.deleteDraft(id, options),
+        contentDocuments,
+        contentService
+      }),
+      /edited while the rename was in flight/
+    );
+    // The edit survives under the original id, and the rename rolled back.
+    const afterRace = await draftStore.getDraft("raced-rename");
+    assert.equal(afterRace.document.title, "Edited mid-rename");
+    await assert.rejects(
+      () => draftStore.getDraft("raced-rename-renamed"),
+      /not found|Unknown draft|ENOENT/i,
+      "a refused rename leaves no half-made copy"
+    );
+
     // The New puzzle form refuses a live id on the same terms create_puzzle_draft
     // does over MCP: a blank skeleton under a published id shadows that board.
     const formBody = new URLSearchParams({

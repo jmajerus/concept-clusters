@@ -228,6 +228,52 @@ describe("D1 draft repository", () => {
     })).rejects.toBeInstanceOf(DraftNotFoundError);
   });
 
+  // Delete carries the same OCC token save() does, so a rename cannot remove
+  // a source row that moved after it was copied.
+  it("compare-and-deletes against an expected revision", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "occ-delete-author" };
+    const document = {
+      ...content.getPuzzleDocument("energy-flow"),
+      id: "occ-delete-fixture",
+      title: "OCC delete fixture"
+    };
+    const created = await repository.create({
+      draftId: "occ-delete-fixture",
+      document,
+      actor
+    });
+    const saved = await repository.save({
+      draftId: "occ-delete-fixture",
+      document: { ...document, title: "Moved on" },
+      actor,
+      expectedRevision: created.revision
+    });
+    expect(saved.revision).toBe(created.revision + 1);
+
+    await expect(repository.delete({
+      draftId: "occ-delete-fixture",
+      actor,
+      expectedRevision: created.revision
+    })).rejects.toBeInstanceOf(DraftConflictError);
+    // Still there, still the newer content.
+    expect((await repository.get({
+      draftId: "occ-delete-fixture",
+      actor
+    })).document.title).toBe("Moved on");
+
+    await repository.delete({
+      draftId: "occ-delete-fixture",
+      actor,
+      expectedRevision: saved.revision
+    });
+    await expect(repository.get({
+      draftId: "occ-delete-fixture",
+      actor
+    })).rejects.toBeInstanceOf(DraftNotFoundError);
+  });
+
   // The write-once rule lives at the repository, not at the MCP boundary: the
   // admin board PUTs a whole document straight to save(), and puzzle_id is
   // recomputed from that document, so any writer able to move or drop the id

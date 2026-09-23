@@ -494,18 +494,46 @@ export class D1DraftRepository extends DraftRepository {
     return result.results.map(includeDocument ? fullDraft : metadata);
   }
 
-  async delete({ draftId, actor }) {
+  /**
+   * `expectedRevision` makes the delete a compare-and-delete, the same OCC
+   * token save() uses. A rename copies a draft and then removes the source,
+   * and without this the removal is unconditional: a save landing between the
+   * copy and the delete would be carried away with the row it was written to.
+   * Callers that simply discard a draft pass nothing and delete regardless.
+   *
+   * @param {{ draftId: string, actor: object, expectedRevision?: number|null }} input
+   * @returns {Promise<void>}
+   */
+  async delete({ draftId, actor, expectedRevision = null }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor).subject;
+    const guarded = Number.isInteger(expectedRevision);
     const result = await this.database.batch([
       this.database.prepare(`
         DELETE FROM puzzle_draft_history WHERE draft_id = ?
       `).bind(draftId),
-      this.database.prepare(`
-        DELETE FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
-      `).bind(draftId, owner)
+      guarded
+        ? this.database.prepare(`
+            DELETE FROM puzzle_drafts
+            WHERE id = ? AND owner_subject = ? AND revision = ?
+          `).bind(draftId, owner, expectedRevision)
+        : this.database.prepare(`
+            DELETE FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+          `).bind(draftId, owner)
     ]);
-    if (changes(result[1]) !== 1) throw new DraftNotFoundError(draftId);
+    if (changes(result[1]) === 1) return;
+    if (guarded) {
+      const row = await this.database.prepare(`
+        SELECT revision FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      `).bind(draftId, owner).first();
+      if (row) {
+        throw new DraftConflictError(
+          `Draft revision conflict: expected ${expectedRevision}, `
+          + `current revision is ${Number(row.revision)}`
+        );
+      }
+    }
+    throw new DraftNotFoundError(draftId);
   }
 
   async recordValidation({ draftId, validation, actor }) {

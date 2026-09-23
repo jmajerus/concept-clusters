@@ -148,6 +148,29 @@ export async function renamePuzzleDraftId({
   if (draft.layout && typeof saveLayout === "function") {
     await saveLayout({ draftId: newId, layout: draft.layout });
   }
-  await deleteDraft(draftId);
+  // The copy above was taken from a snapshot read at the top of this
+  // function. Removing the source is therefore a compare-and-delete against
+  // the revision that snapshot came from: a save landing in between would
+  // otherwise be carried away with the row it was written to, and the rename
+  // would silently destroy an edit rather than move one.
+  try {
+    await deleteDraft(draftId, { expectedRevision: draft.revision });
+  } catch (error) {
+    // Roll back to all-or-nothing. The worst remaining failure is a spare
+    // draft under the new id, which is recoverable; losing the edit is not.
+    try {
+      await deleteDraft(newId);
+    } catch {
+      // Leave it: reporting the real conflict matters more than tidiness.
+    }
+    if (/revision conflict/i.test(String(error?.message || error))) {
+      throw new DraftRenameError(
+        `${draftId} was edited while the rename was in flight, so nothing was `
+        + "moved. Reload the draft and rename it again.",
+        409
+      );
+    }
+    throw error;
+  }
   return created;
 }

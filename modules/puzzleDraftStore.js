@@ -388,8 +388,20 @@ export function createPuzzleDraftStore({ directory }) {
     });
   }
 
-  async function deleteDraft(draftId) {
+  // See D1DraftRepository.delete: expectedRevision turns this into a
+  // compare-and-delete so a rename cannot carry away a save that landed
+  // between the copy and the removal.
+  async function deleteDraft(draftId, { expectedRevision = null } = {}) {
     return withDraftMutation(draftId, async () => {
+      if (Number.isInteger(expectedRevision)) {
+        const raw = await readRawRecord(draftId);
+        if (raw.revision !== expectedRevision) {
+          throw new Error(
+            `Draft revision conflict: expected ${expectedRevision}, `
+            + `current revision is ${raw.revision}`
+          );
+        }
+      }
       await unlink(pathFor(draftId));
     });
   }
