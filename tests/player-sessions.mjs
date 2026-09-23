@@ -265,5 +265,40 @@ export async function run(page, baseURL) {
     "completed Star layout did not restore exactly"
   );
 
+  // A single-cluster vocabulary puzzle opens in Circle unless this puzzle
+  // already has a saved mode or the URL names one. That default must not
+  // replace the global mode preference.
+  await page.evaluate(() => {
+    localStorage.setItem("ccMode", "graph");
+    for (const key of Object.keys(localStorage)) {
+      if (key.includes("short-lived-words")) localStorage.removeItem(key);
+    }
+  });
+  await openPuzzle(page, `${baseURL}/index.html?puzzle=short-lived-words`);
+  assert.equal(await page.evaluate(() => CC.mode), "sets");
+  assert.equal(await page.getAttribute("#mode-sets", "aria-pressed"), "true");
+  assert.equal(await page.evaluate(() => localStorage.getItem("ccMode")), "graph");
+  const vocabularySession = await page.evaluate(() => {
+    const key = Object.keys(localStorage)
+      .find(candidate => candidate.includes("short-lived-words"));
+    return key ? JSON.parse(localStorage.getItem(key)).currentMode : null;
+  });
+  assert.equal(vocabularySession, "sets");
+  await openPuzzle(page, `${baseURL}/index.html?puzzle=short-lived-words&mode=star`);
+  assert.equal(await page.evaluate(() => CC.mode), "star");
+  assert.equal(await page.evaluate(() => localStorage.getItem("ccMode")), "graph");
+  await openPuzzle(page, `${baseURL}/index.html?puzzle=short-lived-words`);
+  assert.equal(
+    await page.evaluate(() => CC.mode),
+    "sets",
+    "a later visit should keep Circle for this puzzle"
+  );
+  await openPuzzle(page, `${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
+  assert.equal(
+    await page.evaluate(() => CC.mode),
+    "star",
+    "the vocabulary default should not replace this puzzle's saved mode"
+  );
+
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

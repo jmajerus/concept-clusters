@@ -1,9 +1,7 @@
 import assert from "node:assert/strict";
 import {
   centeredRect,
-  rectsOverlap,
-  segmentFromPoints,
-  segmentRectIntersectionPoint
+  rectsOverlap
 } from "../modules/geometry.js";
 import {
   loneClusterStarFan,
@@ -55,8 +53,18 @@ export async function run() {
   const fan = loneClusterStarFan(title, terms, width, height);
   const placed = [...fan].map(([node, point]) => ({ ...node, ...point }));
   const hub = fan.get(title);
-  assert.ok(hub.x < width / 2, `fan hub x ${hub.x} should stay left of center`);
-  assert.ok(hub.y > height / 2, `fan hub y ${hub.y} should stay below center`);
+  const selectable = placed.filter(node => !node.isTitle);
+  const selectableX = selectable.reduce((sum, node) => sum + node.x, 0) / selectable.length;
+  const selectableY = selectable.reduce((sum, node) => sum + node.y, 0) / selectable.length;
+  assert.ok(hub.x < width / 2 && hub.y > height / 2, `fan hub (${hub.x}, ${hub.y}) should stay lower-left`);
+  assert.ok(
+    selectableX < width / 2 && selectableY > height / 2,
+    `selectable terms (${selectableX}, ${selectableY}) should sit with the title, near Check selections`
+  );
+  for (const node of selectable) {
+    assert.ok(node.x < width * 0.55, `${node.word} at x ${node.x} reaches the right side`);
+    assert.ok(node.y > height * 0.35, `${node.word} at y ${node.y} reaches the top of the board`);
+  }
   for (const node of placed) {
     assert.ok(node.x - node.w / 2 >= 8 && node.x + node.w / 2 <= width - 8, `${node.word} leaves the board horizontally`);
     assert.ok(node.y >= 24 && node.y <= height - 24, `${node.word} is pinned to the vertical edge at ${node.y}`);
@@ -67,21 +75,6 @@ export async function run() {
         rectsOverlap(centeredRect(placed[i], placed[i].w, 30, 4), centeredRect(placed[j], placed[j].w, 30, 4)),
         false,
         `${placed[i].word} overlaps ${placed[j].word}`
-      );
-    }
-  }
-  for (const term of placed) {
-    if (term === placed.find(node => node.isTitle)) continue;
-    for (const other of placed) {
-      if (other === term || other.isTitle) continue;
-      assert.equal(
-        segmentRectIntersectionPoint(
-          segmentFromPoints(term, hub),
-          centeredRect(other, other.w, 30),
-          4
-        ),
-        null,
-        `${term.word}'s spoke cuts ${other.word}`
       );
     }
   }

@@ -103,9 +103,8 @@ function starFanAttempt(title, ordered, width, height, span, startBias) {
   return place();
 }
 
-function starFanFits(targets, width, height) {
+function starFanContained(targets, width, height) {
   const placed = [...targets].map(([node, point]) => ({ node, ...point }));
-  const title = placed.find(item => item.node.isTitleNode || item.node.isTitle);
   for (const item of placed) {
     if (item.x - item.node.w / 2 < 8 || item.x + item.node.w / 2 > width - 8) return false;
     if (item.y < 24 || item.y > height - 24) return false;
@@ -118,6 +117,13 @@ function starFanFits(targets, width, height) {
       )) return false;
     }
   }
+  return true;
+}
+
+function starFanFits(targets, width, height) {
+  if (!starFanContained(targets, width, height)) return false;
+  const placed = [...targets].map(([node, point]) => ({ node, ...point }));
+  const title = placed.find(item => item.node.isTitleNode || item.node.isTitle);
   if (!title) return true;
   for (const term of placed) {
     if (term === title) continue;
@@ -133,15 +139,107 @@ function starFanFits(targets, width, height) {
   return true;
 }
 
+function placeDoubleRing(title, inner, outer, hubX, hubY, innerRadius, outerRadius, aim) {
+  const gap = 14;
+  const targets = new Map([[title, { x: hubX, y: hubY }]]);
+  [inner, outer].forEach((group, index) => {
+    if (!group.length) return;
+    const radius = index === 0 ? innerRadius : outerRadius;
+    const total = group.reduce((sum, node) => sum + node.w + gap, 0);
+    const span = total / radius;
+    const start = aim - span / 2;
+    let cursor = 0;
+    group.forEach(node => {
+      const mid = cursor + (node.w + gap) / 2;
+      const angle = start + (mid / total) * span;
+      cursor += node.w + gap;
+      targets.set(node, {
+        x: hubX + Math.cos(angle) * radius,
+        y: hubY + Math.sin(angle) * radius
+      });
+    });
+  });
+  return targets;
+}
+
+function fanReach(targets, height) {
+  const terms = [...targets].filter(([node]) => !(node.isTitleNode || node.isTitle));
+  if (!terms.length) return 0;
+  return terms.reduce((sum, [, point]) =>
+    sum + Math.hypot(point.x - 28, point.y - (height - 32)), 0) / terms.length;
+}
+
+function fanHits(targets) {
+  const placed = [...targets].map(([node, point]) => ({ node, ...point }));
+  const title = placed.find(item => item.node.isTitleNode || item.node.isTitle);
+  if (!title) return 0;
+  let hits = 0;
+  for (const term of placed) {
+    if (term === title) continue;
+    for (const other of placed) {
+      if (other === term || other === title) continue;
+      if (segmentRectIntersectionPoint(
+        segmentFromPoints(term, title),
+        centeredRect(other, other.node.w, 30),
+        2
+      )) hits++;
+    }
+  }
+  return hits;
+}
+
+// Two short arcs above a lower-left title. One arc long enough for every
+// label runs across the board; splitting the labels keeps the selectable
+// pills next to Check selections.
+function tightDoubleRing(title, ordered, width, height) {
+  const home = singleClusterTermHome(width, height);
+  const inner = ordered.filter((_, index) => index % 2 === 0);
+  const outer = ordered.filter((_, index) => index % 2 === 1);
+  let best = null;
+  let bestKey = Infinity;
+  for (let hubX = home.x; hubX <= home.x + 40; hubX += 10) {
+    for (let hubY = home.y; hubY <= height - 50; hubY += 10) {
+      for (let innerRadius = 112; innerRadius <= 160; innerRadius += 8) {
+        for (const extra of [56, 68]) {
+          for (let aim = -1.8; aim <= -1.2; aim += 0.1) {
+            const targets = placeDoubleRing(
+              title, inner, outer, hubX, hubY, innerRadius, innerRadius + extra, aim
+            );
+            if (!starFanContained(targets, width, height)) continue;
+            const key = fanHits(targets) * 80 + fanReach(targets, height);
+            if (key < bestKey) {
+              best = targets;
+              bestKey = key;
+            }
+          }
+        }
+      }
+    }
+  }
+  return best;
+}
+
+function termCentroidLowerLeft(targets, width, height) {
+  const terms = [...targets].filter(([node]) => !(node.isTitleNode || node.isTitle));
+  if (!terms.length) return true;
+  const x = terms.reduce((sum, [, point]) => sum + point.x, 0) / terms.length;
+  const y = terms.reduce((sum, [, point]) => sum + point.y, 0) / terms.length;
+  return x < width / 2 && y > height / 2;
+}
+
 export function loneClusterStarFan(title, terms, width, height) {
   const ordered = [...terms].sort((a, b) => compareWordOrder(a.word, b.word));
   const wide = ordered.length <= 1
     ? 0.8
     : Math.min(2.6, Math.max(1.15, ordered.length * 0.37));
   // A rightward semicircle keeps a small group beside the lower-left
-  // title. A label set that cannot fit there opens a wider arc into
-  // the free board instead of resting on the canvas edge.
+  // title. A larger label set uses two short arcs there; a single arc
+  // sized to those labels would park the selectable terms across the board.
   const semicircle = starFanAttempt(title, ordered, width, height, Math.PI, 0);
-  if (starFanFits(semicircle, width, height)) return semicircle;
-  return starFanAttempt(title, ordered, width, height, wide, 0.28);
+  if (starFanFits(semicircle, width, height) &&
+      termCentroidLowerLeft(semicircle, width, height)) {
+    return semicircle;
+  }
+  return tightDoubleRing(title, ordered, width, height) ||
+    starFanAttempt(title, ordered, width, height, wide, 0.28);
 }

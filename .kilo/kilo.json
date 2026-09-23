@@ -1,14 +1,17 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "concept-clusters_*": "allow"
+  },
   "mcp": {
     "concept-clusters": {
       "type": "local",
-      "command": ["node", "tools/mcp-server.mjs"],
+      "command": [
+        "node",
+        "tools/mcp-server.mjs"
+      ],
       "enabled": true,
       "timeout": 10000
     }
-  },
-  "permission": {
-    "concept-clusters_*": "allow"
   }
 }

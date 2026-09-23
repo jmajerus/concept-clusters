@@ -265,6 +265,14 @@ function trackPuzzleCompleted(puzzleId, mode, stats) {
 // other people who open a shared link -- see the note above the Share
 // handler.
 const VALID_MODES = ["graph", "star", "sets"];
+
+// One cluster and nothing to assemble: the player only picks words for
+// the lenses. Circle is a stack of those words in the lower left, next
+// to Check selections. Star and Graph stay available when chosen.
+function singleClusterVocabulary(puzzle) {
+  return puzzle?.puzzleKind === "vocabulary-context" &&
+    puzzle.clusters?.length === 1;
+}
 const urlMode = pageParams.get("mode");
 let mode = VALID_MODES.includes(urlMode)
   ? urlMode
@@ -1924,6 +1932,12 @@ function applyLoadedPuzzle(puzzle, index, {
   } else if (!layoutAuthoringMode && !VALID_MODES.includes(urlMode) && savedSession) {
     mode = savedSession.currentMode;
     updateModeControls();
+  } else if (!layoutAuthoringMode && !VALID_MODES.includes(urlMode) &&
+      singleClusterVocabulary(puzzle)) {
+    // No saved mode for this puzzle, and no &mode= view override. Use
+    // Circle for this visit only — do not write the global ccMode preference.
+    mode = "sets";
+    updateModeControls();
   }
   overviewRenderer.hideOverview();
   // Info shown for the previous overview or puzzle is stale as soon as a
@@ -2077,8 +2091,8 @@ function applyLoadedPuzzle(puzzle, index, {
   // While the learning introduction hides the board, wait to start that
   // replay. Running it underneath display:none finishes and freezes the
   // Star layout before the player can see it move.
-  const automaticallyPreSolved = puzzle.puzzleKind === "vocabulary-context" &&
-    puzzle.clusters?.length === 1 && puzzle.lenses?.length > 0;
+  const automaticallyPreSolved = singleClusterVocabulary(puzzle) &&
+    puzzle.lenses?.length > 0;
   if (!authoringConstruct && (!savedSession || automaticallyPreSolved) &&
       (puzzle.preSolve || automaticallyPreSolved) && state.made !== state.need) {
     if (state.learningGated) state.autoPresolvePending = true;
