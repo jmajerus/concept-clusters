@@ -34,6 +34,7 @@ import {
   AUTHORING_PROVENANCE_SWITCH_LABELS,
   AUTHORING_PROVENANCE_SWITCHES,
   generativeHostKey,
+  UNIDENTIFIED_GENERATIVE_SYSTEM,
   listGenerativeContributorsForEdit,
   resolveLessonByline,
   renderProvenanceL1,
@@ -1702,8 +1703,22 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
     const modelId = `provenance-model-${slugId}`;
     const reasoningId = `provenance-reasoning-${slugId}`;
     const switchId = `provenance-switch-${slugId}`;
-    return `<div class="provenance-client-row">
-      <span class="provenance-host">${escapeHtml(host)}</span>
+    // The unnamed placeholder is a blank, not a contributor: an agent we know
+    // ran but could not name. It is the one host that can be filled in here,
+    // because naming it completes a record rather than overwriting something a
+    // client actually presented.
+    const unnamed = generativeHostKey(host) ===
+      generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM);
+    const hostCell = unnamed
+      ? `<label class="field-label" for="provenance-identify">drafting client</label>
+      <select${form} id="provenance-identify" name="${prefix}identifyHost">${[
+        `<option value="">${escapeHtml(UNIDENTIFIED_GENERATIVE_SYSTEM)} (not identified)</option>`,
+        ...knownGenerativeHostSystems().map(known =>
+          `<option value="${escapeHtml(known)}">${escapeHtml(known)}</option>`)
+      ].join("")}</select>`
+      : `<span class="provenance-host">${escapeHtml(host)}</span>`;
+    return `<div class="provenance-client-row${unnamed ? " provenance-client-unnamed" : ""}">
+      ${hostCell}
       <input${form} type="hidden" name="${prefix}modelHost" value="${escapeHtml(host)}">
       <input${form} type="hidden" name="${prefix}reasoningHost" value="${escapeHtml(host)}">
       <input${form} type="hidden" name="${prefix}switchHost" value="${escapeHtml(host)}">
@@ -1723,9 +1738,14 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
   const listedHostKeys = new Set(generativeHosts.map(({ host }) => generativeHostKey(host)));
   const unlistedHosts = knownGenerativeHostSystems()
     .filter(host => !listedHostKeys.has(generativeHostKey(host)));
+  // While the blank is unfilled there is one way to name the agent -- the
+  // select on its own row. Offering the add row too would present naming the
+  // known agent and inventing a second one as the same gesture.
+  const hasUnnamed = generativeHosts.some(({ host }) =>
+    generativeHostKey(host) === generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM));
   // Reasoning/switch aren't offered on the add row itself -- they tune a
   // specific client's row, which this one becomes only once added and saved.
-  const addClientRow = unlistedHosts.length ? `<div class="provenance-client-row provenance-client-add">
+  const addClientRow = unlistedHosts.length && !hasUnnamed ? `<div class="provenance-client-row provenance-client-add">
       <label class="field-label" for="provenance-add-host">add drafting client</label>
       <select${form} id="provenance-add-host" name="${prefix}modelHost">${[
         `<option value="">(choose a drafting client)</option>`,
@@ -1747,7 +1767,7 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
       <input${form} type="hidden" name="${prefix}authorName" value="${escapeHtml(author)}">
       <div class="provenance-clients">
         <p class="field-label">Drafting client</p>
-        <p class="meta">Confirmed by the MCP probe when a client identifies itself, or added here. Model, reasoning, and switch are optional -- set them only when you're confident what ran; they concatenate into the derived byline after the model (for example Grok 4.6 High Fast).</p>
+        <p class="meta">Confirmed by the MCP probe when a client identifies itself, or added here. Model, reasoning, and switch are optional -- set them only when you're confident what ran; they concatenate into the derived byline after the model (for example Grok 4.6 High Fast).</p>${hasUnnamed ? `<p class="meta">This puzzle records an agent that could not be named when it was written. Choosing a drafting client above fills that blank in place -- it does not add a second contributor. Leave it unidentified unless you have evidence of which client ran. A client the MCP probe confirmed is not editable here; correcting one of those is a removal, not a rename.</p>` : ""}
         ${clientRows}
         ${addClientRow}
       </div>

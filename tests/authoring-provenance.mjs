@@ -9,6 +9,7 @@ import {
   formatGenerativeContributorLabel,
   inferCollaboration,
   inferContributorKind,
+  identifyUnnamedGenerativeContributor,
   listGenerativeContributorsForEdit,
   normalizeGenerativeContributorDisplayName,
   normalizeAuthoringProvenance,
@@ -17,6 +18,8 @@ import {
   renderProvenanceL1,
   renderProvenanceL2,
   resolveLessonByline,
+  soleUnidentifiedGenerativeContributor,
+  unidentifiedGenerativeContributor,
   splitGenerativeContributorLabel,
   upsertGenerativeProvenance,
   upsertHumanProvenance,
@@ -731,5 +734,171 @@ export async function run() {
       }
     }, { collaboration: "aiPrimary" }).provenance.collaboration,
     "aiPrimary"
+  );
+
+  // Naming the unnamed generative placeholder.
+  //
+  // "generative assistance" is not a contributor -- it is an unfilled blank
+  // about an agent that certainly ran, since reaching an authoring tool over
+  // MCP is itself the evidence. So naming it replaces in place rather than
+  // adding a second entry beside it. Suppressing the blank at render time
+  // instead would leave storage genuinely holding two generative contributors,
+  // and every consumer -- L1, L2, JSON-LD -- would have to know to hide one.
+  const unnamedBoard = () => ({
+    id: "unnamed-board",
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }]
+    }
+  });
+
+  const filledIn = identifyUnnamedGenerativeContributor(unnamedBoard(), {
+    host: "Claude",
+    model: "Sonnet 5"
+  });
+  assert.equal(filledIn.provenance.contributors.length, 1);
+  assert.equal(renderProvenanceL1(filledIn.provenance), "Drafted with Claude (Sonnet 5)");
+  // Identical to reaching the same contributor through the model editor.
+  assert.deepEqual(
+    filledIn.provenance.contributors,
+    applyGenerativeContributorModel({ id: "unnamed-board" }, {
+      host: "Claude",
+      model: "Sonnet 5"
+    }).provenance.contributors
+  );
+
+  // Position, mode, and a human editor all survive being filled in.
+  const filledInMixed = identifyUnnamedGenerativeContributor({
+    id: "mixed-board",
+    provenance: {
+      collaboration: "aiPrimary",
+      contributors: [
+        { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+        { name: "John Majerus", kind: "human" }
+      ]
+    }
+  }, { host: "Cursor" });
+  assert.equal(filledInMixed.provenance.collaboration, "aiPrimary");
+  assert.deepEqual(
+    filledInMixed.provenance.contributors.map(entry => entry.name),
+    ["Cursor", "John Majerus"]
+  );
+
+  // Reasoning/switch tuned on the blank describe the run that is now named.
+  assert.equal(
+    identifyUnnamedGenerativeContributor({
+      id: "tuned-board",
+      provenance: {
+        collaboration: "ai",
+        contributors: [
+          { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative", reasoning: "high" }
+        ]
+      }
+    }, { host: "Codex" }).provenance.contributors[0].reasoning,
+    "high"
+  );
+
+  // A host a client actually presented is an observation. A human must not be
+  // able to type over one; correcting a stamp is remove-then-add, which
+  // records it as the claim it is.
+  assert.throws(
+    () => identifyUnnamedGenerativeContributor({
+      id: "stamped-board",
+      provenance: { collaboration: "ai", contributors: [{ name: "Claude Code" }] }
+    }, { host: "Cursor" }),
+    /no unnamed generative contributor/
+  );
+
+  // An unrecognized system must never reach a player-facing byline -- the same
+  // rule the MCP boundary applies to a client it cannot name.
+  assert.throws(
+    () => identifyUnnamedGenerativeContributor(unnamedBoard(), { host: "SomeNewBot" }),
+    /not a known drafting client/
+  );
+  assert.throws(
+    () => identifyUnnamedGenerativeContributor(unnamedBoard(), {
+      host: UNIDENTIFIED_GENERATIVE_SYSTEM
+    }),
+    /cannot be named as itself/
+  );
+
+  // Naming a client already credited would duplicate it, not add a collaborator.
+  assert.throws(
+    () => identifyUnnamedGenerativeContributor({
+      id: "dup-board",
+      provenance: {
+        collaboration: "ai",
+        contributors: [
+          { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+          { name: "Codex" }
+        ]
+      }
+    }, { host: "Codex" }),
+    /already a contributor/
+  );
+
+  assert.equal(
+    soleUnidentifiedGenerativeContributor(unnamedBoard().provenance)?.name,
+    UNIDENTIFIED_GENERATIVE_SYSTEM
+  );
+  // Not "sole" once a named agent is on record, so the blank is no longer the
+  // thing an add row should fill.
+  assert.equal(
+    soleUnidentifiedGenerativeContributor({
+      contributors: [{ name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }, { name: "Codex" }]
+    }),
+    null
+  );
+  // ...but the blank is still findable, and still fillable, in that state.
+  assert.equal(
+    unidentifiedGenerativeContributor({
+      contributors: [{ name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }, { name: "Codex" }]
+    })?.name,
+    UNIDENTIFIED_GENERATIVE_SYSTEM
+  );
+  assert.deepEqual(
+    identifyUnnamedGenerativeContributor({
+      id: "two-agent-board",
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Codex" }, { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" }]
+      }
+    }, { host: "Cursor" }).provenance.contributors.map(entry => entry.name),
+    ["Codex", "Cursor"]
+  );
+
+  // A human contributor whose name matches the agent being named.
+  //
+  // normalizeAuthoringProvenance deduplicates by name across kinds, so naming
+  // the blank "Claude" beside a *human* named "Claude" merged the two and kept
+  // only the human: collaboration fell to "human" and the byline became "By
+  // Claude" -- an AI-drafted puzzle asserting sole human authorship, which is
+  // exactly what the placeholder exists to prevent. Refused, not normalized.
+  assert.throws(
+    () => identifyUnnamedGenerativeContributor({
+      id: "namesake-board",
+      provenance: {
+        collaboration: "aiPrimary",
+        contributors: [
+          { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+          { name: "Claude", kind: "human" }
+        ]
+      }
+    }, { host: "Claude" }),
+    /already has a human contributor named "Claude"/
+  );
+  // The same name with a model suffix does not collide, and is allowed.
+  assert.deepEqual(
+    identifyUnnamedGenerativeContributor({
+      id: "namesake-board",
+      provenance: {
+        collaboration: "aiPrimary",
+        contributors: [
+          { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+          { name: "Claude", kind: "human" }
+        ]
+      }
+    }, { host: "Claude", model: "Sonnet 5" }).provenance.contributors.map(entry => entry.name),
+    ["Claude (Sonnet 5)", "Claude"]
   );
 }
