@@ -18,17 +18,17 @@ const { toolName, args, clientInfo, meta } = invocation;
 
 // A new stdio process cannot discover the client envelope of the agent that
 // launched it. Keep anonymous automation possible, but never let an authored
-// draft write silently lose its server-side provenance credit. The write
-// still lands and is still audited -- an unforwarded identity is recorded as
-// an unattributed assistance stamp -- but only a recognized client is named
-// as a contributor on the document.
+// draft write silently lose its server-side attribution. The write still
+// lands, is still audited as unattributed, and a credit-worthy one is still
+// credited to the unnamed "generative assistance" contributor -- what a
+// forwarded identity adds is the named client, its model and its reasoning.
 if (
   clientInfo.name === "mcp-call" &&
   clientInfo.version === "1" &&
   ["create_puzzle_draft", "save_puzzle_draft"].includes(toolName)
 ) {
   console.error(
-    "[mcp-call] No client identity was forwarded; this write will be audited as unattributed and will receive no automatic provenance credit. " +
+    "[mcp-call] No client identity was forwarded; this write will be credited to an unnamed generative contributor rather than to a named client, model and reasoning. " +
     "Pass the real envelope with --client-info/--meta (or CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME, CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL, CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO, and CONCEPT_CLUSTERS_MCP_CALL_META)."
   );
 }

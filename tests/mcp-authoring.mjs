@@ -1312,6 +1312,22 @@ export async function run() {
     assert.match(driftText, /renamed-behind-your-back/);
     assert.match(driftText, /Rename puzzle/);
 
+    // Dropping the id is drift too: the repository recomputes puzzle_id from
+    // the document, so an omitted id would null it while the row stayed keyed
+    // by draft_id.
+    const { id: _dropped, ...withoutId } =
+      freshUnpublished.result.structuredContent.draft.document;
+    const dropAttempt = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "never-published-board",
+        expected_revision: freshUnpublished.result.structuredContent.draft.revision,
+        document: withoutId
+      }
+    });
+    assert.equal(dropAttempt.result.isError, true);
+    assert.match(JSON.stringify(dropAttempt.result.content), /by dropping it/);
+
     // The same save without touching the id is fine.
     const noDrift = await request("tools/call", {
       name: "save_puzzle_draft",

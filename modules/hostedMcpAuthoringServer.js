@@ -1097,12 +1097,18 @@ export function createAuthoringMcpServer({
     const previousId = typeof previousDocument?.id === "string"
       ? previousDocument.id
       : null;
-    if (previousId && typeof stored.id === "string" && stored.id !== previousId) {
+    // Dropping the id is drift too, not an exemption from it: the repository
+    // recomputes puzzle_id from the document on every save, so an omitted or
+    // non-string id sets it to null while the row stays keyed by draft_id.
+    if (previousId && stored.id !== previousId) {
+      const attempted = typeof stored.id === "string" && stored.id
+        ? `to "${stored.id}"`
+        : "by dropping it";
       throw new Error(
         `This draft's puzzle id is "${previousId}", and a save cannot change it ` +
-        `to "${stored.id}". Renaming a puzzle is a human admin action on the ` +
-        "drafts page (Puzzle id -> Rename puzzle), which checks the new id is " +
-        "free and moves the working copy to it."
+        `${attempted}. Renaming a puzzle is a human admin action on the drafts ` +
+        "page (Puzzle id -> Rename puzzle), which checks the new id is free and " +
+        "moves the working copy to it."
       );
     }
     const retained = retainMcpExcludedMetadata(stored, previousDocument);

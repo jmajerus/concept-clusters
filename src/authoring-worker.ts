@@ -73,6 +73,7 @@ import {
 import {
   DraftRenameError,
   parseRenameForm,
+  puzzleIdIsLive,
   renamePuzzleDraftId
 } from "../modules/draftIdRename.js";
 import { draftShadowsPublished } from "../modules/draftReviewDiff.js";
@@ -1048,6 +1049,13 @@ async function handleAdminRoute(
       alreadyPublished,
       publishedDiff,
       shadowsPublished,
+      // Same question the rename POST asks, so the page never offers a
+      // rename the server will refuse.
+      puzzleIdIsLive: await puzzleIdIsLive({
+        contentDocuments,
+        contentService,
+        puzzleId
+      }),
       validation,
       ...publishedFlags,
       lastAgentReviewedAt: publishedRow?.lastAgentReviewedAt || null,

@@ -2,8 +2,12 @@
 // authoring action: an agent picked an over-long slug, or the title it was
 // given was misspelled and the slug inherited the typo. There is deliberately
 // no MCP tool for it. The rename is a copy to the new id followed by deletion
-// of the old row, which needs no new repository primitive; the draft's
-// working-copy history and assistance stamps stay behind with the old id.
+// of the old row, which needs no new repository primitive. Deleting that row
+// destroys its saved-copy history: puzzle_draft_history cascades on the
+// foreign key, and the file store unlinks the only copy. The rename is
+// therefore lossy by construction, which is tolerable only because it is
+// offered solely for never-published drafts, where there is little or no
+// history to lose.
 //
 // The guard that makes that safe is "never published": an id that has never
 // been published cannot be the target of another puzzle's relatedPuzzles,

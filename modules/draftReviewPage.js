@@ -1411,10 +1411,17 @@ function renderSubmitForm(draft, variant = "hosted") {
 // the title it was given was misspelled and the slug inherited the typo.
 // Only offered before the puzzle is published, because an id that is live in
 // authoring play or git is an identity other rows may point at.
+//
+// `puzzleIdIsLive` is the server's own answer to that question, computed with
+// the same helper the rename POST uses, so the form is never offered for an
+// id the POST would refuse. It counts withdrawn rows and git-only ids as
+// live, which the page's own publication flags do not.
 function renderRenameDraftForm(draft) {
   const draftId = draft.draftId;
   const currentId = typeof draft.document?.id === "string" ? draft.document.id : draftId;
-  if (draft.d1Published === true || draft.inGithubProduction === true) {
+  if (draft.puzzleIdIsLive === true
+    || draft.d1Published === true
+    || draft.inGithubProduction === true) {
     return `<section class="submit-pr">
       <h2>Puzzle id</h2>
       <p class="meta"><code>${escapeHtml(currentId)}</code> is published, so other
@@ -1425,8 +1432,9 @@ function renderRenameDraftForm(draft) {
   return `<section class="submit-pr">
     <h2>Puzzle id</h2>
     <p class="meta">This puzzle has never been published, so its id can still
-      change. The working copy moves to the new id; saved-copy history stays
-      behind. Editing the title does not change the id.</p>
+      change. The working copy moves to the new id and its saved-copy history
+      is discarded, so Revert to last working copy will have nothing to go
+      back to. Editing the title does not change the id.</p>
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
       <input type="hidden" name="confirm" value="${RENAME_DRAFT_CONFIRM}">
       <p><label>id <input name="new_id" required

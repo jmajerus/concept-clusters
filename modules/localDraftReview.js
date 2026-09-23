@@ -205,6 +205,7 @@ function publishedInContentService(contentService, puzzleId) {
 
 export async function mapDraftDetail(record, {
   contentService = null,
+  contentDocuments = null,
   inCheckout = false,
   matchesCheckout = null,
   publishedDocument = null,
@@ -223,6 +224,9 @@ export async function mapDraftDetail(record, {
   const layoutDiffersFromPublished = Boolean(
     publishedDocument && !valuesEqual(publishedLayout || null, record.layout || null)
   );
+  // One diff, read twice: the summary renders it and the shadow check scores
+  // it. Recomputing would canonicalize and walk the whole board again.
+  const publishedDiff = baseline ? diffPublishedDraft(baseline, document) : null;
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -232,8 +236,16 @@ export async function mapDraftDetail(record, {
     title: record.document?.title || record.title || null,
     document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
-    publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
-    shadowsPublished: draftShadowsPublished({ published: baseline, draft: document }),
+    // The same question the rename POST asks, so the page never offers a
+    // rename the server will refuse -- withdrawn rows and git-only ids count
+    // as live there too.
+    puzzleIdIsLive: await puzzleIdIsLive({
+      contentDocuments,
+      contentService,
+      puzzleId
+    }),
+    publishedDiff,
+    shadowsPublished: draftShadowsPublished({ published: baseline, publishedDiff }),
     layoutDiffersFromPublished,
     validation: contentService
       ? await withWikiLinkFlags(
@@ -1406,6 +1418,7 @@ export function createLocalDraftReviewHandler({
       });
       const draft = await mapDraftDetail(record, {
         contentService,
+        contentDocuments,
         inCheckout,
         matchesCheckout,
         publishedDocument: publishedRow && !publishedRow.withdrawnAt

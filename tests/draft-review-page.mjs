@@ -41,6 +41,24 @@ const baseDraft = {
 };
 
 export async function run() {
+  // The rename form is gated on the server's own liveness answer, not on the
+  // page's publication flags: a withdrawn row or a git-only id is live to the
+  // rename POST, so offering the form for one would guarantee a 409.
+  assert.match(
+    renderDraftPage({ ...baseDraft }),
+    /name="new_id"/,
+    "a never-published draft can still be renamed"
+  );
+  assert.doesNotMatch(
+    renderDraftPage({ ...baseDraft, puzzleIdIsLive: true }),
+    /name="new_id"/,
+    "a live id offers no rename field"
+  );
+  assert.match(
+    renderDraftPage({ ...baseDraft, puzzleIdIsLive: true }),
+    /is published, so other/
+  );
+
   // A shadow reads the same diff marks as an edit, so the summary has to say
   // what they mean here, and the list badges the row that is otherwise
   // indistinguishable from a legitimate working copy.
