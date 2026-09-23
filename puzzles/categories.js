@@ -268,10 +268,41 @@ export const CATEGORIES = {
     }
   },
   "Public Health": {
+    slug: "public-health",
     domain: "health-medicine",
     info: {
       text: "How communities understand health risks, prevent harm, protect populations, and build the conditions in which people can thrive.",
       link: "wiki:Public health"
+    },
+    subcategories: {
+      epidemiology: {
+        title: "Epidemiology",
+        info: {
+          text: "Epidemiology is the scientific study of how often diseases occur in different groups of people and why, serving as the basic foundation of public health.",
+          link: "wiki:Epidemiology"
+        }
+      },
+      biostatistics: {
+        title: "Biostatistics",
+        info: {
+          text: "The application of math and statistics to collect, analyze, and interpret health and medical data.",
+          link: "wiki:Biostatistics"
+        }
+      },
+      "environmental-health": {
+        title: "Environmental Health",
+        info: {
+          text: "The study of how surroundings—such as air, water, and chemicals—affect human health.",
+          link: "wiki:Environmental Health"
+        }
+      },
+      "health-policy": {
+        title: "Health Policy and Management",
+        info: {
+          text: "The administration, laws, and planning involved in making healthcare systems efficient, fair, and accessible.",
+          link: "wiki:Health Policy"
+        }
+      }
     }
   },
   "Physical Geography": {

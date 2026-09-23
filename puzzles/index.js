@@ -238,6 +238,10 @@ import yieldingNeighbors from "./vocabulary/yielding-neighbors.js";
 import innateIntrinsicInherent from "./vocabulary/innate-intrinsic-inherent.js";
 import quietNeighbors from "./vocabulary/quiet-neighbors.js";
 import shortLivedWords from "./vocabulary/short-lived-words.js";
+import biostatisticsDesignMeasuresInference from "./public-health/biostatistics-design-measures-inference.js";
+import biostatisticsValidityModelsDiagnostics from "./public-health/biostatistics-validity-models-diagnostics.js";
+import restraintInSpeech from "./vocabulary/restraint-in-speech.js";
+import troublesomeNeighbors from "./vocabulary/troublesome-neighbors.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -486,6 +490,10 @@ export const PUZZLES = [
   innateIntrinsicInherent,
   quietNeighbors,
   shortLivedWords,
+  biostatisticsDesignMeasuresInference,
+  biostatisticsValidityModelsDiagnostics,
+  restraintInSpeech,
+  troublesomeNeighbors,
 ];
 
 export default PUZZLES;
