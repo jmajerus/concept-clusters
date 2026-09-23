@@ -14,6 +14,24 @@
 // strings, dropped whole clusters[].terms arrays, or rewritten cluster ids.
 // Rewriting just the `provenance` key cannot roll content backward, and the
 // guard below refuses any row where anything else would change.
+//
+// THE FREEZE CUE IS A REQUIRED FOLLOW-UP, NOT AN OPTIONAL ONE. Correcting D1
+// alone changes nothing a player sees: production serves the generated modules
+// in puzzles/, which only Freeze writes, and contentFreezePlan exports only
+// rows carrying a pending author cue -- isPendingFreezeCue explicitly excludes
+// the git-seed cue that most already-shipped rows carry. A row corrected here
+// and left seed-cued is stranded in D1 indefinitely.
+//
+// Cueing is still kept out of this script deliberately. It is the act that
+// puts a puzzle into the next freeze, and an operator may be holding one back
+// on purpose -- bundling it in would push every touched row into a freeze plan
+// without anyone choosing that. When this ran, the cue went out as its own
+// reviewed statement covering the ids whose published provenance differed from
+// the corresponding module in puzzles/, and the freeze followed separately.
+//
+// To check for stranded rows afterwards: compare each live published row's
+// provenance against its module in puzzles/, and assert that every row which
+// differs carries a non-seed cue. That count should be zero.
 
 import { writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -124,6 +142,11 @@ const drops = plan.filter(p => p.droppedHumans.length);
 console.log(drops.length ? drops.map(p => `  ${p.id}: ${JSON.stringify(p.droppedHumans)}  "${p.beforeByline}" -> "${p.afterByline}"`).join("\n") : "  none");
 const uncued = plan.filter(p => !p.cuedBy).length;
 console.log(`\nof ${plan.length} rows to fix, ${uncued} currently carry no freeze cue`);
+console.log(
+  "\nReminder: this writes D1 only. Players are served the generated modules in\n" +
+  "puzzles/, so every corrected row still needs a pending author cue and a\n" +
+  "freeze, or the correction never leaves the database."
+);
 
 if (!APPLY && !EMIT) {
   console.log(`\nDRY RUN -- nothing written. Re-run with --emit-sql or --apply.`);
