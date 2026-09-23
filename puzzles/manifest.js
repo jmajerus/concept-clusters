@@ -14350,6 +14350,235 @@ export const PUZZLE_MANIFEST = [
         "evanescent"
       ]
     }
+  },
+  {
+    "id": "biostatistics-design-measures-inference",
+    "module": "./public-health/biostatistics-design-measures-inference.js",
+    "published": "2026-09-23",
+    "browse": {
+      "id": "biostatistics-design-measures-inference",
+      "title": "Biostatistics: Designing Studies and Measuring Risk",
+      "category": "Public Health",
+      "subcategories": {
+        "Public Health": "biostatistics"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "biostatistics-validity-models-diagnostics",
+            "reason": "Continue from measured associations and uncertainty to validity, outcome-specific models, and diagnostic performance."
+          }
+        ]
+      },
+      "info": {
+        "text": "Biostatistics connects the question a study asks to the population observed, the outcome frequency measured, the comparison made, and the uncertainty reported. Keeping those layers distinct helps prevent a numerical result from being mistaken for a causal or universal claim.",
+        "citations": [
+          {
+            "title": "Field Epidemiology Manual: Design, Conduct, Analyze, and Interpret Field Investigations",
+            "publisher": "Centers for Disease Control and Prevention",
+            "url": "https://www.cdc.gov/field-epi-manual/php/chapters/design-conduct-analyze-field-studies.html"
+          },
+          {
+            "title": "Field Epidemiology Manual: Analyze and Interpret Data",
+            "publisher": "Centers for Disease Control and Prevention",
+            "url": "https://www.cdc.gov/field-epi-manual/php/chapters/analyze-interpret-data.html"
+          },
+          {
+            "title": "E9(R1) Statistical Principles for Clinical Trials: Addendum on Estimands and Sensitivity Analysis",
+            "publisher": "U.S. Food and Drug Administration / ICH",
+            "url": "https://www.fda.gov/media/148473/download"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Study designs and populations",
+        "target population",
+        "source population",
+        "cross-sectional study",
+        "case-control study",
+        "cohort study",
+        "randomized controlled trial",
+        "Frequencies, risks, and associations",
+        "prevalence",
+        "incidence",
+        "risk",
+        "rate",
+        "risk difference",
+        "risk ratio",
+        "odds ratio",
+        "Uncertainty and evidence",
+        "standard error",
+        "confidence interval",
+        "null hypothesis",
+        "p-value",
+        "Type I error",
+        "Type II error",
+        "power",
+        "estimand",
+        "point estimate"
+      ]
+    }
+  },
+  {
+    "id": "biostatistics-validity-models-diagnostics",
+    "module": "./public-health/biostatistics-validity-models-diagnostics.js",
+    "published": "2026-09-23",
+    "browse": {
+      "id": "biostatistics-validity-models-diagnostics",
+      "title": "Biostatistics: Bias, Models, and Diagnostic Decisions",
+      "category": "Public Health",
+      "subcategories": {
+        "Public Health": "biostatistics"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "After a biomedical study produces an association, biostatistics asks whether the estimate deserves trust, which model matches the outcome process, and how a diagnostic decision performs. This board treats bias, model choice, and test performance as linked but distinct questions; broader mathematical foundations remain in the separate Math & Statistics space.",
+        "citations": [
+          {
+            "title": "Field Epidemiology Manual: Analyze and Interpret Data",
+            "publisher": "Centers for Disease Control and Prevention",
+            "url": "https://www.cdc.gov/field-epi-manual/php/chapters/analyze-interpret-data.html"
+          },
+          {
+            "title": "Table 16.5: Summary of different methods",
+            "publisher": "NCBI Bookshelf",
+            "url": "https://ncbi.nlm.nih.gov/books/NBK543628/table/ch16.Tab5/?report=objectonly"
+          },
+          {
+            "title": "Evaluating Detection and Diagnostic Decision Support Systems for Bioterrorism Response",
+            "publisher": "Centers for Disease Control and Prevention",
+            "url": "https://wwwnc.cdc.gov/eid/article/10/1/03-0243_article"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Validity, bias, and causal interpretation",
+        "selection bias",
+        "information bias",
+        "measurement error",
+        "confounding",
+        "randomization",
+        "blinding",
+        "sensitivity analysis",
+        "Outcome shape and model families",
+        "linear regression",
+        "logistic regression",
+        "multilevel analysis",
+        "survival analysis",
+        "Kaplan-Meier estimator",
+        "Cox proportional hazards model",
+        "censoring",
+        "Diagnostic performance and thresholds",
+        "sensitivity",
+        "specificity",
+        "positive predictive value",
+        "negative predictive value",
+        "likelihood ratio",
+        "receiver operating characteristic curve",
+        "covariate adjustment",
+        "reference standard"
+      ]
+    }
+  },
+  {
+    "id": "restraint-in-speech",
+    "module": "./vocabulary/restraint-in-speech.js",
+    "published": "2026-09-23",
+    "browse": {
+      "id": "restraint-in-speech",
+      "title": "Holding Back: Five Words for Restraint in Speech",
+      "category": "Vocabulary",
+      "tags": [
+        "near-synonyms",
+        "usage",
+        "register",
+        "Merriam-Webster",
+        "connotation"
+      ],
+      "level": "advanced",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "Merriam-Webster's thesaurus gives the five adjectives taciturn, reticent, reserved, secretive, and silent one shared sense — \"showing restraint in speaking\" — and then spends a full Synonym Chooser paragraph separating them. The differences are real and worth policing: temperament (taciturn), economy (silent), formality or caution (reserved), reluctance about one's own affairs (reticent), and a will to conceal that shades into deviousness (secretive). Each lens below asks which flavor of not-talking a context is actually describing.",
+        "links": [
+          {
+            "href": "https://www.merriam-webster.com/thesaurus/taciturn",
+            "label": "Merriam-Webster Thesaurus: 'Taciturn' — Synonym Chooser paragraph"
+          }
+        ],
+        "citations": [
+          {
+            "title": "\"Taciturn.\" Merriam-Webster.com Thesaurus (Synonym Chooser)",
+            "publisher": "Merriam-Webster",
+            "year": "2026",
+            "url": "https://www.merriam-webster.com/thesaurus/taciturn"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Restraint in speech",
+        "taciturn",
+        "reticent",
+        "reserved",
+        "secretive",
+        "silent"
+      ]
+    }
+  },
+  {
+    "id": "troublesome-neighbors",
+    "module": "./vocabulary/troublesome-neighbors.js",
+    "published": "2026-09-23",
+    "browse": {
+      "id": "troublesome-neighbors",
+      "title": "Causing Trouble",
+      "category": "Vocabulary",
+      "tags": [
+        "synonyms",
+        "usage",
+        "adjectives"
+      ],
+      "level": "intermediate",
+      "large": false,
+      "lensMode": "sequential",
+      "preSolve": true,
+      "info": {
+        "text": "Six near-synonyms for causing trouble, discriminated along the lines of Merriam-Webster's synonym notes: all impose hardship of some kind, but each troubles in a different way — generally, dutifully, weightily, unwieldily, tediously, or harassingly.",
+        "links": [
+          {
+            "href": "https://www.merriam-webster.com/dictionary/onerous"
+          },
+          {
+            "href": "https://www.merriam-webster.com/dictionary/vexatious"
+          }
+        ]
+      },
+      "_searchTerms": [
+        "Causing Trouble",
+        "troublesome",
+        "onerous",
+        "burdensome",
+        "cumbersome",
+        "irksome",
+        "vexatious"
+      ]
+    }
   }
 ];
 
