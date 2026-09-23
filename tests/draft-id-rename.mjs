@@ -87,6 +87,14 @@ export async function run() {
     assert.equal(moved.document.id, "short-slug");
     assert.equal(moved.document.title, "Teh misspelled title");
     assert.ok(moved.layout, "layout follows the rename");
+    // Every mode payload names the puzzle it was laid out for, and all three
+    // mode schemas reject one that disagrees with the document id -- so a
+    // layout carried across unchanged would block publication.
+    assert.equal(
+      moved.layout.modes.sets.puzzleId,
+      "short-slug",
+      "the layout is re-pointed at the new id"
+    );
     await assert.rejects(() => draftStore.getDraft(longId), /not found|Unknown draft|ENOENT/i);
 
     // The title is edited on its own; a rename does not touch it.

@@ -798,10 +798,13 @@ function renderGithubProductionStatus(inGithubProduction) {
 const SHADOW_BADGE = '<span class="badge badge-warn" title="Almost none of the published puzzle survives in this working copy: it is a separate document under the same id, not an edit of the live board. Publishing it would replace the live puzzle.">shadow</span>';
 
 function renderPuzzlePathBadges(item, { detail = false } = {}) {
-  if (item.withdrawn === true || item.d1Withdrawn === true) {
-    return '<span class="badge">withdrawn</span>';
-  }
+  // Computed before the withdrawn branch returns: a withdrawn row's id is
+  // still spoken for (puzzleIdIsLive treats it as live), so a shadow over one
+  // is exactly as worth flagging as a shadow over a live row.
   const shadow = item.shadowsPublished === true ? ` ${SHADOW_BADGE}` : "";
+  if (item.withdrawn === true || item.d1Withdrawn === true) {
+    return `<span class="badge">withdrawn</span>${shadow}`;
+  }
   const published = item.published === true || item.d1Published === true;
   if (published) {
     return `<span class="badge badge-ok">authoring play</span> ${renderPublishedFreezeBadges(item)}${shadow}`.trim();

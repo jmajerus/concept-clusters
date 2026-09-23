@@ -262,6 +262,26 @@ document identity. The rule now sits in the stores themselves, which is the same
 as the creation gate: a boundary check protects the callers you thought of.
 See [STORAGE-DOMAINS.md](../STORAGE-DOMAINS.md#write-once-fields).
 
+### Where the concurrency line sits
+
+This corpus has one editor, working sequentially and unhurriedly, and is expected to for
+the foreseeable future. That is the standard against which every concurrency finding on
+this work was judged, and it splits them cleanly:
+
+- **Check-then-write races** (`puzzleIdIsLive` followed by a create, in the MCP tool and
+  the New puzzle form) produce at worst a spurious row, which is visible and deletable.
+  Closing them needs either an invariant the database cannot express across tables or a
+  create-then-recheck-then-roll-back dance whose own failure path leaves the very row it
+  set out to prevent. Declined: the mitigation is worse than the exposure. The creation
+  gate below removes the window at the repository anyway, which is the only place it can
+  be removed honestly.
+- **Races that destroy work** are a different category and were fixed regardless of how
+  unlikely they look, because "one operator" does not mean "one surface": the construct
+  board auto-saves in a tab of its own.
+
+Reviewers will keep raising the first group, since a check before a write does look like
+a race in isolation. This is the reasoning, recorded once.
+
 ### The rename's own concurrency
 
 A later review pass found a sharper race than the check-then-write ones declined below,

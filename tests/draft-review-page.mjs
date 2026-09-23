@@ -59,6 +59,18 @@ export async function run() {
     /is published, so other/
   );
 
+  // A withdrawn id is still spoken for, so a shadow over one keeps its badge
+  // rather than being collapsed into "withdrawn".
+  const withdrawnShadowRow = renderDraftListPage([{
+    id: "withdrawn-shadow",
+    title: "Withdrawn shadow",
+    category: "Science",
+    hasWorkingCopy: true,
+    withdrawn: true,
+    shadowsPublished: true
+  }], { variant: "local" });
+  assert.match(withdrawnShadowRow, /badge">withdrawn<\/span>\s*<span class="badge badge-warn"[^>]*>shadow</);
+
   // A shadow reads the same diff marks as an edit, so the summary has to say
   // what they mean here, and the list badges the row that is otherwise
   // indistinguishable from a legitimate working copy.

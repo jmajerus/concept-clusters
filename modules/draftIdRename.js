@@ -99,6 +99,26 @@ export const SEEDED_ROUTE_ADMIN = "Open it from the puzzles list instead, "
  * @param {object=} options.contentService
  * @returns {Promise<{ draftId: string }>} the created draft record
  */
+// A layout's per-mode payload names the puzzle it was laid out for, and all
+// three mode schemas reject a payload whose puzzleId is not the document id.
+// Carrying the layout across a rename unchanged would leave a draft that
+// cannot be published until the layout is rewritten or cleared by hand.
+function layoutForRenamedDraft(layout, newId) {
+  const modes = layout && typeof layout === "object" && layout.modes
+    && typeof layout.modes === "object"
+    ? layout.modes
+    : null;
+  if (!modes) return layout;
+  const next = {};
+  for (const [mode, payload] of Object.entries(modes)) {
+    next[mode] = payload && typeof payload === "object" && !Array.isArray(payload)
+      && typeof payload.puzzleId === "string"
+      ? { ...payload, puzzleId: newId }
+      : payload;
+  }
+  return { ...layout, modes: next };
+}
+
 export async function renamePuzzleDraftId({
   draftId,
   newId,
@@ -146,7 +166,10 @@ export async function renamePuzzleDraftId({
     document: { ...draft.document, id: newId }
   });
   if (draft.layout && typeof saveLayout === "function") {
-    await saveLayout({ draftId: newId, layout: draft.layout });
+    await saveLayout({
+      draftId: newId,
+      layout: layoutForRenamedDraft(draft.layout, newId)
+    });
   }
   // The copy above was taken from a snapshot read at the top of this
   // function. Removing the source is therefore a compare-and-delete against
