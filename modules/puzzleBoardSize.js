@@ -127,6 +127,11 @@ export function boardCanvas(puzzle, mode) {
 
 // Null keeps the stylesheet default: 680px, or 1000px once .wrap.wide is on.
 // A grown canvas sets an explicit frame so the extra viewBox is real width.
+// .wrap.wide's default is 1000px, so a computed frame below that would
+// shrink the page. Leave the default in place until the canvas is wide
+// enough to need more than that.
+const WIDE_FRAME_FLOOR = 1000;
+
 export function boardFrameMaxWidth(canvas) {
   if (!canvas || canvas.width <= BOARD_CANVAS.standard.width) return null;
   if (
@@ -135,5 +140,7 @@ export function boardFrameMaxWidth(canvas) {
   ) {
     return null;
   }
-  return Math.round(canvas.width * WIDE_FRAME_RATIO);
+  const frame = Math.round(canvas.width * WIDE_FRAME_RATIO);
+  if (frame <= WIDE_FRAME_FLOOR) return null;
+  return frame;
 }

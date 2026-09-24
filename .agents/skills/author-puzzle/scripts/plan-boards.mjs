@@ -76,7 +76,7 @@ function buildOptions(inventory, totalTerms, connectionCount) {
     options.push({
       strategy: "split-required",
       nodeRange: [minNodes, maxNodes],
-      note: `Exceeds the ${NODE_CAP_XLARGE}-node maximum even with one bridge per connection. Plan a split or trim with ledger entries.`
+      note: `Exceeds the ${NODE_CAP_XLARGE}-node maximum even with one bridge per connection. Plan a split. Do not drop a distinct term to get under the ceiling; a trim is only for a term that is duplicate work.`
     });
     const half = Math.ceil(distinctions.length / 2);
     const first = distinctions.slice(0, half);
@@ -106,7 +106,7 @@ function buildOptions(inventory, totalTerms, connectionCount) {
     options.push({
       strategy: "marginal-overshoot",
       nodeRange: [minNodes, maxNodes],
-      note: `Within a few nodes of the ${NODE_CAP_XLARGE}-node maximum — consider an honest merge, defer-with-destination, or layout verification before split.`
+      note: `Within a few nodes of the ${NODE_CAP_XLARGE}-node maximum. The split is still required. Do not drop a distinct term to get under the ceiling.`
     });
   }
 

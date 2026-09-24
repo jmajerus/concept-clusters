@@ -81,6 +81,7 @@ export async function run() {
   assert.equal(boardCanvas(crowded, "sets"), BOARD_CANVAS.circleWide);
   assert.equal(boardFrameMaxWidth(BOARD_CANVAS.wide), null);
   assert.equal(boardFrameMaxWidth(BOARD_CANVAS.circleWide), null);
+  assert.equal(boardFrameMaxWidth({ width: 650, height: 480 }), null);
 
   const short = sizedPuzzle({
     clusterSizes: [7, 7, 7, 7],

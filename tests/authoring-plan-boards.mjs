@@ -57,8 +57,13 @@ export async function run() {
   assert.match(roomy.nextStep, /Proceed to fit/);
   assert.match(roomy.options[0].note, /do not split in order to change the canvas/);
 
-  const split = runPlan(inventory({ termCounts: [8, 8, 8, 8], connections: 3 }));
-  assert.equal(split.nodeRangeWithBridges[1], 35);
+  const atCeiling = runPlan(inventory({ termCounts: [8, 8, 8, 8], connections: 0 }));
+  assert.equal(atCeiling.nodeRangeWithBridges[1], 32);
+  assert.equal(atCeiling.options[0].strategy, "single-board");
+
+  const split = runPlan(inventory({ termCounts: [8, 8, 8, 8], connections: 1 }));
+  assert.equal(split.nodeRangeWithBridges[1], 33);
   assert.equal(split.options[0].strategy, "split-required");
+  assert.match(split.options[0].note, /Do not drop a distinct term/);
   assert.match(split.nextStep, /split-plan/);
 }

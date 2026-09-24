@@ -355,7 +355,7 @@ function checkSplitPlan(plan, inventory) {
       advisory.push({
         id: "plan-over-node-cap",
         boardId: board.id,
-        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds the ${NODE_CAP_XLARGE}-node maximum — confirm split or trim.`
+        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds the ${NODE_CAP_XLARGE}-node maximum — confirm the split plan. Do not drop a distinct term to get under the ceiling.`
       });
     }
   }
