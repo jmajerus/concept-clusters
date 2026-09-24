@@ -26,9 +26,9 @@ resulting node count; do not set renderer fields.
    a board bridge (`bridge-kept`, matching `concept` to the displayed term)
    or `bridge-dropped` with a reason. A board bridge with no matching
    inventory connection needs `bridge-added` plus a reason.
-6. If the inventory is above 25 nodes, a split plan must already exist;
-   do **not** drop a distinct term merely to stay at 16. Canvas size is
-   derived on save.
+6. If the inventory is above 32 nodes, a split plan must already exist.
+   Do **not** drop a distinct term, and do **not** split, to change the
+   canvas. Canvas size is derived on save.
 7. For splits: copy only `relatedPuzzles.info` and `relatedPuzzles.entries`
    from the split plan onto the first board; `boardOrder` is external plan
    metadata and must not appear in the puzzle document. Use `destinationPuzzleId`

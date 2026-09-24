@@ -67,7 +67,7 @@ body {
 /* Wider layout for large puzzles — only has room to matter on large
    viewports; max-width is a ceiling, so small screens ignore it. */
 .wrap.wide {
-  max-width: 1000px;
+  max-width: var(--board-max-width, 1000px);
 }
 
 /* ---------- rendering mode toggle ---------- */

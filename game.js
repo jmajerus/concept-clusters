@@ -28,7 +28,7 @@ import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
-import { BOARD_CANVAS, boardCanvas, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
+import { BOARD_CANVAS, boardCanvas, boardFrameMaxWidth, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
@@ -131,12 +131,15 @@ const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). The size comes from
 // the puzzle (see boardCanvas): a compact board for a small node count,
 // the standard canvas for an ordinary Graph board, and a wider one when
-// several clusters need room to uncross. Circle's large tier stays on the
-// 1050×780 canvas — 960×720 was not enough for control-and-exit or
-// after-the-click. .wrap.wide only accompanies a wider canvas, and only
-// matters when the viewport can use the extra width. A large puzzle keeps
-// its expanded canvas on a narrow viewport too: shrinking the viewBox
-// there overlaps labels instead of making them easier to read.
+// several clusters need room to uncross. Past that floor, a heavy board
+// — more nodes, more routed edges, or longer terms — grows the viewBox.
+// Circle's large tier stays on the 1050×780 canvas until that growth
+// applies; 960×720 was not enough for control-and-exit or after-the-click.
+// .wrap.wide only accompanies a wider canvas, and only matters when the
+// viewport can use the extra width. A grown canvas also raises the frame's
+// max-width so the extra viewBox is not merely scaled back down. A large
+// puzzle keeps its expanded canvas on a narrow viewport too: shrinking
+// the viewBox there overlaps labels instead of making them easier to read.
 let W, H;
 const wrapEl = document.querySelector(".wrap");
 const msgEl = document.getElementById("message");
@@ -1868,6 +1871,9 @@ function applyBoardSize(puzzle) {
   const chosen = boardCanvas(puzzle, mode);
   const expanded = chosen.width > BOARD_CANVAS.standard.width;
   wrapEl.classList.toggle("wide", expanded);
+  const frame = boardFrameMaxWidth(chosen);
+  if (frame) wrapEl.style.setProperty("--board-max-width", `${frame}px`);
+  else wrapEl.style.removeProperty("--board-max-width");
   // A narrow viewport cannot show the wider container, so a non-large
   // puzzle falls back to the standard canvas. A large puzzle keeps the
   // expanded viewBox anyway: that size is what keeps its labels apart.

@@ -225,7 +225,7 @@ describe("hosted authoring Worker", () => {
       .toBeUndefined();
     expect(resourceSchema.properties.large)
       .toBeUndefined();
-    expect(JSON.stringify(resourceSchema)).toMatch(/25/);
+    expect(JSON.stringify(resourceSchema)).toMatch(/at or below 32/);
     expect(resourceSchema.required).not.toContain("bridges");
 
     const authoringSchemaResponse = await rpc({
@@ -573,7 +573,7 @@ describe("hosted authoring Worker", () => {
       result: { structuredContent: { markdown: string } };
     };
     expect(reviewGuidance.result.structuredContent.markdown)
-      .toMatch(/more than 25 nodes/);
+      .toMatch(/more than 32 nodes/);
     expect(reviewGuidance.result.structuredContent.markdown)
       .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
     expect(reviewGuidance.result.structuredContent.markdown)

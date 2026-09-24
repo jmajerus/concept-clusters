@@ -1,7 +1,7 @@
 # Split / plan pass (Phase A)
 
 Run **after** inventory is approved and **before** fit when the concept map
-exceeds 25 nodes, or when the human is comparing two-board splits.
+exceeds 32 nodes, or when the human is comparing two-board splits because the subject has a natural seam.
 
 Re-read `inventories/<parent-id>.json`. Do **not** re-survey the subject.
 
@@ -13,12 +13,13 @@ decisions, external board sequence, and `relatedPuzzles` wiring.
 
 ## When to run
 
-- Inventory totals exceed 25 once connections count as bridges.
-- Human asks about split, trim, two boards, or `relatedPuzzles`.
+- Inventory totals exceed 32 once connections count as bridges.
+- Human asks about split, trim, two boards, or `relatedPuzzles` because the subject has a natural seam.
 - Human agrees to a board plan and says create/fit — **write the plan first**,
   then fit each board.
 
-Skip this pass when `plan-boards.mjs` reports `single-board`.
+Skip this pass when `plan-boards.mjs` reports `single-board`. Do not open a
+split in order to change the canvas; canvas size is derived.
 
 ## Steps
 

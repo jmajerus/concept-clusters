@@ -26,7 +26,10 @@ module disagree, trust the module.
   Size by genuine distinctness. Same counts across clusters are common; use
   that only as a trigger to check for two terms doing one job or a fact naming
   a concept never used as a term. Canvas size is derived from the honest node
-  count. Do not drop a distinct term to stay small. Split only above 25.
+  count, routed edges, and term length. Do not drop a distinct term to stay
+  small, do not keep terms to fill toward 32, and do not split in order to
+  change the canvas. Split when the subject has a natural seam that teaches
+  better as two lessons, and whenever the map needs more than 32 nodes.
 - **Bridges are optional** and must be genuine. A disconnected graph is fine. Never add a bridge merely to connect the board.
 - **Help at the right grain.** Put cluster-sized help on the cluster, term-sized help on a term, and bridge context on the bridge. Omitting a link means no chip; search is not inferred.
 - **Keep information surfaces stable.** Always-visible `info.text` and a completion-gated `fact` have different jobs; never make a hover or help surface silently replace text the player already read.

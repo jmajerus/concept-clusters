@@ -1,6 +1,12 @@
 # XL board tier (investigation + prototype)
 
-**Status: roadmap — investigation first, no committed cap or ship date.**
+**Status: decided.** Validation refuses a board above 32 nodes. That ceiling
+is the only count agents are given, and it is a backstop rather than a size
+to fill. Canvas size is derived from node count, routed edges, and term
+length in `modules/puzzleBoardSize.js`. Agents do not split or drop terms to
+change that canvas. A split is for a natural seam in the subject, or for a
+board that would exceed 32. The investigation notes below are the record of
+how the question was framed, not the current cap.
 
 Surfaced while rolling out inventory-first authoring (Phase A) and authoring
 `wave-and-particle-descriptions`, whose approved concept map (~31 candidate

@@ -49,10 +49,21 @@ export async function run() {
   assert.equal(wide.nodeRangeWithBridges[1], 19);
   assert.equal(wide.options[0].strategy, "single-board");
   assert.match(wide.options[0].note, /Layout is derived/);
-  assert.deepEqual(wide.caps, { maxNodes: 25 });
+  assert.deepEqual(wide.caps, { maxNodes: 32 });
 
-  const split = runPlan(inventory({ termCounts: [8, 8, 8, 8], connections: 3 }));
-  assert.ok(split.nodeRangeWithBridges[1] > 24);
+  const roomy = runPlan(inventory({ termCounts: [7, 7, 7, 6], connections: 2 }));
+  assert.equal(roomy.nodeRangeWithBridges[1], 29);
+  assert.equal(roomy.options[0].strategy, "single-board");
+  assert.match(roomy.nextStep, /Proceed to fit/);
+  assert.match(roomy.options[0].note, /do not split in order to change the canvas/);
+
+  const atCeiling = runPlan(inventory({ termCounts: [8, 8, 8, 8], connections: 0 }));
+  assert.equal(atCeiling.nodeRangeWithBridges[1], 32);
+  assert.equal(atCeiling.options[0].strategy, "single-board");
+
+  const split = runPlan(inventory({ termCounts: [8, 8, 8, 8], connections: 1 }));
+  assert.equal(split.nodeRangeWithBridges[1], 33);
   assert.equal(split.options[0].strategy, "split-required");
+  assert.match(split.options[0].note, /Do not drop a distinct term/);
   assert.match(split.nextStep, /split-plan/);
 }

@@ -107,7 +107,7 @@ export const SIMPLIFIED_PUZZLE_SCHEMA = Object.freeze({
     structuredClone(SINGLE_VOCABULARY_CLUSTER_SHAPE)
   ],
   description:
-    "MCP agent authoring contract for puzzle content and pedagogy. A single-cluster vocabulary-context puzzle uses one flat terms list and is automatically pre-solved before its lenses. Protected attribution and human-managed editorial metadata are maintained outside this document; language remains optional authored metadata. Keep total nodes (all cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.",
+    "MCP agent authoring contract for puzzle content and pedagogy. A single-cluster vocabulary-context puzzle uses one flat terms list and is automatically pre-solved before its lenses. Protected attribution and human-managed editorial metadata are maintained outside this document; language remains optional authored metadata. Keep total nodes (all cluster terms plus bridges) at or below 32. That ceiling is a refusal point, not a size to fill. Canvas size is derived; do not split or drop terms to change it. Split into relatedPuzzles when the subject has a natural seam that teaches better as two lessons, and whenever the board would exceed 32.",
   // Zod deliberately keeps these input fields permissive so a legacy title
   // can be canonicalized before parsing. The discoverable authoring contract
   // should nevertheless teach clients to send the new stable-id shape.
