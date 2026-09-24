@@ -112,10 +112,32 @@ export async function run() {
   assert.equal(boardCanvas(short, "graph"), BOARD_CANVAS.wide);
   const wordyGraph = boardCanvas(wordy, "graph");
   const bridgedGraph = boardCanvas(bridged, "graph");
-  assert.deepEqual(wordyGraph, { width: 1150, height: 740 });
+  assert.deepEqual(wordyGraph, { width: 1530, height: 990 });
   assert.deepEqual(bridgedGraph, { width: 970, height: 630 });
   assert.ok(wordyGraph.width > bridgedGraph.width);
-  assert.equal(boardFrameMaxWidth(wordyGraph), 1198);
+  assert.equal(boardFrameMaxWidth(wordyGraph), 1594);
+
+  // octopus-play-stages: 17 nodes and an ordinary character total, but most
+  // pills are wider than the wide floor was packed for. The surplus grows
+  // the canvas; a single long label in the published corpus does not.
+  const longLabels = {
+    clusters: [
+      { terms: ["chemotactile inspection", "touch-tasting via sucker chemoreceptors", "bringing under the web to the mouth"] },
+      { terms: ["palpation", "pulling and tugging", "turning and re-orienting", "enveloping with arms and web"] },
+      { terms: ["habituation", "declining palpation across trials", "renewed response to a changed object"] },
+      { terms: ["water-jet bouncing", "repeated return to a familiar object", "blowing objects across the tank", "release-and-float"] }
+    ],
+    bridges: [
+      { term: "the inedible verdict", clusters: [0, 1] },
+      { term: "novelty is the fuel of exploration", clusters: [1, 2] },
+      { term: "play begins when exploration ends", clusters: [2, 3] }
+    ]
+  };
+  assert.equal(puzzleNodeCount(longLabels), 17);
+  assert.ok(puzzleTermCharacters(longLabels) < 450);
+  assert.deepEqual(boardCanvas(longLabels, "graph"), { width: 1080, height: 700 });
+  assert.deepEqual(boardCanvas(longLabels, "sets"), { width: 1180, height: 880 });
+  assert.equal(boardFrameMaxWidth(boardCanvas(longLabels, "graph")), 1125);
 
   const heavy = sizedPuzzle({
     clusterSizes: [7, 7, 7, 7],

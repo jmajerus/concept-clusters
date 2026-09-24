@@ -9,7 +9,12 @@
 // many edges the solved board has to route, and how much label text the
 // terms carry. A 30-node board of short labels and few bridges can stay on
 // the wide canvas; the same node count with long terms or a dense bridge
-// graph gets a larger one.
+// graph gets a larger one. Total characters are not enough on their own:
+// a handful of very wide pills crowds a cluster the way a longer list of
+// ordinary words does not, so surplus pill width past the wide floor
+// grows the canvas too.
+
+import { pillWidth } from "./puzzleGraph.js";
 
 export const NODE_CAP_STANDARD = 16;
 export const NODE_CAP_XLARGE = 32;
@@ -88,14 +93,37 @@ export const BOARD_CANVAS = {
 // tangled or wordy past a board with the same count.
 const LOAD_REFERENCE = { nodes: 24, edges: 25, chars: 450 };
 const LOAD_WEIGHTS = { nodes: 0.5, edges: 0.2, chars: 0.3 };
+// pillWidth of a 24-character term. The wide floor was packed with labels
+// around that length. Width beyond it is the part that collides.
+const COMFORT_PILL_WIDTH = 180;
+// The busiest published board is under this much excess, and the wide
+// floor already holds it. Only the surplus above that grows the canvas.
+const LABEL_EXCESS_ABSORBED = 280;
+// One unit of load per 560px of that surplus. A 17-node board whose pills
+// are mostly past the comfort width then clears the wide floor.
+const LABEL_SURPLUS_REFERENCE = 560;
+
+export function puzzleLabelExcess(puzzle) {
+  if (!Array.isArray(puzzle?.clusters) || !Array.isArray(puzzle?.bridges)) {
+    return 0;
+  }
+  const add = (sum, term) => sum + Math.max(0, pillWidth(String(term ?? "")) - COMFORT_PILL_WIDTH);
+  const clusterExcess = puzzle.clusters.reduce((sum, cluster) => {
+    if (!Array.isArray(cluster?.terms)) return sum;
+    return cluster.terms.reduce(add, sum);
+  }, 0);
+  return puzzle.bridges.reduce((sum, bridge) => add(sum, bridge?.term), clusterExcess);
+}
 
 export function boardLoad(puzzle) {
   const nodes = puzzleNodeCount(puzzle);
   if (nodes <= 0) return 0;
+  const surplus = Math.max(0, puzzleLabelExcess(puzzle) - LABEL_EXCESS_ABSORBED);
   return (
     LOAD_WEIGHTS.nodes * (nodes / LOAD_REFERENCE.nodes) +
     LOAD_WEIGHTS.edges * (puzzleEdgeCount(puzzle) / LOAD_REFERENCE.edges) +
-    LOAD_WEIGHTS.chars * (puzzleTermCharacters(puzzle) / LOAD_REFERENCE.chars)
+    LOAD_WEIGHTS.chars * (puzzleTermCharacters(puzzle) / LOAD_REFERENCE.chars) +
+    surplus / LABEL_SURPLUS_REFERENCE
   );
 }
 
