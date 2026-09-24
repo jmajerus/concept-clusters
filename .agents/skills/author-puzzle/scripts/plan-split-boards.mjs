@@ -19,7 +19,8 @@ const FORBIDDEN = [
   "Do not fit or complete more than one board in this burst",
   "Do not call registered MCP tools when mcpTransport is mcp-call",
   "Do not run get_authoring_guidance and get_authoring_schema in parallel",
-  "Do not start the next board until humanNext is satisfied for this board",
+  "Do not present a human gate while another board remains in this pass",
+  "Do not start notes or lenses until every board has been fitted and the human has approved the ledgers",
   "Do not glob, find, or ripgrep the repo for puzzle content"
 ];
 
@@ -113,8 +114,14 @@ function mcpCall(transport, tool, args = {}, { kiloNative = false } = {}) {
   return `node tools/mcp-call.mjs ${tool} '${argsJson.replace(/'/g, "'\\''")}'`;
 }
 
-function fitSteps({ boardId, transport, kiloNative, inventoryPath, planPath, ledgerPath, draftPath, dryRun }) {
-  return [
+function continueCommand(planPath, pass, boardId) {
+  return `${SCRIPT} --plan ${planPath} --pass ${pass} --board ${boardId} --continue`;
+}
+
+function fitSteps({
+  boardId, transport, kiloNative, inventoryPath, planPath, ledgerPath, draftPath, dryRun, nextBoard
+}) {
+  const steps = [
     `Read ${inventoryPath}, ${planPath}, and references/fit-pass.md for board "${boardId}" only`,
     `Write ${ledgerPath} before any MCP save`,
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_guidance", { phase: "core" }, { kiloNative }),
@@ -126,13 +133,16 @@ function fitSteps({ boardId, transport, kiloNative, inventoryPath, planPath, led
     }, { kiloNative }),
     `node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level fit ${draftPath} --ledger ${ledgerPath}`,
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "validate_puzzle_draft", { draft_id: boardId }, { kiloNative }),
-    `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`,
-    "Emit stop-gate: Fit ready. Waiting on board review. STOP — do not start the next board."
+    `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`
   ];
+  steps.push(nextBoard
+    ? `Validated. In a new burst, run \`${continueCommand(planPath, "fit", boardId)}\`. Do not present a human gate. Do not add notes or lenses.`
+    : "Emit stop-gate: Every board in this plan is fitted. Waiting on ledger review. STOP — do not start notes or lenses.");
+  return steps;
 }
 
-function completeSteps({ boardId, transport, kiloNative, draftPath, dryRun }) {
-  return [
+function completeSteps({ boardId, transport, kiloNative, draftPath, dryRun, planPath, nextBoard }) {
+  const steps = [
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_puzzle_draft", { draft_id: boardId }, { kiloNative }),
     `Refresh revision; add puzzle info, termInfo, bridge help, lenses for "${boardId}" only`,
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_authoring_guidance", { phase: "pedagogy" }, { kiloNative }),
@@ -143,9 +153,12 @@ function completeSteps({ boardId, transport, kiloNative, draftPath, dryRun }) {
     }, { kiloNative }),
     `node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level complete ${draftPath}`,
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "validate_puzzle_draft", { draft_id: boardId }, { kiloNative }),
-    `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`,
-    "Emit stop-gate: Validated. Waiting on /admin/drafts. STOP — do not start the next board."
+    `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`
   ];
+  steps.push(nextBoard
+    ? `Validated. In a new burst, run \`${continueCommand(planPath, "complete", boardId)}\`. Do not present a human gate.`
+    : "Emit stop-gate: Every board passed complete validation. Waiting on /admin/drafts. STOP.");
+  return steps;
 }
 
 function boardReviewSteps({ boardId, draftsUrl, ledgerPath }) {
@@ -167,63 +180,70 @@ function buildHumanPrompt({ pass, active, boardOrder, nextBoard, draftsUrl, plan
   const nextTitle = nextBoard ? boardMeta(plan, nextBoard).title : null;
 
   if (pass === "fit") {
-    const options = [
-      {
-        label: "Revise clusters, bridges, or the loss ledger on this board",
-        accepts: ["revise", "change", "fix", "push back", "trim", "redo"]
-      },
-      {
-        label: "Approve this board — open the drafts page to play it",
-        accepts: ["approve", "looks good", "yes", "ok", "good", "approved"]
-      }
-    ];
     if (nextBoard) {
-      options.push({
-        label: `Fit the next board (${nextTitle || nextBoard})`,
-        accepts: ["next board", "next", "fit next", "board 2", nextBoard]
-      });
+      return {
+        presentGate: false,
+        headline: `${label} is fit. Continue the fit pass on "${nextTitle || nextBoard}" before any review.`,
+        draftsUrl,
+        question: null,
+        options: [],
+        defaultReply: null
+      };
     }
-    options.push({
-      label: "Add notes and lenses (complete pass) for this board",
-      accepts: ["complete", "notes", "lenses", "fill", "finish this board"]
-    });
     return {
-      headline: `${label} is fit. Review the grid and loss ledger.`,
+      presentGate: true,
+      headline: total > 1
+        ? "Every board is fitted. Review each grid and loss ledger."
+        : `${label} is fit. Review the grid and loss ledger.`,
       draftsUrl,
       question: "What would you like to do?",
-      options,
-      defaultReply: "A short reply like “looks good” or “next board” is enough — no special wording."
+      options: [
+        {
+          label: "Revise a board's clusters, bridges, or loss ledger (name which board)",
+          accepts: ["revise", "change", "fix", "push back", "trim", "redo"]
+        },
+        {
+          label: "Approve — add notes and lenses, starting with the first board",
+          accepts: ["approve", "looks good", "yes", "ok", "good", "approved", "complete", "notes", "lenses"]
+        }
+      ],
+      defaultReply: "“Looks good” starts notes and lenses on the first board. Name a board to revise it."
     };
   }
 
   if (pass === "complete") {
-    const options = [
-      {
-        label: "Revise notes, lenses, or bridge help on this board",
-        accepts: ["revise", "change", "fix", "push back"]
-      },
-      {
-        label: "Approve — open the drafts page to review copy",
-        accepts: ["approve", "looks good", "yes", "ok", "good", "approved"]
-      }
-    ];
     if (nextBoard) {
-      options.push({
-        label: `Complete the next board (${nextTitle || nextBoard})`,
-        accepts: ["next board", "next", "complete next", "board 2", nextBoard]
-      });
-    } else {
-      options.push({
-        label: "Open pull requests when ready",
-        accepts: ["submit", "pr", "pull request", "ship", "publish"]
-      });
+      return {
+        presentGate: false,
+        headline: `${label} passed complete validation. Continue the complete pass on "${nextTitle || nextBoard}" before any review.`,
+        draftsUrl,
+        question: null,
+        options: [],
+        defaultReply: null
+      };
     }
     return {
-      headline: `${label} passed complete validation.`,
+      presentGate: true,
+      headline: total > 1
+        ? "Every board passed complete validation."
+        : `${label} passed complete validation.`,
       draftsUrl,
       question: "What would you like to do?",
-      options,
-      defaultReply: "Say “next board”, “looks good”, or “open PR” — plain language is fine."
+      options: [
+        {
+          label: "Revise notes, lenses, or bridge help (name which board)",
+          accepts: ["revise", "change", "fix", "push back"]
+        },
+        {
+          label: "Approve — open the drafts pages to review copy",
+          accepts: ["approve", "looks good", "yes", "ok", "good", "approved"]
+        },
+        {
+          label: "Open pull requests when ready",
+          accepts: ["submit", "pr", "pull request", "ship", "publish"]
+        }
+      ],
+      defaultReply: "“Looks good” opens the drafts pages. Name a board to revise it."
     };
   }
 
@@ -239,32 +259,39 @@ function buildHumanPrompt({ pass, active, boardOrder, nextBoard, draftsUrl, plan
   };
 }
 
-function buildHumanNext({ pass, active, nextBoard, planPath, draftPath, ledgerPath }) {
-  const boardArg = `--board ${active.id}`;
-  const cont = nextBoard ? ` --continue ${boardArg}` : "";
+function buildHumanNext({ pass, active, nextBoard, planPath, draftPath, ledgerPath, firstBoardId }) {
+  if (pass === "fit" && nextBoard) {
+    return {
+      presentGate: false,
+      onValidated: continueCommand(planPath, "fit", active.id),
+      acceptsNaturalLanguage: false
+    };
+  }
   if (pass === "fit") {
     return {
-      onRevise: `Edit ${draftPath} and ${ledgerPath}; re-run fit checker. Stay on this board.`,
-      onApprove: `Human reviewed drafts page. Wait for fit/complete/next choice.`,
-      onNextBoard: nextBoard
-        ? `Run plan-split-boards.mjs --plan ${planPath} --pass fit${cont}`
-        : null,
-      onComplete: `Run plan-split-boards.mjs --plan ${planPath} --pass complete ${boardArg}`,
+      presentGate: true,
+      onRevise: `Edit the named board's draft and ledger, re-run its fit, then continue the fit pass through any boards after it. This board's ledger is ${ledgerPath}.`,
+      onApprove: `Run ${SCRIPT} --plan ${planPath} --pass complete --board ${firstBoardId}`,
       acceptsNaturalLanguage: true
+    };
+  }
+  if (pass === "complete" && nextBoard) {
+    return {
+      presentGate: false,
+      onValidated: continueCommand(planPath, "complete", active.id),
+      acceptsNaturalLanguage: false
     };
   }
   if (pass === "complete") {
     return {
-      onRevise: `Edit ${draftPath}; re-run complete checker and validate.`,
-      onApprove: `Human reviewed drafts page.`,
-      onNextBoard: nextBoard
-        ? `Run plan-split-boards.mjs --plan ${planPath} --pass complete${cont}`
-        : null,
-      onSubmit: "Opening a PR for this draft is a drafts-page button, not an MCP tool. Point them there.",
+      presentGate: true,
+      onRevise: `Edit the named board's draft (${draftPath} is this board); re-run its complete pass, then continue the complete pass through any boards after it.`,
+      onApprove: "Human reviews each board on its drafts page.",
+      onSubmit: "Opening a PR for a draft is a drafts-page button, not an MCP tool. Point them there.",
       acceptsNaturalLanguage: true
     };
   }
-  return { acceptsNaturalLanguage: true };
+  return { presentGate: true, acceptsNaturalLanguage: true };
 }
 
 function build() {
@@ -289,6 +316,9 @@ function build() {
   const ledgerPath = workspace.ledgerFile(active.id);
   const draftPath = workspace.workingDraftFile(active.id);
   const draftsUrl = `${localDraftReviewUrl()}/${active.id}`;
+  const nextBoard = active.index < active.order.length - 1
+    ? active.order[active.index + 1]
+    : null;
 
   const steps = pass === "fit"
     ? fitSteps({
@@ -299,7 +329,8 @@ function build() {
       planPath,
       ledgerPath,
       draftPath,
-      dryRun: args.dryRun
+      dryRun: args.dryRun,
+      nextBoard
     })
     : pass === "complete"
       ? completeSteps({
@@ -307,13 +338,12 @@ function build() {
         transport: args.transport,
         kiloNative,
         draftPath,
-        dryRun: args.dryRun
+        dryRun: args.dryRun,
+        planPath,
+        nextBoard
       })
       : boardReviewSteps({ boardId: active.id, draftsUrl, ledgerPath });
 
-  const nextBoard = active.index < active.order.length - 1
-    ? active.order[active.index + 1]
-    : null;
   const humanPrompt = buildHumanPrompt({
     pass,
     active: { ...board, index: active.index },
@@ -365,10 +395,16 @@ function build() {
       nextBoard,
       planPath,
       draftPath,
-      ledgerPath
+      ledgerPath,
+      firstBoardId: active.order[0]
     }),
     steps,
-    stopAfter: pass === "board-review" ? "human-board-review" : "validate-and-pause",
+    presentGate: humanPrompt.presentGate !== false,
+    stopAfter: pass === "board-review"
+      ? "human-board-review"
+      : humanPrompt.presentGate === false
+        ? "continue-same-pass"
+        : "validate-and-pause",
     report: {
       fields: ["id", "title", "status", "revision", "draftsUrl"],
       closing: pass === "fit"
