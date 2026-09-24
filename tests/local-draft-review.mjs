@@ -242,6 +242,34 @@ export async function run() {
       }
     );
     assert.equal(vsPublishedSnapshot.publishedDiff.total, 0);
+    // The mapping must carry the provenance flag, not just the field diff.
+    // Provenance is excluded from publishedDiff by design, so if this
+    // property is not supplied the page reports "No changes" over a real
+    // provenance edit and withholds Publish -- the field diff alone cannot
+    // catch that, which is why it is asserted on the mapping and not only on
+    // the comparison helper.
+    assert.equal(vsPublishedSnapshot.provenanceDiffersFromPublished, false);
+
+    const draftRecord = await draftStore.getDraft("energy-flow-review");
+    const provenanceOnlyPublished = {
+      ...draftRecord.document,
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "generative assistance", kind: "generative" }]
+      }
+    };
+    const vsProvenanceEdit = await mapDraftDetail(draftRecord, {
+      contentService,
+      inCheckout: true,
+      publishedDocument: provenanceOnlyPublished,
+      categoryRegistry: contentService.categories
+    });
+    assert.equal(
+      vsProvenanceEdit.publishedDiff.total,
+      0,
+      "provenance still stays out of the field-level marks"
+    );
+    assert.equal(vsProvenanceEdit.provenanceDiffersFromPublished, true);
 
     const afterUninstall = await draftStore.markUninstalled("energy-flow-review");
     assert.equal(afterUninstall.status, "draft");

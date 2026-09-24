@@ -1623,6 +1623,61 @@ describe("hosted authoring Worker", () => {
     const publishedBody = await publishedPage.text();
     expect(publishedBody).toContain('role="status"');
     expect(publishedBody).toMatch(/Published[\s\S]*admin-review-fixture[\s\S]*D1 revision/);
+
+    // Provenance-only edit through the hosted route.
+    //
+    // Provenance is deliberately excluded from the field-level diff
+    // (draftReviewDiff SKIP_KEYS), so the hosted page learns about it only
+    // from provenanceDiffersFromPublished in this worker's own payload --
+    // a separate wiring path from the local mapDraftDetail. Without it the
+    // page reports "No changes from the published puzzle" over a real edit
+    // and, worse, treats the draft as already in authoring play and disables
+    // Publish, so the edit cannot leave the working copy.
+    expect(publishedBody).toContain("No changes from the published puzzle");
+
+    // The test MCP client is not a recognized drafting host, so the draft was
+    // stamped with the unnamed placeholder. Naming it is a provenance-only
+    // change and touches nothing else on the board.
+    // The save carries the page's own OCC token, read back from the rendered
+    // form rather than assumed, so the test fails if that contract changes.
+    const revisionToken = /name="expected_revision" value="(\d+)"/.exec(publishedBody)?.[1];
+    expect(revisionToken).toBeTruthy();
+
+    const namedClient = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: new URLSearchParams({
+          confirm: "save-working-copy",
+          "c0.section": "provenance",
+          "c0.id": "",
+          "c0.term": "",
+          "c0.field": "editor",
+          "c0.identifyHost": "Claude",
+          expected_revision: String(revisionToken)
+        }).toString()
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(namedClient.status).toBe(303);
+
+    const afterProvenanceEdit = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(afterProvenanceEdit.status).toBe(200);
+    const afterProvenanceBody = await afterProvenanceEdit.text();
+    expect(afterProvenanceBody).toContain("Drafted with Claude");
+    expect(afterProvenanceBody).not.toContain("No changes from the published puzzle");
+    expect(afterProvenanceBody).toContain("1 change from the published puzzle");
+    expect(afterProvenanceBody).toContain("provenance changed");
+    // The button is always rendered; canPublish only controls `disabled`.
+    expect(afterProvenanceBody).not.toContain('value="publish" disabled');
     expect(publishedBody).toContain("git-bundled production player is unchanged");
     expect(publishedBody).not.toContain("<h1>Puzzles</h1>");
     expect(publishedBody).toContain(">Cue</button>");

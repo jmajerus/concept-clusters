@@ -1333,8 +1333,12 @@ function renderSubmitForm(draft, variant = "hosted") {
   const d1Published = draft.d1Published === true && draft.d1Withdrawn !== true;
   const documentDiffersFromPublished = Number(draft.publishedDiff?.total) > 0;
   const layoutDiffersFromPublished = draft.layoutDiffersFromPublished === true;
+  // Provenance is excluded from the field-level diff, so without this a
+  // provenance-only edit counted as "already in authoring play" and Publish
+  // was withheld, stranding the edit in the working copy.
+  const provenanceDiffers = draft.provenanceDiffersFromPublished === true;
   const differsFromPublished = d1Published && (
-    documentDiffersFromPublished || layoutDiffersFromPublished
+    documentDiffersFromPublished || layoutDiffersFromPublished || provenanceDiffers
   );
   const alreadyAuthoringPlay = d1Published && !differsFromPublished;
   const canPublish = valid && !alreadyAuthoringPlay;
@@ -1853,10 +1857,13 @@ function renderLearningReferences(intro) {
 
 function renderDiffSummary(diff, {
   layoutDiffersFromPublished = false,
+  provenanceDiffersFromPublished = false,
   shadowsPublished = false
 } = {}) {
   if (!diff) return "";
-  const total = Number(diff.total || 0) + (layoutDiffersFromPublished ? 1 : 0);
+  const total = Number(diff.total || 0) +
+    (layoutDiffersFromPublished ? 1 : 0) +
+    (provenanceDiffersFromPublished ? 1 : 0);
   if (!total) {
     return `<aside class="diff-summary diff-summary-none">No changes from the published puzzle.</aside>`;
   }
@@ -1881,6 +1888,7 @@ function renderDiffSummary(diff, {
   if (diff.counts.added) bits.push(`${diff.counts.added} added`);
   if (diff.counts.removed) bits.push(`${diff.counts.removed} removed`);
   if (layoutDiffersFromPublished) bits.push("layout override changed");
+  if (provenanceDiffersFromPublished) bits.push("provenance changed");
   return `<aside class="diff-summary">
     <strong>${total} change${total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
@@ -1964,6 +1972,7 @@ export function renderDraftPage(draft, {
     </p>
     ${renderDiffSummary(diff, {
       layoutDiffersFromPublished: draft.layoutDiffersFromPublished,
+      provenanceDiffersFromPublished: draft.provenanceDiffersFromPublished === true,
       shadowsPublished: draft.shadowsPublished === true
     })}
     ${renderDraftFreshness(draft, variant)}

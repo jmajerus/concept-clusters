@@ -41,6 +41,56 @@ const baseDraft = {
 };
 
 export async function run() {
+  // A provenance-only edit: the field-level diff is empty by design, so the
+  // page has to learn about it from its own flag. Before this, the page said
+  // "No changes from the published puzzle" over a real edit and -- worse --
+  // treated the draft as already in authoring play, withholding Publish so
+  // the edit could not leave the working copy.
+  const emptyPublishedDiff = {
+    total: 0,
+    counts: { changed: 0, added: 0, removed: 0 },
+    fields: {},
+    clusters: { added: [], removed: [], changed: {} },
+    bridges: { added: [], removed: [], changed: {} },
+    lenses: { added: [], removed: [], changed: {} }
+  };
+  const provenanceOnlyDraft = {
+    ...baseDraft,
+    validation: { valid: true },
+    d1Published: true,
+    publishedDiff: emptyPublishedDiff
+  };
+  const withoutProvenanceEdit = renderDraftPage({
+    ...provenanceOnlyDraft,
+    provenanceDiffersFromPublished: false
+  });
+  assert.match(withoutProvenanceEdit, /No changes from the published puzzle/);
+  // The button is always rendered; canPublish controls the disabled
+  // attribute, so that is what has to be asserted.
+  assert.match(
+    withoutProvenanceEdit,
+    /name="confirm" value="publish" disabled/,
+    "an unchanged working copy is already in authoring play, so Publish is disabled"
+  );
+
+  const withProvenanceEdit = renderDraftPage({
+    ...provenanceOnlyDraft,
+    provenanceDiffersFromPublished: true
+  });
+  assert.doesNotMatch(withProvenanceEdit, /No changes from the published puzzle/);
+  assert.match(withProvenanceEdit, /1 change from the published puzzle/);
+  assert.match(withProvenanceEdit, /provenance changed/);
+  assert.match(
+    withProvenanceEdit,
+    /name="confirm" value="publish">/,
+    "a provenance-only edit must still be publishable"
+  );
+  assert.doesNotMatch(
+    withProvenanceEdit,
+    /name="confirm" value="publish" disabled/,
+    "Publish must not be withheld when only provenance changed"
+  );
+
   // The rename form is gated on the server's own liveness answer, not on the
   // page's publication flags: a withdrawn row or a git-only id is live to the
   // rename POST, so offering the form for one would guarantee a 409.
