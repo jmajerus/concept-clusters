@@ -328,8 +328,8 @@ export async function run() {
     [],
     "17 nodes with large: true should still pass"
   );
-  // The one-board ceiling is 25 nodes (puzzleBoardSize.js, raised from 24):
-  // 25 is still one board; the 26th node is the one that asks for a split.
+  // The one-board ceiling is 32 nodes (puzzleBoardSize.js). 25 and 32
+  // are still one board; the 33rd node is the one that asks for a split.
   const twentyFiveNodePuzzle = {
     ...seventeenNodePuzzle,
     clusters: nodeCapClusters.map(cluster => ({
@@ -340,18 +340,43 @@ export async function run() {
   assert.deepEqual(
     validatePuzzleContent(twentyFiveNodePuzzle, { knownPuzzleIds: new Set(["node-cap-fixture"]) }),
     [],
-    "25 nodes is the ceiling, not over it"
+    "25 nodes still fits on one board"
   );
-  const twentySixNodePuzzle = {
-    ...twentyFiveNodePuzzle,
-    clusters: twentyFiveNodePuzzle.clusters.map((cluster, index) => index === 0
+  const ceilingColors = ["teal", "blue", "amber", "magenta", "olive"];
+  const ceilingPuzzle = {
+    ...seventeenNodePuzzle,
+    clusters: ceilingColors.map((color, index) => ({
+      name: `Cluster ${index}`,
+      color,
+      fact: `Cluster ${index} fact.`,
+      terms: Array.from({ length: 6 }, (_, term) => `${index}${String.fromCharCode(97 + term)}`),
+      seeds: [`${index}a`, `${index}b`]
+    })),
+    bridges: [
+      { term: "shared-0", clusters: [0, 1], fact: "Connects two clusters." },
+      { term: "shared-1", clusters: [1, 2], fact: "Connects two clusters." }
+    ]
+  };
+  assert.equal(
+    ceilingPuzzle.clusters.reduce((sum, cluster) => sum + cluster.terms.length, 0) +
+      ceilingPuzzle.bridges.length,
+    32
+  );
+  assert.deepEqual(
+    validatePuzzleContent(ceilingPuzzle, { knownPuzzleIds: new Set(["node-cap-fixture"]) }),
+    [],
+    "32 nodes is the ceiling, not over it"
+  );
+  const thirtyThreeNodePuzzle = {
+    ...ceilingPuzzle,
+    clusters: ceilingPuzzle.clusters.map((cluster, index) => index === 0
       ? { ...cluster, terms: [...cluster.terms, `${cluster.name}-one-too-many`] }
       : cluster)
   };
   assert.ok(
-    validatePuzzleContent(twentySixNodePuzzle, {
+    validatePuzzleContent(thirtyThreeNodePuzzle, {
       knownPuzzleIds: new Set(["node-cap-fixture"])
     }).some(error => error.includes("split into relatedPuzzles rather than dropping essential terms")),
-    "26 nodes should tell the author to split, not drop terms"
+    "33 nodes should tell the author to split, not drop terms"
   );
 }

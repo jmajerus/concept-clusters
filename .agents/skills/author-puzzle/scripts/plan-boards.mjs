@@ -4,7 +4,7 @@
 // from a required split.
 import { readFileSync } from "node:fs";
 import { pillWidth } from "../../../../modules/puzzleGraph.js";
-import { NODE_CAP_LARGE } from "../../../../modules/puzzleBoardSize.js";
+import { NODE_CAP_XLARGE } from "../../../../modules/puzzleBoardSize.js";
 
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
@@ -66,17 +66,17 @@ function buildOptions(inventory, totalTerms, connectionCount) {
   const maxNodes = totalTerms + connectionCount;
   const options = [];
 
-  if (maxNodes <= NODE_CAP_LARGE) {
+  if (maxNodes <= NODE_CAP_XLARGE) {
     options.push({
       strategy: "single-board",
       nodeRange: [minNodes, maxNodes],
-      note: "Fits one board. Layout is derived on save; do not drop distinct terms to shrink."
+      note: "Fits one board. Layout is derived on save; do not drop distinct terms to shrink, do not add terms because there is room, and do not split in order to change the canvas."
     });
   } else {
     options.push({
       strategy: "split-required",
       nodeRange: [minNodes, maxNodes],
-      note: `Exceeds the ${NODE_CAP_LARGE}-node maximum even with one bridge per connection. Plan a split or trim with ledger entries.`
+      note: `Exceeds the ${NODE_CAP_XLARGE}-node maximum even with one bridge per connection. Plan a split or trim with ledger entries.`
     });
     const half = Math.ceil(distinctions.length / 2);
     const first = distinctions.slice(0, half);
@@ -102,11 +102,11 @@ function buildOptions(inventory, totalTerms, connectionCount) {
     });
   }
 
-  if (maxNodes > NODE_CAP_LARGE && maxNodes <= NODE_CAP_LARGE + 3) {
+  if (maxNodes > NODE_CAP_XLARGE && maxNodes <= NODE_CAP_XLARGE + 3) {
     options.push({
       strategy: "marginal-overshoot",
       nodeRange: [minNodes, maxNodes],
-      note: `Within a few nodes of the ${NODE_CAP_LARGE}-node maximum — consider an honest merge, defer-with-destination, or layout verification before split.`
+      note: `Within a few nodes of the ${NODE_CAP_XLARGE}-node maximum — consider an honest merge, defer-with-destination, or layout verification before split.`
     });
   }
 
@@ -145,8 +145,8 @@ function analyze(inventory) {
     longestTerms: longest,
     trimCandidates: trimCandidates(inventory),
     options: buildOptions(inventory, totalTerms, connectionCount),
-    caps: { maxNodes: NODE_CAP_LARGE },
-    nextStep: maxNodes <= NODE_CAP_LARGE
+    caps: { maxNodes: NODE_CAP_XLARGE },
+    nextStep: maxNodes <= NODE_CAP_XLARGE
       ? "Fits one board. Proceed to fit; canvas size is derived."
       : "Discuss seam and board plan, then write the split plan under the authoring data dir (plans/<id>-split-plan.json) before fit."
   };

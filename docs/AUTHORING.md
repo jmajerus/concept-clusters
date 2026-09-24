@@ -66,8 +66,8 @@ short blueprint containing:
   decision to use none;
 - lenses only when they add a worthwhile second way to think.
 
-Canvas size follows the honest node count; do not choose a board tier or
-drop a term to stay small.
+Canvas size follows the honest node count, the routed edges, and the total
+length of the terms. Do not choose a board size or drop a term to stay small.
 
 Locking this blueprint keeps content decisions from competing with schema and
 validation corrections. Draft it through MCP in the
@@ -200,10 +200,14 @@ in its fact for a distinct concept the term list omitted. Make a change only
 when that semantic check finds a real problem; do not alter a puzzle merely to
 make it look less symmetric.
 
-The complete board may contain at most 25 total nodes (all cluster terms plus
-bridges). Layout is derived automatically from the node count and play mode;
-do not drop a distinct term to satisfy a rendering threshold. Above 25, split
-the subject into focused related puzzles rather than compressing the lesson.
+The complete board may contain at most 32 total nodes (all cluster terms plus
+bridges). That ceiling is where validation refuses a board; it is not a size
+to fill. Layout is derived automatically from the node count, the routed
+edges, the total length of the terms, and the play mode. Do not drop a
+distinct term to satisfy a rendering threshold, do not keep terms to fill
+toward 32, and do not split in order to change the canvas. Split the subject
+into focused related puzzles when it has a natural seam that teaches better
+as two lessons, and whenever it needs more than 32 nodes.
 
 See the extended [shape rationale](AUTHORING-REFERENCE.md#extended-design-rationale)
 and [node limit](AUTHORING-REFERENCE.md#puzzle-node-limit).
@@ -374,7 +378,7 @@ Before validation and human review, check the complete puzzle as one lesson:
 - Links resolve to the intended resource at the appropriate grain.
 - Lens wording includes every honest answer and explicitly rules out plausible
   exclusions where necessary.
-- The complete board stays at or below 25 total nodes; layout is derived.
+- The complete board stays at or below 32 total nodes. Layout is derived; do not split or drop terms to change the canvas. Split when the subject has a natural seam, and whenever it needs more than 32 nodes.
 - The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
 - Do not include provenance or human-managed byline/rights metadata in an MCP

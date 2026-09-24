@@ -128,7 +128,7 @@ const RelationKindEnum = z.enum([
 const LEGACY_TERM_ROLES = new Set(["reference", "connector"]);
 
 export const LARGE_DESCRIPTION =
-  "Derived automatically from node count on save; omit this field. Keep total nodes (cluster terms plus bridges) at or below 25; split into relatedPuzzles above 25.";
+  "Derived automatically from node count, routed edges, and term length on save; omit this field. Keep total nodes (cluster terms plus bridges) at or below 32. That ceiling is a refusal point, not a size to fill. Do not split or drop terms to change the canvas.";
 export const LEARNING_MARKDOWN_DESCRIPTION =
   "Markdown lesson body whose string value contains real line breaks: blank lines between paragraphs, headings on their own lines. The dialog already shows title, so do not repeat it as the first line. Do not write the two-character sequence backslash-n; the tool serializer encodes newlines.";
 export const LESSON_CREDIT_DESCRIPTION = lessonCreditFieldDescription();

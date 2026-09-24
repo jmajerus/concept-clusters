@@ -76,7 +76,7 @@ Named targets from the user (or from planner `chunk`) are **not** trusted until 
 
 Load [design judgment](../author-puzzle/references/design-judgment.md) only then. Unset `relationKind`, `direction`, `idealTerms`, `learningIntroduction`, `level`, `relatedPuzzles` unless the board clearly warrants them. Do not manufacture bridges or equalize counts. Merge a targeted edit into the latest document: preserve unrelated current fields, including category metadata, citations, and provenance/contributors.
 
-- Trap words, duplicate jobs, facts naming missing terms, seed recognizability, necessary bridges. Keep the complete board at or below 25 nodes; split only above 25.
+- Trap words, duplicate jobs, facts naming missing terms, seed recognizability, necessary bridges. Keep the complete board at or below 32 nodes. That ceiling is a refusal point, not a size to fill. Canvas size is derived; do not split or drop terms to change it. Split when the subject has a natural seam that teaches better as two lessons, and whenever the map needs more than 32 nodes.
 - Help at the right grain: cluster context on clusters, term notes on terms, and bridge context on bridges.
 - Lenses only if pedagogy needs a change; do not pad toward 6
 - Metadata only for a real discovery fix

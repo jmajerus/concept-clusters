@@ -76,11 +76,13 @@ derives from \`name\` -- a bridge referencing an id-less cluster should
 predict that plain slug). Each cluster's color must be unique within the
 puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
 is reserved for bridges and green/red for lens feedback, so none of those
-three are valid cluster colors. Keep the complete board to at most 25 total
-nodes (all cluster terms plus bridges). Size by genuine distinct terms; do not
-drop a distinct term or bridge to fit a rendering threshold. If the material
-needs more than 25 nodes, split it into relatedPuzzles rather than compressing
-the lesson onto one board. Bridge terms are ordinary authored concepts; there is
+three are valid cluster colors. Keep the complete board to at most 32 total
+nodes (all cluster terms plus bridges). That ceiling is where validation
+refuses a board; it is not a size to fill. Canvas size is derived from the
+board; do not split, drop, or reshape terms in order to change it. Size by
+genuine distinct terms. Split into relatedPuzzles when the subject has a
+natural seam that teaches better as two lessons, and whenever it needs more
+than 32 nodes, rather than compressing the lesson onto one board. Bridge terms are ordinary authored concepts; there is
 no separate pedagogical-role field.
 
 When a split plan is involved, the puzzle document receives only the
@@ -156,11 +158,15 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   when called provisional or said to be within limits. Equal and unequal
   outcomes are both legitimate; never alter the material merely to make the
   resulting counts look less regular.
-  The firm board ceiling is 25 total nodes. Do not hunt for the weakest
+  The firm board ceiling is 32 total nodes, and it is a refusal point rather
+  than a size to fill. Do not hunt for the weakest
   term to drop to fit a rendering threshold. Redundancy checks are a separate
   distinctness judgment; run them because a term is actually duplicate work,
-  not because of how many nodes the board contains. Only above 25 nodes split
-  into relatedPuzzles rather than dropping essential terms.
+  not because of how many nodes the board contains. Canvas size is derived;
+  do not split or reshape the board to change it. Split into relatedPuzzles
+  when the subject has a natural seam that teaches better as two lessons, and
+  whenever the map needs more than 32 nodes, rather than dropping essential
+  terms.
 - Bridges must be genuine, and are optional: a bridge should encode a real
   conceptual connection, never a trick or a link manufactured just to make
   the cluster graph connected. A puzzle with no bridges, or with bridges
@@ -416,7 +422,10 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   that is noise rather than challenge; resolve the ownership or rewrite the
   distinction before publication.
   Size by distinct concepts. Do not drop a genuine term to fit a rendering
-  threshold. If the map needs more than 25 nodes, split it into relatedPuzzles.
+  threshold, and do not split in order to change the canvas; canvas size is
+  derived. If the map needs more than 32 nodes, or the subject has a natural
+  seam that teaches better as two lessons, split it into relatedPuzzles.
+  Do not fill toward 32.
 - Carry approved inventory connections onto the board as bridges. Do not
   invent extras to make the graph connected. A disconnected board or no
   bridges is acceptable. Write each bridge fact now and make its local
@@ -437,8 +446,10 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   redundant terms doing the same conceptual job, missing concepts named by a
   cluster fact, seed recognizability, bridge necessity, and whether each
   bridge fact genuinely explains its connection.
-- If validation flags more than 25 nodes, split into relatedPuzzles rather
-  than dropping essential terms. Checking for redundant terms is a separate
+- If validation flags more than 32 nodes, split into relatedPuzzles rather
+  than dropping essential terms. Do not split or drop terms because of canvas
+  size; that size is derived. A split below the ceiling is for a seam in the
+  subject. Checking for redundant terms is a separate
   distinctness judgment; do not start it because of the node count alone.
 - Verify every retained direct link and citation against the claim it supports.
   Keep exact citation data gathered during research; this pass confirms and

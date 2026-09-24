@@ -359,8 +359,9 @@ inventory you just presented (`create both puzzles` approves both).
 
 Run `plan-boards.mjs` after inventory approval. If it reports `single-board`,
 **skip this pass** and go to fit. Follow [split-pass.md](references/split-pass.md)
-only when the inventory exceeds 25 nodes (terms plus connections) or the human
-asks for a split.
+when the planner reports `split-required`, or when the human asks for a split
+because the subject has a natural seam. Do not split in order to change the
+canvas; canvas size is derived.
 
 ```sh
 node .agents/skills/author-puzzle/scripts/plan-boards.mjs inventories/<parent-id>.json

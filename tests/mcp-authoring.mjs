@@ -269,7 +269,7 @@ export async function run() {
       undefined,
       "lesson citations must use the puzzle-level bibliography"
     );
-    assert.match(JSON.stringify(resourceSchema), /25/);
+    assert.match(JSON.stringify(resourceSchema), /at or below 32/);
     assert.ok(!resourceSchema.required.includes("bridges"));
 
     const authoringSchema = await request("tools/call", {
@@ -497,7 +497,7 @@ export async function run() {
       /admin\/drafts|Open board|click Publish/
     );
     assert.match(guidance.result.structuredContent.markdown, /Cue and Freeze are outside MCP/);
-    assert.match(guidance.result.structuredContent.markdown, /at most 25 total\s+nodes/);
+    assert.match(guidance.result.structuredContent.markdown, /at most 32 total\s+nodes/);
     assert.match(guidance.result.structuredContent.markdown, /hunt for the weakest\s+term to drop/);
     assert.doesNotMatch(
       guidance.result.structuredContent.markdown,
@@ -535,7 +535,7 @@ export async function run() {
     });
     assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the surface/);
-    assert.match(reviewGuidance.result.structuredContent.markdown, /more than 25 nodes/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /more than 32 nodes/);
     assert.doesNotMatch(
       reviewGuidance.result.structuredContent.markdown,
       /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i

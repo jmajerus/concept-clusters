@@ -264,11 +264,14 @@ in a lens on its own merits, say so directly in the prompt (e.g. "besides
 everything in the X cluster, which other concepts also apply to Y?")
 instead of leaving the inclusion looking coincidental.
 
-The 25-node ceiling remains firm even when the natural structure is larger.
-Do not evade it by compressing distinct ideas into vague clusters or by
-dropping essential terms. Layout is derived from node count and play mode;
-authors and agents do not set renderer fields. Split the subject into
-focused, linked puzzles only when one honest treatment would exceed 25; see
+The 32-node ceiling remains firm even when the natural structure is larger.
+It is a refusal point, not a size to fill, and it is the only size agents
+are given. Do not evade it by compressing distinct ideas into vague clusters
+or by dropping essential terms. Layout is derived from node count, routed
+edges, term length, and play mode; authors and agents do not set renderer
+fields and do not split in order to change the canvas. Split into focused,
+linked puzzles when the subject has a natural seam that teaches better as
+two lessons, and whenever one honest treatment would exceed 32; see
 [Puzzle node limit](#puzzle-node-limit) and [Related puzzles](#related-puzzles).
 
 ### Star-mode cold-read check
@@ -1536,12 +1539,16 @@ of adding an unnecessary navigation step.
 
 ## Puzzle node limit
 
-The complete board may contain at most 25 nodes: count every cluster term and
-every bridge. The validator enforces this limit; layout is derived by the
-runtime from the count and selected play mode. Authors and agents omit
-renderer fields and should not remove a distinct term to satisfy an internal
-layout threshold. When an honest treatment needs more than 25 nodes, split the
-subject into focused, linked puzzles through `relatedPuzzles`.
+The complete board may contain at most 32 nodes: count every cluster term and
+every bridge. The validator enforces this limit. It is a refusal point, not a
+size to fill, and it is the only node count agents are asked to respect.
+Layout starts from a floor chosen by the node count and play mode, then grows
+when routed edges and the total length of the terms make that floor too tight.
+Authors and agents omit renderer fields. They should not remove a distinct
+term, or split the subject, to satisfy an internal layout threshold. Split
+into focused, linked puzzles through `relatedPuzzles` when the subject has a
+natural seam that teaches better as two lessons, and whenever an honest
+treatment needs more than 32 nodes.
 
 ## Optional authored layout overrides
 

@@ -112,7 +112,19 @@
 // 5.21: same review bar; wiki: link verification now names the
 // check_puzzle_links tool instead of leaving "verify before writing" to
 // whatever the client can reach.
+// 5.22: same review bar for puzzles already under the old ceiling. One board
+// may hold 40 nodes. Canvas size is derived from node count, routed edges,
+// and term length. Split when a seam teaches better apart, not because the
+// board passed 25.
+// 5.23: same review bar for existing puzzles. The hard ceiling is 32 nodes,
+// a refusal point rather than a size to fill. Through about 25 nodes, one
+// board is the normal lesson; past that, stay together only when a split
+// would cut a connection the player has to work on the same surface.
+// 5.24: same review bar. Agents are not given a second count below the
+// ceiling. Canvas size stays derived. A split is a judgment about the
+// subject, or the response to exceeding 32, not a way to stay under a
+// preferred size.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 21
+  minor: 24
 });

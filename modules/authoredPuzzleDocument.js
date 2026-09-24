@@ -286,7 +286,7 @@ export function redactMcpExcludedDocumentFields(document) {
 // read must not turn those ids back to display titles and make the next save
 // look like a migration. The web/editor paths use documentForEditor instead.
 // The derived board-layout flag is intentionally omitted from reads so clients
-// make decisions from lesson content and the single 25-node hard limit.
+// make decisions from lesson content and the single 32-node hard limit.
 export function documentForMcp(document, options = {}) {
   return redactMcpExcludedDocumentFields(documentForStorage(document, options));
 }

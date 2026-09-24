@@ -3,7 +3,7 @@
 // handoff needs the right artifact for each pass.
 // Reads JSON from a file path or stdin.
 import { readFileSync } from "node:fs";
-import { NODE_CAP_LARGE } from "../../../../modules/puzzleBoardSize.js";
+import { NODE_CAP_XLARGE } from "../../../../modules/puzzleBoardSize.js";
 import { AUTHORING_PROFILES } from "../../../../modules/authoringProfiles.js";
 
 // Specialized puzzleKinds share their identifiers with the MCP authoring
@@ -351,11 +351,11 @@ function checkSplitPlan(plan, inventory) {
   }
 
   for (const board of boards) {
-    if (typeof board.expectedNodes === "number" && board.expectedNodes > NODE_CAP_LARGE) {
+    if (typeof board.expectedNodes === "number" && board.expectedNodes > NODE_CAP_XLARGE) {
       advisory.push({
         id: "plan-over-node-cap",
         boardId: board.id,
-        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds the ${NODE_CAP_LARGE}-node maximum — confirm split or trim.`
+        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds the ${NODE_CAP_XLARGE}-node maximum — confirm split or trim.`
       });
     }
   }

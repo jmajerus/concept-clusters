@@ -1,5 +1,5 @@
 import { IDENTITY_COLOR_KEY_SET } from "./colorPalette.js";
-import { NODE_CAP_LARGE, puzzleNodeCount } from "./puzzleBoardSize.js";
+import { NODE_CAP_XLARGE, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { validateAuthoringProvenance } from "./authoringProvenance.js";
 import { validatePuzzleLenses } from "./lensValidation.js";
 import { PUZZLE_LEVELS } from "../puzzles/categories.js";
@@ -273,9 +273,9 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     fail(`bad cluster count (${puzzle.clusters.length})`);
   }
   const totalNodes = puzzleNodeCount(puzzle);
-  if (totalNodes > NODE_CAP_LARGE) {
+  if (totalNodes > NODE_CAP_XLARGE) {
     fail(
-      `too many total nodes (${totalNodes}, cap is ${NODE_CAP_LARGE} -- split into relatedPuzzles rather than dropping essential terms)`
+      `too many total nodes (${totalNodes}, cap is ${NODE_CAP_XLARGE} -- split into relatedPuzzles rather than dropping essential terms)`
     );
   }
   errors.push(...validateInfo(puzzle.info));
