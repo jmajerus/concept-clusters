@@ -231,5 +231,13 @@ export default definePuzzle(import.meta.url, {
         "enthymeme"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 });

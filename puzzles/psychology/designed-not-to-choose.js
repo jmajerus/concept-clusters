@@ -257,5 +257,13 @@ export default definePuzzle(import.meta.url, {
         "task splitting": "Undoing it is a redesign decision -- restoring whole-patient care is not something one nurse can grant herself."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

@@ -8,20 +8,6 @@
       "name": "Behaviorism",
       "color": "teal",
       "fact": "Behaviorism studies only observable behavior, explaining it through conditioning and reinforcement rather than inner mental states.",
-      "seeds": [
-        "conditioning",
-        "reinforcement"
-      ],
-      "floatingTerms": [
-        "Pavlov",
-        "operant conditioning"
-      ],
-      "terms": [
-        "conditioning",
-        "reinforcement",
-        "Pavlov",
-        "operant conditioning"
-      ],
       "termInfo": {
         "conditioning": {
           "text": "Learning to associate a neutral stimulus with one that already triggers a response — Pavlov's dogs learning to salivate at a bell.",
@@ -62,27 +48,27 @@
             "href": "wiki:Behaviorism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "conditioning",
+        "reinforcement"
+      ],
+      "floatingTerms": [
+        "Pavlov",
+        "operant conditioning"
+      ],
+      "terms": [
+        "conditioning",
+        "reinforcement",
+        "Pavlov",
+        "operant conditioning"
+      ]
     },
     {
       "id": "psychoanalysis",
       "name": "Psychoanalysis",
       "color": "blue",
       "fact": "Psychoanalysis holds that unconscious drives and conflicts, often repressed, shape behavior without a person's awareness.",
-      "seeds": [
-        "id",
-        "repression"
-      ],
-      "floatingTerms": [
-        "Freud",
-        "ego"
-      ],
-      "terms": [
-        "id",
-        "repression",
-        "Freud",
-        "ego"
-      ],
       "termInfo": {
         "id": {
           "text": "In Freud's model, the primitive part of the mind driven by instinct and desire, with no regard for consequences.",
@@ -123,25 +109,27 @@
             "href": "wiki:Psychoanalysis"
           }
         ]
-      }
+      },
+      "seeds": [
+        "id",
+        "repression"
+      ],
+      "floatingTerms": [
+        "Freud",
+        "ego"
+      ],
+      "terms": [
+        "id",
+        "repression",
+        "Freud",
+        "ego"
+      ]
     },
     {
       "id": "humanistic-psychology",
       "name": "Humanistic psychology",
       "color": "amber",
       "fact": "Humanistic psychology focuses on conscious growth toward self-actualization, treating people as active authors of their own development.",
-      "seeds": [
-        "self-actualization",
-        "hierarchy of needs"
-      ],
-      "floatingTerms": [
-        "Maslow"
-      ],
-      "terms": [
-        "self-actualization",
-        "hierarchy of needs",
-        "Maslow"
-      ],
       "termInfo": {
         "self-actualization": {
           "links": [
@@ -173,7 +161,19 @@
             "href": "wiki:Humanistic psychology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "self-actualization",
+        "hierarchy of needs"
+      ],
+      "floatingTerms": [
+        "Maslow"
+      ],
+      "terms": [
+        "self-actualization",
+        "hierarchy of needs",
+        "Maslow"
+      ]
     }
   ],
   "bridges": [
@@ -218,5 +218,13 @@
         "psychoanalysis": "id"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

@@ -295,5 +295,13 @@ export default definePuzzle(import.meta.url, {
         "triad": "Three pitches assembled by stacking intervals."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

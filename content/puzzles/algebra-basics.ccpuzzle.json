@@ -8,20 +8,6 @@
       "name": "Variables",
       "color": "teal",
       "fact": "Variables are symbols that stand in for unknown or changing quantities.",
-      "seeds": [
-        "unknown",
-        "coefficient"
-      ],
-      "floatingTerms": [
-        "term",
-        "expression"
-      ],
-      "terms": [
-        "unknown",
-        "coefficient",
-        "term",
-        "expression"
-      ],
       "termInfo": {
         "unknown": {
           "text": "The letter or symbol standing for the value an equation is solved to find.",
@@ -61,25 +47,27 @@
             "href": "wiki:Variable (mathematics)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "unknown",
+        "coefficient"
+      ],
+      "floatingTerms": [
+        "term",
+        "expression"
+      ],
+      "terms": [
+        "unknown",
+        "coefficient",
+        "term",
+        "expression"
+      ]
     },
     {
       "id": "equations",
       "name": "Equations",
       "color": "blue",
       "fact": "Equations state that two expressions are equal, and stay balanced under the same operation on both sides.",
-      "seeds": [
-        "balance",
-        "inverse operation"
-      ],
-      "floatingTerms": [
-        "solution"
-      ],
-      "terms": [
-        "balance",
-        "inverse operation",
-        "solution"
-      ],
       "termInfo": {
         "balance": {
           "text": "The idea that both sides of an equation must stay equal — whatever you do to one side, you must do to the other.",
@@ -111,27 +99,25 @@
             "href": "wiki:Equation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "balance",
+        "inverse operation"
+      ],
+      "floatingTerms": [
+        "solution"
+      ],
+      "terms": [
+        "balance",
+        "inverse operation",
+        "solution"
+      ]
     },
     {
       "id": "functions",
       "name": "Functions",
       "color": "amber",
       "fact": "Functions map every input to exactly one output, describing how one quantity depends on another.",
-      "seeds": [
-        "input",
-        "output"
-      ],
-      "floatingTerms": [
-        "domain",
-        "range"
-      ],
-      "terms": [
-        "input",
-        "output",
-        "domain",
-        "range"
-      ],
       "termInfo": {
         "input": {
           "text": "The value fed into a function — the independent variable, which the output then depends on.",
@@ -172,7 +158,21 @@
             "href": "wiki:Function (mathematics)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "input",
+        "output"
+      ],
+      "floatingTerms": [
+        "domain",
+        "range"
+      ],
+      "terms": [
+        "input",
+        "output",
+        "domain",
+        "range"
+      ]
     }
   ],
   "bridges": [
@@ -219,5 +219,13 @@
         "equations": "solution"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

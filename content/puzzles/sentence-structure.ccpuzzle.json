@@ -8,18 +8,6 @@
       "name": "Nouns",
       "color": "teal",
       "fact": "Nouns name people, places, things, and ideas — they are the anchors of every sentence.",
-      "seeds": [
-        "subject",
-        "object"
-      ],
-      "floatingTerms": [
-        "pronoun"
-      ],
-      "terms": [
-        "subject",
-        "object",
-        "pronoun"
-      ],
       "termInfo": {
         "subject": {
           "text": "The part of a sentence that performs the verb's action, or that the sentence is about.",
@@ -51,27 +39,25 @@
             "href": "wiki:Noun"
           }
         ]
-      }
+      },
+      "seeds": [
+        "subject",
+        "object"
+      ],
+      "floatingTerms": [
+        "pronoun"
+      ],
+      "terms": [
+        "subject",
+        "object",
+        "pronoun"
+      ]
     },
     {
       "id": "verbs",
       "name": "Verbs",
       "color": "blue",
       "fact": "Verbs express actions, states, or occurrences and give a sentence its energy.",
-      "seeds": [
-        "tense",
-        "predicate"
-      ],
-      "floatingTerms": [
-        "infinitive",
-        "auxiliary verb"
-      ],
-      "terms": [
-        "tense",
-        "predicate",
-        "infinitive",
-        "auxiliary verb"
-      ],
       "termInfo": {
         "tense": {
           "text": "How a verb shows when an action happens — past, present, or future.",
@@ -111,27 +97,27 @@
             "href": "wiki:Verb"
           }
         ]
-      }
+      },
+      "seeds": [
+        "tense",
+        "predicate"
+      ],
+      "floatingTerms": [
+        "infinitive",
+        "auxiliary verb"
+      ],
+      "terms": [
+        "tense",
+        "predicate",
+        "infinitive",
+        "auxiliary verb"
+      ]
     },
     {
       "id": "modifiers",
       "name": "Modifiers",
       "color": "amber",
       "fact": "Modifiers — adjectives and adverbs — add detail and precision by describing other words.",
-      "seeds": [
-        "adjective",
-        "adverb"
-      ],
-      "floatingTerms": [
-        "clause",
-        "prepositional phrase"
-      ],
-      "terms": [
-        "adjective",
-        "adverb",
-        "clause",
-        "prepositional phrase"
-      ],
       "termInfo": {
         "adjective": {
           "links": [
@@ -169,7 +155,21 @@
             "href": "wiki:Grammatical modifier"
           }
         ]
-      }
+      },
+      "seeds": [
+        "adjective",
+        "adverb"
+      ],
+      "floatingTerms": [
+        "clause",
+        "prepositional phrase"
+      ],
+      "terms": [
+        "adjective",
+        "adverb",
+        "clause",
+        "prepositional phrase"
+      ]
     }
   ],
   "bridges": [
@@ -213,5 +213,14 @@
         "modifiers": "adjective"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

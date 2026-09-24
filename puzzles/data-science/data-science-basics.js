@@ -294,5 +294,13 @@ export default definePuzzle(import.meta.url, {
         "median": "A different single number standing in for the center, chosen to resist a few extreme values."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

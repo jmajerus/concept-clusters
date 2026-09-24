@@ -423,5 +423,14 @@ export default definePuzzle(import.meta.url, {
         "public communication": "It translates findings and recommendations into information people can use."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

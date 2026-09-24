@@ -16,20 +16,6 @@
       "name": "Cinematography",
       "color": "teal",
       "fact": "Cinematography is what happens in front of the camera and to it: how close it stands, from what angle, and everything arranged within the frame.",
-      "seeds": [
-        "close-up",
-        "wide shot"
-      ],
-      "floatingTerms": [
-        "camera angle",
-        "mise-en-scène"
-      ],
-      "terms": [
-        "close-up",
-        "wide shot",
-        "camera angle",
-        "mise-en-scène"
-      ],
       "termInfo": {
         "camera angle": {
           "text": "Where the camera is placed relative to the subject -- high, low, or level -- which shapes how powerful or vulnerable that subject looks.",
@@ -63,27 +49,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "close-up",
+        "wide shot"
+      ],
+      "floatingTerms": [
+        "camera angle",
+        "mise-en-scène"
+      ],
+      "terms": [
+        "close-up",
+        "wide shot",
+        "camera angle",
+        "mise-en-scène"
+      ]
     },
     {
       "id": "cluster-editing",
       "name": "Editing",
       "color": "blue",
       "fact": "Editing decides how shots meet: an ordinary cut joins them invisibly, continuity editing keeps dozens of cuts feeling like unbroken time and space, and a jump cut or a montage breaks that continuity on purpose.",
-      "seeds": [
-        "cut",
-        "montage"
-      ],
-      "floatingTerms": [
-        "continuity editing",
-        "jump cut"
-      ],
-      "terms": [
-        "cut",
-        "montage",
-        "continuity editing",
-        "jump cut"
-      ],
       "termInfo": {
         "continuity editing": {
           "text": "The standard practice of cutting shots together so that time and space feel unbroken to the viewer.",
@@ -117,27 +103,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "cut",
+        "montage"
+      ],
+      "floatingTerms": [
+        "continuity editing",
+        "jump cut"
+      ],
+      "terms": [
+        "cut",
+        "montage",
+        "continuity editing",
+        "jump cut"
+      ]
     },
     {
       "id": "cluster-narrative",
       "name": "Narrative",
       "color": "amber",
       "fact": "Narrative is the story itself: a protagonist pursuing something across a plot, in whatever genre the film belongs to, filtered through whoever is telling it.",
-      "seeds": [
-        "protagonist",
-        "genre"
-      ],
-      "floatingTerms": [
-        "plot",
-        "narrator"
-      ],
-      "terms": [
-        "protagonist",
-        "plot",
-        "genre",
-        "narrator"
-      ],
       "termInfo": {
         "genre": {
           "text": "A category of film defined by shared conventions of story, style, or mood, such as the western or the musical.",
@@ -171,7 +157,21 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "protagonist",
+        "genre"
+      ],
+      "floatingTerms": [
+        "plot",
+        "narrator"
+      ],
+      "terms": [
+        "protagonist",
+        "plot",
+        "genre",
+        "narrator"
+      ]
     }
   ],
   "bridges": [
@@ -192,14 +192,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-cinematography": "camera angle",
+        "cluster-narrative": "narrator"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-cinematography",
         "to": "cluster-narrative"
-      },
-      "idealTerms": {
-        "cluster-cinematography": "camera angle",
-        "cluster-narrative": "narrator"
       }
     },
     {
@@ -219,14 +219,14 @@
         ]
       },
       "relationKind": "continuity",
+      "idealTerms": {
+        "cluster-editing": "continuity editing",
+        "cluster-narrative": "plot"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-editing",
         "to": "cluster-narrative"
-      },
-      "idealTerms": {
-        "cluster-editing": "continuity editing",
-        "cluster-narrative": "plot"
       }
     }
   ],
@@ -301,5 +301,13 @@
         "scene": "Combines shots joined by continuity editing into one place and time."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

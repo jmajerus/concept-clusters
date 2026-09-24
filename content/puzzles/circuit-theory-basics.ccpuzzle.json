@@ -5,11 +5,11 @@
   "subcategories": {
     "engineering": "electronics"
   },
+  "large": true,
   "tags": [
     "electronics",
     "circuits"
   ],
-  "large": true,
   "info": {
     "text": "Basic circuit analysis relates electrical quantities to component behavior, then uses network laws and connection patterns to solve for unknown voltages and currents.",
     "links": [
@@ -24,20 +24,6 @@
       "name": "Electrical quantities",
       "color": "teal",
       "fact": "Voltage is energy per unit charge, current is charge flow per unit time, resistance relates voltage to current, and electric power measures the rate at which a circuit transfers energy.",
-      "seeds": [
-        "voltage",
-        "current"
-      ],
-      "floatingTerms": [
-        "resistance",
-        "electric power"
-      ],
-      "terms": [
-        "voltage",
-        "current",
-        "resistance",
-        "electric power"
-      ],
       "termInfo": {
         "voltage": "Electric potential difference: the change in potential energy per unit charge between two points.",
         "current": "The rate at which electric charge passes through a surface or circuit element.",
@@ -57,13 +43,40 @@
             "href": "wiki:Electricity"
           }
         ]
-      }
+      },
+      "seeds": [
+        "voltage",
+        "current"
+      ],
+      "floatingTerms": [
+        "resistance",
+        "electric power"
+      ],
+      "terms": [
+        "voltage",
+        "current",
+        "resistance",
+        "electric power"
+      ]
     },
     {
       "id": "common-circuit-elements",
       "name": "Common circuit elements",
       "color": "blue",
       "fact": "A resistor dissipates energy, a capacitor stores energy in an electric field, an inductor stores energy in a magnetic field, and an ideal voltage source maintains a specified potential difference.",
+      "termInfo": {
+        "resistor": "A two-terminal element whose defining electrical quantity is resistance.",
+        "capacitor": "An element that stores separated electric charge and energy in an electric field.",
+        "inductor": "An element that stores energy in the magnetic field produced by its current.",
+        "voltage source": "An active element that maintains a voltage between its terminals, ideally independent of the current drawn."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Electronic component"
+          }
+        ]
+      },
       "seeds": [
         "resistor",
         "capacitor"
@@ -77,40 +90,13 @@
         "capacitor",
         "inductor",
         "voltage source"
-      ],
-      "termInfo": {
-        "resistor": "A two-terminal element whose defining electrical quantity is resistance.",
-        "capacitor": "An element that stores separated electric charge and energy in an electric field.",
-        "inductor": "An element that stores energy in the magnetic field produced by its current.",
-        "voltage source": "An active element that maintains a voltage between its terminals, ideally independent of the current drawn."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Electronic component"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "analysis-laws-and-conventions",
       "name": "Analysis laws and conventions",
       "color": "amber",
       "fact": "Ohm's law describes an ideal resistor, Kirchhoff's laws constrain currents at nodes and voltages around loops, and the passive sign convention keeps the direction of energy transfer consistent.",
-      "seeds": [
-        "Ohm's law",
-        "Kirchhoff's current law"
-      ],
-      "floatingTerms": [
-        "Kirchhoff's voltage law",
-        "passive sign convention"
-      ],
-      "terms": [
-        "Ohm's law",
-        "Kirchhoff's current law",
-        "Kirchhoff's voltage law",
-        "passive sign convention"
-      ],
       "termInfo": {
         "Ohm's law": "For an ideal resistor, voltage equals current times resistance: V = IR.",
         "Kirchhoff's current law": "The algebraic sum of currents at a node is zero, expressing conservation of charge.",
@@ -130,13 +116,40 @@
             "href": "wiki:Kirchhoff's circuit laws"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Ohm's law",
+        "Kirchhoff's current law"
+      ],
+      "floatingTerms": [
+        "Kirchhoff's voltage law",
+        "passive sign convention"
+      ],
+      "terms": [
+        "Ohm's law",
+        "Kirchhoff's current law",
+        "Kirchhoff's voltage law",
+        "passive sign convention"
+      ]
     },
     {
       "id": "connections-and-reductions",
       "name": "Connections and reductions",
       "color": "magenta",
       "fact": "Series elements share one current path and parallel elements share the same two nodes; those patterns produce voltage dividers, current dividers, and simpler equivalent circuits.",
+      "termInfo": {
+        "series connection": "A connection in which elements lie on a single unbranched path and therefore carry the same current.",
+        "parallel connection": "A connection in which elements share the same pair of nodes and therefore have the same voltage.",
+        "voltage divider": "A series network whose total voltage is divided among its elements in proportion to their resistances or impedances.",
+        "current divider": "A parallel network whose total current splits among branches according to their conductances or admittances."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Series and parallel circuits"
+          }
+        ]
+      },
       "seeds": [
         "series connection",
         "parallel connection"
@@ -150,20 +163,7 @@
         "parallel connection",
         "voltage divider",
         "current divider"
-      ],
-      "termInfo": {
-        "series connection": "A connection in which elements lie on a single unbranched path and therefore carry the same current.",
-        "parallel connection": "A connection in which elements share the same pair of nodes and therefore have the same voltage.",
-        "voltage divider": "A series network whose total voltage is divided among its elements in proportion to their resistances or impedances.",
-        "current divider": "A parallel network whose total current splits among branches according to their conductances or admittances."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Series and parallel circuits"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [
@@ -297,9 +297,6 @@
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Continue from the electrical ideas inside a circuit to the programmable devices that control embedded systems."
-    },
     "entries": [
       {
         "id": "microcontroller-families",
@@ -308,6 +305,14 @@
       {
         "id": "microcontroller-applications",
         "reason": "See how programmable devices use circuit inputs and outputs to measure, control, communicate, and interact with people."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

@@ -8,20 +8,6 @@
       "name": "Statistics",
       "color": "teal",
       "fact": "Statistics summarizes data using measures like mean, median, and range.",
-      "seeds": [
-        "mean",
-        "median"
-      ],
-      "floatingTerms": [
-        "range",
-        "mode"
-      ],
-      "terms": [
-        "mean",
-        "median",
-        "range",
-        "mode"
-      ],
       "termInfo": {
         "mean": {
           "links": [
@@ -60,27 +46,27 @@
             "href": "wiki:Statistics"
           }
         ]
-      }
+      },
+      "seeds": [
+        "mean",
+        "median"
+      ],
+      "floatingTerms": [
+        "range",
+        "mode"
+      ],
+      "terms": [
+        "mean",
+        "median",
+        "range",
+        "mode"
+      ]
     },
     {
       "id": "probability",
       "name": "Probability",
       "color": "blue",
       "fact": "Probability measures how likely an event is, from impossible to certain.",
-      "seeds": [
-        "outcome",
-        "event"
-      ],
-      "floatingTerms": [
-        "likelihood",
-        "sample space"
-      ],
-      "terms": [
-        "outcome",
-        "event",
-        "likelihood",
-        "sample space"
-      ],
       "termInfo": {
         "outcome": {
           "text": "A single possible result of an experiment or trial.",
@@ -120,27 +106,27 @@
             "href": "wiki:Probability"
           }
         ]
-      }
+      },
+      "seeds": [
+        "outcome",
+        "event"
+      ],
+      "floatingTerms": [
+        "likelihood",
+        "sample space"
+      ],
+      "terms": [
+        "outcome",
+        "event",
+        "likelihood",
+        "sample space"
+      ]
     },
     {
       "id": "graphs-charts",
       "name": "Graphs & charts",
       "color": "amber",
       "fact": "Graphs and charts turn raw numbers into a picture that's easier to read at a glance.",
-      "seeds": [
-        "bar chart",
-        "histogram"
-      ],
-      "floatingTerms": [
-        "scatter plot",
-        "line graph"
-      ],
-      "terms": [
-        "bar chart",
-        "histogram",
-        "scatter plot",
-        "line graph"
-      ],
       "termInfo": {
         "bar chart": {
           "links": [
@@ -178,7 +164,21 @@
             "href": "wiki:Chart"
           }
         ]
-      }
+      },
+      "seeds": [
+        "bar chart",
+        "histogram"
+      ],
+      "floatingTerms": [
+        "scatter plot",
+        "line graph"
+      ],
+      "terms": [
+        "bar chart",
+        "histogram",
+        "scatter plot",
+        "line graph"
+      ]
     }
   ],
   "bridges": [
@@ -221,5 +221,13 @@
         "graphs-charts": "histogram"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

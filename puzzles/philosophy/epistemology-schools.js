@@ -195,5 +195,13 @@ export default definePuzzle(import.meta.url, {
         "radical freedom"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 });

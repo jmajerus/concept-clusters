@@ -242,6 +242,9 @@ import biostatisticsDesignMeasuresInference from "./public-health/biostatistics-
 import biostatisticsValidityModelsDiagnostics from "./public-health/biostatistics-validity-models-diagnostics.js";
 import restraintInSpeech from "./vocabulary/restraint-in-speech.js";
 import troublesomeNeighbors from "./vocabulary/troublesome-neighbors.js";
+import cinematography from "./film/cinematography.js";
+import octopusPlayAdjudication from "./zoology/octopus-play-adjudication.js";
+import octopusPlayStages from "./zoology/octopus-play-stages.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -494,6 +497,9 @@ export const PUZZLES = [
   biostatisticsValidityModelsDiagnostics,
   restraintInSpeech,
   troublesomeNeighbors,
+  cinematography,
+  octopusPlayAdjudication,
+  octopusPlayStages,
 ];
 
 export default PUZZLES;

@@ -259,5 +259,13 @@ export default definePuzzle(import.meta.url, {
         "psychological safety": "The standing belief already in place, prior to any one instance of testing it."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

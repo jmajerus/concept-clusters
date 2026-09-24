@@ -17,20 +17,6 @@
       "name": "Recognition and regard",
       "color": "teal",
       "fact": "Recognition resists reduction by attending to a person's dignity, standpoint, particular circumstances, and vulnerability to scapegoating.",
-      "seeds": [
-        "human dignity",
-        "perspective-taking"
-      ],
-      "floatingTerms": [
-        "particularity",
-        "refusal of scapegoating"
-      ],
-      "terms": [
-        "human dignity",
-        "perspective-taking",
-        "particularity",
-        "refusal of scapegoating"
-      ],
       "termInfo": {
         "human dignity": {
           "text": "The standing of each person as worthy of respect and not merely usable as a means.",
@@ -71,27 +57,27 @@
             "href": "wiki:Recognition (sociology)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "human dignity",
+        "perspective-taking"
+      ],
+      "floatingTerms": [
+        "particularity",
+        "refusal of scapegoating"
+      ],
+      "terms": [
+        "human dignity",
+        "perspective-taking",
+        "particularity",
+        "refusal of scapegoating"
+      ]
     },
     {
       "id": "restraint-under-strain",
       "name": "Restraint under strain",
       "color": "blue",
       "fact": "Restorative restraint is not passivity: it is the practiced capacity to slow escalation, preserve proportionality, admit uncertainty, and seek coordination without coercive conformity.",
-      "seeds": [
-        "cultivated restraint",
-        "proportional response"
-      ],
-      "floatingTerms": [
-        "uncertainty acknowledgment",
-        "non-coercive alignment"
-      ],
-      "terms": [
-        "cultivated restraint",
-        "proportional response",
-        "uncertainty acknowledgment",
-        "non-coercive alignment"
-      ],
       "termInfo": {
         "cultivated restraint": {
           "text": "A practiced ability to pause, limit force, and retain judgment under pressure rather than relying on impulse alone.",
@@ -132,27 +118,27 @@
             "href": "wiki:Self-control"
           }
         ]
-      }
+      },
+      "seeds": [
+        "cultivated restraint",
+        "proportional response"
+      ],
+      "floatingTerms": [
+        "uncertainty acknowledgment",
+        "non-coercive alignment"
+      ],
+      "terms": [
+        "cultivated restraint",
+        "proportional response",
+        "uncertainty acknowledgment",
+        "non-coercive alignment"
+      ]
     },
     {
       "id": "institutional-integrity",
       "name": "Institutional integrity",
       "color": "amber",
       "fact": "Institutional integrity protects role boundaries, dissent, understandable reasons, and review so that authority remains answerable rather than self-sealing.",
-      "seeds": [
-        "legitimate dissent",
-        "reviewable decisions"
-      ],
-      "floatingTerms": [
-        "role integrity",
-        "transparent reasons"
-      ],
-      "terms": [
-        "role integrity",
-        "legitimate dissent",
-        "transparent reasons",
-        "reviewable decisions"
-      ],
       "termInfo": {
         "role integrity": {
           "text": "Fulfilling a role's legitimate responsibilities without allowing pressure, loyalty, or convenience to displace its ethical limits.",
@@ -193,27 +179,27 @@
             "href": "wiki:Accountability"
           }
         ]
-      }
+      },
+      "seeds": [
+        "legitimate dissent",
+        "reviewable decisions"
+      ],
+      "floatingTerms": [
+        "role integrity",
+        "transparent reasons"
+      ],
+      "terms": [
+        "role integrity",
+        "legitimate dissent",
+        "transparent reasons",
+        "reviewable decisions"
+      ]
     },
     {
       "id": "repair-and-reintegration",
       "name": "Repair and reintegration",
       "color": "magenta",
       "fact": "Repair neither denies harm nor freezes anyone permanently within it; it joins acknowledgment and restitution with work toward restored relationship and participation.",
-      "seeds": [
-        "acknowledgment of harm",
-        "restitution"
-      ],
-      "floatingTerms": [
-        "relationship repair",
-        "reintegration"
-      ],
-      "terms": [
-        "acknowledgment of harm",
-        "restitution",
-        "relationship repair",
-        "reintegration"
-      ],
       "termInfo": {
         "acknowledgment of harm": {
           "text": "A truthful recognition that an action or system caused injury, loss, humiliation, or exclusion.",
@@ -254,7 +240,21 @@
             "href": "wiki:Reconciliation (reconciliation studies)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "acknowledgment of harm",
+        "restitution"
+      ],
+      "floatingTerms": [
+        "relationship repair",
+        "reintegration"
+      ],
+      "terms": [
+        "acknowledgment of harm",
+        "restitution",
+        "relationship repair",
+        "reintegration"
+      ]
     }
   ],
   "bridges": [
@@ -411,6 +411,15 @@
           "moral judgment",
           "barriers to correction"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

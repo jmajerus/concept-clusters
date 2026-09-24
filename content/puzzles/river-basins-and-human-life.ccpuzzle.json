@@ -17,20 +17,6 @@
       "name": "River system",
       "color": "teal",
       "fact": "A basin works as a connected system: headwaters and tributaries gather water, floodplains exchange water and sediment with the channel, and deltas form where rivers meet standing water.",
-      "seeds": [
-        "headwaters",
-        "delta"
-      ],
-      "floatingTerms": [
-        "tributary network",
-        "floodplain"
-      ],
-      "terms": [
-        "headwaters",
-        "tributary network",
-        "floodplain",
-        "delta"
-      ],
       "termInfo": {
         "headwaters": {
           "text": "The upper streams and source areas where a river system begins.",
@@ -71,27 +57,27 @@
             "href": "wiki:Drainage basin"
           }
         ]
-      }
+      },
+      "seeds": [
+        "headwaters",
+        "delta"
+      ],
+      "floatingTerms": [
+        "tributary network",
+        "floodplain"
+      ],
+      "terms": [
+        "headwaters",
+        "tributary network",
+        "floodplain",
+        "delta"
+      ]
     },
     {
       "id": "human-uses",
       "name": "Human uses",
       "color": "blue",
       "fact": "River water and channels support agriculture, transport, electricity generation, and fisheries, but one use can change the flows and habitats on which another depends.",
-      "seeds": [
-        "irrigation",
-        "navigation"
-      ],
-      "floatingTerms": [
-        "hydropower",
-        "inland fisheries"
-      ],
-      "terms": [
-        "irrigation",
-        "navigation",
-        "hydropower",
-        "inland fisheries"
-      ],
       "termInfo": {
         "irrigation": {
           "text": "The managed application of water to crops through canals, pumps, pipes, reservoirs, or other systems.",
@@ -132,27 +118,27 @@
             "href": "wiki:Water resources"
           }
         ]
-      }
+      },
+      "seeds": [
+        "irrigation",
+        "navigation"
+      ],
+      "floatingTerms": [
+        "hydropower",
+        "inland fisheries"
+      ],
+      "terms": [
+        "irrigation",
+        "navigation",
+        "hydropower",
+        "inland fisheries"
+      ]
     },
     {
       "id": "hazards-and-pressures",
       "name": "Hazards and pressures",
       "color": "amber",
       "fact": "River basins redistribute both benefits and risks: floods, drought, erosion, and pollution can originate in one place and affect communities or ecosystems far downstream.",
-      "seeds": [
-        "seasonal flooding",
-        "drought"
-      ],
-      "floatingTerms": [
-        "bank erosion",
-        "water pollution"
-      ],
-      "terms": [
-        "seasonal flooding",
-        "drought",
-        "bank erosion",
-        "water pollution"
-      ],
       "termInfo": {
         "seasonal flooding": {
           "text": "Recurring high water associated with a basin's annual rainfall, snowmelt, or monsoon cycle.",
@@ -193,27 +179,27 @@
             "href": "wiki:River engineering"
           }
         ]
-      }
+      },
+      "seeds": [
+        "seasonal flooding",
+        "drought"
+      ],
+      "floatingTerms": [
+        "bank erosion",
+        "water pollution"
+      ],
+      "terms": [
+        "seasonal flooding",
+        "drought",
+        "bank erosion",
+        "water pollution"
+      ]
     },
     {
       "id": "governance-and-response",
       "name": "Governance and response",
       "color": "magenta",
       "fact": "Managing a basin requires decisions about infrastructure, land use, emergencies, water allocation, and upstream-downstream effects rather than treating each river reach in isolation.",
-      "seeds": [
-        "dam operation",
-        "watershed management"
-      ],
-      "floatingTerms": [
-        "water-sharing agreement",
-        "floodplain zoning"
-      ],
-      "terms": [
-        "dam operation",
-        "water-sharing agreement",
-        "floodplain zoning",
-        "watershed management"
-      ],
       "termInfo": {
         "dam operation": {
           "text": "The rules and decisions used to store and release reservoir water for purposes such as power, water supply, ecology, and flood reduction.",
@@ -254,7 +240,21 @@
             "href": "wiki:Integrated water resources management"
           }
         ]
-      }
+      },
+      "seeds": [
+        "dam operation",
+        "watershed management"
+      ],
+      "floatingTerms": [
+        "water-sharing agreement",
+        "floodplain zoning"
+      ],
+      "terms": [
+        "dam operation",
+        "water-sharing agreement",
+        "floodplain zoning",
+        "watershed management"
+      ]
     }
   ],
   "bridges": [
@@ -452,6 +452,15 @@
           "irrigation",
           "floodplains"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

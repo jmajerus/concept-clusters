@@ -454,5 +454,14 @@ export default definePuzzle(import.meta.url, {
         "reduced participation": "The person may withdraw from useful transactions or services because the perceived cost of engagement has risen."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

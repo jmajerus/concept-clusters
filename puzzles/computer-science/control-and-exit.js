@@ -463,5 +463,14 @@ export default definePuzzle(import.meta.url, {
         "asymmetric friction": "The effort required depends on whether the person's goal serves or conflicts with the business's interests."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

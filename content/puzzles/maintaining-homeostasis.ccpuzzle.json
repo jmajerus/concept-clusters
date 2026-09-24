@@ -19,20 +19,6 @@
       "name": "Monitoring conditions",
       "color": "teal",
       "fact": "Homeostatic control begins when a receptor detects a stimulus—a change in a regulated variable—and converts information about it into a sensory signal.",
-      "seeds": [
-        "stimulus",
-        "receptor"
-      ],
-      "floatingTerms": [
-        "regulated variable",
-        "sensory signal"
-      ],
-      "terms": [
-        "regulated variable",
-        "stimulus",
-        "receptor",
-        "sensory signal"
-      ],
       "termInfo": {
         "regulated variable": {
           "text": "A measurable internal condition, such as temperature, blood glucose or carbon dioxide, that regulatory mechanisms keep within workable limits.",
@@ -88,27 +74,27 @@
             "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-5-homeostasis"
           }
         ]
-      }
+      },
+      "seeds": [
+        "stimulus",
+        "receptor"
+      ],
+      "floatingTerms": [
+        "regulated variable",
+        "sensory signal"
+      ],
+      "terms": [
+        "regulated variable",
+        "stimulus",
+        "receptor",
+        "sensory signal"
+      ]
     },
     {
       "id": "comparing-with-a-target",
       "name": "Comparing with a target",
       "color": "blue",
       "fact": "A control center integrates incoming information, compares the regulated variable with a set point or acceptable range, and determines whether a corrective response is needed.",
-      "seeds": [
-        "control center",
-        "set point"
-      ],
-      "floatingTerms": [
-        "normal range",
-        "integration"
-      ],
-      "terms": [
-        "control center",
-        "set point",
-        "normal range",
-        "integration"
-      ],
       "termInfo": {
         "control center": {
           "text": "The coordinating part of a regulatory system that evaluates input and determines an appropriate response; the hypothalamus serves this role in many homeostatic processes.",
@@ -164,27 +150,27 @@
             "href": "https://my.clevelandclinic.org/health/body/22566-hypothalamus"
           }
         ]
-      }
+      },
+      "seeds": [
+        "control center",
+        "set point"
+      ],
+      "floatingTerms": [
+        "normal range",
+        "integration"
+      ],
+      "terms": [
+        "control center",
+        "set point",
+        "normal range",
+        "integration"
+      ]
     },
     {
       "id": "producing-a-correction",
       "name": "Producing a correction",
       "color": "amber",
       "fact": "An output signal activates an effector, whose physiological response moves the regulated variable toward dynamic balance rather than holding it perfectly constant.",
-      "seeds": [
-        "effector",
-        "physiological response"
-      ],
-      "floatingTerms": [
-        "output signal",
-        "dynamic equilibrium"
-      ],
-      "terms": [
-        "output signal",
-        "effector",
-        "physiological response",
-        "dynamic equilibrium"
-      ],
       "termInfo": {
         "output signal": {
           "text": "A neural or hormonal instruction sent from a control center toward the tissue that will carry out the response.",
@@ -240,7 +226,21 @@
             "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-5-homeostasis"
           }
         ]
-      }
+      },
+      "seeds": [
+        "effector",
+        "physiological response"
+      ],
+      "floatingTerms": [
+        "output signal",
+        "dynamic equilibrium"
+      ],
+      "terms": [
+        "output signal",
+        "effector",
+        "physiological response",
+        "dynamic equilibrium"
+      ]
     }
   ],
   "bridges": [
@@ -264,14 +264,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "monitoring-conditions": "receptor",
+        "comparing-with-a-target": "control center"
+      },
       "direction": {
         "kind": "through",
         "from": "monitoring-conditions",
         "to": "comparing-with-a-target"
-      },
-      "idealTerms": {
-        "monitoring-conditions": "receptor",
-        "comparing-with-a-target": "control center"
       }
     },
     {
@@ -294,14 +294,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "comparing-with-a-target": "control center",
+        "producing-a-correction": "effector"
+      },
       "direction": {
         "kind": "through",
         "from": "comparing-with-a-target",
         "to": "producing-a-correction"
-      },
-      "idealTerms": {
-        "comparing-with-a-target": "control center",
-        "producing-a-correction": "effector"
       }
     },
     {
@@ -325,14 +325,14 @@
       },
       "conceptId": "negative-feedback",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "producing-a-correction": "physiological response",
+        "monitoring-conditions": "regulated variable"
+      },
       "direction": {
         "kind": "through",
         "from": "producing-a-correction",
         "to": "monitoring-conditions"
-      },
-      "idealTerms": {
-        "producing-a-correction": "physiological response",
-        "monitoring-conditions": "regulated variable"
       }
     }
   ],
@@ -356,6 +356,14 @@
           "blood gases",
           "negative feedback"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
       }
     ]
   }

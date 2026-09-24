@@ -294,5 +294,13 @@ export default definePuzzle(import.meta.url, {
         "scene": "Combines shots joined by continuity editing into one place and time."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

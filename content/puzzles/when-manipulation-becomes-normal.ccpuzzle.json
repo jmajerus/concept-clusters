@@ -27,22 +27,6 @@
       "name": "Strategic incentives",
       "color": "teal",
       "fact": "Organizations define what counts as success through targets, rewards, and oversight. Those choices determine which outcomes become visible, whose interests are prioritized, and what pressures flow downward.",
-      "seeds": [
-        "conversion target",
-        "board oversight"
-      ],
-      "floatingTerms": [
-        "retention target",
-        "data growth target",
-        "executive compensation"
-      ],
-      "terms": [
-        "conversion target",
-        "retention target",
-        "data growth target",
-        "executive compensation",
-        "board oversight"
-      ],
       "termInfo": {
         "conversion target": {
           "text": "A goal for increasing the share of users who purchase, subscribe, consent, register, or complete another business-valued action.",
@@ -91,29 +75,29 @@
             "href": "https://www.ftc.gov/news-events/events/2021/04/bringing-dark-patterns-light-ftc-workshop"
           }
         ]
-      }
+      },
+      "seeds": [
+        "conversion target",
+        "board oversight"
+      ],
+      "floatingTerms": [
+        "retention target",
+        "data growth target",
+        "executive compensation"
+      ],
+      "terms": [
+        "conversion target",
+        "retention target",
+        "data growth target",
+        "executive compensation",
+        "board oversight"
+      ]
     },
     {
       "id": "optimization-machinery",
       "name": "Optimization machinery",
       "color": "blue",
       "fact": "Strategic goals become operational through dashboards, experiments, cascading KPIs, and rollout processes that can select effective behavior without asking whether the behavior should be produced.",
-      "seeds": [
-        "analytics dashboard",
-        "A/B experiment"
-      ],
-      "floatingTerms": [
-        "winning variant",
-        "KPI cascade",
-        "rapid rollout"
-      ],
-      "terms": [
-        "analytics dashboard",
-        "A/B experiment",
-        "winning variant",
-        "KPI cascade",
-        "rapid rollout"
-      ],
       "termInfo": {
         "analytics dashboard": {
           "text": "A display that makes selected outcomes continuously visible while leaving unmeasured harms or externalities comparatively obscure.",
@@ -162,29 +146,29 @@
             "href": "https://www.ftc.gov/news-events/events/2021/04/bringing-dark-patterns-light-ftc-workshop"
           }
         ]
-      }
+      },
+      "seeds": [
+        "analytics dashboard",
+        "A/B experiment"
+      ],
+      "floatingTerms": [
+        "winning variant",
+        "KPI cascade",
+        "rapid rollout"
+      ],
+      "terms": [
+        "analytics dashboard",
+        "A/B experiment",
+        "winning variant",
+        "KPI cascade",
+        "rapid rollout"
+      ]
     },
     {
       "id": "organizational-normalization",
       "name": "Organizational normalization",
       "color": "amber",
       "fact": "Repeated performance gains, survivable complaints, prior precedent, competitor behavior, and divided roles can gradually make a questionable tactic feel routine rather than exceptional.",
-      "seeds": [
-        "successful precedent",
-        "responsibility diffusion"
-      ],
-      "floatingTerms": [
-        "tolerated complaint rate",
-        "ethical fading",
-        "competitor imitation"
-      ],
-      "terms": [
-        "tolerated complaint rate",
-        "successful precedent",
-        "ethical fading",
-        "competitor imitation",
-        "responsibility diffusion"
-      ],
       "termInfo": {
         "tolerated complaint rate": {
           "text": "A level of user objection treated as an acceptable cost of achieving business targets rather than a reason to reconsider the practice.",
@@ -233,29 +217,29 @@
             "href": "https://doi.org/10.1023/B:SORE.0000027411.35832.53"
           }
         ]
-      }
+      },
+      "seeds": [
+        "successful precedent",
+        "responsibility diffusion"
+      ],
+      "floatingTerms": [
+        "tolerated complaint rate",
+        "ethical fading",
+        "competitor imitation"
+      ],
+      "terms": [
+        "tolerated complaint rate",
+        "successful precedent",
+        "ethical fading",
+        "competitor imitation",
+        "responsibility diffusion"
+      ]
     },
     {
       "id": "business-and-market-consequences",
       "name": "Business and market consequences",
       "color": "magenta",
       "fact": "Manipulative practices can damage relationships inside and outside the firm through customer distrust, employee ethical strain, reputational harm, regulatory exposure, and suspicion that spreads across the wider market.",
-      "seeds": [
-        "customer distrust",
-        "employee ethical strain"
-      ],
-      "floatingTerms": [
-        "reputational damage",
-        "regulatory exposure",
-        "market-wide distrust"
-      ],
-      "terms": [
-        "customer distrust",
-        "employee ethical strain",
-        "reputational damage",
-        "regulatory exposure",
-        "market-wide distrust"
-      ],
       "termInfo": {
         "customer distrust": {
           "text": "Reduced confidence that a business's prices, claims, controls, and disclosures can be relied upon without defensive verification.",
@@ -304,7 +288,23 @@
             "href": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "customer distrust",
+        "employee ethical strain"
+      ],
+      "floatingTerms": [
+        "reputational damage",
+        "regulatory exposure",
+        "market-wide distrust"
+      ],
+      "terms": [
+        "customer distrust",
+        "employee ethical strain",
+        "reputational damage",
+        "regulatory exposure",
+        "market-wide distrust"
+      ]
     }
   ],
   "bridges": [
@@ -325,14 +325,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "strategic-incentives": "conversion target",
+        "optimization-machinery": "A/B experiment"
+      },
       "direction": {
         "kind": "through",
         "from": "strategic-incentives",
         "to": "optimization-machinery"
-      },
-      "idealTerms": {
-        "strategic-incentives": "conversion target",
-        "optimization-machinery": "A/B experiment"
       }
     },
     {
@@ -352,14 +352,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "optimization-machinery": "winning variant",
+        "organizational-normalization": "successful precedent"
+      },
       "direction": {
         "kind": "through",
         "from": "optimization-machinery",
         "to": "organizational-normalization"
-      },
-      "idealTerms": {
-        "optimization-machinery": "winning variant",
-        "organizational-normalization": "successful precedent"
       }
     },
     {
@@ -379,14 +379,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "organizational-normalization": "competitor imitation",
+        "business-and-market-consequences": "market-wide distrust"
+      },
       "direction": {
         "kind": "through",
         "from": "organizational-normalization",
         "to": "business-and-market-consequences"
-      },
-      "idealTerms": {
-        "organizational-normalization": "competitor imitation",
-        "business-and-market-consequences": "market-wide distrust"
       }
     }
   ],
@@ -473,5 +473,14 @@
         "market-wide distrust": "Suspicion can generalize to honest businesses and reduce confidence in digital commerce more broadly."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

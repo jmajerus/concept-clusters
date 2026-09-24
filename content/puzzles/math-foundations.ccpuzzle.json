@@ -8,20 +8,6 @@
       "name": "Number systems",
       "color": "teal",
       "fact": "Integers, fractions, and decimals are different ways of writing quantity.",
-      "seeds": [
-        "integers",
-        "fractions"
-      ],
-      "floatingTerms": [
-        "decimals",
-        "negative numbers"
-      ],
-      "terms": [
-        "integers",
-        "fractions",
-        "decimals",
-        "negative numbers"
-      ],
       "termInfo": {
         "integers": {
           "links": [
@@ -59,27 +45,27 @@
             "href": "wiki:Number"
           }
         ]
-      }
+      },
+      "seeds": [
+        "integers",
+        "fractions"
+      ],
+      "floatingTerms": [
+        "decimals",
+        "negative numbers"
+      ],
+      "terms": [
+        "integers",
+        "fractions",
+        "decimals",
+        "negative numbers"
+      ]
     },
     {
       "id": "geometry",
       "name": "Geometry",
       "color": "blue",
       "fact": "Geometry studies shapes and the space they occupy.",
-      "seeds": [
-        "angles",
-        "polygons"
-      ],
-      "floatingTerms": [
-        "circles",
-        "symmetry"
-      ],
-      "terms": [
-        "angles",
-        "polygons",
-        "circles",
-        "symmetry"
-      ],
       "termInfo": {
         "angles": {
           "text": "The figure formed by two rays sharing an endpoint, measured by how much one would need to rotate to meet the other.",
@@ -118,27 +104,27 @@
             "href": "wiki:Geometry"
           }
         ]
-      }
+      },
+      "seeds": [
+        "angles",
+        "polygons"
+      ],
+      "floatingTerms": [
+        "circles",
+        "symmetry"
+      ],
+      "terms": [
+        "angles",
+        "polygons",
+        "circles",
+        "symmetry"
+      ]
     },
     {
       "id": "measurement",
       "name": "Measurement",
       "color": "amber",
       "fact": "Measurement assigns numbers to real-world quantities using units.",
-      "seeds": [
-        "length",
-        "mass"
-      ],
-      "floatingTerms": [
-        "time",
-        "volume"
-      ],
-      "terms": [
-        "length",
-        "mass",
-        "time",
-        "volume"
-      ],
       "termInfo": {
         "length": {
           "links": [
@@ -176,7 +162,21 @@
             "href": "wiki:Measurement"
           }
         ]
-      }
+      },
+      "seeds": [
+        "length",
+        "mass"
+      ],
+      "floatingTerms": [
+        "time",
+        "volume"
+      ],
+      "terms": [
+        "length",
+        "mass",
+        "time",
+        "volume"
+      ]
     }
   ],
   "bridges": [
@@ -220,5 +220,14 @@
         "measurement": "length"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

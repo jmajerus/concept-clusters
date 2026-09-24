@@ -20,18 +20,6 @@
       "name": "Profit and Power",
       "color": "olive",
       "fact": "These three don't just criticize war -- they follow the money and the power. Butler names the corporations that profited from the war he fought in; Engelbrecht and Hanighen's expose of the international arms trade helped provoke a Senate investigation into it; and Bourne argues the deepest profit isn't financial at all, but the vast, temporary power a state seizes over its own citizens once it declares war.",
-      "seeds": [
-        "War Is a Racket",
-        "War is the health of the State"
-      ],
-      "floatingTerms": [
-        "Merchants of Death"
-      ],
-      "terms": [
-        "War Is a Racket",
-        "War is the health of the State",
-        "Merchants of Death"
-      ],
       "termInfo": {
         "Merchants of Death": {
           "text": "A 1934 investigative book on the international arms trade that helped provoke the Senate's Nye Committee hearings into WWI munitions profits.",
@@ -57,25 +45,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "War Is a Racket",
+        "War is the health of the State"
+      ],
+      "floatingTerms": [
+        "Merchants of Death"
+      ],
+      "terms": [
+        "War Is a Racket",
+        "War is the health of the State",
+        "Merchants of Death"
+      ]
     },
     {
       "id": "the-bodys-testimony",
       "name": "The Body's Testimony",
       "color": "brown",
       "fact": "Trumbo, Owen, and Remarque each refuse to let the reader stay at a comfortable distance from what a shell actually does to a human body -- Owen wrote his poem from a hospital bed for shell shock, and Remarque's novel is now so closely identified with the war's physical horror that its title has become shorthand for trench warfare itself.",
-      "seeds": [
-        "All Quiet on the Western Front",
-        "Johnny Got His Gun"
-      ],
-      "floatingTerms": [
-        "Dulce et Decorum Est"
-      ],
-      "terms": [
-        "All Quiet on the Western Front",
-        "Johnny Got His Gun",
-        "Dulce et Decorum Est"
-      ],
       "termInfo": {
         "All Quiet on the Western Front": {
           "text": "Erich Maria Remarque's 1929 novel of German soldiers on the WWI front, drawn from his own service.",
@@ -101,25 +89,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "All Quiet on the Western Front",
+        "Johnny Got His Gun"
+      ],
+      "floatingTerms": [
+        "Dulce et Decorum Est"
+      ],
+      "terms": [
+        "All Quiet on the Western Front",
+        "Johnny Got His Gun",
+        "Dulce et Decorum Est"
+      ]
     },
     {
       "id": "the-absurdist-indictment",
       "name": "The Absurdist Indictment",
       "color": "magenta",
       "fact": "Heller and Vonnegut are both working in a tradition Hašek established decades earlier: instead of describing war's horror directly, all three make its bureaucratic logic look so insane that description becomes unnecessary -- the institution indicts itself.",
-      "seeds": [
-        "Catch-22",
-        "Slaughterhouse-Five"
-      ],
-      "floatingTerms": [
-        "The Good Soldier Švejk"
-      ],
-      "terms": [
-        "Catch-22",
-        "Slaughterhouse-Five",
-        "The Good Soldier Švejk"
-      ],
       "termInfo": {
         "Catch-22": {
           "text": "Joseph Heller's 1961 satirical novel, drawn from his own service as a WWII bombardier.",
@@ -145,25 +133,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Catch-22",
+        "Slaughterhouse-Five"
+      ],
+      "floatingTerms": [
+        "The Good Soldier Švejk"
+      ],
+      "terms": [
+        "Catch-22",
+        "Slaughterhouse-Five",
+        "The Good Soldier Švejk"
+      ]
     },
     {
       "id": "grief-and-the-long-return",
       "name": "Grief and the Long Return",
       "color": "blue",
       "fact": "None of these three is a battlefield account written in the moment -- O'Brien and Brittain are both reconstructing loss from years of distance, and Sassoon's declaration wasn't published as literature at all, but as an active-duty officer's public act of defiance, for which the military's answer was to declare him mentally unfit rather than hear his argument.",
-      "seeds": [
-        "The Things They Carried",
-        "Testament of Youth"
-      ],
-      "floatingTerms": [
-        "A Soldier's Declaration"
-      ],
-      "terms": [
-        "The Things They Carried",
-        "Testament of Youth",
-        "A Soldier's Declaration"
-      ],
       "termInfo": {
         "A Soldier's Declaration": {
           "text": "Siegfried Sassoon's 1917 public letter refusing to return to combat, read into the record of the House of Commons.",
@@ -189,7 +177,19 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "The Things They Carried",
+        "Testament of Youth"
+      ],
+      "floatingTerms": [
+        "A Soldier's Declaration"
+      ],
+      "terms": [
+        "The Things They Carried",
+        "Testament of Youth",
+        "A Soldier's Declaration"
+      ]
     }
   ],
   "bridges": [
@@ -210,14 +210,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "grief-and-the-long-return": "A Soldier's Declaration",
+        "the-bodys-testimony": "Dulce et Decorum Est"
+      },
       "direction": {
         "kind": "through",
         "from": "grief-and-the-long-return",
         "to": "the-bodys-testimony"
-      },
-      "idealTerms": {
-        "grief-and-the-long-return": "A Soldier's Declaration",
-        "the-bodys-testimony": "Dulce et Decorum Est"
       }
     },
     {
@@ -237,14 +237,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "profit-and-power": "War is the health of the State",
+        "grief-and-the-long-return": "A Soldier's Declaration"
+      },
       "direction": {
         "kind": "through",
         "from": "profit-and-power",
         "to": "grief-and-the-long-return"
-      },
-      "idealTerms": {
-        "profit-and-power": "War is the health of the State",
-        "grief-and-the-long-return": "A Soldier's Declaration"
       }
     }
   ],

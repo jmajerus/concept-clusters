@@ -2,7 +2,6 @@
   "id": "video-game-history",
   "title": "Video Game History",
   "category": "trivia",
-  "large": true,
   "info": {
     "text": "Four chapters in video game history, from coin-operated breakthroughs to modern console worlds.",
     "citations": [
@@ -28,7 +27,7 @@
   },
   "clusters": [
     {
-      "id": "cluster-arcade-breakthroughs",
+      "id": "arcade-breakthroughs",
       "name": "Arcade Breakthroughs",
       "color": "teal",
       "fact": "Arcade hits taught a mass audience the grammar of real-time play: simple controls, escalating challenge, high scores, and instantly recognizable characters.",
@@ -48,7 +47,7 @@
       ]
     },
     {
-      "id": "cluster-nintendo-adventures",
+      "id": "nintendo-adventures",
       "name": "Nintendo Adventures",
       "color": "blue",
       "fact": "Nintendo's home-console series made exploration, character movement, and secrets central to long-lived game worlds.",
@@ -68,7 +67,7 @@
       ]
     },
     {
-      "id": "cluster-computer-game-landmarks",
+      "id": "computer-game-landmarks",
       "name": "Computer Game Landmarks",
       "color": "amber",
       "fact": "Personal computers supported distinctive forms of play, including simulation, environmental puzzles, fast first-person action, and real-time strategy.",
@@ -88,7 +87,7 @@
       ]
     },
     {
-      "id": "cluster-modern-console-worlds",
+      "id": "modern-console-worlds",
       "name": "Modern Console Worlds",
       "color": "magenta",
       "fact": "Twenty-first-century console blockbusters expanded cinematic storytelling, online multiplayer, motion control, and freely explorable cities.",
@@ -220,5 +219,13 @@
     }
   ],
   "lensMode": "quiz",
-  "preSolve": true
+  "preSolve": true,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
+      }
+    ]
+  }
 }

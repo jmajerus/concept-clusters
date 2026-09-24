@@ -20,20 +20,6 @@
       "name": "Promises of the universal web",
       "color": "teal",
       "fact": "Web development was presented as a universal solution: one application could reach many systems immediately without conventional installation or separate distribution for each platform.",
-      "seeds": [
-        "runs anywhere",
-        "no installation"
-      ],
-      "floatingTerms": [
-        "one codebase",
-        "instant updates"
-      ],
-      "terms": [
-        "runs anywhere",
-        "no installation",
-        "one codebase",
-        "instant updates"
-      ],
       "termInfo": {
         "runs anywhere": {
           "text": "The promise that standards-based browser software can reach many operating systems and devices through one broadly available runtime.",
@@ -74,27 +60,27 @@
             "href": "wiki:Web application"
           }
         ]
-      }
+      },
+      "seeds": [
+        "runs anywhere",
+        "no installation"
+      ],
+      "floatingTerms": [
+        "one codebase",
+        "instant updates"
+      ],
+      "terms": [
+        "runs anywhere",
+        "no installation",
+        "one codebase",
+        "instant updates"
+      ]
     },
     {
       "id": "organizational-rewards",
       "name": "Organizational rewards",
       "color": "blue",
       "fact": "Browser delivery gives software providers unusual control over deployment, version replacement, observation, monetization, and the continued availability of features.",
-      "seeds": [
-        "centralized deployment",
-        "usage telemetry"
-      ],
-      "floatingTerms": [
-        "forced version replacement",
-        "subscription enforcement"
-      ],
-      "terms": [
-        "centralized deployment",
-        "forced version replacement",
-        "usage telemetry",
-        "subscription enforcement"
-      ],
       "termInfo": {
         "centralized deployment": {
           "text": "Publishing and operating one served application so release decisions remain concentrated in the provider's infrastructure.",
@@ -135,27 +121,27 @@
             "href": "wiki:Software as a service"
           }
         ]
-      }
+      },
+      "seeds": [
+        "centralized deployment",
+        "usage telemetry"
+      ],
+      "floatingTerms": [
+        "forced version replacement",
+        "subscription enforcement"
+      ],
+      "terms": [
+        "centralized deployment",
+        "forced version replacement",
+        "usage telemetry",
+        "subscription enforcement"
+      ]
     },
     {
       "id": "costs-transferred-to-users",
       "name": "Costs transferred to users",
       "color": "amber",
       "fact": "Savings in distribution and platform-specific development can reappear as connectivity requirements, latency, resource use, and interfaces shaped around browser constraints rather than the work itself.",
-      "seeds": [
-        "network dependence",
-        "input latency"
-      ],
-      "floatingTerms": [
-        "memory overhead",
-        "interface inconsistency"
-      ],
-      "terms": [
-        "network dependence",
-        "input latency",
-        "memory overhead",
-        "interface inconsistency"
-      ],
       "termInfo": {
         "network dependence": {
           "text": "Reliance on a continuing connection or remote service for ordinary access, synchronization, authorization, or computation.",
@@ -196,27 +182,27 @@
             "href": "wiki:Usability"
           }
         ]
-      }
+      },
+      "seeds": [
+        "network dependence",
+        "input latency"
+      ],
+      "floatingTerms": [
+        "memory overhead",
+        "interface inconsistency"
+      ],
+      "terms": [
+        "network dependence",
+        "input latency",
+        "memory overhead",
+        "interface inconsistency"
+      ]
     },
     {
       "id": "native-powers-displaced",
       "name": "Native powers displaced",
       "color": "magenta",
       "fact": "Native applications can treat the computer as an autonomous working environment, with persistent local state, long-running processes, specialized hardware access, and versions the user may retain.",
-      "seeds": [
-        "durable local files",
-        "direct hardware integration"
-      ],
-      "floatingTerms": [
-        "sustained background work",
-        "user-controlled versions"
-      ],
-      "terms": [
-        "durable local files",
-        "sustained background work",
-        "direct hardware integration",
-        "user-controlled versions"
-      ],
       "termInfo": {
         "durable local files": {
           "text": "Files held under ordinary user and operating-system control rather than existing primarily as browser cache or remote service state.",
@@ -257,7 +243,21 @@
             "href": "wiki:Desktop application"
           }
         ]
-      }
+      },
+      "seeds": [
+        "durable local files",
+        "direct hardware integration"
+      ],
+      "floatingTerms": [
+        "sustained background work",
+        "user-controlled versions"
+      ],
+      "terms": [
+        "durable local files",
+        "sustained background work",
+        "direct hardware integration",
+        "user-controlled versions"
+      ]
     }
   ],
   "bridges": [
@@ -436,6 +436,15 @@
           "security boundary",
           "web APIs"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

@@ -23,20 +23,6 @@
       "name": "Visible offer",
       "color": "teal",
       "fact": "People form a working model of a transaction from the visible price, the item they selected, and the payment arrangement presented at the point of choice.",
-      "seeds": [
-        "advertised price",
-        "chosen product"
-      ],
-      "floatingTerms": [
-        "one-off expectation",
-        "free trial"
-      ],
-      "terms": [
-        "advertised price",
-        "chosen product",
-        "one-off expectation",
-        "free trial"
-      ],
       "termInfo": {
         "advertised price": {
           "text": "The price made salient when the user first evaluates whether to begin a purchase.",
@@ -77,27 +63,27 @@
             "href": "https://deceptive.design/book/contents/chapter-14/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "advertised price",
+        "chosen product"
+      ],
+      "floatingTerms": [
+        "one-off expectation",
+        "free trial"
+      ],
+      "terms": [
+        "advertised price",
+        "chosen product",
+        "one-off expectation",
+        "free trial"
+      ]
     },
     {
       "id": "concealed-terms",
       "name": "Concealed terms",
       "color": "blue",
       "fact": "Sneaking changes the meaning of a transaction by hiding, delaying, or silently applying information that would matter to an informed choice.",
-      "seeds": [
-        "delayed disclosure",
-        "undisclosed add-on"
-      ],
-      "floatingTerms": [
-        "obscured recurring terms",
-        "silent enrollment"
-      ],
-      "terms": [
-        "delayed disclosure",
-        "undisclosed add-on",
-        "obscured recurring terms",
-        "silent enrollment"
-      ],
       "termInfo": {
         "delayed disclosure": {
           "text": "Withholding a material cost or condition until the user is well into the transaction.",
@@ -138,27 +124,27 @@
             "href": "https://deceptive.design/types/sneaking/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "delayed disclosure",
+        "undisclosed add-on"
+      ],
+      "floatingTerms": [
+        "obscured recurring terms",
+        "silent enrollment"
+      ],
+      "terms": [
+        "delayed disclosure",
+        "undisclosed add-on",
+        "obscured recurring terms",
+        "silent enrollment"
+      ]
     },
     {
       "id": "leverage-after-entry",
       "name": "Leverage after entry",
       "color": "amber",
       "fact": "Concealment becomes more effective after the user has invested effort, progressed through checkout, supplied payment authority, or stopped receiving information that would reveal later charges.",
-      "seeds": [
-        "checkout progress",
-        "time invested"
-      ],
-      "floatingTerms": [
-        "stored payment method",
-        "missing notification"
-      ],
-      "terms": [
-        "checkout progress",
-        "time invested",
-        "stored payment method",
-        "missing notification"
-      ],
       "termInfo": {
         "checkout progress": {
           "text": "The sequence of forms, selections, account steps, and confirmations already completed before a hidden term appears.",
@@ -199,31 +185,27 @@
             "href": "https://deceptive.design/book/contents/chapter-14/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "checkout progress",
+        "time invested"
+      ],
+      "floatingTerms": [
+        "stored payment method",
+        "missing notification"
+      ],
+      "terms": [
+        "checkout progress",
+        "time invested",
+        "stored payment method",
+        "missing notification"
+      ]
     },
     {
       "id": "consequences-for-the-person",
       "name": "Consequences for the person",
       "color": "magenta",
       "fact": "The harm is not exhausted by the charge: a hidden transaction can impose an unwanted item or recurring obligation, consume time and attention, create psychological strain, and reduce the person's control over their own commitments.",
-      "seeds": [
-        "unexpected fee",
-        "impaired autonomy"
-      ],
-      "floatingTerms": [
-        "unwanted item",
-        "recurring charge",
-        "time and attention loss",
-        "psychological strain"
-      ],
-      "terms": [
-        "unexpected fee",
-        "unwanted item",
-        "recurring charge",
-        "time and attention loss",
-        "psychological strain",
-        "impaired autonomy"
-      ],
       "termInfo": {
         "unexpected fee": {
           "text": "A charge added after the user evaluated an earlier, incomplete price.",
@@ -280,7 +262,25 @@
             "href": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "unexpected fee",
+        "impaired autonomy"
+      ],
+      "floatingTerms": [
+        "unwanted item",
+        "recurring charge",
+        "time and attention loss",
+        "psychological strain"
+      ],
+      "terms": [
+        "unexpected fee",
+        "unwanted item",
+        "recurring charge",
+        "time and attention loss",
+        "psychological strain",
+        "impaired autonomy"
+      ]
     }
   ],
   "bridges": [
@@ -301,14 +301,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "visible-offer": "advertised price",
+        "concealed-terms": "delayed disclosure"
+      },
       "direction": {
         "kind": "through",
         "from": "visible-offer",
         "to": "concealed-terms"
-      },
-      "idealTerms": {
-        "visible-offer": "advertised price",
-        "concealed-terms": "delayed disclosure"
       }
     },
     {
@@ -328,14 +328,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "concealed-terms": "delayed disclosure",
+        "leverage-after-entry": "time invested"
+      },
       "direction": {
         "kind": "through",
         "from": "concealed-terms",
         "to": "leverage-after-entry"
-      },
-      "idealTerms": {
-        "concealed-terms": "delayed disclosure",
-        "leverage-after-entry": "time invested"
       }
     },
     {
@@ -355,14 +355,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "leverage-after-entry": "stored payment method",
+        "consequences-for-the-person": "recurring charge"
+      },
       "direction": {
         "kind": "through",
         "from": "leverage-after-entry",
         "to": "consequences-for-the-person"
-      },
-      "idealTerms": {
-        "leverage-after-entry": "stored payment method",
-        "consequences-for-the-person": "recurring charge"
       }
     }
   ],
@@ -464,5 +464,14 @@
         "impaired autonomy": "The central injury is that the resulting commitment did not arise from an informed choice aligned with the person's own purposes."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

@@ -283,5 +283,14 @@ export default definePuzzle(import.meta.url, {
         "tuning": "Designers or operators choose the parameters that shape the response."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

@@ -8,18 +8,6 @@
       "name": "Solid",
       "color": "teal",
       "fact": "Solids have a fixed shape and volume because particles are packed tightly and can only vibrate.",
-      "seeds": [
-        "fixed shape",
-        "crystal"
-      ],
-      "floatingTerms": [
-        "rigid"
-      ],
-      "terms": [
-        "fixed shape",
-        "crystal",
-        "rigid"
-      ],
       "termInfo": {
         "fixed shape": {
           "text": "A solid's particles are packed too tightly to move past one another, so the material holds its shape without a container.",
@@ -51,25 +39,25 @@
             "href": "wiki:Solid"
           }
         ]
-      }
+      },
+      "seeds": [
+        "fixed shape",
+        "crystal"
+      ],
+      "floatingTerms": [
+        "rigid"
+      ],
+      "terms": [
+        "fixed shape",
+        "crystal",
+        "rigid"
+      ]
     },
     {
       "id": "liquid",
       "name": "Liquid",
       "color": "blue",
       "fact": "Liquids take the shape of their container while keeping a fixed volume.",
-      "seeds": [
-        "surface tension",
-        "viscosity"
-      ],
-      "floatingTerms": [
-        "flow"
-      ],
-      "terms": [
-        "surface tension",
-        "viscosity",
-        "flow"
-      ],
       "termInfo": {
         "surface tension": {
           "links": [
@@ -100,27 +88,25 @@
             "href": "wiki:Liquid"
           }
         ]
-      }
+      },
+      "seeds": [
+        "surface tension",
+        "viscosity"
+      ],
+      "floatingTerms": [
+        "flow"
+      ],
+      "terms": [
+        "surface tension",
+        "viscosity",
+        "flow"
+      ]
     },
     {
       "id": "gas",
       "name": "Gas",
       "color": "amber",
       "fact": "Gases expand to fill any container because their particles move freely and far apart.",
-      "seeds": [
-        "pressure",
-        "expansion"
-      ],
-      "floatingTerms": [
-        "compressible",
-        "diffusion"
-      ],
-      "terms": [
-        "pressure",
-        "expansion",
-        "compressible",
-        "diffusion"
-      ],
       "termInfo": {
         "pressure": {
           "links": [
@@ -159,7 +145,21 @@
             "href": "wiki:Gas"
           }
         ]
-      }
+      },
+      "seeds": [
+        "pressure",
+        "expansion"
+      ],
+      "floatingTerms": [
+        "compressible",
+        "diffusion"
+      ],
+      "terms": [
+        "pressure",
+        "expansion",
+        "compressible",
+        "diffusion"
+      ]
     }
   ],
   "bridges": [
@@ -200,5 +200,14 @@
         "gas": "pressure"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

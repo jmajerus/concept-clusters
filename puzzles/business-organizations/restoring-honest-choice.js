@@ -488,5 +488,14 @@ export default definePuzzle(import.meta.url, {
         "enforceable floor": "Minimum protections cannot depend entirely on the goodwill or courage of individual actors."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

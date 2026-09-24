@@ -65,14 +65,7 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "threshold detection": {
-          "text": "Recognizing when a measured value crosses a boundary that changes the system's response.",
-          "links": [
-            {
-              "href": "wiki:Thresholding (signal processing)"
-            }
-          ]
-        }
+        "threshold detection": "Recognizing when a measured value crosses a boundary that changes the system's response."
       },
       "info": {
         "links": [
@@ -390,9 +383,6 @@ export default definePuzzle(import.meta.url, {
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Place these embedded responsibilities between the circuit behavior underneath them and the microcontroller portfolios used to implement them."
-    },
     "entries": [
       {
         "id": "circuit-theory-basics",
@@ -401,6 +391,14 @@ export default definePuzzle(import.meta.url, {
       {
         "id": "microcontroller-families",
         "reason": "Compare the AVR, PIC, MSP430, and STM32 portfolios that can implement these recurring embedded-system jobs."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

@@ -8,20 +8,6 @@
       "name": "Breathing mechanics",
       "color": "teal",
       "fact": "Breathing changes chest volume and pressure to move air: quiet inhalation uses muscle contraction, while quiet exhalation mostly follows elastic recoil.",
-      "seeds": [
-        "diaphragm",
-        "inhalation"
-      ],
-      "floatingTerms": [
-        "exhalation",
-        "intercostal muscles"
-      ],
-      "terms": [
-        "diaphragm",
-        "inhalation",
-        "exhalation",
-        "intercostal muscles"
-      ],
       "termInfo": {
         "diaphragm": {
           "text": "The dome-shaped muscle beneath the lungs; when it contracts and moves downward, the chest cavity expands and air is drawn in.",
@@ -68,27 +54,27 @@
             "href": "https://www.mayo.edu/research/departments-divisions/department-physiology-biomedical-engineering/research/physiology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "diaphragm",
+        "inhalation"
+      ],
+      "floatingTerms": [
+        "exhalation",
+        "intercostal muscles"
+      ],
+      "terms": [
+        "diaphragm",
+        "inhalation",
+        "exhalation",
+        "intercostal muscles"
+      ]
     },
     {
       "id": "alveolar-gas-exchange",
       "name": "Alveolar gas exchange",
       "color": "blue",
       "fact": "Across the thin alveolar-capillary membrane, oxygen diffuses into blood while carbon dioxide diffuses into the alveoli.",
-      "seeds": [
-        "alveoli",
-        "diffusion"
-      ],
-      "floatingTerms": [
-        "pulmonary capillaries",
-        "partial pressure"
-      ],
-      "terms": [
-        "alveoli",
-        "pulmonary capillaries",
-        "diffusion",
-        "partial pressure"
-      ],
       "termInfo": {
         "alveoli": {
           "text": "Millions of tiny air sacs that provide a large, thin surface where the lungs exchange gases with blood.",
@@ -144,27 +130,27 @@
             "href": "https://www.mayoclinic.org/airways-and-air-sacs-of-the-lungs/img-20008294"
           }
         ]
-      }
+      },
+      "seeds": [
+        "alveoli",
+        "diffusion"
+      ],
+      "floatingTerms": [
+        "pulmonary capillaries",
+        "partial pressure"
+      ],
+      "terms": [
+        "alveoli",
+        "pulmonary capillaries",
+        "diffusion",
+        "partial pressure"
+      ]
     },
     {
       "id": "blood-gas-transport",
       "name": "Blood gas transport",
       "color": "amber",
       "fact": "Most oxygen travels bound to hemoglobin in red blood cells, while most carbon dioxide is converted to bicarbonate and carried in plasma.",
-      "seeds": [
-        "hemoglobin",
-        "red blood cells"
-      ],
-      "floatingTerms": [
-        "oxygen saturation",
-        "bicarbonate"
-      ],
-      "terms": [
-        "hemoglobin",
-        "red blood cells",
-        "oxygen saturation",
-        "bicarbonate"
-      ],
       "termInfo": {
         "hemoglobin": {
           "text": "The iron-containing protein in red blood cells that binds oxygen in the lungs and releases it to tissues.",
@@ -220,7 +206,21 @@
             "href": "https://www.mayo.edu/research/labs/human-integrative-physiology-clinical-pharmacology/overview"
           }
         ]
-      }
+      },
+      "seeds": [
+        "hemoglobin",
+        "red blood cells"
+      ],
+      "floatingTerms": [
+        "oxygen saturation",
+        "bicarbonate"
+      ],
+      "terms": [
+        "hemoglobin",
+        "red blood cells",
+        "oxygen saturation",
+        "bicarbonate"
+      ]
     }
   ],
   "bridges": [
@@ -274,5 +274,14 @@
         "blood-gas-transport": "hemoglobin"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

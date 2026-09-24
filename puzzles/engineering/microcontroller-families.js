@@ -382,9 +382,6 @@ export default definePuzzle(import.meta.url, {
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Connect programmable embedded devices back to the circuit concepts used to power, protect, and interface them."
-    },
     "entries": [
       {
         "id": "circuit-theory-basics",
@@ -393,6 +390,14 @@ export default definePuzzle(import.meta.url, {
       {
         "id": "microcontroller-applications",
         "reason": "Move from identifying MCU portfolios to the sensing, control, interface, and communication jobs their peripherals and firmware perform."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

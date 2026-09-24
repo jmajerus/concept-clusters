@@ -16,20 +16,6 @@
       "name": "Visual elements",
       "color": "teal",
       "fact": "Line, color, light and shadow, and texture are basic visual resources through which a painting creates form, mood, emphasis, and surface.",
-      "seeds": [
-        "line",
-        "color"
-      ],
-      "floatingTerms": [
-        "light and shadow",
-        "texture"
-      ],
-      "terms": [
-        "line",
-        "color",
-        "light and shadow",
-        "texture"
-      ],
       "termInfo": {
         "line": {
           "text": "An actual or implied path that can define edges, suggest movement, divide space, or direct the viewer's eye.",
@@ -70,27 +56,27 @@
             "href": "wiki:Elements of art"
           }
         ]
-      }
+      },
+      "seeds": [
+        "line",
+        "color"
+      ],
+      "floatingTerms": [
+        "light and shadow",
+        "texture"
+      ],
+      "terms": [
+        "line",
+        "color",
+        "light and shadow",
+        "texture"
+      ]
     },
     {
       "id": "composition",
       "name": "Composition",
       "color": "blue",
       "fact": "Composition organizes a painting's parts through focal points, balance, scale, and perspective, shaping the order in which viewers notice and relate them.",
-      "seeds": [
-        "focal point",
-        "perspective"
-      ],
-      "floatingTerms": [
-        "balance",
-        "scale"
-      ],
-      "terms": [
-        "focal point",
-        "balance",
-        "scale",
-        "perspective"
-      ],
       "termInfo": {
         "focal point": {
           "text": "The area designed to attract attention first or most strongly within the composition.",
@@ -131,27 +117,27 @@
             "href": "wiki:Composition (visual arts)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "focal point",
+        "perspective"
+      ],
+      "floatingTerms": [
+        "balance",
+        "scale"
+      ],
+      "terms": [
+        "focal point",
+        "balance",
+        "scale",
+        "perspective"
+      ]
     },
     {
       "id": "historical-setting",
       "name": "Historical setting",
       "color": "amber",
       "fact": "A painting's subject, intended audience, original location, and historical moment help explain why it was made and how its first viewers may have understood it.",
-      "seeds": [
-        "subject",
-        "historical moment"
-      ],
-      "floatingTerms": [
-        "intended audience",
-        "original location"
-      ],
-      "terms": [
-        "subject",
-        "intended audience",
-        "original location",
-        "historical moment"
-      ],
       "termInfo": {
         "subject": {
           "text": "The person, event, story, place, or idea represented in the painting.",
@@ -192,7 +178,21 @@
             "href": "wiki:Art history"
           }
         ]
-      }
+      },
+      "seeds": [
+        "subject",
+        "historical moment"
+      ],
+      "floatingTerms": [
+        "intended audience",
+        "original location"
+      ],
+      "terms": [
+        "subject",
+        "intended audience",
+        "original location",
+        "historical moment"
+      ]
     }
   ],
   "bridges": [
@@ -282,6 +282,15 @@
           "iconography",
           "sacred image"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

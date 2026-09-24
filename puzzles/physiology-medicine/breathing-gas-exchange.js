@@ -267,5 +267,14 @@ export default definePuzzle(import.meta.url, {
         "hemoglobin"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

@@ -38,6 +38,19 @@
       "name": "Pressure applied off the merits",
       "color": "teal",
       "fact": "A claim can be neutralized without ever being answered — by making the cost of continuing to make it higher than the person making it is able to bear.",
+      "termInfo": {
+        "strategic lawsuit": "Litigation brought less to win than to impose cost, consume time, and deter a critic from continuing.",
+        "chilling effect": "The deterrence of lawful speech by the prospect of legal or professional consequences rather than by any ruling.",
+        "resource asymmetry": "A mismatch in money, time, institutional backing, or legal support that determines who can afford to continue a dispute.",
+        "coerced apology": "A statement issued to end pressure rather than to concede a point, whose wording may be negotiated as part of the settlement."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Whistleblowing"
+          }
+        ]
+      },
       "seeds": [
         "strategic lawsuit",
         "chilling effect"
@@ -51,40 +64,13 @@
         "chilling effect",
         "resource asymmetry",
         "coerced apology"
-      ],
-      "termInfo": {
-        "strategic lawsuit": "Litigation brought less to win than to impose cost, consume time, and deter a critic from continuing.",
-        "chilling effect": "The deterrence of lawful speech by the prospect of legal or professional consequences rather than by any ruling.",
-        "resource asymmetry": "A mismatch in money, time, institutional backing, or legal support that determines who can afford to continue a dispute.",
-        "coerced apology": "A statement issued to end pressure rather than to concede a point, whose wording may be negotiated as part of the settlement."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Whistleblowing"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "discrediting-the-messenger",
       "name": "Discrediting the messenger",
       "color": "blue",
       "fact": "Where evidence cannot be answered, the person presenting it can be made the subject instead — and a standard applied to one person but not to others with the same record is the tell.",
-      "seeds": [
-        "ad hominem",
-        "manufactured controversy"
-      ],
-      "floatingTerms": [
-        "credential challenge",
-        "special pleading"
-      ],
-      "terms": [
-        "ad hominem",
-        "credential challenge",
-        "special pleading",
-        "manufactured controversy"
-      ],
       "termInfo": {
         "ad hominem": {
           "text": "An attempt to defeat a claim by attacking the character, motives, or standing of the person making it.",
@@ -104,27 +90,27 @@
             "href": "wiki:Source credibility"
           }
         ]
-      }
+      },
+      "seeds": [
+        "ad hominem",
+        "manufactured controversy"
+      ],
+      "floatingTerms": [
+        "credential challenge",
+        "special pleading"
+      ],
+      "terms": [
+        "ad hominem",
+        "credential challenge",
+        "special pleading",
+        "manufactured controversy"
+      ]
     },
     {
       "id": "manufactured-corroboration",
       "name": "Manufactured corroboration",
       "color": "amber",
       "fact": "A claim republished by a second outlet acquires the look of independent confirmation while adding no second source — the original claim, wearing a second byline.",
-      "seeds": [
-        "circular reporting",
-        "amplification network"
-      ],
-      "floatingTerms": [
-        "appearance of independence",
-        "laundered claim"
-      ],
-      "terms": [
-        "circular reporting",
-        "amplification network",
-        "appearance of independence",
-        "laundered claim"
-      ],
       "termInfo": {
         "circular reporting": {
           "text": "A situation in which information appears to come from several independent sources but in fact traces back to only one.",
@@ -144,27 +130,27 @@
             "href": "wiki:Source criticism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "circular reporting",
+        "amplification network"
+      ],
+      "floatingTerms": [
+        "appearance of independence",
+        "laundered claim"
+      ],
+      "terms": [
+        "circular reporting",
+        "amplification network",
+        "appearance of independence",
+        "laundered claim"
+      ]
     },
     {
       "id": "persistence-in-the-record",
       "name": "Persistence in the record",
       "color": "magenta",
       "fact": "What persists is the accusation, not the answer — a rebuttal can be taken down while the charge stays indexed, and anything reading that record later inherits the asymmetry.",
-      "seeds": [
-        "search indexing",
-        "unanswered claim"
-      ],
-      "floatingTerms": [
-        "decontextualization",
-        "removed rebuttal"
-      ],
-      "terms": [
-        "search indexing",
-        "decontextualization",
-        "removed rebuttal",
-        "unanswered claim"
-      ],
       "termInfo": {
         "search indexing": "The process by which published material is catalogued and made retrievable, independently of whether it was ever contested.",
         "decontextualization": {
@@ -184,7 +170,21 @@
             "href": "wiki:Archive"
           }
         ]
-      }
+      },
+      "seeds": [
+        "search indexing",
+        "unanswered claim"
+      ],
+      "floatingTerms": [
+        "decontextualization",
+        "removed rebuttal"
+      ],
+      "terms": [
+        "search indexing",
+        "decontextualization",
+        "removed rebuttal",
+        "unanswered claim"
+      ]
     }
   ],
   "bridges": [
@@ -321,6 +321,14 @@
           "messenger discrediting",
           "organizational silence"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
       }
     ]
   }

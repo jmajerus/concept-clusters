@@ -206,5 +206,13 @@ export default definePuzzle(import.meta.url, {
         "welfare state"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 });

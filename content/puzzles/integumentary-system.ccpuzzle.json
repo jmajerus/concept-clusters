@@ -8,18 +8,6 @@
       "name": "Skin layers",
       "color": "teal",
       "fact": "Skin has three main layers: the epidermis forms the outer barrier, the dermis supports glands, follicles and sensation, and the fatty hypodermis cushions and insulates.",
-      "seeds": [
-        "epidermis",
-        "dermis"
-      ],
-      "floatingTerms": [
-        "hypodermis"
-      ],
-      "terms": [
-        "epidermis",
-        "dermis",
-        "hypodermis"
-      ],
       "termInfo": {
         "epidermis": {
           "text": "The outermost skin layer, made largely of keratin-producing cells that create a protective, water-resistant surface.",
@@ -64,27 +52,25 @@
             "href": "https://my.clevelandclinic.org/health/body/10978-skin"
           }
         ]
-      }
+      },
+      "seeds": [
+        "epidermis",
+        "dermis"
+      ],
+      "floatingTerms": [
+        "hypodermis"
+      ],
+      "terms": [
+        "epidermis",
+        "dermis",
+        "hypodermis"
+      ]
     },
     {
       "id": "accessory-structures",
       "name": "Accessory structures",
       "color": "blue",
       "fact": "Hair, nails and skin glands are accessory structures of the integumentary system: they protect surfaces and release substances such as sweat and sebum.",
-      "seeds": [
-        "hair",
-        "nails"
-      ],
-      "floatingTerms": [
-        "sweat glands",
-        "sebaceous glands"
-      ],
-      "terms": [
-        "hair",
-        "nails",
-        "sweat glands",
-        "sebaceous glands"
-      ],
       "termInfo": {
         "hair": {
           "text": "Keratin-based filaments that grow from follicles and help with protection, insulation and light-touch sensation.",
@@ -140,27 +126,27 @@
             "href": "https://my.clevelandclinic.org/health/body/22827-integumentary-system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "hair",
+        "nails"
+      ],
+      "floatingTerms": [
+        "sweat glands",
+        "sebaceous glands"
+      ],
+      "terms": [
+        "hair",
+        "nails",
+        "sweat glands",
+        "sebaceous glands"
+      ]
     },
     {
       "id": "system-functions",
       "name": "System functions",
       "color": "amber",
       "fact": "The integumentary system protects the body, regulates temperature, detects sensations and uses sunlight to help synthesize vitamin D.",
-      "seeds": [
-        "barrier protection",
-        "temperature regulation"
-      ],
-      "floatingTerms": [
-        "sensation",
-        "vitamin D synthesis"
-      ],
-      "terms": [
-        "barrier protection",
-        "temperature regulation",
-        "sensation",
-        "vitamin D synthesis"
-      ],
       "termInfo": {
         "barrier protection": {
           "text": "The skin's physical and chemical defenses against injury, microbes, ultraviolet radiation and excessive water loss.",
@@ -216,7 +202,21 @@
             "href": "https://my.clevelandclinic.org/health/body/22827-integumentary-system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "barrier protection",
+        "temperature regulation"
+      ],
+      "floatingTerms": [
+        "sensation",
+        "vitamin D synthesis"
+      ],
+      "terms": [
+        "barrier protection",
+        "temperature regulation",
+        "sensation",
+        "vitamin D synthesis"
+      ]
     }
   ],
   "bridges": [
@@ -269,5 +269,14 @@
         "system-functions": "temperature regulation"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

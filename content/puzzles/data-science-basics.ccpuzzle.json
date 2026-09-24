@@ -16,20 +16,6 @@
       "name": "Working with data",
       "color": "teal",
       "fact": "Before any analysis can happen, data has to be collected into a dataset, checked for missing values, organized into features, and drawn as a sample that's meant to represent something larger.",
-      "seeds": [
-        "dataset",
-        "feature"
-      ],
-      "floatingTerms": [
-        "missing value",
-        "sample"
-      ],
-      "terms": [
-        "dataset",
-        "missing value",
-        "feature",
-        "sample"
-      ],
       "termInfo": {
         "dataset": {
           "text": "A collection of data, typically organized so each row is one observation and each column is one variable.",
@@ -63,27 +49,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "dataset",
+        "feature"
+      ],
+      "floatingTerms": [
+        "missing value",
+        "sample"
+      ],
+      "terms": [
+        "dataset",
+        "missing value",
+        "feature",
+        "sample"
+      ]
     },
     {
       "id": "cluster-describing-data",
       "name": "Describing data",
       "color": "blue",
       "fact": "Describing data means summarizing a pile of numbers with a few key figures: where its center sits, using the mean or the median, how spread out it is, using the standard deviation, and the overall shape of that spread, its distribution.",
-      "seeds": [
-        "mean",
-        "distribution"
-      ],
-      "floatingTerms": [
-        "median",
-        "standard deviation"
-      ],
-      "terms": [
-        "mean",
-        "median",
-        "standard deviation",
-        "distribution"
-      ],
       "termInfo": {
         "distribution": {
           "text": "The overall shape of how values are spread across their possible range.",
@@ -117,27 +103,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "mean",
+        "distribution"
+      ],
+      "floatingTerms": [
+        "median",
+        "standard deviation"
+      ],
+      "terms": [
+        "mean",
+        "median",
+        "standard deviation",
+        "distribution"
+      ]
     },
     {
       "id": "cluster-modeling-data",
       "name": "Modeling data",
       "color": "amber",
       "fact": "Modeling data means using it to predict: correlation flags that two things move together, regression fits a line to that relationship, and the model learns from a training set, but only if it doesn't overfit to that training set's particular quirks.",
-      "seeds": [
-        "correlation",
-        "regression"
-      ],
-      "floatingTerms": [
-        "overfitting",
-        "training set"
-      ],
-      "terms": [
-        "correlation",
-        "regression",
-        "overfitting",
-        "training set"
-      ],
       "termInfo": {
         "correlation": {
           "text": "How strongly two variables move together, without saying which one, if either, causes the other.",
@@ -171,7 +157,21 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "correlation",
+        "regression"
+      ],
+      "floatingTerms": [
+        "overfitting",
+        "training set"
+      ],
+      "terms": [
+        "correlation",
+        "regression",
+        "overfitting",
+        "training set"
+      ]
     }
   ],
   "bridges": [
@@ -192,14 +192,14 @@
         ]
       },
       "relationKind": "evaluation",
+      "idealTerms": {
+        "cluster-working-with-data": "sample",
+        "cluster-describing-data": "standard deviation"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-describing-data",
         "to": "cluster-working-with-data"
-      },
-      "idealTerms": {
-        "cluster-working-with-data": "sample",
-        "cluster-describing-data": "standard deviation"
       }
     },
     {
@@ -219,14 +219,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-describing-data": "standard deviation",
+        "cluster-modeling-data": "overfitting"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-describing-data",
         "to": "cluster-modeling-data"
-      },
-      "idealTerms": {
-        "cluster-describing-data": "standard deviation",
-        "cluster-modeling-data": "overfitting"
       }
     }
   ],
@@ -301,5 +301,13 @@
         "median": "A different single number standing in for the center, chosen to resist a few extreme values."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

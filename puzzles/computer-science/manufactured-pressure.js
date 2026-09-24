@@ -438,5 +438,14 @@ export default definePuzzle(import.meta.url, {
         "psychological strain": "Pressure consumes emotional and cognitive resources whether or not it succeeds."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

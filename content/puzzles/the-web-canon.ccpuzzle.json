@@ -17,20 +17,6 @@
       "name": "Web reach and deployment",
       "color": "teal",
       "fact": "The web lowers distribution friction: a shareable URL can open one server-side version across many systems, while the service operator—not each user—usually controls when that version changes or disappears.",
-      "seeds": [
-        "shareable URL",
-        "zero-install launch"
-      ],
-      "floatingTerms": [
-        "server-side updates",
-        "browser-based portability"
-      ],
-      "terms": [
-        "shareable URL",
-        "zero-install launch",
-        "server-side updates",
-        "browser-based portability"
-      ],
       "termInfo": {
         "shareable URL": {
           "text": "A web address that can open an application directly and be copied, bookmarked, or linked from another document.",
@@ -71,29 +57,27 @@
             "href": "wiki:Web application"
           }
         ]
-      }
+      },
+      "seeds": [
+        "shareable URL",
+        "zero-install launch"
+      ],
+      "floatingTerms": [
+        "server-side updates",
+        "browser-based portability"
+      ],
+      "terms": [
+        "shareable URL",
+        "zero-install launch",
+        "server-side updates",
+        "browser-based portability"
+      ]
     },
     {
       "id": "native-application-affordances",
       "name": "Native application affordances",
       "color": "blue",
       "fact": "Installed applications can receive durable access to project files, run long jobs under operating-system scheduling, use vendor GPU stacks, draw on a broad native codec ecosystem, and integrate dedicated control hardware more directly.",
-      "seeds": [
-        "operating-system file access",
-        "OS-scheduled background work"
-      ],
-      "floatingTerms": [
-        "vendor GPU interfaces",
-        "native codec ecosystem",
-        "dedicated control hardware"
-      ],
-      "terms": [
-        "operating-system file access",
-        "OS-scheduled background work",
-        "vendor GPU interfaces",
-        "native codec ecosystem",
-        "dedicated control hardware"
-      ],
       "termInfo": {
         "operating-system file access": {
           "text": "File and directory access granted through operating-system facilities, often retained for complex projects across sessions.",
@@ -148,27 +132,29 @@
             "href": "https://www.blackmagicdesign.com/products/davinciresolve"
           }
         ]
-      }
+      },
+      "seeds": [
+        "operating-system file access",
+        "OS-scheduled background work"
+      ],
+      "floatingTerms": [
+        "vendor GPU interfaces",
+        "native codec ecosystem",
+        "dedicated control hardware"
+      ],
+      "terms": [
+        "operating-system file access",
+        "OS-scheduled background work",
+        "vendor GPU interfaces",
+        "native codec ecosystem",
+        "dedicated control hardware"
+      ]
     },
     {
       "id": "browser-security-boundary",
       "name": "Browser security boundary",
       "color": "amber",
       "fact": "Because a browser may execute code from any visited site, it confines each origin, asks before granting sensitive access, limits origin storage, and may suspend or discard work according to browser policy.",
-      "seeds": [
-        "same-origin sandbox",
-        "permission prompts"
-      ],
-      "floatingTerms": [
-        "origin storage quotas",
-        "browser-controlled lifetime"
-      ],
-      "terms": [
-        "same-origin sandbox",
-        "permission prompts",
-        "origin storage quotas",
-        "browser-controlled lifetime"
-      ],
       "termInfo": {
         "same-origin sandbox": {
           "text": "Isolation of a site's code and data by origin, preventing unrestricted access to other sites and to the local system.",
@@ -209,29 +195,27 @@
             "href": "wiki:Browser security"
           }
         ]
-      }
+      },
+      "seeds": [
+        "same-origin sandbox",
+        "permission prompts"
+      ],
+      "floatingTerms": [
+        "origin storage quotas",
+        "browser-controlled lifetime"
+      ],
+      "terms": [
+        "same-origin sandbox",
+        "permission prompts",
+        "origin storage quotas",
+        "browser-controlled lifetime"
+      ]
     },
     {
       "id": "capabilities-added-through-web-apis",
       "name": "Capabilities added through web APIs",
       "color": "magenta",
       "fact": "In the web platform's standard account, newer APIs progressively recover file, background, GPU, media, and device capabilities while preserving browser mediation.",
-      "seeds": [
-        "service workers",
-        "WebGPU"
-      ],
-      "floatingTerms": [
-        "File System Access API",
-        "WebCodecs",
-        "WebHID"
-      ],
-      "terms": [
-        "File System Access API",
-        "service workers",
-        "WebGPU",
-        "WebCodecs",
-        "WebHID"
-      ],
       "termInfo": {
         "File System Access API": {
           "text": "A permission-mediated browser API for reading and writing user-selected files and directories where supported.",
@@ -280,7 +264,23 @@
             "href": "wiki:Web API"
           }
         ]
-      }
+      },
+      "seeds": [
+        "service workers",
+        "WebGPU"
+      ],
+      "floatingTerms": [
+        "File System Access API",
+        "WebCodecs",
+        "WebHID"
+      ],
+      "terms": [
+        "File System Access API",
+        "service workers",
+        "WebGPU",
+        "WebCodecs",
+        "WebHID"
+      ]
     }
   ],
   "bridges": [
@@ -446,6 +446,15 @@
           "components",
           "frameworks"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

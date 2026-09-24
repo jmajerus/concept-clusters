@@ -8,18 +8,6 @@
       "name": "Structural functionalism",
       "color": "teal",
       "fact": "Structural functionalism sees society as a system of interdependent parts that work together to maintain stability and cohesion.",
-      "seeds": [
-        "social cohesion",
-        "manifest function"
-      ],
-      "floatingTerms": [
-        "latent function"
-      ],
-      "terms": [
-        "social cohesion",
-        "manifest function",
-        "latent function"
-      ],
       "termInfo": {
         "social cohesion": {
           "links": [
@@ -51,27 +39,25 @@
             "href": "wiki:Structural functionalism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "social cohesion",
+        "manifest function"
+      ],
+      "floatingTerms": [
+        "latent function"
+      ],
+      "terms": [
+        "social cohesion",
+        "manifest function",
+        "latent function"
+      ]
     },
     {
       "id": "conflict-theory",
       "name": "Conflict theory",
       "color": "blue",
       "fact": "Conflict theory sees society as an arena of competition, where groups struggle over scarce resources and power.",
-      "seeds": [
-        "class struggle",
-        "power"
-      ],
-      "floatingTerms": [
-        "inequality",
-        "false consciousness"
-      ],
-      "terms": [
-        "class struggle",
-        "power",
-        "inequality",
-        "false consciousness"
-      ],
       "termInfo": {
         "class struggle": {
           "links": [
@@ -112,27 +98,27 @@
             "href": "wiki:Conflict theories"
           }
         ]
-      }
+      },
+      "seeds": [
+        "class struggle",
+        "power"
+      ],
+      "floatingTerms": [
+        "inequality",
+        "false consciousness"
+      ],
+      "terms": [
+        "class struggle",
+        "power",
+        "inequality",
+        "false consciousness"
+      ]
     },
     {
       "id": "symbolic-interactionism",
       "name": "Symbolic interactionism",
       "color": "amber",
       "fact": "Symbolic interactionism studies how individuals create meaning through everyday symbols and face-to-face interaction.",
-      "seeds": [
-        "meaning-making",
-        "symbols"
-      ],
-      "floatingTerms": [
-        "micro-level interaction",
-        "dramaturgy"
-      ],
-      "terms": [
-        "meaning-making",
-        "symbols",
-        "micro-level interaction",
-        "dramaturgy"
-      ],
       "termInfo": {
         "meaning-making": {
           "links": [
@@ -172,7 +158,21 @@
             "href": "wiki:Symbolic interactionism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "meaning-making",
+        "symbols"
+      ],
+      "floatingTerms": [
+        "micro-level interaction",
+        "dramaturgy"
+      ],
+      "terms": [
+        "meaning-making",
+        "symbols",
+        "micro-level interaction",
+        "dramaturgy"
+      ]
     }
   ],
   "bridges": [
@@ -219,5 +219,13 @@
         "symbolic-interactionism": "meaning-making"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

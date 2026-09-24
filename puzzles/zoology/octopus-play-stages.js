@@ -1,0 +1,450 @@
+// Generated from content/puzzles/octopus-play-stages.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "octopus-play-stages",
+  "title": "Can I Eat It? How an Octopus Meets a New Object",
+  "category": "zoology",
+  "large": true,
+  "info": {
+    "text": "Hand an octopus something new and it runs a sequence: taste it as possible food, study it once it fails as food, lose interest as the novelty wears off — and sometimes, if it is that kind of individual, play. This lesson follows that staged response through the studies that discovered it.",
+    "links": [
+      {
+        "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+        "label": "Mather & Anderson 1999"
+      },
+      {
+        "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+        "label": "Kuba et al. 2006"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Exploration, play and habituation in octopuses (Octopus dofleini)",
+        "author": "Mather, J. A. & Anderson, R. C.",
+        "year": "1999",
+        "pages": "113(3), 333–338",
+        "url": "https://doi.org/10.1037/0735-7036.113.3.333"
+      },
+      {
+        "title": "When do octopuses play? Effects of repeated testing, object type, age, and food deprivation on object play in Octopus vulgaris",
+        "author": "Kuba, M. J., Byrne, R. A., Meisel, D. V. & Mather, J. A.",
+        "year": "2006",
+        "pages": "120(3), 184 ff.",
+        "url": "https://doi.org/10.1037/0735-7036.120.3.184"
+      },
+      {
+        "title": "Molecular Basis of Chemotactile Sensation in Octopus",
+        "author": "van Giesen, L., Kilian, P. B., Allard, C. A. R. & Bellono, N. W.",
+        "year": "2020",
+        "pages": "183(4)",
+        "url": "https://doi.org/10.1016/j.cell.2020.09.008"
+      },
+      {
+        "title": "Evidence of play behavior in captive California two-spot octopuses, Octopus bimaculoides",
+        "author": "Jarmoluk, K. & Pelled, G.",
+        "year": "2025",
+        "pages": "20(7), e0326379",
+        "url": "https://doi.org/10.1371/journal.pone.0326379"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "food-check",
+      "name": "Can I eat it? — the food check",
+      "color": "teal",
+      "fact": "An octopus's default hypothesis about any new object is 'food': arms pull it under the web to the mouth, where the suckers chemically sample it on contact before anything else happens.",
+      "terms": [
+        "chemotactile inspection",
+        "touch-tasting via sucker chemoreceptors",
+        "bringing under the web to the mouth"
+      ],
+      "seeds": [
+        "chemotactile inspection",
+        "touch-tasting via sucker chemoreceptors"
+      ],
+      "termInfo": {
+        "bringing under the web to the mouth": {
+          "text": "The opening posture of every novel-object encounter: arms pull the object beneath the web to the mouth region, where tasting happens. Nothing about shape or texture is learned yet.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+              "label": "Kuba et al. 2006"
+            }
+          ]
+        },
+        "chemotactile inspection": {
+          "text": "Kuba et al.'s Level 1: the first treatment any novel object gets. The arms draw it in and the suckers sample it chemically — before anything that looks like curiosity.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+              "label": "Kuba et al. 2006"
+            }
+          ]
+        },
+        "touch-tasting via sucker chemoreceptors": {
+          "text": "Each sucker carries chemotactile receptors, so an octopus tastes what it touches. Contact alone can settle the edible-or-not question.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1016/j.cell.2020.09.008",
+              "label": "van Giesen et al. 2020"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The feeding machinery does double duty here: the same sucker chemistry that finds prey also classifies everything the tank offers.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1016/j.cell.2020.09.008",
+            "label": "van Giesen et al. 2020, Cell"
+          }
+        ]
+      }
+    },
+    {
+      "id": "explore",
+      "name": "What is this? — exploration",
+      "color": "blue",
+      "fact": "Once an object fails as food it gets reclassified as a thing to learn: the arms palpate, pull, turn, and envelop it to map texture and shape rather than test edibility.",
+      "terms": [
+        "palpation",
+        "pulling and tugging",
+        "turning and re-orienting",
+        "enveloping with arms and web"
+      ],
+      "seeds": [
+        "palpation",
+        "pulling and tugging"
+      ],
+      "termInfo": {
+        "enveloping with arms and web": {
+          "text": "Draping the arms and web over the whole object for all-over close inspection — the most thorough form the exploratory stage takes.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        },
+        "palpation": {
+          "text": "Mather & Anderson's operational definition of exploration: feeling the object with the arms. How much an octopus palpated was their measure of its interest.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        },
+        "pulling and tugging": {
+          "text": "Post-verdict handling that tests what the object affords — dragging and hauling it around to learn what it does, not what it tastes like.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        },
+        "turning and re-orienting": {
+          "text": "Rotating a gripped object to bring new surfaces into sucker contact — texture and shape mapping, one face at a time.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The exploratory stage is individual and thorough — examination intensity varied by individual and by day in the 1999 study.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+            "label": "Mather & Anderson 1999"
+          }
+        ]
+      }
+    },
+    {
+      "id": "habituation",
+      "name": "Never mind — habituation",
+      "color": "amber",
+      "fact": "The examination fades across repeated presentations of the same object — noticeably within the first trials, faster within a day than across days — and a changed object renews the response, so the decline tracks novelty.",
+      "terms": [
+        "habituation",
+        "declining palpation across trials",
+        "renewed response to a changed object"
+      ],
+      "seeds": [
+        "habituation",
+        "declining palpation across trials"
+      ],
+      "termInfo": {
+        "declining palpation across trials": {
+          "text": "How habituation is measured here: less palpation each time the same object reappears. The decline ran faster within a day than across days.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        },
+        "habituation": {
+          "text": "The waning of a response to a repeated, harmless stimulus. Visible within the first trials and more intricate across ten trials with the same floating object.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        },
+        "renewed response to a changed object": {
+          "text": "Present a different object and the response returns — the evidence that the decline tracks novelty specifically rather than fatigue or satiation.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Habituation is what makes the later stages interpretable: without it, returning to an old object would be indistinguishable from first curiosity.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+            "label": "Mather & Anderson 1999"
+          }
+        ]
+      }
+    },
+    {
+      "id": "object-play",
+      "name": "What can I do with this? — object play",
+      "color": "magenta",
+      "fact": "Past the curiosity phase, some octopuses keep returning to a now-familiar object and interact with it repeatedly in ways that serve no immediate survival need — jetting it back, blowing it across the tank, letting it go.",
+      "terms": [
+        "water-jet bouncing",
+        "repeated return to a familiar object",
+        "blowing objects across the tank",
+        "release-and-float"
+      ],
+      "seeds": [
+        "water-jet bouncing",
+        "repeated return to a familiar object"
+      ],
+      "termInfo": {
+        "blowing objects across the tank": {
+          "text": "Kuba et al. watched common octopuses blow Lego pieces around the tank with directed water jets — sustained play-like interaction after exploration had faded.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+              "label": "Kuba et al. 2006"
+            }
+          ]
+        },
+        "release-and-float": {
+          "text": "Letting a gripped object go so it drifts or rises, then taking it again — the pattern that scored as play in captive California two-spot octopuses.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1371/journal.pone.0326379",
+              "label": "Jarmoluk & Pelled 2025"
+            }
+          ]
+        },
+        "repeated return to a familiar object": {
+          "text": "The structural hallmark of play: coming back to an object that exploration has already exhausted. Persistence past the point of novelty is what distinguishes play from curiosity.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+              "label": "Kuba et al. 2006"
+            }
+          ]
+        },
+        "water-jet bouncing": {
+          "text": "The signature move: jet water to send a floating object away, then jet again to bounce it back — repeated, variable, and anchored to no reward. Seen in two of the eight octopuses in 1999.",
+          "links": [
+            {
+              "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+              "label": "Mather & Anderson 1999"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Play appeared in a minority of individuals — 2 of 8 in 1999, 9 of 14 in 2006 — which is part of why researchers treat play as a verdict, not a given.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+            "label": "Kuba et al. 2006"
+          },
+          {
+            "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+            "label": "Mather & Anderson 1999"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "inedible-verdict",
+      "term": "the inedible verdict",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Only after chemotactile inspection rules an object out as prey do the arms begin sustained examination — Kuba et al.'s first level is the taste test, and everything after it is contingent on that verdict.",
+      "info": {
+        "text": "Kuba, Byrne, Meisel & Mather describe chemotactile inspection at the mouth as the first level of any novel-object response.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+            "label": "Kuba et al. 2006, J. Comp. Psychol. 120(3)"
+          }
+        ]
+      },
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
+    },
+    {
+      "id": "novelty-fuel",
+      "term": "novelty is the fuel of exploration",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Habituation is measured as exploration decaying across trials — Mather & Anderson tracked palpation of a floating object over ten trials — so these clusters are two views of one process: what the arms do, and how that doing fades.",
+      "info": {
+        "text": "Habituation was noticeable within the first trials and more complex across trials; it was stronger within days than across days.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+            "label": "Mather & Anderson 1999, J. Comp. Psychol. 113(3)"
+          }
+        ]
+      },
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 2
+      }
+    },
+    {
+      "id": "play-after-exploration",
+      "term": "play begins when exploration ends",
+      "clusters": [
+        2,
+        3
+      ],
+      "fact": "In Kuba et al. (2006), play-like interactions appeared only after exploration had peaked around days 3–6 and waned — contact with an object that is no longer news gets scored as play, not curiosity.",
+      "info": {
+        "text": "Exploration preceded play across repeated testing days; play-like behavior emerged as exploration declined.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+            "label": "Kuba et al. 2006, J. Comp. Psychol. 120(3)"
+          }
+        ]
+      },
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 3
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "first-contact-gate",
+      "prompt": "Kuba et al. score an octopus's response to a novel object in levels. Which named behavior is their Level 1 — the chemically mediated check itself, before any examination of shape or texture?",
+      "explanation": "The gate is chemical: the suckers taste the object first, and only the failure of that test unlocks anything that looks like curiosity.",
+      "targets": [
+        "chemotactile inspection"
+      ],
+      "reasons": {
+        "chemotactile inspection": "The level's name: tasting by touch comes before anything else."
+      }
+    },
+    {
+      "id": "novelty-not-fatigue",
+      "prompt": "Which observation shows that the response decline is about novelty rather than fatigue?",
+      "explanation": "A different object revives the response, so the decline is specific to the now-familiar object — novelty, not fatigue.",
+      "targets": [
+        "renewed response to a changed object"
+      ],
+      "reasons": {
+        "renewed response to a changed object": "A changed object revives the response — the decline tracks the object's familiarity, not the octopus's energy."
+      }
+    },
+    {
+      "id": "act-and-its-decay",
+      "prompt": "Which pair names the same movement from its two sides — the exploratory act, and its measurable fade across repeated trials?",
+      "explanation": "Exploration and habituation are one process in two views: what the arms do, and how that doing decays across repeated trials.",
+      "targets": [
+        "palpation",
+        "declining palpation across trials"
+      ],
+      "reasons": {
+        "declining palpation across trials": "Its fade: the habituation measure in the same study.",
+        "palpation": "The act: Mather & Anderson's definition of exploration."
+      }
+    },
+    {
+      "id": "play-stage-colors",
+      "prompt": "Which of these belong to the play stage — repeated interaction with an already-familiar object, serving no survival purpose?",
+      "explanation": "All four belong to the play stage: each persists after the object is already familiar and earns no survival payoff — repeated interaction that has left curiosity behind.",
+      "targets": [
+        "water-jet bouncing",
+        "blowing objects across the tank",
+        "release-and-float",
+        "repeated return to a familiar object"
+      ],
+      "reasons": {
+        "blowing objects across the tank": "Directed jets push objects around the tank, long after novelty.",
+        "release-and-float": "Letting go and taking again, with nothing gained.",
+        "repeated return to a familiar object": "The structural hallmark: persistence past the point of novelty.",
+        "water-jet bouncing": "The signature move from the 1999 study."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "octopus-play-adjudication",
+        "reason": "Play board 1 to meet the behavior; play this to learn how the play verdict is actually made — the criteria and conditions decide, not the appearance."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The pill bottle that started it",
+    "summary": "How a floating pill bottle, ten trials, and two jetting octopuses opened the study of invertebrate play — and why an octopus meets every new object through a chain of gates.",
+    "estimatedMinutes": 2,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "In 1999, researchers working with the Seattle Aquarium handed giant Pacific octopuses a floating pill bottle and watched across ten trials. Nothing kept treating it as prey for long — but two of the eight kept sending it away with a jet of water and bouncing it back, again and again. It was the first solid hint that a mollusc might play.\n\nThe sequence this lesson follows runs deeper than one anecdote. An octopus meets every new object through a chain of decisions: first a possible meal, tasted on contact through the suckers; failing as food, a thing to study, mapped arm by arm; as repetition dulls interest, most individuals drift away — and a few keep coming back to push, jet, and bounce the old object for no reward anyone can point to. Where curiosity ends and play begins turned out to be a measurable, arguable, genuinely scientific question."
+    },
+    "links": [
+      {
+        "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+        "label": "Mather & Anderson 1999, J. Comp. Psychol. 113(3)"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+});

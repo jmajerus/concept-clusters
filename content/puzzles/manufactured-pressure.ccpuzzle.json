@@ -23,20 +23,6 @@
       "name": "Fabricated conditions",
       "color": "teal",
       "fact": "Manufactured pressure begins by falsely representing when an opportunity ends, how scarce it is, how many people want it, or who endorses it.",
-      "seeds": [
-        "false deadline",
-        "artificial scarcity"
-      ],
-      "floatingTerms": [
-        "invented demand",
-        "invented endorsement"
-      ],
-      "terms": [
-        "false deadline",
-        "artificial scarcity",
-        "invented demand",
-        "invented endorsement"
-      ],
       "termInfo": {
         "false deadline": {
           "text": "A claimed expiration time that does not correspond to a genuine end of the offer, often because it resets or remains available afterward.",
@@ -77,29 +63,27 @@
             "href": "https://deceptive.design/book/contents/chapter-8/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "false deadline",
+        "artificial scarcity"
+      ],
+      "floatingTerms": [
+        "invented demand",
+        "invented endorsement"
+      ],
+      "terms": [
+        "false deadline",
+        "artificial scarcity",
+        "invented demand",
+        "invented endorsement"
+      ]
     },
     {
       "id": "interface-signals",
       "name": "Interface signals",
       "color": "blue",
       "fact": "Countdowns, limited-time messages, stock warnings, activity notices, and testimonials make an asserted condition visible and emotionally immediate.",
-      "seeds": [
-        "countdown timer",
-        "low-stock warning"
-      ],
-      "floatingTerms": [
-        "limited-time message",
-        "activity notification",
-        "testimonial"
-      ],
-      "terms": [
-        "countdown timer",
-        "limited-time message",
-        "low-stock warning",
-        "activity notification",
-        "testimonial"
-      ],
       "termInfo": {
         "countdown timer": {
           "text": "A clock displayed as counting toward the end of an offer or opportunity.",
@@ -148,27 +132,29 @@
             "href": "https://deceptive.design/types/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "countdown timer",
+        "low-stock warning"
+      ],
+      "floatingTerms": [
+        "limited-time message",
+        "activity notification",
+        "testimonial"
+      ],
+      "terms": [
+        "countdown timer",
+        "limited-time message",
+        "low-stock warning",
+        "activity notification",
+        "testimonial"
+      ]
     },
     {
       "id": "psychological-leverage",
       "name": "Psychological leverage",
       "color": "amber",
       "fact": "Time limits, apparent rarity, and other people's supposed behavior exploit ordinary ways of making decisions under uncertainty and limited attention.",
-      "seeds": [
-        "time pressure",
-        "social proof"
-      ],
-      "floatingTerms": [
-        "scarcity bias",
-        "fear of missing out"
-      ],
-      "terms": [
-        "time pressure",
-        "scarcity bias",
-        "social proof",
-        "fear of missing out"
-      ],
       "termInfo": {
         "time pressure": {
           "text": "The felt need to decide quickly because delay appears likely to remove an opportunity.",
@@ -209,29 +195,27 @@
             "href": "https://deceptive.design/book/contents/chapter-6/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "time pressure",
+        "social proof"
+      ],
+      "floatingTerms": [
+        "scarcity bias",
+        "fear of missing out"
+      ],
+      "terms": [
+        "time pressure",
+        "scarcity bias",
+        "social proof",
+        "fear of missing out"
+      ]
     },
     {
       "id": "pressured-decisions",
       "name": "Pressured decisions",
       "color": "magenta",
       "fact": "Manufactured pressure harms decision quality by reducing deliberation and comparison, accelerating purchases, misplacing trust, and creating anxiety or stress.",
-      "seeds": [
-        "compressed deliberation",
-        "misplaced trust"
-      ],
-      "floatingTerms": [
-        "reduced comparison",
-        "hasty purchase",
-        "psychological strain"
-      ],
-      "terms": [
-        "compressed deliberation",
-        "reduced comparison",
-        "hasty purchase",
-        "misplaced trust",
-        "psychological strain"
-      ],
       "termInfo": {
         "compressed deliberation": {
           "text": "A shortened or subjectively narrowed opportunity to understand an offer and consider whether it serves one's goals.",
@@ -280,7 +264,23 @@
             "href": "https://deceptive.design/book/contents/chapter-22/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "compressed deliberation",
+        "misplaced trust"
+      ],
+      "floatingTerms": [
+        "reduced comparison",
+        "hasty purchase",
+        "psychological strain"
+      ],
+      "terms": [
+        "compressed deliberation",
+        "reduced comparison",
+        "hasty purchase",
+        "misplaced trust",
+        "psychological strain"
+      ]
     }
   ],
   "bridges": [
@@ -301,14 +301,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "fabricated-conditions": "false deadline",
+        "interface-signals": "countdown timer"
+      },
       "direction": {
         "kind": "through",
         "from": "fabricated-conditions",
         "to": "interface-signals"
-      },
-      "idealTerms": {
-        "fabricated-conditions": "false deadline",
-        "interface-signals": "countdown timer"
       }
     },
     {
@@ -328,14 +328,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "interface-signals": "low-stock warning",
+        "psychological-leverage": "scarcity bias"
+      },
       "direction": {
         "kind": "through",
         "from": "interface-signals",
         "to": "psychological-leverage"
-      },
-      "idealTerms": {
-        "interface-signals": "low-stock warning",
-        "psychological-leverage": "scarcity bias"
       }
     },
     {
@@ -355,14 +355,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "psychological-leverage": "time pressure",
+        "pressured-decisions": "compressed deliberation"
+      },
       "direction": {
         "kind": "through",
         "from": "psychological-leverage",
         "to": "pressured-decisions"
-      },
-      "idealTerms": {
-        "psychological-leverage": "time pressure",
-        "pressured-decisions": "compressed deliberation"
       }
     }
   ],
@@ -451,5 +451,14 @@
         "psychological strain": "Pressure consumes emotional and cognitive resources whether or not it succeeds."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

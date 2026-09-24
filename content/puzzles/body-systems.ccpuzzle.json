@@ -8,20 +8,6 @@
       "name": "Circulatory",
       "color": "teal",
       "fact": "The circulatory system pumps blood carrying oxygen and nutrients to every cell.",
-      "seeds": [
-        "heart",
-        "blood vessels"
-      ],
-      "floatingTerms": [
-        "pulse",
-        "red blood cells"
-      ],
-      "terms": [
-        "heart",
-        "blood vessels",
-        "pulse",
-        "red blood cells"
-      ],
       "termInfo": {
         "heart": {
           "links": [
@@ -59,27 +45,27 @@
             "href": "wiki:Circulatory system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "heart",
+        "blood vessels"
+      ],
+      "floatingTerms": [
+        "pulse",
+        "red blood cells"
+      ],
+      "terms": [
+        "heart",
+        "blood vessels",
+        "pulse",
+        "red blood cells"
+      ]
     },
     {
       "id": "respiratory",
       "name": "Respiratory",
       "color": "blue",
       "fact": "The respiratory system exchanges oxygen and carbon dioxide between the air and the blood.",
-      "seeds": [
-        "lungs",
-        "alveoli"
-      ],
-      "floatingTerms": [
-        "diaphragm",
-        "trachea"
-      ],
-      "terms": [
-        "lungs",
-        "alveoli",
-        "diaphragm",
-        "trachea"
-      ],
       "termInfo": {
         "lungs": {
           "links": [
@@ -118,27 +104,27 @@
             "href": "wiki:Respiratory system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "lungs",
+        "alveoli"
+      ],
+      "floatingTerms": [
+        "diaphragm",
+        "trachea"
+      ],
+      "terms": [
+        "lungs",
+        "alveoli",
+        "diaphragm",
+        "trachea"
+      ]
     },
     {
       "id": "digestive",
       "name": "Digestive",
       "color": "amber",
       "fact": "The digestive system breaks food into nutrients the body can absorb and use.",
-      "seeds": [
-        "stomach",
-        "enzymes"
-      ],
-      "floatingTerms": [
-        "intestines",
-        "esophagus"
-      ],
-      "terms": [
-        "stomach",
-        "enzymes",
-        "intestines",
-        "esophagus"
-      ],
       "termInfo": {
         "stomach": {
           "links": [
@@ -176,7 +162,21 @@
             "href": "wiki:Digestive system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "stomach",
+        "enzymes"
+      ],
+      "floatingTerms": [
+        "intestines",
+        "esophagus"
+      ],
+      "terms": [
+        "stomach",
+        "enzymes",
+        "intestines",
+        "esophagus"
+      ]
     }
   ],
   "bridges": [
@@ -222,5 +222,13 @@
         "digestive": "intestines"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

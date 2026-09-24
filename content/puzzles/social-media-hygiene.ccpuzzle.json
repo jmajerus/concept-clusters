@@ -8,20 +8,6 @@
       "name": "Manipulative sharing cues",
       "color": "teal",
       "fact": "Some posts pressure people to react or repost before reflecting, using emotional urgency, engagement bait, unattributed copying or shame about refusing to share.",
-      "seeds": [
-        "emotional urgency",
-        "copy-and-paste posts"
-      ],
-      "floatingTerms": [
-        "engagement traps",
-        "share-shaming"
-      ],
-      "terms": [
-        "emotional urgency",
-        "engagement traps",
-        "copy-and-paste posts",
-        "share-shaming"
-      ],
       "termInfo": {
         "emotional urgency": {
           "text": "Language designed to trigger an immediate emotional reaction and make pausing for verification feel unnecessary or disloyal.",
@@ -77,27 +63,27 @@
             "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
           }
         ]
-      }
+      },
+      "seeds": [
+        "emotional urgency",
+        "copy-and-paste posts"
+      ],
+      "floatingTerms": [
+        "engagement traps",
+        "share-shaming"
+      ],
+      "terms": [
+        "emotional urgency",
+        "engagement traps",
+        "copy-and-paste posts",
+        "share-shaming"
+      ]
     },
     {
       "id": "check-the-claim",
       "name": "Check the claim",
       "color": "blue",
       "fact": "Verification means tracing a claim to its origin and checking whether its quoted experts, images and words are authentic and represented accurately.",
-      "seeds": [
-        "original source",
-        "reverse image search"
-      ],
-      "floatingTerms": [
-        "authority claims",
-        "quote search"
-      ],
-      "terms": [
-        "original source",
-        "authority claims",
-        "reverse image search",
-        "quote search"
-      ],
       "termInfo": {
         "original source": {
           "text": "The earliest available document, post, recording, image or firsthand account from which a circulating claim was derived.",
@@ -153,27 +139,27 @@
             "href": "https://newslit.org/news-and-research/fact-check-it/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "original source",
+        "reverse image search"
+      ],
+      "floatingTerms": [
+        "authority claims",
+        "quote search"
+      ],
+      "terms": [
+        "original source",
+        "authority claims",
+        "reverse image search",
+        "quote search"
+      ]
     },
     {
       "id": "judge-trust-wisely",
       "name": "Judge trust wisely",
       "color": "amber",
       "fact": "Trusting the person who shared something is not the same as trusting the information itself; evidence, relevant expertise, transparency and accountability matter more than familiarity or polished presentation.",
-      "seeds": [
-        "relational trust",
-        "informational trust"
-      ],
-      "floatingTerms": [
-        "institutional sources",
-        "story polish"
-      ],
-      "terms": [
-        "relational trust",
-        "informational trust",
-        "institutional sources",
-        "story polish"
-      ],
       "termInfo": {
         "relational trust": {
           "text": "Confidence that grows from familiarity, affection, shared identity or a history with the person who shared the information.",
@@ -229,7 +215,21 @@
             "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
           }
         ]
-      }
+      },
+      "seeds": [
+        "relational trust",
+        "informational trust"
+      ],
+      "floatingTerms": [
+        "institutional sources",
+        "story polish"
+      ],
+      "terms": [
+        "relational trust",
+        "informational trust",
+        "institutional sources",
+        "story polish"
+      ]
     }
   ],
   "bridges": [
@@ -284,5 +284,14 @@
         "judge-trust-wisely": "informational trust"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

@@ -302,5 +302,14 @@ export default definePuzzle(import.meta.url, {
         "thoracic duct": "It delivers chyle-rich lymph into the subclavian vein."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

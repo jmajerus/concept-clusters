@@ -8,18 +8,6 @@
       "name": "Fascist Italy",
       "color": "teal",
       "fact": "Mussolini's Fascist Italy fused ultranationalism with a single-party corporatist state and militarist expansion into Ethiopia, providing a template later regimes adapted.",
-      "seeds": [
-        "Blackshirts",
-        "Il Duce"
-      ],
-      "floatingTerms": [
-        "March on Rome"
-      ],
-      "terms": [
-        "Blackshirts",
-        "Il Duce",
-        "March on Rome"
-      ],
       "termInfo": {
         "Blackshirts": {
           "links": [
@@ -49,25 +37,25 @@
             "href": "wiki:Fascist Italy"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Blackshirts",
+        "Il Duce"
+      ],
+      "floatingTerms": [
+        "March on Rome"
+      ],
+      "terms": [
+        "Blackshirts",
+        "Il Duce",
+        "March on Rome"
+      ]
     },
     {
       "id": "nazi-germany",
       "name": "Nazi Germany",
       "color": "blue",
       "fact": "Nazi Germany combined totalitarian control with a racial ideology that justified genocide and aggressive territorial conquest.",
-      "seeds": [
-        "Gestapo",
-        "Führer"
-      ],
-      "floatingTerms": [
-        "Nuremberg Laws"
-      ],
-      "terms": [
-        "Gestapo",
-        "Führer",
-        "Nuremberg Laws"
-      ],
       "termInfo": {
         "Gestapo": {
           "links": [
@@ -97,27 +85,25 @@
             "href": "wiki:Nazi Germany"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Gestapo",
+        "Führer"
+      ],
+      "floatingTerms": [
+        "Nuremberg Laws"
+      ],
+      "terms": [
+        "Gestapo",
+        "Führer",
+        "Nuremberg Laws"
+      ]
     },
     {
       "id": "stalinist-ussr",
       "name": "Stalinist USSR",
       "color": "amber",
       "fact": "Stalin's USSR used forced collectivization, mass terror, and state control over science itself to remake Soviet society by command.",
-      "seeds": [
-        "Gulag",
-        "Five-Year Plan"
-      ],
-      "floatingTerms": [
-        "Lysenkoism",
-        "Vozhd"
-      ],
-      "terms": [
-        "Gulag",
-        "Five-Year Plan",
-        "Lysenkoism",
-        "Vozhd"
-      ],
       "termInfo": {
         "Gulag": {
           "links": [
@@ -155,7 +141,21 @@
             "href": "wiki:History of the Soviet Union (1927–1953)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Gulag",
+        "Five-Year Plan"
+      ],
+      "floatingTerms": [
+        "Lysenkoism",
+        "Vozhd"
+      ],
+      "terms": [
+        "Gulag",
+        "Five-Year Plan",
+        "Lysenkoism",
+        "Vozhd"
+      ]
     }
   ],
   "bridges": [
@@ -221,5 +221,13 @@
         "stalinist-ussr": "Vozhd"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

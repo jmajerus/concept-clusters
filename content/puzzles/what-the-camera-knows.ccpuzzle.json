@@ -16,20 +16,6 @@
       "name": "Alignment",
       "color": "teal",
       "fact": "Cinematographic alignment positions the viewer to share a character's perceptual experience: a point-of-view shot shows the world exactly as a character sees it; an eyeline match cuts between a glancing character and what they see; a reaction shot cuts to their face as they respond to what they have just seen; and a subjective camera renders the character's inner state so completely that the viewer's look becomes their own.",
-      "seeds": [
-        "point-of-view shot",
-        "eyeline match"
-      ],
-      "floatingTerms": [
-        "reaction shot",
-        "subjective camera"
-      ],
-      "terms": [
-        "point-of-view shot",
-        "eyeline match",
-        "reaction shot",
-        "subjective camera"
-      ],
       "termInfo": {
         "point-of-view shot": {
           "text": "A shot explicitly representing what a character sees from their optical position, aligning the viewer's perception with theirs.",
@@ -70,27 +56,27 @@
             "href": "wiki:Film theory"
           }
         ]
-      }
+      },
+      "seeds": [
+        "point-of-view shot",
+        "eyeline match"
+      ],
+      "floatingTerms": [
+        "reaction shot",
+        "subjective camera"
+      ],
+      "terms": [
+        "point-of-view shot",
+        "eyeline match",
+        "reaction shot",
+        "subjective camera"
+      ]
     },
     {
       "id": "cluster-survey",
       "name": "The surveying camera",
       "color": "blue",
       "fact": "The surveying camera occupies a position no character in the scene can share: an establishing shot surveys a location before any character enters it; a high-angle shot looks down from a height no participant occupies; a long shot diminishes figures within their environment, giving the viewer more contextual knowledge than any character has; and a bird's-eye view provides an overhead, god's-eye perspective entirely removed from human scale.",
-      "seeds": [
-        "establishing shot",
-        "high-angle shot"
-      ],
-      "floatingTerms": [
-        "long shot",
-        "bird's-eye view"
-      ],
-      "terms": [
-        "establishing shot",
-        "high-angle shot",
-        "long shot",
-        "bird's-eye view"
-      ],
       "termInfo": {
         "establishing shot": {
           "text": "A wide or long shot that surveys a setting before or between scenes, giving the viewer spatial knowledge that precedes and exceeds any character's entry into the space.",
@@ -131,27 +117,27 @@
             "href": "wiki:Camera angle"
           }
         ]
-      }
+      },
+      "seeds": [
+        "establishing shot",
+        "high-angle shot"
+      ],
+      "floatingTerms": [
+        "long shot",
+        "bird's-eye view"
+      ],
+      "terms": [
+        "establishing shot",
+        "high-angle shot",
+        "long shot",
+        "bird's-eye view"
+      ]
     },
     {
       "id": "cluster-disturbance",
       "name": "Disturbance",
       "color": "amber",
       "fact": "The camera can declare its own unreliability: a Dutch tilt cants the frame off its horizontal axis to signal psychological unease or moral distortion; a dolly zoom keeps a subject at constant screen size while the background warps, producing a disorientation of space that defies normal perception; a whip pan moves the camera so fast the image blurs into abstraction; and a slow zoom imperceptibly advances on a subject until the viewer senses, before they consciously register, that something has changed.",
-      "seeds": [
-        "Dutch tilt",
-        "dolly zoom"
-      ],
-      "floatingTerms": [
-        "whip pan",
-        "slow zoom"
-      ],
-      "terms": [
-        "Dutch tilt",
-        "dolly zoom",
-        "whip pan",
-        "slow zoom"
-      ],
       "termInfo": {
         "Dutch tilt": {
           "text": "A shot in which the camera is canted sideways so the frame is no longer level, used to signal psychological instability, moral distortion, or impending threat.",
@@ -192,7 +178,21 @@
             "href": "wiki:Film technique"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Dutch tilt",
+        "dolly zoom"
+      ],
+      "floatingTerms": [
+        "whip pan",
+        "slow zoom"
+      ],
+      "terms": [
+        "Dutch tilt",
+        "dolly zoom",
+        "whip pan",
+        "slow zoom"
+      ]
     }
   ],
   "bridges": [
@@ -234,5 +234,14 @@
       }
     }
   ],
-  "lensMode": "sequential"
+  "lensMode": "sequential",
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

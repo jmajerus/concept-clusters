@@ -23,20 +23,6 @@
       "name": "Perceptual presentation",
       "color": "teal",
       "fact": "Visual hierarchy, contrast, familiar interface cues, and ordinary scan-reading habits shape which options are noticed and what a control appears to mean.",
-      "seeds": [
-        "visual prominence",
-        "low contrast"
-      ],
-      "floatingTerms": [
-        "familiar interface cues",
-        "scan reading"
-      ],
-      "terms": [
-        "visual prominence",
-        "low contrast",
-        "familiar interface cues",
-        "scan reading"
-      ],
       "termInfo": {
         "visual prominence": {
           "text": "The use of size, color, position, spacing, or emphasis to make one element command attention before others.",
@@ -77,27 +63,27 @@
             "href": "https://deceptive.design/types/visual-interference/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "visual prominence",
+        "low contrast"
+      ],
+      "floatingTerms": [
+        "familiar interface cues",
+        "scan reading"
+      ],
+      "terms": [
+        "visual prominence",
+        "low contrast",
+        "familiar interface cues",
+        "scan reading"
+      ]
     },
     {
       "id": "choice-framing",
       "name": "Choice framing",
       "color": "blue",
       "fact": "A business can steer a formally available choice by selecting the default, obscuring an alternative, using ambiguous language, or attaching an emotional judgment to refusal.",
-      "seeds": [
-        "preselected default",
-        "ambiguous wording"
-      ],
-      "floatingTerms": [
-        "obscured alternative",
-        "loaded refusal"
-      ],
-      "terms": [
-        "preselected default",
-        "obscured alternative",
-        "ambiguous wording",
-        "loaded refusal"
-      ],
       "termInfo": {
         "preselected default": {
           "text": "An option chosen in advance by the business so that accepting it requires no additional action from the user.",
@@ -138,27 +124,27 @@
             "href": "https://deceptive.design/book/contents/chapter-16/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "preselected default",
+        "ambiguous wording"
+      ],
+      "floatingTerms": [
+        "obscured alternative",
+        "loaded refusal"
+      ],
+      "terms": [
+        "preselected default",
+        "obscured alternative",
+        "ambiguous wording",
+        "loaded refusal"
+      ]
     },
     {
       "id": "human-heuristics",
       "name": "Human heuristics",
       "color": "amber",
       "fact": "People reasonably rely on defaults, selective attention, familiar conventions, and self-image to navigate complex interfaces; manipulation converts those coping strategies into leverage.",
-      "seeds": [
-        "default effect",
-        "limited attention"
-      ],
-      "floatingTerms": [
-        "expectation matching",
-        "self-image pressure"
-      ],
-      "terms": [
-        "default effect",
-        "limited attention",
-        "expectation matching",
-        "self-image pressure"
-      ],
       "termInfo": {
         "default effect": {
           "text": "The tendency to retain an option that has already been selected rather than expend effort replacing it.",
@@ -199,27 +185,27 @@
             "href": "https://deceptive.design/book/contents/chapter-13/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "default effect",
+        "limited attention"
+      ],
+      "floatingTerms": [
+        "expectation matching",
+        "self-image pressure"
+      ],
+      "terms": [
+        "default effect",
+        "limited attention",
+        "expectation matching",
+        "self-image pressure"
+      ]
     },
     {
       "id": "choice-consequences",
       "name": "Choice consequences",
       "color": "magenta",
       "fact": "When interface steering produces an action that conflicts with the person's purposes, a visible click may conceal mistaken action, unwanted consent, unintended spending, or impaired autonomy.",
-      "seeds": [
-        "unwanted consent",
-        "impaired autonomy"
-      ],
-      "floatingTerms": [
-        "mistaken click",
-        "unintended purchase"
-      ],
-      "terms": [
-        "mistaken click",
-        "unwanted consent",
-        "unintended purchase",
-        "impaired autonomy"
-      ],
       "termInfo": {
         "mistaken click": {
           "text": "Activating an element under a false understanding of what it is or what it will do.",
@@ -260,7 +246,21 @@
             "href": "https://deceptive.design/book/contents/part-1/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "unwanted consent",
+        "impaired autonomy"
+      ],
+      "floatingTerms": [
+        "mistaken click",
+        "unintended purchase"
+      ],
+      "terms": [
+        "mistaken click",
+        "unwanted consent",
+        "unintended purchase",
+        "impaired autonomy"
+      ]
     }
   ],
   "bridges": [
@@ -281,14 +281,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "perceptual-presentation": "visual prominence",
+        "choice-framing": "obscured alternative"
+      },
       "direction": {
         "kind": "through",
         "from": "perceptual-presentation",
         "to": "choice-framing"
-      },
-      "idealTerms": {
-        "perceptual-presentation": "visual prominence",
-        "choice-framing": "obscured alternative"
       }
     },
     {
@@ -430,5 +430,14 @@
         "mistaken click": "The user activates the advertisement while believing they selected something else."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

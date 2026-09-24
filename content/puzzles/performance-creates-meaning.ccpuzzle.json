@@ -17,20 +17,6 @@
       "name": "Written work",
       "color": "teal",
       "fact": "A dramatic text supplies words, actions, structure, and information, but it usually leaves many choices of tone, movement, design, emphasis, and interpretation unresolved.",
-      "seeds": [
-        "dialogue",
-        "stage directions"
-      ],
-      "floatingTerms": [
-        "plot",
-        "dramatic irony"
-      ],
-      "terms": [
-        "dialogue",
-        "stage directions",
-        "plot",
-        "dramatic irony"
-      ],
       "termInfo": {
         "dialogue": {
           "text": "Spoken exchange among characters through which action, conflict, information, and relationship are developed.",
@@ -71,27 +57,27 @@
             "href": "wiki:Drama"
           }
         ]
-      }
+      },
+      "seeds": [
+        "dialogue",
+        "stage directions"
+      ],
+      "floatingTerms": [
+        "plot",
+        "dramatic irony"
+      ],
+      "terms": [
+        "dialogue",
+        "stage directions",
+        "plot",
+        "dramatic irony"
+      ]
     },
     {
       "id": "embodied-performance",
       "name": "Embodied performance",
       "color": "blue",
       "fact": "Actors make a text present through bodies and voices: gesture, delivery, placement, and timing turn written possibilities into particular relationships and actions.",
-      "seeds": [
-        "gesture",
-        "blocking"
-      ],
-      "floatingTerms": [
-        "vocal delivery",
-        "pacing"
-      ],
-      "terms": [
-        "gesture",
-        "vocal delivery",
-        "blocking",
-        "pacing"
-      ],
       "termInfo": {
         "gesture": {
           "text": "A movement or bodily expression that communicates action, emotion, intention, relationship, or social meaning.",
@@ -132,27 +118,27 @@
             "href": "wiki:Acting"
           }
         ]
-      }
+      },
+      "seeds": [
+        "gesture",
+        "blocking"
+      ],
+      "floatingTerms": [
+        "vocal delivery",
+        "pacing"
+      ],
+      "terms": [
+        "gesture",
+        "vocal delivery",
+        "blocking",
+        "pacing"
+      ]
     },
     {
       "id": "design-and-staging",
       "name": "Design and staging",
       "color": "amber",
       "fact": "Lighting, costume, scenery, and sound organize the sensory world of a production, guiding attention and making historical, emotional, social, and symbolic claims.",
-      "seeds": [
-        "lighting",
-        "costume"
-      ],
-      "floatingTerms": [
-        "set design",
-        "sound design"
-      ],
-      "terms": [
-        "lighting",
-        "costume",
-        "set design",
-        "sound design"
-      ],
       "termInfo": {
         "lighting": {
           "text": "The design and control of illumination, visibility, color, contrast, focus, and cue timing in performance.",
@@ -193,27 +179,27 @@
             "href": "wiki:Stagecraft"
           }
         ]
-      }
+      },
+      "seeds": [
+        "lighting",
+        "costume"
+      ],
+      "floatingTerms": [
+        "set design",
+        "sound design"
+      ],
+      "terms": [
+        "lighting",
+        "costume",
+        "set design",
+        "sound design"
+      ]
     },
     {
       "id": "audience-and-reception",
       "name": "Audience and reception",
       "color": "magenta",
       "fact": "A performance unfolds for spectators whose expectations, collective attention, interpretations, and responses help make each live event socially and aesthetically distinct.",
-      "seeds": [
-        "interpretation",
-        "applause"
-      ],
-      "floatingTerms": [
-        "audience expectation",
-        "shared attention"
-      ],
-      "terms": [
-        "audience expectation",
-        "shared attention",
-        "interpretation",
-        "applause"
-      ],
       "termInfo": {
         "audience expectation": {
           "text": "What spectators anticipate because of genre, publicity, prior knowledge, culture, and earlier experience.",
@@ -254,7 +240,21 @@
             "href": "wiki:Audience"
           }
         ]
-      }
+      },
+      "seeds": [
+        "interpretation",
+        "applause"
+      ],
+      "floatingTerms": [
+        "audience expectation",
+        "shared attention"
+      ],
+      "terms": [
+        "audience expectation",
+        "shared attention",
+        "interpretation",
+        "applause"
+      ]
     }
   ],
   "bridges": [
@@ -459,6 +459,15 @@
           "convention",
           "shared attention"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

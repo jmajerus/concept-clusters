@@ -22,20 +22,6 @@
       "name": "Epistemic distortion",
       "color": "teal",
       "fact": "Epistemic distortion weakens access to shared reality by narrowing information, misreading threats, circulating falsehoods, or stripping claims from the context needed to judge them.",
-      "seeds": [
-        "misinformation",
-        "threat misperception"
-      ],
-      "floatingTerms": [
-        "information isolation",
-        "loss of context"
-      ],
-      "terms": [
-        "information isolation",
-        "threat misperception",
-        "misinformation",
-        "loss of context"
-      ],
       "termInfo": {
         "information isolation": {
           "text": "A condition in which relevant evidence and competing interpretations are absent or systematically excluded.",
@@ -76,27 +62,27 @@
             "href": "wiki:Epistemology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "misinformation",
+        "threat misperception"
+      ],
+      "floatingTerms": [
+        "information isolation",
+        "loss of context"
+      ],
+      "terms": [
+        "information isolation",
+        "threat misperception",
+        "misinformation",
+        "loss of context"
+      ]
     },
     {
       "id": "moral-distortion",
       "name": "Moral distortion",
       "color": "blue",
       "fact": "Moral distortion changes the terms of regard by making dignity conditional, excluding people from moral concern, collapsing proportionality, or disengaging responsibility from harmful conduct.",
-      "seeds": [
-        "moral exclusion",
-        "moral disengagement"
-      ],
-      "floatingTerms": [
-        "conditional dignity",
-        "proportionality collapse"
-      ],
-      "terms": [
-        "conditional dignity",
-        "moral exclusion",
-        "proportionality collapse",
-        "moral disengagement"
-      ],
       "termInfo": {
         "conditional dignity": {
           "text": "The treatment of human worth as something that can be earned, lost, or withheld according to identity, conduct, status, or usefulness.",
@@ -137,27 +123,27 @@
             "href": "wiki:Moral psychology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "moral exclusion",
+        "moral disengagement"
+      ],
+      "floatingTerms": [
+        "conditional dignity",
+        "proportionality collapse"
+      ],
+      "terms": [
+        "conditional dignity",
+        "moral exclusion",
+        "proportionality collapse",
+        "moral disengagement"
+      ]
     },
     {
       "id": "institutional-magnification",
       "name": "Institutional magnification",
       "color": "amber",
       "fact": "Institutions magnify orientations by adding authority, repetition, technical language, and divided roles that extend decisions beyond any one person's judgment.",
-      "seeds": [
-        "role authority",
-        "diffusion of responsibility"
-      ],
-      "floatingTerms": [
-        "procedural repetition",
-        "technical framing"
-      ],
-      "terms": [
-        "role authority",
-        "procedural repetition",
-        "technical framing",
-        "diffusion of responsibility"
-      ],
       "termInfo": {
         "role authority": {
           "text": "Power or deference attached to an institutional position rather than only to the individual who occupies it.",
@@ -198,27 +184,27 @@
             "href": "wiki:Institution"
           }
         ]
-      }
+      },
+      "seeds": [
+        "role authority",
+        "diffusion of responsibility"
+      ],
+      "floatingTerms": [
+        "procedural repetition",
+        "technical framing"
+      ],
+      "terms": [
+        "role authority",
+        "procedural repetition",
+        "technical framing",
+        "diffusion of responsibility"
+      ]
     },
     {
       "id": "identity-magnification",
       "name": "Identity magnification",
       "color": "magenta",
       "fact": "Group identity magnifies judgments when loyalty, betrayal, stereotypes, and fused identity make agreement a condition of belonging and opposition a threat to the self.",
-      "seeds": [
-        "in-group loyalty",
-        "betrayal framing"
-      ],
-      "floatingTerms": [
-        "out-group homogeneity",
-        "identity fusion"
-      ],
-      "terms": [
-        "in-group loyalty",
-        "betrayal framing",
-        "out-group homogeneity",
-        "identity fusion"
-      ],
       "termInfo": {
         "in-group loyalty": {
           "text": "Preferential commitment to the welfare, norms, and judgments of one's own group.",
@@ -259,7 +245,21 @@
             "href": "wiki:Social identity theory"
           }
         ]
-      }
+      },
+      "seeds": [
+        "in-group loyalty",
+        "betrayal framing"
+      ],
+      "floatingTerms": [
+        "out-group homogeneity",
+        "identity fusion"
+      ],
+      "terms": [
+        "in-group loyalty",
+        "betrayal framing",
+        "out-group homogeneity",
+        "identity fusion"
+      ]
     }
   ],
   "bridges": [
@@ -418,6 +418,15 @@
           "moral judgment",
           "corrective practices"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

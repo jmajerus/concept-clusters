@@ -1,7 +1,10 @@
 {
   "id": "climate-and-livelihoods",
   "title": "Climate and livelihoods across regions",
-  "category": "geography",
+  "category": "atmospheric-science",
+  "subcategories": {
+    "atmospheric-science": "climatology"
+  },
   "large": true,
   "info": {
     "text": "Regional patterns emerge from relationships among climate, ecosystems, livelihoods, and human adaptations; no single feature defines an entire region.",
@@ -17,20 +20,6 @@
       "name": "Climate and ground conditions",
       "color": "teal",
       "fact": "Regional climate and ground conditions differ in average temperature and precipitation, in when water arrives, how variable it is, and whether the ground remains frozen.",
-      "seeds": [
-        "seasonal monsoon",
-        "permafrost"
-      ],
-      "floatingTerms": [
-        "dry-summer climate",
-        "variable semiarid rainfall"
-      ],
-      "terms": [
-        "dry-summer climate",
-        "seasonal monsoon",
-        "variable semiarid rainfall",
-        "permafrost"
-      ],
       "termInfo": {
         "dry-summer climate": {
           "text": "A climate with dry summers and wetter cool seasons, characteristic of much of the Mediterranean Basin and several comparable regions elsewhere.",
@@ -71,27 +60,27 @@
             "href": "wiki:Climate classification"
           }
         ]
-      }
+      },
+      "seeds": [
+        "seasonal monsoon",
+        "permafrost"
+      ],
+      "floatingTerms": [
+        "dry-summer climate",
+        "variable semiarid rainfall"
+      ],
+      "terms": [
+        "dry-summer climate",
+        "seasonal monsoon",
+        "variable semiarid rainfall",
+        "permafrost"
+      ]
     },
     {
       "id": "vegetation-and-ecosystems",
       "name": "Vegetation and ecosystems",
       "color": "blue",
       "fact": "Vegetation reflects regional combinations of heat, water, soils, disturbance, and seasonality rather than climate alone.",
-      "seeds": [
-        "monsoon forest",
-        "Arctic tundra"
-      ],
-      "floatingTerms": [
-        "sclerophyll vegetation",
-        "Sahelian savanna"
-      ],
-      "terms": [
-        "sclerophyll vegetation",
-        "monsoon forest",
-        "Sahelian savanna",
-        "Arctic tundra"
-      ],
       "termInfo": {
         "sclerophyll vegetation": {
           "text": "Evergreen vegetation with small, hard, often thick leaves that reduce water loss during seasonal drought.",
@@ -132,27 +121,27 @@
             "href": "wiki:Biome"
           }
         ]
-      }
+      },
+      "seeds": [
+        "monsoon forest",
+        "Arctic tundra"
+      ],
+      "floatingTerms": [
+        "sclerophyll vegetation",
+        "Sahelian savanna"
+      ],
+      "terms": [
+        "sclerophyll vegetation",
+        "monsoon forest",
+        "Sahelian savanna",
+        "Arctic tundra"
+      ]
     },
     {
       "id": "livelihoods",
       "name": "Livelihoods",
       "color": "amber",
       "fact": "Livelihoods respond to environmental opportunities and constraints, but they are also shaped by culture, history, technology, markets, and political institutions.",
-      "seeds": [
-        "wet-rice agriculture",
-        "reindeer herding"
-      ],
-      "floatingTerms": [
-        "olive cultivation",
-        "mobile pastoralism"
-      ],
-      "terms": [
-        "olive cultivation",
-        "wet-rice agriculture",
-        "mobile pastoralism",
-        "reindeer herding"
-      ],
       "termInfo": {
         "olive cultivation": {
           "text": "The growing of olive trees for fruit and oil, a practice deeply embedded in Mediterranean landscapes and foodways.",
@@ -193,27 +182,27 @@
             "href": "wiki:Livelihood"
           }
         ]
-      }
+      },
+      "seeds": [
+        "wet-rice agriculture",
+        "reindeer herding"
+      ],
+      "floatingTerms": [
+        "olive cultivation",
+        "mobile pastoralism"
+      ],
+      "terms": [
+        "olive cultivation",
+        "wet-rice agriculture",
+        "mobile pastoralism",
+        "reindeer herding"
+      ]
     },
     {
       "id": "adaptations-and-practices",
       "name": "Adaptations and practices",
       "color": "magenta",
       "fact": "People reshape and move through environments using accumulated knowledge, infrastructure, and institutions—from terraces and irrigation networks to seasonal routes and cold-region engineering.",
-      "seeds": [
-        "terraced farming",
-        "irrigation"
-      ],
-      "floatingTerms": [
-        "transhumance",
-        "elevated foundations"
-      ],
-      "terms": [
-        "terraced farming",
-        "irrigation",
-        "transhumance",
-        "elevated foundations"
-      ],
       "termInfo": {
         "terraced farming": {
           "text": "Cultivation on level steps constructed across slopes to retain soil, manage runoff, and create workable fields.",
@@ -254,7 +243,21 @@
             "href": "wiki:Human ecology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "terraced farming",
+        "irrigation"
+      ],
+      "floatingTerms": [
+        "transhumance",
+        "elevated foundations"
+      ],
+      "terms": [
+        "terraced farming",
+        "irrigation",
+        "transhumance",
+        "elevated foundations"
+      ]
     }
   ],
   "bridges": [
@@ -415,14 +418,6 @@
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Compare regional environments and livelihoods with other ways people organize life and resources.",
-      "links": [
-        {
-          "href": "wiki:Regional geography"
-        }
-      ]
-    },
     "entries": [
       {
         "id": "ancient-civilizations",
@@ -439,6 +434,14 @@
           "livelihoods",
           "land use"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

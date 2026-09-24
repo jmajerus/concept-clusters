@@ -6,7 +6,7 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "popular-music-milestones",
   "title": "Popular Music Milestones",
-  "category": "anthropology",
+  "category": "trivia",
   "info": {
     "text": "Landmark albums across five decades, with questions about the people, prizes, and breakthroughs behind them.",
     "citations": [
@@ -293,10 +293,10 @@ export default definePuzzle(import.meta.url, {
   "lensMode": "quiz",
   "preSolve": true,
   "provenance": {
-    "collaboration": "human",
+    "collaboration": "ai",
     "contributors": [
       {
-        "name": "John Majerus"
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

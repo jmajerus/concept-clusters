@@ -6,7 +6,10 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "climate-and-livelihoods",
   "title": "Climate and livelihoods across regions",
-  "category": "geography",
+  "category": "atmospheric-science",
+  "subcategories": {
+    "atmospheric-science": "climatology"
+  },
   "large": true,
   "info": {
     "text": "Regional patterns emerge from relationships among climate, ecosystems, livelihoods, and human adaptations; no single feature defines an entire region.",
@@ -405,14 +408,6 @@ export default definePuzzle(import.meta.url, {
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Compare regional environments and livelihoods with other ways people organize life and resources.",
-      "links": [
-        {
-          "href": "wiki:Regional geography"
-        }
-      ]
-    },
     "entries": [
       {
         "id": "ancient-civilizations",
@@ -429,6 +424,14 @@ export default definePuzzle(import.meta.url, {
           "livelihoods",
           "land use"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

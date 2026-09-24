@@ -17,20 +17,6 @@
       "name": "Scientific investigation",
       "color": "teal",
       "fact": "Scientific inference links controlled observation and measurement to analysis, while replication tests whether a result depends on one sample, method, or laboratory.",
-      "seeds": [
-        "controlled experiment",
-        "measurement"
-      ],
-      "floatingTerms": [
-        "replication",
-        "statistical analysis"
-      ],
-      "terms": [
-        "controlled experiment",
-        "measurement",
-        "replication",
-        "statistical analysis"
-      ],
       "termInfo": {
         "controlled experiment": {
           "text": "A study that changes an independent variable while holding other relevant conditions constant or comparing against a control.",
@@ -71,27 +57,27 @@
             "href": "wiki:Scientific method"
           }
         ]
-      }
+      },
+      "seeds": [
+        "controlled experiment",
+        "measurement"
+      ],
+      "floatingTerms": [
+        "replication",
+        "statistical analysis"
+      ],
+      "terms": [
+        "controlled experiment",
+        "measurement",
+        "replication",
+        "statistical analysis"
+      ]
     },
     {
       "id": "historical-inquiry",
       "name": "Historical inquiry",
       "color": "blue",
       "fact": "Historians construct accounts by placing documents and artifacts in chronological and social context, then critically comparing what different sources can and cannot support.",
-      "seeds": [
-        "archival document",
-        "chronology"
-      ],
-      "floatingTerms": [
-        "material artifact",
-        "source criticism"
-      ],
-      "terms": [
-        "archival document",
-        "material artifact",
-        "chronology",
-        "source criticism"
-      ],
       "termInfo": {
         "archival document": {
           "text": "A document preserved within an archive or manuscript collection together with information about its creator and context.",
@@ -132,27 +118,27 @@
             "href": "wiki:Historical method"
           }
         ]
-      }
+      },
+      "seeds": [
+        "archival document",
+        "chronology"
+      ],
+      "floatingTerms": [
+        "material artifact",
+        "source criticism"
+      ],
+      "terms": [
+        "archival document",
+        "material artifact",
+        "chronology",
+        "source criticism"
+      ]
     },
     {
       "id": "legal-adjudication",
       "name": "Legal adjudication",
       "color": "amber",
       "fact": "Courts evaluate testimony, objects, records, and prior decisions through rules governing relevance, reliability, authentication, custody, and permissible inference.",
-      "seeds": [
-        "sworn testimony",
-        "physical evidence"
-      ],
-      "floatingTerms": [
-        "precedent",
-        "chain of custody"
-      ],
-      "terms": [
-        "sworn testimony",
-        "physical evidence",
-        "precedent",
-        "chain of custody"
-      ],
       "termInfo": {
         "sworn testimony": {
           "text": "Evidence given by a witness under oath or affirmation in a legal proceeding.",
@@ -193,27 +179,27 @@
             "href": "wiki:Evidence (law)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "sworn testimony",
+        "physical evidence"
+      ],
+      "floatingTerms": [
+        "precedent",
+        "chain of custody"
+      ],
+      "terms": [
+        "sworn testimony",
+        "physical evidence",
+        "precedent",
+        "chain of custody"
+      ]
     },
     {
       "id": "journalistic-verification",
       "name": "Journalistic verification",
       "color": "magenta",
       "fact": "Journalists strengthen public claims by attributing statements, consulting records, checking eyewitness accounts, and seeking confirmation independent of the original source.",
-      "seeds": [
-        "on-record interview",
-        "public record"
-      ],
-      "floatingTerms": [
-        "eyewitness account",
-        "independent verification"
-      ],
-      "terms": [
-        "on-record interview",
-        "public record",
-        "eyewitness account",
-        "independent verification"
-      ],
       "termInfo": {
         "on-record interview": {
           "text": "An interview in which the source agrees that the information and the source's identity may be published.",
@@ -254,7 +240,21 @@
             "href": "wiki:Journalism ethics and standards"
           }
         ]
-      }
+      },
+      "seeds": [
+        "on-record interview",
+        "public record"
+      ],
+      "floatingTerms": [
+        "eyewitness account",
+        "independent verification"
+      ],
+      "terms": [
+        "on-record interview",
+        "public record",
+        "eyewitness account",
+        "independent verification"
+      ]
     }
   ],
   "bridges": [
@@ -453,6 +453,15 @@
           "verification",
           "evidence"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

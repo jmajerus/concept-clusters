@@ -451,5 +451,14 @@ export default definePuzzle(import.meta.url, {
         "impaired autonomy": "The central injury is that the resulting commitment did not arise from an informed choice aligned with the person's own purposes."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

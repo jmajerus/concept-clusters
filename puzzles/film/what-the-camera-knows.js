@@ -227,5 +227,14 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "lensMode": "sequential"
+  "lensMode": "sequential",
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

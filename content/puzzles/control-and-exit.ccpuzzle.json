@@ -23,22 +23,6 @@
       "name": "Person's intended action",
       "color": "teal",
       "fact": "People approach an interface with purposes of their own: to use a service, decline a request, protect personal information, or end a relationship they no longer want.",
-      "seeds": [
-        "access desired service",
-        "end subscription"
-      ],
-      "floatingTerms": [
-        "use core feature",
-        "decline request",
-        "control personal data"
-      ],
-      "terms": [
-        "access desired service",
-        "use core feature",
-        "decline request",
-        "end subscription",
-        "control personal data"
-      ],
       "termInfo": {
         "access desired service": {
           "text": "The product, information, confirmation, or capability the person originally came to obtain.",
@@ -87,29 +71,29 @@
             "href": "https://deceptive.design/types/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "access desired service",
+        "end subscription"
+      ],
+      "floatingTerms": [
+        "use core feature",
+        "decline request",
+        "control personal data"
+      ],
+      "terms": [
+        "access desired service",
+        "use core feature",
+        "decline request",
+        "end subscription",
+        "control personal data"
+      ]
     },
     {
       "id": "business-imposed-action",
       "name": "Business-imposed action",
       "color": "blue",
       "fact": "A business can condition access on registration, disclosure, installation, marketing consent, or payment authority that serves its own interests more than the person's immediate goal.",
-      "seeds": [
-        "create account",
-        "disclose personal data"
-      ],
-      "floatingTerms": [
-        "install app",
-        "accept marketing",
-        "provide payment details"
-      ],
-      "terms": [
-        "create account",
-        "disclose personal data",
-        "install app",
-        "accept marketing",
-        "provide payment details"
-      ],
       "termInfo": {
         "create account": {
           "text": "Registering an ongoing identity and relationship with the business before completing a task that may not inherently require one.",
@@ -158,29 +142,29 @@
             "href": "https://deceptive.design/types/forced-action/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "create account",
+        "disclose personal data"
+      ],
+      "floatingTerms": [
+        "install app",
+        "accept marketing",
+        "provide payment details"
+      ],
+      "terms": [
+        "create account",
+        "disclose personal data",
+        "install app",
+        "accept marketing",
+        "provide payment details"
+      ]
     },
     {
       "id": "asymmetric-pathways",
       "name": "Asymmetric pathways",
       "color": "amber",
       "fact": "Business-favorable actions are made immediate and prominent, while refusal and exit are interrupted, hidden, lengthened, or displaced into less convenient channels.",
-      "seeds": [
-        "repeated prompt",
-        "hidden cancellation"
-      ],
-      "floatingTerms": [
-        "easy enrollment",
-        "extra steps",
-        "channel switching"
-      ],
-      "terms": [
-        "repeated prompt",
-        "easy enrollment",
-        "hidden cancellation",
-        "extra steps",
-        "channel switching"
-      ],
       "termInfo": {
         "repeated prompt": {
           "text": "A request that returns after refusal because the interface offers only a temporary dismissal such as 'Not now'.",
@@ -229,31 +213,29 @@
             "href": "https://deceptive.design/book/contents/chapter-19/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "repeated prompt",
+        "hidden cancellation"
+      ],
+      "floatingTerms": [
+        "easy enrollment",
+        "extra steps",
+        "channel switching"
+      ],
+      "terms": [
+        "repeated prompt",
+        "easy enrollment",
+        "hidden cancellation",
+        "extra steps",
+        "channel switching"
+      ]
     },
     {
       "id": "consequences-for-agency",
       "name": "Consequences for agency",
       "color": "magenta",
       "fact": "Conditional access, repeated interruption, and obstructed exit consume personal resources and can leave people sharing data, remaining enrolled, or accepting conditions they did not freely choose.",
-      "seeds": [
-        "time and attention loss",
-        "impaired autonomy"
-      ],
-      "floatingTerms": [
-        "interrupted task",
-        "fatigue",
-        "privacy loss",
-        "forced persistence"
-      ],
-      "terms": [
-        "interrupted task",
-        "time and attention loss",
-        "fatigue",
-        "privacy loss",
-        "forced persistence",
-        "impaired autonomy"
-      ],
       "termInfo": {
         "interrupted task": {
           "text": "The person's original activity is paused or displaced by a request serving the business's objective.",
@@ -310,7 +292,25 @@
             "href": "https://deceptive.design/types/obstruction/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "time and attention loss",
+        "impaired autonomy"
+      ],
+      "floatingTerms": [
+        "interrupted task",
+        "fatigue",
+        "privacy loss",
+        "forced persistence"
+      ],
+      "terms": [
+        "interrupted task",
+        "time and attention loss",
+        "fatigue",
+        "privacy loss",
+        "forced persistence",
+        "impaired autonomy"
+      ]
     }
   ],
   "bridges": [
@@ -331,14 +331,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "person-s-intended-action": "access desired service",
+        "business-imposed-action": "create account"
+      },
       "direction": {
         "kind": "through",
         "from": "person-s-intended-action",
         "to": "business-imposed-action"
-      },
-      "idealTerms": {
-        "person-s-intended-action": "access desired service",
-        "business-imposed-action": "create account"
       }
     },
     {
@@ -358,14 +358,14 @@
         ]
       },
       "relationKind": "contrast",
+      "idealTerms": {
+        "person-s-intended-action": "end subscription",
+        "asymmetric-pathways": "hidden cancellation"
+      },
       "direction": {
         "kind": "through",
         "from": "person-s-intended-action",
         "to": "asymmetric-pathways"
-      },
-      "idealTerms": {
-        "person-s-intended-action": "end subscription",
-        "asymmetric-pathways": "hidden cancellation"
       }
     },
     {
@@ -385,14 +385,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "asymmetric-pathways": "extra steps",
+        "consequences-for-agency": "fatigue"
+      },
       "direction": {
         "kind": "through",
         "from": "asymmetric-pathways",
         "to": "consequences-for-agency"
-      },
-      "idealTerms": {
-        "asymmetric-pathways": "extra steps",
-        "consequences-for-agency": "fatigue"
       }
     }
   ],
@@ -479,5 +479,14 @@
         "asymmetric friction": "The effort required depends on whether the person's goal serves or conflicts with the business's interests."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

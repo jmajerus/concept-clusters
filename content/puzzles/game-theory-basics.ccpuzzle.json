@@ -16,20 +16,6 @@
       "name": "Describing a game",
       "color": "teal",
       "fact": "Before a game can be solved, it has to be described: who's playing, what strategies they can choose, what each combination of choices pays out, whether the players see everything as it happens, and whether one player's gain is exactly another's loss.",
-      "seeds": [
-        "strategy",
-        "zero-sum game"
-      ],
-      "floatingTerms": [
-        "payoff",
-        "perfect information"
-      ],
-      "terms": [
-        "strategy",
-        "payoff",
-        "zero-sum game",
-        "perfect information"
-      ],
       "termInfo": {
         "payoff": {
           "text": "What a player actually gets -- money, points, years in prison -- for one particular combination of everyone's choices.",
@@ -63,27 +49,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "strategy",
+        "zero-sum game"
+      ],
+      "floatingTerms": [
+        "payoff",
+        "perfect information"
+      ],
+      "terms": [
+        "strategy",
+        "payoff",
+        "zero-sum game",
+        "perfect information"
+      ]
     },
     {
       "id": "cluster-solving-a-game",
       "name": "Solving a game",
       "color": "blue",
       "fact": "Solving a game means predicting how rational players will actually play it: a dominant strategy wins no matter what anyone else does, a best response is the smartest reply to a specific opponent, a Nash equilibrium is where everyone is playing a best response to everyone else, and a mixed strategy solves it by randomizing when no single choice is safely best.",
-      "seeds": [
-        "Nash equilibrium",
-        "dominant strategy"
-      ],
-      "floatingTerms": [
-        "best response",
-        "mixed strategy"
-      ],
-      "terms": [
-        "dominant strategy",
-        "best response",
-        "Nash equilibrium",
-        "mixed strategy"
-      ],
       "termInfo": {
         "Nash equilibrium": {
           "text": "A set of strategies, one per player, where no one can do better by switching, given what everyone else is doing.",
@@ -117,27 +103,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Nash equilibrium",
+        "dominant strategy"
+      ],
+      "floatingTerms": [
+        "best response",
+        "mixed strategy"
+      ],
+      "terms": [
+        "dominant strategy",
+        "best response",
+        "Nash equilibrium",
+        "mixed strategy"
+      ]
     },
     {
       "id": "cluster-playing-again-and-again",
       "name": "Playing again and again",
       "color": "amber",
       "fact": "Some games get played only once, like the prisoner's dilemma; others repeat, which changes everything, since players in a repeated game can reward or punish each other over time, cooperative games let them make binding agreements up front, and a strategy like tit for tat shows how cooperation can win even among purely self-interested players.",
-      "seeds": [
-        "prisoner's dilemma",
-        "repeated game"
-      ],
-      "floatingTerms": [
-        "cooperative game",
-        "tit for tat"
-      ],
-      "terms": [
-        "repeated game",
-        "cooperative game",
-        "prisoner's dilemma",
-        "tit for tat"
-      ],
       "termInfo": {
         "cooperative game": {
           "text": "A game where players can make binding agreements with each other before choosing their strategies.",
@@ -171,7 +157,21 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "prisoner's dilemma",
+        "repeated game"
+      ],
+      "floatingTerms": [
+        "cooperative game",
+        "tit for tat"
+      ],
+      "terms": [
+        "repeated game",
+        "cooperative game",
+        "prisoner's dilemma",
+        "tit for tat"
+      ]
     }
   ],
   "bridges": [
@@ -214,14 +214,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-solving-a-game": "dominant strategy",
+        "cluster-playing-again-and-again": "prisoner's dilemma"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-playing-again-and-again",
         "to": "cluster-solving-a-game"
-      },
-      "idealTerms": {
-        "cluster-solving-a-game": "dominant strategy",
-        "cluster-playing-again-and-again": "prisoner's dilemma"
       }
     }
   ],
@@ -302,6 +302,14 @@
       {
         "id": "finite-and-infinite-games",
         "reason": "For the philosophical stakes underneath cooperation and repeated play -- what it means to keep a game going rather than win it -- see James Carse's account of finite and infinite play."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
       }
     ]
   }

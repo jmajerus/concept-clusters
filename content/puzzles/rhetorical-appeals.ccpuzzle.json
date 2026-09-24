@@ -4,6 +4,11 @@
   "category": "language-arts",
   "info": {
     "text": "Aristotle's three artistic proofs — ethos, pathos, and logos — are the means of persuasion a speech itself can produce. Kairos is the occasion: whether this is the time for those proofs to land.",
+    "links": [
+      {
+        "href": "wiki:Modes of persuasion"
+      }
+    ],
     "citations": [
       {
         "title": "Aristotle’s Rhetoric",
@@ -13,11 +18,6 @@
         "pages": "§2, §5",
         "url": "https://plato.stanford.edu/entries/aristotle-rhetoric/"
       }
-    ],
-    "links": [
-      {
-        "href": "wiki:Modes of persuasion"
-      }
     ]
   },
   "clusters": [
@@ -26,18 +26,6 @@
       "name": "Ethos",
       "color": "teal",
       "fact": "Ethos persuades through the speaker's credibility and character: the audience's sense that this person is worth believing on this subject.",
-      "seeds": [
-        "credibility",
-        "character"
-      ],
-      "floatingTerms": [
-        "speaker's goodwill"
-      ],
-      "terms": [
-        "credibility",
-        "character",
-        "speaker's goodwill"
-      ],
       "termInfo": {
         "character": {
           "text": "The moral person the speech presents the speaker as being. Aristotle held that this character has to come through in the speech itself, not from a prior reputation."
@@ -55,25 +43,25 @@
             "href": "wiki:Modes of persuasion#Ethos"
           }
         ]
-      }
+      },
+      "seeds": [
+        "credibility",
+        "character"
+      ],
+      "floatingTerms": [
+        "speaker's goodwill"
+      ],
+      "terms": [
+        "credibility",
+        "character",
+        "speaker's goodwill"
+      ]
     },
     {
       "id": "pathos",
       "name": "Pathos",
       "color": "blue",
       "fact": "Pathos persuades by putting the audience into an emotional state, so they judge from sympathy rather than from a cool distance.",
-      "seeds": [
-        "emotion",
-        "sympathy"
-      ],
-      "floatingTerms": [
-        "loaded language"
-      ],
-      "terms": [
-        "emotion",
-        "sympathy",
-        "loaded language"
-      ],
       "termInfo": {
         "emotion": {
           "text": "A feeling that changes how people judge. Aristotle's point is not that speeches should be tearful, but that hearers do not decide the same way when they are angry, afraid, or pleased."
@@ -96,25 +84,25 @@
             "href": "wiki:Modes of persuasion#Pathos"
           }
         ]
-      }
+      },
+      "seeds": [
+        "emotion",
+        "sympathy"
+      ],
+      "floatingTerms": [
+        "loaded language"
+      ],
+      "terms": [
+        "emotion",
+        "sympathy",
+        "loaded language"
+      ]
     },
     {
       "id": "logos",
       "name": "Logos",
       "color": "amber",
       "fact": "Logos persuades through the argument itself — reasoning and evidence that prove, or seem to prove, the claim.",
-      "seeds": [
-        "reasoning",
-        "evidence"
-      ],
-      "floatingTerms": [
-        "enthymeme"
-      ],
-      "terms": [
-        "reasoning",
-        "evidence",
-        "enthymeme"
-      ],
       "termInfo": {
         "enthymeme": {
           "text": "Aristotle's distinctive form of rhetorical proof: a rhetorical syllogism, often with a premise left for the audience to supply.",
@@ -137,25 +125,25 @@
             "href": "wiki:Modes of persuasion#Logos"
           }
         ]
-      }
+      },
+      "seeds": [
+        "reasoning",
+        "evidence"
+      ],
+      "floatingTerms": [
+        "enthymeme"
+      ],
+      "terms": [
+        "reasoning",
+        "evidence",
+        "enthymeme"
+      ]
     },
     {
       "id": "kairos",
       "name": "Kairos",
       "color": "magenta",
       "fact": "Kairos is the occasion of persuasion: whether this is the time and situation for the speech to land, rather than a proof the speech itself produces.",
-      "seeds": [
-        "timing",
-        "occasion"
-      ],
-      "floatingTerms": [
-        "opportune moment"
-      ],
-      "terms": [
-        "timing",
-        "occasion",
-        "opportune moment"
-      ],
       "termInfo": {
         "occasion": {
           "text": "The situation that makes this speech fitting or unfitting: the event, place, and audience already gathered, not a proof invented inside the speech."
@@ -173,7 +161,19 @@
             "href": "wiki:Modes of persuasion#Kairos"
           }
         ]
-      }
+      },
+      "seeds": [
+        "timing",
+        "occasion"
+      ],
+      "floatingTerms": [
+        "opportune moment"
+      ],
+      "terms": [
+        "timing",
+        "occasion",
+        "opportune moment"
+      ]
     }
   ],
   "bridges": [
@@ -238,5 +238,13 @@
         "enthymeme"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 }

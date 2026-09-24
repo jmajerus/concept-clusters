@@ -27,18 +27,6 @@
       "name": "The anxiety underneath",
       "color": "teal",
       "fact": "Menzies Lyth drew on Melanie Klein's account of infantile anxiety to explain what she found: close, repeated contact with suffering and death stirs feelings of a violence and intensity most adult life never requires anyone to face. The individual mind has its own old defenses against this -- splitting the frightening into pieces, projecting it outward, denying it is happening at all. None of this is unique to nursing. Nursing simply requires it constantly, of everyone, at once.",
-      "seeds": [
-        "primitive anxiety",
-        "projection"
-      ],
-      "floatingTerms": [
-        "splitting"
-      ],
-      "terms": [
-        "primitive anxiety",
-        "projection",
-        "splitting"
-      ],
       "termInfo": {
         "primitive anxiety": {
           "text": "Fear of a violence and intensity Menzies Lyth traced to infancy -- ordinarily long outgrown, but reawakened by sustained closeness to suffering and death."
@@ -50,27 +38,25 @@
           "text": "Dividing something too threatening to hold as one whole into separate, more bearable pieces. Klein's term for an infant defense that persists, in adult form, well into later life."
         }
       },
-      "info": "The primitive, Kleinian-rooted anxiety that intimate contact with suffering and death stirs up, and the individual mind's own old defenses against feeling the whole of it."
+      "info": "The primitive, Kleinian-rooted anxiety that intimate contact with suffering and death stirs up, and the individual mind's own old defenses against feeling the whole of it.",
+      "seeds": [
+        "primitive anxiety",
+        "projection"
+      ],
+      "floatingTerms": [
+        "splitting"
+      ],
+      "terms": [
+        "primitive anxiety",
+        "projection",
+        "splitting"
+      ]
     },
     {
       "id": "cluster-defence",
       "name": "The social defence system",
       "color": "blue",
       "fact": "Menzies Lyth was careful about what she was and was not claiming: an institution does not have a psyche of its own. What she found instead was something stranger -- impersonal structures, existing independently of whoever currently holds a given post, that let each new occupant lean on the same defenses the last one did. Task lists, checklists, and clinical distance were not chosen by any nurse in particular. They were simply what the role already came with.",
-      "seeds": [
-        "ritual task performance",
-        "depersonalization"
-      ],
-      "floatingTerms": [
-        "checks and counter-checks",
-        "task splitting"
-      ],
-      "terms": [
-        "ritual task performance",
-        "depersonalization",
-        "checks and counter-checks",
-        "task splitting"
-      ],
       "termInfo": {
         "checks and counter-checks": {
           "text": "Having a second, sometimes a third, person verify a decision already made. Reads as diligence. Functions as diffusion: once several people have glanced at the same chart, no one of them carries it alone."
@@ -85,25 +71,27 @@
           "text": "Dividing the total care one patient needs into separate tasks, carried out by different nurses, so that no single nurse holds the whole relationship -- or the whole of what it costs to hold it."
         }
       },
-      "info": "The impersonal, structural defenses built into the role itself -- inherited by whoever fills it, chosen by no one currently in it."
+      "info": "The impersonal, structural defenses built into the role itself -- inherited by whoever fills it, chosen by no one currently in it.",
+      "seeds": [
+        "ritual task performance",
+        "depersonalization"
+      ],
+      "floatingTerms": [
+        "checks and counter-checks",
+        "task splitting"
+      ],
+      "terms": [
+        "ritual task performance",
+        "depersonalization",
+        "checks and counter-checks",
+        "task splitting"
+      ]
     },
     {
       "id": "cluster-cost",
       "name": "The cost of the defence",
       "color": "amber",
       "fact": "None of this made the anxiety go away. Menzies Lyth's central, uncomfortable finding was that these defenses generated a further layer of anxiety on top of the original -- guilt, doubt, and frustration about a system nobody could quite explain or defend -- and that the more the system leaned on ritual, the more rigid and harder to change it became. The hospital she studied was, by its own senior staff's account, edging toward a genuine breakdown in its ability to train anyone at all.",
-      "seeds": [
-        "secondary anxiety",
-        "diffusion of responsibility"
-      ],
-      "floatingTerms": [
-        "rigidity"
-      ],
-      "terms": [
-        "secondary anxiety",
-        "diffusion of responsibility",
-        "rigidity"
-      ],
       "termInfo": {
         "diffusion of responsibility": {
           "text": "Spreading a decision across enough people, or enough procedure, that no single person has to carry the full weight of having made it."
@@ -115,25 +103,25 @@
           "text": "Anxiety produced by the defenses themselves -- guilt, doubt, and frustration at a system nobody chose and nobody can quite justify -- layered on top of whatever anxiety the defenses were meant to relieve."
         }
       },
-      "info": "What the defenses actually produced, measured against what they were meant to produce: not less anxiety, but a system generating more of it, and getting more rigid as it did."
+      "info": "What the defenses actually produced, measured against what they were meant to produce: not less anxiety, but a system generating more of it, and getting more rigid as it did.",
+      "seeds": [
+        "secondary anxiety",
+        "diffusion of responsibility"
+      ],
+      "floatingTerms": [
+        "rigidity"
+      ],
+      "terms": [
+        "secondary anxiety",
+        "diffusion of responsibility",
+        "rigidity"
+      ]
     },
     {
       "id": "cluster-containment",
       "name": "What containment would require",
       "color": "magenta",
       "fact": "Menzies Lyth pushed back, later in her career, against a popular misreading of her own paper -- that the fix was better staff support, helping nurses cope with a role that stayed exactly as it was. She wanted the opposite: containment, in Bion's sense, meant a role redesigned to actually hold the anxiety it provoked, rather than one where anxiety was quietly denied and the people in it were asked to manage on their own.",
-      "seeds": [
-        "containment",
-        "redesigning the role"
-      ],
-      "floatingTerms": [
-        "acknowledging the anxiety"
-      ],
-      "terms": [
-        "containment",
-        "redesigning the role",
-        "acknowledging the anxiety"
-      ],
       "termInfo": {
         "acknowledging the anxiety": {
           "text": "Treating the anxiety as a real and reasonable response to a real situation, rather than something a properly professional nurse should not be feeling."
@@ -145,7 +133,19 @@
           "text": "Changing the structure of the job itself -- what a nurse's task actually is -- rather than asking the people already in it to cope better with a design nobody chose."
         }
       },
-      "info": "What Menzies Lyth argued would actually help, against the popular misreading of her own work as an argument for better staff support."
+      "info": "What Menzies Lyth argued would actually help, against the popular misreading of her own work as an argument for better staff support.",
+      "seeds": [
+        "containment",
+        "redesigning the role"
+      ],
+      "floatingTerms": [
+        "acknowledging the anxiety"
+      ],
+      "terms": [
+        "containment",
+        "redesigning the role",
+        "acknowledging the anxiety"
+      ]
     }
   ],
   "bridges": [
@@ -161,14 +161,14 @@
         "text": "The same defensive move -- dividing a threatening whole into manageable pieces -- appearing first in one mind, then built into the structure everyone inherits."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-underneath": "splitting",
+        "cluster-defence": "task splitting"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-underneath",
         "to": "cluster-defence"
-      },
-      "idealTerms": {
-        "cluster-underneath": "splitting",
-        "cluster-defence": "task splitting"
       }
     },
     {
@@ -200,14 +200,14 @@
         "text": "What the most capable people actually did, in the absence of any structural alternative: they left."
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-cost": "diffusion of responsibility",
+        "cluster-containment": "redesigning the role"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-cost",
         "to": "cluster-containment"
-      },
-      "idealTerms": {
-        "cluster-cost": "diffusion of responsibility",
-        "cluster-containment": "redesigning the role"
       }
     }
   ],
@@ -265,5 +265,13 @@
         "task splitting": "Undoing it is a redesign decision -- restoring whole-patient care is not something one nurse can grant herself."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }
