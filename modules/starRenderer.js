@@ -1655,13 +1655,14 @@ export function createStarRenderer({
     // ends up pointing at that seed either way -- invisible to the
     // player, since every such line is drawn to the title regardless of
     // which specific member it's recorded against.
-    // Once a solved board is being edited in authoring mode, dragging is
-    // literal placement: the simulation stays stopped after release so it
-    // cannot "helpfully" undo the author's decision. The same frozen
-    // placement applies after lenses freeze the map, so the last connected
-    // node can still be nudged. Before solve (and in ordinary play) the
-    // existing force-release behavior remains unchanged.
-    const frozenPlacement = () =>
+    // Once polish has finished, or a solved board is being edited in
+    // authoring / lens review, a drag is literal placement: the
+    // simulation stays stopped so it cannot pull the node back, and
+    // edges follow the pill as it moves. Before solve (and after a
+    // live solve that has only been uncrossed) the force-release
+    // behavior remains unchanged.
+    const settledPlacement = () =>
+      state.solutionLayout === "pretty" ||
       (state.layoutAuthoring && state.made === state.need && state.layoutAdapter?.mode === "star") ||
       lensLayoutEditable(state);
     const starDrag = () => d3.drag()
@@ -1671,7 +1672,7 @@ export function createStarRenderer({
       })
       .clickDistance(6)
       .on("start", (e, d) => {
-        if (frozenPlacement()) {
+        if (settledPlacement()) {
           sim.stop();
         } else if (!e.active) {
           sim.alphaTarget(0.2).restart();
@@ -1682,7 +1683,7 @@ export function createStarRenderer({
       .on("drag", (e, d) => {
         d.x = d.fx = e.x;
         d.y = d.fy = e.y;
-        if (frozenPlacement()) renderPositions();
+        if (settledPlacement()) renderPositions();
       })
       .on("end", (e, d) => {
         const authoring = state.layoutAuthoring &&
@@ -1690,7 +1691,7 @@ export function createStarRenderer({
           state.layoutAdapter?.mode === "star";
         d.fx = null;
         d.fy = null;
-        if (authoring || lensLayoutEditable(state)) {
+        if (settledPlacement()) {
           d.vx = 0;
           d.vy = 0;
           sim.stop();

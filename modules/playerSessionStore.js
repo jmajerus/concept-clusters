@@ -10,6 +10,13 @@ export function playerSessionKey(puzzle) {
   return `${PREFIX}:${puzzle.id}`;
 }
 
+// Draft play uses the same session shape as a published puzzle, but a
+// separate key so preview layouts never attach to the live id.
+export function playerSessionPuzzle(puzzle, draftId = null) {
+  if (!puzzle) return null;
+  return draftId ? { ...puzzle, id: `draft:${draftId}` } : puzzle;
+}
+
 // Coordinate artifacts remain reusable when only teaching copy changes,
 // but a saved in-progress lens must never attach to a revised answer set.
 // Preserve the historical revision for puzzles without lenses; append a

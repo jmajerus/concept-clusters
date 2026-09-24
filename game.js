@@ -105,6 +105,7 @@ import {
 import {
   clearPlayerSession,
   loadPlayerSession,
+  playerSessionPuzzle,
   savePlayerSession
 } from "./modules/playerSessionStore.js";
 import {
@@ -464,17 +465,22 @@ function semanticMovesForState(currentState) {
   });
 }
 
+function sessionStoragePuzzle(puzzle = state?.puzzle) {
+  return playerSessionPuzzle(puzzle, overlayDraftId);
+}
+
 function persistPlayerSession({ captureLayout = false } = {}) {
-  if (overlayDraftId) return false;
   if (!state || state.restoringSession || layoutAuthoringMode) return false;
-  const previous = loadPlayerSession(localStorage, state.puzzle);
+  const sessionPuzzle = sessionStoragePuzzle();
+  if (!sessionPuzzle) return false;
+  const previous = loadPlayerSession(localStorage, sessionPuzzle);
   const layouts = { ...(previous?.layouts || {}) };
   if (captureLayout &&
       state.layoutAdapter?.mode === mode &&
       typeof state.layoutAdapter.capture === "function") {
     layouts[mode] = state.layoutAdapter.capture();
   }
-  return savePlayerSession(localStorage, state.puzzle, {
+  return savePlayerSession(localStorage, sessionPuzzle, {
     // A hand-authored ?mode= remains a view-only override. If the player
     // explicitly clicks a mode button, setMode updates persistedMode.
     currentMode: state.persistedMode,
@@ -571,7 +577,7 @@ function setMode(newMode) {
     // elements.
     state.setLayersReady = false;
     buildForMode();
-    const session = loadPlayerSession(localStorage, state.puzzle);
+    const session = loadPlayerSession(localStorage, sessionStoragePuzzle());
     const layout = session?.layouts?.[mode];
     let restoredLayout = null;
     if (layout &&
@@ -1929,7 +1935,7 @@ function applyLoadedPuzzle(puzzle, index, {
   appNavigation.notePuzzleLoaded();
   browsePuzzlesBtn.disabled = false;
   const savedSession = !layoutAuthoringMode && !authoringConstruct && restoreSession
-    ? loadPlayerSession(localStorage, puzzle)
+    ? loadPlayerSession(localStorage, sessionStoragePuzzle(puzzle))
     : null;
   if (authoringConstruct) {
     mode = constructViewMode === "graph" ? "graph" : "star";
