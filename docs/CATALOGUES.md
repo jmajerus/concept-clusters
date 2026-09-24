@@ -15,8 +15,9 @@ puzzle?"
 
 ## LAN authoring
 
-On `npm run dev` and the hosted authoring Worker, `/admin/catalogues`
-lists leaf and meta catalogues from D1. Leaf catalogues edit as Library
+On the LAN authoring server (and `npm run dev`), `/admin/catalogues`
+lists leaf and meta catalogues from D1. The hosted Worker serves MCP only
+and has no admin pages. Leaf catalogues edit as Library
 cards at `/?catalogue=<id>&view=author`. Meta catalogues edit at
 `/admin/catalogues/<id>`; their entries are other catalogues.
 **Publish** writes the shared D1 row and leaves the current editor open.
