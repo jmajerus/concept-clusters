@@ -76,7 +76,7 @@ import {
   puzzleIdIsLive,
   renamePuzzleDraftId
 } from "../modules/draftIdRename.js";
-import { draftShadowsPublished } from "../modules/draftReviewDiff.js";
+import { draftShadowsPublished, provenanceDiffersFromPublished } from "../modules/draftReviewDiff.js";
 
 const MAX_MCP_REQUEST_BYTES = 1_600_000;
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -1007,6 +1007,10 @@ async function handleAdminRoute(
       published: shadowBaseline,
       publishedDiff
     });
+    // Provenance is outside the field-level diff by design, so it is reported
+    // as its own difference -- otherwise a provenance-only edit reads as "no
+    // changes" and Publish is withheld as already-live.
+    const provenanceDiffers = provenanceDiffersFromPublished(shadowBaseline, document);
     const baseValidation = withStorageCanonicalizeFlags(
       draft.document,
       await contentService.validatePuzzleDraft(document, { categoryRegistry }),
@@ -1056,6 +1060,7 @@ async function handleAdminRoute(
       alreadyPublished,
       publishedDiff,
       shadowsPublished,
+      provenanceDiffersFromPublished: provenanceDiffers,
       // Same question the rename POST asks, so the page never offers a
       // rename the server will refuse.
       puzzleIdIsLive: await puzzleIdIsLive({

@@ -261,6 +261,26 @@ export function diffPublishedDraft(published, draft) {
 }
 
 /**
+ * Provenance is kept out of the field-level marks (see SKIP_KEYS) so a review
+ * pass is not a changelog of tooling: an MCP stamp lands on its own and should
+ * not litter a copy review. But provenance is authored now -- an editor names
+ * the drafting client by hand -- so a provenance-only edit must still register
+ * as a difference, or the page reports "No changes" over a real edit and
+ * Publish treats the draft as already live.
+ *
+ * Reported as its own flag beside layoutDiffersFromPublished rather than as a
+ * field mark, which keeps both properties.
+ *
+ * @param {{ provenance?: unknown } | null | undefined} published
+ * @param {{ provenance?: unknown } | null | undefined} draft
+ * @returns {boolean}
+ */
+export function provenanceDiffersFromPublished(published, draft) {
+  if (!published || !draft) return false;
+  return !valuesEqual(published.provenance ?? null, draft.provenance ?? null);
+}
+
+/**
  * Does this working copy descend from the published board, or is it a
  * different document filed under the same id?
  *

@@ -87,7 +87,7 @@ import { renderContentLifecycleResultPage, renderContentPublishResultPage } from
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { checkDocumentWikiLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
-import { draftShadowsPublished } from "./draftReviewDiff.js";
+import { draftShadowsPublished, provenanceDiffersFromPublished } from "./draftReviewDiff.js";
 import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
@@ -246,6 +246,7 @@ export async function mapDraftDetail(record, {
     }),
     publishedDiff,
     shadowsPublished: draftShadowsPublished({ published: baseline, publishedDiff }),
+    provenanceDiffersFromPublished: provenanceDiffersFromPublished(baseline, document),
     layoutDiffersFromPublished,
     validation: contentService
       ? await withWikiLinkFlags(

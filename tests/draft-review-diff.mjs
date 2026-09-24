@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
-import { diffPublishedDraft, draftShadowsPublished } from "../modules/draftReviewDiff.js";
+import {
+  diffPublishedDraft,
+  draftShadowsPublished,
+  provenanceDiffersFromPublished
+} from "../modules/draftReviewDiff.js";
 
 export const name = "draft review diff: published vs draft marks";
 
@@ -224,4 +228,35 @@ export async function run() {
     false,
     "an empty published board has no identity to lose"
   );
+
+  // Provenance is deliberately outside the field-level marks, so the diff
+  // itself reports nothing for a provenance-only edit...
+  const beforeProvenance = {
+    id: "p", clusters: [], bridges: [], lenses: [],
+    provenance: { collaboration: "ai", contributors: [{ name: "Claude" }] }
+  };
+  const afterProvenance = {
+    ...beforeProvenance,
+    provenance: { collaboration: "ai", contributors: [{ name: "Claude (Sonnet 5)" }] }
+  };
+  assert.equal(
+    diffPublishedDraft(beforeProvenance, afterProvenance).total,
+    0,
+    "provenance stays out of the field-level marks"
+  );
+  // ...which is why it is reported separately. Without this the review page
+  // said "No changes from the published puzzle" over a real edit, and worse,
+  // the draft counted as already-in-authoring-play so Publish was withheld
+  // and the edit could not leave the working copy.
+  assert.equal(provenanceDiffersFromPublished(beforeProvenance, afterProvenance), true);
+  assert.equal(provenanceDiffersFromPublished(beforeProvenance, beforeProvenance), false);
+  // Naming a client on a puzzle that had none is still a difference.
+  assert.equal(
+    provenanceDiffersFromPublished(
+      { id: "p", clusters: [] },
+      { id: "p", clusters: [], provenance: { collaboration: "ai", contributors: [{ name: "Codex" }] } }
+    ),
+    true
+  );
+  assert.equal(provenanceDiffersFromPublished(null, afterProvenance), false);
 }
