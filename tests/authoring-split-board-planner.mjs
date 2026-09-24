@@ -46,13 +46,42 @@ export async function run() {
   assert.equal(plan.activeBoard.id, "light-wave-and-particle-evidence");
   assert.equal(plan.mcpTransport, "mcp-call");
   assert.ok(plan.forbidden.some(line => line.includes("one board")));
+  assert.ok(plan.forbidden.some(line => line.includes("notes or lenses")));
   assert.ok(plan.steps.some(step => step.includes("check-completeness.mjs --level fit")));
-  assert.ok(plan.humanPrompt?.options?.length >= 2);
+  assert.equal(plan.presentGate, false);
+  assert.equal(plan.humanPrompt.presentGate, false);
+  assert.equal(plan.stopAfter, "continue-same-pass");
+  assert.match(plan.report.closing, /Continue the fit pass/);
+  assert.doesNotMatch(plan.report.closing, /Waiting on board review/);
+  assert.equal(plan.humanPrompt.options.length, 0);
+  assert.ok(plan.steps.at(-1).includes("--pass fit"));
+  assert.ok(plan.steps.at(-1).includes("--continue"));
+  assert.ok(plan.humanNext.onValidated.includes("--continue"));
+  assert.ok(plan.humanNext.onValidated.includes("--transport mcp-call"));
+  assert.ok(plan.steps.at(-1).includes("--transport mcp-call"));
   assert.ok(plan.artifacts.ledger.includes("ledgers"));
   assert.doesNotMatch(plan.artifacts.inventory, /\/tmp\//);
   assert.ok(plan.humanPrompt.draftsUrl.includes("/admin/drafts/"));
-  assert.ok(plan.humanPrompt.defaultReply);
-  assert.equal(plan.humanNext.acceptsNaturalLanguage, true);
+  assert.equal(plan.humanNext.acceptsNaturalLanguage, false);
+
+  const lastFit = runPlanner([
+    "--plan", EXAMPLE_PLAN,
+    "--pass", "fit",
+    "--board", "light-wave-and-particle-evidence",
+    "--continue",
+    "--dry-run"
+  ]);
+  assert.equal(lastFit.activeBoard.id, "matter-waves-and-quantum-outcomes");
+  assert.equal(lastFit.presentGate, true);
+  assert.equal(lastFit.stopAfter, "validate-and-pause");
+  assert.ok(lastFit.humanPrompt.options.length >= 2);
+  assert.ok(lastFit.humanPrompt.options.some(option => /notes and lenses/i.test(option.label)));
+  assert.ok(!lastFit.humanPrompt.options.some(option => /fit the next/i.test(option.label)));
+  assert.ok(lastFit.humanNext.onApprove.includes("--pass complete"));
+  assert.ok(lastFit.humanNext.onApprove.includes("light-wave-and-particle-evidence"));
+  assert.ok(lastFit.humanNext.onApprove.includes("--transport mcp-call"));
+  assert.match(lastFit.report.closing, /Waiting on board review/);
+  assert.equal(lastFit.humanNext.acceptsNaturalLanguage, true);
 
   const kiloNative = runPlanner([
     "--plan", EXAMPLE_PLAN,
@@ -88,6 +117,8 @@ export async function run() {
     "--transport", "stdio"
   ]);
   assert.equal(nativeMcp.mcpTransport, "stdio");
+  assert.ok(nativeMcp.humanNext.onValidated.includes("--transport stdio"));
+  assert.ok(nativeMcp.steps.at(-1).includes("--transport stdio"));
   assert.ok(
     nativeMcp.steps.some(step => step.startsWith("Call MCP tool get_authoring_guidance sequentially")),
     "native-MCP transport must emit direct sequential tool calls"
@@ -102,4 +133,18 @@ export async function run() {
   ]);
   assert.equal(second.activeBoard.id, "matter-waves-and-quantum-outcomes");
   assert.equal(second.invocation.pass, "complete");
+  assert.equal(second.presentGate, true);
+  assert.ok(second.steps.at(-1).includes("Every board passed complete validation"));
+
+  const firstComplete = runPlanner([
+    "--plan", EXAMPLE_PLAN,
+    "--pass", "complete",
+    "--dry-run"
+  ]);
+  assert.equal(firstComplete.activeBoard.id, "light-wave-and-particle-evidence");
+  assert.equal(firstComplete.presentGate, false);
+  assert.match(firstComplete.report.closing, /Continue the complete pass/);
+  assert.ok(firstComplete.humanNext.onValidated.includes("--transport mcp-call"));
+  assert.ok(firstComplete.steps.at(-1).includes("--pass complete"));
+  assert.ok(firstComplete.humanNext.onValidated.includes("--continue"));
 }

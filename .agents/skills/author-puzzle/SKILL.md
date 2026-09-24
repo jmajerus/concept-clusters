@@ -118,11 +118,11 @@ At **every** stop gate, end with a short **What's next?** block: 2–4 numbered 
 | yes / looks good / ok / approved | Approve and take the forward option at this gate |
 | continue / next / go ahead | Advance to the next pass or next board |
 | revise / change / fix / push back | Stay on this pass; edit the artifact they name |
-| complete / notes / lenses / fill | Complete pass for the current board |
-| next board / board 2 | Next board in the split plan |
+| complete / notes / lenses / fill | Complete pass, starting with the first board once every board is fitted |
+| next board / board 2 | Name a board to revise; the planner already chains the rest of the same pass |
 | submit / pr / ship | Publish on the drafts page (a human action; MCP does not do it). Whatever happens after that is outside this session |
 
-Vague **continue** after a gate: pick the most likely forward step from context (e.g. after inventory approval → run `plan-boards.mjs`, then fit or split plan; after fit board 1 in a split → fit board 2 or complete board 1).
+Vague **continue** after a gate: pick the most likely forward step from context (e.g. after inventory approval → run `plan-boards.mjs`, then fit or split plan; after the split fit gate, both boards are already fitted → start the complete pass on the first board).
 
 ### Inventory gate
 
@@ -138,7 +138,6 @@ What's next?
 What's next?
 1. Revise the seam, trims, or board count
 2. Approve — fit the first board
-3. Approve — fit all boards (I'll do them one at a time)
 ```
 
 ### Fit gate (single board)
@@ -151,7 +150,7 @@ What's next?
 
 ### Split boards
 
-Run `plan-split-boards.mjs` once per board; **print its `humanPrompt` verbatim** (headline, drafts URL, numbered options, `defaultReply`). Obey `humanNext` for which planner invocation to run on their reply — the human never sees flags.
+Run `plan-split-boards.mjs` once per board. When `presentGate` is false, do not stop and do not use the waiting one-liner above: print `report.closing` and run the next burst named in the last step. When `presentGate` is true, **print `humanPrompt` verbatim** (headline, drafts URL, numbered options, `defaultReply`) and obey `humanNext`. The human never sees flags. Copy the planner command as written, including `--transport`.
 
 ### Complete gate
 
@@ -159,7 +158,7 @@ Run `plan-split-boards.mjs` once per board; **print its `humanPrompt` verbatim**
 What's next?
 1. Revise notes, lenses, or bridge help
 2. Approve — open the drafts page to review copy
-3. Publish and cue for freeze when ready (or next board in a split)
+3. Publish and cue for freeze when ready
 ```
 
 ### Integrated profile gate
@@ -390,11 +389,15 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 - **Split:** run `plan-split-boards.mjs` once per board and obey its JSON;
   transport selection (`--transport stdio` vs. `mcp-call`, Kilo's namespaced
   tools) and client-identity forwarding are in
-  [split-pass.md](references/split-pass.md). Fit **each board** in the plan's
-  `boardOrder`; copy only `relatedPuzzles.info` and `relatedPuzzles.entries`
-  from the plan onto the first board (reciprocal link on the sequel when
-  useful) — `boardOrder` is plan metadata and must not enter the puzzle
-  document. **Never fit or complete two boards in one burst.**
+  [split-pass.md](references/split-pass.md). Fit **every board** in
+  `boardOrder` before any notes or lenses: each board is its own burst, and
+  the planner chains the next fit without a human gate. One gate covers the
+  whole set. After that approval, complete the boards in the same order, again
+  one burst each, with one gate after the last board. Copy only
+  `relatedPuzzles.info` and `relatedPuzzles.entries` from the plan onto the
+  first board (reciprocal link on the sequel when useful) — `boardOrder` is
+  plan metadata and must not enter the puzzle document. **Never fit or
+  complete two boards in one burst.**
 - Use `destinationPuzzleId` in ledger `deferred` entries for sibling terms.
 
 - If the category already has published puzzles, read **one same-category** comparable for JSON field conventions only — not to copy its cluster count or term counts.
@@ -417,7 +420,7 @@ Fix `blocking` until `ok: true`. Then `validate_puzzle_draft`. Then:
 node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
 ```
 
-Stop-gate: board + loss ledger review on `/admin/drafts`.
+Stop-gate for a single board: board + loss ledger review on `/admin/drafts`. A split does not stop here; the planner's last-fit gate is the review, after every board is fitted.
 
 ### 4. Complete pass
 

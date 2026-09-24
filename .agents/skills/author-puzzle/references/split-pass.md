@@ -61,9 +61,11 @@ split in order to change the canvas; canvas size is derived.
    MCP calls (Codex-safe); when Kilo's own VS Code backend launches the helper,
    it recognizes Kilo's process markers and stamps the Kilo surface as a
    low-trust fallback, but only native calls preserve per-call metadata.
-   Fit **one board per burst**; stop at the planner's
-   `stopAfter`. Present the planner's **`humanPrompt`** at the gate; on reply,
-   follow **`humanNext`** (never ask the human for flags or `--continue`).
+   Fit **one board per burst**. When `presentGate` is false, start the next
+   fit in a new burst and do not ask the human anything. When `presentGate`
+   is true (the last board), present **`humanPrompt`** and follow
+   **`humanNext`** (never ask the human for flags or `--continue`). Notes and
+   lenses wait until that gate is approved.
 
    `mcp-call` is a new MCP client, not a transparent relay. Forward the real
    caller envelope through `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO` and (when
@@ -160,8 +162,9 @@ node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs \
   --plan plans/<parent-id>-split-plan.json --pass complete --board <board-id>
 ```
 
-After board 1 validates: present `humanPrompt`; when the human picks the next
-board, the agent re-runs the planner with `--continue --board <board-1-id>`.
+After a board validates, follow the planner. A board that is not last says
+to re-run with `--continue` in a new burst and not to present a gate. The
+last board presents `humanPrompt` for the whole set.
 
 - Shared `relatedPuzzles.info` tone across both boards.
 - Sibling ids in `relatedPuzzles.entries` are valid before both PRs merge;
