@@ -332,9 +332,8 @@ export async function run(page, baseURL) {
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
   assert.equal(await page.textContent("#lens-progress"), "Lens 3 of 3");
 
-  // Lens takeover removes the ordinary second "Polish layout" click.
-  // Its preparation step must therefore run the final aesthetic pass
-  // automatically before freezing the map for selections.
+  // Lenses freeze the map after Show Solution. The polish pass has to
+  // finish before that freeze, or selections sit on the detangled board.
   await page.goto(
     `${baseURL}/index.html?puzzle=the-programmers-bargain&mode=star&moves=`
   );

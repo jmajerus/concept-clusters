@@ -1273,12 +1273,11 @@ async function beginLensSequence() {
     }
   }
   if (state !== lensState) return;
-  // Ordinary solved puzzles can expose a second "Polish layout" click
-  // after the human-like Star detangler. Lenses take over that control,
-  // so automatically supply the final aesthetic pass for layouts made
-  // by Show Solution. A live player completion already ran detangle
-  // before this freeze (an uncrossing pass on Star; Graph/Circle's
-  // pretty-printer) so the last connection is not locked in crossed.
+  // Show Solution already continues from the Star detangler into polish.
+  // Lenses still wait for that pass before they freeze the map. A live
+  // player completion already ran detangle before this freeze (an
+  // uncrossing pass on Star; Graph/Circle's pretty-printer) so the last
+  // connection is not locked in crossed.
   if (state.completedViaShowSolution &&
       state.solutionLayout !== "pretty" &&
       typeof state.prettyPrint === "function") {

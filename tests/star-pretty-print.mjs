@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-export const name = "star pretty print: second Show Solution click polishes the solved layout";
+export const name = "star pretty print: Show Solution follows the detangle animation with polish";
 export const tier = "extended";
 
 const SAMPLE_PUZZLES = [
@@ -56,19 +56,9 @@ export async function run(page, baseURL) {
 
     await page.click("#show-solution");
     await page.evaluate(() => window.CC.state.detanglePromise);
-    assert.equal(await page.textContent("#show-solution"), "Polish layout");
-    assert.equal(await page.isDisabled("#show-solution"), false);
-
-    const before = await page.evaluate(() =>
-      [...document.querySelectorAll(".title-node,.node")].map(el => ({
-        word: el.__data__.word,
-        x: el.__data__.x,
-        y: el.__data__.y
-      }))
-    );
-    await page.click("#show-solution");
     const stats = await page.evaluate(() => window.CC.state.prettyPrintPromise);
 
+    assert.ok(stats, `${puzzleId}: polish did not run after the detangle animation`);
     assert.equal(stats.lineCrossings, 0, `${puzzleId}: pretty print introduced a crossing`);
     assert.equal(await page.textContent("#show-solution"), "Layout polished");
     assert.equal(await page.isDisabled("#show-solution"), true);
@@ -79,16 +69,6 @@ export async function run(page, baseURL) {
     );
 
     if (puzzleId === "fundamental-forces") {
-      const moved = await page.evaluate(previous => {
-        const oldByWord = new Map(previous.map(node => [node.word, node]));
-        return [...document.querySelectorAll(".title-node,.node")]
-          .map(el => el.__data__)
-          .filter(node => {
-            const old = oldByWord.get(node.word);
-            return Math.hypot(node.x - old.x, node.y - old.y) > 5;
-          }).length;
-      }, before);
-      assert.ok(moved > 0, `${puzzleId}: pretty print did not change the layout`);
       assert.equal(stats.overlaps, 0, `${puzzleId}: pretty print left overlapping pills`);
     }
   }

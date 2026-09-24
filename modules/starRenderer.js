@@ -1611,19 +1611,23 @@ export function createStarRenderer({
         if (getState() === state && getSim() === sim) {
           state.solutionLayout = "animated";
           updateSolutionHint();
+          state.onPlayerLayoutChanged?.("automatic");
+          // Show Solution used to stop here on boards with no saved layout
+          // and no lenses, leaving "Polish layout" as a second click.
+          // Curated boards, one-cluster boards, and lens boards already
+          // continue into the polish transition. Do the same after this
+          // animation so a draft like octopus-play-adjudication still
+          // gets that pass.
+          if (state.completedViaShowSolution) {
+            await state.prettyPrint();
+            return stats;
+          }
           setMessage(
             current.crossingCount === 0
-              ? state.completedViaShowSolution
-                ? puzzle.bridges.length
-                  ? "Solution shown — every bridge connected and line crossings cleared."
-                  : "Solution shown — Star layout polished."
-                : "Line crossings cleared."
-              : state.completedViaShowSolution
-                ? "Solution shown — drag any remaining crossed endpoint to finish untangling."
-                : "Drag any remaining crossed endpoint to finish untangling.",
+              ? "Line crossings cleared."
+              : "Drag any remaining crossed endpoint to finish untangling.",
             current.crossingCount === 0 ? "good" : undefined
           );
-          state.onPlayerLayoutChanged?.("automatic");
         }
         return stats;
       };

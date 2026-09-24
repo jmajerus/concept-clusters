@@ -240,7 +240,7 @@ export async function run(page, baseURL) {
     if (!key) return false;
     const session = JSON.parse(localStorage.getItem(key));
     return session.completed &&
-      session.layouts.star?.solutionLayout === "animated";
+      session.layouts.star?.solutionLayout === "pretty";
   }, PUZZLE_ID);
   const completed = await sessionFor(page);
   await openPuzzle(page,`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
@@ -250,7 +250,7 @@ export async function run(page, baseURL) {
     true,
     "completed session did not restore completion"
   );
-  assert.equal(await page.evaluate(() => CC.state.solutionLayout), "animated");
+  assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
   const completedWord = draggedWord;
   const completedPoint = completed.layouts.star.nodes[`term:${completedWord}`];
   const restoredCompletedPoint = await page.locator(".node")
