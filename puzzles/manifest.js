@@ -1171,17 +1171,12 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "climate-and-livelihoods",
       "title": "Climate and livelihoods across regions",
-      "category": "Physical Geography",
+      "category": "Atmospheric Science",
+      "subcategories": {
+        "Atmospheric Science": "climatology"
+      },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Compare regional environments and livelihoods with other ways people organize life and resources.",
-          "links": [
-            {
-              "href": "wiki:Regional geography"
-            }
-          ]
-        },
         "entries": [
           {
             "id": "ancient-civilizations",
@@ -3360,9 +3355,6 @@ export const PUZZLE_MANIFEST = [
       },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Continue from the electrical ideas inside a circuit to the programmable devices that control embedded systems."
-        },
         "entries": [
           {
             "id": "microcontroller-families",
@@ -3427,9 +3419,6 @@ export const PUZZLE_MANIFEST = [
       },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Connect programmable embedded devices back to the circuit concepts used to power, protect, and interface them."
-        },
         "entries": [
           {
             "id": "circuit-theory-basics",
@@ -3494,9 +3483,6 @@ export const PUZZLE_MANIFEST = [
       },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Place these embedded responsibilities between the circuit behavior underneath them and the microcontroller portfolios used to implement them."
-        },
         "entries": [
           {
             "id": "circuit-theory-basics",
@@ -5456,7 +5442,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "popular-music-milestones",
       "title": "Popular Music Milestones",
-      "category": "Anthropology",
+      "category": "Trivia",
       "large": false,
       "lensMode": "quiz",
       "preSolve": true,
@@ -6564,12 +6550,6 @@ export const PUZZLE_MANIFEST = [
       "info": {
         "text": "James Scott's account of what happens to dissent under conditions where open confrontation is too costly to risk -- from small, deniable acts of everyday resistance to the disguised, half-public forms that let a hidden truth travel further than a name attached to it ever could.",
         "citations": [
-          {
-            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-            "author": "Scott, James C.",
-            "publisher": "Yale University Press",
-            "year": "1990"
-          },
           {
             "title": "Domination and the Arts of Resistance: Hidden Transcripts",
             "author": "James C. Scott",
@@ -13903,24 +13883,33 @@ export const PUZZLE_MANIFEST = [
       "id": "homonyms-in-context",
       "title": "Homonyms in Context",
       "category": "Vocabulary",
+      "level": "advanced",
       "large": false,
       "lensMode": "sequential",
-      "preSolve": true,
       "info": {
-        "text": "Use the surrounding sentence to distinguish two unrelated meanings of the same spelling."
+        "text": "Use linguistic diagnostics—not spelling alone—to distinguish overlap in form, relations among senses, and the contextual evidence that selects an interpretation."
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
       },
       "_searchTerms": [
-        "River Edge",
-        "shore",
-        "levee",
-        "floodplain",
-        "embankment",
-        "Financial Institution",
-        "deposit",
-        "loan",
-        "interest",
-        "account",
-        "bank"
+        "Form Overlap",
+        "homonym",
+        "homophone",
+        "homograph",
+        "heteronym",
+        "Sense Relations",
+        "polysemy",
+        "homonymy",
+        "contronym",
+        "Contextual Resolution",
+        "collocation",
+        "syntactic frame",
+        "selectional restriction",
+        "disambiguation",
+        "ambiguity",
+        "context"
       ]
     }
   },
@@ -14577,6 +14566,217 @@ export const PUZZLE_MANIFEST = [
         "cumbersome",
         "irksome",
         "vexatious"
+      ]
+    }
+  },
+  {
+    "id": "cinematography",
+    "module": "./film/cinematography.js",
+    "published": "2026-09-24",
+    "browse": {
+      "id": "cinematography",
+      "title": "Cinematography: the visual language of film",
+      "category": "Film",
+      "large": false,
+      "info": {
+        "text": "How a cinematographer shapes meaning through composition of the frame, movement of the camera, and control of light.",
+        "links": [
+          {
+            "href": "wiki:Cinematography"
+          }
+        ]
+      },
+      "_searchTerms": [
+        "Composition",
+        "framing",
+        "deep focus",
+        "rule of thirds",
+        "negative space",
+        "Camera movement",
+        "tracking shot",
+        "pan",
+        "crane shot",
+        "handheld camera",
+        "Lighting design",
+        "chiaroscuro",
+        "three-point lighting",
+        "motivated lighting",
+        "low-key lighting",
+        "Steadicam"
+      ]
+    }
+  },
+  {
+    "id": "octopus-play-adjudication",
+    "module": "./zoology/octopus-play-adjudication.js",
+    "published": "2026-09-24",
+    "browse": {
+      "id": "octopus-play-adjudication",
+      "title": "Is It Really Play? The Octopus Play Verdict",
+      "category": "Zoology",
+      "large": false,
+      "relatedPuzzles": {
+        "info": {
+          "text": "Board 1 follows what an octopus actually does with a new object — taste it, study it, lose interest, and sometimes play. Board 2 asks how researchers know that last step is really play: the explicit criteria, the conditions that suppress it, and why the verdict matters for cognition and welfare."
+        },
+        "entries": [
+          {
+            "id": "octopus-play-stages",
+            "reason": "Start here: board 1 follows what the octopus actually does with a new object — the behavior this board adjudicates."
+          }
+        ]
+      },
+      "info": {
+        "text": "Two octopuses can do the same thing for different reasons: curiosity, habit-breaking, or play. This lesson covers how researchers tell play apart — the explicit criteria a behavior must meet, the conditions that suppress it, and why the verdict matters for how we keep and judge captive octopuses.",
+        "links": [
+          {
+            "href": "https://doi.org/10.12966/abc.05.01.2014",
+            "label": "Burghardt 2014"
+          },
+          {
+            "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+            "label": "Kuba et al. 2006"
+          },
+          {
+            "href": "https://doi.org/10.1371/journal.pone.0326379",
+            "label": "Jarmoluk & Pelled 2025"
+          }
+        ],
+        "citations": [
+          {
+            "title": "A Brief Glimpse at the Long Evolutionary History of Play",
+            "author": "Burghardt, G. M.",
+            "year": "2014",
+            "pages": "1(1)",
+            "url": "https://doi.org/10.12966/abc.05.01.2014"
+          },
+          {
+            "title": "When do octopuses play? Effects of repeated testing, object type, age, and food deprivation on object play in Octopus vulgaris",
+            "author": "Kuba, M. J., Byrne, R. A., Meisel, D. V. & Mather, J. A.",
+            "year": "2006",
+            "pages": "120(3), 184 ff.",
+            "url": "https://doi.org/10.1037/0735-7036.120.3.184"
+          },
+          {
+            "title": "Evidence of play behavior in captive California two-spot octopuses, Octopus bimaculoides",
+            "author": "Jarmoluk, K. & Pelled, G.",
+            "year": "2025",
+            "pages": "20(7), e0326379",
+            "url": "https://doi.org/10.1371/journal.pone.0326379"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Is it really play? — the criteria",
+        "not fully functional",
+        "repeated but not stereotyped",
+        "spontaneous and voluntary",
+        "relaxed field (fed, healthy, unstressed)",
+        "Who plays, and when",
+        "individual differences in playfulness",
+        "food deprivation suppresses play",
+        "object type (floating beats static)",
+        "age effects",
+        "Why it matters",
+        "cognitive flexibility",
+        "environmental enrichment",
+        "positive affect",
+        "captive cephalopod welfare",
+        "when the criteria aren't met",
+        "patchy play as a welfare signal"
+      ]
+    }
+  },
+  {
+    "id": "octopus-play-stages",
+    "module": "./zoology/octopus-play-stages.js",
+    "published": "2026-09-24",
+    "browse": {
+      "id": "octopus-play-stages",
+      "title": "Can I Eat It? How an Octopus Meets a New Object",
+      "category": "Zoology",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "octopus-play-adjudication",
+            "reason": "Play board 1 to meet the behavior; play this to learn how the play verdict is actually made — the criteria and conditions decide, not the appearance."
+          }
+        ]
+      },
+      "info": {
+        "text": "Hand an octopus something new and it runs a sequence: taste it as possible food, study it once it fails as food, lose interest as the novelty wears off — and sometimes, if it is that kind of individual, play. This lesson follows that staged response through the studies that discovered it.",
+        "links": [
+          {
+            "href": "https://doi.org/10.1037/0735-7036.113.3.333",
+            "label": "Mather & Anderson 1999"
+          },
+          {
+            "href": "https://doi.org/10.1037/0735-7036.120.3.184",
+            "label": "Kuba et al. 2006"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Exploration, play and habituation in octopuses (Octopus dofleini)",
+            "author": "Mather, J. A. & Anderson, R. C.",
+            "year": "1999",
+            "pages": "113(3), 333–338",
+            "url": "https://doi.org/10.1037/0735-7036.113.3.333"
+          },
+          {
+            "title": "When do octopuses play? Effects of repeated testing, object type, age, and food deprivation on object play in Octopus vulgaris",
+            "author": "Kuba, M. J., Byrne, R. A., Meisel, D. V. & Mather, J. A.",
+            "year": "2006",
+            "pages": "120(3), 184 ff.",
+            "url": "https://doi.org/10.1037/0735-7036.120.3.184"
+          },
+          {
+            "title": "Molecular Basis of Chemotactile Sensation in Octopus",
+            "author": "van Giesen, L., Kilian, P. B., Allard, C. A. R. & Bellono, N. W.",
+            "year": "2020",
+            "pages": "183(4)",
+            "url": "https://doi.org/10.1016/j.cell.2020.09.008"
+          },
+          {
+            "title": "Evidence of play behavior in captive California two-spot octopuses, Octopus bimaculoides",
+            "author": "Jarmoluk, K. & Pelled, G.",
+            "year": "2025",
+            "pages": "20(7), e0326379",
+            "url": "https://doi.org/10.1371/journal.pone.0326379"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Can I eat it? — the food check",
+        "chemotactile inspection",
+        "touch-tasting via sucker chemoreceptors",
+        "bringing under the web to the mouth",
+        "What is this? — exploration",
+        "palpation",
+        "pulling and tugging",
+        "turning and re-orienting",
+        "enveloping with arms and web",
+        "Never mind — habituation",
+        "habituation",
+        "declining palpation across trials",
+        "renewed response to a changed object",
+        "What can I do with this? — object play",
+        "water-jet bouncing",
+        "repeated return to a familiar object",
+        "blowing objects across the tank",
+        "release-and-float",
+        "the inedible verdict",
+        "novelty is the fuel of exploration",
+        "play begins when exploration ends"
       ]
     }
   }
