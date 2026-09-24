@@ -224,7 +224,7 @@ corpus.
 
 Written for: you, plus whoever picks up the authoring system later — it's a dev brief, so it assumes the codebase but not this conversation.
 
-[docs/dev-briefs/draft-lineage-and-shadow-detection.md](docs/dev-briefs/draft-lineage-and-shadow-detection.md) — uncommitted, on `main`, so you can edit or discard before it lands.
+This brief is intentionally a proposal; revise it as the lineage design is implemented.
 
 **The central finding, which reframes the whole thing:** this is **check-out / check-in**, and we already built it without naming it. `seed_from_published` *is* the check-out; Publish is the check-in. What we don't do is persist the check-out record — `seededFromPublished` gates the insert and is then discarded. Neither `base_commit_sha` (git PR anchor) nor `installed_content_hash` (local dev install state) records which published revision a copy was taken from. So the proposal is just: write down what the seeding helper already knew.
 
