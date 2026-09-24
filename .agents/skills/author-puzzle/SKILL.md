@@ -150,7 +150,7 @@ What's next?
 
 ### Split boards
 
-Run `plan-split-boards.mjs` once per board. When `presentGate` is false, do not stop: the last step names the next burst of the same pass. When `presentGate` is true, **print `humanPrompt` verbatim** (headline, drafts URL, numbered options, `defaultReply`) and obey `humanNext`. The human never sees flags.
+Run `plan-split-boards.mjs` once per board. When `presentGate` is false, do not stop and do not use the waiting one-liner above: print `report.closing` and run the next burst named in the last step. When `presentGate` is true, **print `humanPrompt` verbatim** (headline, drafts URL, numbered options, `defaultReply`) and obey `humanNext`. The human never sees flags. Copy the planner command as written, including `--transport`.
 
 ### Complete gate
 

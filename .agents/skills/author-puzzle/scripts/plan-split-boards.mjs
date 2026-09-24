@@ -114,8 +114,9 @@ function mcpCall(transport, tool, args = {}, { kiloNative = false } = {}) {
   return `node tools/mcp-call.mjs ${tool} '${argsJson.replace(/'/g, "'\\''")}'`;
 }
 
-function continueCommand(planPath, pass, boardId) {
-  return `${SCRIPT} --plan ${planPath} --pass ${pass} --board ${boardId} --continue`;
+function plannerCommand(planPath, pass, boardId, transport, { advance = false } = {}) {
+  const continueFlag = advance ? " --continue" : "";
+  return `${SCRIPT} --plan ${planPath} --pass ${pass} --board ${boardId}${continueFlag} --transport ${transport}`;
 }
 
 function fitSteps({
@@ -136,7 +137,7 @@ function fitSteps({
     `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`
   ];
   steps.push(nextBoard
-    ? `Validated. In a new burst, run \`${continueCommand(planPath, "fit", boardId)}\`. Do not present a human gate. Do not add notes or lenses.`
+    ? `Validated. In a new burst, run \`${plannerCommand(planPath, "fit", boardId, transport, { advance: true })}\`. Do not present a human gate. Do not add notes or lenses.`
     : "Emit stop-gate: Every board in this plan is fitted. Waiting on ledger review. STOP — do not start notes or lenses.");
   return steps;
 }
@@ -156,7 +157,7 @@ function completeSteps({ boardId, transport, kiloNative, draftPath, dryRun, plan
     `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`
   ];
   steps.push(nextBoard
-    ? `Validated. In a new burst, run \`${continueCommand(planPath, "complete", boardId)}\`. Do not present a human gate.`
+    ? `Validated. In a new burst, run \`${plannerCommand(planPath, "complete", boardId, transport, { advance: true })}\`. Do not present a human gate.`
     : "Emit stop-gate: Every board passed complete validation. Waiting on /admin/drafts. STOP.");
   return steps;
 }
@@ -248,6 +249,7 @@ function buildHumanPrompt({ pass, active, boardOrder, nextBoard, draftsUrl, plan
   }
 
   return {
+    presentGate: true,
     headline: `Review ${label} on the drafts page.`,
     draftsUrl,
     question: "Approve the board, ask for revisions, or say what to do next?",
@@ -259,11 +261,11 @@ function buildHumanPrompt({ pass, active, boardOrder, nextBoard, draftsUrl, plan
   };
 }
 
-function buildHumanNext({ pass, active, nextBoard, planPath, draftPath, ledgerPath, firstBoardId }) {
+function buildHumanNext({ pass, active, nextBoard, planPath, draftPath, ledgerPath, firstBoardId, transport }) {
   if (pass === "fit" && nextBoard) {
     return {
       presentGate: false,
-      onValidated: continueCommand(planPath, "fit", active.id),
+      onValidated: plannerCommand(planPath, "fit", active.id, transport, { advance: true }),
       acceptsNaturalLanguage: false
     };
   }
@@ -271,14 +273,14 @@ function buildHumanNext({ pass, active, nextBoard, planPath, draftPath, ledgerPa
     return {
       presentGate: true,
       onRevise: `Edit the named board's draft and ledger, re-run its fit, then continue the fit pass through any boards after it. This board's ledger is ${ledgerPath}.`,
-      onApprove: `Run ${SCRIPT} --plan ${planPath} --pass complete --board ${firstBoardId}`,
+      onApprove: `Run ${plannerCommand(planPath, "complete", firstBoardId, transport)}`,
       acceptsNaturalLanguage: true
     };
   }
   if (pass === "complete" && nextBoard) {
     return {
       presentGate: false,
-      onValidated: continueCommand(planPath, "complete", active.id),
+      onValidated: plannerCommand(planPath, "complete", active.id, transport, { advance: true }),
       acceptsNaturalLanguage: false
     };
   }
@@ -396,7 +398,8 @@ function build() {
       planPath,
       draftPath,
       ledgerPath,
-      firstBoardId: active.order[0]
+      firstBoardId: active.order[0],
+      transport: args.transport
     }),
     steps,
     presentGate: humanPrompt.presentGate !== false,
@@ -407,11 +410,15 @@ function build() {
         : "validate-and-pause",
     report: {
       fields: ["id", "title", "status", "revision", "draftsUrl"],
-      closing: pass === "fit"
-        ? "Fit ready. Waiting on board review."
-        : pass === "complete"
-          ? "Validated. Waiting on /admin/drafts."
-          : "Waiting on board review."
+      closing: humanPrompt.presentGate === false
+        ? (pass === "complete"
+          ? "Validated. Continue the complete pass. Do not present a human gate."
+          : "Fit ready. Continue the fit pass. Do not present a human gate.")
+        : pass === "fit"
+          ? "Fit ready. Waiting on board review."
+          : pass === "complete"
+            ? "Validated. Waiting on /admin/drafts."
+            : "Waiting on board review."
     }
   };
 
