@@ -335,6 +335,39 @@ export function draftShadowsPublished({
   return (total - removed) / total < threshold;
 }
 
+/**
+ * Every fact the review page derives from a (published, draft) pair, in one
+ * place.
+ *
+ * Both request paths -- the LAN authoring server's mapDraftDetail and the
+ * hosted Worker's draft route -- assemble their own renderDraftPage payload,
+ * and each used to compute these three separately. That is where two bugs of
+ * the same shape landed: provenance was added to one path and not the other,
+ * and neither the page-renderer test nor the local mapping test could see the
+ * gap. A flag added here reaches both callers at once, so the next one cannot
+ * be half-wired.
+ *
+ * Deliberately pure and baseline-agnostic. Choosing the baseline is genuinely
+ * environment-specific (the Worker prefers the D1 published row and falls back
+ * to the content service; the LAN server prefers an explicitly supplied
+ * published document and falls back to git), so it stays with the caller.
+ * Facts that only one environment can produce -- layoutDiffersFromPublished,
+ * which needs a layout editor the hosted side does not have -- stay with the
+ * caller too, rather than being faked here as always-false.
+ *
+ * @param {{ published?: object|null, draft?: object|null }} [options]
+ */
+export function deriveDraftComparison({ published = null, draft = null } = {}) {
+  // One diff, read three times. Recomputing would canonicalize and walk the
+  // whole board again for each question.
+  const publishedDiff = published ? diffPublishedDraft(published, draft) : null;
+  return {
+    publishedDiff,
+    shadowsPublished: draftShadowsPublished({ published, publishedDiff }),
+    provenanceDiffersFromPublished: provenanceDiffersFromPublished(published, draft)
+  };
+}
+
 export function publishedDocumentFromService(contentService, puzzleId) {
   if (!contentService || typeof puzzleId !== "string") return null;
   if (typeof contentService.getPuzzleDocument !== "function") return null;

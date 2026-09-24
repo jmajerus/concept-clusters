@@ -87,7 +87,7 @@ import { renderContentLifecycleResultPage, renderContentPublishResultPage } from
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { checkDocumentWikiLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
-import { draftShadowsPublished, provenanceDiffersFromPublished } from "./draftReviewDiff.js";
+import { deriveDraftComparison, draftShadowsPublished } from "./draftReviewDiff.js";
 import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
@@ -224,9 +224,9 @@ export async function mapDraftDetail(record, {
   const layoutDiffersFromPublished = Boolean(
     publishedDocument && !valuesEqual(publishedLayout || null, record.layout || null)
   );
-  // One diff, read twice: the summary renders it and the shadow check scores
-  // it. Recomputing would canonicalize and walk the whole board again.
-  const publishedDiff = baseline ? diffPublishedDraft(baseline, document) : null;
+  // Every published-vs-draft fact comes from one shared derivation, so the
+  // hosted route cannot drift from this one.
+  const comparison = deriveDraftComparison({ published: baseline, draft: document });
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -244,9 +244,9 @@ export async function mapDraftDetail(record, {
       contentService,
       puzzleId
     }),
-    publishedDiff,
-    shadowsPublished: draftShadowsPublished({ published: baseline, publishedDiff }),
-    provenanceDiffersFromPublished: provenanceDiffersFromPublished(baseline, document),
+    ...comparison,
+    // Layout editing is LAN-only, so this fact has no hosted counterpart and
+    // stays out of the shared derivation.
     layoutDiffersFromPublished,
     validation: contentService
       ? await withWikiLinkFlags(

@@ -32,7 +32,7 @@ import { loadMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { validatePublishedPuzzleLayout } from "../modules/layoutPublication.js";
 import { LINK_HEALTH_PATH, renderAdminIndexPage, renderLinkHealthPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
-import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
+import { publishedDocumentFromService } from "../modules/draftReviewDiff.js";
 import {
   DraftFieldError,
   draftFieldRedirectPath,
@@ -76,7 +76,7 @@ import {
   puzzleIdIsLive,
   renamePuzzleDraftId
 } from "../modules/draftIdRename.js";
-import { draftShadowsPublished, provenanceDiffersFromPublished } from "../modules/draftReviewDiff.js";
+import { deriveDraftComparison, draftShadowsPublished } from "../modules/draftReviewDiff.js";
 
 const MAX_MCP_REQUEST_BYTES = 1_600_000;
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -1000,17 +1000,13 @@ async function handleAdminRoute(
       : null;
     const shadowBaseline = d1Baseline
       || (alreadyPublished ? contentService.getPuzzleDocument(puzzleId) : null);
-    const publishedDiff = shadowBaseline
-      ? diffPublishedDraft(shadowBaseline, document)
-      : null;
-    const shadowsPublished = draftShadowsPublished({
+    // Every published-vs-draft fact comes from one shared derivation, so this
+    // route cannot drift from the LAN server's mapDraftDetail.
+    const comparison = deriveDraftComparison({
       published: shadowBaseline,
-      publishedDiff
+      draft: document
     });
-    // Provenance is outside the field-level diff by design, so it is reported
-    // as its own difference -- otherwise a provenance-only edit reads as "no
-    // changes" and Publish is withheld as already-live.
-    const provenanceDiffers = provenanceDiffersFromPublished(shadowBaseline, document);
+    const { publishedDiff, shadowsPublished } = comparison;
     const baseValidation = withStorageCanonicalizeFlags(
       draft.document,
       await contentService.validatePuzzleDraft(document, { categoryRegistry }),
@@ -1058,9 +1054,7 @@ async function handleAdminRoute(
       document,
       inGithubProduction: inGithubProduction(githubSnapshot, puzzleId),
       alreadyPublished,
-      publishedDiff,
-      shadowsPublished,
-      provenanceDiffersFromPublished: provenanceDiffers,
+      ...comparison,
       // Same question the rename POST asks, so the page never offers a
       // rename the server will refuse.
       puzzleIdIsLive: await puzzleIdIsLive({

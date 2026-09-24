@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  deriveDraftComparison,
   diffPublishedDraft,
   draftShadowsPublished,
   provenanceDiffersFromPublished
@@ -259,4 +260,42 @@ export async function run() {
     true
   );
   assert.equal(provenanceDiffersFromPublished(null, afterProvenance), false);
+
+  // One derivation, both request paths.
+  //
+  // The LAN server's mapDraftDetail and the hosted Worker's draft route each
+  // assemble their own renderDraftPage payload. Computing these separately is
+  // how provenance reached one path and not the other, invisibly to both the
+  // page-renderer test and the local mapping test. The key set is asserted so
+  // that adding a fact here is a single edit that reaches both callers, and
+  // so that dropping one is a failure rather than a silent half-wiring.
+  const derived = deriveDraftComparison({
+    published: beforeProvenance,
+    draft: afterProvenance
+  });
+  assert.deepEqual(
+    Object.keys(derived).sort(),
+    ["provenanceDiffersFromPublished", "publishedDiff", "shadowsPublished"]
+  );
+  assert.equal(derived.provenanceDiffersFromPublished, true);
+  assert.equal(derived.publishedDiff.total, 0);
+  assert.equal(derived.shadowsPublished, false);
+
+  // Matches what the callers previously computed by hand, term for term.
+  const handRolled = {
+    publishedDiff: diffPublishedDraft(beforeProvenance, afterProvenance),
+    shadowsPublished: draftShadowsPublished({
+      published: beforeProvenance,
+      publishedDiff: diffPublishedDraft(beforeProvenance, afterProvenance)
+    }),
+    provenanceDiffersFromPublished:
+      provenanceDiffersFromPublished(beforeProvenance, afterProvenance)
+  };
+  assert.deepEqual(derived, handRolled);
+
+  // No baseline: nothing to compare against, and no false positives.
+  const noBaseline = deriveDraftComparison({ published: null, draft: afterProvenance });
+  assert.equal(noBaseline.publishedDiff, null);
+  assert.equal(noBaseline.shadowsPublished, false);
+  assert.equal(noBaseline.provenanceDiffersFromPublished, false);
 }
