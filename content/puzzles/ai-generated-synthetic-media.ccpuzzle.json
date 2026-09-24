@@ -8,20 +8,6 @@
       "name": "Synthetic media forms",
       "color": "teal",
       "fact": "Synthetic media can imitate people or events through generated video, cloned voices, generated images and fabricated documents.",
-      "seeds": [
-        "deepfake video",
-        "cloned voice"
-      ],
-      "floatingTerms": [
-        "generated image",
-        "fabricated document"
-      ],
-      "terms": [
-        "deepfake video",
-        "cloned voice",
-        "generated image",
-        "fabricated document"
-      ],
       "termInfo": {
         "deepfake video": {
           "text": "Video generated or altered to make a person appear to say or do something that did not occur.",
@@ -77,27 +63,27 @@
             "href": "https://ai-challenges.nist.gov/forensics"
           }
         ]
-      }
+      },
+      "seeds": [
+        "deepfake video",
+        "cloned voice"
+      ],
+      "floatingTerms": [
+        "generated image",
+        "fabricated document"
+      ],
+      "terms": [
+        "deepfake video",
+        "cloned voice",
+        "generated image",
+        "fabricated document"
+      ]
     },
     {
       "id": "provenance-signals",
       "name": "Provenance signals",
       "color": "blue",
       "fact": "Technical provenance signals can record how media was created or edited and whether that record has been altered.",
-      "seeds": [
-        "Content Credentials",
-        "digital signature"
-      ],
-      "floatingTerms": [
-        "metadata",
-        "edit history"
-      ],
-      "terms": [
-        "Content Credentials",
-        "metadata",
-        "digital signature",
-        "edit history"
-      ],
       "termInfo": {
         "Content Credentials": {
           "text": "A C2PA-based record attached or linked to media that can describe its origin, edits and use of generative AI.",
@@ -153,27 +139,27 @@
             "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Content Credentials",
+        "digital signature"
+      ],
+      "floatingTerms": [
+        "metadata",
+        "edit history"
+      ],
+      "terms": [
+        "Content Credentials",
+        "metadata",
+        "digital signature",
+        "edit history"
+      ]
     },
     {
       "id": "human-verification",
       "name": "Human verification",
       "color": "amber",
       "fact": "Technical signals help, but people still need to check the original publisher, seek independent corroboration, use a known contact channel and consult forensic analysis.",
-      "seeds": [
-        "original publisher",
-        "independent corroboration"
-      ],
-      "floatingTerms": [
-        "known-channel check",
-        "forensic analysis"
-      ],
-      "terms": [
-        "original publisher",
-        "independent corroboration",
-        "known-channel check",
-        "forensic analysis"
-      ],
       "termInfo": {
         "original publisher": {
           "text": "The verified organization or account that first released the media and can confirm whether the circulating item belongs to its output.",
@@ -229,7 +215,21 @@
             "href": "https://www.reuters.com/fact-check/about/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "original publisher",
+        "independent corroboration"
+      ],
+      "floatingTerms": [
+        "known-channel check",
+        "forensic analysis"
+      ],
+      "terms": [
+        "original publisher",
+        "independent corroboration",
+        "known-channel check",
+        "forensic analysis"
+      ]
     }
   ],
   "bridges": [
@@ -294,6 +294,15 @@
           "provenance",
           "authentication"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

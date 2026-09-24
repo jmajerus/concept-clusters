@@ -351,5 +351,13 @@ export default definePuzzle(import.meta.url, {
         ]
       }
     ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
   }
 });

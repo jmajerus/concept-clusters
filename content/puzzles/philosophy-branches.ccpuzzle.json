@@ -9,20 +9,6 @@
       "name": "Epistemology",
       "color": "teal",
       "fact": "Epistemology studies what knowledge is and what justifies believing something is true.",
-      "seeds": [
-        "justified belief",
-        "skepticism"
-      ],
-      "floatingTerms": [
-        "knowledge",
-        "evidence"
-      ],
-      "terms": [
-        "justified belief",
-        "skepticism",
-        "knowledge",
-        "evidence"
-      ],
       "termInfo": {
         "justified belief": {
           "text": "The traditional core requirement for knowledge: a belief must not just be true, but backed by adequate reasons or evidence.",
@@ -61,27 +47,27 @@
             "href": "wiki:Epistemology"
           }
         ]
-      }
+      },
+      "seeds": [
+        "justified belief",
+        "skepticism"
+      ],
+      "floatingTerms": [
+        "knowledge",
+        "evidence"
+      ],
+      "terms": [
+        "justified belief",
+        "skepticism",
+        "knowledge",
+        "evidence"
+      ]
     },
     {
       "id": "ethics",
       "name": "Ethics",
       "color": "blue",
       "fact": "Ethics asks what makes an action right or wrong, and what we owe to one another.",
-      "seeds": [
-        "virtue",
-        "duty"
-      ],
-      "floatingTerms": [
-        "consequences",
-        "moral agent"
-      ],
-      "terms": [
-        "virtue",
-        "duty",
-        "consequences",
-        "moral agent"
-      ],
       "termInfo": {
         "virtue": {
           "links": [
@@ -120,27 +106,27 @@
             "href": "wiki:Ethics"
           }
         ]
-      }
+      },
+      "seeds": [
+        "virtue",
+        "duty"
+      ],
+      "floatingTerms": [
+        "consequences",
+        "moral agent"
+      ],
+      "terms": [
+        "virtue",
+        "duty",
+        "consequences",
+        "moral agent"
+      ]
     },
     {
       "id": "metaphysics",
       "name": "Metaphysics",
       "color": "amber",
       "fact": "Metaphysics studies the fundamental nature of reality — what exists, and what it means for one thing to cause another.",
-      "seeds": [
-        "being",
-        "causation"
-      ],
-      "floatingTerms": [
-        "identity",
-        "substance"
-      ],
-      "terms": [
-        "being",
-        "causation",
-        "identity",
-        "substance"
-      ],
       "termInfo": {
         "being": {
           "links": [
@@ -181,27 +167,27 @@
             "href": "wiki:Metaphysics"
           }
         ]
-      }
+      },
+      "seeds": [
+        "being",
+        "causation"
+      ],
+      "floatingTerms": [
+        "identity",
+        "substance"
+      ],
+      "terms": [
+        "being",
+        "causation",
+        "identity",
+        "substance"
+      ]
     },
     {
       "id": "logic",
       "name": "Logic",
       "color": "magenta",
       "fact": "Logic studies what makes an argument valid — whether its conclusion truly follows from its premises.",
-      "seeds": [
-        "validity",
-        "syllogism"
-      ],
-      "floatingTerms": [
-        "inference",
-        "soundness"
-      ],
-      "terms": [
-        "validity",
-        "syllogism",
-        "inference",
-        "soundness"
-      ],
       "termInfo": {
         "validity": {
           "text": "An argument is valid when its conclusion truly follows from its premises — regardless of whether the premises are actually true.",
@@ -241,7 +227,21 @@
             "href": "wiki:Logic"
           }
         ]
-      }
+      },
+      "seeds": [
+        "validity",
+        "syllogism"
+      ],
+      "floatingTerms": [
+        "inference",
+        "soundness"
+      ],
+      "terms": [
+        "validity",
+        "syllogism",
+        "inference",
+        "soundness"
+      ]
     }
   ],
   "bridges": [
@@ -307,5 +307,14 @@
         "logic": "validity"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

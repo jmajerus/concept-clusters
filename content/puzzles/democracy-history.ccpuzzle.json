@@ -8,20 +8,6 @@
       "name": "Ancient Athens",
       "color": "teal",
       "fact": "Athens invented direct democracy, where citizens voted on laws themselves in the assembly.",
-      "seeds": [
-        "agora",
-        "citizens"
-      ],
-      "floatingTerms": [
-        "assembly",
-        "ostracism"
-      ],
-      "terms": [
-        "agora",
-        "citizens",
-        "assembly",
-        "ostracism"
-      ],
       "termInfo": {
         "agora": {
           "links": [
@@ -60,27 +46,27 @@
             "href": "wiki:Classical Athens"
           }
         ]
-      }
+      },
+      "seeds": [
+        "agora",
+        "citizens"
+      ],
+      "floatingTerms": [
+        "assembly",
+        "ostracism"
+      ],
+      "terms": [
+        "agora",
+        "citizens",
+        "assembly",
+        "ostracism"
+      ]
     },
     {
       "id": "roman-republic",
       "name": "Roman Republic",
       "color": "blue",
       "fact": "Rome pioneered representative government with elected magistrates and a powerful Senate.",
-      "seeds": [
-        "Senate",
-        "consuls"
-      ],
-      "floatingTerms": [
-        "tribunes",
-        "plebeians"
-      ],
-      "terms": [
-        "Senate",
-        "consuls",
-        "tribunes",
-        "plebeians"
-      ],
       "termInfo": {
         "Senate": {
           "links": [
@@ -118,27 +104,27 @@
             "href": "wiki:Roman Republic"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Senate",
+        "consuls"
+      ],
+      "floatingTerms": [
+        "tribunes",
+        "plebeians"
+      ],
+      "terms": [
+        "Senate",
+        "consuls",
+        "tribunes",
+        "plebeians"
+      ]
     },
     {
       "id": "modern-democracy",
       "name": "Modern democracy",
       "color": "amber",
       "fact": "Modern democracies blend direct and representative elements, protected by written constitutions.",
-      "seeds": [
-        "elections",
-        "constitution"
-      ],
-      "floatingTerms": [
-        "rights",
-        "separation of powers"
-      ],
-      "terms": [
-        "elections",
-        "constitution",
-        "rights",
-        "separation of powers"
-      ],
       "termInfo": {
         "elections": {
           "links": [
@@ -176,7 +162,21 @@
             "href": "wiki:Liberal democracy"
           }
         ]
-      }
+      },
+      "seeds": [
+        "elections",
+        "constitution"
+      ],
+      "floatingTerms": [
+        "rights",
+        "separation of powers"
+      ],
+      "terms": [
+        "elections",
+        "constitution",
+        "rights",
+        "separation of powers"
+      ]
     }
   ],
   "bridges": [
@@ -222,5 +222,14 @@
         "modern-democracy": "elections"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

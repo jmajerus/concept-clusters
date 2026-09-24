@@ -17,20 +17,6 @@
       "name": "Evidence of harm",
       "color": "teal",
       "fact": "Correction begins with signals that expectations, policies, or explanations may be wrong: outcomes, contradictions, near misses, and recurring complaints all deserve proportionate inquiry.",
-      "seeds": [
-        "adverse outcome",
-        "near miss"
-      ],
-      "floatingTerms": [
-        "contradictory evidence",
-        "recurring complaint"
-      ],
-      "terms": [
-        "adverse outcome",
-        "contradictory evidence",
-        "near miss",
-        "recurring complaint"
-      ],
       "termInfo": {
         "adverse outcome": {
           "text": "A harmful or significantly unfavorable result associated with a decision, intervention, or process.",
@@ -71,27 +57,27 @@
             "href": "wiki:Feedback"
           }
         ]
-      }
+      },
+      "seeds": [
+        "adverse outcome",
+        "near miss"
+      ],
+      "floatingTerms": [
+        "contradictory evidence",
+        "recurring complaint"
+      ],
+      "terms": [
+        "adverse outcome",
+        "contradictory evidence",
+        "near miss",
+        "recurring complaint"
+      ]
     },
     {
       "id": "defensive-reception",
       "name": "Defensive reception",
       "color": "blue",
       "fact": "Evidence is defensively received when it is treated as an isolated anomaly, responsibility is shifted, the messenger is attacked, or standards are moved to keep the existing conclusion intact.",
-      "seeds": [
-        "blame shifting",
-        "messenger discrediting"
-      ],
-      "floatingTerms": [
-        "anomaly dismissal",
-        "goalpost movement"
-      ],
-      "terms": [
-        "anomaly dismissal",
-        "blame shifting",
-        "messenger discrediting",
-        "goalpost movement"
-      ],
       "termInfo": {
         "anomaly dismissal": {
           "text": "Treatment of contrary evidence as an isolated exception without adequately testing whether it reveals a pattern.",
@@ -132,27 +118,27 @@
             "href": "wiki:Denial"
           }
         ]
-      }
+      },
+      "seeds": [
+        "blame shifting",
+        "messenger discrediting"
+      ],
+      "floatingTerms": [
+        "anomaly dismissal",
+        "goalpost movement"
+      ],
+      "terms": [
+        "anomaly dismissal",
+        "blame shifting",
+        "messenger discrediting",
+        "goalpost movement"
+      ]
     },
     {
       "id": "blocked-challenge",
       "name": "Blocked challenge",
       "color": "amber",
       "fact": "Challenge is blocked when dissent carries punishment, review is captured, loyalty is tested, or appeal exists only in forms that affected people cannot realistically use.",
-      "seeds": [
-        "retaliation",
-        "loyalty test"
-      ],
-      "floatingTerms": [
-        "captured review",
-        "inaccessible appeal"
-      ],
-      "terms": [
-        "retaliation",
-        "captured review",
-        "loyalty test",
-        "inaccessible appeal"
-      ],
       "termInfo": {
         "retaliation": {
           "text": "Punishment or adverse treatment directed at someone for reporting, opposing, or participating in review of alleged wrongdoing.",
@@ -193,27 +179,27 @@
             "href": "wiki:Whistleblowing"
           }
         ]
-      }
+      },
+      "seeds": [
+        "retaliation",
+        "loyalty test"
+      ],
+      "floatingTerms": [
+        "captured review",
+        "inaccessible appeal"
+      ],
+      "terms": [
+        "retaliation",
+        "captured review",
+        "loyalty test",
+        "inaccessible appeal"
+      ]
     },
     {
       "id": "simulated-correction",
       "name": "Simulated correction",
       "color": "magenta",
       "fact": "Correction is simulated when investigation and reform remain ceremonial, policy is left intact, and recurring failure is absorbed without institutional learning.",
-      "seeds": [
-        "symbolic reform",
-        "unrevised policy"
-      ],
-      "floatingTerms": [
-        "ritual investigation",
-        "recurrence without learning"
-      ],
-      "terms": [
-        "ritual investigation",
-        "symbolic reform",
-        "unrevised policy",
-        "recurrence without learning"
-      ],
       "termInfo": {
         "ritual investigation": {
           "text": "An inquiry performed to demonstrate concern or procedural compliance without meaningful authority to alter the outcome.",
@@ -254,7 +240,21 @@
             "href": "wiki:Organizational learning"
           }
         ]
-      }
+      },
+      "seeds": [
+        "symbolic reform",
+        "unrevised policy"
+      ],
+      "floatingTerms": [
+        "ritual investigation",
+        "recurrence without learning"
+      ],
+      "terms": [
+        "ritual investigation",
+        "symbolic reform",
+        "unrevised policy",
+        "recurrence without learning"
+      ]
     }
   ],
   "bridges": [
@@ -419,6 +419,15 @@
           "protected dissent",
           "reviewable decisions"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

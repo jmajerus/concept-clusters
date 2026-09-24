@@ -26,6 +26,19 @@
       "name": "Conditions that create contact",
       "color": "teal",
       "fact": "Spillover opportunity is manufactured by ordinary economic activity: clearing habitat, concentrating livestock, moving live animals, and shifting the ranges species occupy. More contact means more attempts, and more attempts means more chances for one to succeed.",
+      "termInfo": {
+        "land-use change": "Conversion of habitat for agriculture, settlement, or extraction, creating contact zones between people and wildlife that did not previously exist.",
+        "agricultural intensification": "Concentrating animals at high density, which raises both transmission within a herd or flock and exposure among the people working with them.",
+        "wildlife trade": "The capture, transport, and sale of live wild animals, bringing species into contact with each other and with humans outside their natural ranges.",
+        "range shift": "Movement of animal populations into new territory as climate alters where they can live, producing novel encounters between species."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Ecosystem"
+          }
+        ]
+      },
       "seeds": [
         "land-use change",
         "wildlife trade"
@@ -39,26 +52,26 @@
         "agricultural intensification",
         "wildlife trade",
         "range shift"
-      ],
-      "termInfo": {
-        "land-use change": "Conversion of habitat for agriculture, settlement, or extraction, creating contact zones between people and wildlife that did not previously exist.",
-        "agricultural intensification": "Concentrating animals at high density, which raises both transmission within a herd or flock and exposure among the people working with them.",
-        "wildlife trade": "The capture, transport, and sale of live wild animals, bringing species into contact with each other and with humans outside their natural ranges.",
-        "range shift": "Movement of animal populations into new territory as climate alters where they can live, producing novel encounters between species."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Ecosystem"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "how-a-pathogen-establishes-itself",
       "name": "How a pathogen establishes itself",
       "color": "blue",
       "fact": "Crossing into a person is common and usually a dead end. What turns a crossing into an outbreak is the acquisition of efficient transmission between people — a threshold, not a gradient.",
+      "termInfo": {
+        "animal reservoir": "A species population in which a pathogen persists over time without causing the die-off that would end it.",
+        "intermediate host": "A species in which a pathogen replicates on the way between reservoir and new host, sometimes acquiring the changes that make the next step possible.",
+        "reassortment": "Exchange of genetic segments between two viruses infecting the same cell, capable of producing a novel combination in a single step.",
+        "sustained transmission": "Continuing person-to-person spread without repeated reintroduction from an animal source."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Virus"
+          }
+        ]
+      },
       "seeds": [
         "animal reservoir",
         "sustained transmission"
@@ -72,26 +85,26 @@
         "intermediate host",
         "reassortment",
         "sustained transmission"
-      ],
-      "termInfo": {
-        "animal reservoir": "A species population in which a pathogen persists over time without causing the die-off that would end it.",
-        "intermediate host": "A species in which a pathogen replicates on the way between reservoir and new host, sometimes acquiring the changes that make the next step possible.",
-        "reassortment": "Exchange of genetic segments between two viruses infecting the same cell, capable of producing a novel combination in a single step.",
-        "sustained transmission": "Continuing person-to-person spread without repeated reintroduction from an animal source."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Virus"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "noticing-early",
       "name": "Noticing early",
       "color": "amber",
       "fact": "Detection is the one intervention that compresses every other response. The difference between recognizing a novel pathogen early and recognizing it late is not a difference of degree in the response; it is a difference in what response remains possible.",
+      "termInfo": {
+        "field epidemiology": "Investigation conducted where an outbreak is occurring, tracing cases and contacts on the ground rather than from aggregate data.",
+        "genomic sequencing": "Reading a pathogen's genetic material to identify it, track its changes, and establish how samples relate to one another.",
+        "wastewater monitoring": "Sampling sewage to detect pathogen presence across a whole population without requiring anyone to seek care first.",
+        "international reporting": "The obligation and the channels by which a country notifies others of an event of potential international concern."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Epidemiology"
+          }
+        ]
+      },
       "seeds": [
         "genomic sequencing",
         "field epidemiology"
@@ -105,26 +118,26 @@
         "genomic sequencing",
         "wastewater monitoring",
         "international reporting"
-      ],
-      "termInfo": {
-        "field epidemiology": "Investigation conducted where an outbreak is occurring, tracing cases and contacts on the ground rather than from aggregate data.",
-        "genomic sequencing": "Reading a pathogen's genetic material to identify it, track its changes, and establish how samples relate to one another.",
-        "wastewater monitoring": "Sampling sewage to detect pathogen presence across a whole population without requiring anyone to seek care first.",
-        "international reporting": "The obligation and the channels by which a country notifies others of an event of potential international concern."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Epidemiology"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "capacity-that-must-exist-beforehand",
       "name": "Capacity that must exist beforehand",
       "color": "magenta",
       "fact": "Every detection method depends on infrastructure that takes years to build: trained people, working laboratories, sustained funding, and agreements that let findings cross borders. None of it can be assembled after the outbreak starts.",
+      "termInfo": {
+        "sustained funding": "Multi-year support that allows surveillance programmes to retain staff and maintain capability between emergencies.",
+        "trained workforce": "Epidemiologists, veterinarians, and laboratory scientists whose training takes years and whose departure is not quickly reversed.",
+        "laboratory network": "Distributed laboratories using compatible methods, so that results from different places can be compared rather than merely collected.",
+        "coordination agreement": "Standing arrangements between countries and agencies governing how surveillance findings are shared and acted on."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Public health"
+          }
+        ]
+      },
       "seeds": [
         "sustained funding",
         "laboratory network"
@@ -138,20 +151,7 @@
         "trained workforce",
         "laboratory network",
         "coordination agreement"
-      ],
-      "termInfo": {
-        "sustained funding": "Multi-year support that allows surveillance programmes to retain staff and maintain capability between emergencies.",
-        "trained workforce": "Epidemiologists, veterinarians, and laboratory scientists whose training takes years and whose departure is not quickly reversed.",
-        "laboratory network": "Distributed laboratories using compatible methods, so that results from different places can be compared rather than merely collected.",
-        "coordination agreement": "Standing arrangements between countries and agencies governing how surveillance findings are shared and acted on."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Public health"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [
@@ -288,6 +288,14 @@
           "near miss",
           "recurrence without learning"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
       }
     ]
   }

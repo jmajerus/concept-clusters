@@ -297,5 +297,13 @@ export default definePuzzle(import.meta.url, {
         "reason": "For the philosophical stakes underneath cooperation and repeated play -- what it means to keep a game going rather than win it -- see James Carse's account of finite and infinite play."
       }
     ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
   }
 });

@@ -8,18 +8,6 @@
       "name": "Photosynthesis",
       "color": "teal",
       "fact": "Plants turn sunlight, water, and carbon dioxide into food.",
-      "seeds": [
-        "sunlight",
-        "chlorophyll"
-      ],
-      "floatingTerms": [
-        "carbon dioxide"
-      ],
-      "terms": [
-        "sunlight",
-        "chlorophyll",
-        "carbon dioxide"
-      ],
       "termInfo": {
         "sunlight": {
           "links": [
@@ -50,27 +38,25 @@
             "href": "wiki:Photosynthesis"
           }
         ]
-      }
+      },
+      "seeds": [
+        "sunlight",
+        "chlorophyll"
+      ],
+      "floatingTerms": [
+        "carbon dioxide"
+      ],
+      "terms": [
+        "sunlight",
+        "chlorophyll",
+        "carbon dioxide"
+      ]
     },
     {
       "id": "cellular-respiration",
       "name": "Cellular respiration",
       "color": "blue",
       "fact": "Cells break down food to release usable energy as ATP.",
-      "seeds": [
-        "mitochondria",
-        "ATP"
-      ],
-      "floatingTerms": [
-        "aerobic",
-        "glucose"
-      ],
-      "terms": [
-        "mitochondria",
-        "ATP",
-        "aerobic",
-        "glucose"
-      ],
       "termInfo": {
         "mitochondria": {
           "text": "The organelle where cellular respiration happens — often called the cell's powerhouse.",
@@ -111,27 +97,27 @@
             "href": "wiki:Cellular respiration"
           }
         ]
-      }
+      },
+      "seeds": [
+        "mitochondria",
+        "ATP"
+      ],
+      "floatingTerms": [
+        "aerobic",
+        "glucose"
+      ],
+      "terms": [
+        "mitochondria",
+        "ATP",
+        "aerobic",
+        "glucose"
+      ]
     },
     {
       "id": "ecosystems",
       "name": "Ecosystems",
       "color": "amber",
       "fact": "Energy flows through ecosystems along food chains.",
-      "seeds": [
-        "food chain",
-        "consumers"
-      ],
-      "floatingTerms": [
-        "decomposers",
-        "trophic level"
-      ],
-      "terms": [
-        "food chain",
-        "consumers",
-        "decomposers",
-        "trophic level"
-      ],
       "termInfo": {
         "food chain": {
           "links": [
@@ -169,7 +155,21 @@
             "href": "wiki:Ecosystem"
           }
         ]
-      }
+      },
+      "seeds": [
+        "food chain",
+        "consumers"
+      ],
+      "floatingTerms": [
+        "decomposers",
+        "trophic level"
+      ],
+      "terms": [
+        "food chain",
+        "consumers",
+        "decomposers",
+        "trophic level"
+      ]
     }
   ],
   "bridges": [
@@ -213,5 +213,14 @@
       },
       "relationKind": "foundation"
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

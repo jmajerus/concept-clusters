@@ -215,5 +215,13 @@ export default definePuzzle(import.meta.url, {
         "standardized weights"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 });

@@ -277,5 +277,14 @@ export default definePuzzle(import.meta.url, {
         "informational trust"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

@@ -5,12 +5,12 @@
   "subcategories": {
     "engineering": "electronics"
   },
+  "large": true,
   "tags": [
     "electronics",
     "embedded systems",
     "microcontrollers"
   ],
-  "large": true,
   "info": {
     "text": "Microcontroller family names identify related processor cores, memories, peripherals, tools, and migration paths—but similarly named portfolios can still span several architectures and performance levels.",
     "links": [
@@ -25,20 +25,6 @@
       "name": "AVR families",
       "color": "teal",
       "fact": "AVR is Microchip's code-efficient 8-bit MCU architecture; the familiar ATtiny and ATmega lines now sit beside newer AVR Dx and analog-focused AVR EA families.",
-      "seeds": [
-        "ATtiny",
-        "ATmega"
-      ],
-      "floatingTerms": [
-        "AVR Dx",
-        "AVR EA"
-      ],
-      "terms": [
-        "ATtiny",
-        "ATmega",
-        "AVR Dx",
-        "AVR EA"
-      ],
       "termInfo": {
         "ATtiny": {
           "text": "A group of compact 8-bit AVR microcontrollers intended for designs with modest memory and pin-count needs.",
@@ -79,27 +65,27 @@
             "href": "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus"
           }
         ]
-      }
+      },
+      "seeds": [
+        "ATtiny",
+        "ATmega"
+      ],
+      "floatingTerms": [
+        "AVR Dx",
+        "AVR EA"
+      ],
+      "terms": [
+        "ATtiny",
+        "ATmega",
+        "AVR Dx",
+        "AVR EA"
+      ]
     },
     {
       "id": "pic-families",
       "name": "PIC families",
       "color": "blue",
       "fact": "The PIC name covers a broad Microchip portfolio: PIC16 and PIC18 are 8-bit families, PIC24 is 16-bit, and PIC32 extends the line into several 32-bit architectures.",
-      "seeds": [
-        "PIC16",
-        "PIC18"
-      ],
-      "floatingTerms": [
-        "PIC24",
-        "PIC32"
-      ],
-      "terms": [
-        "PIC16",
-        "PIC18",
-        "PIC24",
-        "PIC32"
-      ],
       "termInfo": {
         "PIC16": {
           "text": "A large group of 8-bit PIC microcontrollers traditionally associated with Microchip's mid-range cores.",
@@ -140,27 +126,27 @@
             "href": "https://www.microchip.com/en-us/products/microcontrollers/pic-mcus"
           }
         ]
-      }
+      },
+      "seeds": [
+        "PIC16",
+        "PIC18"
+      ],
+      "floatingTerms": [
+        "PIC24",
+        "PIC32"
+      ],
+      "terms": [
+        "PIC16",
+        "PIC18",
+        "PIC24",
+        "PIC32"
+      ]
     },
     {
       "id": "msp430-families",
       "name": "MSP430 families",
       "color": "amber",
       "fact": "Texas Instruments' MSP430 platform is built around 16-bit, ultra-low-power mixed-signal MCUs; its series names distinguish memory technology and peripheral or application focus.",
-      "seeds": [
-        "MSP430G",
-        "MSP430FR"
-      ],
-      "floatingTerms": [
-        "MSP430F",
-        "MSP430i"
-      ],
-      "terms": [
-        "MSP430G",
-        "MSP430F",
-        "MSP430FR",
-        "MSP430i"
-      ],
       "termInfo": {
         "MSP430G": {
           "text": "A value-oriented MSP430 series familiar from early LaunchPad development kits.",
@@ -201,27 +187,27 @@
             "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/low-power/overview.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "MSP430G",
+        "MSP430FR"
+      ],
+      "floatingTerms": [
+        "MSP430F",
+        "MSP430i"
+      ],
+      "terms": [
+        "MSP430G",
+        "MSP430F",
+        "MSP430FR",
+        "MSP430i"
+      ]
     },
     {
       "id": "stm32-families",
       "name": "STM32 families",
       "color": "magenta",
       "fact": "STMicroelectronics organizes its 32-bit Arm Cortex-M MCU portfolio by series: STM32F is broad and established, STM32G is mainstream, STM32H emphasizes performance, and STM32L emphasizes low power.",
-      "seeds": [
-        "STM32F",
-        "STM32L"
-      ],
-      "floatingTerms": [
-        "STM32G",
-        "STM32H"
-      ],
-      "terms": [
-        "STM32F",
-        "STM32G",
-        "STM32H",
-        "STM32L"
-      ],
       "termInfo": {
         "STM32F": {
           "text": "A broad set of STM32 series ranging from entry-level to high-performance general-purpose MCUs.",
@@ -262,7 +248,21 @@
             "href": "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "STM32F",
+        "STM32L"
+      ],
+      "floatingTerms": [
+        "STM32G",
+        "STM32H"
+      ],
+      "terms": [
+        "STM32F",
+        "STM32G",
+        "STM32H",
+        "STM32L"
+      ]
     }
   ],
   "bridges": [
@@ -391,9 +391,6 @@
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Connect programmable embedded devices back to the circuit concepts used to power, protect, and interface them."
-    },
     "entries": [
       {
         "id": "circuit-theory-basics",
@@ -402,6 +399,14 @@
       {
         "id": "microcontroller-applications",
         "reason": "Move from identifying MCU portfolios to the sensing, control, interface, and communication jobs their peripherals and firmware perform."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

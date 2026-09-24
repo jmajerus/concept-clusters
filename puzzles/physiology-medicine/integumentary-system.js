@@ -264,5 +264,14 @@ export default definePuzzle(import.meta.url, {
         "temperature regulation"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

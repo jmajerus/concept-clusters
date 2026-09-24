@@ -2,7 +2,6 @@
   "id": "film-classics",
   "title": "Film Classics",
   "category": "trivia",
-  "puzzleKind": "trivia-quiz",
   "large": true,
   "info": {
     "text": "Four genres that defined classic Hollywood, told through representative films from each."
@@ -33,6 +32,11 @@
       "name": "Western",
       "color": "blue",
       "fact": "The classic Western dramatized westward expansion as heroic order emerging from lawlessness -- a mythology film criticism has long scrutinized for minimizing the era's real violence against Native peoples, sometimes by the genre's own most celebrated films.",
+      "termInfo": {
+        "The Searchers": {
+          "text": "Widely read by film scholars as interrogating the racial obsession it depicts through Ethan Edwards rather than simply endorsing it -- though the genre around it has just as often done the opposite."
+        }
+      },
       "seeds": [
         "Stagecoach",
         "High Noon"
@@ -46,12 +50,7 @@
         "High Noon",
         "Red River",
         "The Searchers"
-      ],
-      "termInfo": {
-        "The Searchers": {
-          "text": "Widely read by film scholars as interrogating the racial obsession it depicts through Ethan Edwards rather than simply endorsing it -- though the genre around it has just as often done the opposite."
-        }
-      }
+      ]
     },
     {
       "id": "screwball-comedy",
@@ -235,5 +234,14 @@
     }
   ],
   "lensMode": "quiz",
-  "preSolve": true
+  "preSolve": true,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

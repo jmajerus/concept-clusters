@@ -160,7 +160,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "hajj",
       "term": "hajj",
       "clusters": [
         2,
@@ -169,7 +168,6 @@ export default definePuzzle(import.meta.url, {
       "fact": "The hajj is five days of prescribed bodily rites -- circling, standing, walking -- culminating at one built shrine, the Kaaba."
     },
     {
-      "id": "temple-feast",
       "term": "temple feast",
       "clusters": [
         3,
@@ -221,5 +219,14 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "Religion is usually described as belief, but it is practiced with knees, stomachs, feet, and calendars. Long before anyone states a doctrine, they have already been washed, fed by rule, walked to a shrine, and taught which days are different.\n\nFour patterns carry that life across traditions: rites that move people over life's thresholds, times set apart as holy, bodily disciplines of devotion, and places kept to hold it all."
     }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
   }
 });

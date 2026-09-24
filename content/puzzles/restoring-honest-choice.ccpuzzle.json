@@ -37,22 +37,6 @@
       "name": "Professional commitments",
       "color": "teal",
       "fact": "Professional ethics asks computing practitioners and leaders to define success through human well-being, avoidance of harm, honesty, privacy, and careful evaluation of impacts, not solely through technical performance or business metrics.",
-      "seeds": [
-        "public good",
-        "avoid harm"
-      ],
-      "floatingTerms": [
-        "honesty and trustworthiness",
-        "respect for privacy",
-        "impact and risk evaluation"
-      ],
-      "terms": [
-        "public good",
-        "avoid harm",
-        "honesty and trustworthiness",
-        "respect for privacy",
-        "impact and risk evaluation"
-      ],
       "termInfo": {
         "public good": {
           "text": "The ACM Code places the public good at the center of computing work and treats all people as stakeholders in computing.",
@@ -102,29 +86,29 @@
             "label": "ACM Code of Ethics"
           }
         ]
-      }
+      },
+      "seeds": [
+        "public good",
+        "avoid harm"
+      ],
+      "floatingTerms": [
+        "honesty and trustworthiness",
+        "respect for privacy",
+        "impact and risk evaluation"
+      ],
+      "terms": [
+        "public good",
+        "avoid harm",
+        "honesty and trustworthiness",
+        "respect for privacy",
+        "impact and risk evaluation"
+      ]
     },
     {
       "id": "education-and-formation",
       "name": "Education and formation",
       "color": "blue",
       "fact": "Education can build the concepts, habits, and professional identity needed to recognize manipulation, analyze stakeholders, reason from cases, and treat ethical judgment as part of competent practice.",
-      "seeds": [
-        "business ethics",
-        "stakeholder analysis"
-      ],
-      "floatingTerms": [
-        "computing ethics",
-        "case-based reasoning",
-        "professional identity"
-      ],
-      "terms": [
-        "business ethics",
-        "computing ethics",
-        "stakeholder analysis",
-        "case-based reasoning",
-        "professional identity"
-      ],
       "termInfo": {
         "business ethics": {
           "text": "Study of the responsibilities, values, institutions, and conflicts that shape business decisions and their effects on stakeholders and society.",
@@ -175,29 +159,29 @@
             "label": "AACSB global standards"
           }
         ]
-      }
+      },
+      "seeds": [
+        "business ethics",
+        "stakeholder analysis"
+      ],
+      "floatingTerms": [
+        "computing ethics",
+        "case-based reasoning",
+        "professional identity"
+      ],
+      "terms": [
+        "business ethics",
+        "computing ethics",
+        "stakeholder analysis",
+        "case-based reasoning",
+        "professional identity"
+      ]
     },
     {
       "id": "organizational-safeguards",
       "name": "Organizational safeguards",
       "color": "amber",
       "fact": "Organizations make ethical restraint credible by changing incentives, reviewing high-risk designs, testing the integrity of choices, escalating complaints, and protecting people who challenge harmful objectives or practices.",
-      "seeds": [
-        "ethics review",
-        "protected dissent"
-      ],
-      "floatingTerms": [
-        "incentive redesign",
-        "autonomy testing",
-        "complaint escalation"
-      ],
-      "terms": [
-        "ethics review",
-        "incentive redesign",
-        "autonomy testing",
-        "complaint escalation",
-        "protected dissent"
-      ],
       "termInfo": {
         "ethics review": {
           "text": "A structured examination of foreseeable impacts, stakeholder interests, conflicts, alternatives, and safeguards before or during deployment.",
@@ -251,29 +235,29 @@
             "label": "FTC dark-patterns report"
           }
         ]
-      }
+      },
+      "seeds": [
+        "ethics review",
+        "protected dissent"
+      ],
+      "floatingTerms": [
+        "incentive redesign",
+        "autonomy testing",
+        "complaint escalation"
+      ],
+      "terms": [
+        "ethics review",
+        "incentive redesign",
+        "autonomy testing",
+        "complaint escalation",
+        "protected dissent"
+      ]
     },
     {
       "id": "public-accountability",
       "name": "Public accountability",
       "color": "magenta",
       "fact": "Public institutions establish minimum protections through enforcement, disclosure requirements, fair cancellation expectations, legislation, and independent oversight when voluntary or internal safeguards prove inadequate.",
-      "seeds": [
-        "FTC enforcement",
-        "clear disclosure"
-      ],
-      "floatingTerms": [
-        "cancellation parity",
-        "statutory protection",
-        "independent oversight"
-      ],
-      "terms": [
-        "FTC enforcement",
-        "clear disclosure",
-        "cancellation parity",
-        "statutory protection",
-        "independent oversight"
-      ],
       "termInfo": {
         "FTC enforcement": {
           "text": "Investigation and legal action by the Federal Trade Commission against practices within its authority that are unfair, deceptive, or otherwise unlawful.",
@@ -332,7 +316,23 @@
             "label": "FTC-administered statutes"
           }
         ]
-      }
+      },
+      "seeds": [
+        "FTC enforcement",
+        "clear disclosure"
+      ],
+      "floatingTerms": [
+        "cancellation parity",
+        "statutory protection",
+        "independent oversight"
+      ],
+      "terms": [
+        "FTC enforcement",
+        "clear disclosure",
+        "cancellation parity",
+        "statutory protection",
+        "independent oversight"
+      ]
     }
   ],
   "bridges": [
@@ -353,14 +353,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "professional-commitments": "impact and risk evaluation",
+        "organizational-safeguards": "ethics review"
+      },
       "direction": {
         "kind": "through",
         "from": "professional-commitments",
         "to": "organizational-safeguards"
-      },
-      "idealTerms": {
-        "professional-commitments": "impact and risk evaluation",
-        "organizational-safeguards": "ethics review"
       }
     },
     {
@@ -380,14 +380,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "education-and-formation": "professional identity",
+        "organizational-safeguards": "protected dissent"
+      },
       "direction": {
         "kind": "through",
         "from": "education-and-formation",
         "to": "organizational-safeguards"
-      },
-      "idealTerms": {
-        "education-and-formation": "professional identity",
-        "organizational-safeguards": "protected dissent"
       }
     },
     {
@@ -407,14 +407,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "public-accountability": "statutory protection",
+        "organizational-safeguards": "ethics review"
+      },
       "direction": {
         "kind": "through",
         "from": "public-accountability",
         "to": "organizational-safeguards"
-      },
-      "idealTerms": {
-        "public-accountability": "statutory protection",
-        "organizational-safeguards": "ethics review"
       }
     }
   ],
@@ -503,5 +503,14 @@
         "enforceable floor": "Minimum protections cannot depend entirely on the goodwill or courage of individual actors."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

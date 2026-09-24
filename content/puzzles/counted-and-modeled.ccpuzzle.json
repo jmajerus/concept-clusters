@@ -30,20 +30,6 @@
       "name": "Directly counted",
       "color": "teal",
       "fact": "A counted event is one with a record attached — a certificate, a confirmed test, a registry entry. Its strength is that it happened. Its limit is that it can only see what someone recorded.",
-      "seeds": [
-        "death certificate",
-        "laboratory-confirmed case"
-      ],
-      "floatingTerms": [
-        "notifiable disease report",
-        "vital statistics"
-      ],
-      "terms": [
-        "death certificate",
-        "laboratory-confirmed case",
-        "notifiable disease report",
-        "vital statistics"
-      ],
       "termInfo": {
         "death certificate": "The official document recording a death and the cause assigned to it by a certifying clinician.",
         "laboratory-confirmed case": "An event established by a test result rather than by clinical judgment or self-report.",
@@ -63,13 +49,40 @@
             "href": "wiki:Primary source"
           }
         ]
-      }
+      },
+      "seeds": [
+        "death certificate",
+        "laboratory-confirmed case"
+      ],
+      "floatingTerms": [
+        "notifiable disease report",
+        "vital statistics"
+      ],
+      "terms": [
+        "death certificate",
+        "laboratory-confirmed case",
+        "notifiable disease report",
+        "vital statistics"
+      ]
     },
     {
       "id": "estimated-from-incomplete-counts",
       "name": "Estimated from incomplete counts",
       "color": "blue",
       "fact": "Where recording is known to be incomplete, the gap itself is estimated — which requires a model of what complete recording would have produced, and therefore a stated assumption.",
+      "termInfo": {
+        "expected baseline": "The number of events that would have been expected in a period absent the event under study, derived from historical trend.",
+        "underreporting": "The shortfall between events that occurred and events that entered the record.",
+        "case ascertainment": "The proportion of true cases a surveillance system actually detects and records.",
+        "surveillance gap": "A population, region, or period a monitoring system does not effectively cover."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Statistical inference"
+          }
+        ]
+      },
       "seeds": [
         "expected baseline",
         "underreporting"
@@ -83,26 +96,26 @@
         "underreporting",
         "case ascertainment",
         "surveillance gap"
-      ],
-      "termInfo": {
-        "expected baseline": "The number of events that would have been expected in a period absent the event under study, derived from historical trend.",
-        "underreporting": "The shortfall between events that occurred and events that entered the record.",
-        "case ascertainment": "The proportion of true cases a surveillance system actually detects and records.",
-        "surveillance gap": "A population, region, or period a monitoring system does not effectively cover."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Statistical inference"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "attributed-from-individual-records",
       "name": "Attributed from individual records",
       "color": "amber",
       "fact": "Linking individual outcomes to individual exposures answers a question no aggregate can: not how many events occurred, but how many occurred in one group and not the other.",
+      "termInfo": {
+        "cohort comparison": "Following two groups that differ in one exposure and comparing what happens to each.",
+        "record linkage": "Joining separate datasets about the same individuals so that exposure and outcome can be examined together.",
+        "confidence interval": "The range within which a true value is expected to lie, reported alongside the estimate itself.",
+        "bounded time window": "An explicitly stated start and end date, outside which the study makes no claim at all."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Scientific control"
+          }
+        ]
+      },
       "seeds": [
         "cohort comparison",
         "confidence interval"
@@ -116,26 +129,26 @@
         "record linkage",
         "confidence interval",
         "bounded time window"
-      ],
-      "termInfo": {
-        "cohort comparison": "Following two groups that differ in one exposure and comparing what happens to each.",
-        "record linkage": "Joining separate datasets about the same individuals so that exposure and outcome can be examined together.",
-        "confidence interval": "The range within which a true value is expected to lie, reported alongside the estimate itself.",
-        "bounded time window": "An explicitly stated start and end date, outside which the study makes no claim at all."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Scientific control"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "projected-under-a-counterfactual",
       "name": "Projected under a counterfactual",
       "color": "magenta",
       "fact": "A projection answers a question no count can reach — what would have happened otherwise — and pays for that reach with assumptions it is obliged to declare.",
+      "termInfo": {
+        "counterfactual scenario": "A specified alternative world used as the comparison against which an effect is measured.",
+        "modeling assumption": "An input a model requires but cannot observe, chosen and stated by the people who built it.",
+        "scenario projection": "An estimate of what a specified set of conditions would produce, as distinct from a record of what did happen.",
+        "sensitivity analysis": "Systematically varying assumptions to show how much the result depends on each one."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Scientific method"
+          }
+        ]
+      },
       "seeds": [
         "counterfactual scenario",
         "modeling assumption"
@@ -149,20 +162,7 @@
         "modeling assumption",
         "scenario projection",
         "sensitivity analysis"
-      ],
-      "termInfo": {
-        "counterfactual scenario": "A specified alternative world used as the comparison against which an effect is measured.",
-        "modeling assumption": "An input a model requires but cannot observe, chosen and stated by the people who built it.",
-        "scenario projection": "An estimate of what a specified set of conditions would produce, as distinct from a record of what did happen.",
-        "sensitivity analysis": "Systematically varying assumptions to show how much the result depends on each one."
-      },
-      "info": {
-        "links": [
-          {
-            "href": "wiki:Scientific method"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [
@@ -291,6 +291,14 @@
         "via": [
           "contradictory evidence"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
       }
     ]
   }

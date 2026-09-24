@@ -32,7 +32,7 @@ export default definePuzzle(import.meta.url, {
   },
   "clusters": [
     {
-      "id": "cluster-arcade-breakthroughs",
+      "id": "arcade-breakthroughs",
       "name": "Arcade Breakthroughs",
       "color": "teal",
       "fact": "Arcade hits taught a mass audience the grammar of real-time play: simple controls, escalating challenge, high scores, and instantly recognizable characters.",
@@ -48,7 +48,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "cluster-nintendo-adventures",
+      "id": "nintendo-adventures",
       "name": "Nintendo Adventures",
       "color": "blue",
       "fact": "Nintendo's home-console series made exploration, character movement, and secrets central to long-lived game worlds.",
@@ -64,7 +64,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "cluster-computer-game-landmarks",
+      "id": "computer-game-landmarks",
       "name": "Computer Game Landmarks",
       "color": "amber",
       "fact": "Personal computers supported distinctive forms of play, including simulation, environmental puzzles, fast first-person action, and real-time strategy.",
@@ -80,7 +80,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "cluster-modern-console-worlds",
+      "id": "modern-console-worlds",
       "name": "Modern Console Worlds",
       "color": "magenta",
       "fact": "Twenty-first-century console blockbusters expanded cinematic storytelling, online multiplayer, motion control, and freely explorable cities.",
@@ -208,5 +208,13 @@ export default definePuzzle(import.meta.url, {
     }
   ],
   "lensMode": "quiz",
-  "preSolve": true
+  "preSolve": true,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
+      }
+    ]
+  }
 });

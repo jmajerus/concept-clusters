@@ -285,5 +285,14 @@ export default definePuzzle(import.meta.url, {
         "strike-slip fault"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

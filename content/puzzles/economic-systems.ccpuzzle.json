@@ -8,20 +8,6 @@
       "name": "Capitalism",
       "color": "teal",
       "fact": "Capitalism relies on private property and competitive markets to decide what gets produced.",
-      "seeds": [
-        "private property",
-        "competition"
-      ],
-      "floatingTerms": [
-        "profit",
-        "supply and demand"
-      ],
-      "terms": [
-        "private property",
-        "competition",
-        "profit",
-        "supply and demand"
-      ],
       "termInfo": {
         "private property": {
           "links": [
@@ -60,27 +46,27 @@
             "href": "wiki:Capitalism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "private property",
+        "competition"
+      ],
+      "floatingTerms": [
+        "profit",
+        "supply and demand"
+      ],
+      "terms": [
+        "private property",
+        "competition",
+        "profit",
+        "supply and demand"
+      ]
     },
     {
       "id": "socialism",
       "name": "Socialism",
       "color": "blue",
       "fact": "Socialism emphasizes collective or state ownership of resources to reduce inequality.",
-      "seeds": [
-        "collective ownership",
-        "central planning"
-      ],
-      "floatingTerms": [
-        "public services",
-        "means of production"
-      ],
-      "terms": [
-        "collective ownership",
-        "central planning",
-        "public services",
-        "means of production"
-      ],
       "termInfo": {
         "collective ownership": {
           "links": [
@@ -118,25 +104,27 @@
             "href": "wiki:Socialism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "collective ownership",
+        "central planning"
+      ],
+      "floatingTerms": [
+        "public services",
+        "means of production"
+      ],
+      "terms": [
+        "collective ownership",
+        "central planning",
+        "public services",
+        "means of production"
+      ]
     },
     {
       "id": "mixed-economy",
       "name": "Mixed economy",
       "color": "amber",
       "fact": "A mixed economy combines private markets with government regulation and public programs.",
-      "seeds": [
-        "regulation",
-        "welfare state"
-      ],
-      "floatingTerms": [
-        "public-private"
-      ],
-      "terms": [
-        "regulation",
-        "welfare state",
-        "public-private"
-      ],
       "termInfo": {
         "regulation": {
           "links": [
@@ -166,7 +154,19 @@
             "href": "wiki:Mixed economy"
           }
         ]
-      }
+      },
+      "seeds": [
+        "regulation",
+        "welfare state"
+      ],
+      "floatingTerms": [
+        "public-private"
+      ],
+      "terms": [
+        "regulation",
+        "welfare state",
+        "public-private"
+      ]
     }
   ],
   "bridges": [
@@ -212,5 +212,13 @@
         "mixed-economy": "welfare state"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

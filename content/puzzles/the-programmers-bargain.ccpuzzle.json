@@ -17,20 +17,6 @@
       "name": "Mature application leverage",
       "color": "teal",
       "fact": "Desktop RAD environments let programmers construct substantial interfaces from inspectable, reusable components whose behavior, configuration, and data connections were visible at design time.",
-      "seeds": [
-        "visual form designer",
-        "component palette"
-      ],
-      "floatingTerms": [
-        "property inspector",
-        "design-time data binding"
-      ],
-      "terms": [
-        "visual form designer",
-        "component palette",
-        "property inspector",
-        "design-time data binding"
-      ],
       "termInfo": {
         "visual form designer": {
           "text": "A design surface where forms and controls can be placed, sized, aligned, and connected without manually coding every layout operation.",
@@ -71,27 +57,27 @@
             "href": "wiki:Rapid application development"
           }
         ]
-      }
+      },
+      "seeds": [
+        "visual form designer",
+        "component palette"
+      ],
+      "floatingTerms": [
+        "property inspector",
+        "design-time data binding"
+      ],
+      "terms": [
+        "visual form designer",
+        "component palette",
+        "property inspector",
+        "design-time data binding"
+      ]
     },
     {
       "id": "object-oriented-craft",
       "name": "Object-oriented craft",
       "color": "blue",
       "fact": "Object-oriented analysis asked programmers to organize software around domain responsibilities, stable abstractions, encapsulated invariants, and recurring forms of collaboration.",
-      "seeds": [
-        "encapsulation",
-        "inheritance"
-      ],
-      "floatingTerms": [
-        "domain model",
-        "design patterns"
-      ],
-      "terms": [
-        "domain model",
-        "encapsulation",
-        "inheritance",
-        "design patterns"
-      ],
       "termInfo": {
         "domain model": {
           "text": "A representation of the meaningful entities, relationships, behavior, and rules within the problem domain.",
@@ -132,27 +118,27 @@
             "href": "wiki:Object-oriented analysis and design"
           }
         ]
-      }
+      },
+      "seeds": [
+        "encapsulation",
+        "inheritance"
+      ],
+      "floatingTerms": [
+        "domain model",
+        "design patterns"
+      ],
+      "terms": [
+        "domain model",
+        "encapsulation",
+        "inheritance",
+        "design patterns"
+      ]
     },
     {
       "id": "web-reconstruction-work",
       "name": "Web reconstruction work",
       "color": "amber",
       "fact": "Early web applications required programmers to reconstruct application continuity and interaction from documents, requests, style rules, scripts, and browser behavior that did not form a complete application environment.",
-      "seeds": [
-        "session state",
-        "browser workarounds"
-      ],
-      "floatingTerms": [
-        "hand-coded controls",
-        "request plumbing"
-      ],
-      "terms": [
-        "hand-coded controls",
-        "session state",
-        "browser workarounds",
-        "request plumbing"
-      ],
       "termInfo": {
         "hand-coded controls": {
           "text": "Application controls assembled from markup, style rules, scripting, accessibility attributes, state, and event handling rather than supplied as one integrated component.",
@@ -193,27 +179,27 @@
             "href": "wiki:Web development"
           }
         ]
-      }
+      },
+      "seeds": [
+        "session state",
+        "browser workarounds"
+      ],
+      "floatingTerms": [
+        "hand-coded controls",
+        "request plumbing"
+      ],
+      "terms": [
+        "hand-coded controls",
+        "session state",
+        "browser workarounds",
+        "request plumbing"
+      ]
     },
     {
       "id": "new-measures-of-competence",
       "name": "New measures of competence",
       "color": "magenta",
       "fact": "As delivery moved to the web, professional value shifted toward coordinating browsers, frameworks, client-server stacks, build systems, and deployment pipelines—often displacing older forms of application leverage.",
-      "seeds": [
-        "cross-browser compatibility",
-        "framework fluency"
-      ],
-      "floatingTerms": [
-        "stack integration",
-        "deployment automation"
-      ],
-      "terms": [
-        "cross-browser compatibility",
-        "stack integration",
-        "deployment automation",
-        "framework fluency"
-      ],
       "termInfo": {
         "cross-browser compatibility": {
           "text": "Making an application behave acceptably across browsers that differ in supported features, rendering, defaults, or implementation details.",
@@ -254,7 +240,21 @@
             "href": "wiki:Web development"
           }
         ]
-      }
+      },
+      "seeds": [
+        "cross-browser compatibility",
+        "framework fluency"
+      ],
+      "floatingTerms": [
+        "stack integration",
+        "deployment automation"
+      ],
+      "terms": [
+        "cross-browser compatibility",
+        "stack integration",
+        "deployment automation",
+        "framework fluency"
+      ]
     }
   ],
   "bridges": [
@@ -275,14 +275,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "mature-application-leverage": "visual form designer",
+        "web-reconstruction-work": "hand-coded controls"
+      },
       "direction": {
         "kind": "through",
         "from": "mature-application-leverage",
         "to": "web-reconstruction-work"
-      },
-      "idealTerms": {
-        "mature-application-leverage": "visual form designer",
-        "web-reconstruction-work": "hand-coded controls"
       }
     },
     {
@@ -324,12 +324,12 @@
         ]
       },
       "relationKind": "foundation",
-      "direction": {
-        "kind": "outward"
-      },
       "idealTerms": {
         "web-reconstruction-work": "hand-coded controls",
         "new-measures-of-competence": "framework fluency"
+      },
+      "direction": {
+        "kind": "outward"
       }
     }
   ],
@@ -462,6 +462,15 @@
           "browser mediation",
           "frameworks"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

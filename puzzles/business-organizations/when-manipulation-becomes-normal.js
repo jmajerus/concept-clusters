@@ -458,5 +458,14 @@ export default definePuzzle(import.meta.url, {
         "market-wide distrust": "Suspicion can generalize to honest businesses and reduce confidence in digital commerce more broadly."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

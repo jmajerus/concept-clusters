@@ -9,20 +9,6 @@
       "name": "Gravity",
       "color": "teal",
       "fact": "Gravity is the weakest fundamental force, yet it dominates at cosmic scale because mass is never negative — its pull always adds up.",
-      "seeds": [
-        "mass",
-        "spacetime curvature"
-      ],
-      "floatingTerms": [
-        "universal attraction",
-        "escape velocity"
-      ],
-      "terms": [
-        "mass",
-        "spacetime curvature",
-        "universal attraction",
-        "escape velocity"
-      ],
       "termInfo": {
         "mass": {
           "links": [
@@ -60,27 +46,27 @@
             "href": "wiki:Gravity"
           }
         ]
-      }
+      },
+      "seeds": [
+        "mass",
+        "spacetime curvature"
+      ],
+      "floatingTerms": [
+        "universal attraction",
+        "escape velocity"
+      ],
+      "terms": [
+        "mass",
+        "spacetime curvature",
+        "universal attraction",
+        "escape velocity"
+      ]
     },
     {
       "id": "electromagnetism",
       "name": "Electromagnetism",
       "color": "blue",
       "fact": "Electromagnetism governs every interaction between charged particles, from lightning to the chemical bonds holding molecules together.",
-      "seeds": [
-        "electric charge",
-        "photon"
-      ],
-      "floatingTerms": [
-        "magnetic field",
-        "Coulomb's law"
-      ],
-      "terms": [
-        "electric charge",
-        "photon",
-        "magnetic field",
-        "Coulomb's law"
-      ],
       "termInfo": {
         "electric charge": {
           "links": [
@@ -118,27 +104,27 @@
             "href": "wiki:Electromagnetism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "electric charge",
+        "photon"
+      ],
+      "floatingTerms": [
+        "magnetic field",
+        "Coulomb's law"
+      ],
+      "terms": [
+        "electric charge",
+        "photon",
+        "magnetic field",
+        "Coulomb's law"
+      ]
     },
     {
       "id": "strong-nuclear-force",
       "name": "Strong nuclear force",
       "color": "amber",
       "fact": "The strong force binds quarks into protons and neutrons, and holds the nucleus together against the electric repulsion of its own protons.",
-      "seeds": [
-        "quarks",
-        "gluons"
-      ],
-      "floatingTerms": [
-        "nuclear binding energy",
-        "confinement"
-      ],
-      "terms": [
-        "quarks",
-        "gluons",
-        "nuclear binding energy",
-        "confinement"
-      ],
       "termInfo": {
         "quarks": {
           "links": [
@@ -176,27 +162,27 @@
             "href": "wiki:Strong interaction"
           }
         ]
-      }
+      },
+      "seeds": [
+        "quarks",
+        "gluons"
+      ],
+      "floatingTerms": [
+        "nuclear binding energy",
+        "confinement"
+      ],
+      "terms": [
+        "quarks",
+        "gluons",
+        "nuclear binding energy",
+        "confinement"
+      ]
     },
     {
       "id": "weak-nuclear-force",
       "name": "Weak nuclear force",
       "color": "magenta",
       "fact": "The weak force lets one type of particle transform into another, making it the force responsible for radioactive decay.",
-      "seeds": [
-        "beta decay",
-        "neutrino"
-      ],
-      "floatingTerms": [
-        "radioactive decay",
-        "flavor change"
-      ],
-      "terms": [
-        "beta decay",
-        "neutrino",
-        "radioactive decay",
-        "flavor change"
-      ],
       "termInfo": {
         "beta decay": {
           "links": [
@@ -234,7 +220,21 @@
             "href": "wiki:Weak interaction"
           }
         ]
-      }
+      },
+      "seeds": [
+        "beta decay",
+        "neutrino"
+      ],
+      "floatingTerms": [
+        "radioactive decay",
+        "flavor change"
+      ],
+      "terms": [
+        "beta decay",
+        "neutrino",
+        "radioactive decay",
+        "flavor change"
+      ]
     }
   ],
   "bridges": [
@@ -303,5 +303,13 @@
         "weak-nuclear-force": "flavor change"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

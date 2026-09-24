@@ -8,20 +8,6 @@
       "name": "Image origins",
       "color": "teal",
       "fact": "An image's origin includes who created or first posted it, when it first appeared, and the caption or description attached to that original use.",
-      "seeds": [
-        "original upload",
-        "original caption"
-      ],
-      "floatingTerms": [
-        "creator",
-        "first appearance"
-      ],
-      "terms": [
-        "original upload",
-        "creator",
-        "first appearance",
-        "original caption"
-      ],
       "termInfo": {
         "original upload": {
           "text": "The earliest known online posting of an image, before later reposts, screenshots or altered copies obscured where it came from.",
@@ -77,27 +63,27 @@
             "href": "https://support.google.com/websearch/answer/14177408?hl=en"
           }
         ]
-      }
+      },
+      "seeds": [
+        "original upload",
+        "original caption"
+      ],
+      "floatingTerms": [
+        "creator",
+        "first appearance"
+      ],
+      "terms": [
+        "original upload",
+        "creator",
+        "first appearance",
+        "original caption"
+      ]
     },
     {
       "id": "context-manipulation",
       "name": "Context manipulation",
       "color": "blue",
       "fact": "A genuine image can mislead when it is recycled from another event, paired with a false caption, selectively cropped or digitally altered.",
-      "seeds": [
-        "false caption",
-        "digital alteration"
-      ],
-      "floatingTerms": [
-        "recycled image",
-        "selective crop"
-      ],
-      "terms": [
-        "recycled image",
-        "false caption",
-        "selective crop",
-        "digital alteration"
-      ],
       "termInfo": {
         "recycled image": {
           "text": "An older or unrelated image reused as though it depicts a newer event, place or claim.",
@@ -153,27 +139,27 @@
             "href": "https://www.reuters.com/fact-check/about/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "false caption",
+        "digital alteration"
+      ],
+      "floatingTerms": [
+        "recycled image",
+        "selective crop"
+      ],
+      "terms": [
+        "recycled image",
+        "false caption",
+        "selective crop",
+        "digital alteration"
+      ]
     },
     {
       "id": "verification-methods",
       "name": "Verification methods",
       "color": "amber",
       "fact": "Visual verification combines reverse search, source comparison, geographic clues and metadata rather than relying on appearance alone.",
-      "seeds": [
-        "reverse image search",
-        "source comparison"
-      ],
-      "floatingTerms": [
-        "geolocation clues",
-        "file metadata"
-      ],
-      "terms": [
-        "reverse image search",
-        "source comparison",
-        "geolocation clues",
-        "file metadata"
-      ],
       "termInfo": {
         "reverse image search": {
           "text": "Searching with an image to find similar copies, earlier uses and pages that may reveal its original context.",
@@ -229,7 +215,21 @@
             "href": "https://support.google.com/websearch/answer/14177408?hl=en"
           }
         ]
-      }
+      },
+      "seeds": [
+        "reverse image search",
+        "source comparison"
+      ],
+      "floatingTerms": [
+        "geolocation clues",
+        "file metadata"
+      ],
+      "terms": [
+        "reverse image search",
+        "source comparison",
+        "geolocation clues",
+        "file metadata"
+      ]
     }
   ],
   "bridges": [
@@ -302,6 +302,15 @@
           "provenance",
           "context"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

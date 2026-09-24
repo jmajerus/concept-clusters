@@ -8,20 +8,6 @@
       "name": "Sonnet",
       "color": "teal",
       "fact": "A sonnet is a 14-line poem, traditionally in iambic pentameter, often turning on a final couplet or volta.",
-      "seeds": [
-        "14 lines",
-        "volta"
-      ],
-      "floatingTerms": [
-        "iambic pentameter",
-        "rhyme scheme"
-      ],
-      "terms": [
-        "14 lines",
-        "volta",
-        "iambic pentameter",
-        "rhyme scheme"
-      ],
       "termInfo": {
         "14 lines": {
           "text": "The defining structural feature of a sonnet — no other fixed poetic form is exactly this length.",
@@ -61,25 +47,27 @@
             "href": "wiki:Sonnet"
           }
         ]
-      }
+      },
+      "seeds": [
+        "14 lines",
+        "volta"
+      ],
+      "floatingTerms": [
+        "iambic pentameter",
+        "rhyme scheme"
+      ],
+      "terms": [
+        "14 lines",
+        "volta",
+        "iambic pentameter",
+        "rhyme scheme"
+      ]
     },
     {
       "id": "haiku",
       "name": "Haiku",
       "color": "blue",
       "fact": "A haiku is a three-line Japanese form built on a 5-7-5 syllable pattern, often capturing a single moment in nature.",
-      "seeds": [
-        "5-7-5 syllables",
-        "kigo"
-      ],
-      "floatingTerms": [
-        "single image"
-      ],
-      "terms": [
-        "5-7-5 syllables",
-        "kigo",
-        "single image"
-      ],
       "termInfo": {
         "5-7-5 syllables": {
           "text": "The traditional syllable count across a haiku's three lines: five, then seven, then five.",
@@ -112,25 +100,25 @@
             "href": "wiki:Haiku"
           }
         ]
-      }
+      },
+      "seeds": [
+        "5-7-5 syllables",
+        "kigo"
+      ],
+      "floatingTerms": [
+        "single image"
+      ],
+      "terms": [
+        "5-7-5 syllables",
+        "kigo",
+        "single image"
+      ]
     },
     {
       "id": "free-verse",
       "name": "Free verse",
       "color": "amber",
       "fact": "Free verse abandons fixed meter and rhyme, letting rhythm follow the natural cadence of the language.",
-      "seeds": [
-        "no fixed meter",
-        "line breaks"
-      ],
-      "floatingTerms": [
-        "natural cadence"
-      ],
-      "terms": [
-        "no fixed meter",
-        "line breaks",
-        "natural cadence"
-      ],
       "termInfo": {
         "no fixed meter": {
           "text": "Free verse's defining trait: it isn't built on a repeating pattern of stressed and unstressed syllables the way metered poetry is.",
@@ -163,7 +151,19 @@
             "href": "wiki:Free verse"
           }
         ]
-      }
+      },
+      "seeds": [
+        "no fixed meter",
+        "line breaks"
+      ],
+      "floatingTerms": [
+        "natural cadence"
+      ],
+      "terms": [
+        "no fixed meter",
+        "line breaks",
+        "natural cadence"
+      ]
     }
   ],
   "bridges": [
@@ -208,5 +208,13 @@
         "haiku": "single image"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

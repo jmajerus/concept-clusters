@@ -419,5 +419,14 @@ export default definePuzzle(import.meta.url, {
         "mistaken click": "The user activates the advertisement while believing they selected something else."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

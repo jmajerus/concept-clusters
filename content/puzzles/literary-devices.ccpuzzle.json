@@ -8,20 +8,6 @@
       "name": "Sound devices",
       "color": "teal",
       "fact": "Sound devices use the way words sound, not just what they mean, to create rhythm and emphasis.",
-      "seeds": [
-        "alliteration",
-        "rhyme"
-      ],
-      "floatingTerms": [
-        "onomatopoeia",
-        "assonance"
-      ],
-      "terms": [
-        "alliteration",
-        "rhyme",
-        "onomatopoeia",
-        "assonance"
-      ],
       "termInfo": {
         "alliteration": {
           "links": [
@@ -59,25 +45,27 @@
             "href": "wiki:Literary technique"
           }
         ]
-      }
+      },
+      "seeds": [
+        "alliteration",
+        "rhyme"
+      ],
+      "floatingTerms": [
+        "onomatopoeia",
+        "assonance"
+      ],
+      "terms": [
+        "alliteration",
+        "rhyme",
+        "onomatopoeia",
+        "assonance"
+      ]
     },
     {
       "id": "comparison-devices",
       "name": "Comparison devices",
       "color": "blue",
       "fact": "Comparison devices link two unlike things to reveal a shared quality.",
-      "seeds": [
-        "simile",
-        "metaphor"
-      ],
-      "floatingTerms": [
-        "analogy"
-      ],
-      "terms": [
-        "simile",
-        "metaphor",
-        "analogy"
-      ],
       "termInfo": {
         "simile": {
           "links": [
@@ -107,27 +95,25 @@
             "href": "wiki:Figure of speech"
           }
         ]
-      }
+      },
+      "seeds": [
+        "simile",
+        "metaphor"
+      ],
+      "floatingTerms": [
+        "analogy"
+      ],
+      "terms": [
+        "simile",
+        "metaphor",
+        "analogy"
+      ]
     },
     {
       "id": "narrative-devices",
       "name": "Narrative devices",
       "color": "amber",
       "fact": "Narrative devices shape how a story reveals information over time.",
-      "seeds": [
-        "foreshadowing",
-        "irony"
-      ],
-      "floatingTerms": [
-        "symbolism",
-        "flashback"
-      ],
-      "terms": [
-        "foreshadowing",
-        "irony",
-        "symbolism",
-        "flashback"
-      ],
       "termInfo": {
         "foreshadowing": {
           "links": [
@@ -166,7 +152,21 @@
             "href": "wiki:Literary technique"
           }
         ]
-      }
+      },
+      "seeds": [
+        "foreshadowing",
+        "irony"
+      ],
+      "floatingTerms": [
+        "symbolism",
+        "flashback"
+      ],
+      "terms": [
+        "foreshadowing",
+        "irony",
+        "symbolism",
+        "flashback"
+      ]
     }
   ],
   "bridges": [
@@ -212,5 +212,13 @@
         "narrative-devices": "foreshadowing"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

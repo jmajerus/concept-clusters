@@ -16,20 +16,6 @@
       "name": "Nervous signaling",
       "color": "teal",
       "fact": "Neurons transmit electrical changes along their membranes and use neurotransmitters at synapses to influence nearby neurons, muscles, or glands rapidly and selectively.",
-      "seeds": [
-        "neuron",
-        "synapse"
-      ],
-      "floatingTerms": [
-        "action potential",
-        "neurotransmitter"
-      ],
-      "terms": [
-        "neuron",
-        "action potential",
-        "synapse",
-        "neurotransmitter"
-      ],
       "termInfo": {
         "neuron": {
           "text": "A specialized cell that receives, processes, and transmits information through electrical and chemical signals.",
@@ -70,27 +56,27 @@
             "href": "wiki:Nervous system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "neuron",
+        "synapse"
+      ],
+      "floatingTerms": [
+        "action potential",
+        "neurotransmitter"
+      ],
+      "terms": [
+        "neuron",
+        "action potential",
+        "synapse",
+        "neurotransmitter"
+      ]
     },
     {
       "id": "endocrine-signaling",
       "name": "Endocrine signaling",
       "color": "blue",
       "fact": "Endocrine cells secrete hormones that travel through extracellular fluid and often blood, but only target cells with suitable receptors and response machinery react.",
-      "seeds": [
-        "endocrine gland",
-        "hormone"
-      ],
-      "floatingTerms": [
-        "bloodstream",
-        "target cell"
-      ],
-      "terms": [
-        "endocrine gland",
-        "hormone",
-        "bloodstream",
-        "target cell"
-      ],
       "termInfo": {
         "endocrine gland": {
           "text": "A ductless gland that releases hormones into surrounding fluid and the circulation.",
@@ -131,27 +117,27 @@
             "href": "wiki:Endocrine system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "endocrine gland",
+        "hormone"
+      ],
+      "floatingTerms": [
+        "bloodstream",
+        "target cell"
+      ],
+      "terms": [
+        "endocrine gland",
+        "hormone",
+        "bloodstream",
+        "target cell"
+      ]
     },
     {
       "id": "immune-signaling",
       "name": "Immune signaling",
       "color": "amber",
       "fact": "Immune responses depend on recognition and communication among antigen-presenting cells, lymphocytes, cytokines, and antibodies rather than on any one cell acting alone.",
-      "seeds": [
-        "antibody",
-        "lymphocyte"
-      ],
-      "floatingTerms": [
-        "antigen-presenting cell",
-        "cytokine"
-      ],
-      "terms": [
-        "antigen-presenting cell",
-        "cytokine",
-        "antibody",
-        "lymphocyte"
-      ],
       "termInfo": {
         "antigen-presenting cell": {
           "text": "A cell that processes antigens and displays fragments to T lymphocytes through major histocompatibility molecules.",
@@ -192,7 +178,21 @@
             "href": "wiki:Immune system"
           }
         ]
-      }
+      },
+      "seeds": [
+        "antibody",
+        "lymphocyte"
+      ],
+      "floatingTerms": [
+        "antigen-presenting cell",
+        "cytokine"
+      ],
+      "terms": [
+        "antigen-presenting cell",
+        "cytokine",
+        "antibody",
+        "lymphocyte"
+      ]
     }
   ],
   "bridges": [
@@ -378,6 +378,15 @@
           "bloodstream",
           "target cell"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

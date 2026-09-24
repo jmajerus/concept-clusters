@@ -17,20 +17,6 @@
       "name": "Functional reduction",
       "color": "teal",
       "fact": "Functional categories help organize work and knowledge, but they become objectifying when the role, market profile, case, or risk designation is allowed to stand in for the whole person.",
-      "seeds": [
-        "labor unit",
-        "market segment"
-      ],
-      "floatingTerms": [
-        "case type",
-        "security risk"
-      ],
-      "terms": [
-        "labor unit",
-        "case type",
-        "market segment",
-        "security risk"
-      ],
       "termInfo": {
         "labor unit": {
           "text": "A representation of a worker chiefly in terms of available or productive labor.",
@@ -71,27 +57,27 @@
             "href": "wiki:Objectification"
           }
         ]
-      }
+      },
+      "seeds": [
+        "labor unit",
+        "market segment"
+      ],
+      "floatingTerms": [
+        "case type",
+        "security risk"
+      ],
+      "terms": [
+        "labor unit",
+        "case type",
+        "market segment",
+        "security risk"
+      ]
     },
     {
       "id": "erasure-of-subjectivity",
       "name": "Erasure of subjectivity",
       "color": "blue",
       "fact": "Subjectivity is erased when a person's testimony, agency, emotional experience, identity, or distinctiveness is treated as irrelevant to how they may be understood or treated.",
-      "seeds": [
-        "denied agency",
-        "emotional dismissal"
-      ],
-      "floatingTerms": [
-        "silenced testimony",
-        "presumed interchangeability"
-      ],
-      "terms": [
-        "silenced testimony",
-        "denied agency",
-        "emotional dismissal",
-        "presumed interchangeability"
-      ],
       "termInfo": {
         "silenced testimony": {
           "text": "A person's account is prevented, ignored, or made unable to influence judgment.",
@@ -132,27 +118,27 @@
             "href": "wiki:Subjectivity"
           }
         ]
-      }
+      },
+      "seeds": [
+        "denied agency",
+        "emotional dismissal"
+      ],
+      "floatingTerms": [
+        "silenced testimony",
+        "presumed interchangeability"
+      ],
+      "terms": [
+        "silenced testimony",
+        "denied agency",
+        "emotional dismissal",
+        "presumed interchangeability"
+      ]
     },
     {
       "id": "withdrawal-of-moral-regard",
       "name": "Withdrawal of moral regard",
       "color": "amber",
       "fact": "Moral regard is withdrawn when dignity becomes conditional, people are placed outside ordinary protection, blame is assigned by group membership, or cruelty becomes familiar enough to escape notice.",
-      "seeds": [
-        "moral exclusion",
-        "collective blame"
-      ],
-      "floatingTerms": [
-        "conditional dignity",
-        "normalized cruelty"
-      ],
-      "terms": [
-        "conditional dignity",
-        "moral exclusion",
-        "collective blame",
-        "normalized cruelty"
-      ],
       "termInfo": {
         "conditional dignity": {
           "text": "The treatment of human worth as something that can be earned, forfeited, or withheld.",
@@ -193,27 +179,27 @@
             "href": "wiki:Moral exclusion"
           }
         ]
-      }
+      },
+      "seeds": [
+        "moral exclusion",
+        "collective blame"
+      ],
+      "floatingTerms": [
+        "conditional dignity",
+        "normalized cruelty"
+      ],
+      "terms": [
+        "conditional dignity",
+        "moral exclusion",
+        "collective blame",
+        "normalized cruelty"
+      ]
     },
     {
       "id": "restoring-personhood",
       "name": "Restoring personhood",
       "color": "magenta",
       "fact": "Personhood is restored through attention to biography, first-person voice, reciprocal recognition, and moral imagination that makes the other's experience relevant to judgment.",
-      "seeds": [
-        "first-person voice",
-        "moral imagination"
-      ],
-      "floatingTerms": [
-        "particular biography",
-        "reciprocal recognition"
-      ],
-      "terms": [
-        "particular biography",
-        "first-person voice",
-        "reciprocal recognition",
-        "moral imagination"
-      ],
       "termInfo": {
         "particular biography": {
           "text": "The concrete history and circumstances that make a person's life irreducible to a general category.",
@@ -254,7 +240,21 @@
             "href": "wiki:Recognition (sociology)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "first-person voice",
+        "moral imagination"
+      ],
+      "floatingTerms": [
+        "particular biography",
+        "reciprocal recognition"
+      ],
+      "terms": [
+        "particular biography",
+        "first-person voice",
+        "reciprocal recognition",
+        "moral imagination"
+      ]
     }
   ],
   "bridges": [
@@ -417,6 +417,15 @@
           "recognition",
           "moral imagination"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

@@ -8,20 +8,6 @@
       "name": "Mesopotamia",
       "color": "teal",
       "fact": "Mesopotamia, between the Tigris and Euphrates, gave rise to the first cities and the earliest writing.",
-      "seeds": [
-        "cuneiform",
-        "ziggurat"
-      ],
-      "floatingTerms": [
-        "Tigris-Euphrates",
-        "Hammurabi's Code"
-      ],
-      "terms": [
-        "cuneiform",
-        "ziggurat",
-        "Tigris-Euphrates",
-        "Hammurabi's Code"
-      ],
       "termInfo": {
         "cuneiform": {
           "links": [
@@ -59,27 +45,27 @@
             "href": "wiki:Mesopotamia"
           }
         ]
-      }
+      },
+      "seeds": [
+        "cuneiform",
+        "ziggurat"
+      ],
+      "floatingTerms": [
+        "Tigris-Euphrates",
+        "Hammurabi's Code"
+      ],
+      "terms": [
+        "cuneiform",
+        "ziggurat",
+        "Tigris-Euphrates",
+        "Hammurabi's Code"
+      ]
     },
     {
       "id": "ancient-egypt",
       "name": "Ancient Egypt",
       "color": "blue",
       "fact": "Ancient Egypt built a civilization along the Nile, unified under pharaohs and famous for monumental architecture.",
-      "seeds": [
-        "pharaoh",
-        "Nile"
-      ],
-      "floatingTerms": [
-        "pyramid",
-        "hieroglyphics"
-      ],
-      "terms": [
-        "pharaoh",
-        "Nile",
-        "pyramid",
-        "hieroglyphics"
-      ],
       "termInfo": {
         "pharaoh": {
           "links": [
@@ -117,27 +103,27 @@
             "href": "wiki:Ancient Egypt"
           }
         ]
-      }
+      },
+      "seeds": [
+        "pharaoh",
+        "Nile"
+      ],
+      "floatingTerms": [
+        "pyramid",
+        "hieroglyphics"
+      ],
+      "terms": [
+        "pharaoh",
+        "Nile",
+        "pyramid",
+        "hieroglyphics"
+      ]
     },
     {
       "id": "indus-valley",
       "name": "Indus Valley",
       "color": "amber",
       "fact": "The Indus Valley civilization built precisely planned cities with advanced sanitation, long before most of the ancient world.",
-      "seeds": [
-        "Mohenjo-daro",
-        "standardized weights"
-      ],
-      "floatingTerms": [
-        "drainage",
-        "Indus script"
-      ],
-      "terms": [
-        "Mohenjo-daro",
-        "standardized weights",
-        "drainage",
-        "Indus script"
-      ],
       "termInfo": {
         "Mohenjo-daro": {
           "links": [
@@ -176,7 +162,21 @@
             "href": "wiki:Indus Valley Civilisation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Mohenjo-daro",
+        "standardized weights"
+      ],
+      "floatingTerms": [
+        "drainage",
+        "Indus script"
+      ],
+      "terms": [
+        "Mohenjo-daro",
+        "standardized weights",
+        "drainage",
+        "Indus script"
+      ]
     }
   ],
   "bridges": [
@@ -220,5 +220,13 @@
         "indus-valley": "standardized weights"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

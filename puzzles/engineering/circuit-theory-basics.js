@@ -287,9 +287,6 @@ export default definePuzzle(import.meta.url, {
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Continue from the electrical ideas inside a circuit to the programmable devices that control embedded systems."
-    },
     "entries": [
       {
         "id": "microcontroller-families",
@@ -298,6 +295,14 @@ export default definePuzzle(import.meta.url, {
       {
         "id": "microcontroller-applications",
         "reason": "See how programmable devices use circuit inputs and outputs to measure, control, communicate, and interact with people."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

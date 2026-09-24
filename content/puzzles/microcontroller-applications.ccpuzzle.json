@@ -5,12 +5,12 @@
   "subcategories": {
     "engineering": "electronics"
   },
+  "large": true,
   "tags": [
     "electronics",
     "embedded systems",
     "microcontrollers"
   ],
-  "large": true,
   "info": {
     "text": "Across appliances, instruments, vehicles, and connected devices, microcontrollers repeatedly perform four kinds of work: measure inputs, control physical processes, manage human interfaces, and exchange or retain data.",
     "links": [
@@ -25,20 +25,6 @@
       "name": "Sensing and measurement",
       "color": "teal",
       "fact": "A microcontroller turns physical conditions into usable data by scheduling sensor reads, converting analog signals, calibrating raw values, and detecting conditions that matter to the application.",
-      "seeds": [
-        "ADC sampling",
-        "sensor polling"
-      ],
-      "floatingTerms": [
-        "calibration",
-        "threshold detection"
-      ],
-      "terms": [
-        "ADC sampling",
-        "sensor polling",
-        "calibration",
-        "threshold detection"
-      ],
       "termInfo": {
         "ADC sampling": {
           "text": "Capturing an analog voltage at a chosen time and converting it to a digital number.",
@@ -64,14 +50,7 @@
             }
           ]
         },
-        "threshold detection": {
-          "text": "Recognizing when a measured value crosses a boundary that changes the system's response.",
-          "links": [
-            {
-              "href": "wiki:Thresholding (signal processing)"
-            }
-          ]
-        }
+        "threshold detection": "Recognizing when a measured value crosses a boundary that changes the system's response."
       },
       "info": {
         "links": [
@@ -79,27 +58,27 @@
             "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "ADC sampling",
+        "sensor polling"
+      ],
+      "floatingTerms": [
+        "calibration",
+        "threshold detection"
+      ],
+      "terms": [
+        "ADC sampling",
+        "sensor polling",
+        "calibration",
+        "threshold detection"
+      ]
     },
     {
       "id": "real-time-control",
       "name": "Real-time control",
       "color": "blue",
       "fact": "Control firmware must observe deadlines as well as compute correct values: it updates outputs, sequences motor phases, closes feedback loops, and blocks actions that violate safety conditions.",
-      "seeds": [
-        "PWM output",
-        "feedback control"
-      ],
-      "floatingTerms": [
-        "motor commutation",
-        "safety interlock"
-      ],
-      "terms": [
-        "PWM output",
-        "motor commutation",
-        "feedback control",
-        "safety interlock"
-      ],
       "termInfo": {
         "PWM output": {
           "text": "A digital pulse train whose duty cycle controls average power delivered through suitable external circuitry.",
@@ -140,27 +119,27 @@
             "href": "https://www.ti.com/technologies/motor-control.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "PWM output",
+        "feedback control"
+      ],
+      "floatingTerms": [
+        "motor commutation",
+        "safety interlock"
+      ],
+      "terms": [
+        "PWM output",
+        "motor commutation",
+        "feedback control",
+        "safety interlock"
+      ]
     },
     {
       "id": "human-machine-interface",
       "name": "Human-machine interface",
       "color": "amber",
       "fact": "Small MCUs often create an entire user interface by scanning shared input lines, refreshing displays a piece at a time, measuring touch capacitance, and producing simple audible feedback.",
-      "seeds": [
-        "key scanning",
-        "capacitive touch"
-      ],
-      "floatingTerms": [
-        "display multiplexing",
-        "audible alert"
-      ],
-      "terms": [
-        "key scanning",
-        "display multiplexing",
-        "capacitive touch",
-        "audible alert"
-      ],
       "termInfo": {
         "key scanning": {
           "text": "Driving and reading a matrix of rows and columns to identify a pressed key with fewer I/O pins.",
@@ -201,27 +180,27 @@
             "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
           }
         ]
-      }
+      },
+      "seeds": [
+        "key scanning",
+        "capacitive touch"
+      ],
+      "floatingTerms": [
+        "display multiplexing",
+        "audible alert"
+      ],
+      "terms": [
+        "key scanning",
+        "display multiplexing",
+        "capacitive touch",
+        "audible alert"
+      ]
     },
     {
       "id": "communication-and-persistence",
       "name": "Communication and persistence",
       "color": "magenta",
       "fact": "Embedded data becomes useful elsewhere only when firmware follows an interface protocol or deliberately stores it: UART, I2C, and CAN solve different communication problems, while nonvolatile logs survive power loss.",
-      "seeds": [
-        "UART framing",
-        "CAN messaging"
-      ],
-      "floatingTerms": [
-        "I2C transactions",
-        "nonvolatile data logging"
-      ],
-      "terms": [
-        "UART framing",
-        "I2C transactions",
-        "CAN messaging",
-        "nonvolatile data logging"
-      ],
       "termInfo": {
         "UART framing": {
           "text": "Adding start, data, optional parity, and stop bits so asynchronous serial receivers can recognize each transmitted character.",
@@ -262,7 +241,21 @@
             "href": "wiki:Serial communication"
           }
         ]
-      }
+      },
+      "seeds": [
+        "UART framing",
+        "CAN messaging"
+      ],
+      "floatingTerms": [
+        "I2C transactions",
+        "nonvolatile data logging"
+      ],
+      "terms": [
+        "UART framing",
+        "I2C transactions",
+        "CAN messaging",
+        "nonvolatile data logging"
+      ]
     }
   ],
   "bridges": [
@@ -401,9 +394,6 @@
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Place these embedded responsibilities between the circuit behavior underneath them and the microcontroller portfolios used to implement them."
-    },
     "entries": [
       {
         "id": "circuit-theory-basics",
@@ -412,6 +402,14 @@
       {
         "id": "microcontroller-families",
         "reason": "Compare the AVR, PIC, MSP430, and STM32 portfolios that can implement these recurring embedded-system jobs."
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

@@ -9,20 +9,6 @@
       "name": "American Revolution",
       "color": "teal",
       "fact": "The American Revolution overthrew British colonial rule in the name of natural rights and self-governance, founding a republic.",
-      "seeds": [
-        "independence",
-        "natural rights"
-      ],
-      "floatingTerms": [
-        "republic",
-        "taxation"
-      ],
-      "terms": [
-        "independence",
-        "natural rights",
-        "republic",
-        "taxation"
-      ],
       "termInfo": {
         "independence": {
           "links": [
@@ -59,27 +45,27 @@
             "href": "wiki:American Revolution"
           }
         ]
-      }
+      },
+      "seeds": [
+        "independence",
+        "natural rights"
+      ],
+      "floatingTerms": [
+        "republic",
+        "taxation"
+      ],
+      "terms": [
+        "independence",
+        "natural rights",
+        "republic",
+        "taxation"
+      ]
     },
     {
       "id": "french-revolution",
       "name": "French Revolution",
       "color": "blue",
       "fact": "The French Revolution overthrew the monarchy in the name of liberty and equality, but its radical phase descended into mass executions.",
-      "seeds": [
-        "Estates-General",
-        "guillotine"
-      ],
-      "floatingTerms": [
-        "Reign of Terror",
-        "Declaration of the Rights of Man"
-      ],
-      "terms": [
-        "Estates-General",
-        "guillotine",
-        "Reign of Terror",
-        "Declaration of the Rights of Man"
-      ],
       "termInfo": {
         "Estates-General": {
           "text": "France's traditional assembly of the three social estates (clergy, nobility, commoners) — its convening in 1789 triggered the Revolution.",
@@ -117,27 +103,27 @@
             "href": "wiki:French Revolution"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Estates-General",
+        "guillotine"
+      ],
+      "floatingTerms": [
+        "Reign of Terror",
+        "Declaration of the Rights of Man"
+      ],
+      "terms": [
+        "Estates-General",
+        "guillotine",
+        "Reign of Terror",
+        "Declaration of the Rights of Man"
+      ]
     },
     {
       "id": "haitian-revolution",
       "name": "Haitian Revolution",
       "color": "amber",
       "fact": "The Haitian Revolution was the only successful slave revolt to found a nation, ending slavery in Saint-Domingue and establishing Haiti.",
-      "seeds": [
-        "enslaved rebellion",
-        "Toussaint Louverture"
-      ],
-      "floatingTerms": [
-        "Haitian independence",
-        "Saint-Domingue"
-      ],
-      "terms": [
-        "enslaved rebellion",
-        "Toussaint Louverture",
-        "Haitian independence",
-        "Saint-Domingue"
-      ],
       "termInfo": {
         "enslaved rebellion": {
           "text": "An uprising by enslaved people against those who enslaved them — the Haitian Revolution is history's only one to succeed in founding a nation.",
@@ -176,27 +162,27 @@
             "href": "wiki:Haitian Revolution"
           }
         ]
-      }
+      },
+      "seeds": [
+        "enslaved rebellion",
+        "Toussaint Louverture"
+      ],
+      "floatingTerms": [
+        "Haitian independence",
+        "Saint-Domingue"
+      ],
+      "terms": [
+        "enslaved rebellion",
+        "Toussaint Louverture",
+        "Haitian independence",
+        "Saint-Domingue"
+      ]
     },
     {
       "id": "russian-revolution",
       "name": "Russian Revolution",
       "color": "magenta",
       "fact": "The Russian Revolution toppled the Tsar and, months later, brought the Bolsheviks to power, founding the world's first communist state.",
-      "seeds": [
-        "Bolsheviks",
-        "Tsar"
-      ],
-      "floatingTerms": [
-        "Lenin",
-        "October Revolution"
-      ],
-      "terms": [
-        "Bolsheviks",
-        "Tsar",
-        "Lenin",
-        "October Revolution"
-      ],
       "termInfo": {
         "Bolsheviks": {
           "links": [
@@ -233,7 +219,21 @@
             "href": "wiki:Russian Revolution"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Bolsheviks",
+        "Tsar"
+      ],
+      "floatingTerms": [
+        "Lenin",
+        "October Revolution"
+      ],
+      "terms": [
+        "Bolsheviks",
+        "Tsar",
+        "Lenin",
+        "October Revolution"
+      ]
     }
   ],
   "bridges": [
@@ -300,5 +300,13 @@
         "russian-revolution": "Bolsheviks"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

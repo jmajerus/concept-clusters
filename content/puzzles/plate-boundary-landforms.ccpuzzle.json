@@ -3,26 +3,31 @@
   "title": "Where Plates Meet",
   "category": "science",
   "large": true,
+  "info": {
+    "citations": [
+      {
+        "title": "Understanding plate motions",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"
+      },
+      {
+        "title": "This Dynamic Planet",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://pubs.usgs.gov/pdf/planet.pdf"
+      },
+      {
+        "title": "The Himalayas: Two continents collide",
+        "publisher": "U.S. Geological Survey",
+        "url": "https://pubs.usgs.gov/gip/dynamic/himalaya.html"
+      }
+    ]
+  },
   "clusters": [
     {
       "id": "divergent",
       "name": "Divergent boundaries",
       "color": "teal",
       "fact": "At divergent boundaries, plates move apart and rising mantle melts as pressure falls, supplying magma that forms new crust.",
-      "seeds": [
-        "Mid-Atlantic Ridge",
-        "rift valley"
-      ],
-      "floatingTerms": [
-        "seafloor spreading",
-        "basaltic crust"
-      ],
-      "terms": [
-        "Mid-Atlantic Ridge",
-        "rift valley",
-        "seafloor spreading",
-        "basaltic crust"
-      ],
       "termInfo": {
         "Mid-Atlantic Ridge": {
           "links": [
@@ -60,27 +65,27 @@
             "href": "wiki:Divergent boundary"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Mid-Atlantic Ridge",
+        "rift valley"
+      ],
+      "floatingTerms": [
+        "seafloor spreading",
+        "basaltic crust"
+      ],
+      "terms": [
+        "Mid-Atlantic Ridge",
+        "rift valley",
+        "seafloor spreading",
+        "basaltic crust"
+      ]
     },
     {
       "id": "subduction",
       "name": "Subduction zones",
       "color": "blue",
       "fact": "At a subduction zone, dense oceanic lithosphere bends beneath another plate, forming a trench, an inclined earthquake zone, and commonly a volcanic arc.",
-      "seeds": [
-        "Mariana Trench",
-        "volcanic arc"
-      ],
-      "floatingTerms": [
-        "Wadati-Benioff zone",
-        "accretionary wedge"
-      ],
-      "terms": [
-        "Mariana Trench",
-        "volcanic arc",
-        "Wadati-Benioff zone",
-        "accretionary wedge"
-      ],
       "termInfo": {
         "Mariana Trench": {
           "links": [
@@ -119,27 +124,27 @@
             "href": "wiki:Subduction"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Mariana Trench",
+        "volcanic arc"
+      ],
+      "floatingTerms": [
+        "Wadati-Benioff zone",
+        "accretionary wedge"
+      ],
+      "terms": [
+        "Mariana Trench",
+        "volcanic arc",
+        "Wadati-Benioff zone",
+        "accretionary wedge"
+      ]
     },
     {
       "id": "collision",
       "name": "Continental collision",
       "color": "amber",
       "fact": "When two buoyant continental plates converge, neither readily sinks; the crust shortens, thickens, and rises into mountain belts and high plateaus.",
-      "seeds": [
-        "Himalayas",
-        "Tibetan Plateau"
-      ],
-      "floatingTerms": [
-        "suture zone",
-        "fold-and-thrust belt"
-      ],
-      "terms": [
-        "Himalayas",
-        "Tibetan Plateau",
-        "suture zone",
-        "fold-and-thrust belt"
-      ],
       "termInfo": {
         "Himalayas": {
           "links": [
@@ -178,27 +183,27 @@
             "href": "wiki:Continental collision"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Himalayas",
+        "Tibetan Plateau"
+      ],
+      "floatingTerms": [
+        "suture zone",
+        "fold-and-thrust belt"
+      ],
+      "terms": [
+        "Himalayas",
+        "Tibetan Plateau",
+        "suture zone",
+        "fold-and-thrust belt"
+      ]
     },
     {
       "id": "transform",
       "name": "Transform boundaries",
       "color": "magenta",
       "fact": "At transform boundaries, plates slide horizontally past one another, concentrating lateral displacement along strike-slip fault zones without creating or consuming crust.",
-      "seeds": [
-        "San Andreas Fault",
-        "strike-slip fault"
-      ],
-      "floatingTerms": [
-        "offset streams",
-        "linear valleys"
-      ],
-      "terms": [
-        "San Andreas Fault",
-        "strike-slip fault",
-        "offset streams",
-        "linear valleys"
-      ],
       "termInfo": {
         "San Andreas Fault": {
           "links": [
@@ -227,7 +232,21 @@
             "href": "wiki:Transform fault"
           }
         ]
-      }
+      },
+      "seeds": [
+        "San Andreas Fault",
+        "strike-slip fault"
+      ],
+      "floatingTerms": [
+        "offset streams",
+        "linear valleys"
+      ],
+      "terms": [
+        "San Andreas Fault",
+        "strike-slip fault",
+        "offset streams",
+        "linear valleys"
+      ]
     }
   ],
   "bridges": [
@@ -278,22 +297,12 @@
       ]
     }
   ],
-  "info": {
-    "citations": [
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
       {
-        "title": "Understanding plate motions",
-        "publisher": "U.S. Geological Survey",
-        "url": "https://pubs.usgs.gov/gip/dynamic/understanding.html"
-      },
-      {
-        "title": "This Dynamic Planet",
-        "publisher": "U.S. Geological Survey",
-        "url": "https://pubs.usgs.gov/pdf/planet.pdf"
-      },
-      {
-        "title": "The Himalayas: Two continents collide",
-        "publisher": "U.S. Geological Survey",
-        "url": "https://pubs.usgs.gov/gip/dynamic/himalaya.html"
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

@@ -20,12 +20,6 @@ export default definePuzzle(import.meta.url, {
     "citations": [
       {
         "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-        "author": "Scott, James C.",
-        "publisher": "Yale University Press",
-        "year": "1990"
-      },
-      {
-        "title": "Domination and the Arts of Resistance: Hidden Transcripts",
         "author": "James C. Scott",
         "publisher": "Yale University Press",
         "year": "1990"
@@ -55,15 +49,9 @@ export default definePuzzle(import.meta.url, {
         "deference"
       ],
       "termInfo": {
-        "deference": {
-          "text": "The outward performance of respect and submission -- a bow, a title used correctly, an argument not made. It costs little to give and buys a great deal of room underneath it."
-        },
-        "flattery": {
-          "text": "Praise offered upward, whether or not it is felt. One of the cheapest currencies in an unequal relationship, and one of the most demanded."
-        },
-        "public transcript": {
-          "text": "The open, official record of an interaction between the powerful and the less powerful -- what gets said where both can hear it and both know they are being watched."
-        }
+        "deference": "The outward performance of respect and submission -- a bow, a title used correctly, an argument not made. It costs little to give and buys a great deal of room underneath it.",
+        "flattery": "Praise offered upward, whether or not it is felt. One of the cheapest currencies in an unequal relationship, and one of the most demanded.",
+        "public transcript": "The open, official record of an interaction between the powerful and the less powerful -- what gets said where both can hear it and both know they are being watched."
       },
       "info": "The open, on-record interaction between the powerful and the less powerful, performed for each other rather than felt by either."
     },
@@ -82,15 +70,9 @@ export default definePuzzle(import.meta.url, {
         "grumbling"
       ],
       "termInfo": {
-        "fantasy of reversal": {
-          "text": "A story, joke, or daydream in which the current order is turned upside down -- the servant giving the orders, the master doing the fetching. Scott finds these recur across very different unequal relationships."
-        },
-        "grumbling": {
-          "text": "Complaint shared only among trusted equals, safe precisely because the setting itself is what protects it, not anything about how it is phrased."
-        },
-        "hidden transcript": {
-          "text": "What people say about power when the people with power cannot hear it. Often flatly contradicts the public transcript given only minutes before."
-        }
+        "fantasy of reversal": "A story, joke, or daydream in which the current order is turned upside down -- the servant giving the orders, the master doing the fetching. Scott finds these recur across very different unequal relationships.",
+        "grumbling": "Complaint shared only among trusted equals, safe precisely because the setting itself is what protects it, not anything about how it is phrased.",
+        "hidden transcript": "What people say about power when the people with power cannot hear it. Often flatly contradicts the public transcript given only minutes before."
       },
       "info": "What gets said out of sight of power, among people who trust each other enough to drop the performance."
     },
@@ -111,21 +93,11 @@ export default definePuzzle(import.meta.url, {
         "false compliance"
       ],
       "termInfo": {
-        "false compliance": {
-          "text": "Appearing to do what was ordered while quietly not doing it, or doing it in a way guaranteed to fail. Indistinguishable from incompetence unless it happens too consistently to be accidental."
-        },
-        "feigned ignorance": {
-          "text": "Claiming not to have understood an order, a rule, or a consequence. Cheap to deploy and almost impossible to disprove."
-        },
-        "foot-dragging": {
-          "text": "Working slowly enough to blunt an order without ever refusing it outright. The single most common weapon in Scott's account, because it requires no plan and no ally."
-        },
-        "pilfering": {
-          "text": "Small, informal taking -- grain, tools, time -- kept below whatever amount would force an owner to respond directly."
-        },
-        "sabotage": {
-          "text": "Damage disguised as accident: a gate left open, a machine run wrong. The most severe of these weapons, and the one requiring the most caution, because it invites the most severe response if traced."
-        }
+        "false compliance": "Appearing to do what was ordered while quietly not doing it, or doing it in a way guaranteed to fail. Indistinguishable from incompetence unless it happens too consistently to be accidental.",
+        "feigned ignorance": "Claiming not to have understood an order, a rule, or a consequence. Cheap to deploy and almost impossible to disprove.",
+        "foot-dragging": "Working slowly enough to blunt an order without ever refusing it outright. The single most common weapon in Scott's account, because it requires no plan and no ally.",
+        "pilfering": "Small, informal taking -- grain, tools, time -- kept below whatever amount would force an owner to respond directly.",
+        "sabotage": "Damage disguised as accident: a gate left open, a machine run wrong. The most severe of these weapons, and the one requiring the most caution, because it invites the most severe response if traced."
       },
       "info": "The small, deniable, everyday acts Scott catalogued among Malaysian peasants -- resistance that never rises to the level of anything anyone could be charged with."
     },
@@ -145,18 +117,10 @@ export default definePuzzle(import.meta.url, {
         "folktale"
       ],
       "termInfo": {
-        "anonymity": {
-          "text": "An unsigned complaint, an unattributed threat, a message with no traceable author. Removes the one thing that would let power respond to the person rather than the point."
-        },
-        "euphemism": {
-          "text": "Saying a milder thing that everyone present understands to mean the sharper thing underneath it. Deniable by design."
-        },
-        "folktale": {
-          "text": "A story about animals, tricksters, or distant kings that everyone present can hear as being about their own situation, while nobody present has to say so."
-        },
-        "rumor": {
-          "text": "A claim with no traceable origin, which is exactly what lets it travel into rooms a signed statement never could."
-        }
+        "anonymity": "An unsigned complaint, an unattributed threat, a message with no traceable author. Removes the one thing that would let power respond to the person rather than the point.",
+        "euphemism": "Saying a milder thing that everyone present understands to mean the sharper thing underneath it. Deniable by design.",
+        "folktale": "A story about animals, tricksters, or distant kings that everyone present can hear as being about their own situation, while nobody present has to say so.",
+        "rumor": "A claim with no traceable origin, which is exactly what lets it travel into rooms a signed statement never could."
       },
       "info": "The forms that let something true about power be said where power can hear it, without anyone having to own having said it."
     }
@@ -170,9 +134,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The hidden transcript is not only spoken. Where grumbling among trusted equals fails to relieve the pressure, or conditions keep worsening, the same refusal tends to migrate from words into small, deniable acts -- a field left half-weeded, a tool that breaks at a convenient moment. Nothing has changed except the register. Underneath, it is the same transcript that was already there.",
-      "info": {
-        "text": "Scott's observation that the hidden transcript exists in two forms -- as speech among trusted equals, and as practice, in acts too small and too deniable to answer for."
-      },
+      "info": "Scott's observation that the hidden transcript exists in two forms -- as speech among trusted equals, and as practice, in acts too small and too deniable to answer for.",
       "relationKind": "dynamic",
       "idealTerms": [
         "grumbling",
@@ -192,9 +154,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "From the vantage of power, false compliance and genuine deference look identical -- both present as someone doing what they were told. Read from underneath, they are opposites: one is the relationship working as intended, the other is refusal wearing the relationship's clothes. Neither party watching the performance from outside can tell which one they are seeing, which is exactly what makes it usable.",
-      "info": {
-        "text": "The point where the public transcript and its subversion become visually identical, and only the outcome tells them apart."
-      },
+      "info": "The point where the public transcript and its subversion become visually identical, and only the outcome tells them apart.",
       "relationKind": "contrast",
       "idealTerms": [
         "deference",
@@ -209,9 +169,7 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "A fantasy of the tables turning, told straight, is dangerous. Told as a story about animals, or a joke, or a rumor with no author, it can be said in the open -- even within earshot of the people it is about -- because it can always be disowned. The content of the hidden transcript survives the trip into public view. What it loses is a name attached to whoever said it.",
-      "info": {
-        "text": "How the content of the hidden transcript gets smuggled into public view, in a form nobody can be made to answer for."
-      },
+      "info": "How the content of the hidden transcript gets smuggled into public view, in a form nobody can be made to answer for.",
       "relationKind": "dynamic",
       "idealTerms": [
         "fantasy of reversal",
@@ -282,5 +240,14 @@ export default definePuzzle(import.meta.url, {
         "public transcript": "By definition the record kept where both parties can see each other."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

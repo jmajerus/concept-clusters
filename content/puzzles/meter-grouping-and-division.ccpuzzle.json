@@ -4,19 +4,19 @@
   "category": "music",
   "info": {
     "text": "Western meter is two questions at once: how many beats fill a bar, and whether each of those beats splits in two or in three.",
-    "citations": [
-      {
-        "title": "Meter and time signatures",
-        "publisher": "Open Music Theory",
-        "url": "https://openmusictheory.github.io/meter.html"
-      }
-    ],
     "links": [
       {
         "href": "wiki:Metre (music)"
       },
       {
         "href": "wiki:Time signature"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Meter and time signatures",
+        "publisher": "Open Music Theory",
+        "url": "https://openmusictheory.github.io/meter.html"
       }
     ]
   },
@@ -26,18 +26,6 @@
       "name": "Beat grouping",
       "color": "teal",
       "fact": "Duple, triple, and quadruple meter classify how many counting-pulse beats occupy a bar: two, three, or four — the slower pulse layer, not how each beat subdivides.",
-      "seeds": [
-        "duple meter",
-        "triple meter"
-      ],
-      "floatingTerms": [
-        "quadruple meter"
-      ],
-      "terms": [
-        "duple meter",
-        "triple meter",
-        "quadruple meter"
-      ],
       "termInfo": {
         "duple meter": {
           "text": "Two counting-pulse beats in each bar — a march, a polka, or a fast 6/8.",
@@ -61,25 +49,25 @@
       },
       "info": {
         "text": "How many beats occupy a bar."
-      }
+      },
+      "seeds": [
+        "duple meter",
+        "triple meter"
+      ],
+      "floatingTerms": [
+        "quadruple meter"
+      ],
+      "terms": [
+        "duple meter",
+        "triple meter",
+        "quadruple meter"
+      ]
     },
     {
       "id": "cluster-division",
       "name": "Beat division",
       "color": "blue",
       "fact": "Simple meter divides each beat into two equal parts; compound meter divides each beat into three, so the beat itself is written as a dotted note.",
-      "seeds": [
-        "simple meter",
-        "compound meter"
-      ],
-      "floatingTerms": [
-        "dotted beat"
-      ],
-      "terms": [
-        "simple meter",
-        "compound meter",
-        "dotted beat"
-      ],
       "termInfo": {
         "compound meter": {
           "text": "Each beat divides into three equal parts. The top number is 6, 9, or 12, and the bottom number names one division of the beat, not the beat."
@@ -98,7 +86,19 @@
       },
       "info": {
         "text": "Whether each beat splits in two or in three."
-      }
+      },
+      "seeds": [
+        "simple meter",
+        "compound meter"
+      ],
+      "floatingTerms": [
+        "dotted beat"
+      ],
+      "terms": [
+        "simple meter",
+        "compound meter",
+        "dotted beat"
+      ]
     }
   ],
   "bridges": [
@@ -186,5 +186,13 @@
       }
     }
   ],
-  "lensMode": "sequential"
+  "lensMode": "sequential",
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 }

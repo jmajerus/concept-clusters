@@ -31,7 +31,7 @@ export default definePuzzle(import.meta.url, {
   },
   "clusters": [
     {
-      "id": "cluster-situation-comedy",
+      "id": "situation-comedy",
       "name": "Situation Comedy",
       "color": "teal",
       "fact": "The television sitcom repeatedly reinvents a durable setup: recurring characters negotiating family, friendship, and work within a familiar place.",
@@ -47,7 +47,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "cluster-science-fiction",
+      "id": "science-fiction",
       "name": "Science Fiction",
       "color": "blue",
       "fact": "Television science fiction turns speculative ideas into continuing worlds, giving audiences time to live with their social and technological consequences.",
@@ -63,7 +63,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "cluster-crime-mystery",
+      "id": "crime-mystery",
       "name": "Crime & Mystery",
       "color": "amber",
       "fact": "Crime television ranges from self-contained puzzles to serialized portraits of institutions, investigators, victims, and offenders.",
@@ -79,7 +79,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "cluster-animation",
+      "id": "animation",
       "name": "Animation",
       "color": "magenta",
       "fact": "Television animation grew from economical limited-animation production into a medium for family comedy, superhero drama, satire, and serialized fantasy.",
@@ -207,5 +207,13 @@ export default definePuzzle(import.meta.url, {
     }
   ],
   "lensMode": "quiz",
-  "preSolve": true
+  "preSolve": true,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)"
+      }
+    ]
+  }
 });

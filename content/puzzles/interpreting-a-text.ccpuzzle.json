@@ -16,20 +16,6 @@
       "name": "Features of the text",
       "color": "teal",
       "fact": "Interpretation begins with features that can be pointed to in the text itself: diction, imagery, structure, and recurring motifs.",
-      "seeds": [
-        "diction",
-        "imagery"
-      ],
-      "floatingTerms": [
-        "structure",
-        "recurring motif"
-      ],
-      "terms": [
-        "diction",
-        "imagery",
-        "structure",
-        "recurring motif"
-      ],
       "termInfo": {
         "diction": {
           "text": "A writer's choice of words, including their level of formality, connotations, sound, and associations.",
@@ -70,27 +56,27 @@
             "href": "wiki:Literary criticism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "diction",
+        "imagery"
+      ],
+      "floatingTerms": [
+        "structure",
+        "recurring motif"
+      ],
+      "terms": [
+        "diction",
+        "imagery",
+        "structure",
+        "recurring motif"
+      ]
     },
     {
       "id": "historical-and-cultural-context",
       "name": "Historical and cultural context",
       "color": "blue",
       "fact": "A text was produced within a particular historical setting, genre, authorship situation, and relationship to an expected audience.",
-      "seeds": [
-        "historical setting",
-        "intended audience"
-      ],
-      "floatingTerms": [
-        "genre",
-        "authorship"
-      ],
-      "terms": [
-        "historical setting",
-        "genre",
-        "authorship",
-        "intended audience"
-      ],
       "termInfo": {
         "historical setting": {
           "text": "The events, institutions, assumptions, and conditions surrounding the text's production and earliest reception.",
@@ -131,27 +117,27 @@
             "href": "wiki:Historicism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "historical setting",
+        "intended audience"
+      ],
+      "floatingTerms": [
+        "genre",
+        "authorship"
+      ],
+      "terms": [
+        "historical setting",
+        "genre",
+        "authorship",
+        "intended audience"
+      ]
     },
     {
       "id": "interpretive-argument",
       "name": "Interpretive argument",
       "color": "amber",
       "fact": "An interpretation becomes an argument when it states a thesis, supports it with textual evidence, explains its inferences, and addresses plausible alternatives.",
-      "seeds": [
-        "thesis",
-        "textual evidence"
-      ],
-      "floatingTerms": [
-        "inference",
-        "counterreading"
-      ],
-      "terms": [
-        "thesis",
-        "textual evidence",
-        "inference",
-        "counterreading"
-      ],
       "termInfo": {
         "thesis": {
           "text": "The central interpretive claim an analysis asks the reader to accept.",
@@ -192,7 +178,21 @@
             "href": "wiki:Argument"
           }
         ]
-      }
+      },
+      "seeds": [
+        "thesis",
+        "textual evidence"
+      ],
+      "floatingTerms": [
+        "inference",
+        "counterreading"
+      ],
+      "terms": [
+        "thesis",
+        "textual evidence",
+        "inference",
+        "counterreading"
+      ]
     }
   ],
   "bridges": [
@@ -322,6 +322,15 @@
           "imagery",
           "structure"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

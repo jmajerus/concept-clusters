@@ -8,18 +8,6 @@
       "name": "Rationalism",
       "color": "teal",
       "fact": "Rationalism holds that reason alone, independent of the senses, can access certain truths — for Descartes, even one's own existence.",
-      "seeds": [
-        "innate ideas",
-        "cogito ergo sum"
-      ],
-      "floatingTerms": [
-        "Descartes"
-      ],
-      "terms": [
-        "innate ideas",
-        "cogito ergo sum",
-        "Descartes"
-      ],
       "termInfo": {
         "innate ideas": {
           "links": [
@@ -51,25 +39,25 @@
             "href": "wiki:Rationalism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "innate ideas",
+        "cogito ergo sum"
+      ],
+      "floatingTerms": [
+        "Descartes"
+      ],
+      "terms": [
+        "innate ideas",
+        "cogito ergo sum",
+        "Descartes"
+      ]
     },
     {
       "id": "empiricism",
       "name": "Empiricism",
       "color": "blue",
       "fact": "Empiricism holds that all knowledge comes from sensory experience; the mind begins as a blank slate with nothing innate.",
-      "seeds": [
-        "tabula rasa",
-        "sense-data"
-      ],
-      "floatingTerms": [
-        "Locke"
-      ],
-      "terms": [
-        "tabula rasa",
-        "sense-data",
-        "Locke"
-      ],
       "termInfo": {
         "tabula rasa": {
           "text": "Latin for \"blank slate\" — Locke's idea that the mind starts empty, with all knowledge built up from experience.",
@@ -102,25 +90,25 @@
             "href": "wiki:Empiricism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "tabula rasa",
+        "sense-data"
+      ],
+      "floatingTerms": [
+        "Locke"
+      ],
+      "terms": [
+        "tabula rasa",
+        "sense-data",
+        "Locke"
+      ]
     },
     {
       "id": "existentialism",
       "name": "Existentialism",
       "color": "amber",
       "fact": "Existentialism holds that humans have no fixed nature or purpose — we are radically free, and must create meaning through our own choices.",
-      "seeds": [
-        "radical freedom",
-        "authenticity"
-      ],
-      "floatingTerms": [
-        "Sartre"
-      ],
-      "terms": [
-        "radical freedom",
-        "authenticity",
-        "Sartre"
-      ],
       "termInfo": {
         "radical freedom": {
           "text": "Sartre's claim that we have no fixed nature to fall back on — we are \"condemned to be free,\" fully responsible for defining ourselves through our choices.",
@@ -153,7 +141,19 @@
             "href": "wiki:Existentialism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "radical freedom",
+        "authenticity"
+      ],
+      "floatingTerms": [
+        "Sartre"
+      ],
+      "terms": [
+        "radical freedom",
+        "authenticity",
+        "Sartre"
+      ]
     }
   ],
   "bridges": [
@@ -199,5 +199,13 @@
         "existentialism": "radical freedom"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

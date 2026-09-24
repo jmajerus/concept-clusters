@@ -26,24 +26,6 @@
       "name": "Lymphoid organs",
       "color": "teal",
       "fact": "Lymphoid organs and tissues house lymphocytes and filter lymph, so immune responses start where lymph is screened.",
-      "seeds": [
-        "lymph nodes",
-        "spleen"
-      ],
-      "floatingTerms": [
-        "thymus",
-        "tonsils",
-        "Peyer's patches",
-        "bone marrow"
-      ],
-      "terms": [
-        "lymph nodes",
-        "spleen",
-        "thymus",
-        "tonsils",
-        "Peyer's patches",
-        "bone marrow"
-      ],
       "termInfo": {
         "lymph nodes": {
           "text": "Small encapsulated filters along lymphatic vessels where macrophages and lymphocytes screen passing lymph for antigen.",
@@ -88,27 +70,31 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "lymph nodes",
+        "spleen"
+      ],
+      "floatingTerms": [
+        "thymus",
+        "tonsils",
+        "Peyer's patches",
+        "bone marrow"
+      ],
+      "terms": [
+        "lymph nodes",
+        "spleen",
+        "thymus",
+        "tonsils",
+        "Peyer's patches",
+        "bone marrow"
+      ]
     },
     {
       "id": "lymph-return-route",
       "name": "Lymph return route",
       "color": "blue",
       "fact": "Lymphatic capillaries collect leaked fluid and intestinal chyle into vessels and two ducts that empty into the subclavian veins.",
-      "seeds": [
-        "thoracic duct",
-        "lymphatic vessels"
-      ],
-      "floatingTerms": [
-        "right lymphatic duct",
-        "lymphatic capillaries"
-      ],
-      "terms": [
-        "thoracic duct",
-        "lymphatic vessels",
-        "right lymphatic duct",
-        "lymphatic capillaries"
-      ],
       "termInfo": {
         "thoracic duct": {
           "text": "The body's largest lymphatic vessel, draining most of the body into the left subclavian vein.",
@@ -137,29 +123,27 @@
         "lymphatic capillaries": {
           "text": "Blind-ended, highly permeable vessels that admit interstitial fluid, solutes, and immune cells."
         }
-      }
+      },
+      "seeds": [
+        "thoracic duct",
+        "lymphatic vessels"
+      ],
+      "floatingTerms": [
+        "right lymphatic duct",
+        "lymphatic capillaries"
+      ],
+      "terms": [
+        "thoracic duct",
+        "lymphatic vessels",
+        "right lymphatic duct",
+        "lymphatic capillaries"
+      ]
     },
     {
       "id": "fluid-and-lipid-cargo",
       "name": "Fluid and lipid cargo",
       "color": "amber",
       "fact": "Tissue fluid constantly leaks from blood and intestinal lacteals absorb fats as chylomicrons; without lymphatic return that fluid stays trapped as edema.",
-      "seeds": [
-        "lymph",
-        "edema"
-      ],
-      "floatingTerms": [
-        "interstitial fluid",
-        "lacteals",
-        "chylomicrons"
-      ],
-      "terms": [
-        "lymph",
-        "interstitial fluid",
-        "edema",
-        "lacteals",
-        "chylomicrons"
-      ],
       "termInfo": {
         "lymph": {
           "text": "The fluid inside lymphatic vessels: recovered interstitial fluid plus immune cells and, after meals, absorbed fats.",
@@ -201,25 +185,29 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "lymph",
+        "edema"
+      ],
+      "floatingTerms": [
+        "interstitial fluid",
+        "lacteals",
+        "chylomicrons"
+      ],
+      "terms": [
+        "lymph",
+        "interstitial fluid",
+        "edema",
+        "lacteals",
+        "chylomicrons"
+      ]
     },
     {
       "id": "surveillance-cells",
       "name": "Surveillance cells",
       "color": "magenta",
       "fact": "Lymphocytes, macrophages, and dendritic cells patrol lymph and present what they find, turning drainage into immune surveillance.",
-      "seeds": [
-        "lymphocytes",
-        "macrophages"
-      ],
-      "floatingTerms": [
-        "dendritic cells"
-      ],
-      "terms": [
-        "lymphocytes",
-        "macrophages",
-        "dendritic cells"
-      ],
       "termInfo": {
         "lymphocytes": {
           "text": "Immune cells that recognize specific antigen and mount responses inside lymphoid organs.",
@@ -245,7 +233,19 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "lymphocytes",
+        "macrophages"
+      ],
+      "floatingTerms": [
+        "dendritic cells"
+      ],
+      "terms": [
+        "lymphocytes",
+        "macrophages",
+        "dendritic cells"
+      ]
     }
   ],
   "bridges": [
@@ -315,5 +315,14 @@
         "thoracic duct": "It delivers chyle-rich lymph into the subclavian vein."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

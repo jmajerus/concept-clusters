@@ -2,90 +2,229 @@
   "id": "homonyms-in-context",
   "title": "Homonyms in Context",
   "category": "vocabulary",
-  "puzzleKind": "vocabulary-context",
+  "level": "advanced",
   "info": {
-    "text": "Use the surrounding sentence to distinguish two unrelated meanings of the same spelling."
+    "text": "Use linguistic diagnostics—not spelling alone—to distinguish overlap in form, relations among senses, and the contextual evidence that selects an interpretation."
   },
   "clusters": [
     {
-      "id": "river-edge",
-      "name": "River Edge",
+      "id": "form-overlap",
+      "name": "Form Overlap",
       "color": "teal",
-      "fact": "These terms describe the land and structures alongside a river, where water meets or reshapes the ground.",
+      "fact": "These labels classify how distinct lexemes share spelling, pronunciation, or both; the narrower labels specify which channel overlaps.",
       "seeds": [
-        "shore",
-        "levee"
+        "homonym",
+        "homophone"
       ],
       "floatingTerms": [
-        "floodplain",
-        "embankment"
+        "homograph",
+        "heteronym"
       ],
       "terms": [
-        "shore",
-        "levee",
-        "floodplain",
-        "embankment"
+        "homonym",
+        "homophone",
+        "homograph",
+        "heteronym"
       ]
     },
     {
-      "id": "financial-institution",
-      "name": "Financial Institution",
+      "id": "sense-relations",
+      "name": "Sense Relations",
       "color": "blue",
-      "fact": "These terms describe money placed with, borrowed from, charged by, or maintained at a financial institution.",
+      "fact": "These labels distinguish multiple senses by semantic relatedness: homonymy treats them as separate lexemes, polysemy as related senses of one lexeme, and a contronym has established senses that point in opposite directions.",
       "seeds": [
-        "deposit",
-        "loan"
+        "polysemy",
+        "homonymy"
       ],
       "floatingTerms": [
-        "interest",
-        "account"
+        "contronym"
       ],
       "terms": [
-        "deposit",
-        "loan",
-        "interest",
-        "account"
+        "polysemy",
+        "homonymy",
+        "contronym"
+      ]
+    },
+    {
+      "id": "contextual-resolution",
+      "name": "Contextual Resolution",
+      "color": "amber",
+      "fact": "These concepts describe evidence or operations that make a lexical reading fit a sentence: recurring neighbors, grammatical frame, semantic compatibility, and the act of choosing among readings.",
+      "seeds": [
+        "collocation",
+        "syntactic frame"
+      ],
+      "floatingTerms": [
+        "selectional restriction",
+        "disambiguation"
+      ],
+      "terms": [
+        "collocation",
+        "syntactic frame",
+        "selectional restriction",
+        "disambiguation"
       ]
     }
   ],
   "bridges": [
     {
-      "id": "bank",
-      "term": "bank",
+      "id": "ambiguity",
+      "term": "ambiguity",
       "clusters": [
-        "river-edge",
-        "financial-institution"
+        "form-overlap",
+        "sense-relations"
       ],
-      "fact": "Bank names both the sloping land beside a river and an institution that holds or lends money: one spelling, two unrelated senses.",
+      "fact": "Shared form and multiple senses can create lexical ambiguity: the analyst must decide whether competing readings reflect different lexemes or related senses.",
       "info": {
-        "text": "Context selects the sense. A river bank is terrain; a bank handles deposits, loans, and accounts."
+        "text": "Ambiguity is an interpretive condition, not proof of homonymy; the relation among senses still has to be diagnosed."
+      }
+    },
+    {
+      "id": "context",
+      "term": "context",
+      "clusters": [
+        "sense-relations",
+        "contextual-resolution"
+      ],
+      "fact": "Context supplies the evidence that lets an analyst compare senses and select the reading licensed by a particular utterance.",
+      "info": {
+        "text": "Collocations, syntactic frames, and semantic compatibility can resolve an ambiguity without changing the word form."
       }
     }
   ],
   "lenses": [
     {
-      "id": "river-sense",
-      "prompt": "After the river rose, the hikers climbed onto the grassy ______ above the water.",
+      "id": "homophone-diagnostic",
+      "prompt": "Site and cite have different spellings but the same pronunciation. Which term names this relationship?",
+      "explanation": "Homophones share pronunciation but differ in spelling and meaning.",
       "targets": [
-        "bank"
+        "homophone"
       ],
-      "explanation": "Here bank means the sloping land at a river's edge. The surrounding terms describe related river-edge features, not the financial sense.",
       "reasons": {
-        "bank": "The sentence places the word beside a river, so bank means its raised or sloping edge."
+        "homophone": "Site and cite are pronounced alike even though their spellings and meanings differ."
       }
     },
     {
-      "id": "financial-sense",
-      "prompt": "The small business asked its ______ for a loan to repair the storefront.",
+      "id": "heteronym-diagnostic",
+      "prompt": "Lead has the same spelling but different pronunciations in its two senses. Which term names this relationship?",
+      "explanation": "A heteronym is a homograph whose pronunciation changes with its sense: lead is pronounced LEED as a metal and LED as a guide.",
       "targets": [
-        "bank"
+        "heteronym"
       ],
-      "explanation": "Here bank means a financial institution. Deposits, loans, interest, and accounts belong to this sense.",
       "reasons": {
-        "bank": "A business asks a financial institution for a loan, not a river feature."
+        "heteronym": "Lead keeps one spelling but changes pronunciation when it means a metal versus when it means to guide."
+      }
+    },
+    {
+      "id": "homonymy-diagnostic",
+      "prompt": "Bank has a river-edge sense and a financial-institution sense that are conventionally treated as separate lexemes. Which term names that relation?",
+      "explanation": "Homonymy treats identical or similar forms as separate lexemes with unrelated senses.",
+      "targets": [
+        "homonymy"
+      ],
+      "reasons": {
+        "homonymy": "The river and financial senses of bank are conventionally analyzed as separate lexemes."
+      }
+    },
+    {
+      "id": "polysemy-diagnostic",
+      "prompt": "Paper can mean a material, a document, or an academic article; these senses are connected extensions of one lexeme. Which term names that relation?",
+      "explanation": "Polysemy treats multiple related senses as belonging to one lexeme.",
+      "targets": [
+        "polysemy"
+      ],
+      "reasons": {
+        "polysemy": "Paper's material, document, and scholarly-article senses form a connected semantic network."
+      }
+    },
+    {
+      "id": "collocation-diagnostic",
+      "prompt": "Words such as lifted and beam favor the machine reading of crane, while nesting and marsh favor the bird reading. Which term names this evidence from recurring word partners?",
+      "explanation": "Collocation is the evidence supplied by words that regularly occur together.",
+      "targets": [
+        "collocation"
+      ],
+      "reasons": {
+        "collocation": "Lifted/beam and nesting/marsh are recurring lexical partners that favor different readings of crane."
+      }
+    },
+    {
+      "id": "syntactic-frame-diagnostic",
+      "prompt": "Crane appears in a transitive lifting construction in one sentence and a nesting construction in another. Which term names the grammatical pattern that helps select a sense?",
+      "explanation": "A syntactic frame is the grammatical pattern of a word and its arguments or complements.",
+      "targets": [
+        "syntactic frame"
+      ],
+      "reasons": {
+        "syntactic frame": "The lifting example and the nesting example place crane in different grammatical patterns."
+      }
+    },
+    {
+      "id": "selectional-restriction-diagnostic",
+      "prompt": "The verb lift is compatible with a machine acting on a beam, while nest is compatible with a bird in a marsh. Which term names these semantic-type constraints on a predicate's arguments?",
+      "explanation": "Selectional restrictions are the semantic-type preferences or constraints that predicates impose on their arguments.",
+      "targets": [
+        "selectional restriction"
+      ],
+      "reasons": {
+        "selectional restriction": "The predicates and their arguments favor a machine in the lifting event and a bird in the nesting event."
+      }
+    },
+    {
+      "id": "contronym-diagnostic",
+      "prompt": "Sanction can mean authorize or penalize, with senses that point in opposite directions. Which term names this lexical phenomenon?",
+      "explanation": "A contronym is a form with established senses that point in opposite directions.",
+      "targets": [
+        "contronym"
+      ],
+      "reasons": {
+        "contronym": "Sanction has established senses that mean approval and penalty."
+      }
+    },
+    {
+      "id": "ambiguity-diagnostic",
+      "prompt": "Before context resolves sanction, the form permits more than one plausible reading. Which term names this interpretive condition?",
+      "explanation": "Ambiguity is the condition in which more than one interpretation remains possible.",
+      "targets": [
+        "ambiguity"
+      ],
+      "reasons": {
+        "ambiguity": "Sanction permits more than one plausible interpretation until contextual evidence narrows it."
+      }
+    },
+    {
+      "id": "disambiguation-diagnostic",
+      "prompt": "Using context to decide whether sanction means authorize or penalize is what process? Which term names that process?",
+      "explanation": "Disambiguation is the process of selecting the intended sense of an ambiguous form.",
+      "targets": [
+        "disambiguation"
+      ],
+      "reasons": {
+        "disambiguation": "The reader uses context to select the intended sense of sanction."
       }
     }
   ],
   "lensMode": "sequential",
-  "preSolve": true
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Before You Begin",
+    "summary": "Sense relations and context shape lexical ambiguity.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "Lexical ambiguity is not a single phenomenon. Homographs share spelling; homophones share pronunciation; and heteronyms are homographs whose pronunciations differ. Homonymy treats competing senses as belonging to separate lexemes, while polysemy treats them as related senses of one lexeme. Contronyms are a special case in which a single form has opposing senses.\n\nIn serious reading, context often narrows an interpretation before a dictionary does. Collocation, grammatical pattern, and the kinds of arguments a predicate permits can all make one sense more plausible than another. The goal is to name those distinctions precisely and use them to explain how a reader resolves an ambiguous form."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      },
+      {
+        "name": "Codex (GPT-5.6 Luna)",
+        "reasoning": "max"
+      }
+    ]
+  }
 }

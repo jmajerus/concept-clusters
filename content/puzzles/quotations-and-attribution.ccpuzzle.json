@@ -8,20 +8,6 @@
       "name": "Quotation evidence",
       "color": "teal",
       "fact": "A quotation is strongest when it can be tied to direct evidence such as a transcript, recording, primary document or published interview.",
-      "seeds": [
-        "transcript",
-        "audio recording"
-      ],
-      "floatingTerms": [
-        "primary document",
-        "published interview"
-      ],
-      "terms": [
-        "transcript",
-        "audio recording",
-        "primary document",
-        "published interview"
-      ],
       "termInfo": {
         "transcript": {
           "text": "A written representation of spoken words that can be checked against an original speech, hearing, interview or recording.",
@@ -77,27 +63,27 @@
             "href": "https://guides.loc.gov/quotations"
           }
         ]
-      }
+      },
+      "seeds": [
+        "transcript",
+        "audio recording"
+      ],
+      "floatingTerms": [
+        "primary document",
+        "published interview"
+      ],
+      "terms": [
+        "transcript",
+        "audio recording",
+        "primary document",
+        "published interview"
+      ]
     },
     {
       "id": "attribution-failures",
       "name": "Attribution failures",
       "color": "blue",
       "fact": "Quotations can become unreliable through changed wording, attribution to the wrong person, selective excerpting or repeated paraphrase.",
-      "seeds": [
-        "misquotation",
-        "false attribution"
-      ],
-      "floatingTerms": [
-        "quote mining",
-        "paraphrase drift"
-      ],
-      "terms": [
-        "misquotation",
-        "false attribution",
-        "quote mining",
-        "paraphrase drift"
-      ],
       "termInfo": {
         "misquotation": {
           "text": "A quotation whose wording differs materially from what the source actually said or wrote.",
@@ -153,27 +139,27 @@
             "href": "https://guides.loc.gov/quotations/misquotations"
           }
         ]
-      }
+      },
+      "seeds": [
+        "misquotation",
+        "false attribution"
+      ],
+      "floatingTerms": [
+        "quote mining",
+        "paraphrase drift"
+      ],
+      "terms": [
+        "misquotation",
+        "false attribution",
+        "quote mining",
+        "paraphrase drift"
+      ]
     },
     {
       "id": "verification-practices",
       "name": "Verification practices",
       "color": "amber",
       "fact": "Quotation research uses exact-phrase searching, the earliest documented source, surrounding context and independent confirmation.",
-      "seeds": [
-        "exact-phrase search",
-        "surrounding context"
-      ],
-      "floatingTerms": [
-        "earliest source",
-        "independent confirmation"
-      ],
-      "terms": [
-        "exact-phrase search",
-        "earliest source",
-        "surrounding context",
-        "independent confirmation"
-      ],
       "termInfo": {
         "exact-phrase search": {
           "text": "Searching distinctive words inside quotation marks, then trying shorter or variant phrases when the circulating wording may be imperfect.",
@@ -229,7 +215,21 @@
             "href": "https://guides.loc.gov/quotations"
           }
         ]
-      }
+      },
+      "seeds": [
+        "exact-phrase search",
+        "surrounding context"
+      ],
+      "floatingTerms": [
+        "earliest source",
+        "independent confirmation"
+      ],
+      "terms": [
+        "exact-phrase search",
+        "earliest source",
+        "surrounding context",
+        "independent confirmation"
+      ]
     }
   ],
   "bridges": [
@@ -302,6 +302,15 @@
           "provenance",
           "authentication"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

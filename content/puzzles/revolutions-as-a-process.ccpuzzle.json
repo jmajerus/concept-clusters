@@ -17,20 +17,6 @@
       "name": "Crisis of the old order",
       "color": "teal",
       "fact": "Revolutionary situations often combine state weakness with hardship, exclusion, and war, but the balance among those pressures differs sharply from one society to another.",
-      "seeds": [
-        "fiscal crisis",
-        "food shortage"
-      ],
-      "floatingTerms": [
-        "political exclusion",
-        "imperial war"
-      ],
-      "terms": [
-        "fiscal crisis",
-        "food shortage",
-        "political exclusion",
-        "imperial war"
-      ],
       "termInfo": {
         "fiscal crisis": {
           "text": "A breakdown in a government's ability to raise revenue, service debt, or sustain expected spending.",
@@ -71,27 +57,27 @@
             "href": "wiki:Revolutionary situation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "fiscal crisis",
+        "food shortage"
+      ],
+      "floatingTerms": [
+        "political exclusion",
+        "imperial war"
+      ],
+      "terms": [
+        "fiscal crisis",
+        "food shortage",
+        "political exclusion",
+        "imperial war"
+      ]
     },
     {
       "id": "political-mobilization",
       "name": "Political mobilization",
       "color": "blue",
       "fact": "Ideas become revolutionary forces through communication, assembly, organization, and collective action rather than through dissatisfaction alone.",
-      "seeds": [
-        "popular assemblies",
-        "revolutionary party"
-      ],
-      "floatingTerms": [
-        "pamphlet networks",
-        "slave uprising"
-      ],
-      "terms": [
-        "pamphlet networks",
-        "popular assemblies",
-        "slave uprising",
-        "revolutionary party"
-      ],
       "termInfo": {
         "pamphlet networks": {
           "text": "The production and circulation of short printed arguments through writers, printers, sellers, clubs, and readers.",
@@ -132,27 +118,27 @@
             "href": "wiki:Collective action"
           }
         ]
-      }
+      },
+      "seeds": [
+        "popular assemblies",
+        "revolutionary party"
+      ],
+      "floatingTerms": [
+        "pamphlet networks",
+        "slave uprising"
+      ],
+      "terms": [
+        "pamphlet networks",
+        "popular assemblies",
+        "slave uprising",
+        "revolutionary party"
+      ]
     },
     {
       "id": "social-and-institutional-transformation",
       "name": "Social and institutional transformation",
       "color": "amber",
       "fact": "Revolutionary programs become concrete when they change legal status, property, landholding, institutions, and control over economic resources.",
-      "seeds": [
-        "emancipation",
-        "nationalization"
-      ],
-      "floatingTerms": [
-        "abolition of privilege",
-        "land redistribution"
-      ],
-      "terms": [
-        "abolition of privilege",
-        "emancipation",
-        "land redistribution",
-        "nationalization"
-      ],
       "termInfo": {
         "abolition of privilege": {
           "text": "The removal of inherited legal exemptions, status rights, or feudal obligations attached to estates or social orders.",
@@ -193,27 +179,27 @@
             "href": "wiki:Social revolution"
           }
         ]
-      }
+      },
+      "seeds": [
+        "emancipation",
+        "nationalization"
+      ],
+      "floatingTerms": [
+        "abolition of privilege",
+        "land redistribution"
+      ],
+      "terms": [
+        "abolition of privilege",
+        "emancipation",
+        "land redistribution",
+        "nationalization"
+      ]
     },
     {
       "id": "consolidation-and-aftermath",
       "name": "Consolidation and aftermath",
       "color": "magenta",
       "fact": "After an old regime breaks, constitutions, armed resistance, civil conflict, and new elites shape which revolutionary aims survive and how power is institutionalized.",
-      "seeds": [
-        "constitution",
-        "civil war"
-      ],
-      "floatingTerms": [
-        "counterrevolution",
-        "new governing elite"
-      ],
-      "terms": [
-        "constitution",
-        "counterrevolution",
-        "civil war",
-        "new governing elite"
-      ],
       "termInfo": {
         "constitution": {
           "text": "A fundamental framework defining political institutions, powers, procedures, and often rights.",
@@ -254,7 +240,21 @@
             "href": "wiki:State-building"
           }
         ]
-      }
+      },
+      "seeds": [
+        "constitution",
+        "civil war"
+      ],
+      "floatingTerms": [
+        "counterrevolution",
+        "new governing elite"
+      ],
+      "terms": [
+        "constitution",
+        "counterrevolution",
+        "civil war",
+        "new governing elite"
+      ]
     }
   ],
   "bridges": [
@@ -458,6 +458,15 @@
           "constitution",
           "popular assemblies"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }

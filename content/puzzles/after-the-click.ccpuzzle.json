@@ -27,22 +27,6 @@
       "name": "Recognition and reappraisal",
       "color": "teal",
       "fact": "The psychological aftermath begins when a result, condition, or fabricated signal reveals that the person's recorded action did not faithfully express the choice they believed they were making.",
-      "seeds": [
-        "unexpected outcome",
-        "manipulation recognized"
-      ],
-      "floatingTerms": [
-        "concealed condition discovered",
-        "fabricated signal exposed",
-        "intention mismatch"
-      ],
-      "terms": [
-        "unexpected outcome",
-        "concealed condition discovered",
-        "fabricated signal exposed",
-        "manipulation recognized",
-        "intention mismatch"
-      ],
       "termInfo": {
         "unexpected outcome": {
           "text": "A charge, enrollment, disclosure, purchase, or other result that differs materially from what the person expected the action to produce.",
@@ -91,29 +75,29 @@
             "href": "https://doi.org/10.1145/3461778.3462086"
           }
         ]
-      }
+      },
+      "seeds": [
+        "unexpected outcome",
+        "manipulation recognized"
+      ],
+      "floatingTerms": [
+        "concealed condition discovered",
+        "fabricated signal exposed",
+        "intention mismatch"
+      ],
+      "terms": [
+        "unexpected outcome",
+        "concealed condition discovered",
+        "fabricated signal exposed",
+        "manipulation recognized",
+        "intention mismatch"
+      ]
     },
     {
       "id": "self-directed-aftermath",
       "name": "Self-directed aftermath",
       "color": "blue",
       "fact": "Recognition may be turned inward as regret, repeated mental replay, self-blame, humiliation, or reduced confidence in one's own ability to make safe decisions.",
-      "seeds": [
-        "decision regret",
-        "self-blame"
-      ],
-      "floatingTerms": [
-        "shame or humiliation",
-        "rumination",
-        "loss of self-trust"
-      ],
-      "terms": [
-        "decision regret",
-        "self-blame",
-        "shame or humiliation",
-        "rumination",
-        "loss of self-trust"
-      ],
       "termInfo": {
         "decision regret": {
           "text": "A painful comparison between the actual outcome and the choice the person believes they would have made with clearer or fairer information.",
@@ -162,29 +146,29 @@
             "href": "https://doi.org/10.3389/fpsyg.2026.1805536"
           }
         ]
-      }
+      },
+      "seeds": [
+        "decision regret",
+        "self-blame"
+      ],
+      "floatingTerms": [
+        "shame or humiliation",
+        "rumination",
+        "loss of self-trust"
+      ],
+      "terms": [
+        "decision regret",
+        "self-blame",
+        "shame or humiliation",
+        "rumination",
+        "loss of self-trust"
+      ]
     },
     {
       "id": "response-toward-the-business",
       "name": "Response toward the business",
       "color": "amber",
       "fact": "The same recognition may be directed outward as anger, perceived betrayal, lost credibility, complaint, departure, or an effort to warn other people.",
-      "seeds": [
-        "perceived betrayal",
-        "credibility loss"
-      ],
-      "floatingTerms": [
-        "anger",
-        "complaint or exit",
-        "warning others"
-      ],
-      "terms": [
-        "anger",
-        "perceived betrayal",
-        "credibility loss",
-        "complaint or exit",
-        "warning others"
-      ],
       "termInfo": {
         "anger": {
           "text": "An emotional response to being treated unfairly or intentionally steered into an unwanted outcome.",
@@ -233,29 +217,29 @@
             "href": "https://doi.org/10.1007/978-3-030-77750-0_10"
           }
         ]
-      }
+      },
+      "seeds": [
+        "perceived betrayal",
+        "credibility loss"
+      ],
+      "floatingTerms": [
+        "anger",
+        "complaint or exit",
+        "warning others"
+      ],
+      "terms": [
+        "anger",
+        "perceived betrayal",
+        "credibility loss",
+        "complaint or exit",
+        "warning others"
+      ]
     },
     {
       "id": "lasting-adaptation",
       "name": "Lasting adaptation",
       "color": "magenta",
       "fact": "A deceptive encounter can change future behavior: people inspect more, assume greater risk, avoid businesses, generalize suspicion, or participate less in services they might otherwise use.",
-      "seeds": [
-        "defensive vigilance",
-        "trust erosion"
-      ],
-      "floatingTerms": [
-        "avoidance",
-        "generalized suspicion",
-        "reduced participation"
-      ],
-      "terms": [
-        "defensive vigilance",
-        "avoidance",
-        "generalized suspicion",
-        "trust erosion",
-        "reduced participation"
-      ],
       "termInfo": {
         "defensive vigilance": {
           "text": "Increased checking, verification, and monitoring motivated by the expectation that an interface may conceal or distort something important.",
@@ -304,7 +288,23 @@
             "href": "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
           }
         ]
-      }
+      },
+      "seeds": [
+        "defensive vigilance",
+        "trust erosion"
+      ],
+      "floatingTerms": [
+        "avoidance",
+        "generalized suspicion",
+        "reduced participation"
+      ],
+      "terms": [
+        "defensive vigilance",
+        "avoidance",
+        "generalized suspicion",
+        "trust erosion",
+        "reduced participation"
+      ]
     }
   ],
   "bridges": [
@@ -325,14 +325,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "recognition-and-reappraisal": "manipulation recognized",
+        "self-directed-aftermath": "decision regret"
+      },
       "direction": {
         "kind": "through",
         "from": "recognition-and-reappraisal",
         "to": "self-directed-aftermath"
-      },
-      "idealTerms": {
-        "recognition-and-reappraisal": "manipulation recognized",
-        "self-directed-aftermath": "decision regret"
       }
     },
     {
@@ -352,14 +352,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "recognition-and-reappraisal": "concealed condition discovered",
+        "response-toward-the-business": "perceived betrayal"
+      },
       "direction": {
         "kind": "through",
         "from": "recognition-and-reappraisal",
         "to": "response-toward-the-business"
-      },
-      "idealTerms": {
-        "recognition-and-reappraisal": "concealed condition discovered",
-        "response-toward-the-business": "perceived betrayal"
       }
     },
     {
@@ -379,14 +379,14 @@
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "response-toward-the-business": "credibility loss",
+        "lasting-adaptation": "defensive vigilance"
+      },
       "direction": {
         "kind": "through",
         "from": "response-toward-the-business",
         "to": "lasting-adaptation"
-      },
-      "idealTerms": {
-        "response-toward-the-business": "credibility loss",
-        "lasting-adaptation": "defensive vigilance"
       }
     }
   ],
@@ -469,5 +469,14 @@
         "reduced participation": "The person may withdraw from useful transactions or services because the perceived cost of engagement has risen."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

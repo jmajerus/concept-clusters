@@ -8,18 +8,6 @@
       "name": "Types of false information",
       "color": "teal",
       "fact": "False information falls into three types by intent and harm: misinformation is false but spread without intent to deceive, disinformation is deliberately fabricated to mislead, and malinformation is genuine information shared to cause harm.",
-      "seeds": [
-        "misinformation",
-        "disinformation"
-      ],
-      "floatingTerms": [
-        "malinformation"
-      ],
-      "terms": [
-        "misinformation",
-        "disinformation",
-        "malinformation"
-      ],
       "termInfo": {
         "misinformation": {
           "text": "False information spread without knowing — or intending — that it's false.",
@@ -53,25 +41,25 @@
             "href": "wiki:Misinformation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "misinformation",
+        "disinformation"
+      ],
+      "floatingTerms": [
+        "malinformation"
+      ],
+      "terms": [
+        "misinformation",
+        "disinformation",
+        "malinformation"
+      ]
     },
     {
       "id": "verification-practices",
       "name": "Verification practices",
       "color": "blue",
       "fact": "Verifying a claim means checking it against the original evidence: fact-checking tests a specific claim, a primary source is the original record itself, and lateral reading means leaving a site to check other sources rather than digging deeper within it.",
-      "seeds": [
-        "fact-checking",
-        "primary source"
-      ],
-      "floatingTerms": [
-        "lateral reading"
-      ],
-      "terms": [
-        "fact-checking",
-        "lateral reading",
-        "primary source"
-      ],
       "termInfo": {
         "fact-checking": {
           "text": "Testing a specific factual claim against evidence — what professional fact-checkers do, and what any reader can do informally.",
@@ -113,25 +101,25 @@
             "href": "wiki:Fact-checking"
           }
         ]
-      }
+      },
+      "seeds": [
+        "fact-checking",
+        "primary source"
+      ],
+      "floatingTerms": [
+        "lateral reading"
+      ],
+      "terms": [
+        "fact-checking",
+        "lateral reading",
+        "primary source"
+      ]
     },
     {
       "id": "cognitive-social-dynamics",
       "name": "Cognitive & social dynamics",
       "color": "amber",
       "fact": "People don't just receive false information passively: confirmation bias makes us favor claims that fit what we already believe, echo chambers repeatedly reinforce those same beliefs, and conspiracy theories offer an appealingly simple explanation that resists correction.",
-      "seeds": [
-        "confirmation bias",
-        "echo chamber"
-      ],
-      "floatingTerms": [
-        "conspiracy theory"
-      ],
-      "terms": [
-        "confirmation bias",
-        "echo chamber",
-        "conspiracy theory"
-      ],
       "termInfo": {
         "confirmation bias": {
           "links": [
@@ -165,7 +153,19 @@
             "href": "wiki:Misinformation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "confirmation bias",
+        "echo chamber"
+      ],
+      "floatingTerms": [
+        "conspiracy theory"
+      ],
+      "terms": [
+        "confirmation bias",
+        "echo chamber",
+        "conspiracy theory"
+      ]
     }
   ],
   "bridges": [
@@ -213,5 +213,13 @@
         "verification-practices": "fact-checking"
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 }

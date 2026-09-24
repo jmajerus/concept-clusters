@@ -8,20 +8,6 @@
       "name": "Heart chambers",
       "color": "teal",
       "fact": "The atria receive blood and the ventricles pump it onward: the right heart sends blood to the lungs, while the left heart sends oxygen-rich blood to the body.",
-      "seeds": [
-        "right atrium",
-        "left ventricle"
-      ],
-      "floatingTerms": [
-        "right ventricle",
-        "left atrium"
-      ],
-      "terms": [
-        "right atrium",
-        "right ventricle",
-        "left atrium",
-        "left ventricle"
-      ],
       "termInfo": {
         "right atrium": {
           "text": "The upper-right chamber, which receives oxygen-poor blood returning from the body and passes it through the tricuspid valve.",
@@ -68,27 +54,27 @@
             "href": "https://www.mayoclinic.org/diseases-conditions/aortic-valve-disease/multimedia/chambers-and-valves-of-the-heart/img-20007497"
           }
         ]
-      }
+      },
+      "seeds": [
+        "right atrium",
+        "left ventricle"
+      ],
+      "floatingTerms": [
+        "right ventricle",
+        "left atrium"
+      ],
+      "terms": [
+        "right atrium",
+        "right ventricle",
+        "left atrium",
+        "left ventricle"
+      ]
     },
     {
       "id": "heart-valves",
       "name": "Heart valves",
       "color": "blue",
       "fact": "Four valves open and close as pressure changes, directing blood forward and preventing it from leaking backward between chambers or vessels.",
-      "seeds": [
-        "mitral valve",
-        "aortic valve"
-      ],
-      "floatingTerms": [
-        "tricuspid valve",
-        "pulmonary valve"
-      ],
-      "terms": [
-        "tricuspid valve",
-        "pulmonary valve",
-        "mitral valve",
-        "aortic valve"
-      ],
       "termInfo": {
         "tricuspid valve": {
           "text": "The valve between the right atrium and right ventricle; it prevents blood from flowing backward into the atrium.",
@@ -144,27 +130,27 @@
             "href": "https://www.mayoclinic.org/diseases-conditions/heart-valve-disease/symptoms-causes/syc-20353727"
           }
         ]
-      }
+      },
+      "seeds": [
+        "mitral valve",
+        "aortic valve"
+      ],
+      "floatingTerms": [
+        "tricuspid valve",
+        "pulmonary valve"
+      ],
+      "terms": [
+        "tricuspid valve",
+        "pulmonary valve",
+        "mitral valve",
+        "aortic valve"
+      ]
     },
     {
       "id": "cardiac-cycle",
       "name": "Cardiac cycle",
       "color": "amber",
       "fact": "During diastole the ventricles relax and fill; during systole they contract and eject a stroke volume, which combines with heart rate to determine cardiac output.",
-      "seeds": [
-        "systole",
-        "diastole"
-      ],
-      "floatingTerms": [
-        "stroke volume",
-        "cardiac output"
-      ],
-      "terms": [
-        "systole",
-        "diastole",
-        "stroke volume",
-        "cardiac output"
-      ],
       "termInfo": {
         "systole": {
           "text": "The contraction phase of the heartbeat, when ventricular pressure rises and blood is ejected.",
@@ -214,7 +200,21 @@
             "href": "https://www.mayoclinic.org/tests-procedures/echocardiogram/about/pac-20393856"
           }
         ]
-      }
+      },
+      "seeds": [
+        "systole",
+        "diastole"
+      ],
+      "floatingTerms": [
+        "stroke volume",
+        "cardiac output"
+      ],
+      "terms": [
+        "systole",
+        "diastole",
+        "stroke volume",
+        "cardiac output"
+      ]
     }
   ],
   "bridges": [
@@ -260,5 +260,14 @@
       },
       "relationKind": "dynamic"
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

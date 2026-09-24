@@ -17,22 +17,6 @@
       "name": "Understand population health",
       "color": "teal",
       "fact": "Public health combines reports, measurements, surveys, laboratory evidence, and vital records to identify patterns affecting communities rather than relying on isolated cases alone.",
-      "seeds": [
-        "disease rates",
-        "health surveys"
-      ],
-      "floatingTerms": [
-        "case reports",
-        "laboratory results",
-        "mortality records"
-      ],
-      "terms": [
-        "case reports",
-        "disease rates",
-        "health surveys",
-        "laboratory results",
-        "mortality records"
-      ],
       "termInfo": {
         "case reports": {
           "text": "Reports describing identified cases of a disease or other health event.",
@@ -81,29 +65,29 @@
             "href": "wiki:Public health surveillance"
           }
         ]
-      }
+      },
+      "seeds": [
+        "disease rates",
+        "health surveys"
+      ],
+      "floatingTerms": [
+        "case reports",
+        "laboratory results",
+        "mortality records"
+      ],
+      "terms": [
+        "case reports",
+        "disease rates",
+        "health surveys",
+        "laboratory results",
+        "mortality records"
+      ]
     },
     {
       "id": "prevent-illness-and-injury",
       "name": "Prevent illness and injury",
       "color": "blue",
       "fact": "Prevention reduces the chance that harm will occur, detects problems early, and lowers their consequences before treatment becomes the only remaining option.",
-      "seeds": [
-        "vaccination",
-        "screening"
-      ],
-      "floatingTerms": [
-        "safer workplaces",
-        "nutrition programs",
-        "injury prevention"
-      ],
-      "terms": [
-        "vaccination",
-        "screening",
-        "safer workplaces",
-        "nutrition programs",
-        "injury prevention"
-      ],
       "termInfo": {
         "vaccination": {
           "text": "The administration of a vaccine to help the immune system prevent or reduce disease.",
@@ -152,29 +136,29 @@
             "href": "wiki:Preventive healthcare"
           }
         ]
-      }
+      },
+      "seeds": [
+        "vaccination",
+        "screening"
+      ],
+      "floatingTerms": [
+        "safer workplaces",
+        "nutrition programs",
+        "injury prevention"
+      ],
+      "terms": [
+        "vaccination",
+        "screening",
+        "safer workplaces",
+        "nutrition programs",
+        "injury prevention"
+      ]
     },
     {
       "id": "protect-shared-environments",
       "name": "Protect shared environments",
       "color": "amber",
       "fact": "Many public-health protections work upstream by making water, food, air, workplaces, and other shared surroundings safer for everyone who depends on them.",
-      "seeds": [
-        "clean water",
-        "food safety"
-      ],
-      "floatingTerms": [
-        "air quality",
-        "sanitation",
-        "hazard regulation"
-      ],
-      "terms": [
-        "clean water",
-        "food safety",
-        "air quality",
-        "sanitation",
-        "hazard regulation"
-      ],
       "termInfo": {
         "clean water": {
           "text": "Water protected from contaminants through source protection, treatment, testing, and safe distribution.",
@@ -223,29 +207,29 @@
             "href": "wiki:Environmental health"
           }
         ]
-      }
+      },
+      "seeds": [
+        "clean water",
+        "food safety"
+      ],
+      "floatingTerms": [
+        "air quality",
+        "sanitation",
+        "hazard regulation"
+      ],
+      "terms": [
+        "clean water",
+        "food safety",
+        "air quality",
+        "sanitation",
+        "hazard regulation"
+      ]
     },
     {
       "id": "prepare-and-respond",
       "name": "Prepare and respond",
       "color": "magenta",
       "fact": "Public-health response connects preparation, investigation, communication, logistics, and coordinated action so emerging threats can be contained and communities supported.",
-      "seeds": [
-        "emergency planning",
-        "outbreak investigation"
-      ],
-      "floatingTerms": [
-        "contact tracing",
-        "public communication",
-        "resource coordination"
-      ],
-      "terms": [
-        "emergency planning",
-        "outbreak investigation",
-        "contact tracing",
-        "public communication",
-        "resource coordination"
-      ],
       "termInfo": {
         "emergency planning": {
           "text": "Advance preparation for roles, resources, communication, and operations during a health emergency.",
@@ -294,7 +278,23 @@
             "href": "wiki:Public health emergency"
           }
         ]
-      }
+      },
+      "seeds": [
+        "emergency planning",
+        "outbreak investigation"
+      ],
+      "floatingTerms": [
+        "contact tracing",
+        "public communication",
+        "resource coordination"
+      ],
+      "terms": [
+        "emergency planning",
+        "outbreak investigation",
+        "contact tracing",
+        "public communication",
+        "resource coordination"
+      ]
     }
   ],
   "bridges": [
@@ -316,14 +316,14 @@
       },
       "conceptId": "public-health-surveillance",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "understand-population-health": "disease rates",
+        "prepare-and-respond": "outbreak investigation"
+      },
       "direction": {
         "kind": "through",
         "from": "understand-population-health",
         "to": "prepare-and-respond"
-      },
-      "idealTerms": {
-        "understand-population-health": "disease rates",
-        "prepare-and-respond": "outbreak investigation"
       }
     },
     {
@@ -367,14 +367,14 @@
       },
       "conceptId": "evidence-based-action",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "understand-population-health": "laboratory results",
+        "prevent-illness-and-injury": "screening"
+      },
       "direction": {
         "kind": "through",
         "from": "understand-population-health",
         "to": "prevent-illness-and-injury"
-      },
-      "idealTerms": {
-        "understand-population-health": "laboratory results",
-        "prevent-illness-and-injury": "screening"
       }
     }
   ],
@@ -438,5 +438,14 @@
         "public communication": "It translates findings and recommendations into information people can use."
       }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 }

@@ -207,5 +207,14 @@ export default definePuzzle(import.meta.url, {
       },
       "relationKind": "foundation"
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      }
+    ]
+  }
 });

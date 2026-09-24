@@ -215,5 +215,13 @@ export default definePuzzle(import.meta.url, {
         "intestines"
       ]
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5)"
+      }
+    ]
+  }
 });

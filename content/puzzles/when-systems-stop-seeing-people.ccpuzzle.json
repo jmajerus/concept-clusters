@@ -17,20 +17,6 @@
       "name": "Administrative abstraction",
       "color": "teal",
       "fact": "Administrative representations make large systems manageable, but they become dehumanizing when the representation is mistaken for the person and omitted circumstances no longer matter.",
-      "seeds": [
-        "case number",
-        "performance metric"
-      ],
-      "floatingTerms": [
-        "eligibility category",
-        "population aggregate"
-      ],
-      "terms": [
-        "case number",
-        "eligibility category",
-        "performance metric",
-        "population aggregate"
-      ],
       "termInfo": {
         "case number": {
           "text": "An identifier that lets an institution track a matter without repeatedly naming or describing the people involved.",
@@ -71,27 +57,27 @@
             "href": "wiki:Abstraction"
           }
         ]
-      }
+      },
+      "seeds": [
+        "case number",
+        "performance metric"
+      ],
+      "floatingTerms": [
+        "eligibility category",
+        "population aggregate"
+      ],
+      "terms": [
+        "case number",
+        "eligibility category",
+        "performance metric",
+        "population aggregate"
+      ]
     },
     {
       "id": "role-insulation",
       "name": "Role insulation",
       "color": "blue",
       "fact": "Institutional roles coordinate complex work, but they can also insulate participants from the full consequences of what the organization does.",
-      "seeds": [
-        "assigned duty",
-        "chain of command"
-      ],
-      "floatingTerms": [
-        "divided responsibility",
-        "professional detachment"
-      ],
-      "terms": [
-        "assigned duty",
-        "chain of command",
-        "divided responsibility",
-        "professional detachment"
-      ],
       "termInfo": {
         "assigned duty": {
           "text": "A task understood primarily as an obligation attached to one's position.",
@@ -132,27 +118,27 @@
             "href": "wiki:Role theory"
           }
         ]
-      }
+      },
+      "seeds": [
+        "assigned duty",
+        "chain of command"
+      ],
+      "floatingTerms": [
+        "divided responsibility",
+        "professional detachment"
+      ],
+      "terms": [
+        "assigned duty",
+        "chain of command",
+        "divided responsibility",
+        "professional detachment"
+      ]
     },
     {
       "id": "procedural-dominance",
       "name": "Procedural dominance",
       "color": "amber",
       "fact": "Procedure becomes dominant when completing the approved process substitutes for judging whether the result is humane, proportionate, and justified.",
-      "seeds": [
-        "rule compliance",
-        "checklist completion"
-      ],
-      "floatingTerms": [
-        "standardized treatment",
-        "documentation requirement"
-      ],
-      "terms": [
-        "rule compliance",
-        "checklist completion",
-        "standardized treatment",
-        "documentation requirement"
-      ],
       "termInfo": {
         "rule compliance": {
           "text": "Conformity with an established instruction or requirement.",
@@ -193,27 +179,27 @@
             "href": "wiki:Bureaucracy"
           }
         ]
-      }
+      },
+      "seeds": [
+        "rule compliance",
+        "checklist completion"
+      ],
+      "floatingTerms": [
+        "standardized treatment",
+        "documentation requirement"
+      ],
+      "terms": [
+        "rule compliance",
+        "checklist completion",
+        "standardized treatment",
+        "documentation requirement"
+      ]
     },
     {
       "id": "corrective-capacity",
       "name": "Corrective capacity",
       "color": "magenta",
       "fact": "A corrigible institution can receive evidence of harm, protect challenge, reconsider a decision, and change practice rather than defending the first result at all costs.",
-      "seeds": [
-        "appeal process",
-        "feedback loop"
-      ],
-      "floatingTerms": [
-        "protected dissent",
-        "discretionary review"
-      ],
-      "terms": [
-        "appeal process",
-        "protected dissent",
-        "discretionary review",
-        "feedback loop"
-      ],
       "termInfo": {
         "appeal process": {
           "text": "A formal route for asking that a decision be reconsidered by another authority.",
@@ -254,7 +240,21 @@
             "href": "wiki:Accountability"
           }
         ]
-      }
+      },
+      "seeds": [
+        "appeal process",
+        "feedback loop"
+      ],
+      "floatingTerms": [
+        "protected dissent",
+        "discretionary review"
+      ],
+      "terms": [
+        "appeal process",
+        "protected dissent",
+        "discretionary review",
+        "feedback loop"
+      ]
     }
   ],
   "bridges": [
@@ -414,6 +414,15 @@
           "accountability",
           "corrective capacity"
         ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
       }
     ]
   }
