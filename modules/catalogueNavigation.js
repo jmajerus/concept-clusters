@@ -130,6 +130,10 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
   }
 
   if (params.has("library")) return { kind: "library" };
+  // The unqualified site root is the main Library landing page. Keep
+  // parameterized-but-unrecognized routes on the existing default fallback
+  // so stale puzzle/category links still degrade to a playable puzzle.
+  if (!params.toString()) return { kind: "library" };
   return { kind: "default" };
 }
 

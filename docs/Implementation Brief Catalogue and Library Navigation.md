@@ -62,13 +62,14 @@ Use this vocabulary consistently:
 
 Do not use “master catalogue” in player-facing copy.
 
-### 4. Preserve the current default landing
+### 4. Make the Library the root landing
 
-A bare root visit must continue to load a live puzzle using the existing remembered-next/showcase behavior.
+A bare root visit should open the main Library screen so visitors can choose
+the complete collection, a subject area, or a curated catalogue immediately.
 
-Do not change the root URL into the Library screen.
-
-The Library is reached through an explicit button or URL.
+The explicit `?library` route and the header Library control remain supported.
+Stale or unrecognized parameterized links may continue to use the existing
+remembered-next/showcase puzzle fallback.
 
 ### 5. Maintain backward compatibility
 
@@ -399,7 +400,9 @@ Recommended precedence:
 3. `?catalogue=...&category=...` opens a filtered category.
 4. `?catalogue=...` opens a catalogue.
 5. `?library` opens the Library.
-6. A parameter-free root visit uses the existing default puzzle landing.
+6. A parameter-free root visit opens the Library.
+7. Stale or unrecognized parameterized routes use the existing default
+   puzzle landing.
 
 When `?puzzle=` and `?catalogue=` appear together:
 
@@ -570,8 +573,8 @@ Update existing tests where new context intentionally changes output.
 
 Cover at least:
 
-1. A parameter-free fresh visit still opens a live showcase puzzle.
-2. The Library button opens the Library.
+1. A parameter-free fresh visit opens the Library.
+2. The Library button opens the Library from a puzzle view.
 3. Library lists All Puzzles and all curated catalogues.
 4. All Puzzles derives its total directly from `PUZZLES`.
 5. Catalogue puzzle counts match their valid entries.
