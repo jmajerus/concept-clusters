@@ -26,7 +26,7 @@ export const name = "layout-sanity: cluster circles never overlap in Circle mode
 
 export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
-  await page.waitForSelector("#overview-title");
+  await page.waitForSelector("#overview-title:not(:empty)");
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   await page.click("#mode-sets");

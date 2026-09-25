@@ -1667,8 +1667,8 @@ function addFactCard(kind, title, fact, relation, direction) {
 //   that entry -- the one deliberately-authored "what's next" signal
 //   this catalog has, so a returning visitor with one available moves
 //   forward through it rather than replaying the same puzzle again.
-// - Everything else -- a genuinely first-time visitor, cleared storage,
-//   or a remembered puzzle with no relatedPuzzles to advance into --
+// - Everything else -- no remembered puzzle, or a remembered puzzle with no
+//   relatedPuzzles to advance into --
 //   picks a random puzzle from puzzles/showcase.js's SHOWCASE_PUZZLE_IDS,
 //   a short hand-picked sample rather than the whole catalog -- see that
 //   file's own comment. Falls back to the whole catalog if that pool is

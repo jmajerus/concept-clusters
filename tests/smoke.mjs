@@ -12,7 +12,7 @@ export async function run(page, baseURL) {
   page.on("console", msg => { if (msg.type() === "error") errors.push(msg.text()); });
 
   await page.goto(`${baseURL}/index.html`);
-  await page.waitForSelector("#overview-title");
+  await page.waitForSelector("#overview-title:not(:empty)");
   assert.equal(await page.textContent("#overview-title"), "Library");
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow`);
   await page.waitForSelector("#puzzle-title:not(:empty)");

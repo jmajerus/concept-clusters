@@ -613,8 +613,8 @@ still lands directly on a live, playable puzzle rather than a blank state.
   deliberately-authored "what's next" signal this catalog has, so a
   returning visitor with one available moves forward through it rather
   than replaying the same puzzle again.
-- Otherwise — a genuinely first-time visitor, cleared storage, or a
-  remembered puzzle with no `relatedPuzzles` to advance into — it picks
+- Otherwise — there is no remembered puzzle, or the remembered puzzle has
+  no `relatedPuzzles` to advance into — it picks
   a puzzle at random from `puzzles/showcase.js`'s
   `SHOWCASE_PUZZLE_IDS`, a short hand-picked sample rather than the
   whole catalog: a few good ones to make a first impression with, not a

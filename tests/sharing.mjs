@@ -76,10 +76,9 @@ export async function run(page, baseURL) {
   // catalog has -- rather than reloading itself or picking randomly;
   // one with no relatedPuzzles falls back to a random pick, where only
   // "some real puzzle" is checkable, not which one. Both branches are
-  // driven independently via explicit ?puzzle= links rather than
-  // whatever the fresh visit above happened to land on, so this doesn't
-  // depend on the catalog's current random draw to exercise either
-  // path. ----
+  // driven independently via explicit ?puzzle= links, so neither branch
+  // depends on the Library root or on the catalog's current random draw.
+  // ----
   const puzzleWithNext = await page.evaluate(() => {
     const p = CC.PUZZLES.find(x => x.relatedPuzzles?.entries?.length);
     return p ? { id: p.id, nextId: p.relatedPuzzles.entries[0].id } : null;
