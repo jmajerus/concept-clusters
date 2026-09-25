@@ -71,12 +71,12 @@ export async function run(page, baseURL) {
   });
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
 
-  // A bare visit remains a live showcase puzzle, not the Library.
+  // The parameter-free root is the main Library landing page.
   await page.goto(`${baseURL}/index.html`);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await page.waitForSelector("#puzzle-title:not(:empty)");
-  assert.equal(await page.locator("#puzzle-view").isVisible(), true);
+  await waitForOverview(page, "Library");
+  assert.equal(await page.locator("#puzzle-view").isVisible(), false);
   assert.equal(await page.textContent("#browse-puzzles"), "Library");
 
   // The global Library control exposes All Puzzles, New Puzzles, the
@@ -101,6 +101,8 @@ export async function run(page, baseURL) {
         .map(c => c.id)
     ];
   }, derivedIds);
+  await page.goto(`${baseURL}/index.html?puzzle=energy-flow`);
+  await waitForPuzzle(page, "energy-flow");
   await page.click("#browse-puzzles");
   await waitForOverview(page, "Library");
   assert.equal(new URL(page.url()).searchParams.has("library"), true);

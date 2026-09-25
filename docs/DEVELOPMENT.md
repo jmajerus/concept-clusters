@@ -433,19 +433,19 @@ Initial route precedence is:
    `subcategory`, or `view=all`;
 4. an explicit catalogue overview;
 5. a legacy bare `?category=` within All Puzzles;
-6. `?library`;
-7. the existing showcase/remembered-next default landing.
+6. `?library` or a parameter-free root visit;
+7. the existing showcase/remembered-next fallback for stale or unrecognized
+   parameterized routes.
 
 An invalid explicit catalogue opens the Library. A valid puzzle paired
 with an invalid or nonmember catalogue still opens the puzzle under
 neutral All Puzzles context.
 
 UI navigation calls `history.pushState`, and `popstate` reparses and
-renders the URL. Before leaving a parameter-free showcase puzzle,
-`appNavigation.js` replaces that otherwise-ambiguous root history entry
-with the actual puzzle URL; Back can then return to the puzzle the
-player really left instead of running the remembered-next selection
-again.
+renders the URL. Before leaving a puzzle reached from a route without a
+puzzle parameter, `appNavigation.js` replaces that otherwise-ambiguous
+history entry with the actual puzzle URL so Back can return to the puzzle
+the player really left.
 
 `moves` and `solved` replay only once after initial bootstrap. Later
 same-document navigation, Back, and Forward restore canonical local
@@ -601,12 +601,10 @@ local return path while related puzzles remain the completion handoff.
 
 ### Default landing
 
-A root visit with no `?puzzle=`/`?category=`/`&puzzles=` — or a
-`?puzzle=`/`?category=`/`&puzzles=` that names nothing real — always
-lands directly on a live, playable puzzle, never a blank state: like an
-arcade's machines, this stays lit up and running something rather than
-waiting on the visitor to make a choice first. What varies is *which*
-puzzle. `goToDefaultLanding` (`game.js`) picks it via:
+A parameter-free root visit opens the Library, which is now the main landing
+page. A `?puzzle=`/`?category=`/`&puzzles=` route that names nothing real
+still lands directly on a live, playable puzzle rather than a blank state.
+`goToDefaultLanding` (`game.js`) picks that fallback via:
 
 - If this browser has a remembered last-played puzzle
   (`localStorage.ccLastPuzzle`, set by `loadPuzzle` on every puzzle
@@ -628,8 +626,9 @@ Both lookups are fresh each time, not trusted blindly, in case the
 puzzle or its listed `relatedPuzzles` entry has since been removed from
 the catalog. `validate.mjs` catches a stale/typo'd id in
 `SHOWCASE_PUZZLE_IDS` the same way it catches one in `relatedPuzzles`.
-The Library stays purely opt-in — default landing never opens it
-automatically, only ever a puzzle.
+The Library is also available through the explicit `?library` route and the
+header control. The fallback remains puzzle-first only for stale or
+unrecognized parameterized links.
 
 `tests/sharing.mjs` covers the legacy puzzle/group params, including the
 Start-Over/later-navigation-shouldn't-replay distinction for `&moves`, that
@@ -638,10 +637,9 @@ must degrade to a plain load, the overview screen's own behavior
 (category listing, id-list filtering, its Share button emitting a
 slugified `?category=`, a raw pre-slug category name still resolving
 correctly, picker navigation between category overviews), and default-landing
-itself (a fresh visit landing directly on some real puzzle, last-puzzle
-persistence, the next-vs-random branch exercised directly against known
+fallback itself (the next-vs-random branch exercised directly against known
 puzzles, and that an unrecognized `?puzzle=`/`?category=`/`&puzzles=`
-falls back to the same default-landing logic rather than erroring).
+falls back to the same logic rather than erroring).
 `tests/catalogues.mjs` covers Library/catalogue/category routing,
 membership-relative counts, history, context-aware picker and related
 navigation, sharing, canonical completion progress, term-info placement,

@@ -51,25 +51,23 @@ export async function run(page, baseURL) {
   const context = page.context();
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
-  // ---- a genuinely fresh visit (nothing in localStorage yet) lands
-  // directly on a live, playable puzzle -- never a blank/idle state (see
-  // the arcade-machines framing in the design discussion this responds
-  // to: the machines are always lit up and running something). Which
-  // puzzle is a random pick from the showcase pool
-  // (puzzles/showcase.js), not always PUZZLES[0] and not the whole
-  // catalog. ----
+  // ---- a genuinely fresh visit (nothing in localStorage yet) opens the
+  // main Library landing page. ----
   await page.goto(`${baseURL}/index.html`);
-  await page.waitForSelector("#puzzle-title:not(:empty)");
-  assert.equal(await page.locator("#puzzle-view").isVisible(), true, "a fresh visit should land directly on a puzzle");
-  const puzzleId = await page.evaluate(() => CC.state.puzzle.id);
-  assert.ok(
-    await page.evaluate(id => CC.SHOWCASE_PUZZLE_IDS.has(id), puzzleId),
-    "the puzzle loaded on a fresh visit should come from the showcase pool"
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForFunction(() =>
+    document.querySelector("#puzzle-overview")?.classList.contains("shown") &&
+    document.getElementById("overview-title")?.textContent === "Library"
   );
+  assert.equal(await page.locator("#puzzle-view").isVisible(), false, "a fresh visit should land on the Library");
+  const puzzleId = await page.evaluate(() => CC.PUZZLES[0].id);
+  await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(
     await page.evaluate(() => localStorage.getItem("ccLastPuzzle")),
     puzzleId,
-    "loading a puzzle should remember it as the last one played"
+    "an explicitly loaded puzzle should still be remembered as the last one played"
   );
 
   // ---- goToDefaultLanding's two branches, exercised directly: a
@@ -113,8 +111,8 @@ export async function run(page, baseURL) {
     );
   }
 
-  // Reload the original fresh-visit puzzle so the rest of this test
-  // builds on a known, remembered `puzzleId` again.
+  // Reload the known puzzle so the rest of this test builds on a remembered
+  // `puzzleId` again.
   await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
 
@@ -187,7 +185,7 @@ export async function run(page, baseURL) {
   assert.equal(plainShareAfterModeOverride.searchParams.has("mode"), false, "the Share button must never add &mode= on its own");
 
   // ---- partial progress shares &moves=, and round-trips exactly ----
-  await page.goto(`${baseURL}/index.html`);
+  await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}&moves=`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.ok(await makeOneCorrectMove(page), "couldn't make a first correct move to seed the moves test");
   assert.ok(await makeOneCorrectMove(page), "couldn't make a second correct move to seed the moves test");
@@ -231,7 +229,7 @@ export async function run(page, baseURL) {
   assert.equal(await page.evaluate(() => CC.state.made), 0, "switching puzzles should not carry over a shared moves param");
 
   // ---- a fully-solved puzzle shares the terser &solved flag instead ----
-  await page.goto(`${baseURL}/index.html`);
+  await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}&moves=`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   await page.click("#show-solution");
   await page.waitForTimeout(150);

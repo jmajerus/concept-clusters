@@ -295,9 +295,9 @@ Legacy `?puzzle=`, `?category=`, `?puzzles=`, `moves`, `solved`, and
 Puzzles context. If a puzzle URL names a catalogue that does not contain
 it, the puzzle still opens but the invalid association is dropped.
 
-An invalid explicit catalogue opens the Library. A bare root visit still
-opens a live showcase or remembered-next puzzle; it does not open the
-Library.
+An invalid explicit catalogue opens the Library. A bare root visit opens the
+Library as the main landing page. Stale or unrecognized parameterized routes
+still use the existing live showcase or remembered-next fallback.
 
 The global header picker contains category, registered subcategory, and
 catalogue landing pages rather than every individual puzzle. Category and

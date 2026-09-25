@@ -18,6 +18,8 @@ export const viewport = { width: 320, height: 700 };
 
 export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
+  await page.waitForSelector("#overview-title");
+  await page.goto(`${baseURL}/index.html?puzzle=energy-flow`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
 
   // The Library catalogue cards carry multi-line metadata that could

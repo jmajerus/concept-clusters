@@ -1658,13 +1658,9 @@ function addFactCard(kind, title, fact, relation, direction) {
   factsEl.appendChild(card);
 }
 
-// Where a root-URL visit with no specific puzzle named lands -- used by
-// the bootstrap below both for a truly param-less visit and for a
-// stale/typo'd ?puzzle= id, since neither has any better claim on
-// "which puzzle" than the other. Per the arcade-machines framing (see
-// the design discussion this responds to): a puzzle is always loaded,
-// live and ready to play, never a blank/idle state -- what varies is
-// *which* one.
+// Where an explicit but stale or unrecognized route lands. The parameterless
+// root is handled by the Library route; this fallback keeps old puzzle,
+// category, and related-set links from becoming a blank or broken page.
 //
 // - A remembered last-played puzzle (localStorage.ccLastPuzzle, set by
 //   loadPuzzle) that itself lists a relatedPuzzles entry advances to
