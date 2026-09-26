@@ -245,6 +245,11 @@ import troublesomeNeighbors from "./vocabulary/troublesome-neighbors.js";
 import cinematography from "./film/cinematography.js";
 import octopusPlayAdjudication from "./zoology/octopus-play-adjudication.js";
 import octopusPlayStages from "./zoology/octopus-play-stages.js";
+import digestiveAbsorptionControl from "./physiology-medicine/digestive-absorption-control.js";
+import digestiveBreakdown from "./physiology-medicine/digestive-breakdown.js";
+import religionSharedBeliefs from "./religion/religion-shared-beliefs.js";
+import statisticalMechanics from "./physics/statistical-mechanics.js";
+import whyTheGramStainWorks from "./microbiology/why-the-gram-stain-works.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -500,6 +505,11 @@ export const PUZZLES = [
   cinematography,
   octopusPlayAdjudication,
   octopusPlayStages,
+  digestiveAbsorptionControl,
+  digestiveBreakdown,
+  religionSharedBeliefs,
+  statisticalMechanics,
+  whyTheGramStainWorks,
 ];
 
 export default PUZZLES;

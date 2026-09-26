@@ -103,7 +103,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "pantheon-oculus",
       "term": "Pantheon oculus",
       "clusters": [
         0,

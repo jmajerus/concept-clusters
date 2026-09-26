@@ -103,7 +103,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "cloister",
       "term": "cloister",
       "clusters": [
         0,
@@ -112,7 +111,6 @@ export default definePuzzle(import.meta.url, {
       "fact": "A cloister is a void subtracted from a monastery's mass that works as a walled outdoor room, open to the sky yet fully enclosed."
     },
     {
-      "id": "portal",
       "term": "portal",
       "clusters": [
         0,

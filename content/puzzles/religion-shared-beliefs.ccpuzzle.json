@@ -1,0 +1,357 @@
+{
+  "id": "religion-shared-beliefs",
+  "title": "Where Traditions Converge: The Sacred, the Human Problem, and the Path",
+  "category": "religion",
+  "large": true,
+  "info": {
+    "text": "The categories of belief that recur across the world's major religious traditions: the sacred as a distinct order of reality, a shared diagnosis of what is wrong with ordinary existence, and convergent paths toward resolution.",
+    "links": [
+      {
+        "href": "wiki:Perennial philosophy"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "the-sacred",
+      "name": "The Sacred",
+      "color": "teal",
+      "fact": "Across traditions, some dimension of reality is experienced as categorically different from ordinary experience — not merely important, but of a different order. Rudolf Otto called this das Heilige: the holy as its own irreducible category.",
+      "termInfo": {
+        "divine presence": {
+          "text": "The sacred experienced as immanent — felt within the world, in persons, places, or moments.",
+          "links": [
+            {
+              "href": "wiki:Divine immanence"
+            }
+          ]
+        },
+        "revelation": {
+          "text": "The sacred making itself known to human beings — through scripture, prophets, visions, or direct experience.",
+          "links": [
+            {
+              "href": "wiki:Revelation"
+            }
+          ]
+        },
+        "sacred": {
+          "text": "That which is set apart from ordinary life as belonging to a different, higher order of reality.",
+          "links": [
+            {
+              "href": "wiki:Sacred"
+            }
+          ]
+        },
+        "the holy": {
+          "text": "Rudolf Otto's term for the irreducible experience of the sacred — awesome, overwhelming, and utterly other.",
+          "links": [
+            {
+              "href": "wiki:Numinous"
+            }
+          ]
+        },
+        "transcendence": {
+          "text": "The divine as beyond and above the natural world — not contained within it.",
+          "links": [
+            {
+              "href": "wiki:Transcendence (religion)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The shared recognition that a dimension of reality is set apart from ordinary experience — the foundation beneath specific claims about God, gods, or ultimate reality.",
+        "links": [
+          {
+            "href": "wiki:Sacred"
+          }
+        ]
+      },
+      "seeds": [
+        "sacred",
+        "transcendence"
+      ],
+      "floatingTerms": [
+        "the holy",
+        "divine presence",
+        "revelation"
+      ],
+      "terms": [
+        "sacred",
+        "transcendence",
+        "the holy",
+        "divine presence",
+        "revelation"
+      ]
+    },
+    {
+      "id": "human-problem",
+      "name": "The Human Problem",
+      "color": "amber",
+      "fact": "Traditions that disagree on almost everything else agree that ordinary human existence contains a fundamental problem — whether named sin, suffering, ignorance, or estrangement — that religion exists to address.",
+      "termInfo": {
+        "alienation": {
+          "text": "Estrangement from the sacred, from community, or from one's true self — a structural diagnosis shared across mystical and prophetic traditions.",
+          "links": [
+            {
+              "href": "wiki:Alienation"
+            }
+          ]
+        },
+        "ignorance": {
+          "text": "Avidya in Hindu and Buddhist traditions: not knowing one's true nature or the nature of reality — the root of suffering and poor action.",
+          "links": [
+            {
+              "href": "wiki:Avidyā (Buddhism)"
+            }
+          ]
+        },
+        "impermanence": {
+          "text": "Anicca in Buddhism: the truth that all conditioned things pass away. Recognized in Indigenous traditions through seasonal and generational cycles.",
+          "links": [
+            {
+              "href": "wiki:Impermanence"
+            }
+          ]
+        },
+        "sin": {
+          "text": "The Abrahamic diagnosis: moral failing and the resulting separation from the divine. Named differently across Judaism, Christianity, and Islam but structurally shared.",
+          "links": [
+            {
+              "href": "wiki:Sin"
+            }
+          ]
+        },
+        "suffering": {
+          "text": "Dukkha in Buddhism: the pervasive unsatisfactoriness of conditioned existence. Also central to Jewish, Christian, and Indigenous understandings of the human condition.",
+          "links": [
+            {
+              "href": "wiki:Dukkha"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The shared diagnosis: something is wrong with ordinary human existence, and religion offers the path toward its resolution.",
+        "links": [
+          {
+            "href": "wiki:Hamartiology"
+          }
+        ]
+      },
+      "seeds": [
+        "suffering",
+        "sin"
+      ],
+      "floatingTerms": [
+        "impermanence",
+        "ignorance",
+        "alienation"
+      ],
+      "terms": [
+        "suffering",
+        "sin",
+        "impermanence",
+        "ignorance",
+        "alienation"
+      ]
+    },
+    {
+      "id": "path-and-goal",
+      "name": "The Path and the Goal",
+      "color": "blue",
+      "fact": "Every tradition offers a path — practices that orient the practitioner toward the sacred — and a goal that names what resolution looks like: liberation, salvation, enlightenment, or restored relationship.",
+      "termInfo": {
+        "community": {
+          "text": "The path walked together: sangha (Buddhist), umma (Islamic), kehilla (Jewish), church (Christian), clan or tribe (Indigenous). Spiritual life is rarely solitary.",
+          "links": [
+            {
+              "href": "wiki:Religious community"
+            }
+          ]
+        },
+        "liberation": {
+          "text": "The analytical umbrella for moksha (Hindu), nirvana (Buddhist), salvation (Christian), and related goals — freedom from the human problem.",
+          "links": [
+            {
+              "href": "wiki:Soteriology"
+            }
+          ]
+        },
+        "meditation": {
+          "text": "Sustained interior practice across Buddhism, Hinduism, Christian contemplative traditions, Sufism, and Jewish Kabbalah — disciplining attention toward the sacred.",
+          "links": [
+            {
+              "href": "wiki:Meditation"
+            }
+          ]
+        },
+        "prayer": {
+          "text": "Address to the divine — spoken, silent, or embodied — across Abrahamic, Indigenous, Hindu, and many other traditions.",
+          "links": [
+            {
+              "href": "wiki:Prayer"
+            }
+          ]
+        },
+        "ritual purification": {
+          "text": "Cleansing the self — through water, fire, fasting, or confession — to approach the sacred. Near-universal across traditions.",
+          "links": [
+            {
+              "href": "wiki:Ritual purification"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The convergent structure of religious practice: disciplines that move the practitioner toward the sacred, and the state or condition that counts as arrival.",
+        "links": [
+          {
+            "href": "wiki:Soteriology"
+          }
+        ]
+      },
+      "seeds": [
+        "liberation",
+        "meditation"
+      ],
+      "floatingTerms": [
+        "prayer",
+        "ritual purification",
+        "community"
+      ],
+      "terms": [
+        "liberation",
+        "meditation",
+        "prayer",
+        "ritual purification",
+        "community"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "compassion",
+      "term": "compassion",
+      "clusters": [
+        "human-problem",
+        "path-and-goal"
+      ],
+      "fact": "Compassion appears in every tradition as both the recognition of shared suffering and the primary vehicle of the path — karuna (Buddhist), agape (Christian), rahma (Islamic mercy), and ahimsa (Jain/Hindu nonviolence).",
+      "info": {
+        "text": "The recognition of suffering in others that motivates the path — named differently across traditions but structurally central to all of them.",
+        "links": [
+          {
+            "href": "wiki:Compassion"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "human-problem",
+        "to": "path-and-goal"
+      }
+    },
+    {
+      "id": "afterlife",
+      "term": "afterlife",
+      "clusters": [
+        "the-sacred",
+        "path-and-goal"
+      ],
+      "fact": "How a tradition pictures what comes after death — resurrection, reincarnation, ancestor presence, paradise — reveals what it takes the sacred to ultimately demand of human life.",
+      "info": {
+        "text": "Beliefs about what follows death: resurrection (Christianity, Islam), reincarnation (Hinduism, Buddhism), ancestor continuation (many Indigenous traditions), and paradise.",
+        "links": [
+          {
+            "href": "wiki:Afterlife"
+          }
+        ]
+      },
+      "relationKind": "dynamic"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "inner-spiritual-development",
+      "prompt": "Which concepts are central to traditions that emphasize inner spiritual development?",
+      "explanation": "These concepts form the contemplative core shared by Buddhism, Advaita Hinduism, Sufism, and Christian mysticism — traditions where the path runs primarily inward, through transformed perception and practice rather than law, community, or revealed text alone.",
+      "targets": [
+        "suffering",
+        "impermanence",
+        "ignorance",
+        "liberation",
+        "meditation",
+        "compassion"
+      ],
+      "reasons": {
+        "compassion": "In contemplative traditions, compassion is both cultivated through practice and understood as the natural fruit of awakening.",
+        "ignorance": "Avidya, the root of suffering in Hindu and Buddhist thought, is what contemplative practice directly addresses.",
+        "impermanence": "Anicca — the truth of passing away — is a primary object of contemplative attention in Buddhism and beyond.",
+        "liberation": "The contemplative goal: moksha, nirvana, or union — freedom from the human problem through inner transformation.",
+        "meditation": "The defining practice of contemplative traditions across Buddhism, Hinduism, Sufism, and Christian mysticism.",
+        "suffering": "The recognition of dukkha is the starting point of the contemplative path across Buddhist and Hindu traditions."
+      }
+    },
+    {
+      "id": "received-not-achieved",
+      "prompt": "Which concepts describe something the practitioner receives rather than does?",
+      "explanation": "These concepts carry the gift dimension of religious life — what arrives from beyond rather than what is earned or practiced. Even compassion, which can be cultivated, is in many traditions understood as ultimately a grace received, not a virtue produced.",
+      "targets": [
+        "revelation",
+        "divine presence",
+        "compassion",
+        "liberation"
+      ],
+      "reasons": {
+        "compassion": "In traditions of grace, compassion flows through the practitioner from the divine rather than being self-generated.",
+        "divine presence": "Immanence is experienced, not constructed — the sacred arrives.",
+        "liberation": "In theistic traditions especially, final liberation — salvation, moksha granted by Ishvara — is received as gift, not only achieved.",
+        "revelation": "The sacred discloses itself — the practitioner does not manufacture it."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "religion-ritual-practice",
+        "reason": "This board maps what traditions believe; the companion board shows what believers do with their bodies and calendars.",
+        "via": [
+          "sacred"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "What Religions Agree On",
+    "summary": "Before the traditions diverge on doctrine, they converge on a shared map: the sacred as a distinct category, a diagnosis of what is wrong with ordinary existence, and a path toward resolution.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "## The question beneath the differences\r\n\r\nThe world's major religious traditions disagree sharply — about God or gods, about scripture, about practice, about who is saved and who is not. But underneath those disagreements, scholars of comparative religion have noticed a recurring structure: the same *kinds* of questions, answered in structurally similar ways.\r\n\r\nRudolf Otto, writing in 1917, argued that \"the holy\" is a distinct category of human experience — not reducible to moral goodness or philosophical truth, but its own irreducible encounter with something *wholly other*. William James, Mircea Eliade, and Huston Smith each explored the same convergence from different angles: that traditions as distant as Zen Buddhism and Lakota ceremony and Sufi Islam and medieval Christian mysticism share a recognizable shape.\r\n\r\nThis convergence is also the intellectual foundation of the **ecumenical movement** — the sustained effort, especially in the 20th century, to find common ground across traditions. The World Council of Churches (1948), Vatican II's *Nostra Aetate* (1965), and the Parliament of the World's Religions have all built on the observation that traditions differ most sharply on the surface and converge most clearly at depth.\r\n\r\n## The shared map\r\n\r\nThree categories recur reliably:\r\n\r\n**The sacred** — the recognition that some dimension of reality is categorically different from ordinary experience. Not every tradition names a personal God, but virtually all recognize that the ordinary world points beyond itself.\r\n\r\n**The human problem** — the diagnosis that something is wrong with ordinary existence. Buddhism names it *dukkha* (suffering, unsatisfactoriness). Christianity names it sin. Hinduism names *avidya* (ignorance of one's true nature). Indigenous traditions often name broken relationship — with land, ancestors, or community. The diagnoses differ; the conviction that a diagnosis is needed does not.\r\n\r\n**The path and the goal** — every tradition offers practices that move the practitioner toward resolution, and a name for what resolution looks like: nirvana, moksha, salvation, enlightenment, restored right relationship.\r\n\r\n## What this board shows\r\n\r\nThis puzzle maps the analytical vocabulary that sits beneath tradition-specific terms. *Liberation* names the shared structure; *moksha*, *nirvana*, and *salvation* are its tradition-specific expressions. The board uses the umbrella terms; the definitions behind each one name their equivalents across traditions.\r\n\r\nAs you organize the board, notice which concepts appear to belong to more than one cluster — and which practices seem to be doing more than one kind of work."
+    },
+    "links": [
+      {
+        "href": "https://www.gutenberg.org/ebooks/35217",
+        "label": "Rudolf Otto, The Idea of the Holy (1917)"
+      },
+      {
+        "href": "https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_decl_19651028_nostra-aetate_en.html",
+        "label": "Nostra Aetate — Vatican II Declaration on Non-Christian Religions (1965)"
+      },
+      {
+        "href": "https://www.harpercollins.com/products/the-worlds-religions-huston-smith",
+        "label": "Huston Smith, The World's Religions — overview"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
+}
