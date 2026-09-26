@@ -24,24 +24,6 @@
       "name": "Circulation and Sequence",
       "color": "teal",
       "fact": "Architects order movement and views by threading rooms along axes, corridors, stairs, ramps, enfilades, and promenades.",
-      "seeds": [
-        "corridor",
-        "stair"
-      ],
-      "floatingTerms": [
-        "axis",
-        "enfilade",
-        "promenade",
-        "ramp"
-      ],
-      "terms": [
-        "axis",
-        "corridor",
-        "enfilade",
-        "promenade",
-        "ramp",
-        "stair"
-      ],
       "termInfo": {
         "axis": {
           "text": "An organizing straight line that rooms, walls, and vistas align to."
@@ -61,31 +43,31 @@
         "stair": {
           "text": "Steps joining levels, pacing ascent into a measured rhythm."
         }
-      }
+      },
+      "seeds": [
+        "corridor",
+        "stair"
+      ],
+      "floatingTerms": [
+        "axis",
+        "enfilade",
+        "promenade",
+        "ramp"
+      ],
+      "terms": [
+        "axis",
+        "corridor",
+        "enfilade",
+        "promenade",
+        "ramp",
+        "stair"
+      ]
     },
     {
       "id": "light-and-proportion",
       "name": "Light and Proportion",
       "color": "blue",
       "fact": "Openings and measure tune how big a room feels: domes, vaults, bays, clerestories, and oculi meter daylight against proportion.",
-      "seeds": [
-        "dome",
-        "oculus"
-      ],
-      "floatingTerms": [
-        "bay",
-        "clerestory",
-        "proportion",
-        "vault"
-      ],
-      "terms": [
-        "bay",
-        "clerestory",
-        "dome",
-        "oculus",
-        "proportion",
-        "vault"
-      ],
       "termInfo": {
         "bay": {
           "text": "One measured module of a plan or elevation, repeated to order a building."
@@ -105,7 +87,25 @@
         "vault": {
           "text": "An arched ceiling spanning between supports."
         }
-      }
+      },
+      "seeds": [
+        "dome",
+        "oculus"
+      ],
+      "floatingTerms": [
+        "bay",
+        "clerestory",
+        "proportion",
+        "vault"
+      ],
+      "terms": [
+        "bay",
+        "clerestory",
+        "dome",
+        "oculus",
+        "proportion",
+        "vault"
+      ]
     }
   ],
   "bridges": [

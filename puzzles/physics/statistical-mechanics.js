@@ -1,0 +1,328 @@
+// Generated from content/puzzles/statistical-mechanics.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "statistical-mechanics",
+  "title": "Statistical mechanics: why disorder wins",
+  "category": "physics",
+  "info": {
+    "text": "Statistical mechanics counts microscopic arrangements to explain entropy, temperature, and the one-way evolution toward likely states.",
+    "links": [
+      {
+        "href": "wiki:Statistical mechanics"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Multiplicity (statistical mechanics) -- Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Multiplicity_(statistical_mechanics)"
+      },
+      {
+        "title": "Boltzmann's entropy formula -- Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Boltzmann%27s_entropy_formula"
+      },
+      {
+        "title": "9.17 Kinetic Theory of Gases: Distribution of Molecular Speeds -- LibreTexts ChemPRIME",
+        "url": "https://chem.libretexts.org/Bookshelves/General_Chemistry/ChemPRIME_(Moore_et_al.)/09:_Gases/9.17:_Kinetic_Theory_of_Gases-_The_Distribution_of_Molecular_Speeds"
+      },
+      {
+        "title": "Philosophy of Statistical Mechanics -- Stanford Encyclopedia of Philosophy",
+        "url": "https://plato.stanford.edu/archIves/spr2024/entries/statphys-statmech/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "count-the-arrangements",
+      "name": "Count the arrangements",
+      "color": "teal",
+      "fact": "A macrostate is what you observe; microstates are the exact arrangements behind it, and multiplicity counts how many arrangements each macrostate allows.",
+      "terms": [
+        "macrostate",
+        "microstate",
+        "multiplicity"
+      ],
+      "seeds": [
+        "microstate",
+        "macrostate"
+      ],
+      "termInfo": {
+        "macrostate": {
+          "text": "What you observe: bulk quantities like temperature and pressure, each compatible with many microstates.",
+          "links": [
+            {
+              "href": "wiki:Macrostate"
+            }
+          ]
+        },
+        "microstate": {
+          "text": "One exact microscopic arrangement -- every particle's position and momentum specified.",
+          "links": [
+            {
+              "href": "wiki:Microstate (statistical mechanics)"
+            }
+          ]
+        },
+        "multiplicity": {
+          "text": "The number of microstates behind one macrostate; entropy's raw count.",
+          "links": [
+            {
+              "href": "wiki:Multiplicity (statistical mechanics)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Counting comes first: every later claim about entropy, temperature, or settling refers back to microstates, macrostates, and their count.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Multiplicity_(statistical_mechanics)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "entropy-from-counting",
+      "name": "Read entropy as likelihood",
+      "color": "blue",
+      "fact": "Boltzmann entropy turns the count into physics: S = k log W, with the Boltzmann constant setting the scale and equal likelihood for every microstate justifying the count.",
+      "terms": [
+        "Boltzmann entropy",
+        "Boltzmann constant",
+        "equal a priori probability"
+      ],
+      "seeds": [
+        "Boltzmann entropy",
+        "Boltzmann constant"
+      ],
+      "termInfo": {
+        "Boltzmann constant": {
+          "text": "The scale factor k joining temperature to energy in S = k log W.",
+          "links": [
+            {
+              "href": "wiki:Boltzmann constant"
+            }
+          ]
+        },
+        "Boltzmann entropy": {
+          "text": "Entropy as S = k log W: the log of multiplicity, turning counting into physics.",
+          "links": [
+            {
+              "href": "wiki:Boltzmann's entropy formula"
+            }
+          ]
+        },
+        "equal a priori probability": {
+          "text": "The postulate that every allowed microstate is equally likely -- what justifies counting."
+        }
+      },
+      "info": {
+        "text": "The formula and its postulate turn bare counting into the statistical meaning of the second law.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Boltzmann%27s_entropy_formula"
+          }
+        ]
+      }
+    },
+    {
+      "id": "temperature-from-motion",
+      "name": "Read temperature as motion",
+      "color": "amber",
+      "fact": "Kinetic theory reads temperature as average molecular motion: mean kinetic energy fixes hotness while the Maxwell-Boltzmann distribution spreads speeds around it.",
+      "terms": [
+        "kinetic theory",
+        "mean kinetic energy",
+        "Maxwell-Boltzmann distribution"
+      ],
+      "seeds": [
+        "kinetic theory",
+        "Maxwell-Boltzmann distribution"
+      ],
+      "termInfo": {
+        "Maxwell-Boltzmann distribution": {
+          "text": "The spread of molecular speeds at a temperature -- the most probable macrostate winning by multiplicity.",
+          "links": [
+            {
+              "href": "wiki:Maxwell–Boltzmann distribution"
+            }
+          ]
+        },
+        "kinetic theory": {
+          "text": "The model reading gases as particles in random motion, with pressure and temperature from collisions and energy.",
+          "links": [
+            {
+              "href": "wiki:Kinetic theory of gases"
+            }
+          ]
+        },
+        "mean kinetic energy": {
+          "text": "The average molecular kinetic energy; temperature is proportional to it.",
+          "links": [
+            {
+              "href": "wiki:Kinetic theory of gases"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Motion underlies the familiar quantities: temperature is an average, and averages come with a spread.",
+        "links": [
+          {
+            "href": "https://chem.libretexts.org/Bookshelves/General_Chemistry/ChemPRIME_(Moore_et_al.)/09:_Gases/9.17:_Kinetic_Theory_of_Gases-_The_Distribution_of_Molecular_Speeds"
+          }
+        ]
+      }
+    },
+    {
+      "id": "settle-into-likelihood",
+      "name": "Evolve toward the likely",
+      "color": "magenta",
+      "fact": "Isolated systems equilibrate toward the likeliest macrostate and thermalize to one temperature; fluctuations around it are tiny, and return to the unlikely past never happens.",
+      "terms": [
+        "equilibration",
+        "thermalization",
+        "fluctuations",
+        "irreversibility"
+      ],
+      "seeds": [
+        "fluctuations",
+        "irreversibility"
+      ],
+      "termInfo": {
+        "equilibration": {
+          "text": "A system's relaxation toward its most probable macrostate.",
+          "links": [
+            {
+              "href": "wiki:Equilibration"
+            }
+          ]
+        },
+        "fluctuations": {
+          "text": "Small, brief departures from the likeliest state; negligible in large systems.",
+          "links": [
+            {
+              "href": "wiki:Thermal fluctuations"
+            }
+          ]
+        },
+        "irreversibility": {
+          "text": "The one-way character of macroscopic change: returns to unlikely pasts never happen.",
+          "links": [
+            {
+              "href": "wiki:Irreversible process"
+            }
+          ]
+        },
+        "thermalization": {
+          "text": "Settling specifically to shared temperature -- thermal equilibrium with the surroundings.",
+          "links": [
+            {
+              "href": "wiki:Thermalisation"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Settling is what likelihood looks like over time: likely states arrived at, unlikely pasts never revisited.",
+        "links": [
+          {
+            "href": "https://plato.stanford.edu/archIves/spr2024/entries/statphys-statmech/"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-arrow-of-time",
+      "term": "arrow of time",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "The arrow of time is likelihood made visible: the second law points toward the future because future macrostates admit overwhelmingly more microstates.",
+      "info": {
+        "text": "The observed one-way direction of macroscopic change, read statistically.",
+        "links": [
+          {
+            "href": "wiki:Arrow of time"
+          }
+        ]
+      },
+      "idealTerms": [
+        "Boltzmann entropy",
+        "irreversibility"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 3
+      }
+    },
+    {
+      "id": "bridge-most-probable-distribution",
+      "term": "most probable distribution",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "The most probable distribution wins by counting: the Maxwell-Boltzmann spread is the macrostate with the greatest multiplicity.",
+      "info": {
+        "text": "The macrostate with the greatest multiplicity -- the winner counting picks."
+      },
+      "idealTerms": [
+        "multiplicity",
+        "Maxwell-Boltzmann distribution"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "exact-vs-observed",
+      "prompt": "Which terms name the exact arrangement or the observed condition -- rather than the count linking them?",
+      "explanation": "The microstate is the exact arrangement and the macrostate the observed bulk condition. Multiplicity is the count linking them -- neither side of the distinction itself.",
+      "targets": [
+        "microstate",
+        "macrostate"
+      ],
+      "reasons": {
+        "macrostate": "The macrostate is the observed bulk condition behind which many arrangements sit.",
+        "microstate": "The microstate is one exact microscopic arrangement."
+      }
+    },
+    {
+      "id": "settling-not-noise",
+      "prompt": "Which terms name the process of settling -- rather than the noise around it or its direction?",
+      "explanation": "Equilibration is settling to the likeliest macrostate and thermalization settling to shared temperature. Fluctuations are departures from the settled state, and irreversibility names its one-way character.",
+      "targets": [
+        "equilibration",
+        "thermalization"
+      ],
+      "reasons": {
+        "equilibration": "Equilibration is relaxation toward the most probable macrostate.",
+        "thermalization": "Thermalization is settling specifically to one shared temperature."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Why the Future Has More Room",
+    "summary": "Separate the counting of arrangements, motion as temperature, and settling into likely states.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Thermodynamics says entropy never decreases. Statistical mechanics asks what entropy is: a count of arrangements. Every bulk condition you observe is one macrostate, and behind it sit astronomically many exact microstates -- most bulk conditions you will ever see are simply the ones with the most arrangements behind them.\n\nThat reframing turns temperature into average motion and the future into the roomier neighborhood. Keep the count apart from the motion and the settling, and the second law stops sounding like a command and starts sounding like arithmetic."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Muse Code"
+      }
+    ]
+  }
+});

@@ -24,24 +24,6 @@
       "name": "Mass and Void",
       "color": "teal",
       "fact": "Architects treat solid matter and empty void as two building materials, adding mass or subtracting openings to shape occupiable emptiness.",
-      "seeds": [
-        "mass",
-        "void"
-      ],
-      "floatingTerms": [
-        "addition",
-        "extrusion",
-        "solid",
-        "subtraction"
-      ],
-      "terms": [
-        "addition",
-        "extrusion",
-        "mass",
-        "solid",
-        "subtraction",
-        "void"
-      ],
       "termInfo": {
         "addition": {
           "text": "Placing volumes together so their massing composes the whole."
@@ -61,31 +43,31 @@
         "void": {
           "text": "Emptiness treated as a building material: rooms, courts, and openings carved from mass."
         }
-      }
+      },
+      "seeds": [
+        "mass",
+        "void"
+      ],
+      "floatingTerms": [
+        "addition",
+        "extrusion",
+        "solid",
+        "subtraction"
+      ],
+      "terms": [
+        "addition",
+        "extrusion",
+        "mass",
+        "solid",
+        "subtraction",
+        "void"
+      ]
     },
     {
       "id": "enclosure-and-threshold",
       "name": "Enclosure and Threshold",
       "color": "blue",
       "fact": "A wall divides space into an inside and an outside, and gates, colonnades, facades, and courtyards stage the act of crossing between them.",
-      "seeds": [
-        "threshold",
-        "wall"
-      ],
-      "floatingTerms": [
-        "colonnade",
-        "courtyard",
-        "facade",
-        "gate"
-      ],
-      "terms": [
-        "colonnade",
-        "courtyard",
-        "facade",
-        "gate",
-        "threshold",
-        "wall"
-      ],
       "termInfo": {
         "colonnade": {
           "text": "A row of columns carrying a roof, edging open space with a permeable boundary."
@@ -105,7 +87,25 @@
         "wall": {
           "text": "The plane that divides inside from outside and carries a building's openings."
         }
-      }
+      },
+      "seeds": [
+        "threshold",
+        "wall"
+      ],
+      "floatingTerms": [
+        "colonnade",
+        "courtyard",
+        "facade",
+        "gate"
+      ],
+      "terms": [
+        "colonnade",
+        "courtyard",
+        "facade",
+        "gate",
+        "threshold",
+        "wall"
+      ]
     }
   ],
   "bridges": [

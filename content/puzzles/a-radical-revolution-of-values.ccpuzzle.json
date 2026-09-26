@@ -20,6 +20,14 @@
       "name": "The Triple Evils",
       "color": "brown",
       "fact": "On April 4, 1967, exactly one year before his assassination, King stood in Riverside Church and broke with many of his own civil rights allies to deliver Beyond Vietnam, naming racism, militarism, and extreme materialism as the giant triplets no single-issue reform could conquer on its own, and calling for nothing less than a radical revolution of values away from a thing-oriented society.",
+      "info": {
+        "text": "King's 1967 Riverside Church speech naming racism, militarism, and extreme materialism as one interlocking structure -- a speech many of his own allies called a mistake.",
+        "links": [
+          {
+            "href": "wiki:Beyond Vietnam: A Time to Break Silence"
+          }
+        ]
+      },
       "seeds": [
         "the giant triplets",
         "Beyond Vietnam"
@@ -33,21 +41,21 @@
         "Beyond Vietnam",
         "a radical revolution of values",
         "a thing-oriented society"
-      ],
-      "info": {
-        "text": "King's 1967 Riverside Church speech naming racism, militarism, and extreme materialism as one interlocking structure -- a speech many of his own allies called a mistake.",
-        "links": [
-          {
-            "href": "wiki:Beyond Vietnam: A Time to Break Silence"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "the-beloved-community",
       "name": "The Beloved Community",
       "color": "magenta",
       "fact": "King's ultimate goal was never simply to win: agape, the kind of love that seeks nothing in return, aims to convert an opponent into a friend rather than defeat an enemy, absorbing redemptive suffering without retaliation on the way to what he called the Beloved Community -- an actually integrated society built on justice, not merely proximity.",
+      "info": {
+        "text": "The theological and philosophical core of King's nonviolence: love that seeks to convert rather than defeat an opponent, aimed at an integrated, justly reconciled society rather than a won argument.",
+        "links": [
+          {
+            "href": "wiki:Martin Luther King Jr."
+          }
+        ]
+      },
       "seeds": [
         "the Beloved Community",
         "agape"
@@ -61,21 +69,21 @@
         "agape",
         "redemptive suffering",
         "reconciliation, not defeat"
-      ],
-      "info": {
-        "text": "The theological and philosophical core of King's nonviolence: love that seeks to convert rather than defeat an opponent, aimed at an integrated, justly reconciled society rather than a won argument.",
-        "links": [
-          {
-            "href": "wiki:Martin Luther King Jr."
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "the-poor-peoples-campaign",
       "name": "The Poor People's Campaign",
       "color": "olive",
       "fact": "In his final months King redirected the movement toward economic justice directly: he made the Memphis sanitation workers' strike -- fought under the banner I Am a Man -- part of the larger Poor People's Campaign, a planned multiracial encampment in Washington that became Resurrection City after his assassination in Memphis cut his own involvement short.",
+      "info": {
+        "text": "King's final organizing campaign: a planned multiracial march and encampment demanding economic justice, cut short by his assassination while supporting Memphis's striking sanitation workers.",
+        "links": [
+          {
+            "href": "wiki:Poor People's Campaign"
+          }
+        ]
+      },
       "seeds": [
         "the Memphis sanitation strike",
         "the Poor People's Campaign"
@@ -89,15 +97,7 @@
         "the Poor People's Campaign",
         "I Am a Man",
         "Resurrection City"
-      ],
-      "info": {
-        "text": "King's final organizing campaign: a planned multiracial march and encampment demanding economic justice, cut short by his assassination while supporting Memphis's striking sanitation workers.",
-        "links": [
-          {
-            "href": "wiki:Poor People's Campaign"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [

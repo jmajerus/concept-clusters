@@ -1,0 +1,389 @@
+// Generated from content/puzzles/why-the-gram-stain-works.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "why-the-gram-stain-works",
+  "title": "Why the Gram stain works",
+  "category": "microbiology",
+  "large": true,
+  "tags": [
+    "bacteria",
+    "cell wall",
+    "antibiotics",
+    "lab methods"
+  ],
+  "info": {
+    "text": "Why one 1884 staining trick still sorts the bacterial world in two, and what that split decides about which drugs can reach their target.",
+    "citations": [
+      {
+        "title": "The bacterial cell envelope",
+        "author": "Silhavy, Thomas J.; Kahne, Daniel; Walker, Suzanne",
+        "publisher": "Cold Spring Harbor Perspectives in Biology 2(5): a000414",
+        "year": "2010",
+        "url": "https://doi.org/10.1101/cshperspect.a000414"
+      },
+      {
+        "title": "Über die isolierte Färbung der Schizomyceten in Schnitt- und Trockenpräparaten",
+        "author": "Gram, Hans Christian",
+        "publisher": "Fortschritte der Medizin 2",
+        "year": "1884",
+        "pages": "185–189"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "gram-positive",
+      "name": "Gram-positive",
+      "color": "teal",
+      "fact": "A Gram-positive wall can be 20 to 80 nanometres thick, up to forty layers of peptidoglycan with teichoic acids threaded through it. There is nothing outside that wall: it faces the world directly.",
+      "terms": [
+        "thick peptidoglycan",
+        "teichoic acids",
+        "Staphylococcus aureus",
+        "Streptococcus"
+      ],
+      "seeds": [
+        "thick peptidoglycan",
+        "teichoic acids"
+      ],
+      "termInfo": {
+        "thick peptidoglycan": "Dozens of stacked layers of the same mesh a Gram-negative cell has one or two of.",
+        "teichoic acids": {
+          "text": "Long negatively charged polymers threaded through the Gram-positive wall; some (lipoteichoic acids) anchor down into the membrane.",
+          "links": [
+            {
+              "href": "wiki:Teichoic acid"
+            }
+          ]
+        },
+        "Staphylococcus aureus": {
+          "text": "Grape-like clusters of cocci; the classic Gram-positive of skin and wound infections.",
+          "links": [
+            {
+              "href": "wiki:Staphylococcus aureus"
+            }
+          ]
+        },
+        "Streptococcus": "Chains of cocci; strep throat and scarlet fever."
+      },
+      "info": {
+        "text": "One membrane, then a thick wall. Stains purple.",
+        "links": [
+          {
+            "href": "wiki:Gram-positive bacteria"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gram-negative",
+      "name": "Gram-negative",
+      "color": "blue",
+      "fact": "A Gram-negative wall is one or two layers thick and sits in the periplasm, sandwiched between the cytoplasmic membrane and an outer membrane whose outward face is lipopolysaccharide rather than phospholipid.",
+      "terms": [
+        "outer membrane",
+        "lipopolysaccharide",
+        "porins",
+        "periplasm",
+        "thin peptidoglycan",
+        "Escherichia coli"
+      ],
+      "seeds": [
+        "outer membrane",
+        "lipopolysaccharide"
+      ],
+      "termInfo": {
+        "outer membrane": "A second lipid bilayer outside the wall, found only in Gram-negatives.",
+        "lipopolysaccharide": {
+          "text": "The outer leaflet of the outer membrane. Its lipid A anchor is endotoxin, the trigger for septic shock when Gram-negative cells break apart in the bloodstream.",
+          "links": [
+            {
+              "href": "wiki:Lipopolysaccharide"
+            }
+          ]
+        },
+        "porins": {
+          "text": "Barrel-shaped channels through the outer membrane that let small water-soluble molecules pass: nutrients, and some antibiotics.",
+          "links": [
+            {
+              "href": "wiki:Porin (protein)"
+            }
+          ]
+        },
+        "periplasm": {
+          "text": "The compartment between the two membranes, where the thin wall sits and where beta-lactamases wait for incoming antibiotics.",
+          "links": [
+            {
+              "href": "wiki:Periplasm"
+            }
+          ]
+        },
+        "thin peptidoglycan": "One or two layers, enough to hold shape but not enough to trap a dye.",
+        "Escherichia coli": {
+          "text": "The gut rod every microbiology lab keeps as its Gram-negative reference.",
+          "links": [
+            {
+              "href": "wiki:Escherichia coli"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Two membranes with a thin wall between them. Stains pink.",
+        "links": [
+          {
+            "href": "wiki:Gram-negative bacteria"
+          }
+        ]
+      }
+    },
+    {
+      "id": "staining-procedure",
+      "name": "The staining procedure",
+      "color": "amber",
+      "fact": "Every cell takes up crystal violet and iodine. What the procedure really tests is whether a cell can hold onto them through the alcohol wash; the counterstain only makes the cells that could not visible again.",
+      "terms": [
+        "crystal violet",
+        "safranin",
+        "Gram's iodine",
+        "heat-fixed smear"
+      ],
+      "seeds": [
+        "crystal violet",
+        "safranin"
+      ],
+      "termInfo": {
+        "crystal violet": {
+          "text": "The primary stain. Every cell takes it up.",
+          "links": [
+            {
+              "href": "wiki:Crystal violet"
+            }
+          ]
+        },
+        "safranin": {
+          "text": "The counterstain, applied last; only cells the decolorizer emptied show its pink.",
+          "links": [
+            {
+              "href": "wiki:Safranin"
+            }
+          ]
+        },
+        "Gram's iodine": {
+          "text": "The mordant. Iodine binds crystal violet into a larger complex that is harder to wash out.",
+          "links": [
+            {
+              "href": "wiki:Lugol's iodine"
+            }
+          ]
+        },
+        "heat-fixed smear": {
+          "text": "Cells dried onto a slide and passed through a flame so they stay put through four washes.",
+          "links": [
+            {
+              "href": "wiki:Fixation (histology)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Hans Christian Gram's 1884 method, still the first test run on almost any bacterial sample.",
+        "links": [
+          {
+            "href": "wiki:Gram stain"
+          }
+        ]
+      }
+    },
+    {
+      "id": "envelope-agents",
+      "name": "Agents that attack the envelope",
+      "color": "magenta",
+      "fact": "None of these agents can tell Gram-positive from Gram-negative. What differs is access: a thick wall standing in the open, or a thin one hidden behind a second membrane.",
+      "terms": [
+        "penicillin",
+        "lysozyme",
+        "vancomycin",
+        "polymyxin"
+      ],
+      "seeds": [
+        "penicillin",
+        "lysozyme"
+      ],
+      "termInfo": {
+        "penicillin": {
+          "text": "Blocks the enzymes that cross-link new peptidoglycan; a growing wall without cross-links bursts.",
+          "links": [
+            {
+              "href": "wiki:Penicillin"
+            }
+          ]
+        },
+        "lysozyme": {
+          "text": "An enzyme in tears, saliva, and egg white that cuts the sugar backbone of peptidoglycan.",
+          "links": [
+            {
+              "href": "wiki:Lysozyme"
+            }
+          ]
+        },
+        "vancomycin": {
+          "text": "Binds the tail of peptidoglycan building blocks so they cannot be added to the wall. Far too large to pass a porin.",
+          "links": [
+            {
+              "href": "wiki:Vancomycin"
+            }
+          ]
+        },
+        "polymyxin": {
+          "text": "A last-resort antibiotic that binds lipid A and tears open the outer membrane. Useless against bacteria that have no outer membrane.",
+          "links": [
+            {
+              "href": "wiki:Polymyxin"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Antibiotics and enzymes whose target is the envelope itself, and whose reach depends on which envelope they meet.",
+        "links": [
+          {
+            "href": "wiki:Bacterial cell structure"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "peptidoglycan",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Both envelopes are held in shape by the same mesh: sugar chains cross-linked by short peptides. The difference is dosage, dozens of layers in one and one or two in the other, and that difference is what the stain reads.",
+      "info": {
+        "text": "The polymer that gives nearly all bacteria their shape and keeps them from bursting under their own osmotic pressure.",
+        "links": [
+          {
+            "href": "wiki:Peptidoglycan"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": [
+        "thick peptidoglycan",
+        "thin peptidoglycan"
+      ]
+    },
+    {
+      "term": "alcohol decolorizer",
+      "clusters": [
+        2,
+        0,
+        1
+      ],
+      "fact": "The decisive step. Alcohol dissolves the outer membrane's lipids and pulls the crystal violet–iodine complex out through the thin Gram-negative wall, leaving the cell colourless for safranin. The thick Gram-positive wall dehydrates and tightens around the complex instead, and the cell stays purple.",
+      "relationKind": "evaluation",
+      "idealTerms": [
+        "crystal violet",
+        "thick peptidoglycan",
+        "outer membrane"
+      ]
+    },
+    {
+      "term": "permeability barrier",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "The outer membrane is a second gate. Bulky molecules such as lysozyme and vancomycin cannot get through it to the wall behind, which is why they work poorly on Gram-negatives. Polymyxin works precisely because it attacks that gate's lipopolysaccharide directly.",
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "outer membrane",
+        "vancomycin"
+      ]
+    },
+    {
+      "term": "exposed cell wall",
+      "clusters": [
+        0,
+        3
+      ],
+      "fact": "With no outer membrane in the way, the thick Gram-positive wall is reachable from outside: by lysozyme in tears and saliva, by penicillin blocking its cross-links, by vancomycin capping its building blocks. Fleming's mould worked first against staphylococci for exactly this reason.",
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "thick peptidoglycan",
+        "penicillin"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "retained-dyes",
+      "prompt": "Which reagents is a Gram-positive cell still holding when the procedure ends?",
+      "explanation": "The crystal violet–iodine complex is trapped in the thick, alcohol-tightened wall. Safranin is applied afterwards and does bind, but the darker purple masks it. The heat-fixed smear is the preparation, not a reagent.",
+      "targets": [
+        "crystal violet",
+        "Gram's iodine"
+      ],
+      "reasons": {
+        "crystal violet": "The primary stain, locked in once iodine enlarges it.",
+        "Gram's iodine": "The mordant that made the complex too big to wash out."
+      }
+    },
+    {
+      "id": "wall-targets",
+      "prompt": "Which agents act on peptidoglycan itself?",
+      "explanation": "Lysozyme cuts the sugar backbone, penicillin blocks the peptide cross-links, and vancomycin caps the precursors before they can be added. Polymyxin never touches peptidoglycan; its target is the lipopolysaccharide of the outer membrane.",
+      "targets": [
+        "penicillin",
+        "lysozyme",
+        "vancomycin"
+      ],
+      "reasons": {
+        "penicillin": "Stops cross-linking, so the wall is built but never braced.",
+        "lysozyme": "Cuts the glycan chains directly.",
+        "vancomycin": "Blocks the building blocks from being incorporated."
+      }
+    },
+    {
+      "id": "too-large-for-porins",
+      "prompt": "Which agents are too large to fit through a porin?",
+      "explanation": "Lysozyme is a protein and vancomycin a bulky glycopeptide; neither fits a porin, so an intact outer membrane keeps both away from the wall. Penicillin's family is small enough that many members pass through porins, which is why ampicillin works on E. coli even though penicillin G barely does. Polymyxin does not need to get past the outer membrane: the outer membrane is its target.",
+      "targets": [
+        "lysozyme",
+        "vancomycin"
+      ],
+      "reasons": {
+        "lysozyme": "A 14-kilodalton protein; porins pass molecules a twentieth that size.",
+        "vancomycin": "A glycopeptide of about 1,450 daltons, well above the porin cutoff."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "optional",
+    "estimatedMinutes": 2,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "In 1884 Hans Christian Gram, working in a Berlin morgue, was trying to make bacteria visible in lung tissue and noticed that some kept his violet dye through an alcohol rinse while others let it go. He thought the method incomplete. It turned out to be the most durable test in microbiology, because the dye's behaviour tracks a deep divide in how bacteria build their outer layers.\r\n\r\nThat divide matters far beyond the microscope. It decides which antibiotics can reach their target, which bacteria release endotoxin when they die, and why the first question a clinical lab asks about an isolate is still whether it is Gram-positive or Gram-negative."
+    },
+    "links": [
+      {
+        "href": "wiki:Hans Christian Gram"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude Code (Claude Opus 5)",
+        "reasoning": "extraHigh"
+      }
+    ]
+  }
+});
