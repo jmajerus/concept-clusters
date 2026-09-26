@@ -14779,6 +14779,297 @@ export const PUZZLE_MANIFEST = [
         "play begins when exploration ends"
       ]
     }
+  },
+  {
+    "id": "digestive-absorption-control",
+    "module": "./physiology-medicine/digestive-absorption-control.js",
+    "published": "2026-09-26",
+    "browse": {
+      "id": "digestive-absorption-control",
+      "title": "Digestion: absorption and control",
+      "category": "Physiology & Medicine",
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "digestive-breakdown",
+            "reason": "Start with breakdown: how food is moved, mixed, and chemically dismantled before it can be absorbed."
+          }
+        ]
+      },
+      "info": {
+        "text": "Digestion ends with delivery and timing. This board teaches how nutrients cross into blood or lymph, and how gut hormones and nerves schedule secretions, motility, and hunger.",
+        "citations": [
+          {
+            "title": "23.7 Chemical Digestion and Absorption: A Closer Look - Anatomy and Physiology | OpenStax",
+            "url": "https://openstax.org/books/anatomy-and-physiology/pages/23-7-chemical-digestion-and-absorption-a-closer-look"
+          },
+          {
+            "title": "Role of GI Hormones on Gut Mucosal Growth - Regulation of Gastrointestinal Mucosal Growth - NCBI Bookshelf",
+            "url": "https://www.ncbi.nlm.nih.gov/books/NBK54093/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Absorb and carry away",
+        "villi",
+        "lacteal",
+        "microvilli",
+        "hepatic portal vein",
+        "chylomicron",
+        "brush-border enzymes",
+        "Sense and regulate",
+        "ghrelin",
+        "vagus nerve",
+        "gastrin",
+        "secretin",
+        "cholecystokinin",
+        "enteric nervous system"
+      ]
+    }
+  },
+  {
+    "id": "digestive-breakdown",
+    "module": "./physiology-medicine/digestive-breakdown.js",
+    "published": "2026-09-26",
+    "browse": {
+      "id": "digestive-breakdown",
+      "title": "Digestion: breakdown",
+      "category": "Physiology & Medicine",
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "digestive-absorption-control",
+            "reason": "Continue to absorption and regulation: how digested subunits enter the body and how the gut times secretion and motility."
+          }
+        ]
+      },
+      "info": {
+        "text": "Before the body can use food, it must be moved, mixed, and chemically dismantled. This board teaches how muscles propel and mix contents while acid, bile, and enzymes break them into absorbable pieces.",
+        "citations": [
+          {
+            "title": "23.2 Digestive System Processes and Regulation - Anatomy and Physiology 2e | OpenStax",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-2-digestive-system-processes-and-regulation"
+          },
+          {
+            "title": "Digestive Enzymes - The Exocrine Pancreas - NCBI Bookshelf",
+            "url": "https://www.ncbi.nlm.nih.gov/books/NBK54127/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Move and mix",
+        "chewing",
+        "swallowing",
+        "peristalsis",
+        "segmentation",
+        "stomach churning",
+        "defecation",
+        "Break down chemically",
+        "pepsin",
+        "bile",
+        "salivary amylase",
+        "hydrochloric acid",
+        "pancreatic lipase",
+        "bicarbonate",
+        "chyme"
+      ]
+    }
+  },
+  {
+    "id": "religion-shared-beliefs",
+    "module": "./religion/religion-shared-beliefs.js",
+    "published": "2026-09-26",
+    "browse": {
+      "id": "religion-shared-beliefs",
+      "title": "Where Traditions Converge: The Sacred, the Human Problem, and the Path",
+      "category": "Religion",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "religion-ritual-practice",
+            "reason": "This board maps what traditions believe; the companion board shows what believers do with their bodies and calendars.",
+            "via": [
+              "sacred"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "The categories of belief that recur across the world's major religious traditions: the sacred as a distinct order of reality, a shared diagnosis of what is wrong with ordinary existence, and convergent paths toward resolution.",
+        "links": [
+          {
+            "href": "wiki:Perennial philosophy"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Sacred",
+        "sacred",
+        "transcendence",
+        "the holy",
+        "divine presence",
+        "revelation",
+        "The Human Problem",
+        "suffering",
+        "sin",
+        "impermanence",
+        "ignorance",
+        "alienation",
+        "The Path and the Goal",
+        "liberation",
+        "meditation",
+        "prayer",
+        "ritual purification",
+        "community",
+        "compassion",
+        "afterlife"
+      ]
+    }
+  },
+  {
+    "id": "statistical-mechanics",
+    "module": "./physics/statistical-mechanics.js",
+    "published": "2026-09-26",
+    "browse": {
+      "id": "statistical-mechanics",
+      "title": "Statistical mechanics: why disorder wins",
+      "category": "Physics",
+      "large": false,
+      "info": {
+        "text": "Statistical mechanics counts microscopic arrangements to explain entropy, temperature, and the one-way evolution toward likely states.",
+        "links": [
+          {
+            "href": "wiki:Statistical mechanics"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Multiplicity (statistical mechanics) -- Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Multiplicity_(statistical_mechanics)"
+          },
+          {
+            "title": "Boltzmann's entropy formula -- Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Boltzmann%27s_entropy_formula"
+          },
+          {
+            "title": "9.17 Kinetic Theory of Gases: Distribution of Molecular Speeds -- LibreTexts ChemPRIME",
+            "url": "https://chem.libretexts.org/Bookshelves/General_Chemistry/ChemPRIME_(Moore_et_al.)/09:_Gases/9.17:_Kinetic_Theory_of_Gases-_The_Distribution_of_Molecular_Speeds"
+          },
+          {
+            "title": "Philosophy of Statistical Mechanics -- Stanford Encyclopedia of Philosophy",
+            "url": "https://plato.stanford.edu/archIves/spr2024/entries/statphys-statmech/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Count the arrangements",
+        "macrostate",
+        "microstate",
+        "multiplicity",
+        "Read entropy as likelihood",
+        "Boltzmann entropy",
+        "Boltzmann constant",
+        "equal a priori probability",
+        "Read temperature as motion",
+        "kinetic theory",
+        "mean kinetic energy",
+        "Maxwell-Boltzmann distribution",
+        "Evolve toward the likely",
+        "equilibration",
+        "thermalization",
+        "fluctuations",
+        "irreversibility",
+        "arrow of time",
+        "most probable distribution"
+      ]
+    }
+  },
+  {
+    "id": "why-the-gram-stain-works",
+    "module": "./microbiology/why-the-gram-stain-works.js",
+    "published": "2026-09-26",
+    "browse": {
+      "id": "why-the-gram-stain-works",
+      "title": "Why the Gram stain works",
+      "category": "Microbiology",
+      "tags": [
+        "bacteria",
+        "cell wall",
+        "antibiotics",
+        "lab methods"
+      ],
+      "large": true,
+      "info": {
+        "text": "Why one 1884 staining trick still sorts the bacterial world in two, and what that split decides about which drugs can reach their target.",
+        "citations": [
+          {
+            "title": "The bacterial cell envelope",
+            "author": "Silhavy, Thomas J.; Kahne, Daniel; Walker, Suzanne",
+            "publisher": "Cold Spring Harbor Perspectives in Biology 2(5): a000414",
+            "year": "2010",
+            "url": "https://doi.org/10.1101/cshperspect.a000414"
+          },
+          {
+            "title": "Über die isolierte Färbung der Schizomyceten in Schnitt- und Trockenpräparaten",
+            "author": "Gram, Hans Christian",
+            "publisher": "Fortschritte der Medizin 2",
+            "year": "1884",
+            "pages": "185–189"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Gram-positive",
+        "thick peptidoglycan",
+        "teichoic acids",
+        "Staphylococcus aureus",
+        "Streptococcus",
+        "Gram-negative",
+        "outer membrane",
+        "lipopolysaccharide",
+        "porins",
+        "periplasm",
+        "thin peptidoglycan",
+        "Escherichia coli",
+        "The staining procedure",
+        "crystal violet",
+        "safranin",
+        "Gram's iodine",
+        "heat-fixed smear",
+        "Agents that attack the envelope",
+        "penicillin",
+        "lysozyme",
+        "vancomycin",
+        "polymyxin",
+        "peptidoglycan",
+        "alcohol decolorizer",
+        "permeability barrier",
+        "exposed cell wall"
+      ]
+    }
   }
 ];
 
