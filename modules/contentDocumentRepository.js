@@ -211,6 +211,28 @@ export class ContentDocumentNotFoundError extends Error {
   }
 }
 
+export class PublishedRevisionConflictError extends Error {
+  constructor(kind, id) {
+    super(`Published ${kind} "${id}" changed while publishing. Reload and try again.`);
+    this.name = "PublishedRevisionConflictError";
+    this.status = 409;
+    this.kind = kind;
+    this.id = id;
+  }
+}
+
+function isPublishedPrimaryKeyError(error) {
+  const message = String(error?.message || error);
+  return message.includes("UNIQUE constraint failed: published_document");
+}
+
+function samePublishedSnapshot(record, { kind, contentHash, layoutJson }) {
+  if (!record || record.withdrawnAt || record.contentHash !== contentHash) return false;
+  if (kind !== "puzzle") return true;
+  const currentLayout = record.layout ? serializeLayoutDocument(record.layout) : null;
+  return currentLayout === (layoutJson || null);
+}
+
 export async function publishedRowOrNull(contentDocuments, kind, id) {
   if (!contentDocuments || !id) return null;
   try {
@@ -536,45 +558,62 @@ export class D1ContentDocumentRepository {
         ? existing?.layout_json || null
         : serializeLayoutDocument(layout)
       : null;
+    const snapshot = { kind, id, contentHash, layoutJson };
     if (!existing) {
+      try {
+        await this.database.batch([
+          this.database.prepare(`
+            INSERT INTO published_documents (
+              kind, id, title, document, content_hash, revision,
+              published_by, published_at, updated_at, last_agent_reviewed_at,
+              layout_json
+            ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+          `).bind(
+            kind, id, titleOf(sourceDocument), documentJson, contentHash,
+            publishedBy, now, now, now, layoutJson
+          ),
+          this.database.prepare(`
+            INSERT INTO published_document_revisions (
+              kind, id, revision, document, content_hash, published_by, published_at
+            ) VALUES (?, ?, 1, ?, ?, ?, ?)
+          `).bind(kind, id, documentJson, contentHash, publishedBy, now)
+        ]);
+      } catch (error) {
+        if (!isPublishedPrimaryKeyError(error)) throw error;
+        return this.adoptUnchangedPublication(snapshot);
+      }
+      return this.getPublished({ kind, id });
+    }
+    const nextRevision = Number(existing.revision) + 1;
+    try {
       await this.database.batch([
         this.database.prepare(`
-          INSERT INTO published_documents (
-            kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at, last_agent_reviewed_at,
-            layout_json
-          ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+          UPDATE published_documents
+          SET title = ?, document = ?, content_hash = ?, revision = ?,
+              published_by = ?, published_at = ?, updated_at = ?, withdrawn_at = NULL,
+              cued_for_freeze_at = NULL, cued_for_freeze_by = ?, layout_json = ?
+          WHERE kind = ? AND id = ? AND revision = ?
         `).bind(
-          kind, id, titleOf(sourceDocument), documentJson, contentHash,
-          publishedBy, now, now, now, layoutJson
+          titleOf(sourceDocument), documentJson, contentHash, nextRevision,
+          publishedBy, now, now, null, layoutJson, kind, id, Number(existing.revision)
         ),
         this.database.prepare(`
           INSERT INTO published_document_revisions (
             kind, id, revision, document, content_hash, published_by, published_at
-          ) VALUES (?, ?, 1, ?, ?, ?, ?)
-        `).bind(kind, id, documentJson, contentHash, publishedBy, now)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).bind(kind, id, nextRevision, documentJson, contentHash, publishedBy, now)
       ]);
-      return this.getPublished({ kind, id });
+    } catch (error) {
+      if (!isPublishedPrimaryKeyError(error)) throw error;
+      return this.adoptUnchangedPublication(snapshot);
     }
-    const nextRevision = Number(existing.revision) + 1;
-    await this.database.batch([
-      this.database.prepare(`
-        UPDATE published_documents
-        SET title = ?, document = ?, content_hash = ?, revision = ?,
-            published_by = ?, published_at = ?, updated_at = ?, withdrawn_at = NULL,
-            cued_for_freeze_at = NULL, cued_for_freeze_by = ?, layout_json = ?
-        WHERE kind = ? AND id = ?
-      `).bind(
-        titleOf(sourceDocument), documentJson, contentHash, nextRevision,
-        publishedBy, now, now, null, layoutJson, kind, id
-      ),
-      this.database.prepare(`
-        INSERT INTO published_document_revisions (
-          kind, id, revision, document, content_hash, published_by, published_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).bind(kind, id, nextRevision, documentJson, contentHash, publishedBy, now)
-    ]);
     return this.getPublished({ kind, id });
+  }
+
+  async adoptUnchangedPublication({ kind, id, contentHash, layoutJson }) {
+    const current = await this.getPublished({ kind, id });
+    if (samePublishedSnapshot(current, { kind, contentHash, layoutJson })) return current;
+    throw new PublishedRevisionConflictError(kind, id);
   }
 
   async unpublish({ kind, id, actor }) {
@@ -814,12 +853,22 @@ export function createMemoryContentDocumentRepository() {
           ? existing?.layout_json || null
           : serializeLayoutDocument(layout)
         : null;
+      const revisionKey = `${key}:${nextRevision}`;
+      const contentHash = draftContentHash(documentJson);
+      if (revisions.has(revisionKey)) {
+        const current = published.get(key);
+        const record = current ? publishedRecord(current) : null;
+        if (samePublishedSnapshot(record, { kind, contentHash, layoutJson })) {
+          return repository.getPublished({ kind, id });
+        }
+        throw new PublishedRevisionConflictError(kind, id);
+      }
       const row = {
         kind,
         id,
         title: titleOf(sourceDocument),
         document: documentJson,
-        content_hash: draftContentHash(documentJson),
+        content_hash: contentHash,
         revision: nextRevision,
         published_by: publishedBy,
         published_at: now,
@@ -832,7 +881,7 @@ export function createMemoryContentDocumentRepository() {
         cued_for_freeze_by: null
       };
       published.set(key, row);
-      revisions.set(`${key}:${nextRevision}`, row);
+      revisions.set(revisionKey, row);
       return repository.getPublished({ kind, id });
     },
     async unpublish({ kind, id, actor }) {

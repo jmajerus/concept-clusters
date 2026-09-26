@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import {
+  D1ContentDocumentRepository,
+  PublishedRevisionConflictError,
   createMemoryContentDocumentRepository
 } from "../modules/contentDocumentRepository.js";
 import {
@@ -455,4 +457,109 @@ export async function run() {
   assert.equal(gitOnly.categories, null);
   assert.equal(gitOnly.hasWorkingCopy, false);
   assert.equal(gitOnly.inGit, true);
+
+  const revised = { ...createCatalogueSkeleton({ id: "race-docs", title: "Race" }), title: "Race revised" };
+  const colliding = createCollidingPublishedDatabase({ conflict: "same" });
+  const d1 = new D1ContentDocumentRepository(colliding.database);
+  const adopted = await d1.publish({
+    kind: "catalogue",
+    id: "race-docs",
+    document: revised,
+    actor
+  });
+  assert.equal(adopted.revision, 2);
+  assert.equal(adopted.document.title, "Race revised");
+  assert.match(colliding.updateSql, /AND revision = \?/);
+
+  const diverged = createCollidingPublishedDatabase({ conflict: "different" });
+  const d1Diverged = new D1ContentDocumentRepository(diverged.database);
+  await assert.rejects(
+    () => d1Diverged.publish({
+      kind: "catalogue",
+      id: "race-docs",
+      document: revised,
+      actor
+    }),
+    error => error instanceof PublishedRevisionConflictError
+      && error.status === 409
+      && !error.message.includes("UNIQUE constraint failed")
+      && !/SQLITE/i.test(error.message)
+  );
+}
+
+const PUBLISHED_REVISION_PRIMARY_KEY = "UNIQUE constraint failed: published_document_revisions.kind, published_document_revisions.id, published_document_revisions.revision: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_PRIMARYKEY)";
+
+function createCollidingPublishedDatabase({ conflict }) {
+  const initial = createCatalogueSkeleton({ id: "race-docs", title: "Race" });
+  const store = {
+    updateSql: "",
+    row: {
+      kind: "catalogue",
+      id: "race-docs",
+      title: initial.title,
+      document: JSON.stringify({ ...initial, id: "race-docs" }),
+      content_hash: "fnv1a64:initial",
+      revision: 1,
+      published_by: "author-1",
+      published_at: "2026-09-26T00:00:00.000Z",
+      updated_at: "2026-09-26T00:00:00.000Z",
+      withdrawn_at: null,
+      layout_json: null,
+      cued_for_freeze_at: null,
+      cued_for_freeze_by: null
+    }
+  };
+  function statement(sql, params = []) {
+    return {
+      sql,
+      params,
+      bind(...next) {
+        return statement(sql, next);
+      },
+      async first() {
+        return store.row;
+      },
+      async run() {
+        return { meta: { changes: 1 } };
+      }
+    };
+  }
+  return {
+    get updateSql() {
+      return store.updateSql;
+    },
+    database: {
+      prepare(sql) {
+        return statement(sql);
+      },
+      async batch(statements) {
+        const update = statements[0];
+        store.updateSql = update.sql;
+        if (conflict === "same") {
+          store.row = {
+            ...store.row,
+            title: update.params[0],
+            document: update.params[1],
+            content_hash: update.params[2],
+            revision: update.params[3],
+            published_by: update.params[4],
+            published_at: update.params[5],
+            updated_at: update.params[6],
+            withdrawn_at: null,
+            cued_for_freeze_by: update.params[7],
+            layout_json: update.params[8]
+          };
+        } else {
+          store.row = {
+            ...store.row,
+            title: "Someone else",
+            document: JSON.stringify({ ...initial, title: "Someone else" }),
+            content_hash: "fnv1a64:someone-else",
+            revision: 2
+          };
+        }
+        throw new Error(PUBLISHED_REVISION_PRIMARY_KEY);
+      }
+    }
+  };
 }

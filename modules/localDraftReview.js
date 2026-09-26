@@ -1077,7 +1077,7 @@ export function createLocalDraftReviewHandler({
             id: draftId,
             error: formatActionError(error),
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
-          }), 400);
+          }), error.status || 400);
         }
         return true;
       }
