@@ -85,7 +85,11 @@ import {
   shadowCreateRefusal
 } from "./draftIdRename.js";
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
-import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
+import {
+  ContentDocumentNotFoundError,
+  PublishedRevisionConflictError,
+  publishedRowOrNull
+} from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { checkDocumentWikiLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
 import { draftShadowsPublished, provenanceDiffersFromPublished } from "./draftReviewDiff.js";
@@ -1464,6 +1468,10 @@ export function createLocalDraftReviewHandler({
             }
           }
           const publishedBefore = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+          if (!publishedBefore || publishedBefore.withdrawnAt
+            || publishedBefore.revision !== chosen.basePublishedRevision) {
+            throw new PublishedRevisionConflictError("puzzle", puzzleId);
+          }
           const publishLayout = record.layout ?? publishedBefore?.layout ?? undefined;
           const layoutValidation = validatePublishedPuzzleLayout({
             document: authoredDocument,
@@ -1485,7 +1493,8 @@ export function createLocalDraftReviewHandler({
             id: puzzleId,
             document: documentForStorage(authoredDocument, { categoryRegistry }),
             actor: publicationActor,
-            layout: publishLayout
+            layout: publishLayout,
+            expectedRevision: chosen.basePublishedRevision
           });
           await recordReviewDecision(contentDocuments, {
             puzzleId,

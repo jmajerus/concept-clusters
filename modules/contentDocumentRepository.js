@@ -560,15 +560,22 @@ export class D1ContentDocumentRepository {
         event.clientSystem, event.clientModel, event.clientName, event.sourceEventId
       );
     if (event.eventType !== "review") {
-      await this.database.batch([insertEvent]);
-      if (event.eventType !== "proposed") return null;
+      if (event.eventType !== "proposed") {
+        await this.database.batch([insertEvent]);
+        return null;
+      }
+      const result = await insertEvent.run();
+      const eventId = Number(result?.meta?.last_row_id);
+      if (!Number.isInteger(eventId) || eventId < 1) {
+        throw new Error("Could not read the review proposal that was just filed.");
+      }
       const inserted = await this.database.prepare(`
-        SELECT * FROM puzzle_review_events
-        WHERE puzzle_id = ? AND event_type = 'proposed'
-        ORDER BY id DESC
-        LIMIT 1
-      `).bind(id).first();
-      return inserted ? reviewEventRecord(inserted) : null;
+        SELECT * FROM puzzle_review_events WHERE id = ?
+      `).bind(eventId).first();
+      if (!inserted || inserted.puzzle_id !== id || inserted.event_type !== "proposed") {
+        throw new Error("Could not read the review proposal that was just filed.");
+      }
+      return reviewEventRecord(inserted);
     }
     await this.getPublished({ kind: "puzzle", id });
     const reviewColumn = event.reviewerKind === "agent"
@@ -703,12 +710,16 @@ export class D1ContentDocumentRepository {
    *   id: string,
    *   document: object,
    *   actor: object,
-   *   layout?: object | null
+   *   layout?: object | null,
+   *   expectedRevision?: number | null
    * }} options
    */
-  async publish({ kind, id, document, actor, layout = undefined }) {
+  async publish({ kind, id, document, actor, layout = undefined, expectedRevision = null }) {
     assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
     assertDraftId(id);
+    if (expectedRevision != null && (!Number.isInteger(expectedRevision) || expectedRevision < 1)) {
+      throw new Error("expectedRevision must be a positive integer");
+    }
     const publishedBy = normalizeDraftActor(actor).subject;
     const sourceDocument = documentForPublishedStorage(kind, document);
     const documentJson = serializeDraftDocument({ ...sourceDocument, id });
@@ -717,6 +728,9 @@ export class D1ContentDocumentRepository {
     const existing = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? AND id = ?
     `).bind(kind, id).first();
+    if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
+      throw new PublishedRevisionConflictError(kind, id);
+    }
     const layoutJson = kind === "puzzle"
       ? layout === undefined
         ? existing?.layout_json || null
@@ -1012,15 +1026,21 @@ export function createMemoryContentDocumentRepository() {
         revisions.set(`${key}:1`, row);
       }
     },
-    async publish({ kind, id, document, actor, layout = undefined }) {
+    async publish({ kind, id, document, actor, layout = undefined, expectedRevision = null }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(id);
+      if (expectedRevision != null && (!Number.isInteger(expectedRevision) || expectedRevision < 1)) {
+        throw new Error("expectedRevision must be a positive integer");
+      }
       const publishedBy = normalizeDraftActor(actor).subject;
       const sourceDocument = documentForPublishedStorage(kind, document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id });
       const now = new Date().toISOString();
       const key = publishedKey(kind, id);
       const existing = published.get(key);
+      if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
+        throw new PublishedRevisionConflictError(kind, id);
+      }
       const nextRevision = existing ? Number(existing.revision) + 1 : 1;
       const layoutJson = kind === "puzzle"
         ? layout === undefined
@@ -1113,7 +1133,7 @@ export function createMemoryContentDocumentRepository() {
           : "last_human_reviewed_at";
         published.set(key, { ...existing, [reviewColumn]: reviewedAt });
       }
-      reviewEvents.push({
+      const row = {
         id: reviewEvents.length + 1,
         puzzle_id: id,
         reviewer_kind: event.reviewerKind,
@@ -1132,8 +1152,9 @@ export function createMemoryContentDocumentRepository() {
         client_model: event.clientModel,
         client_name: event.clientName,
         source_event_id: event.sourceEventId
-      });
-      if (event.eventType === "proposed") return reviewEventRecord(reviewEvents.at(-1));
+      };
+      reviewEvents.push(row);
+      if (event.eventType === "proposed") return reviewEventRecord(row);
       return event.eventType === "review"
         ? repository.getPublished({ kind: "puzzle", id })
         : null;

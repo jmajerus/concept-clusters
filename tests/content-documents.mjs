@@ -454,6 +454,75 @@ export async function run() {
   const decided = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
   assert.equal(decided.lastHumanReviewedAt, beforeProposals.lastHumanReviewedAt);
   await assert.rejects(
+    () => repo.publish({
+      kind: "puzzle",
+      id: "old-git-puzzle",
+      document: decided.document,
+      actor,
+      expectedRevision: decided.revision + 9
+    }),
+    PublishedRevisionConflictError
+  );
+  assert.equal(
+    (await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" })).revision,
+    decided.revision
+  );
+  const proposalRows = [];
+  let proposalSeq = 1;
+  const proposalDatabase = {
+    prepare(sql) {
+      let params = [];
+      return {
+        bind(...next) {
+          params = next;
+          return this;
+        },
+        async run() {
+          const eventId = proposalSeq++;
+          proposalRows.push({
+            id: eventId,
+            puzzle_id: params[0],
+            reviewer_kind: params[1],
+            reviewed_at: params[2],
+            comments: params[3],
+            outcome: params[4],
+            draft_revision: params[5],
+            guidance_major: params[6],
+            guidance_minor: params[7],
+            issue_id: params[8],
+            event_type: params[9],
+            proposal_json: params[10],
+            base_published_revision: params[11],
+            published_revision: params[12],
+            client_system: params[13],
+            client_model: params[14],
+            client_name: params[15],
+            source_event_id: params[16]
+          });
+          proposalRows.push({
+            ...proposalRows.at(-1),
+            id: proposalSeq++,
+            client_name: "later-agent"
+          });
+          return { meta: { changes: 1, last_row_id: eventId } };
+        },
+        async first() {
+          return proposalRows.find(row => row.id === params[0]) || null;
+        }
+      };
+    }
+  };
+  const filedOnD1 = await new D1ContentDocumentRepository(proposalDatabase).recordPuzzleAgentReview({
+    id: "old-git-puzzle",
+    eventType: "proposed",
+    proposal: { id: "old-git-puzzle", title: "Filed first" },
+    basePublishedRevision: decided.revision,
+    clientName: "first-agent"
+  });
+  assert.equal(filedOnD1.clientName, "first-agent");
+  assert.equal(filedOnD1.id, proposalRows[0].id);
+  assert.notEqual(filedOnD1.id, proposalRows.at(-1).id);
+  await assert.rejects(
     repo.recordPuzzleAgentReview({ id: "unpublished-handoff", eventType: "open", issueId: "issue-no-comment" }),
     /comments/
   );
