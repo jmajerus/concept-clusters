@@ -413,6 +413,15 @@ async function matchingOpenProposals(contentDocuments, puzzleId, anchor) {
   return open.filter(event => event.basePublishedRevision === anchor);
 }
 
+async function currentChoiceProposals(contentDocuments, record) {
+  const puzzleId = puzzleIdOf(record);
+  const anchor = record?.reviewBasePublishedRevision;
+  if (!Number.isInteger(anchor)) return [];
+  const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+  if (!published || published.withdrawnAt || published.revision !== anchor) return [];
+  return matchingOpenProposals(contentDocuments, puzzleId, anchor);
+}
+
 function puzzleIdOf(record) {
   return typeof record?.document?.id === "string" ? record.document.id : record?.puzzleId || null;
 }
@@ -895,11 +904,7 @@ export function createLocalDraftReviewHandler({
             saveDraft: ({ document, expectedRevision: revision }) =>
               draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
           });
-          const openProposals = await matchingOpenProposals(
-            contentDocuments,
-            puzzleIdOf(record),
-            record.reviewBasePublishedRevision
-          );
+          const openProposals = await currentChoiceProposals(contentDocuments, record);
           if (openProposals.length === 0 && reviewSessionOpen(record) && typeof draftStore.releaseReviewSession === "function") {
             await draftStore.releaseReviewSession(draftId);
           }
@@ -1062,11 +1067,7 @@ export function createLocalDraftReviewHandler({
             return true;
           }
           if (form.isPublish || form.isPublishAndCue) {
-            const openProposals = await matchingOpenProposals(
-              contentDocuments,
-              puzzleId,
-              record.reviewBasePublishedRevision
-            );
+            const openProposals = await currentChoiceProposals(contentDocuments, record);
             if (openProposals.length) {
               html(res, "<p>Choose Publish this review or Keep published. Those decide the open proposals.</p>", 400);
               return true;
@@ -1365,10 +1366,7 @@ export function createLocalDraftReviewHandler({
             html(res, renderDraftFieldConflictPage({ draftId, error: stale }), 409);
             return true;
           }
-          const anchor = Number.isInteger(record.reviewBasePublishedRevision)
-            ? record.reviewBasePublishedRevision
-            : null;
-          const openProposals = await matchingOpenProposals(contentDocuments, puzzleId, anchor);
+          const openProposals = await currentChoiceProposals(contentDocuments, record);
           if (!openProposals.length) {
             html(res, "<p>There is no open review proposal against this published revision.</p>", 400);
             return true;
@@ -1559,11 +1557,7 @@ export function createLocalDraftReviewHandler({
             html(res, "<p>This draft has no puzzle id to review.</p>", 400);
             return true;
           }
-          const openProposals = await matchingOpenProposals(
-            contentDocuments,
-            puzzleId,
-            record.reviewBasePublishedRevision
-          );
+          const openProposals = await currentChoiceProposals(contentDocuments, record);
           if (openProposals.length) {
             html(res, "<p>Choose Publish this review or Keep published. Those decide the open proposals.</p>", 400);
             return true;
@@ -1845,21 +1839,29 @@ export function createLocalDraftReviewHandler({
       const reviewIssues = puzzleId && contentDocuments?.listPuzzleReviewIssues
         ? await contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: true })
         : [];
-      const reviewCandidates = puzzleId && typeof contentDocuments?.listOpenReviewProposals === "function"
+      const currentPublishedRevision = publishedRow && !publishedRow.withdrawnAt
+        && Number.isInteger(publishedRow.revision)
+        ? publishedRow.revision
+        : null;
+      const reviewCandidates = puzzleId && currentPublishedRevision != null
+        && record.reviewBasePublishedRevision === currentPublishedRevision
+        && typeof contentDocuments?.listOpenReviewProposals === "function"
         ? await contentDocuments.listOpenReviewProposals({ id: puzzleId })
         : [];
       let reviewAnchorDocument = null;
-      if (puzzleId && Number.isInteger(record.reviewBasePublishedRevision)
+      if (puzzleId && currentPublishedRevision != null
+        && record.reviewBasePublishedRevision === currentPublishedRevision
         && typeof contentDocuments?.getPublishedAtRevision === "function") {
         const snapshot = await contentDocuments.getPublishedAtRevision({
           kind: "puzzle",
           id: puzzleId,
-          revision: record.reviewBasePublishedRevision
+          revision: currentPublishedRevision
         });
         reviewAnchorDocument = snapshot?.document || null;
       }
       html(res, renderDraftPage({
         ...draft,
+        currentPublishedRevision,
         reviewCandidates,
         reviewAnchorDocument,
         ...publishedFlags,

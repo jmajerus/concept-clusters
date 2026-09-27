@@ -62,16 +62,16 @@ Before the first edit of a review or loop pass, call
 document the review started from. It does not record a completed review.
 
 After the edited draft validates, call the same tool with `action="propose"`.
-That files the current document as one candidate against the published
-revision this review started from, then restores the working copy to the
-baseline so another agent can file a competing candidate. Skip `propose` when
-the document matches the baseline. Then call `action="complete"`.
+That files the current document as one candidate against the published puzzle
+this review started from, then restores the working copy to the baseline so
+another agent can file a competing candidate. Skip `propose` when the document
+matches the baseline. If the puzzle has been published again since this review
+began, stop; do not file the older draft. Then call `action="complete"`.
 
-The drafts page lists open candidates from that same published revision.
+The drafts page lists those candidates for the current published puzzle.
 **Play** loads one into the working copy. **Publish this review** publishes
 that stored proposal and rejects the others. **Keep published** rejects every
-open proposal. A proposal against a different published revision is not part
-of the choice.
+open proposal.
 
 When no candidate has been filed yet, the page still offers **Publish** and,
 if this review opened the working copy, **Discard review**. When a draft was

@@ -406,6 +406,7 @@ export async function run() {
     openedFromPublished: true,
     hasReviewBaseline: true,
     reviewBasePublishedRevision: 4,
+    currentPublishedRevision: 4,
     workingCopyHistoryCount: 2,
     d1Published: true,
     validation: { valid: true, errors: [], flags: [] },
@@ -446,7 +447,8 @@ export async function run() {
   assert.match(choicePage, /name="proposal_id" value="9"/);
   assert.match(choicePage, /value="preview-review"/);
   assert.match(choicePage, /value="keep-published"/);
-  assert.match(choicePage, /different published revision/);
+  assert.match(choicePage, /alternatives to the published puzzle/);
+  assert.doesNotMatch(choicePage, /different published revision/);
   assert.doesNotMatch(choicePage, /Stale agent/);
   assert.doesNotMatch(choicePage, /value="discard-review"/);
   assert.doesNotMatch(choicePage, /value="undo-review"/);

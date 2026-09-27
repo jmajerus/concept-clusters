@@ -1426,7 +1426,11 @@ export function createAuthoringMcpServer({
         ? stored.reviewBasePublishedRevision
         : null;
       if (basePublishedRevision == null) {
-        throw new Error("A review proposal needs the published revision this review started from.");
+        throw new Error("A review proposal needs the published puzzle this review started from.");
+      }
+      const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+      if (!published || published.withdrawnAt || published.revision !== basePublishedRevision) {
+        throw new Error("The published puzzle has changed since this review began. Review the current published puzzle before filing a proposal.");
       }
       const baseline = await draftRepository.readReviewBaseline({ draftId: draft_id, actor });
       if (!baseline) throw new Error("This review has no saved baseline to restore.");

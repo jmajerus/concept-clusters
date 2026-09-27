@@ -1337,10 +1337,10 @@ function reviewCandidateLabel(event) {
 }
 
 function reviewChoiceCandidates(draft) {
-  const anchor = draft.reviewBasePublishedRevision;
-  if (!Number.isInteger(anchor)) return [];
+  const current = draft.currentPublishedRevision;
+  if (!Number.isInteger(current) || draft.reviewBasePublishedRevision !== current) return [];
   return (Array.isArray(draft.reviewCandidates) ? draft.reviewCandidates : [])
-    .filter(event => event?.eventType === "proposed" && event.basePublishedRevision === anchor);
+    .filter(event => event?.eventType === "proposed" && event.basePublishedRevision === current);
 }
 
 function truncateReviewText(value, limit = 160) {
@@ -1386,9 +1386,6 @@ function reviewCandidateLines(diff) {
 function renderReviewChoice(draft) {
   const candidates = reviewChoiceCandidates(draft);
   if (!candidates.length) return "";
-  const stale = (Array.isArray(draft.reviewCandidates) ? draft.reviewCandidates : [])
-    .filter(event => event?.eventType === "proposed" && event.basePublishedRevision !== draft.reviewBasePublishedRevision)
-    .length;
   const draftId = draft.draftId;
   const action = `/admin/drafts/${encodeURIComponent(draftId)}`;
   const expected = escapeHtml(String(draft.revision ?? ""));
@@ -1401,7 +1398,7 @@ function renderReviewChoice(draft) {
     const total = reviewCandidateLines(diff).length;
     const list = lines.length
       ? `<ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`
-      : `<p class="meta">${draft.reviewAnchorDocument ? "No fact-level changes to show." : "The published revision for this review is not available, so this card has no diff."}</p>`;
+      : `<p class="meta">${draft.reviewAnchorDocument ? "No fact-level changes to show." : "The published puzzle is not available, so this card has no diff."}</p>`;
     const more = total > hidden ? `<p class="meta">${total - hidden} more changes are in the proposal.</p>` : "";
     const proposalId = escapeHtml(String(event.id));
     return `<article class="review-candidate">
@@ -1425,13 +1422,9 @@ function renderReviewChoice(draft) {
       </div>
     </article>`;
   }).join("\n");
-  const staleNote = stale
-    ? `<p class="meta">${stale} proposal${stale === 1 ? " is" : "s are"} against a different published revision and ${stale === 1 ? "is" : "are"} not part of this choice.</p>`
-    : "";
   return `<section class="submit-pr">
     <h2>Choose a review</h2>
-    <p class="meta">These proposals are alternatives against published revision ${escapeHtml(String(draft.reviewBasePublishedRevision))}. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
-    ${staleNote}
+    <p class="meta">These proposals are alternatives to the published puzzle. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
     ${cards}
     <form method="post" action="${action}">
       <input type="hidden" name="confirm" value="keep-published">
@@ -1663,14 +1656,7 @@ export function renderPuzzleReviewIssuesPage({
       <button type="submit" name="confirm" value="review-issue" class="secondary">Save issue update</button>
     </form>`}
   </section>`;
-  const decidedProposalIds = new Set(
-    events.map(event => event.sourceEventId).filter(id => Number.isInteger(id))
-  );
-  const completedEvents = events.filter(event => {
-    if (event.issueId) return false;
-    if (event.eventType === "proposed" && decidedProposalIds.has(event.id)) return false;
-    return true;
-  });
+  const completedEvents = events.filter(event => !event.issueId && event.eventType !== "proposed");
   const body = `
     <p class="meta">${authoringAdminNav()} · ${chronicleOnly
       ? `<a href="/admin/drafts">Back to puzzles</a>`
