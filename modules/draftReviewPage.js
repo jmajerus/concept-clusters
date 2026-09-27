@@ -1337,10 +1337,8 @@ function reviewCandidateLabel(event) {
 }
 
 function reviewChoiceCandidates(draft) {
-  const current = draft.currentPublishedRevision;
-  if (!Number.isInteger(current) || draft.reviewBasePublishedRevision !== current) return [];
   return (Array.isArray(draft.reviewCandidates) ? draft.reviewCandidates : [])
-    .filter(event => event?.eventType === "proposed" && event.basePublishedRevision === current);
+    .filter(event => event?.eventType === "proposed" && event.proposal);
 }
 
 function truncateReviewText(value, limit = 160) {

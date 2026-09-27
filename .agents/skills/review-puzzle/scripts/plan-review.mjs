@@ -321,7 +321,7 @@ async function build() {
         `If the document changed: record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="propose" [comments on why this candidate should win]. That files the candidate and restores the baseline. Skip propose when nothing changed.`,
         `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
         `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after propose (when the document changed) and only while the current draft is valid`,
-        "Give the drafts URL. Open candidates for the current published puzzle are cards: Play loads one, Publish this review publishes that stored proposal and rejects the others, Keep published rejects all of them. If the puzzle was published again after this review began, do not file the older draft. Cue and Freeze stay human actions. STOP."
+        "Give the drafts URL. Open candidates for the current published puzzle are cards: Play loads one, Publish this review publishes that stored proposal and rejects the others, Keep published rejects all of them. If content or pedagogy was published after this review began, do not file the older draft. A byline or layout publish does not. Cue and Freeze stay human actions. STOP."
       ],
       report: {
         ...loadReport(),
@@ -382,7 +382,7 @@ async function build() {
         `If the document changed: record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="propose" [comments on why this candidate should win]. That files the candidate and restores the baseline. Skip propose when nothing changed.`,
         `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
         `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after propose (when the document changed) and only while the current draft is valid`,
-        "Give the drafts URL. Open candidates for the current published puzzle are cards: Play loads one, Publish this review publishes that stored proposal and rejects the others, Keep published rejects all of them. If the puzzle was published again after this review began, do not file the older draft. Cue and Freeze stay human actions. STOP."
+        "Give the drafts URL. Open candidates for the current published puzzle are cards: Play loads one, Publish this review publishes that stored proposal and rejects the others, Keep published rejects all of them. If content or pedagogy was published after this review began, do not file the older draft. A byline or layout publish does not. Cue and Freeze stay human actions. STOP."
       ],
       report: {
         ...loadReport(),

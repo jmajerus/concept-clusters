@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import {
   diffPublishedDraft,
+  documentKeepingProvenance,
   draftShadowsPublished,
-  provenanceDiffersFromPublished
+  provenanceDiffersFromPublished,
+  samePlayablePuzzle
 } from "../modules/draftReviewDiff.js";
 
 export const name = "draft review diff: published vs draft marks";
@@ -244,6 +246,17 @@ export async function run() {
     0,
     "provenance stays out of the field-level marks"
   );
+  assert.equal(samePlayablePuzzle(beforeProvenance, afterProvenance), true);
+  assert.equal(samePlayablePuzzle(beforeProvenance, {
+    ...afterProvenance,
+    clusters: [{ id: "added", name: "Added", fact: "New." }]
+  }), false);
+  const kept = documentKeepingProvenance(
+    { id: "p", title: "Baseline", provenance: { collaboration: "ai" } },
+    { provenance: { collaboration: "human" } }
+  );
+  assert.equal(kept.title, "Baseline");
+  assert.deepEqual(kept.provenance, { collaboration: "human" });
   // ...which is why it is reported separately. Without this the review page
   // said "No changes from the published puzzle" over a real edit, and worse,
   // the draft counted as already-in-authoring-play so Publish was withheld

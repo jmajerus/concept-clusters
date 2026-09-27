@@ -47,7 +47,11 @@ import {
   observedMcpClientLabel,
   stampDocumentAssistanceFromMcp
 } from "./mcpClientIdentity.js";
-import { diffPublishedDraft } from "./draftReviewDiff.js";
+import {
+  diffPublishedDraft,
+  documentKeepingProvenance,
+  samePlayablePuzzle
+} from "./draftReviewDiff.js";
 import { MCP_EXCLUDED_ROOT_FIELDS } from "./authoringFieldOwnership.js";
 import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
@@ -1429,7 +1433,21 @@ export function createAuthoringMcpServer({
         throw new Error("A review proposal needs the published puzzle this review started from.");
       }
       const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-      if (!published || published.withdrawnAt || published.revision !== basePublishedRevision) {
+      if (!published || published.withdrawnAt || !published.document) {
+        throw new Error("A review proposal needs the published puzzle this review started from.");
+      }
+      let baseDocument = published.document;
+      if (published.revision !== basePublishedRevision) {
+        const snapshot = typeof contentDocuments.getPublishedAtRevision === "function"
+          ? await contentDocuments.getPublishedAtRevision({
+            kind: "puzzle",
+            id: puzzleId,
+            revision: basePublishedRevision
+          })
+          : null;
+        baseDocument = snapshot?.document || null;
+      }
+      if (!samePlayablePuzzle(baseDocument, published.document)) {
         throw new Error("The published puzzle has changed since this review began. Review the current published puzzle before filing a proposal.");
       }
       const baseline = await draftRepository.readReviewBaseline({ draftId: draft_id, actor });
@@ -1453,7 +1471,7 @@ export function createAuthoringMcpServer({
       });
       const restored = await draftRepository.save({
         draftId: draft_id,
-        document: baseline,
+        document: documentKeepingProvenance(baseline, stored.document),
         expectedRevision: stored.revision,
         actor
       });

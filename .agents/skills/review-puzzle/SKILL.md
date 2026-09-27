@@ -63,10 +63,12 @@ document the review started from. It does not record a completed review.
 
 After the edited draft validates, call the same tool with `action="propose"`.
 That files the current document as one candidate against the published puzzle
-this review started from, then restores the working copy to the baseline so
-another agent can file a competing candidate. Skip `propose` when the document
-matches the baseline. If the puzzle has been published again since this review
-began, stop; do not file the older draft. Then call `action="complete"`.
+this review started from, then restores content and pedagogy to the baseline
+and leaves provenance as it stands, so another agent can file a competing
+candidate. Skip `propose` when the playable puzzle matches the baseline. If
+content or pedagogy has been published since this review began, stop; do not
+file the older draft. A later byline or layout publish does not. Then call
+`action="complete"`.
 
 The drafts page lists those candidates for the current published puzzle.
 **Play** loads one into the working copy. **Publish this review** publishes

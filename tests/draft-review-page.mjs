@@ -406,7 +406,7 @@ export async function run() {
     openedFromPublished: true,
     hasReviewBaseline: true,
     reviewBasePublishedRevision: 4,
-    currentPublishedRevision: 4,
+    currentPublishedRevision: 5,
     workingCopyHistoryCount: 2,
     d1Published: true,
     validation: { valid: true, errors: [], flags: [] },
@@ -432,12 +432,6 @@ export async function run() {
           fact: "A sharper alpha fact."
         }]
       }
-    }, {
-      id: 10,
-      eventType: "proposed",
-      basePublishedRevision: 2,
-      clientSystem: "Stale agent",
-      proposal: baseDraft.document
     }]
   });
   assert.match(choicePage, /Codex gpt-5.4/);
@@ -449,7 +443,6 @@ export async function run() {
   assert.match(choicePage, /value="keep-published"/);
   assert.match(choicePage, /alternatives to the published puzzle/);
   assert.doesNotMatch(choicePage, /different published revision/);
-  assert.doesNotMatch(choicePage, /Stale agent/);
   assert.doesNotMatch(choicePage, /value="discard-review"/);
   assert.doesNotMatch(choicePage, /value="undo-review"/);
   assert.doesNotMatch(choicePage, /value="publish"/);

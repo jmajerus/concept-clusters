@@ -55,7 +55,9 @@ import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import { draftPlayQuery } from "./stagingPlayLinks.js";
 import {
   diffPublishedDraft,
+  documentKeepingProvenance,
   publishedDocumentFromService,
+  samePlayablePuzzle,
   valuesEqual
 } from "./draftReviewDiff.js";
 import {
@@ -417,12 +419,25 @@ async function matchingOpenProposals(contentDocuments, puzzleId, anchor) {
   return open.filter(event => event.basePublishedRevision === anchor);
 }
 
+async function playableSnapshot(contentDocuments, puzzleId, revision, current) {
+  if (current && current.revision === revision) return current.document || null;
+  if (typeof contentDocuments?.getPublishedAtRevision !== "function") return null;
+  const snapshot = await contentDocuments.getPublishedAtRevision({
+    kind: "puzzle",
+    id: puzzleId,
+    revision
+  });
+  return snapshot?.document || null;
+}
+
 async function currentChoiceProposals(contentDocuments, record) {
   const puzzleId = puzzleIdOf(record);
   const anchor = record?.reviewBasePublishedRevision;
   if (!Number.isInteger(anchor)) return [];
   const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-  if (!published || published.withdrawnAt || published.revision !== anchor) return [];
+  if (!published || published.withdrawnAt || !published.document) return [];
+  const baseDocument = await playableSnapshot(contentDocuments, puzzleId, anchor, published);
+  if (!samePlayablePuzzle(baseDocument, published.document)) return [];
   return matchingOpenProposals(contentDocuments, puzzleId, anchor);
 }
 
@@ -1436,7 +1451,7 @@ export function createLocalDraftReviewHandler({
           if (form.isPreviewReview) {
             await draftStore.replaceDraft({
               draftId,
-              document: chosen.proposal,
+              document: documentKeepingProvenance(chosen.proposal, record.document),
               expectedRevision: record.revision
             });
             const played = await draftStore.getDraft(draftId);
@@ -1452,7 +1467,10 @@ export function createLocalDraftReviewHandler({
             contentService,
             actor: publicationActor
           });
-          const authoredDocument = documentForEditor(chosen.proposal, { categoryRegistry });
+          const authoredDocument = documentForEditor(
+            documentKeepingProvenance(chosen.proposal, record.document),
+            { categoryRegistry }
+          );
           if (typeof contentService?.validatePuzzleDraft === "function") {
             const validation = await contentService.validatePuzzleDraft(authoredDocument, {
               categoryRegistry
@@ -1468,8 +1486,14 @@ export function createLocalDraftReviewHandler({
             }
           }
           const publishedBefore = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+          const baseDocument = await playableSnapshot(
+            contentDocuments,
+            puzzleId,
+            chosen.basePublishedRevision,
+            publishedBefore
+          );
           if (!publishedBefore || publishedBefore.withdrawnAt
-            || publishedBefore.revision !== chosen.basePublishedRevision) {
+            || !samePlayablePuzzle(baseDocument, publishedBefore.document)) {
             throw new PublishedRevisionConflictError("puzzle", puzzleId);
           }
           const publishLayout = record.layout ?? publishedBefore?.layout ?? undefined;
@@ -1494,7 +1518,7 @@ export function createLocalDraftReviewHandler({
             document: documentForStorage(authoredDocument, { categoryRegistry }),
             actor: publicationActor,
             layout: publishLayout,
-            expectedRevision: chosen.basePublishedRevision
+            expectedRevision: publishedBefore.revision
           });
           await recordReviewDecision(contentDocuments, {
             puzzleId,
@@ -1852,22 +1876,10 @@ export function createLocalDraftReviewHandler({
         && Number.isInteger(publishedRow.revision)
         ? publishedRow.revision
         : null;
-      const reviewCandidates = puzzleId && currentPublishedRevision != null
-        && record.reviewBasePublishedRevision === currentPublishedRevision
-        && typeof contentDocuments?.listOpenReviewProposals === "function"
-        ? await contentDocuments.listOpenReviewProposals({ id: puzzleId })
-        : [];
-      let reviewAnchorDocument = null;
-      if (puzzleId && currentPublishedRevision != null
-        && record.reviewBasePublishedRevision === currentPublishedRevision
-        && typeof contentDocuments?.getPublishedAtRevision === "function") {
-        const snapshot = await contentDocuments.getPublishedAtRevision({
-          kind: "puzzle",
-          id: puzzleId,
-          revision: currentPublishedRevision
-        });
-        reviewAnchorDocument = snapshot?.document || null;
-      }
+      const reviewCandidates = await currentChoiceProposals(contentDocuments, record);
+      const reviewAnchorDocument = reviewCandidates.length && publishedRow && !publishedRow.withdrawnAt
+        ? publishedRow.document || null
+        : null;
       html(res, renderDraftPage({
         ...draft,
         currentPublishedRevision,

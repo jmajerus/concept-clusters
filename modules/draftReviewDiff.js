@@ -260,6 +260,23 @@ export function diffPublishedDraft(published, draft) {
   return { counts, total, fields, clusters, bridges, lenses };
 }
 
+/** Content and pedagogy only. Provenance is outside the review identity. */
+export function samePlayablePuzzle(left, right) {
+  const diff = diffPublishedDraft(left, right);
+  return Boolean(diff && diff.total === 0);
+}
+
+/** Baseline content and pedagogy, with provenance left as it stands on the draft. */
+export function documentKeepingProvenance(document, provenanceSource) {
+  const next = JSON.parse(JSON.stringify(document));
+  if (provenanceSource && Object.prototype.hasOwnProperty.call(provenanceSource, "provenance")) {
+    next.provenance = JSON.parse(JSON.stringify(provenanceSource.provenance));
+  } else {
+    delete next.provenance;
+  }
+  return next;
+}
+
 /**
  * Provenance is kept out of the field-level marks (see SKIP_KEYS) so a review
  * pass is not a changelog of tooling: an MCP stamp lands on its own and should
