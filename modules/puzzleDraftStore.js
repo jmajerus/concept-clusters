@@ -152,15 +152,17 @@ export function createPuzzleDraftStore({ directory }) {
   }
 
   function publicRecord(record) {
-    const { workingCopyStack, domains, ...rest } = record;
+    const { workingCopyStack, domains, reviewBaselineDocument, ...rest } = record;
     return clone({
       ...rest,
+      openedFromPublished: record.openedFromPublished === true,
+      hasReviewBaseline: reviewBaselineDocument != null,
       documentStale: Boolean(record.documentStale),
       workingCopyHistoryCount: historyOf({ workingCopyStack }).length
     });
   }
 
-  async function createDraft({ draftId, document }) {
+  async function createDraft({ draftId, document, seededFromPublished = false }) {
     assertDraftId(draftId);
     assertDocumentSize(document);
     return withDraftMutation(draftId, async () => {
@@ -182,6 +184,8 @@ export function createPuzzleDraftStore({ directory }) {
         updatedAt: now,
         document: clone(materialized),
         documentStale: false,
+        openedFromPublished: seededFromPublished === true,
+        reviewBaselineDocument: null,
         domains: storedDomainDocuments(materialized),
         layout: null
       };
@@ -487,6 +491,7 @@ export function createPuzzleDraftStore({ directory }) {
           workingCopyStack,
           domains,
           layout: _layout,
+          reviewBaselineDocument: _baseline,
           ...metadata
         } = record;
         return {
@@ -500,11 +505,43 @@ export function createPuzzleDraftStore({ directory }) {
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }
 
+  async function rememberReviewBaseline({ draftId, document, expectedRevision }) {
+    return withDraftMutation(draftId, async () => {
+      const record = await readRecord(draftId);
+      if (Number(record.revision) !== expectedRevision) {
+        throw new Error(
+          `Draft revision conflict: expected ${expectedRevision}, current revision is ${record.revision}`
+        );
+      }
+      record.reviewBaselineDocument = clone(document);
+      await writeRecord(record);
+      return publicRecord(record);
+    });
+  }
+
+  async function readReviewBaseline(draftId) {
+    const record = await readRecord(draftId);
+    return record.reviewBaselineDocument ? clone(record.reviewBaselineDocument) : null;
+  }
+
+  async function releaseReviewSession(draftId) {
+    return withDraftMutation(draftId, async () => {
+      const record = await readRecord(draftId);
+      record.openedFromPublished = false;
+      record.reviewBaselineDocument = null;
+      await writeRecord(record);
+      return publicRecord(record);
+    });
+  }
+
   return {
     createDraft,
     deleteDraft,
     getDraft,
     listDrafts,
+    rememberReviewBaseline,
+    readReviewBaseline,
+    releaseReviewSession,
     replaceDraft,
     replaceDomain,
     materializeDraft,

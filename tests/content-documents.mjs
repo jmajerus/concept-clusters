@@ -229,7 +229,66 @@ export async function run() {
   });
   assert.equal(humanReviewed.lastHumanReviewedAt, humanReviewTime);
   assert.equal(humanReviewed.lastAgentReviewedAt, reviewTime);
+  const rejectedProposal = {
+    id: "old-git-puzzle",
+    title: "Rejected wording",
+    category: "science",
+    clusters: []
+  };
+  const rejectedAt = "2026-09-09T13:00:00.000Z";
+  await repo.recordPuzzleHumanReview({
+    id: "old-git-puzzle",
+    reviewedAt: rejectedAt,
+    eventType: "rejected",
+    draftRevision: 2,
+    basePublishedRevision: reviewed.revision,
+    proposal: rejectedProposal
+  });
+  const afterRejection = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
+  assert.equal(afterRejection.lastHumanReviewedAt, humanReviewTime);
+  assert.equal(afterRejection.revision, reviewed.revision);
+  const [rejectedEvent] = await repo.listPuzzleReviewEvents({ id: "old-git-puzzle" });
+  assert.equal(rejectedEvent.eventType, "rejected");
+  assert.equal(rejectedEvent.basePublishedRevision, reviewed.revision);
+  assert.deepEqual(rejectedEvent.proposal, rejectedProposal);
+  const acceptedAt = "2026-09-09T14:00:00.000Z";
+  await repo.recordPuzzleHumanReview({
+    id: "old-git-puzzle",
+    reviewedAt: acceptedAt,
+    eventType: "accepted",
+    publishedRevision: reviewed.revision,
+    draftRevision: 3
+  });
+  const [acceptedEvent] = await repo.listPuzzleReviewEvents({ id: "old-git-puzzle" });
+  assert.equal(acceptedEvent.eventType, "accepted");
+  assert.equal(acceptedEvent.publishedRevision, reviewed.revision);
+  assert.equal(acceptedEvent.proposal, undefined);
   assert.deepEqual(await repo.listPuzzleReviewEvents({ id: "old-git-puzzle" }), [{
+    id: 4,
+    puzzleId: "old-git-puzzle",
+    reviewerKind: "human",
+    reviewedAt: acceptedAt,
+    issueId: null,
+    eventType: "accepted",
+    comments: null,
+    outcome: null,
+    draftRevision: 3,
+    guidance: null,
+    publishedRevision: reviewed.revision
+  }, {
+    id: 3,
+    puzzleId: "old-git-puzzle",
+    reviewerKind: "human",
+    reviewedAt: rejectedAt,
+    issueId: null,
+    eventType: "rejected",
+    comments: null,
+    outcome: null,
+    draftRevision: 2,
+    guidance: null,
+    proposal: rejectedProposal,
+    basePublishedRevision: reviewed.revision
+  }, {
     id: 2,
     puzzleId: "old-git-puzzle",
     reviewerKind: "human",
@@ -271,7 +330,7 @@ export async function run() {
     lastRecordedRevision: null,
     draftRevisedSinceOpening: false,
     events: [{
-      id: 3,
+      id: 5,
       puzzleId: "unpublished-handoff",
       reviewerKind: "agent",
       reviewedAt: handoffTime,

@@ -12,6 +12,8 @@ function record(draft) {
     createdAt: draft.createdAt,
     updatedAt: draft.updatedAt,
     workingCopyHistoryCount: Number(draft.workingCopyHistoryCount || 0),
+    openedFromPublished: draft.openedFromPublished === true,
+    hasReviewBaseline: draft.hasReviewBaseline === true,
     validation: draft.validation ?? null,
     layout: draft.layout ?? null,
     document: draft.document
@@ -84,6 +86,27 @@ export function createRepositoryDraftStore({ repository, actor }) {
     },
     async listDrafts(options = {}) {
       return repository.list({ actor, ...options });
+    },
+    async rememberReviewBaseline({ draftId, document, expectedRevision }) {
+      if (typeof repository.rememberReviewBaseline !== "function") {
+        throw new Error("Review baseline storage is not available.");
+      }
+      return record(await repository.rememberReviewBaseline({
+        draftId,
+        document,
+        actor,
+        expectedRevision
+      }));
+    },
+    async readReviewBaseline(draftId) {
+      if (typeof repository.readReviewBaseline !== "function") return null;
+      return repository.readReviewBaseline({ draftId, actor });
+    },
+    async releaseReviewSession(draftId) {
+      if (typeof repository.releaseReviewSession !== "function") {
+        return getDraft(draftId);
+      }
+      return record(await repository.releaseReviewSession({ draftId, actor }));
     },
     async deleteDraft(draftId, { expectedRevision = null } = {}) {
       return repository.delete({ draftId, actor, expectedRevision });

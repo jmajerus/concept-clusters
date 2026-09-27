@@ -57,6 +57,17 @@ Never send the canonical file itself as a replacement document during this
 import. If a D1 draft already exists, it is the current working copy; preserve
 it and let an explicit subsequent save persist any required canonical form.
 
+Before the first edit of a review or loop pass, call
+`record_agent_puzzle_review` with `action="begin"`. That snapshots the
+document the review started from. It does not record a completed review.
+
+When this review opened the working copy, the drafts page offers **Publish**
+and **Discard review**. Publish records the review as accepted. Discard
+deletes the working copy and stores the proposal on the review record.
+When a draft was already open, **Undo review** restores that snapshot and
+stores the proposal the same way. Saving the working copy yourself ends that
+session and brings the ordinary revert actions back.
+
 ## Fail closed
 
 - Named / planned ids are locked.

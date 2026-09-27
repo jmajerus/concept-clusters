@@ -365,6 +365,43 @@ function isMissingDraft(error) {
     message.includes("draftId must");
 }
 
+async function publishedRevisionFor(contentDocuments, puzzleId) {
+  if (typeof contentDocuments?.getPublished !== "function") return null;
+  try {
+    const published = await contentDocuments.getPublished({ kind: "puzzle", id: puzzleId });
+    if (!published || published.withdrawnAt) return null;
+    return Number.isInteger(published.revision) ? published.revision : null;
+  } catch (error) {
+    if (error instanceof ContentDocumentNotFoundError) return null;
+    throw error;
+  }
+}
+
+async function recordReviewDecision(contentDocuments, {
+  puzzleId,
+  eventType,
+  document = null,
+  draftRevision = null,
+  basePublishedRevision = null,
+  publishedRevision = null
+}) {
+  if (typeof contentDocuments?.recordPuzzleHumanReview !== "function") {
+    throw new Error("Recording a review decision requires D1 content documents.");
+  }
+  await contentDocuments.recordPuzzleHumanReview({
+    id: puzzleId,
+    eventType,
+    draftRevision,
+    proposal: eventType === "rejected" ? document : null,
+    basePublishedRevision: eventType === "rejected" ? basePublishedRevision : null,
+    publishedRevision: eventType === "accepted" ? publishedRevision : null
+  });
+}
+
+function reviewSessionOpen(record) {
+  return record?.openedFromPublished === true || record?.hasReviewBaseline === true;
+}
+
 function isWorkspaceConfigError(error) {
   return error instanceof LocalD1ConfigError
     || error instanceof HttpD1Error;
@@ -713,10 +750,21 @@ export function createLocalDraftReviewHandler({
         return true;
       }
       try {
-        const record = await draftStore.getDraft(draftId);
-        const puzzleId = typeof record.document?.id === "string" ? record.document.id : record.puzzleId;
+        let record = null;
+        try {
+          record = await draftStore.getDraft(draftId);
+        } catch (error) {
+          if (!isMissingDraft(error)) throw error;
+        }
+        const puzzleId = record
+          ? (typeof record.document?.id === "string" ? record.document.id : record.puzzleId)
+          : draftId;
         if (!puzzleId) {
           html(res, "<p>This draft has no puzzle id to review.</p>", 400);
+          return true;
+        }
+        if (!record && req.method === "POST") {
+          html(res, "<p>That working copy has been discarded. The review record is read-only.</p>", 404);
           return true;
         }
         if (req.method === "POST") {
@@ -769,10 +817,20 @@ export function createLocalDraftReviewHandler({
           contentDocuments.listPuzzleReviewEvents({ id: puzzleId }),
           contentDocuments.getPublished({ kind: "puzzle", id: puzzleId }).catch(() => null)
         ]);
+        if (!record && !published && events.length === 0) {
+          html(res, `<p>Draft not found: ${escapeHtml(draftId)}</p>`, 404);
+          return true;
+        }
         html(res, renderPuzzleReviewIssuesPage({
-          draft: record,
+          draft: record || {
+            draftId: puzzleId,
+            title: published?.title || puzzleId,
+            document: published?.document || null
+          },
           issues,
           events,
+          publishedDocument: published?.document || null,
+          chronicleOnly: !record,
           lastAgentReviewedAt: published?.lastAgentReviewedAt || null,
           lastHumanReviewedAt: published?.lastHumanReviewedAt || null
         }));
@@ -809,6 +867,9 @@ export function createLocalDraftReviewHandler({
             saveDraft: ({ document, expectedRevision: revision }) =>
               draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
           });
+          if (reviewSessionOpen(record) && typeof draftStore.releaseReviewSession === "function") {
+            await draftStore.releaseReviewSession(draftId);
+          }
           res.writeHead(303, {
             Location: draftFieldRedirectPath(draftId),
             "Cache-Control": "no-store"
@@ -1044,6 +1105,17 @@ export function createLocalDraftReviewHandler({
             actor: publicationActor,
             layout: publishLayout
           });
+          if (reviewSessionOpen(record)) {
+            await recordReviewDecision(contentDocuments, {
+              puzzleId,
+              eventType: "accepted",
+              draftRevision: record.revision,
+              publishedRevision: published.revision
+            });
+            if (typeof draftStore.releaseReviewSession === "function") {
+              await draftStore.releaseReviewSession(draftId);
+            }
+          }
           if (form.isPublishAndCue) {
             await contentDocuments.setFreezeCue({
               kind: "puzzle",
@@ -1229,6 +1301,77 @@ export function createLocalDraftReviewHandler({
             error: formatActionError(error),
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
           }), error instanceof DraftRenameError ? error.status : 400);
+        }
+        return true;
+      }
+      if (form.isDiscardReview || form.isUndoReview) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to review.</p>", 400);
+            return true;
+          }
+          if (form.isDiscardReview && record.openedFromPublished !== true) {
+            html(res, "<p>Discard review is only for a working copy this review opened.</p>", 400);
+            return true;
+          }
+          if (form.isUndoReview && record.hasReviewBaseline !== true) {
+            html(res, "<p>This review has no saved baseline to restore.</p>", 400);
+            return true;
+          }
+          const basePublishedRevision = await publishedRevisionFor(contentDocuments, puzzleId);
+          await recordReviewDecision(contentDocuments, {
+            puzzleId,
+            eventType: "rejected",
+            document: record.document,
+            draftRevision: record.revision,
+            basePublishedRevision
+          });
+          if (form.isDiscardReview) {
+            await draftStore.deleteDraft(draftId);
+            res.writeHead(303, {
+              Location: `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`,
+              "Cache-Control": "no-store"
+            });
+            res.end();
+            return true;
+          }
+          const baseline = await draftStore.readReviewBaseline(draftId);
+          if (!baseline) {
+            html(res, "<p>This review has no saved baseline to restore.</p>", 400);
+            return true;
+          }
+          await draftStore.replaceDraft({
+            draftId,
+            document: baseline,
+            expectedRevision: record.revision
+          });
+          await draftStore.releaseReviewSession(draftId);
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          if (isDraftConflictError(error)) {
+            html(res, renderDraftFieldConflictPage({
+              draftId,
+              error: formatActionError(error)
+            }), 409);
+            return true;
+          }
+          html(res, `<p>${escapeHtml(formatActionError(error))}</p>`, 400);
         }
         return true;
       }

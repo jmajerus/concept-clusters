@@ -365,6 +365,71 @@ export async function run() {
   assert.match(identicalPlay, /value="unpublish"/);
   assert.match(identicalPlay, /authoring-play snapshot/);
 
+  const seededReview = renderDraftPage({
+    ...baseDraft,
+    openedFromPublished: true,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 1,
+      counts: { changed: 1, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(seededReview, /value="discard-review"/);
+  assert.match(seededReview, /Discard review deletes the working copy/);
+  assert.doesNotMatch(seededReview, /value="revert-published"/);
+  assert.doesNotMatch(seededReview, /value="revert-working-copy"/);
+
+  const baselineReview = renderDraftPage({
+    ...baseDraft,
+    hasReviewBaseline: true,
+    workingCopyHistoryCount: 2,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 1,
+      counts: { changed: 1, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(baselineReview, /value="undo-review"/);
+  assert.doesNotMatch(baselineReview, /value="discard-review"/);
+  assert.doesNotMatch(baselineReview, /value="revert-published"/);
+
+  const discardedChronicle = renderPuzzleReviewIssuesPage({
+    draft: { draftId: "review-fixture", title: "Review Fixture", document: { title: "Review Fixture" } },
+    chronicleOnly: true,
+    publishedDocument: baseDraft.document,
+    events: [{
+      id: 1,
+      reviewerKind: "human",
+      reviewedAt: "2026-09-27T00:00:00.000Z",
+      eventType: "rejected",
+      issueId: null,
+      comments: null,
+      outcome: null,
+      draftRevision: 2,
+      basePublishedRevision: 4,
+      proposal: {
+        ...baseDraft.document,
+        clusters: [{
+          ...baseDraft.document.clusters[0],
+          fact: "Rewritten fact."
+        }]
+      }
+    }]
+  });
+  assert.match(discardedChronicle, /Rejected proposal kept against published revision 4/);
+  assert.match(discardedChronicle, /working copy was discarded/);
+  assert.doesNotMatch(discardedChronicle, /value="review-issue"/);
+
   const dirtyPlay = renderDraftPage({
     ...baseDraft,
     d1Published: true,

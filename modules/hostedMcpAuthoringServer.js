@@ -1311,7 +1311,7 @@ export function createAuthoringMcpServer({
 
   const agentReviewInput = z.object({
     draft_id: draftIdSchema,
-    action: z.enum(["complete", "open", "note", "resolve", "reopen"]).default("complete"),
+    action: z.enum(["complete", "begin", "open", "note", "resolve", "reopen"]).default("complete"),
     issue_id: z.string().min(1).max(100).optional(),
     outcome: z.enum(["unchanged", "changed", "authored", "open-questions"]).optional(),
     comments: z.string().max(10_000).optional()
@@ -1323,7 +1323,7 @@ export function createAuthoringMcpServer({
     if (["note", "resolve", "reopen"].includes(input.action) && !input.issue_id) {
       context.addIssue({ code: "custom", path: ["issue_id"], message: `${input.action} requires issue_id` });
     }
-    if (input.action !== "complete" && !hasComments) {
+    if (input.action !== "complete" && input.action !== "begin" && !hasComments) {
       context.addIssue({ code: "custom", path: ["comments"], message: `${input.action} requires non-empty comments` });
     }
   });
@@ -1355,7 +1355,7 @@ export function createAuthoringMcpServer({
   server.registerTool("record_agent_puzzle_review", {
     title: "Record agent review or handoff issue",
     description:
-      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues to obtain an issue id before note, resolve, or reopen. The server derives timestamps, draft revision, and guidance version; it never records a human review.",
+      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues to obtain an issue id before note, resolve, or reopen. The server derives timestamps, draft revision, and guidance version; it never records a human review. Accept and reject are human actions on the drafts page.",
     inputSchema: agentReviewInput,
     annotations: WRITE
   }, tracked("record_agent_puzzle_review", safe(async ({ draft_id, action, issue_id, outcome, comments }) => {
@@ -1366,6 +1366,23 @@ export function createAuthoringMcpServer({
     const puzzleId = typeof stored.document?.id === "string" ? stored.document.id : stored.puzzleId;
     if (!puzzleId) throw new Error(`Draft ${draft_id} has no puzzle id.`);
     const reviewComments = comments?.trim() || null;
+    if (action === "begin") {
+      if (typeof draftRepository.rememberReviewBaseline !== "function") {
+        throw new Error("Recording a review baseline requires draft baseline storage.");
+      }
+      const draft = await draftRepository.rememberReviewBaseline({
+        draftId: draft_id,
+        actor,
+        document: stored.document,
+        expectedRevision: stored.revision
+      });
+      return success(`Recorded the review baseline for ${puzzleId} at draft revision ${stored.revision}.`, {
+        puzzleId,
+        draftId: draft_id,
+        draftRevision: draft.revision,
+        action
+      });
+    }
     if (action === "complete") {
       const taxonomy = await taxonomyContext();
       const validation = await contentService.validatePuzzleDraft(stored.document, {

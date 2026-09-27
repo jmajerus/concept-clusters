@@ -144,7 +144,7 @@ async function build() {
   // A changed single-pass review can need: load, guidance, save, validate,
   // then refresh, corrective save, and re-validation. Load/pick remain
   // deliberately cheaper; loop supplies its own per-round calculation below.
-  const budget = args.budget ? Number(args.budget) : mode === "review" ? 7 : 3;
+  const budget = args.budget ? Number(args.budget) : mode === "review" ? 8 : 3;
   if (!Number.isInteger(budget) || budget < 1) usage("--budget must be a positive integer.");
   const rounds = args.rounds ? Number(args.rounds) : 3;
   if (!Number.isInteger(rounds) || rounds < 1) usage("--rounds must be a positive integer.");
@@ -311,6 +311,7 @@ async function build() {
       stopAfter: "validate-and-pause",
       allowedMcp: allowedMcpFor("review"),
       steps: [
+        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="begin" before any edit, so the drafts page can undo this review`,
         `get_puzzle_draft draft_id="${fromTargets.firstId}" (already loaded; refresh before save)`,
         `get_authoring_guidance phase="review" (pedagogy only if lenses/intro need work)`,
         "If validation has a structural-regularity-combination prompt: resolve the authoring workspace once; read only ledgers/<draft-id>-fit.json, then inventories/<ledger.inventoryId>.json when named (otherwise inventories/<draft-id>.json). If neither source exists, keep the prompt open for human source review; do not alter counts merely to clear it.",
@@ -318,7 +319,7 @@ async function build() {
         "If changing the document: save_puzzle_draft with the current expected_revision, then validate_puzzle_draft. If validation needs a correction, refresh revision, save once more, and re-validate.",
         `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
         `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after the review is complete and the current draft is valid`,
-        "Give the drafts URL. Publish, Cue, and Freeze are human actions there, not MCP tools. STOP."
+        "Give the drafts URL. Publish accepts this review. If this review opened the working copy, Discard review deletes it and keeps the proposal. If a draft was already open, Undo review restores it. Cue and Freeze stay human actions. STOP."
       ],
       report: {
         ...loadReport(),
@@ -342,7 +343,7 @@ async function build() {
     // slack for a re-validate after fixing errors), plus one initial
     // get_puzzle_draft -- well past review/load's flat default of 3.
     // An explicit --budget is trusted as-is; only the default is scaled.
-    const loopBudget = args.budget ? budget : rounds * 4 + 1;
+    const loopBudget = args.budget ? budget : rounds * 4 + 2;
     const resolved = resolveTargets(args.ids, { namedByUser: true });
     const fromTargets = planFromTargets(resolved.targets, {
       namedByUser: true,
@@ -367,6 +368,7 @@ async function build() {
       allowedMcp: allowedMcpFor("loop"),
       rounds,
       steps: [
+        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="begin" once, before the first edit`,
         `get_puzzle_draft draft_id="${fromTargets.firstId}" (already loaded; refresh before each save)`,
         "Two roles, one agent switching hats each turn -- not a truly independent critic. The critic turn must judge the draft as written, not defend why it was written that way.",
         "CRITIC TURN: get_authoring_guidance phase=\"review\" (pedagogy only if lenses/intro need work). Evaluate the current document fresh against the board checklist. List concrete objections tied to specific clusters/terms/bridges/facts. Make no edits this turn.",
@@ -377,7 +379,7 @@ async function build() {
         "WRAP-UP: report each round's objections and fixes, and the stop reason (converged/stagnant/capped).",
         `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
         `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after the review is complete and the current draft is valid`,
-        "Give the drafts URL. Publish, Cue, and Freeze are human actions there, not MCP tools. STOP."
+        "Give the drafts URL. Publish accepts this review. If this review opened the working copy, Discard review deletes it and keeps the proposal. If a draft was already open, Undo review restores it. Cue and Freeze stay human actions. STOP."
       ],
       report: {
         ...loadReport(),
