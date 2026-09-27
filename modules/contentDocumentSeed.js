@@ -515,6 +515,17 @@ export async function openPuzzleWorkingCopy({
   // JSON-LD belongs at the explicit interchange boundary; do not silently
   // turn an interchange document into a draft while opening a working copy.
   const document = documentForStorage(sourceDocument, { categoryRegistry });
+  let basePublishedRevision = null;
+  if (typeof contentDocuments?.getPublished === "function") {
+    try {
+      const published = await contentDocuments.getPublished({ kind: "puzzle", id });
+      if (published && !published.withdrawnAt && Number.isInteger(published.revision)) {
+        basePublishedRevision = published.revision;
+      }
+    } catch (error) {
+      if (!(error instanceof ContentDocumentNotFoundError)) throw error;
+    }
+  }
   try {
     // Server-set, never caller-set: this is the one route that legitimately
     // opens a draft over a published id, and the repository's insert-time
@@ -522,7 +533,8 @@ export async function openPuzzleWorkingCopy({
     const draft = await createDraft({
       draftId: id,
       document,
-      seededFromPublished: true
+      seededFromPublished: true,
+      basePublishedRevision
     });
     return { draft, created: true };
   } catch (error) {

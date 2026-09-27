@@ -206,6 +206,18 @@ export async function run() {
     document: publishedPuzzle
   });
   const initiallyReviewed = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
+  const publishedSnapshot = await repo.getPublishedAtRevision({
+    kind: "puzzle",
+    id: "old-git-puzzle",
+    revision: initiallyReviewed.revision
+  });
+  assert.equal(publishedSnapshot.revision, initiallyReviewed.revision);
+  assert.equal(publishedSnapshot.document.title, initiallyReviewed.document.title);
+  assert.equal(await repo.getPublishedAtRevision({
+    kind: "puzzle",
+    id: "old-git-puzzle",
+    revision: initiallyReviewed.revision + 1
+  }), null);
   assert.equal(initiallyReviewed.document.dateCreated, undefined);
   assert.equal(initiallyReviewed.document.dateModified, undefined);
   assert.equal(initiallyReviewed.document.version, undefined);

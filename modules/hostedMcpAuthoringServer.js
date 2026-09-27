@@ -919,12 +919,13 @@ export function createAuthoringMcpServer({
       const puzzleId = args.draft_id || args.puzzle_id;
       const { draft, created } = await openPuzzleWorkingCopy({
         getDraft: id => draftRepository.get({ draftId: id, actor }),
-        createDraft: ({ draftId, document, seededFromPublished }) =>
+        createDraft: ({ draftId, document, seededFromPublished, basePublishedRevision }) =>
           draftRepository.create({
             draftId,
             document,
             actor,
             seededFromPublished,
+            basePublishedRevision,
             baseCommitSha: args.base_commit_sha || null
           }),
         contentDocuments,
@@ -1370,16 +1371,36 @@ export function createAuthoringMcpServer({
       if (typeof draftRepository.rememberReviewBaseline !== "function") {
         throw new Error("Recording a review baseline requires draft baseline storage.");
       }
+      if (stored.hasReviewBaseline) {
+        return success(`Review baseline already recorded for ${puzzleId}.`, {
+          puzzleId,
+          draftId: draft_id,
+          draftRevision: stored.revision,
+          action,
+          alreadyRecorded: true
+        });
+      }
+      let basePublishedRevision = Number.isInteger(stored.reviewBasePublishedRevision)
+        ? stored.reviewBasePublishedRevision
+        : null;
+      if (basePublishedRevision == null) {
+        const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+        if (published && !published.withdrawnAt && Number.isInteger(published.revision)) {
+          basePublishedRevision = published.revision;
+        }
+      }
       const draft = await draftRepository.rememberReviewBaseline({
         draftId: draft_id,
         actor,
         document: stored.document,
-        expectedRevision: stored.revision
+        expectedRevision: stored.revision,
+        basePublishedRevision
       });
       return success(`Recorded the review baseline for ${puzzleId} at draft revision ${stored.revision}.`, {
         puzzleId,
         draftId: draft_id,
         draftRevision: draft.revision,
+        basePublishedRevision: draft.reviewBasePublishedRevision,
         action
       });
     }

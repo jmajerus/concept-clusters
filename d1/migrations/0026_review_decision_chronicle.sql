@@ -9,6 +9,7 @@
 
 ALTER TABLE puzzle_drafts ADD COLUMN opened_from_published INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE puzzle_drafts ADD COLUMN review_baseline_json TEXT;
+ALTER TABLE puzzle_drafts ADD COLUMN review_base_published_revision INTEGER;
 
 ALTER TABLE puzzle_review_events ADD COLUMN proposal_json TEXT;
 ALTER TABLE puzzle_review_events ADD COLUMN base_published_revision INTEGER;

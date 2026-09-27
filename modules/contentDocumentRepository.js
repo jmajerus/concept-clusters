@@ -59,6 +59,17 @@ function draftRecord(row) {
   };
 }
 
+function publishedRevisionSnapshot(kind, row) {
+  const document = assertCurrentAuthoredDocument(
+    parsedJson(row.document, "Published revision"),
+    "Published revision"
+  );
+  return {
+    revision: Number(row.revision),
+    document: kind === "puzzle" ? stripSystemAuthoredMetadata(document) : document
+  };
+}
+
 function publishedRecord(row) {
   const document = assertCurrentAuthoredDocument(
     parsedJson(row.document, "Published document"),
@@ -403,6 +414,20 @@ export class D1ContentDocumentRepository {
     `).bind(kind, id).first();
     if (!row) throw new ContentDocumentNotFoundError(kind, id);
     return publishedRecord(row);
+  }
+
+  async getPublishedAtRevision({ kind, id, revision }) {
+    assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+    assertDraftId(id);
+    if (!Number.isInteger(revision) || revision < 1) {
+      throw new Error("revision must be a positive integer");
+    }
+    const row = await this.database.prepare(`
+      SELECT revision, document FROM published_document_revisions
+      WHERE kind = ? AND id = ? AND revision = ?
+    `).bind(kind, id, revision).first();
+    if (!row) return null;
+    return publishedRevisionSnapshot(kind, row);
   }
 
   async saveLayout({ id, layout }) {
@@ -821,6 +846,16 @@ export function createMemoryContentDocumentRepository() {
       const row = published.get(publishedKey(kind, id));
       if (!row) throw new ContentDocumentNotFoundError(kind, id);
       return publishedRecord(row);
+    },
+    async getPublishedAtRevision({ kind, id, revision }) {
+      assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+      assertDraftId(id);
+      if (!Number.isInteger(revision) || revision < 1) {
+        throw new Error("revision must be a positive integer");
+      }
+      const row = revisions.get(`${publishedKey(kind, id)}:${revision}`);
+      if (!row) return null;
+      return publishedRevisionSnapshot(kind, row);
     },
     async listPublished({ kind, includeWithdrawn = false } = {}) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);

@@ -1472,7 +1472,7 @@ function renderRenameDraftForm(draft) {
   </section>`;
 }
 
-function decisionEventDetail(event, publishedDocument) {
+function decisionEventDetail(event, publishedSnapshots) {
   if (event.eventType === "accepted") {
     return `Accepted as published revision ${event.publishedRevision}.`;
   }
@@ -1480,8 +1480,9 @@ function decisionEventDetail(event, publishedDocument) {
   const against = event.basePublishedRevision
     ? ` against published revision ${event.basePublishedRevision}`
     : "";
-  const diff = publishedDocument && event.proposal
-    ? diffPublishedDraft(publishedDocument, event.proposal)
+  const baseline = publishedSnapshots?.[event.basePublishedRevision] || null;
+  const diff = baseline && event.proposal
+    ? diffPublishedDraft(baseline, event.proposal)
     : null;
   const counts = diff
     ? ` ${diff.counts.changed} changed, ${diff.counts.added} added, ${diff.counts.removed} removed.`
@@ -1495,7 +1496,7 @@ export function renderPuzzleReviewIssuesPage({
   events = [],
   lastAgentReviewedAt = null,
   lastHumanReviewedAt = null,
-  publishedDocument = null,
+  publishedSnapshots = null,
   chronicleOnly = false
 }) {
   const draftId = draft.draftId;
@@ -1544,7 +1545,7 @@ export function renderPuzzleReviewIssuesPage({
     ${issues.filter(issue => issue.status === "resolved").map(issueCard).join("\n") || '<p class="meta">No resolved issues.</p>'}
     <h2>Completed review history</h2>
     ${completedEvents.length ? `<ol class="review-events">${completedEvents.map(event => {
-      const decision = decisionEventDetail(event, publishedDocument);
+      const decision = decisionEventDetail(event, publishedSnapshots);
       return `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${decision ? ` · ${escapeHtml(decision)}` : ""}${!decision && event.draftRevision ? event.outcome === "changed" ? ` · changes recorded in draft revision ${escapeHtml(event.draftRevision)}` : ` · reviewed draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`;
     }).join("")}</ol>` : '<p class="meta">No completed reviews recorded.</p>'}
     ${chronicleOnly ? `<p class="meta">This working copy was discarded. Accepted and rejected reviews remain on this record.</p>` : `<section class="submit-pr">

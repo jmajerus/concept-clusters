@@ -53,7 +53,14 @@ function lazyRepository(resolveRepository) {
     "recordValidation",
     "recordAssistanceStamp"
   ];
-  const optional = ["saveDomain", "materialize", "popWorkingCopy"];
+  const optional = [
+    "saveDomain",
+    "materialize",
+    "popWorkingCopy",
+    "rememberReviewBaseline",
+    "readReviewBaseline",
+    "releaseReviewSession"
+  ];
   const facade = Object.fromEntries(required.map(method => [method, async (...args) => {
     const repository = await resolve();
     return repository[method](...args);
@@ -86,6 +93,7 @@ function lazyContentDocuments(resolveRepository) {
     "getDraft",
     "listDrafts",
     "getPublished",
+    "getPublishedAtRevision",
     "listPublished",
     "publish",
     "seedPublishedIfAbsent",

@@ -365,16 +365,21 @@ function isMissingDraft(error) {
     message.includes("draftId must");
 }
 
-async function publishedRevisionFor(contentDocuments, puzzleId) {
-  if (typeof contentDocuments?.getPublished !== "function") return null;
-  try {
-    const published = await contentDocuments.getPublished({ kind: "puzzle", id: puzzleId });
-    if (!published || published.withdrawnAt) return null;
-    return Number.isInteger(published.revision) ? published.revision : null;
-  } catch (error) {
-    if (error instanceof ContentDocumentNotFoundError) return null;
-    throw error;
-  }
+async function publishedSnapshotsFor(contentDocuments, puzzleId, events) {
+  const snapshots = {};
+  if (typeof contentDocuments?.getPublishedAtRevision !== "function") return snapshots;
+  const revisions = [...new Set((events || [])
+    .filter(event => event.eventType === "rejected" && Number.isInteger(event.basePublishedRevision))
+    .map(event => event.basePublishedRevision))];
+  await Promise.all(revisions.map(async revision => {
+    const snapshot = await contentDocuments.getPublishedAtRevision({
+      kind: "puzzle",
+      id: puzzleId,
+      revision
+    });
+    if (snapshot?.document) snapshots[revision] = snapshot.document;
+  }));
+  return snapshots;
 }
 
 async function recordReviewDecision(contentDocuments, {
@@ -640,8 +645,8 @@ export function createLocalDraftReviewHandler({
           try {
             const { draft, created } = await openPuzzleWorkingCopy({
               getDraft: draftId => draftStore.getDraft(draftId),
-              createDraft: ({ draftId, document, seededFromPublished }) =>
-                draftStore.createDraft({ draftId, document, seededFromPublished }),
+              createDraft: ({ draftId, document, seededFromPublished, basePublishedRevision }) =>
+                draftStore.createDraft({ draftId, document, seededFromPublished, basePublishedRevision }),
               contentDocuments,
               contentService,
               categoryRegistry: await loadMergedCategoryRegistry({
@@ -821,6 +826,7 @@ export function createLocalDraftReviewHandler({
           html(res, `<p>Draft not found: ${escapeHtml(draftId)}</p>`, 404);
           return true;
         }
+        const publishedSnapshots = await publishedSnapshotsFor(contentDocuments, puzzleId, events);
         html(res, renderPuzzleReviewIssuesPage({
           draft: record || {
             draftId: puzzleId,
@@ -829,7 +835,7 @@ export function createLocalDraftReviewHandler({
           },
           issues,
           events,
-          publishedDocument: published?.document || null,
+          publishedSnapshots,
           chronicleOnly: !record,
           lastAgentReviewedAt: published?.lastAgentReviewedAt || null,
           lastHumanReviewedAt: published?.lastHumanReviewedAt || null
@@ -1326,7 +1332,9 @@ export function createLocalDraftReviewHandler({
             html(res, "<p>This review has no saved baseline to restore.</p>", 400);
             return true;
           }
-          const basePublishedRevision = await publishedRevisionFor(contentDocuments, puzzleId);
+          const basePublishedRevision = Number.isInteger(record.reviewBasePublishedRevision)
+            ? record.reviewBasePublishedRevision
+            : null;
           await recordReviewDecision(contentDocuments, {
             puzzleId,
             eventType: "rejected",
@@ -1335,7 +1343,7 @@ export function createLocalDraftReviewHandler({
             basePublishedRevision
           });
           if (form.isDiscardReview) {
-            await draftStore.deleteDraft(draftId);
+            await draftStore.deleteDraft(draftId, { expectedRevision: record.revision });
             res.writeHead(303, {
               Location: `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`,
               "Cache-Control": "no-store"
@@ -1532,8 +1540,8 @@ export function createLocalDraftReviewHandler({
     try {
       const opened = await loadOrSeedPuzzleDraft({
         getDraft: id => draftStore.getDraft(id),
-        createDraft: ({ draftId: id, document, seededFromPublished }) =>
-          draftStore.createDraft({ draftId: id, document, seededFromPublished }),
+        createDraft: ({ draftId: id, document, seededFromPublished, basePublishedRevision }) =>
+          draftStore.createDraft({ draftId: id, document, seededFromPublished, basePublishedRevision }),
         contentDocuments,
         contentService,
         categoryRegistry: await loadMergedCategoryRegistry({

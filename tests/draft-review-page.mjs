@@ -406,7 +406,7 @@ export async function run() {
   const discardedChronicle = renderPuzzleReviewIssuesPage({
     draft: { draftId: "review-fixture", title: "Review Fixture", document: { title: "Review Fixture" } },
     chronicleOnly: true,
-    publishedDocument: baseDraft.document,
+    publishedSnapshots: { 4: baseDraft.document },
     events: [{
       id: 1,
       reviewerKind: "human",
