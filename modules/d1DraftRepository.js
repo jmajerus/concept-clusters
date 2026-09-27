@@ -43,7 +43,12 @@ function metadata(row) {
     baseCommitSha: row.base_commit_sha,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    documentStale: Number(row.document_stale || 0) === 1
+    documentStale: Number(row.document_stale || 0) === 1,
+    openedFromPublished: Number(row.opened_from_published || 0) === 1,
+    hasReviewBaseline: row.review_baseline_json != null && row.review_baseline_json !== "",
+    reviewBasePublishedRevision: row.review_base_published_revision == null
+      ? null
+      : Number(row.review_base_published_revision)
   };
 }
 
@@ -119,7 +124,8 @@ export class D1DraftRepository extends DraftRepository {
     document,
     actor,
     baseCommitSha = null,
-    seededFromPublished = false
+    seededFromPublished = false,
+    basePublishedRevision = null
   }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor);
@@ -162,9 +168,15 @@ export class D1DraftRepository extends DraftRepository {
         names: `id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
           created_at, updated_at, revision, document_stale,
-          content_json, pedagogy_json, provenance_json`,
-        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?"
-      })).bind(...bindFresh, ...gateBindings).run();
+          content_json, pedagogy_json, provenance_json, opened_from_published,
+          review_base_published_revision`,
+        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, ?"
+      })).bind(
+        ...bindFresh,
+        seededFromPublished ? 1 : 0,
+        Number.isInteger(basePublishedRevision) ? basePublishedRevision : null,
+        ...gateBindings
+      ).run();
     } catch (error) {
       if (String(error?.message || error).includes("UNIQUE constraint failed")) {
         throw new DraftConflictError(`Draft "${draftId}" already exists`);
@@ -208,6 +220,70 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(draftId, owner).first();
     if (!row) throw new DraftNotFoundError(draftId);
     return fullDraft(row);
+  }
+
+  async rememberReviewBaseline({
+    draftId,
+    actor,
+    document,
+    expectedRevision,
+    basePublishedRevision = null
+  }) {
+    assertDraftId(draftId);
+    if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
+      throw new Error("expectedRevision must be a positive integer");
+    }
+    const owner = normalizeDraftActor(actor);
+    const baselineJson = serializeDraftDocument(document);
+    const publishedRevision = Number.isInteger(basePublishedRevision)
+      ? basePublishedRevision
+      : null;
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET review_baseline_json = ?,
+          review_base_published_revision = COALESCE(review_base_published_revision, ?)
+      WHERE id = ? AND owner_subject = ? AND revision = ?
+        AND (review_baseline_json IS NULL OR review_baseline_json = '')
+    `).bind(
+      baselineJson,
+      publishedRevision,
+      draftId,
+      owner.subject,
+      expectedRevision
+    ).run();
+    if (changes(result) !== 1) {
+      const current = await this.get({ draftId, actor });
+      if (current.hasReviewBaseline) return current;
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
+      );
+    }
+    return this.get({ draftId, actor });
+  }
+
+  async readReviewBaseline({ draftId, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const row = await this.database.prepare(`
+      SELECT review_baseline_json FROM puzzle_drafts
+      WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner).first();
+    if (!row) throw new DraftNotFoundError(draftId);
+    if (!row.review_baseline_json) return null;
+    return parsedJson(row.review_baseline_json, "Stored review baseline");
+  }
+
+  async releaseReviewSession({ draftId, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET opened_from_published = 0,
+          review_baseline_json = NULL,
+          review_base_published_revision = NULL
+      WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner).run();
+    return this.get({ draftId, actor });
   }
 
   async save({ draftId, document, actor, expectedRevision }) {

@@ -59,6 +59,17 @@ function draftRecord(row) {
   };
 }
 
+function publishedRevisionSnapshot(kind, row) {
+  const document = assertCurrentAuthoredDocument(
+    parsedJson(row.document, "Published revision"),
+    "Published revision"
+  );
+  return {
+    revision: Number(row.revision),
+    document: kind === "puzzle" ? stripSystemAuthoredMetadata(document) : document
+  };
+}
+
 function publishedRecord(row) {
   const document = assertCurrentAuthoredDocument(
     parsedJson(row.document, "Published document"),
@@ -104,6 +115,12 @@ function titleOf(document) {
 }
 
 function reviewEventRecord(row) {
+  let proposal = null;
+  if (row.proposal_json) {
+    proposal = typeof row.proposal_json === "string"
+      ? JSON.parse(row.proposal_json)
+      : row.proposal_json;
+  }
   return {
     id: Number(row.id),
     puzzleId: row.puzzle_id,
@@ -116,9 +133,21 @@ function reviewEventRecord(row) {
     draftRevision: row.draft_revision == null ? null : Number(row.draft_revision),
     guidance: row.guidance_major == null
       ? null
-      : { major: Number(row.guidance_major), minor: Number(row.guidance_minor || 0) }
+      : { major: Number(row.guidance_major), minor: Number(row.guidance_minor || 0) },
+    ...(proposal ? { proposal } : {}),
+    ...(row.base_published_revision == null
+      ? {}
+      : { basePublishedRevision: Number(row.base_published_revision) }),
+    ...(row.published_revision == null
+      ? {}
+      : { publishedRevision: Number(row.published_revision) })
   };
 }
+
+const REVIEW_EVENT_TYPES = Object.freeze([
+  "review", "open", "note", "resolved", "reopened", "accepted", "rejected"
+]);
+const PROPOSAL_BYTE_LIMIT = 1_250_000;
 
 function reviewEventInput({
   reviewerKind,
@@ -127,7 +156,10 @@ function reviewEventInput({
   draftRevision = null,
   guidance = null,
   issueId = null,
-  eventType = "review"
+  eventType = "review",
+  proposal = null,
+  basePublishedRevision = null,
+  publishedRevision = null
 }) {
   if (!['agent', 'human'].includes(reviewerKind)) {
     throw new Error("reviewerKind must be agent or human");
@@ -144,21 +176,43 @@ function reviewEventInput({
   if (guidance != null && (!Number.isInteger(guidance.major) || !Number.isInteger(guidance.minor))) {
     throw new Error("guidance must contain integer major and minor values");
   }
-  if (!["review", "open", "note", "resolved", "reopened"].includes(eventType)) {
-    throw new Error("eventType must be review, open, note, resolved, or reopened");
+  if (!REVIEW_EVENT_TYPES.includes(eventType)) {
+    throw new Error(`eventType must be ${REVIEW_EVENT_TYPES.join(", ")}`);
   }
   if (issueId != null && (typeof issueId !== "string" || !issueId.trim() || issueId.length > 100)) {
     throw new Error("issueId must be a non-empty string of at most 100 characters");
   }
+  const decision = eventType === "accepted" || eventType === "rejected";
   const normalizedComments = comments?.trim() || null;
-  if (eventType === "review" && issueId != null) {
-    throw new Error("review events cannot have an issueId");
+  if ((eventType === "review" || decision) && issueId != null) {
+    throw new Error(`${eventType} events cannot have an issueId`);
   }
-  if (eventType !== "review" && !issueId) {
+  if (!decision && eventType !== "review" && !issueId) {
     throw new Error("issue events require an issueId");
   }
-  if (eventType !== "review" && !normalizedComments) {
+  if (!decision && eventType !== "review" && !normalizedComments) {
     throw new Error("issue events require comments");
+  }
+  if (basePublishedRevision != null && (!Number.isInteger(basePublishedRevision) || basePublishedRevision < 1)) {
+    throw new Error("basePublishedRevision must be a positive integer");
+  }
+  if (publishedRevision != null && (!Number.isInteger(publishedRevision) || publishedRevision < 1)) {
+    throw new Error("publishedRevision must be a positive integer");
+  }
+  if (eventType === "accepted" && publishedRevision == null) {
+    throw new Error("accepted events require publishedRevision");
+  }
+  let proposalJson = null;
+  if (eventType === "rejected") {
+    if (!proposal || typeof proposal !== "object" || Array.isArray(proposal)) {
+      throw new Error("rejected events require a proposal document");
+    }
+    proposalJson = JSON.stringify(proposal);
+    if (new TextEncoder().encode(proposalJson).byteLength > PROPOSAL_BYTE_LIMIT) {
+      throw new Error(`proposal document exceeds ${PROPOSAL_BYTE_LIMIT} bytes`);
+    }
+  } else if (proposal != null) {
+    throw new Error("only rejected events carry a proposal document");
   }
   return {
     reviewerKind,
@@ -167,7 +221,10 @@ function reviewEventInput({
     draftRevision,
     guidance: guidance ? { major: guidance.major, minor: guidance.minor } : null,
     issueId: issueId?.trim() || null,
-    eventType
+    eventType,
+    proposalJson,
+    basePublishedRevision,
+    publishedRevision
   };
 }
 
@@ -359,6 +416,20 @@ export class D1ContentDocumentRepository {
     return publishedRecord(row);
   }
 
+  async getPublishedAtRevision({ kind, id, revision }) {
+    assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+    assertDraftId(id);
+    if (!Number.isInteger(revision) || revision < 1) {
+      throw new Error("revision must be a positive integer");
+    }
+    const row = await this.database.prepare(`
+      SELECT revision, document FROM published_document_revisions
+      WHERE kind = ? AND id = ? AND revision = ?
+    `).bind(kind, id, revision).first();
+    if (!row) return null;
+    return publishedRevisionSnapshot(kind, row);
+  }
+
   async saveLayout({ id, layout }) {
     assertDraftId(id);
     const current = await this.getPublished({ kind: "puzzle", id });
@@ -411,22 +482,30 @@ export class D1ContentDocumentRepository {
     draftRevision = null,
     guidance = null,
     issueId = null,
-    eventType = "review"
+    eventType = "review",
+    proposal = null,
+    basePublishedRevision = null,
+    publishedRevision = null
   }) {
     assertDraftId(id);
     if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
       throw new Error("reviewedAt must be an ISO timestamp");
     }
-    const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType });
+    const event = reviewEventInput({
+      reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType,
+      proposal, basePublishedRevision, publishedRevision
+    });
     const insertEvent = this.database.prepare(`
         INSERT INTO puzzle_review_events (
           puzzle_id, reviewer_kind, reviewed_at, comments, outcome,
-          draft_revision, guidance_major, guidance_minor, issue_id, event_type
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          draft_revision, guidance_major, guidance_minor, issue_id, event_type,
+          proposal_json, base_published_revision, published_revision
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         id, event.reviewerKind, reviewedAt, event.comments, event.outcome,
         event.draftRevision, event.guidance?.major ?? null, event.guidance?.minor ?? null,
-        event.issueId, event.eventType
+        event.issueId, event.eventType,
+        event.proposalJson, event.basePublishedRevision, event.publishedRevision
       );
     if (event.eventType !== "review") {
       await this.database.batch([insertEvent]);
@@ -768,6 +847,16 @@ export function createMemoryContentDocumentRepository() {
       if (!row) throw new ContentDocumentNotFoundError(kind, id);
       return publishedRecord(row);
     },
+    async getPublishedAtRevision({ kind, id, revision }) {
+      assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+      assertDraftId(id);
+      if (!Number.isInteger(revision) || revision < 1) {
+        throw new Error("revision must be a positive integer");
+      }
+      const row = revisions.get(`${publishedKey(kind, id)}:${revision}`);
+      if (!row) return null;
+      return publishedRevisionSnapshot(kind, row);
+    },
     async listPublished({ kind, includeWithdrawn = false } = {}) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
       return [...published.values()]
@@ -910,13 +999,19 @@ export function createMemoryContentDocumentRepository() {
       draftRevision = null,
       guidance = null,
       issueId = null,
-      eventType = "review"
+      eventType = "review",
+      proposal = null,
+      basePublishedRevision = null,
+      publishedRevision = null
     }) {
       assertDraftId(id);
       if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
         throw new Error("reviewedAt must be an ISO timestamp");
       }
-      const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType });
+      const event = reviewEventInput({
+        reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType,
+        proposal, basePublishedRevision, publishedRevision
+      });
       const key = publishedKey("puzzle", id);
       const existing = published.get(key);
       if (event.eventType === "review" && (!existing || existing.withdrawn_at)) {
@@ -939,7 +1034,10 @@ export function createMemoryContentDocumentRepository() {
         guidance_major: event.guidance?.major ?? null,
         guidance_minor: event.guidance?.minor ?? null,
         issue_id: event.issueId,
-        event_type: event.eventType
+        event_type: event.eventType,
+        proposal_json: event.proposalJson,
+        base_published_revision: event.basePublishedRevision,
+        published_revision: event.publishedRevision
       });
       return event.eventType === "review"
         ? repository.getPublished({ kind: "puzzle", id })
