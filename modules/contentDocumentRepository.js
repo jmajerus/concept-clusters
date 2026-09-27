@@ -140,12 +140,27 @@ function reviewEventRecord(row) {
       : { basePublishedRevision: Number(row.base_published_revision) }),
     ...(row.published_revision == null
       ? {}
-      : { publishedRevision: Number(row.published_revision) })
+      : { publishedRevision: Number(row.published_revision) }),
+    ...(row.client_system ? { clientSystem: row.client_system } : {}),
+    ...(row.client_model ? { clientModel: row.client_model } : {}),
+    ...(row.client_name ? { clientName: row.client_name } : {}),
+    ...(row.source_event_id == null
+      ? {}
+      : { sourceEventId: Number(row.source_event_id) })
   };
 }
 
+export function undecidedReviewProposals(events = []) {
+  const decided = new Set(
+    events
+      .map(event => event.sourceEventId)
+      .filter(id => Number.isInteger(id))
+  );
+  return events.filter(event => event.eventType === "proposed" && !decided.has(event.id));
+}
+
 const REVIEW_EVENT_TYPES = Object.freeze([
-  "review", "open", "note", "resolved", "reopened", "accepted", "rejected"
+  "review", "open", "note", "resolved", "reopened", "accepted", "rejected", "proposed"
 ]);
 const PROPOSAL_BYTE_LIMIT = 1_250_000;
 
@@ -159,7 +174,11 @@ function reviewEventInput({
   eventType = "review",
   proposal = null,
   basePublishedRevision = null,
-  publishedRevision = null
+  publishedRevision = null,
+  clientSystem = null,
+  clientModel = null,
+  clientName = null,
+  sourceEventId = null
 }) {
   if (!['agent', 'human'].includes(reviewerKind)) {
     throw new Error("reviewerKind must be agent or human");
@@ -183,14 +202,16 @@ function reviewEventInput({
     throw new Error("issueId must be a non-empty string of at most 100 characters");
   }
   const decision = eventType === "accepted" || eventType === "rejected";
+  const proposalEvent = eventType === "proposed" || eventType === "rejected";
+  const standalone = eventType === "review" || decision || eventType === "proposed";
   const normalizedComments = comments?.trim() || null;
-  if ((eventType === "review" || decision) && issueId != null) {
+  if (standalone && issueId != null) {
     throw new Error(`${eventType} events cannot have an issueId`);
   }
-  if (!decision && eventType !== "review" && !issueId) {
+  if (!standalone && !issueId) {
     throw new Error("issue events require an issueId");
   }
-  if (!decision && eventType !== "review" && !normalizedComments) {
+  if (!standalone && !normalizedComments) {
     throw new Error("issue events require comments");
   }
   if (basePublishedRevision != null && (!Number.isInteger(basePublishedRevision) || basePublishedRevision < 1)) {
@@ -202,17 +223,31 @@ function reviewEventInput({
   if (eventType === "accepted" && publishedRevision == null) {
     throw new Error("accepted events require publishedRevision");
   }
+  if (eventType === "proposed" && basePublishedRevision == null) {
+    throw new Error("proposed events require basePublishedRevision");
+  }
+  if (sourceEventId != null && (!Number.isInteger(sourceEventId) || sourceEventId < 1)) {
+    throw new Error("sourceEventId must be a positive integer");
+  }
+  if (eventType === "proposed" && sourceEventId != null) {
+    throw new Error("proposed events cannot reference another event");
+  }
+  const client = {
+    clientSystem: boundedClientLabel(clientSystem, "clientSystem"),
+    clientModel: boundedClientLabel(clientModel, "clientModel"),
+    clientName: boundedClientLabel(clientName, "clientName")
+  };
   let proposalJson = null;
-  if (eventType === "rejected") {
+  if (proposalEvent) {
     if (!proposal || typeof proposal !== "object" || Array.isArray(proposal)) {
-      throw new Error("rejected events require a proposal document");
+      throw new Error(`${eventType} events require a proposal document`);
     }
     proposalJson = JSON.stringify(proposal);
     if (new TextEncoder().encode(proposalJson).byteLength > PROPOSAL_BYTE_LIMIT) {
       throw new Error(`proposal document exceeds ${PROPOSAL_BYTE_LIMIT} bytes`);
     }
   } else if (proposal != null) {
-    throw new Error("only rejected events carry a proposal document");
+    throw new Error("only proposed and rejected events carry a proposal document");
   }
   return {
     reviewerKind,
@@ -224,8 +259,18 @@ function reviewEventInput({
     eventType,
     proposalJson,
     basePublishedRevision,
-    publishedRevision
+    publishedRevision,
+    ...client,
+    sourceEventId
   };
+}
+
+function boundedClientLabel(value, name) {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string" || value.length > 200) {
+    throw new Error(`${name} must be a string of at most 200 characters`);
+  }
+  return value;
 }
 
 function reviewIssueThreads(events) {
@@ -485,7 +530,11 @@ export class D1ContentDocumentRepository {
     eventType = "review",
     proposal = null,
     basePublishedRevision = null,
-    publishedRevision = null
+    publishedRevision = null,
+    clientSystem = null,
+    clientModel = null,
+    clientName = null,
+    sourceEventId = null
   }) {
     assertDraftId(id);
     if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
@@ -493,23 +542,33 @@ export class D1ContentDocumentRepository {
     }
     const event = reviewEventInput({
       reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType,
-      proposal, basePublishedRevision, publishedRevision
+      proposal, basePublishedRevision, publishedRevision,
+      clientSystem, clientModel, clientName, sourceEventId
     });
     const insertEvent = this.database.prepare(`
         INSERT INTO puzzle_review_events (
           puzzle_id, reviewer_kind, reviewed_at, comments, outcome,
           draft_revision, guidance_major, guidance_minor, issue_id, event_type,
-          proposal_json, base_published_revision, published_revision
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          proposal_json, base_published_revision, published_revision,
+          client_system, client_model, client_name, source_event_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         id, event.reviewerKind, reviewedAt, event.comments, event.outcome,
         event.draftRevision, event.guidance?.major ?? null, event.guidance?.minor ?? null,
         event.issueId, event.eventType,
-        event.proposalJson, event.basePublishedRevision, event.publishedRevision
+        event.proposalJson, event.basePublishedRevision, event.publishedRevision,
+        event.clientSystem, event.clientModel, event.clientName, event.sourceEventId
       );
     if (event.eventType !== "review") {
       await this.database.batch([insertEvent]);
-      return null;
+      if (event.eventType !== "proposed") return null;
+      const inserted = await this.database.prepare(`
+        SELECT * FROM puzzle_review_events
+        WHERE puzzle_id = ? AND event_type = 'proposed'
+        ORDER BY id DESC
+        LIMIT 1
+      `).bind(id).first();
+      return inserted ? reviewEventRecord(inserted) : null;
     }
     await this.getPublished({ kind: "puzzle", id });
     const reviewColumn = event.reviewerKind === "agent"
@@ -544,6 +603,32 @@ export class D1ContentDocumentRepository {
       LIMIT ?
     `).bind(id, cappedLimit).all();
     return result.results.map(reviewEventRecord);
+  }
+
+  async listOpenReviewProposals({ id }) {
+    assertDraftId(id);
+    const result = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ? AND event_type = 'proposed'
+        AND id NOT IN (
+          SELECT source_event_id FROM puzzle_review_events
+          WHERE puzzle_id = ? AND source_event_id IS NOT NULL
+        )
+      ORDER BY reviewed_at ASC, id ASC
+    `).bind(id, id).all();
+    return result.results.map(reviewEventRecord);
+  }
+
+  async getPuzzleReviewEvent({ id, eventId }) {
+    assertDraftId(id);
+    if (!Number.isInteger(eventId) || eventId < 1) {
+      throw new Error("eventId must be a positive integer");
+    }
+    const row = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ? AND id = ?
+    `).bind(id, eventId).first();
+    return row ? reviewEventRecord(row) : null;
   }
 
   async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
@@ -1002,7 +1087,11 @@ export function createMemoryContentDocumentRepository() {
       eventType = "review",
       proposal = null,
       basePublishedRevision = null,
-      publishedRevision = null
+      publishedRevision = null,
+      clientSystem = null,
+      clientModel = null,
+      clientName = null,
+      sourceEventId = null
     }) {
       assertDraftId(id);
       if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
@@ -1010,7 +1099,8 @@ export function createMemoryContentDocumentRepository() {
       }
       const event = reviewEventInput({
         reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType,
-        proposal, basePublishedRevision, publishedRevision
+        proposal, basePublishedRevision, publishedRevision,
+        clientSystem, clientModel, clientName, sourceEventId
       });
       const key = publishedKey("puzzle", id);
       const existing = published.get(key);
@@ -1037,8 +1127,13 @@ export function createMemoryContentDocumentRepository() {
         event_type: event.eventType,
         proposal_json: event.proposalJson,
         base_published_revision: event.basePublishedRevision,
-        published_revision: event.publishedRevision
+        published_revision: event.publishedRevision,
+        client_system: event.clientSystem,
+        client_model: event.clientModel,
+        client_name: event.clientName,
+        source_event_id: event.sourceEventId
       });
+      if (event.eventType === "proposed") return reviewEventRecord(reviewEvents.at(-1));
       return event.eventType === "review"
         ? repository.getPublished({ kind: "puzzle", id })
         : null;
@@ -1057,6 +1152,24 @@ export function createMemoryContentDocumentRepository() {
         .sort((left, right) => String(right.reviewed_at).localeCompare(String(left.reviewed_at)) || right.id - left.id)
         .slice(0, cappedLimit)
         .map(reviewEventRecord);
+    },
+    async listOpenReviewProposals({ id }) {
+      assertDraftId(id);
+      return undecidedReviewProposals(
+        reviewEvents
+          .filter(event => event.puzzle_id === id)
+          .map(reviewEventRecord)
+      ).sort((left, right) =>
+        String(left.reviewedAt).localeCompare(String(right.reviewedAt)) || left.id - right.id
+      );
+    },
+    async getPuzzleReviewEvent({ id, eventId }) {
+      assertDraftId(id);
+      if (!Number.isInteger(eventId) || eventId < 1) {
+        throw new Error("eventId must be a positive integer");
+      }
+      const row = reviewEvents.find(event => event.puzzle_id === id && event.id === eventId);
+      return row ? reviewEventRecord(row) : null;
     },
     async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
       assertDraftId(id);

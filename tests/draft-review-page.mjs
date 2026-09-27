@@ -400,6 +400,58 @@ export async function run() {
     }
   });
   assert.match(baselineReview, /value="undo-review"/);
+
+  const choicePage = renderDraftPage({
+    ...baseDraft,
+    openedFromPublished: true,
+    hasReviewBaseline: true,
+    reviewBasePublishedRevision: 4,
+    workingCopyHistoryCount: 2,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 1,
+      counts: { changed: 1, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    },
+    reviewAnchorDocument: baseDraft.document,
+    reviewCandidates: [{
+      id: 9,
+      eventType: "proposed",
+      basePublishedRevision: 4,
+      clientSystem: "Codex gpt-5.4",
+      comments: "The fact was broader than the cluster.",
+      proposal: {
+        ...baseDraft.document,
+        clusters: [{
+          ...baseDraft.document.clusters[0],
+          fact: "A sharper alpha fact."
+        }]
+      }
+    }, {
+      id: 10,
+      eventType: "proposed",
+      basePublishedRevision: 2,
+      clientSystem: "Stale agent",
+      proposal: baseDraft.document
+    }]
+  });
+  assert.match(choicePage, /Codex gpt-5.4/);
+  assert.match(choicePage, /A sharper alpha fact/);
+  assert.match(choicePage, /The fact was broader than the cluster/);
+  assert.match(choicePage, /value="publish-review"/);
+  assert.match(choicePage, /name="proposal_id" value="9"/);
+  assert.match(choicePage, /value="preview-review"/);
+  assert.match(choicePage, /value="keep-published"/);
+  assert.match(choicePage, /different published revision/);
+  assert.doesNotMatch(choicePage, /Stale agent/);
+  assert.doesNotMatch(choicePage, /value="discard-review"/);
+  assert.doesNotMatch(choicePage, /value="undo-review"/);
+  assert.doesNotMatch(choicePage, /value="publish"/);
+  assert.doesNotMatch(choicePage, /value="delete-draft"/);
   assert.doesNotMatch(baselineReview, /value="discard-review"/);
   assert.doesNotMatch(baselineReview, /value="revert-published"/);
 

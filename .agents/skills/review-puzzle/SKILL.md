@@ -61,12 +61,22 @@ Before the first edit of a review or loop pass, call
 `record_agent_puzzle_review` with `action="begin"`. That snapshots the
 document the review started from. It does not record a completed review.
 
-When this review opened the working copy, the drafts page offers **Publish**
-and **Discard review**. Publish records the review as accepted. Discard
-deletes the working copy and stores the proposal on the review record.
-When a draft was already open, **Undo review** restores that snapshot and
-stores the proposal the same way. Saving the working copy yourself ends that
-session and brings the ordinary revert actions back.
+After the edited draft validates, call the same tool with `action="propose"`.
+That files the current document as one candidate against the published
+revision this review started from, then restores the working copy to the
+baseline so another agent can file a competing candidate. Skip `propose` when
+the document matches the baseline. Then call `action="complete"`.
+
+The drafts page lists open candidates from that same published revision.
+**Play** loads one into the working copy. **Publish this review** publishes
+that stored proposal and rejects the others. **Keep published** rejects every
+open proposal. A proposal against a different published revision is not part
+of the choice.
+
+When no candidate has been filed yet, the page still offers **Publish** and,
+if this review opened the working copy, **Discard review**. When a draft was
+already open, **Undo review** restores the snapshot from `begin`. Saving the
+working copy yourself ends that session only when no candidate is open.
 
 ## Fail closed
 
@@ -140,7 +150,9 @@ Before opening an issue, apply this threshold:
 
 Open one independent issue for each qualifying concern with `record_agent_puzzle_review action="open"` and non-empty comments. Do not leave a qualifying open concern only in the completion comment.
 
-Call MCP `record_agent_puzzle_review` with its default `action="complete"` only at successful wrap-up, after the current draft is valid. It takes the `draft_id`, an outcome (`unchanged`, `changed`, or `open-questions`), and optional comments limited to the completed review. The server derives the timestamp, draft revision, and guidance version and advances only the agent-review timestamp. It never changes the separate human-review time, which only the authoring-page action records.
+If the review changed the document, call `record_agent_puzzle_review` with `action="propose"` after `validate_puzzle_draft` passes and before completion. Optional comments state why the proposal should win. The server stores the document, the published revision it was written against, and the MCP client identity, then restores the baseline. Do not leave the edited draft as the only copy of the proposal.
+
+Call MCP `record_agent_puzzle_review` with its default `action="complete"` only at successful wrap-up, after `propose` when there were changes, and only while the current draft is valid. It takes the `draft_id`, an outcome (`unchanged`, `changed`, or `open-questions`), and optional comments limited to the completed review. The server derives the timestamp, draft revision, and guidance version and advances only the agent-review timestamp. It never changes the separate human-review time, which only the authoring-page action records. Choosing among filed proposals is a human action on the drafts page.
 
 For unfinished work—during creation or review—call the same tool with `action="open"` and non-empty comments. It creates a durable unresolved handoff without requiring a valid draft or advancing either review timestamp. `list_puzzle_review_issues` returns only actionable open issues by default; use its returned `issue_id` before `note` or `resolve`. Set `include_resolved: true` only to audit history or select an issue to `reopen`. Do not treat a completed review as resolving an issue.
 

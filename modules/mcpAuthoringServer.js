@@ -101,6 +101,8 @@ function lazyContentDocuments(resolveRepository) {
     "recordPuzzleAgentReview",
     "recordPuzzleHumanReview",
     "listPuzzleReviewEvents",
+    "listOpenReviewProposals",
+    "getPuzzleReviewEvent",
     "listPuzzleReviewIssues",
     "getPuzzleReviewIssue"
   ].map(method => [method, async (...args) => {

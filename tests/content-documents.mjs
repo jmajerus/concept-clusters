@@ -392,6 +392,67 @@ export async function run() {
   assert.equal(revisionIssue.openingRevision, 3);
   assert.equal(revisionIssue.lastRecordedRevision, 5);
   assert.equal(revisionIssue.draftRevisedSinceOpening, true);
+
+  const beforeProposals = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
+  const proposal = {
+    id: "old-git-puzzle",
+    title: "Candidate title",
+    clusters: [{ id: "alpha", fact: "A narrower fact." }]
+  };
+  const filed = await repo.recordPuzzleAgentReview({
+    id: "old-git-puzzle",
+    reviewedAt: "2026-09-14T12:00:00.000Z",
+    eventType: "proposed",
+    draftRevision: 6,
+    basePublishedRevision: beforeProposals.revision,
+    proposal,
+    comments: "The fact was broader than the cluster.",
+    clientSystem: "Codex gpt-5.4",
+    clientModel: "gpt-5.4",
+    clientName: "Codex"
+  });
+  const afterProposal = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
+  assert.equal(afterProposal.lastAgentReviewedAt, beforeProposals.lastAgentReviewedAt);
+  assert.equal(afterProposal.lastHumanReviewedAt, beforeProposals.lastHumanReviewedAt);
+  assert.equal(afterProposal.revision, beforeProposals.revision);
+  assert.equal(filed.eventType, "proposed");
+  assert.equal(filed.clientSystem, "Codex gpt-5.4");
+  assert.deepEqual(filed.proposal, proposal);
+  const rival = await repo.recordPuzzleAgentReview({
+    id: "old-git-puzzle",
+    reviewedAt: "2026-09-14T12:05:00.000Z",
+    eventType: "proposed",
+    draftRevision: 7,
+    basePublishedRevision: beforeProposals.revision,
+    proposal: { ...proposal, title: "Other candidate" },
+    clientName: "Other agent"
+  });
+  assert.deepEqual(
+    (await repo.listOpenReviewProposals({ id: "old-git-puzzle" })).map(event => event.id),
+    [filed.id, rival.id]
+  );
+  await repo.recordPuzzleHumanReview({
+    id: "old-git-puzzle",
+    reviewedAt: "2026-09-14T12:10:00.000Z",
+    eventType: "accepted",
+    publishedRevision: beforeProposals.revision,
+    sourceEventId: filed.id
+  });
+  await repo.recordPuzzleHumanReview({
+    id: "old-git-puzzle",
+    reviewedAt: "2026-09-14T12:10:01.000Z",
+    eventType: "rejected",
+    basePublishedRevision: beforeProposals.revision,
+    proposal: rival.proposal,
+    sourceEventId: rival.id
+  });
+  const stillOpen = await repo.listOpenReviewProposals({ id: "old-git-puzzle" });
+  assert.deepEqual(stillOpen, []);
+  const acceptedProposal = await repo.getPuzzleReviewEvent({ id: "old-git-puzzle", eventId: filed.id });
+  assert.equal(acceptedProposal.eventType, "proposed");
+  assert.deepEqual(acceptedProposal.proposal, proposal);
+  const decided = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
+  assert.equal(decided.lastHumanReviewedAt, beforeProposals.lastHumanReviewedAt);
   await assert.rejects(
     repo.recordPuzzleAgentReview({ id: "unpublished-handoff", eventType: "open", issueId: "issue-no-comment" }),
     /comments/
