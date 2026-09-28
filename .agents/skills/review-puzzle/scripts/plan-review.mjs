@@ -46,7 +46,7 @@ Flags:
   --dry-run              Plan only; no MCP, no log writes
   --category <slug>      --subcategory <id>  --count <n>
   --record <id>          --unchanged  --authored  --comments <text>
-  --budget <n>           Max MCP calls per id (default: 7 for review, 3 otherwise)
+  --budget <n>           Max MCP calls per id (default: 9 for review, 3 otherwise)
   --rounds <n>           Max critic/author rounds for --mode loop (default 3)`);
   process.exit(message ? 1 : 0);
 }
@@ -141,10 +141,11 @@ async function build() {
   const args = parseArgs(process.argv.slice(2));
   const mode = inferMode(args);
   if (!MODES.includes(mode)) usage(`Unknown --mode "${mode}".`);
-  // A changed single-pass review can need: load, guidance, save, validate,
-  // then refresh, corrective save, and re-validation. Load/pick remain
-  // deliberately cheaper; loop supplies its own per-round calculation below.
-  const budget = args.budget ? Number(args.budget) : mode === "review" ? 8 : 3;
+  // A changed single-pass review can need: begin, load, guidance, save,
+  // validate, refresh, a corrective save, re-validation, and propose.
+  // Load/pick remain deliberately cheaper; loop supplies its own per-round
+  // calculation below.
+  const budget = args.budget ? Number(args.budget) : mode === "review" ? 9 : 3;
   if (!Number.isInteger(budget) || budget < 1) usage("--budget must be a positive integer.");
   const rounds = args.rounds ? Number(args.rounds) : 3;
   if (!Number.isInteger(rounds) || rounds < 1) usage("--rounds must be a positive integer.");
@@ -317,9 +318,10 @@ async function build() {
         "If validation has a structural-regularity-combination prompt: resolve the authoring workspace once; read only ledgers/<draft-id>-fit.json, then inventories/<ledger.inventoryId>.json when named (otherwise inventories/<draft-id>.json). If neither source exists, keep the prompt open for human source review; do not alter counts merely to clear it.",
         "Apply the board checklist on this document only",
         "If changing the document: save_puzzle_draft with the current expected_revision, then validate_puzzle_draft. If validation needs a correction, refresh revision, save once more, and re-validate.",
+        `If the document changed: record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="propose" [comments on why this candidate should win]. That files the candidate and restores the baseline. Skip propose when nothing changed.`,
         `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
-        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after the review is complete and the current draft is valid`,
-        "Give the drafts URL. Publish accepts this review. If this review opened the working copy, Discard review deletes it and keeps the proposal. If a draft was already open, Undo review restores it. Cue and Freeze stay human actions. STOP."
+        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after propose (when the document changed) and only while the current draft is valid`,
+        "Give the drafts URL. Open candidates for the current published puzzle are cards: Play loads one, Publish this review publishes that stored proposal and rejects the others, Keep published rejects all of them. If content or pedagogy was published after this review began, do not file the older draft. A byline or layout publish does not. Cue and Freeze stay human actions. STOP."
       ],
       report: {
         ...loadReport(),
@@ -343,7 +345,7 @@ async function build() {
     // slack for a re-validate after fixing errors), plus one initial
     // get_puzzle_draft -- well past review/load's flat default of 3.
     // An explicit --budget is trusted as-is; only the default is scaled.
-    const loopBudget = args.budget ? budget : rounds * 4 + 2;
+    const loopBudget = args.budget ? budget : rounds * 4 + 3;
     const resolved = resolveTargets(args.ids, { namedByUser: true });
     const fromTargets = planFromTargets(resolved.targets, {
       namedByUser: true,
@@ -377,9 +379,10 @@ async function build() {
         "AUTHOR TURN: address each objection with targeted edits, then save_puzzle_draft with the current expected_revision. validate_puzzle_draft; fix any errors before the next round.",
         `Repeat CRITIC TURN / AUTHOR TURN up to ${rounds} rounds total. If the cap is reached with objections still open: stop looping, reason="capped".`,
         "WRAP-UP: report each round's objections and fixes, and the stop reason (converged/stagnant/capped).",
+        `If the document changed: record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="propose" [comments on why this candidate should win]. That files the candidate and restores the baseline. Skip propose when nothing changed.`,
         `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
-        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after the review is complete and the current draft is valid`,
-        "Give the drafts URL. Publish accepts this review. If this review opened the working copy, Discard review deletes it and keeps the proposal. If a draft was already open, Undo review restores it. Cue and Freeze stay human actions. STOP."
+        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after propose (when the document changed) and only while the current draft is valid`,
+        "Give the drafts URL. Open candidates for the current published puzzle are cards: Play loads one, Publish this review publishes that stored proposal and rejects the others, Keep published rejects all of them. If content or pedagogy was published after this review began, do not file the older draft. A byline or layout publish does not. Cue and Freeze stay human actions. STOP."
       ],
       report: {
         ...loadReport(),

@@ -42,7 +42,16 @@ import {
   buildMcpClientProbeRecord,
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
-import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
+import {
+  identifyMcpAssistanceClient,
+  observedMcpClientLabel,
+  stampDocumentAssistanceFromMcp
+} from "./mcpClientIdentity.js";
+import {
+  diffPublishedDraft,
+  documentKeepingProvenance,
+  samePlayablePuzzle
+} from "./draftReviewDiff.js";
 import { MCP_EXCLUDED_ROOT_FIELDS } from "./authoringFieldOwnership.js";
 import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
@@ -222,6 +231,12 @@ function failure(error) {
     structuredContent: output,
     isError: true
   };
+}
+
+function clipClientLabel(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed.slice(0, 200) : null;
 }
 
 function safe(handler) {
@@ -1312,7 +1327,7 @@ export function createAuthoringMcpServer({
 
   const agentReviewInput = z.object({
     draft_id: draftIdSchema,
-    action: z.enum(["complete", "begin", "open", "note", "resolve", "reopen"]).default("complete"),
+    action: z.enum(["complete", "begin", "propose", "open", "note", "resolve", "reopen"]).default("complete"),
     issue_id: z.string().min(1).max(100).optional(),
     outcome: z.enum(["unchanged", "changed", "authored", "open-questions"]).optional(),
     comments: z.string().max(10_000).optional()
@@ -1324,7 +1339,7 @@ export function createAuthoringMcpServer({
     if (["note", "resolve", "reopen"].includes(input.action) && !input.issue_id) {
       context.addIssue({ code: "custom", path: ["issue_id"], message: `${input.action} requires issue_id` });
     }
-    if (input.action !== "complete" && input.action !== "begin" && !hasComments) {
+    if (!["complete", "begin", "propose"].includes(input.action) && !hasComments) {
       context.addIssue({ code: "custom", path: ["comments"], message: `${input.action} requires non-empty comments` });
     }
   });
@@ -1356,10 +1371,10 @@ export function createAuthoringMcpServer({
   server.registerTool("record_agent_puzzle_review", {
     title: "Record agent review or handoff issue",
     description:
-      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues to obtain an issue id before note, resolve, or reopen. The server derives timestamps, draft revision, and guidance version; it never records a human review. Accept and reject are human actions on the drafts page.",
+      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. action=propose files the current document as one candidate against that published revision, then restores the working copy to the baseline so another agent can file a competing candidate. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues to obtain an issue id before note, resolve, or reopen. The server derives timestamps, draft revision, and guidance version; it never records a human review. Choosing a winner is a human action on the drafts page.",
     inputSchema: agentReviewInput,
     annotations: WRITE
-  }, tracked("record_agent_puzzle_review", safe(async ({ draft_id, action, issue_id, outcome, comments }) => {
+  }, tracked("record_agent_puzzle_review", safe(async ({ draft_id, action, issue_id, outcome, comments }, ctx) => {
     if (typeof contentDocuments?.recordPuzzleAgentReview !== "function") {
       throw new Error("Recording agent puzzle reviews requires D1 content documents.");
     }
@@ -1401,6 +1416,80 @@ export function createAuthoringMcpServer({
         draftId: draft_id,
         draftRevision: draft.revision,
         basePublishedRevision: draft.reviewBasePublishedRevision,
+        action
+      });
+    }
+    if (action === "propose") {
+      if (typeof draftRepository.readReviewBaseline !== "function") {
+        throw new Error("Filing a review proposal requires a stored review baseline.");
+      }
+      if (!stored.hasReviewBaseline) {
+        throw new Error("Call action=begin before filing a review proposal.");
+      }
+      const basePublishedRevision = Number.isInteger(stored.reviewBasePublishedRevision)
+        ? stored.reviewBasePublishedRevision
+        : null;
+      if (basePublishedRevision == null) {
+        throw new Error("A review proposal needs the published puzzle this review started from.");
+      }
+      const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+      if (!published || published.withdrawnAt || !published.document) {
+        throw new Error("A review proposal needs the published puzzle this review started from.");
+      }
+      let baseDocument = published.document;
+      if (published.revision !== basePublishedRevision) {
+        const snapshot = typeof contentDocuments.getPublishedAtRevision === "function"
+          ? await contentDocuments.getPublishedAtRevision({
+            kind: "puzzle",
+            id: puzzleId,
+            revision: basePublishedRevision
+          })
+          : null;
+        baseDocument = snapshot?.document || null;
+      }
+      if (!samePlayablePuzzle(baseDocument, published.document)) {
+        throw new Error("The published puzzle has changed since this review began. Review the current published puzzle before filing a proposal.");
+      }
+      const baseline = await draftRepository.readReviewBaseline({ draftId: draft_id, actor });
+      if (!baseline) throw new Error("This review has no saved baseline to restore.");
+      const proposalDiff = diffPublishedDraft(baseline, stored.document);
+      if (!proposalDiff || proposalDiff.total === 0) {
+        throw new Error("This draft matches the review baseline; nothing to propose.");
+      }
+      const taxonomy = await taxonomyContext();
+      const validation = await contentService.validatePuzzleDraft(stored.document, {
+        categoryRegistry: taxonomy.categoryRegistry,
+        knownPuzzleIds: taxonomy.puzzleIds
+      });
+      if (!validation.valid) {
+        throw new Error(`Draft ${draft_id} is not valid; fix and validate it before filing a proposal.`);
+      }
+      const identity = identifyMcpAssistanceClient({ ctx, server });
+      const clientName = clipClientLabel(identity?.clientName || observedMcpClientLabel({ ctx, server }));
+      const filed = await contentDocuments.recordPuzzleAgentReview({
+        id: puzzleId,
+        eventType: "proposed",
+        comments: reviewComments,
+        proposal: stored.document,
+        basePublishedRevision,
+        draftRevision: stored.revision,
+        clientSystem: clipClientLabel(identity?.system || null),
+        clientModel: clipClientLabel(identity?.model || null),
+        clientName
+      });
+      const restored = await draftRepository.save({
+        draftId: draft_id,
+        document: documentKeepingProvenance(baseline, stored.document),
+        expectedRevision: stored.revision,
+        actor
+      });
+      return success(`Filed a review proposal for ${puzzleId} and restored the working copy to the baseline.`, {
+        puzzleId,
+        draftId: draft_id,
+        draftRevision: restored.revision,
+        eventId: filed?.id || null,
+        basePublishedRevision,
+        clientSystem: identity?.system || null,
         action
       });
     }

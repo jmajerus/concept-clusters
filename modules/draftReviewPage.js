@@ -1328,6 +1328,112 @@ function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
      has no git checkout.`;
 }
 
+function reviewCandidateLabel(event) {
+  const system = typeof event?.clientSystem === "string" ? event.clientSystem.trim() : "";
+  if (system) return system;
+  const name = typeof event?.clientName === "string" ? event.clientName.trim() : "";
+  if (name) return name;
+  return "Unnamed agent";
+}
+
+function reviewChoiceCandidates(draft) {
+  return (Array.isArray(draft.reviewCandidates) ? draft.reviewCandidates : [])
+    .filter(event => event?.eventType === "proposed" && event.proposal);
+}
+
+function truncateReviewText(value, limit = 160) {
+  const text = typeof value === "string" ? value : JSON.stringify(value ?? "");
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit - 1)}…`;
+}
+
+function reviewItemLabel(item) {
+  if (typeof item === "string") return item;
+  if (item && typeof item === "object") {
+    return item.id || item.name || item.term || item.prompt || "item";
+  }
+  return "item";
+}
+
+function reviewCandidateLines(diff) {
+  if (!diff) return [];
+  const lines = [];
+  for (const [name, change] of Object.entries(diff.fields || {})) {
+    if (change?.after != null && typeof change.after !== "object") {
+      lines.push(`${name}: ${truncateReviewText(change.after)}`);
+    } else {
+      lines.push(`${name} changed`);
+    }
+  }
+  for (const [label, section] of [
+    ["cluster", diff.clusters],
+    ["bridge", diff.bridges],
+    ["lens", diff.lenses]
+  ]) {
+    for (const key of section?.added || []) lines.push(`Added ${label} ${key}`);
+    for (const item of section?.removed || []) lines.push(`Removed ${label} ${reviewItemLabel(item)}`);
+    for (const [key, mark] of Object.entries(section?.changed || {})) {
+      const fact = mark.fields?.fact;
+      if (typeof fact?.after === "string") lines.push(`${key}: ${truncateReviewText(fact.after)}`);
+      else lines.push(`${key} changed`);
+    }
+  }
+  return lines;
+}
+
+function renderReviewChoice(draft) {
+  const candidates = reviewChoiceCandidates(draft);
+  if (!candidates.length) return "";
+  const draftId = draft.draftId;
+  const action = `/admin/drafts/${encodeURIComponent(draftId)}`;
+  const expected = escapeHtml(String(draft.revision ?? ""));
+  const cards = candidates.map(event => {
+    const diff = draft.reviewAnchorDocument && event.proposal
+      ? diffPublishedDraft(draft.reviewAnchorDocument, event.proposal)
+      : null;
+    const lines = reviewCandidateLines(diff).slice(0, 8);
+    const hidden = lines.length;
+    const total = reviewCandidateLines(diff).length;
+    const list = lines.length
+      ? `<ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`
+      : `<p class="meta">${draft.reviewAnchorDocument ? "No fact-level changes to show." : "The published puzzle is not available, so this card has no diff."}</p>`;
+    const more = total > hidden ? `<p class="meta">${total - hidden} more changes are in the proposal.</p>` : "";
+    const proposalId = escapeHtml(String(event.id));
+    return `<article class="review-candidate">
+      <h3>${escapeHtml(reviewCandidateLabel(event))}</h3>
+      ${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}
+      ${list}
+      ${more}
+      <div class="actions">
+        <form method="post" action="${action}">
+          <input type="hidden" name="confirm" value="preview-review">
+          <input type="hidden" name="proposal_id" value="${proposalId}">
+          <input type="hidden" name="expected_revision" value="${expected}">
+          <button type="submit">Play</button>
+        </form>
+        <form method="post" action="${action}">
+          <input type="hidden" name="confirm" value="publish-review">
+          <input type="hidden" name="proposal_id" value="${proposalId}">
+          <input type="hidden" name="expected_revision" value="${expected}">
+          <button type="submit">Publish this review</button>
+        </form>
+      </div>
+    </article>`;
+  }).join("\n");
+  return `<section class="submit-pr">
+    <h2>Choose a review</h2>
+    <p class="meta">These proposals are alternatives to the published puzzle. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
+    ${cards}
+    <form method="post" action="${action}">
+      <input type="hidden" name="confirm" value="keep-published">
+      <input type="hidden" name="expected_revision" value="${expected}">
+      <div class="actions">
+        <button type="submit" class="secondary">Keep published</button>
+      </div>
+    </form>
+  </section>`;
+}
+
 function renderSubmitForm(draft, variant = "hosted") {
   const draftId = draft.draftId;
   const valid = draft.validation?.valid === true;
@@ -1346,12 +1452,13 @@ function renderSubmitForm(draft, variant = "hosted") {
   const disabled = canPublish ? "" : " disabled";
   const hint = submitHint(variant, { valid, alreadyAuthoringPlay });
   const playButton = variant === "local" ? renderPlayAction(draft, { valid }) : "";
-  const reviewOpenedDraft = draft.openedFromPublished === true;
-  const undoReview = !reviewOpenedDraft && draft.hasReviewBaseline === true;
-  const revert = !reviewOpenedDraft && !undoReview && differsFromPublished
+  const choosingReview = reviewChoiceCandidates(draft).length > 0;
+  const reviewOpenedDraft = !choosingReview && draft.openedFromPublished === true;
+  const undoReview = !choosingReview && !reviewOpenedDraft && draft.hasReviewBaseline === true;
+  const revert = !reviewOpenedDraft && !undoReview && !choosingReview && differsFromPublished
     ? `<button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>`
     : "";
-  const revertWorking = !reviewOpenedDraft && !undoReview && Number(draft.workingCopyHistoryCount) > 0
+  const revertWorking = !choosingReview && !reviewOpenedDraft && !undoReview && Number(draft.workingCopyHistoryCount) > 0
     ? `<button type="submit" name="confirm" value="revert-working-copy" class="secondary">Revert to last working copy</button>`
     : "";
   const discardReview = reviewOpenedDraft
@@ -1365,22 +1472,25 @@ function renderSubmitForm(draft, variant = "hosted") {
     : "";
   const workingMeta = [
     "Copy edits on this page stay in the browser until you Save working copy. Construct auto-saves board structure.",
+    choosingReview
+      ? "Open proposals are the choice. Saving the working copy does not publish one or end the choice."
+      : "",
     reviewOpenedDraft
       ? "This working copy was opened for review. Publish records the review as accepted. Discard review deletes the working copy and keeps the proposal on the review record."
       : "",
     undoReview
       ? "Undo review restores the draft from before this review and keeps the proposal on the review record."
       : "",
-    !reviewOpenedDraft && !undoReview && Number(draft.workingCopyHistoryCount) > 0
+    !choosingReview && !reviewOpenedDraft && !undoReview && Number(draft.workingCopyHistoryCount) > 0
       ? "Revert to last working copy restores the previous save. Each click goes back one save."
       : "",
-    !reviewOpenedDraft && !undoReview && differsFromPublished
+    !choosingReview && !reviewOpenedDraft && !undoReview && differsFromPublished
       ? `Revert to published restores the last D1 published document${layoutDiffersFromPublished ? " and layout" : ""}.`
       : "",
     d1Published
       ? "Remove from authoring play withdraws the published row (Freeze later deletes git files)."
       : "",
-    "Delete working copy removes only this draft."
+    choosingReview ? "" : "Delete working copy removes only this draft."
   ].filter(Boolean).join(" ");
   const reviewIssues = Array.isArray(draft.reviewIssues) ? draft.reviewIssues : [];
   const openReviewIssues = reviewIssues.filter(issue => issue.status === "open");
@@ -1390,7 +1500,9 @@ function renderSubmitForm(draft, variant = "hosted") {
     <p class="meta">Agent review: ${escapeHtml(draft.lastAgentReviewedAt || "not recorded")} · Human review: ${escapeHtml(draft.lastHumanReviewedAt || "not recorded")} · ${openReviewIssues.length} open issue handoff${openReviewIssues.length === 1 ? "" : "s"}.</p>
     <a class="play-button secondary" href="${reviewLink}">Review issues</a>
   </section>`;
-  return `<section class="submit-pr">
+  const publishSection = choosingReview
+    ? renderReviewChoice(draft)
+    : `<section class="submit-pr">
     <h2>Actions</h2>
     <p class="meta">${hint}</p>
     <div class="actions">
@@ -1401,7 +1513,11 @@ function renderSubmitForm(draft, variant = "hosted") {
           title="Publish and cue for the next freeze in one step, for minor edits that don't need a separate review before cueing.">Publish &amp; Cue</button>
       </form>
     </div>
-  </section>
+  </section>`;
+  const deleteWorkingCopy = choosingReview
+    ? ""
+    : `<button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>`;
+  return `${publishSection}
   ${reviewSummary}
   ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
     published: draft.d1Published === true,
@@ -1425,7 +1541,7 @@ function renderSubmitForm(draft, variant = "hosted") {
         ${revertWorking}
         ${revert}
         ${unpublish}
-        <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>
+        ${deleteWorkingCopy}
       </div>
     </form>
   </section>
@@ -1472,9 +1588,21 @@ function renderRenameDraftForm(draft) {
   </section>`;
 }
 
-function decisionEventDetail(event, publishedSnapshots) {
+function decisionEventDetail(event, publishedSnapshots, events = []) {
+  const source = Number.isInteger(event.sourceEventId)
+    ? events.find(item => item.id === event.sourceEventId)
+    : null;
+  const candidate = source ? `${reviewCandidateLabel(source)}'s proposal` : null;
+  if (event.eventType === "proposed") {
+    const against = event.basePublishedRevision
+      ? ` against published revision ${event.basePublishedRevision}`
+      : "";
+    return `Proposed by ${reviewCandidateLabel(event)}${against}.`;
+  }
   if (event.eventType === "accepted") {
-    return `Accepted as published revision ${event.publishedRevision}.`;
+    return candidate
+      ? `Accepted ${candidate} as published revision ${event.publishedRevision}.`
+      : `Accepted as published revision ${event.publishedRevision}.`;
   }
   if (event.eventType !== "rejected") return "";
   const against = event.basePublishedRevision
@@ -1487,7 +1615,10 @@ function decisionEventDetail(event, publishedSnapshots) {
   const counts = diff
     ? ` ${diff.counts.changed} changed, ${diff.counts.added} added, ${diff.counts.removed} removed.`
     : "";
-  return `Rejected proposal kept${against}.${counts}`;
+  const kept = candidate
+    ? `Rejected ${candidate}, kept${against}`
+    : `Rejected proposal kept${against}`;
+  return `${kept}.${counts}`;
 }
 
 export function renderPuzzleReviewIssuesPage({
@@ -1523,7 +1654,7 @@ export function renderPuzzleReviewIssuesPage({
       <button type="submit" name="confirm" value="review-issue" class="secondary">Save issue update</button>
     </form>`}
   </section>`;
-  const completedEvents = events.filter(event => !event.issueId);
+  const completedEvents = events.filter(event => !event.issueId && event.eventType !== "proposed");
   const body = `
     <p class="meta">${authoringAdminNav()} · ${chronicleOnly
       ? `<a href="/admin/drafts">Back to puzzles</a>`
@@ -1545,7 +1676,7 @@ export function renderPuzzleReviewIssuesPage({
     ${issues.filter(issue => issue.status === "resolved").map(issueCard).join("\n") || '<p class="meta">No resolved issues.</p>'}
     <h2>Completed review history</h2>
     ${completedEvents.length ? `<ol class="review-events">${completedEvents.map(event => {
-      const decision = decisionEventDetail(event, publishedSnapshots);
+      const decision = decisionEventDetail(event, publishedSnapshots, events);
       return `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${decision ? ` · ${escapeHtml(decision)}` : ""}${!decision && event.draftRevision ? event.outcome === "changed" ? ` · changes recorded in draft revision ${escapeHtml(event.draftRevision)}` : ` · reviewed draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`;
     }).join("")}</ol>` : '<p class="meta">No completed reviews recorded.</p>'}
     ${chronicleOnly ? `<p class="meta">This working copy was discarded. Accepted and rejected reviews remain on this record.</p>` : `<section class="submit-pr">

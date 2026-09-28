@@ -26,6 +26,9 @@ export const UNPUBLISH_CONFIRM = "unpublish";
 export const DELETE_DRAFT_CONFIRM = "delete-draft";
 export const DISCARD_REVIEW_CONFIRM = "discard-review";
 export const UNDO_REVIEW_CONFIRM = "undo-review";
+export const PREVIEW_REVIEW_CONFIRM = "preview-review";
+export const PUBLISH_REVIEW_CONFIRM = "publish-review";
+export const KEEP_PUBLISHED_CONFIRM = "keep-published";
 export const MARK_HUMAN_REVIEWED_CONFIRM = "mark-human-reviewed";
 export { RENAME_DRAFT_CONFIRM };
 export { CUE_FOR_FREEZE_CONFIRM, HOLD_FROM_FREEZE_CONFIRM };
@@ -56,6 +59,9 @@ export function parseSubmitForm(params) {
     isDeleteDraft: confirm === DELETE_DRAFT_CONFIRM,
     isDiscardReview: confirm === DISCARD_REVIEW_CONFIRM,
     isUndoReview: confirm === UNDO_REVIEW_CONFIRM,
+    isPreviewReview: confirm === PREVIEW_REVIEW_CONFIRM,
+    isPublishReview: confirm === PUBLISH_REVIEW_CONFIRM,
+    isKeepPublished: confirm === KEEP_PUBLISHED_CONFIRM,
     isRenameDraft: confirm === RENAME_DRAFT_CONFIRM,
     isMarkHumanReviewed: confirm === MARK_HUMAN_REVIEWED_CONFIRM,
     isCueForFreeze: parseFreezeCueConfirm(confirm) === true,

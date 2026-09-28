@@ -140,12 +140,27 @@ function reviewEventRecord(row) {
       : { basePublishedRevision: Number(row.base_published_revision) }),
     ...(row.published_revision == null
       ? {}
-      : { publishedRevision: Number(row.published_revision) })
+      : { publishedRevision: Number(row.published_revision) }),
+    ...(row.client_system ? { clientSystem: row.client_system } : {}),
+    ...(row.client_model ? { clientModel: row.client_model } : {}),
+    ...(row.client_name ? { clientName: row.client_name } : {}),
+    ...(row.source_event_id == null
+      ? {}
+      : { sourceEventId: Number(row.source_event_id) })
   };
 }
 
+export function undecidedReviewProposals(events = []) {
+  const decided = new Set(
+    events
+      .map(event => event.sourceEventId)
+      .filter(id => Number.isInteger(id))
+  );
+  return events.filter(event => event.eventType === "proposed" && !decided.has(event.id));
+}
+
 const REVIEW_EVENT_TYPES = Object.freeze([
-  "review", "open", "note", "resolved", "reopened", "accepted", "rejected"
+  "review", "open", "note", "resolved", "reopened", "accepted", "rejected", "proposed"
 ]);
 const PROPOSAL_BYTE_LIMIT = 1_250_000;
 
@@ -159,7 +174,11 @@ function reviewEventInput({
   eventType = "review",
   proposal = null,
   basePublishedRevision = null,
-  publishedRevision = null
+  publishedRevision = null,
+  clientSystem = null,
+  clientModel = null,
+  clientName = null,
+  sourceEventId = null
 }) {
   if (!['agent', 'human'].includes(reviewerKind)) {
     throw new Error("reviewerKind must be agent or human");
@@ -183,14 +202,16 @@ function reviewEventInput({
     throw new Error("issueId must be a non-empty string of at most 100 characters");
   }
   const decision = eventType === "accepted" || eventType === "rejected";
+  const proposalEvent = eventType === "proposed" || eventType === "rejected";
+  const standalone = eventType === "review" || decision || eventType === "proposed";
   const normalizedComments = comments?.trim() || null;
-  if ((eventType === "review" || decision) && issueId != null) {
+  if (standalone && issueId != null) {
     throw new Error(`${eventType} events cannot have an issueId`);
   }
-  if (!decision && eventType !== "review" && !issueId) {
+  if (!standalone && !issueId) {
     throw new Error("issue events require an issueId");
   }
-  if (!decision && eventType !== "review" && !normalizedComments) {
+  if (!standalone && !normalizedComments) {
     throw new Error("issue events require comments");
   }
   if (basePublishedRevision != null && (!Number.isInteger(basePublishedRevision) || basePublishedRevision < 1)) {
@@ -202,17 +223,31 @@ function reviewEventInput({
   if (eventType === "accepted" && publishedRevision == null) {
     throw new Error("accepted events require publishedRevision");
   }
+  if (eventType === "proposed" && basePublishedRevision == null) {
+    throw new Error("proposed events require basePublishedRevision");
+  }
+  if (sourceEventId != null && (!Number.isInteger(sourceEventId) || sourceEventId < 1)) {
+    throw new Error("sourceEventId must be a positive integer");
+  }
+  if (eventType === "proposed" && sourceEventId != null) {
+    throw new Error("proposed events cannot reference another event");
+  }
+  const client = {
+    clientSystem: boundedClientLabel(clientSystem, "clientSystem"),
+    clientModel: boundedClientLabel(clientModel, "clientModel"),
+    clientName: boundedClientLabel(clientName, "clientName")
+  };
   let proposalJson = null;
-  if (eventType === "rejected") {
+  if (proposalEvent) {
     if (!proposal || typeof proposal !== "object" || Array.isArray(proposal)) {
-      throw new Error("rejected events require a proposal document");
+      throw new Error(`${eventType} events require a proposal document`);
     }
     proposalJson = JSON.stringify(proposal);
     if (new TextEncoder().encode(proposalJson).byteLength > PROPOSAL_BYTE_LIMIT) {
       throw new Error(`proposal document exceeds ${PROPOSAL_BYTE_LIMIT} bytes`);
     }
   } else if (proposal != null) {
-    throw new Error("only rejected events carry a proposal document");
+    throw new Error("only proposed and rejected events carry a proposal document");
   }
   return {
     reviewerKind,
@@ -224,8 +259,70 @@ function reviewEventInput({
     eventType,
     proposalJson,
     basePublishedRevision,
-    publishedRevision
+    publishedRevision,
+    ...client,
+    sourceEventId
   };
+}
+
+function boundedClientLabel(value, name) {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string" || value.length > 200) {
+    throw new Error(`${name} must be a string of at most 200 characters`);
+  }
+  return value;
+}
+
+function reviewEventInsertStatement(database, puzzleId, reviewedAt, event) {
+  return database.prepare(`
+      INSERT INTO puzzle_review_events (
+        puzzle_id, reviewer_kind, reviewed_at, comments, outcome,
+        draft_revision, guidance_major, guidance_minor, issue_id, event_type,
+        proposal_json, base_published_revision, published_revision,
+        client_system, client_model, client_name, source_event_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      puzzleId, event.reviewerKind, reviewedAt, event.comments, event.outcome,
+      event.draftRevision, event.guidance?.major ?? null, event.guidance?.minor ?? null,
+      event.issueId, event.eventType,
+      event.proposalJson, event.basePublishedRevision, event.publishedRevision,
+      event.clientSystem, event.clientModel, event.clientName, event.sourceEventId
+    );
+}
+
+function storedReviewEventRow(eventId, puzzleId, reviewedAt, event) {
+  return {
+    id: eventId,
+    puzzle_id: puzzleId,
+    reviewer_kind: event.reviewerKind,
+    reviewed_at: reviewedAt,
+    comments: event.comments,
+    outcome: event.outcome,
+    draft_revision: event.draftRevision,
+    guidance_major: event.guidance?.major ?? null,
+    guidance_minor: event.guidance?.minor ?? null,
+    issue_id: event.issueId,
+    event_type: event.eventType,
+    proposal_json: event.proposalJson,
+    base_published_revision: event.basePublishedRevision,
+    published_revision: event.publishedRevision,
+    client_system: event.clientSystem,
+    client_model: event.clientModel,
+    client_name: event.clientName,
+    source_event_id: event.sourceEventId
+  };
+}
+
+function reviewDecisionInputs(decisions, publishedRevision) {
+  return (Array.isArray(decisions) ? decisions : []).map(decision => reviewEventInput({
+    reviewerKind: "human",
+    eventType: decision.eventType,
+    draftRevision: decision.draftRevision ?? null,
+    proposal: decision.proposal ?? null,
+    basePublishedRevision: decision.basePublishedRevision ?? null,
+    publishedRevision: decision.eventType === "accepted" ? publishedRevision : null,
+    sourceEventId: decision.sourceEventId ?? null
+  }));
 }
 
 function reviewIssueThreads(events) {
@@ -485,7 +582,11 @@ export class D1ContentDocumentRepository {
     eventType = "review",
     proposal = null,
     basePublishedRevision = null,
-    publishedRevision = null
+    publishedRevision = null,
+    clientSystem = null,
+    clientModel = null,
+    clientName = null,
+    sourceEventId = null
   }) {
     assertDraftId(id);
     if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
@@ -493,23 +594,27 @@ export class D1ContentDocumentRepository {
     }
     const event = reviewEventInput({
       reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType,
-      proposal, basePublishedRevision, publishedRevision
+      proposal, basePublishedRevision, publishedRevision,
+      clientSystem, clientModel, clientName, sourceEventId
     });
-    const insertEvent = this.database.prepare(`
-        INSERT INTO puzzle_review_events (
-          puzzle_id, reviewer_kind, reviewed_at, comments, outcome,
-          draft_revision, guidance_major, guidance_minor, issue_id, event_type,
-          proposal_json, base_published_revision, published_revision
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        id, event.reviewerKind, reviewedAt, event.comments, event.outcome,
-        event.draftRevision, event.guidance?.major ?? null, event.guidance?.minor ?? null,
-        event.issueId, event.eventType,
-        event.proposalJson, event.basePublishedRevision, event.publishedRevision
-      );
+    const insertEvent = reviewEventInsertStatement(this.database, id, reviewedAt, event);
     if (event.eventType !== "review") {
-      await this.database.batch([insertEvent]);
-      return null;
+      if (event.eventType !== "proposed") {
+        await this.database.batch([insertEvent]);
+        return null;
+      }
+      const result = await insertEvent.run();
+      const eventId = Number(result?.meta?.last_row_id);
+      if (!Number.isInteger(eventId) || eventId < 1) {
+        throw new Error("Could not read the review proposal that was just filed.");
+      }
+      const inserted = await this.database.prepare(`
+        SELECT * FROM puzzle_review_events WHERE id = ?
+      `).bind(eventId).first();
+      if (!inserted || inserted.puzzle_id !== id || inserted.event_type !== "proposed") {
+        throw new Error("Could not read the review proposal that was just filed.");
+      }
+      return reviewEventRecord(inserted);
     }
     await this.getPublished({ kind: "puzzle", id });
     const reviewColumn = event.reviewerKind === "agent"
@@ -544,6 +649,32 @@ export class D1ContentDocumentRepository {
       LIMIT ?
     `).bind(id, cappedLimit).all();
     return result.results.map(reviewEventRecord);
+  }
+
+  async listOpenReviewProposals({ id }) {
+    assertDraftId(id);
+    const result = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ? AND event_type = 'proposed'
+        AND id NOT IN (
+          SELECT source_event_id FROM puzzle_review_events
+          WHERE puzzle_id = ? AND source_event_id IS NOT NULL
+        )
+      ORDER BY reviewed_at ASC, id ASC
+    `).bind(id, id).all();
+    return result.results.map(reviewEventRecord);
+  }
+
+  async getPuzzleReviewEvent({ id, eventId }) {
+    assertDraftId(id);
+    if (!Number.isInteger(eventId) || eventId < 1) {
+      throw new Error("eventId must be a positive integer");
+    }
+    const row = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ? AND id = ?
+    `).bind(id, eventId).first();
+    return row ? reviewEventRecord(row) : null;
   }
 
   async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
@@ -618,12 +749,19 @@ export class D1ContentDocumentRepository {
    *   id: string,
    *   document: object,
    *   actor: object,
-   *   layout?: object | null
+   *   layout?: object | null,
+   *   expectedRevision?: number | null,
+   *   reviewDecisions?: Array<object> | null
    * }} options
    */
-  async publish({ kind, id, document, actor, layout = undefined }) {
+  async publish({
+    kind, id, document, actor, layout = undefined, expectedRevision = null, reviewDecisions = null
+  }) {
     assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
     assertDraftId(id);
+    if (expectedRevision != null && (!Number.isInteger(expectedRevision) || expectedRevision < 1)) {
+      throw new Error("expectedRevision must be a positive integer");
+    }
     const publishedBy = normalizeDraftActor(actor).subject;
     const sourceDocument = documentForPublishedStorage(kind, document);
     const documentJson = serializeDraftDocument({ ...sourceDocument, id });
@@ -632,6 +770,9 @@ export class D1ContentDocumentRepository {
     const existing = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? AND id = ?
     `).bind(kind, id).first();
+    if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
+      throw new PublishedRevisionConflictError(kind, id);
+    }
     const layoutJson = kind === "puzzle"
       ? layout === undefined
         ? existing?.layout_json || null
@@ -664,6 +805,10 @@ export class D1ContentDocumentRepository {
       return this.getPublished({ kind, id });
     }
     const nextRevision = Number(existing.revision) + 1;
+    const decisionInputs = reviewDecisionInputs(reviewDecisions, nextRevision);
+    const decisionInserts = decisionInputs.map(event =>
+      reviewEventInsertStatement(this.database, id, now, event)
+    );
     try {
       await this.database.batch([
         this.database.prepare(`
@@ -680,11 +825,18 @@ export class D1ContentDocumentRepository {
           INSERT INTO published_document_revisions (
             kind, id, revision, document, content_hash, published_by, published_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).bind(kind, id, nextRevision, documentJson, contentHash, publishedBy, now)
+        `).bind(kind, id, nextRevision, documentJson, contentHash, publishedBy, now),
+        ...decisionInserts
       ]);
     } catch (error) {
       if (!isPublishedPrimaryKeyError(error)) throw error;
-      return this.adoptUnchangedPublication(snapshot);
+      const current = await this.adoptUnchangedPublication(snapshot);
+      if (decisionInputs.length) {
+        await this.database.batch(reviewDecisionInputs(reviewDecisions, current.revision).map(event =>
+          reviewEventInsertStatement(this.database, id, now, event)
+        ));
+      }
+      return current;
     }
     return this.getPublished({ kind, id });
   }
@@ -927,15 +1079,23 @@ export function createMemoryContentDocumentRepository() {
         revisions.set(`${key}:1`, row);
       }
     },
-    async publish({ kind, id, document, actor, layout = undefined }) {
+    async publish({
+      kind, id, document, actor, layout = undefined, expectedRevision = null, reviewDecisions = null
+    }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(id);
+      if (expectedRevision != null && (!Number.isInteger(expectedRevision) || expectedRevision < 1)) {
+        throw new Error("expectedRevision must be a positive integer");
+      }
       const publishedBy = normalizeDraftActor(actor).subject;
       const sourceDocument = documentForPublishedStorage(kind, document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id });
       const now = new Date().toISOString();
       const key = publishedKey(kind, id);
       const existing = published.get(key);
+      if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
+        throw new PublishedRevisionConflictError(kind, id);
+      }
       const nextRevision = existing ? Number(existing.revision) + 1 : 1;
       const layoutJson = kind === "puzzle"
         ? layout === undefined
@@ -948,6 +1108,9 @@ export function createMemoryContentDocumentRepository() {
         const current = published.get(key);
         const record = current ? publishedRecord(current) : null;
         if (samePublishedSnapshot(record, { kind, contentHash, layoutJson })) {
+          for (const event of reviewDecisionInputs(reviewDecisions, Number(current.revision))) {
+            reviewEvents.push(storedReviewEventRow(reviewEvents.length + 1, id, now, event));
+          }
           return repository.getPublished({ kind, id });
         }
         throw new PublishedRevisionConflictError(kind, id);
@@ -969,8 +1132,12 @@ export function createMemoryContentDocumentRepository() {
         cued_for_freeze_at: null,
         cued_for_freeze_by: null
       };
+      const decisionInputs = reviewDecisionInputs(reviewDecisions, nextRevision);
       published.set(key, row);
       revisions.set(revisionKey, row);
+      for (const event of decisionInputs) {
+        reviewEvents.push(storedReviewEventRow(reviewEvents.length + 1, id, now, event));
+      }
       return repository.getPublished({ kind, id });
     },
     async unpublish({ kind, id, actor }) {
@@ -1002,7 +1169,11 @@ export function createMemoryContentDocumentRepository() {
       eventType = "review",
       proposal = null,
       basePublishedRevision = null,
-      publishedRevision = null
+      publishedRevision = null,
+      clientSystem = null,
+      clientModel = null,
+      clientName = null,
+      sourceEventId = null
     }) {
       assertDraftId(id);
       if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
@@ -1010,7 +1181,8 @@ export function createMemoryContentDocumentRepository() {
       }
       const event = reviewEventInput({
         reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType,
-        proposal, basePublishedRevision, publishedRevision
+        proposal, basePublishedRevision, publishedRevision,
+        clientSystem, clientModel, clientName, sourceEventId
       });
       const key = publishedKey("puzzle", id);
       const existing = published.get(key);
@@ -1023,22 +1195,9 @@ export function createMemoryContentDocumentRepository() {
           : "last_human_reviewed_at";
         published.set(key, { ...existing, [reviewColumn]: reviewedAt });
       }
-      reviewEvents.push({
-        id: reviewEvents.length + 1,
-        puzzle_id: id,
-        reviewer_kind: event.reviewerKind,
-        reviewed_at: reviewedAt,
-        comments: event.comments,
-        outcome: event.outcome,
-        draft_revision: event.draftRevision,
-        guidance_major: event.guidance?.major ?? null,
-        guidance_minor: event.guidance?.minor ?? null,
-        issue_id: event.issueId,
-        event_type: event.eventType,
-        proposal_json: event.proposalJson,
-        base_published_revision: event.basePublishedRevision,
-        published_revision: event.publishedRevision
-      });
+      const row = storedReviewEventRow(reviewEvents.length + 1, id, reviewedAt, event);
+      reviewEvents.push(row);
+      if (event.eventType === "proposed") return reviewEventRecord(row);
       return event.eventType === "review"
         ? repository.getPublished({ kind: "puzzle", id })
         : null;
@@ -1057,6 +1216,24 @@ export function createMemoryContentDocumentRepository() {
         .sort((left, right) => String(right.reviewed_at).localeCompare(String(left.reviewed_at)) || right.id - left.id)
         .slice(0, cappedLimit)
         .map(reviewEventRecord);
+    },
+    async listOpenReviewProposals({ id }) {
+      assertDraftId(id);
+      return undecidedReviewProposals(
+        reviewEvents
+          .filter(event => event.puzzle_id === id)
+          .map(reviewEventRecord)
+      ).sort((left, right) =>
+        String(left.reviewedAt).localeCompare(String(right.reviewedAt)) || left.id - right.id
+      );
+    },
+    async getPuzzleReviewEvent({ id, eventId }) {
+      assertDraftId(id);
+      if (!Number.isInteger(eventId) || eventId < 1) {
+        throw new Error("eventId must be a positive integer");
+      }
+      const row = reviewEvents.find(event => event.puzzle_id === id && event.id === eventId);
+      return row ? reviewEventRecord(row) : null;
     },
     async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
       assertDraftId(id);

@@ -147,7 +147,8 @@ export async function run() {
   ], { encoding: "utf8", env: { ...process.env } });
   assert.equal(reviewPlan.status, 0, reviewPlan.stderr);
   const plan = JSON.parse(reviewPlan.stdout);
-  assert.equal(plan.chunk[0].mcpBudget, 7);
+  assert.equal(plan.chunk[0].mcpBudget, 9);
+  assert.ok(plan.steps.some(step => step.includes('action="propose"')));
   assert.ok(plan.steps.some(step => step.includes("expected_revision")));
   assert.ok(plan.steps.some(step => step.includes("structural-regularity-combination")));
 }
