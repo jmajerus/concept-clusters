@@ -14,9 +14,18 @@ if (!process.env.AUTHORING_DEPLOY_PASSWORD) {
   process.exit(1);
 }
 
-const remoteCommand =
-  "git -C /opt/concept-clusters pull --ff-only && " +
-  "sudo -S -p '' systemctl restart concept-clusters-authoring.service";
+// Freeze syncs puzzles/, catalogues/, and content/ from origin without
+// moving HEAD (`git checkout origin/<base> -- <dirs>`), which stages those
+// paths against the old commit. A later fast-forward then refuses. Those
+// directories are not a local source of truth — Freeze publishes through
+// GitHub — so put them back to HEAD before pulling.
+const remoteCommand = [
+  "git -C /opt/concept-clusters reset -q -- puzzles catalogues content",
+  "git -C /opt/concept-clusters checkout -q -- puzzles catalogues content",
+  "git -C /opt/concept-clusters clean -fd -- puzzles catalogues content",
+  "git -C /opt/concept-clusters pull --ff-only",
+  "sudo -S -p '' systemctl restart concept-clusters-authoring.service"
+].join(" && ");
 
 const ssh = spawn(
   "ssh",

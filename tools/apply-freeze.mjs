@@ -35,6 +35,15 @@ function git(args) {
   return result.stdout;
 }
 
+// `git checkout origin/<base> -- <dirs>` stages those paths against HEAD.
+// Freeze publishes through GitHub, so the checkout must not keep that
+// staged snapshot: it blocks the next `git pull --ff-only`.
+function restoreContentDirsToHead() {
+  git(["reset", "-q", "--", ...CONTENT_DIRS]);
+  git(["checkout", "-q", "--", ...CONTENT_DIRS]);
+  git(["clean", "-fd", "--", ...CONTENT_DIRS]);
+}
+
 async function main() {
   const additionalContext = process.argv[2] || "";
   loadProjectEnv({ repositoryRoot });
@@ -82,6 +91,14 @@ async function main() {
   }
   git(["checkout", `origin/${githubConfig.baseBranch}`, "--", ...CONTENT_DIRS]);
 
+  try {
+    return await freezeFromOriginCheckout(additionalContext, githubConfig);
+  } finally {
+    restoreContentDirsToHead();
+  }
+}
+
+async function freezeFromOriginCheckout(additionalContext, githubConfig) {
   const [
     { resolveLocalAuthoringWorkspace },
     { GitHubRepositoryClient },

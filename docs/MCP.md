@@ -118,7 +118,7 @@ the local or remote D1 database; they are independent of the stdio server.
 | `authoring:d1:migrate:local` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
 | `authoring:d1:migrate:remote` | D1 migrations on the remote authoring database. |
 | `mcp:hosted:deploy` | Deploy the hosted Worker. |
-| `authoring:deploy` | From this machine, SSH to the LAN authoring server, fast-forward pull `/opt/concept-clusters`, then restart `concept-clusters-authoring.service`. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. |
+| `authoring:deploy` | From this machine, SSH to the LAN authoring server, restore `puzzles/`, `catalogues/`, and `content/` to `HEAD` (a Freeze checkout of those directories stages them and would block the pull), fast-forward pull `/opt/concept-clusters`, then restart `concept-clusters-authoring.service`. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. |
 | `mcp:hosted:release` | Remote D1 migration, then hosted Worker deploy. |
 | `mcp:hosted:types` | Regenerate Worker TypeScript types. |
 
