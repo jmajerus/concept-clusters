@@ -789,8 +789,16 @@ export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
 export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
   const humans = contributorsByKind(provenance, "human", settings);
-  const generative = expandContributors(provenance.contributors, settings)
-    .filter(entry => entry.kind === "generative")
+  const generativeEntries = expandContributors(provenance.contributors, settings)
+    .filter(entry => entry.kind === "generative");
+  const namedGenerative = generativeEntries.filter(entry =>
+    !isUnidentifiedGenerativeContributor(entry, settings)
+  );
+  // The unnamed placeholder records an original draft whose client was never
+  // identified. Once a named client is also credited, "generative assistance"
+  // adds nothing a reader can use, so the player byline leaves it out. The
+  // stored contributor and the admin summary still keep it.
+  const generative = (namedGenerative.length ? namedGenerative : generativeEntries)
     .map(entry => formatGenerativeBylineName(entry, settings));
   const templates = settings.credit?.templates || {};
   const humanList = formatSystemsList(humans);

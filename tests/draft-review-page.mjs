@@ -432,6 +432,20 @@ export async function run() {
           fact: "A sharper alpha fact."
         }]
       }
+    }, {
+      id: 10,
+      eventType: "proposed",
+      basePublishedRevision: 4,
+      clientSystem: "Claude Code",
+      comments: "Added a lesson.",
+      proposal: {
+        ...baseDraft.document,
+        learningIntroduction: {
+          requirement: "recommended",
+          credit: "Claude",
+          content: { text: "Start with the alpha fact." }
+        }
+      }
     }]
   });
   assert.match(choicePage, /Codex gpt-5.4/);
@@ -447,6 +461,10 @@ export async function run() {
   assert.doesNotMatch(choicePage, /value="undo-review"/);
   assert.doesNotMatch(choicePage, /value="publish"/);
   assert.doesNotMatch(choicePage, /value="delete-draft"/);
+  assert.match(choicePage, /No lesson/);
+  assert.match(choicePage, /Use Claude Code's lesson/);
+  assert.match(choicePage, /name="lesson_from" value="10"/);
+  assert.doesNotMatch(choicePage, /Use Codex gpt-5.4's lesson/);
   assert.doesNotMatch(baselineReview, /value="discard-review"/);
   assert.doesNotMatch(baselineReview, /value="revert-published"/);
 

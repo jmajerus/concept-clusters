@@ -65,15 +65,24 @@ After the edited draft validates, call the same tool with `action="propose"`.
 That files the current document as one candidate against the published puzzle
 this review started from, then restores content and pedagogy to the baseline
 and leaves provenance as it stands, so another agent can file a competing
-candidate. Skip `propose` when the playable puzzle matches the baseline. If
-content or pedagogy has been published since this review began, stop; do not
-file the older draft. A later byline or layout publish does not. Then call
+candidate. Changes that only repeat an open proposal are left out of the new
+candidate. Pass `stack_on: true` to put this review on top of the preceding
+one. The server chooses that proposal, so there is no id to track. Skip
+`propose` when the playable puzzle matches the baseline. If content or
+pedagogy has been published since this review began, stop; do not file the
+older draft. A later byline or layout publish does not. Then call
 `action="complete"`.
+
+If `begin` finds the working copy equal to an open proposal, it restores the
+baseline first. Pass `stack_on: true` on `begin` only when this review should
+start by reading that preceding document. Passing it on `propose` is enough
+to keep the preceding review's edits.
 
 The drafts page lists those candidates for the current published puzzle.
 **Play** loads one into the working copy. **Publish this review** publishes
 that stored proposal and rejects the others. **Keep published** rejects every
-open proposal.
+open proposal. When another review wrote a lesson this one does not have, the
+card can use that lesson with the review you play or publish.
 
 When no candidate has been filed yet, the page still offers **Publish** and,
 if this review opened the working copy, **Discard review**. When a draft was

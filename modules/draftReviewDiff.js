@@ -266,6 +266,219 @@ export function samePlayablePuzzle(left, right) {
   return Boolean(diff && diff.total === 0);
 }
 
+const PLAYABLE_FIELDS = [
+  "title", "puzzleKind", "category", "categories", "subcategories", "large", "tags",
+  "level", "lensMode", "preSolve", "relatedPuzzles", "learningIntroduction"
+];
+
+function copyValue(value) {
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
+
+function restoreField(target, name, baselineValue) {
+  if (baselineValue === undefined) delete target[name];
+  else target[name] = copyValue(baselineValue);
+}
+
+function itemFieldNames(baseItem, proposalItem, documentItem) {
+  return new Set([
+    ...Object.keys(baseItem || {}),
+    ...Object.keys(proposalItem || {}),
+    ...Object.keys(documentItem || {})
+  ]);
+}
+
+/** Fields the proposal copied in, and the document left untouched, go back to the baseline. */
+function revertMatchingFields(baseItem, proposalItem, documentItem) {
+  const next = copyValue(documentItem);
+  for (const name of itemFieldNames(baseItem, proposalItem, documentItem)) {
+    const baseValue = fieldValue(baseItem, name);
+    const proposalValue = fieldValue(proposalItem, name);
+    const documentValue = fieldValue(documentItem, name);
+    if (valuesEqual(baseValue, proposalValue) || !valuesEqual(proposalValue, documentValue)) continue;
+    restoreField(next, name, baseValue);
+  }
+  return next;
+}
+
+/** The document's own field edits, laid onto the preceding item. */
+function overlayItemFields(baseItem, precedingItem, documentItem) {
+  const next = copyValue(precedingItem || documentItem);
+  for (const name of itemFieldNames(baseItem, precedingItem, documentItem)) {
+    const baseValue = fieldValue(baseItem, name);
+    const documentValue = fieldValue(documentItem, name);
+    if (valuesEqual(baseValue, documentValue)) continue;
+    restoreField(next, name, documentValue);
+  }
+  return next;
+}
+
+function revertCollection(baseItems = [], proposalItems = [], documentItems = [], keyFields) {
+  const baseMap = indexItems(baseItems, ...keyFields);
+  const proposalMap = indexItems(proposalItems, ...keyFields);
+  const result = [];
+  const seen = new Set();
+  for (const item of documentItems || []) {
+    const key = keyFor(item, ...keyFields);
+    if (!key) {
+      result.push(copyValue(item));
+      continue;
+    }
+    seen.add(key);
+    const proposed = proposalMap.get(key);
+    const base = baseMap.get(key);
+    if (proposed && valuesEqual(item, proposed) && !valuesEqual(item, base)) {
+      if (base) result.push(copyValue(base));
+      continue;
+    }
+    if (proposed && base) {
+      result.push(revertMatchingFields(base, proposed, item));
+      continue;
+    }
+    result.push(copyValue(item));
+  }
+  for (const item of baseItems || []) {
+    const key = keyFor(item, ...keyFields);
+    if (!key || seen.has(key) || proposalMap.has(key)) continue;
+    result.push(copyValue(item));
+    seen.add(key);
+  }
+  return result;
+}
+
+function revertProposalChanges(baseline, proposal, document) {
+  const next = copyValue(document);
+  for (const name of PLAYABLE_FIELDS) {
+    const baseValue = Object.prototype.hasOwnProperty.call(baseline, name) ? baseline[name] : undefined;
+    const proposalValue = Object.prototype.hasOwnProperty.call(proposal, name) ? proposal[name] : undefined;
+    const documentValue = Object.prototype.hasOwnProperty.call(document, name) ? document[name] : undefined;
+    if (valuesEqual(baseValue, proposalValue) || !valuesEqual(proposalValue, documentValue)) continue;
+    restoreField(next, name, baseValue);
+  }
+  if (!valuesEqual(baseline?.info, proposal?.info) && valuesEqual(proposal?.info, document?.info)) {
+    restoreField(next, "info", baseline?.info);
+  }
+  next.clusters = revertCollection(baseline?.clusters, proposal?.clusters, document?.clusters, ["id", "name"]);
+  next.bridges = revertCollection(baseline?.bridges, proposal?.bridges, document?.bridges, ["id", "term"]);
+  next.lenses = revertCollection(baseline?.lenses, proposal?.lenses, document?.lenses, ["id", "prompt"]);
+  return next;
+}
+
+/**
+ * A later review often edits a working copy that already contains an open
+ * proposal. Drop those copied changes so the new candidate stands on the
+ * baseline. An exact further edit of a proposed item is kept.
+ */
+export function independentReviewDocument(baseline, proposals, document) {
+  let next = copyValue(document);
+  for (const entry of proposals || []) {
+    const proposal = entry?.proposal || entry;
+    if (!proposal || samePlayablePuzzle(baseline, proposal)) continue;
+    next = revertProposalChanges(baseline, proposal, next);
+  }
+  return next;
+}
+
+function fieldValue(source, name) {
+  return source && Object.prototype.hasOwnProperty.call(source, name) ? source[name] : undefined;
+}
+
+function applyCollectionDelta(baseItems = [], precedingItems = [], documentItems = [], keyFields) {
+  const baseMap = indexItems(baseItems, ...keyFields);
+  const result = (precedingItems || []).map(item => copyValue(item));
+  const indexInResult = new Map();
+  result.forEach((item, index) => {
+    const key = keyFor(item, ...keyFields);
+    if (key) indexInResult.set(key, index);
+  });
+  const documentKeys = new Set();
+  for (const item of documentItems || []) {
+    const key = keyFor(item, ...keyFields);
+    if (!key) {
+      result.push(copyValue(item));
+      continue;
+    }
+    documentKeys.add(key);
+    if (valuesEqual(item, baseMap.get(key))) continue;
+    if (indexInResult.has(key)) {
+      result[indexInResult.get(key)] = overlayItemFields(
+        baseMap.get(key),
+        result[indexInResult.get(key)],
+        item
+      );
+    } else {
+      indexInResult.set(key, result.length);
+      result.push(copyValue(item));
+    }
+  }
+  for (const item of baseItems || []) {
+    const key = keyFor(item, ...keyFields);
+    if (!key || documentKeys.has(key) || !indexInResult.has(key)) continue;
+    result[indexInResult.get(key)] = null;
+  }
+  return result.filter(Boolean);
+}
+
+/**
+ * Put this review on the preceding one. `loaded` means begin already put
+ * that proposal in the working copy, so deletions of its additions stand.
+ * Otherwise a working copy that still contains the proposal is filed as it
+ * stands, and one edited from the baseline keeps the preceding review and
+ * adds only its own changes.
+ */
+export function stackedReviewDocument(baseline, preceding, document, { loaded = false } = {}) {
+  const proposal = preceding?.proposal || preceding;
+  if (!proposal) return copyValue(document);
+  if (loaded) return copyValue(document);
+  const alreadyStacked = !samePlayablePuzzle(
+    independentReviewDocument(baseline, [proposal], document),
+    document
+  );
+  if (alreadyStacked) return copyValue(document);
+  const next = copyValue(proposal);
+  for (const name of PLAYABLE_FIELDS) {
+    const baseValue = fieldValue(baseline, name);
+    const documentValue = fieldValue(document, name);
+    if (valuesEqual(baseValue, documentValue)) continue;
+    restoreField(next, name, documentValue);
+  }
+  if (!valuesEqual(fieldValue(baseline, "info"), fieldValue(document, "info"))) {
+    restoreField(next, "info", fieldValue(document, "info"));
+  }
+  next.clusters = applyCollectionDelta(baseline?.clusters, proposal?.clusters, document?.clusters, ["id", "name"]);
+  next.bridges = applyCollectionDelta(baseline?.bridges, proposal?.bridges, document?.bridges, ["id", "term"]);
+  next.lenses = applyCollectionDelta(baseline?.lenses, proposal?.lenses, document?.lenses, ["id", "prompt"]);
+  return next;
+}
+
+export function lessonContentText(document) {
+  const text = document?.learningIntroduction?.content?.text;
+  return typeof text === "string" ? text.trim() : "";
+}
+
+/**
+ * The chosen board, with another review's lesson in place of its own.
+ * Credit and revision stay with the chosen document.
+ */
+export function documentWithLesson(document, donor) {
+  const next = JSON.parse(JSON.stringify(document));
+  const lesson = donor?.learningIntroduction;
+  if (!lesson || typeof lesson !== "object" || Array.isArray(lesson)) {
+    delete next.learningIntroduction;
+    return next;
+  }
+  const copied = JSON.parse(JSON.stringify(lesson));
+  delete copied.credit;
+  delete copied.revision;
+  const keptCredit = document?.learningIntroduction?.credit;
+  if (typeof keptCredit === "string" && keptCredit.trim()) copied.credit = keptCredit;
+  if (document?.learningIntroduction && Object.prototype.hasOwnProperty.call(document.learningIntroduction, "revision")) {
+    copied.revision = document.learningIntroduction.revision;
+  }
+  next.learningIntroduction = copied;
+  return next;
+}
+
 /** Baseline content and pedagogy, with provenance left as it stands on the draft. */
 export function documentKeepingProvenance(document, provenanceSource) {
   const next = JSON.parse(JSON.stringify(document));

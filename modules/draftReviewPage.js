@@ -17,7 +17,7 @@ import {
   WORKING_COPY_FORM_ID
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
-import { diffPublishedDraft } from "./draftReviewDiff.js";
+import { diffPublishedDraft, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
 import { draftBoardQuery, draftPlayQuery, playQuery } from "./stagingPlayLinks.js";
 import {
   CATEGORIES,
@@ -655,6 +655,8 @@ const PAGE_STYLE = `
   td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
   .submit-pr { border: 1px solid #dbeafe; background: #f8fbff; border-radius: 6px; padding: 12px 16px; margin: 20px 0 28px; }
   .submit-pr h2 { margin: 0 0 8px; font-size: 18px; }
+  .submit-pr fieldset.lesson-choice { border: 0; margin: 8px 0 0; padding: 0; }
+  .submit-pr fieldset.lesson-choice legend { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.03em; padding: 0; }
   .submit-pr .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
   .submit-pr .actions form { margin: 0; display: flex; gap: 8px; flex-wrap: wrap; }
   .submit-pr button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 0; background: #2563eb; color: #fff; cursor: pointer; }
@@ -1381,6 +1383,28 @@ function reviewCandidateLines(diff) {
   return lines;
 }
 
+function lessonDonors(event, candidates) {
+  const own = lessonContentText(event.proposal);
+  return candidates.filter(other => {
+    if (other.id === event.id) return false;
+    const text = lessonContentText(other.proposal);
+    return Boolean(text) && text !== own;
+  });
+}
+
+function renderLessonChoice(event, candidates) {
+  const donors = lessonDonors(event, candidates);
+  if (!donors.length) return "";
+  const keepLabel = lessonContentText(event.proposal) ? "Keep this review's lesson" : "No lesson";
+  const options = donors.map(other =>
+    `<label><input type="radio" name="lesson_from" value="${escapeHtml(String(other.id))}"> Use ${escapeHtml(reviewCandidateLabel(other))}'s lesson</label>`
+  ).join("");
+  return `<fieldset class="lesson-choice"><legend>Lesson</legend>
+      <label><input type="radio" name="lesson_from" value="" checked> ${keepLabel}</label>
+      ${options}
+    </fieldset>`;
+}
+
 function renderReviewChoice(draft) {
   const candidates = reviewChoiceCandidates(draft);
   if (!candidates.length) return "";
@@ -1398,31 +1422,40 @@ function renderReviewChoice(draft) {
       ? `<ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`
       : `<p class="meta">${draft.reviewAnchorDocument ? "No fact-level changes to show." : "The published puzzle is not available, so this card has no diff."}</p>`;
     const more = total > hidden ? `<p class="meta">${total - hidden} more changes are in the proposal.</p>` : "";
+    const included = draft.reviewAnchorDocument
+      ? candidates.filter(other =>
+        other.id !== event.id &&
+        other.proposal &&
+        !samePlayablePuzzle(
+          independentReviewDocument(draft.reviewAnchorDocument, [other], event.proposal),
+          event.proposal
+        )
+      )
+      : [];
+    const stackedNote = included.length
+      ? `<p class="meta">Also includes ${included.map(other => escapeHtml(reviewCandidateLabel(other))).join(" and ")}'s changes.</p>`
+      : "";
     const proposalId = escapeHtml(String(event.id));
     return `<article class="review-candidate">
       <h3>${escapeHtml(reviewCandidateLabel(event))}</h3>
       ${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}
+      ${stackedNote}
       ${list}
       ${more}
-      <div class="actions">
-        <form method="post" action="${action}">
-          <input type="hidden" name="confirm" value="preview-review">
-          <input type="hidden" name="proposal_id" value="${proposalId}">
-          <input type="hidden" name="expected_revision" value="${expected}">
-          <button type="submit">Play</button>
-        </form>
-        <form method="post" action="${action}">
-          <input type="hidden" name="confirm" value="publish-review">
-          <input type="hidden" name="proposal_id" value="${proposalId}">
-          <input type="hidden" name="expected_revision" value="${expected}">
-          <button type="submit">Publish this review</button>
-        </form>
-      </div>
+      <form method="post" action="${action}">
+        <input type="hidden" name="proposal_id" value="${proposalId}">
+        <input type="hidden" name="expected_revision" value="${expected}">
+        ${renderLessonChoice(event, candidates)}
+        <div class="actions">
+          <button type="submit" name="confirm" value="preview-review">Play</button>
+          <button type="submit" name="confirm" value="publish-review">Publish this review</button>
+        </div>
+      </form>
     </article>`;
   }).join("\n");
   return `<section class="submit-pr">
     <h2>Choose a review</h2>
-    <p class="meta">These proposals are alternatives to the published puzzle. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
+    <p class="meta">These proposals are alternatives to the published puzzle. A later review files only its own changes. Pass stack_on to put it on top of the preceding review. When another review wrote a lesson, you can use that lesson with the review you play or publish. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
     ${cards}
     <form method="post" action="${action}">
       <input type="hidden" name="confirm" value="keep-published">

@@ -22,6 +22,7 @@ import {
   parseLayoutDocument,
   serializeLayoutDocument
 } from "./layoutDocument.js";
+import { parseReviewBaseline, serializeReviewBaseline } from "./reviewBaseline.js";
 
 function parsedJson(text, label) {
   try {
@@ -56,9 +57,19 @@ function assembleRowDocument(row) {
   return assembleAuthoredDocumentFromDraftRow(row, { parseJson: parsedJson });
 }
 
+function reviewStackLoadedFromRow(row) {
+  if (!row.review_baseline_json) return false;
+  try {
+    return parseReviewBaseline(row.review_baseline_json)?.stackLoaded === true;
+  } catch {
+    return false;
+  }
+}
+
 function fullDraft(row) {
   return {
     ...metadata(row),
+    reviewStackLoaded: reviewStackLoadedFromRow(row),
     workingCopyHistoryCount: Number(row.working_copy_history_count || 0),
     validation: row.validation_json
       ? parsedJson(row.validation_json, "Stored validation")
@@ -234,7 +245,8 @@ export class D1DraftRepository extends DraftRepository {
       throw new Error("expectedRevision must be a positive integer");
     }
     const owner = normalizeDraftActor(actor);
-    const baselineJson = serializeDraftDocument(document);
+    serializeDraftDocument(document);
+    const baselineJson = serializeReviewBaseline(document);
     const publishedRevision = Number.isInteger(basePublishedRevision)
       ? basePublishedRevision
       : null;
@@ -270,7 +282,31 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(draftId, owner).first();
     if (!row) throw new DraftNotFoundError(draftId);
     if (!row.review_baseline_json) return null;
-    return parsedJson(row.review_baseline_json, "Stored review baseline");
+    const session = parseReviewBaseline(parsedJson(row.review_baseline_json, "Stored review baseline"));
+    return session?.document ?? null;
+  }
+
+  async setReviewStackLoaded({ draftId, actor, stackLoaded }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const row = await this.database.prepare(`
+      SELECT review_baseline_json FROM puzzle_drafts
+      WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner).first();
+    if (!row) throw new DraftNotFoundError(draftId);
+    if (!row.review_baseline_json) return this.get({ draftId, actor });
+    const session = parseReviewBaseline(parsedJson(row.review_baseline_json, "Stored review baseline"));
+    if (!session?.document) return this.get({ draftId, actor });
+    await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET review_baseline_json = ?
+      WHERE id = ? AND owner_subject = ?
+    `).bind(
+      serializeReviewBaseline(session.document, { stackLoaded: stackLoaded === true }),
+      draftId,
+      owner
+    ).run();
+    return this.get({ draftId, actor });
   }
 
   async releaseReviewSession({ draftId, actor }) {

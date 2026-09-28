@@ -3,7 +3,10 @@ import {
   diffPublishedDraft,
   documentForChosenProposal,
   documentKeepingProvenance,
+  documentWithLesson,
   draftShadowsPublished,
+  independentReviewDocument,
+  stackedReviewDocument,
   provenanceDiffersFromPublished,
   samePlayablePuzzle
 } from "../modules/draftReviewDiff.js";
@@ -300,4 +303,113 @@ export async function run() {
     true
   );
   assert.equal(provenanceDiffersFromPublished(null, afterProvenance), false);
+
+  const baseline = {
+    id: "energy-flow",
+    title: "Energy flow",
+    clusters: [
+      { id: "photosynthesis", name: "Photosynthesis", fact: "Plants store light.", terms: ["sunlight"] },
+      { id: "cellular-respiration", name: "Cellular respiration", fact: "Cells release energy.", terms: ["atp"] }
+    ],
+    bridges: []
+  };
+  const firstProposal = {
+    ...baseline,
+    clusters: [
+      baseline.clusters[0],
+      { ...baseline.clusters[1], fact: "Cells release energy from food." }
+    ],
+    bridges: [{ term: "glucose", clusters: ["photosynthesis", "cellular-respiration"], fact: "Sugar carries the energy." }]
+  };
+  const stacked = {
+    ...firstProposal,
+    learningIntroduction: { text: "Energy moves from light to heat.", audience: "recommended" }
+  };
+  const independent = independentReviewDocument(baseline, [{ proposal: firstProposal }], stacked);
+  assert.equal(independent.learningIntroduction.text, "Energy moves from light to heat.");
+  assert.deepEqual(independent.bridges, []);
+  assert.equal(independent.clusters[1].fact, "Cells release energy.");
+  assert.equal(samePlayablePuzzle(independent, stacked), false);
+  const furtherEdit = {
+    ...firstProposal,
+    clusters: [
+      firstProposal.clusters[0],
+      { ...firstProposal.clusters[1], fact: "A different respiration fact." }
+    ]
+  };
+  const keptEdit = independentReviewDocument(baseline, [{ proposal: firstProposal }], furtherEdit);
+  assert.equal(keptEdit.clusters[1].fact, "A different respiration fact.");
+  assert.deepEqual(keptEdit.bridges, []);
+
+  const ownDelta = {
+    ...baseline,
+    learningIntroduction: { text: "Energy moves from light to heat.", audience: "recommended" }
+  };
+  const merged = stackedReviewDocument(baseline, { proposal: firstProposal }, ownDelta);
+  assert.equal(merged.learningIntroduction.text, "Energy moves from light to heat.");
+  assert.equal(merged.clusters[1].fact, "Cells release energy from food.");
+  assert.equal(merged.bridges[0].term, "glucose");
+  const removedGlucose = {
+    ...firstProposal,
+    bridges: [],
+    learningIntroduction: ownDelta.learningIntroduction
+  };
+  const filed = stackedReviewDocument(baseline, { proposal: firstProposal }, removedGlucose);
+  assert.deepEqual(filed.bridges, []);
+  assert.equal(filed.clusters[1].fact, "Cells release energy from food.");
+
+  const termsOnly = {
+    ...baseline,
+    clusters: [
+      baseline.clusters[0],
+      { ...baseline.clusters[1], fact: "Cells release energy from food.", terms: ["atp", "heat"] }
+    ]
+  };
+  const strippedFields = independentReviewDocument(baseline, [{ proposal: firstProposal }], termsOnly);
+  assert.equal(strippedFields.clusters[1].fact, "Cells release energy.");
+  assert.deepEqual(strippedFields.clusters[1].terms, ["atp", "heat"]);
+  const termsFromBaseline = {
+    ...baseline,
+    clusters: [
+      baseline.clusters[0],
+      { ...baseline.clusters[1], terms: ["atp", "heat"] }
+    ]
+  };
+  const overlaid = stackedReviewDocument(baseline, { proposal: firstProposal }, termsFromBaseline);
+  assert.equal(overlaid.clusters[1].fact, "Cells release energy from food.");
+  assert.deepEqual(overlaid.clusters[1].terms, ["atp", "heat"]);
+  assert.equal(overlaid.bridges[0].term, "glucose");
+
+  const bridgeOnly = {
+    ...baseline,
+    bridges: [{ term: "glucose", clusters: ["photosynthesis", "cellular-respiration"], fact: "Sugar carries the energy." }]
+  };
+  const deletedBridge = {
+    ...baseline,
+    learningIntroduction: { text: "Energy moves from light to heat.", audience: "recommended" }
+  };
+  const resurrected = stackedReviewDocument(baseline, { proposal: bridgeOnly }, deletedBridge);
+  assert.equal(resurrected.bridges[0].term, "glucose");
+  const keptDeletion = stackedReviewDocument(baseline, { proposal: bridgeOnly }, deletedBridge, { loaded: true });
+  assert.deepEqual(keptDeletion.bridges, []);
+  assert.equal(keptDeletion.learningIntroduction.text, "Energy moves from light to heat.");
+
+  const board = {
+    ...baseline,
+    learningIntroduction: { requirement: "optional", credit: "Editor", revision: 2, content: { text: "Old lesson." } }
+  };
+  const donor = {
+    learningIntroduction: {
+      requirement: "recommended",
+      credit: "Other agent",
+      revision: 9,
+      content: { text: "Start from the light." }
+    }
+  };
+  const picked = documentWithLesson(board, donor);
+  assert.equal(picked.learningIntroduction.content.text, "Start from the light.");
+  assert.equal(picked.learningIntroduction.requirement, "recommended");
+  assert.equal(picked.learningIntroduction.credit, "Editor");
+  assert.equal(picked.learningIntroduction.revision, 2);
+  assert.equal(picked.clusters[1].fact, "Cells release energy.");
 }

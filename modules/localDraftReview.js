@@ -57,6 +57,8 @@ import {
   diffPublishedDraft,
   documentForChosenProposal,
   documentKeepingProvenance,
+  documentWithLesson,
+  lessonContentText,
   publishedDocumentFromService,
   samePlayablePuzzle,
   valuesEqual
@@ -1449,10 +1451,22 @@ export function createLocalDraftReviewHandler({
             html(res, "<p>That proposal is not an open choice for this published revision.</p>", 400);
             return true;
           }
+          let chosenDocument = documentForChosenProposal(chosen.proposal, record.document, openProposals);
+          const lessonFromRaw = params.get("lesson_from");
+          if (lessonFromRaw) {
+            const lessonFrom = Number.parseInt(lessonFromRaw, 10);
+            const donor = openProposals.find(event => event.id === lessonFrom);
+            if (!Number.isInteger(lessonFrom) || lessonFrom === chosen.id || !donor?.proposal
+              || !lessonContentText(donor.proposal)) {
+              html(res, "<p>That lesson is not an open choice for this published revision.</p>", 400);
+              return true;
+            }
+            chosenDocument = documentWithLesson(chosenDocument, donor.proposal);
+          }
           if (form.isPreviewReview) {
             await draftStore.replaceDraft({
               draftId,
-              document: documentForChosenProposal(chosen.proposal, record.document, openProposals),
+              document: chosenDocument,
               expectedRevision: record.revision
             });
             const played = await draftStore.getDraft(draftId);
@@ -1468,10 +1482,7 @@ export function createLocalDraftReviewHandler({
             contentService,
             actor: publicationActor
           });
-          const authoredDocument = documentForEditor(
-            documentForChosenProposal(chosen.proposal, record.document, openProposals),
-            { categoryRegistry }
-          );
+          const authoredDocument = documentForEditor(chosenDocument, { categoryRegistry });
           if (typeof contentService?.validatePuzzleDraft === "function") {
             const validation = await contentService.validatePuzzleDraft(authoredDocument, {
               categoryRegistry
