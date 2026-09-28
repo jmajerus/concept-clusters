@@ -28,12 +28,15 @@ module disagree, trust the module.
   clusters all have the same term count, and mentions it when the cluster
   count repeats that number. That prompt is a reason to re-read each cluster
   for two terms doing one job, or a fact naming a concept the term list
-  omitted. If the board has no concept-gathering inventory, reopen that pass
-  and stop for human approval before fitting the sourced map. Early boards
-  were often sparse as well as even,
+  omitted; fix those on the board. That is not a licence to add or drop
+  terms just to break an even count. If the board has no concept-gathering
+  inventory, write that inventory in this review and stop for human approval
+  before fitting it onto the board. Do not leave that inventory as an open
+  issue. Early boards were often sparse as well as even,
   and gathering the omitted concepts usually changes the counts. Keep even
-  counts when the material supports them. Do not add or drop terms to break
-  the pattern, and do not change bridges because of the prompt. Canvas size
+  counts when the sourced map supports them. Do not add or drop terms on the
+  current board to break the pattern, and do not change bridges because of
+  the prompt. Canvas size
   is derived from the honest node count, routed edges, and term length. Do
   not drop a distinct term to stay small, do not keep terms to fill toward
   32, and do not split in order to change the canvas. Split when the subject

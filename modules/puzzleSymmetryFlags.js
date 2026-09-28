@@ -31,7 +31,7 @@ function signature(clusterCount, termCounts) {
   };
 }
 
-const RECHECK_CONCEPT_SET = "Re-read each cluster for two terms doing one job, and for a fact that names a concept missing from its terms. If this board has no concept-gathering inventory, reopen that pass and stop for human approval before fitting the sourced map. Keep the even counts when the material supports them. Do not add or remove terms to clear this prompt, and do not change bridges because of it.";
+const RECHECK_CONCEPT_SET = "Re-read each cluster for two terms doing one job, and for a fact that names a concept missing from its terms; fix those on the board. That is not a licence to add or drop terms just to break an even count. If this board has no concept-gathering inventory, write that inventory in this review and stop for human approval before fitting it onto the board. Do not leave that inventory as an open issue. Keep even counts when the sourced map supports them, and do not change bridges because of this prompt.";
 
 // Document-only count signals. mcpFlags is the symmetry prompt (even term
 // counts). descriptors are draft-review notes that are not that prompt.
@@ -65,9 +65,10 @@ export function computeStructuralRegularity(puzzle) {
         instruction: RECHECK_CONCEPT_SET
       },
       message: `All ${count} clusters have exactly ${value} terms.${lockSentence} ` +
-        "Most subjects are less even than this. Re-check each cluster for two terms doing one job, and for a fact that names a concept the term list omitted. " +
-        "If this board never had a concept-gathering pass, reopen that pass and stop for human approval before fitting the sourced map. " +
-        "Keep the counts when the material supports them; do not add or remove terms merely to break the pattern, and do not change bridges because of this prompt.",
+        "Most subjects are less even than this. Re-check each cluster for two terms doing one job, and for a fact that names a concept the term list omitted; fix those on the board. " +
+        "That is not a licence to add or drop terms just to break an even count. " +
+        "If this board never had a concept-gathering pass, write that inventory in this review and stop for human approval before fitting it onto the board. Do not leave that inventory as an open issue. " +
+        "Keep even counts when the sourced map supports them, and do not change bridges because of this prompt.",
       signature: result.signature
     });
   }

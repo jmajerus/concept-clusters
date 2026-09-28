@@ -199,16 +199,17 @@ to look, not a separate flag. Bridges are not part of the prompt. Attachment
 concept-gathering tends to produce, and it is not flagged.
 
 Look within each cluster for two terms doing the same conceptual job, and
-look in its fact for a distinct concept the term list omitted. If the prompt
-fires on a reviewed puzzle that has no concept-gathering inventory, reopen
-that pass and stop for human approval before fitting the sourced map,
-instead of editing the board in place.
+look in its fact for a distinct concept the term list omitted; fix those on
+the board. That is not a licence to add or drop terms just to break an even
+count. If the prompt fires on a reviewed puzzle that has no concept-gathering
+inventory, write that inventory in this review. The map is the repair. It is
+not a board edit and not an open issue. Stop when it is saved, and fit it
+onto the board only after the human approves it.
 Early boards were often sparse as well as even, because each cluster was
 closed at a small finished number; gathering the omitted concepts usually
-changes the counts. Make a change only when that reading finds a real
-problem. Keep even counts when the material supports them. Do not add or
-remove terms merely to make a puzzle look less even, and do not add or
-remove bridges because of this prompt.
+changes the counts. Keep even counts when the sourced map supports them. Do not
+add or remove terms on the current board merely to make it look less even, and
+do not add or remove bridges because of this prompt.
 
 The complete board may contain at most 32 total nodes (all cluster terms plus
 bridges). That ceiling is where validation refuses a board; it is not a size

@@ -119,7 +119,9 @@ Load [design judgment](../author-puzzle/references/design-judgment.md) only then
 
 On that prompt, resolve the authoring workspace once, then read only the exact source paths for this draft: `ledgers/<draft-id>-fit.json`; its `inventoryId` selects `inventories/<inventory-id>.json`, otherwise try `inventories/<draft-id>.json`. Do not search the workspace.
 
-Compare the board to that source map and loss ledger before retaining or changing the even clusters. If those artifacts are absent (common for early published puzzles, which were often sparse as well as even), reopen the concept-gathering inventory pass instead of editing counts in place, and fit only after the human approves that map. Gathering the concepts the small even clusters left out usually changes the counts. If the counts are still even afterward, keep them. Never add or remove terms merely to clear the prompt, and do not change bridges because of it.
+Compare the board to that source map and loss ledger before retaining or changing the even clusters. Re-read each cluster for two terms doing one job, and for a fact that already names a missing concept; fix those on the board. That is not a licence to add or drop terms just to break an even count.
+
+If those artifacts are absent (common for early published puzzles, which were often sparse as well as even), write the concept-gathering inventory in this review. That map is the repair. It is not a board edit and not an open issue. Stop when it is saved. Fit it onto the board only after the human approves it. Gathering the concepts the small even clusters left out usually changes the counts. If the counts are still even afterward, keep them. Do not change bridges because of the prompt.
 
 For every save, use the latest `expected_revision`. Validate after a save; if
 validation requires a correction, refresh the draft and validate the corrected
@@ -146,6 +148,7 @@ Only when the plan’s review steps include it:
 Before opening an issue, apply this threshold:
 
 - It must be a judgment call, structural question, or future authoring decision that remains after `validate_puzzle_draft` and a careful routine editing pass. Fix mechanical validation failures and ordinary copy defects now instead.
+- A missing concept-gathering inventory is not an open issue. Write the inventory in this review and stop for approval of that map.
 - One issue describes one unresolved pattern or decision. Do not open node-by-node threads for a board-wide concern such as unverified links.
 - Resolved work belongs in the completion comment; an open issue is only for work needing a later decision or action.
 

@@ -153,17 +153,18 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   puzzle's own prose already names alongside included ones is the
   strongest signal of a real gap, much stronger than the raw count.
   If the prompt fires on a reviewed puzzle that has no concept-gathering
-  inventory, reopen that pass and stop for human approval before fitting
-  the sourced map, instead of editing
-  the board in place. Early boards were often sparse as well as even,
+  inventory, write that inventory in this review. Writing the map is the
+  repair: it is not a board edit, and it is not an open issue. Stop when
+  the map is saved. Fit it onto the board only after the human approves
+  it. Early boards were often sparse as well as even,
   because each cluster was closed at a small finished number; gathering
   the omitted concepts usually changes the counts. Order matters: before
   choosing any count or range, enumerate the sourced distinctions,
   candidate terms, and genuine connections. A statement such as "four
   clusters of three to four terms" is not a valid starting plan, even
   when called provisional or said to be within limits. Keep even counts
-  when the material supports them. Never alter the material merely to
-  make the resulting counts look less regular, and do not add or remove
+  when the sourced map supports them. Never alter the current board
+  merely to make its counts look less regular, and do not add or remove
   bridges because of this prompt.
   The firm board ceiling is 32 total nodes, and it is a refusal point rather
   than a size to fill. Do not hunt for the weakest
@@ -449,10 +450,19 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
 
 const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
 
-- Review the latest accumulated draft; do not regenerate it. Check ambiguity,
-  redundant terms doing the same conceptual job, missing concepts named by a
-  cluster fact, seed recognizability, bridge necessity, and whether each
-  bridge fact genuinely explains its connection.
+- Review the latest accumulated draft; do not regenerate it to silence a
+  prompt. Check ambiguity, redundant terms doing the same conceptual job,
+  missing concepts named by a cluster fact, seed recognizability, bridge
+  necessity, and whether each bridge fact genuinely explains its connection.
+- uniform-partition means three or more clusters share one term count. Re-read
+  each cluster for two terms doing one job, and for a fact that already names
+  a missing concept; fix those on the board. That is not a licence to add or
+  drop terms just to break an even count, and it is not a reason to change
+  bridges. If the board has no concept-gathering inventory, write that
+  inventory in this review. That map is the repair. It is not a board edit
+  and not an open issue. Stop when it is saved, and fit it onto the board
+  only after the human approves it. Gathering what the small clusters left
+  out usually changes the counts. If they are still even, keep them.
 - If validation flags more than 32 nodes, split into relatedPuzzles rather
   than dropping essential terms. Do not split or drop terms because of canvas
   size; that size is derived. A split below the ceiling is for a seam in the

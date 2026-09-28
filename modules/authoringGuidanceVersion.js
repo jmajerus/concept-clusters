@@ -130,7 +130,11 @@
 // swaps are not symmetry signals. Reviews that treated only an
 // incidence-graph combination as the prompt should be revisited. A board
 // with no concept-gathering inventory is repaired by reopening that pass.
+// 6.1: same prompt. A review that finds no inventory writes that inventory
+// and stops for approval before fitting. Leaving the reopen as an open
+// issue, or treating "do not add or drop terms" as a reason not to write
+// the map, is not the repair.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 0
+  minor: 1
 });
