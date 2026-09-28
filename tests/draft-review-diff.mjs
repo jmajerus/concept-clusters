@@ -358,6 +358,42 @@ export async function run() {
   assert.deepEqual(filed.bridges, []);
   assert.equal(filed.clusters[1].fact, "Cells release energy from food.");
 
+  const termsOnly = {
+    ...baseline,
+    clusters: [
+      baseline.clusters[0],
+      { ...baseline.clusters[1], fact: "Cells release energy from food.", terms: ["atp", "heat"] }
+    ]
+  };
+  const strippedFields = independentReviewDocument(baseline, [{ proposal: firstProposal }], termsOnly);
+  assert.equal(strippedFields.clusters[1].fact, "Cells release energy.");
+  assert.deepEqual(strippedFields.clusters[1].terms, ["atp", "heat"]);
+  const termsFromBaseline = {
+    ...baseline,
+    clusters: [
+      baseline.clusters[0],
+      { ...baseline.clusters[1], terms: ["atp", "heat"] }
+    ]
+  };
+  const overlaid = stackedReviewDocument(baseline, { proposal: firstProposal }, termsFromBaseline);
+  assert.equal(overlaid.clusters[1].fact, "Cells release energy from food.");
+  assert.deepEqual(overlaid.clusters[1].terms, ["atp", "heat"]);
+  assert.equal(overlaid.bridges[0].term, "glucose");
+
+  const bridgeOnly = {
+    ...baseline,
+    bridges: [{ term: "glucose", clusters: ["photosynthesis", "cellular-respiration"], fact: "Sugar carries the energy." }]
+  };
+  const deletedBridge = {
+    ...baseline,
+    learningIntroduction: { text: "Energy moves from light to heat.", audience: "recommended" }
+  };
+  const resurrected = stackedReviewDocument(baseline, { proposal: bridgeOnly }, deletedBridge);
+  assert.equal(resurrected.bridges[0].term, "glucose");
+  const keptDeletion = stackedReviewDocument(baseline, { proposal: bridgeOnly }, deletedBridge, { loaded: true });
+  assert.deepEqual(keptDeletion.bridges, []);
+  assert.equal(keptDeletion.learningIntroduction.text, "Energy moves from light to heat.");
+
   const board = {
     ...baseline,
     learningIntroduction: { requirement: "optional", credit: "Editor", revision: 2, content: { text: "Old lesson." } }

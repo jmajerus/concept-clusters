@@ -1384,6 +1384,14 @@ export function createAuthoringMcpServer({
     return openProposals.length ? openProposals[openProposals.length - 1] : null;
   }
 
+  async function markReviewStackLoaded(draftId, stackLoaded) {
+    const supported = typeof draftRepository.supports === "function"
+      ? await draftRepository.supports("setReviewStackLoaded")
+      : typeof draftRepository.setReviewStackLoaded === "function";
+    if (!supported) return;
+    await draftRepository.setReviewStackLoaded({ draftId, actor, stackLoaded });
+  }
+
   server.registerTool("record_agent_puzzle_review", {
     title: "Record agent review or handoff issue",
     description:
@@ -1413,6 +1421,7 @@ export function createAuthoringMcpServer({
             expectedRevision: stored.revision,
             actor
           });
+          await markReviewStackLoaded(draft_id, true);
           return success(
             "Loaded the preceding review into the working copy. Edits from here stack on it; pass stack_on true again when filing.",
             {
@@ -1436,6 +1445,7 @@ export function createAuthoringMcpServer({
             expectedRevision: stored.revision,
             actor
           });
+          await markReviewStackLoaded(draft_id, false);
           return success(
             "Restored the working copy to the review baseline. Open proposals stay filed separately. Pass stack_on true to build on the preceding review.",
             {
@@ -1464,7 +1474,16 @@ export function createAuthoringMcpServer({
           }))
         });
       }
-      if (stack_on === true) throw new Error("There is no preceding review to stack on.");
+      let stackTarget = null;
+      if (stack_on === true) {
+        const published = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+        const revision = Number.isInteger(stored.reviewBasePublishedRevision)
+          ? stored.reviewBasePublishedRevision
+          : (published && !published.withdrawnAt && Number.isInteger(published.revision)
+            ? published.revision
+            : null);
+        stackTarget = precedingReview(await openReviewProposals(puzzleId, revision));
+      }
       let basePublishedRevision = Number.isInteger(stored.reviewBasePublishedRevision)
         ? stored.reviewBasePublishedRevision
         : null;
@@ -1481,13 +1500,39 @@ export function createAuthoringMcpServer({
         expectedRevision: stored.revision,
         basePublishedRevision
       });
-      return success(`Recorded the review baseline for ${puzzleId} at draft revision ${stored.revision}.`, {
-        puzzleId,
+      if (!stackTarget) {
+        return success(
+          stack_on === true
+            ? `Recorded the review baseline for ${puzzleId} at draft revision ${stored.revision}. There is no preceding review to stack on.`
+            : `Recorded the review baseline for ${puzzleId} at draft revision ${stored.revision}.`,
+          {
+            puzzleId,
+            draftId: draft_id,
+            draftRevision: draft.revision,
+            basePublishedRevision: draft.reviewBasePublishedRevision,
+            action,
+            stackOn: stack_on === true ? false : null
+          }
+        );
+      }
+      const loaded = await draftRepository.save({
         draftId: draft_id,
-        draftRevision: draft.revision,
-        basePublishedRevision: draft.reviewBasePublishedRevision,
-        action
+        document: documentKeepingProvenance(stackTarget.proposal, stored.document),
+        expectedRevision: draft.revision,
+        actor
       });
+      await markReviewStackLoaded(draft_id, true);
+      return success(
+        "Recorded the review baseline and loaded the preceding review into the working copy. Edits from here stack on it; pass stack_on true again when filing.",
+        {
+          puzzleId,
+          draftId: draft_id,
+          draftRevision: loaded.revision,
+          basePublishedRevision: draft.reviewBasePublishedRevision,
+          action,
+          stackOn: true
+        }
+      );
     }
     if (action === "propose") {
       if (typeof draftRepository.readReviewBaseline !== "function") {
@@ -1528,7 +1573,9 @@ export function createAuthoringMcpServer({
       let proposalDocument = stored.document;
       if (preceding) {
         proposalDocument = documentKeepingProvenance(
-          stackedReviewDocument(baseline, preceding, stored.document),
+          stackedReviewDocument(baseline, preceding, stored.document, {
+            loaded: stored.reviewStackLoaded === true
+          }),
           stored.document
         );
         if (samePlayablePuzzle(preceding.proposal, proposalDocument)) {
@@ -1578,6 +1625,7 @@ export function createAuthoringMcpServer({
         expectedRevision: stored.revision,
         actor
       });
+      await markReviewStackLoaded(draft_id, false);
       return success(
         preceding
           ? `Filed a review proposal for ${puzzleId} on top of the preceding review, and restored the working copy to the baseline.`

@@ -59,6 +59,7 @@ function lazyRepository(resolveRepository) {
     "popWorkingCopy",
     "rememberReviewBaseline",
     "readReviewBaseline",
+    "setReviewStackLoaded",
     "releaseReviewSession"
   ];
   const facade = Object.fromEntries(required.map(method => [method, async (...args) => {

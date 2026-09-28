@@ -157,6 +157,7 @@ export function createPuzzleDraftStore({ directory }) {
       ...rest,
       openedFromPublished: record.openedFromPublished === true,
       hasReviewBaseline: reviewBaselineDocument != null,
+      reviewStackLoaded: record.reviewStackLoaded === true,
       reviewBasePublishedRevision: Number.isInteger(record.reviewBasePublishedRevision)
         ? record.reviewBasePublishedRevision
         : null,
@@ -531,6 +532,7 @@ export function createPuzzleDraftStore({ directory }) {
         );
       }
       record.reviewBaselineDocument = clone(document);
+      record.reviewStackLoaded = false;
       if (!Number.isInteger(record.reviewBasePublishedRevision) &&
           Number.isInteger(basePublishedRevision)) {
         record.reviewBasePublishedRevision = basePublishedRevision;
@@ -545,12 +547,23 @@ export function createPuzzleDraftStore({ directory }) {
     return record.reviewBaselineDocument ? clone(record.reviewBaselineDocument) : null;
   }
 
+  async function setReviewStackLoaded({ draftId, stackLoaded }) {
+    return withDraftMutation(draftId, async () => {
+      const record = await readRecord(draftId);
+      if (record.reviewBaselineDocument == null) return publicRecord(record);
+      record.reviewStackLoaded = stackLoaded === true;
+      await writeRecord(record);
+      return publicRecord(record);
+    });
+  }
+
   async function releaseReviewSession(draftId) {
     return withDraftMutation(draftId, async () => {
       const record = await readRecord(draftId);
       record.openedFromPublished = false;
       record.reviewBaselineDocument = null;
       record.reviewBasePublishedRevision = null;
+      record.reviewStackLoaded = false;
       await writeRecord(record);
       return publicRecord(record);
     });
@@ -563,6 +576,7 @@ export function createPuzzleDraftStore({ directory }) {
     listDrafts,
     rememberReviewBaseline,
     readReviewBaseline,
+    setReviewStackLoaded,
     releaseReviewSession,
     replaceDraft,
     replaceDomain,

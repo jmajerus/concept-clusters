@@ -280,6 +280,39 @@ function restoreField(target, name, baselineValue) {
   else target[name] = copyValue(baselineValue);
 }
 
+function itemFieldNames(baseItem, proposalItem, documentItem) {
+  return new Set([
+    ...Object.keys(baseItem || {}),
+    ...Object.keys(proposalItem || {}),
+    ...Object.keys(documentItem || {})
+  ]);
+}
+
+/** Fields the proposal copied in, and the document left untouched, go back to the baseline. */
+function revertMatchingFields(baseItem, proposalItem, documentItem) {
+  const next = copyValue(documentItem);
+  for (const name of itemFieldNames(baseItem, proposalItem, documentItem)) {
+    const baseValue = fieldValue(baseItem, name);
+    const proposalValue = fieldValue(proposalItem, name);
+    const documentValue = fieldValue(documentItem, name);
+    if (valuesEqual(baseValue, proposalValue) || !valuesEqual(proposalValue, documentValue)) continue;
+    restoreField(next, name, baseValue);
+  }
+  return next;
+}
+
+/** The document's own field edits, laid onto the preceding item. */
+function overlayItemFields(baseItem, precedingItem, documentItem) {
+  const next = copyValue(precedingItem || documentItem);
+  for (const name of itemFieldNames(baseItem, precedingItem, documentItem)) {
+    const baseValue = fieldValue(baseItem, name);
+    const documentValue = fieldValue(documentItem, name);
+    if (valuesEqual(baseValue, documentValue)) continue;
+    restoreField(next, name, documentValue);
+  }
+  return next;
+}
+
 function revertCollection(baseItems = [], proposalItems = [], documentItems = [], keyFields) {
   const baseMap = indexItems(baseItems, ...keyFields);
   const proposalMap = indexItems(proposalItems, ...keyFields);
@@ -296,6 +329,10 @@ function revertCollection(baseItems = [], proposalItems = [], documentItems = []
     const base = baseMap.get(key);
     if (proposed && valuesEqual(item, proposed) && !valuesEqual(item, base)) {
       if (base) result.push(copyValue(base));
+      continue;
+    }
+    if (proposed && base) {
+      result.push(revertMatchingFields(base, proposed, item));
       continue;
     }
     result.push(copyValue(item));
@@ -363,8 +400,13 @@ function applyCollectionDelta(baseItems = [], precedingItems = [], documentItems
     }
     documentKeys.add(key);
     if (valuesEqual(item, baseMap.get(key))) continue;
-    if (indexInResult.has(key)) result[indexInResult.get(key)] = copyValue(item);
-    else {
+    if (indexInResult.has(key)) {
+      result[indexInResult.get(key)] = overlayItemFields(
+        baseMap.get(key),
+        result[indexInResult.get(key)],
+        item
+      );
+    } else {
       indexInResult.set(key, result.length);
       result.push(copyValue(item));
     }
@@ -378,13 +420,16 @@ function applyCollectionDelta(baseItems = [], precedingItems = [], documentItems
 }
 
 /**
- * Put this review on the preceding one. A working copy that already contains
- * that proposal is filed as it stands. A working copy edited from the
- * baseline keeps the preceding review and adds only its own changes.
+ * Put this review on the preceding one. `loaded` means begin already put
+ * that proposal in the working copy, so deletions of its additions stand.
+ * Otherwise a working copy that still contains the proposal is filed as it
+ * stands, and one edited from the baseline keeps the preceding review and
+ * adds only its own changes.
  */
-export function stackedReviewDocument(baseline, preceding, document) {
+export function stackedReviewDocument(baseline, preceding, document, { loaded = false } = {}) {
   const proposal = preceding?.proposal || preceding;
   if (!proposal) return copyValue(document);
+  if (loaded) return copyValue(document);
   const alreadyStacked = !samePlayablePuzzle(
     independentReviewDocument(baseline, [proposal], document),
     document
