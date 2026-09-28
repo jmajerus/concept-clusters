@@ -1456,6 +1456,14 @@ export function createAuthoringMcpServer({
       if (!proposalDiff || proposalDiff.total === 0) {
         throw new Error("This draft matches the review baseline; nothing to propose.");
       }
+      const taxonomy = await taxonomyContext();
+      const validation = await contentService.validatePuzzleDraft(stored.document, {
+        categoryRegistry: taxonomy.categoryRegistry,
+        knownPuzzleIds: taxonomy.puzzleIds
+      });
+      if (!validation.valid) {
+        throw new Error(`Draft ${draft_id} is not valid; fix and validate it before filing a proposal.`);
+      }
       const identity = identifyMcpAssistanceClient({ ctx, server });
       const clientName = clipClientLabel(identity?.clientName || observedMcpClientLabel({ ctx, server }));
       const filed = await contentDocuments.recordPuzzleAgentReview({

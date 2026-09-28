@@ -224,7 +224,7 @@ export function diffPublishedDraft(published, draft) {
   const counts = { changed: 0, added: 0, removed: 0 };
   const fields = {};
   for (const name of [
-    "title", "category", "categories", "subcategories", "large", "tags",
+    "title", "puzzleKind", "category", "categories", "subcategories", "large", "tags",
     "level", "lensMode", "preSolve", "relatedPuzzles",
     "learningIntroduction"
   ]) {
@@ -275,6 +275,20 @@ export function documentKeepingProvenance(document, provenanceSource) {
     delete next.provenance;
   }
   return next;
+}
+
+/**
+ * The chosen proposal is published as stored, including its provenance.
+ * A byline edit made after the candidates were filed is no agent's stamp,
+ * so that working-copy provenance replaces the proposal's.
+ */
+export function documentForChosenProposal(proposal, workingCopy, proposals = []) {
+  const workingProvenance = workingCopy?.provenance ?? null;
+  const matchesFiledProposal = proposals.some(event =>
+    valuesEqual(event?.proposal?.provenance ?? null, workingProvenance)
+  );
+  if (matchesFiledProposal) return JSON.parse(JSON.stringify(proposal));
+  return documentKeepingProvenance(proposal, workingCopy);
 }
 
 /**

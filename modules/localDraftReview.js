@@ -55,6 +55,7 @@ import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import { draftPlayQuery } from "./stagingPlayLinks.js";
 import {
   diffPublishedDraft,
+  documentForChosenProposal,
   documentKeepingProvenance,
   publishedDocumentFromService,
   samePlayablePuzzle,
@@ -1451,7 +1452,7 @@ export function createLocalDraftReviewHandler({
           if (form.isPreviewReview) {
             await draftStore.replaceDraft({
               draftId,
-              document: documentKeepingProvenance(chosen.proposal, record.document),
+              document: documentForChosenProposal(chosen.proposal, record.document, openProposals),
               expectedRevision: record.revision
             });
             const played = await draftStore.getDraft(draftId);
@@ -1468,7 +1469,7 @@ export function createLocalDraftReviewHandler({
             actor: publicationActor
           });
           const authoredDocument = documentForEditor(
-            documentKeepingProvenance(chosen.proposal, record.document),
+            documentForChosenProposal(chosen.proposal, record.document, openProposals),
             { categoryRegistry }
           );
           if (typeof contentService?.validatePuzzleDraft === "function") {
@@ -1518,26 +1519,22 @@ export function createLocalDraftReviewHandler({
             document: documentForStorage(authoredDocument, { categoryRegistry }),
             actor: publicationActor,
             layout: publishLayout,
-            expectedRevision: publishedBefore.revision
+            expectedRevision: publishedBefore.revision,
+            reviewDecisions: [
+              {
+                eventType: "accepted",
+                draftRevision: chosen.draftRevision,
+                sourceEventId: chosen.id
+              },
+              ...openProposals.filter(event => event.id !== chosen.id).map(event => ({
+                eventType: "rejected",
+                proposal: event.proposal,
+                draftRevision: event.draftRevision,
+                basePublishedRevision: event.basePublishedRevision,
+                sourceEventId: event.id
+              }))
+            ]
           });
-          await recordReviewDecision(contentDocuments, {
-            puzzleId,
-            eventType: "accepted",
-            draftRevision: chosen.draftRevision,
-            publishedRevision: published.revision,
-            sourceEventId: chosen.id
-          });
-          for (const event of openProposals) {
-            if (event.id === chosen.id) continue;
-            await recordReviewDecision(contentDocuments, {
-              puzzleId,
-              eventType: "rejected",
-              document: event.proposal,
-              draftRevision: event.draftRevision,
-              basePublishedRevision: event.basePublishedRevision,
-              sourceEventId: event.id
-            });
-          }
           await draftStore.replaceDraft({
             draftId,
             document: documentForStorage(authoredDocument, { categoryRegistry }),

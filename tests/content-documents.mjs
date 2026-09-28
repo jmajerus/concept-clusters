@@ -467,6 +467,49 @@ export async function run() {
     (await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" })).revision,
     decided.revision
   );
+  const eventsBeforeChoice = await repo.listPuzzleReviewEvents({ id: "old-git-puzzle", limit: 100 });
+  await assert.rejects(
+    () => repo.publish({
+      kind: "puzzle",
+      id: "old-git-puzzle",
+      document: decided.document,
+      actor,
+      expectedRevision: decided.revision + 9,
+      reviewDecisions: [{ eventType: "accepted", sourceEventId: filed.id }]
+    }),
+    PublishedRevisionConflictError
+  );
+  assert.equal(
+    (await repo.listPuzzleReviewEvents({ id: "old-git-puzzle", limit: 100 })).length,
+    eventsBeforeChoice.length
+  );
+  const choice = await repo.publish({
+    kind: "puzzle",
+    id: "old-git-puzzle",
+    document: decided.document,
+    actor,
+    expectedRevision: decided.revision,
+    reviewDecisions: [
+      { eventType: "accepted", sourceEventId: filed.id, draftRevision: 6 },
+      {
+        eventType: "rejected",
+        sourceEventId: rival.id,
+        proposal: rival.proposal,
+        basePublishedRevision: decided.revision,
+        draftRevision: 7
+      }
+    ]
+  });
+  assert.equal(choice.revision, decided.revision + 1);
+  const choiceEvents = await repo.listPuzzleReviewEvents({ id: "old-git-puzzle", limit: 5 });
+  assert.equal(choiceEvents.some(event =>
+    event.eventType === "accepted" &&
+    event.sourceEventId === filed.id &&
+    event.publishedRevision === choice.revision
+  ), true);
+  assert.equal(choiceEvents.some(event =>
+    event.eventType === "rejected" && event.sourceEventId === rival.id
+  ), true);
   const proposalRows = [];
   let proposalSeq = 1;
   const proposalDatabase = {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   diffPublishedDraft,
+  documentForChosenProposal,
   documentKeepingProvenance,
   draftShadowsPublished,
   provenanceDiffersFromPublished,
@@ -247,6 +248,33 @@ export async function run() {
     "provenance stays out of the field-level marks"
   );
   assert.equal(samePlayablePuzzle(beforeProvenance, afterProvenance), true);
+  assert.equal(samePlayablePuzzle(
+    { id: "p", clusters: [], puzzleKind: "topic-based" },
+    { id: "p", clusters: [], puzzleKind: "trivia-quiz" }
+  ), false);
+  const chosen = {
+    id: "p",
+    title: "Chosen",
+    provenance: { collaboration: "ai", contributors: [{ name: "Codex" }] }
+  };
+  const later = {
+    id: "p",
+    title: "Later",
+    provenance: { collaboration: "ai", contributors: [{ name: "Claude" }] }
+  };
+  const chosenDocument = documentForChosenProposal(chosen, later, [
+    { proposal: chosen },
+    { proposal: later }
+  ]);
+  assert.equal(chosenDocument.title, "Chosen");
+  assert.deepEqual(chosenDocument.provenance, chosen.provenance);
+  const humanEdit = documentForChosenProposal(
+    chosen,
+    { provenance: { collaboration: "human", contributors: [{ name: "Ada" }] } },
+    [{ proposal: chosen }, { proposal: later }]
+  );
+  assert.equal(humanEdit.title, "Chosen");
+  assert.deepEqual(humanEdit.provenance, { collaboration: "human", contributors: [{ name: "Ada" }] });
   assert.equal(samePlayablePuzzle(beforeProvenance, {
     ...afterProvenance,
     clusters: [{ id: "added", name: "Added", fact: "New." }]
