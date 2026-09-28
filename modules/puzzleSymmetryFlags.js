@@ -1,8 +1,13 @@
-// Soft, non-blocking authoring signals. The pure structural analysis below
-// describes one submitted puzzle only -- it never assumes an inventory,
-// authoring path, model, or corpus baseline. A draft-review page can show its
-// weak observations; MCP receives only combinations strong enough to prompt
-// an author to reconsider the submitted concept set.
+// Soft, non-blocking authoring signals. The analysis below describes one
+// submitted puzzle only -- it never assumes an inventory, authoring path,
+// model, or corpus baseline.
+//
+// Symmetry-seeking is an even term count across clusters. That prompt goes
+// to MCP validation and to the draft-review page. A cluster count that
+// repeats the same number is a further sentence on that prompt, not a
+// second flag. Attachment — bridges joining clusters — is a normal result
+// of concept-gathering and is not flagged. A copied bridge relationKind
+// and an even lens-target count stay on the draft-review page only.
 //
 // Browser-safe (no Node APIs) so it can run in the hosted Worker, the
 // local stdio MCP server, and the admin review page's renderer alike, all
@@ -19,229 +24,20 @@ function uniformCount(values, { minItems = 3 } = {}) {
   return rest.every(value => value === first) ? { count: values.length, value: first } : null;
 }
 
-function validBinaryBridge(bridge, clusterCount) {
-  const endpoints = bridge?.clusters;
-  return Array.isArray(endpoints)
-    && endpoints.length === 2
-    && Number.isInteger(endpoints[0])
-    && Number.isInteger(endpoints[1])
-    && endpoints[0] !== endpoints[1]
-    && endpoints.every(index => index >= 0 && index < clusterCount);
-}
-
-function binaryTopology(clusters, bridges) {
-  const clusterCount = clusters.length;
-  if (clusterCount < 3 || !bridges.length || !bridges.every(bridge =>
-    validBinaryBridge(bridge, clusterCount)
-  )) return null;
-  const adjacency = Array.from({ length: clusterCount }, () => new Set());
-  for (const bridge of bridges) {
-    const [left, right] = bridge.clusters;
-    adjacency[left].add(right);
-    adjacency[right].add(left);
-  }
-  const seen = new Set();
-  let components = 0;
-  for (let start = 0; start < clusterCount; start++) {
-    if (seen.has(start)) continue;
-    components++;
-    const pending = [start];
-    seen.add(start);
-    while (pending.length) {
-      const current = pending.pop();
-      for (const next of adjacency[current]) {
-        if (seen.has(next)) continue;
-        seen.add(next);
-        pending.push(next);
-      }
-    }
-  }
-  const degrees = adjacency.map(neighbors => neighbors.size).sort((a, b) => a - b);
-  const connected = components === 1;
-  const tree = connected && bridges.length === clusterCount - 1;
-  const path = tree
-    && degrees[0] === 1
-    && degrees[1] === 1
-    && degrees.slice(2).every(degree => degree === 2);
-  const cycle = connected
-    && bridges.length === clusterCount
-    && degrees.every(degree => degree === 2);
-  return { components, degrees, connected, tree, path, cycle };
-}
-
-function compactColors(values) {
-  const unique = [...new Set(values)].sort();
-  const ids = new Map(unique.map((value, index) => [value, String(index)]));
-  return values.map(value => ids.get(value));
-}
-
-function samePartition(left, right) {
-  if (left.length !== right.length) return false;
-  for (let index = 0; index < left.length; index++) {
-    for (let other = index + 1; other < left.length; other++) {
-      if ((left[index] === left[other]) !== (right[index] === right[other])) return false;
-    }
-  }
-  return true;
-}
-
-// Model clusters and bridges as a colored incidence graph. This covers
-// n-ary bridges without pretending they are pairwise links. Cluster colors
-// preserve term counts; bridge colors preserve structural relationship
-// annotations, but deliberately omit the bridge word itself (unique words
-// would erase the structural question before it can be asked).
-function incidenceGraph(clusters, bridges) {
-  if (clusters.length < 3 || !bridges.length) return null;
-  if (bridges.some(bridge => {
-    const endpoints = bridge?.clusters;
-    return !Array.isArray(endpoints)
-      || endpoints.length < 2
-      || new Set(endpoints).size !== endpoints.length
-      || endpoints.some(index => !Number.isInteger(index) || index < 0 || index >= clusters.length);
-  })) return null;
-  const count = clusters.length + bridges.length;
-  const adjacency = Array.from({ length: count }, () => Array(count).fill(false));
-  const colors = clusters.map(cluster =>
-    `cluster:${Array.isArray(cluster?.terms) ? cluster.terms.length : 0}`
-  );
-  bridges.forEach((bridge, bridgeIndex) => {
-    const node = clusters.length + bridgeIndex;
-    colors.push([
-      "bridge",
-      bridge.clusters.length,
-      bridge.relationKind || "",
-      bridge.direction || ""
-    ].join(":"));
-    for (const clusterIndex of bridge.clusters) {
-      adjacency[node][clusterIndex] = true;
-      adjacency[clusterIndex][node] = true;
-    }
-  });
-  return { adjacency, colors, clusterCount: clusters.length };
-}
-
-function refinedColors(graph) {
-  let colors = compactColors(graph.colors);
-  for (let pass = 0; pass < colors.length; pass++) {
-    const next = compactColors(colors.map((color, index) => {
-      const neighbors = graph.adjacency[index]
-        .map((connected, other) => connected ? colors[other] : null)
-        .filter(Boolean)
-        .sort();
-      return `${color}|${neighbors.join(",")}`;
-    }));
-    if (samePartition(colors, next)) return next;
-    colors = next;
-  }
-  return colors;
-}
-
-function findNonIdentityAutomorphism(graph) {
-  if (!graph) return null;
-  const colors = refinedColors(graph);
-  const groups = new Map();
-  colors.forEach((color, index) => {
-    const group = groups.get(color) || [];
-    group.push(index);
-    groups.set(color, group);
-  });
-  const candidates = [...groups.values()].filter(group => group.length > 1);
-  if (!candidates.length) return null;
-  const size = colors.length;
-  const mapping = Array(size).fill(-1);
-  const used = Array(size).fill(false);
-
-  function compatible(source, target) {
-    for (let other = 0; other < size; other++) {
-      const mapped = mapping[other];
-      if (mapped < 0) continue;
-      if (graph.adjacency[source][other] !== graph.adjacency[target][mapped]) return false;
-    }
-    return true;
-  }
-
-  function chooseSource() {
-    const remaining = [];
-    for (let source = 0; source < size; source++) {
-      if (mapping[source] >= 0) continue;
-      const mappedNeighbors = graph.adjacency[source]
-        .filter((connected, other) => connected && mapping[other] >= 0).length;
-      remaining.push({
-        source,
-        mappedNeighbors,
-        candidateCount: groups.get(colors[source]).length
-      });
-    }
-    remaining.sort((left, right) =>
-      right.mappedNeighbors - left.mappedNeighbors
-      || left.candidateCount - right.candidateCount
-      || left.source - right.source
-    );
-    return remaining[0]?.source ?? null;
-  }
-
-  function extend() {
-    const source = chooseSource();
-    if (source == null) return [...mapping];
-    for (const target of groups.get(colors[source])) {
-      if (used[target] || !compatible(source, target)) continue;
-      mapping[source] = target;
-      used[target] = true;
-      const found = extend();
-      if (found) return found;
-      mapping[source] = -1;
-      used[target] = false;
-    }
-    return null;
-  }
-
-  for (const group of candidates) {
-    for (const source of group) {
-      for (const target of group) {
-        if (source === target) continue;
-        mapping[source] = target;
-        used[target] = true;
-        const found = extend();
-        if (found) {
-          const movedClusters = found
-            .slice(0, graph.clusterCount)
-            .map((mapped, index) => ({ index, mapped }))
-            .filter(({ index, mapped }) => index !== mapped);
-          if (movedClusters.length) return { mapping: found, movedClusters };
-        }
-        mapping[source] = -1;
-        used[target] = false;
-      }
-    }
-  }
-  return null;
-}
-
-function movedClusterNumbers(movedClusters) {
-  const numbers = new Set();
-  for (const { index, mapped } of movedClusters) {
-    numbers.add(index + 1);
-    numbers.add(mapped + 1);
-  }
-  return [...numbers].sort((left, right) => left - right);
-}
-
-function signature({ clusterCount, termCounts, bridgeCount, topology }) {
+function signature(clusterCount, termCounts) {
   return {
     clusters: clusterCount,
-    termsPerCluster: [...termCounts].sort((a, b) => a - b),
-    bridges: bridgeCount,
-    binaryBridgeDegrees: topology?.degrees || null,
-    binaryComponents: topology?.components || null
+    termsPerCluster: [...termCounts].sort((a, b) => a - b)
   };
 }
 
-// The complete document-only regularity result. descriptors are raw shape
-// facts; observations are actual symmetries or cross-axis locks. MCP prompts
-// require both kinds of significant observation, never a pile-up of facts.
+const RECHECK_CONCEPT_SET = "Re-read each cluster for two terms doing one job, and for a fact that names a concept missing from its terms. If this board has no concept-gathering inventory, reopen that pass and stop for human approval before fitting the sourced map. Keep the even counts when the material supports them. Do not add or remove terms to clear this prompt, and do not change bridges because of it.";
+
+// Document-only count signals. mcpFlags is the symmetry prompt (even term
+// counts). descriptors are draft-review notes that are not that prompt.
 export function computeStructuralRegularity(puzzle) {
   if (!puzzle || typeof puzzle !== "object") {
-    return { signature: null, descriptors: [], observations: [], mcpFlags: [] };
+    return { signature: null, descriptors: [], mcpFlags: [] };
   }
   const clusters = Array.isArray(puzzle.clusters) ? puzzle.clusters : [];
   const bridges = Array.isArray(puzzle.bridges) ? puzzle.bridges : [];
@@ -250,83 +46,29 @@ export function computeStructuralRegularity(puzzle) {
     Array.isArray(cluster?.terms) ? cluster.terms.length : 0
   );
   const uniformTerms = uniformCount(termCounts);
-  const topology = binaryTopology(clusters, bridges);
-  const graphSymmetry = findNonIdentityAutomorphism(incidenceGraph(clusters, bridges));
-  const value = uniformTerms?.value;
   const result = {
-    signature: signature({
-      clusterCount: clusters.length,
-      termCounts,
-      bridgeCount: bridges.length,
-      topology
-    }),
+    signature: signature(clusters.length, termCounts),
     descriptors: [],
-    observations: [],
     mcpFlags: []
   };
 
   if (uniformTerms) {
-    result.descriptors.push({
-      id: "uniform-partition",
-      message: `All ${uniformTerms.count} clusters have exactly ${value} terms. ` +
-        "This is a shape descriptor, not a defect; check that the concept set, rather than a target count, produced the partition.",
-      signature: result.signature
-    });
-  }
-
-  if (topology?.path) {
-    result.descriptors.push({
-      id: "binary-path-scaffold",
-      message: `The ${clusters.length} clusters are connected by a binary path scaffold (${bridges.length} bridges; degrees ${topology.degrees.join(", ")}). ` +
-        "This is a shape descriptor, not a defect.",
-      signature: result.signature
-    });
-  } else if (topology?.tree) {
-    result.descriptors.push({
-      id: "binary-spanning-tree",
-      message: `The ${clusters.length} clusters use the minimum connected binary bridge scaffold (${bridges.length} bridges). ` +
-        "This is a shape descriptor, not a defect.",
-      signature: result.signature
-    });
-  } else if (topology?.cycle) {
-    result.descriptors.push({
-      id: "binary-cycle-scaffold",
-      message: `The ${clusters.length} clusters form a binary cycle scaffold (${bridges.length} bridges; every cluster has degree 2). ` +
-        "This is a shape descriptor, not a defect.",
-      signature: result.signature
-    });
-  }
-
-  const axisLock = uniformTerms && value === clusters.length;
-  if (graphSymmetry) {
-    result.observations.push({
-      id: "incidence-graph-symmetry",
-      message: `The attributed cluster–bridge incidence graph has a non-identity symmetry: it can permute ` +
-        `clusters ${movedClusterNumbers(graphSymmetry.movedClusters).join(", ")} ` +
-        "while preserving the submitted structure. Symmetry is neutral; this is a review observation, not a defect.",
-      signature: result.signature
-    });
-  }
-  if (axisLock) {
-    result.observations.push({
-      id: "cluster-size-count-lock",
-      message: `The uniform terms-per-cluster count (${value}) also equals the cluster count (${clusters.length}). ` +
-        "This is a cross-axis count lock, not a defect.",
-      signature: result.signature
-    });
-  }
-
-  if (graphSymmetry && axisLock) {
+    const { count, value } = uniformTerms;
+    const countLock = value === clusters.length;
+    const lockSentence = countLock
+      ? ` The cluster count matches that number (${clusters.length}).`
+      : "";
     result.mcpFlags.push({
-      id: "structural-regularity-combination",
+      id: "uniform-partition",
       nextStep: {
         action: "recheck-concept-set",
-        instruction: "Independently enumerate the concepts and bridges the lesson needs. Retain the shape only when that review supports it; never add or remove terms or bridges merely to clear this prompt."
+        instruction: RECHECK_CONCEPT_SET
       },
-      message: `This submitted puzzle has both a non-identity incidence-graph symmetry and a cross-axis count lock (${clusters.length} clusters with ${value} terms each). ` +
-        "Re-check the concept set independently before retaining the shape; symmetry is not itself a defect, and you must not add or remove terms or bridges merely to break it.",
-      signature: result.signature,
-      observations: result.observations.map(observation => observation.id)
+      message: `All ${count} clusters have exactly ${value} terms.${lockSentence} ` +
+        "Most subjects are less even than this. Re-check each cluster for two terms doing one job, and for a fact that names a concept the term list omitted. " +
+        "If this board never had a concept-gathering pass, reopen that pass and stop for human approval before fitting the sourced map. " +
+        "Keep the counts when the material supports them; do not add or remove terms merely to break the pattern, and do not change bridges because of this prompt.",
+      signature: result.signature
     });
   }
 
@@ -343,14 +85,14 @@ export function computeStructuralRegularity(puzzle) {
     });
   }
 
-  // relationKind is optional and has no default. Real symmetry-chasing
-  // shows up on every item, not a subset of them -- so a bridge that left
-  // relationKind unset is itself a deviation, not a non-participant to
-  // exclude from the comparison. Passing every bridge's raw value (no
-  // filtering) gets this for free: uniformCount's own undefined-first
-  // guard means "nobody set it" still doesn't flag, and .every() means
-  // one unset bridge among otherwise-matching ones breaks the match just
-  // like a differing explicit value would.
+  // relationKind is optional and has no default. A copied label shows up on
+  // every bridge, not a subset of them -- so a bridge that left relationKind
+  // unset is itself a deviation, not a non-participant to exclude from the
+  // comparison. Passing every bridge's raw value (no filtering) gets this
+  // for free: uniformCount's own undefined-first guard means "nobody set it"
+  // still doesn't flag, and .every() means one unset bridge among
+  // otherwise-matching ones breaks the match just like a differing explicit
+  // value would. This is a classification note, not a symmetry flag.
   const relationKinds = uniformCount(bridges.map(bridge => bridge?.relationKind));
   if (relationKinds) {
     result.descriptors.push({
@@ -362,33 +104,12 @@ export function computeStructuralRegularity(puzzle) {
     });
   }
 
-  // Zero bridges touching every cluster is the trivial, meaningless case
-  // (a puzzle can legitimately have no bridges at all) -- excluded so this
-  // only fires on a real shared nonzero count. A path/cycle descriptor is
-  // already clearer than its uniform degree count, so avoid duplicating it.
-  if (bridges.length > 0 && !topology?.path && !topology?.cycle) {
-    const touchCounts = uniformCount(clusters.map((_, ci) =>
-      bridges.filter(bridge => Array.isArray(bridge?.clusters) && bridge.clusters.includes(ci)).length
-    ));
-    if (touchCounts && touchCounts.value > 0) {
-      result.descriptors.push({
-        id: "uniform-bridge-touch-count",
-        message: `Every cluster touches exactly ${touchCounts.value} bridge${touchCounts.value === 1 ? "" : "s"}. ` +
-          "Worth checking each bridge is a genuine conceptual connection for that specific pair, " +
-          "not one added just to keep every cluster's bridge count matching.",
-        signature: result.signature
-      });
-    }
-  }
-
   return result;
 }
 
-// Full structural observations, retained as a small helper for direct
-// consumers and tests. MCP callers should use computeAuthoringFlags below.
+// The symmetry prompt. Draft-review-only notes are computeUserOnlyAuthoringFlags.
 export function computeSymmetryFlags(puzzle) {
-  const regularity = computeStructuralRegularity(puzzle);
-  return [...regularity.descriptors, ...regularity.observations];
+  return computeStructuralRegularity(puzzle).mcpFlags;
 }
 
 function sameMembers(left, right) {
@@ -529,12 +250,9 @@ export function computeAuthoringFlags(puzzle) {
   ];
 }
 
-// User-only flags: surfaced on the draft review page but deliberately left
-// out of what an MCP client sees (validate_puzzle_draft's response, and
-// anything derived from it that a client could read back, e.g.
-// get_puzzle_draft's stored validation). Structural observations are
-// intentionally withheld from MCP: a human can skim a descriptor without
-// being induced to "fix" an otherwise natural shape.
+// Draft-review notes withheld from MCP validation: an even lens-target count,
+// and a relationKind copied onto every bridge. The symmetry prompt itself is
+// an MCP flag, so it is not repeated here.
 export function computeUserOnlyAuthoringFlags(puzzle) {
-  return computeSymmetryFlags(puzzle);
+  return computeStructuralRegularity(puzzle).descriptors;
 }

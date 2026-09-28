@@ -124,7 +124,13 @@
 // ceiling. Canvas size stays derived. A split is a judgment about the
 // subject, or the response to exceeding 32, not a way to stay under a
 // preferred size.
+// 6.0: the symmetry prompt is an even term count across three or more
+// clusters (uniform-partition). A cluster count that repeats that number
+// is a sentence on the same prompt. Bridges, attachment, and cluster
+// swaps are not symmetry signals. Reviews that treated only an
+// incidence-graph combination as the prompt should be revisited. A board
+// with no concept-gathering inventory is repaired by reopening that pass.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
-  major: 5,
-  minor: 24
+  major: 6,
+  minor: 0
 });

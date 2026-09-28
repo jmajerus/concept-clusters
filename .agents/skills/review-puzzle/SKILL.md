@@ -104,23 +104,13 @@ Load [design judgment](../author-puzzle/references/design-judgment.md) only then
 - Lenses only if pedagogy needs a change; do not pad toward 6
 - Metadata only for a real discovery fix
 
-### Structural-regularity prompts
+### Symmetry prompt
 
-`structural-regularity-combination` is the MCP-visible prompt: an actual
-non-identity symmetry in the attributed cluster--bridge incidence graph plus a
-cross-axis count lock (terms per cluster equal the cluster count). Individual
-count, topology, and symmetry observations are draft-review-only, deliberately
-kept out of MCP responses to reduce author noise. For a combination prompt,
-resolve the authoring workspace once, then read only the exact source paths for
-this draft: `ledgers/<draft-id>-fit.json`; its `inventoryId` selects
-`inventories/<inventory-id>.json`, otherwise try `inventories/<draft-id>.json`.
-Do not search the workspace.
+`uniform-partition` is the validation prompt: three or more clusters all have the same term count. When the cluster count equals that term count, the message says so. That match is a further reason to look, not a separate flag. Bridges, bridge degrees, and whether one cluster could swap with another are not part of the prompt. Attachment is a normal result of concept-gathering and is not flagged.
 
-Compare the board to that source map and loss ledger before retaining or
-changing a repeated shape. Never add/remove terms or bridges merely to clear a
-prompt. If the artifacts are absent (common for legacy published puzzles),
-report the prompt as open and ask the human for the source rationale; do not
-reconstruct an inventory from the board.
+On that prompt, resolve the authoring workspace once, then read only the exact source paths for this draft: `ledgers/<draft-id>-fit.json`; its `inventoryId` selects `inventories/<inventory-id>.json`, otherwise try `inventories/<draft-id>.json`. Do not search the workspace.
+
+Compare the board to that source map and loss ledger before retaining or changing the even clusters. If those artifacts are absent (common for early published puzzles, which were often sparse as well as even), reopen the concept-gathering inventory pass instead of editing counts in place, and fit only after the human approves that map. Gathering the concepts the small even clusters left out usually changes the counts. If the counts are still even afterward, keep them. Never add or remove terms merely to clear the prompt, and do not change bridges because of it.
 
 For every save, use the latest `expected_revision`. Validate after a save; if
 validation requires a correction, refresh the draft and validate the corrected

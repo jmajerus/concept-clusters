@@ -113,7 +113,7 @@ function readsFor(mode, gate) {
     return [
       ".agents/skills/author-puzzle/references/design-judgment.md",
       "docs/SIMPLIFIED-PUZZLE-FORMAT.md (one field only, if unknown)",
-      "After a structural-regularity-combination prompt only: node tools/authoring-workspace.mjs, then the exact ledger/inventory paths named by the selected draft (no search)"
+      "After a uniform-partition prompt only: node tools/authoring-workspace.mjs, then the exact ledger/inventory paths named by the selected draft (no search). If neither source exists, reopen the concept-gathering inventory pass"
     ];
   }
   return [];
@@ -315,7 +315,7 @@ async function build() {
         `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="begin" before any edit, so the drafts page can undo this review`,
         `get_puzzle_draft draft_id="${fromTargets.firstId}" (already loaded; refresh before save)`,
         `get_authoring_guidance phase="review" (pedagogy only if lenses/intro need work)`,
-        "If validation has a structural-regularity-combination prompt: resolve the authoring workspace once; read only ledgers/<draft-id>-fit.json, then inventories/<ledger.inventoryId>.json when named (otherwise inventories/<draft-id>.json). If neither source exists, keep the prompt open for human source review; do not alter counts merely to clear it.",
+        "If validation has a uniform-partition prompt: resolve the authoring workspace once; read only ledgers/<draft-id>-fit.json, then inventories/<ledger.inventoryId>.json when named (otherwise inventories/<draft-id>.json). If neither source exists, reopen the concept-gathering inventory pass instead of editing counts in place, and fit only after the human approves that map. Keep even counts when the material supports them. Do not add or remove terms merely to clear the prompt, and do not change bridges because of it.",
         "Apply the board checklist on this document only",
         "If changing the document: save_puzzle_draft with the current expected_revision, then validate_puzzle_draft. If validation needs a correction, refresh revision, save once more, and re-validate.",
         `If the document changed: record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="propose" [comments on why this candidate should win]. That files the candidate and restores the baseline. Skip propose when nothing changed.`,

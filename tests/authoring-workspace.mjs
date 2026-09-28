@@ -150,5 +150,5 @@ export async function run() {
   assert.equal(plan.chunk[0].mcpBudget, 9);
   assert.ok(plan.steps.some(step => step.includes('action="propose"')));
   assert.ok(plan.steps.some(step => step.includes("expected_revision")));
-  assert.ok(plan.steps.some(step => step.includes("structural-regularity-combination")));
+  assert.ok(plan.steps.some(step => step.includes("uniform-partition")));
 }

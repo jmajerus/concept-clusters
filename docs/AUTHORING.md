@@ -190,15 +190,25 @@ what the material requires.
 - Add only genuine bridges; zero bridges and disconnected components are valid.
 - Add only lenses with a distinct, defensible learning purpose.
 
-Equal counts do not prove templating, and historical corpus frequency is not
-evidence either way. The draft-review page shows an individual repeated count
-as a descriptor. MCP validation emits a structural-regularity prompt only when
-the attributed cluster--bridge incidence graph has a real non-identity symmetry
-and the terms-per-cluster count also equals the cluster count. In either case,
-look within each cluster for two terms doing the same conceptual job, and look
-in its fact for a distinct concept the term list omitted. Make a change only
-when that semantic check finds a real problem; do not alter a puzzle merely to
-make it look less symmetric.
+Equal term counts are the symmetry prompt. A subject's clusters are usually
+uneven. Validation emits one non-blocking `uniform-partition` prompt when
+three or more clusters all have the same term count. When the cluster count
+equals that term count, the prompt says so; that match is a further reason
+to look, not a separate flag. Bridges are not part of the prompt. Attachment
+— each cluster joined to another by a real relationship — is what careful
+concept-gathering tends to produce, and it is not flagged.
+
+Look within each cluster for two terms doing the same conceptual job, and
+look in its fact for a distinct concept the term list omitted. If the prompt
+fires on a reviewed puzzle that has no concept-gathering inventory, reopen
+that pass and stop for human approval before fitting the sourced map,
+instead of editing the board in place.
+Early boards were often sparse as well as even, because each cluster was
+closed at a small finished number; gathering the omitted concepts usually
+changes the counts. Make a change only when that reading finds a real
+problem. Keep even counts when the material supports them. Do not add or
+remove terms merely to make a puzzle look less even, and do not add or
+remove bridges because of this prompt.
 
 The complete board may contain at most 32 total nodes (all cluster terms plus
 bridges). That ceiling is where validation refuses a board; it is not a size

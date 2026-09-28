@@ -5,15 +5,15 @@ import {
   computeLensReasonCoverageFlags,
   computeLensShapeFlags,
   computeStructuralRegularity,
-  computeSymmetryFlags,
   computeUserOnlyAuthoringFlags
 } from "../modules/puzzleSymmetryFlags.js";
 
-export const name = "puzzle symmetry flags: structural regularity and audience filtering";
+export const name = "puzzle symmetry flags: even term counts and audience filtering";
 
-// The flags are structural review prompts, not corpus-rate predictions. A
-// genuine pattern has to cover every relevant item; one differing count (or
-// one unset optional bridge field) removes the signal.
+// The symmetry prompt is an even term count across three or more clusters.
+// One differing count removes it. Bridges, attachment, and cluster swaps
+// are not part of the prompt. A cluster count that repeats the term count
+// is a sentence on the same flag.
 
 function cluster(termCount) {
   return { terms: Array.from({ length: termCount }, (_, i) => `term-${i}`) };
@@ -21,72 +21,64 @@ function cluster(termCount) {
 
 export async function run() {
   // Nothing to flag: no puzzle, or a puzzle whose counts don't converge.
-  assert.deepEqual(computeSymmetryFlags(null), []);
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeAuthoringFlags(null), []);
+  assert.deepEqual(computeAuthoringFlags({
     clusters: [cluster(3), cluster(4), cluster(5)]
   }), []);
 
-  // --- uniform partition: draft-review observation, not MCP noise -------
-  const lowClusterFlags = computeSymmetryFlags({
+  // --- even term counts: the MCP symmetry prompt -----------------------
+  const threeOfThree = computeAuthoringFlags({
     clusters: [cluster(3), cluster(3), cluster(3)]
   });
-  assert.ok(lowClusterFlags.some(flag => flag.id === "uniform-partition"));
-  assert.ok(lowClusterFlags.some(flag => flag.id === "cluster-size-count-lock"));
-  const fourClusterFlags = computeSymmetryFlags({
-    clusters: [cluster(4), cluster(4), cluster(4)]
+  assert.equal(threeOfThree.filter(flag => flag.id === "uniform-partition").length, 1);
+  assert.match(threeOfThree[0].message, /cluster count matches that number \(3\)/);
+  const fourOfThree = computeAuthoringFlags({
+    clusters: [cluster(3), cluster(3), cluster(3), cluster(3)]
   });
-  assert.ok(fourClusterFlags.some(flag => flag.id === "uniform-partition"));
-  const clusterFlags = computeSymmetryFlags({
+  assert.ok(fourOfThree.some(flag => flag.id === "uniform-partition"));
+  assert.doesNotMatch(
+    fourOfThree.find(flag => flag.id === "uniform-partition").message,
+    /cluster count matches/
+  );
+  const clusterFlags = computeAuthoringFlags({
     clusters: [cluster(5), cluster(5), cluster(5)]
   });
   assert.equal(clusterFlags.length, 1);
   assert.equal(clusterFlags[0].id, "uniform-partition");
   assert.match(clusterFlags[0].message, /All 3 clusters have exactly 5 terms/);
+  assert.doesNotMatch(clusterFlags[0].message, /cluster count matches/);
+  assert.match(clusterFlags[0].message, /concept-gathering pass/);
+  assert.match(clusterFlags[0].message, /do not change bridges/i);
   // A partial match (3 of 4 clusters share a count, one doesn't) still
   // isn't the same signal as "every cluster".
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeAuthoringFlags({
     clusters: [cluster(5), cluster(5), cluster(5), cluster(6)]
   }), []);
+  // Two matching clusters are too small to call symmetry-seeking.
+  assert.deepEqual(computeAuthoringFlags({
+    clusters: [cluster(4), cluster(4)]
+  }), []);
 
-  // A real incidence-graph symmetry plus the independent count lock is an
-  // MCP-visible combination. It is not called a "square": topology alone
-  // is only a descriptor and the graph test also works for n-ary bridges.
-  const threeByThreeByThree = computeSymmetryFlags({
-    clusters: [cluster(3), cluster(3), cluster(3)],
-    bridges: [
-      { clusters: [0, 1] },
-      { clusters: [1, 2] },
-      { clusters: [2, 0] }
-    ]
-  });
-  assert.ok(threeByThreeByThree.some(flag => flag.id === "uniform-partition"));
-  assert.ok(threeByThreeByThree.some(flag => flag.id === "binary-cycle-scaffold"));
-  assert.ok(threeByThreeByThree.some(flag => flag.id === "incidence-graph-symmetry"));
-  assert.ok(threeByThreeByThree.some(flag => flag.id === "cluster-size-count-lock"));
+  // Bridges do not create, remove, or intensify the prompt. A connected
+  // board and an unbridged board with the same term counts say the same thing.
   const threeRegularity = computeStructuralRegularity({
     clusters: [cluster(3), cluster(3), cluster(3)],
     bridges: [{ clusters: [0, 1] }, { clusters: [1, 2] }, { clusters: [2, 0] }]
   });
   assert.deepEqual(threeRegularity.signature, {
     clusters: 3,
-    termsPerCluster: [3, 3, 3],
-    bridges: 3,
-    binaryBridgeDegrees: [2, 2, 2],
-    binaryComponents: 1
+    termsPerCluster: [3, 3, 3]
   });
-  assert.equal(threeRegularity.mcpFlags[0].id, "structural-regularity-combination");
+  assert.equal(threeRegularity.mcpFlags.length, 1);
+  assert.equal(threeRegularity.mcpFlags[0].id, "uniform-partition");
   assert.equal(threeRegularity.mcpFlags[0].nextStep.action, "recheck-concept-set");
-  assert.match(threeRegularity.mcpFlags[0].nextStep.instruction, /never add or remove/i);
-  const fourByFourByFour = computeSymmetryFlags({
-    clusters: [cluster(4), cluster(4), cluster(4), cluster(4)],
-    bridges: [
-      { clusters: [0, 1] },
-      { clusters: [1, 2] },
-      { clusters: [2, 3] },
-      { clusters: [3, 0] }
-    ]
+  assert.match(threeRegularity.mcpFlags[0].nextStep.instruction, /human approval/);
+  assert.match(threeRegularity.mcpFlags[0].nextStep.instruction, /do not change bridges/i);
+  assert.deepEqual(threeRegularity.descriptors, []);
+  const unbridged = computeStructuralRegularity({
+    clusters: [cluster(3), cluster(3), cluster(3)]
   });
-  assert.ok(fourByFourByFour.some(flag => flag.id === "binary-cycle-scaffold"));
+  assert.equal(unbridged.mcpFlags[0].message, threeRegularity.mcpFlags[0].message);
 
   // Drafts arrive in simplified form (seeds + floatingTerms), then validate
   // through puzzleFromAuthoredDocument before flags run. Exercise that exact
@@ -118,10 +110,10 @@ export async function run() {
   );
   assert.deepEqual(errors, []);
   assert.ok(computeAuthoringFlags(convertedThreeByThreeByThree)
-    .some(flag => flag.id === "structural-regularity-combination"));
+    .some(flag => flag.id === "uniform-partition"));
 
   // --- uniform lens target count: draft-review-only observation ----------
-  const lensFlags = computeSymmetryFlags({
+  const lensFlags = computeUserOnlyAuthoringFlags({
     clusters: [],
     lenses: [
       { targets: ["a", "b", "c", "d"] },
@@ -133,14 +125,14 @@ export async function run() {
   assert.equal(lensFlags[0].id, "uniform-lens-target-count");
   assert.match(lensFlags[0].message, /All 3 lenses have exactly 4 targets/);
   // Two matching lenses are not enough to establish a repeated pattern.
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeUserOnlyAuthoringFlags({
     clusters: [],
     lenses: [
       { targets: ["a", "b", "c"] },
       { targets: ["d", "e", "f"] }
     ]
   }), []);
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeUserOnlyAuthoringFlags({
     clusters: [],
     lenses: [
       { targets: ["a", "b", "c", "d"] },
@@ -148,11 +140,11 @@ export async function run() {
     ]
   }), []);
   // A single maxed-out lens is not intra-puzzle symmetry.
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeUserOnlyAuthoringFlags({
     clusters: [],
     lenses: [{ targets: ["a", "b", "c", "d", "e", "f"] }]
   }), []);
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeUserOnlyAuthoringFlags({
     clusters: [],
     lenses: [
       { targets: ["a", "b", "c", "d", "e"] },
@@ -160,13 +152,11 @@ export async function run() {
     ]
   }), []);
 
-  // --- bridge relation-kind: user-only descriptor ------------------------
-  // Real symmetry-chasing shows up on every item, not a subset -- so an
-  // unset bridge is itself a deviation, not a non-participant excluded
-  // from the comparison. 4 bridges that agree plus 1 that never set
-  // relationKind at all does NOT flag, even though "4 of 5 agree" would
-  // read as strong symmetry under a looser rule.
-  assert.deepEqual(computeSymmetryFlags({
+  // --- bridge relation-kind: review-page note, not a symmetry flag ------
+  // A copied label shows up on every bridge, not a subset -- so an unset
+  // bridge is itself a deviation. 4 bridges that agree plus 1 that never
+  // set relationKind at all does NOT flag.
+  assert.deepEqual(computeUserOnlyAuthoringFlags({
     clusters: [],
     bridges: [
       { relationKind: "dynamic" },
@@ -176,7 +166,7 @@ export async function run() {
       {}
     ]
   }), []);
-  const threeRelations = computeSymmetryFlags({
+  const threeRelations = computeUserOnlyAuthoringFlags({
     clusters: [],
     bridges: [
       { relationKind: "dynamic" },
@@ -186,7 +176,15 @@ export async function run() {
   });
   assert.equal(threeRelations.length, 1);
   assert.equal(threeRelations[0].id, "uniform-bridge-relation-kind");
-  const relationFlags = computeSymmetryFlags({
+  assert.deepEqual(computeAuthoringFlags({
+    clusters: [],
+    bridges: [
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" }
+    ]
+  }), []);
+  const relationFlags = computeUserOnlyAuthoringFlags({
     clusters: [],
     bridges: [
       { relationKind: "dynamic" },
@@ -199,39 +197,25 @@ export async function run() {
   assert.equal(relationFlags[0].id, "uniform-bridge-relation-kind");
   assert.match(relationFlags[0].message, /All 4 bridges.*"dynamic"/);
 
-  // --- binary topology supersedes a generic uniform degree observation ---
-  // Zero bridges overall is the trivial, meaningless case (never flagged).
-  assert.equal(
-    computeSymmetryFlags({
-      clusters: [cluster(2), cluster(2), cluster(2)],
-      bridges: []
-    }).find(flag => flag.id === "uniform-bridge-touch-count"),
-    undefined
-  );
-  const threeClusterTouch = computeSymmetryFlags({
-    clusters: [cluster(1), cluster(1), cluster(1)],
+  // Attachment is not flagged. A path, a cycle, and equal bridge degrees
+  // leave the symmetry channel quiet unless the term counts are even.
+  assert.deepEqual(computeAuthoringFlags({
+    clusters: [cluster(2), cluster(3), cluster(4)],
     bridges: [
       { clusters: [0, 1] },
       { clusters: [1, 2] },
       { clusters: [2, 0] }
     ]
-  });
-  assert.ok(threeClusterTouch.some(flag => flag.id === "binary-cycle-scaffold"));
-  const touchFlags = computeSymmetryFlags({
-    clusters: [cluster(1), cluster(1), cluster(1), cluster(1)],
+  }), []);
+  assert.deepEqual(computeUserOnlyAuthoringFlags({
+    clusters: [cluster(2), cluster(3), cluster(4)],
     bridges: [
       { clusters: [0, 1] },
       { clusters: [1, 2] },
-      { clusters: [2, 3] },
-      { clusters: [3, 0] }
+      { clusters: [2, 0] }
     ]
-  });
-  const cycleFlag = touchFlags.find(flag => flag.id === "binary-cycle-scaffold");
-  assert.ok(cycleFlag, "expected a binary-cycle-scaffold observation");
-  assert.match(cycleFlag.message, /every cluster has degree 2/);
+  }), []);
 
-  // A varied partition can still have a descriptive topology. It remains out
-  // of the MCP channel because the cross-dimension combination is absent.
   const variedPath = {
     clusters: [cluster(3), cluster(4), cluster(5)],
     lenses: [{ targets: ["a"] }, { targets: ["a", "b"] }],
@@ -240,50 +224,32 @@ export async function run() {
       { relationKind: "contrast", clusters: [1, 2] }
     ]
   };
-  assert.deepEqual(computeSymmetryFlags(variedPath).map(flag => flag.id), ["binary-path-scaffold"]);
   assert.deepEqual(computeAuthoringFlags(variedPath), []);
+  assert.deepEqual(computeUserOnlyAuthoringFlags(variedPath), []);
 
-  // A four-cluster uniform path is still only a set of descriptors. It
-  // reaches MCP only when an independent cross-axis count lock accompanies
-  // the graph's real reflection symmetry.
+  // Four clusters of three terms is the symmetry prompt. The three bridges
+  // that join them do not change it, and the cluster count does not match.
   const fourUniformPath = {
     clusters: [cluster(3), cluster(3), cluster(3), cluster(3)],
     bridges: [{ clusters: [0, 1] }, { clusters: [1, 2] }, { clusters: [2, 3] }]
   };
-  assert.deepEqual(
-    computeSymmetryFlags(fourUniformPath).map(flag => flag.id),
-    ["uniform-partition", "binary-path-scaffold", "incidence-graph-symmetry"]
-  );
-  assert.equal(
-    computeAuthoringFlags(fourUniformPath)
-      .some(flag => flag.id === "structural-regularity-combination"),
-    false
-  );
-  assert.equal(
-    computeAuthoringFlags(fourUniformPath).some(flag => flag.id === "uniform-partition"),
-    false
-  );
-  assert.deepEqual(
-    computeUserOnlyAuthoringFlags(fourUniformPath)
-      .filter(flag => ["uniform-partition", "binary-path-scaffold"].includes(flag.id))
-      .map(flag => flag.id),
-    ["uniform-partition", "binary-path-scaffold"]
-  );
-  assert.ok(computeUserOnlyAuthoringFlags(fourUniformPath)
-    .some(flag => flag.id === "incidence-graph-symmetry"));
+  const fourUniformFlag = computeAuthoringFlags(fourUniformPath)
+    .find(flag => flag.id === "uniform-partition");
+  assert.ok(fourUniformFlag);
+  assert.match(fourUniformFlag.message, /All 4 clusters have exactly 3 terms/);
+  assert.doesNotMatch(fourUniformFlag.message, /cluster count matches/);
+  assert.deepEqual(computeUserOnlyAuthoringFlags(fourUniformPath), []);
   const fourCountLockedPath = {
     clusters: [cluster(4), cluster(4), cluster(4), cluster(4)],
     bridges: [{ clusters: [0, 1] }, { clusters: [1, 2] }, { clusters: [2, 3] }]
   };
-  assert.equal(
-    computeAuthoringFlags(fourCountLockedPath)
-      .some(flag => flag.id === "structural-regularity-combination"),
-    true
-  );
-  // The count lock by itself is not enough. This seven-cluster tree has
-  // three unequal arms (lengths 1, 2, and 3), so it has no non-identity
-  // incidence-graph automorphism even though every cluster has seven terms.
-  const asymmetricCountLockedTree = {
+  const fourLockedFlag = computeAuthoringFlags(fourCountLockedPath)
+    .find(flag => flag.id === "uniform-partition");
+  assert.match(fourLockedFlag.message, /All 4 clusters have exactly 4 terms/);
+  assert.match(fourLockedFlag.message, /cluster count matches that number \(4\)/);
+  // Seven clusters of seven terms is the same prompt. The bridge pattern
+  // is irrelevant, including a tree with no cluster that can swap places.
+  const sevenOfSeven = {
     clusters: Array.from({ length: 7 }, () => cluster(7)),
     bridges: [
       { clusters: [0, 1] },
@@ -291,19 +257,19 @@ export async function run() {
       { clusters: [0, 4] }, { clusters: [4, 5] }, { clusters: [5, 6] }
     ]
   };
-  const asymmetricRegularity = computeStructuralRegularity(asymmetricCountLockedTree);
-  assert.ok(asymmetricRegularity.observations
-    .some(flag => flag.id === "cluster-size-count-lock"));
-  assert.equal(asymmetricRegularity.observations
-    .some(flag => flag.id === "incidence-graph-symmetry"), false);
-  assert.deepEqual(computeAuthoringFlags(asymmetricCountLockedTree), []);
+  const sevenFlag = computeAuthoringFlags(sevenOfSeven)
+    .find(flag => flag.id === "uniform-partition");
+  assert.match(sevenFlag.message, /All 7 clusters have exactly 7 terms/);
+  assert.match(sevenFlag.message, /cluster count matches that number \(7\)/);
   const threeOrdinaryPath = {
     clusters: [cluster(4), cluster(4), cluster(4)],
     bridges: [{ clusters: [0, 1] }, { clusters: [1, 2] }]
   };
-  assert.equal(computeAuthoringFlags(threeOrdinaryPath).length, 0);
-  assert.ok(computeUserOnlyAuthoringFlags(threeOrdinaryPath)
-    .some(flag => flag.id === "binary-path-scaffold"));
+  const threeOrdinaryFlag = computeAuthoringFlags(threeOrdinaryPath)
+    .find(flag => flag.id === "uniform-partition");
+  assert.match(threeOrdinaryFlag.message, /All 3 clusters have exactly 4 terms/);
+  assert.doesNotMatch(threeOrdinaryFlag.message, /cluster count matches/);
+  assert.deepEqual(computeUserOnlyAuthoringFlags(threeOrdinaryPath), []);
 
   // --- lens-whole-cluster: sequential recitation of one cluster --------
   const wholeCluster = computeLensShapeFlags({

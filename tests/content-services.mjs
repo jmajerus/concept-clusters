@@ -99,9 +99,8 @@ export async function run() {
 
     const hosted = createHostedAuthoringContentService();
     {
-      // Structural observations belong on the human draft-review channel;
-      // only their strong combined prompt reaches MCP validation. This must
-      // hold for both local and hosted authoring paths.
+      // An even term count is the MCP symmetry prompt. Attachment is not
+      // flagged, on either the local or the hosted authoring path.
       const uniformPathPuzzle = {
         id: "uniform-path-fixture",
         title: "Uniform path fixture",
@@ -121,35 +120,25 @@ export async function run() {
       };
       const localRegularity = await content.validatePuzzleDraft(uniformPathPuzzle, { categoryRegistry: content.categories });
       assert.equal(
-        localRegularity.flags.some(flag => flag.id === "structural-regularity-combination"),
+        localRegularity.flags.some(flag => flag.id === "uniform-partition"),
         true
       );
       assert.equal(
-        localRegularity.flags.find(flag => flag.id === "structural-regularity-combination")
+        localRegularity.flags.find(flag => flag.id === "uniform-partition")
           ?.nextStep?.action,
         "recheck-concept-set"
       );
-      assert.equal(
-        localRegularity.flags.some(flag => flag.id === "uniform-partition"),
-        false
+      assert.match(
+        localRegularity.flags.find(flag => flag.id === "uniform-partition").message,
+        /cluster count matches that number \(4\)/
       );
-      assert.deepEqual(
-        (await content.computeUserOnlyFlags(uniformPathPuzzle))
-          .filter(flag => ["uniform-partition", "binary-path-scaffold"].includes(flag.id))
-          .map(flag => flag.id),
-        ["uniform-partition", "binary-path-scaffold"]
-      );
+      assert.deepEqual(await content.computeUserOnlyFlags(uniformPathPuzzle), []);
       const hostedRegularity = hosted.validatePuzzleDraft(uniformPathPuzzle);
       assert.equal(
-        hostedRegularity.flags.some(flag => flag.id === "structural-regularity-combination"),
+        hostedRegularity.flags.some(flag => flag.id === "uniform-partition"),
         true
       );
-      assert.deepEqual(
-        hosted.computeUserOnlyFlags(uniformPathPuzzle)
-          .filter(flag => ["uniform-partition", "binary-path-scaffold"].includes(flag.id))
-          .map(flag => flag.id),
-        ["uniform-partition", "binary-path-scaffold"]
-      );
+      assert.deepEqual(hosted.computeUserOnlyFlags(uniformPathPuzzle), []);
     }
     {
       // Hosted validation must fold a retired category title before checking

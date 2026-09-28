@@ -23,13 +23,22 @@ module disagree, trust the module.
 - **Seeds** are the two most instantly recognizable terms in the cluster. The least obvious term is the aha among floating terms. A minimum-size two-term cluster keeps only one seed, so its one remaining term is still the aha.
 - **Do not default to "4 terms, 3 lenses."** Before mapping the material, do
   not pick any count or narrow range for clusters, terms, bridges, or lenses.
-  Size by genuine distinctness. Same counts across clusters are common; use
-  that only as a trigger to check for two terms doing one job or a fact naming
-  a concept never used as a term. Canvas size is derived from the honest node
-  count, routed edges, and term length. Do not drop a distinct term to stay
-  small, do not keep terms to fill toward 32, and do not split in order to
-  change the canvas. Split when the subject has a natural seam that teaches
-  better as two lessons, and whenever the map needs more than 32 nodes.
+  Size by genuine distinctness. A subject's clusters are usually uneven.
+  `validate_puzzle_draft` emits `uniform-partition` when three or more
+  clusters all have the same term count, and mentions it when the cluster
+  count repeats that number. That prompt is a reason to re-read each cluster
+  for two terms doing one job, or a fact naming a concept the term list
+  omitted. If the board has no concept-gathering inventory, reopen that pass
+  and stop for human approval before fitting the sourced map. Early boards
+  were often sparse as well as even,
+  and gathering the omitted concepts usually changes the counts. Keep even
+  counts when the material supports them. Do not add or drop terms to break
+  the pattern, and do not change bridges because of the prompt. Canvas size
+  is derived from the honest node count, routed edges, and term length. Do
+  not drop a distinct term to stay small, do not keep terms to fill toward
+  32, and do not split in order to change the canvas. Split when the subject
+  has a natural seam that teaches better as two lessons, and whenever the
+  map needs more than 32 nodes.
 - **Bridges are optional** and must be genuine. A disconnected graph is fine. Never add a bridge merely to connect the board.
 - **Help at the right grain.** Put cluster-sized help on the cluster, term-sized help on a term, and bridge context on the bridge. Omitting a link means no chip; search is not inferred.
 - **Keep information surfaces stable.** Always-visible `info.text` and a completion-gated `fact` have different jobs; never make a hover or help surface silently replace text the player already read.

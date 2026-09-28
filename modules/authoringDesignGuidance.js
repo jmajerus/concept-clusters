@@ -133,18 +133,18 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   obvious term as the "aha" the player has to work out. A cluster pared
   down to just two terms total keeps only one seed, so that one remaining
   term stays the aha instead of the cluster arriving pre-solved.
-- Size each cluster, bridge count, and lens count by genuine conceptual
-  distinctness, not by converging toward a prior cluster's count or a
-  familiar-looking template (e.g. defaulting to "4 terms, 3 lenses"
-  because it reads as finished). Equal counts across clusters can be
-  entirely legitimate; historical corpus frequency is not evidence either
-  way. Treat an individual repeated count as a cheap draft-review
-  descriptor, not a verdict. validate_puzzle_draft emits one non-blocking
-  structural-regularity prompt only when the attributed cluster--bridge
-  incidence graph has a real non-identity symmetry and the terms-per-cluster
-  count also equals the cluster count. In either case, scan each
-  cluster's own terms for a pair doing the same conceptual job (one
-  naming a condition, the other just restating what it amounts to --
+- Size each cluster and lens count by genuine conceptual distinctness, not
+  by converging toward a prior cluster's count or a familiar-looking
+  template (e.g. defaulting to "4 terms, 3 lenses" because it reads as
+  finished). A subject's clusters are usually uneven. validate_puzzle_draft
+  emits one non-blocking prompt, uniform-partition, when three or more
+  clusters all have the same term count. When the cluster count equals
+  that term count, the prompt says so; that match is a further reason to
+  look, not a separate flag. Bridges are not part of the prompt.
+  Attachment — each cluster joined to another by a real relationship — is
+  what careful concept-gathering tends to produce, and it is not flagged.
+  Scan each cluster's own terms for a pair doing the same conceptual job
+  (one naming a condition, the other just restating what it amounts to --
   "state of nature" / "war of every man against every man" is a real
   example caught this way), and separately check whether the cluster's
   own fact text names a genuinely distinct concept that never made it
@@ -152,12 +152,19 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   against its own cluster facts and bridge facts -- an excluded term the
   puzzle's own prose already names alongside included ones is the
   strongest signal of a real gap, much stronger than the raw count.
-  Order matters: before choosing any count or range, enumerate the sourced
-  distinctions, candidate terms, and genuine connections. A statement such as
-  "four clusters of three to four terms" is not a valid starting plan, even
-  when called provisional or said to be within limits. Equal and unequal
-  outcomes are both legitimate; never alter the material merely to make the
-  resulting counts look less regular.
+  If the prompt fires on a reviewed puzzle that has no concept-gathering
+  inventory, reopen that pass and stop for human approval before fitting
+  the sourced map, instead of editing
+  the board in place. Early boards were often sparse as well as even,
+  because each cluster was closed at a small finished number; gathering
+  the omitted concepts usually changes the counts. Order matters: before
+  choosing any count or range, enumerate the sourced distinctions,
+  candidate terms, and genuine connections. A statement such as "four
+  clusters of three to four terms" is not a valid starting plan, even
+  when called provisional or said to be within limits. Keep even counts
+  when the material supports them. Never alter the material merely to
+  make the resulting counts look less regular, and do not add or remove
+  bridges because of this prompt.
   The firm board ceiling is 32 total nodes, and it is a refusal point rather
   than a size to fill. Do not hunt for the weakest
   term to drop to fit a rendering threshold. Redundancy checks are a separate

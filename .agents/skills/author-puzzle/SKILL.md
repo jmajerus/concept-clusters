@@ -325,7 +325,10 @@ Survey the concept space **before** board limits. Follow [inventory-format.md](r
   already covers the distinction, extend or relate instead of opening a
   parallel puzzle.
 - Candidate-term counts may be uneven or equal — do not equalize them or
-  manufacture variation.
+  manufacture variation. On review, an even term count across three or more
+  clusters is the `uniform-partition` prompt. If that board has no inventory,
+  reopen this pass and stop for human approval before fitting, instead of
+  editing the counts in place.
 - Record exclusions and rival splits; note open questions for the human.
 - Save `inventories/<id>.json` and run the inventory checker. It checks source
   coverage and the map's internal accounting, not whether its counts look

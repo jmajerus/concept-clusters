@@ -209,44 +209,23 @@ Changing counts only to make a catalogue look less regular merely replaces
 one aesthetic constraint with another.
 
 Before finalizing one puzzle—and especially after generating several puzzles
-in a batch—perform a regularity audit. Inspect these counts together:
+in a batch—perform a regularity audit. Inspect these counts:
 
 ```text
 cluster count:
 terms per cluster:
-bridge count:
 total nodes and applicable node cap:
 lens count:
 targets per lens:
 ```
 
-Then review any repeated pattern rather than automatically correcting it.
-For each equal count, ask whether the material independently supports it. If
-a cluster combines separable ideas, split it; if a cluster contains padding,
-trim it; if a lens restates another lens, remove or replace it. Conversely,
-leave a repeated count alone when the concepts genuinely justify it.
+The symmetry check is the term counts. When three or more clusters share one term count, validation raises `uniform-partition`. When the cluster count equals that number, the prompt says so. Bridge count is not part of that check. A bridge is kept or cut because the clusters require that relationship. A board in which every cluster has a real bridge is a normal result of concept-gathering.
 
-Multiple clusters landing on the same term count is not on its own evidence
-of anything — across this project's own puzzles, roughly seven in ten
-clusters land on four terms regardless of author, so equal counts are the
-ordinary case, not a coincidence needing an explanation. Treat it as a cheap
-trigger for one specific, cheap check instead of a verdict: when several
-clusters share a count, scan each cluster's own term list for two terms
-doing the same conceptual job — one naming a condition, the other simply
-restating what it amounts to — and separately scan the cluster's own `fact`
-text for a term it already names but never added to `terms`. A real
-instance found this way: a puzzle contrasting Hobbes, Machiavelli, and
-Morgenthau had settled on four terms each, but "state of nature" and "war
-of every man against every man" were the same idea twice for Hobbes, and
-"national interest" and "interest defined as power" were the same idea
-twice for Morgenthau — while Machiavelli's own fact text pointed at "the
-lion and the fox" as a genuinely distinct concept that had been left out to
-keep the count at four. Re-deriving each cluster's size from distinctness
-alone gave 5/3/3, not 4/4/4, and every one of those numbers is more honest
-than the template it replaced. The same cross-reference — does the puzzle's
-own prose already name a term it excluded? — is the highest-precision check
-available for a lens's target set too, stronger than the raw target count
-(see the high-target-lens check below).
+For an even term count, ask whether the material independently supports it. If a cluster combines separable ideas, split it; if a cluster contains padding, trim it; if a fact already names a distinct concept the term list omitted, add it. If a lens restates another lens, remove or replace it. Keep a repeated count when the concepts genuinely justify it. Do not add or remove terms merely to make the board look less even.
+
+If the prompt fires on a reviewed puzzle that has no concept-gathering inventory, reopen that pass and stop for human approval before fitting the sourced map, instead of editing the board in place. Early puzzles were often sparse as well as even: each cluster was closed at a small finished number, so the concepts that would have made it larger and uneven were never gathered. Gathering them usually changes the counts. A full gather can still come out even, and then the board stays.
+
+A worked case of the in-cluster check: a puzzle contrasting Hobbes, Machiavelli, and Morgenthau had settled on four terms each, but "state of nature" and "war of every man against every man" were the same idea twice for Hobbes, and "national interest" and "interest defined as power" were the same idea twice for Morgenthau — while Machiavelli's own fact text pointed at "the lion and the fox" as a genuinely distinct concept that had been left out to keep the count at four. Re-deriving each cluster's size from distinctness alone gave 5/3/3, not 4/4/4, and every one of those numbers is more honest than the template it replaced. The same cross-reference — does the puzzle's own prose already name a term it excluded? — is the highest-precision check available for a lens's target set too, stronger than the raw target count (see the high-target-lens check below).
 
 A high-target lens deserves one more specific check: if its targets are one
 cluster's entire term list plus every bridge already touching that cluster,
