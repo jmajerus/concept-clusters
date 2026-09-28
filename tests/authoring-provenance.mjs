@@ -102,6 +102,29 @@ export async function run() {
     renderProvenanceL1(mixed),
     "Drafted with Cursor; edited by Jane Doe"
   );
+  // A later named client does not make the unnamed original draft a second
+  // product in the player byline. Storage and the admin summary still hold it.
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [
+        { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+        { name: "Claude Code", kind: "generative" },
+        { name: "Codex (GPT-5.6 Luna Max)", kind: "generative" }
+      ]
+    }),
+    "Drafted with Claude Code and Codex (GPT-5.6 Luna)"
+  );
+  assert.equal(
+    renderProvenanceL2({
+      collaboration: "ai",
+      contributors: [
+        { name: UNIDENTIFIED_GENERATIVE_SYSTEM, kind: "generative" },
+        { name: "Claude Code", kind: "generative" }
+      ]
+    }),
+    "ai: generative assistance (generative); Claude Code (generative)"
+  );
   // The exact client surface remains visible in both L1 (byline) and L2
   // (admin/review).
   assert.equal(
