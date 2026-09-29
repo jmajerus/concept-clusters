@@ -132,6 +132,7 @@ function fitSteps({
       draft_id: boardId,
       document: `<from ${draftPath}>`
     }, { kiloNative }),
+    `First write for "${boardId}" in this session. If create_puzzle_draft reports the draft already exists, get_puzzle_draft and save_puzzle_draft with that expected_revision. Do not create again.`,
     `node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level fit ${draftPath} --ledger ${ledgerPath}`,
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "validate_puzzle_draft", { draft_id: boardId }, { kiloNative }),
     `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${boardId} --authored`

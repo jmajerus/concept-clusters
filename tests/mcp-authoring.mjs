@@ -110,6 +110,10 @@ export async function run() {
     assert.doesNotMatch(initialized.result.instructions, /admin\/drafts|Open board|click Publish/);
     assert.match(initialized.result.instructions, /Cue and Freeze are outside MCP/);
     assert.match(initialized.result.instructions, /one integrated cycle/);
+    assert.match(
+      initialized.result.instructions,
+      /Pass expected_revision on every save_puzzle_draft/
+    );
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -117,6 +121,13 @@ export async function run() {
 
     const listed = await request("tools/list", {});
     const toolNames = listed.result.tools.map(tool => tool.name);
+    const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
+    assert.match(saveTool.description, /^Every save requires expected_revision/);
+    const revisionField = saveTool.inputSchema.properties.expected_revision;
+    assert.equal(revisionField.type, "integer");
+    assert.match(revisionField.description, /Copy draft\.revision/);
+    assert.match(revisionField.description, /create_puzzle_draft/);
+    assert.ok(saveTool.inputSchema.required.includes("expected_revision"));
     for (const name of [
       "list_puzzles",
       "search_puzzles",
@@ -915,6 +926,26 @@ export async function run() {
       id: "mcp-service-fixture",
       title: "MCP service fixture"
     };
+    for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+      delete replacement[field];
+    }
+    if (replacement.learningIntroduction) delete replacement.learningIntroduction.credit;
+
+    const missingRevision = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-service-fixture",
+        document: replacement
+      }
+    });
+    const missingRevisionText = [
+      missingRevision.error?.message,
+      ...(missingRevision.result?.content || []).map(part => part.text)
+    ].filter(Boolean).join("\n");
+    assert.match(missingRevisionText, /Copy draft\.revision/);
+    assert.match(missingRevisionText, /create_puzzle_draft/);
+    assert.equal(missingRevision.result?.structuredContent?.draft, undefined);
+
     const replaced = await request("tools/call", {
       name: "save_puzzle_draft",
       arguments: {

@@ -102,6 +102,10 @@ const draftIdSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
   "Use a lowercase URL-safe draft id"
 );
+const EXPECTED_REVISION_CONTRACT =
+  "Required positive integer. Copy draft.revision from the latest create_puzzle_draft, " +
+  "get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has " +
+  "never been created uses create_puzzle_draft.";
 const OPEN_ISSUE_LANGUAGE = /\b(?:unresolved|needs?|need to|follow[- ]?up|future work|worth (?:developing|investigating|reviewing)|candidate|open question|could)\b/i;
 const infoSchema = z.object({
   text: z.string().min(1),
@@ -393,7 +397,9 @@ function serverInstructions() {
     "write domain. Unprofiled guidance stays profile-neutral. " +
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
-    "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
+    "Pass expected_revision on every save_puzzle_draft: copy draft.revision from the latest " +
+    "create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for that draft_id. " +
+    "A draft that has never been created uses create_puzzle_draft. " +
     mcpPublicationBoundaryGuidance() + " " +
     "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and publishing remains held from Cue/Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
@@ -1043,10 +1049,13 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. Pedagogy receives content as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+      "Every save requires expected_revision, copied from draft.revision on the latest create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has never been created uses create_puzzle_draft. " +
+      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. Pedagogy receives content as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
-      expected_revision: z.number().int().positive(),
+      expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive().describe(
+        EXPECTED_REVISION_CONTRACT
+      ),
       document: documentSchema,
       domain: authoringDomainSchema,
       repair: z.boolean().optional(),

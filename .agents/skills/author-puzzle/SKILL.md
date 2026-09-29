@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `7cce007f` · 2026-09-21
+Skill rev `11ef80e7` · 2026-09-29
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. The human Publishes on `/admin/drafts`, or
@@ -33,6 +33,14 @@ once if you need resolved paths or the drafts URL.
 | Design notes / proposals | `proposals/` |
 
 Never write those into `docs/`, `.agents/`, or `/tmp`.
+
+## Draft writes
+
+- No `draft.revision` for this id in this session: `create_puzzle_draft` with `draft_id` and `document`.
+- A revision in hand: `save_puzzle_draft` on the native tool, with that integer as its own `expected_revision` argument. Copy it from the latest `create_puzzle_draft`, `get_puzzle_draft`, or `save_puzzle_draft` result.
+- The working file is the document only. Pass `expected_revision` separately. Do not assemble the save body with `printf` or `cat`.
+- To save `working/<id>.json` without passing the revision yourself, run `node tools/save-working-draft.mjs <id>`. The helper loads the current revision and writes once. If the revision moved, it exits and writes nothing. It does not create a missing draft.
+- Prefer the native tool (`concept-clusters_save_puzzle_draft` in Kilo) when you pass the revision yourself. Use `node tools/mcp-call.mjs` only when that native tool is not listed.
 
 ## Passes (pick one)
 
@@ -262,8 +270,10 @@ staged workflow instead.
    after any lens revision.
 5. **Check, create once, validate, record, stop.** Run the checker, then create
    the entire draft in one `create_puzzle_draft` call — never a cluster-only
-   skeleton with lenses saved later. Then `validate_puzzle_draft`, record the
-   authored review, and stop at the
+   skeleton with lenses saved later. If this session already holds
+   `draft.revision` for the id, `save_puzzle_draft` with that
+   `expected_revision` instead of creating again. Then `validate_puzzle_draft`,
+   record the authored review, and stop at the
    [Integrated profile gate](#integrated-profile-gate). Never publish unless
    the human asks.
 
@@ -406,10 +416,13 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 
 - If the category already has published puzzles, read **one same-category** comparable for JSON field conventions only — not to copy its cluster count or term counts.
 - If the category is new (no peers), skip comparable reads; rely on MCP `get_authoring_schema` phase `core`.
-- Write `ledgers/<id>-fit.json` (loss ledger) **before** MCP save.
+- Write `ledgers/<id>-fit.json` (loss ledger) **before** the draft write.
 - MCP tools **one at a time** (never parallel on stdio — Codex closes the transport): `get_authoring_guidance` phase `core`, then `get_authoring_schema` phase `core`, then `review`.
-- `create_puzzle_draft` / `save_puzzle_draft`: clusters and bridges first; add
-  notes, lenses, and publication metadata in later passes.
+- Clusters and bridges first; notes, lenses, and publication metadata wait
+  for later passes. No `draft.revision` yet for this id means
+  `create_puzzle_draft`. A revision already in hand means `save_puzzle_draft`
+  with that `expected_revision`, or `node tools/save-working-draft.mjs <id>`
+  once the draft exists.
 
 **Codex:** first draft write hits Cloudflare D1 — approve network if prompted, then retry unchanged.
 

@@ -258,7 +258,9 @@ The tracked D1 migrations create:
 generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
 A matching complete save replaces the current document; a matching focused
 save replaces only the selected domain, reassembles the complete document, and
-then bumps the integer. A stale token fails closed. Distinct saves push the
+then bumps the integer. A stale token fails closed. `tools/save-working-draft.mjs`
+reads `working/<id>.json`, supplies the current revision, and does not write
+when the token is stale or the draft does not exist. Distinct saves push the
 previous working copy onto a
 capped D1 stack (`puzzle_draft_history`). A revert operation pops one save at
 a time. Set `publish_to_authoring: true` on a confirmed final edit to also
