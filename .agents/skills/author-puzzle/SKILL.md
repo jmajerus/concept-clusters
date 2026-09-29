@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `11ef80e7` · 2026-09-29
+Skill rev `98140b43` · 2026-09-29
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. The human Publishes on `/admin/drafts`, or
@@ -39,7 +39,7 @@ Never write those into `docs/`, `.agents/`, or `/tmp`.
 - No `draft.revision` for this id in this session: `create_puzzle_draft` with `draft_id` and `document`.
 - A revision in hand: `save_puzzle_draft` on the native tool, with that integer as its own `expected_revision` argument. Copy it from the latest `create_puzzle_draft`, `get_puzzle_draft`, or `save_puzzle_draft` result.
 - The working file is the document only. Pass `expected_revision` separately. Do not assemble the save body with `printf` or `cat`.
-- To save `working/<id>.json` without passing the revision yourself, run `node tools/save-working-draft.mjs <id>`. The helper loads the current revision and writes once. If the revision moved, it exits and writes nothing. It does not create a missing draft.
+- To save `working/<id>.json`, run `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>` with the revision this file was based on. The helper submits that token. If the draft has moved, it exits and writes nothing. After a successful save it records the new revision in `working/<id>.revision`, and a later save of that same baseline can omit the flag. It does not create a missing draft, and it does not adopt whatever revision is current.
 - Prefer the native tool (`concept-clusters_save_puzzle_draft` in Kilo) when you pass the revision yourself. Use `node tools/mcp-call.mjs` only when that native tool is not listed.
 
 ## Passes (pick one)
@@ -421,8 +421,9 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 - Clusters and bridges first; notes, lenses, and publication metadata wait
   for later passes. No `draft.revision` yet for this id means
   `create_puzzle_draft`. A revision already in hand means `save_puzzle_draft`
-  with that `expected_revision`, or `node tools/save-working-draft.mjs <id>`
-  once the draft exists.
+  with that `expected_revision`, or `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>`
+  once the draft exists. If the draft already has notes or lenses, merge the fit
+  into the fetched document before that save.
 
 **Codex:** first draft write hits Cloudflare D1 — approve network if prompted, then retry unchanged.
 

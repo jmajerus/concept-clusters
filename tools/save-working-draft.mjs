@@ -7,9 +7,12 @@ import { callAuthoringMcpTool } from "../modules/mcpStdioCall.js";
 import {
   SAVE_WORKING_DRAFT_EXIT,
   WorkingDraftSaveError,
+  missingBaselineMessage,
   parseSaveWorkingDraftArgs,
+  readWorkingDraftBaseline,
   readWorkingDraftDocument,
-  saveWorkingDraft
+  saveWorkingDraft,
+  writeWorkingDraftBaseline
 } from "../modules/saveWorkingDraft.js";
 
 const ANONYMOUS_WRITE_WARNING =
@@ -60,9 +63,16 @@ if (
 
 try {
   const document = await readWorkingDraftDocument(args.draftId);
+  const expectedRevision = Number.isInteger(args.expectedRevision)
+    ? args.expectedRevision
+    : await readWorkingDraftBaseline(args.draftId);
+  if (!Number.isInteger(expectedRevision)) {
+    throw new WorkingDraftSaveError("missing-baseline", missingBaselineMessage(args.draftId));
+  }
   const saved = await saveWorkingDraft({
     draftId: args.draftId,
     document,
+    expectedRevision,
     domain: args.domain,
     repair: args.repair,
     publishToAuthoring: args.publishToAuthoring,
@@ -73,6 +83,9 @@ try {
       meta: envelope.meta
     })
   });
+  if (Number.isInteger(saved.revision)) {
+    await writeWorkingDraftBaseline(args.draftId, saved.revision);
+  }
   console.error(`Saved ${saved.draftId}; revision ${saved.revision} (expected ${saved.expectedRevision}).`);
   console.log(JSON.stringify(saved, null, 2));
 } catch (error) {

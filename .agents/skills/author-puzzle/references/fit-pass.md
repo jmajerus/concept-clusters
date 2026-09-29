@@ -40,9 +40,12 @@ resulting node count; do not set renderer fields.
     No `draft.revision` for this id in this session means `create_puzzle_draft`.
     A revision already in hand means `save_puzzle_draft` with that integer as
     `expected_revision`. The working file is the document only. To save
-    `working/<id>.json` without passing the revision yourself, run
-    `node tools/save-working-draft.mjs <id>` once a draft exists. The helper
-    does not create a missing draft.
+    `working/<id>.json`, run
+    `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>`
+    with the revision this file was based on. If the draft already exists,
+    merge these clusters and bridges into the fetched document and preserve
+    notes, lenses, and every other field. The helper does not create a missing
+    draft and does not adopt the current revision.
 
 ## Loss ledger shape
 

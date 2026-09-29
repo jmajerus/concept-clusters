@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Review a Concept Clusters puzzle
 
-Skill rev `9984e8d6` · 2026-09-29
+Skill rev `fec55391` · 2026-09-29
 
 Run **one** planner. Treat its JSON as the contract. Do not improvise a search.
 
@@ -124,8 +124,9 @@ Compare the board to that source map and loss ledger before retaining or changin
 If those artifacts are absent (common for early published puzzles, which were often sparse as well as even), write the concept-gathering inventory in this review. That map is the repair. It is not a board edit and not an open issue. Stop when it is saved. Fit it onto the board only after the human approves it. Gathering the concepts the small even clusters left out usually changes the counts. If the counts are still even afterward, keep them. Do not change bridges because of the prompt.
 
 For every save, pass the latest `draft.revision` as its own `expected_revision`
-argument on the native tool. `node tools/save-working-draft.mjs <id>` does that
-for `working/<id>.json` and writes nothing if the revision moved. Validate after
+argument on the native tool. `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>`
+submits the revision `working/<id>.json` was based on and writes nothing if the
+draft has moved. Validate after
 a save; if validation requires a correction, refresh the draft and validate the
 corrected revision before recording the pass.
 

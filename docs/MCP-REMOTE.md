@@ -259,8 +259,10 @@ generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_draft
 A matching complete save replaces the current document; a matching focused
 save replaces only the selected domain, reassembles the complete document, and
 then bumps the integer. A stale token fails closed. `tools/save-working-draft.mjs`
-reads `working/<id>.json`, supplies the current revision, and does not write
-when the token is stale or the draft does not exist. Distinct saves push the
+reads `working/<id>.json` and submits `--expected-revision` (or the recorded
+`working/<id>.revision` baseline). It does not write when that baseline is
+stale or the draft does not exist, and it does not substitute the current
+revision. Distinct saves push the
 previous working copy onto a
 capped D1 stack (`puzzle_draft_history`). A revert operation pops one save at
 a time. Set `publish_to_authoring: true` on a confirmed final edit to also

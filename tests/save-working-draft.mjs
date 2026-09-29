@@ -7,8 +7,10 @@ import {
   SAVE_WORKING_DRAFT_EXIT,
   WorkingDraftSaveError,
   parseSaveWorkingDraftArgs,
+  readWorkingDraftBaseline,
   readWorkingDraftDocument,
-  saveWorkingDraft
+  saveWorkingDraft,
+  writeWorkingDraftBaseline
 } from "../modules/saveWorkingDraft.js";
 
 export const name = "Save working draft: revision lock stays with the helper";
@@ -23,13 +25,19 @@ export async function run() {
     "--repair",
     "--publish-to-authoring",
     "--client-info", "{\"name\":\"kilo\"}",
+    "--expected-revision", "2",
     "chirality-isomer-classes"
   ]);
   assert.equal(parsed.draftId, "chirality-isomer-classes");
   assert.equal(parsed.domain, "content");
   assert.equal(parsed.repair, true);
   assert.equal(parsed.publishToAuthoring, true);
+  assert.equal(parsed.expectedRevision, 2);
   assert.equal(parsed.clientInfoRaw, "{\"name\":\"kilo\"}");
+  assert.throws(
+    () => parseSaveWorkingDraftArgs(["--expected-revision", "0", "chirality-isomer-classes"]),
+    error => error instanceof WorkingDraftSaveError && error.code === "usage"
+  );
   assert.throws(
     () => parseSaveWorkingDraftArgs(["Not A Slug"]),
     error => error instanceof WorkingDraftSaveError && error.code === "usage"
@@ -57,6 +65,24 @@ export async function run() {
       env: { AUTHORING_DATA_DIR: root }
     });
     assert.equal(document.title, "Mirror");
+    assert.equal(await readWorkingDraftBaseline("chirality-isomer-classes", {
+      env: { AUTHORING_DATA_DIR: root }
+    }), null);
+    const noBaseline = spawnSync(process.execPath, [
+      "tools/save-working-draft.mjs",
+      "chirality-isomer-classes"
+    ], {
+      encoding: "utf8",
+      env: { ...process.env, AUTHORING_DATA_DIR: root }
+    });
+    assert.equal(noBaseline.status, SAVE_WORKING_DRAFT_EXIT["missing-baseline"]);
+    assert.match(noBaseline.stderr, /Refusing to adopt the current revision/);
+    await writeWorkingDraftBaseline("chirality-isomer-classes", 2, {
+      env: { AUTHORING_DATA_DIR: root }
+    });
+    assert.equal(await readWorkingDraftBaseline("chirality-isomer-classes", {
+      env: { AUTHORING_DATA_DIR: root }
+    }), 2);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -66,6 +92,7 @@ export async function run() {
     () => saveWorkingDraft({
       draftId: "chirality-isomer-classes",
       document: { id: "chirality-isomer-classes" },
+      expectedRevision: 1,
       callTool: async name => {
         calls += 1;
         assert.equal(name, "get_puzzle_draft");
@@ -84,6 +111,7 @@ export async function run() {
     () => saveWorkingDraft({
       draftId: "chirality-isomer-classes",
       document: { id: "other-board" },
+      expectedRevision: 1,
       callTool: async () => {
         calls += 1;
         return loaded(1);
@@ -98,6 +126,7 @@ export async function run() {
     () => saveWorkingDraft({
       draftId: "chirality-isomer-classes",
       document: { id: "chirality-isomer-classes", title: "Next" },
+      expectedRevision: 2,
       callTool: async (name, args) => {
         calls += 1;
         if (name === "get_puzzle_draft") return loaded(2);
@@ -116,9 +145,39 @@ export async function run() {
   );
   assert.equal(calls, 2);
 
+  calls = 0;
+  await assert.rejects(
+    () => saveWorkingDraft({
+      draftId: "chirality-isomer-classes",
+      document: { id: "chirality-isomer-classes", title: "Stale" },
+      expectedRevision: 1,
+      callTool: async name => {
+        calls += 1;
+        assert.equal(name, "get_puzzle_draft");
+        return loaded(2);
+      }
+    }),
+    error => error.code === "revision-conflict" &&
+      error.expectedRevision === 1 &&
+      error.currentRevision === 2
+  );
+  assert.equal(calls, 1);
+
+  await assert.rejects(
+    () => saveWorkingDraft({
+      draftId: "chirality-isomer-classes",
+      document: { id: "chirality-isomer-classes" },
+      callTool: async () => {
+        throw new Error("must not load the current revision without a baseline");
+      }
+    }),
+    error => error.code === "missing-baseline"
+  );
+
   const saved = await saveWorkingDraft({
     draftId: "chirality-isomer-classes",
     document: { id: "chirality-isomer-classes", clusters: [] },
+    expectedRevision: 4,
     domain: "content",
     repair: true,
     publishToAuthoring: true,
