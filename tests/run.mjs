@@ -106,6 +106,7 @@ import * as localGitHubConfig from "./local-github-config.mjs";
 import * as localD1Workspace from "./local-d1-workspace.mjs";
 import * as loadProjectEnv from "./load-project-env.mjs";
 import * as authoringWorkspace from "./authoring-workspace.mjs";
+import * as saveWorkingDraft from "./save-working-draft.mjs";
 import * as stagingPlayLinks from "./staging-play-links.mjs";
 import * as localDevHttp from "./local-dev-http.mjs";
 import * as localDevHousekeep from "./local-dev-housekeep.mjs";
@@ -133,7 +134,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
@@ -156,7 +157,7 @@ const quickTests = [
   mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness,
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
-  authoringWorkspace, stagingPlayLinks, boot, puzzleManifest, librarySearchEngine, geometryVisibleSegment,
+  authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, librarySearchEngine, geometryVisibleSegment,
   singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
@@ -200,7 +201,7 @@ const sideTests = {
     authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner,
     authoringAssistanceLog, authoringChangeScore, authoringDomains,
     authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
-    localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks,
+    localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, domains, wikiLinkCheck
   ]),
   shared: new Set([

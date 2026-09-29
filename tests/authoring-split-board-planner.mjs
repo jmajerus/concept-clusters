@@ -48,6 +48,11 @@ export async function run() {
   assert.ok(plan.forbidden.some(line => line.includes("one board")));
   assert.ok(plan.forbidden.some(line => line.includes("notes or lenses")));
   assert.ok(plan.steps.some(step => step.includes("check-completeness.mjs --level fit")));
+  assert.ok(plan.steps.some(step =>
+    step.includes("merge this fit's clusters and bridges") &&
+    step.includes("preserving notes, lenses") &&
+    step.includes("Do not replace the stored document with the clusters-only working file")
+  ));
   assert.equal(plan.presentGate, false);
   assert.equal(plan.humanPrompt.presentGate, false);
   assert.equal(plan.stopAfter, "continue-same-pass");

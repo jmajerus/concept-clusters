@@ -164,6 +164,12 @@ calls are still required for the live Kilo client envelope and full assistance
 metadata. Do not run `node tools/mcp-call.mjs` when the namespaced native tool
 is available; if it is missing, reload MCP or start a fresh session.
 
+When the puzzle document is already in `working/<id>.json` under the authoring
+data dir, `node tools/save-working-draft.mjs <id> --expected-revision <n>`
+calls `save_puzzle_draft` with the revision that file was based on. If the
+draft has moved, the helper exits and writes nothing. It does not adopt the
+current revision. A missing draft still uses `create_puzzle_draft`.
+
 See Kilo's [MCP configuration and permissions documentation][kilo-mcp].
 
 ## Kimi Code CLI

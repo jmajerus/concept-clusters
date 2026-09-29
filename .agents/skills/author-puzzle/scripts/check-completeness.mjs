@@ -750,7 +750,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   const ok = blocking.length === 0;
   let stopGate;
   if (!ok) {
-    stopGate = "FAILED. Fix blocking gaps with save_puzzle_draft. Do not stop. Do not submit.";
+    stopGate = "FAILED. Fix blocking gaps with save_puzzle_draft and the revision this file was based on, or node tools/save-working-draft.mjs --expected-revision <draft.revision>. Do not stop. Do not submit.";
   } else if (level === "fit" || level === "board") {
     stopGate = level === "fit"
       ? "Fit OK. Stop for human board review (term set + loss ledger). Do not write term notes or lenses until the human says continue / fill / complete."

@@ -33,11 +33,19 @@ resulting node count; do not set renderer fields.
    from the split plan onto the first board; `boardOrder` is external plan
    metadata and must not appear in the puzzle document. Use `destinationPuzzleId`
    on ledger `deferred` entries.
-8. Write `ledgers/<id>-fit.json` (loss ledger) **before** `save_puzzle_draft`.
+8. Write `ledgers/<id>-fit.json` (loss ledger) **before** the draft write.
 9. MCP (sequential on stdio): `get_authoring_guidance` phase `core`, then
    `get_authoring_schema` phase `core`, then `review`.
-10. `create_puzzle_draft` or `save_puzzle_draft` with clusters/bridges only —
-   no term notes, puzzle `info`, or lenses yet.
+10. Clusters and bridges only — no term notes, puzzle `info`, or lenses yet.
+    No `draft.revision` for this id in this session means `create_puzzle_draft`.
+    A revision already in hand means `save_puzzle_draft` with that integer as
+    `expected_revision`. The working file is the document only. To save
+    `working/<id>.json`, run
+    `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>`
+    with the revision this file was based on. If the draft already exists,
+    merge these clusters and bridges into the fetched document and preserve
+    notes, lenses, and every other field. The helper does not create a missing
+    draft and does not adopt the current revision.
 
 ## Loss ledger shape
 

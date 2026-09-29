@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Review a Concept Clusters puzzle
 
-Skill rev `bbf4bcdc` · 2026-09-21
+Skill rev `fec55391` · 2026-09-29
 
 Run **one** planner. Treat its JSON as the contract. Do not improvise a search.
 
@@ -123,9 +123,12 @@ Compare the board to that source map and loss ledger before retaining or changin
 
 If those artifacts are absent (common for early published puzzles, which were often sparse as well as even), write the concept-gathering inventory in this review. That map is the repair. It is not a board edit and not an open issue. Stop when it is saved. Fit it onto the board only after the human approves it. Gathering the concepts the small even clusters left out usually changes the counts. If the counts are still even afterward, keep them. Do not change bridges because of the prompt.
 
-For every save, use the latest `expected_revision`. Validate after a save; if
-validation requires a correction, refresh the draft and validate the corrected
-revision before recording the pass.
+For every save, pass the latest `draft.revision` as its own `expected_revision`
+argument on the native tool. `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>`
+submits the revision `working/<id>.json` was based on and writes nothing if the
+draft has moved. Validate after
+a save; if validation requires a correction, refresh the draft and validate the
+corrected revision before recording the pass.
 
 Do not set `publish_to_authoring: true` on `save_puzzle_draft` unless the human asks. Cue and Freeze, from the drafts and admin pages, are how a puzzle reaches production; this skill is structural, not a publish action. The drafts page is the copy surface.
 
