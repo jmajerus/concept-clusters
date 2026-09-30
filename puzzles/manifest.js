@@ -11,6 +11,10 @@ export const PUZZLE_MANIFEST = [
       "title": "Energy flow in living systems",
       "category": "Science",
       "large": false,
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
       "_searchTerms": [
         "Photosynthesis",
         "sunlight",
@@ -20,13 +24,13 @@ export const PUZZLE_MANIFEST = [
         "mitochondria",
         "ATP",
         "aerobic",
-        "glucose",
         "Ecosystems",
         "food chain",
         "consumers",
         "decomposers",
         "trophic level",
         "oxygen",
+        "glucose",
         "producers"
       ]
     }
@@ -15068,6 +15072,618 @@ export const PUZZLE_MANIFEST = [
         "alcohol decolorizer",
         "permeability barrier",
         "exposed cell wall"
+      ]
+    }
+  },
+  {
+    "id": "cellular-energy",
+    "module": "./biology/cellular-energy.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "cellular-energy",
+      "title": "How a cell captures and spends energy",
+      "category": "Biology",
+      "subcategories": {
+        "Biology": "foundations"
+      },
+      "large": true,
+      "info": {
+        "text": "The two processes at the centre of a cell's energy budget — building sugar from light, and taking it apart again — and the molecules that carry energy between them.",
+        "citations": [
+          {
+            "title": "Biology 2e, 8.1: Overview of Photosynthesis",
+            "publisher": "OpenStax, Rice University",
+            "url": "https://openstax.org/books/biology-2e/pages/8-1-overview-of-photosynthesis"
+          },
+          {
+            "title": "Biology 2e, Chapter 7: Cellular Respiration",
+            "publisher": "OpenStax, Rice University",
+            "url": "https://openstax.org/books/biology-2e/pages/7-chapter-summary"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Capturing light",
+        "sunlight",
+        "chlorophyll",
+        "chloroplast",
+        "thylakoid",
+        "light-dependent reactions",
+        "Calvin cycle",
+        "stomata",
+        "Releasing stored energy",
+        "mitochondria",
+        "fermentation",
+        "glycolysis",
+        "citric acid cycle",
+        "oxidative phosphorylation",
+        "aerobic",
+        "anaerobic",
+        "What carries the energy",
+        "ADP",
+        "redox reaction",
+        "electron carrier",
+        "glucose",
+        "oxygen",
+        "carbon dioxide",
+        "ATP"
+      ]
+    }
+  },
+  {
+    "id": "chirality-isomer-classes",
+    "module": "./chemistry/chirality-isomer-classes.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "chirality-isomer-classes",
+      "title": "Mirror Images First: Classifying Isomer Pairs and Finding Chirality",
+      "category": "Chemistry",
+      "subcategories": {
+        "Chemistry": "organic-chemistry"
+      },
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "chirality-labels-and-light",
+            "reason": "Applies the two naming-and-measurement systems to the relationships classified on board one, and resolves what board one's achiral-looking observations (meso, racemic) were hiding."
+          }
+        ]
+      },
+      "info": {
+        "text": "Same formula, same bonds, different substance: the comparison flowchart that classifies any same-formula pair — identical, conformers, constitutional isomers, stereoisomers — and the mirror test that divides stereoisomer pairs into enantiomers and their non-mirror relatives, anchored in the structural features (chirality center, plane of symmetry) that decide whether a reflection is a different molecule at all.",
+        "citations": [
+          {
+            "title": "5.9: A Review of Isomerism — Organic Chemistry (Morsch et al.)",
+            "author": "Steven Farmer, Dietmar Kennepohl, Zachary Sharrett, William Reusch",
+            "publisher": "Chemistry LibreTexts",
+            "year": "2023",
+            "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/05%3A_Stereochemistry_at_Tetrahedral_Centers/5.09%3A_A_Review_of_Isomerism"
+          },
+          {
+            "title": "5.2: The Reason for Handedness in Molecules – Chirality — Organic Chemistry (Morsch et al.)",
+            "publisher": "Chemistry LibreTexts",
+            "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/05%3A_Stereochemistry_at_Tetrahedral_Centers/5.02%3A_The_Reason_for_Handedness_in_Molecules_-_Chirality"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Isomer comparison verdicts",
+        "constitutional isomers",
+        "identical compounds",
+        "conformers",
+        "stereoisomers",
+        "Stereoisomer pair classes",
+        "enantiomers",
+        "diastereomers",
+        "epimers",
+        "cis–trans (geometric) isomers",
+        "Where handedness lives",
+        "chirality center",
+        "plane of symmetry",
+        "achiral",
+        "same connectivity, different arrangement",
+        "non-superimposable mirror image"
+      ]
+    }
+  },
+  {
+    "id": "chirality-labels-and-light",
+    "module": "./chemistry/chirality-labels-and-light.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "chirality-labels-and-light",
+      "title": "Naming and Measuring Handedness: R/S Labels, Polarized Light, and Cancellation",
+      "category": "Chemistry",
+      "subcategories": {
+        "Chemistry": "organic-chemistry"
+      },
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "chirality-isomer-classes",
+            "reason": "Play first: board one classifies the isomer pairs and locates handedness with the mirror test that this board's labels and measurements presuppose."
+          }
+        ]
+      },
+      "info": {
+        "text": "The same handedness has two independent namings: the (R)/(S) configuration each stereocenter carries, and the direction a sample rotates plane-polarized light. This board teaches both systems and the cancellation payoffs — why meso compounds and racemic mixtures read zero, and how resolution and racemization move a substance between the mixed and resolved states.",
+        "citations": [
+          {
+            "title": "5.5: Sequence Rules for Specifying Configuration — Organic Chemistry (Morsch et al.)",
+            "author": "Steven Farmer, Ekta Patel, Ifemayowa Aworanti, Dietmar Kennepohl, Zachary Sharrett, Layne Morsch, Krista Cunningham",
+            "publisher": "Chemistry LibreTexts",
+            "year": "2023",
+            "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/05%3A_Stereochemistry_at_Tetrahedral_Centers/5.05%3A_Sequence_Rules_for_Specifying_Configuration"
+          },
+          {
+            "title": "5.3: Optical Activity — Organic Chemistry (Morsch et al.)",
+            "author": "Steven Farmer, Dietmar Kennepohl, Zachary Sharrett, Krista Cunningham, Tim Soderberg",
+            "publisher": "Chemistry LibreTexts",
+            "year": "2023",
+            "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/05%3A_Stereochemistry_at_Tetrahedral_Centers/5.03%3A_Optical_Activity"
+          },
+          {
+            "title": "5.7: Meso Compounds — Organic Chemistry (Morsch et al.)",
+            "publisher": "Chemistry LibreTexts",
+            "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/05%3A_Stereochemistry_at_Tetrahedral_Centers/5.07%3A_Meso_Compounds"
+          },
+          {
+            "title": "5.8: Racemic Mixtures and the Resolution of Enantiomers — Organic Chemistry (Morsch et al.)",
+            "publisher": "Chemistry LibreTexts",
+            "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/05%3A_Stereochemistry_at_Tetrahedral_Centers/5.08%3A_Racemic_Mixtures_and_the_Resolution_of_Enantiomers"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Absolute configuration labels",
+        "(R) configuration",
+        "(S) configuration",
+        "CIP priority rules",
+        "absolute configuration",
+        "Polarimetry observations",
+        "plane-polarized light",
+        "polarimeter",
+        "optically active",
+        "dextrorotatory (+)",
+        "levorotatory (−)",
+        "specific rotation",
+        "Chirality cancellation and its undoing",
+        "meso compound",
+        "racemic mixture",
+        "resolution",
+        "racemization",
+        "optical inactivity by cancellation",
+        "configuration vs rotation sign"
+      ]
+    }
+  },
+  {
+    "id": "energy-flows-one-way",
+    "module": "./biology/energy-flows-one-way.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "energy-flows-one-way",
+      "title": "Why energy flows one way",
+      "category": "Biology",
+      "categories": [
+        "Biology",
+        "Physics"
+      ],
+      "large": false,
+      "info": {
+        "text": "The two thermodynamic rules underneath every living process, and why they make energy take a one-way trip while matter comes back around.",
+        "citations": [
+          {
+            "title": "Biology 2e, 6.3: The Laws of Thermodynamics",
+            "publisher": "OpenStax, Rice University",
+            "url": "https://openstax.org/books/biology-2e/pages/6-3-the-laws-of-thermodynamics"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "What the laws allow",
+        "first law of thermodynamics",
+        "second law of thermodynamics",
+        "entropy",
+        "free energy",
+        "exergonic",
+        "endergonic",
+        "Why matter comes back",
+        "carbon cycle",
+        "biogeochemical cycle",
+        "open system",
+        "heat"
+      ]
+    }
+  },
+  {
+    "id": "functional-groups-organic",
+    "module": "./chemistry/functional-groups-organic.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "functional-groups-organic",
+      "title": "Families of Organic Compounds: Reading Functional Groups",
+      "category": "Chemistry",
+      "subcategories": {
+        "Chemistry": "organic-chemistry"
+      },
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "chirality-isomer-classes",
+            "reason": "Play after naming the families: the next lesson classifies same-formula pairs — including the cis–trans alkene pairs met here — by the mirror test."
+          }
+        ]
+      },
+      "info": {
+        "text": "Organic compounds come in families defined by small, characteristic groups: hydrocarbon frameworks (alkane, alkene, alkyne, arene), single-bond heteroatom families (alkyl halide, alcohol, ether, amine, thiol), the carbonyl core and its acid-derived relatives (carboxylic acid, ester, amide, acid chloride), and the carbon–nitrogen multiple bonds (nitrile, imine) — with R groups abstracting the framework and heteroatoms naming most families.",
+        "citations": [
+          {
+            "title": "3.1: Functional Groups — Organic Chemistry (Morsch et al.)",
+            "author": "Steven Farmer, Dietmar Kennepohl, Layne Morsch, Krista Cunningham, Tim Soderberg",
+            "publisher": "Chemistry LibreTexts",
+            "year": "2026",
+            "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/03%3A_Organic_Compounds-_Alkanes_and_Their_Stereochemistry/3.01%3A_Functional_Groups"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Hydrocarbon frameworks",
+        "alkane",
+        "alkene",
+        "alkyne",
+        "arene",
+        "Single-bond heteroatom families",
+        "alcohol",
+        "amine",
+        "alkyl halide",
+        "ether",
+        "thiol",
+        "The carbonyl core",
+        "ketone",
+        "aldehyde",
+        "Carboxylic acid derivatives",
+        "carboxylic acid",
+        "ester",
+        "amide",
+        "acid chloride",
+        "Nitrogen multiple-bond families",
+        "nitrile",
+        "imine",
+        "The functional-group lens",
+        "functional group",
+        "R group",
+        "heteroatom",
+        "the framework is the R group",
+        "heteroatom identity names the family",
+        "C/H vs heteroatom neighbors",
+        "alkane as parent framework",
+        "O-for-N at multiple bonds",
+        "read as carbonyl plus family",
+        "polyfunctionality in real molecules"
+      ]
+    }
+  },
+  {
+    "id": "massive-stars-remnants-and-recycling",
+    "module": "./astronomy/massive-stars-remnants-and-recycling.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "massive-stars-remnants-and-recycling",
+      "title": "Massive Stars, Remnants, and Recycling",
+      "category": "Astronomy",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "stellar-formation-and-sunlike-evolution",
+            "reason": "Review formation, hydrogen-burning balance, and the Sun-like path first, then compare its white-dwarf endpoint with massive-star remnants."
+          }
+        ]
+      },
+      "info": {
+        "text": "Massive stars burn through heavier fuels quickly, then collapse when an iron core can no longer release energy by fusion. Their explosions can leave neutron stars or black holes while winds and ejecta return newly made elements to the interstellar medium, linking stellar death to the formation of later stars and planetary systems.",
+        "citations": [
+          {
+            "title": "Stars",
+            "author": "NASA Science",
+            "publisher": "National Aeronautics and Space Administration",
+            "url": "https://science.nasa.gov/universe/stars/"
+          },
+          {
+            "title": "Evolution of Massive Stars: An Explosive Finish",
+            "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/astronomy-2e/pages/23-2-evolution-of-massive-stars-an-explosive-finish"
+          },
+          {
+            "title": "The Death of Low-Mass Stars",
+            "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/astronomy-2e/pages/23-1-the-death-of-low-mass-stars"
+          },
+          {
+            "title": "Cosmic Origins",
+            "author": "NASA Science",
+            "publisher": "National Aeronautics and Space Administration",
+            "url": "https://science.nasa.gov/astrophysics/programs/cosmic-origins/about/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Massive stars: the explosive path",
+        "red supergiant",
+        "supernova",
+        "successive heavy-element fusion",
+        "onion-shell structure",
+        "iron core",
+        "core collapse",
+        "Compact remnants: what survives",
+        "white dwarf",
+        "black hole",
+        "electron degeneracy pressure",
+        "Chandrasekhar limit",
+        "neutron star",
+        "pulsar",
+        "Recycling the star's material",
+        "stellar wind",
+        "interstellar medium",
+        "ejecta",
+        "nucleosynthesis",
+        "chemical enrichment",
+        "next-generation stars",
+        "core-collapse supernova",
+        "supernova ejecta"
+      ]
+    }
+  },
+  {
+    "id": "solar-system-inner",
+    "module": "./astronomy/solar-system-inner.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "solar-system-inner",
+      "title": "The Solar System: A Star Sorts a Cloud",
+      "category": "Astronomy",
+      "subcategories": {
+        "Astronomy": "solar-system"
+      },
+      "large": false,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "solar-system-outer",
+            "reason": "Play next: the frost line from this board explains why the outer system is built of giants, icy leftovers, and tidally heated moons."
+          }
+        ]
+      },
+      "info": {
+        "text": "How one collapsing cloud became a system: the young Sun's heat gradient sorted chemistry by distance, so only rock and metal could condense where the terrestrial planets grew - while the spinning disk left the planets on the flat, same-direction orbits they still follow.",
+        "citations": [
+          {
+            "title": "Solar System",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Solar_System"
+          },
+          {
+            "title": "Frost line (astrophysics)",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Frost_line_(astrophysics)"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Sun and its engine",
+        "Sun",
+        "nuclear fusion",
+        "photosphere",
+        "solar wind",
+        "heliosphere",
+        "Terrestrial planets",
+        "Earth",
+        "Mars",
+        "Mercury",
+        "Venus",
+        "Formation physics",
+        "accretion",
+        "nebular hypothesis",
+        "protoplanetary disk",
+        "planetesimals",
+        "planetary migration",
+        "frost line",
+        "habitable zone"
+      ]
+    }
+  },
+  {
+    "id": "solar-system-outer",
+    "module": "./astronomy/solar-system-outer.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "solar-system-outer",
+      "title": "The Solar System: Giants, Dwarfs, and Leftovers",
+      "category": "Astronomy",
+      "subcategories": {
+        "Astronomy": "solar-system"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "solar-system-inner",
+            "reason": "Play first: the frost-line and formation rules from board one explain why the outer system looks the way this board shows."
+          }
+        ]
+      },
+      "info": {
+        "text": "What the giant planets are made of, what makes a dwarf planet a dwarf, where the leftover debris is stored, and why some moons are geologically alive - the solar system from the asteroid belt outward, as the output of one sorting mechanism.",
+        "citations": [
+          {
+            "title": "Solar System",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Solar_System"
+          },
+          {
+            "title": "Dwarf planet",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Dwarf_planet"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Gas giants",
+        "Jupiter",
+        "Saturn",
+        "Ice giants",
+        "Uranus",
+        "Neptune",
+        "Dwarf planets",
+        "Pluto",
+        "Ceres",
+        "Eris",
+        "Haumea",
+        "Small-body reservoirs",
+        "asteroid belt",
+        "Kuiper Belt",
+        "Oort cloud",
+        "comets",
+        "Moons as worlds",
+        "Titan",
+        "Europa",
+        "Io",
+        "Enceladus",
+        "Triton",
+        "orbital resonance",
+        "clearing the neighborhood",
+        "tidal heating",
+        "capture"
+      ]
+    }
+  },
+  {
+    "id": "stellar-formation-and-sunlike-evolution",
+    "module": "./astronomy/stellar-formation-and-sunlike-evolution.js",
+    "published": "2026-09-30",
+    "browse": {
+      "id": "stellar-formation-and-sunlike-evolution",
+      "title": "Star Formation and the Sun-like Path",
+      "category": "Astronomy",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "massive-stars-remnants-and-recycling",
+            "reason": "Continue to the massive-star branch, compare the compact remnants it leaves, and see how stellar ejecta seeds later stars."
+          }
+        ]
+      },
+      "info": {
+        "text": "A star's story begins with gravitational collapse, settles into a long hydrogen-burning equilibrium, and then changes once its core fuel runs out. This board follows the common formation and main-sequence phases into the low- and intermediate-mass path that ends with a planetary nebula and a cooling white dwarf.",
+        "citations": [
+          {
+            "title": "Stars",
+            "author": "NASA Science",
+            "publisher": "National Aeronautics and Space Administration",
+            "url": "https://science.nasa.gov/universe/stars/"
+          },
+          {
+            "title": "The H–R Diagram and the Study of Stellar Evolution",
+            "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/astronomy-2e/pages/21-2-the-h-r-diagram-and-the-study-of-stellar-evolution"
+          },
+          {
+            "title": "Evolution from the Main Sequence to Red Giants",
+            "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/astronomy-2e/pages/22-1-evolution-from-the-main-sequence-to-red-giants"
+          },
+          {
+            "title": "Further Evolution of Stars",
+            "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/astronomy-2e/pages/22-4-further-evolution-of-stars"
+          },
+          {
+            "title": "The Death of Low-Mass Stars",
+            "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/astronomy-2e/pages/23-1-the-death-of-low-mass-stars"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Formation: from cloud to protostar",
+        "molecular cloud",
+        "protostar",
+        "gravitational collapse",
+        "accretion disk",
+        "stellar nursery",
+        "Main sequence: fusion in balance",
+        "main sequence",
+        "hydrogen fusion",
+        "hydrostatic equilibrium",
+        "mass–lifetime relation",
+        "hydrogen exhaustion",
+        "Sun-like stars: giants to a white dwarf",
+        "red giant",
+        "planetary nebula",
+        "helium flash",
+        "triple-alpha process",
+        "core helium burning",
+        "asymptotic giant branch",
+        "white dwarf",
+        "hydrogen ignition",
+        "core hydrogen exhaustion"
       ]
     }
   }
