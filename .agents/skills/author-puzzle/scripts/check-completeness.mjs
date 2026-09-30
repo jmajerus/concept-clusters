@@ -360,6 +360,12 @@ function checkSplitPlan(plan, inventory) {
     }
   }
 
+  if (Object.hasOwn(plan, "resolvedQuestions") && !Array.isArray(plan.resolvedQuestions)) {
+    blocking.push({
+      id: "plan-resolved-questions",
+      message: "resolvedQuestions must be an array of { question, resolution }."
+    });
+  }
   const resolutions = Array.isArray(plan.resolvedQuestions) ? plan.resolvedQuestions : [];
   const recorded = new Map();
   for (const entry of inventory.resolvedQuestions || []) {

@@ -74,6 +74,13 @@ export function canonicalSplitPlanPath(inventory, planPath) {
 }
 
 export function applySplitPlan(inventory, plan, { planPath }) {
+  if (Object.hasOwn(plan, "resolvedQuestions") && !Array.isArray(plan.resolvedQuestions)) {
+    return {
+      ok: false,
+      code: "invalid-resolutions",
+      message: "resolvedQuestions must be an array of { question, resolution }."
+    };
+  }
   const next = structuredClone(inventory);
   const resolutions = Array.isArray(plan.resolvedQuestions) ? plan.resolvedQuestions : [];
   const open = Array.isArray(next.scope?.openQuestions) ? next.scope.openQuestions : [];
@@ -161,7 +168,13 @@ function main() {
   const plan = readJson(planPath, "split plan");
   const inventoryId = trimmed(inventory.id);
   const planInventoryId = trimmed(plan.inventoryId);
-  if (inventoryId && planInventoryId && inventoryId !== planInventoryId) {
+  if (!inventoryId || !planInventoryId) {
+    fail({
+      code: "inventory-id-missing",
+      message: "Both the inventory id and the split plan inventoryId are required before the inventory is updated."
+    }, 1);
+  }
+  if (inventoryId !== planInventoryId) {
     fail({
       code: "inventory-mismatch",
       message: `Split plan inventoryId "${planInventoryId}" does not match inventory id "${inventoryId}".`

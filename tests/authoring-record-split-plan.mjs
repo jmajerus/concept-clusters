@@ -140,6 +140,36 @@ export async function run() {
     assert.equal(wrong.status, 1, wrong.stdout);
     assert.equal(JSON.parse(wrong.stdout).code, "inventory-mismatch");
     assert.equal(readFileSync(wrongPaths.inventoryPath, "utf8"), wrongBefore);
+
+    const unbound = plan();
+    delete unbound.inventoryId;
+    const unboundPaths = writePair(directory, inventory(), unbound);
+    const unboundBefore = readFileSync(unboundPaths.inventoryPath, "utf8");
+    const unboundRun = runRecorder([
+      "--inventory", unboundPaths.inventoryPath,
+      "--plan", unboundPaths.planPath
+    ]);
+    assert.equal(unboundRun.status, 1, unboundRun.stdout);
+    assert.equal(JSON.parse(unboundRun.stdout).code, "inventory-id-missing");
+    assert.equal(readFileSync(unboundPaths.inventoryPath, "utf8"), unboundBefore);
+
+    const malformed = plan();
+    malformed.resolvedQuestions = { question: OPEN_SEAM, resolution: "Two boards." };
+    const malformedPaths = writePair(directory, inventory(), malformed);
+    const malformedBefore = readFileSync(malformedPaths.inventoryPath, "utf8");
+    const malformedRun = runRecorder([
+      "--inventory", malformedPaths.inventoryPath,
+      "--plan", malformedPaths.planPath
+    ]);
+    assert.equal(malformedRun.status, 1, malformedRun.stdout);
+    assert.equal(JSON.parse(malformedRun.stdout).code, "invalid-resolutions");
+    assert.equal(readFileSync(malformedPaths.inventoryPath, "utf8"), malformedBefore);
+
+    const shape = spawnSync(process.execPath, [
+      CHECKER, "--level", "split", "--plan", malformedPaths.planPath, malformedPaths.inventoryPath
+    ], { encoding: "utf8" });
+    assert.equal(shape.status, 2, shape.stderr || shape.stdout);
+    assert.ok(JSON.parse(shape.stdout).blocking.some(entry => entry.id === "plan-resolved-questions"));
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
