@@ -62,8 +62,7 @@ export default definePuzzle(import.meta.url, {
       "terms": [
         "mitochondria",
         "ATP",
-        "aerobic",
-        "glucose"
+        "aerobic"
       ],
       "seeds": [
         "mitochondria",
@@ -91,14 +90,6 @@ export default definePuzzle(import.meta.url, {
           "links": [
             {
               "href": "wiki:Cellular respiration"
-            }
-          ]
-        },
-        "glucose": {
-          "text": "The simple sugar cells break down during respiration to release usable energy.",
-          "links": [
-            {
-              "href": "wiki:Glucose"
             }
           ]
         }
@@ -142,6 +133,7 @@ export default definePuzzle(import.meta.url, {
           ]
         },
         "decomposers": {
+          "text": "Organisms such as fungi and bacteria that break down dead material and release its nutrients again.",
           "links": [
             {
               "href": "wiki:Decomposer"
@@ -174,9 +166,9 @@ export default definePuzzle(import.meta.url, {
         0,
         1
       ],
-      "fact": "Oxygen bridges the two: photosynthesis releases it, respiration consumes it.",
+      "fact": "Photosynthesis releases oxygen as a by-product, and aerobic respiration consumes it to get energy out of food.",
       "info": {
-        "text": "A gas made of two bonded oxygen atoms (O2) — a waste product of photosynthesis and a required input for aerobic respiration.",
+        "text": "A gas made of two bonded oxygen atoms (O2) — about a fifth of the air.",
         "links": [
           {
             "href": "wiki:Oxygen"
@@ -185,8 +177,30 @@ export default definePuzzle(import.meta.url, {
       },
       "relationKind": "dynamic",
       "idealTerms": [
-        "chlorophyll",
+        null,
         "aerobic"
+      ]
+    },
+    {
+      "id": "glucose",
+      "term": "glucose",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Photosynthesis locks energy into glucose, and respiration takes it apart to release that energy as ATP.",
+      "info": {
+        "text": "A simple sugar that holds chemical energy in its bonds.",
+        "links": [
+          {
+            "href": "wiki:Glucose"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        null,
+        "ATP"
       ]
     },
     {
@@ -196,9 +210,9 @@ export default definePuzzle(import.meta.url, {
         0,
         2
       ],
-      "fact": "Producers bridge the two: organisms that photosynthesize form the base of every ecosystem.",
+      "fact": "Organisms that photosynthesize are producers — the base of the food chain every other organism feeds from.",
       "info": {
-        "text": "An organism that makes its own food from light or chemical energy, rather than eating other organisms — the base of every food chain.",
+        "text": "An organism that makes its own food from light or chemical energy rather than by eating other organisms.",
         "links": [
           {
             "href": "wiki:Autotroph"
@@ -208,12 +222,28 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "foundation"
     }
   ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "summary": "Trace how energy is captured, transferred, and passed through living systems.",
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Living systems transform energy rather than create it. Photosynthesis captures light energy in glucose; cellular respiration transfers that chemical energy to ATP, the immediately usable energy currency of cells.\r\n\r\nAt the ecosystem scale, feeding relationships carry stored energy from each level to the one above it, and whatever is never eaten is broken back down and returned to the soil. Energy flows through these levels and is ultimately dissipated as heat, while matter such as carbon is recycled."
+    }
+  },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
         "name": "generative assistance",
         "kind": "generative"
+      },
+      {
+        "name": "Claude Code (Claude Opus 5)",
+        "reasoning": "high"
+      },
+      {
+        "name": "Codex (GPT-5.6 Luna)",
+        "reasoning": "max"
       }
     ]
   }

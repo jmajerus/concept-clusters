@@ -1,0 +1,302 @@
+// Generated from content/puzzles/solar-system-inner.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "solar-system-inner",
+  "title": "The Solar System: A Star Sorts a Cloud",
+  "category": "astronomy",
+  "subcategories": {
+    "astronomy": "solar-system"
+  },
+  "info": {
+    "text": "How one collapsing cloud became a system: the young Sun's heat gradient sorted chemistry by distance, so only rock and metal could condense where the terrestrial planets grew - while the spinning disk left the planets on the flat, same-direction orbits they still follow.",
+    "citations": [
+      {
+        "title": "Solar System",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Solar_System"
+      },
+      {
+        "title": "Frost line (astrophysics)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Frost_line_(astrophysics)"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "sun-engine",
+      "name": "The Sun and its engine",
+      "color": "teal",
+      "fact": "One star holds 99.86 percent of the mass in the system: its core fuses hydrogen into helium, the energy escapes through the photosphere, and the outward solar wind inflates the heliosphere.",
+      "terms": [
+        "Sun",
+        "nuclear fusion",
+        "photosphere",
+        "solar wind",
+        "heliosphere"
+      ],
+      "seeds": [
+        "Sun",
+        "nuclear fusion"
+      ],
+      "termInfo": {
+        "Sun": {
+          "text": "A middle-aged G-type star, about 4.6 billion years old, fusing some 600 million tons of hydrogen every second in its core.",
+          "links": [
+            {
+              "href": "wiki:Sun"
+            }
+          ]
+        },
+        "nuclear fusion": {
+          "text": "In the core, hydrogen nuclei merge into helium, converting a sliver of mass into the energy that lights and warms the whole system.",
+          "links": [
+            {
+              "href": "wiki:Nuclear fusion"
+            }
+          ]
+        },
+        "photosphere": {
+          "text": "The visible surface where the Sun's gas finally becomes transparent and light escapes into space, at about 5,500 degrees C.",
+          "links": [
+            {
+              "href": "wiki:Photosphere"
+            }
+          ]
+        },
+        "solar wind": {
+          "text": "A steady stream of charged particles blown off the Sun at hundreds of kilometers per second, carrying the Sun's magnetic field out through the system.",
+          "links": [
+            {
+              "href": "wiki:Solar wind"
+            }
+          ]
+        },
+        "heliosphere": {
+          "text": "The vast bubble the solar wind inflates around the planets, ending at the heliopause - detected near 120 AU, far beyond Neptune.",
+          "links": [
+            {
+              "href": "wiki:Heliosphere"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "terrestrial",
+      "name": "Terrestrial planets",
+      "color": "blue",
+      "fact": "Four small, dense worlds of rock wrapped around iron cores - Mercury, Venus, Earth, and Mars - together hold less than half a percent of the planets' combined mass.",
+      "terms": [
+        "Earth",
+        "Mars",
+        "Mercury",
+        "Venus"
+      ],
+      "seeds": [
+        "Earth",
+        "Mars"
+      ],
+      "termInfo": {
+        "Mercury": {
+          "text": "The smallest planet and the closest to the Sun: an airless, cratered ball of iron and rock locked in a 3:2 spin-orbit rhythm.",
+          "links": [
+            {
+              "href": "wiki:Mercury (planet)"
+            }
+          ]
+        },
+        "Venus": {
+          "text": "Nearly Earth's twin in size - and its opposite in climate: a runaway greenhouse of carbon dioxide at 465 degrees C under crushing pressure.",
+          "links": [
+            {
+              "href": "wiki:Venus"
+            }
+          ]
+        },
+        "Earth": {
+          "text": "The only world known to hold liquid surface water and life, orbiting one AU from the Sun.",
+          "links": [
+            {
+              "href": "wiki:Earth"
+            }
+          ]
+        },
+        "Mars": {
+          "text": "A cold desert with the system's largest volcano and canyon, dried riverbeds, and buried ice - once warmer and wetter than today.",
+          "links": [
+            {
+              "href": "wiki:Mars"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "formation",
+      "name": "Formation physics",
+      "color": "amber",
+      "fact": "A molecular cloud collapsed into a spinning protoplanetary disk; dust accreted into planetesimals, the frost line sorted chemistry by distance, and planetary migration later reshuffled the young system.",
+      "terms": [
+        "accretion",
+        "nebular hypothesis",
+        "protoplanetary disk",
+        "planetesimals",
+        "planetary migration"
+      ],
+      "seeds": [
+        "accretion",
+        "nebular hypothesis"
+      ],
+      "termInfo": {
+        "nebular hypothesis": {
+          "text": "The idea, dating to Kant and Laplace, that the system condensed from a rotating cloud of gas and dust - now the standard model, backed by the dusty disks telescopes see around young stars.",
+          "links": [
+            {
+              "href": "wiki:Nebular hypothesis"
+            }
+          ]
+        },
+        "protoplanetary disk": {
+          "text": "The flattened, spinning disk of gas and dust around the young Sun from which the planets accreted; its leftovers became the belts and comets.",
+          "links": [
+            {
+              "href": "wiki:Protoplanetary disk"
+            }
+          ]
+        },
+        "accretion": {
+          "text": "The bottom-up construction of worlds: grains stuck together, grew by collisions into boulders, then into kilometer-scale bodies.",
+          "links": [
+            {
+              "href": "wiki:Accretion (astrophysics)"
+            }
+          ]
+        },
+        "planetesimals": {
+          "text": "Bodies of kilometers to hundreds of kilometers, massive enough for gravity to take over the gathering - the raw building blocks of planets.",
+          "links": [
+            {
+              "href": "wiki:Planetesimal"
+            }
+          ]
+        },
+        "planetary migration": {
+          "text": "Young planets drifted as they traded momentum with the disk: Neptune pushed outward, and giant worlds around other stars slid sunward wholesale.",
+          "links": [
+            {
+              "href": "wiki:Planetary migration"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "frost-line-inside",
+      "term": "frost line",
+      "clusters": [
+        2,
+        1
+      ],
+      "fact": "Within about 3 AU of the young Sun only rock and metal could condense, which is why the inner planets stayed small and rocky.",
+      "info": "Also called the snow line: the distance in the young disk where water ice could first condense into solid grains."
+    },
+    {
+      "id": "habitable-zone",
+      "term": "habitable zone",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Earth and Mars orbit at distances where sunlight could keep surface water liquid - but only Earth kept an atmosphere thick enough to hold it; Mars lost its air and its rivers.",
+      "info": "Sometimes nicknamed the Goldilocks zone; Mars sits at its ragged outer edge.",
+      "idealTerms": [
+        "Sun",
+        null
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "dust-to-worlds",
+      "prompt": "Which entries are successive stages in building planets from dust?",
+      "explanation": "First the protoplanetary disk, then accretion sticking its grains together, then planetesimals big enough for gravity to take over. The nebular hypothesis is the theory describing all of it rather than a stage, and planetary migration came after the planets had formed.",
+      "targets": [
+        "protoplanetary disk",
+        "accretion",
+        "planetesimals"
+      ],
+      "reasons": {
+        "protoplanetary disk": "The spinning disk of gas and dust where building began.",
+        "accretion": "Grains sticking and colliding into ever-larger bodies.",
+        "planetesimals": "Kilometer-scale bodies where gravity takes over the gathering."
+      }
+    },
+    {
+      "id": "sun-drawn-boundaries",
+      "prompt": "Which entries are boundaries the Sun draws - places where its light, heat, or wind crosses a threshold?",
+      "explanation": "At the photosphere the Sun's gas turns transparent and light breaks free; the habitable zone is the band where sunlight is warm enough, but not too warm, for liquid water; the frost line was where the young disk turned cold enough for ice; the heliosphere ends where the solar wind stalls against interstellar gas. Read outward - the Sun's surface, about 1 AU, about 3 AU, about 120 AU - the zone of liquid water lies well inside the line where ice first froze. The Sun is the source, not a boundary, and the solar wind is the flow, not where it stops.",
+      "targets": [
+        "photosphere",
+        "habitable zone",
+        "frost line",
+        "heliosphere"
+      ],
+      "reasons": {
+        "photosphere": "Where the Sun's gas turns transparent and light escapes.",
+        "habitable zone": "The band where sunlight keeps surface water liquid - neither boiling nor frozen.",
+        "frost line": "Where the young disk turned cold enough for ice to condense.",
+        "heliosphere": "Bounded where the solar wind stalls against interstellar gas."
+      }
+    },
+    {
+      "id": "water-line",
+      "prompt": "Which two of the rocky four orbit where sunlight could keep surface water liquid?",
+      "explanation": "Earth sits squarely in the habitable zone and Mars at its ragged outer edge. Venus lies inside the zone's inner edge - whatever water it may once have had was lost to a runaway greenhouse - and Mercury is far too close to the Sun.",
+      "targets": [
+        "Earth",
+        "Mars"
+      ],
+      "reasons": {
+        "Earth": "Squarely in the zone: oceans that have lasted billions of years.",
+        "Mars": "At the outer edge - rivers flowed here once, when its air was thicker."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "solar-system-outer",
+        "reason": "Play next: the frost line from this board explains why the outer system is built of giants, icy leftovers, and tidally heated moons."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "One cloud, one sorting rule",
+    "summary": "How a collapsing cloud of gas and dust became the Sun and the planets - and why distance from the Sun decided what each world is made of.",
+    "estimatedMinutes": 2,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "About 4.6 billion years ago, a region of a molecular cloud collapsed under its own gravity. Most of the material fell to the center and ignited as the Sun; the rest flattened into a spinning disk of gas and dust. Within that disk, small grains stuck together and grew, step by step, into the worlds we know.\r\n\r\nTemperature did the sorting. Close to the young Sun it was too hot for anything but rock and metal to condense, so the inner planets stayed small and dense. Farther out, water and other ices froze solid, feeding much faster growth. The same physics that built the planets left its fingerprints everywhere - in the Sun's slow burn, the rocky inner worlds, and the leftover debris that still falls as meteors today."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      },
+      {
+        "name": "Claude Code"
+      }
+    ]
+  }
+});

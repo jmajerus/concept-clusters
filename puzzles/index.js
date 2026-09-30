@@ -250,6 +250,15 @@ import digestiveBreakdown from "./physiology-medicine/digestive-breakdown.js";
 import religionSharedBeliefs from "./religion/religion-shared-beliefs.js";
 import statisticalMechanics from "./physics/statistical-mechanics.js";
 import whyTheGramStainWorks from "./microbiology/why-the-gram-stain-works.js";
+import cellularEnergy from "./biology/cellular-energy.js";
+import chiralityIsomerClasses from "./chemistry/chirality-isomer-classes.js";
+import chiralityLabelsAndLight from "./chemistry/chirality-labels-and-light.js";
+import energyFlowsOneWay from "./biology/energy-flows-one-way.js";
+import functionalGroupsOrganic from "./chemistry/functional-groups-organic.js";
+import massiveStarsRemnantsAndRecycling from "./astronomy/massive-stars-remnants-and-recycling.js";
+import solarSystemInner from "./astronomy/solar-system-inner.js";
+import solarSystemOuter from "./astronomy/solar-system-outer.js";
+import stellarFormationAndSunlikeEvolution from "./astronomy/stellar-formation-and-sunlike-evolution.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -510,6 +519,15 @@ export const PUZZLES = [
   religionSharedBeliefs,
   statisticalMechanics,
   whyTheGramStainWorks,
+  cellularEnergy,
+  chiralityIsomerClasses,
+  chiralityLabelsAndLight,
+  energyFlowsOneWay,
+  functionalGroupsOrganic,
+  massiveStarsRemnantsAndRecycling,
+  solarSystemInner,
+  solarSystemOuter,
+  stellarFormationAndSunlikeEvolution,
 ];
 
 export default PUZZLES;

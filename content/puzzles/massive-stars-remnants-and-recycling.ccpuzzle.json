@@ -1,0 +1,259 @@
+{
+  "id": "massive-stars-remnants-and-recycling",
+  "title": "Massive Stars, Remnants, and Recycling",
+  "category": "astronomy",
+  "large": true,
+  "info": {
+    "text": "Massive stars burn through heavier fuels quickly, then collapse when an iron core can no longer release energy by fusion. Their explosions can leave neutron stars or black holes while winds and ejecta return newly made elements to the interstellar medium, linking stellar death to the formation of later stars and planetary systems.",
+    "citations": [
+      {
+        "title": "Stars",
+        "author": "NASA Science",
+        "publisher": "National Aeronautics and Space Administration",
+        "url": "https://science.nasa.gov/universe/stars/"
+      },
+      {
+        "title": "Evolution of Massive Stars: An Explosive Finish",
+        "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/astronomy-2e/pages/23-2-evolution-of-massive-stars-an-explosive-finish"
+      },
+      {
+        "title": "The Death of Low-Mass Stars",
+        "author": "Andrew Fraknoi, David Morrison, and Sidney Wolff",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/astronomy-2e/pages/23-1-the-death-of-low-mass-stars"
+      },
+      {
+        "title": "Cosmic Origins",
+        "author": "NASA Science",
+        "publisher": "National Aeronautics and Space Administration",
+        "url": "https://science.nasa.gov/astrophysics/programs/cosmic-origins/about/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-massive-star-death",
+      "name": "Massive stars: the explosive path",
+      "color": "teal",
+      "fact": "Massive stars burn successively heavier fuels in an onion-like set of shells. When fusion builds an iron core, further fusion cannot release energy; the core collapses and the star explodes as a supernova.",
+      "termInfo": {
+        "red supergiant": "A late stage of a massive star with expanded, cooler outer layers and advanced fusion in its core and surrounding shells.",
+        "supernova": "The explosive death of a star, ejecting outer layers when the core collapses and releasing energy and newly made elements.",
+        "successive heavy-element fusion": "The sequence of carbon-, neon-, oxygen-, and silicon-burning stages that builds heavier nuclei in a massive star before iron.",
+        "onion-shell structure": "Nested burning shells around the core, with different fuels fusing at different depths as a massive star approaches collapse.",
+        "iron core": "The dense endpoint of massive-star fusion; fusing iron does not provide the net energy needed to support the core.",
+        "core collapse": "The rapid inward implosion of the iron core after pressure support fails, leading to a supernova and a compact remnant."
+      },
+      "seeds": [
+        "red supergiant",
+        "supernova"
+      ],
+      "floatingTerms": [
+        "successive heavy-element fusion",
+        "onion-shell structure",
+        "iron core",
+        "core collapse"
+      ],
+      "terms": [
+        "red supergiant",
+        "supernova",
+        "successive heavy-element fusion",
+        "onion-shell structure",
+        "iron core",
+        "core collapse"
+      ]
+    },
+    {
+      "id": "cluster-compact-remnants",
+      "name": "Compact remnants: what survives",
+      "color": "blue",
+      "fact": "After fusion stops, the surviving core's mass determines its fate. Electron degeneracy pressure can support a white dwarf below the Chandrasekhar limit; a denser core becomes a neutron star, sometimes observed as a pulsar, or collapses into a black hole.",
+      "termInfo": {
+        "white dwarf": "A compact remnant supported by electron degeneracy pressure, typically produced when a lower-mass star sheds its outer layers rather than undergoing core collapse.",
+        "black hole": "A compact remnant whose gravity creates a region from which light cannot escape when the collapsed core is sufficiently massive.",
+        "electron degeneracy pressure": "Quantum-mechanical pressure from closely packed electrons that can support a white dwarf against further gravitational contraction.",
+        "Chandrasekhar limit": "About 1.4 times the Sun's mass, the approximate upper limit for a stable white dwarf supported by electron degeneracy pressure.",
+        "neutron star": "An ultra-dense compact remnant formed when a massive star's collapsed core is compressed mostly into neutrons.",
+        "pulsar": "A rapidly rotating, strongly magnetized neutron star whose beams sweep past Earth as regularly timed pulses."
+      },
+      "seeds": [
+        "white dwarf",
+        "black hole"
+      ],
+      "floatingTerms": [
+        "electron degeneracy pressure",
+        "Chandrasekhar limit",
+        "neutron star",
+        "pulsar"
+      ],
+      "terms": [
+        "white dwarf",
+        "black hole",
+        "electron degeneracy pressure",
+        "Chandrasekhar limit",
+        "neutron star",
+        "pulsar"
+      ]
+    },
+    {
+      "id": "cluster-recycling",
+      "name": "Recycling the star's material",
+      "color": "amber",
+      "fact": "Stellar winds and explosive ejecta carry newly made elements into the interstellar medium. That chemical enrichment becomes raw material for later stars and planetary systems, so stellar death feeds future formation.",
+      "termInfo": {
+        "stellar wind": "A continuous outflow of particles and gas from a star that can carry material and newly made elements into surrounding space.",
+        "interstellar medium": "The gas and dust between stars that receives stellar winds and explosive ejecta and can later collapse into new stars.",
+        "ejecta": "Material expelled by a stellar explosion, including both pre-existing layers and elements newly produced in the star or blast.",
+        "nucleosynthesis": "The creation of atomic nuclei and chemical elements inside stars and during explosive stellar events.",
+        "chemical enrichment": "The increase in a gas cloud's abundance of elements heavier than hydrogen and helium after stellar products mix into it.",
+        "next-generation stars": "Later stars formed from interstellar gas that contains material and heavier elements returned by earlier stars."
+      },
+      "seeds": [
+        "stellar wind",
+        "interstellar medium"
+      ],
+      "floatingTerms": [
+        "ejecta",
+        "nucleosynthesis",
+        "chemical enrichment",
+        "next-generation stars"
+      ],
+      "terms": [
+        "stellar wind",
+        "interstellar medium",
+        "ejecta",
+        "nucleosynthesis",
+        "chemical enrichment",
+        "next-generation stars"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-core-collapse-supernova",
+      "term": "core-collapse supernova",
+      "clusters": [
+        "cluster-massive-star-death",
+        "cluster-compact-remnants"
+      ],
+      "fact": "When an iron core can no longer be supported by fusion, it collapses and rebounds in a supernova; the dense core left behind becomes a neutron star or black hole.",
+      "info": {
+        "text": "The arrow marks the causal handoff from an unsupported iron core to the explosion and compact remnant: collapse drives the supernova, and the surviving core becomes a neutron star or black hole.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/astronomy-2e/pages/23-2-evolution-of-massive-stars-an-explosive-finish"
+          }
+        ]
+      },
+      "direction": {
+        "kind": "through",
+        "from": "cluster-massive-star-death",
+        "to": "cluster-compact-remnants"
+      }
+    },
+    {
+      "id": "bridge-supernova-ejecta",
+      "term": "supernova ejecta",
+      "clusters": [
+        "cluster-massive-star-death",
+        "cluster-recycling"
+      ],
+      "fact": "The explosion throws the star's outer layers into space, spreading both newly synthesized elements and older material into the interstellar medium.",
+      "info": {
+        "text": "The arrow follows matter outward from the explosion into the interstellar medium, where newly synthesized elements mix with gas that can form later stars and planetary systems.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/astronomy-2e/pages/23-2-evolution-of-massive-stars-an-explosive-finish"
+          },
+          {
+            "href": "https://science.nasa.gov/astrophysics/programs/cosmic-origins/about/"
+          }
+        ]
+      },
+      "direction": {
+        "kind": "through",
+        "from": "cluster-massive-star-death",
+        "to": "cluster-recycling"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "fuel-ladder-to-iron",
+      "prompt": "Which terms describe the internal structure and final fusion endpoint of a massive star just before collapse?",
+      "explanation": "Successive heavy-element fusion describes the sequence of fuels, onion-shell structure describes the nested arrangement of burning layers, and the iron core is the endpoint that cannot yield further fusion energy. Red supergiant names the outer stellar stage, while core collapse is the event that follows.",
+      "targets": [
+        "successive heavy-element fusion",
+        "onion-shell structure",
+        "iron core"
+      ],
+      "reasons": {
+        "successive heavy-element fusion": "The process: massive stars burn progressively heavier fuels before reaching iron.",
+        "onion-shell structure": "The arrangement: different fuels burn in nested layers around the core.",
+        "iron core": "The endpoint: iron marks the point where fusion no longer supplies net support."
+      }
+    },
+    {
+      "id": "collapse-to-remnant",
+      "prompt": "After a core-collapse supernova, which terms name the two compact-remnant outcomes represented here?",
+      "explanation": "A collapsed core can settle as an ultra-dense neutron star or continue collapsing into a black hole, depending largely on the remnant's mass. A white dwarf belongs to the lower-mass envelope-shedding path, and a pulsar is an observable kind of neutron star rather than a separate outcome.",
+      "targets": [
+        "neutron star",
+        "black hole"
+      ],
+      "reasons": {
+        "neutron star": "One possible compact remnant: a collapsed core compressed mostly into neutrons.",
+        "black hole": "The other represented outcome: a sufficiently massive collapsed core forms an event horizon."
+      }
+    },
+    {
+      "id": "death-feeds-birth",
+      "prompt": "Which terms trace the recycling pathway from material leaving a star to the formation of later stars?",
+      "explanation": "Stellar winds and supernova ejecta carry material outward; the interstellar medium receives and mixes it; chemical enrichment changes that reservoir; and next-generation stars form from the enriched gas. Nucleosynthesis explains where new elements come from, but it is a production process rather than one of the pathway's flow stages.",
+      "targets": [
+        "stellar wind",
+        "supernova ejecta",
+        "interstellar medium",
+        "chemical enrichment",
+        "next-generation stars"
+      ],
+      "reasons": {
+        "stellar wind": "A pre-explosion outflow that removes material from the star.",
+        "supernova ejecta": "The explosive outflow that carries stellar layers and newly made elements into space.",
+        "interstellar medium": "The gas-and-dust reservoir where the outflowing material mixes.",
+        "chemical enrichment": "The increase in heavy-element content after stellar products are added.",
+        "next-generation stars": "The later stars that form from the enriched reservoir."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "stellar-formation-and-sunlike-evolution",
+        "reason": "Review formation, hydrogen-burning balance, and the Sun-like path first, then compare its white-dwarf endpoint with massive-star remnants."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "When massive stars die",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "Massive stars live fast because they burn their fuel rapidly. They move through progressively heavier fusion stages until an iron core can no longer release energy by fusion; the resulting collapse produces a supernova and may leave a neutron star or black hole.\r\n\r\nThe explosion is also a beginning. Stellar winds and supernova ejecta carry elements into the interstellar medium, where mixing enriches the gas that can form later stars and planetary systems."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Luna)",
+        "reasoning": "max"
+      }
+    ]
+  }
+}
