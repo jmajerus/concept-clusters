@@ -1,0 +1,386 @@
+{
+  "id": "solar-system-outer",
+  "title": "The Solar System: Giants, Dwarfs, and Leftovers",
+  "category": "astronomy",
+  "subcategories": {
+    "astronomy": "solar-system"
+  },
+  "large": true,
+  "info": {
+    "text": "What the giant planets are made of, what makes a dwarf planet a dwarf, where the leftover debris is stored, and why some moons are geologically alive - the solar system from the asteroid belt outward, as the output of one sorting mechanism.",
+    "citations": [
+      {
+        "title": "Solar System",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Solar_System"
+      },
+      {
+        "title": "Dwarf planet",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Dwarf_planet"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "gas-giants",
+      "name": "Gas giants",
+      "color": "teal",
+      "fact": "The two giants nearest the frost line grew fast enough to swallow huge hydrogen-helium envelopes: Jupiter and Saturn hold more than 90 percent of the planets' combined mass.",
+      "termInfo": {
+        "Jupiter": {
+          "text": "The largest planet - more than twice the mass of every other planet combined - with dozens of moons and the Great Red Spot, a storm wider than Earth that has been watched for at least 190 years and is slowly shrinking.",
+          "links": [
+            {
+              "href": "wiki:Jupiter"
+            }
+          ]
+        },
+        "Saturn": {
+          "text": "Mostly hydrogen and helium around a small core, famous for rings of ice and rock; the planet is less dense than water.",
+          "links": [
+            {
+              "href": "wiki:Saturn"
+            }
+          ]
+        }
+      },
+      "seeds": [
+        "Jupiter"
+      ],
+      "floatingTerms": [
+        "Saturn"
+      ],
+      "terms": [
+        "Jupiter",
+        "Saturn"
+      ]
+    },
+    {
+      "id": "ice-giants",
+      "name": "Ice giants",
+      "color": "blue",
+      "fact": "Uranus and Neptune are smaller giants built more from water, ammonia, and methane ices than from captured gas - and Uranus rolls around the Sun tipped nearly on its side.",
+      "termInfo": {
+        "Uranus": {
+          "text": "An ice giant tipped about 98 degrees - most likely by one or more ancient giant impacts - so it spins almost in its orbital plane and each pole gets 42 years of sunlight, then 42 years of dark. The first planet found by telescope (William Herschel, 1781).",
+          "links": [
+            {
+              "href": "wiki:Uranus"
+            }
+          ]
+        },
+        "Neptune": {
+          "text": "The farthest planet, with the fastest winds in the solar system - supersonic gusts above 2,000 km/h - and more heat leaking out than it receives from the Sun.",
+          "links": [
+            {
+              "href": "wiki:Neptune"
+            }
+          ]
+        }
+      },
+      "seeds": [
+        "Uranus"
+      ],
+      "floatingTerms": [
+        "Neptune"
+      ],
+      "terms": [
+        "Uranus",
+        "Neptune"
+      ]
+    },
+    {
+      "id": "dwarfs",
+      "name": "Dwarf planets",
+      "color": "amber",
+      "fact": "Round under their own gravity but sharing their orbital neighborhoods with debris: Pluto, Eris, Ceres, and Haumea are worlds in shape, not in orbital dominance.",
+      "termInfo": {
+        "Pluto": {
+          "text": "The archetype dwarf planet: round, cratered, with mountains of water ice and a moon (Charon) half its own size - but locked in 3:2 resonance with Neptune and sharing its zone with Kuiper-belt debris.",
+          "links": [
+            {
+              "href": "wiki:Pluto"
+            }
+          ]
+        },
+        "Ceres": {
+          "text": "The largest object in the asteroid belt and the only dwarf planet inside Neptune's orbit - round, rich in water ice, and counted as a planet for about half a century after its 1801 discovery.",
+          "links": [
+            {
+              "href": "wiki:Ceres (dwarf planet)"
+            }
+          ]
+        },
+        "Eris": {
+          "text": "The scattered-disc world whose 2005 discovery forced the planet-definition debate: slightly more massive than Pluto, on a steeply tilted, stretched orbit that carries it far beyond Pluto's.",
+          "links": [
+            {
+              "href": "wiki:Eris (dwarf planet)"
+            }
+          ]
+        },
+        "Haumea": {
+          "text": "A dwarf planet spinning so fast it is stretched egg-shaped, with a ring and two moons of its own.",
+          "links": [
+            {
+              "href": "wiki:Haumea"
+            }
+          ]
+        }
+      },
+      "seeds": [
+        "Pluto",
+        "Ceres"
+      ],
+      "floatingTerms": [
+        "Eris",
+        "Haumea"
+      ],
+      "terms": [
+        "Pluto",
+        "Ceres",
+        "Eris",
+        "Haumea"
+      ]
+    },
+    {
+      "id": "reservoirs",
+      "name": "Small-body reservoirs",
+      "color": "magenta",
+      "fact": "Leftover planetesimals that never became planets: the asteroid belt inside the giants, the Kuiper Belt beyond Neptune, the distant Oort cloud - with comets as their icy visitors.",
+      "termInfo": {
+        "asteroid belt": {
+          "text": "Millions of rocky bodies between Mars and Jupiter - the makings of a planet that Jupiter's gravity never allowed to assemble.",
+          "links": [
+            {
+              "href": "wiki:Asteroid belt"
+            }
+          ]
+        },
+        "Kuiper Belt": {
+          "text": "The icy doughnut beyond Neptune: a reservoir of frozen leftovers, home to several dwarf planets, with the more scattered disc stretching past its outer edge.",
+          "links": [
+            {
+              "href": "wiki:Kuiper belt"
+            }
+          ]
+        },
+        "Oort cloud": {
+          "text": "A vast shell of icy bodies reaching perhaps a light-year out - the source of long-period comets that fall in from every direction.",
+          "links": [
+            {
+              "href": "wiki:Oort cloud"
+            }
+          ]
+        },
+        "comets": {
+          "text": "Icy small bodies that grow glowing comas and tails when sunlight boils their ices near the Sun; a comet's tail always points away from the Sun, no matter which way it travels.",
+          "links": [
+            {
+              "href": "wiki:Comet"
+            }
+          ]
+        }
+      },
+      "seeds": [
+        "asteroid belt",
+        "Kuiper Belt"
+      ],
+      "floatingTerms": [
+        "Oort cloud",
+        "comets"
+      ],
+      "terms": [
+        "asteroid belt",
+        "Kuiper Belt",
+        "Oort cloud",
+        "comets"
+      ]
+    },
+    {
+      "id": "moons",
+      "name": "Moons as worlds",
+      "color": "olive",
+      "fact": "The largest moons are worlds in their own right: Titan with its thick atmosphere, Europa and Enceladus with hidden oceans, Io with constant volcanoes, Triton orbiting backwards.",
+      "termInfo": {
+        "Titan": {
+          "text": "Saturn's largest moon, with a dense nitrogen atmosphere and lakes of liquid methane - the only moon with weather and rain.",
+          "links": [
+            {
+              "href": "wiki:Titan (moon)"
+            }
+          ]
+        },
+        "Europa": {
+          "text": "Jupiter's smooth ice-clad moon; a global saltwater ocean hides beneath the ice, making it a prime target in the search for life.",
+          "links": [
+            {
+              "href": "wiki:Europa (moon)"
+            }
+          ]
+        },
+        "Io": {
+          "text": "The most volcanic body in the solar system, kneaded by Jupiter's tides until parts of its interior melt and erupt.",
+          "links": [
+            {
+              "href": "wiki:Io (moon)"
+            }
+          ]
+        },
+        "Enceladus": {
+          "text": "A small icy moon of Saturn whose south-polar geysers spray ocean water directly into space - sampled in flight by the Cassini spacecraft.",
+          "links": [
+            {
+              "href": "wiki:Enceladus"
+            }
+          ]
+        },
+        "Triton": {
+          "text": "Neptune's large moon orbits backwards; its surface vents nitrogen geysers, and tidal forces are slowly dragging it toward eventual destruction.",
+          "links": [
+            {
+              "href": "wiki:Triton (moon)"
+            }
+          ]
+        }
+      },
+      "seeds": [
+        "Titan",
+        "Europa"
+      ],
+      "floatingTerms": [
+        "Io",
+        "Enceladus",
+        "Triton"
+      ],
+      "terms": [
+        "Titan",
+        "Europa",
+        "Io",
+        "Enceladus",
+        "Triton"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "jupiter-stirring",
+      "term": "orbital resonance",
+      "clusters": [
+        "gas-giants",
+        "reservoirs"
+      ],
+      "fact": "Jupiter's resonances carve gaps in the asteroid belt and stir its planetesimals into collisions too fast to merge, so they could never assemble into a planet.",
+      "info": "Objects in resonance repeat a simple orbital ratio - like 2:1 - so the same alignments recur and small tugs add up.",
+      "idealTerms": {
+        "gas-giants": "Jupiter",
+        "reservoirs": "asteroid belt"
+      }
+    },
+    {
+      "id": "round-worlds",
+      "term": "clearing the neighborhood",
+      "clusters": [
+        "dwarfs",
+        "reservoirs"
+      ],
+      "fact": "Ceres rides inside the asteroid belt, Pluto and Haumea among Kuiper-belt debris, and Eris in the scattered disc beyond: round enough to be worlds, too small to clear their paths.",
+      "info": "The IAU test a planet passes and a dwarf planet fails: gravitationally dominating its orbital zone by sweeping up or scattering the debris around it."
+    },
+    {
+      "id": "tidal-heating",
+      "term": "tidal heating",
+      "clusters": [
+        "gas-giants",
+        "moons"
+      ],
+      "fact": "Flexing by Jupiter and Saturn kneads their big moons from the inside, powering volcanoes on Io and keeping oceans liquid inside Europa and Enceladus.",
+      "info": "The same tidal tug that raises ocean tides on Earth, but strong enough to warm a moon's interior."
+    },
+    {
+      "id": "capture",
+      "term": "capture",
+      "clusters": [
+        "reservoirs",
+        "moons"
+      ],
+      "fact": "Triton circles Neptune backwards - the signature of a captured Kuiper-belt object rather than a moon born in place around its planet.",
+      "info": "A backwards (retrograde) orbit is hard to explain any other way: co-formed moons almost always orbit in the disk's direction."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "hidden-oceans",
+      "prompt": "Which two moons are known to hide global oceans - one beneath smooth ice, one spraying its ocean into space?",
+      "explanation": "Tidal flexing from their giant planets keeps both oceans liquid: Europa's lies under its ice shell, Enceladus vents its own through south-polar geysers. Titan probably hides a subsurface ocean too, but its surface is shrouded rather than smooth and nothing sprays out; its visible lakes are methane. Triton's possible ocean is still speculative.",
+      "targets": [
+        "Europa",
+        "Enceladus"
+      ],
+      "reasons": {
+        "Europa": "A global saltwater ocean lies beneath its ice shell, kept liquid by tidal heating.",
+        "Enceladus": "South-polar geysers spray its ocean water directly into space, sampled by Cassini."
+      }
+    },
+    {
+      "id": "oriented-wrong",
+      "prompt": "Which two worlds are oriented wrong - one tipped nearly on its side, one circling its planet backwards?",
+      "explanation": "Uranus spins at about 98 degrees, most likely knocked over by a giant impact; Triton's retrograde orbit marks it as a captured Kuiper-belt object. No other world on this board is known for its orientation.",
+      "targets": [
+        "Uranus",
+        "Triton"
+      ],
+      "reasons": {
+        "Uranus": "It rolls almost in its orbital plane - the system's biggest knock.",
+        "Triton": "Its backwards orbit is the signature of capture, not co-formation."
+      }
+    },
+    {
+      "id": "beyond-neptune",
+      "prompt": "Which dwarf planets orbit the Sun beyond Neptune?",
+      "explanation": "Pluto and Haumea live in the Kuiper Belt and Eris in the scattered disc beyond it. Ceres is the exception: the one dwarf planet inside Neptune's orbit, in the asteroid belt between Mars and Jupiter. Triton probably began as a trans-Neptunian world, but it now orbits Neptune as a moon.",
+      "targets": [
+        "Pluto",
+        "Eris",
+        "Haumea"
+      ],
+      "reasons": {
+        "Pluto": "A Kuiper-belt world in 3:2 resonance with Neptune.",
+        "Eris": "Out in the scattered disc, beyond the Kuiper Belt.",
+        "Haumea": "A fast-spinning Kuiper-belt resident."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "solar-system-inner",
+        "reason": "Play first: the frost-line and formation rules from board one explain why the outer system looks the way this board shows."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "Beyond the frost line",
+    "summary": "Where the outer solar system came from, and why its worlds look the way they do.",
+    "estimatedMinutes": 2,
+    "content": {
+      "text": "Past a line roughly three times farther from the Sun than Earth, the young solar nebula was cold enough for water, ammonia, and methane to freeze. That change in chemistry decided everything about the outer solar system: icy grains piled into cores big enough to grab enormous atmospheres of hydrogen and helium, building the giants, while smaller leftovers stayed frozen in belts and clouds.\r\n\r\nThe worlds out there are stranger than cold copies of the inner planets: giants with no surface to stand on, dwarf planets sharing their orbits with debris, and moons with atmospheres, buried oceans, and volcanoes of their own. Tides, resonances, and one dramatic capture keep them active five billion kilometers from the Sun's warmth."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      },
+      {
+        "name": "Claude Code (Claude Opus 5)",
+        "reasoning": "medium"
+      }
+    ]
+  }
+}

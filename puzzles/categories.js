@@ -18,11 +18,21 @@ export const CATEGORIES = {
     domain: "sciences-mathematics",
     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
   },
-  "Chemistry": {
+  Chemistry: {
+    slug: "chemistry",
     domain: "sciences-mathematics",
     info: {
       text: "How matter is built from atoms, how atomic structure produces bonding and properties, and how substances transform through chemical reactions.",
       link: "wiki:Chemistry"
+    },
+    subcategories: {
+      "organic-chemistry": {
+        title: "Organic Chemistry",
+        info: {
+          text: "Organic Chemistry is the scientific study of the structure, properties, composition, reactions, and synthesis of carbon-containing compounds.",
+          link: "wiki:Organic_chemistry"
+        }
+      }
     }
   },
   "Physics": {
@@ -539,6 +549,23 @@ export const CATEGORIES = {
     info: {
       text: "Zoology is the branch of biology that studies the scientific and structural aspects of animals, including their behavior, classification, and ecosystems.",
       link: "wiki:Zoology"
+    }
+  },
+  Astronomy: {
+    slug: "astronomy",
+    domain: "sciences-mathematics",
+    info: {
+      text: "How stars, planets, moons, and the systems they form arise, behave, and evolve.",
+      link: "wiki:Astronomy"
+    },
+    subcategories: {
+      "solar-system": {
+        title: "Solar System",
+        info: {
+          text: "How one star and the worlds orbiting it - planets, dwarfs, moons, and leftover debris - were sorted into place.",
+          link: "wiki:Solar_System"
+        }
+      }
     }
   }
 };

@@ -1,0 +1,206 @@
+{
+  "id": "energy-flows-one-way",
+  "title": "Why energy flows one way",
+  "category": "biology",
+  "categories": [
+    "biology",
+    "physics"
+  ],
+  "info": {
+    "text": "The two thermodynamic rules underneath every living process, and why they make energy take a one-way trip while matter comes back around.",
+    "citations": [
+      {
+        "title": "Biology 2e, 6.3: The Laws of Thermodynamics",
+        "publisher": "OpenStax, Rice University",
+        "url": "https://openstax.org/books/biology-2e/pages/6-3-the-laws-of-thermodynamics"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "the-two-laws",
+      "name": "What the laws allow",
+      "color": "teal",
+      "fact": "Energy cannot be created or destroyed, but each transfer leaves less of it able to do work.",
+      "termInfo": {
+        "first law of thermodynamics": {
+          "text": "Energy is never created or destroyed — it only changes form or moves somewhere else.",
+          "links": [
+            {
+              "href": "wiki:First law of thermodynamics"
+            }
+          ]
+        },
+        "second law of thermodynamics": {
+          "text": "Every transfer leaves some energy in a form that can no longer be used to do work.",
+          "links": [
+            {
+              "href": "wiki:Second law of thermodynamics"
+            }
+          ]
+        },
+        "entropy": {
+          "text": "A measure of how much of a system's energy has become unavailable; it rises with every transfer.",
+          "links": [
+            {
+              "href": "wiki:Entropy"
+            }
+          ]
+        },
+        "free energy": {
+          "text": "The portion of a system's energy that is actually available to drive a change.",
+          "links": [
+            {
+              "href": "wiki:Thermodynamic free energy"
+            }
+          ]
+        },
+        "exergonic": {
+          "text": "A reaction that releases usable energy, and so can proceed on its own.",
+          "links": [
+            {
+              "href": "wiki:Exergonic reaction"
+            }
+          ]
+        },
+        "endergonic": {
+          "text": "A reaction that needs an input of usable energy, and has to be paid for by one that releases it.",
+          "links": [
+            {
+              "href": "wiki:Endergonic reaction"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Two rules constrain everything alive: the total never changes, and the useful fraction always shrinks.",
+        "links": [
+          {
+            "href": "wiki:Laws of thermodynamics"
+          }
+        ]
+      },
+      "seeds": [
+        "first law of thermodynamics",
+        "second law of thermodynamics"
+      ],
+      "floatingTerms": [
+        "entropy",
+        "free energy",
+        "exergonic",
+        "endergonic"
+      ],
+      "terms": [
+        "first law of thermodynamics",
+        "second law of thermodynamics",
+        "entropy",
+        "free energy",
+        "exergonic",
+        "endergonic"
+      ]
+    },
+    {
+      "id": "matter-returns",
+      "name": "Why matter comes back",
+      "color": "blue",
+      "fact": "The atoms that carried the energy are not used up, and the same ones cycle through living things indefinitely.",
+      "termInfo": {
+        "carbon cycle": {
+          "text": "The route carbon atoms take through air, living things, soil and rock, arriving back where they began.",
+          "links": [
+            {
+              "href": "wiki:Carbon cycle"
+            }
+          ]
+        },
+        "biogeochemical cycle": {
+          "text": "Any such route by which an element moves through the living and non-living parts of the Earth and returns.",
+          "links": [
+            {
+              "href": "wiki:Biogeochemical cycle"
+            }
+          ]
+        },
+        "open system": {
+          "text": "Something that exchanges both energy and matter with its surroundings instead of being sealed off from them.",
+          "links": [
+            {
+              "href": "wiki:Open system (systems theory)"
+            }
+          ]
+        }
+      },
+      "info": "Atoms are not consumed by being used. The same ones are borrowed, passed along, and returned, over and over.",
+      "seeds": [
+        "carbon cycle",
+        "biogeochemical cycle"
+      ],
+      "floatingTerms": [
+        "open system"
+      ],
+      "terms": [
+        "carbon cycle",
+        "biogeochemical cycle",
+        "open system"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "heat",
+      "term": "heat",
+      "clusters": [
+        "the-two-laws",
+        "matter-returns"
+      ],
+      "fact": "Every transfer sheds some energy as heat that cannot be gathered back, which is exactly why the atoms come round again and the energy does not.",
+      "info": {
+        "text": "Energy in its most dispersed form — the state that every other form eventually degrades into.",
+        "links": [
+          {
+            "href": "wiki:Heat"
+          }
+        ]
+      },
+      "idealTerms": {
+        "the-two-laws": "second law of thermodynamics",
+        "matter-returns": "biogeochemical cycle"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "which-way-a-reaction-runs",
+      "prompt": "Which terms say whether a reaction can run by itself or has to be paid for by another?",
+      "explanation": "These two are a matched pair describing direction: one releases usable energy and will proceed unaided, the other consumes it and only happens when something else supplies the difference. Coupling the two is how a cell builds anything at all. Free energy is excluded because it names the quantity being released or spent rather than the direction of the exchange, and entropy because it measures what has already been lost rather than what a reaction will do next.",
+      "targets": [
+        "exergonic",
+        "endergonic"
+      ]
+    },
+    {
+      "id": "why-life-is-not-an-exception",
+      "prompt": "Which term explains how a living thing can become more ordered without breaking the second law?",
+      "explanation": "Because it is not sealed off. A living thing takes in energy and matter and passes both back out, so the order it builds inside is paid for by a larger disorder it creates outside, and the books balance across the boundary. Entropy is excluded on purpose: it measures the disorder but says nothing about how an organism is exempt, and taken alone it is what makes life look like a violation in the first place. One honest answer is the whole lens here.",
+      "targets": [
+        "open system"
+      ]
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "summary": "Why energy makes a one-way trip through living things while the atoms carrying it return again and again.",
+    "content": {
+      "text": "Living things look, at first glance, like they break a rule. They build order, grow, repair themselves and hold their shape, all of which runs against the general tendency of things to come apart.\r\n\r\nThey do not break it. A living thing is not sealed off from its surroundings: it takes in energy and matter and gives both back. The order it keeps inside is paid for by a larger disorder it creates outside, and that bill is settled in heat.\r\n\r\nThat payment is why energy and matter behave so differently in the living world. Every transfer sheds a little energy in a form nothing can use again, so energy makes a one-way trip and must be resupplied from outside without end. The atoms are under no such constraint. A carbon atom in the air can be in a leaf, then an animal, then the soil, then the air again, indefinitely. Matter goes round; energy goes through."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude Code (Claude Opus 5)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

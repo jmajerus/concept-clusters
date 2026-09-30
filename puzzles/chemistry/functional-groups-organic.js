@@ -1,0 +1,301 @@
+// Generated from content/puzzles/functional-groups-organic.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "functional-groups-organic",
+  "title": "Families of Organic Compounds: Reading Functional Groups",
+  "category": "chemistry",
+  "subcategories": {
+    "chemistry": "organic-chemistry"
+  },
+  "large": true,
+  "info": {
+    "text": "Organic compounds come in families defined by small, characteristic groups: hydrocarbon frameworks (alkane, alkene, alkyne, arene), single-bond heteroatom families (alkyl halide, alcohol, ether, amine, thiol), the carbonyl core and its acid-derived relatives (carboxylic acid, ester, amide, acid chloride), and the carbon–nitrogen multiple bonds (nitrile, imine) — with R groups abstracting the framework and heteroatoms naming most families.",
+    "citations": [
+      {
+        "title": "3.1: Functional Groups — Organic Chemistry (Morsch et al.)",
+        "author": "Steven Farmer, Dietmar Kennepohl, Layne Morsch, Krista Cunningham, Tim Soderberg",
+        "publisher": "Chemistry LibreTexts",
+        "year": "2026",
+        "url": "https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/03%3A_Organic_Compounds-_Alkanes_and_Their_Stereochemistry/3.01%3A_Functional_Groups"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "hydrocarbon-frameworks",
+      "name": "Hydrocarbon frameworks",
+      "color": "teal",
+      "fact": "A skeleton of only carbon and hydrogen is classified by its bonding: all single bonds is an alkane (saturated — full of hydrogen), a C=C double bond is an alkene, a C≡C triple bond is an alkyne, and a planar aromatic ring is an arene.",
+      "terms": [
+        "alkane",
+        "alkene",
+        "alkyne",
+        "arene"
+      ],
+      "seeds": [
+        "alkane",
+        "alkene"
+      ],
+      "termInfo": {
+        "alkane": "Only single bonds, to carbon and hydrogen — saturated, meaning every carbon carries the maximum possible hydrogen. Methane and octane are the everyday examples.",
+        "alkene": "A carbon–carbon double bond; the alkene carbons are trigonal planar (sp²), and the bond's rigidity can give cis and trans forms.",
+        "alkyne": "A carbon–carbon triple bond; linear geometry at the sp carbons. Ethyne (acetylene) feeds welding torches.",
+        "arene": "A planar aromatic ring such as benzene or naphthalene — its own classification, beyond the saturated/unsaturated split."
+      }
+    },
+    {
+      "id": "heteroatom-singles",
+      "name": "Single-bond heteroatom families",
+      "color": "blue",
+      "fact": "Put one heteroatom into a saturated framework through single bonds and a family appears: carbon–halogen is an alkyl halide, carbon–OH is an alcohol, oxygen between two carbons is an ether, carbon–nitrogen is an amine, and the sulfur analog of an alcohol is a thiol.",
+      "terms": [
+        "alcohol",
+        "amine",
+        "alkyl halide",
+        "ether",
+        "thiol"
+      ],
+      "seeds": [
+        "alcohol",
+        "amine"
+      ],
+      "termInfo": {
+        "alkyl halide": "An alkane carbon bonded to a halogen (F, Cl, Br, I — often written X). Common in the laboratory, quite rare in biomolecules.",
+        "alcohol": "A carbon single-bonded to an OH (a hydroxyl); how many other carbons that carbon touches makes the alcohol primary, secondary, or tertiary.",
+        "ether": "An oxygen bonded to two carbons — diethyl ether was one of the first anesthetics and remains a common laboratory solvent.",
+        "amine": "Nitrogen with single bonds to hydrogens and carbons; amines are basic and readily protonated to ammonium ions.",
+        "thiol": "The sulfur analog of an alcohol: an SH where the alcohol's OH sits (the prefix thio- refers to sulfur)."
+      }
+    },
+    {
+      "id": "carbonyl-core",
+      "name": "The carbonyl core",
+      "color": "amber",
+      "fact": "The carbon–oxygen double bond is the carbonyl; when its carbon sees only carbons and hydrogen it makes the two closely related, similarly reacting families: ketones (two carbon neighbors) and aldehydes (one hydrogen neighbor — formaldehyde the exception with two).",
+      "terms": [
+        "ketone",
+        "aldehyde"
+      ],
+      "seeds": [
+        "ketone"
+      ],
+      "termInfo": {
+        "ketone": "A carbonyl whose carbon bonds to two other carbons — acetone is the everyday example.",
+        "aldehyde": "A carbonyl whose carbon bonds to one hydrogen and one carbon (formaldehyde is the exception, with two hydrogens)."
+      }
+    },
+    {
+      "id": "acid-derivatives",
+      "name": "Carboxylic acid derivatives",
+      "color": "magenta",
+      "fact": "When a carbonyl carbon bonds to a heteroatom instead of only C/H, the group joins the carboxylic acid derivative family: OH gives the carboxylic acid (readily deprotonated to a carboxylate), O–C gives an ester, N gives an amide, Cl gives an acid chloride.",
+      "terms": [
+        "carboxylic acid",
+        "ester",
+        "amide",
+        "acid chloride"
+      ],
+      "seeds": [
+        "carboxylic acid",
+        "ester"
+      ],
+      "termInfo": {
+        "carboxylic acid": "A carbonyl bonded to a hydroxyl; acidic, meaning it readily loses that proton to become a carboxylate. Acetic acid is the vinegar member.",
+        "ester": "A carbonyl bonded to an oxygen that is itself bonded to another carbon — readable as a carbonyl plus an alcohol.",
+        "amide": "A carbonyl bonded to a nitrogen bearing hydrogens, carbons, or both — readable as a carbonyl plus an amine.",
+        "acid chloride": "A carbonyl bonded to a chlorine — the table's acid halide, e.g. ethanoyl (acetyl) chloride."
+      }
+    },
+    {
+      "id": "nitrogen-multiple-bonds",
+      "name": "Nitrogen multiple-bond families",
+      "color": "olive",
+      "fact": "Carbon–nitrogen multiple bonds outside the carbonyl framework form their own families: the C≡N triple bond is a nitrile (cyano group), and the C=N double bond is an imine.",
+      "terms": [
+        "nitrile",
+        "imine"
+      ],
+      "seeds": [
+        "nitrile"
+      ],
+      "termInfo": {
+        "nitrile": "A carbon triple-bonded to a nitrogen, often called a cyano group; the tables file it under multiple bonds to heteroatoms.",
+        "imine": "A carbon–nitrogen double bond — sometimes called a Schiff base."
+      }
+    },
+    {
+      "id": "functional-group-lens",
+      "name": "The functional-group lens",
+      "color": "brown",
+      "fact": "A functional group is a small group of atoms with characteristic reactivity — the same behavior shows up wherever the group occurs; the rest of the molecule is abstracted as an R group, and heteroatom names the non-carbon, non-hydrogen atoms that define most families.",
+      "terms": [
+        "functional group",
+        "R group",
+        "heteroatom"
+      ],
+      "seeds": [
+        "functional group",
+        "R group"
+      ],
+      "termInfo": {
+        "functional group": "A small group of atoms with characteristic reactivity — a particular group almost always displays its distinctive chemical behavior in any compound that carries it.",
+        "R group": "The abbreviation for the part of the molecule outside the region of interest — read it as 'any carbon framework here'.",
+        "heteroatom": "In organic chemistry, any atom other than carbon or hydrogen — oxygen, nitrogen, sulfur, or a halogen — whose identity names most of the single-bond families."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "framework-is-the-r-group",
+      "term": "the framework is the R group",
+      "clusters": [
+        0,
+        5
+      ],
+      "fact": "The hydrocarbon framework is what R abbreviates — the part of the molecule outside the group of interest; alkanes themselves are the simplest functional group, the one listings tend to ignore.",
+      "info": "When a formula shows R, read 'any carbon framework here'."
+    },
+    {
+      "id": "heteroatom-names-the-family",
+      "term": "heteroatom identity names the family",
+      "clusters": [
+        1,
+        5
+      ],
+      "fact": "One look at which non-carbon atom carries the single bonds names the family: a halogen gives an alkyl halide, OH gives an alcohol, O between two carbons an ether, N an amine, S a thiol."
+    },
+    {
+      "id": "carbonyl-neighbor-types",
+      "term": "C/H vs heteroatom neighbors",
+      "clusters": [
+        2,
+        3
+      ],
+      "fact": "The carbonyl world splits by what sits next to the C=O carbon: only carbons and hydrogen gives aldehydes and ketones; a heteroatom on the other side makes it a carboxylic acid derivative.",
+      "info": "First question at any C=O: are both neighbors C/H, or is one a heteroatom?"
+    },
+    {
+      "id": "alkane-parent",
+      "term": "alkane as parent framework",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Each single-bond family is an alkane framework with one substitution: a halogen where an H was makes an alkyl halide, an OH makes an alcohol, nitrogen makes an amine — the parent shows through."
+    },
+    {
+      "id": "o-for-n-multiple-bonds",
+      "term": "O-for-N at multiple bonds",
+      "clusters": [
+        2,
+        4
+      ],
+      "fact": "Swap a carbonyl oxygen for nitrogen and the other multiple-bond families appear: C=O becomes C=N (an imine), and the triple-bond C≡N is a nitrile."
+    },
+    {
+      "id": "carbonyl-plus-family",
+      "term": "read as carbonyl plus family",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "An ester is a carbonyl bonded to an alcohol and an amide is a carbonyl bonded to an amine — spot an acid derivative by seeing which single-bond family hangs off the carbonyl carbon."
+    },
+    {
+      "id": "polyfunctionality",
+      "term": "polyfunctionality in real molecules",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Real compounds wear several families at once: glucose is an aldehyde with five alcohol groups, fructose a ketone with five alcohols — recognition is per group, not per molecule.",
+      "info": "Aspirin: an arene plus a carboxylic acid plus an ester — three families, one molecule."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "saturated-or-not",
+      "prompt": "Which two hydrocarbon families does the classification call unsaturated — carrying fewer hydrogens than the saturated maximum?",
+      "explanation": "Alkanes are saturated: every carbon carries its maximum hydrogen. The double- and triple-bonded carbons of alkenes and alkynes hold fewer hydrogens, hence unsaturated. Arenes are filed as their own planar-ring family rather than in this split.",
+      "targets": [
+        "alkene",
+        "alkyne"
+      ]
+    },
+    {
+      "id": "who-carries-an-oh",
+      "prompt": "Two families on this board carry an O–H — which are they?",
+      "explanation": "The alcohol's OH hangs from a saturated carbon; the carboxylic acid's OH hangs from the carbonyl carbon — same bond, different carbon, which is why the acid readily loses that proton. The ether's oxygen bonds two carbons and no hydrogen at all.",
+      "targets": [
+        "alcohol",
+        "carboxylic acid"
+      ]
+    },
+    {
+      "id": "hydrogen-neighbor-test",
+      "prompt": "Which family's carbonyl carbon is bonded to at least one hydrogen?",
+      "explanation": "Aldehydes carry exactly one hydrogen on the carbonyl carbon (formaldehyde carries two); ketones carry only carbons, and the acid derivatives carry a heteroatom instead.",
+      "targets": [
+        "aldehyde"
+      ]
+    },
+    {
+      "id": "acid-family-neighbors",
+      "prompt": "Which two members of the acid-derivative family bond an oxygen to the carbonyl carbon?",
+      "explanation": "The acid's oxygen is the OH; the ester's is an O that continues on to another carbon. The amide's neighbor is nitrogen and the acid chloride's is chlorine — which is exactly how you tell all four apart.",
+      "targets": [
+        "carboxylic acid",
+        "ester"
+      ]
+    },
+    {
+      "id": "nitrogen-sweep",
+      "prompt": "Sweep the board: which families put nitrogen into the molecule?",
+      "explanation": "Four different ways for one element to enter: single-bonded N is an amine; N sitting on a carbonyl carbon is an amide; a C≡N triple bond is a nitrile; a C=N double bond is an imine. Every O, S, and halogen family stays out.",
+      "targets": [
+        "amine",
+        "amide",
+        "nitrile",
+        "imine"
+      ]
+    },
+    {
+      "id": "lens-vocabulary",
+      "prompt": "Which two of these name a multi-atom part of a molecule rather than a single atom?",
+      "explanation": "The functional group is the reactive atom-group and the R group is the abstracted framework it rides on — both are multi-atom parts. Heteroatom is the one atom-level word, and it does the family-naming work.",
+      "targets": [
+        "functional group",
+        "R group"
+      ]
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "chirality-isomer-classes",
+        "reason": "Play after naming the families: the next lesson classifies same-formula pairs — including the cis–trans alkene pairs met here — by the mirror test."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Learning organic chemistry by families",
+    "summary": "Why small atom-groups, not whole molecules, are the units of organic chemistry.",
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Why can a chemist glance at a structure and say 'ester' in a second? Because organic chemistry is learned by families: small groups of atoms — a double bond here, an OH there, a carbonyl with a heteroatom neighbor — bring the same characteristic behavior wherever they appear, whether the molecule is a painkiller, a banana's ripening signal, or a hormone. Reading a structure fluently means spotting those groups: first the carbon framework, then the heteroatoms bonded through single bonds, then the carbonyls and whatever hangs off them.\r\n\r\nThe objective: given any simple organic structure, name its family or families — and know why that naming matters. Each family name is a promise about behavior: carboxylic acids give up a proton, amines accept one, double and triple bonds add hydrogen, and ester linkages hold fats and flavors together. Recognition first; behavior follows."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+});
