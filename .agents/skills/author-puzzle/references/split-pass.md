@@ -32,8 +32,19 @@ split in order to change the canvas; canvas size is derived.
 2. Discuss seam and trims with the human (pedagogy stays in chat). Do not
    discuss renderer cutovers — layout is derived.
 3. Write `plans/<parent-id>-split-plan.json` capturing the **agreed** plan.
-4. Resolve answered `openQuestions` on the inventory JSON (move to
-   `resolvedQuestions`; clear or shorten `openQuestions`).
+   Include `resolvedQuestions` for every open question this approval answers,
+   copying the exact `scope.openQuestions` text.
+4. Apply the plan to the existing inventory. The recorder sets `splitPlanPath`
+   and moves those questions to `resolvedQuestions`. Do not patch the inventory
+   by hand, and do not invoke `apply_patch` — the repository has no such executable.
+
+   ```sh
+   node .agents/skills/author-puzzle/scripts/record-split-plan.mjs \
+     --inventory inventories/<parent-id>.json \
+     --plan plans/<parent-id>-split-plan.json
+   ```
+
+   On `question-mismatch`, fix the plan's question text and re-run the recorder.
 5. Validate the plan:
 
    ```sh
@@ -58,9 +69,10 @@ split in order to change the canvas; canvas size is derived.
    new session. Do not fall back to `node tools/mcp-call.mjs` just because a
    permission prompt appeared.
    Default **`mcp-call`** is one-shot stdio per tool for clients without native
-   MCP calls (Codex-safe); when Kilo's own VS Code backend launches the helper,
-   it recognizes Kilo's process markers and stamps the Kilo surface as a
-   low-trust fallback, but only native calls preserve per-call metadata.
+   MCP calls (Codex-safe). When Kilo's own VS Code backend launches the helper,
+   it recognizes Kilo's process markers and stamps the Kilo surface. When Codex
+   launches it, Codex's shell thread id stamps the Codex surface. Both are
+   low-trust fallbacks with no model; only native calls preserve per-call metadata.
    Fit **one board per burst**. When `presentGate` is false, start the next
    fit in a new burst and do not ask the human anything. When `presentGate`
    is true (the last board), present **`humanPrompt`** and follow

@@ -1005,7 +1005,7 @@ export function createAuthoringMcpServer({
       actor,
       baseCommitSha: args.base_commit_sha || null
     });
-    persistAuthoringAssistanceStamp(
+    await persistAuthoringAssistanceStamp(
       stampRecord && { ...stampRecord, draftId },
       { analytics, recordStamp }
     );
@@ -1152,7 +1152,7 @@ export function createAuthoringMcpServer({
         actor
       });
     }
-    persistAuthoringAssistanceStamp(
+    await persistAuthoringAssistanceStamp(
       stampRecord && { ...stampRecord, draftId: draft_id },
       { analytics, recordStamp }
     );

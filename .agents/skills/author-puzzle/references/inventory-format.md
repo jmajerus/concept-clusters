@@ -71,8 +71,10 @@ the corpus.
 ```
 
 When sizing or split is needed, follow [split-pass.md](split-pass.md) after
-inventory approval. Move answered questions from `openQuestions` to
-`resolvedQuestions`.
+inventory approval. Record answered questions on the split plan, then run
+`record-split-plan.mjs` so it moves them from `openQuestions` to
+`resolvedQuestions` and sets `splitPlanPath`. Do not patch the inventory by
+hand.
 
 ## Rules
 

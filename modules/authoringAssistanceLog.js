@@ -99,8 +99,11 @@ export function createMcpStampContext({
   };
 }
 
-// Fire-and-forget — must never break an authoring call.
-export function persistAuthoringAssistanceStamp(record, {
+// The document write has already succeeded. The audit row must finish before
+// the handler returns: tools/mcp-call.mjs exits as soon as it prints the
+// result, and a detached insert is killed with that process. A stamp failure
+// still must not fail the authoring call.
+export async function persistAuthoringAssistanceStamp(record, {
   analytics = null,
   recordStamp = null
 } = {}) {
@@ -111,7 +114,11 @@ export function persistAuthoringAssistanceStamp(record, {
     // Ignore — see hostedMcpAuthoringServer track() comment.
   }
   if (typeof recordStamp === "function") {
-    Promise.resolve(recordStamp(record)).catch(() => {});
+    try {
+      await recordStamp(record);
+    } catch {
+      // Ignore — attribution on the document already landed.
+    }
   }
   return record;
 }

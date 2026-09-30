@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `98140b43` · 2026-09-29
+Skill rev `c2ac4c52` · 2026-09-30
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. The human Publishes on `/admin/drafts`, or
@@ -382,9 +382,21 @@ node .agents/skills/author-puzzle/scripts/plan-boards.mjs inventories/<parent-id
 
 After the human agrees on seam, board count, trims, and split strategy:
 
-- Write `plans/<parent-id>-split-plan.json`.
-- Move answered `openQuestions` to `resolvedQuestions` on the inventory (clear
-  or shorten `openQuestions`).
+- Write `plans/<parent-id>-split-plan.json`. Put each answered open question in
+  the plan's `resolvedQuestions`, using the exact `scope.openQuestions` text.
+- Apply that plan to the existing inventory with the recorder below. It sets
+  `splitPlanPath` and moves those questions to `resolvedQuestions`, leaving
+  every other field alone. Do not patch the inventory by hand. There is no
+  `apply_patch` executable.
+
+```sh
+node .agents/skills/author-puzzle/scripts/record-split-plan.mjs \
+  --inventory inventories/<parent-id>.json \
+  --plan plans/<parent-id>-split-plan.json
+```
+
+If the recorder reports `question-mismatch`, correct the plan's question text
+and re-run it. Do not edit the inventory to force the match.
 
 ```sh
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level split \

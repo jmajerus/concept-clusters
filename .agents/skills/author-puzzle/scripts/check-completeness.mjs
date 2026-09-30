@@ -360,6 +360,38 @@ function checkSplitPlan(plan, inventory) {
     }
   }
 
+  if (Object.hasOwn(plan, "resolvedQuestions") && !Array.isArray(plan.resolvedQuestions)) {
+    blocking.push({
+      id: "plan-resolved-questions",
+      message: "resolvedQuestions must be an array of { question, resolution }."
+    });
+  }
+  const resolutions = Array.isArray(plan.resolvedQuestions) ? plan.resolvedQuestions : [];
+  const recorded = new Map();
+  for (const entry of inventory.resolvedQuestions || []) {
+    if (nonEmptyString(entry?.question)) recorded.set(entry.question.trim(), String(entry.resolution ?? "").trim());
+  }
+  const stillOpen = new Set(
+    (inventory.scope?.openQuestions || []).filter(nonEmptyString).map(question => question.trim())
+  );
+  for (const [index, entry] of resolutions.entries()) {
+    if (!nonEmptyString(entry?.question) || !nonEmptyString(entry?.resolution)) {
+      blocking.push({
+        id: "plan-resolved-question",
+        message: `resolvedQuestions[${index}] needs question and resolution.`
+      });
+      continue;
+    }
+    const question = entry.question.trim();
+    const resolution = entry.resolution.trim();
+    if (recorded.get(question) !== resolution || stillOpen.has(question)) {
+      blocking.push({
+        id: "inventory-resolution-missing",
+        message: `Approved answer to "${question}" is on the split plan but not the inventory. Run record-split-plan.mjs --inventory <inventory.json> --plan <split-plan.json>. Do not patch the inventory by hand, and do not invoke apply_patch.`
+      });
+    }
+  }
+
   return {
     blocking,
     advisory,
