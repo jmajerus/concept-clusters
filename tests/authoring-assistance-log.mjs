@@ -87,7 +87,7 @@ export async function run() {
   assert.equal(stampRecord.tool, "save_puzzle_draft");
   assert.equal(stampRecord.client.system, "Cursor");
 
-  persistAuthoringAssistanceStamp(
+  await persistAuthoringAssistanceStamp(
     { ...stampRecord, draftId: "demo-puzzle" },
     {
       analytics: { writeDataPoint: dp => dataPoints.push(dp) },
@@ -96,7 +96,6 @@ export async function run() {
       }
     }
   );
-  await new Promise(resolve => setImmediate(resolve));
   assert.equal(dataPoints.length, 1);
   assert.equal(dataPoints[0].blobs[0], "authoring_assistance_stamp");
   assert.equal(persisted.length, 1);

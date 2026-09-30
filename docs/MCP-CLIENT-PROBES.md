@@ -244,8 +244,12 @@ unstamped create/save call; it never guesses or impersonates a client. When
 Kilo Code's own VS Code backend launches the helper, it recognizes Kilo's
 exact `KILO_APP_NAME` plus `KILOCODE_FEATURE`/`KILO_CLIENT` markers and forwards
 the native-compatible `{name: "kilo", version}` surface as a low-trust
-fallback. This does not claim a model or per-call metadata, and arbitrary
-environment names are never inferred.
+fallback. When Codex launches the helper from a shell tool, it recognizes
+Codex's `CODEX_THREAD_ID` (a UUID) and forwards the `{name: "codex-mcp-client", title: "Codex"}`
+surface the same way. Neither fallback claims a model or per-call metadata,
+and arbitrary environment names are never inferred. The audit row is written
+before the tool result returns, so the one-shot helper does not exit before
+the stamp insert finishes.
 
 For isolated scripts or CI that need stable surface attribution but cannot
 expose a full envelope, configure

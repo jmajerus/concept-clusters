@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   MCP_CALL_FALLBACK_CLIENT_INFO,
   McpCallInvocationError,
+  isCodexEnvironment,
   isKiloCodeEnvironment,
   parseMcpCallInvocation
 } from "../modules/mcpCallInvocation.js";
@@ -135,6 +136,40 @@ export async function run() {
   );
   assert.equal(modelOnly.clientInfo, MCP_CALL_FALLBACK_CLIENT_INFO);
   assert.equal(identifyForwarded(modelOnly), null);
+
+  const CODEX_THREAD = "01a0effb-98bb-7b72-adee-4f6bf38c720d";
+  const codexHostFallback = parseMcpCallInvocation(
+    ["create_puzzle_draft", '{"draft_id":"host-codex"}'],
+    { CODEX_THREAD_ID: CODEX_THREAD }
+  );
+  assert.equal(isCodexEnvironment({ CODEX_THREAD_ID: CODEX_THREAD }), true);
+  assert.deepEqual(codexHostFallback.clientInfo, {
+    name: "codex-mcp-client",
+    title: "Codex",
+    version: "unknown"
+  });
+  assert.equal(codexHostFallback.meta, null);
+  assert.deepEqual(identifyForwarded(codexHostFallback), {
+    system: "Codex",
+    hostId: "codex",
+    clientName: "codex-mcp-client"
+  });
+  assert.equal(isCodexEnvironment({ CODEX_THREAD_ID: "not-a-thread" }), false);
+  assert.equal(
+    parseMcpCallInvocation(["get_authoring_guidance"], { CODEX_THREAD_ID: "not-a-thread" }).clientInfo,
+    MCP_CALL_FALLBACK_CLIENT_INFO
+  );
+  const codexExplicitWins = parseMcpCallInvocation(
+    ["get_authoring_guidance"],
+    {
+      CODEX_THREAD_ID: CODEX_THREAD,
+      CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME: "test-harness"
+    }
+  );
+  assert.deepEqual(codexExplicitWins.clientInfo, {
+    name: "test-harness",
+    version: "unknown"
+  });
 
   const codex = parseMcpCallInvocation([
     "--client-info", '{"name":"codex-mcp-client","version":"1"}',

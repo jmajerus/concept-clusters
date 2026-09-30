@@ -56,5 +56,13 @@
       "tooltip": "npm run import:star-layout -- pick a layout JSON exported from Author Layout and save it as a curated Star override",
       "alignment": "left"
     }
-  ]
+  ],
+  "chat.mcp.serverSampling": {
+    "concept-clusters/.vscode/mcp.json: concept-clusters-local": {
+      "allowedModels": [
+        "copilot/auto",
+        "copilotcli/auto"
+      ]
+    }
+  }
 }
