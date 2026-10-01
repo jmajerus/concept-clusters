@@ -187,7 +187,7 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
     ]),
     // Content core for inspection plus pedagogy annotations for the
     // relationship check. Annotation writes go through domain=pedagogy;
-    // do not save this phase shape as a content or pedagogy replacement.
+    // do not save this phase shape as a content, classification, or pedagogy replacement.
     bridges: Object.freeze([
       "id", "term", "clusters", "fact", "info",
       "conceptId", "relationKind", "direction", "idealTerms"

@@ -155,7 +155,7 @@ function phaseDescription(phase, pass) {
     "read context; bridge relationship annotations (conceptId, relationKind, " +
     "direction, idealTerms) belong to the pedagogy domain and must be saved with " +
     "domain=pedagogy after retrieving that projection. Do not save this phase " +
-    "shape as a content or pedagogy domain replacement."
+    "shape as a content, classification, or pedagogy domain replacement."
   );
 }
 

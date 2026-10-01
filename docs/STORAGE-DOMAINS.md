@@ -1,9 +1,9 @@
 # Storage Domains: Write-Domain Scoping in Concept Clusters
 
-*Status: the first production slice is implemented. `content` and `pedagogy`
-are the focused agent-write domains; the complete authored-content form remains
+*Status: implemented. `content`, `classification`, and `pedagogy` are the
+focused agent-write domains; the complete authored-content form remains
 available for compatibility, while protected metadata is hidden and preserved.
-Finer-grained partitioning remains future work.*
+Pass-level writes that patch a domain instead of replacing it remain future work.*
 
 This document describes the design and the reader-visible behavior of the
 Concept Clusters authoring boundary. The repository-level migration and
@@ -30,7 +30,7 @@ Write-domain scoping makes ownership explicit at the authoring boundary. The
 agent is given the smallest useful document for the pass it is performing;
 the infrastructure preserves and recombines the other domains.
 
-## The four domains
+## The five domains
 
 | Domain | Purpose | Current owner | Focused agent access |
 |---|---|---|---|
@@ -115,9 +115,11 @@ than by exception.
 ## What is implemented
 
 An MCP caller may request `content`, `classification`, or `pedagogy` when reading or saving a
-puzzle draft. A focused read contains only the selected writable projection;
-the pedagogy response additionally supplies content as read-only context. A
-focused save replaces the selected projection, preserves the protected
+puzzle draft. A focused read contains only the selected writable projection.
+Content and pedagogy responses include the classification fields as read-only
+context. A classification response includes id and title as read-only context,
+and a pedagogy response also includes the content projection. A focused
+save replaces the selected projection, preserves the protected
 domains, and lets the infrastructure reassemble a complete document for
 validation, publication, rendering, and Freeze.
 
@@ -173,12 +175,13 @@ domain may define omission as removal within that domain. A narrow contract
 must never cause an incomplete agent response to be mistaken for a complete
 document.
 
-The current implementation provides the first building blocks: focused
-`content` and `pedagogy` projections, phase-specific schema guidance, and a
+The current implementation provides focused
+`content`, `classification`, and `pedagogy` projections, phase-specific schema guidance, and a
 shared [field-ownership map](dev-briefs/authoring-domain-scoping-implementation.md#projection-and-sub-schema-refinement)
 (`modules/authoringFieldOwnership.js`) that both domain partition and phase
 schemas consume. Phase schemas bind to a write domain when they are a pure
-subset (`core` → content; `pedagogy` / `publication` → pedagogy); `review`
+subset (`core` → content; `classification` → classification;
+`pedagogy` / `publication` → pedagogy); `review`
 remains a cross-domain inspection view. A future refinement can make pass
 writes themselves composable (patch vs whole-domain replace), so a narrow
 phase-shaped response is never mistaken for a complete domain replacement.

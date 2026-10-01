@@ -17,9 +17,9 @@ agent context is deliberately progressive:
    `get_authoring_schema` projection when field structure is needed.
 3. Work on one accumulating draft. Before every later pass, retrieve its
    latest revision and preserve every field that pass is not improving.
-4. Request `review`, `pedagogy`, or `publication` guidance only when entering
-   that concern. Use `complete` only when the focused views do not resolve a
-   problem.
+4. Request `review`, `pedagogy`, `classification`, or `publication` guidance
+   only when entering that concern. Classification is the pass that sets the
+   shelf. Use `complete` only when the focused views do not resolve a problem.
 5. Call `get_workflow_guidance` only when entering pull-request review
    or MCP catalogue/category tools (`topic: "catalogue"`). On the LAN
    authoring server, humans use Publish/Cue on `/admin/drafts`,

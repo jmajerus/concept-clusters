@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 
 export const name =
@@ -242,6 +243,36 @@ export async function run() {
     assert.equal(splitShelf.category, "biology");
     assert.equal(splitShelf.categories, undefined);
     assert.equal(splitShelf.lenses[0].id, "lens");
+
+    // A database that has not applied 0028 must fail the insert. Succeeding
+    // without classification_json would return a draft later writes cannot save.
+    const attemptedSql = [];
+    const unmigrated = new D1DraftRepository({
+      prepare(sql) {
+        return {
+          bind() {
+            return this;
+          },
+          async run() {
+            attemptedSql.push(sql);
+            if (attemptedSql.length === 1) {
+              throw new Error("no such column: document_stale");
+            }
+            throw new Error("no such column: classification_json");
+          }
+        };
+      }
+    });
+    await assert.rejects(
+      () => unmigrated.create({
+        draftId: "unmigrated-shelf",
+        document,
+        actor: { subject: "owner" }
+      }),
+      /0028_classification_domain/
+    );
+    assert.equal(attemptedSql.length, 2);
+    assert.match(attemptedSql[1], /classification_json/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

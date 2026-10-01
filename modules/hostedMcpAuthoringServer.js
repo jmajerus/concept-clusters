@@ -516,7 +516,7 @@ export function createAuthoringMcpServer({
     return (await taxonomyContext()).categoryRegistry;
   }
 
-  async function publishHeldDraft(draft) {
+  async function publishHeldDraft(draft, taxonomy = null) {
     if (typeof contentDocuments?.publish !== "function") {
       throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
     }
@@ -525,10 +525,10 @@ export function createAuthoringMcpServer({
     if (await repositorySupports(draftRepository, "materialize")) {
       current = await draftRepository.materialize({ draftId, actor });
     }
-    const taxonomy = await taxonomyContext();
+    const resolvedTaxonomy = taxonomy || await taxonomyContext();
     const validation = await contentService.validatePuzzleDraft(current.document, {
-      categoryRegistry: taxonomy.categoryRegistry,
-      knownPuzzleIds: taxonomy.puzzleIds
+      categoryRegistry: resolvedTaxonomy.categoryRegistry,
+      knownPuzzleIds: resolvedTaxonomy.puzzleIds
     });
     if (!validation.valid) {
       return { draft: current, published: null, publicationErrors: validation.errors };
@@ -539,7 +539,7 @@ export function createAuthoringMcpServer({
     const layoutValidation = validatePublishedPuzzleLayout({
       document: current.document,
       layout: publishLayout,
-      categoryRegistry: taxonomy.categoryRegistry
+      categoryRegistry: resolvedTaxonomy.categoryRegistry
     });
     if (!layoutValidation.valid) {
       return {
@@ -555,7 +555,7 @@ export function createAuthoringMcpServer({
       kind: "puzzle",
       id: puzzleId,
       document: documentForStorage(current.document, {
-        categoryRegistry: taxonomy.categoryRegistry
+        categoryRegistry: resolvedTaxonomy.categoryRegistry
       }),
       actor,
       layout: publishLayout
@@ -1315,7 +1315,8 @@ export function createAuthoringMcpServer({
     assignments,
     publish_to_authoring
   }, ctx) => {
-    const registry = await categoryRegistry();
+    const taxonomy = await taxonomyContext();
+    const registry = taxonomy.categoryRegistry;
     const results = [];
     for (const assignment of assignments) {
       const puzzleId = assignment.puzzle_id;
@@ -1372,7 +1373,7 @@ export function createAuthoringMcpServer({
         let published = null;
         let publicationErrors = null;
         if (publish_to_authoring) {
-          const publication = await publishHeldDraft(draft);
+          const publication = await publishHeldDraft(draft, taxonomy);
           draft = publication.draft;
           published = publication.published;
           publicationErrors = publication.publicationErrors;
