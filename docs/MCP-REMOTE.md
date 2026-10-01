@@ -85,13 +85,14 @@ kind and set it explicitly for `trivia-quiz` or `vocabulary-context`. It is
 independent of taxonomy and lens mode, belongs to the existing `content`
 domain, and creates no new storage projection. Draft reads and writes also
 accept an optional
-`domain`: `content`, `pedagogy`, or the
+`domain`: `content`, `classification`, `pedagogy`, or the
 backwards-compatible `complete` default. A focused domain is a real write
 boundary, not just prose guidance:
 
-- `domain: "content"` returns the core puzzle document.
+- `domain: "content"` returns the core puzzle document and the shelf as read-only context.
+- `domain: "classification"` returns `category`, `categories`, and `subcategories`, plus id and title as read-only context.
 - `domain: "pedagogy"` returns the annotation/learning metadata and a
-  read-only `context` containing content needed to refer to it.
+  read-only `context` containing content and classification.
 - `domain: "complete"` preserves the whole authored-content compatibility
   contract while protected metadata remains hidden and server-preserved.
 
@@ -102,7 +103,7 @@ replacing authored fields, materialize the complete document, and follow the
 same validation/publication path. Omitting an optional field from the selected
 projection removes it. The legacy human-owned `learningIntroduction.credit`
 is not exposed and is preserved when its introduction remains present.
-`repair: true` is accepted for complete or content saves, not pedagogy saves,
+`repair: true` is accepted for complete or content saves, not classification or pedagogy saves,
 because it repairs content-domain fields. The save still requires
 `expected_revision`.
 

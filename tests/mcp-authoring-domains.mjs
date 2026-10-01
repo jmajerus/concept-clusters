@@ -93,9 +93,11 @@ export async function run() {
     const contentDraft = contentRead.result.structuredContent.draft;
     assert.deepEqual(
       Object.keys(contentDraft).sort(),
-      ["document", "domain", "draftId", "revision"]
+      ["context", "document", "domain", "draftId", "revision"]
     );
     assert.equal(contentDraft.domain, "content");
+    assert.equal(contentDraft.document.category, undefined);
+    assert.equal(contentDraft.context.category, "science");
     assert.equal(contentDraft.document.provenance, undefined);
     assert.equal(contentDraft.document.lenses, undefined);
     assert.equal(contentDraft.document.bridges[0].relationKind, undefined);
@@ -149,6 +151,7 @@ export async function run() {
       arguments: { draft_id: "domain-mcp" }
     });
     const complete = completeRead.result.structuredContent.draft.document;
+    assert.equal(complete.category, "science");
     assert.equal(complete.title, "Content-edited MCP");
     assert.equal(complete.puzzleKind, "vocabulary-context");
     assert.equal(complete.bridges[0].fact, "Shared fact");

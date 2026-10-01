@@ -9,7 +9,7 @@ function compactActor(actor) {
 }
 
 export function assistanceStampScopes(document, { domain = "complete" } = {}) {
-  const scopes = domain === "content" || domain === "pedagogy"
+  const scopes = domain === "content" || domain === "pedagogy" || domain === "classification"
     ? [domain]
     : ["puzzle"];
   if (domain === "complete" &&

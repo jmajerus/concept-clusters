@@ -186,6 +186,93 @@ export function validateCategoryDocument(
   };
 }
 
+function registeredCategoryId(value, categories) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const metadata = categoryMetadataFor(value, categories);
+  if (!metadata || metadata.registered === false) return null;
+  return categoryIdFor(value, categories);
+}
+
+// Batch shelf moves check the assignment before any draft is opened.
+// Errors are messages for one puzzle; an empty list means the projection
+// can be saved as the classification domain.
+export function classificationAssignmentErrors(assignment, categories = CATEGORIES) {
+  const errors = [];
+  if (!isObject(assignment)) return ["classification must be an object"];
+  const categoryId = registeredCategoryId(assignment.category, categories);
+  if (!categoryId) {
+    errors.push("category must name a registered category");
+    return errors;
+  }
+  let membership = [categoryId];
+  if (assignment.categories !== undefined) {
+    if (!Array.isArray(assignment.categories) || assignment.categories.length === 0) {
+      errors.push("categories must be a non-empty array when present");
+    } else {
+      const ids = [];
+      assignment.categories.forEach((value, index) => {
+        const id = registeredCategoryId(value, categories);
+        if (!id) {
+          errors.push(`categories[${index}] must name a registered category`);
+          return;
+        }
+        if (ids.includes(id)) {
+          errors.push(`categories[${index}] repeats "${id}"`);
+          return;
+        }
+        ids.push(id);
+      });
+      if (ids[0] && ids[0] !== categoryId) {
+        errors.push(`categories[0] must match primary category "${categoryId}"`);
+      }
+      if (ids.length) membership = ids;
+    }
+  }
+  if (assignment.subcategories !== undefined) {
+    if (!isObject(assignment.subcategories)) {
+      errors.push("subcategories must be an object keyed by category");
+    } else {
+      for (const [key, id] of Object.entries(assignment.subcategories)) {
+        const keyId = registeredCategoryId(key, categories);
+        if (!keyId || !membership.includes(keyId)) {
+          errors.push(`subcategories.${key} is not one of this puzzle's categories`);
+          continue;
+        }
+        if (typeof id !== "string" || !id.trim()) {
+          errors.push(`subcategories.${key} must name one subcategory id`);
+          continue;
+        }
+        const metadata = categoryMetadataFor(keyId, categories);
+        if (!metadata?.subcategories?.[id]) {
+          errors.push(
+            `subcategories.${key} "${id}" is not registered under "${keyId}"`
+          );
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+export function canonicalClassificationProjection(assignment, categories = CATEGORIES) {
+  const category = categoryIdFor(assignment.category, categories);
+  const projection = { category };
+  if (Array.isArray(assignment.categories)) {
+    projection.categories = assignment.categories.map(value =>
+      categoryIdFor(value, categories)
+    );
+  }
+  if (isObject(assignment.subcategories)) {
+    projection.subcategories = Object.fromEntries(
+      Object.entries(assignment.subcategories).map(([key, id]) => [
+        categoryIdFor(key, categories),
+        id
+      ])
+    );
+  }
+  return projection;
+}
+
 // The category's own rename ledger. On an update whose title differs from
 // the stored one, the stored title joins previousTitles; history the
 // caller omitted (a client echoing get_category's document) is kept rather

@@ -8,6 +8,7 @@
 
 export const AUTHORING_DOMAINS = Object.freeze([
   "content",
+  "classification",
   "pedagogy",
   "provenance",
   "system"
@@ -16,16 +17,22 @@ export const AUTHORING_DOMAINS = Object.freeze([
 export const AUTHORING_READ_DOMAINS = Object.freeze([
   "complete",
   "content",
+  "classification",
   "pedagogy"
 ]);
 
-export const AUTHORING_WRITE_DOMAINS = Object.freeze(["content", "pedagogy"]);
+export const AUTHORING_WRITE_DOMAINS = Object.freeze([
+  "content",
+  "classification",
+  "pedagogy"
+]);
 
 export const AUTHORING_PHASES = Object.freeze([
   "complete",
   "core",
   "review",
   "pedagogy",
+  "classification",
   "publication"
 ]);
 
@@ -33,7 +40,7 @@ export const AUTHORING_PHASES = Object.freeze([
 
 /**
  * @typedef {object} FieldOwnership
- * @property {"content" | "pedagogy" | "provenance" | "system"} domain
+ * @property {"content" | "classification" | "pedagogy" | "provenance" | "system"} domain
  * @property {FieldKind} kind
  * @property {boolean} [identity] stable cross-domain identity for this field
  * @property {boolean} [writeOnce] authored when the draft is created and
@@ -44,7 +51,7 @@ export const AUTHORING_PHASES = Object.freeze([
  *   field is the document's own identity in storage: an agent picks it when
  *   the puzzle is born and nothing may move it afterwards except a
  *   deliberate human rename, which does not go through an authored write.
- * @property {ReadonlyArray<"content" | "pedagogy">} [contextFor]
+ * @property {ReadonlyArray<"content" | "classification" | "pedagogy">} [contextFor]
  *   domains that may receive this field as read-only sibling context
  */
 
@@ -55,10 +62,10 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
     kind: "authored",
     identity: true,
     writeOnce: true,
-    contextFor: ["pedagogy"]
+    contextFor: ["pedagogy", "classification"]
   },
-  title: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
-  category: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
+  title: { domain: "content", kind: "authored", contextFor: ["pedagogy", "classification"] },
+  category: { domain: "classification", kind: "authored", contextFor: ["content", "pedagogy"] },
   puzzleKind: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   info: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   clusters: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
@@ -66,8 +73,8 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
   // annotation fields layered onto the same array (see BRIDGE_FIELD_OWNERSHIP).
   bridges: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
 
-  categories: { domain: "pedagogy", kind: "authored" },
-  subcategories: { domain: "pedagogy", kind: "authored" },
+  categories: { domain: "classification", kind: "authored", contextFor: ["content", "pedagogy"] },
+  subcategories: { domain: "classification", kind: "authored", contextFor: ["content", "pedagogy"] },
   tags: { domain: "pedagogy", kind: "authored" },
   level: { domain: "pedagogy", kind: "authored" },
   lenses: { domain: "pedagogy", kind: "authored" },
@@ -155,7 +162,7 @@ export const BRIDGE_FIELD_OWNERSHIP = Object.freeze({
  * writeDomain and must not be saved as a domain replacement.
  *
  * @type {Readonly<Record<string, {
- *   writeDomain: "content" | "pedagogy" | null,
+ *   writeDomain: "content" | "classification" | "pedagogy" | null,
  *   root: ReadonlyArray<string>,
  *   clusters?: ReadonlyArray<string>,
  *   bridges?: ReadonlyArray<string>
@@ -165,7 +172,7 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
   core: Object.freeze({
     writeDomain: "content",
     root: Object.freeze([
-      "id", "title", "category", "puzzleKind", "info", "clusters", "bridges"
+      "id", "title", "puzzleKind", "info", "clusters", "bridges"
     ]),
     clusters: Object.freeze([
       "id", "name", "fact", "seeds", "floatingTerms", "terms", "termInfo", "info"
@@ -190,13 +197,17 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
     writeDomain: "pedagogy",
     root: Object.freeze(["lenses", "lensMode", "preSolve", "learningIntroduction"])
   }),
+  classification: Object.freeze({
+    writeDomain: "classification",
+    root: Object.freeze(["category", "categories", "subcategories"])
+  }),
   publication: Object.freeze({
     writeDomain: "pedagogy",
     // Protected creator/license/derivedFrom values stay in storage but are
-    // not exposed through MCP authoring passes.
+    // not exposed through MCP authoring passes. Shelf placement is the
+    // classification pass, not this one.
     root: Object.freeze([
-      "categories", "subcategories", "tags", "level", "relatedPuzzles",
-      "language"
+      "tags", "level", "relatedPuzzles", "language"
     ])
   })
 });
@@ -217,6 +228,16 @@ export const SYSTEM_ROOT_FIELDS = fieldsMatching(
 export const PEDAGOGY_ROOT_FIELDS = fieldsMatching(
   ROOT_FIELD_OWNERSHIP,
   meta => meta.domain === "pedagogy" && meta.kind === "authored"
+);
+
+export const CLASSIFICATION_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.domain === "classification" && meta.kind === "authored"
+);
+
+export const CLASSIFICATION_STORED_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.domain === "classification" && meta.kind !== "retired"
 );
 
 // Includes human-/infrastructure-managed metadata kept in the pedagogy
@@ -303,7 +324,7 @@ export function assertPhasePassesConsistent(
   for (const [phase, pass] of Object.entries(passes)) {
     const writeDomain = pass.writeDomain;
     if (writeDomain != null && !AUTHORING_WRITE_DOMAINS.includes(writeDomain)) {
-      throw new Error(`Phase ${phase} writeDomain must be content or pedagogy`);
+      throw new Error(`Phase ${phase} writeDomain must be an agent write domain`);
     }
     for (const name of pass.root) {
       const meta = assertOwnedField(ROOT_FIELD_OWNERSHIP, phase, name, {
@@ -361,6 +382,8 @@ export default {
   SYSTEM_ROOT_FIELDS,
   PEDAGOGY_ROOT_FIELDS,
   PEDAGOGY_STORED_ROOT_FIELDS,
+  CLASSIFICATION_ROOT_FIELDS,
+  CLASSIFICATION_STORED_ROOT_FIELDS,
   MCP_EXCLUDED_ROOT_FIELDS,
   PEDAGOGY_BRIDGE_FIELDS,
   CONTENT_BRIDGE_FIELDS,

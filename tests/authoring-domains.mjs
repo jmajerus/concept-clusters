@@ -64,6 +64,9 @@ export async function run() {
   assert.equal(domains.pedagogy.bridges[0].fact, undefined);
   assert.deepEqual(domains.provenance, document.provenance);
   assert.equal(domains.content.puzzleKind, "vocabulary-context");
+  assert.equal(domains.content.category, undefined);
+  assert.equal(domains.classification.category, "science");
+  assert.equal(domains.pedagogy.categories, undefined);
 
   const content = projectAuthoredDocument(document, "content");
   assert.equal(content.document.provenance, undefined);
@@ -74,6 +77,8 @@ export async function run() {
   }
   assert.equal(content.document.language, undefined);
   assert.equal(content.document.puzzleKind, "vocabulary-context");
+  assert.equal(content.document.category, undefined);
+  assert.equal(content.context.category, "science");
   assert.equal(content.document.bridges[0].direction, undefined);
 
   const pedagogy = projectAuthoredDocument(document, "pedagogy");
@@ -87,6 +92,7 @@ export async function run() {
   assert.equal(pedagogy.document.language, "en");
   assert.equal(pedagogy.context.provenance, undefined);
   assert.equal(pedagogy.context.puzzleKind, "vocabulary-context");
+  assert.equal(pedagogy.context.category, "science");
   assert.equal(pedagogy.context.bridges[0].fact, "Shared fact");
 
   const contentEdit = applyAuthoredDomain(document, "content", {
@@ -94,6 +100,7 @@ export async function run() {
     title: "Edited content"
   });
   assert.equal(contentEdit.title, "Edited content");
+  assert.equal(contentEdit.category, "science");
   assert.equal(contentEdit.puzzleKind, "vocabulary-context");
   assert.deepEqual(contentEdit.provenance, document.provenance);
   assert.equal(contentEdit.bridges[0].relationKind, "contrast");
@@ -114,6 +121,37 @@ export async function run() {
     assert.equal(pedagogyEdit[field], document[field]);
   }
   assert.equal(contentEdit.large, true);
+
+  const classification = projectAuthoredDocument(document, "classification");
+  assert.equal(classification.document.category, "science");
+  assert.equal(classification.document.lenses, undefined);
+  assert.equal(classification.context.id, "domain-fixture");
+  assert.equal(classification.context.title, "Domain fixture");
+  assert.equal(classification.context.clusters, undefined);
+  const classified = applyAuthoredDomain(document, "classification", {
+    category: "biology",
+    categories: ["biology", "science"],
+    subcategories: { biology: "foundations" }
+  });
+  assert.equal(classified.category, "biology");
+  assert.deepEqual(classified.categories, ["biology", "science"]);
+  assert.deepEqual(classified.subcategories, { biology: "foundations" });
+  assert.deepEqual(classified.lenses, document.lenses);
+  assert.equal(classified.title, document.title);
+  const cleared = applyAuthoredDomain(classified, "classification", {
+    category: "biology"
+  });
+  assert.equal(cleared.categories, undefined);
+  assert.equal(cleared.subcategories, undefined);
+  assert.equal(cleared.category, "biology");
+  assert.deepEqual(cleared.lenses, document.lenses);
+  assert.throws(
+    () => applyAuthoredDomain(document, "content", {
+      ...content.document,
+      category: "biology"
+    }),
+    /category belongs to the classification domain/
+  );
 
   const { info: _contentInfo, ...contentWithoutInfo } = content.document;
   assert.equal(
@@ -203,8 +241,10 @@ export async function run() {
   const stored = storedDomainDocuments(document);
   assert.equal(typeof stored.content, "string");
   assert.equal(typeof stored.pedagogy, "string");
+  assert.equal(typeof stored.classification, "string");
   assert.equal(typeof stored.provenance, "string");
   assert.deepEqual(assistanceStampScopes(document, { domain: "content" }), ["content"]);
+  assert.deepEqual(assistanceStampScopes(document, { domain: "classification" }), ["classification"]);
   assert.deepEqual(assistanceStampScopes(document, { domain: "pedagogy" }), ["pedagogy"]);
   assert.deepEqual(assistanceStampScopes(document), ["puzzle", "learningIntroduction"]);
 

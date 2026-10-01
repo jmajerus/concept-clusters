@@ -4,6 +4,7 @@ import {
   AUTHORING_WRITE_DOMAINS,
   BRIDGE_FIELD_OWNERSHIP,
   BRIDGE_IDENTITY_FIELDS,
+  CLASSIFICATION_ROOT_FIELDS,
   CONTENT_BRIDGE_FIELDS,
   DERIVED_ROOT_FIELDS,
   MCP_EXCLUDED_ROOT_FIELDS,
@@ -30,7 +31,10 @@ export const name =
 export async function run() {
   assert.equal(assertPhasePassesConsistent(), true);
   assert.ok(PEDAGOGY_ROOT_FIELDS.has("lenses"));
-  assert.ok(PEDAGOGY_ROOT_FIELDS.has("categories"));
+  assert.equal(PEDAGOGY_ROOT_FIELDS.has("categories"), false);
+  assert.ok(CLASSIFICATION_ROOT_FIELDS.has("category"));
+  assert.ok(CLASSIFICATION_ROOT_FIELDS.has("categories"));
+  assert.ok(CLASSIFICATION_ROOT_FIELDS.has("subcategories"));
   assert.ok(PEDAGOGY_BRIDGE_FIELDS.has("relationKind"));
   assert.ok(CONTENT_BRIDGE_FIELDS.has("fact"));
   assert.ok(!CONTENT_BRIDGE_FIELDS.has("relationKind"));
@@ -52,9 +56,13 @@ export async function run() {
   assert.equal(BRIDGE_FIELD_OWNERSHIP.relationKind.domain, "pedagogy");
 
   assert.equal(AUTHORING_PHASE_PASSES.core.writeDomain, "content");
+  assert.equal(AUTHORING_PHASE_PASSES.classification.writeDomain, "classification");
   assert.equal(AUTHORING_PHASE_PASSES.pedagogy.writeDomain, "pedagogy");
   assert.equal(AUTHORING_PHASE_PASSES.publication.writeDomain, "pedagogy");
   assert.equal(AUTHORING_PHASE_PASSES.review.writeDomain, null);
+  assert.ok(!AUTHORING_PHASE_PASSES.core.root.includes("category"));
+  assert.ok(!AUTHORING_PHASE_PASSES.publication.root.includes("categories"));
+  assert.ok(!AUTHORING_PHASE_PASSES.publication.root.includes("subcategories"));
   assert.ok(!AUTHORING_PHASE_PASSES.publication.root.includes("provenance"));
   for (const field of ["creator", "license", "derivedFrom"]) {
     assert.ok(!AUTHORING_PHASE_PASSES.publication.root.includes(field));
@@ -67,6 +75,7 @@ export async function run() {
   assert.equal(core.domain, "content");
   assert.equal(core.preserveExisting, true);
   assert.equal(core.schema.properties.lenses, undefined);
+  assert.equal(core.schema.properties.category, undefined);
   assert.equal(core.schema.properties.bridges.items.properties.relationKind, undefined);
   assert.match(core.schema.description, /write domain "content"/);
 
@@ -85,8 +94,17 @@ export async function run() {
   }
   assert.ok(publication.schema.properties.language);
   assert.ok(publication.schema.properties.relatedPuzzles);
-  assert.ok(publication.schema.properties.categories);
+  assert.equal(publication.schema.properties.categories, undefined);
+  assert.equal(publication.schema.properties.subcategories, undefined);
   assert.match(publication.schema.description, /write domain "pedagogy"/);
+
+  const classification = simplifiedPuzzleSchemaResult("classification");
+  assert.equal(classification.domain, "classification");
+  assert.ok(classification.schema.properties.category);
+  assert.ok(classification.schema.properties.categories);
+  assert.ok(classification.schema.properties.subcategories);
+  assert.equal(classification.schema.properties.lenses, undefined);
+  assert.match(classification.schema.description, /write domain "classification"/);
 
   const review = simplifiedPuzzleSchemaResult("review");
   assert.equal(review.domain, undefined);
@@ -193,7 +211,7 @@ export async function run() {
     assert.equal(pedagogyEdit[field], document[field]);
   }
 
-  assert.deepEqual([...AUTHORING_WRITE_DOMAINS], ["content", "pedagogy"]);
+  assert.deepEqual([...AUTHORING_WRITE_DOMAINS], ["content", "classification", "pedagogy"]);
 
   // Write-once is its own axis, distinct from protected (never agent-written)
   // and from identity (the matching key, which ordinary authoring renames).

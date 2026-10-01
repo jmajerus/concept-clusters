@@ -39,6 +39,10 @@ import {
 } from "./authoringDomains.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
 import {
+  canonicalClassificationProjection,
+  classificationAssignmentErrors
+} from "./categoryValidation.js";
+import {
   buildMcpClientProbeRecord,
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
@@ -372,10 +376,13 @@ function serverInstructions() {
     "when it helps the current work. " +
     "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
     "links and citation details during the research that found them rather than rediscovering them. " +
-    "For a focused authoring pass, call get_puzzle_draft with domain=content or domain=pedagogy and " +
+    "For a focused authoring pass, call get_puzzle_draft with domain=content, " +
+    "domain=classification, or domain=pedagogy and " +
     "save_puzzle_draft with the same domain; the server preserves protected provenance and system state " +
     "and materializes the complete document for validation and publication. Pedagogy responses include " +
-    "content as read-only context. The complete domain remains available for compatibility. " +
+    "content and classification as read-only context. Classification owns category, categories, and " +
+    "subcategories. Move many puzzles with reassign_puzzle_classifications instead of editing each " +
+    "lesson. The complete domain remains available for compatibility. " +
     "For compact, bounded vocabulary-context requests, co-design the near-synonym cluster and its lenses " +
     "in one integrated cycle, then substitute every playable term into each drafted lens before saving. " +
     "Use the staged inventory/plan/fit workflow for open-ended or likely multi-board work. " +
@@ -394,14 +401,15 @@ function serverInstructions() {
     "puzzles whose clusters and questions are co-designed; set the corresponding puzzleKind for either " +
     "specialized type. Omit puzzleKind for the default topic-based type. puzzleKind is independent of " +
     "category and lensMode, belongs to content, and creates no new " +
-    "write domain. Unprofiled guidance stays profile-neutral. " +
+    "profile-specific write domain. Classification is the shelf for every puzzle. " +
+    "Unprofiled guidance stays profile-neutral. " +
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Pass expected_revision on every save_puzzle_draft: copy draft.revision from the latest " +
     "create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for that draft_id. " +
     "A draft that has never been created uses create_puzzle_draft. " +
     mcpPublicationBoundaryGuidance() + " " +
-    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and publishing remains held from Cue/Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
+    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. Associate a puzzle with categories on the draft (category / categories / subcategories) with domain=classification, and with catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and publishing remains held from Cue/Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
 
 export function createAuthoringMcpServer({
@@ -506,6 +514,53 @@ export function createAuthoringMcpServer({
   async function categoryRegistry() {
     requireD1ContentDocuments("category reads");
     return (await taxonomyContext()).categoryRegistry;
+  }
+
+  async function publishHeldDraft(draft) {
+    if (typeof contentDocuments?.publish !== "function") {
+      throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
+    }
+    let current = draft;
+    const draftId = current.draftId || current.id;
+    if (await repositorySupports(draftRepository, "materialize")) {
+      current = await draftRepository.materialize({ draftId, actor });
+    }
+    const taxonomy = await taxonomyContext();
+    const validation = await contentService.validatePuzzleDraft(current.document, {
+      categoryRegistry: taxonomy.categoryRegistry,
+      knownPuzzleIds: taxonomy.puzzleIds
+    });
+    if (!validation.valid) {
+      return { draft: current, published: null, publicationErrors: validation.errors };
+    }
+    const puzzleId = typeof current.document?.id === "string" ? current.document.id : current.puzzleId;
+    const publishedBefore = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+    const publishLayout = current.layout || publishedBefore?.layout || undefined;
+    const layoutValidation = validatePublishedPuzzleLayout({
+      document: current.document,
+      layout: publishLayout,
+      categoryRegistry: taxonomy.categoryRegistry
+    });
+    if (!layoutValidation.valid) {
+      return {
+        draft: current,
+        published: null,
+        publicationErrors: [
+          "The saved layout must be reconfirmed after this puzzle edit.",
+          ...layoutValidation.errors
+        ]
+      };
+    }
+    const published = await contentDocuments.publish({
+      kind: "puzzle",
+      id: puzzleId,
+      document: documentForStorage(current.document, {
+        categoryRegistry: taxonomy.categoryRegistry
+      }),
+      actor,
+      layout: publishLayout
+    });
+    return { draft: current, published, publicationErrors: null };
   }
 
   async function authoringPuzzles({ categoryRegistry = null } = {}) {
@@ -1021,9 +1076,10 @@ export function createAuthoringMcpServer({
     title: "Get puzzle draft",
     description:
       "Return a private draft's current state. The default complete domain " +
-      "includes all agent-authored puzzle content and pedagogy; request content " +
-      "or pedagogy to receive only that write domain. Pedagogy includes content " +
-      "as read-only context. " +
+      "includes all agent-authored puzzle content, classification, and pedagogy; request content, " +
+      "classification, or pedagogy to receive only that write domain. Pedagogy includes content " +
+      "and classification as read-only context. Content and classification include the other as " +
+      "read-only context where a pass needs it. " +
       "Protected attribution/editorial and system metadata are omitted from all " +
       "agent-facing document projections.",
     inputSchema: z.object({
@@ -1050,7 +1106,7 @@ export function createAuthoringMcpServer({
     title: "Save puzzle draft",
     description:
       "Every save requires expected_revision, copied from draft.revision on the latest create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has never been created uses create_puzzle_draft. " +
-      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. With domain=content or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. Pedagogy receives content as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive().describe(
@@ -1071,7 +1127,7 @@ export function createAuthoringMcpServer({
     publish_to_authoring
   }, ctx) => {
     assertNoAgentProtectedFields(document, "MCP puzzle document");
-    if (domain === "pedagogy" && repair) {
+    if (domain !== "complete" && domain !== "content" && repair) {
       throw new Error(
         "repair=true is only supported for complete or content domain saves"
       );
@@ -1238,6 +1294,118 @@ export function createAuthoringMcpServer({
           }
           : {})
       }
+    );
+  })));
+
+  server.registerTool("reassign_puzzle_classifications", {
+    title: "Reassign puzzle classifications",
+    description:
+      "Write the classification projection for many puzzles in one call. Each assignment sets category, and optionally categories and subcategories, for one puzzle id. The server opens a working copy from the published row when this owner has none, then saves domain=classification. Lenses and the board are left unchanged. One bad assignment does not hide the others: the result lists each puzzle id with ok or errors. Set publish_to_authoring=true to publish each successful save held; it does not Cue or Freeze. Call this tool one invocation at a time.",
+    inputSchema: z.object({
+      assignments: z.array(z.object({
+        puzzle_id: draftIdSchema,
+        category: z.string().min(1),
+        categories: z.array(z.string().min(1)).optional(),
+        subcategories: z.record(z.string().min(1), z.string().min(1)).optional()
+      }).strict()).min(1).max(100),
+      ...publishToAuthoringInput
+    }),
+    annotations: WRITE
+  }, tracked("reassign_puzzle_classifications", safe(async ({
+    assignments,
+    publish_to_authoring
+  }, ctx) => {
+    const registry = await categoryRegistry();
+    const results = [];
+    for (const assignment of assignments) {
+      const puzzleId = assignment.puzzle_id;
+      const errors = classificationAssignmentErrors(assignment, registry);
+      if (errors.length) {
+        results.push({ puzzle_id: puzzleId, ok: false, errors });
+        continue;
+      }
+      try {
+        const projection = canonicalClassificationProjection(assignment, registry);
+        const { draft: opened } = await openPuzzleWorkingCopy({
+          getDraft: id => draftRepository.get({ draftId: id, actor }),
+          createDraft: ({ draftId, document, seededFromPublished, basePublishedRevision }) =>
+            draftRepository.create({
+              draftId,
+              document,
+              actor,
+              seededFromPublished,
+              basePublishedRevision
+            }),
+          contentDocuments,
+          contentService,
+          allowGitFallback: false,
+          categoryRegistry: registry,
+          puzzleId
+        });
+        const draftId = opened.draftId || opened.id || puzzleId;
+        const previousDocument = documentForEditor(opened.document);
+        const nextDocument = applyAuthoredDomain(previousDocument, "classification", projection);
+        const substantial = isSubstantialChange(computeChangeScore(previousDocument, nextDocument));
+        const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(
+          nextDocument,
+          {
+            ctx,
+            server,
+            role: "edited",
+            substantial,
+            domain: "classification",
+            log: stampLog("reassign_puzzle_classifications", draftId, nextDocument)
+          }
+        );
+        let draft = await draftRepository.saveDomain({
+          draftId,
+          domain: "classification",
+          projection: projectAuthoredDocument(stamped, "classification").document,
+          provenance: stamped.provenance,
+          expectedRevision: opened.revision,
+          actor
+        });
+        await persistAuthoringAssistanceStamp(
+          stampRecord && { ...stampRecord, draftId },
+          { analytics, recordStamp }
+        );
+        let published = null;
+        let publicationErrors = null;
+        if (publish_to_authoring) {
+          const publication = await publishHeldDraft(draft);
+          draft = publication.draft;
+          published = publication.published;
+          publicationErrors = publication.publicationErrors;
+        }
+        results.push({
+          puzzle_id: puzzleId,
+          ok: !publicationErrors,
+          draft_id: draft.draftId || draftId,
+          revision: draft.revision,
+          category: draft.document?.category,
+          ...(draft.document?.categories ? { categories: draft.document.categories } : {}),
+          ...(draft.document?.subcategories ? { subcategories: draft.document.subcategories } : {}),
+          ...(publish_to_authoring
+            ? {
+              published: Boolean(published),
+              ...(publicationErrors ? { publicationErrors } : {})
+            }
+            : {})
+        });
+      } catch (error) {
+        results.push({
+          puzzle_id: puzzleId,
+          ok: false,
+          errors: [error?.message || String(error)]
+        });
+      }
+    }
+    const failed = results.filter(result => !result.ok).length;
+    return success(
+      failed
+        ? `Reassigned ${results.length - failed} of ${results.length} classifications; ${failed} failed.`
+        : `Reassigned ${results.length} classifications.`,
+      { results }
     );
   })));
 

@@ -27,8 +27,9 @@ order, and verification commands.
 `modules/authoringDomains.js` defines four logical domains:
 
 - `content` — puzzle identity, copy, clusters, and bridge core;
+- `classification` — primary category, membership, and subcategory placement;
 - `pedagogy` — bridge relationship annotations, lenses, learning
-  introductions, category/discovery metadata, and editorial fields;
+  introductions, and the remaining discovery fields;
 - `provenance` — contributor attribution; and
 - `system` — repository-owned state.
 

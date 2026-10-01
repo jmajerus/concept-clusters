@@ -32,7 +32,7 @@ export const SAVE_WORKING_DRAFT_EXIT = Object.freeze({
 });
 
 export const SAVE_WORKING_DRAFT_USAGE =
-  "Usage: node tools/save-working-draft.mjs [--client-info '<json>'] [--meta '<json>'] [--domain complete|content|pedagogy] [--repair] [--publish-to-authoring] [--expected-revision <n>] <draft-id>";
+  "Usage: node tools/save-working-draft.mjs [--client-info '<json>'] [--meta '<json>'] [--domain complete|content|classification|pedagogy] [--repair] [--publish-to-authoring] [--expected-revision <n>] <draft-id>";
 
 function toolErrorMessage(result) {
   if (typeof result?.structured?.error === "string" && result.structured.error) {
@@ -63,8 +63,8 @@ export function parseSaveWorkingDraftArgs(argv) {
       const value = argv[++index];
       if (!value) throw new WorkingDraftSaveError("usage", `${arg} requires a value. ${SAVE_WORKING_DRAFT_USAGE}`);
       if (arg === "--domain") {
-        if (!["complete", "content", "pedagogy"].includes(value)) {
-          throw new WorkingDraftSaveError("usage", `--domain must be complete, content, or pedagogy. ${SAVE_WORKING_DRAFT_USAGE}`);
+        if (!["complete", "content", "classification", "pedagogy"].includes(value)) {
+          throw new WorkingDraftSaveError("usage", `--domain must be complete, content, classification, or pedagogy. ${SAVE_WORKING_DRAFT_USAGE}`);
         }
         domain = value;
       } else if (arg === "--expected-revision") {

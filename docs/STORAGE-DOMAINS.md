@@ -35,16 +35,18 @@ the infrastructure preserves and recombines the other domains.
 | Domain | Purpose | Current owner | Focused agent access |
 |---|---|---|---|
 | `content` | Educational meaning: puzzle identity, copy, clusters, and bridge core | Agent | Read/write |
-| `pedagogy` | Relationships, lenses, learning introductions, and discovery metadata | Agent | Read/write; content is read-only context |
+| `classification` | Disciplinary home, full membership, and subcategory placement | Agent | Read/write; id and title are read-only context |
+| `pedagogy` | Relationships, lenses, learning introductions, and remaining discovery metadata | Agent | Read/write; content and classification are read-only context |
 | `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
 | `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document |
 
-The first two domains are intentionally broad enough to be useful authoring
-surfaces. Content includes the core of a bridge and its cluster membership;
-pedagogy includes bridge relationship annotations and the surrounding
-discovery and lesson structure. Provenance is a compact document-level record,
-while system state belongs to the repository envelope rather than to authored
-JSON.
+The agent-write domains are broad enough to be useful authoring surfaces.
+Content includes the core of a bridge and its cluster membership. Classification
+is the shelf: primary category, membership, and subcategory placement. Pedagogy
+includes bridge relationship annotations, the lesson, and the remaining
+discovery fields (tags, level, related puzzles, and language). Provenance is a
+compact document-level record, while system state belongs to the repository
+envelope rather than to authored JSON.
 
 An authoring profile is a different axis from a storage domain. For example,
 the `vocabulary-context` profile spans the existing `content` and `pedagogy`
@@ -112,7 +114,7 @@ than by exception.
 
 ## What is implemented
 
-An MCP caller may request `content` or `pedagogy` when reading or saving a
+An MCP caller may request `content`, `classification`, or `pedagogy` when reading or saving a
 puzzle draft. A focused read contains only the selected writable projection;
 the pedagogy response additionally supplies content as read-only context. A
 focused save replaces the selected projection, preserves the protected
@@ -234,11 +236,12 @@ not by asking an agent to preserve obsolete formats.
 
 ## The next boundary
 
-The current partition is deliberately a useful minimum: two agent-write
-domains plus protected provenance and infrastructure-owned system state.
-Further separation may be worthwhile where a field has a distinct owner or
-where a different model needs a different context. The criterion is whether
-the separation removes real decision and integrity burden without turning the
+Classification is a third agent-write domain because shelf placement has a
+different owner and a different decision from the board and the lesson.
+Tags, level, related puzzles, and language stay in pedagogy. Further
+separation may be worthwhile where a field has a distinct owner or where a
+different model needs a different context. The criterion is whether the
+separation removes real decision and integrity burden without turning the
 authoring contract into a collection of fragments that must be mentally
 reconstructed by the agent.
 

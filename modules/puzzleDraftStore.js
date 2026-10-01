@@ -94,6 +94,7 @@ export function createPuzzleDraftStore({ directory }) {
     }
     const content = storedDomainValue(record, "content", "Stored content domain");
     const pedagogy = storedDomainValue(record, "pedagogy", "Stored pedagogy domain");
+    const classification = storedDomainValue(record, "classification", "Stored classification domain");
     if (documentStale && (content == null || pedagogy == null)) {
       throw new Error(
         `Draft ${record.draftId || "unknown"} is stale but missing durable content/pedagogy projections`
@@ -107,6 +108,7 @@ export function createPuzzleDraftStore({ directory }) {
         document: documentStale ? undefined : record.document,
         content,
         pedagogy,
+        classification,
         provenance: storedDomainValue(record, "provenance", "Stored provenance domain")
       })
     };
@@ -295,13 +297,28 @@ export function createPuzzleDraftStore({ directory }) {
       // assembled document so marking the cache stale does not drop them.
       // Keep the on-disk document blob unchanged until materializeDraft().
       const nextDomains = storedDomainDocuments(materialized);
-      const domains = raw.domains && typeof raw.domains === "object"
-        ? {
-          ...raw.domains,
-          [domain]: nextDomains[domain],
-          provenance: nextDomains.provenance
-        }
-        : nextDomains;
+      const storedDomains = raw.domains && typeof raw.domains === "object"
+        ? raw.domains
+        : null;
+      // Legacy rows keep category inside content and categories inside
+      // pedagogy. The first focused save rewrites every projection together
+      // so those fields are not stored twice.
+      const needsSplit = !storedDomains || storedDomains.classification == null;
+      const domains = !storedDomains
+        ? nextDomains
+        : needsSplit
+          ? {
+            ...storedDomains,
+            content: nextDomains.content,
+            pedagogy: nextDomains.pedagogy,
+            classification: nextDomains.classification,
+            provenance: nextDomains.provenance
+          }
+          : {
+            ...storedDomains,
+            [domain]: nextDomains[domain],
+            provenance: nextDomains.provenance
+          };
       const record = {
         ...raw,
         revision: raw.revision + 1,

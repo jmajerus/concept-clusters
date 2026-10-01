@@ -338,7 +338,7 @@ export async function run() {
     assert.equal(authoringSchema.result.structuredContent.phase, undefined);
 
     const phasedSchemas = {};
-    for (const phase of ["core", "review", "pedagogy", "publication"]) {
+    for (const phase of ["core", "review", "pedagogy", "classification", "publication"]) {
       const response = await request("tools/call", {
         name: "get_authoring_schema",
         arguments: { phase }
@@ -786,10 +786,23 @@ export async function run() {
     );
     assert.match(
       triviaPublicationGuidance.result.structuredContent.markdown,
+      /domain=classification/
+    );
+
+    const triviaClassificationGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "classification", profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaClassificationGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaClassificationGuidance.result.structuredContent.markdown,
       /Trivia is the current domain-less category convention/
     );
     assert.match(
-      triviaPublicationGuidance.result.structuredContent.markdown,
+      triviaClassificationGuidance.result.structuredContent.markdown,
       /Do not infer or require profile=trivia-quiz from\s+category=trivia/
     );
     assert.doesNotMatch(
@@ -1400,6 +1413,42 @@ export async function run() {
       seededAgain.result.structuredContent.draft.revision,
       seeded.result.structuredContent.draft.revision
     );
+
+    const beforeShelf = seeded.result.structuredContent.draft.document;
+    const reassigned = await request("tools/call", {
+      name: "reassign_puzzle_classifications",
+      arguments: {
+        assignments: [
+          {
+            puzzle_id: "energy-flow",
+            category: "biology",
+            subcategories: { biology: "foundations" }
+          },
+          { puzzle_id: "missing-shelf-puzzle", category: "biology" },
+          {
+            puzzle_id: "energy-flow",
+            category: "biology",
+            subcategories: { biology: "not-a-subcategory" }
+          }
+        ]
+      }
+    });
+    assert.equal(reassigned.result.isError, undefined);
+    const shelfResults = reassigned.result.structuredContent.results;
+    assert.equal(shelfResults[0].ok, true);
+    assert.equal(shelfResults[0].category, "biology");
+    assert.deepEqual(shelfResults[0].subcategories, { biology: "foundations" });
+    assert.equal(shelfResults[1].ok, false);
+    assert.equal(shelfResults[2].ok, false);
+    const afterShelf = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    const shelfDocument = afterShelf.result.structuredContent.draft.document;
+    assert.equal(shelfDocument.category, "biology");
+    assert.deepEqual(shelfDocument.subcategories, { biology: "foundations" });
+    assert.deepEqual(shelfDocument.lenses, beforeShelf.lenses);
+    assert.deepEqual(shelfDocument.clusters, beforeShelf.clusters);
 
     await verifyStdioEntrypoint();
   } finally {
