@@ -65,4 +65,44 @@ export async function run() {
   assert.ok(pill);
   assert.deepEqual(pill.gs, [0, 1]);
   assert.deepEqual(pill.connected, [0, 1]);
+  const bridgeSpokes = bridged.links.filter(link => link.bridge && link.source === pill);
+  assert.equal(bridgeSpokes.length, 2);
+  assert.deepEqual(bridgeSpokes.map(link => link.clusterIndex).sort(), [0, 1]);
+
+  const placed = authoringBoardFromDocument({
+    id: "placed",
+    title: "Placed",
+    category: "Science",
+    clusters: [
+      {
+        id: "a",
+        name: "A",
+        color: "teal",
+        seeds: ["alpha", "beta"],
+        floatingTerms: ["gamma"]
+      },
+      {
+        id: "b",
+        name: "B",
+        color: "blue",
+        seeds: ["delta"],
+        floatingTerms: ["epsilon"]
+      }
+    ],
+    bridges: [{
+      term: "link",
+      clusters: ["a", "b"],
+      fact: "",
+      idealTerms: { a: "gamma" }
+    }]
+  });
+  const gamma = placed.nodes.find(node => node.word === "gamma");
+  const epsilon = placed.nodes.find(node => node.word === "epsilon");
+  assert.ok(placed.links.some(link => link.source === gamma && !link.bridge));
+  assert.ok(placed.links.some(link => link.source === epsilon && !link.bridge));
+  const aimed = placed.links.filter(link => link.bridge);
+  assert.equal(aimed.length, 2);
+  assert.equal(aimed.find(link => link.clusterIndex === 0).target.word, "gamma");
+  assert.equal(aimed.find(link => link.clusterIndex === 0).ideal, true);
+  assert.equal(aimed.find(link => link.clusterIndex === 1).ideal, false);
 }

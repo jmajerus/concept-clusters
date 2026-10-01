@@ -105,6 +105,17 @@ function unplacedNodes(document, startId) {
   }));
 }
 
+function idealTermFor(bridge, clusterIndex, cluster) {
+  const ideal = bridge?.idealTerms;
+  if (!ideal) return null;
+  if (Array.isArray(ideal)) {
+    const term = ideal[clusterIndex];
+    return typeof term === "string" && term ? term : null;
+  }
+  const named = cluster?.id ? ideal[cluster.id] : null;
+  return typeof named === "string" && named ? named : null;
+}
+
 export function authoringBoardFromDocument(document) {
   const rawClusters = Array.isArray(document?.clusters) ? document.clusters : [];
   const rawBridges = Array.isArray(document?.bridges) ? document.bridges : [];
@@ -185,21 +196,52 @@ export function authoringBoardFromDocument(document) {
   const extras = unplacedNodes(document, built.nodes.length);
   const nodes = [...built.nodes, ...extras];
   const links = built.links;
+  // Star draws each line from its source to the target's cluster title.
+  // A hub→member link therefore paints on the hub, and the member looks
+  // like a loose play term. Every placed term has to be a link source.
+  // Bridges are not in the seed-link list at all, so each attached side
+  // needs its own line or the bridge sits between clusters with no spokes.
   if (clusters.length) {
     clusters.forEach((cluster, ci) => {
       const members = nodes.filter(node => node.gs.length === 1 && node.gs[0] === ci);
       if (members.length < 2) return;
       const hub = members[0];
       for (let i = 1; i < members.length; i += 1) {
+        const member = members[i];
         if (!links.some(link =>
-          (link.source === hub && link.target === members[i]) ||
-          (link.source === members[i] && link.target === hub)
+          (link.source === hub && link.target === member) ||
+          (link.source === member && link.target === hub)
         )) {
-          links.push({ source: hub, target: members[i], bridge: false });
+          links.push({ source: hub, target: member, bridge: false });
+        }
+        if (!links.some(link => link.source === member && !link.bridge)) {
+          links.push({
+            source: member,
+            target: hub,
+            clusterIndex: ci,
+            bridge: false
+          });
         }
       }
     });
   }
+  nodes.filter(node => node.gs.length > 1).forEach(bridge => {
+    bridge.gs.forEach(ci => {
+      const members = nodes.filter(node => node.gs.length === 1 && node.gs[0] === ci);
+      const ideal = idealTermFor(bridge, ci, clusters[ci]);
+      const endpoint = (ideal && members.find(node => node.word === ideal)) || members[0];
+      if (!endpoint) return;
+      const aimed = Boolean(ideal && endpoint.word === ideal);
+      links.push({
+        source: bridge,
+        target: endpoint,
+        clusterIndex: ci,
+        bridge: true,
+        ideal: aimed,
+        canonicalTarget: aimed ? endpoint : null
+      });
+    });
+  });
 
   return {
     puzzle,
