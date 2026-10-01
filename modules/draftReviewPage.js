@@ -1242,22 +1242,34 @@ export function renderDraftListPage(rows, {
   return pageShell("Puzzles", body);
 }
 
+function renderOpenBoardButton(draft) {
+  const draftId = typeof draft.draftId === "string" ? draft.draftId : "";
+  if (!draftId) return "";
+  let href;
+  try {
+    href = draftBoardQuery(draftId);
+  } catch {
+    return "";
+  }
+  // New tab: copy edits on this page stay in the browser until Save working
+  // copy, so leaving this document would drop them.
+  return `<a class="play-button secondary" href="${escapeHtml(href)}" target="_blank" rel="noopener" data-draft-preview aria-disabled="true">Open board</a>`;
+}
+
 function renderPlayAction(draft, { valid }) {
   const draftId = typeof draft.draftId === "string" ? draft.draftId : "";
   if (!draftId) return "";
-  let boardHref;
   let playHref;
   try {
     // Normal preview follows the current working copy. A revision-pinned URL
     // remains supported for diagnostics, but would make a refreshed Play tab
     // ignore an edit just saved in another tab.
-    boardHref = draftBoardQuery(draftId);
     playHref = draftPlayQuery(draftId);
   } catch {
     return "";
   }
   const gate = ` data-draft-preview`;
-  const board = `<a class="play-button secondary" href="${escapeHtml(boardHref)}"${gate} aria-disabled="true">Open board</a>`;
+  const board = renderOpenBoardButton(draft);
   if (!valid) {
     return `${board}<button type="button" class="play-button" disabled>Play</button>`;
   }
@@ -1315,8 +1327,9 @@ function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
          on the LAN authoring checkout, not here.`;
   }
   if (variant === "local") {
-    return `This page is for design copy. Open board loads
-       <code>/?puzzle=</code> in Construct. Play is a clean player preview
+    return `This page is for design copy. Open board opens
+       <code>/?puzzle=</code> in a new tab, in Construct, and leaves this
+       page as it is. Play is a clean player preview
        (<code>/?puzzle=&amp;play</code>), the same chrome as
        <code>/</code>; add <code>&amp;admin</code> for layout tools.
        Publish writes the shared D1 row. Cue means you are done with this
@@ -1405,7 +1418,7 @@ function renderLessonChoice(event, candidates) {
     </fieldset>`;
 }
 
-function renderReviewChoice(draft) {
+function renderReviewChoice(draft, { boardButton = "" } = {}) {
   const candidates = reviewChoiceCandidates(draft);
   if (!candidates.length) return "";
   const draftId = draft.draftId;
@@ -1456,6 +1469,7 @@ function renderReviewChoice(draft) {
   return `<section class="submit-pr">
     <h2>Choose a review</h2>
     <p class="meta">These proposals are alternatives to the published puzzle. A later review files only its own changes. Pass stack_on to put it on top of the preceding review. When another review wrote a lesson, you can use that lesson with the review you play or publish. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
+    ${boardButton ? `<div class="actions">${boardButton}</div>` : ""}
     ${cards}
     <form method="post" action="${action}">
       <input type="hidden" name="confirm" value="keep-published">
@@ -1534,7 +1548,9 @@ function renderSubmitForm(draft, variant = "hosted") {
     <a class="play-button secondary" href="${reviewLink}">Review issues</a>
   </section>`;
   const publishSection = choosingReview
-    ? renderReviewChoice(draft)
+    ? renderReviewChoice(draft, {
+      boardButton: variant === "local" ? renderOpenBoardButton(draft) : ""
+    })
     : `<section class="submit-pr">
     <h2>Actions</h2>
     <p class="meta">${hint}</p>

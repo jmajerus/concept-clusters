@@ -457,6 +457,18 @@ export async function run() {
   assert.match(choicePage, /value="keep-published"/);
   assert.match(choicePage, /alternatives to the published puzzle/);
   assert.doesNotMatch(choicePage, /different published revision/);
+  const localReviewChoice = renderDraftPage({
+    ...baseDraft,
+    validation: { valid: true, errors: [], flags: [] },
+    reviewCandidates: [{
+      id: 9,
+      eventType: "proposed",
+      proposal: baseDraft.document
+    }]
+  }, { variant: "local" });
+  assert.match(localReviewChoice, /Choose a review/);
+  assert.match(localReviewChoice, /class="play-button secondary" href="\/\?puzzle=review-fixture" target="_blank" rel="noopener"/);
+  assert.doesNotMatch(choicePage, /Open board/);
   assert.doesNotMatch(choicePage, /value="discard-review"/);
   assert.doesNotMatch(choicePage, /value="undo-review"/);
   assert.doesNotMatch(choicePage, /value="publish"/);
@@ -783,8 +795,9 @@ export async function run() {
   assert.doesNotMatch(localPage, /Install in this checkout/);
   assert.doesNotMatch(localPage, /value="install-checkout"/);
   assert.match(localPage, /Open board/);
+  assert.doesNotMatch(localPage, /<a href="\/\?puzzle=review-fixture">Open board<\/a>/);
   assert.match(localPage, /\/admin\/catalogues/);
-  assert.match(localPage, /class="play-button secondary" href="\/\?puzzle=review-fixture"/);
+  assert.match(localPage, /class="play-button secondary" href="\/\?puzzle=review-fixture" target="_blank" rel="noopener"/);
   assert.match(localPage, /class="play-button" href="\/\?puzzle=review-fixture&amp;play"/);
   assert.doesNotMatch(localPage, /install-and-play/);
   assert.doesNotMatch(localPage, /value="open-pull-request"/);
