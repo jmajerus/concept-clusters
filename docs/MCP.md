@@ -28,7 +28,7 @@ versioned JSON Schema for simplified input. Clients that do not inspect MCP
 resources can call `get_authoring_schema` for the same schema as structured
 tool output. With no arguments, that tool and `get_authoring_guidance` retain
 their complete no-phase responses. Passing `phase: "core"`,
-`"review"`, `"pedagogy"`, or `"publication"` returns a much smaller working
+`"review"`, `"pedagogy"`, `"classification"`, or `"publication"` returns a much smaller working
 projection for that pass. A projection is not a standalone format: apply it to
 one accumulating draft and preserve fields from every earlier pass.
 Draft-write tool schemas intentionally leave `document` permissive so
@@ -48,10 +48,14 @@ revisions, hashes, status, and lesson-progress fingerprints are supplied by
 infrastructure and are not fields an agent has to author.
 
 For smaller authoring payloads, `get_puzzle_draft` and
-`save_puzzle_draft` accept `domain: "content"` or `domain: "pedagogy"`.
-Content is the core puzzle write surface. Pedagogy is the annotation, learning,
-and discovery-metadata write surface and includes content as read-only
-`context`. Focused responses omit protected attribution/editorial metadata
+`save_puzzle_draft` accept `domain: "content"`, `domain: "classification"`, or `domain: "pedagogy"`.
+Shelf placement (`category`, `categories`, `subcategories`) is
+`domain: "classification"`. `reassign_puzzle_classifications` writes that
+projection for many puzzles in one call.
+Content is the core puzzle write surface. Classification is the shelf.
+Pedagogy is the annotation and learning write surface, plus tags, level,
+related puzzles, and language. Pedagogy includes content and classification
+as read-only `context`. Focused responses omit protected attribution/editorial metadata
 and system metadata, retaining only the draft id and revision needed for the
 next save. The complete-document compatibility path also omits protected
 fields and preserves them on save.
@@ -79,7 +83,7 @@ progressive route:
    `create_puzzle_draft` / `save_puzzle_draft` also needs outbound HTTPS to
    `api.cloudflare.com` (D1); approve network when prompted, then retry the
    same save — nothing is persisted until that call succeeds.
-4. The same pair is requested with `review`, `pedagogy`, or `publication` only
+4. The same pair is requested with `review`, `pedagogy`, `classification`, or `publication` only
    when that concern is active. Omitting `phase`, or passing `complete`, returns
    the full fallback payload.
 5. `get_workflow_guidance` supplies operational instructions only when the

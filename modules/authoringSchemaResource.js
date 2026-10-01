@@ -15,7 +15,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.22.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.23.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
@@ -155,7 +155,7 @@ function phaseDescription(phase, pass) {
     "read context; bridge relationship annotations (conceptId, relationKind, " +
     "direction, idealTerms) belong to the pedagogy domain and must be saved with " +
     "domain=pedagogy after retrieving that projection. Do not save this phase " +
-    "shape as a content or pedagogy domain replacement."
+    "shape as a content, classification, or pedagogy domain replacement."
   );
 }
 

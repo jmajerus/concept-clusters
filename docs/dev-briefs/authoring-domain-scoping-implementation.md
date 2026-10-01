@@ -17,37 +17,39 @@ order, and verification commands.
 | Domain constants, projections, merge rules, protected fields | `modules/authoringDomains.js` (consumes the ownership map) |
 | Authored-document normalization and storage boundary | `modules/authoredPuzzleDocument.js` |
 | Hosted MCP read/write contract | `modules/hostedMcpAuthoringServer.js` |
-| Draft projections and D1 persistence | `modules/d1DraftRepository.js` and migration `0019_authoring_domains` |
+| Draft projections and D1 persistence | `modules/d1DraftRepository.js` and migrations `0019_authoring_domains`, `0028_classification_domain` |
 | Contributor normalization and automatic document attribution | `modules/authoringProvenance.js` and `modules/mcpClientIdentity.js` |
 | Invocation audit record and best-effort persistence | `modules/authoringAssistanceLog.js` and migration `0008_draft_assistance_stamps` |
 | One-time cleanup of document snapshots | migration `0020_purge_retired_document_snapshots` |
 
 ## Domain contract
 
-`modules/authoringDomains.js` defines four logical domains:
+`modules/authoringDomains.js` defines five logical domains:
 
 - `content` — puzzle identity, copy, clusters, and bridge core;
+- `classification` — primary category, membership, and subcategory placement;
 - `pedagogy` — bridge relationship annotations, lenses, learning
-  introductions, category/discovery metadata, and editorial fields;
+  introductions, and the remaining discovery fields;
 - `provenance` — contributor attribution; and
 - `system` — repository-owned state.
 
-Only `content` and `pedagogy` are agent-writable. The read domains are
-`complete`, `content`, and `pedagogy`; `complete` remains the compatibility
+`content`, `classification`, and `pedagogy` are agent-writable. The read domains are
+`complete`, `content`, `classification`, and `pedagogy`; `complete` remains the compatibility
 path for clients that still work with the whole authored document.
 
 For a focused read, `projectAuthoredDocument()` removes provenance, system
-fields, and the derived `large` flag. Pedagogy receives content as read-only
-`context`. Its projection also omits the human-owned
-`learningIntroduction.credit`. Content receives no pedagogy context.
+fields, and the derived `large` flag. Classification receives id and title as
+read-only `context`. Content and pedagogy receive the classification fields as
+read-only `context`, and pedagogy also receives the content projection. The
+pedagogy projection omits the human-owned `learningIntroduction.credit`.
 
 For a focused save, `applyAuthoredDomain()` replaces the selected projection
 as a whole, so omission removes an optional field in that projection. The
 other projections are retained and the infrastructure reassembles the
 complete document. A pedagogy bridge entry must identify an existing content
 bridge and may change only its annotation fields. Protected fields and fields
-owned by the other domain are rejected. Mechanical `repair` is accepted for
-complete and content saves, not pedagogy saves, because it repairs content
+owned by another domain are rejected. Mechanical `repair` is accepted for
+complete and content saves, not classification or pedagogy saves, because it repairs content
 fields.
 
 ## Projection and sub-schema refinement
@@ -62,11 +64,12 @@ backed by one ownership map:
 - `projectAuthoredDocument()` defines the data and ownership boundary for a
   domain read or write from that map; and
 - `get_authoring_schema` supplies focused guidance and schemas for the
-  `core`, `review`, `pedagogy`, and `publication` phases from
+  `core`, `review`, `pedagogy`, `classification`, and `publication` phases from
   `AUTHORING_PHASE_PASSES` in the same module. Those responses set
   `preserveExisting: true`; they are task views, not independently complete
   replacement documents. Pure passes also set `domain` to the matching write
-  domain (`core` → `content`; `pedagogy` / `publication` → `pedagogy`).
+  domain (`core` → `content`; `classification` → `classification`;
+  `pedagogy` / `publication` → `pedagogy`).
   `review` omits `domain` because it mixes content inspection with pedagogy
   bridge annotations. Protected fields such as `provenance` are not listed
   on any agent-facing phase pass.

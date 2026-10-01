@@ -57,6 +57,41 @@ function assembleRowDocument(row) {
   return assembleAuthoredDocumentFromDraftRow(row, { parseJson: parsedJson });
 }
 
+const CLASSIFICATION_COLUMN_MIGRATION =
+  "puzzle_drafts.classification_json is missing. Apply d1/migrations/0028_classification_domain.sql before writing drafts.";
+
+function rethrowMissingClassificationColumn(error) {
+  const message = String(error?.message || error);
+  if (/no such column/i.test(message) && /classification_json/i.test(message)) {
+    throw new Error(CLASSIFICATION_COLUMN_MIGRATION);
+  }
+  throw error;
+}
+
+async function runDraftWrite(statement) {
+  try {
+    return await statement.run();
+  } catch (error) {
+    rethrowMissingClassificationColumn(error);
+  }
+}
+
+function domainColumnValues(current, domain, domains) {
+  const needsSplit = current.classification_json == null;
+  return {
+    content: domain === "content" || current.content_json == null || needsSplit
+      ? domains.content
+      : current.content_json,
+    pedagogy: domain === "pedagogy" || current.pedagogy_json == null || needsSplit
+      ? domains.pedagogy
+      : current.pedagogy_json,
+    classification: domain === "classification" || needsSplit
+      ? domains.classification
+      : current.classification_json,
+    provenance: domains.provenance
+  };
+}
+
 function reviewStackLoadedFromRow(row) {
   if (!row.review_baseline_json) return false;
   try {
@@ -145,7 +180,7 @@ export class D1DraftRepository extends DraftRepository {
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
-    const bindFresh = [
+    const bindIdentity = [
       draftId,
       typeof materialized.id === "string" ? materialized.id : null,
       owner.subject,
@@ -154,9 +189,13 @@ export class D1DraftRepository extends DraftRepository {
       contentHash,
       baseCommitSha,
       now,
-      now,
+      now
+    ];
+    const bindModern = [
+      ...bindIdentity,
       domains.content,
       domains.pedagogy,
+      domains.classification,
       domains.provenance
     ];
     // Both identities are gated: the row id keys the drafts list and the admin
@@ -175,32 +214,35 @@ export class D1DraftRepository extends DraftRepository {
     `;
     let result;
     try {
-      result = await this.database.prepare(insert({
+      result = await runDraftWrite(this.database.prepare(insert({
         names: `id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
           created_at, updated_at, revision, document_stale,
-          content_json, pedagogy_json, provenance_json, opened_from_published,
+          content_json, pedagogy_json, classification_json, provenance_json, opened_from_published,
           review_base_published_revision`,
-        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, ?"
+        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, ?, ?"
       })).bind(
-        ...bindFresh,
+        ...bindModern,
         seededFromPublished ? 1 : 0,
         Number.isInteger(basePublishedRevision) ? basePublishedRevision : null,
         ...gateBindings
-      ).run();
+      ));
     } catch (error) {
       if (String(error?.message || error).includes("UNIQUE constraint failed")) {
         throw new DraftConflictError(`Draft "${draftId}" already exists`);
       }
-      // Older local D1 DBs may lack document_stale until migrate; retry without it.
-      if (/document_stale|no such column/i.test(String(error?.message || error))) {
-        result = await this.database.prepare(insert({
+      // Older local D1 DBs may lack document_stale until migrate. That retry
+      // still writes classification_json. A database missing the column fails
+      // here instead of accepting a draft that later saves cannot update.
+      const message = String(error?.message || error);
+      if (/no such column/i.test(message) && /document_stale/i.test(message)) {
+        result = await runDraftWrite(this.database.prepare(insert({
           names: `id, puzzle_id, owner_subject, title, status,
             document, content_hash, base_commit_sha,
             created_at, updated_at, revision,
-            content_json, pedagogy_json, provenance_json`,
-          values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?"
-        })).bind(...bindFresh, ...gateBindings).run();
+            content_json, pedagogy_json, classification_json, provenance_json`,
+          values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?, ?"
+        })).bind(...bindModern, ...gateBindings));
       } else {
         throw error;
       }
@@ -355,12 +397,12 @@ export class D1DraftRepository extends DraftRepository {
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
-    const result = await this.database.prepare(`
+    const result = await runDraftWrite(this.database.prepare(`
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
           document_stale = 0,
-          content_json = ?, pedagogy_json = ?, provenance_json = ?
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof materialized.id === "string" ? materialized.id : null,
@@ -370,11 +412,12 @@ export class D1DraftRepository extends DraftRepository {
       now,
       domains.content,
       domains.pedagogy,
+      domains.classification,
       domains.provenance,
       draftId,
       owner.subject,
       expectedRevision
-    ).run();
+    ));
     if (changes(result) !== 1) {
       const latest = await this.get({ draftId, actor });
       throw new DraftConflictError(
@@ -407,7 +450,7 @@ export class D1DraftRepository extends DraftRepository {
   }) {
     assertDraftId(draftId);
     if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
-      throw new Error("saveDomain requires domain content or pedagogy");
+      throw new Error(`saveDomain requires domain ${AUTHORING_WRITE_DOMAINS.join(", ")}`);
     }
     if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
       throw new Error("expectedRevision must be a positive integer");
@@ -441,31 +484,27 @@ export class D1DraftRepository extends DraftRepository {
     // Seed any missing domain columns from the assembled snapshot so the first
     // focused save on a pre-domain row does not drop sibling fields when the
     // document cache is marked stale.
-    const contentJson = domain === "content" || current.content_json == null
-      ? domains.content
-      : current.content_json;
-    const pedagogyJson = domain === "pedagogy" || current.pedagogy_json == null
-      ? domains.pedagogy
-      : current.pedagogy_json;
-    const result = await this.database.prepare(`
+    const columns = domainColumnValues(current, domain, domains);
+    const result = await runDraftWrite(this.database.prepare(`
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
           document_stale = 1,
-          content_json = ?, pedagogy_json = ?, provenance_json = ?
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof materialized.id === "string" ? materialized.id : null,
       typeof materialized.title === "string" ? materialized.title : null,
       contentHash,
       now,
-      contentJson,
-      pedagogyJson,
-      domains.provenance,
+      columns.content,
+      columns.pedagogy,
+      columns.classification,
+      columns.provenance,
       draftId,
       owner.subject,
       expectedRevision
-    ).run();
+    ));
     if (changes(result) !== 1) {
       const latest = await this.get({ draftId, actor });
       throw new DraftConflictError(
@@ -501,10 +540,10 @@ export class D1DraftRepository extends DraftRepository {
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
-    const result = await this.database.prepare(`
+    const result = await runDraftWrite(this.database.prepare(`
       UPDATE puzzle_drafts
       SET document = ?, content_hash = ?, document_stale = 0,
-          content_json = ?, pedagogy_json = ?, provenance_json = ?,
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?,
           updated_at = ?
       WHERE id = ? AND owner_subject = ? AND revision = ? AND document_stale = 1
     `).bind(
@@ -512,12 +551,13 @@ export class D1DraftRepository extends DraftRepository {
       contentHash,
       domains.content,
       domains.pedagogy,
+      domains.classification,
       domains.provenance,
       now,
       draftId,
       owner.subject,
       Number(current.revision)
-    ).run();
+    ));
     if (changes(result) !== 1) {
       const latest = await this.get({ draftId, actor });
       if (latest.documentStale) {
@@ -556,12 +596,12 @@ export class D1DraftRepository extends DraftRepository {
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
-    const result = await this.database.prepare(`
+    const result = await runDraftWrite(this.database.prepare(`
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
           document_stale = 0,
-          content_json = ?, pedagogy_json = ?, provenance_json = ?
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof materialized.id === "string" ? materialized.id : null,
@@ -571,11 +611,12 @@ export class D1DraftRepository extends DraftRepository {
       now,
       domains.content,
       domains.pedagogy,
+      domains.classification,
       domains.provenance,
       draftId,
       owner.subject,
       expectedRevision
-    ).run();
+    ));
     if (changes(result) !== 1) {
       const latest = await this.get({ draftId, actor });
       throw new DraftConflictError(

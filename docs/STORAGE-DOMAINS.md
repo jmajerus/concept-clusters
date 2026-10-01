@@ -1,9 +1,9 @@
 # Storage Domains: Write-Domain Scoping in Concept Clusters
 
-*Status: the first production slice is implemented. `content` and `pedagogy`
-are the focused agent-write domains; the complete authored-content form remains
+*Status: implemented. `content`, `classification`, and `pedagogy` are the
+focused agent-write domains; the complete authored-content form remains
 available for compatibility, while protected metadata is hidden and preserved.
-Finer-grained partitioning remains future work.*
+Pass-level writes that patch a domain instead of replacing it remain future work.*
 
 This document describes the design and the reader-visible behavior of the
 Concept Clusters authoring boundary. The repository-level migration and
@@ -30,21 +30,23 @@ Write-domain scoping makes ownership explicit at the authoring boundary. The
 agent is given the smallest useful document for the pass it is performing;
 the infrastructure preserves and recombines the other domains.
 
-## The four domains
+## The five domains
 
 | Domain | Purpose | Current owner | Focused agent access |
 |---|---|---|---|
 | `content` | Educational meaning: puzzle identity, copy, clusters, and bridge core | Agent | Read/write |
-| `pedagogy` | Relationships, lenses, learning introductions, and discovery metadata | Agent | Read/write; content is read-only context |
+| `classification` | Disciplinary home, full membership, and subcategory placement | Agent | Read/write; id and title are read-only context |
+| `pedagogy` | Relationships, lenses, learning introductions, and remaining discovery metadata | Agent | Read/write; content and classification are read-only context |
 | `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
 | `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document |
 
-The first two domains are intentionally broad enough to be useful authoring
-surfaces. Content includes the core of a bridge and its cluster membership;
-pedagogy includes bridge relationship annotations and the surrounding
-discovery and lesson structure. Provenance is a compact document-level record,
-while system state belongs to the repository envelope rather than to authored
-JSON.
+The agent-write domains are broad enough to be useful authoring surfaces.
+Content includes the core of a bridge and its cluster membership. Classification
+is the shelf: primary category, membership, and subcategory placement. Pedagogy
+includes bridge relationship annotations, the lesson, and the remaining
+discovery fields (tags, level, related puzzles, and language). Provenance is a
+compact document-level record, while system state belongs to the repository
+envelope rather than to authored JSON.
 
 An authoring profile is a different axis from a storage domain. For example,
 the `vocabulary-context` profile spans the existing `content` and `pedagogy`
@@ -112,10 +114,12 @@ than by exception.
 
 ## What is implemented
 
-An MCP caller may request `content` or `pedagogy` when reading or saving a
-puzzle draft. A focused read contains only the selected writable projection;
-the pedagogy response additionally supplies content as read-only context. A
-focused save replaces the selected projection, preserves the protected
+An MCP caller may request `content`, `classification`, or `pedagogy` when reading or saving a
+puzzle draft. A focused read contains only the selected writable projection.
+Content and pedagogy responses include the classification fields as read-only
+context. A classification response includes id and title as read-only context,
+and a pedagogy response also includes the content projection. A focused
+save replaces the selected projection, preserves the protected
 domains, and lets the infrastructure reassemble a complete document for
 validation, publication, rendering, and Freeze.
 
@@ -171,12 +175,13 @@ domain may define omission as removal within that domain. A narrow contract
 must never cause an incomplete agent response to be mistaken for a complete
 document.
 
-The current implementation provides the first building blocks: focused
-`content` and `pedagogy` projections, phase-specific schema guidance, and a
+The current implementation provides focused
+`content`, `classification`, and `pedagogy` projections, phase-specific schema guidance, and a
 shared [field-ownership map](dev-briefs/authoring-domain-scoping-implementation.md#projection-and-sub-schema-refinement)
 (`modules/authoringFieldOwnership.js`) that both domain partition and phase
 schemas consume. Phase schemas bind to a write domain when they are a pure
-subset (`core` → content; `pedagogy` / `publication` → pedagogy); `review`
+subset (`core` → content; `classification` → classification;
+`pedagogy` / `publication` → pedagogy); `review`
 remains a cross-domain inspection view. A future refinement can make pass
 writes themselves composable (patch vs whole-domain replace), so a narrow
 phase-shaped response is never mistaken for a complete domain replacement.
@@ -234,11 +239,12 @@ not by asking an agent to preserve obsolete formats.
 
 ## The next boundary
 
-The current partition is deliberately a useful minimum: two agent-write
-domains plus protected provenance and infrastructure-owned system state.
-Further separation may be worthwhile where a field has a distinct owner or
-where a different model needs a different context. The criterion is whether
-the separation removes real decision and integrity burden without turning the
+Classification is a third agent-write domain because shelf placement has a
+different owner and a different decision from the board and the lesson.
+Tags, level, related puzzles, and language stay in pedagogy. Further
+separation may be worthwhile where a field has a distinct owner or where a
+different model needs a different context. The criterion is whether the
+separation removes real decision and integrity burden without turning the
 authoring contract into a collection of fragments that must be mentally
 reconstructed by the agent.
 

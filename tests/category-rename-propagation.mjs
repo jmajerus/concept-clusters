@@ -203,12 +203,13 @@ export async function run() {
     after: puzzleDocument
   }]);
   const puzzleUpdate = puzzleDatabase.batches[0][0];
-  assert.match(puzzleUpdate.sql, /content_json = \?, pedagogy_json = \?, provenance_json = \?/);
+  assert.match(puzzleUpdate.sql, /content_json = \?, pedagogy_json = \?, classification_json = \?, provenance_json = \?/);
   const storedContent = JSON.parse(puzzleUpdate.params[5]);
   const storedPedagogy = JSON.parse(puzzleUpdate.params[6]);
   assert.equal(storedContent.bridges[0].relationKind, undefined);
   assert.equal(storedPedagogy.bridges[0].relationKind, "contrast");
-  assert.deepEqual(JSON.parse(puzzleUpdate.params[7]), puzzleDocument.provenance);
+  assert.equal(JSON.parse(puzzleUpdate.params[7]).category, puzzleDocument.category);
+  assert.deepEqual(JSON.parse(puzzleUpdate.params[8]), puzzleDocument.provenance);
 
   await assert.rejects(
     () => applyD1Changes(fakeDatabase({ changes: 0 }), [{

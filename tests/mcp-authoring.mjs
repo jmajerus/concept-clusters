@@ -121,6 +121,10 @@ export async function run() {
 
     const listed = await request("tools/list", {});
     const toolNames = listed.result.tools.map(tool => tool.name);
+    const guidanceTool = listed.result.tools.find(tool => tool.name === "get_authoring_guidance");
+    const schemaTool = listed.result.tools.find(tool => tool.name === "get_authoring_schema");
+    assert.match(guidanceTool.description, /core, review, pedagogy, classification, or publication/);
+    assert.match(schemaTool.description, /core, review, pedagogy, classification, or publication/);
     const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
     assert.match(saveTool.description, /^Every save requires expected_revision/);
     const revisionField = saveTool.inputSchema.properties.expected_revision;
@@ -338,7 +342,7 @@ export async function run() {
     assert.equal(authoringSchema.result.structuredContent.phase, undefined);
 
     const phasedSchemas = {};
-    for (const phase of ["core", "review", "pedagogy", "publication"]) {
+    for (const phase of ["core", "review", "pedagogy", "classification", "publication"]) {
       const response = await request("tools/call", {
         name: "get_authoring_schema",
         arguments: { phase }
@@ -786,10 +790,23 @@ export async function run() {
     );
     assert.match(
       triviaPublicationGuidance.result.structuredContent.markdown,
+      /domain=classification/
+    );
+
+    const triviaClassificationGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "classification", profile: "trivia-quiz" }
+    });
+    assert.equal(
+      triviaClassificationGuidance.result.structuredContent.profile,
+      "trivia-quiz"
+    );
+    assert.match(
+      triviaClassificationGuidance.result.structuredContent.markdown,
       /Trivia is the current domain-less category convention/
     );
     assert.match(
-      triviaPublicationGuidance.result.structuredContent.markdown,
+      triviaClassificationGuidance.result.structuredContent.markdown,
       /Do not infer or require profile=trivia-quiz from\s+category=trivia/
     );
     assert.doesNotMatch(
@@ -1399,6 +1416,69 @@ export async function run() {
     assert.equal(
       seededAgain.result.structuredContent.draft.revision,
       seeded.result.structuredContent.draft.revision
+    );
+
+    const beforeShelf = seeded.result.structuredContent.draft.document;
+    const reassigned = await request("tools/call", {
+      name: "reassign_puzzle_classifications",
+      arguments: {
+        assignments: [
+          {
+            puzzle_id: "energy-flow",
+            category: "biology",
+            subcategories: { biology: "foundations" }
+          },
+          { puzzle_id: "missing-shelf-puzzle", category: "biology" },
+          {
+            puzzle_id: "energy-flow",
+            category: "biology",
+            subcategories: { biology: "not-a-subcategory" }
+          }
+        ]
+      }
+    });
+    assert.equal(reassigned.result.isError, undefined);
+    const shelfResults = reassigned.result.structuredContent.results;
+    assert.equal(shelfResults[0].ok, true);
+    assert.equal(shelfResults[0].category, "biology");
+    assert.deepEqual(shelfResults[0].subcategories, { biology: "foundations" });
+    assert.equal(shelfResults[1].ok, false);
+    assert.equal(shelfResults[2].ok, false);
+    const afterShelf = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow" }
+    });
+    const shelfDocument = afterShelf.result.structuredContent.draft.document;
+    assert.equal(shelfDocument.category, "biology");
+    assert.deepEqual(shelfDocument.subcategories, { biology: "foundations" });
+    assert.deepEqual(shelfDocument.lenses, beforeShelf.lenses);
+    assert.deepEqual(shelfDocument.clusters, beforeShelf.clusters);
+
+    // A held publish that fails validation does not undo the classification
+    // save, and ok stays true so a caller does not retry a write that landed.
+    const unpublishedShelf = await request("tools/call", {
+      name: "reassign_puzzle_classifications",
+      arguments: {
+        publish_to_authoring: true,
+        assignments: [{
+          puzzle_id: "zxqv-mcp-search-draft",
+          category: "biology"
+        }]
+      }
+    });
+    assert.equal(unpublishedShelf.result.isError, undefined);
+    const unpublished = unpublishedShelf.result.structuredContent.results[0];
+    assert.equal(unpublished.ok, true);
+    assert.equal(unpublished.published, false);
+    assert.ok(unpublished.publicationErrors.length > 0);
+    assert.match(unpublishedShelf.result.content[0].text, /saved but not published/);
+    const heldDraft = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "zxqv-mcp-search-draft", domain: "classification" }
+    });
+    assert.equal(
+      heldDraft.result.structuredContent.draft.document.category,
+      "biology"
     );
 
     await verifyStdioEntrypoint();

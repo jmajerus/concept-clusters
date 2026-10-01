@@ -13,10 +13,13 @@ import {
   DERIVED_ROOT_FIELDS,
   MCP_EXCLUDED_ROOT_FIELDS,
   WRITE_ONCE_ROOT_FIELDS,
+  CLASSIFICATION_ROOT_FIELDS,
+  CLASSIFICATION_STORED_ROOT_FIELDS,
   PEDAGOGY_BRIDGE_FIELDS,
   PEDAGOGY_ROOT_FIELDS,
   PEDAGOGY_STORED_ROOT_FIELDS,
   PROTECTED_ROOT_FIELDS,
+  ROOT_FIELD_OWNERSHIP,
   RETIRED_ROOT_FIELDS,
   SYSTEM_ROOT_FIELDS
 } from "./authoringFieldOwnership.js";
@@ -219,12 +222,15 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
   const authored = stripSystemAuthoredMetadata(document);
   const content = {};
   const pedagogy = {};
+  const classification = {};
   let provenance;
 
   for (const [key, value] of Object.entries(authored)) {
     if (key === "bridges") continue;
     if (key === "provenance") {
       provenance = clone(value);
+    } else if (CLASSIFICATION_STORED_ROOT_FIELDS.has(key)) {
+      classification[key] = clone(value);
     } else if (PEDAGOGY_STORED_ROOT_FIELDS.has(key)) {
       pedagogy[key] = clone(value);
     } else {
@@ -242,6 +248,7 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
   return {
     content,
     pedagogy,
+    classification,
     provenance,
     system: clone(system) || {}
   };
@@ -255,16 +262,21 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
 export function assembleAuthoredDocument({
   content = {},
   pedagogy = {},
+  classification = {},
   provenance = undefined
 } = {}) {
   assertObject(content, "Content domain");
   assertObject(pedagogy, "Pedagogy domain");
+  assertObject(classification, "Classification domain");
   const document = clone(content);
   if (hasOwn(content, "bridges")) {
     document.bridges = assembleBridges(content.bridges, pedagogy.bridges);
   }
   for (const [key, value] of Object.entries(pedagogy)) {
     if (key === "bridges") continue;
+    document[key] = clone(value);
+  }
+  for (const [key, value] of Object.entries(classification)) {
     document[key] = clone(value);
   }
   if (provenance !== undefined && provenance !== null) {
@@ -304,10 +316,28 @@ function publicPedagogyDomain(value) {
   return result;
 }
 
+function contextForDomain(source, domainName) {
+  const result = {};
+  if (!isObject(source)) return result;
+  for (const [key, meta] of Object.entries(ROOT_FIELD_OWNERSHIP)) {
+    if (!meta.contextFor?.includes(domainName) || !hasOwn(source, key)) continue;
+    result[key] = clone(source[key]);
+  }
+  return result;
+}
+
+function omitClassificationFields(domain) {
+  if (!isObject(domain)) return domain;
+  const next = { ...domain };
+  for (const key of CLASSIFICATION_STORED_ROOT_FIELDS) delete next[key];
+  return next;
+}
+
 /**
  * Return an agent-facing projection. Pedagogy receives content as read-only
- * context because annotations reference clusters and bridges, but only the
- * returned `document` is writable.
+ * context because annotations reference clusters and bridges. Content and
+ * pedagogy also receive classification as read-only context. Classification
+ * receives id and title. Only the returned `document` is writable.
  */
 export function projectAuthoredDocument(document, domain = "complete") {
   if (domain === "complete") {
@@ -318,12 +348,26 @@ export function projectAuthoredDocument(document, domain = "complete") {
   }
   const domains = partitionAuthoredDocument(document);
   if (domain === "content") {
-    return { domain, document: publicDomain(domains.content) };
+    return {
+      domain,
+      document: publicDomain(domains.content),
+      context: publicDomain(domains.classification)
+    };
+  }
+  if (domain === "classification") {
+    return {
+      domain,
+      document: publicDomain(domains.classification),
+      context: contextForDomain(domains.content, "classification")
+    };
   }
   return {
     domain,
     document: publicPedagogyDomain(domains.pedagogy),
-    context: publicDomain(domains.content)
+    context: {
+      ...publicDomain(domains.content),
+      ...publicDomain(domains.classification)
+    }
   };
 }
 
@@ -395,8 +439,18 @@ function assertDomainPayload(domain, incoming) {
     if (DERIVED_ROOT_FIELDS.has(key)) {
       throw new Error(`${key} is derived and cannot be written through the ${domain} domain`);
     }
+    if (domain === "content" && CLASSIFICATION_ROOT_FIELDS.has(key)) {
+      throw new Error(`${key} belongs to the classification domain`);
+    }
     if (domain === "content" && PEDAGOGY_ROOT_FIELDS.has(key)) {
       throw new Error(`${key} belongs to the pedagogy domain`);
+    }
+    if (domain === "classification" && !CLASSIFICATION_ROOT_FIELDS.has(key)) {
+      const owner = PEDAGOGY_ROOT_FIELDS.has(key) ? "pedagogy" : "content";
+      throw new Error(`${key} belongs to the ${owner} domain`);
+    }
+    if (domain === "pedagogy" && key !== "bridges" && CLASSIFICATION_ROOT_FIELDS.has(key)) {
+      throw new Error(`${key} belongs to the classification domain`);
     }
     if (domain === "pedagogy" && key !== "bridges" && !PEDAGOGY_ROOT_FIELDS.has(key)) {
       throw new Error(`${key} belongs to the content domain`);
@@ -482,6 +536,7 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
   const next = {
     content: current.content,
     pedagogy: current.pedagogy,
+    classification: current.classification,
     provenance: current.provenance
   };
   if (domain === "content") {
@@ -489,6 +544,8 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     // makes omission meaningful (for example, removing an optional info
     // field), while the other logical domains remain untouched.
     next.content = clone(incoming);
+  } else if (domain === "classification") {
+    next.classification = clone(incoming);
   } else {
     const preservedProtected = Object.fromEntries(
       [...PEDAGOGY_STORED_ROOT_FIELDS]
@@ -528,6 +585,7 @@ export function storedDomainDocuments(document) {
   return {
     content: JSON.stringify(domains.content),
     pedagogy: JSON.stringify(domains.pedagogy),
+    classification: JSON.stringify(domains.classification),
     provenance: domains.provenance === undefined
       ? null
       : JSON.stringify(domains.provenance)
@@ -538,12 +596,24 @@ export function assembleStoredDomainDocuments({
   document,
   content = null,
   pedagogy = null,
+  classification = null,
   provenance = null
 } = {}) {
   const fallback = document ? partitionAuthoredDocument(document) : null;
+  // A stored classification column is authoritative, including when it omits
+  // a field. Legacy rows leave the column null and still carry those fields
+  // inside the content and pedagogy blobs.
+  const classificationProvided = classification !== null && classification !== undefined;
   return assembleAuthoredDocument({
-    content: content ?? fallback?.content ?? {},
-    pedagogy: pedagogy ?? fallback?.pedagogy ?? {},
+    content: classificationProvided
+      ? omitClassificationFields(content ?? fallback?.content ?? {})
+      : (content ?? fallback?.content ?? {}),
+    pedagogy: classificationProvided
+      ? omitClassificationFields(pedagogy ?? fallback?.pedagogy ?? {})
+      : (pedagogy ?? fallback?.pedagogy ?? {}),
+    classification: classificationProvided
+      ? classification
+      : (fallback?.classification ?? {}),
     provenance: provenance ?? fallback?.provenance
   });
 }
@@ -573,6 +643,9 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
   const pedagogy = row.pedagogy_json == null
     ? null
     : parseJson(row.pedagogy_json, "Stored pedagogy domain");
+  const classification = row.classification_json == null
+    ? null
+    : parseJson(row.classification_json, "Stored classification domain");
   const provenance = row.provenance_json == null
     ? null
     : parseJson(row.provenance_json, "Stored provenance domain");
@@ -587,10 +660,11 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
       document: undefined,
       content,
       pedagogy,
+      classification,
       provenance
     });
   }
-  if (content != null || pedagogy != null || provenance != null) {
+  if (content != null || pedagogy != null || classification != null || provenance != null) {
     return assembleStoredDomainDocuments({
       document: row.document == null
         ? undefined
@@ -599,6 +673,7 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
           : row.document),
       content,
       pedagogy,
+      classification,
       provenance
     });
   }

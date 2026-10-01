@@ -75,7 +75,7 @@ fingerprints are generated or stored by infrastructure rather than supplied
 by an agent.
 
 The guidance and schema tools accept an optional `phase`: `core`, `review`,
-`pedagogy`, `publication`, or `complete`. They also accept the optional
+`pedagogy`, `classification`, `publication`, or `complete`. They also accept the optional
 authoring profile: `vocabulary-context` or `trivia-quiz`. An unprofiled
 guidance response is profile-neutral. Supplying a profile selects that
 profile's compact overview for `complete`, or only its focused brief for a
@@ -85,13 +85,14 @@ kind and set it explicitly for `trivia-quiz` or `vocabulary-context`. It is
 independent of taxonomy and lens mode, belongs to the existing `content`
 domain, and creates no new storage projection. Draft reads and writes also
 accept an optional
-`domain`: `content`, `pedagogy`, or the
+`domain`: `content`, `classification`, `pedagogy`, or the
 backwards-compatible `complete` default. A focused domain is a real write
 boundary, not just prose guidance:
 
-- `domain: "content"` returns the core puzzle document.
+- `domain: "content"` returns the core puzzle document and the shelf as read-only context.
+- `domain: "classification"` returns `category`, `categories`, and `subcategories`, plus id and title as read-only context.
 - `domain: "pedagogy"` returns the annotation/learning metadata and a
-  read-only `context` containing content needed to refer to it.
+  read-only `context` containing content and classification.
 - `domain: "complete"` preserves the whole authored-content compatibility
   contract while protected metadata remains hidden and server-preserved.
 
@@ -102,7 +103,7 @@ replacing authored fields, materialize the complete document, and follow the
 same validation/publication path. Omitting an optional field from the selected
 projection removes it. The legacy human-owned `learningIntroduction.credit`
 is not exposed and is preserved when its introduction remains present.
-`repair: true` is accepted for complete or content saves, not pedagogy saves,
+`repair: true` is accepted for complete or content saves, not classification or pedagogy saves,
 because it repairs content-domain fields. The save still requires
 `expected_revision`.
 
@@ -119,8 +120,11 @@ accumulating draft:
 3. `pedagogy` owns lenses and learning introductions. They may be authored at
    different times: revisiting this phase to add a later introduction must
    preserve lenses already present unless they independently need revision.
-4. `publication` adds only useful discovery and publication metadata
-   (categories, tags, level, related puzzles, and language). Attribution and
+4. `classification` sets the shelf: primary category, full membership, and
+   subcategory placement. Get and save that projection with
+   `domain=classification`.
+5. `publication` adds only useful discovery and publication metadata
+   (tags, level, related puzzles, and language). Attribution and
    rights metadata stay protected and are not part of the agent schema.
 
 For `profile: "vocabulary-context"`, the core pass treats clusters as tight
@@ -145,8 +149,9 @@ Before every later pass, call `get_puzzle_draft`, edit the latest document or
 selected domain, preserve all fields outside the selected domain, and send the
 full latest selected projection when saving. Focused `get_authoring_schema`
 responses bind pure phases to a write `domain` (`core` → `content`;
-`pedagogy` / `publication` → `pedagogy`); `review` omits `domain` because it
-mixes content inspection with pedagogy bridge annotations. A phase schema is a
+`classification` → `classification`; `pedagogy` / `publication` → `pedagogy`);
+`review` omits `domain` because it mixes content inspection with pedagogy
+bridge annotations. A phase schema is a
 focused field projection, not a standalone replacement schema or an independent
 validator; the complete schema resource remains canonical. Phases can be
 revisited in any order when their concern needs further work; they are not
@@ -164,7 +169,7 @@ The tools are:
 | Area | Tools |
 |---|---|
 | Published content | `list_puzzles`, `search_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` |
-| Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
+| Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `reassign_puzzle_classifications`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_catalogue_creation`, `preview_update_catalogue` |
 | Categories and catalogues | `create_category`, `update_category`, `create_catalogue`, `update_catalogue`, `update_meta_catalogue` |
 

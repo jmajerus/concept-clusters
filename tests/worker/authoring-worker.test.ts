@@ -807,8 +807,25 @@ describe("hosted authoring Worker", () => {
     expect(triviaPublicationGuidance.result.structuredContent.profile)
       .toBe("trivia-quiz");
     expect(triviaPublicationGuidance.result.structuredContent.markdown)
+      .toMatch(/domain=classification/);
+
+    const triviaClassificationGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-trivia-quiz-classification",
+      method: "tools/call",
+      params: {
+        name: "get_authoring_guidance",
+        arguments: { phase: "classification", profile: "trivia-quiz" }
+      }
+    });
+    const triviaClassificationGuidance = await rpcJson(triviaClassificationGuided) as {
+      result: { structuredContent: { profile: string; markdown: string } };
+    };
+    expect(triviaClassificationGuidance.result.structuredContent.profile)
+      .toBe("trivia-quiz");
+    expect(triviaClassificationGuidance.result.structuredContent.markdown)
       .toMatch(/Trivia is the current domain-less category convention/);
-    expect(triviaPublicationGuidance.result.structuredContent.markdown)
+    expect(triviaClassificationGuidance.result.structuredContent.markdown)
       .toMatch(/Do not infer or require profile=trivia-quiz from\s+category=trivia/);
     expect(triviaPublicationGuidance.result.structuredContent.markdown)
       .not.toMatch(/## Design judgment|Dutch tilt|Vocabulary-in-context/);
@@ -1238,7 +1255,8 @@ describe("hosted authoring Worker", () => {
     // authored document.
     await env.AUTHORING_DB.prepare(`
       UPDATE puzzle_drafts
-      SET content_json = NULL, pedagogy_json = NULL, provenance_json = NULL
+      SET content_json = NULL, pedagogy_json = NULL, classification_json = NULL,
+          provenance_json = NULL
       WHERE id = ?
     `).bind("domain-projection-fixture").run();
     const legacy = await repository.get({
@@ -1255,7 +1273,6 @@ describe("hosted authoring Worker", () => {
       projection: {
         id: document.id,
         title: "Legacy domain seed",
-        category: document.category,
         clusters: document.clusters,
         bridges: document.bridges.map(({ id, term, clusters, fact }) => ({
           id, term, clusters, fact
@@ -1265,14 +1282,18 @@ describe("hosted authoring Worker", () => {
       expectedRevision: legacy.revision
     });
     const seededRow = await env.AUTHORING_DB.prepare(
-      "SELECT document_stale, content_json, pedagogy_json FROM puzzle_drafts WHERE id = ?"
+      `SELECT document_stale, content_json, pedagogy_json, classification_json
+       FROM puzzle_drafts WHERE id = ?`
     ).bind("domain-projection-fixture").first() as {
       document_stale: number;
       content_json: string;
       pedagogy_json: string;
+      classification_json: string;
     };
     expect(Number(seededRow.document_stale)).toBe(1);
     expect(JSON.parse(seededRow.content_json).title).toBe("Legacy domain seed");
+    expect(JSON.parse(seededRow.content_json).category).toBeUndefined();
+    expect(JSON.parse(seededRow.classification_json).category).toBe(document.category);
     expect(JSON.parse(seededRow.pedagogy_json).lenses).toHaveLength(1);
     const seededAssembled = await repository.get({
       draftId: "domain-projection-fixture",
@@ -1295,7 +1316,7 @@ describe("hosted authoring Worker", () => {
       await env.AUTHORING_DB.prepare(`
         UPDATE puzzle_drafts
         SET document = ?, content_json = NULL, pedagogy_json = NULL,
-            provenance_json = NULL, document_stale = 0
+            classification_json = NULL, provenance_json = NULL, document_stale = 0
         WHERE id = ? AND owner_subject = ?
       `).bind(
         JSON.stringify({
@@ -1314,7 +1335,8 @@ describe("hosted authoring Worker", () => {
       await env.AUTHORING_DB.prepare(`
         UPDATE puzzle_drafts
         SET document = ?, content_hash = ?, content_json = NULL,
-            pedagogy_json = NULL, provenance_json = NULL, document_stale = 0
+            pedagogy_json = NULL, classification_json = NULL,
+            provenance_json = NULL, document_stale = 0
         WHERE id = ? AND owner_subject = ?
       `).bind(
         originalRow.document,

@@ -419,7 +419,7 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   search_puzzles covers the authoring corpus and your drafts (a draft
   overlays the same id). Set full_text=true when looking for a fact, lesson,
   or other prose rather than a title or board term.
-- Establish id, title, primary category, and two to six conceptually distinct
+- Establish id, title, and two to six conceptually distinct
   clusters for the default topic-based kind (follow the active specialized
   profile and schema for its permitted range), with their facts and terms.
   Each cluster needs two immediately recognizable seeds and one to five
@@ -434,6 +434,9 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   derived. If the map needs more than 32 nodes, or the subject has a natural
   seam that teaches better as two lessons, split it into relatedPuzzles.
   Do not fill toward 32.
+- The disciplinary home is classification, not part of this board pass. Set
+  category on the complete document at create time, or later with
+  domain=classification. A content save does not change it.
 - Carry approved inventory connections onto the board as bridges. Do not
   invent extras to make the graph connected. A disconnected board or no
   bridges is acceptable. Write each bridge fact now and make its local
@@ -531,20 +534,27 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   learning introduction long after the lenses exist; preserve those lenses
   unless the later lesson work reveals a substantive reason to change them.`;
 
+const CLASSIFICATION_PHASE_GUIDANCE = `## Classification pass
+
+- This pass owns the puzzle's shelf: primary \`category\`, optional \`categories\`, and optional \`subcategories\`.
+- \`category\` is the disciplinary home. When \`categories\` is present it is the full membership and its first id matches \`category\`. \`subcategories\` maps a category id to one registered subcategory id.
+- Retrieve get_puzzle_draft with domain=classification and save that same domain. The payload replaces the whole classification projection. Omitting \`categories\` or \`subcategories\` clears them. Omitting \`category\` clears the home; validate and publish still require one.
+- Register a category, and any subcategory id, on the category document before a puzzle references it.
+- Do not send lenses, the learning introduction, tags, level, or the board in this projection.`;
+
 const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 
-- Add only useful discovery and stewardship metadata: tags, secondary category
-  assignments, level, related puzzles, and language.
+- Add only useful discovery and stewardship metadata: tags, level, related puzzles, and language.
   Most are optional; omission is better than filler. The server supplies
   timestamps, revision metadata, and MCP-client attribution; protected
-  provenance and rights metadata are not authored in this pass.
+  provenance and rights metadata are not authored in this pass. Shelf
+  placement is the classification pass, saved with domain=classification.
 - Do not include learningIntroduction.credit, provenance, creator, license, or
   derivedFrom in an MCP document. Do not invent a reviewer name or treat roles
   or per-scope assistance entries as publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
-  judgment is genuinely clear, and add subcategories only when category browse
-  benefits from a stable subject split.
+  judgment is genuinely clear.
 - This pass binds to write domain pedagogy: retrieve get_puzzle_draft with
   domain=pedagogy, preserve lenses and learningIntroduction already present,
   and save that same domain. Do not send a publication-only object as a
@@ -554,7 +564,8 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   \`save_puzzle_draft\` for a confirmed final edit; this publishes a valid
   document to authoring play in that same call, but it remains held and is
   not cued for Freeze. Cue and Freeze are outside MCP. Set
-  \`category\` / \`categories\` / \`subcategories\` on this document. A category is
+  \`category\` / \`categories\` / \`subcategories\` with domain=classification.
+  A category is
   registered when its category-editor document is published to D1; create_category
   or update_category creates or revises that document, and a new category should
   be published before a puzzle references it. Add or remove catalogue
@@ -700,14 +711,20 @@ save lenses, lensMode, any multi-cluster preSolve choice, and
 learningIntroduction with domain=pedagogy.`,
   publication: `## Vocabulary-in-context publication pass
 
-- Keep Vocabulary as the stable taxonomy category when the puzzle belongs in
-  that cross-disciplinary collection. Preserve the authored
-  puzzleKind: "vocabulary-context" independently of that category; the
-  profile argument selects guidance, while the kind is content metadata, not a
-  third document domain.
-- Publish only useful discovery metadata. Do not flatten the puzzle into a
+- Preserve the authored puzzleKind: "vocabulary-context"; the profile argument
+  selects guidance, while the kind is content metadata. The taxonomy category
+  is saved with domain=classification, not in this pass.
+- Publish only useful discovery metadata: tags, level, related puzzles, and
+  language. Do not flatten the puzzle into a
   generic quiz description: its purpose is to teach precise usage among close
-  lexical neighbors.`
+  lexical neighbors.`,
+  classification: `## Vocabulary-in-context classification pass
+
+- Keep Vocabulary as the stable taxonomy category when the puzzle belongs in
+  that cross-disciplinary collection. Save category, categories, and
+  subcategories with domain=classification.
+- Do not change category merely to select this profile, and do not send the
+  board or the lenses in this projection.`
 });
 
 const TRIVIA_QUIZ_PROFILE_OVERVIEW = `## Trivia-quiz profile
@@ -756,8 +773,8 @@ const TRIVIA_QUIZ_PROFILE_GUIDANCE = Object.freeze({
   not be invented to connect the whole board.
 
 This is a content-domain pass: save the clusters, terms, facts, and genuine
-bridge cores with domain=content. The category is chosen separately during
-publication; selecting this profile does not require category=trivia.`,
+bridge cores with domain=content. The category is chosen with
+domain=classification; selecting this profile does not require category=trivia.`,
   review: `## Trivia-quiz review pass
 
 - Check that each cluster is a coherent, defensible group and that its fact
@@ -809,14 +826,19 @@ This is a pedagogy-domain pass: retrieve the pedagogy projection and save
 lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
   publication: `## Trivia-quiz publication pass
 
+- Preserve puzzleKind: "trivia-quiz" as the authored puzzle type; the MCP
+  profile selects guidance but does not replace the document field. Publish
+  only useful discovery metadata for the actual puzzle: tags, level, related
+  puzzles, and language. The taxonomy category is saved with
+  domain=classification.`,
+  classification: `## Trivia-quiz classification pass
+
 - Choose category for discovery and disciplinary home, independently of this
   profile. Trivia is the current domain-less category convention for
   cross-disciplinary fact collections; use a disciplinary category when that
-  is the better browse home. Do not infer or require profile=trivia-quiz from
-  category=trivia, and do not change category just to select this profile.
-- Preserve puzzleKind: "trivia-quiz" as the authored puzzle type; the MCP
-  profile selects guidance but does not replace the document field. Publish
-  only useful discovery metadata for the actual puzzle.`
+  is the better browse home. Save it with domain=classification.
+- Do not infer or require profile=trivia-quiz from category=trivia, and do
+  not change category just to select this profile.`
 });
 
 const PROFILE_PHASE_PREAMBLE = `# Progressive profile authoring
@@ -836,19 +858,20 @@ const AUTHORING_PROFILE_GUIDANCE = Object.freeze({
   [VOCABULARY_CONTEXT_PROFILE]: Object.freeze({
     overview: VOCABULARY_CONTEXT_PROFILE_OVERVIEW,
     phases: VOCABULARY_CONTEXT_PROFILE_GUIDANCE,
-    routing: `Request profile=vocabulary-context with phase=core, review, pedagogy, or
-publication for the focused brief. Core owns semantic neighborhoods and
+    routing: `Request profile=vocabulary-context with phase=core, review, pedagogy,
+classification, or publication for the focused brief. Core owns semantic neighborhoods and
 bridge cores in content; review checks usage distinctions across the
 accumulated draft; pedagogy authors contextual lenses and learning
-introductions; publication adds ordinary discovery metadata.`
+introductions; classification sets the shelf; publication adds ordinary discovery metadata.`
   }),
   [TRIVIA_QUIZ_PROFILE]: Object.freeze({
     overview: TRIVIA_QUIZ_PROFILE_OVERVIEW,
     phases: TRIVIA_QUIZ_PROFILE_GUIDANCE,
-    routing: `Request profile=trivia-quiz with phase=core, review, pedagogy, or
-publication for the focused brief. Core co-designs the board and its question
+    routing: `Request profile=trivia-quiz with phase=core, review, pedagogy,
+classification, or publication for the focused brief. Core co-designs the board and its question
 space; review checks factual accuracy, group coherence, and answer mappings;
-pedagogy authors the quiz sequence; publication chooses taxonomy independently.`
+pedagogy authors the quiz sequence; classification chooses the taxonomy;
+publication adds ordinary discovery metadata.`
   })
 });
 
@@ -875,6 +898,7 @@ export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
   core: `${PHASE_PREAMBLE}\n\n${CORE_PHASE_GUIDANCE}`,
   review: `${PHASE_PREAMBLE}\n\n${REVIEW_PHASE_GUIDANCE}`,
   pedagogy: `${PHASE_PREAMBLE}\n\n${PEDAGOGY_PHASE_GUIDANCE}`,
+  classification: `${PHASE_PREAMBLE}\n\n${CLASSIFICATION_PHASE_GUIDANCE}`,
   publication: `${PHASE_PREAMBLE}\n\n${PUBLICATION_PHASE_GUIDANCE}`
 });
 
@@ -882,8 +906,10 @@ export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
   catalogue: `# Catalogue and category workflow
 
 A puzzle's category association is on the puzzle document: stable category id in \`category\`,
-optional \`categories\`, and optional \`subcategories\`. Save those with
-save_puzzle_draft after its category-editor document is published to D1. A
+optional \`categories\`, and optional \`subcategories\`. Save that projection with
+domain=classification. To move many puzzles at once, call
+reassign_puzzle_classifications; it writes the same projection and does not
+edit lenses. Save after the category-editor document is published to D1. A
 published category document is the registration event. Create category
 metadata (title, domain, blurb, subcategory definitions) with create_category /
 update_category — the same D1

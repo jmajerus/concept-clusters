@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 
 export const name =
@@ -44,7 +45,6 @@ export async function run() {
       projection: {
         id: "column-level",
         title: "Content retitled",
-        category: "science",
         clusters: document.clusters,
         bridges: [{
           id: "b",
@@ -57,6 +57,7 @@ export async function run() {
     });
     assert.equal(afterContent.documentStale, true);
     assert.equal(afterContent.document.title, "Content retitled");
+    assert.equal(afterContent.document.category, "science");
     assert.equal(afterContent.document.lenses[0].id, "lens");
     assert.equal(afterContent.document.bridges[0].relationKind, "contrast");
 
@@ -66,6 +67,8 @@ export async function run() {
     assert.equal(onDisk.documentStale, true);
     assert.equal(onDisk.document.title, "Column level");
     assert.match(onDisk.domains.content, /Content retitled/);
+    assert.equal(JSON.parse(onDisk.domains.content).category, undefined);
+    assert.equal(JSON.parse(onDisk.domains.classification).category, "science");
 
     const afterPedagogy = await store.replaceDomain({
       draftId: "column-level",
@@ -125,7 +128,6 @@ export async function run() {
       projection: {
         id: "legacy-pre-domain",
         title: "Legacy retitled",
-        category: "science",
         clusters: document.clusters,
         bridges: document.bridges.map(({ id, term, clusters, fact }) => ({
           id, term, clusters, fact
@@ -142,6 +144,8 @@ export async function run() {
     assert.ok(legacyDisk.domains?.content);
     assert.ok(legacyDisk.domains?.pedagogy);
     assert.match(legacyDisk.domains.pedagogy, /"id":"lens"/);
+    assert.equal(JSON.parse(legacyDisk.domains.content).category, undefined);
+    assert.equal(JSON.parse(legacyDisk.domains.classification).category, "science");
 
     // Revert after a focused save must clear documentStale.
     const afterPop = await store.popWorkingCopy({
@@ -160,7 +164,6 @@ export async function run() {
     const contentProjection = {
       id: "race-domain",
       title: "Race content",
-      category: "science",
       clusters: document.clusters,
       bridges: document.bridges.map(({ id, term, clusters, fact }) => ({
         id, term, clusters, fact
@@ -214,6 +217,62 @@ export async function run() {
       }),
       /missing durable content\/pedagogy/
     );
+    const legacyShelf = assembleAuthoredDocumentFromDraftRow({
+      document_stale: 1,
+      content_json: JSON.stringify({ id: "x", title: "T", category: "science" }),
+      pedagogy_json: JSON.stringify({
+        categories: ["science"],
+        lenses: [{ id: "lens", prompt: "P", explanation: "E" }]
+      }),
+      classification_json: null,
+      provenance_json: null
+    });
+    assert.equal(legacyShelf.category, "science");
+    assert.deepEqual(legacyShelf.categories, ["science"]);
+    assert.equal(legacyShelf.lenses[0].id, "lens");
+    const splitShelf = assembleAuthoredDocumentFromDraftRow({
+      document_stale: 1,
+      content_json: JSON.stringify({ id: "x", title: "T", category: "science" }),
+      pedagogy_json: JSON.stringify({
+        categories: ["science"],
+        lenses: [{ id: "lens", prompt: "P", explanation: "E" }]
+      }),
+      classification_json: JSON.stringify({ category: "biology" }),
+      provenance_json: null
+    });
+    assert.equal(splitShelf.category, "biology");
+    assert.equal(splitShelf.categories, undefined);
+    assert.equal(splitShelf.lenses[0].id, "lens");
+
+    // A database that has not applied 0028 must fail the insert. Succeeding
+    // without classification_json would return a draft later writes cannot save.
+    const attemptedSql = [];
+    const unmigrated = new D1DraftRepository({
+      prepare(sql) {
+        return {
+          bind() {
+            return this;
+          },
+          async run() {
+            attemptedSql.push(sql);
+            if (attemptedSql.length === 1) {
+              throw new Error("no such column: document_stale");
+            }
+            throw new Error("no such column: classification_json");
+          }
+        };
+      }
+    });
+    await assert.rejects(
+      () => unmigrated.create({
+        draftId: "unmigrated-shelf",
+        document,
+        actor: { subject: "owner" }
+      }),
+      /0028_classification_domain/
+    );
+    assert.equal(attemptedSql.length, 2);
+    assert.match(attemptedSql[1], /classification_json/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
