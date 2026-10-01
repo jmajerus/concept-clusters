@@ -922,7 +922,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft. Set profile=vocabulary-context or profile=trivia-quiz to select only that profile's compact overview or focused brief; omit puzzleKind for the default topic-based type and set it only for a specialized authored type. Profiles are independent of category and do not append rules to generic guidance or change the write domain. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
+    description: "Return profile-neutral complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, classification, or publication pass over one accumulating draft. Set profile=vocabulary-context or profile=trivia-quiz to select only that profile's compact overview or focused brief; omit puzzleKind for the default topic-based type and set it only for a specialized authored type. Profiles are independent of category and do not append rules to generic guidance or change the write domain. Taxonomy claims must come from list_categories/get_category, which read D1; do not use Git category files as a live source.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
   }, tracked("get_authoring_guidance", safe(async ({ phase, profile }) => success(
@@ -933,7 +933,7 @@ export function createAuthoringMcpServer({
   server.registerTool("get_authoring_schema", {
     title: "Get authoring schema",
     description:
-      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Set profile=vocabulary-context or profile=trivia-quiz to select focused guidance; the canonical document schema includes the authored puzzleKind field, and category does not select the profile. Phase projections preserve omitted fields and are not standalone replacement schemas.",
+      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, classification, or publication pass. Set profile=vocabulary-context or profile=trivia-quiz to select focused guidance; the canonical document schema includes the authored puzzleKind field, and category does not select the profile. Phase projections preserve omitted fields and are not standalone replacement schemas.",
     inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
   }, tracked("get_authoring_schema", safe(async ({ phase, profile }) => success(
@@ -1300,7 +1300,7 @@ export function createAuthoringMcpServer({
   server.registerTool("reassign_puzzle_classifications", {
     title: "Reassign puzzle classifications",
     description:
-      "Write the classification projection for many puzzles in one call. Each assignment sets category, and optionally categories and subcategories, for one puzzle id. The server opens a working copy from the published row when this owner has none, then saves domain=classification. Lenses and the board are left unchanged. One bad assignment does not hide the others: the result lists each puzzle id with ok or errors. Set publish_to_authoring=true to publish each successful save held; it does not Cue or Freeze. Call this tool one invocation at a time.",
+      "Write the classification projection for many puzzles in one call. Each assignment sets category, and optionally categories and subcategories, for one puzzle id. The server opens a working copy from the published row when this owner has none, then saves domain=classification. Lenses and the board are left unchanged. One bad assignment does not hide the others: the result lists each puzzle id with ok or errors. ok means that classification save succeeded. Set publish_to_authoring=true to publish each successful save held; a publication failure leaves ok true and reports published false with publicationErrors. It does not Cue or Freeze. Call this tool one invocation at a time.",
     inputSchema: z.object({
       assignments: z.array(z.object({
         puzzle_id: draftIdSchema,
@@ -1373,14 +1373,18 @@ export function createAuthoringMcpServer({
         let published = null;
         let publicationErrors = null;
         if (publish_to_authoring) {
-          const publication = await publishHeldDraft(draft, taxonomy);
-          draft = publication.draft;
-          published = publication.published;
-          publicationErrors = publication.publicationErrors;
+          try {
+            const publication = await publishHeldDraft(draft, taxonomy);
+            draft = publication.draft;
+            published = publication.published;
+            publicationErrors = publication.publicationErrors;
+          } catch (error) {
+            publicationErrors = [error?.message || String(error)];
+          }
         }
         results.push({
           puzzle_id: puzzleId,
-          ok: !publicationErrors,
+          ok: true,
           draft_id: draft.draftId || draftId,
           revision: draft.revision,
           category: draft.document?.category,
@@ -1402,10 +1406,12 @@ export function createAuthoringMcpServer({
       }
     }
     const failed = results.filter(result => !result.ok).length;
+    const unpublished = results.filter(result => result.publicationErrors?.length).length;
+    const summary = failed
+      ? `Reassigned ${results.length - failed} of ${results.length} classifications; ${failed} failed.`
+      : `Reassigned ${results.length} classifications.`;
     return success(
-      failed
-        ? `Reassigned ${results.length - failed} of ${results.length} classifications; ${failed} failed.`
-        : `Reassigned ${results.length} classifications.`,
+      unpublished ? `${summary} ${unpublished} saved but not published.` : summary,
       { results }
     );
   })));

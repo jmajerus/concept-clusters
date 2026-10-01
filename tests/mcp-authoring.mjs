@@ -121,6 +121,10 @@ export async function run() {
 
     const listed = await request("tools/list", {});
     const toolNames = listed.result.tools.map(tool => tool.name);
+    const guidanceTool = listed.result.tools.find(tool => tool.name === "get_authoring_guidance");
+    const schemaTool = listed.result.tools.find(tool => tool.name === "get_authoring_schema");
+    assert.match(guidanceTool.description, /core, review, pedagogy, classification, or publication/);
+    assert.match(schemaTool.description, /core, review, pedagogy, classification, or publication/);
     const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
     assert.match(saveTool.description, /^Every save requires expected_revision/);
     const revisionField = saveTool.inputSchema.properties.expected_revision;
@@ -1449,6 +1453,33 @@ export async function run() {
     assert.deepEqual(shelfDocument.subcategories, { biology: "foundations" });
     assert.deepEqual(shelfDocument.lenses, beforeShelf.lenses);
     assert.deepEqual(shelfDocument.clusters, beforeShelf.clusters);
+
+    // A held publish that fails validation does not undo the classification
+    // save, and ok stays true so a caller does not retry a write that landed.
+    const unpublishedShelf = await request("tools/call", {
+      name: "reassign_puzzle_classifications",
+      arguments: {
+        publish_to_authoring: true,
+        assignments: [{
+          puzzle_id: "zxqv-mcp-search-draft",
+          category: "biology"
+        }]
+      }
+    });
+    assert.equal(unpublishedShelf.result.isError, undefined);
+    const unpublished = unpublishedShelf.result.structuredContent.results[0];
+    assert.equal(unpublished.ok, true);
+    assert.equal(unpublished.published, false);
+    assert.ok(unpublished.publicationErrors.length > 0);
+    assert.match(unpublishedShelf.result.content[0].text, /saved but not published/);
+    const heldDraft = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "zxqv-mcp-search-draft", domain: "classification" }
+    });
+    assert.equal(
+      heldDraft.result.structuredContent.draft.document.category,
+      "biology"
+    );
 
     await verifyStdioEntrypoint();
   } finally {
