@@ -130,6 +130,19 @@
         <div id="board-status" hidden role="status" aria-live="polite"></div>
       </div>
 
+      <!-- #term-info keeps two lines reserved under the board.
+           overviewRenderer.js moves it into #puzzle-overview while an
+           overview screen is showing and puts it back before #message on
+           return. A note that does not fit grows the slot while it is
+           showing, then the slot settles back to two lines. Citations
+           stay in the Lesson or About dialog. -->
+      <div id="term-info" aria-live="polite">
+        <div class="term-info-copy">
+          <span class="term-info-body"></span>
+        </div>
+      </div>
+      <div id="message" aria-live="polite"></div>
+
       <section id="lens-panel" hidden aria-labelledby="lens-prompt">
         <div id="lens-progress"></div>
         <p id="lens-prompt"></p>
@@ -144,10 +157,13 @@
       </section>
       <cc-lens-assignment id="lens-assignment" hidden></cc-lens-assignment>
 
-      <!-- Completion reveals related puzzles here, immediately below the
-           active lens feedback. Keeping this in the player's existing
-           reading position avoids both an extra "what next" control and a
-           disorienting automatic scroll. It remains empty until the whole
+      <!-- Earned fact cards stay here, under the live instruction and any
+           lens feedback, so completion can reveal related puzzles below
+           them without pushing the record of this puzzle downward. -->
+      <div id="facts"></div>
+
+      <!-- Completion reveals related puzzles after the fact cards. Lens
+           feedback still sits above both. It remains empty until the whole
            puzzle (and, when present, every lens) is complete. -->
       <div id="related-puzzles"></div>
 
@@ -181,17 +197,6 @@
           <button id="layout-authoring-clear">Clear draft</button>
         </div>
       </section>
-
-      <div id="message" aria-live="polite"></div>
-      <!-- #term-info lives here at rest, but game.js relocates it (see
-           the comment above showOverview/hideOverview) into
-           #puzzle-overview whenever an overview screen is showing --
-           shared by term/cluster-title/puzzle-title hover here and
-           category-card hover there, and a fixed DOM position in
-           either container would put it in the wrong place (or, if
-           left nested in the wrong one, hidden entirely) for the other. -->
-      <div id="term-info" aria-live="polite"></div>
-      <div id="facts"></div>
 
       <footer>
         Tap a gray term, then tap a node in the cluster it belongs to.

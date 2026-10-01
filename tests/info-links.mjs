@@ -507,29 +507,28 @@ export async function run(page, baseURL) {
   );
   assert.match(await page.locator("#term-info").textContent(), /See also:/);
 
-  // A real citation (Carse's book, no url -- plain text, not a link)
-  // on finite-and-infinite-games's puzzle-level info, checked both on
-  // the permanent subtitle and the title-hover popover -- the latter
-  // is what actually proves #term-info's flex-direction: column fix
-  // stacks the citation below the rest of the popover rather than
-  // beside it.
-  await page.goto(`${baseURL}/index.html?puzzle=finite-and-infinite-games`);
-  await waitForPuzzle(page, "finite-and-infinite-games");
-  const expectedCitation = "Carse, James P. Finite and Infinite Games: A Vision of Life as Play and Possibility. Free Press, 1986.";
-  assert.match(
-    await page.locator("#puzzle-info .citations").textContent(),
-    new RegExp(expectedCitation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-  );
-  assert.equal(await page.locator("#puzzle-info .citations a").count(), 0);
-
+  // Stacked references stay in the About dialog. The board subtitle and
+  // the two-line hover slot do not grow a citation list.
+  await page.goto(`${baseURL}/index.html?puzzle=research-languages-and-future-directions`);
+  await waitForPuzzle(page, "research-languages-and-future-directions");
+  assert.equal(await page.locator("#puzzle-info .citations").count(), 0);
   await page.hover("#puzzle-title");
   await page.waitForFunction(() =>
     document.getElementById("term-info")?.classList.contains("visible")
   );
+  assert.equal(await page.locator("#term-info .citations").count(), 0);
+  const termInfoBox = await page.locator("#term-info").evaluate(element => {
+    const copy = element.querySelector(".term-info-copy");
+    return copy.scrollHeight > element.clientHeight + 2;
+  });
+  assert.equal(termInfoBox, false, "hover slot clipped a note instead of growing to fit it");
+  await page.click("#learning-review");
+  await page.waitForSelector("#learning-introduction #citation-list");
   assert.match(
-    await page.locator("#term-info .citations").textContent(),
-    new RegExp(expectedCitation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    await page.locator("#learning-introduction #citation-list").textContent(),
+    /The Koka Programming Language/
   );
+  await page.click("#learning-introduction #close");
 
   // Contextual bridge wording is useful on the board but not as a raw
   // Wikipedia query. With no authored info of its own, hovering a bridge

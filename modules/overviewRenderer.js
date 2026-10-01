@@ -66,7 +66,7 @@ export function createOverviewRenderer({
 }) {
   const {
     termInfoEl,
-    factsEl,
+    messageEl,
     relatedPuzzlesEl,
     puzzleInfoEl,
     puzzleCatalogueSuggestionEl,
@@ -1711,18 +1711,17 @@ export function createOverviewRenderer({
 
   function hideOverview() {
     overviewEl.classList.remove("shown");
-    puzzleViewEl.insertBefore(termInfoEl, factsEl);
+    puzzleViewEl.insertBefore(termInfoEl, messageEl);
     puzzleViewEl.classList.remove("hidden");
     puzzleControlsEl.classList.remove("hidden");
   }
 
   function showPuzzleInfo(puzzle) {
-    // One bibliography on puzzle.info.citations. When a lesson exists, the
-    // Lesson dialog shows it under References; keep it off the persistent board.
-    // Never invent a Wikipedia search chip for the puzzle title -- omit links
-    // means text-only subtitle (citations cover sources in the lesson).
+    // Bibliography stays in the Lesson or About dialog (References). The
+    // board subtitle is the short blurb and its inline links only.
+    // Never invent a Wikipedia search chip for the puzzle title.
     renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title, {
-      omitCitations: !!puzzle.learningIntroduction,
+      omitCitations: true,
       allowFallbackLink: false
     });
   }

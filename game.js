@@ -25,7 +25,7 @@ import {
   playCorpusUrlFromDocument
 } from "./modules/playCorpusClient.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
-import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
+import { linkLabel, normalizeInfo } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
 import { BOARD_CANVAS, boardCanvas, boardFrameMaxWidth, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
@@ -145,6 +145,7 @@ let W, H;
 const wrapEl = document.querySelector(".wrap");
 const msgEl = document.getElementById("message");
 const termInfoEl = document.getElementById("term-info");
+const termInfoBodyEl = termInfoEl.querySelector(".term-info-body");
 const countEl = document.getElementById("progress");
 const factsEl = document.getElementById("facts");
 const relatedPuzzlesEl = document.getElementById("related-puzzles");
@@ -1495,6 +1496,7 @@ lensNextBtn.addEventListener("click", () => {
 // ever clicked, is completely unaffected and stays instant throughout.
 let clearInfoTimer = null;
 let focusedInfoNode = null;
+let termInfoSubject = null;
 // A node gets an outbound chip only when it authored a primary `link`
 // (or seeAlso/citations). Missing-link Wikipedia search is deprecated:
 // it looked unique and often landed on the wrong sense. Bridges have no
@@ -1508,32 +1510,6 @@ function appendInfoAnchor(container, href, label = null) {
   anchor.rel = "noopener noreferrer";
   anchor.textContent = `${label || linkLabel(href)} ↗`;
   container.appendChild(anchor);
-}
-
-// A citation renders as its own small block, one line per citation,
-// distinct from the inline "See also: ↗ · ↗" run above it -- a formal
-// footnote reads as reference text, not another clickable chip. Only
-// linked (target="_blank", like every other outbound link here) when
-// the citation actually carries a url; otherwise it's plain text.
-function renderCitationsList(citations) {
-  const list = document.createElement("ul");
-  list.className = "citations";
-  citations.forEach(citation => {
-    const item = document.createElement("li");
-    const formatted = formatCitation(citation);
-    if (citation.url) {
-      const anchor = document.createElement("a");
-      anchor.href = citation.url;
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-      anchor.textContent = `${formatted} ↗`;
-      item.appendChild(anchor);
-    } else {
-      item.textContent = formatted;
-    }
-    list.appendChild(item);
-  });
-  return list;
 }
 
 // Quiz mode's comparative reveal can put up to three different incorrect
@@ -1555,26 +1531,43 @@ function quizEvidenceNote(n) {
     : `Evidence for ${option.label}, not the correct answer. `;
 }
 
+function reservedTermInfoHeight() {
+  return parseFloat(getComputedStyle(termInfoEl).lineHeight) * 2;
+}
+// Two lines stay reserved. A longer note sets an explicit height so the
+// slot can ease open and closed; a short note leaves the stylesheet height
+// alone, which is what keeps a sweep across ordinary nodes from resizing
+// the page.
+function fitTermInfo() {
+  const copy = termInfoEl.querySelector(".term-info-copy");
+  const reserved = reservedTermInfoHeight();
+  termInfoEl.classList.add("expanded");
+  const needed = copy.scrollHeight;
+  if (needed > reserved + 1) {
+    termInfoEl.style.height = `${Math.ceil(needed)}px`;
+    return;
+  }
+  termInfoEl.classList.remove("expanded");
+  termInfoEl.style.height = "";
+}
 function showTermInfo(n) {
   clearTimeout(clearInfoTimer);
-  termInfoEl.textContent = "";
+  termInfoSubject = n;
+  termInfoBodyEl.replaceChildren();
   const info = n.info || {};
-  // A single inline wrapper, not multiple direct children of the flex
-  // container — otherwise the text and each link become separate flex
-  // items laid out in a row instead of wrapping together as one
-  // paragraph (confirmed: the links floated off to the side instead of
-  // following the wrapped text).
+  // One inline run, so the text and each link wrap as a single paragraph.
+  // Citations are not part of this slot: they live in the Lesson or About
+  // dialog. Notes that fit stay inside the reserved two lines; longer
+  // ones grow the slot until the pointer leaves.
   const inner = document.createElement("span");
   const quizNote = quizEvidenceNote(n);
   const links = Array.isArray(info.links) ? info.links : [];
   const primary = links[0] || (info.link ? { href: info.link, label: info.linkLabel || null } : null);
   const rest = primary && links.length ? links.slice(1) : (info.seeAlso || []);
-  const hasContent = !!(
-    quizNote || info.text || primary || rest.length ||
-    info.citations?.length
-  );
+  const hasContent = !!(quizNote || info.text || primary || rest.length);
   if (!hasContent) {
-    termInfoEl.classList.remove("visible");
+    termInfoEl.classList.remove("visible", "expanded");
+    termInfoEl.style.height = "";
     return;
   }
   if (quizNote) inner.append(quizNote);
@@ -1587,9 +1580,9 @@ function showTermInfo(n) {
       appendInfoAnchor(inner, entry.href, entry.label);
     });
   }
-  termInfoEl.append(inner);
-  if (info.citations?.length) termInfoEl.append(renderCitationsList(info.citations));
+  termInfoBodyEl.append(inner);
   termInfoEl.classList.add("visible");
+  fitTermInfo();
 }
 function clearTermInfo() {
   clearTimeout(clearInfoTimer);
@@ -1597,8 +1590,14 @@ function clearTermInfo() {
   // small jitter between adjacent elements) — reaching a link reliably
   // is the focus lock's job (see focusTermInfo/blurTermInfo below), not
   // this timer's, so it no longer has to cover a full trip down to the
-  // panel the way it once did.
-  clearInfoTimer = setTimeout(() => termInfoEl.classList.remove("visible"), 300);
+  // panel the way it once did. The slot eases back to two lines.
+  clearInfoTimer = setTimeout(() => {
+    if (focusedInfoNode) return;
+    termInfoBodyEl.replaceChildren();
+    termInfoEl.classList.remove("visible", "expanded");
+    termInfoEl.style.height = "";
+    termInfoSubject = null;
+  }, 300);
 }
 // The pointer's trip from the node down to a link inside the panel
 // passes through here — canceling the pending clear on arrival is what
@@ -1701,7 +1700,7 @@ overviewRenderer = createOverviewRenderer({
   searchDrafts: SEARCH_DRAFTS,
   elements: {
     termInfoEl,
-    factsEl,
+    messageEl: msgEl,
     relatedPuzzlesEl,
     puzzleInfoEl,
     puzzleCatalogueSuggestionEl,
@@ -1952,8 +1951,10 @@ function applyLoadedPuzzle(puzzle, index, {
   // citation/link layout around for the normal mouseleave grace period.
   clearTimeout(clearInfoTimer);
   focusedInfoNode = null;
-  termInfoEl.replaceChildren();
-  termInfoEl.classList.remove("visible");
+  termInfoSubject = null;
+  termInfoBodyEl.replaceChildren();
+  termInfoEl.classList.remove("visible", "expanded");
+  termInfoEl.style.height = "";
   currentIndex = index;
   // Individual puzzles no longer have picker options; once one is opened,
   // return the global navigation control to its neutral prompt.

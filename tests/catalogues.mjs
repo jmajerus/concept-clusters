@@ -336,6 +336,23 @@ export async function run(page, baseURL) {
     await page.evaluate(() => document.getElementById("term-info").parentElement.id),
     "puzzle-view"
   );
+  assert.equal(
+    await page.evaluate(() => {
+      const board = document.querySelector("#board-stage");
+      const info = document.querySelector("#term-info");
+      const message = document.querySelector("#message");
+      const facts = document.querySelector("#facts");
+      const related = document.querySelector("#related-puzzles");
+      const following = Node.DOCUMENT_POSITION_FOLLOWING;
+      return !!board && !!info && !!message && !!facts && !!related &&
+        board.nextElementSibling === info &&
+        Boolean(info.compareDocumentPosition(message) & following) &&
+        Boolean(message.compareDocumentPosition(facts) & following) &&
+        Boolean(facts.compareDocumentPosition(related) & following);
+    }),
+    true,
+    "hover text sits under the board, then the selected-node message, then fact cards, then related puzzles"
+  );
 
   // A small catalogue's overview shows its puzzles inline instead of
   // behind an "All puzzles" card -- Disentanglements has 3, at or below
