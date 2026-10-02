@@ -85,6 +85,8 @@ export async function run(page, baseURL) {
   assert.equal(shown.text.includes("The chapter may name the groups"), false);
   assert.equal(shown.continueReading, true);
   await page.click("#learning-introduction #continue-reading");
+  assert.equal(await page.evaluate(() => document.querySelector("#learning-introduction")
+    ?.shadowRoot?.activeElement?.id), "lesson-remainder");
   shown = await lessonText(page);
   assert.match(shown.text, /The chapter may name the groups/);
   assert.equal(shown.continueReading, false);

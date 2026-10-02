@@ -57,5 +57,5 @@ module disagree, trust the module.
   full text once the board and its lenses are complete. Omit when the title
   and clusters already orient clearly; prefer a lesson for technical,
   sequential, or easy-to-misframe subjects. `required` holds the board until
-  the learner dismisses the lesson and should be rare; most lessons should
+  the learner chooses Start puzzle in the lesson and should be rare; most lessons should
   be `optional` or `recommended`.

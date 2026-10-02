@@ -287,7 +287,8 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   title and cluster names already orient clearly. requirement: optional and
   recommended both leave the board reachable without reading (recommended
   leads with the invitation first); required holds the board until the
-  learner dismisses the lesson. Reserve required for when the puzzle
+  learner chooses Start puzzle in the lesson. Closing the dialog returns
+  to the invitation. Reserve required for when the puzzle
   genuinely depends on that source.
   content.text is Markdown with real line breaks in the string value (blank
   lines between paragraphs, \`##\` headings on their own lines). The lesson
@@ -519,7 +520,8 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   complete. Omit the field when the board already orients clearly. Reserve
   required for material the puzzle truly depends on; otherwise prefer
   optional or recommended. required holds the board until the learner
-  dismisses the lesson. Preserve prior research citations on
+  chooses Start puzzle in the lesson. Closing the dialog returns to the
+  invitation. Preserve prior research citations on
   info.citations (one list for the puzzle and lesson). content.text is
   Markdown with real line breaks in the string value (blank lines between
   paragraphs, \`##\` headings on their own lines). The lesson dialog already

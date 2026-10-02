@@ -337,7 +337,8 @@ teaser, or a split. Play shows the start, then Continue reading, and opens
 the full text once the puzzle and its lenses are complete. Mark it
 `required` only when the puzzle truly depends on it; otherwise prefer
 `recommended` or `optional`. `required` holds the board until the learner
-dismisses the lesson.
+chooses Start puzzle in the lesson. Closing the dialog returns to the
+invitation.
 
 Instructional content should point toward richer resources rather than trying
 to teach everything inline. Preserve exact citations discovered during

@@ -266,6 +266,13 @@ export async function run() {
   });
   assert.equal(backfilled.document.dateCreated, RECORDING_START_DATE);
   assert.equal(backfilled.document.dateModified, RECORDING_START_DATE);
+  const backfilledRevision = await repo.getPublishedAtRevision({
+    kind: "puzzle",
+    id: "existing-corpus",
+    revision: backfilled.revision
+  });
+  assert.equal(backfilledRevision.document.dateCreated, RECORDING_START_DATE);
+  assert.equal(backfilledRevision.document.dateModified, RECORDING_START_DATE);
   assert.equal(initiallyReviewed.document.version, undefined);
   assert.equal(initiallyReviewed.document.learningIntroduction.revision, undefined);
   assert.ok(initiallyReviewed.lastAgentReviewedAt);

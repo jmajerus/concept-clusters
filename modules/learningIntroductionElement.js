@@ -71,6 +71,7 @@ class LearningIntroductionElement extends HTMLElement {
   #abortController = null;
   #returnFocus = null;
   #lessonExpanded = false;
+  #focusRemainder = false;
   #initialized = false;
 
   constructor() {
@@ -454,7 +455,17 @@ class LearningIntroductionElement extends HTMLElement {
         resolvePuzzleResourceUrl(this.#model.puzzle, src, this.#loaded.baseUrl).href
     };
     lesson.replaceChildren();
-    lesson.appendChild(renderSafeMarkdown(showAll ? this.#loaded.markdown : preview, options));
+    if (showAll && remainder && this.#focusRemainder) {
+      const continued = document.createElement("div");
+      continued.id = "lesson-remainder";
+      continued.tabIndex = -1;
+      continued.appendChild(renderSafeMarkdown(remainder, options));
+      lesson.append(renderSafeMarkdown(preview, options), continued);
+      this.#focusRemainder = false;
+      continued.focus();
+    } else {
+      lesson.appendChild(renderSafeMarkdown(showAll ? this.#loaded.markdown : preview, options));
+    }
     if (!showAll) {
       const more = document.createElement("button");
       more.id = "continue-reading";
@@ -463,6 +474,7 @@ class LearningIntroductionElement extends HTMLElement {
       more.textContent = "Continue reading";
       more.addEventListener("click", () => {
         this.#lessonExpanded = true;
+        this.#focusRemainder = true;
         this.#paintLoaded();
       });
       lesson.appendChild(more);

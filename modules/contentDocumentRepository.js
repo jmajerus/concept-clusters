@@ -9,8 +9,7 @@ import {
 import {
   assertCurrentAuthoredDocument,
   publicationDocument,
-  puzzleDocumentFromStorage,
-  stripSystemAuthoredMetadata
+  puzzleDocumentFromStorage
 } from "./authoringDomains.js";
 import {
   parseLayoutDocument,
@@ -68,9 +67,7 @@ function publishedRevisionSnapshot(kind, row) {
   );
   return {
     revision: Number(row.revision),
-    document: kind === "puzzle" ? stripSystemAuthoredMetadata(document, {
-      keepDocumentDates: true
-    }) : document
+    document: kind === "puzzle" ? puzzleDocumentFromStorage(document) : document
   };
 }
 

@@ -937,10 +937,11 @@ The three requirement levels deliberately behave differently:
   you begin** invitation above it.
 - `recommended` first presents the invitation, while allowing **Start
   puzzle** without reading.
-- `required` holds the board until the learner dismisses the lesson. Use
-  this sparingly, for example when the puzzle depends on a particular
-  source. Dismissing the lesson acknowledges it at the preview or after
-  Continue reading.
+- `required` holds the board until the learner chooses **Start puzzle** in
+  the lesson. Use this sparingly, for example when the puzzle depends on a
+  particular source. That choice acknowledges the lesson at the preview or
+  after Continue reading. Closing the dialog, including Escape, returns to
+  the invitation and leaves the board held.
 
 A read or skipped choice is stored separately from puzzle progress. It is
 content-aware: the player derives a fingerprint from the introduction, so
