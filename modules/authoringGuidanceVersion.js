@@ -141,7 +141,13 @@
 // 6.3: same review bar. dateCreated and dateModified are stamped at
 // publication and stay on the puzzle. Agents do not send them. large is
 // computed from the node count and is not a stored field.
+// 6.4: same review bar. Writing a lesson copies the board links that text
+// relies on into info.citations in the same pass. Those URLs may stay on
+// their nodes. They are not also lesson links.
+// 6.5: same review bar. info.citations stays an agent content-domain write.
+// The server does not copy links into it. The default set is the cluster
+// links the lesson text relies on, saved after the lesson exists.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 3
+  minor: 5
 });

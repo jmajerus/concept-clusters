@@ -298,13 +298,20 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   learningIntroduction.credit is a legacy human-managed byline; do not include
   it in MCP documents. The MCP server keeps protected attribution outside the
   agent-authored document and stamps an identifiable client when possible.
-  Prefer links (same shape as info.links) for further-reading on the lesson.
+  Prefer links (same shape as info.links) for further-reading on the lesson
+  that is not already a reference for the text.
   Bibliographic references are a single puzzle-level list on info.citations
   (same { author?, title, publisher?, year?, pages?, url? } shape) -- never
   a second list on the lesson. When a learningIntroduction exists, play
   shows that list under References in the Lesson dialog; otherwise it
-  shows on the board.
-  Do not duplicate references across surfaces.
+  shows on the board. info.citations is content. A pedagogy save cannot
+  write it, and the server does not copy links into it. After the lesson
+  is saved, a content-domain save copies the cluster links that lesson
+  text relies on into this list. That is the default set. Add a term link
+  only when the lesson depends on a source that exists only on a term.
+  Add a source for a claim that lives only in the lesson and has no node.
+  Do not start a new source hunt. The same URL may stay on its node. Do
+  not also put it on learningIntroduction.links or puzzle info.links.
 - Do not submit \`provenance\`, \`creator\`, \`license\`, or \`derivedFrom\` in
   MCP puzzle documents. They are protected metadata outside the agent authoring
   contract; the server preserves existing values and records an identifiable
@@ -386,13 +393,16 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   shorthand for a link). Renders as a formal footnote-style line, not
   another "See also" chip. One bibliography for the whole puzzle -- attach
   it to puzzle info, not to a cluster, term, bridge, or the lesson object.
-  Hover help is for the local idea; the citation is for the work the
-  puzzle is based on. When a learningIntroduction exists, play shows that
-  same list under References in the Lesson dialog (not on the board); with
-  no introduction, it shows on the board. Do not also put the same destinations
-  on info.links (or lesson links) -- that duplicates See also chips and
-  References. Use links only for destinations that are not already in
-  citations.
+  Hover help is for the local idea. When a learningIntroduction exists,
+  play shows info.citations under References in the Lesson dialog (not on
+  the board); with no introduction, it shows on the board. That list is
+  the sources the lesson text relies on. The agent writes them with a
+  content-domain save after the lesson exists, starting from the cluster
+  links. The server does not insert them. A book, edition, or page range
+  a link cannot carry belongs there too.
+  The same URL may stay on its cluster, term, or bridge. Do not also put
+  it on info.links or learningIntroduction.links. Use those link lists
+  only for destinations that are not already in citations.
 - Keep information surfaces stable. Always-visible info.text and a
   completion-gated fact have different jobs; never make a hover or help
   surface silently replace text the player already read after an achievement.
@@ -444,11 +454,12 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   bridges is acceptable. Write each bridge fact now and make its local
   relationship understandable from the fact and any concise bridge info.
 - Research while shaping the concepts. When a source supports a fact or term,
-  record it immediately in the existing exact citation shape
-  { title, author?, publisher?, year?, pages?, url? } under the appropriate
-  puzzle, cluster, term, bridge, or learning info. Preserve URLs and page
-  details discovered now; do not plan to rediscover or reconstruct them in a
-  later pass.
+  record it immediately as a link on that cluster, term, or bridge. Preserve
+  the URL discovered now. A book, edition, or page range that a link cannot
+  carry goes on puzzle info.citations when you find it. A later
+  content-domain save, after the lesson exists, copies the cluster links
+  that lesson text relies on into that same list. The server does not
+  write that list. Do not plan to rediscover either later.
 - Provide help at the appropriate level of granularity; prefer a verified
   direct resource that advances this lesson. Omitting a link means no chip
   -- automatic Wikipedia search is not inferred.`;
@@ -475,9 +486,14 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   distinctness judgment; do not start it because of the node count alone.
 - Verify every retained direct link and citation against the claim it supports.
   Keep exact citation data gathered during research; this pass confirms and
-  corrects it rather than performing a second generic source hunt. Check that
-  each link matches the grain of the surface it sits on. Omitting a link
-  means no chip -- automatic Wikipedia search is not inferred.
+  corrects it rather than performing a second generic source hunt. When a
+  learningIntroduction exists and info.citations is missing the cluster
+  links that lesson text relies on, repair that with a content-domain save.
+  Do not open a new source hunt, and do not copy every term link. Add a
+  term-only or lesson-only source when the text depends on it. Check that
+  each link matches the grain of the
+  surface it sits on. Omitting a link means no chip -- automatic Wikipedia
+  search is not inferred.
 - Check that always-visible info and completion-gated facts remain distinct;
   no hover or help surface should silently replace text the player already read.
 - Add relationKind only when the bridge clearly fits dynamic, foundation,
@@ -523,8 +539,15 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   required for material the puzzle truly depends on; otherwise prefer
   optional or recommended. required holds the board until the learner
   chooses Start puzzle in the lesson. Closing the dialog returns to the
-  invitation. Preserve prior research citations on
-  info.citations (one list for the puzzle and lesson). content.text is
+  invitation. info.citations is content, so this pedagogy save does not
+  write it and the server will not fill it in. Cluster links are already
+  in the read-only content context. After this save, a content-domain save
+  copies those cluster links the lesson text relies on into info.citations.
+  Add a term link only when the lesson depends on a source that exists only
+  on a term. Add a source for a claim that lives only in the lesson and has
+  no node. Do not start a new source hunt, and do not copy every term link.
+  The same URL may remain on its node. Do not also put it on
+  learningIntroduction.links. content.text is
   Markdown with real line breaks in the string value (blank lines between
   paragraphs, \`##\` headings on their own lines). The lesson dialog already
   shows title; do not repeat it as the first line. Do not write the
