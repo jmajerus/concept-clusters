@@ -6,6 +6,7 @@ import { puzzleFromJsonLd } from "../modules/puzzleJsonLd.js";
 import { documentForMcp, storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
 import { buildNodesAndLinks } from "../modules/puzzleGraph.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
+import { derivedLarge, puzzleNodeCount } from "../modules/puzzleBoardSize.js";
 import { selectableConceptWords } from "../modules/lensEngine.js";
 import { SIMPLIFIED_PUZZLE_SCHEMA } from "../modules/authoringSchemaResource.js";
 import {
@@ -662,10 +663,9 @@ export async function run() {
     assert.equal(document.language, "en");
   }
 
-  // Repository-owned dates, version, and lesson-progress revision are not
-  // part of the authoring contract. Legacy values are accepted only by the
-  // compatibility fold and disappear before the simplified document is
-  // materialized.
+  // version and lesson-progress revision stay off the document. Publication
+  // dates are kept. A raw document that also carries version still fails the
+  // strict schema until the compatibility fold removes it.
   {
     const legacyMetadata = validPuzzle({
       dateCreated: "2026-01-01",
@@ -680,14 +680,14 @@ export async function run() {
     assert.equal(SimplifiedPuzzleInputSchema.safeParse(legacyMetadata).success, false);
     const { puzzle, errors } = puzzleFromAuthoredDocument(legacyMetadata);
     assert.deepEqual(errors, []);
-    assert.equal(puzzle.dateCreated, undefined);
-    assert.equal(puzzle.dateModified, undefined);
+    assert.equal(puzzle.dateCreated, "2026-01-01");
+    assert.equal(puzzle.dateModified, "2026-01-02");
     assert.equal(puzzle.version, undefined);
     assert.equal(puzzle.learningIntroduction.revision, undefined);
     const normalized = normalizeAuthoredPuzzleDocument(legacyMetadata);
     assert.deepEqual(normalized.errors, []);
-    assert.equal(normalized.document.dateCreated, undefined);
-    assert.equal(normalized.document.dateModified, undefined);
+    assert.equal(normalized.document.dateCreated, "2026-01-01");
+    assert.equal(normalized.document.dateModified, "2026-01-02");
     assert.equal(normalized.document.version, undefined);
     assert.equal(normalized.document.learningIntroduction.revision, undefined);
   }
@@ -758,7 +758,7 @@ export async function run() {
       seventeen.clusters.reduce((sum, c) => sum + c.terms.length, 0) + seventeen.bridges.length,
       17
     );
-    assert.equal(seventeen.large, true);
+    assert.equal(seventeen.large, undefined);
     const sixteen = puzzleFromSimplified(SimplifiedPuzzleInputSchema.parse({
       ...seventeenInput,
       bridges: seventeenInput.bridges.slice(0, 1)
@@ -768,6 +768,8 @@ export async function run() {
       16
     );
     assert.equal(sixteen.large, undefined);
+    assert.equal(derivedLarge(puzzleNodeCount(seventeen)), true);
+    assert.equal(derivedLarge(puzzleNodeCount(sixteen)), false);
   }
 
   // A contributor carrying its own reasoning/switch (set from the drafts

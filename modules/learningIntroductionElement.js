@@ -1,6 +1,8 @@
 import {
-  loadLearningIntroduction
+  loadLearningIntroduction,
+  truncateLearningMarkdown
 } from "./learningIntroduction.js";
+import { RECORDING_START_DATE } from "./authoringDomains.js";
 import { resolveLessonByline } from "./authoringProvenance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
@@ -20,15 +22,29 @@ function safeExternalUrl(raw) {
 // Month granularity: the stamp is git's first-add of the puzzle's files,
 // which runs a few days late for the boards that predate the per-file
 // split, and a player has no use for the day anyway.
-function publishedLabel(published) {
-  const match = /^(\d{4})-(\d{2})-\d{2}$/.exec(published || "");
+function monthYear(isoDate) {
+  const match = /^(\d{4})-(\d{2})-\d{2}$/.exec(isoDate || "");
   if (!match) return "";
   const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
-  return `First published ${date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
     timeZone: "UTC"
-  })}`;
+  });
+}
+
+function publishedLabel(published) {
+  const label = monthYear(published);
+  return label ? `First published ${label}` : "";
+}
+
+function documentDateLine(puzzle) {
+  const created = monthYear(puzzle?.dateCreated || RECORDING_START_DATE);
+  const modified = monthYear(puzzle?.dateModified || puzzle?.dateCreated || RECORDING_START_DATE);
+  if (created && modified && created !== modified) {
+    return `Created ${created} · Updated ${modified}`;
+  }
+  return created ? `Created ${created}` : "";
 }
 
 function aboutEyebrow(about) {
@@ -54,6 +70,8 @@ class LearningIntroductionElement extends HTMLElement {
   #loading = null;
   #abortController = null;
   #returnFocus = null;
+  #lessonExpanded = false;
+  #focusRemainder = false;
   #initialized = false;
 
   constructor() {
@@ -149,6 +167,7 @@ class LearningIntroductionElement extends HTMLElement {
         .lesson figure { margin: 16px 0; text-align: center; }
         .lesson img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px; }
         .lesson figcaption { margin-top: 5px; color: var(--ink-soft); font-size: 13px; }
+        button.continue-reading { margin-top: 4px; }
         .sources { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--rule); }
         .sources h3 { margin: 0 0 5px; font-size: 14px; }
         .sources ul { margin: 0; padding-left: 20px; }
@@ -262,10 +281,13 @@ class LearningIntroductionElement extends HTMLElement {
 
   async openLesson(returnFocus = document.activeElement) {
     if (!this.#model) return false;
+    this.#lessonExpanded = this.#model.lessonExpanded === true;
     this.#returnFocus = returnFocus;
+    this.#render();
     const dialog = this.shadowRoot.getElementById("dialog");
     if (!dialog.open) dialog.showModal();
-    if (this.#model.introduction && !this.#loaded && !this.#loading) await this.#load();
+    if (this.#model.introduction && this.#loaded) this.#paintLoaded();
+    else if (this.#model.introduction && !this.#loading) await this.#load();
     return true;
   }
 
@@ -279,6 +301,7 @@ class LearningIntroductionElement extends HTMLElement {
     this.#abortController = null;
     this.#loading = null;
     this.#loaded = null;
+    this.#lessonExpanded = false;
     this.closeLesson();
     this.shadowRoot?.getElementById("lesson")?.replaceChildren();
   }
@@ -308,7 +331,8 @@ class LearningIntroductionElement extends HTMLElement {
     const root = this.shadowRoot;
     if (introduction) this.#renderLesson();
     else this.#renderAbout();
-    const published = publishedLabel(this.#model.about?.published);
+    const published = documentDateLine(puzzle)
+      || publishedLabel(this.#model.about?.published);
     const publishedLine = root.getElementById("published");
     publishedLine.textContent = published;
     publishedLine.hidden = !published;
@@ -330,7 +354,7 @@ class LearningIntroductionElement extends HTMLElement {
     root.getElementById("offer-title").textContent = introduction.title;
     root.getElementById("dialog-title").textContent = introduction.title;
     root.getElementById("offer-summary").textContent = introduction.summary ||
-      "Build the background knowledge for this puzzle without revealing its solution.";
+      "A short orientation before you begin.";
     root.getElementById("skip").hidden = introduction.requirement === "required";
     root.getElementById("finish").textContent = gate ? "Start puzzle" : "Return to puzzle";
     root.getElementById("close").setAttribute("aria-label", "Close introduction");
@@ -417,6 +441,49 @@ class LearningIntroductionElement extends HTMLElement {
     line.hidden = !text;
   }
 
+  #paintLoaded() {
+    if (!this.#loaded || !this.shadowRoot || !this.#model) return;
+    const root = this.shadowRoot;
+    const lesson = root.getElementById("lesson");
+    const status = root.getElementById("lesson-status");
+    const finish = root.getElementById("finish");
+    const { preview, remainder } = truncateLearningMarkdown(this.#loaded.markdown);
+    const showAll = this.#lessonExpanded || !remainder;
+    const options = {
+      baseUrl: this.#loaded.baseUrl,
+      resolveAssetUrl: src =>
+        resolvePuzzleResourceUrl(this.#model.puzzle, src, this.#loaded.baseUrl).href
+    };
+    lesson.replaceChildren();
+    if (showAll && remainder && this.#focusRemainder) {
+      const continued = document.createElement("div");
+      continued.id = "lesson-remainder";
+      continued.tabIndex = -1;
+      continued.appendChild(renderSafeMarkdown(remainder, options));
+      lesson.append(renderSafeMarkdown(preview, options), continued);
+      this.#focusRemainder = false;
+      continued.focus();
+    } else {
+      lesson.appendChild(renderSafeMarkdown(showAll ? this.#loaded.markdown : preview, options));
+    }
+    if (!showAll) {
+      const more = document.createElement("button");
+      more.id = "continue-reading";
+      more.className = "continue-reading primary";
+      more.type = "button";
+      more.textContent = "Continue reading";
+      more.addEventListener("click", () => {
+        this.#lessonExpanded = true;
+        this.#focusRemainder = true;
+        this.#paintLoaded();
+      });
+      lesson.appendChild(more);
+    }
+    status.hidden = true;
+    finish.hidden = false;
+    finish.textContent = this.#model.gate ? "Start puzzle" : "Return to puzzle";
+  }
+
   async #load() {
     const modelAtStart = this.#model;
     const root = this.shadowRoot;
@@ -436,13 +503,7 @@ class LearningIntroductionElement extends HTMLElement {
       const loaded = await this.#loading;
       if (this.#model !== modelAtStart) return;
       this.#loaded = loaded;
-      lesson.appendChild(renderSafeMarkdown(loaded.markdown, {
-        baseUrl: loaded.baseUrl,
-        resolveAssetUrl: src =>
-          resolvePuzzleResourceUrl(modelAtStart.puzzle, src, loaded.baseUrl).href
-      }));
-      status.hidden = true;
-      finish.hidden = false;
+      this.#paintLoaded();
     } catch (error) {
       if (error.name === "AbortError" || this.#model !== modelAtStart) return;
       status.textContent = `This introduction is temporarily unavailable. ${error.message}`;

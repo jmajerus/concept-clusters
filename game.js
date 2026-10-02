@@ -542,6 +542,7 @@ function restorePlayerSession(session) {
     state.made === state.need ? "good" : undefined
   );
   state.paint();
+  updateLearningIntroduction();
 }
 
 function setMode(newMode) {
@@ -966,9 +967,16 @@ function puzzleAboutFacts(puzzle) {
   };
 }
 
-// One slot, two promises: "Lesson" when the puzzle has an authored
-// introduction (with its read/skip gate), "About" otherwise -- a catalogue
-// card that never gates. The slot itself stays put across puzzles.
+function puzzleFullyComplete() {
+  if (!state?.puzzle || layoutAuthoringMode || authoringStudio?.isConstruct()) return false;
+  if (state.learningGated || state.made !== state.need) return false;
+  if (state.puzzle.lenses?.length) return state.phase === "complete";
+  return true;
+}
+
+// One slot: "Lesson" when the puzzle has an authored introduction (with its
+// read/skip gate), "About" otherwise. The dialog previews the lesson and
+// offers Continue reading until the board and its lenses are complete.
 function updateLearningIntroduction() {
   const introduction = state?.learningIntroduction || null;
   const gated = !layoutAuthoringMode && learningIntroductionGate(
@@ -993,6 +1001,7 @@ function updateLearningIntroduction() {
     introduction,
     about: puzzleAboutFacts(state.puzzle),
     gate: gated,
+    lessonExpanded: puzzleFullyComplete(),
     status: state.learningIntroductionStatus
   } : null;
 }
@@ -1340,6 +1349,7 @@ function restoreLensSession(savedLens) {
       setMessage("Saved lens assignments restored — continue classifying the map.", "good");
     }
     updateLensInterface();
+    updateLearningIntroduction();
     if (state.solutionLayout === "animated") {
       state.modeSwitchLayoutPromise = finishLensLayoutAfterModeSwitch(state, mode);
     }
@@ -1370,6 +1380,7 @@ function restoreLensSession(savedLens) {
     );
   }
   updateLensInterface();
+  updateLearningIntroduction();
   // A session saved before the automatic final pass may contain the
   // detangler's "animated" Star layout. Upgrade only that generated
   // state on restore; a player's organically completed custom layout
@@ -1391,6 +1402,7 @@ function finishLensSequence() {
   overviewRenderer.showRelatedPuzzles(state.puzzle);
   trackPuzzleCompleted(state.puzzle.id, mode, state);
   updateLensInterface();
+  updateLearningIntroduction();
   persistPlayerSession({ captureLayout: true });
 }
 
@@ -1410,6 +1422,7 @@ function finishLensAssignment() {
   overviewRenderer.showRelatedPuzzles(state.puzzle);
   trackPuzzleCompleted(state.puzzle.id, mode, state);
   updateLensInterface();
+  updateLearningIntroduction();
   persistPlayerSession({ captureLayout: true });
 }
 
@@ -1780,7 +1793,8 @@ const { handleTap, checkClusterCompletion, showSolution } = createGameEngine({
   setMessage,
   addFactCard,
   trackPuzzleCompleted,
-  showRelatedPuzzles: overviewRenderer.showRelatedPuzzles
+  showRelatedPuzzles: overviewRenderer.showRelatedPuzzles,
+  onPuzzleComplete: () => updateLearningIntroduction()
 });
 
 function onBoardTap(node, event) {

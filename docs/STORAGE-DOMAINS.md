@@ -38,7 +38,7 @@ the infrastructure preserves and recombines the other domains.
 | `classification` | Disciplinary home, full membership, and subcategory placement | Agent | Read/write; id and title are read-only context |
 | `pedagogy` | Relationships, lenses, learning introductions, and remaining discovery metadata | Agent | Read/write; content and classification are read-only context |
 | `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
-| `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document |
+| `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document, except `dateCreated` and `dateModified`, which publication stamps onto the puzzle |
 
 The agent-write domains are broad enough to be useful authoring surfaces.
 Content includes the core of a bridge and its cluster membership. Classification

@@ -7,6 +7,7 @@
 // (`/?puzzle=`) or via optional MCP. Freeze on `/admin` writes cued D1
 // snapshots into git. Publish writes the shared D1 row.
 
+import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
 import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
@@ -2222,12 +2223,11 @@ export function renderDraftPage(draft, {
         .map(name => badge(categoryTitleFor(name, categoryRegistry))).join("")}
       ${subcategoryBadges(document.subcategories, categoryRegistry)}
       ${(document.tags || []).map(tag => badge(tag)).join("")}
-      ${document.large ? badge("large") : ""}
+      ${derivedLarge(puzzleNodeCount(document)) ? badge("large") : ""}
     </p>
     ${renderWas(diff?.fields?.category)}
     ${renderSubcategoriesWas(diff?.fields?.subcategories, categoryRegistry)}
     ${renderWas(diff?.fields?.tags)}
-    ${renderWas(diff?.fields?.large)}
     ${renderPuzzleMeta(document)}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}

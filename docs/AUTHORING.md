@@ -214,7 +214,8 @@ do not add or remove bridges because of this prompt.
 The complete board may contain at most 32 total nodes (all cluster terms plus
 bridges). That ceiling is where validation refuses a board; it is not a size
 to fill. Layout is derived automatically from the node count, the routed
-edges, the total length of the terms, and the play mode. Do not drop a
+edges, the total length of the terms, and the play mode. The Large badge
+uses that same node count and is not a field on the puzzle. Do not drop a
 distinct term to satisfy a rendering threshold, do not keep terms to fill
 toward 32, and do not split in order to change the canvas. Split the subject
 into focused related puzzles when it has a natural seam that teaches better
@@ -323,18 +324,21 @@ is the better browse home.
 
 ### Learning introductions
 
-A learning introduction is optional, but a short orienting note is often
-worth including: one or two paragraphs that state the learning objective and
-situate the learner in the domain (vocabulary, stakes, why this subject
-matters). It need not be lengthy — a tight paragraph beats a mini-essay.
-Omit it when the title and cluster names already orient clearly; prefer it
-when the subject is technical, sequential, or easy to misframe.
+A learning introduction is one optional Markdown document. Write the lesson
+the subject needs, in the order the subject needs: the learning objective,
+the domain (vocabulary, stakes, why this subject matters), and how the ideas
+relate, including the groupings and why they hold. Omit the field when the
+title and cluster names already orient clearly; prefer it when the subject
+is technical, sequential, or easy to misframe.
 
-Write about the **subject**, not the puzzle. The introduction should not
-mention clusters, bridges, lenses, boards, sorting, or how terms will be
-grouped; schema vocabulary leaking into the lesson is a failure even when no
-answer is named. Mark material `required` only when the puzzle truly depends
-on it; otherwise prefer `recommended` or `optional`.
+Write it about the **subject**, not the puzzle. It should not mention
+clusters, bridges, lenses, boards, or sorting. Do not author a preview, a
+teaser, or a split. Play shows the start, then Continue reading, and opens
+the full text once the puzzle and its lenses are complete. Mark it
+`required` only when the puzzle truly depends on it; otherwise prefer
+`recommended` or `optional`. `required` holds the board until the learner
+chooses Start puzzle in the lesson. Closing the dialog returns to the
+invitation.
 
 Instructional content should point toward richer resources rather than trying
 to teach everything inline. Preserve exact citations discovered during

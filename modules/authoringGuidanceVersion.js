@@ -134,7 +134,14 @@
 // and stops for approval before fitting. Leaving the reopen as an open
 // issue, or treating "do not add or drop terms" as a reason not to write
 // the map, is not the repair.
+// 6.2: same review bar. A learning introduction is one lesson about the
+// subject, including how the ideas relate. Authors do not write a short
+// spoiler-free opening, a teaser, or a split. Play previews the text and
+// offers Continue reading; the full text opens after the puzzle is complete.
+// 6.3: same review bar. dateCreated and dateModified are stamped at
+// publication and stay on the puzzle. Agents do not send them. large is
+// computed from the node count and is not a stored field.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 1
+  minor: 3
 });

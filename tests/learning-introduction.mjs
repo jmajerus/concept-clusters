@@ -150,8 +150,9 @@ export async function run(page, baseURL) {
   assert.equal(await page.evaluate(() => CC.state.learningGated), false);
 
   // No authored lesson: the same slot reads "About", never gates, and opens
-  // a catalogue card -- info.text summary, provenance byline, first-published
-  // month from the manifest -- with no lesson fetch.
+  // a catalogue card -- info.text summary, provenance byline, and the
+  // recording-start date when the puzzle has no document dates -- with no
+  // lesson fetch.
   const lessonFetches = lessonRequests.length;
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=graph`);
   await page.waitForFunction(() => window.CC?.state?.puzzle?.id === "energy-flow");
@@ -171,9 +172,9 @@ export async function run(page, baseURL) {
     (await page.textContent("#learning-introduction #lesson")).trim().length > 0,
     "About card needs a summary"
   );
-  assert.match(
+  assert.equal(
     await page.textContent("#learning-introduction #published"),
-    /^First published [A-Z][a-z]+ 20\d\d$/
+    "Created October 2026"
   );
   assert.equal(await page.isVisible("#learning-introduction #lesson-status"), false);
   assert.equal(lessonRequests.length, lessonFetches, "About mode must not fetch a lesson");

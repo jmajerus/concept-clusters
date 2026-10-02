@@ -11,6 +11,32 @@ export const LEARNING_REQUIREMENTS = new Set([
 
 export const LEARNING_MEDIA_TYPE = "text/markdown";
 
+// Play shows this much of a lesson first, ending on a paragraph boundary,
+// then a Continue reading control for the rest. Shorter lessons are shown
+// whole. Once the puzzle is complete, the dialog opens on the full text.
+export const LESSON_PREVIEW_CHARACTERS = 600;
+
+export function truncateLearningMarkdown(markdown, limit = LESSON_PREVIEW_CHARACTERS) {
+  const text = decodeAuthoredEscapedNewlines(
+    typeof markdown === "string" ? markdown : ""
+  ).trim();
+  if (!text) return { preview: "", remainder: "" };
+  const blocks = text.split(/\n{2,}/);
+  let used = 0;
+  const kept = [];
+  for (const block of blocks) {
+    const next = used + block.length + (kept.length ? 2 : 0);
+    if (kept.length > 0 && next > limit) break;
+    kept.push(block);
+    used = next;
+  }
+  if (kept.length >= blocks.length) return { preview: text, remainder: "" };
+  return {
+    preview: kept.join("\n\n"),
+    remainder: blocks.slice(kept.length).join("\n\n")
+  };
+}
+
 // Chatbots often put the two-character sequence \n into tool-argument
 // strings, as if they were writing JSON source. After structured decode
 // those are literal backslash-n, so headings and paragraphs collapse into

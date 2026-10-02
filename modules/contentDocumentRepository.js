@@ -8,7 +8,8 @@ import {
 } from "./draftRepository.js";
 import {
   assertCurrentAuthoredDocument,
-  stripSystemAuthoredMetadata
+  publicationDocument,
+  puzzleDocumentFromStorage
 } from "./authoringDomains.js";
 import {
   parseLayoutDocument,
@@ -66,7 +67,7 @@ function publishedRevisionSnapshot(kind, row) {
   );
   return {
     revision: Number(row.revision),
-    document: kind === "puzzle" ? stripSystemAuthoredMetadata(document) : document
+    document: kind === "puzzle" ? puzzleDocumentFromStorage(document) : document
   };
 }
 
@@ -97,17 +98,14 @@ function publishedRecord(row) {
     // simplified rows on read as a compatibility measure; new writes use the
     // same fold before serialization below.
     document: row.kind === "puzzle"
-      ? stripSystemAuthoredMetadata(document)
+      ? puzzleDocumentFromStorage(document)
       : document,
     ...(layout ? { layout } : {})
   };
 }
 
-function documentForPublishedStorage(kind, document) {
-  assertCurrentAuthoredDocument(document, `${kind} document`);
-  return kind === "puzzle"
-    ? stripSystemAuthoredMetadata(document)
-    : document;
+function documentForPublishedStorage(kind, document, options = {}) {
+  return publicationDocument(kind, document, options);
 }
 
 function titleOf(document) {
@@ -713,7 +711,10 @@ export class D1ContentDocumentRepository {
     for (const item of items) {
       assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(item.id);
-      const sourceDocument = documentForPublishedStorage(item.kind, item.document);
+      const sourceDocument = documentForPublishedStorage(item.kind, item.document, {
+        now,
+        backfill: true
+      });
       const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
       const contentHash = draftContentHash(documentJson);
       const layoutJson = item.kind === "puzzle"
@@ -763,13 +764,16 @@ export class D1ContentDocumentRepository {
       throw new Error("expectedRevision must be a positive integer");
     }
     const publishedBy = normalizeDraftActor(actor).subject;
-    const sourceDocument = documentForPublishedStorage(kind, document);
-    const documentJson = serializeDraftDocument({ ...sourceDocument, id });
-    const contentHash = draftContentHash(documentJson);
     const now = new Date().toISOString();
     const existing = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? AND id = ?
     `).bind(kind, id).first();
+    const previous = existing?.document
+      ? parsedJson(existing.document, "Published document")
+      : null;
+    const sourceDocument = documentForPublishedStorage(kind, document, { previous, now });
+    const documentJson = serializeDraftDocument({ ...sourceDocument, id });
+    const contentHash = draftContentHash(documentJson);
     if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
       throw new PublishedRevisionConflictError(kind, id);
     }
@@ -1051,7 +1055,10 @@ export function createMemoryContentDocumentRepository() {
       for (const item of items) {
         assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
         assertDraftId(item.id);
-        const sourceDocument = documentForPublishedStorage(item.kind, item.document);
+        const sourceDocument = documentForPublishedStorage(item.kind, item.document, {
+          now: new Date().toISOString(),
+          backfill: true
+        });
         const key = publishedKey(item.kind, item.id);
         if (published.has(key)) continue;
         const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
@@ -1088,11 +1095,14 @@ export function createMemoryContentDocumentRepository() {
         throw new Error("expectedRevision must be a positive integer");
       }
       const publishedBy = normalizeDraftActor(actor).subject;
-      const sourceDocument = documentForPublishedStorage(kind, document);
-      const documentJson = serializeDraftDocument({ ...sourceDocument, id });
       const now = new Date().toISOString();
       const key = publishedKey(kind, id);
       const existing = published.get(key);
+      const previous = existing?.document
+        ? parsedJson(existing.document, "Published document")
+        : null;
+      const sourceDocument = documentForPublishedStorage(kind, document, { previous, now });
+      const documentJson = serializeDraftDocument({ ...sourceDocument, id });
       if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
         throw new PublishedRevisionConflictError(kind, id);
       }

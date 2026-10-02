@@ -12,7 +12,6 @@ import {
   canonicalizePuzzleCategoryReferences,
   slugify
 } from "../puzzles/categories.js";
-import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
@@ -143,7 +142,6 @@ export function puzzleToSimplified(
     ...(source.puzzleKind ? { puzzleKind: source.puzzleKind } : {}),
     ...(source.categories ? { categories: [...source.categories] } : {}),
     ...(source.subcategories ? { subcategories: clone(source.subcategories) } : {}),
-    ...largeField(puzzleNodeCount(source)),
     ...(source.tags ? { tags: [...source.tags] } : {}),
     ...(source.level ? { level: source.level } : {}),
     ...(source.info ? { info: clone(source.info) } : {}),
@@ -159,7 +157,9 @@ export function puzzleToSimplified(
     ...(source.creator ? { creator: source.creator } : {}),
     ...(source.license ? { license: source.license } : {}),
     ...(source.derivedFrom ? { derivedFrom: source.derivedFrom } : {}),
-    ...(source.language ? { language: source.language } : {})
+    ...(source.language ? { language: source.language } : {}),
+    ...(source.dateCreated ? { dateCreated: source.dateCreated } : {}),
+    ...(source.dateModified ? { dateModified: source.dateModified } : {})
   };
 }
 
@@ -173,7 +173,9 @@ export function puzzleToSimplified(
 export function puzzleForCanonicalPublication(puzzle, options) {
   const next = hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
-      stripSystemAuthoredMetadata(canonicalizeDocumentProvenance(clone(puzzle)))
+      stripSystemAuthoredMetadata(canonicalizeDocumentProvenance(clone(puzzle)), {
+        keepDocumentDates: true
+      })
     )
   );
   const canonical = canonicalizePuzzleCategoryReferences(

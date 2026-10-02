@@ -13,7 +13,6 @@ import { validateCatalogueContent, validatePuzzleContent } from "../modules/cont
 import { puzzleFromJsonLd, puzzleToJsonLd } from "../modules/puzzleJsonLd.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import { PUZZLES } from "../puzzles/index.js";
-import { largeField, puzzleNodeCount } from "../modules/puzzleBoardSize.js";
 
 export const name = "JSON-LD: puzzle and catalogue profile round trips";
 
@@ -26,7 +25,6 @@ function runtimeShape(puzzle) {
     delete bridge.termRole;
   });
   delete copy.large;
-  Object.assign(copy, largeField(puzzleNodeCount(copy)));
   return copy;
 }
 
