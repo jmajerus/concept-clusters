@@ -629,7 +629,12 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!document.id) blocking.push({ id: "missing-id", message: "Document has no id." });
   if (!document.title) blocking.push({ id: "missing-title", message: "Document has no title." });
   if (!document.category && !(Array.isArray(document.categories) && document.categories.length)) {
-    blocking.push({ id: "missing-category", message: "Document has no category." });
+    blocking.push({
+      id: "missing-category",
+      message: level === "fit" || level === "board"
+        ? "Add `category` on the working document before create. Add `subcategories` as { categoryId: subcategoryId } when one applies."
+        : "Document has no category."
+    });
   }
   if (level === "integrated" && !INTEGRATED_PUZZLE_KINDS.includes(document.puzzleKind)) {
     blocking.push({

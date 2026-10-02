@@ -36,7 +36,9 @@ resulting node count; do not set renderer fields.
 8. Write `ledgers/<id>-fit.json` (loss ledger) **before** the draft write.
 9. MCP (sequential on stdio): `get_authoring_guidance` phase `core`, then
    `get_authoring_schema` phase `core`, then `review`.
-10. Clusters and bridges only — no term notes, puzzle `info`, or lenses yet.
+10. The create document is clusters, bridges, `category`, and `subcategories`
+    when one applies. Omit `categories` for a single home. No term notes,
+    puzzle `info`, or lenses yet.
     No `draft.revision` for this id in this session means `create_puzzle_draft`.
     A revision already in hand means `save_puzzle_draft` with that integer as
     `expected_revision`. The working file is the document only. To save

@@ -164,4 +164,37 @@ export async function run() {
     }])
   });
   assert.equal(added.ok, true, JSON.stringify(added.blocking));
+
+  const uncategorizedBoard = board([{
+    term: "shared mechanism",
+    clusters: ["one", "two"],
+    fact: "Connects the two groupings."
+  }]);
+  delete uncategorizedBoard.category;
+  const uncategorized = runFit({
+    inventory: inventory(),
+    board: uncategorizedBoard,
+    ledger: ledger([])
+  });
+  assert.equal(uncategorized.ok, false);
+  const categoryGap = uncategorized.blocking.find(gap => gap.id === "missing-category");
+  assert.equal(
+    categoryGap?.message,
+    "Add `category` on the working document before create. Add `subcategories` as { categoryId: subcategoryId } when one applies."
+  );
+
+  const completeDirectory = mkdtempSync(join(tmpdir(), "cc-fit-"));
+  const completePath = join(completeDirectory, "board.json");
+  writeFileSync(completePath, JSON.stringify(uncategorizedBoard));
+  const complete = spawnSync(
+    process.execPath,
+    [CHECKER, "--level", "complete", completePath],
+    { encoding: "utf8" }
+  );
+  rmSync(completeDirectory, { recursive: true, force: true });
+  const completeReport = JSON.parse(complete.stdout);
+  assert.equal(
+    completeReport.blocking.find(gap => gap.id === "missing-category")?.message,
+    "Document has no category."
+  );
 }

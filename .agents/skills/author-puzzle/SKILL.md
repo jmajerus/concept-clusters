@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `c2ac4c52` · 2026-09-30
+Skill rev `ca16cb22` · 2026-10-02
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. The human Publishes on `/admin/drafts`, or
@@ -430,8 +430,10 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 - If the category is new (no peers), skip comparable reads; rely on MCP `get_authoring_schema` phase `core`.
 - Write `ledgers/<id>-fit.json` (loss ledger) **before** the draft write.
 - MCP tools **one at a time** (never parallel on stdio — Codex closes the transport): `get_authoring_guidance` phase `core`, then `get_authoring_schema` phase `core`, then `review`.
-- Clusters and bridges first; notes, lenses, and publication metadata wait
-  for later passes. No `draft.revision` yet for this id means
+- The create document is clusters, bridges, `category`, and `subcategories`
+  when one applies. Omit `categories` for a single home. No term notes,
+  puzzle `info`, lenses, or publication metadata yet.
+  No `draft.revision` yet for this id means
   `create_puzzle_draft`. A revision already in hand means `save_puzzle_draft`
   with that `expected_revision`, or `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>`
   once the draft exists. If the draft already has notes or lenses, merge the fit

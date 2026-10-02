@@ -434,9 +434,11 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   derived. If the map needs more than 32 nodes, or the subject has a natural
   seam that teaches better as two lessons, split it into relatedPuzzles.
   Do not fill toward 32.
-- The disciplinary home is classification, not part of this board pass. Set
-  category on the complete document at create time, or later with
-  domain=classification. A content save does not change it.
+- Include \`category\` on the complete document in \`create_puzzle_draft\`. Add
+  \`subcategories\` when one applies, as { categoryId: subcategoryId }. Omit
+  \`categories\` when the puzzle has one home. A later shelf edit is a
+  domain=classification save. A domain=content save omits \`category\`,
+  \`categories\`, and \`subcategories\` and leaves the shelf as it is.
 - Carry approved inventory connections onto the board as bridges. Do not
   invent extras to make the graph connected. A disconnected board or no
   bridges is acceptable. Write each bridge fact now and make its local

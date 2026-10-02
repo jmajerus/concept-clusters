@@ -114,6 +114,10 @@ export async function run() {
       initialized.result.instructions,
       /Pass expected_revision on every save_puzzle_draft/
     );
+    assert.match(
+      initialized.result.instructions,
+      /create_puzzle_draft takes category, categories, and subcategories on the complete document/
+    );
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -532,6 +536,10 @@ export async function run() {
     assert.match(coreGuidance.result.structuredContent.markdown, /appropriate level of granularity/);
     assert.match(coreGuidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
     assert.match(coreGuidance.result.structuredContent.markdown, /Carry approved inventory connections/);
+    assert.match(
+      coreGuidance.result.structuredContent.markdown,
+      /Include `category` on the complete document in `create_puzzle_draft`/
+    );
     assert.doesNotMatch(
       coreGuidance.result.structuredContent.markdown,
       /\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i

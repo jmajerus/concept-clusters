@@ -90,6 +90,9 @@ describe("hosted authoring Worker", () => {
       .toBe("concept-clusters-hosted-authoring");
     expect(initialization.result.serverInfo.version).toBe(AUTHORING_MCP_SERVER_VERSION);
     expect(initialization.result.instructions).toMatch(/one integrated cycle/);
+    expect(initialization.result.instructions).toMatch(
+      /create_puzzle_draft takes category, categories, and subcategories on the complete document/
+    );
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -557,6 +560,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/do not plan to rediscover/);
     expect(coreGuidance.result.structuredContent.markdown)
       .toMatch(/Carry approved inventory connections/);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .toMatch(/Include `category` on the complete document in `create_puzzle_draft`/);
     expect(coreGuidance.result.structuredContent.markdown)
       .not.toMatch(/\b(?:standard|large|wide)\b|\b16(?:-node)?\b/i);
     expect(coreGuidance.result.structuredContent.markdown)
