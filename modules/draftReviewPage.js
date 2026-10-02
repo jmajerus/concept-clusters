@@ -1637,6 +1637,12 @@ function renderRenameDraftForm(draft) {
   </section>`;
 }
 
+function reviewEventTimeOrder(left, right) {
+  const byTime = String(left.reviewedAt || "").localeCompare(String(right.reviewedAt || ""));
+  if (byTime) return byTime;
+  return (Number(left.id) || 0) - (Number(right.id) || 0);
+}
+
 function decisionEventDetail(event, publishedSnapshots, events = []) {
   const source = Number.isInteger(event.sourceEventId)
     ? events.find(item => item.id === event.sourceEventId)
@@ -1703,7 +1709,9 @@ export function renderPuzzleReviewIssuesPage({
       <button type="submit" name="confirm" value="review-issue" class="secondary">Save issue update</button>
     </form>`}
   </section>`;
-  const completedEvents = events.filter(event => !event.issueId && event.eventType !== "proposed");
+  const completedEvents = events
+    .filter(event => !event.issueId && event.eventType !== "proposed")
+    .sort(reviewEventTimeOrder);
   const body = `
     <p class="meta">${authoringAdminNav()} · ${chronicleOnly
       ? `<a href="/admin/drafts">Back to puzzles</a>`

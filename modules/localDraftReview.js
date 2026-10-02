@@ -872,7 +872,7 @@ export function createLocalDraftReviewHandler({
         }
         const [issues, events, published] = await Promise.all([
           contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: true }),
-          contentDocuments.listPuzzleReviewEvents({ id: puzzleId }),
+          contentDocuments.listPuzzleReviewEvents({ id: puzzleId, limit: 100 }),
           contentDocuments.getPublished({ kind: "puzzle", id: puzzleId }).catch(() => null)
         ]);
         if (!record && !published && events.length === 0) {

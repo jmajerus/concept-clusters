@@ -921,6 +921,25 @@ export async function run() {
   assert.match(issuePage, /Mark resolved/);
   assert.match(issuePage, /Mark reviewed by human/);
 
+  const historyPage = renderPuzzleReviewIssuesPage({
+    draft: { draftId: "review-fixture", title: "Review Fixture", document: { title: "Review Fixture" } },
+    events: [
+      { id: 9, reviewerKind: "human", reviewedAt: "2026-10-02T02:48:32.869Z", issueId: null, eventType: "rejected", comments: null, outcome: null },
+      { id: 7, reviewerKind: "agent", reviewedAt: "2026-10-01T15:02:30.229Z", issueId: null, eventType: "review", outcome: "changed", draftRevision: 26, comments: "Later pass." },
+      { id: 8, reviewerKind: "human", reviewedAt: "2026-10-02T02:48:32.869Z", issueId: null, eventType: "accepted", comments: null, outcome: null, publishedRevision: 8 },
+      { id: 6, reviewerKind: "agent", reviewedAt: "2026-10-01T13:26:11.071Z", issueId: null, eventType: "review", outcome: "changed", draftRevision: 8, comments: "Earlier pass." },
+      { id: 5, reviewerKind: "agent", reviewedAt: "2026-10-01T12:00:00.000Z", issueId: null, eventType: "proposed", comments: null, outcome: null }
+    ]
+  });
+  const earlierPass = historyPage.indexOf("Earlier pass.");
+  const laterPass = historyPage.indexOf("Later pass.");
+  const acceptedAt = historyPage.indexOf("2026-10-02T02:48:32.869Z · accepted");
+  const rejectedAt = historyPage.indexOf("2026-10-02T02:48:32.869Z · rejected");
+  assert.ok(earlierPass > -1 && laterPass > earlierPass);
+  assert.ok(acceptedAt > laterPass);
+  assert.ok(rejectedAt > acceptedAt);
+  assert.doesNotMatch(historyPage, /· proposed/);
+
   const publishedLocal = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,
