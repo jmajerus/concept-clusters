@@ -14,7 +14,9 @@ import {
 } from "../modules/learningIntroduction.js";
 import {
   loadLearningIntroductionStatus,
-  saveLearningIntroductionStatus
+  loadShowFullLessons,
+  saveLearningIntroductionStatus,
+  saveShowFullLessons
 } from "../modules/learningIntroductionStore.js";
 import {
   definePuzzle,
@@ -163,6 +165,13 @@ export async function run() {
       }
     }
   );
+  const lessonPreference = memoryStorage();
+  assert.equal(loadShowFullLessons(lessonPreference), false);
+  assert.equal(saveShowFullLessons(lessonPreference, true), true);
+  assert.equal(loadShowFullLessons(lessonPreference), true);
+  assert.equal(saveShowFullLessons(lessonPreference, false), true);
+  assert.equal(loadShowFullLessons(lessonPreference), false);
+
   const assetErrors = await validateLearningIntroduction(unsafeAsset);
   assert.ok(assetErrors.some(error => error.includes("non-empty alt text")));
   assert.ok(assetErrors.some(error => error.includes("invalid or missing")));

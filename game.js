@@ -100,7 +100,9 @@ import {
 } from "./modules/learningIntroduction.js";
 import {
   loadLearningIntroductionStatus,
-  saveLearningIntroductionStatus
+  loadShowFullLessons,
+  saveLearningIntroductionStatus,
+  saveShowFullLessons
 } from "./modules/learningIntroductionStore.js";
 import {
   clearPlayerSession,
@@ -182,6 +184,13 @@ if (playSource === "d1" && overviewSearchInputEl) {
 }
 const overviewListEl = document.getElementById("overview-list");
 const overviewRelatedCataloguesEl = document.getElementById("overview-related-catalogues");
+const showFullLessonsEl = document.getElementById("show-full-lessons");
+if (showFullLessonsEl) {
+  showFullLessonsEl.checked = loadShowFullLessons(localStorage);
+  showFullLessonsEl.addEventListener("change", () => {
+    saveShowFullLessons(localStorage, showFullLessonsEl.checked);
+  });
+}
 const overviewShareBtn = document.getElementById("overview-share-btn");
 const overviewShareStatusEl = document.getElementById("overview-share-status");
 const lensPanelEl = document.getElementById("lens-panel");
@@ -976,7 +985,8 @@ function puzzleFullyComplete() {
 
 // One slot: "Lesson" when the puzzle has an authored introduction (with its
 // read/skip gate), "About" otherwise. The dialog previews the lesson and
-// offers Continue reading until the board and its lenses are complete.
+// offers Continue reading until the board and its lenses are complete,
+// or until the visitor's "Always show full lessons" preference is on.
 function updateLearningIntroduction() {
   const introduction = state?.learningIntroduction || null;
   const gated = !layoutAuthoringMode && learningIntroductionGate(

@@ -2,6 +2,7 @@ import {
   loadLearningIntroduction,
   truncateLearningMarkdown
 } from "./learningIntroduction.js";
+import { loadShowFullLessons } from "./learningIntroductionStore.js";
 import { RECORDING_START_DATE } from "./authoringDomains.js";
 import { resolveLessonByline } from "./authoringProvenance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
@@ -448,7 +449,7 @@ class LearningIntroductionElement extends HTMLElement {
     const status = root.getElementById("lesson-status");
     const finish = root.getElementById("finish");
     const { preview, remainder } = truncateLearningMarkdown(this.#loaded.markdown);
-    const showAll = this.#lessonExpanded || !remainder;
+    const showAll = loadShowFullLessons(localStorage) || this.#lessonExpanded || !remainder;
     const options = {
       baseUrl: this.#loaded.baseUrl,
       resolveAssetUrl: src =>

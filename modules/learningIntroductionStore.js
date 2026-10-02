@@ -3,6 +3,7 @@ import { learningIntroductionFingerprint } from "./learningIntroduction.js";
 export const LEARNING_INTRODUCTION_SCHEMA_VERSION = 1;
 const PREFIX = `ccLearningIntroduction:v${LEARNING_INTRODUCTION_SCHEMA_VERSION}`;
 const VALID_STATUSES = new Set(["read", "skipped"]);
+const SHOW_FULL_LESSONS_KEY = "ccShowFullLessons";
 
 export function learningIntroductionKey(puzzle) {
   return `${PREFIX}:${puzzle.id}`;
@@ -25,6 +26,24 @@ export function loadLearningIntroductionStatus(storage, puzzle) {
       : null;
   } catch {
     return null;
+  }
+}
+
+export function loadShowFullLessons(storage) {
+  try {
+    return storage.getItem(SHOW_FULL_LESSONS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveShowFullLessons(storage, enabled) {
+  try {
+    if (enabled) storage.setItem(SHOW_FULL_LESSONS_KEY, "1");
+    else storage.removeItem(SHOW_FULL_LESSONS_KEY);
+    return true;
+  } catch {
+    return false;
   }
 }
 

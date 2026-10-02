@@ -138,5 +138,26 @@ export async function run(page, baseURL) {
       !root.getElementById("continue-reading");
   });
 
+  await page.click("#learning-introduction #close");
+  await page.click("#browse-puzzles");
+  await page.click("#library-preferences summary");
+  await page.click("#show-full-lessons");
+  assert.equal(await page.evaluate(() => localStorage.getItem("ccShowFullLessons")), "1");
+  await openFixture(page, puzzle("lesson-preview-preference"));
+  await page.click("#learning-introduction #read");
+  await page.waitForFunction(() => {
+    const root = document.querySelector("#learning-introduction")?.shadowRoot;
+    return root?.getElementById("lesson")?.textContent?.includes("The chapter may name the groups") &&
+      !root.getElementById("continue-reading") &&
+      !root.getElementById("show-full-lessons");
+  });
+  await page.click("#learning-introduction #close");
+  await page.click("#browse-puzzles");
+  await page.click("#show-full-lessons");
+  await openFixture(page, puzzle("lesson-preview-preference"));
+  await page.click("#learning-introduction #read");
+  await page.waitForFunction(() => document.querySelector("#learning-introduction")
+    ?.shadowRoot?.getElementById("continue-reading"));
+
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }
