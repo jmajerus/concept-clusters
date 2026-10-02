@@ -917,14 +917,19 @@ until a richer schema is justified.
 
 ## Learning introductions
 
-`learningIntroduction` adds optional, puzzle-associated preparation before
-the learner organizes the board. Its UI label is **Before You Begin**. Use it
-for a short orientation to the learning objective — domain knowledge,
-vocabulary, framing, examples, a reflection question. A paragraph or two is
-often enough; omit only when the board title and clusters already orient
-clearly. Prefer an introduction for technical, sequential, or easy-to-misframe
-subjects. Write about the **subject**, not the puzzle mechanism. The lesson
-remains available for review throughout play.
+`learningIntroduction` is one optional Markdown document. Play labels the
+button **Lesson** (the dialog title still defaults to **Before You Begin**).
+Write the lesson the subject needs, in the order the subject needs: domain
+knowledge, vocabulary, framing, examples, how the ideas relate, and why the
+groupings hold. Omit the field only when the board title and clusters
+already orient clearly. Prefer a lesson for technical, sequential, or
+easy-to-misframe subjects. Write about the **subject**, not the puzzle
+mechanism. Do not author a preview, a teaser, or a split.
+
+Play shows the start of that text, then **Continue reading** for the rest.
+The cut is made in play, at a paragraph boundary. Once the board and its
+lenses are complete, the same dialog opens on the full text. A short lesson
+is shown whole.
 
 The three requirement levels deliberately behave differently:
 
@@ -932,9 +937,10 @@ The three requirement levels deliberately behave differently:
   you begin** invitation above it.
 - `recommended` first presents the invitation, while allowing **Start
   puzzle** without reading.
-- `required` holds the board until the lesson loads and the learner marks
-  it read. Use this sparingly, for example when the puzzle depends on a
-  particular source.
+- `required` holds the board until the learner dismisses the lesson. Use
+  this sparingly, for example when the puzzle depends on a particular
+  source. Dismissing the lesson acknowledges it at the preview or after
+  Continue reading.
 
 A read or skipped choice is stored separately from puzzle progress. It is
 content-aware: the player derives a fingerprint from the introduction, so

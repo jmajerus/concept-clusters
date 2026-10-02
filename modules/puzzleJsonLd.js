@@ -2,7 +2,6 @@ import {
   canonicalizePuzzleCategoryReferences,
   slugify
 } from "../puzzles/categories.js";
-import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import {
   CONCEPT_CLUSTERS_CONTEXT,
   CONTENT_SCHEMA_VERSION,
@@ -16,7 +15,7 @@ import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
 const PUZZLE_KEYS = new Set([
   "@context", "@id", "@type", "schemaVersion", "id", "title", "category", "puzzleKind",
-  "categories", "subcategories", "large", "info", "relatedPuzzles", "lensMode", "lenses",
+  "categories", "subcategories", "info", "relatedPuzzles", "lensMode", "lenses",
   "preSolve", "tags", "level",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
   "derivedFrom", "dateCreated", "dateModified", "language", "version",
@@ -165,7 +164,6 @@ export function puzzleToJsonLd(
     ...(categorySource.puzzleKind ? { puzzleKind: categorySource.puzzleKind } : {}),
     ...(categorySource.categories ? { categories: [...categorySource.categories] } : {}),
     ...(categorySource.subcategories ? { subcategories: clone(categorySource.subcategories) } : {}),
-    ...largeField(puzzleNodeCount(categorySource)),
     ...(categorySource.tags ? { tags: [...categorySource.tags] } : {}),
     ...(categorySource.level ? { level: categorySource.level } : {}),
     ...(categorySource.info ? { info: clone(categorySource.info) } : {}),
@@ -263,7 +261,6 @@ export function puzzleFromJsonLd(document) {
     clusters,
     bridges
   };
-  Object.assign(puzzle, largeField(puzzleNodeCount(puzzle)));
   for (const key of [
     "creator", "license", "derivedFrom", "dateCreated", "dateModified",
     "language", "version", "provenance"

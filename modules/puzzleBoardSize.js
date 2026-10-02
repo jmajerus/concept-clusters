@@ -1,6 +1,6 @@
-// Layout is derived from the puzzle and the play mode. Authors and agents
-// omit renderer flags; conversion/save may retain the legacy `large` field
-// for runtime compatibility, and play derives the same choice from the count.
+// Layout is derived from the puzzle and the play mode. `large` is not stored.
+// Play and the Library badge both call derivedLarge on the node count, so a
+// later change to that threshold applies to every puzzle.
 //
 // The one-board ceiling is 32 nodes. It is the only size agents are told.
 // Canvas floors below it are derived here and are not authoring choices.
@@ -23,10 +23,12 @@ export function puzzleNodeCount(puzzle) {
   if (!Array.isArray(puzzle?.clusters) || !Array.isArray(puzzle?.bridges)) {
     return 0;
   }
-  return puzzle.clusters.reduce(
-    (sum, cluster) => sum + (Array.isArray(cluster?.terms) ? cluster.terms.length : 0),
-    0
-  ) + puzzle.bridges.length;
+  return puzzle.clusters.reduce((sum, cluster) => {
+    const terms = Array.isArray(cluster?.terms) && cluster.terms.length
+      ? cluster.terms
+      : [...(cluster?.seeds || []), ...(cluster?.floatingTerms || [])];
+    return sum + terms.length;
+  }, 0) + puzzle.bridges.length;
 }
 
 // Solved-board segments the canvas has to keep apart: a spanning link

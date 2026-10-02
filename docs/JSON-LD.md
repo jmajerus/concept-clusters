@@ -231,11 +231,10 @@ version
 provenance
 ```
 
-`dateCreated`, `dateModified`, and `version` are intentionally not part of the
-simplified authoring/storage document. When a future repository-backed export
-has D1 lifecycle metadata available, the adapter may synthesize their portable
-values; an import into the current authoring workflow does not ask an agent to
-reproduce them.
+`dateCreated` and `dateModified` are system-stamped on the simplified puzzle
+and travel with it through Freeze. Agents do not send them. `version` stays
+off the stored puzzle. An import does not ask an agent to reproduce any of
+these values.
 
 `provenance` is the optional two-axis authoring record and the current model
 of record for authoring attribution

@@ -4,8 +4,9 @@
 //
 // "Simplified" means the identity ceremony is gone while authored puzzle
 // content remains available. Repository-owned lifecycle metadata is excluded:
-// the infrastructure supplies dates, revisions, hashes, and status outside
-// this document. Legacy bridge termRole is migration-only and is removed before
+// the infrastructure supplies revisions, hashes, and status outside this
+// document, and stamps dateCreated and dateModified onto it at publication.
+// Legacy bridge termRole is migration-only and is removed before
 // this schema is parsed. JSON-LD is interchange-only (content:export/import),
 // never a stored draft. Live authoring uses puzzleFromAuthoredDocument() to
 // reach the runtime puzzle model.
@@ -30,7 +31,6 @@ import {
   LEARNING_REQUIREMENTS
 } from "./learningIntroduction.js";
 import { puzzleToJsonLd } from "./puzzleJsonLd.js";
-import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import {
   CATEGORIES,
   PUZZLE_LEVELS,
@@ -127,10 +127,8 @@ const RelationKindEnum = z.enum([
 // discarding authored data.
 const LEGACY_TERM_ROLES = new Set(["reference", "connector"]);
 
-export const LARGE_DESCRIPTION =
-  "Derived automatically from node count, routed edges, and term length on save; omit this field. Keep total nodes (cluster terms plus bridges) at or below 32. That ceiling is a refusal point, not a size to fill. Do not split or drop terms to change the canvas.";
 export const LEARNING_MARKDOWN_DESCRIPTION =
-  "Markdown lesson body whose string value contains real line breaks: blank lines between paragraphs, headings on their own lines. The dialog already shows title, so do not repeat it as the first line. Do not write the two-character sequence backslash-n; the tool serializer encodes newlines.";
+  "One Markdown document with real line breaks in the string value: blank lines between paragraphs, headings on their own lines. Write the lesson the subject needs, in that order, as one text. Do not author a preview, a teaser, or a split. The dialog already shows title, so do not repeat it as the first line. Do not write the two-character sequence backslash-n; the tool serializer encodes newlines.";
 export const LESSON_CREDIT_DESCRIPTION = lessonCreditFieldDescription();
 
 // Matches VALID_BRIDGE_DIRECTIONS in modules/contentValidation.js. Whether
@@ -344,7 +342,6 @@ export const SimplifiedPuzzleInputSchema = z.object({
   // Opt-in, small fixed vocabulary -- see puzzles/categories.js's
   // PUZZLE_LEVELS for why this isn't freeform like tags.
   level: z.enum(PUZZLE_LEVELS).optional(),
-  large: z.boolean().optional().describe(LARGE_DESCRIPTION),
   info: PuzzleInfoValueSchema.optional(),
   unplacedTerms: UnplacedTermsSchema.optional(),
   // Ordinary topic/trivia sorting needs at least two groups. Vocabulary
@@ -368,7 +365,11 @@ export const SimplifiedPuzzleInputSchema = z.object({
   creator: z.string().min(1).optional(),
   license: z.string().min(1).optional(),
   derivedFrom: z.string().min(1).optional(),
-  language: z.string().min(1).optional()
+  language: z.string().min(1).optional(),
+  // System-stamped at publication. Agents do not send these; the MCP schema
+  // omits them. They stay on the stored puzzle so Freeze and play can read them.
+  dateCreated: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  dateModified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
 }).strict().superRefine((input, context) => {
   if (input.puzzleKind !== "vocabulary-context" && input.clusters.length < 2) {
     context.addIssue({
@@ -652,7 +653,6 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     ...(input.puzzleKind ? { puzzleKind: input.puzzleKind } : {}),
     ...(categoryFields.categories ? { categories: [...categoryFields.categories] } : {}),
     ...(categoryFields.subcategories ? { subcategories: clone(categoryFields.subcategories) } : {}),
-    ...largeField(puzzleNodeCount({ clusters, bridges })),
     ...(input.tags ? { tags: [...input.tags] } : {}),
     ...(input.level ? { level: input.level } : {}),
     ...(input.info ? { info: clone(input.info) } : {}),
@@ -669,7 +669,9 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     ...(input.creator ? { creator: input.creator } : {}),
     ...(input.license ? { license: input.license } : {}),
     ...(input.derivedFrom ? { derivedFrom: input.derivedFrom } : {}),
-    ...(input.language ? { language: input.language } : {})
+    ...(input.language ? { language: input.language } : {}),
+    ...(input.dateCreated ? { dateCreated: input.dateCreated } : {}),
+    ...(input.dateModified ? { dateModified: input.dateModified } : {})
   };
 }
 
@@ -701,7 +703,7 @@ export function authoredDocumentForSchema(input, { categoryRegistry = CATEGORIES
       canonicalizeBridgeTermRoles(
         canonicalizePuzzleCategoryReferences(
           canonicalizeDocumentProvenance(
-            stripSystemAuthoredMetadata(input)
+            stripSystemAuthoredMetadata(input, { keepDocumentDates: true })
           ),
           categoryRegistry
         )

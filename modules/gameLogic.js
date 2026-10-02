@@ -20,7 +20,7 @@ import { bridgeDirectionText } from "./bridgeDirection.js";
 
 export function createGameEngine({
   getState, getMode, isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted,
-  showRelatedPuzzles
+  showRelatedPuzzles, onPuzzleComplete
 }) {
   // Arity-neutral progress phrasing for a partially-connected bridge --
   // "1 of 2 clusters connected; 1 remains" reads identically whether the
@@ -273,6 +273,7 @@ export function createGameEngine({
               trackPuzzleCompleted(state.puzzle.id, getMode(), state);
             }
             showRelatedPuzzles(state.puzzle);
+            onPuzzleComplete?.();
           }
         }
       } else if (s.connected.includes(gi)) {

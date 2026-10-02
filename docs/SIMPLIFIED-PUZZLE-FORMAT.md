@@ -116,11 +116,16 @@ The MCP agent schema does not include `provenance`, `creator`, `license`,
 preserves existing values and stamps recognized MCP clients where possible;
 human editorial workflows maintain attribution and rights information.
 
-The authoring document does not contain `dateCreated`, `dateModified`,
-`version`, or a learning-introduction `revision`. Timestamps, revision tokens,
-hashes, status, and lesson-progress invalidation keys are owned and generated
-by infrastructure (D1 row fields or derived runtime values). JSON-LD export
-may represent the portable equivalents at its explicit interchange boundary.
+Publication stamps `dateCreated` and `dateModified` (`YYYY-MM-DD`) onto the
+puzzle. Agents do not send them. A puzzle with neither date is read as
+`2026-10-02` for both; that default is not written back into an existing
+puzzle. A first publication sets both to that day. A later publication keeps
+`dateCreated` and moves `dateModified` only when the document changes. The
+document does not contain `version`, `large`, or a learning-introduction
+`revision`.
+`large` is computed from the node count when a list or a board needs it.
+Revision tokens, hashes, status, and the other lifecycle fields stay on the
+D1 row.
 
 Two to six `clusters` for the default topic-based and trivia-quiz kinds;
 `vocabulary-context` permits one to six. A single-cluster vocabulary board is

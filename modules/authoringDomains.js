@@ -108,22 +108,123 @@ export function assertCurrentAuthoredDocument(document, label = "Authored docume
  * therefore be read once, while newly saved authoring documents cannot make
  * an agent reproduce timestamps or revision tokens.
  */
-export function stripSystemAuthoredMetadata(document) {
+export const RECORDING_START_DATE = "2026-10-02";
+
+const DOCUMENT_DATE_FIELDS = new Set(["dateCreated", "dateModified"]);
+const ISO_DAY = /^(\d{4}-\d{2}-\d{2})$/;
+
+export function publicationDay(now) {
+  const match = /^(\d{4}-\d{2}-\d{2})/.exec(typeof now === "string" ? now : "");
+  return match ? match[1] : RECORDING_START_DATE;
+}
+
+function validPublicationDay(value) {
+  return typeof value === "string" && ISO_DAY.test(value) ? value : null;
+}
+
+function stableDocument(value) {
+  if (Array.isArray(value)) return value.map(stableDocument);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.keys(value).sort().map(key => [key, stableDocument(value[key])])
+  );
+}
+
+// `dateCreated` and `dateModified` are the two system fields that stay on
+// the puzzle. Everything else in SYSTEM_ROOT_FIELDS is row metadata.
+// `large` is derived at read time and is never stored.
+export function stripSystemAuthoredMetadata(document, { keepDocumentDates = false } = {}) {
   if (!isObject(document) || Object.hasOwn(document, "@context")) return document;
   assertNoRetiredAuthoringFields(document);
   let next = document;
   for (const key of SYSTEM_ROOT_FIELDS) {
+    if (keepDocumentDates && DOCUMENT_DATE_FIELDS.has(key)) continue;
     if (!hasOwn(document, key)) continue;
     if (next === document) next = { ...document };
     delete next[key];
   }
-  const introduction = document.learningIntroduction;
+  if (hasOwn(next, "large")) {
+    if (next === document) next = { ...document };
+    delete next.large;
+  }
+  const introduction = next.learningIntroduction;
   if (isObject(introduction) && hasOwn(introduction, "revision")) {
     if (next === document) next = { ...document };
     next.learningIntroduction = { ...introduction };
     delete next.learningIntroduction.revision;
   }
   return next;
+}
+
+export function samePuzzlePublicationBody(left, right) {
+  return JSON.stringify(stableDocument(stripSystemAuthoredMetadata(left)))
+    === JSON.stringify(stableDocument(stripSystemAuthoredMetadata(right)));
+}
+
+// Publish stamps the dates. A puzzle stored without them keeps dateCreated
+// at the recording-start day and moves dateModified only when the body
+// changes. An unchanged body leaves both alone. Agent-supplied dates are
+// not an input: callers pass the body with those fields removed. Import
+// does not write the recording-start day; readers apply it when the dates
+// are missing.
+export function stampPublicationDates(document, {
+  previous = null,
+  now,
+  contentUnchanged = false,
+  backfill = false
+} = {}) {
+  const day = publicationDay(now);
+  const previousCreated = validPublicationDay(previous?.dateCreated);
+  const previousModified = validPublicationDay(previous?.dateModified);
+  if (backfill || (previous && !previousCreated)) {
+    return {
+      ...document,
+      dateCreated: RECORDING_START_DATE,
+      dateModified: contentUnchanged || backfill
+        ? RECORDING_START_DATE
+        : day
+    };
+  }
+  if (!previousCreated) {
+    return { ...document, dateCreated: day, dateModified: day };
+  }
+  return {
+    ...document,
+    dateCreated: previousCreated,
+    dateModified: contentUnchanged ? (previousModified || previousCreated) : day
+  };
+}
+
+export function publicationDocument(kind, document, {
+  previous = null,
+  now,
+  backfill = false
+} = {}) {
+  assertCurrentAuthoredDocument(document, `${kind} document`);
+  if (kind !== "puzzle") return stripSystemAuthoredMetadata(document);
+  const body = stripSystemAuthoredMetadata(document);
+  if (backfill) {
+    const kept = stripSystemAuthoredMetadata(document, { keepDocumentDates: true });
+    const dateCreated = validPublicationDay(kept.dateCreated);
+    const dateModified = validPublicationDay(kept.dateModified);
+    if (dateCreated && dateModified) {
+      return { ...body, dateCreated, dateModified };
+    }
+    return body;
+  }
+  return stampPublicationDates(body, {
+    previous,
+    now,
+    contentUnchanged: previous ? samePuzzlePublicationBody(previous, document) : false
+  });
+}
+
+export function puzzleDocumentFromStorage(document) {
+  const kept = stripSystemAuthoredMetadata(document, { keepDocumentDates: true });
+  if (validPublicationDay(kept.dateCreated) && validPublicationDay(kept.dateModified)) {
+    return kept;
+  }
+  return stampPublicationDates(stripSystemAuthoredMetadata(document), { backfill: true });
 }
 
 function bridgeIdentity(bridge) {
@@ -570,14 +671,7 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
       };
     }
   }
-  const assembled = assembleAuthoredDocument(next);
-  // `large` is derived and absent from focused payloads, but preserving an
-  // existing value keeps the complete materialized snapshot stable until the
-  // normal canonical boundary recomputes it.
-  if (hasOwn(currentDocument, "large")) {
-    assembled.large = clone(currentDocument.large);
-  }
-  return assembled;
+  return assembleAuthoredDocument(next);
 }
 
 export function storedDomainDocuments(document) {
@@ -701,5 +795,11 @@ export default {
   storedDomainDocuments,
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,
-  stripSystemAuthoredMetadata
+  stripSystemAuthoredMetadata,
+  RECORDING_START_DATE,
+  publicationDay,
+  stampPublicationDates,
+  samePuzzlePublicationBody,
+  publicationDocument,
+  puzzleDocumentFromStorage
 };

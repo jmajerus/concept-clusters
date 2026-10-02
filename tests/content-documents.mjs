@@ -15,6 +15,7 @@ import {
 } from "../modules/contentDocumentSeed.js";
 import { DraftNotFoundError } from "../modules/draftRepository.js";
 import { createCatalogueSkeleton } from "../modules/catalogueAuthorEngine.js";
+import { RECORDING_START_DATE } from "../modules/authoringDomains.js";
 
 export const name = "content documents: memory published row, history, revert";
 
@@ -218,8 +219,53 @@ export async function run() {
     id: "old-git-puzzle",
     revision: initiallyReviewed.revision + 1
   }), null);
-  assert.equal(initiallyReviewed.document.dateCreated, undefined);
-  assert.equal(initiallyReviewed.document.dateModified, undefined);
+  assert.equal(initiallyReviewed.document.dateCreated, "2026-01-01");
+  assert.equal(initiallyReviewed.document.dateModified, "2026-01-02");
+  const datedBody = {
+    id: "dated-puzzle",
+    title: "Dated",
+    category: "Science",
+    clusters: [],
+    bridges: []
+  };
+  await repo.seedPublishedIfAbsent({
+    kind: "puzzle",
+    id: "dated-puzzle",
+    document: {
+      ...datedBody,
+      dateCreated: "2026-01-01",
+      dateModified: "2026-01-02"
+    }
+  });
+  const unchanged = await repo.publish({
+    kind: "puzzle",
+    id: "dated-puzzle",
+    document: { ...datedBody, dateCreated: "1999-01-01", dateModified: "1999-01-02" },
+    actor
+  });
+  assert.equal(unchanged.document.dateCreated, "2026-01-01");
+  assert.equal(unchanged.document.dateModified, "2026-01-02");
+  const edited = await repo.publish({
+    kind: "puzzle",
+    id: "dated-puzzle",
+    document: { ...datedBody, title: "Dated revised" },
+    actor
+  });
+  assert.equal(edited.document.dateCreated, "2026-01-01");
+  assert.notEqual(edited.document.dateModified, "2026-01-02");
+  const backfilled = await repo.seedPublishedIfAbsent({
+    kind: "puzzle",
+    id: "existing-corpus",
+    document: {
+      id: "existing-corpus",
+      title: "Existing",
+      category: "Science",
+      clusters: [],
+      bridges: []
+    }
+  });
+  assert.equal(backfilled.document.dateCreated, RECORDING_START_DATE);
+  assert.equal(backfilled.document.dateModified, RECORDING_START_DATE);
   assert.equal(initiallyReviewed.document.version, undefined);
   assert.equal(initiallyReviewed.document.learningIntroduction.revision, undefined);
   assert.ok(initiallyReviewed.lastAgentReviewedAt);

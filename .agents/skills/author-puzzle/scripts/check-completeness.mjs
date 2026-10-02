@@ -775,7 +775,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!document.learningIntroduction) {
     advisory.push({
       id: "learning-introduction",
-      message: "No learningIntroduction. Prefer a short orienting note (1–2 paragraphs on the learning objective) when the subject is technical, sequential, or easy to misframe; leave unset when title and clusters already orient clearly."
+      message: "No learningIntroduction. Prefer a lesson on the learning objective and how the ideas relate when the subject is technical, sequential, or easy to misframe; leave unset when title and clusters already orient clearly."
     });
   }
 

@@ -276,21 +276,19 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   concrete attribute, then function, then comparison or synthesis when
   those questions exist -- rather than as unrelated quizzes. Do not
   invent a cross-cutting round just to complete that sequence.
-- learningIntroduction ("Before You Begin") is optional, but often worth a short
-  orienting note: one or two paragraphs that state the learning objective and
-  situate the learner in the domain (vocabulary, stakes, why the subject
-  matters). Write about the **subject**, full stop — never about the puzzle as
-  a device. Do not mention clusters, bridges, lenses, boards, sorting, or how
-  terms will be grouped; do not preview membership or topology; do not give
-  gameplay instructions. Schema vocabulary leaking into the lesson is a failure
-  mode even when no "answer" is named. Length is not a virtue -- a tight
-  paragraph beats a mini-essay. Omit it when the board title and cluster names
-  already orient clearly; add it when the subject is technical, sequential, or
-  easy to misframe. Its requirement level changes real behavior: optional and
-  recommended both leave the board reachable without reading (recommended just
-  leads with the invitation first), required holds the board until it's marked
-  read. Reserve required for when the puzzle genuinely depends on that source,
-  not as a default -- most introductions should be optional or recommended.
+- learningIntroduction ("Before You Begin") is one optional Markdown document.
+  Write the lesson the subject needs, in the order the subject needs: the
+  learning objective, the domain (vocabulary, stakes, why it matters), and
+  how the ideas relate, including the groupings and why they hold. Write
+  about the **subject**. Do not mention clusters, bridges, lenses, boards,
+  sorting, or how play works. Do not author a preview, a teaser, or a split.
+  Play shows the start, then Continue reading, and opens the full text once
+  the board and its lenses are complete. Omit the whole field when the board
+  title and cluster names already orient clearly. requirement: optional and
+  recommended both leave the board reachable without reading (recommended
+  leads with the invitation first); required holds the board until the
+  learner dismisses the lesson. Reserve required for when the puzzle
+  genuinely depends on that source.
   content.text is Markdown with real line breaks in the string value (blank
   lines between paragraphs, \`##\` headings on their own lines). The lesson
   dialog already shows title; do not repeat it as the first line. Do not write
@@ -304,7 +302,8 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   (same { author?, title, publisher?, year?, pages?, url? } shape) -- never
   a second list on the lesson. When a learningIntroduction exists, play
   shows that list under References in the Lesson dialog; otherwise it
-  shows on the board. Do not duplicate references across surfaces.
+  shows on the board.
+  Do not duplicate references across surfaces.
 - Do not submit \`provenance\`, \`creator\`, \`license\`, or \`derivedFrom\` in
   MCP puzzle documents. They are protected metadata outside the agent authoring
   contract; the server preserves existing values and records an identifiable
@@ -389,7 +388,7 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Hover help is for the local idea; the citation is for the work the
   puzzle is based on. When a learningIntroduction exists, play shows that
   same list under References in the Lesson dialog (not on the board); with
-  no lesson, it shows on the board. Do not also put the same destinations
+  no introduction, it shows on the board. Do not also put the same destinations
   on info.links (or lesson links) -- that duplicates See also chips and
   References. Use links only for destinations that are not already in
   citations.
@@ -511,14 +510,16 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   every term that answers the question. Bound the wording so plausible
   excluded terms are not also defensibly correct. Order multiple lenses
   as a progression instead of unrelated trivia.
-- Prefer a short learningIntroduction when orientation helps -- typically one
-  or two paragraphs naming the learning objective and situating the domain --
-  not only when a long lesson is warranted. Write about the subject, not the
-  puzzle: no clusters, bridges, lenses, boards, sorting instructions, or
-  membership/topology talk. Schema vocabulary in the lesson is a failure even
-  when no answer is named. Omit it when the board already orients clearly.
-  Reserve required for material the puzzle truly depends on; otherwise prefer
-  optional or recommended. Preserve prior research citations on
+- Prefer a learningIntroduction when orientation helps. Write one lesson
+  about the subject: the learning objective, the domain, and how the ideas
+  relate, including the groupings and why they hold. No clusters, bridges,
+  lenses, boards, sorting instructions, or gameplay instructions. Do not
+  author a preview, a teaser, or a split. Play shows the start, then
+  Continue reading, and the full text once the board and its lenses are
+  complete. Omit the field when the board already orients clearly. Reserve
+  required for material the puzzle truly depends on; otherwise prefer
+  optional or recommended. required holds the board until the learner
+  dismisses the lesson. Preserve prior research citations on
   info.citations (one list for the puzzle and lesson). content.text is
   Markdown with real line breaks in the string value (blank lines between
   paragraphs, \`##\` headings on their own lines). The lesson dialog already
@@ -528,7 +529,9 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   Do not include the human-managed legacy field learningIntroduction.credit.
   Do not put byline text in content.text.
   Never add dateCreated, dateModified, version, or
-  learningIntroduction.revision; those are infrastructure-derived values.
+  learningIntroduction.revision. Publication stamps dateCreated and
+  dateModified; version and the lesson revision stay off the document.
+  Do not send large. Lists and play compute it from the node count.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
   they do not have to be authored together. It is normal to add or revise a
   learning introduction long after the lenses exist; preserve those lenses

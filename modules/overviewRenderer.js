@@ -1765,11 +1765,9 @@ export function createOverviewRenderer({
 
   // Admin-only (see index.html's #puzzle-meta comment) -- a raw dump of
   // whichever optional metadata fields this puzzle actually has, not a
-  // fixed report. Most are unpopulated on every puzzle today (creator/
-  // license/dateCreated/dateModified/derivedFrom/version/language exist
-  // in the schema but nothing sets them yet); tags is the one field with
-  // real data right now. Renders nothing beyond "no metadata set" until
-  // more fields get populated -- no change needed here when they do.
+  // fixed report. dateCreated and dateModified are stamped at publication.
+  // creator, license, derivedFrom, version, and language are still unset.
+  // tags is populated on some puzzles.
   const ADMIN_META_FIELDS = [
     "tags", "dateCreated", "dateModified", "creator", "license",
     "derivedFrom", "language", "version"

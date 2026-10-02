@@ -15,7 +15,6 @@ const document = {
   title: "Domain fixture",
   category: "science",
   puzzleKind: "vocabulary-context",
-  large: true,
   info: { text: "Core information" },
   clusters: [{
     id: "alpha",
@@ -120,7 +119,7 @@ export async function run() {
   for (const field of ["creator", "license", "derivedFrom", "language"]) {
     assert.equal(pedagogyEdit[field], document[field]);
   }
-  assert.equal(contentEdit.large, true);
+  assert.equal(contentEdit.large, undefined);
 
   const classification = projectAuthoredDocument(document, "classification");
   assert.equal(classification.document.category, "science");

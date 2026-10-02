@@ -8,7 +8,9 @@ import {
 import {
   decodeAuthoredEscapedNewlines,
   learningIntroductionGate,
-  normalizedLearningIntroduction
+  LESSON_PREVIEW_CHARACTERS,
+  normalizedLearningIntroduction,
+  truncateLearningMarkdown
 } from "../modules/learningIntroduction.js";
 import {
   loadLearningIntroductionStatus,
@@ -53,6 +55,18 @@ export async function run() {
   assert.equal(learningIntroductionGate({ requirement: "required" }, "skipped"), true);
   assert.equal(learningIntroductionGate({ requirement: "required" }, "read"), false);
   assert.equal(learningIntroductionGate({ requirement: "optional" }, null), false);
+
+  const opening = "Visible opening.";
+  const rest = "R".repeat(LESSON_PREVIEW_CHARACTERS);
+  const cut = truncateLearningMarkdown(`${opening}\n\n${rest}`);
+  assert.equal(cut.preview, opening);
+  assert.equal(cut.remainder, rest);
+  assert.deepEqual(truncateLearningMarkdown("Short only."), {
+    preview: "Short only.",
+    remainder: ""
+  });
+  const oneBlock = "A".repeat(LESSON_PREVIEW_CHARACTERS + 40);
+  assert.equal(truncateLearningMarkdown(oneBlock).remainder, "");
 
   const packagedPuzzle = definePuzzle(
     new URL("../puzzles/public-health/from-evidence-to-action.js", import.meta.url),

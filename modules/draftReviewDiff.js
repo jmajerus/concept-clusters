@@ -224,7 +224,7 @@ export function diffPublishedDraft(published, draft) {
   const counts = { changed: 0, added: 0, removed: 0 };
   const fields = {};
   for (const name of [
-    "title", "puzzleKind", "category", "categories", "subcategories", "large", "tags",
+    "title", "puzzleKind", "category", "categories", "subcategories", "tags",
     "level", "lensMode", "preSolve", "relatedPuzzles",
     "learningIntroduction"
   ]) {
@@ -267,7 +267,7 @@ export function samePlayablePuzzle(left, right) {
 }
 
 const PLAYABLE_FIELDS = [
-  "title", "puzzleKind", "category", "categories", "subcategories", "large", "tags",
+  "title", "puzzleKind", "category", "categories", "subcategories", "tags",
   "level", "lensMode", "preSolve", "relatedPuzzles", "learningIntroduction"
 ];
 

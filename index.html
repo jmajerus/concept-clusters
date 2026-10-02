@@ -65,7 +65,9 @@
         </div>
         <!-- One slot, relabelled per puzzle by updateLearningIntroduction:
              "Lesson" (authored introduction, with its read/skip gate) or
-             "About" (catalogue card: summary, sources, byline, date). -->
+             "About" (catalogue card: summary, sources, byline, date).
+             A long lesson starts truncated, with Continue reading, and
+             opens in full once the puzzle is complete. -->
         <button id="learning-review" type="button" hidden>Lesson</button>
         <!-- Admin-only, gated the same way as #puzzle-meta below. Toggles
              #puzzle-stats-report -- the whole collection's content stats
@@ -135,7 +137,7 @@
            overview screen is showing and puts it back before #message on
            return. A note that does not fit grows the slot while it is
            showing, then the slot settles back to two lines. Citations
-           stay in the Lesson or About dialog. -->
+           stay in the Intro, Lesson, or About dialog. -->
       <div id="term-info" aria-live="polite">
         <div class="term-info-copy">
           <span class="term-info-body"></span>

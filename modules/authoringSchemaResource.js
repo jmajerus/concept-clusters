@@ -84,14 +84,13 @@ const SINGLE_VOCABULARY_CLUSTER_SHAPE = Object.freeze({
     }
   }
 });
-// `large` remains an internal compatibility field on the storage/runtime
-// schema, but its value is derived from node count and is not part of the
-// MCP authoring contract. Keep it out of the discoverable complete schema as
-// well as the focused phase projections so clients see only the real content
-// limit rather than a rendering switch.
+// dateCreated and dateModified are stamped at publication and are not part
+// of the MCP authoring contract. `large` is computed from the node count
+// wherever a list or a board needs it, and is not a stored field.
 const generatedAuthoringProperties = Object.fromEntries(
   Object.entries(generatedSimplifiedPuzzleSchema.properties)
-    .filter(([name]) => name !== "large" && !MCP_EXCLUDED_ROOT_FIELDS.has(name))
+    .filter(([name]) => name !== "dateCreated" && name !== "dateModified"
+      && !MCP_EXCLUDED_ROOT_FIELDS.has(name))
 );
 if (generatedAuthoringProperties.learningIntroduction?.properties) {
   generatedAuthoringProperties.learningIntroduction = structuredClone(
