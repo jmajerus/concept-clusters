@@ -111,6 +111,56 @@ export async function run(page) {
   assert.match(biologyRow, new RegExp(`>${expectedBiology.puzzleCount}<`),
     "Biology's rendered puzzle count should match the live corpus, not 0 or missing");
 
+  const literacyPublished = await contentDocuments.getPublished({
+    kind: "category",
+    id: "media-information-literacy"
+  });
+  await contentDocuments.createDraft({
+    kind: "category",
+    id: "media-information-literacy",
+    actor,
+    document: {
+      ...literacyPublished.document,
+      subcategories: {
+        "propaganda-disinformation": {
+          title: "Propaganda & Disinformation",
+          info: { text: "Campaigns." }
+        },
+        "verification-fact-checking": {
+          title: "Verification & Fact-Checking",
+          info: { text: "Checking." }
+        }
+      }
+    }
+  });
+  await contentDocuments.setFreezeCue({
+    kind: "category",
+    id: "media-information-literacy",
+    actor: { subject: "git-seed" },
+    cued: true
+  });
+  const literacyList = createResponse();
+  assert.equal(await handleRequest({ method: "GET", url: "/admin/categories" }, literacyList), true);
+  const literacyStart = literacyList.body.indexOf("Media &amp; Information Literacy");
+  assert.ok(literacyStart >= 0);
+  const literacyRow = literacyList.body.slice(
+    literacyStart,
+    literacyList.body.indexOf("</tr>", literacyStart)
+  );
+  assert.match(literacyRow, /published in D1/);
+  assert.match(literacyRow, /unpublished changes/);
+  assert.match(literacyRow, /Not on the published snapshot/);
+  assert.match(literacyRow, /Propaganda &amp; Disinformation \(4\)|Propaganda &amp; Disinformation/);
+  assert.doesNotMatch(literacyRow, /badge-accent">cued/);
+  const literacyEdit = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/categories/media-information-literacy"
+  }, literacyEdit), true);
+  assert.match(literacyEdit.body, /unpublished changes/);
+  assert.match(literacyEdit.body, /value="publish">Publish<\/button>/);
+  assert.doesNotMatch(literacyEdit.body, /badge-accent">cued/);
+
   const skipped = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/drafts" }, skipped), false);
 

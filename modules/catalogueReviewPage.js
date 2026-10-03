@@ -506,7 +506,7 @@ function puzzleCountCell(count) {
 }
 
 function subcategoryListCell(subcategories) {
-  if (!subcategories?.length) return "—";
+  if (!subcategories?.length) return "";
   return subcategories.map(sub => {
     const title = escapeHtml(sub.title);
     return sub.puzzleCount === 0
@@ -515,19 +515,34 @@ function subcategoryListCell(subcategories) {
   }).join(" · ");
 }
 
+function categorySubcategoryCell(item) {
+  const published = subcategoryListCell(item.subcategories);
+  const unpublished = subcategoryListCell(item.unpublishedSubcategories);
+  if (!published && !unpublished) return "—";
+  const unpublishedNote = unpublished
+    ? `<div class="meta">Not on the published snapshot: ${unpublished}</div>`
+    : "";
+  return `${published}${unpublishedNote}`;
+}
+
+function categoryStatusCell(item) {
+  if (item.withdrawn) return '<span class="badge">withdrawn</span>';
+  if (!item.published) return '<span class="badge badge-warn">working copy only</span>';
+  const unpublished = item.differsFromPublished
+    ? ' <span class="badge badge-warn">unpublished changes</span>'
+    : "";
+  return `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}${unpublished}`;
+}
+
 export function renderCategoryListPage(categories, { notice = null } = {}) {
   function categoryRow(item) {
     return `<tr>
     <td><a href="/admin/categories/${encodeURIComponent(item.id)}">${escapeHtml(item.title || item.id)}</a></td>
     <td>${escapeHtml(categoryDomainTitle(item.domain) || "—")}</td>
     <td><code>${escapeHtml(item.id)}</code></td>
-    <td>${item.withdrawn
-      ? '<span class="badge">withdrawn</span>'
-      : item.published
-      ? `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`
-      : '<span class="badge badge-warn">working copy only</span>'}</td>
+    <td>${categoryStatusCell(item)}</td>
     <td>${puzzleCountCell(item.puzzleCount)}</td>
-    <td class="meta">${subcategoryListCell(item.subcategories)}</td>
+    <td class="meta">${categorySubcategoryCell(item)}</td>
   </tr>`;
   }
   const rows = groupCategoriesByDomain(categories)
@@ -546,7 +561,13 @@ export function renderCategoryListPage(categories, { notice = null } = {}) {
     registered subcategories. Puzzle membership stays derived.
     <span class="badge badge-new">new on next freeze</span> marks a published
     D1 row that git does not have yet and that you cued.
-    <span class="badge">held</span> stays in authoring play until you cue it;
+    <span class="badge">held</span> stays in authoring play until you cue it.
+    A row with no cue badge is already in git. A git import cue is not one
+    you asked for, and Freeze does not treat it as a change to ship.
+    <span class="badge badge-warn">unpublished changes</span> means the working
+    copy is not the D1 snapshot Freeze writes. The subcategory column is that
+    snapshot. Names under “Not on the published snapshot” exist only on the
+    working copy.
     Cue means you are done and returns to this list.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/categories">
@@ -570,7 +591,9 @@ export function renderCategoryEditPage({
   revision,
   published = false,
   withdrawn = false,
+  differsFromPublished = false,
   freezeAdd = false,
+  gitSeedCue = false,
   cuedForFreeze = false,
   readyForFreeze = false,
   notice = null
@@ -579,7 +602,17 @@ export function renderCategoryEditPage({
   const subcategoryFields = subcategories.length
     ? subcategories.map(([subId, definition]) => subcategoryFieldset(subId, definition)).join("\n")
     : "<p class=\"meta\">No subcategories registered on this category yet.</p>";
+  const activePublished = published && !withdrawn;
+  const canPublish = !activePublished || differsFromPublished;
+  const publishDisabled = canPublish ? "" : " disabled";
   const publishLabel = withdrawn ? "Republish" : "Publish";
+  const lifecycleHint = withdrawn
+    ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to authoring play."
+    : activePublished && !differsFromPublished
+    ? "This working copy is already the published D1 snapshot. Edit it before publishing again."
+    : activePublished
+    ? "This working copy has unpublished changes. Publish to replace the D1 snapshot. Freeze writes that snapshot, not this form, until you publish."
+    : "This working copy has not been published to D1 yet.";
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
     ${renderContentPublicationNotice(notice)}
     <p class="meta"><code>${escapeHtml(id)}</code>
@@ -588,9 +621,11 @@ export function renderCategoryEditPage({
       ? "withdrawn from authoring play"
       : published ? "has a published D1 row" : "working copy only"}
     ${renderPublishedFreezeBadges({
-      published, withdrawn, freezeAdd, cuedForFreeze: cuedForFreeze || readyForFreeze
+      published, withdrawn, freezeAdd, gitSeedCue,
+      cuedForFreeze: cuedForFreeze || readyForFreeze
     })}
     · ${navLinks()}</p>
+    <p class="meta">${lifecycleHint}</p>
     <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <input type="hidden" name="confirm" value="save-category">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
@@ -621,11 +656,11 @@ export function renderCategoryEditPage({
       <p><button type="submit">Save working copy</button></p>
     </form>
     <form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">
-      <p><button type="submit" name="confirm" value="publish">${publishLabel}</button>
-      <button type="submit" name="confirm" value="${PUBLISH_AND_CUE_CONFIRM}" class="secondary"
+      <p><button type="submit" name="confirm" value="publish"${publishDisabled}>${publishLabel}</button>
+      <button type="submit" name="confirm" value="${PUBLISH_AND_CUE_CONFIRM}" class="secondary"${publishDisabled}
         title="Publish and cue this snapshot for the next freeze in one step.">${publishLabel} &amp; Cue</button></p>
     </form>
-    ${published
+    ${activePublished && differsFromPublished
       ? `<form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">
            <input type="hidden" name="confirm" value="revert-published">
            <p><button type="submit" class="play-button secondary">Revert to published</button></p>

@@ -201,7 +201,16 @@ export function publicationDocument(kind, document, {
   backfill = false
 } = {}) {
   assertCurrentAuthoredDocument(document, `${kind} document`);
-  if (kind !== "puzzle") return stripSystemAuthoredMetadata(document);
+  if (kind !== "puzzle") {
+    const stripped = stripSystemAuthoredMetadata(document);
+    // Puzzle documents use `domain` for authoring-partition metadata, so the
+    // strip removes it. On a category document the same key is the subject
+    // domain and must survive publication.
+    if (kind === "category" && typeof document.domain === "string" && document.domain) {
+      return { ...stripped, domain: document.domain };
+    }
+    return stripped;
+  }
   const body = stripSystemAuthoredMetadata(document);
   if (backfill) {
     const kept = stripSystemAuthoredMetadata(document, { keepDocumentDates: true });

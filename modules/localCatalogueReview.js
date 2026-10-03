@@ -34,6 +34,8 @@ import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
   isCuedForFreeze,
+  isGitSeedFreezeCue,
+  isPendingFreezeCue,
   parseFreezeCueConfirm
 } from "./contentFreezePlan.js";
 import { isSameOriginRequest } from "./draftReviewSubmit.js";
@@ -257,7 +259,8 @@ function listCatalogueRows(published, working) {
       kind: (draft?.document?.kind || item.document?.kind) === "meta" ? "meta" : "leaf",
       entryCount: draft?.document?.entries?.length ?? item.document?.entries?.length ?? 0,
       updatedAt: draft?.updatedAt || item.updatedAt || "",
-      cuedForFreeze: isCuedForFreeze(item)
+      cuedForFreeze: isPendingFreezeCue(item),
+      gitSeedCue: isGitSeedFreezeCue(item)
     });
   }
   for (const draft of working) {
@@ -303,13 +306,15 @@ function decorateCoverageCounts(rows, summaries) {
     const subPuzzleCounts = new Map(
       (summary?.subcategories || []).map(sub => [sub.id, sub.puzzleCount])
     );
+    const withCounts = subs => (subs || []).map(sub => ({
+      ...sub,
+      puzzleCount: subPuzzleCounts.get(sub.id) ?? 0
+    }));
     return {
       ...row,
       puzzleCount: summary ? summary.puzzleCount : null,
-      subcategories: row.subcategories.map(sub => ({
-        ...sub,
-        puzzleCount: subPuzzleCounts.get(sub.id) ?? 0
-      }))
+      subcategories: withCounts(row.subcategories),
+      unpublishedSubcategories: withCounts(row.unpublishedSubcategories)
     };
   });
 }
@@ -477,15 +482,20 @@ function listCategoryRows(published, working) {
   for (const item of published) {
     seen.add(item.id);
     const draft = working.find(row => row.id === item.id);
+    const publishedSubcategories = subcategoryList(item);
+    const publishedIds = new Set(publishedSubcategories.map(sub => sub.id));
     rows.push({
       id: item.id,
-      title: draft?.title || item.title,
-      domain: draft?.document?.domain ?? item.document?.domain ?? null,
+      title: item.title,
+      domain: item.document?.domain ?? null,
       published: true,
       withdrawn: Boolean(item.withdrawnAt),
-      subcategories: subcategoryList(draft || item),
-      updatedAt: draft?.updatedAt || item.updatedAt || "",
-      cuedForFreeze: isCuedForFreeze(item)
+      differsFromPublished: Boolean(draft) && cataloguePublicationState(draft, item).differsFromPublished,
+      subcategories: publishedSubcategories,
+      unpublishedSubcategories: subcategoryList(draft).filter(sub => !publishedIds.has(sub.id)),
+      updatedAt: item.updatedAt || "",
+      cuedForFreeze: isPendingFreezeCue(item),
+      gitSeedCue: isGitSeedFreezeCue(item)
     });
   }
   for (const draft of working) {
@@ -1207,13 +1217,16 @@ export function createLocalCatalogueReviewHandler({
           published,
           gitIdsFromContentService(contentService).categories
         );
+        const publication = cataloguePublicationState(record, published);
         html(res, renderCategoryEditPage({
           id: categoryId,
           document: record.document,
           revision: record.revision,
-          published: Boolean(published),
-          withdrawn: Boolean(published?.withdrawnAt),
+          published: publication.published,
+          withdrawn: publication.withdrawn,
+          differsFromPublished: publication.differsFromPublished,
           freezeAdd: flags.freezeAdd,
+          gitSeedCue: flags.gitSeedCue,
           cuedForFreeze: flags.cuedForFreeze,
           notice: publicationNoticeFromSearch(requestUrl.searchParams, "category", published)
         }));

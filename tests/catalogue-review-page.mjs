@@ -227,8 +227,44 @@ export async function run() {
   assert.match(biology, /<select name="domain">/);
   assert.match(biology, /name="link"/);
   assert.match(biology, /stable join used by puzzle/);
-  assert.match(biology, /name="confirm" value="publish">Publish<\/button>/);
-  assert.match(biology, /value="publish-and-cue" class="secondary"[\s\S]*>Publish &amp; Cue<\/button>/);
+  assert.match(biology, /already the published D1 snapshot/);
+  assert.match(biology, /name="confirm" value="publish" disabled>Publish<\/button>/);
+  assert.match(biology, /value="publish-and-cue" class="secondary" disabled[\s\S]*>Publish &amp; Cue<\/button>/);
+  assert.doesNotMatch(biology, /Revert to published/);
+  const biologyChanged = renderCategoryEditPage({
+    id: "biology",
+    revision: 2,
+    published: true,
+    differsFromPublished: true,
+    document: {
+      id: "biology",
+      title: "Biology",
+      subcategories: {
+        foundations: { title: "Foundations", info: { text: "Cells and variation." } }
+      }
+    }
+  });
+  assert.match(biologyChanged, /unpublished changes/);
+  assert.match(biologyChanged, /name="confirm" value="publish">Publish<\/button>/);
+  assert.match(biologyChanged, /Revert to published/);
+  const seededCategory = renderCategoryListPage([{
+    id: "media-information-literacy",
+    title: "Media & Information Literacy",
+    published: true,
+    gitSeedCue: true,
+    cuedForFreeze: false,
+    differsFromPublished: true,
+    puzzleCount: 11,
+    subcategories: [],
+    unpublishedSubcategories: [
+      { id: "propaganda-disinformation", title: "Propaganda & Disinformation", puzzleCount: 4 },
+      { id: "verification-fact-checking", title: "Verification & Fact-Checking", puzzleCount: 7 }
+    ]
+  }]);
+  assert.match(seededCategory, /published in D1/);
+  assert.match(seededCategory, /unpublished changes/);
+  assert.match(seededCategory, /Not on the published snapshot: Propaganda &amp; Disinformation \(4\) · Verification &amp; Fact-Checking \(7\)/);
+  assert.doesNotMatch(seededCategory, /badge-accent">cued/);
   const biologyNew = renderCategoryEditPage({
     id: "lab-subject",
     revision: 1,
