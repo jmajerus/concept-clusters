@@ -1,19 +1,26 @@
-// Author-facing check of every `wiki:` link a puzzle document carries.
-// Backs the check_puzzle_links MCP tool, the draft review page's link
-// flags, and the authoring worker's weekly corpus-wide health run.
+// Author-facing check of the links a puzzle document carries. Backs the
+// check_puzzle_links MCP tool, the draft review page's link flags, and
+// (for wiki: titles) the authoring worker's weekly corpus-wide health run.
 // Network-dependent by nature, so it is never part of validatePuzzleDraft:
-// validation stays offline and fast, and a Wikipedia outage must not make
-// a draft look invalid.
+// validation stays offline and fast, and a Wikipedia or host outage must
+// not make a draft look invalid.
+//
+// wiki: titles, and https Wikipedia article URLs, are asked of Wikipedia:
+// ok, redirect, missing, or disambiguation. Every other http(s) URL,
+// including citation URLs, is checked for reachability only. A live
+// response is not a reading of the page. A timeout, refusal, or non-public
+// address is inconclusive, not a broken link.
 //
 // Surfaces collected: puzzle info, relatedPuzzles info, cluster info, term
-// info, bridge info, and the lesson's further-reading links. Auto-search
-// fallbacks for overview surfaces are not collected -- only titles an
-// author actually wrote.
+// info, bridge info, citation URLs on those surfaces, and the lesson's
+// further-reading links. Auto-search fallbacks for overview surfaces are
+// not collected -- only targets an author actually wrote.
 //
-// Resolutions are remembered in D1 (wikiLinkCheckStore.js) when a store is
-// supplied: fresh rows are trusted, the rest are asked of Wikipedia and
-// written back. Without a store every call asks Wikipedia.
+// Wikipedia resolutions are remembered in D1 (wikiLinkCheckStore.js) when
+// a store is supplied. Reachability is not stored: a refusal depends on
+// the client asking.
 
+import { checkUrlReachabilityAll } from "./linkReachability.js";
 import { authoredLinks, authoredLearningLinks, parseWikiShorthand } from "./termInfo.js";
 import { resolveWikipediaTitles } from "./wikipediaTitles.js";
 
@@ -26,6 +33,12 @@ export const WIKI_LINK_FLAG_IDS = Object.freeze({
   disambiguation: "wiki-link-disambiguation",
   redirect: "wiki-link-redirect",
   unavailable: "wiki-link-check-unavailable"
+});
+
+export const WEB_LINK_FLAG_IDS = Object.freeze({
+  missing: "web-link-missing",
+  redirect: "web-link-redirect",
+  inconclusive: "web-link-inconclusive"
 });
 
 /**
@@ -45,28 +58,74 @@ export const WIKI_LINK_FLAG_IDS = Object.freeze({
  */
 
 /**
- * Every wiki: link in the document with a human-readable location.
- * @param {object} document
- * @returns {WikiLinkRef[]}
+ * An en.wikipedia.org article URL an author wrote out in full, or null.
+ * Special: pages stay ordinary URLs: a search results page is a destination,
+ * not an article title.
+ * @param {string} raw
+ * @returns {string | null}
  */
-export function collectDocumentWikiLinks(document) {
-  const refs = [];
-  const seen = new Set();
+export function wikipediaArticleTitle(raw) {
+  if (typeof raw !== "string") return null;
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:") return null;
+  const host = url.hostname.toLowerCase();
+  if (host !== "en.wikipedia.org" && host !== "en.m.wikipedia.org") return null;
+  if (!url.pathname.startsWith("/wiki/")) return null;
+  const slug = url.pathname.slice("/wiki/".length);
+  if (!slug || slug.startsWith("Special:")) return null;
+  let title;
+  try {
+    title = decodeURIComponent(slug);
+  } catch {
+    return null;
+  }
+  title = title.replace(/_/g, " ").trim();
+  return title || null;
+}
+
+function wikiTitleOf(href) {
+  const parsed = parseWikiShorthand(href);
+  if (parsed) return parsed.title;
+  return wikipediaArticleTitle(href);
+}
+
+function citationLabel(entry) {
+  return typeof entry?.title === "string" && entry.title.trim() ? entry.title.trim() : "citation";
+}
+
+/**
+ * Every authored href, in document order, with the surface it sits on.
+ * Citation URLs are included; they are not part of `links`.
+ * @param {object} document
+ * @param {(where: string, href: string) => void} onHref
+ */
+function visitDocumentHrefs(document, onHref) {
   const addLinks = (where, links) => {
     for (const { href } of links) {
-      const parsed = parseWikiShorthand(href);
-      if (!parsed) continue;
-      const key = `${where}\u0000${href}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      refs.push({ where, link: href, title: parsed.title });
+      if (typeof href === "string" && href.trim()) onHref(where, href.trim());
+    }
+  };
+  const addCitations = (where, info) => {
+    const citations = info && typeof info === "object" && !Array.isArray(info) && Array.isArray(info.citations)
+      ? info.citations
+      : [];
+    for (const citation of citations) {
+      const url = typeof citation?.url === "string" ? citation.url.trim() : "";
+      if (!url) continue;
+      onHref(`${where} citation "${citationLabel(citation)}"`, url);
     }
   };
   const addInfo = (where, info) => {
     if (typeof info === "string" || !info) return;
     addLinks(where, authoredLinks(info));
+    addCitations(where, info);
   };
-  if (!document || typeof document !== "object") return refs;
+  if (!document || typeof document !== "object") return;
   addInfo("puzzle", document.info);
   addInfo("relatedPuzzles", document.relatedPuzzles?.info);
   for (const cluster of Array.isArray(document.clusters) ? document.clusters : []) {
@@ -81,8 +140,44 @@ export function collectDocumentWikiLinks(document) {
   }
   if (document.learningIntroduction) {
     addLinks("learningIntroduction", authoredLearningLinks(document.learningIntroduction));
+    addCitations("learningIntroduction", document.learningIntroduction);
   }
+}
+
+function collectHrefs(document, accept) {
+  const refs = [];
+  const seen = new Set();
+  visitDocumentHrefs(document, (where, href) => {
+    const extra = accept(href);
+    if (!extra) return;
+    const key = `${where}\u0000${href}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    refs.push({ where, link: href, ...extra });
+  });
   return refs;
+}
+
+/**
+ * Every wiki: link, and every full English Wikipedia article URL, with a
+ * human-readable location.
+ * @param {object} document
+ * @returns {WikiLinkRef[]}
+ */
+export function collectDocumentWikiLinks(document) {
+  return collectHrefs(document, href => {
+    const title = wikiTitleOf(href);
+    return title ? { title } : null;
+  });
+}
+
+/**
+ * Every other authored link. Wikipedia articles are left to the title check.
+ * @param {object} document
+ * @returns {Array<{ where: string, link: string }>}
+ */
+export function collectDocumentWebLinks(document) {
+  return collectHrefs(document, href => (wikiTitleOf(href) ? null : { }));
 }
 
 function statusOf(resolution) {
@@ -171,6 +266,77 @@ export async function checkDocumentWikiLinks(document, options = {}) {
 }
 
 /**
+ * Reachability of every non-Wikipedia link. Nothing is written to the
+ * Wikipedia store. Each URL is probed once and copied onto every surface
+ * that carries it.
+ * @param {object} document
+ * @param {{ fetch?: typeof fetch, timeoutMs?: number, signal?: AbortSignal }} [options]
+ */
+export async function checkDocumentWebLinks(document, {
+  fetch: fetchImpl = globalThis.fetch,
+  timeoutMs = 8000,
+  signal
+} = {}) {
+  const refs = collectDocumentWebLinks(document);
+  if (!refs.length) return { checked: 0, results: [], unavailable: null };
+  // One budget for the whole batch, shared with the draft page's short
+  // timeout. URLs still waiting when it runs out are inconclusive.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const onParent = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) controller.abort();
+    else signal.addEventListener("abort", onParent, { once: true });
+  }
+  let resolutions;
+  try {
+    resolutions = await checkUrlReachabilityAll(refs.map(ref => ref.link), {
+      fetch: fetchImpl,
+      timeoutMs,
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onParent);
+  }
+  const results = refs.map(ref => {
+    const resolution = resolutions.get(ref.link);
+    return {
+      kind: "web",
+      where: ref.where,
+      link: ref.link,
+      status: resolution?.status || "inconclusive",
+      finalUrl: resolution?.finalUrl || null,
+      reason: resolution?.reason || null
+    };
+  });
+  return { checked: results.length, results, unavailable: null };
+}
+
+/**
+ * Wikipedia titles and other links, for the MCP tool and the draft page.
+ * The weekly corpus run stays on checkDocumentWikiLinks.
+ * @param {object} document
+ * @param {Parameters<typeof resolveTitlesThroughStore>[1]} [options]
+ */
+export async function checkDocumentLinks(document, options = {}) {
+  const [wiki, web] = await Promise.all([
+    checkDocumentWikiLinks(document, options),
+    checkDocumentWebLinks(document, options)
+  ]);
+  return {
+    checked: wiki.checked + web.checked,
+    results: [
+      ...wiki.results.map(result => ({ kind: "wiki", ...result })),
+      ...web.results
+    ],
+    unavailable: wiki.unavailable,
+    wiki,
+    web
+  };
+}
+
+/**
  * Weekly corpus-wide run: every wiki: title in every live published puzzle,
  * refreshed regardless of age and written to the store, with the problems
  * grouped by title so a report can say which puzzles each one affects.
@@ -237,6 +403,25 @@ export function wikiLinkFlags(report) {
   for (const result of report.results || []) {
     if (result.status === "ok") continue;
     const at = `${result.where}: ${result.link}`;
+    if (result.kind === "web") {
+      if (result.status === "missing") {
+        flags.push({
+          id: WEB_LINK_FLAG_IDS.missing,
+          message: `${at} — ${result.reason || "the link does not resolve"}.`
+        });
+      } else if (result.status === "redirect") {
+        flags.push({
+          id: WEB_LINK_FLAG_IDS.redirect,
+          message: `${at} — redirects to ${result.finalUrl}. Consider linking that URL directly.`
+        });
+      } else if (result.status === "inconclusive") {
+        flags.push({
+          id: WEB_LINK_FLAG_IDS.inconclusive,
+          message: `${at} — could not be checked (${result.reason || "no answer"}). This does not mean the link is wrong.`
+        });
+      }
+      continue;
+    }
     if (result.status === "missing") {
       flags.push({
         id: WIKI_LINK_FLAG_IDS.missing,

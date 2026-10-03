@@ -97,7 +97,7 @@ import {
   publishedRowOrNull
 } from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
-import { checkDocumentWikiLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
+import { checkDocumentLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
 import { draftShadowsPublished, provenanceDiffersFromPublished } from "./draftReviewDiff.js";
 import {
   freezeFlagsFromPublished,
@@ -277,8 +277,8 @@ export async function mapDraftDetail(record, {
   };
 }
 
-// Wikipedia link problems (missing, disambiguation, redirect) join the
-// page-only flags the same way the structural notes do: shown to the human
+// Link problems (a Wikipedia title, or another URL that does not resolve)
+// join the page-only flags the same way the structural notes do: shown to the human
 // reviewer, never persisted, never part of what MCP validation returns.
 // The checker is injected so the page can render without network access
 // (tests, offline dev) and so the review handler decides the timeout.
@@ -472,12 +472,13 @@ export function createLocalDraftReviewHandler({
   contentDocuments = null,
   publicationActor = null,
   repositoryRoot,
-  // Wikipedia link check for the draft page's flags. Pass null to render
-  // offline; the default keeps the page responsive on a slow network by
-  // giving up after a few seconds and saying so in one flag. A store makes
-  // D1 the cache so a title checked anywhere recently is not asked again.
+  // Link check for the draft page's flags. Pass null to render offline;
+  // the default keeps the page responsive on a slow network by giving up
+  // after a few seconds and saying so. A store makes D1 the cache for
+  // Wikipedia titles so a title checked anywhere recently is not asked
+  // again. Other URLs are probed for reachability and are not stored.
   wikiLinkStore = null,
-  checkWikiLinks = document => checkDocumentWikiLinks(document, { timeoutMs: 4000, store: wikiLinkStore })
+  checkWikiLinks = document => checkDocumentLinks(document, { timeoutMs: 4000, store: wikiLinkStore })
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");

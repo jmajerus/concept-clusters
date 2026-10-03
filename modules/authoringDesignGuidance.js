@@ -362,8 +362,13 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   would genuinely benefit from the extra level, not as routine polish.
 - Verify a wiki: link before writing it, don't infer it from the title
   alone. check_puzzle_links asks Wikipedia about every wiki: link and
-  reports ok / redirect / missing / disambiguation. Pass draft_id. That
-  checks the working copy, or the filed review when the working copy is
+  reports ok / redirect / missing / disambiguation. Other http(s) links,
+  including citation URLs, are checked for reachability in the same call:
+  ok, redirect (with the URL reached), missing, or inconclusive.
+  Inconclusive -- a timeout, a non-public address, or a site that refused
+  the request -- is not a broken link, and a live response is not a reading
+  of the page. Pass draft_id. That checks the working copy, or the filed
+  review when the working copy is
   only the restored baseline after action=propose, including a stacked
   one. Pass puzzle_id for the published puzzle. The result names the
   document it checked. Run it once that document is saved rather than

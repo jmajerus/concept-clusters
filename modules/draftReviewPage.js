@@ -566,11 +566,12 @@ function renderValidation(validation, variant = "hosted") {
 // never a pass/fail verdict -- see puzzleSymmetryFlags.js. Absent entirely
 // when there's nothing to flag, same convention as every other optional
 // section on this page.
-const WIKI_LINK_FLAG_PREFIX = "wiki-link-";
+const LINK_FLAG_PREFIXES = ["wiki-link-", "web-link-"];
 
 function renderFlags(flags, edit = null) {
   if (!Array.isArray(flags) || flags.length === 0) return "";
-  const isLinkFlag = flag => typeof flag.id === "string" && flag.id.startsWith(WIKI_LINK_FLAG_PREFIX);
+  const isLinkFlag = flag => typeof flag.id === "string"
+    && LINK_FLAG_PREFIXES.some(prefix => flag.id.startsWith(prefix));
   const linkFlags = flags.filter(flag => flag.pageOnly && isLinkFlag(flag));
   const structuralNotes = flags.filter(flag => flag.pageOnly && !isLinkFlag(flag));
   const authoringFlags = flags.filter(flag => !flag.pageOnly);
@@ -604,7 +605,7 @@ function renderFlags(flags, edit = null) {
   // hit, and a redirect is a one-line fix worth seeing once.
   const linkFlagBlock = linkFlags.length
     ? `<div class="validation validation-flags validation-links">
-         <p>🔗 ${linkFlags.length} Wikipedia link${linkFlags.length === 1 ? "" : "s"} to look at (checked live for this page; not an MCP flag):</p>
+         <p>🔗 ${linkFlags.length} link${linkFlags.length === 1 ? "" : "s"} to look at (checked live for this page; not an MCP flag):</p>
          <ul>${linkFlags.map(flag => `<li>${escapeHtml(flag.message)}</li>`).join("")}</ul>
        </div>`
     : "";

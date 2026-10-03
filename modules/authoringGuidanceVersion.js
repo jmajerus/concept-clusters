@@ -150,7 +150,10 @@
 // 6.6: same review bar. check_puzzle_links with draft_id checks the filed
 // review when the working copy is only the restored baseline, including a
 // stacked review. The result names that document.
+// 6.7: same review bar. check_puzzle_links also reports reachability of
+// other http(s) links, including citation URLs. Inconclusive is not a
+// broken link, and a live response is not a reading of the page.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 6
+  minor: 7
 });

@@ -6,8 +6,11 @@ import {
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { resolveWikipediaTitles } from "../modules/wikipediaTitles.js";
+import { checkUrlReachability, publicHttpUrlError } from "../modules/linkReachability.js";
 import {
+  checkDocumentLinks,
   checkDocumentWikiLinks,
+  collectDocumentWebLinks,
   collectDocumentWikiLinks,
   loadWikiLinkHealth,
   runWikiLinkHealth,
@@ -28,6 +31,10 @@ export const name = "wiki link check: collector, Wikipedia resolution, D1-backed
 function wikipediaStub(calls = []) {
   return async (url, init) => {
     calls.push({ url: String(url), init });
+    const href = String(url);
+    if (!href.includes("api.php")) {
+      return { status: 200, ok: true, headers: new Headers(), body: { async cancel() {} } };
+    }
     const titles = new URL(url).searchParams.get("titles").split("|");
     const normalized = [];
     const redirects = [];
@@ -118,6 +125,117 @@ export async function run() {
   ]);
   assert.equal(refs[1].link, "wiki:Gram-negative bacteria#Cell envelope",
     "the authored link is kept verbatim for the report; only the title is stripped of its section");
+  assert.deepEqual(collectDocumentWebLinks(fixture).map(ref => [ref.where, ref.link]), [
+    ['bridge "peptidoglycan"', "https://example.org/not-wiki"]
+  ]);
+
+  const cited = {
+    id: "cited",
+    info: {
+      links: ["https://en.wikipedia.org/wiki/Gram_stain"],
+      citations: [
+        { title: "Dodho", url: "https://www.dodho.com/photo" },
+        { title: "Already wiki", url: "wiki:Gram stain" }
+      ]
+    },
+    learningIntroduction: {
+      links: ["https://spj.org/ethics"],
+      citations: [{ title: "SPJ note", url: "https://www.spj.org/ethicscode.asp" }]
+    }
+  };
+  assert.deepEqual(collectDocumentWikiLinks(cited).map(ref => ref.title), ["Gram stain", "Gram stain"]);
+  assert.deepEqual(collectDocumentWebLinks(cited).map(ref => [ref.where, ref.link]), [
+    ['puzzle citation "Dodho"', "https://www.dodho.com/photo"],
+    ["learningIntroduction", "https://spj.org/ethics"],
+    ['learningIntroduction citation "SPJ note"', "https://www.spj.org/ethicscode.asp"]
+  ]);
+
+  // ---- reachability: public URLs only; refusal is inconclusive, not missing ----
+  assert.equal(publicHttpUrlError("https://www.dodho.com/photo"), null);
+  assert.equal(publicHttpUrlError("http://127.0.0.1/latest"), "not a public address");
+  assert.equal(publicHttpUrlError("http://169.254.169.254/"), "not a public address");
+  assert.equal(publicHttpUrlError("http://[::1]/"), "not a public address");
+  assert.equal(publicHttpUrlError("mailto:editor@example.org"), "not an http(s) URL");
+  const privateProbe = [];
+  const blocked = await checkUrlReachability("http://127.0.0.1/latest", {
+    fetch: async url => { privateProbe.push(String(url)); return { status: 200, headers: new Headers() }; }
+  });
+  assert.equal(blocked.status, "inconclusive");
+  assert.equal(privateProbe.length, 0);
+
+  const probes = [];
+  function scripted(responses) {
+    return async (url, init) => {
+      probes.push({ url: String(url), method: init.method });
+      const next = responses.shift();
+      if (next instanceof Error) throw next;
+      return { status: next.status, headers: new Headers(next.headers || {}), body: { async cancel() {} } };
+    };
+  }
+  const ok = await checkUrlReachability("https://www.dodho.com/photo", {
+    fetch: scripted([{ status: 200 }])
+  });
+  assert.equal(ok.status, "ok");
+  assert.equal(probes[0].method, "HEAD");
+
+  probes.length = 0;
+  const headMissing = await checkUrlReachability("https://www.dodho.com/photo", {
+    fetch: scripted([{ status: 404 }, { status: 200 }])
+  });
+  assert.equal(headMissing.status, "ok", "a HEAD 404 is retried with GET");
+  assert.deepEqual(probes.map(probe => probe.method), ["HEAD", "GET"]);
+
+  const missing = await checkUrlReachability("https://www.dodho.com/gone", {
+    fetch: scripted([{ status: 404 }, { status: 404 }])
+  });
+  assert.deepEqual(missing, { status: "missing", finalUrl: null, reason: "HTTP 404" });
+
+  const refused = await checkUrlReachability("https://www.spj.org/ethics", {
+    fetch: scripted([{ status: 403 }, { status: 403 }])
+  });
+  assert.equal(refused.status, "inconclusive");
+  assert.equal(refused.reason, "HTTP 403");
+
+  const moved = await checkUrlReachability("http://spj.org/ethics", {
+    fetch: scripted([
+      { status: 301, headers: { location: "https://www.spj.org/ethics" } },
+      { status: 200 }
+    ])
+  });
+  assert.equal(moved.status, "redirect");
+  assert.equal(moved.finalUrl, "https://www.spj.org/ethics");
+
+  const trap = [];
+  const redirectedHome = await checkUrlReachability("https://example.org/start", {
+    fetch: async (url, init) => {
+      trap.push(String(url));
+      if (init.method === "HEAD" && String(url).endsWith("/start")) {
+        return { status: 302, headers: new Headers({ location: "http://127.0.0.1/secret" }), body: { async cancel() {} } };
+      }
+      return { status: 200, headers: new Headers(), body: { async cancel() {} } };
+    }
+  });
+  assert.equal(redirectedHome.status, "inconclusive");
+  assert.equal(redirectedHome.reason, "redirected to a non-public address");
+  assert.deepEqual(trap, ["https://example.org/start"]);
+
+  const citedReport = await checkDocumentLinks(cited, {
+    fetch: async url => {
+      const href = String(url);
+      if (href.includes("api.php")) return wikipediaStub()(url);
+      if (href.includes("dodho")) return { status: 404, headers: new Headers(), body: { async cancel() {} } };
+      return { status: 403, headers: new Headers(), body: { async cancel() {} } };
+    }
+  });
+  const dodho = citedReport.results.find(result => result.link === "https://www.dodho.com/photo");
+  assert.equal(dodho.status, "missing");
+  assert.equal(dodho.kind, "web");
+  const spj = citedReport.results.find(result => result.link === "https://www.spj.org/ethicscode.asp");
+  assert.equal(spj.status, "inconclusive");
+  assert.ok(citedReport.results.some(result => result.kind === "wiki" && result.title === "Gram stain"));
+  const citedFlags = wikiLinkFlags(citedReport);
+  assert.ok(citedFlags.some(flag => flag.id === "web-link-missing" && flag.message.includes("Dodho")));
+  assert.ok(citedFlags.some(flag => flag.id === "web-link-inconclusive" && flag.message.includes("does not mean the link is wrong")));
 
   // ---- shared resolver: normalisation and redirect both surface as resolvedTitle ----
   const calls = [];
@@ -275,7 +393,7 @@ export async function run() {
   assert.equal(pageFlags.length, 4);
   assert.ok(pageFlags.every(flag => flag.pageOnly), "link flags never enter MCP validation output");
   const page = renderDraftPage(detail, { variant: "local", categoryRegistry: CATEGORIES });
-  assert.match(page, /4 Wikipedia links to look at/);
+  assert.match(page, /4 links to look at/);
   assert.match(page, /redirects to &quot;Lugol&#39;s solution&quot;/);
   assert.doesNotMatch(page, /Structural note[^<]*<\/summary>\s*<ul>[^]*?Lugol/,
     "link flags are not folded into the collapsed structural notes");
@@ -311,14 +429,19 @@ export async function run() {
     const result = await session.call("check_puzzle_links", { draft_id: "gram-stain-fixture" });
     assert.equal(result.draftId, "gram-stain-fixture");
     assert.equal(result.checkedDocument, "working-copy");
-    assert.equal(result.checked, 8);
-    assert.deepEqual(result.counts, { ok: 4, redirect: 2, missing: 1, disambiguation: 1 });
+    assert.equal(result.checked, 9);
+    assert.equal(result.wiki.checked, 8);
+    assert.equal(result.web.checked, 1);
+    assert.equal(result.web.counts.ok, 1);
+    assert.deepEqual(result.counts, { ok: 5, redirect: 2, missing: 1, disambiguation: 1, inconclusive: 0 });
     assert.equal(result.problems.length, 4);
     assert.equal(result.unavailable, null);
-    assert.equal(mcpCalls.length, 1);
-    assert.equal(mcpStore.size(), 8, "the tool writes what it learned to the store");
+    const apiCalls = () => mcpCalls.filter(call => String(call.url).includes("api.php"));
+    assert.equal(apiCalls().length, 1);
+    assert.equal(mcpStore.size(), 8, "the tool writes Wikipedia resolutions to the store");
     await session.call("check_puzzle_links", { draft_id: "gram-stain-fixture" });
-    assert.equal(mcpCalls.length, 1, "and reads it back next time");
+    assert.equal(apiCalls().length, 1, "and reads them back next time");
+    assert.ok(mcpCalls.length > apiCalls().length, "other URLs are asked again; they are not stored");
 
     const both = await session.request("tools/call", {
       name: "check_puzzle_links",
@@ -411,7 +534,7 @@ export async function run() {
     const proposal = await reviewSession.call("check_puzzle_links", { draft_id: "filed-review" });
     assert.equal(proposal.checkedDocument, "proposal");
     assert.equal(proposal.eventId, filedEvent.id);
-    assert.equal(proposal.checked, 9);
+    assert.equal(proposal.checked, 10);
     assert.ok(proposal.results.some(item =>
       item.where === 'cluster "Verification methods"' && item.title === "Verification methods"
     ), "a restored baseline checks the filed review, not the old working copy");

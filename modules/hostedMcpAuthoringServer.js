@@ -3,7 +3,7 @@
 // and local stdio MCP. Keep Node-only checkout behavior in mcpAuthoringServer.
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
-import { checkDocumentWikiLinks } from "./wikiLinkCheck.js";
+import { checkDocumentLinks } from "./wikiLinkCheck.js";
 import { DOMAINS } from "../puzzles/categories.js";
 import {
   authoringGuidanceResult,
@@ -218,6 +218,34 @@ const DESTRUCTIVE = Object.freeze({
   idempotentHint: false,
   openWorldHint: false
 });
+
+function countStatuses(results = []) {
+  const counts = { ok: 0, redirect: 0, missing: 0, disambiguation: 0, inconclusive: 0 };
+  for (const result of results) {
+    if (Object.prototype.hasOwnProperty.call(counts, result.status)) counts[result.status] += 1;
+  }
+  return counts;
+}
+
+function statusClause(counts, keys) {
+  return keys.map(key => `${counts[key]} ${key}`).join(", ");
+}
+
+function linkCheckSummary(report, where) {
+  const wikiCounts = countStatuses(report.wiki.results);
+  const wiki = report.wiki.unavailable
+    ? `Wikipedia links on ${where} not checked: ${report.wiki.unavailable}.`
+    : `${report.wiki.checked} wiki: link${report.wiki.checked === 1 ? "" : "s"} checked on ${where}: ` +
+      `${statusClause(wikiCounts, ["ok", "redirect", "missing", "disambiguation"])}.`;
+  if (!report.web.checked) return wiki;
+  const webCounts = countStatuses(report.web.results);
+  const web = `${report.web.checked} other link${report.web.checked === 1 ? "" : "s"}: ` +
+    `${statusClause(webCounts, ["ok", "redirect", "missing", "inconclusive"])}.`;
+  const caveat = webCounts.inconclusive
+    ? " Inconclusive means the check could not tell, not that the link is wrong."
+    : "";
+  return `${wiki} ${web}${caveat}`;
+}
 
 function success(summary, output) {
   return {
@@ -1487,12 +1515,16 @@ export function createAuthoringMcpServer({
   server.registerTool("check_puzzle_links", {
     title: "Check puzzle links",
     description:
-      "Verify every wiki: link against Wikipedia: ok, redirect (with the title actually reached), missing, or " +
-      "disambiguation. draft_id checks the working copy. When that copy is only the restored review baseline, " +
-      "the same call checks the latest open review proposal instead, including one stacked on a preceding " +
-      "proposal. puzzle_id checks the published puzzle. The result names which document was checked. " +
-      "Network-dependent and separate from validate_puzzle_draft on purpose. Redirects still work in play but " +
-      "the canonical title is usually the better link.",
+      "Check every link on a puzzle. wiki: titles and English Wikipedia article URLs are asked of Wikipedia: " +
+      "ok, redirect (with the title actually reached), missing, or disambiguation. Every other http(s) URL, " +
+      "including citation URLs, is checked for reachability: ok, redirect (with the URL reached), missing, or " +
+      "inconclusive. Inconclusive means a timeout, a non-public address, or a refusal; it does not mean the " +
+      "link is wrong, and a live response is not a reading of the page. draft_id checks the working copy. " +
+      "When that copy is only the restored review baseline, the same call checks the latest open review " +
+      "proposal instead, including one stacked on a preceding proposal. puzzle_id checks the published " +
+      "puzzle. The result names which document was checked. Network-dependent and separate from " +
+      "validate_puzzle_draft on purpose. Redirects still work in play but the canonical target is usually " +
+      "the better link.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       puzzle_id: draftIdSchema.optional()
@@ -1513,26 +1545,23 @@ export function createAuthoringMcpServer({
       checkedDocument = chosen.checkedDocument;
       eventId = chosen.eventId;
     }
-    const report = await checkDocumentWikiLinks(document, { fetch: fetchImpl, store: wikiLinkStore });
-    const counts = { ok: 0, redirect: 0, missing: 0, disambiguation: 0 };
-    for (const result of report.results) counts[result.status] += 1;
+    const report = await checkDocumentLinks(document, { fetch: fetchImpl, store: wikiLinkStore });
+    const counts = countStatuses(report.results);
     const problems = report.results.filter(result => result.status !== "ok");
     const where = checkedDocument === "proposal"
       ? `the filed review proposal (event ${eventId})`
       : checkedDocument === "published"
         ? "the published puzzle"
         : "the working copy";
-    const summary = report.unavailable
-      ? `Links on ${where} not checked: ${report.unavailable}.`
-      : `${report.checked} wiki: link${report.checked === 1 ? "" : "s"} checked on ${where}: ` +
-        `${counts.ok} ok, ${counts.redirect} redirect, ${counts.missing} missing, ${counts.disambiguation} disambiguation.`;
-    return success(summary, {
+    return success(linkCheckSummary(report, where), {
       ...(draft_id ? { draftId: draft_id } : { puzzleId: puzzle_id }),
       checkedDocument,
       ...(eventId == null ? {} : { eventId }),
       checked: report.checked,
       counts,
       unavailable: report.unavailable,
+      wiki: { checked: report.wiki.checked, counts: countStatuses(report.wiki.results), unavailable: report.wiki.unavailable },
+      web: { checked: report.web.checked, counts: countStatuses(report.web.results), unavailable: report.web.unavailable },
       problems,
       results: report.results
     });
