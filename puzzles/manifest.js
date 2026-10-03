@@ -587,22 +587,40 @@ export const PUZZLE_MANIFEST = [
       "id": "media-literacy",
       "title": "Misinformation & media literacy",
       "category": "Media & Information Literacy",
-      "large": false,
+      "subcategories": {
+        "Media & Information Literacy": "verification-fact-checking"
+      },
+      "large": true,
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
       "_searchTerms": [
         "Types of false information",
         "misinformation",
         "disinformation",
         "malinformation",
+        "imposter content",
+        "deepfake",
         "Verification practices",
         "fact-checking",
         "lateral reading",
         "primary source",
+        "reverse image search",
         "Cognitive & social dynamics",
         "confirmation bias",
         "echo chamber",
         "conspiracy theory",
+        "illusory truth effect",
+        "continued influence effect",
+        "Platforms & incentives",
         "algorithmic amplification",
-        "gatekeeping"
+        "content moderation",
+        "gatekeeping",
+        "attention economy",
+        "virality",
+        "filter bubble",
+        "prebunking"
       ]
     }
   },
@@ -614,7 +632,34 @@ export const PUZZLE_MANIFEST = [
       "id": "social-media-hygiene",
       "title": "Social media hygiene",
       "category": "Media & Information Literacy",
+      "subcategories": {
+        "Media & Information Literacy": "verification-fact-checking"
+      },
       "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "media-literacy",
+            "reason": "Media literacy explains why false information spreads and which habits resist it; this puzzle is the applied side, the specific practices to run before you share.",
+            "via": [
+              "reverse image search",
+              "original source"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://newslit.org/news-and-research/eight-tips-to-google-like-a-pro/",
+            "label": "Eight Tips to Google Like a Pro"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
       "_searchTerms": [
         "Manipulative sharing cues",
         "emotional urgency",
@@ -631,6 +676,9 @@ export const PUZZLE_MANIFEST = [
         "informational trust",
         "institutional sources",
         "story polish",
+        "Responsible sharing",
+        "pause before sharing",
+        "gentle correction",
         "provenance",
         "source credibility"
       ]
@@ -644,7 +692,10 @@ export const PUZZLE_MANIFEST = [
       "id": "quotations-and-attribution",
       "title": "Quotations and attribution",
       "category": "Media & Information Literacy",
-      "large": false,
+      "subcategories": {
+        "Media & Information Literacy": "verification-fact-checking"
+      },
+      "large": true,
       "relatedPuzzles": {
         "entries": [
           {
@@ -659,11 +710,34 @@ export const PUZZLE_MANIFEST = [
             "id": "ai-generated-synthetic-media",
             "reason": "Extend source tracing from altered words to synthetic media and technical authenticity signals.",
             "via": [
-              "provenance",
-              "authentication"
+              "provenance"
             ]
           }
         ]
+      },
+      "info": {
+        "citations": [
+          {
+            "title": "Library of Congress: Quotations research guide",
+            "url": "https://guides.loc.gov/quotations"
+          },
+          {
+            "title": "Library of Congress: Misquotations",
+            "url": "https://guides.loc.gov/quotations/misquotations"
+          },
+          {
+            "title": "Library of Congress: Searching online for quotations",
+            "url": "https://guides.loc.gov/quotations/online"
+          },
+          {
+            "title": "Quote Investigator",
+            "url": "https://quoteinvestigator.com/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
       },
       "_searchTerms": [
         "Quotation evidence",
@@ -676,11 +750,15 @@ export const PUZZLE_MANIFEST = [
         "false attribution",
         "quote mining",
         "paraphrase drift",
+        "apocryphal quotation",
         "Verification practices",
         "exact-phrase search",
         "earliest source",
         "surrounding context",
         "independent confirmation",
+        "Reporting uncertainty",
+        "hedged attribution",
+        "unverified quotation",
         "provenance",
         "context"
       ]
@@ -694,7 +772,10 @@ export const PUZZLE_MANIFEST = [
       "id": "images-out-of-context",
       "title": "Images out of context",
       "category": "Media & Information Literacy",
-      "large": false,
+      "subcategories": {
+        "Media & Information Literacy": "verification-fact-checking"
+      },
+      "large": true,
       "relatedPuzzles": {
         "entries": [
           {
@@ -709,11 +790,50 @@ export const PUZZLE_MANIFEST = [
             "id": "quotations-and-attribution",
             "reason": "Continue from visual context to the transmission and attribution of words.",
             "via": [
-              "provenance",
-              "context"
+              "provenance"
             ]
           }
         ]
+      },
+      "info": {
+        "citations": [
+          {
+            "title": "Verification Handbook: Verifying Images",
+            "url": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+          },
+          {
+            "title": "First Draft: Visual Verification Guide: Photos",
+            "url": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
+          },
+          {
+            "title": "Bellingcat: Advanced guide to verifying video content",
+            "url": "https://www.bellingcat.com/resources/how-tos/2017/06/30/advanced-guide-verifying-video-content/"
+          },
+          {
+            "title": "Bellingcat: Searching the Earth: essential geolocation tools for verification",
+            "url": "https://www.bellingcat.com/resources/how-tos/2015/07/25/searching-the-earth-essential-geolocation-tools-for-verification/"
+          },
+          {
+            "title": "Poynter: Three ways to spot if an image has been manipulated",
+            "url": "https://www.poynter.org/reporting-editing/2012/three-ways-to-spot-if-an-image-has-been-manipulated/"
+          },
+          {
+            "title": "About Reuters Fact Check",
+            "url": "https://www.reuters.com/fact-check/about/"
+          },
+          {
+            "title": "Dodho: Staged photography: artistic lie or emotional truth?",
+            "url": "https://www.dodho.com/staged-photography-artistic-lie-or-emotional-truth/"
+          },
+          {
+            "title": "Society of Professional Journalists: Code of Ethics",
+            "url": "https://www.spj.org/pdf/ethicscode.pdf"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
       },
       "_searchTerms": [
         "Image origins",
@@ -721,18 +841,25 @@ export const PUZZLE_MANIFEST = [
         "creator",
         "first appearance",
         "original caption",
+        "capture date",
         "Context manipulation",
         "recycled image",
         "false caption",
         "selective crop",
         "digital alteration",
-        "Verification methods",
-        "reverse image search",
-        "source comparison",
+        "staged scene",
+        "Reading the frame",
         "geolocation clues",
         "file metadata",
+        "weather and shadow check",
+        "Tracing the image",
+        "reverse image search",
+        "source comparison",
+        "uploader check",
         "provenance",
-        "corroboration"
+        "corroboration",
+        "caption",
+        "claimed place and date"
       ]
     }
   },
@@ -744,7 +871,10 @@ export const PUZZLE_MANIFEST = [
       "id": "ai-generated-synthetic-media",
       "title": "AI-generated and synthetic media",
       "category": "Media & Information Literacy",
-      "large": false,
+      "subcategories": {
+        "Media & Information Literacy": "verification-fact-checking"
+      },
+      "large": true,
       "relatedPuzzles": {
         "entries": [
           {
@@ -757,6 +887,38 @@ export const PUZZLE_MANIFEST = [
           }
         ]
       },
+      "info": {
+        "citations": [
+          {
+            "title": "C2PA Explainer (specification 2.4)",
+            "url": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
+          },
+          {
+            "title": "Content Credentials",
+            "url": "https://contentcredentials.org/"
+          },
+          {
+            "title": "NIST AI Challenges: Forensics",
+            "url": "https://ai-challenges.nist.gov/forensics"
+          },
+          {
+            "title": "FTC: Scammers use AI to enhance their family emergency schemes",
+            "url": "https://consumer.ftc.gov/consumer-alerts/2023/03/scammers-use-ai-enhance-their-family-emergency-schemes"
+          },
+          {
+            "title": "About Reuters Fact Check",
+            "url": "https://www.reuters.com/fact-check/about/"
+          },
+          {
+            "title": "Liar's dividend",
+            "url": "https://en.wikipedia.org/wiki/Liar%27s_dividend"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
       "_searchTerms": [
         "Synthetic media forms",
         "deepfake video",
@@ -768,12 +930,16 @@ export const PUZZLE_MANIFEST = [
         "metadata",
         "digital signature",
         "edit history",
+        "Detection signals",
+        "AI-content detector",
+        "invisible watermark",
+        "forensic analysis",
         "Human verification",
         "original publisher",
         "independent corroboration",
         "known-channel check",
-        "forensic analysis",
         "provenance",
+        "origin evidence",
         "authentication"
       ]
     }
@@ -1315,40 +1481,23 @@ export const PUZZLE_MANIFEST = [
       "id": "evidence-and-inference-across-disciplines",
       "title": "Evidence and inference across disciplines",
       "category": "Media & Information Literacy",
+      "subcategories": {
+        "Media & Information Literacy": "verification-fact-checking"
+      },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Follow evidence from source and attribution through verification, interpretation, and public claims.",
-          "links": [
-            {
-              "href": "wiki:Information literacy"
-            }
-          ]
-        },
         "entries": [
           {
             "id": "quotations-and-attribution",
-            "reason": "Apply provenance and source verification to claims about who said or wrote particular words.",
-            "via": [
-              "provenance",
-              "attribution"
-            ]
+            "reason": "Apply provenance and source verification to claims about who said or wrote particular words."
           },
           {
             "id": "images-out-of-context",
-            "reason": "Use source history and external corroboration to evaluate visual evidence separated from its original setting.",
-            "via": [
-              "provenance",
-              "independent verification"
-            ]
+            "reason": "Use source history and external corroboration to evaluate visual evidence separated from its original setting."
           },
           {
             "id": "media-literacy",
-            "reason": "Connect disciplinary evidence practices with everyday habits for evaluating public information.",
-            "via": [
-              "verification",
-              "evidence"
-            ]
+            "reason": "Connect disciplinary evidence practices with everyday habits for evaluating public information."
           }
         ]
       },
@@ -3660,35 +3809,23 @@ export const PUZZLE_MANIFEST = [
         "Media & Information Literacy",
         "Public Health"
       ],
+      "subcategories": {
+        "Media & Information Literacy": "propaganda-disinformation"
+      },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Trace how claims acquire the appearance of support, and what happens when the support was never independent."
-        },
         "entries": [
           {
             "id": "quotations-and-attribution",
-            "reason": "Compare a quotation severed from its surrounding context with a document severed from the circumstances that produced it.",
-            "via": [
-              "provenance",
-              "context"
-            ]
+            "reason": "Compare a quotation severed from its surrounding context with a document severed from the circumstances that produced it."
           },
           {
             "id": "images-out-of-context",
-            "reason": "See the same decontextualization mechanism operating on an image rather than on a person's record.",
-            "via": [
-              "provenance",
-              "corroboration"
-            ]
+            "reason": "See the same decontextualization mechanism operating on an image rather than on a person's record."
           },
           {
             "id": "when-correction-fails",
-            "reason": "Follow what happens inside an institution when the same discrediting tactics are turned on someone reporting harm.",
-            "via": [
-              "messenger discrediting",
-              "organizational silence"
-            ]
+            "reason": "Follow what happens inside an institution when the same discrediting tactics are turned on someone reporting harm."
           }
         ]
       },
@@ -3756,34 +3893,24 @@ export const PUZZLE_MANIFEST = [
         "Public Health",
         "Media & Information Literacy"
       ],
+      "subcategories": {
+        "Media & Information Literacy": "verification-fact-checking",
+        "Public Health": "epidemiology"
+      },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Compare how different fields establish what happened, and how claims are tested once established."
-        },
         "entries": [
           {
             "id": "evidence-and-inference-across-disciplines",
-            "reason": "Move from how one discipline grades its own evidence to how science, history, law, and journalism grade theirs differently.",
-            "via": [
-              "corroboration",
-              "provenance"
-            ]
+            "reason": "Move from how one discipline grades its own evidence to how science, history, law, and journalism grade theirs differently."
           },
           {
             "id": "data-probability",
-            "reason": "Revisit the statistical machinery — sampling, distribution, likelihood — underneath every estimate on this map.",
-            "via": [
-              "sample",
-              "distribution"
-            ]
+            "reason": "Revisit the statistical machinery — sampling, distribution, likelihood — underneath every estimate on this map."
           },
           {
             "id": "when-correction-fails",
-            "reason": "Follow what happens after a figure is well established and still not received.",
-            "via": [
-              "contradictory evidence"
-            ]
+            "reason": "Follow what happens after a figure is well established and still not received."
           }
         ]
       },
@@ -8732,6 +8859,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Media & Information Literacy": "propaganda-disinformation"
+      },
       "large": true,
       "relatedPuzzles": {
         "entries": [
@@ -8746,14 +8876,6 @@ export const PUZZLE_MANIFEST = [
         "links": [
           {
             "href": "wiki:Manufacturing Consent"
-          }
-        ],
-        "citations": [
-          {
-            "title": "Manufacturing Consent: The Political Economy of the Mass Media",
-            "author": "Herman, Edward S., and Chomsky, Noam",
-            "publisher": "Pantheon Books",
-            "year": "1988"
           }
         ]
       },
@@ -8932,6 +9054,9 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "subcategories": {
+        "Media & Information Literacy": "propaganda-disinformation"
+      },
       "large": true,
       "relatedPuzzles": {
         "info": {
@@ -8940,10 +9065,10 @@ export const PUZZLE_MANIFEST = [
         "entries": [
           {
             "id": "manufacturing-consent",
-            "reason": "Johnson explicitly invokes Herman and Chomsky's own axiom that concision is necessarily conservative -- see the propaganda model whose five filters this puzzle's techniques apply to a single, faster-moving, higher-stakes story.",
+            "reason": "Johnson explicitly invokes Herman and Chomsky's axiom that concision is necessarily conservative; this puzzle applies the propaganda model to one faster-moving, higher-stakes story -- owner pressure from Comcast, and official sourcing of the helpless-Biden stories.",
             "via": [
-              "propaganda model",
-              "concision"
+              "owner pressure",
+              "official sourcing"
             ]
           }
         ]
@@ -8970,28 +9095,28 @@ export const PUZZLE_MANIFEST = [
       },
       "_searchTerms": [
         "Massacre vs. Blast",
-        "the massacre/slaughter gap",
+        "loaded vocabulary",
         "human shields",
-        "blast emerges",
-        "war crimes like earthquakes",
+        "passive voice",
+        "natural-disaster framing",
         "The ISIS-ification of Hamas",
-        "the beheaded-babies hoax",
-        "the Hamas-run qualifier",
-        "the moral plane of acceptable parties",
-        "one-third combatants",
+        "hoax amplification",
+        "one-sided qualifiers",
+        "delegitimization",
+        "selective omission",
         "Starting the Clock",
-        "the October 26 memo",
-        "the IDF-confirmation standard",
-        "the helpless Biden narrative",
-        "a sketch, not a plot",
+        "context cut-off",
+        "confirmation standard",
+        "constraint narrative",
+        "narrative repetition",
         "Who Gets to Speak",
-        "zero Palestinian guests",
-        "six Netanyahu interviews",
-        "three categories",
-        "soft genocide denial",
+        "guest selection",
+        "source roles",
+        "official sourcing",
+        "token inclusion",
         "racist tautology",
-        "the agency-language comparison",
-        "Ali Velshi"
+        "agency comparison",
+        "owner pressure"
       ]
     }
   },
@@ -11819,6 +11944,10 @@ export const PUZZLE_MANIFEST = [
             "url": "https://openstax.org/books/anatomy-and-physiology/pages/21-3-the-adaptive-immune-response-t-lymphocytes-and-their-functional-types"
           }
         ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
       },
       "_searchTerms": [
         "Lymphoid organs",
@@ -15684,6 +15813,419 @@ export const PUZZLE_MANIFEST = [
         "white dwarf",
         "hydrogen ignition",
         "core hydrogen exhaustion"
+      ]
+    }
+  },
+  {
+    "id": "climate-change-and-manufactured-doubt",
+    "module": "./atmospheric-science/climate-change-and-manufactured-doubt.js",
+    "published": "2026-10-03",
+    "browse": {
+      "id": "climate-change-and-manufactured-doubt",
+      "title": "Climate Change and Manufactured Doubt",
+      "category": "Atmospheric Science",
+      "categories": [
+        "Atmospheric Science",
+        "Media & Information Literacy"
+      ],
+      "tags": [
+        "book",
+        "climate change",
+        "global warming",
+        "misinformation"
+      ],
+      "subcategories": {
+        "Atmospheric Science": "climatology",
+        "Media & Information Literacy": "propaganda-disinformation"
+      },
+      "large": true,
+      "info": {
+        "text": "How added carbon dioxide is changing Earth's climate, how independent records register that change, and how an organized effort works to cast doubt on both.",
+        "links": [
+          {
+            "href": "https://www.hachettebookgroup.com/titles/michael-e-mann/science-under-siege/9781541705494/",
+            "label": "Mann & Hotez, Science Under Siege"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Science Under Siege: How to Fight the Five Most Powerful Forces That Threaten Our World",
+            "author": "Mann, Michael E., and Peter J. Hotez",
+            "publisher": "PublicAffairs",
+            "year": "2025",
+            "url": "https://www.hachettebookgroup.com/titles/michael-e-mann/science-under-siege/9781541705494/"
+          },
+          {
+            "title": "A history of FLICC: the 5 techniques of science denial",
+            "author": "Cook, John",
+            "publisher": "Skeptical Science",
+            "year": "2020",
+            "url": "https://skepticalscience.com/history-flicc-5-techniques-science-denial.html"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Trapping Outgoing Heat",
+        "greenhouse effect",
+        "carbon dioxide",
+        "infrared radiation",
+        "water vapor feedback",
+        "Lines of Evidence",
+        "thermometer record",
+        "ice cores",
+        "hockey stick graph",
+        "isotopic fingerprint",
+        "sea-level rise",
+        "Forces Behind Antiscience",
+        "petrostates",
+        "plutocrats",
+        "pros",
+        "propagandists",
+        "press",
+        "Techniques of Science Denial",
+        "cherry picking",
+        "conspiracy theories",
+        "logical fallacies",
+        "impossible expectations",
+        "fossil fuels",
+        "fake experts",
+        "Climategate"
+      ]
+    }
+  },
+  {
+    "id": "fungal-diseases-vegetables",
+    "module": "./botany/fungal-diseases-vegetables.js",
+    "published": "2026-10-03",
+    "browse": {
+      "id": "fungal-diseases-vegetables",
+      "title": "Fungal Diseases on Vegetables",
+      "category": "Botany",
+      "subcategories": {
+        "Botany": "horticulture"
+      },
+      "large": true,
+      "info": {
+        "text": "Six families of fungal and fungal-like disease strike the vegetable garden in different places and in different ways — foliage, xylem, seedling stems, fruit — and each family's biology dictates its management: dry leaves, clean ground, resistant varieties, gentle handling.",
+        "citations": [
+          {
+            "title": "Alternaria solani",
+            "url": "https://en.wikipedia.org/wiki/Alternaria_solani"
+          },
+          {
+            "title": "Erysiphaceae (powdery mildews)",
+            "url": "https://en.wikipedia.org/wiki/Erysiphaceae"
+          },
+          {
+            "title": "Downy mildew",
+            "url": "https://en.wikipedia.org/wiki/Downy_mildew"
+          },
+          {
+            "title": "Fusarium wilt",
+            "url": "https://en.wikipedia.org/wiki/Fusarium_wilt"
+          },
+          {
+            "title": "Verticillium wilt",
+            "url": "https://en.wikipedia.org/wiki/Verticillium_wilt"
+          },
+          {
+            "title": "Damping off",
+            "url": "https://en.wikipedia.org/wiki/Damping_off"
+          },
+          {
+            "title": "Botrytis cinerea",
+            "url": "https://en.wikipedia.org/wiki/Botrytis_cinerea"
+          },
+          {
+            "title": "Corn smut",
+            "url": "https://en.wikipedia.org/wiki/Corn_smut"
+          },
+          {
+            "title": "Rust (fungus)",
+            "url": "https://en.wikipedia.org/wiki/Rust_(fungus)"
+          },
+          {
+            "title": "List of tomato diseases",
+            "url": "https://en.wikipedia.org/wiki/List_of_tomato_diseases"
+          },
+          {
+            "title": "Oomycete",
+            "url": "https://en.wikipedia.org/wiki/Oomycete"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Foliage Spotter-Blighters",
+        "early blight",
+        "late blight",
+        "Septoria leaf spot",
+        "gray leaf spot",
+        "anthracnose",
+        "The Two Mildews",
+        "powdery mildew",
+        "downy mildew",
+        "Vascular Wilts",
+        "Fusarium wilt",
+        "Verticillium wilt",
+        "Below-the-Soil-Line Killers",
+        "damping-off",
+        "southern blight",
+        "black root rot",
+        "Fruit and Soft-Tissue Rotters",
+        "gray mold",
+        "white mold",
+        "Rhizopus rot",
+        "sour rot",
+        "Rusts and Smuts",
+        "corn smut",
+        "bean rust",
+        "common corn rust",
+        "free water",
+        "resting spores",
+        "obligate biotrophs",
+        "sanitation"
+      ]
+    }
+  },
+  {
+    "id": "manul-cold-steppe-cat",
+    "module": "./zoology/manul-cold-steppe-cat.js",
+    "published": "2026-10-03",
+    "browse": {
+      "id": "manul-cold-steppe-cat",
+      "title": "The Cold-Steppe Cat",
+      "category": "Zoology",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "manul-under-pressure",
+            "reason": "The sequel explains the cost of the specialization this board celebrates: an isolated lineage, a life timed to one short summer, and a prey base people are poisoning."
+          }
+        ]
+      },
+      "info": {
+        "text": "Pallas's cat (Otocolobus manul), a wild cat shaped by the cold, treeless steppes of Central Asia.",
+        "citations": [
+          {
+            "title": "Mammals of the Soviet Union, Volume II, Part 2",
+            "author": "V. G. Heptner & N. P. Sludskii",
+            "publisher": "Smithsonian Institution Libraries",
+            "year": "1992"
+          },
+          {
+            "title": "Pallas's cat — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Pallas%27s_cat"
+          },
+          {
+            "title": "Ecological niche models reveal divergent habitat use of Pallas's cat in the Eurasian cold steppes",
+            "author": "N. Lorestani, M.-R. Hemami, A. Rezvani, M. Ahmadi",
+            "publisher": "Ecology and Evolution",
+            "year": "2022",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/36532134/"
+          },
+          {
+            "title": "Dietary Differentiation Mitigates Interspecific Interference Competition Between Sympatric Pallas's Cats (Otocolobus manul) and Red Foxes (Vulpes vulpes)",
+            "author": "D. Wang, Q. Li, J. Gao, L. Hou, Y. Zou, X. Lian",
+            "publisher": "Animals",
+            "year": "2025",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/40362082/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Dressed for deep cold",
+        "densest fur of any cat",
+        "thick, black-ringed tail",
+        "denser winter coat",
+        "house-cat body under the fluff",
+        "Built low for open ground",
+        "low-set rounded ears",
+        "flat face, short nose",
+        "round pupils, not slits",
+        "grey-ochre camouflage",
+        "The cold steppe home",
+        "high, treeless cold steppe",
+        "−50 °C winters",
+        "only shallow snow (under 20 cm)",
+        "rocky outcrops for shelter",
+        "dens in old marmot burrows",
+        "The pika hunter",
+        "pikas as staple prey",
+        "ambush at burrow exits",
+        "raking voles out of shallow burrows",
+        "a continental winter",
+        "nowhere to hide",
+        "dens beside the larder"
+      ]
+    }
+  },
+  {
+    "id": "manul-under-pressure",
+    "module": "./zoology/manul-under-pressure.js",
+    "published": "2026-10-03",
+    "browse": {
+      "id": "manul-under-pressure",
+      "title": "The Manul Under Pressure",
+      "category": "Zoology",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "manul-cold-steppe-cat",
+            "reason": "Play the prequel: the cold steppe built this cat — its coat, its silhouette, its pika hunt. This board is about what that specialization costs.",
+            "via": [
+              "a calendar zoos can't fake"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "Pallas's cat, or manul: how it lives, and what poison, pelts and zoos cost it.",
+        "citations": [
+          {
+            "title": "Pallas's cat — Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Pallas%27s_cat"
+          },
+          {
+            "title": "Four new genome sequences of the Pallas's cat (Otocolobus manul): an insight into the patterns of within-species variability",
+            "author": "J. Bubenikova, M. Plasil, P. A. Burger, P. Horin",
+            "publisher": "Frontiers in Genetics",
+            "year": "2024",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/39720181/"
+          },
+          {
+            "title": "Wild Cats: Status Survey and Conservation Action Plan",
+            "author": "K. Nowell & P. Jackson",
+            "publisher": "IUCN/SSC Cat Specialist Group",
+            "year": "1996"
+          },
+          {
+            "title": "Exploring the ecologic basis for extreme susceptibility of Pallas' cats (Otocolobus manul) to fatal toxoplasmosis",
+            "author": "M. Brown, M. R. Lappin, J. L. Brown, B. Munkhtsog, W. F. Swanson",
+            "publisher": "Journal of Wildlife Diseases",
+            "year": "2005",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/16456157/"
+          },
+          {
+            "title": "Use of clindamycin in Pallas' cats [Otocolobus (Felis) manul] to reduce juvenile toxoplasmosis-associated mortality rates",
+            "author": "S. J. Girling, R. Pizzi, A. D. Naylor, et al.",
+            "publisher": "Journal of Zoo and Wildlife Medicine",
+            "year": "2020",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/32212544/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "A genus of one",
+        "Otocolobus manul",
+        "Peter Simon Pallas",
+        "Miocene split from the leopard cats",
+        "Racing the short summer",
+        "one spring litter a year",
+        "a fertile window of a day or two",
+        "first hunt at five months",
+        "Solitary and wide-ranging",
+        "solitary adults",
+        "huge, overlapping home ranges",
+        "a new den every few days",
+        "active at dusk and dawn",
+        "A specialist under pressure",
+        "globally Least Concern",
+        "pika poisoning",
+        "Endangered in China",
+        "the pelt trade",
+        "herding dogs and traps",
+        "Fragile far from home",
+        "deadly toxoplasmosis",
+        "high zoo kitten mortality",
+        "first artificial insemination",
+        "spread thin",
+        "a calendar zoos can't fake"
+      ]
+    }
+  },
+  {
+    "id": "person-place-and-time",
+    "module": "./public-health/person-place-and-time.js",
+    "published": "2026-10-03",
+    "browse": {
+      "id": "person-place-and-time",
+      "title": "Person, Place, and Time",
+      "category": "Public Health",
+      "tags": [
+        "epidemiology",
+        "outbreak investigation",
+        "history of medicine"
+      ],
+      "subcategories": {
+        "Public Health": "epidemiology"
+      },
+      "large": false,
+      "info": {
+        "text": "How epidemiologists investigate an outbreak while it is under way: describing who is sick, working out how the infection spreads, and choosing measures that break the chain.",
+        "links": [
+          {
+            "href": "https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/lesson6/section2.html",
+            "label": "CDC: Steps of an Outbreak Investigation"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Principles of Epidemiology in Public Health Practice, Third Edition: An Introduction to Applied Epidemiology and Biostatistics",
+            "author": "Centers for Disease Control and Prevention",
+            "year": "2006",
+            "url": "https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/index.html"
+          },
+          {
+            "title": "On the Mode of Communication of Cholera (2nd ed.)",
+            "author": "Snow, John",
+            "publisher": "John Churchill",
+            "year": "1855",
+            "url": "https://archive.org/details/b28985266"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Describing the Outbreak",
+        "case definition",
+        "epidemic curve",
+        "attack rate",
+        "spot map",
+        "index case",
+        "How Infection Spreads",
+        "mode of transmission",
+        "basic reproduction number",
+        "serial interval",
+        "superspreading",
+        "Breaking the Chain",
+        "isolation",
+        "quarantine",
+        "contact tracing",
+        "ring vaccination",
+        "incubation period",
+        "effective reproduction number",
+        "Broad Street pump"
       ]
     }
   }
