@@ -160,6 +160,23 @@ export async function run(page) {
   assert.match(literacyEdit.body, /unpublished changes/);
   assert.match(literacyEdit.body, /value="publish">Publish<\/button>/);
   assert.doesNotMatch(literacyEdit.body, /badge-accent">cued/);
+  const literacyPublish = createResponse();
+  assert.equal(await handleRequest(formRequest("/admin/categories/media-information-literacy", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "publish" }
+  }), literacyPublish), true);
+  assert.equal(literacyPublish.status, 303);
+  const literacyAfterPublish = createResponse();
+  assert.equal(await handleRequest({ method: "GET", url: "/admin/categories" }, literacyAfterPublish), true);
+  const afterStart = literacyAfterPublish.body.indexOf("Media &amp; Information Literacy");
+  const afterRow = literacyAfterPublish.body.slice(
+    afterStart,
+    literacyAfterPublish.body.indexOf("</tr>", afterStart)
+  );
+  assert.match(afterRow, /published in D1/);
+  assert.doesNotMatch(afterRow, /unpublished changes/);
+  assert.doesNotMatch(afterRow, /Not on the published snapshot/);
 
   const skipped = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/drafts" }, skipped), false);

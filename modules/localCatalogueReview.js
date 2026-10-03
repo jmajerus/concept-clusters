@@ -40,6 +40,7 @@ import {
 } from "./contentFreezePlan.js";
 import { isSameOriginRequest } from "./draftReviewSubmit.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
+import { sameStoredDocument } from "./authoringDomains.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import {
@@ -136,11 +137,10 @@ function assertPublishableTitle(document, kind) {
 function cataloguePublicationState(record, published) {
   const withdrawn = Boolean(published?.withdrawnAt);
   const activePublished = Boolean(published && !withdrawn);
-  // Hash algorithms are an implementation detail of the two records. Compare
-  // the canonical documents when both are available so a new draft seeded
-  // from a legacy SHA-256 published row is not falsely marked as edited.
+  // Key order is not an edit. Publish rewrites the stored object, so a
+  // raw stringify would keep "unpublished changes" up after a successful publish.
   const documentsDiffer = record?.document && published?.document
-    ? JSON.stringify(record.document) !== JSON.stringify(published.document)
+    ? !sameStoredDocument(record.document, published.document)
     : record?.contentHash !== published?.contentHash;
   const differsFromPublished = activePublished
     && documentsDiffer;

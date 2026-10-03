@@ -130,6 +130,10 @@ function stableDocument(value) {
   );
 }
 
+export function sameStoredDocument(left, right) {
+  return JSON.stringify(stableDocument(left)) === JSON.stringify(stableDocument(right));
+}
+
 // `dateCreated` and `dateModified` are the two system fields that stay on
 // the puzzle. Everything else in SYSTEM_ROOT_FIELDS is row metadata.
 // `large` is derived at read time and is never stored.
