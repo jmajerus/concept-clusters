@@ -1487,10 +1487,12 @@ export function createAuthoringMcpServer({
   server.registerTool("check_puzzle_links", {
     title: "Check puzzle links",
     description:
-      "Verify every wiki: link in a draft (draft_id) or a published puzzle (puzzle_id) against Wikipedia: " +
-      "ok, redirect (with the title actually reached), missing, or disambiguation. Network-dependent and " +
-      "separate from validate_puzzle_draft on purpose; run it before treating a board's links as checked. " +
-      "Redirects still work in play but the canonical title is usually the better link.",
+      "Verify every wiki: link against Wikipedia: ok, redirect (with the title actually reached), missing, or " +
+      "disambiguation. draft_id checks the working copy. When that copy is only the restored review baseline, " +
+      "the same call checks the latest open review proposal instead, including one stacked on a preceding " +
+      "proposal. puzzle_id checks the published puzzle. The result names which document was checked. " +
+      "Network-dependent and separate from validate_puzzle_draft on purpose. Redirects still work in play but " +
+      "the canonical title is usually the better link.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       puzzle_id: draftIdSchema.optional()
@@ -1499,19 +1501,35 @@ export function createAuthoringMcpServer({
     }),
     annotations: READ_ONLY
   }, tracked("check_puzzle_links", safe(async ({ draft_id, puzzle_id }) => {
-    const document = draft_id
-      ? (await draftRepository.get({ draftId: draft_id, actor })).document
-      : await publishedPuzzleDocument(puzzle_id);
+    let document;
+    let checkedDocument;
+    let eventId = null;
+    if (puzzle_id) {
+      document = await publishedPuzzleDocument(puzzle_id);
+      checkedDocument = "published";
+    } else {
+      const chosen = await documentForLinkCheck(draft_id);
+      document = chosen.document;
+      checkedDocument = chosen.checkedDocument;
+      eventId = chosen.eventId;
+    }
     const report = await checkDocumentWikiLinks(document, { fetch: fetchImpl, store: wikiLinkStore });
     const counts = { ok: 0, redirect: 0, missing: 0, disambiguation: 0 };
     for (const result of report.results) counts[result.status] += 1;
     const problems = report.results.filter(result => result.status !== "ok");
+    const where = checkedDocument === "proposal"
+      ? `the filed review proposal (event ${eventId})`
+      : checkedDocument === "published"
+        ? "the published puzzle"
+        : "the working copy";
     const summary = report.unavailable
-      ? `Links not checked: ${report.unavailable}.`
-      : `${report.checked} wiki: link${report.checked === 1 ? "" : "s"} checked: ` +
+      ? `Links on ${where} not checked: ${report.unavailable}.`
+      : `${report.checked} wiki: link${report.checked === 1 ? "" : "s"} checked on ${where}: ` +
         `${counts.ok} ok, ${counts.redirect} redirect, ${counts.missing} missing, ${counts.disambiguation} disambiguation.`;
     return success(summary, {
       ...(draft_id ? { draftId: draft_id } : { puzzleId: puzzle_id }),
+      checkedDocument,
+      ...(eventId == null ? {} : { eventId }),
       checked: report.checked,
       counts,
       unavailable: report.unavailable,
@@ -1596,6 +1614,29 @@ export function createAuthoringMcpServer({
     return openProposals.length ? openProposals[openProposals.length - 1] : null;
   }
 
+  // propose restores the working copy to the baseline and files the review
+  // separately. A draft_id check then follows the filed proposal, including
+  // the latest stacked one. An edited working copy is still the document.
+  async function documentForLinkCheck(draftId) {
+    const stored = await draftRepository.get({ draftId, actor });
+    const proposal = await filedProposalReplacingBaseline(draftId, stored);
+    if (proposal) {
+      return { document: proposal.proposal, checkedDocument: "proposal", eventId: proposal.id };
+    }
+    return { document: stored.document, checkedDocument: "working-copy", eventId: null };
+  }
+
+  async function filedProposalReplacingBaseline(draftId, stored) {
+    if (stored?.hasReviewBaseline !== true) return null;
+    if (!Number.isInteger(stored.reviewBasePublishedRevision)) return null;
+    if (typeof draftRepository.readReviewBaseline !== "function") return null;
+    const baseline = await draftRepository.readReviewBaseline({ draftId, actor });
+    if (!baseline || !samePlayablePuzzle(baseline, stored.document)) return null;
+    const puzzleId = typeof stored.document?.id === "string" ? stored.document.id : stored.puzzleId;
+    if (!puzzleId) return null;
+    return precedingReview(await openReviewProposals(puzzleId, stored.reviewBasePublishedRevision));
+  }
+
   async function markReviewStackLoaded(draftId, stackLoaded) {
     const supported = typeof draftRepository.supports === "function"
       ? await draftRepository.supports("setReviewStackLoaded")
@@ -1607,7 +1648,7 @@ export function createAuthoringMcpServer({
   server.registerTool("record_agent_puzzle_review", {
     title: "Record agent review or handoff issue",
     description:
-      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. If that baseline already exists and the working copy is an open proposal, begin restores the baseline so the next review is independent. action=propose files the current document as one candidate against that published revision, omitting changes that only repeat an open proposal, then restores the working copy to the baseline. Pass stack_on true to build on the preceding open proposal instead; the server chooses that proposal, so there is no proposal id to pass. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues and pass that issue's number as issue_id before note, resolve, or reopen. The tracking id is that small integer. The server derives timestamps, draft revision, and guidance version; it never records a human review. Choosing a winner is a human action on the drafts page.",
+      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. If that baseline already exists and the working copy is an open proposal, begin restores the baseline so the next review is independent. action=propose files the current document as one candidate against that published revision, omitting changes that only repeat an open proposal, then restores the working copy to the baseline. After that restore, check_puzzle_links on this draft checks the filed proposal. Pass stack_on true to build on the preceding open proposal instead; the server chooses that proposal, so there is no proposal id to pass. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues and pass that issue's number as issue_id before note, resolve, or reopen. The tracking id is that small integer. The server derives timestamps, draft revision, and guidance version; it never records a human review. Choosing a winner is a human action on the drafts page.",
     inputSchema: agentReviewInput,
     annotations: WRITE
   }, tracked("record_agent_puzzle_review", safe(async ({ draft_id, action, issue_id, outcome, comments, stack_on }, ctx) => {
@@ -1836,9 +1877,10 @@ export function createAuthoringMcpServer({
       });
       await markReviewStackLoaded(draft_id, false);
       return success(
-        preceding
+        (preceding
           ? `Filed a review proposal for ${puzzleId} on top of the preceding review, and restored the working copy to the baseline.`
-          : `Filed a review proposal for ${puzzleId} and restored the working copy to the baseline.`,
+          : `Filed a review proposal for ${puzzleId} and restored the working copy to the baseline.`) +
+          " check_puzzle_links on this draft checks the filed proposal.",
         {
           puzzleId,
           draftId: draft_id,

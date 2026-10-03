@@ -147,7 +147,10 @@
 // 6.5: same review bar. info.citations stays an agent content-domain write.
 // The server does not copy links into it. The default set is the cluster
 // links the lesson text relies on, saved after the lesson exists.
+// 6.6: same review bar. check_puzzle_links with draft_id checks the filed
+// review when the working copy is only the restored baseline, including a
+// stacked review. The result names that document.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 5
+  minor: 6
 });

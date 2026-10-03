@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Review a Concept Clusters puzzle
 
-Skill rev `fec55391` · 2026-09-29
+Skill rev `08757254` · 2026-10-03
 
 Run **one** planner. Treat its JSON as the contract. Do not improvise a search.
 
@@ -157,7 +157,7 @@ Before opening an issue, apply this threshold:
 
 Open one independent issue for each qualifying concern with `record_agent_puzzle_review action="open"` and non-empty comments. Do not leave a qualifying open concern only in the completion comment.
 
-If the review changed the document, call `record_agent_puzzle_review` with `action="propose"` after `validate_puzzle_draft` passes and before completion. Optional comments state why the proposal should win. The server stores the document, the published revision it was written against, and the MCP client identity, then restores the baseline. Do not leave the edited draft as the only copy of the proposal.
+If the review changed the document, call `record_agent_puzzle_review` with `action="propose"` after `validate_puzzle_draft` passes and before completion. Optional comments state why the proposal should win. The server stores the document, the published revision it was written against, and the MCP client identity, then restores the baseline. Do not leave the edited draft as the only copy of the proposal. `check_puzzle_links` with that `draft_id` then checks the filed proposal, including a stacked review. The result names that document.
 
 Call MCP `record_agent_puzzle_review` with its default `action="complete"` only at successful wrap-up, after `propose` when there were changes, and only while the current draft is valid. It takes the `draft_id`, an outcome (`unchanged`, `changed`, or `open-questions`), and optional comments limited to the completed review. The server derives the timestamp, draft revision, and guidance version and advances only the agent-review timestamp. It never changes the separate human-review time, which only the authoring-page action records. Choosing among filed proposals is a human action on the drafts page.
 

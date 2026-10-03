@@ -310,6 +310,7 @@ export async function run() {
   try {
     const result = await session.call("check_puzzle_links", { draft_id: "gram-stain-fixture" });
     assert.equal(result.draftId, "gram-stain-fixture");
+    assert.equal(result.checkedDocument, "working-copy");
     assert.equal(result.checked, 8);
     assert.deepEqual(result.counts, { ok: 4, redirect: 2, missing: 1, disambiguation: 1 });
     assert.equal(result.problems.length, 4);
@@ -329,6 +330,128 @@ export async function run() {
   } finally {
     await session.close();
   }
+
+  // ---- MCP tool: a restored baseline follows the filed review; an edit stays on the working copy ----
+  const older = withClusterWikiLink(fixture, { name: "Old cluster", title: "Old cluster page" });
+  const filed = withClusterWikiLink(fixture, { name: "Verification methods", title: "Verification methods" });
+  const inProgress = withClusterWikiLink(fixture, { name: "In progress", title: "In progress" });
+  const otherGeneration = withClusterWikiLink(fixture, { name: "Other generation", title: "Other generation" });
+  const quiet = structuredClone(fixture);
+  quiet.id = "quiet-puzzle";
+  const reviewDocuments = createMemoryContentDocumentRepository();
+  const olderEvent = await reviewDocuments.recordPuzzleAgentReview({
+    id: "gram-stain-fixture",
+    eventType: "proposed",
+    proposal: older,
+    basePublishedRevision: 1,
+    reviewedAt: "2026-10-01T00:00:00.000Z"
+  });
+  const filedEvent = await reviewDocuments.recordPuzzleAgentReview({
+    id: "gram-stain-fixture",
+    eventType: "proposed",
+    proposal: filed,
+    basePublishedRevision: 1,
+    reviewedAt: "2026-10-02T00:00:00.000Z"
+  });
+  await reviewDocuments.recordPuzzleAgentReview({
+    id: "gram-stain-fixture",
+    eventType: "proposed",
+    proposal: otherGeneration,
+    basePublishedRevision: 2,
+    reviewedAt: "2026-10-02T12:00:00.000Z"
+  });
+  const reviewDrafts = {
+    "filed-review": {
+      draftId: "filed-review",
+      puzzleId: "gram-stain-fixture",
+      revision: 4,
+      status: "draft",
+      document: fixture,
+      hasReviewBaseline: true,
+      reviewBasePublishedRevision: 1
+    },
+    "in-progress": {
+      draftId: "in-progress",
+      puzzleId: "gram-stain-fixture",
+      revision: 5,
+      status: "draft",
+      document: inProgress,
+      hasReviewBaseline: true,
+      reviewBasePublishedRevision: 1
+    },
+    "quiet-review": {
+      draftId: "quiet-review",
+      puzzleId: "quiet-puzzle",
+      revision: 1,
+      status: "draft",
+      document: quiet,
+      hasReviewBaseline: true,
+      reviewBasePublishedRevision: 1
+    }
+  };
+  const reviewServer = createHostedMcpAuthoringServer({
+    draftRepository: {
+      async list() { return []; },
+      async get({ draftId }) {
+        const record = reviewDrafts[draftId];
+        if (!record) throw new Error(`Unknown draft: ${draftId}`);
+        return record;
+      },
+      async readReviewBaseline({ draftId }) {
+        return draftId === "quiet-review" ? quiet : fixture;
+      }
+    },
+    contentDocuments: reviewDocuments,
+    contentService,
+    actor: { subject: "link-check-tests" },
+    fetch: wikipediaStub()
+  });
+  const reviewSession = await connect(reviewServer);
+  try {
+    const proposal = await reviewSession.call("check_puzzle_links", { draft_id: "filed-review" });
+    assert.equal(proposal.checkedDocument, "proposal");
+    assert.equal(proposal.eventId, filedEvent.id);
+    assert.equal(proposal.checked, 9);
+    assert.ok(proposal.results.some(item =>
+      item.where === 'cluster "Verification methods"' && item.title === "Verification methods"
+    ), "a restored baseline checks the filed review, not the old working copy");
+    assert.ok(!proposal.results.some(item => item.title === "Old cluster page"),
+      "a stacked filing is the latest open proposal, not the preceding one");
+    assert.ok(!proposal.results.some(item => item.title === "Other generation"),
+      "a proposal against another published revision is not this review");
+
+    const editing = await reviewSession.call("check_puzzle_links", { draft_id: "in-progress" });
+    assert.equal(editing.checkedDocument, "working-copy");
+    assert.equal(editing.eventId, undefined);
+    assert.ok(editing.results.some(item => item.title === "In progress"));
+
+    const quietCheck = await reviewSession.call("check_puzzle_links", { draft_id: "quiet-review" });
+    assert.equal(quietCheck.checkedDocument, "working-copy");
+    assert.equal(quietCheck.eventId, undefined, "a baseline with no filed review is the working copy");
+
+    await reviewDocuments.recordPuzzleAgentReview({
+      id: "gram-stain-fixture",
+      eventType: "rejected",
+      proposal: filed,
+      sourceEventId: filedEvent.id,
+      reviewedAt: "2026-10-03T00:00:00.000Z"
+    });
+    const preceding = await reviewSession.call("check_puzzle_links", { draft_id: "filed-review" });
+    assert.equal(preceding.checkedDocument, "proposal");
+    assert.equal(preceding.eventId, olderEvent.id);
+    assert.ok(preceding.results.some(item => item.title === "Old cluster page"));
+    assert.ok(!preceding.results.some(item => item.title === "Verification methods"));
+  } finally {
+    await reviewSession.close();
+  }
+}
+
+function withClusterWikiLink(document, { name, title }) {
+  const next = structuredClone(document);
+  const cluster = next.clusters[0];
+  cluster.name = name;
+  cluster.info = { ...cluster.info, links: [...cluster.info.links, `wiki:${title}`] };
+  return next;
 }
 
 async function connect(server) {
