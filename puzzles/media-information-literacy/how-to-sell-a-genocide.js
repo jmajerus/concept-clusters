@@ -11,7 +11,9 @@ export default definePuzzle(import.meta.url, {
     "media-information-literacy",
     "political-science"
   ],
-  "large": true,
+  "subcategories": {
+    "media-information-literacy": "propaganda-disinformation"
+  },
   "tags": [
     "book"
   ],
@@ -38,18 +40,18 @@ export default definePuzzle(import.meta.url, {
       "color": "amber",
       "fact": "Analyzing the first 60 days of coverage, Johnson found the New York Times called Israeli deaths a massacre 124 times and Palestinian deaths zero, with CNN at 225-16 and MSNBC at 177-8 -- the same asymmetry recurring for slaughter, barbaric, and savage -- while Israeli responsibility itself vanished from headlines that let a blast simply emerge, a pattern Johnson calls reporting war crimes like earthquakes.",
       "terms": [
-        "the massacre/slaughter gap",
+        "loaded vocabulary",
         "human shields",
-        "blast emerges",
-        "war crimes like earthquakes"
+        "passive voice",
+        "natural-disaster framing"
       ],
       "seeds": [
-        "the massacre/slaughter gap",
+        "loaded vocabulary",
         "human shields"
       ],
       "termInfo": {
-        "blast emerges": {
-          "text": "The passive construction Johnson found replacing named Israeli responsibility in headlines about strikes on Gaza -- a blast simply emerges or a hospital comes under siege, with no actor named.",
+        "loaded vocabulary": {
+          "text": "Emotionally charged words -- massacre, slaughter, barbaric, savage -- applied to one side's dead and almost never to the other's. Johnson tallied the gap across major outlets in the war's first sixty days.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
@@ -64,16 +66,16 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "the massacre/slaughter gap": {
-          "text": "Johnson's tally of emotionally charged words -- massacre, slaughter, barbaric, savage -- used for Israeli deaths and almost never for Palestinian deaths across major outlets in the war's first sixty days, despite Palestinian deaths vastly outnumbering Israeli ones after the war's first week.",
+        "passive voice": {
+          "text": "Headlines in which a blast simply emerges or a hospital comes under siege, with no actor named -- the grammar Johnson found replacing named Israeli responsibility in coverage of strikes on Gaza.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
             }
           ]
         },
-        "war crimes like earthquakes": {
-          "text": "Johnson's phrase for coverage that documents Palestinian suffering in detail while stripping out who caused it -- treating a strike as a natural disaster rather than a decision made by an identifiable actor.",
+        "natural-disaster framing": {
+          "text": "Johnson's phrase is reporting war crimes like earthquakes: documenting Palestinian suffering in detail while treating a strike as an act of nature rather than a decision made by an identifiable actor.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
@@ -96,42 +98,42 @@ export default definePuzzle(import.meta.url, {
       "color": "brown",
       "fact": "Johnson traces a deliberate effort to strip Hamas of political context and remove it from the moral plane of acceptable parties specifically to delegitimize ceasefire calls -- reinforced by the beheaded-babies hoax, spread widely and never fully retracted, and by a Hamas-run Ministry of Health qualifier attached to Gaza's death toll but never to October 7's, despite roughly a third of that day's dead being combatants.",
       "terms": [
-        "the beheaded-babies hoax",
-        "the Hamas-run qualifier",
-        "the moral plane of acceptable parties",
-        "one-third combatants"
+        "hoax amplification",
+        "one-sided qualifiers",
+        "delegitimization",
+        "selective omission"
       ],
       "seeds": [
-        "the beheaded-babies hoax",
-        "the Hamas-run qualifier"
+        "hoax amplification",
+        "one-sided qualifiers"
       ],
       "termInfo": {
-        "one-third combatants": {
-          "text": "Roughly a third of the approximately 1,200 people killed on October 7 were active-duty combatants, by Johnson's count -- a fact he argues is underemphasized because it complicates claims that Gaza's civilian-to-combatant ratio was uniquely disproportionate.",
-          "links": [
-            {
-              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
-            }
-          ]
-        },
-        "the Hamas-run qualifier": {
-          "text": "A caveat about undifferentiated civilian and combatant deaths -- 'the Hamas-run Ministry of Health' -- routinely attached to Gaza's death toll but never to Israel's October 7 toll, even though roughly a third of the October 7 dead were combatants.",
-          "links": [
-            {
-              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
-            }
-          ]
-        },
-        "the beheaded-babies hoax": {
-          "text": "Unverified claims, first made by Israeli soldiers and rescue workers and briefly endorsed by President Biden and Israeli officials, that Hamas beheaded dozens of infants on October 7 -- since refuted, but never fully retracted by the outlets that spread it.",
+        "hoax amplification": {
+          "text": "Unverified claims -- here, that Hamas beheaded dozens of infants on October 7, first made by Israeli soldiers and rescue workers and briefly endorsed by President Biden and Israeli officials -- spread widely and never fully retracted by the outlets that carried them.",
           "links": [
             {
               "href": "wiki:Hamas baby beheading hoax"
             }
           ]
         },
-        "the moral plane of acceptable parties": {
-          "text": "Johnson's phrase for the political legitimacy a party needs to be treated as a negotiating partner rather than an entity beyond discussion -- removing Hamas from it, he argues, made ceasefire calls politically impossible to entertain.",
+        "one-sided qualifiers": {
+          "text": "A caveat such as 'the Hamas-run Ministry of Health' routinely attached to Gaza's death toll but never to Israel's October 7 toll.",
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
+        },
+        "delegitimization": {
+          "text": "Removing a party from what Johnson calls the moral plane of acceptable parties -- the legitimacy needed to be treated as a negotiating partner -- which he argues made ceasefire calls politically impossible to entertain.",
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
+        },
+        "selective omission": {
+          "text": "Leaving out a fact that complicates the story: by Johnson's count, roughly a third of the approximately 1,200 people killed on October 7 were active-duty combatants.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
@@ -154,25 +156,25 @@ export default definePuzzle(import.meta.url, {
       "color": "blue",
       "fact": "CNN president Mark Thompson's October 26 memo required every mention of Palestinian suffering to be prefaced with October 7, while a new IDF-confirmation standard -- invented only after the al-Ahli hospital bombing and applied nowhere else, not Ukraine, not Russia -- made Israeli responsibility for a strike wait days for confirmation that sometimes never came; Johnson calls the resulting flood of helpless-Biden stories a sketch, not a plot, because the same beat repeats for fifteen months without a single policy actually changing.",
       "terms": [
-        "the October 26 memo",
-        "the IDF-confirmation standard",
-        "the helpless Biden narrative",
-        "a sketch, not a plot"
+        "context cut-off",
+        "confirmation standard",
+        "constraint narrative",
+        "narrative repetition"
       ],
       "seeds": [
-        "the October 26 memo",
-        "the IDF-confirmation standard"
+        "context cut-off",
+        "confirmation standard"
       ],
       "termInfo": {
-        "a sketch, not a plot": {
-          "text": "Johnson's analogy for the helpless-Biden story format: a sketch repeats the same gag without advancing anywhere, unlike a plot, which moves events forward -- and no actual policy changed across fifteen months of these stories.",
+        "context cut-off": {
+          "text": "Starting the story on a chosen day: CNN president Mark Thompson's October 26, 2023 memo told staff to preface any mention of Palestinian suffering or death with the October 7 death toll -- effectively starting Gaza's history on the day it was attacked.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
             }
           ]
         },
-        "the IDF-confirmation standard": {
+        "confirmation standard": {
           "text": "An editorial rule requiring Israeli military confirmation before attributing a strike to Israel in a headline -- adopted only after the October 17 al-Ahli hospital bombing and applied nowhere else, including Ukraine and Russia.",
           "links": [
             {
@@ -180,16 +182,16 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "the October 26 memo": {
-          "text": "CNN president Mark Thompson's October 26, 2023 internal memo instructing staff to preface any mention of Palestinian suffering or death with the October 7 death toll -- effectively starting Gaza's history on the day it was attacked.",
+        "constraint narrative": {
+          "text": "A recurring story format -- widening gaps, growing tensions, private frustration -- portraying Biden as constrained from pressuring Israel.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
             }
           ]
         },
-        "the helpless Biden narrative": {
-          "text": "A recurring story format -- widening gaps, growing tensions, private frustration -- portraying Biden as constrained from pressuring Israel, sourced overwhelmingly (94%, by Johnson's count) to Biden aides and allies rather than independent reporting.",
+        "narrative repetition": {
+          "text": "Johnson's sketch-not-a-plot point: the same beat repeating for fifteen months without a single policy changing -- a sketch repeats the same gag, while a plot moves events forward.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
@@ -210,35 +212,27 @@ export default definePuzzle(import.meta.url, {
       "id": "who-gets-to-speak",
       "name": "Who Gets to Speak",
       "color": "teal",
-      "fact": "Across Meet the Press, This Week, and State of the Union, Johnson counted zero Palestinian guests for over two years running, against six Netanyahu interviews in year one alone; he argues the rare Palestinian voice that does appear is confined to one of three categories -- mindless terrorist, native informant, or passive victim -- with The Atlantic's version of the pattern earning his verdict of soft genocide denial for the tote bag set.",
+      "fact": "Across Meet the Press, This Week, and State of the Union, Johnson counted zero Palestinian guests for over two years running, against six Netanyahu interviews in year one alone; the rare Palestinian voice that does appear -- Face the Nation had exactly one, in November 2023 -- is confined, he argues, to one of three roles: mindless terrorist, native informant, or passive victim; and the stories explaining the war lean on government insiders, with 94% of the helpless-Biden stories sourced to Biden aides and allies.",
       "terms": [
-        "zero Palestinian guests",
-        "six Netanyahu interviews",
-        "three categories",
-        "soft genocide denial"
+        "guest selection",
+        "source roles",
+        "official sourcing",
+        "token inclusion"
       ],
       "seeds": [
-        "zero Palestinian guests",
-        "six Netanyahu interviews"
+        "guest selection",
+        "source roles"
       ],
       "termInfo": {
-        "six Netanyahu interviews": {
-          "text": "Benjamin Netanyahu alone appeared on the Sunday shows six times in the first year of the war, by Johnson's count, against zero Palestinian guests across the same period.",
+        "guest selection": {
+          "text": "Johnson's census of Sunday-show guest lists: zero Palestinian guests on Meet the Press, ABC's This Week, and CBS's State of the Union for more than two years after October 2023, against six Netanyahu interviews in the first year alone.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
             }
           ]
         },
-        "soft genocide denial": {
-          "text": "Johnson's verdict on The Atlantic's coverage -- 'for the tote bag set': consistently genocidal in substance -- amplifying the beheaded-babies claim, scolding against ceasefire calls, minimizing Palestinian death counts -- while carrying the aesthetic trappings of intellectual seriousness.",
-          "links": [
-            {
-              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
-            }
-          ]
-        },
-        "three categories": {
+        "source roles": {
           "text": "Johnson's argument that mainstream coverage permits a Palestinian source only one of three roles: mindless terrorist, native informant willing to condemn Hamas and Palestinian society, or passive victim with no political voice of their own.",
           "links": [
             {
@@ -246,8 +240,16 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "zero Palestinian guests": {
-          "text": "Johnson's finding that Meet the Press, ABC's This Week, and CBS's State of the Union featured no Palestinian guest at all for more than two years after October 2023 -- Face the Nation had exactly one, in November 2023.",
+        "official sourcing": {
+          "text": "Relying on government insiders as the default voice: by Johnson's count, 94% of the helpless-Biden stories were sourced to Biden aides and allies rather than independent reporting.",
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
+        },
+        "token inclusion": {
+          "text": "An occasional exception set against the pattern: Face the Nation hosted exactly one Palestinian guest, in November 2023.",
           "links": [
             {
               "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
@@ -267,7 +269,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "racist-tautology",
       "term": "racist tautology",
       "clusters": [
         0,
@@ -279,40 +280,38 @@ export default definePuzzle(import.meta.url, {
       },
       "relationKind": "foundation",
       "idealTerms": [
-        "the massacre/slaughter gap",
-        "the moral plane of acceptable parties"
+        "loaded vocabulary",
+        "delegitimization"
       ]
     },
     {
-      "id": "the-agency-language-comparison",
-      "term": "the agency-language comparison",
+      "term": "agency comparison",
       "clusters": [
         0,
         2
       ],
       "fact": "Comparing New York Times front-page coverage of Russia's invasion of Ukraine to Israel's invasion of Gaza across matched one-month windows, Johnson found roughly 32 references naming Russian agency against just two naming Israeli agency -- the same study that surfaced the passive blast-emerges language and that dates the invented IDF-confirmation standard to the days after the October 17 al-Ahli hospital bombing.",
       "info": {
-        "text": "Johnson's side-by-side count of agency language in coverage of Russia's invasion of Ukraine versus Israel's invasion of Gaza -- the evidence base for both the vanishing-agency pattern in headlines and the timing of the IDF-confirmation rule."
+        "text": "Johnson's side-by-side count of agency language in coverage of Russia's invasion of Ukraine versus Israel's invasion of Gaza -- the evidence base for both the vanishing-agency pattern in headlines and the timing of the confirmation rule."
       },
       "relationKind": "evaluation",
       "idealTerms": [
-        "blast emerges",
-        "the IDF-confirmation standard"
+        "passive voice",
+        "confirmation standard"
       ],
       "direction": {
         "kind": "outward"
       }
     },
     {
-      "id": "ali-velshi",
-      "term": "Ali Velshi",
+      "term": "owner pressure",
       "clusters": [
         1,
         3
       ],
       "fact": "When MSNBC's Ali Velshi began explaining the history of Gaza's blockade on the morning of October 7, Comcast corporate intervened directly to stop him -- the clearest documented instance of the same enforcement mechanism that kept Hamas outside of history in coverage and kept Palestinian voices off the Sunday shows for over two years: offering context itself treated as terrorism apologia.",
       "info": {
-        "text": "MSNBC anchor whose on-air attempt to contextualize the Gaza blockade on October 7, 2023 was shut down by Comcast corporate -- documented by Johnson as a direct instance of editorial enforcement.",
+        "text": "Corporate-owner intervention in editorial content: MSNBC anchor Ali Velshi's on-air attempt to contextualize the Gaza blockade on October 7, 2023 was shut down by Comcast corporate -- documented by Johnson as a direct instance of editorial enforcement.",
         "links": [
           {
             "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
@@ -321,8 +320,8 @@ export default definePuzzle(import.meta.url, {
       },
       "relationKind": "dynamic",
       "idealTerms": [
-        "the moral plane of acceptable parties",
-        "zero Palestinian guests"
+        "delegitimization",
+        "guest selection"
       ],
       "direction": {
         "kind": "outward"
@@ -331,46 +330,50 @@ export default definePuzzle(import.meta.url, {
   ],
   "lenses": [
     {
-      "id": "counted-not-coined",
-      "prompt": "Which concepts name a specific number or ratio Johnson counted himself, rather than a named policy, a debunked claim, or his own label for a technique?",
-      "explanation": "Each of these is a raw count from Johnson's own data-driven analysis -- word-usage tallies, a demographic breakdown of the dead, and a guest-list census -- rather than a formal editorial rule, a specific false claim, or a phrase he coined to describe a pattern.",
-      "targets": [
-        "the massacre/slaughter gap",
-        "one-third combatants",
-        "zero Palestinian guests",
-        "six Netanyahu interviews"
-      ],
-      "reasons": {
-        "one-third combatants": "A demographic finding about who died on October 7, not a label for a technique or a formal policy."
-      }
-    },
-    {
       "id": "formal-mechanisms",
-      "prompt": "Which concepts name a specific editorial policy, corporate intervention, or attached qualifier -- a formal institutional decision -- rather than a recurring word choice or a debunked claim?",
-      "explanation": "A memo, a confirmation rule, a routinely attached caveat, and a corporate intervention against an anchor providing context are each a specific institutional decision, distinct from the word-choice patterns and debunked claims documented elsewhere in this puzzle.",
+      "prompt": "Which concepts name a rule, qualifier, or pressure imposed by an institution, rather than a choice a writer makes inside a sentence?",
+      "explanation": "A starting-date memo, a confirmation rule, a routinely attached caveat, and a corporate owner's intervention are each institutional decisions made above the level of any one sentence.",
       "targets": [
-        "the October 26 memo",
-        "the IDF-confirmation standard",
-        "the Hamas-run qualifier",
-        "Ali Velshi"
+        "context cut-off",
+        "confirmation standard",
+        "one-sided qualifiers",
+        "owner pressure"
       ],
       "reasons": {
-        "Ali Velshi": "The bridge naming a specific, documented instance of corporate enforcement -- structurally the same kind of institutional decision as a memo or an editorial standard, even though it touches two clusters at once."
+        "context cut-off": "A written instruction from CNN's president fixing where every Palestinian-suffering story must begin -- a rule issued by management.",
+        "confirmation standard": "A standing editorial rule adopted after the al-Ahli bombing and applied to no other conflict.",
+        "one-sided qualifiers": "A caveat attached to one side's death toll and not the other's -- a routine editorial convention, not a one-off phrase.",
+        "owner pressure": "Comcast corporate stopping an anchor mid-broadcast -- an institution, not a reporter, deciding what gets said."
       }
     },
     {
-      "id": "johnsons-own-names",
-      "prompt": "Which concepts are Johnson's own coined phrase or metaphor for a technique, rather than the raw count behind it or a specific institutional policy?",
-      "explanation": "Across all four clusters, and the bridge tying the first two together, Johnson gives the pattern he documents its own name or image -- earthquakes without an actor, a circular racist premise, a plane of political legitimacy, a sketch instead of a plot, a genocide denial dressed for a particular class -- turning a data pattern into a memorable diagnosis.",
+      "id": "hidden-actor",
+      "prompt": "Which techniques work by hiding or delaying who is responsible for an act?",
+      "explanation": "Passive grammar, a natural-disaster frame, and a rule that postpones naming the responsible party all keep the actor out of the headline while the harm stays in it.",
       "targets": [
-        "war crimes like earthquakes",
-        "the moral plane of acceptable parties",
-        "a sketch, not a plot",
-        "soft genocide denial",
-        "racist tautology"
+        "passive voice",
+        "natural-disaster framing",
+        "confirmation standard"
       ],
       "reasons": {
-        "racist tautology": "Johnson's own name for the circular logic underneath the puzzle's first bridge, structurally identical to the coined phrases drawn from each cluster."
+        "passive voice": "A blast that emerges has no one who set it off.",
+        "natural-disaster framing": "A strike treated as an act of nature has no decision-maker.",
+        "confirmation standard": "Attribution waits days, or forever, for a confirmation that the standard itself makes slow to arrive."
+      }
+    },
+    {
+      "id": "removed-background",
+      "prompt": "Which techniques work by removing the background a reader would need to judge an event, rather than by choosing words or controlling who speaks?",
+      "explanation": "A chosen starting date, a left-out fact, and a stripped-away political context each shrink what the reader is allowed to know before judging an event.",
+      "targets": [
+        "context cut-off",
+        "selective omission",
+        "delegitimization"
+      ],
+      "reasons": {
+        "context cut-off": "History begins on the day of the attack.",
+        "selective omission": "A complicating fact about who died on October 7 goes unmentioned.",
+        "delegitimization": "Hamas loses its political and historical context, so ceasefire calls lose their standing."
       }
     }
   ],
@@ -381,10 +384,10 @@ export default definePuzzle(import.meta.url, {
     "entries": [
       {
         "id": "manufacturing-consent",
-        "reason": "Johnson explicitly invokes Herman and Chomsky's own axiom that concision is necessarily conservative -- see the propaganda model whose five filters this puzzle's techniques apply to a single, faster-moving, higher-stakes story.",
+        "reason": "Johnson explicitly invokes Herman and Chomsky's axiom that concision is necessarily conservative; this puzzle applies the propaganda model to one faster-moving, higher-stakes story -- owner pressure from Comcast, and official sourcing of the helpless-Biden stories.",
         "via": [
-          "propaganda model",
-          "concision"
+          "owner pressure",
+          "official sourcing"
         ]
       }
     ]
@@ -414,7 +417,12 @@ export default definePuzzle(import.meta.url, {
     "contributors": [
       {
         "name": "Claude"
+      },
+      {
+        "name": "Claude Code"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 });

@@ -7,31 +7,71 @@ export default definePuzzle(import.meta.url, {
   "id": "images-out-of-context",
   "title": "Images out of context",
   "category": "media-information-literacy",
+  "subcategories": {
+    "media-information-literacy": "verification-fact-checking"
+  },
+  "info": {
+    "citations": [
+      {
+        "title": "Verification Handbook: Verifying Images",
+        "url": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+      },
+      {
+        "title": "First Draft: Visual Verification Guide: Photos",
+        "url": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
+      },
+      {
+        "title": "Bellingcat: Advanced guide to verifying video content",
+        "url": "https://www.bellingcat.com/resources/how-tos/2017/06/30/advanced-guide-verifying-video-content/"
+      },
+      {
+        "title": "Bellingcat: Searching the Earth: essential geolocation tools for verification",
+        "url": "https://www.bellingcat.com/resources/how-tos/2015/07/25/searching-the-earth-essential-geolocation-tools-for-verification/"
+      },
+      {
+        "title": "Poynter: Three ways to spot if an image has been manipulated",
+        "url": "https://www.poynter.org/reporting-editing/2012/three-ways-to-spot-if-an-image-has-been-manipulated/"
+      },
+      {
+        "title": "About Reuters Fact Check",
+        "url": "https://www.reuters.com/fact-check/about/"
+      },
+      {
+        "title": "Dodho: Staged photography: artistic lie or emotional truth?",
+        "url": "https://www.dodho.com/staged-photography-artistic-lie-or-emotional-truth/"
+      },
+      {
+        "title": "Society of Professional Journalists: Code of Ethics",
+        "url": "https://www.spj.org/pdf/ethicscode.pdf"
+      }
+    ]
+  },
   "clusters": [
     {
       "id": "image-origins",
       "name": "Image origins",
       "color": "teal",
-      "fact": "An image's origin includes who created or first posted it, when it first appeared, and the caption or description attached to that original use.",
+      "fact": "An image's origin includes who created or first posted it, when it was taken, when it first appeared, and the caption or description attached to that original use.",
       "terms": [
         "original upload",
         "creator",
         "first appearance",
-        "original caption"
+        "original caption",
+        "capture date"
       ],
       "seeds": [
         "original upload",
         "original caption"
       ],
       "termInfo": {
-        "original upload": {
-          "text": "The earliest known online posting of an image, before later reposts, screenshots or altered copies obscured where it came from.",
+        "capture date": {
+          "text": "When the photograph was actually taken, which can be much earlier than the event it is now said to show.",
           "links": [
             {
-              "href": "wiki:Image sharing"
+              "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
             },
             {
-              "href": "https://support.google.com/websearch/answer/14177408?hl=en"
+              "href": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
             }
           ]
         },
@@ -67,6 +107,17 @@ export default definePuzzle(import.meta.url, {
               "href": "https://www.reuters.com/fact-check/about/"
             }
           ]
+        },
+        "original upload": {
+          "text": "The earliest known online posting of an image, before later reposts, screenshots or altered copies obscured where it came from.",
+          "links": [
+            {
+              "href": "wiki:Image sharing"
+            },
+            {
+              "href": "https://support.google.com/websearch/answer/14177408?hl=en"
+            }
+          ]
         }
       },
       "info": {
@@ -84,26 +135,30 @@ export default definePuzzle(import.meta.url, {
       "id": "context-manipulation",
       "name": "Context manipulation",
       "color": "blue",
-      "fact": "A genuine image can mislead when it is recycled from another event, paired with a false caption, selectively cropped or digitally altered.",
+      "fact": "An image can mislead when it is recycled from another event, paired with a false caption, selectively cropped, digitally altered or staged and presented as an unplanned moment.",
       "terms": [
         "recycled image",
         "false caption",
         "selective crop",
-        "digital alteration"
+        "digital alteration",
+        "staged scene"
       ],
       "seeds": [
         "false caption",
         "digital alteration"
       ],
       "termInfo": {
-        "recycled image": {
-          "text": "An older or unrelated image reused as though it depicts a newer event, place or claim.",
+        "digital alteration": {
+          "text": "Changing pixels or combining visual elements so the resulting image depicts something different from the original.",
           "links": [
             {
-              "href": "wiki:Recontextualisation"
+              "href": "wiki:Photo manipulation"
             },
             {
-              "href": "https://support.google.com/websearch/answer/14177408?hl=en"
+              "href": "https://www.reuters.com/fact-check/about/"
+            },
+            {
+              "href": "https://www.poynter.org/reporting-editing/2012/three-ways-to-spot-if-an-image-has-been-manipulated/"
             }
           ]
         },
@@ -115,6 +170,23 @@ export default definePuzzle(import.meta.url, {
             },
             {
               "href": "https://www.reuters.com/fact-check/about/"
+            },
+            {
+              "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+            }
+          ]
+        },
+        "recycled image": {
+          "text": "An older or unrelated image reused as though it depicts a newer event, place or claim.",
+          "links": [
+            {
+              "href": "wiki:Recontextualisation"
+            },
+            {
+              "href": "https://support.google.com/websearch/answer/14177408?hl=en"
+            },
+            {
+              "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
             }
           ]
         },
@@ -129,14 +201,14 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "digital alteration": {
-          "text": "Changing pixels or combining visual elements so the resulting image depicts something different from the original.",
+        "staged scene": {
+          "text": "A scene arranged or directed for the camera and then presented as an unplanned, documentary moment.",
           "links": [
             {
-              "href": "wiki:Photo manipulation"
+              "href": "https://www.dodho.com/staged-photography-artistic-lie-or-emotional-truth/"
             },
             {
-              "href": "https://www.reuters.com/fact-check/about/"
+              "href": "https://www.spj.org/pdf/ethicscode.pdf"
             }
           ]
         }
@@ -153,15 +225,83 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "verification-methods",
-      "name": "Verification methods",
+      "id": "reading-the-frame",
+      "name": "Reading the frame",
+      "color": "magenta",
+      "fact": "Some checks treat the image as evidence about itself: visible landmarks, weather and shadows can be tested against the claimed place and date, and file metadata may carry clues, though it can be stripped or edited.",
+      "terms": [
+        "geolocation clues",
+        "file metadata",
+        "weather and shadow check"
+      ],
+      "seeds": [
+        "geolocation clues",
+        "file metadata"
+      ],
+      "termInfo": {
+        "file metadata": {
+          "text": "Data stored with a digital file, such as timestamps, device details or editing information, which may provide clues but can also be removed or changed.",
+          "links": [
+            {
+              "href": "wiki:Metadata"
+            },
+            {
+              "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+            },
+            {
+              "href": "https://www.poynter.org/reporting-editing/2012/three-ways-to-spot-if-an-image-has-been-manipulated/"
+            }
+          ]
+        },
+        "geolocation clues": {
+          "text": "Visible landmarks, signs, roads, terrain, weather and other features used to test where an image was made.",
+          "links": [
+            {
+              "href": "wiki:Geolocation"
+            },
+            {
+              "href": "https://www.bellingcat.com/resources/how-tos/2015/07/25/searching-the-earth-essential-geolocation-tools-for-verification/"
+            },
+            {
+              "href": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
+            }
+          ]
+        },
+        "weather and shadow check": {
+          "text": "Comparing recorded weather, and the direction and length of shadows, at the claimed place and date with what the image shows.",
+          "links": [
+            {
+              "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+            },
+            {
+              "href": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
+            },
+            {
+              "href": "https://www.bellingcat.com/resources/how-tos/2017/06/30/advanced-guide-verifying-video-content/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+          },
+          {
+            "href": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
+          }
+        ]
+      }
+    },
+    {
+      "id": "image-tracing",
+      "name": "Tracing the image",
       "color": "amber",
-      "fact": "Visual verification combines reverse search, source comparison, geographic clues and metadata rather than relying on appearance alone.",
+      "fact": "Other checks follow the image's path: searching for earlier copies, assessing who posted it, and comparing how independent sources present the same image.",
       "terms": [
         "reverse image search",
         "source comparison",
-        "geolocation clues",
-        "file metadata"
+        "uploader check"
       ],
       "seeds": [
         "reverse image search",
@@ -176,6 +316,12 @@ export default definePuzzle(import.meta.url, {
             },
             {
               "href": "https://support.google.com/websearch/answer/1325808?co=GENIE.Platform%3DDesktop&hl=en"
+            },
+            {
+              "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+            },
+            {
+              "href": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
             }
           ]
         },
@@ -190,25 +336,17 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "geolocation clues": {
-          "text": "Visible landmarks, signs, roads, terrain, weather and other features used to test where an image was made.",
+        "uploader check": {
+          "text": "Looking at who posted an image, including their history and location and whether they can show they took it, for example by contacting them directly.",
           "links": [
             {
-              "href": "wiki:Geolocation"
+              "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
             },
             {
-              "href": "https://www.bellingcat.com/resources/how-tos/2015/07/25/searching-the-earth-essential-geolocation-tools-for-verification/"
-            }
-          ]
-        },
-        "file metadata": {
-          "text": "Data stored with a digital file, such as timestamps, device details or editing information, which may provide clues but can also be removed or changed.",
-          "links": [
-            {
-              "href": "wiki:Metadata"
+              "href": "https://www.bellingcat.com/resources/how-tos/2017/06/30/advanced-guide-verifying-video-content/"
             },
             {
-              "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
+              "href": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
             }
           ]
         }
@@ -231,9 +369,9 @@ export default definePuzzle(import.meta.url, {
       "term": "provenance",
       "clusters": [
         0,
-        2
+        3
       ],
-      "fact": "Provenance bridges image origins and verification: tracing an image's creator, first appearance and original use helps distinguish the source from later reposts or altered versions.",
+      "fact": "Provenance bridges image origins and tracing: following an image's creator, first appearance and original use helps distinguish the source from later reposts or altered versions.",
       "info": {
         "text": "The documented origin and transmission history of an image, including who created it, where it first appeared and how it changed or circulated.",
         "links": [
@@ -257,9 +395,9 @@ export default definePuzzle(import.meta.url, {
       "term": "corroboration",
       "clusters": [
         1,
-        2
+        3
       ],
-      "fact": "Corroboration bridges manipulation and verification: comparing an image with independent reporting, records or views of the same event can expose a false caption, crop or alteration.",
+      "fact": "Corroboration bridges manipulation and tracing: comparing an image with independent reporting, records or views of the same event can expose a false caption, crop or alteration.",
       "info": {
         "text": "Independent evidence that supports, qualifies or contradicts what an image is claimed to show.",
         "links": [
@@ -275,6 +413,55 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "false caption",
         "source comparison"
+      ]
+    },
+    {
+      "id": "caption",
+      "term": "caption",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Caption bridges image origins and manipulation: a false caption can be recognized only by recovering what the image was first said to show.",
+      "info": {
+        "text": "The text that accompanies an image and tells viewers who, where, when and what it shows.",
+        "links": [
+          {
+            "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+          },
+          {
+            "href": "https://www.reuters.com/fact-check/about/"
+          }
+        ]
+      },
+      "idealTerms": [
+        "original caption",
+        "false caption"
+      ]
+    },
+    {
+      "id": "claimed-place-and-date",
+      "term": "claimed place and date",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Claimed place and date bridge manipulation and the frame itself: a false caption asserts where and when an image was made, and landmarks, weather and shadows can test that assertion.",
+      "info": {
+        "text": "The location and date a caption or post says an image shows, which can be checked against what is visible in it.",
+        "links": [
+          {
+            "href": "https://datajournalism.com/read/handbook/verification-1/verifying-images/4-verifying-images"
+          },
+          {
+            "href": "https://firstdraftnews.org/wp-content/uploads/2017/03/FDN_verificationguide_photos.pdf"
+          }
+        ]
+      },
+      "relationKind": "evaluation",
+      "idealTerms": [
+        "false caption",
+        "geolocation clues"
       ]
     }
   ],
@@ -292,11 +479,19 @@ export default definePuzzle(import.meta.url, {
         "id": "quotations-and-attribution",
         "reason": "Continue from visual context to the transmission and attribution of words.",
         "via": [
-          "provenance",
-          "context"
+          "provenance"
         ]
       }
     ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "summary": "A real photograph can still say something false. This lesson covers where an image comes from, how a genuine one is made to mislead, and the two kinds of check that test the claim attached to it.",
+    "estimatedMinutes": 4,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "A photograph can be completely real and still say something false. The claim usually lives in the caption, the date, the framing or the story told around the picture, not in the pixels. So the useful question changes from \"is this picture real?\" to \"what is it actually a picture of, and who says so?\"\n\n## Where an image comes from\n\nAn image has an origin that is separate from wherever it is circulating now: who made it, when it was taken, when and where it first appeared, and what it was first said to show. These are different facts. A photograph taken years before an event, and published long before it, cannot show that event, however well it fits. The original caption matters for the same reason: a false caption can only be recognized by recovering what the image was first said to show.\n\n## How a genuine image misleads\n\nThe ways differ, and each calls for a different check. An older image can be recycled as though it shows a new event. A wrong caption can assign it the wrong person, place, date or event. A crop can remove the people or surroundings that change what the scene means. The pixels can be altered, at which point the image is no longer genuine. And a scene can be staged: arranged or directed for the camera and then presented as an unplanned moment. Staging has a long history in photography and is not deceptive when it is open about being constructed. The harm comes when a constructed scene is offered as documentary proof, which is why journalism's ethics codes ask that staged or re-enacted material be labeled.\n\n## Two kinds of check\n\nSome checks treat the image as evidence about itself. Landmarks, signs, weather and shadows can be compared with the place and date the caption claims. File metadata may carry timestamps and device details, but many platforms strip it on upload and it can be edited, so its absence proves little and its presence proves only so much.\n\nOther checks follow the image's path. A reverse image search can turn up earlier copies. Looking at who posted the image, and whether they can show they took it, tests the source. Comparing how independent sources caption and date the same image shows where accounts agree or diverge.\n\nNeither kind settles everything. Verifiers commonly treat confidence as graded, asking separately who captured an image, where, when and why, and accepting that it is rarely possible to be fully certain of every part."
+    }
   },
   "provenance": {
     "collaboration": "ai",
@@ -304,7 +499,12 @@ export default definePuzzle(import.meta.url, {
       {
         "name": "generative assistance",
         "kind": "generative"
+      },
+      {
+        "name": "Claude Code"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-03"
 });

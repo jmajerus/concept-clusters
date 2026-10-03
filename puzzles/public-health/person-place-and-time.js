@@ -1,0 +1,366 @@
+// Generated from content/puzzles/person-place-and-time.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "person-place-and-time",
+  "title": "Person, Place, and Time",
+  "category": "public-health",
+  "subcategories": {
+    "public-health": "epidemiology"
+  },
+  "tags": [
+    "epidemiology",
+    "outbreak investigation",
+    "history of medicine"
+  ],
+  "info": {
+    "text": "How epidemiologists investigate an outbreak while it is under way: describing who is sick, working out how the infection spreads, and choosing measures that break the chain.",
+    "links": [
+      {
+        "href": "https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/lesson6/section2.html",
+        "label": "CDC: Steps of an Outbreak Investigation"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Principles of Epidemiology in Public Health Practice, Third Edition: An Introduction to Applied Epidemiology and Biostatistics",
+        "author": "Centers for Disease Control and Prevention",
+        "year": "2006",
+        "url": "https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/index.html"
+      },
+      {
+        "title": "On the Mode of Communication of Cholera (2nd ed.)",
+        "author": "Snow, John",
+        "publisher": "John Churchill",
+        "year": "1855",
+        "url": "https://archive.org/details/b28985266"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "describing-the-outbreak",
+      "name": "Describing the Outbreak",
+      "color": "teal",
+      "fact": "Descriptive epidemiology organizes cases by person, place, and time. The case definition fixes who counts, the index case marks where the chain of cases is first picked up, the epidemic curve shows when people fell ill, the spot map shows where, and the attack rate shows which group was hit hardest. Together they generate the hypotheses an investigation then tests.",
+      "terms": [
+        "case definition",
+        "epidemic curve",
+        "attack rate",
+        "spot map",
+        "index case"
+      ],
+      "seeds": [
+        "case definition",
+        "epidemic curve"
+      ],
+      "termInfo": {
+        "attack rate": {
+          "text": "The proportion of an exposed group that becomes ill during the outbreak, compared across groups to locate the exposure.",
+          "links": [
+            {
+              "href": "wiki:Attack rate"
+            }
+          ]
+        },
+        "case definition": {
+          "text": "A standard set of criteria, combining clinical features with a specified person, place, and time, for deciding who counts as a case in this investigation.",
+          "links": [
+            {
+              "href": "https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/lesson6/section2.html",
+              "label": "CDC: Steps of an Outbreak Investigation"
+            }
+          ]
+        },
+        "epidemic curve": {
+          "text": "A histogram of cases by date of illness onset. Its shape suggests whether people were exposed to a single source or passed the infection from person to person.",
+          "links": [
+            {
+              "href": "wiki:Epidemic curve"
+            }
+          ]
+        },
+        "index case": {
+          "text": "The first case to come to investigators' attention, from which they begin tracing the chain of transmission. It is sometimes, though not always, the first person infected.",
+          "links": [
+            {
+              "href": "wiki:Index case"
+            }
+          ]
+        },
+        "spot map": {
+          "text": "A map marking where each case lived, worked, or fell ill, used to reveal clustering around a possible source.",
+          "links": [
+            {
+              "href": "wiki:Dot distribution map"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "How investigators characterize an outbreak by who is affected, where, and when.",
+        "links": [
+          {
+            "href": "https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/lesson6/section2.html",
+            "label": "CDC: Steps of an Outbreak Investigation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "how-infection-spreads",
+      "name": "How Infection Spreads",
+      "color": "blue",
+      "fact": "Transmission has a route and a tempo. The mode of transmission is how an agent reaches a new host; the basic reproduction number is how many others one case infects in a fully susceptible population; the serial interval sets the pace between generations of cases; and superspreading reflects how a small share of cases often accounts for most onward spread.",
+      "terms": [
+        "mode of transmission",
+        "basic reproduction number",
+        "serial interval",
+        "superspreading"
+      ],
+      "seeds": [
+        "mode of transmission",
+        "basic reproduction number"
+      ],
+      "termInfo": {
+        "basic reproduction number": {
+          "text": "R₀: the average number of new infections caused by one case in a population with no immunity and no control measures.",
+          "links": [
+            {
+              "href": "wiki:Basic reproduction number"
+            }
+          ]
+        },
+        "mode of transmission": {
+          "text": "The route an infectious agent takes to a new host, such as airborne, droplet, direct contact, waterborne, foodborne, or vector-borne.",
+          "links": [
+            {
+              "href": "wiki:Pathogen transmission"
+            }
+          ]
+        },
+        "serial interval": {
+          "text": "The time between symptom onset in one case and symptom onset in the person that case infected.",
+          "links": [
+            {
+              "href": "wiki:Serial interval"
+            }
+          ]
+        },
+        "superspreading": {
+          "text": "Transmission concentrated in a small share of cases or settings, while most infected people pass the agent to few others or none.",
+          "links": [
+            {
+              "href": "wiki:Superspreading event"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The routes, rates, and timing by which an infectious agent passes from person to person.",
+        "links": [
+          {
+            "href": "wiki:Pathogen transmission"
+          }
+        ]
+      }
+    },
+    {
+      "id": "breaking-the-chain",
+      "name": "Breaking the Chain",
+      "color": "amber",
+      "fact": "Control measures cut transmission at different links. Isolation separates people who are sick; quarantine separates people who were exposed but are not yet sick; contact tracing finds the exposed; and ring vaccination immunizes the contacts around each case, the strategy at the center of smallpox eradication.",
+      "terms": [
+        "isolation",
+        "quarantine",
+        "contact tracing",
+        "ring vaccination"
+      ],
+      "seeds": [
+        "isolation",
+        "quarantine"
+      ],
+      "termInfo": {
+        "contact tracing": {
+          "text": "Identifying and notifying the people a case may have exposed, so they can be tested, monitored, or quarantined.",
+          "links": [
+            {
+              "href": "wiki:Contact tracing"
+            }
+          ]
+        },
+        "isolation": {
+          "text": "Separating people known to be infected from others for as long as they remain infectious.",
+          "links": [
+            {
+              "href": "wiki:Isolation (health care)"
+            }
+          ]
+        },
+        "quarantine": {
+          "text": "Restricting the movement of people who were exposed but are not yet sick, typically for the length of the incubation period.",
+          "links": [
+            {
+              "href": "wiki:Quarantine"
+            }
+          ]
+        },
+        "ring vaccination": {
+          "text": "Vaccinating the contacts of each confirmed case, and their contacts in turn, to surround the outbreak with immune people.",
+          "links": [
+            {
+              "href": "wiki:Ring vaccination"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Public health measures that interrupt the passage of infection from person to person.",
+        "links": [
+          {
+            "href": "wiki:Infection prevention and control"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "incubation period",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "The time from exposure to first symptoms shapes both the epidemic curve and the tempo of spread. In a point-source outbreak, investigators count back one average incubation period from the peak of the epidemic curve to estimate when the shared exposure took place.",
+      "info": {
+        "text": "The interval between exposure to an infectious agent and the onset of symptoms.",
+        "links": [
+          {
+            "href": "wiki:Incubation period"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": [
+        "epidemic curve",
+        "serial interval"
+      ]
+    },
+    {
+      "term": "effective reproduction number",
+      "clusters": [
+        2,
+        1
+      ],
+      "fact": "The effective reproduction number is the basic reproduction number adjusted for immunity and control measures: how many new infections each case actually causes now. Every measure in an outbreak response aims to push it below 1, the point at which each generation of cases is smaller than the last and the outbreak shrinks.",
+      "info": {
+        "text": "The average number of new infections caused by each case under current conditions of immunity and control.",
+        "links": [
+          {
+            "href": "wiki:Basic reproduction number"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        null,
+        "basic reproduction number"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 1
+      }
+    },
+    {
+      "term": "Broad Street pump",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "During the 1854 cholera outbreak in Soho, London, John Snow traced the deaths house by house to a single public well. On his evidence, the St James's parish Board of Guardians had the pump handle removed on 8 September, though cases were already falling. Officials later restored the handle and rejected his waterborne explanation; the investigation is now regarded as the founding event of epidemiology.",
+      "info": {
+        "text": "The Soho street pump at the center of John Snow's investigation of the 1854 cholera outbreak, which killed 420 people.",
+        "links": [
+          {
+            "href": "wiki:1854 Broad Street cholera outbreak"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "spot map",
+        null
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 2
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "intervals-between-events",
+      "prompt": "Which concepts measure the time between two events in the course of an infection?",
+      "explanation": "The incubation period runs from exposure to symptoms in one person; the serial interval runs from symptoms in one person to symptoms in the next. The epidemic curve is plotted against time but measures how many fell ill on each date, and quarantine lasts a set period but is an action taken by health authorities.",
+      "targets": [
+        "incubation period",
+        "serial interval"
+      ],
+      "reasons": {
+        "incubation period": "Measures the time from exposure to first symptoms within a single infection.",
+        "serial interval": "Measures the time between symptom onset in successive cases along a chain of transmission."
+      }
+    },
+    {
+      "id": "before-anyone-is-sick",
+      "prompt": "Which control measures act on people who are not yet ill?",
+      "explanation": "Most of the work of breaking a chain of transmission happens among people who feel well: finding them, holding them apart during the incubation period, or immunizing them before the agent arrives. Isolation is the one measure applied to people already sick.",
+      "targets": [
+        "quarantine",
+        "contact tracing",
+        "ring vaccination"
+      ],
+      "reasons": {
+        "contact tracing": "Finds exposed people so that testing, monitoring, or quarantine can reach them before illness appears.",
+        "quarantine": "Restricts exposed people during the window when they may be infected but show no symptoms.",
+        "ring vaccination": "Immunizes contacts so that infection never takes hold in them."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Before You Begin: Investigating an Outbreak",
+    "summary": "How epidemiologists describe an outbreak, understand how it spreads, and stop it, ending with John Snow and the Broad Street pump.",
+    "estimatedMinutes": 6,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "## Three questions\r\n\r\nWhen an unusual number of people fall ill, public health workers have to answer three questions quickly: who is getting sick, how the illness is spreading, and what will stop it. Epidemiology, the study of how disease is distributed in populations and why, supplies the methods.\r\n\r\n## Describing the outbreak\r\n\r\nInvestigators begin with a **case definition**: clinical criteria combined with a specified person, place, and time, so that everyone counts cases the same way. The first case to come to their attention is the **index case**, the point where tracing begins. It is not always the first person infected.\r\n\r\nThey then describe the cases three ways. By time, an **epidemic curve** plots cases by the date illness began; a single sharp peak suggests a shared source, while successive waves suggest spread from person to person. By place, a **spot map** marks where each case lived or worked, revealing clusters. By person, the **attack rate** is the share of a group that fell ill; comparing attack rates between people who did and did not share an exposure points to the source.\r\n\r\n## How infection spreads\r\n\r\nEvery infection has a **mode of transmission**, the route it takes to a new host: through the air, by droplets or touch, or in water, food, or insects. The **incubation period** is the time from exposure to the first symptoms. Because of it, investigators can count back one average incubation period from the peak of an epidemic curve to estimate when a shared exposure happened.\r\n\r\nThe **serial interval** is the time between symptoms in one case and symptoms in the person that case infected; it sets how quickly one generation of cases follows another. The **basic reproduction number**, written R₀, is the average number of people one case infects where no one is immune and nothing is done to stop it. Transmission is rarely even: in **superspreading**, a small share of cases or settings accounts for most onward spread.\r\n\r\n## Breaking the chain\r\n\r\n**Isolation** separates people who are sick. **Quarantine** separates people who were exposed but are not yet sick, usually for the length of the incubation period. **Contact tracing** works outward from known cases to find everyone they may have exposed. **Ring vaccination** immunizes the contacts around each case, and their contacts in turn; it was central to the eradication of smallpox.\r\n\r\nAll of these measures act on the **effective reproduction number**: the basic reproduction number adjusted for immunity and control, meaning the number of people each case actually infects under current conditions. Once it falls below 1, each generation of cases is smaller than the last and the outbreak shrinks.\r\n\r\n## The Broad Street pump\r\n\r\nIn late August 1854, cholera killed 420 people in a few streets of Soho, London. Most physicians of the day attributed cholera to foul air. The physician John Snow went house to house and found that the deaths clustered around a public water pump on Broad Street. Households nearer other pumps were largely spared, except those that fetched their water from Broad Street anyway; workers at a nearby brewery, who drank beer, stayed well.\r\n\r\nSnow presented his evidence to the St James's parish Board of Guardians on 7 September, and the **Broad Street pump** had its handle removed the next day. Cases were already falling by then, and officials later restored the handle and rejected his waterborne explanation. Snow's dot map of the deaths, published the following year, became one of the most famous images in public health. The curate Henry Whitehead later traced the outbreak's likely index case to an infant whose soiled washing had drained into a cesspit a few feet from the well. The investigation is regarded as the founding event of epidemiology."
+    },
+    "links": [
+      {
+        "href": "wiki:1854 Broad Street cholera outbreak",
+        "label": "The 1854 Broad Street cholera outbreak"
+      },
+      {
+        "href": "https://archive.cdc.gov/www_cdc_gov/csels/dsepd/ss1978/lesson1/section10.html",
+        "label": "CDC: Chain of Infection"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  },
+  "dateCreated": "2026-10-03",
+  "dateModified": "2026-10-03"
+});

@@ -2,7 +2,6 @@
   "id": "lymphatic-system",
   "title": "The Lymphatic System: Drainage, Surveillance, and Return",
   "category": "physiology-medicine",
-  "large": true,
   "info": {
     "text": "Tissue fluid constantly leaks from blood, and intestinal lacteals absorb dietary fats. The lymphatic system collects both as lymph, screens them in lymphoid organs, and returns them to venous blood.",
     "citations": [
@@ -59,9 +58,7 @@
             }
           ]
         },
-        "Peyer's patches": {
-          "text": "Lymphoid follicles in the small-intestine wall that sample antigen from the gut lumen."
-        },
+        "Peyer's patches": "Lymphoid follicles in the small-intestine wall that sample antigen from the gut lumen.",
         "bone marrow": {
           "text": "Primary lymphoid organ where lymphocytes are generated and B cells mature.",
           "links": [
@@ -120,9 +117,7 @@
             }
           ]
         },
-        "lymphatic capillaries": {
-          "text": "Blind-ended, highly permeable vessels that admit interstitial fluid, solutes, and immune cells."
-        }
+        "lymphatic capillaries": "Blind-ended, highly permeable vessels that admit interstitial fluid, solutes, and immune cells."
       },
       "seeds": [
         "thoracic duct",
@@ -257,9 +252,7 @@
         "fluid-and-lipid-cargo"
       ],
       "fact": "Both lymphatic ducts return collected lymph — watery interstitial fluid and fatty chyle from lacteals — to blood at the subclavian veins; that return is what prevents edema.",
-      "info": {
-        "text": "The venous endpoint where the lymphatic return route delivers its fluid and lipid cargo back to blood."
-      },
+      "info": "The venous endpoint where the lymphatic return route delivers its fluid and lipid cargo back to blood.",
       "idealTerms": {
         "lymph-return-route": "thoracic duct",
         "fluid-and-lipid-cargo": "lymph"
@@ -273,9 +266,7 @@
         "surveillance-cells"
       ],
       "fact": "Dendritic cells and macrophages present lymph-borne antigen to lymphocytes inside lymphoid organs such as lymph nodes.",
-      "info": {
-        "text": "The handoff where cargo carried into lymphoid tissue becomes a signal lymphocytes can respond to."
-      },
+      "info": "The handoff where cargo carried into lymphoid tissue becomes a signal lymphocytes can respond to.",
       "idealTerms": {
         "lymphoid-organs": "lymph nodes",
         "surveillance-cells": "dendritic cells"
@@ -302,27 +293,39 @@
     },
     {
       "id": "fat-from-gut-to-blood",
-      "prompt": "Which concepts carry dietary fat from the gut toward blood?",
-      "explanation": "Lacteals absorb fats, chylomicrons ferry them through lymph, and the thoracic duct delivers that fatty lymph to venous blood.",
+      "prompt": "Which concepts handle dietary fat at its uptake, packaging, and delivery to blood?",
+      "explanation": "Lacteals take up fats from the gut wall, chylomicrons package them for transport, and the thoracic duct delivers that fatty lymph to venous blood; lymph itself is the general medium, not a fat-specific stage.",
       "targets": [
         "lacteals",
         "chylomicrons",
         "thoracic duct"
       ],
       "reasons": {
-        "lacteals": "They absorb dietary fats from intestinal villi into lymph.",
-        "chylomicrons": "They are the particles ferrying absorbed fat through lymph.",
+        "lacteals": "They take up dietary fats from intestinal villi into lymph.",
+        "chylomicrons": "They are the particles that package absorbed fat for transport through lymph.",
         "thoracic duct": "It delivers chyle-rich lymph into the subclavian vein."
       }
     }
   ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Lymph: the body's return line and its checkpoint",
+    "content": {
+      "text": "Blood capillaries leak. Every day, roughly 20 liters of plasma filter out into the spaces between cells; blood vessels reabsorb most of it, but about three liters are left behind. The lymphatic system is the second drain that collects that surplus, which is why it is best understood as plumbing before it is immunity. When the drain fails, the fluid stays and tissue swells as edema.\r\n\r\nThe same network does a second job. Dietary fat takes a different route from other nutrients: after a meal, it enters lymphatic vessels in the intestinal wall and travels as particles called chylomicrons. Everything collected, tissue fluid and dietary fat alike, is called lymph. It flows one way through ever larger valved vessels into two ducts, which empty into the veins beneath the collarbones and return it to the blood.\r\n\r\nBecause all of that fluid passes through a few chokepoints on its way back, the body uses the route as a checkpoint. Lymph filters through nodes, and blood through the spleen. Other lymphoid tissues guard the throat and gut, while the thymus and bone marrow produce and train the cells that do the screening. Immune cells such as dendritic cells and macrophages carry samples of what they have found into these organs, where lymphocytes decide whether to respond.\r\n\r\nThe result is one system with three linked purposes: draining leaked fluid, carrying dietary fat, and screening everything that passes through for threats."
+    }
+  },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "generative assistance",
-        "kind": "generative"
+        "name": "Muse Code (Spark 1.3)"
+      },
+      {
+        "name": "Claude Code (Claude Sonnet 5.5)",
+        "reasoning": "high"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-03"
 }

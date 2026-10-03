@@ -1,0 +1,205 @@
+{
+  "id": "manul-cold-steppe-cat",
+  "title": "The Cold-Steppe Cat",
+  "category": "zoology",
+  "info": {
+    "text": "Pallas's cat (Otocolobus manul), a wild cat shaped by the cold, treeless steppes of Central Asia.",
+    "citations": [
+      {
+        "title": "Mammals of the Soviet Union, Volume II, Part 2",
+        "author": "V. G. Heptner & N. P. Sludskii",
+        "publisher": "Smithsonian Institution Libraries",
+        "year": "1992"
+      },
+      {
+        "title": "Pallas's cat — Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Pallas%27s_cat"
+      },
+      {
+        "title": "Ecological niche models reveal divergent habitat use of Pallas's cat in the Eurasian cold steppes",
+        "author": "N. Lorestani, M.-R. Hemami, A. Rezvani, M. Ahmadi",
+        "publisher": "Ecology and Evolution",
+        "year": "2022",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36532134/"
+      },
+      {
+        "title": "Dietary Differentiation Mitigates Interspecific Interference Competition Between Sympatric Pallas's Cats (Otocolobus manul) and Red Foxes (Vulpes vulpes)",
+        "author": "D. Wang, Q. Li, J. Gao, L. Hou, Y. Zou, X. Lian",
+        "publisher": "Animals",
+        "year": "2025",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/40362082/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "dressed-for-cold",
+      "name": "Dressed for deep cold",
+      "color": "teal",
+      "fact": "The coldest winters of any cat's range built the densest coat in the family — and a body that only looks too big for it.",
+      "termInfo": {
+        "densest fur of any cat": "Up to 9,000 hairs per cm², with underfur 40 mm long and guard hairs up to 69 mm.",
+        "thick, black-ringed tail": "A thick grey tail with seven narrow black rings and a black tip.",
+        "denser winter coat": "In winter the fur turns greyer and denser, with fewer visible markings than in summer.",
+        "house-cat body under the fluff": "About the size of a domestic cat. A stocky posture and long, dense fur make it look stout and plush."
+      },
+      "info": "Fur figures follow Heptner & Sludskii (1992), via the Wikipedia species account.",
+      "seeds": [
+        "densest fur of any cat",
+        "thick, black-ringed tail"
+      ],
+      "floatingTerms": [
+        "denser winter coat",
+        "house-cat body under the fluff"
+      ],
+      "terms": [
+        "densest fur of any cat",
+        "thick, black-ringed tail",
+        "denser winter coat",
+        "house-cat body under the fluff"
+      ]
+    },
+    {
+      "id": "built-low",
+      "name": "Built low for open ground",
+      "color": "blue",
+      "fact": "A flat-faced, low-eared silhouette for hunting treeless ground: peer over rocks without showing yourself, then strike at the burrow exit.",
+      "termInfo": {
+        "low-set rounded ears": "Set low on the sides of the head, so the cat can peer over a rock and show only a small part of its head above the eyes.",
+        "flat face, short nose": "A rounded skull with a short nasal bone gives the manul its flat-faced look.",
+        "round pupils, not slits": "In sunlight its pupils shrink to small round disks rather than slits, a trait shared with the puma, jaguarundi and cheetah.",
+        "grey-ochre camouflage": "Light grey fur with pale yellowish-ochre tints blends into dry grass and scree."
+      },
+      "info": "Skull and pupil observations follow Pocock (1907), via the Wikipedia species account.",
+      "seeds": [
+        "low-set rounded ears",
+        "flat face, short nose"
+      ],
+      "floatingTerms": [
+        "round pupils, not slits",
+        "grey-ochre camouflage"
+      ],
+      "terms": [
+        "low-set rounded ears",
+        "flat face, short nose",
+        "round pupils, not slits",
+        "grey-ochre camouflage"
+      ]
+    },
+    {
+      "id": "cold-steppe-home",
+      "name": "The cold steppe home",
+      "color": "amber",
+      "fact": "Arid, treeless high country from the Caucasus to the Tibetan Plateau, bounded by snow it cannot stalk beneath — shelter is rocks and borrowed burrows.",
+      "termInfo": {
+        "high, treeless cold steppe": "Montane grasslands and shrublands from the Caucasus to the Tibetan Plateau, recorded as high as 5,050 m.",
+        "−50 °C winters": "Winters fall to −50 °C, and temperatures can swing by 80 °C over a year.",
+        "only shallow snow (under 20 cm)": "It lives only where continuous snow cover stays below 15–20 cm. Deeper snow marks the edge of its range.",
+        "rocky outcrops for shelter": "Caves and rock crevices give shelter on otherwise open ground.",
+        "dens in old marmot burrows": "Marmot burrows, alongside caves and rock crevices, serve as shelter."
+      },
+      "info": "Range and habitat limits from the Wikipedia species account; niche modelling in Lorestani et al. (2022).",
+      "seeds": [
+        "high, treeless cold steppe",
+        "−50 °C winters"
+      ],
+      "floatingTerms": [
+        "only shallow snow (under 20 cm)",
+        "rocky outcrops for shelter",
+        "dens in old marmot burrows"
+      ],
+      "terms": [
+        "high, treeless cold steppe",
+        "−50 °C winters",
+        "only shallow snow (under 20 cm)",
+        "rocky outcrops for shelter",
+        "dens in old marmot burrows"
+      ]
+    },
+    {
+      "id": "pika-hunter",
+      "name": "The pika hunter",
+      "color": "magenta",
+      "fact": "A small-mammal specialist: watch the pika colony exits, stalk close, pounce — and rake voles straight out of shallow burrows when pikas run thin.",
+      "termInfo": {
+        "pikas as staple prey": "Scat studies find pikas, especially the Daurian pika, foremost in its diet.",
+        "ambush at burrow exits": "It catches small mammals by stalking them or by waiting in ambush near the exits of their burrows.",
+        "raking voles out of shallow burrows": "It also pulls rodents out of shallow burrows with its paws. Where Brandt's voles boom, they dominate its diet."
+      },
+      "info": "Diet from scat studies summarized in the Wikipedia species account; sympatric-prey differentiation in Wang et al. (2025).",
+      "seeds": [
+        "pikas as staple prey",
+        "ambush at burrow exits"
+      ],
+      "floatingTerms": [
+        "raking voles out of shallow burrows"
+      ],
+      "terms": [
+        "pikas as staple prey",
+        "ambush at burrow exits",
+        "raking voles out of shallow burrows"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "a-continental-winter",
+      "term": "a continental winter",
+      "clusters": [
+        "cold-steppe-home",
+        "dressed-for-cold"
+      ],
+      "fact": "Winter at −50 °C within an 80 °C annual swing is the selection pressure behind the densest coat in the cat family, grown denser and greyer each winter."
+    },
+    {
+      "id": "nowhere-to-hide",
+      "term": "nowhere to hide",
+      "clusters": [
+        "cold-steppe-home",
+        "built-low"
+      ],
+      "fact": "Treeless steppe offers nothing to hide behind — ears set low on the skull let the manul peer over a rock showing only its eyes, while grey-ochre fur melts into the scree."
+    },
+    {
+      "id": "dens-beside-the-larder",
+      "term": "dens beside the larder",
+      "clusters": [
+        "cold-steppe-home",
+        "pika-hunter"
+      ],
+      "fact": "The manul lives where pika and rodent colonies meet rocky cover: dens sit within a short stalk of the larder, and where pikas disappear the cat cannot follow."
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "manul-under-pressure",
+        "reason": "The sequel explains the cost of the specialization this board celebrates: an isolated lineage, a life timed to one short summer, and a prey base people are poisoning."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Built by the cold steppe",
+    "summary": "How one harsh habitat explains the manul's coat, shape and hunting.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "**Pallas's cat** (*Otocolobus manul*), or manul, is a wild cat about the size of a house cat. It lives in the high, dry grasslands of Central Asia, from the Caucasus to the Tibetan Plateau. Winters there fall to −50 °C, there are no trees, and shelter means a rock crevice or another animal's burrow. Nearly every feature of the manul makes sense as an answer to that place.\r\n\r\n## A coat for a continental winter\r\n\r\nThe manul has the densest fur of any cat, up to 9,000 hairs per square centimetre, and in winter its coat grows greyer and denser still. Under all that fur is a body no bigger than a house cat's; the manul looks stout and plush mostly because of its coat. The temperature can swing by 80 °C over a year, and the coat is built for the coldest end of that range.\r\n\r\n## A shape for open ground\r\n\r\nOn treeless steppe there is nothing to hide behind, so the cat's body has to do the hiding. Its rounded ears sit low on the sides of a flat, short-nosed head, so it can peer over a rock while showing little more than its eyes. Grey fur tinged with ochre blends into dry grass and scree. Even its eyes are unusual for a small cat: in bright light the pupils close to small round disks, not slits.\r\n\r\n## A home with hard edges\r\n\r\nThe manul's range is set by cold, by cover and by snow. It stays where snow lies shallow, under about 15–20 cm. It shelters in caves, rock crevices and marmot burrows, in places where that shelter sits close to colonies of small burrowing mammals.\r\n\r\n## A hunter of pikas\r\n\r\nThose colonies are its food. The manul is a specialist hunter of small mammals, above all pikas. It stalks them or waits in ambush near the exits of their burrows, and it pulls voles and other rodents out of shallow burrows with its paws. In years when voles boom, they can dominate its diet.\r\n\r\n## One place, one animal\r\n\r\nThe coat answers the cold, the low shape answers the open ground, and the hunt follows the burrowing animals whose colonies also give the manul shelter. That close fit is also a weakness: where its prey disappears, the manul cannot simply move on to something else."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      },
+      {
+        "name": "Claude Code (Claude Opus 5.5)",
+        "reasoning": "medium"
+      }
+    ]
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
+}

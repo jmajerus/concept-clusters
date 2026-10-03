@@ -1,0 +1,373 @@
+{
+  "id": "climate-change-and-manufactured-doubt",
+  "title": "Climate Change and Manufactured Doubt",
+  "category": "atmospheric-science",
+  "categories": [
+    "atmospheric-science",
+    "media-information-literacy"
+  ],
+  "subcategories": {
+    "atmospheric-science": "climatology",
+    "media-information-literacy": "propaganda-disinformation"
+  },
+  "tags": [
+    "book",
+    "climate change",
+    "global warming",
+    "misinformation"
+  ],
+  "info": {
+    "text": "How added carbon dioxide is changing Earth's climate, how independent records register that change, and how an organized effort works to cast doubt on both.",
+    "links": [
+      {
+        "href": "https://www.hachettebookgroup.com/titles/michael-e-mann/science-under-siege/9781541705494/",
+        "label": "Mann & Hotez, Science Under Siege"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Science Under Siege: How to Fight the Five Most Powerful Forces That Threaten Our World",
+        "author": "Mann, Michael E., and Peter J. Hotez",
+        "publisher": "PublicAffairs",
+        "year": "2025",
+        "url": "https://www.hachettebookgroup.com/titles/michael-e-mann/science-under-siege/9781541705494/"
+      },
+      {
+        "title": "A history of FLICC: the 5 techniques of science denial",
+        "author": "Cook, John",
+        "publisher": "Skeptical Science",
+        "year": "2020",
+        "url": "https://skepticalscience.com/history-flicc-5-techniques-science-denial.html"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "greenhouse-mechanism",
+      "name": "Trapping Outgoing Heat",
+      "color": "teal",
+      "fact": "Earth sheds the sun's energy as infrared radiation. Carbon dioxide absorbs part of that outgoing infrared and returns some of it downward, so the surface warms until it radiates enough to restore balance. Warmer air holds more water vapor, itself a greenhouse gas, which amplifies the initial warming.",
+      "termInfo": {
+        "carbon dioxide": {
+          "text": "A heat-trapping gas whose atmospheric concentration has risen roughly 50 percent above its pre-industrial level.",
+          "links": [
+            {
+              "href": "wiki:Carbon dioxide in the atmosphere of Earth"
+            }
+          ]
+        },
+        "infrared radiation": {
+          "text": "The heat energy Earth's surface and atmosphere emit toward space; greenhouse gases absorb it at specific wavelengths.",
+          "links": [
+            {
+              "href": "wiki:Infrared"
+            }
+          ]
+        },
+        "water vapor feedback": {
+          "text": "Warming raises the air's capacity to hold water vapor; the added vapor absorbs more infrared, making this the largest amplifying feedback in the climate system.",
+          "links": [
+            {
+              "href": "wiki:Climate change feedbacks"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "How certain gases in the atmosphere change the balance between energy arriving from the sun and energy leaving the planet.",
+        "links": [
+          {
+            "href": "wiki:Greenhouse effect"
+          }
+        ]
+      },
+      "seeds": [
+        "greenhouse effect",
+        "carbon dioxide"
+      ],
+      "floatingTerms": [
+        "infrared radiation",
+        "water vapor feedback"
+      ],
+      "terms": [
+        "greenhouse effect",
+        "carbon dioxide",
+        "infrared radiation",
+        "water vapor feedback"
+      ]
+    },
+    {
+      "id": "lines-of-evidence",
+      "name": "Lines of Evidence",
+      "color": "blue",
+      "fact": "Independent records converge. Thermometers show surface warming since the late 1800s; air trapped in ice cores shows carbon dioxide now far above any level in 800,000 years; proxy reconstructions place recent warmth outside the range of the past millennium; and oceans rise as water warms and land ice melts.",
+      "termInfo": {
+        "hockey stick graph": {
+          "text": "A 1998–99 temperature reconstruction by Michael Mann, Raymond Bradley, and Malcolm Hughes, built from tree rings, corals, and ice cores. Its long flat shaft and sharp recent upturn have been reproduced by many later studies using different methods.",
+          "links": [
+            {
+              "href": "wiki:Hockey stick graph (global temperature)"
+            }
+          ]
+        },
+        "ice cores": {
+          "text": "Cylinders drilled from Antarctic and Greenland ice; trapped air bubbles preserve samples of past atmospheres.",
+          "links": [
+            {
+              "href": "wiki:Ice core"
+            }
+          ]
+        },
+        "isotopic fingerprint": {
+          "text": "Fossil carbon is depleted in carbon-13 and contains no carbon-14. The atmosphere's shifting isotope ratios identify burned fossil fuel as the source of the added carbon dioxide.",
+          "links": [
+            {
+              "href": "wiki:Suess effect"
+            }
+          ]
+        },
+        "sea-level rise": {
+          "text": "The global ocean rises as warming water expands and glaciers and ice sheets add meltwater.",
+          "links": [
+            {
+              "href": "wiki:Sea level rise"
+            }
+          ]
+        },
+        "thermometer record": {
+          "text": "Global surface temperature compiled from weather stations and ships since about 1850, maintained independently by several agencies.",
+          "links": [
+            {
+              "href": "wiki:Global surface temperature"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Separate measurements, made by different methods and different teams, that each register the same change.",
+        "links": [
+          {
+            "href": "wiki:Scientific consensus on climate change"
+          }
+        ]
+      },
+      "seeds": [
+        "thermometer record",
+        "ice cores"
+      ],
+      "floatingTerms": [
+        "hockey stick graph",
+        "isotopic fingerprint",
+        "sea-level rise"
+      ],
+      "terms": [
+        "thermometer record",
+        "ice cores",
+        "hockey stick graph",
+        "isotopic fingerprint",
+        "sea-level rise"
+      ]
+    },
+    {
+      "id": "five-forces",
+      "name": "Forces Behind Antiscience",
+      "color": "amber",
+      "fact": "Michael Mann and Peter Hotez group the organized opposition to climate and vaccine science into five forces: billionaires who fund it, fossil-fuel states whose revenue depends on it, credentialed professionals who lend it authority, propagandists who amplify it, and a press that too often relays it.",
+      "termInfo": {
+        "petrostates": "States whose economies and ruling elites depend on oil and gas revenue. Mann and Hotez include the United States' own fossil-fuel political economy in this group.",
+        "plutocrats": "Extremely wealthy individuals whose donations to think tanks and front groups finance doubt about science that threatens their holdings.",
+        "press": "News outlets that platform contrarians as though a settled question were still open, or that bury consensus findings.",
+        "propagandists": "Operatives and influencers who package antiscience messages and amplify them across social media and partisan outlets.",
+        "pros": "Scientists, physicians, and other credentialed professionals who use that standing to promote contrarian claims the evidence does not support."
+      },
+      "info": {
+        "text": "Mann and Hotez's account of who sustains organized opposition to established science, and what each party contributes to it.",
+        "links": [
+          {
+            "href": "https://www.hachettebookgroup.com/titles/michael-e-mann/science-under-siege/9781541705494/",
+            "label": "Science Under Siege (PublicAffairs)"
+          }
+        ]
+      },
+      "seeds": [
+        "petrostates",
+        "plutocrats"
+      ],
+      "floatingTerms": [
+        "pros",
+        "propagandists",
+        "press"
+      ],
+      "terms": [
+        "petrostates",
+        "plutocrats",
+        "pros",
+        "propagandists",
+        "press"
+      ]
+    },
+    {
+      "id": "denial-techniques",
+      "name": "Techniques of Science Denial",
+      "color": "magenta",
+      "fact": "John Cook's FLICC framework, building on Mark Hoofnagle's 2007 list, names five techniques that recur in denial of climate science, evolution, and vaccine safety. Recognizing a technique protects people against arguments they have not yet encountered.",
+      "termInfo": {
+        "cherry picking": "Citing a narrow slice of data, such as a single cold winter or an unusually hot starting year, that runs against the full record.",
+        "conspiracy theories": "Explaining away a scientific consensus as a coordinated fraud by researchers, agencies, or governments.",
+        "impossible expectations": "Demanding a level of certainty no science can provide before accepting a finding or acting on it.",
+        "logical fallacies": "Arguments whose conclusions do not follow from their premises, such as a straw man, a red herring, or an attack on the person."
+      },
+      "info": {
+        "text": "Rhetorical moves that recur across denial of many different scientific findings.",
+        "links": [
+          {
+            "href": "https://skepticalscience.com/history-flicc-5-techniques-science-denial.html",
+            "label": "Skeptical Science: A history of FLICC"
+          }
+        ]
+      },
+      "seeds": [
+        "cherry picking",
+        "conspiracy theories"
+      ],
+      "floatingTerms": [
+        "logical fallacies",
+        "impossible expectations"
+      ],
+      "terms": [
+        "cherry picking",
+        "conspiracy theories",
+        "logical fallacies",
+        "impossible expectations"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "fossil-fuels",
+      "term": "fossil fuels",
+      "clusters": [
+        "greenhouse-mechanism",
+        "five-forces"
+      ],
+      "fact": "Burning coal, oil, and gas releases the carbon that drives the rise in atmospheric carbon dioxide. The same fuels are the revenue base of petrostates and the source of plutocratic wealth; delaying the energy transition protects reserves that would otherwise become stranded assets.",
+      "info": {
+        "text": "Coal, oil, and natural gas: ancient carbon stored underground and released as carbon dioxide when burned.",
+        "links": [
+          {
+            "href": "wiki:Fossil fuel"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "greenhouse-mechanism": "carbon dioxide",
+        "five-forces": "petrostates"
+      },
+      "direction": {
+        "kind": "outward"
+      }
+    },
+    {
+      "id": "fake-experts",
+      "term": "fake experts",
+      "clusters": [
+        "five-forces",
+        "denial-techniques"
+      ],
+      "fact": "The credentialed professionals among Mann and Hotez's five forces supply the first FLICC technique: a few dissenting voices presented as if they outweighed the consensus of working specialists.",
+      "info": "Non-experts or rare dissenters presented as authorities, to suggest that an expert consensus does not exist.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "five-forces": "pros"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "five-forces",
+        "to": "denial-techniques"
+      }
+    },
+    {
+      "id": "climategate",
+      "term": "Climategate",
+      "clusters": [
+        "lines-of-evidence",
+        "denial-techniques"
+      ],
+      "fact": "In 2009, emails stolen from the Climatic Research Unit at the University of East Anglia were quote-mined to allege fraud; a phrase about a statistical 'trick' referred to joining the thermometer record to a proxy reconstruction. Eight committees investigated and found no fraud or scientific misconduct.",
+      "info": {
+        "text": "The 2009 hack and selective publication of climate scientists' emails, released weeks before the Copenhagen climate summit.",
+        "links": [
+          {
+            "href": "wiki:Climatic Research Unit email controversy"
+          }
+        ]
+      },
+      "idealTerms": {
+        "lines-of-evidence": "hockey stick graph",
+        "denial-techniques": "conspiracy theories"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "tracing-the-carbon",
+      "prompt": "Which concepts help identify burned fossil carbon as the source of the added carbon dioxide?",
+      "explanation": "Attribution rests on the carbon itself. Ice cores show the rise beginning with industrialization, isotope ratios carry the signature of ancient plant carbon, and the quantity matches what burning fossil fuels released. The thermometer record and sea-level rise document the warming but cannot by themselves say where the carbon came from.",
+      "targets": [
+        "carbon dioxide",
+        "ice cores",
+        "isotopic fingerprint",
+        "fossil fuels"
+      ],
+      "reasons": {
+        "carbon dioxide": "The gas whose added quantity is being traced.",
+        "fossil fuels": "The reservoir of ancient carbon whose combustion matches the observed increase.",
+        "ice cores": "Trapped air dates the start of the rise to the industrial era.",
+        "isotopic fingerprint": "The carbon-13 and carbon-14 signature marks the added carbon as fossil in origin."
+      }
+    },
+    {
+      "id": "the-financial-source",
+      "prompt": "Which concepts sit at the financial source of opposition to climate action?",
+      "explanation": "Mann and Hotez trace organized opposition to the parties whose wealth depends on continued fossil-fuel extraction. Professionals, propagandists, and press outlets may be paid or rewarded for carrying the message, but their role is to supply credibility and reach for an interest that originates elsewhere.",
+      "targets": [
+        "fossil fuels",
+        "petrostates",
+        "plutocrats"
+      ],
+      "reasons": {
+        "fossil fuels": "The asset whose value depends on delaying the transition.",
+        "petrostates": "Governments whose budgets and ruling elites live on oil and gas revenue.",
+        "plutocrats": "Private fortunes tied to extraction that fund think tanks and front groups."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Before You Begin: Evidence and Doubt",
+    "summary": "The physics of a warming planet, the records that show it, and the organized effort to make a settled question look open.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "## Two questions\r\n\r\nClimate change raises two kinds of question. The first is physical: how adding carbon dioxide to the atmosphere warms the planet, and how scientists know it is happening. The second is social: why a finding that every major scientific body treats as established has stayed publicly contested for decades. The two are connected, and this lesson takes them together.\r\n\r\n## The physics and the record\r\n\r\nSunlight warms Earth's surface, and the surface sheds that energy back toward space as heat. Some gases in the air absorb part of the outgoing heat. Raising their concentration means the planet has to warm before it radiates away as much energy as it receives. Scientists worked out the basic physics in the nineteenth century. What changed in the twentieth was the amount of carbon entering the air, chiefly from burning coal, oil, and gas.\r\n\r\nConfidence in the conclusion rests on convergence. Instruments, archives preserved in nature, and the chemistry of the atmosphere itself have been measured by different teams using different methods, and they agree. The case is carried by all of them together.\r\n\r\n## The organized response\r\n\r\nThe historians Naomi Oreskes and Erik Conway documented in *Merchants of Doubt* (2010) how a small network of scientists and think tanks first defended the tobacco industry and later turned the same methods on climate science. Their aim was to persuade the public that the scientific question remained open, which was enough to delay regulation.\r\n\r\nMichael Mann, a climate scientist, and Peter Hotez, a vaccine scientist, carry that history forward in *Science Under Siege* (2025). They ask who funds and sustains opposition to established science today, and what each participant contributes: money, state power, borrowed credentials, reach. Separately, the cognitive scientist John Cook has catalogued the rhetorical moves that recur whenever a scientific consensus is denied, whether the subject is climate, evolution, or vaccines. His research finds that learning those moves in advance makes people harder to mislead.\r\n\r\n## Where the halves meet\r\n\r\nThe fuels that add carbon to the air are also the source of the wealth and state revenue the opposition protects. The physics sets the stakes, and the stakes explain the doubt.\r\n\r\n**Before you start:** when someone says a scientific question is still being debated, what would you want to know about who is doing the debating?"
+    },
+    "links": [
+      {
+        "href": "wiki:Merchants of Doubt",
+        "label": "Merchants of Doubt (Oreskes & Conway, 2010)"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  },
+  "dateCreated": "2026-10-03",
+  "dateModified": "2026-10-03"
+}
