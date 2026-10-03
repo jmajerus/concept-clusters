@@ -322,4 +322,130 @@ export async function run() {
   assert.deepEqual(emptyPlan.emptyCategories, ["zoology"],
     "withdrawn puzzles do not count; secondary membership does");
   assert.deepEqual(emptyPlan.dependencies.missing, []);
+
+  const literacyRegistry = {
+    "Media & Information Literacy": {
+      slug: "media-information-literacy",
+      title: "Media & Information Literacy"
+    }
+  };
+  const literacyCategory = {
+    id: "media-information-literacy",
+    document: {
+      id: "media-information-literacy",
+      title: "Media & Information Literacy",
+      subcategories: {
+        "verification-fact-checking": { title: "Verification and fact-checking" },
+        "propaganda-disinformation": { title: "Propaganda and disinformation" }
+      }
+    }
+  };
+  const subcategoryPlan = planContentFreeze({
+    publishedPuzzles: [
+      {
+        id: "media-literacy",
+        cuedForFreezeAt: "2026-10-03T00:00:00.000Z",
+        document: {
+          category: "media-information-literacy",
+          subcategories: { "media-information-literacy": "verification-fact-checking" }
+        }
+      },
+      {
+        id: "manufacturing-consent",
+        cuedForFreezeAt: "2026-10-03T00:00:00.000Z",
+        document: {
+          category: "media-information-literacy",
+          subcategories: { "media-information-literacy": "propaganda-disinformation" }
+        }
+      },
+      {
+        id: "held-puzzle",
+        document: {
+          category: "media-information-literacy",
+          subcategories: { "media-information-literacy": "verification-fact-checking" }
+        }
+      }
+    ],
+    publishedCategories: [literacyCategory],
+    gitPuzzleIds: ["media-literacy", "manufacturing-consent", "held-puzzle"],
+    gitCategoryIds: ["media-information-literacy"],
+    categoryRegistry: literacyRegistry
+  });
+  assert.deepEqual(subcategoryPlan.categories.update, ["media-information-literacy"]);
+  assert.deepEqual(subcategoryPlan.categories.add, []);
+  assert.deepEqual(subcategoryPlan.held.categories, []);
+  assert.deepEqual(subcategoryPlan.dependencies.automatic, [{
+    kind: "category",
+    id: "media-information-literacy",
+    requiredBy: [
+      { kind: "puzzle", id: "media-literacy" },
+      { kind: "puzzle", id: "manufacturing-consent" }
+    ]
+  }]);
+
+  const alreadyRegistered = planContentFreeze({
+    publishedPuzzles: [{
+      id: "media-literacy",
+      cuedForFreezeAt: "2026-10-03T00:00:00.000Z",
+      document: {
+        category: "media-information-literacy",
+        subcategories: { "media-information-literacy": "verification-fact-checking" }
+      }
+    }],
+    publishedCategories: [literacyCategory],
+    gitPuzzleIds: ["media-literacy"],
+    gitCategoryIds: ["media-information-literacy"],
+    categoryRegistry: {
+      "Media & Information Literacy": {
+        slug: "media-information-literacy",
+        subcategories: {
+          "verification-fact-checking": { title: "Verification and fact-checking" }
+        }
+      }
+    }
+  });
+  assert.deepEqual(alreadyRegistered.categories.update, []);
+  assert.deepEqual(alreadyRegistered.dependencies.automatic, []);
+  assert.deepEqual(alreadyRegistered.held.categories, ["media-information-literacy"]);
+
+  const unpublishedSubcategory = planContentFreeze({
+    publishedPuzzles: [{
+      id: "media-literacy",
+      cuedForFreezeAt: "2026-10-03T00:00:00.000Z",
+      document: {
+        category: "media-information-literacy",
+        subcategories: { "media-information-literacy": "verification-fact-checking" }
+      }
+    }],
+    publishedCategories: [{
+      id: "media-information-literacy",
+      document: {
+        id: "media-information-literacy",
+        title: "Media & Information Literacy"
+      }
+    }],
+    gitCategoryIds: ["media-information-literacy"],
+    categoryRegistry: literacyRegistry
+  });
+  assert.deepEqual(unpublishedSubcategory.categories.update, []);
+  assert.deepEqual(unpublishedSubcategory.dependencies.automatic, []);
+
+  const authorCuedCategory = planContentFreeze({
+    publishedPuzzles: [{
+      id: "media-literacy",
+      cuedForFreezeAt: "2026-10-03T00:00:00.000Z",
+      document: {
+        category: "media-information-literacy",
+        subcategories: { "media-information-literacy": "verification-fact-checking" }
+      }
+    }],
+    publishedCategories: [{
+      ...literacyCategory,
+      cuedForFreezeAt: "2026-10-03T00:00:00.000Z"
+    }],
+    gitCategoryIds: ["media-information-literacy"],
+    categoryRegistry: literacyRegistry
+  });
+  assert.deepEqual(authorCuedCategory.categories.update, ["media-information-literacy"]);
+  assert.deepEqual(authorCuedCategory.dependencies.automatic, []);
 }

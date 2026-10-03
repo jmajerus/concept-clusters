@@ -278,8 +278,9 @@ function renderFreezeSection({
     <h2>Freeze</h2>
     <p class="meta">Cue snapshots on each document, then freeze them into one
     release pull request together. Missing forward dependencies are automatically cued when D1 has
-    a published snapshot not yet in git; a missing, withdrawn, or git-only
-    dependency blocks Freeze. Held published boards stay in authoring play only.
+    a published snapshot not yet in git. A category already in git is cued too when a shipping
+    puzzle names a subcategory that the published category registers and this checkout does not.
+    A missing, withdrawn, or git-only dependency blocks Freeze. Held published boards stay in authoring play only.
     Puzzle entries below show their category and subcategory assignments;
     <code>(none)</code> means the puzzle document has no subcategory assignment.
     ${applyHint} Git-seeded snapshots already in this checkout stay out of

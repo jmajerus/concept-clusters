@@ -336,6 +336,29 @@ function resolveFreezeDependencies({
         ? categoryIdFor(row.document.category, categoryRegistry)
         : "";
       if (category) requireSupporting("category", category, { kind, id });
+      requireSubcategoryRegistrations(id, row.document);
+    }
+  }
+
+  // A category id already in git does not mean its subcategory registry is.
+  // Cue the published category when a shipping puzzle names a subcategory
+  // that snapshot registers and this checkout does not.
+  function requireSubcategoryRegistrations(puzzleId, document) {
+    const assignments = document?.subcategories;
+    if (!assignments || typeof assignments !== "object" || Array.isArray(assignments)) return;
+    for (const [category, subcategoryId] of Object.entries(assignments)) {
+      if (typeof subcategoryId !== "string" || !subcategoryId.trim()) continue;
+      const categoryId = categoryIdFor(category, categoryRegistry);
+      if (!categoryId) continue;
+      const gitSubcategories = categoryMetadataFor(categoryId, categoryRegistry)?.subcategories;
+      if (gitSubcategories?.[subcategoryId]) continue;
+      const publishedSubcategories = rows.category.get(categoryId)?.document?.subcategories;
+      if (!publishedSubcategories
+        || typeof publishedSubcategories !== "object"
+        || Array.isArray(publishedSubcategories)
+        || !publishedSubcategories[subcategoryId]) continue;
+      if (roots.category.has(categoryId)) continue;
+      recordDependency(automatic, "category", categoryId, { kind: "puzzle", id: puzzleId });
     }
   }
 
@@ -395,9 +418,11 @@ function automaticIdsFor(dependencies, kind) {
 
 // Live D1 vs git registries → the freeze patch. Author cues are the roots;
 // missing forward dependencies are automatically included where D1 has a
-// published snapshot not yet in git. Withdrawn D1 rows and git-only ids both
-// land in remove. Derived catalogues stay out. Admin Freeze on the LAN server
-// applies this patch to the checkout.
+// published snapshot not yet in git. A category already in git is included
+// the same way when a shipping puzzle names a subcategory that the published
+// category registers and the checkout does not. Withdrawn D1 rows and
+// git-only ids both land in remove. Derived catalogues stay out. Admin Freeze
+// on the LAN server applies this patch to the checkout.
 /**
  * @param {{
  *   publishedPuzzles?: any[],
