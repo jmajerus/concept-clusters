@@ -8,6 +8,7 @@ import { buildNodesAndLinks } from "../modules/puzzleGraph.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { derivedLarge, puzzleNodeCount } from "../modules/puzzleBoardSize.js";
 import { selectableConceptWords } from "../modules/lensEngine.js";
+import { settleAgentPresentationColors } from "../modules/colorPalette.js";
 import { SIMPLIFIED_PUZZLE_SCHEMA } from "../modules/authoringSchemaResource.js";
 import {
   isJsonLdShaped,
@@ -329,6 +330,58 @@ export async function run() {
     assert.equal(colors[1], "teal");
     assert.notEqual(colors[0], "teal");
     assert.equal(new Set(colors).size, 2);
+  }
+
+  // MCP reads hide presentation color. A save ignores an agent hue, keeps a
+  // stored cluster hue, and assigns the next unused hue for a new cluster.
+  {
+    const stored = validPuzzle({
+      clusters: [
+        { ...validPuzzle().clusters[0], color: "olive" },
+        { ...validPuzzle().clusters[1], color: "brown" }
+      ],
+      lenses: [{
+        id: "raw",
+        prompt: "Which are raw?",
+        explanation: "Distinguishes unmediated force from managed expression.",
+        color: "cyan",
+        targets: ["element interactivity"]
+      }]
+    });
+    const mcpRead = documentForMcp(stored);
+    assert.equal("color" in mcpRead.clusters[0], false);
+    assert.equal("color" in mcpRead.clusters[1], false);
+    assert.equal("color" in mcpRead.lenses[0], false);
+
+    const agentDocument = {
+      ...mcpRead,
+      clusters: [
+        { ...mcpRead.clusters[0], color: "magenta" },
+        { ...mcpRead.clusters[1] },
+        {
+          id: "germane-load",
+          name: "Germane Load",
+          color: "teal",
+          fact: "Effort spent building schemas.",
+          seeds: ["schema construction", "mental effort"],
+          floatingTerms: ["reflection"]
+        }
+      ],
+      lenses: [{ ...mcpRead.lenses[0], color: "amber" }]
+    };
+    const settled = settleAgentPresentationColors(agentDocument, stored);
+    assert.equal(settled.clusters[0].color, "olive");
+    assert.equal(settled.clusters[1].color, "brown");
+    assert.equal(settled.clusters[2].color, "teal");
+    assert.equal(settled.lenses[0].color, "cyan");
+
+    const created = settleAgentPresentationColors({
+      ...agentDocument,
+      clusters: agentDocument.clusters.map(({ color, ...cluster }) => cluster),
+      lenses: agentDocument.lenses.map(({ color, ...lens }) => lens)
+    }, null);
+    assert.deepEqual(created.clusters.map(cluster => cluster.color), ["teal", "blue", "amber"]);
+    assert.equal("color" in created.lenses[0], false);
   }
 
   // A lens missing `explanation` fails shape validation with a clear message.

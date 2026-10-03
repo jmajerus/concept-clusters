@@ -3,6 +3,7 @@
 // and local stdio MCP. Keep Node-only checkout behavior in mcpAuthoringServer.
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
+import { settleAgentPresentationColors } from "./colorPalette.js";
 import { checkDocumentLinks } from "./wikiLinkCheck.js";
 import { DOMAINS } from "../puzzles/categories.js";
 import {
@@ -1084,11 +1085,12 @@ export function createAuthoringMcpServer({
     for (const candidate of new Set([args.draft_id, document.id].filter(Boolean))) {
       await assertPuzzleIdIsUnpublished(candidate);
     }
-    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(document, {
+    const settled = settleAgentPresentationColors(document, null);
+    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(settled, {
       ctx,
       server,
       role: "drafted",
-      log: stampLog("create_puzzle_draft", args.draft_id || document?.id, document)
+      log: stampLog("create_puzzle_draft", args.draft_id || settled?.id, settled)
     });
     const draftId = args.draft_id || stamped.id;
     const draft = await draftRepository.create({
@@ -1217,7 +1219,10 @@ export function createAuthoringMcpServer({
     // applyAuthoredDomain; this catches the complete-document save, which
     // does not go through it.
     assertNoWriteOnceDrift(previousDocument, stored, "MCP puzzle document");
-    const retained = retainMcpExcludedMetadata(stored, previousDocument);
+    const retained = settleAgentPresentationColors(
+      retainMcpExcludedMetadata(stored, previousDocument),
+      previousDocument
+    );
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {
       ctx,
       server,

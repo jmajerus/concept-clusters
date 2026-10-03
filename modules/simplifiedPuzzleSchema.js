@@ -246,7 +246,7 @@ const LearningIntroductionSchema = z.object({
 const ClusterSchema = z.object({
   id: SlugSchema.optional(), // Derived from name when omitted -- see puzzleFromSimplified.
   name: z.string().min(1),
-  color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted.
+  color: ClusterColorEnum.optional(), // Imports and the studio may set this. MCP omits it; settleAgentPresentationColors assigns or preserves a hue.
   fact: z.string().min(1),
   // Multi-cluster puzzles can ask the player to build groups from seeds and
   // floating terms. A one-cluster Vocabulary puzzle instead authors its

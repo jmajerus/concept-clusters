@@ -70,13 +70,11 @@ to five) become its full term list. The default topic-based kind uses two to
 six clusters; use the active specialized profile and schema for its permitted
 range. A bridge's \`clusters\`
 names exactly two cluster \`id\`s (three for a ternary bridge) -- not
-positions, not fragments. Cluster \`id\`, bridge \`id\`, and cluster \`color\`
-are all optional and assigned automatically when omitted (cluster \`id\`
-derives from \`name\` -- a bridge referencing an id-less cluster should
-predict that plain slug). Each cluster's color must be unique within the
-puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
-is reserved for bridges and green/red for lens feedback, so none of those
-three are valid cluster colors. Keep the complete board to at most 32 total
+positions, not fragments. Cluster \`id\` and bridge \`id\` are optional and
+assigned automatically when omitted (cluster \`id\` derives from \`name\` --
+a bridge referencing an id-less cluster should predict that plain slug).
+Omit cluster color and lens color. The server assigns a hue and keeps it
+across saves; do not choose one. Keep the complete board to at most 32 total
 nodes (all cluster terms plus bridges). That ceiling is where validation
 refuses a board; it is not a size to fill. Canvas size is derived from the
 board; do not split, drop, or reshape terms in order to change it. Size by

@@ -157,7 +157,9 @@
 // the board.
 // 6.9: same review bar. A learning introduction helps in almost every case.
 // The author cannot know what the player already knows.
+// 6.10: same review bar. Cluster and lens color are not agent fields. The
+// server assigns a cluster hue and keeps a stored one; agents omit both.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 9
+  minor: 10
 });

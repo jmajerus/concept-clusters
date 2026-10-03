@@ -277,6 +277,18 @@ export function redactMcpExcludedDocumentFields(document) {
     delete introduction.credit;
     result.learningIntroduction = introduction;
   }
+  for (const key of ["clusters", "lenses"]) {
+    if (!Array.isArray(result[key])) continue;
+    result[key] = result[key].map(entry => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry) ||
+          !Object.hasOwn(entry, "color")) {
+        return entry;
+      }
+      const next = { ...entry };
+      delete next.color;
+      return next;
+    });
+  }
   return result;
 }
 

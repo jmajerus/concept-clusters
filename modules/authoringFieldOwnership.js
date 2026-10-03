@@ -131,7 +131,9 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
 export const CLUSTER_FIELD_OWNERSHIP = Object.freeze({
   id: { domain: "content", kind: "authored", identity: true, contextFor: ["pedagogy"] },
   name: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
-  color: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
+  // Presentational. Stored for play and editable in the studio. MCP reads
+  // omit it, and an agent save cannot choose or replace it.
+  color: { domain: "content", kind: "derived" },
   fact: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   seeds: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },
   floatingTerms: { domain: "content", kind: "authored", contextFor: ["pedagogy"] },

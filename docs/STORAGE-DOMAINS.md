@@ -62,10 +62,12 @@ the Integrity Burden paper’s associated documents:
 
 The boundary is about ownership, not an assertion that every field needs to
 remain authored. A partitioning review is also a good time to ask whether a
-field is semantic, human-controlled, or derivable. For example, a
-presentational cluster color may eventually be derived from cluster order
-instead of being part of an agent payload. That would be a schema decision,
-not a silent consequence of partitioning.
+field is semantic, human-controlled, or derivable. Cluster color is
+presentational: play needs a stored hue, and the studio can still choose
+one, but MCP reads omit it and an agent save cannot choose or replace it.
+The server keeps the stored hue for a cluster that is still the same one,
+and assigns the next unused palette color for a cluster that has none.
+That is a schema decision, not a silent consequence of partitioning.
 
 ## Write-once fields
 

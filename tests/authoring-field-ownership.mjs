@@ -3,6 +3,7 @@ import {
   AUTHORING_PHASE_PASSES,
   AUTHORING_WRITE_DOMAINS,
   BRIDGE_FIELD_OWNERSHIP,
+  CLUSTER_FIELD_OWNERSHIP,
   BRIDGE_IDENTITY_FIELDS,
   CLASSIFICATION_ROOT_FIELDS,
   CONTENT_BRIDGE_FIELDS,
@@ -18,6 +19,7 @@ import {
   WRITE_ONCE_ROOT_FIELDS,
   assertPhasePassesConsistent
 } from "../modules/authoringFieldOwnership.js";
+import { AUTHORING_FORMAT_GUIDANCE } from "../modules/authoringDesignGuidance.js";
 import { simplifiedPuzzleSchemaResult } from "../modules/authoringSchemaResource.js";
 import { assertNoWriteOnceDrift } from "../modules/authoringDomains.js";
 import {
@@ -133,6 +135,13 @@ export async function run() {
     undefined
   );
   assert.match(completeSchema.properties.puzzleKind.description, /Omit for the default topic-based kind/);
+  assert.equal(CLUSTER_FIELD_OWNERSHIP.color.kind, "derived");
+  assert.equal(completeSchema.properties.clusters.items.properties.color, undefined);
+  assert.equal(completeSchema.properties.lenses.items.properties.color, undefined);
+  assert.equal(JSON.stringify(completeSchema).includes("teal"), false);
+  assert.match(completeSchema.description, /Omit cluster color and lens color/);
+  assert.match(AUTHORING_FORMAT_GUIDANCE, /Omit cluster color and lens color/);
+  assert.doesNotMatch(AUTHORING_FORMAT_GUIDANCE, /valid cluster colors/);
 
   // Phase-advertised pedagogy fields must be accepted by a pedagogy domain save.
   const document = {
