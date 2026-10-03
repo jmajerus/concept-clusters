@@ -7,7 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "evidence-and-inference-across-disciplines",
   "title": "Evidence and inference across disciplines",
   "category": "media-information-literacy",
-  "large": true,
+  "subcategories": {
+    "media-information-literacy": "verification-fact-checking"
+  },
   "info": {
     "text": "Science, history, law, and journalism use different kinds of evidence, but all must ask where information came from, how it was preserved, and what supports an inference.",
     "links": [
@@ -98,19 +100,19 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "material artifact": {
-          "text": "A human-made or modified object studied as evidence about past activity and culture.",
-          "links": [
-            {
-              "href": "wiki:Artifact (archaeology)"
-            }
-          ]
-        },
         "chronology": {
           "text": "The ordering and dating of events so that sequence, duration, and possible relationships can be examined.",
           "links": [
             {
               "href": "wiki:Chronology"
+            }
+          ]
+        },
+        "material artifact": {
+          "text": "A human-made or modified object studied as evidence about past activity and culture.",
+          "links": [
+            {
+              "href": "wiki:Artifact (archaeology)"
             }
           ]
         },
@@ -147,11 +149,11 @@ export default definePuzzle(import.meta.url, {
         "physical evidence"
       ],
       "termInfo": {
-        "sworn testimony": {
-          "text": "Evidence given by a witness under oath or affirmation in a legal proceeding.",
+        "chain of custody": {
+          "text": "The documented sequence of possession, transfer, analysis, and storage of evidence.",
           "links": [
             {
-              "href": "wiki:Testimony"
+              "href": "wiki:Chain of custody"
             }
           ]
         },
@@ -171,11 +173,11 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "chain of custody": {
-          "text": "The documented sequence of possession, transfer, analysis, and storage of evidence.",
+        "sworn testimony": {
+          "text": "Evidence given by a witness under oath or affirmation in a legal proceeding.",
           "links": [
             {
-              "href": "wiki:Chain of custody"
+              "href": "wiki:Testimony"
             }
           ]
         }
@@ -204,22 +206,6 @@ export default definePuzzle(import.meta.url, {
         "public record"
       ],
       "termInfo": {
-        "on-record interview": {
-          "text": "An interview in which the source agrees that the information and the source's identity may be published.",
-          "links": [
-            {
-              "href": "wiki:Interview"
-            }
-          ]
-        },
-        "public record": {
-          "text": "Information created or maintained by a government body and made available under applicable law or policy.",
-          "links": [
-            {
-              "href": "wiki:Public records"
-            }
-          ]
-        },
         "eyewitness account": {
           "text": "A first-person report from someone who directly perceived an event.",
           "links": [
@@ -233,6 +219,22 @@ export default definePuzzle(import.meta.url, {
           "links": [
             {
               "href": "wiki:Fact-checking"
+            }
+          ]
+        },
+        "on-record interview": {
+          "text": "An interview in which the source agrees that the information and the source's identity may be published.",
+          "links": [
+            {
+              "href": "wiki:Interview"
+            }
+          ]
+        },
+        "public record": {
+          "text": "Information created or maintained by a government body and made available under applicable law or policy.",
+          "links": [
+            {
+              "href": "wiki:Public records"
             }
           ]
         }
@@ -324,10 +326,10 @@ export default definePuzzle(import.meta.url, {
         "expert testimony"
       ],
       "reasons": {
-        "sworn testimony": "A witness gives an attributable statement under oath or affirmation.",
-        "on-record interview": "The speaker agrees that the statement and identity may be reported.",
+        "expert testimony": "A qualified specialist offers an opinion grounded in relevant knowledge and methods.",
         "eyewitness account": "A person reports what they perceived directly.",
-        "expert testimony": "A qualified specialist offers an opinion grounded in relevant knowledge and methods."
+        "on-record interview": "The speaker agrees that the statement and identity may be reported.",
+        "sworn testimony": "A witness gives an attributable statement under oath or affirmation."
       }
     },
     {
@@ -344,11 +346,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "archival document": "Archival context can record who created a document and how it entered a collection.",
+        "chain of custody": "A documented handling history helps show that evidence was not substituted or materially altered.",
         "material artifact": "An object's origin, excavation context, ownership, and alterations affect what can be inferred from it.",
         "physical evidence": "Authenticity and integrity matter when an object is offered as evidence.",
-        "public record": "Official creation, custody, and certification can support a record's authenticity.",
-        "chain of custody": "A documented handling history helps show that evidence was not substituted or materially altered.",
-        "provenance": "Provenance directly names the history of origin, ownership, custody, or transmission."
+        "provenance": "Provenance directly names the history of origin, ownership, custody, or transmission.",
+        "public record": "Official creation, custody, and certification can support a record's authenticity."
       }
     },
     {
@@ -362,10 +364,10 @@ export default definePuzzle(import.meta.url, {
         "corroboration"
       ],
       "reasons": {
-        "replication": "A new study tests whether a reported finding can be obtained again.",
-        "source criticism": "Historians compare a source's origin, purpose, context, and claims with other evidence.",
+        "corroboration": "Separate evidence agrees with or materially supports a claim.",
         "independent verification": "A journalist seeks confirmation that does not merely repeat the original source.",
-        "corroboration": "Separate evidence agrees with or materially supports a claim."
+        "replication": "A new study tests whether a reported finding can be obtained again.",
+        "source criticism": "Historians compare a source's origin, purpose, context, and claims with other evidence."
       }
     },
     {
@@ -382,11 +384,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "archival document": "The document is preserved as part of an identifiable collection or record.",
-        "sworn testimony": "Proceedings ordinarily preserve testimony in an official record or transcript.",
-        "precedent": "Published or recorded decisions preserve legal reasoning for later cases.",
         "chain of custody": "The chain is itself a record of who controlled evidence and when.",
         "on-record interview": "The source permits attribution, allowing the statement to remain inspectable and contestable.",
-        "public record": "A public body creates or maintains the record for official purposes."
+        "precedent": "Published or recorded decisions preserve legal reasoning for later cases.",
+        "public record": "A public body creates or maintains the record for official purposes.",
+        "sworn testimony": "Proceedings ordinarily preserve testimony in an official record or transcript."
       }
     },
     {
@@ -402,46 +404,26 @@ export default definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "archival document": "It is both an evidence item and a preserved record whose origin can be studied.",
-        "sworn testimony": "It is a personal statement and part of an attributable proceeding record.",
         "chain of custody": "It helps establish authenticity and creates an inspectable handling record.",
         "on-record interview": "It is a person's statement and an attributable record for later checking.",
-        "public record": "It is both a source of evidence and an officially preserved record whose origin can be verified."
+        "public record": "It is both a source of evidence and an officially preserved record whose origin can be verified.",
+        "sworn testimony": "It is a personal statement and part of an attributable proceeding record."
       }
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Follow evidence from source and attribution through verification, interpretation, and public claims.",
-      "links": [
-        {
-          "href": "wiki:Information literacy"
-        }
-      ]
-    },
     "entries": [
       {
         "id": "quotations-and-attribution",
-        "reason": "Apply provenance and source verification to claims about who said or wrote particular words.",
-        "via": [
-          "provenance",
-          "attribution"
-        ]
+        "reason": "Apply provenance and source verification to claims about who said or wrote particular words."
       },
       {
         "id": "images-out-of-context",
-        "reason": "Use source history and external corroboration to evaluate visual evidence separated from its original setting.",
-        "via": [
-          "provenance",
-          "independent verification"
-        ]
+        "reason": "Use source history and external corroboration to evaluate visual evidence separated from its original setting."
       },
       {
         "id": "media-literacy",
-        "reason": "Connect disciplinary evidence practices with everyday habits for evaluating public information.",
-        "via": [
-          "verification",
-          "evidence"
-        ]
+        "reason": "Connect disciplinary evidence practices with everyday habits for evaluating public information."
       }
     ]
   },
@@ -453,5 +435,7 @@ export default definePuzzle(import.meta.url, {
         "kind": "generative"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 });

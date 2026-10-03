@@ -11,7 +11,9 @@ export default definePuzzle(import.meta.url, {
     "media-information-literacy",
     "political-science"
   ],
-  "large": true,
+  "subcategories": {
+    "media-information-literacy": "propaganda-disinformation"
+  },
   "tags": [
     "book"
   ],
@@ -20,14 +22,6 @@ export default definePuzzle(import.meta.url, {
     "links": [
       {
         "href": "wiki:Manufacturing Consent"
-      }
-    ],
-    "citations": [
-      {
-        "title": "Manufacturing Consent: The Political Economy of the Mass Media",
-        "author": "Herman, Edward S., and Chomsky, Noam",
-        "publisher": "Pantheon Books",
-        "year": "1988"
       }
     ]
   },
@@ -203,7 +197,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "selective-indignation",
       "term": "selective indignation",
       "clusters": [
         0,
@@ -222,7 +215,6 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "necessary-illusions",
       "term": "necessary illusions",
       "clusters": [
         2,
@@ -249,7 +241,6 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "the-war-on-terror",
       "term": "the war on terror",
       "clusters": [
         0,
@@ -326,5 +317,7 @@ export default definePuzzle(import.meta.url, {
         "name": "Claude"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 });

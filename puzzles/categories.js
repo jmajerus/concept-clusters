@@ -263,8 +263,28 @@ export const CATEGORIES = {
     }
   },
   "Media & Information Literacy": {
+    slug: "media-information-literacy",
     domain: "communication-media",
-    info: { text: "Telling apart what's real, sourced, and trustworthy online.", link: "wiki:Media literacy" }
+    info: {
+      text: "Telling apart what's real, sourced, and trustworthy online.",
+      link: "wiki:Media literacy"
+    },
+    subcategories: {
+      "propaganda-disinformation": {
+        title: "Propaganda & Disinformation",
+        info: {
+          text: "How organized campaigns produce, launder, and amplify misleading belief, and whose interests they serve.",
+          link: "wiki:Disinformation"
+        }
+      },
+      "verification-fact-checking": {
+        title: "Verification & Fact-Checking",
+        info: {
+          text: "How a reader checks a claim, source, image, or figure against its origin and against independent evidence.",
+          link: "wiki:Fact-checking"
+        }
+      }
+    }
   },
   "Physiology & Medicine": {
     domain: "health-medicine",
@@ -518,7 +538,6 @@ export const CATEGORIES = {
   },
   Botany: {
     slug: "botany",
-    domain: "life-sciences",
     info: {
       text: "The scientific branch of biology that focuses on the study of plants, including their structure, growth, reproduction, metabolism, and interactions with the environment.",
       link: "wiki:Biology"

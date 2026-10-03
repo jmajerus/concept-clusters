@@ -7,6 +7,17 @@ export default definePuzzle(import.meta.url, {
   "id": "social-media-hygiene",
   "title": "Social media hygiene",
   "category": "media-information-literacy",
+  "subcategories": {
+    "media-information-literacy": "verification-fact-checking"
+  },
+  "info": {
+    "links": [
+      {
+        "href": "https://newslit.org/news-and-research/eight-tips-to-google-like-a-pro/",
+        "label": "Eight Tips to Google Like a Pro"
+      }
+    ]
+  },
   "clusters": [
     {
       "id": "manipulative-sharing-cues",
@@ -24,6 +35,17 @@ export default definePuzzle(import.meta.url, {
         "copy-and-paste posts"
       ],
       "termInfo": {
+        "copy-and-paste posts": {
+          "text": "Blocks of text repeatedly reposted without a stable link to an author, publication, date or original context.",
+          "links": [
+            {
+              "href": "wiki:Copypasta"
+            },
+            {
+              "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
+            }
+          ]
+        },
         "emotional urgency": {
           "text": "Language designed to trigger an immediate emotional reaction and make pausing for verification feel unnecessary or disloyal.",
           "links": [
@@ -46,17 +68,6 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "copy-and-paste posts": {
-          "text": "Blocks of text repeatedly reposted without a stable link to an author, publication, date or original context.",
-          "links": [
-            {
-              "href": "wiki:Copypasta"
-            },
-            {
-              "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
-            }
-          ]
-        },
         "share-shaming": {
           "text": "Pressuring readers to repost by implying that sharing proves they care, while declining to share suggests indifference or disloyalty.",
           "links": [
@@ -75,7 +86,7 @@ export default definePuzzle(import.meta.url, {
             "href": "wiki:Media literacy"
           },
           {
-            "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+            "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
           }
         ]
       }
@@ -96,17 +107,6 @@ export default definePuzzle(import.meta.url, {
         "reverse image search"
       ],
       "termInfo": {
-        "original source": {
-          "text": "The earliest available document, post, recording, image or firsthand account from which a circulating claim was derived.",
-          "links": [
-            {
-              "href": "wiki:Primary source"
-            },
-            {
-              "href": "https://newslit.org/news-and-research/the-sift-dangerous-memes-ai-pikachu/"
-            }
-          ]
-        },
         "authority claims": {
           "text": "Assertions that a person or organization should be believed because of a title, credential or reputation; the identity, relevant expertise and supporting evidence still need checking.",
           "links": [
@@ -118,6 +118,30 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
+        "original source": {
+          "text": "The earliest available document, post, recording, image or firsthand account from which a circulating claim was derived.",
+          "links": [
+            {
+              "href": "wiki:Primary source"
+            },
+            {
+              "href": "https://newslit.org/news-and-research/the-sift-dangerous-memes-ai-pikachu/"
+            }
+          ]
+        },
+        "quote search": {
+          "text": "Searching distinctive quoted words to locate earlier appearances, fuller context, or evidence that the quotation was altered or misattributed.",
+          "links": [
+            {
+              "href": "https://zerotwo.ai/quote-finder",
+              "label": "Quote Finder"
+            },
+            {
+              "href": "https://quoteinvestigator.com/",
+              "label": "Quote Investigator"
+            }
+          ]
+        },
         "reverse image search": {
           "text": "Searching with an image rather than keywords to locate earlier uses, related versions and the image’s original context.",
           "links": [
@@ -126,17 +150,6 @@ export default definePuzzle(import.meta.url, {
             },
             {
               "href": "https://newslit.org/news-and-research/reverse-image-search/"
-            }
-          ]
-        },
-        "quote search": {
-          "text": "Searching distinctive quoted words to locate earlier appearances, fuller context, or evidence that the quotation was altered or misattributed.",
-          "links": [
-            {
-              "href": "wiki:Quotation mark"
-            },
-            {
-              "href": "https://newslit.org/news-and-research/eight-tips-to-google-like-a-pro/"
             }
           ]
         }
@@ -168,17 +181,6 @@ export default definePuzzle(import.meta.url, {
         "informational trust"
       ],
       "termInfo": {
-        "relational trust": {
-          "text": "Confidence that grows from familiarity, affection, shared identity or a history with the person who shared the information.",
-          "links": [
-            {
-              "href": "wiki:Trust (social science)"
-            },
-            {
-              "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
-            }
-          ]
-        },
         "informational trust": {
           "text": "Confidence in a claim that is earned through evidence, relevant expertise, transparent sourcing and willingness to correct errors.",
           "links": [
@@ -186,7 +188,7 @@ export default definePuzzle(import.meta.url, {
               "href": "wiki:Information quality"
             },
             {
-              "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+              "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
             }
           ]
         },
@@ -194,10 +196,22 @@ export default definePuzzle(import.meta.url, {
           "text": "Trusted institutional sources: organizations that produce information through established standards, specialized expertise and accountable processes; they are not infallible, but their methods can be examined.",
           "links": [
             {
-              "href": "wiki:Institution"
+              "href": "https://libraries.vsc.edu/research/sources",
+              "label": "Sources of Information"
             },
             {
               "href": "https://guides.library.cornell.edu/english1183ac23/evaluate"
+            }
+          ]
+        },
+        "relational trust": {
+          "text": "Confidence that grows from familiarity, affection, shared identity or a history with the person who shared the information.",
+          "links": [
+            {
+              "href": "wiki:Trust (social science)"
+            },
+            {
+              "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
             }
           ]
         },
@@ -208,7 +222,7 @@ export default definePuzzle(import.meta.url, {
               "href": "wiki:Transportation theory (psychology)"
             },
             {
-              "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+              "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
             }
           ]
         }
@@ -219,7 +233,48 @@ export default definePuzzle(import.meta.url, {
             "href": "wiki:Trust (social science)"
           },
           {
-            "href": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+            "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "responsible-sharing",
+      "name": "Responsible sharing",
+      "color": "magenta",
+      "fact": "Responsible sharing is a discipline of care: pausing before sharing interrupts the impulse to forward without thinking, and gently correcting someone who has passed along something wrong extends that care to others -- not to prove anyone right, but to keep each other from being misled.",
+      "terms": [
+        "pause before sharing",
+        "gentle correction"
+      ],
+      "seeds": [
+        "pause before sharing"
+      ],
+      "termInfo": {
+        "pause before sharing": {
+          "text": "A brief moment of reflection before forwarding, interrupting the emotional impulse to share without thinking -- a stance toward information as much as a technique, and the habit the other practices depend on.",
+          "links": [
+            {
+              "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
+            },
+            {
+              "href": "https://newslit.org/news-and-research/should-you-share-it/"
+            }
+          ]
+        },
+        "gentle correction": {
+          "text": "Caring enough to tell someone that what they passed along may be wrong, kindly and without trying to win -- the aim is to help keep each other from being misled, not to prove you were right.",
+          "links": [
+            {
+              "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
           }
         ]
       }
@@ -278,13 +333,81 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
+  "lenses": [
+    {
+      "id": "borrowed-credibility",
+      "prompt": "Which concepts make a post feel credible because of who or what stands behind it, rather than because of evidence?",
+      "explanation": "A claimed expert, a polished presentation, and a friend who shared it all lend a post credibility it has not earned; institutional sources and informational trust are the contrast, because their credibility rests on standards and evidence that can be examined.",
+      "targets": [
+        "authority claims",
+        "story polish",
+        "relational trust"
+      ],
+      "reasons": {
+        "authority claims": "A title or credential is invoked, but the expert's identity and evidence have not been checked.",
+        "story polish": "Professional design and fluent storytelling make a claim feel solid without supplying evidence.",
+        "relational trust": "Familiarity with the person who shared it stands in for any look at the claim itself."
+      }
+    },
+    {
+      "id": "run-a-search",
+      "prompt": "Which concepts are specific searches you can run to expose reused or altered material, rather than judgments about a source?",
+      "explanation": "A reverse image search and a quote search each take a distinctive piece of the post and look for earlier or fuller appearances; the original source is what such a search aims to reach, not the search itself.",
+      "targets": [
+        "reverse image search",
+        "quote search"
+      ],
+      "reasons": {
+        "reverse image search": "Searches with the picture itself to find where else and when it appeared.",
+        "quote search": "Searches distinctive quoted words to find earlier appearances, fuller context, or signs of alteration."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "media-literacy",
+        "reason": "Media literacy explains why false information spreads and which habits resist it; this puzzle is the applied side, the specific practices to run before you share.",
+        "via": [
+          "reverse image search",
+          "original source"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "Before You Begin: Sharing Responsibly",
+    "summary": "Why people pass along false information with good intentions, and the small habits that come before the share.",
+    "estimatedMinutes": 2,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "## Sharing responsibly\r\n\r\nMost people who pass along something false are not trying to deceive anyone. They are reacting to a post that felt urgent, familiar, or moving, and the share button is one tap away. That is why the habits that help most are small and come before the share: a moment to pause, a quick look at where a claim came from, and the discipline of asking whether you trust the person who sent it or the information itself.\r\n\r\nNone of this requires suspicion of everyone you know. Trusting people is a strength. The aim is to trust information on its own evidence, and to care enough about the people around you to correct a mistake gently when you spot one -- not to win an argument, but to keep each other from being misled.\r\n\r\n**Before you start:** think of the last post that made you feel something strongly. What would you have noticed if you had waited a minute?"
+    },
+    "links": [
+      {
+        "href": "https://blog.majerus.us/media-hygiene-a-quick-guide/",
+        "label": "Media Hygiene: A Practical Guide"
+      },
+      {
+        "href": "https://newslit.org/news-and-research/should-you-share-it/",
+        "label": "News Literacy Project: Should you share it?"
+      }
+    ]
+  },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
         "name": "generative assistance",
         "kind": "generative"
+      },
+      {
+        "name": "Claude Code (Claude Sonnet 5.5)",
+        "reasoning": "high"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 });

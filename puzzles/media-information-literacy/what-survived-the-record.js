@@ -11,7 +11,9 @@ export default definePuzzle(import.meta.url, {
     "media-information-literacy",
     "public-health"
   ],
-  "large": true,
+  "subcategories": {
+    "media-information-literacy": "propaganda-disinformation"
+  },
   "info": {
     "text": "How a false picture of a person can be assembled entirely out of true fragments — through pressure applied off the merits, a challenge to standing rather than to evidence, republication that looks like confirmation, and a record that keeps the accusation after the answer is gone. Each mechanism is established separately: strategic litigation in legal scholarship, circular reporting in source criticism, and the coordinated targeting of researchers that Peter Hotez named anti-science aggression.",
     "links": [
@@ -54,10 +56,10 @@ export default definePuzzle(import.meta.url, {
         "chilling effect"
       ],
       "termInfo": {
-        "strategic lawsuit": "Litigation brought less to win than to impose cost, consume time, and deter a critic from continuing.",
         "chilling effect": "The deterrence of lawful speech by the prospect of legal or professional consequences rather than by any ruling.",
+        "coerced apology": "A statement issued to end pressure rather than to concede a point, whose wording may be negotiated as part of the settlement.",
         "resource asymmetry": "A mismatch in money, time, institutional backing, or legal support that determines who can afford to continue a dispute.",
-        "coerced apology": "A statement issued to end pressure rather than to concede a point, whose wording may be negotiated as part of the settlement."
+        "strategic lawsuit": "Litigation brought less to win than to impose cost, consume time, and deter a critic from continuing."
       },
       "info": {
         "links": [
@@ -92,8 +94,8 @@ export default definePuzzle(import.meta.url, {
           ]
         },
         "credential challenge": "A dispute over whether someone is entitled to speak on a subject, raised in place of a dispute over what they said.",
-        "special pleading": "Applying a standard to one case while exempting other cases that meet the same conditions, without giving a reason for the exemption.",
-        "manufactured controversy": "A dispute generated and sustained deliberately, whose appearance of live disagreement is the product rather than a by-product."
+        "manufactured controversy": "A dispute generated and sustained deliberately, whose appearance of live disagreement is the product rather than a by-product.",
+        "special pleading": "Applying a standard to one case while exempting other cases that meet the same conditions, without giving a reason for the exemption."
       },
       "info": {
         "links": [
@@ -119,6 +121,8 @@ export default definePuzzle(import.meta.url, {
         "amplification network"
       ],
       "termInfo": {
+        "amplification network": "A set of outlets or accounts that reliably reproduce each other's material, multiplying reach without multiplying sourcing.",
+        "appearance of independence": "The impression that two accounts confirm each other, created by separate publication rather than by separate evidence.",
         "circular reporting": {
           "text": "A situation in which information appears to come from several independent sources but in fact traces back to only one.",
           "links": [
@@ -127,8 +131,6 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "amplification network": "A set of outlets or accounts that reliably reproduce each other's material, multiplying reach without multiplying sourcing.",
-        "appearance of independence": "The impression that two accounts confirm each other, created by separate publication rather than by separate evidence.",
         "laundered claim": "An assertion that acquires credibility by passing through a more reputable venue than the one it started in."
       },
       "info": {
@@ -155,7 +157,6 @@ export default definePuzzle(import.meta.url, {
         "unanswered claim"
       ],
       "termInfo": {
-        "search indexing": "The process by which published material is catalogued and made retrievable, independently of whether it was ever contested.",
         "decontextualization": {
           "text": "The separation of a statement or document from the circumstances that determine what it means.",
           "links": [
@@ -165,6 +166,7 @@ export default definePuzzle(import.meta.url, {
           ]
         },
         "removed rebuttal": "A reply that is no longer reachable at its original address, leaving the claim it answered in circulation alone.",
+        "search indexing": "The process by which published material is catalogued and made retrievable, independently of whether it was ever contested.",
         "unanswered claim": "An assertion that stands in the record without a visible response, whether because none was made or because the response is gone."
       },
       "info": {
@@ -185,9 +187,7 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "One document, two readings. As a settlement it records a decision to avoid a cost; as an exhibit it is presented as an admission of wrongdoing. Nothing about the document changes between the two — only what is placed around it.",
-      "info": {
-        "text": "A statement obtained through pressure and then presented as though it had been volunteered."
-      },
+      "info": "A statement obtained through pressure and then presented as though it had been volunteered.",
       "conceptId": "weaponized-retraction",
       "relationKind": "contrast",
       "idealTerms": [
@@ -255,11 +255,11 @@ export default definePuzzle(import.meta.url, {
         "removed rebuttal"
       ],
       "reasons": {
+        "circular reporting": "Republication is a real event. What it adds is visibility, not a second source.",
         "coerced apology": "The statement was genuinely made; what is omitted is that it settled a cost, not a question of fact.",
         "credential challenge": "The stated distinction can be accurate while the standard behind it is applied to one person and not another.",
-        "circular reporting": "Republication is a real event. What it adds is visibility, not a second source.",
-        "search indexing": "The index records accurately what was published; it does not record what was contested.",
-        "removed rebuttal": "A page can be taken down for any reason. The accusation stays up either way."
+        "removed rebuttal": "A page can be taken down for any reason. The accusation stays up either way.",
+        "search indexing": "The index records accurately what was published; it does not record what was contested."
       }
     },
     {
@@ -275,41 +275,26 @@ export default definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "appearance of independence": "Two outlets, one source: the second appearance is the thing that is missing, disguised as a thing that is present.",
-        "unanswered claim": "Silence can mean a claim is unanswerable, or that answering it has been made too costly.",
-        "removed rebuttal": "The disappearance of one specific reply, while neighbouring material remains, is itself information.",
         "corroboration": "Where genuine corroboration should be and is not, its absence bears on how much weight the claim can carry.",
-        "provenance": "A claim circulating without its origin cannot be checked, and the missing origin is the reason."
+        "provenance": "A claim circulating without its origin cannot be checked, and the missing origin is the reason.",
+        "removed rebuttal": "The disappearance of one specific reply, while neighbouring material remains, is itself information.",
+        "unanswered claim": "Silence can mean a claim is unanswerable, or that answering it has been made too costly."
       }
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Trace how claims acquire the appearance of support, and what happens when the support was never independent."
-    },
     "entries": [
       {
         "id": "quotations-and-attribution",
-        "reason": "Compare a quotation severed from its surrounding context with a document severed from the circumstances that produced it.",
-        "via": [
-          "provenance",
-          "context"
-        ]
+        "reason": "Compare a quotation severed from its surrounding context with a document severed from the circumstances that produced it."
       },
       {
         "id": "images-out-of-context",
-        "reason": "See the same decontextualization mechanism operating on an image rather than on a person's record.",
-        "via": [
-          "provenance",
-          "corroboration"
-        ]
+        "reason": "See the same decontextualization mechanism operating on an image rather than on a person's record."
       },
       {
         "id": "when-correction-fails",
-        "reason": "Follow what happens inside an institution when the same discrediting tactics are turned on someone reporting harm.",
-        "via": [
-          "messenger discrediting",
-          "organizational silence"
-        ]
+        "reason": "Follow what happens inside an institution when the same discrediting tactics are turned on someone reporting harm."
       }
     ]
   },
@@ -317,8 +302,11 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude (Sonnet 5)"
+        "name": "Claude (Sonnet 5)",
+        "model": "Claude Sonnet 5"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 });

@@ -7,6 +7,29 @@ export default definePuzzle(import.meta.url, {
   "id": "quotations-and-attribution",
   "title": "Quotations and attribution",
   "category": "media-information-literacy",
+  "subcategories": {
+    "media-information-literacy": "verification-fact-checking"
+  },
+  "info": {
+    "citations": [
+      {
+        "title": "Library of Congress: Quotations research guide",
+        "url": "https://guides.loc.gov/quotations"
+      },
+      {
+        "title": "Library of Congress: Misquotations",
+        "url": "https://guides.loc.gov/quotations/misquotations"
+      },
+      {
+        "title": "Library of Congress: Searching online for quotations",
+        "url": "https://guides.loc.gov/quotations/online"
+      },
+      {
+        "title": "Quote Investigator",
+        "url": "https://quoteinvestigator.com/"
+      }
+    ]
+  },
   "clusters": [
     {
       "id": "quotation-evidence",
@@ -24,17 +47,6 @@ export default definePuzzle(import.meta.url, {
         "audio recording"
       ],
       "termInfo": {
-        "transcript": {
-          "text": "A written representation of spoken words that can be checked against an original speech, hearing, interview or recording.",
-          "links": [
-            {
-              "href": "wiki:Transcription (linguistics)"
-            },
-            {
-              "href": "https://guides.loc.gov/quotations"
-            }
-          ]
-        },
         "audio recording": {
           "text": "Captured sound that may preserve the speaker's exact words, delivery and surrounding exchange.",
           "links": [
@@ -67,6 +79,17 @@ export default definePuzzle(import.meta.url, {
               "href": "https://guides.loc.gov/quotations"
             }
           ]
+        },
+        "transcript": {
+          "text": "A written representation of spoken words that can be checked against an original speech, hearing, interview or recording.",
+          "links": [
+            {
+              "href": "wiki:Transcription (linguistics)"
+            },
+            {
+              "href": "https://guides.loc.gov/quotations"
+            }
+          ]
         }
       },
       "info": {
@@ -84,26 +107,24 @@ export default definePuzzle(import.meta.url, {
       "id": "attribution-failures",
       "name": "Attribution failures",
       "color": "blue",
-      "fact": "Quotations can become unreliable through changed wording, attribution to the wrong person, selective excerpting or repeated paraphrase.",
+      "fact": "Quotations can become unreliable through changed wording, attribution to the wrong person, selective excerpting, repeated paraphrase or an origin that was never documented.",
       "terms": [
         "misquotation",
         "false attribution",
         "quote mining",
-        "paraphrase drift"
+        "paraphrase drift",
+        "apocryphal quotation"
       ],
       "seeds": [
         "misquotation",
         "false attribution"
       ],
       "termInfo": {
-        "misquotation": {
-          "text": "A quotation whose wording differs materially from what the source actually said or wrote.",
+        "apocryphal quotation": {
+          "text": "A quotation that circulates widely and sounds plausible but has no documented origin, so there may be no original statement to find.",
           "links": [
             {
-              "href": "wiki:Quotation"
-            },
-            {
-              "href": "https://guides.loc.gov/quotations/misquotations"
+              "href": "https://quoteinvestigator.com/"
             }
           ]
         },
@@ -118,11 +139,11 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "quote mining": {
-          "text": "Selecting a fragment while omitting nearby words or qualifications that would change how the passage is understood.",
+        "misquotation": {
+          "text": "A quotation whose wording differs materially from what the source actually said or wrote.",
           "links": [
             {
-              "href": "wiki:Quoting out of context"
+              "href": "wiki:Quotation"
             },
             {
               "href": "https://guides.loc.gov/quotations/misquotations"
@@ -134,6 +155,17 @@ export default definePuzzle(import.meta.url, {
           "links": [
             {
               "href": "wiki:Paraphrase"
+            },
+            {
+              "href": "https://guides.loc.gov/quotations/misquotations"
+            }
+          ]
+        },
+        "quote mining": {
+          "text": "Selecting a fragment while omitting nearby words or qualifications that would change how the passage is understood.",
+          "links": [
+            {
+              "href": "wiki:Quoting out of context"
             },
             {
               "href": "https://guides.loc.gov/quotations/misquotations"
@@ -168,17 +200,6 @@ export default definePuzzle(import.meta.url, {
         "surrounding context"
       ],
       "termInfo": {
-        "exact-phrase search": {
-          "text": "Searching distinctive words inside quotation marks, then trying shorter or variant phrases when the circulating wording may be imperfect.",
-          "links": [
-            {
-              "href": "wiki:Quotation mark"
-            },
-            {
-              "href": "https://guides.loc.gov/quotations/online"
-            }
-          ]
-        },
         "earliest source": {
           "text": "The oldest documented occurrence found so far, which may reveal the original wording, speaker and setting or show that attribution changed later.",
           "links": [
@@ -190,14 +211,14 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "surrounding context": {
-          "text": "The nearby sentences, questions, circumstances and larger work needed to understand what the quoted words meant.",
+        "exact-phrase search": {
+          "text": "Searching distinctive words inside quotation marks, then trying shorter or variant phrases when the circulating wording may be imperfect.",
           "links": [
             {
-              "href": "wiki:Context (language use)"
+              "href": "wiki:Quotation mark"
             },
             {
-              "href": "https://guides.loc.gov/quotations/misquotations"
+              "href": "https://guides.loc.gov/quotations/online"
             }
           ]
         },
@@ -211,6 +232,17 @@ export default definePuzzle(import.meta.url, {
               "href": "https://guides.loc.gov/quotations"
             }
           ]
+        },
+        "surrounding context": {
+          "text": "The nearby sentences, questions, circumstances and larger work needed to understand what the quoted words meant.",
+          "links": [
+            {
+              "href": "wiki:Context (language use)"
+            },
+            {
+              "href": "https://guides.loc.gov/quotations/misquotations"
+            }
+          ]
         }
       },
       "info": {
@@ -220,6 +252,44 @@ export default definePuzzle(import.meta.url, {
           },
           {
             "href": "https://guides.loc.gov/quotations"
+          }
+        ]
+      }
+    },
+    {
+      "id": "reporting-uncertainty",
+      "name": "Reporting uncertainty",
+      "color": "magenta",
+      "fact": "When tracing cannot settle a quotation, a careful citation says so: it credits the words with explicit doubt or labels the quotation unverified, instead of presenting it as established.",
+      "terms": [
+        "hedged attribution",
+        "unverified quotation"
+      ],
+      "seeds": [
+        "hedged attribution"
+      ],
+      "termInfo": {
+        "hedged attribution": {
+          "text": "Crediting words with stated doubt, such as \"attributed to\" or \"sometimes credited to\", when the evidence points to a speaker but does not establish that they said it.",
+          "links": [
+            {
+              "href": "https://quoteinvestigator.com/"
+            }
+          ]
+        },
+        "unverified quotation": {
+          "text": "A quotation presented with an explicit statement that no reliable record of its wording or speaker has been found, instead of as established fact.",
+          "links": [
+            {
+              "href": "https://quoteinvestigator.com/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://quoteinvestigator.com/"
           }
         ]
       }
@@ -292,11 +362,19 @@ export default definePuzzle(import.meta.url, {
         "id": "ai-generated-synthetic-media",
         "reason": "Extend source tracing from altered words to synthetic media and technical authenticity signals.",
         "via": [
-          "provenance",
-          "authentication"
+          "provenance"
         ]
       }
     ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "summary": "A quotation claims both what was said and who said it, and either can be wrong. This lesson covers what counts as evidence, how quotations go wrong, how to trace them, and how to report what you find.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "A quotation makes two claims at once: these are the words, and this person said them. Either claim can be wrong on its own. Most quotations that circulate are copies of copies, so the useful question is not whether a line sounds like the person, but how far back a documented chain can be traced.\n\n## Evidence close to the speaker\n\nThe strongest support is a record made at or near the moment: a recording of the speech, a transcript that can be checked against it, a letter, speech text or court record in the speaker's own time, or a published interview that names the speaker, the interviewer, the publication and the date. A website or a book of quotations that simply repeats the line is not evidence for it; it is another copy.\n\n## How quotations go wrong\n\nThe failures are different and need different checks. The wording can change, so a real source says something else. The words can be real but credited to someone who never said them, often because a famous name makes a line more memorable. A fragment can be lifted so that the surrounding words, which would change its meaning, are dropped. A summary can be repeated until it is remembered as an exact quotation. And some quotations have no original statement at all: they sound plausible, spread widely, and were never documented.\n\n## Tracing a quotation\n\nTracing starts with searching the circulating wording in quotation marks, then trying shorter pieces in case the wording has drifted. Full-text archives of books and historical newspapers can turn up early uses of a phrase. The earliest appearance matters because it often shows where the wording or the credit changed. Reading the surrounding passage shows what the words meant in place, and a second independent record guards against trusting one source's account.\n\n## Saying what you know\n\nTracing sometimes stops short. A careful citation says so. It can credit the words with stated doubt, such as \"attributed to\", when the evidence points to a speaker without proving it, or it can label a quotation unverified when nothing reliable has been found. Both are more accurate than presenting an unconfirmed line as established fact."
+    }
   },
   "provenance": {
     "collaboration": "ai",
@@ -304,7 +382,12 @@ export default definePuzzle(import.meta.url, {
       {
         "name": "generative assistance",
         "kind": "generative"
+      },
+      {
+        "name": "Claude Code"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 });

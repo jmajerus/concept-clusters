@@ -6,20 +6,14 @@
     "media-information-literacy",
     "political-science"
   ],
-  "large": true,
+  "subcategories": {
+    "media-information-literacy": "propaganda-disinformation"
+  },
   "tags": [
     "book"
   ],
   "info": {
     "text": "Herman and Chomsky's argument that a free press still filters the news it prints -- not through censorship, but through ownership, markets, sourcing, and fear.",
-    "citations": [
-      {
-        "author": "Herman, Edward S., and Chomsky, Noam",
-        "title": "Manufacturing Consent: The Political Economy of the Mass Media",
-        "publisher": "Pantheon Books",
-        "year": "1988"
-      }
-    ],
     "links": [
       {
         "href": "wiki:Manufacturing Consent"
@@ -32,6 +26,18 @@
       "name": "The Five Filters",
       "color": "amber",
       "fact": "Herman and Chomsky's five filters -- ownership concentration, advertiser dependence, reliance on elite sourcing, organized flak, and a shifting fear ideology -- need no conspiracy to work; each pushes independently toward the same result, filtering out what powerful interests would find inconvenient before a story ever reaches print.",
+      "termInfo": {
+        "elite sourcing": "Reliance on government and corporate spokespeople as the cheapest, most 'objective'-seeming source of daily quotes, which quietly hands those institutions the power to set a story's frame.",
+        "flak discipline": "Organized complaints, lawsuits, and pressure campaigns -- from advertisers, press councils, or political operations -- that make publishing an inconvenient story costly enough to discourage doing it again."
+      },
+      "info": {
+        "text": "Herman and Chomsky's account of how ownership, markets, and access to power quietly filter which stories become news at all.",
+        "links": [
+          {
+            "href": "wiki:Propaganda model"
+          }
+        ]
+      },
       "seeds": [
         "ownership concentration",
         "advertising dependence"
@@ -47,39 +53,13 @@
         "elite sourcing",
         "flak discipline",
         "fear ideology"
-      ],
-      "termInfo": {
-        "elite sourcing": "Reliance on government and corporate spokespeople as the cheapest, most 'objective'-seeming source of daily quotes, which quietly hands those institutions the power to set a story's frame.",
-        "flak discipline": "Organized complaints, lawsuits, and pressure campaigns -- from advertisers, press councils, or political operations -- that make publishing an inconvenient story costly enough to discourage doing it again."
-      },
-      "info": {
-        "text": "Herman and Chomsky's account of how ownership, markets, and access to power quietly filter which stories become news at all.",
-        "links": [
-          {
-            "href": "wiki:Propaganda model"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "worthy-and-unworthy-victims",
       "name": "Worthy and Unworthy Victims",
       "color": "brown",
       "fact": "The same murder reads as an atrocity or a footnote depending on who committed it: priests killed in Communist Poland became worthy victims commanding sustained outrage, while priests killed by US-backed forces in Latin America became unworthy ones -- an ally's bloodbath framed as constructive where an enemy's was nefarious.",
-      "seeds": [
-        "worthy victims",
-        "unworthy victims"
-      ],
-      "floatingTerms": [
-        "constructive bloodbaths",
-        "nefarious bloodbaths"
-      ],
-      "terms": [
-        "worthy victims",
-        "unworthy victims",
-        "constructive bloodbaths",
-        "nefarious bloodbaths"
-      ],
       "termInfo": {
         "constructive bloodbaths": {
           "text": "Mass killing that serves the interests of the reporting country's own government, and is accordingly minimized, justified, or left uninvestigated.",
@@ -121,27 +101,27 @@
             "href": "wiki:Manufacturing Consent"
           }
         ]
-      }
+      },
+      "seeds": [
+        "worthy victims",
+        "unworthy victims"
+      ],
+      "floatingTerms": [
+        "constructive bloodbaths",
+        "nefarious bloodbaths"
+      ],
+      "terms": [
+        "worthy victims",
+        "unworthy victims",
+        "constructive bloodbaths",
+        "nefarious bloodbaths"
+      ]
     },
     {
       "id": "manufacturing-consent-the-idea",
       "name": "Manufacturing Consent, the Idea",
       "color": "blue",
       "fact": "Decades before Chomsky and Herman, Walter Lippmann named the manufacture of consent and Edward Bernays called it the engineering of consent: the shared premise was that a bewildered herd cannot govern itself directly, so a specialized class must administer a spectator democracy on its behalf.",
-      "seeds": [
-        "manufacture of consent",
-        "engineering of consent"
-      ],
-      "floatingTerms": [
-        "spectator democracy",
-        "bewildered herd"
-      ],
-      "terms": [
-        "manufacture of consent",
-        "engineering of consent",
-        "spectator democracy",
-        "bewildered herd"
-      ],
       "termInfo": {
         "bewildered herd": {
           "text": "Lippmann's name for the general public: too numerous, distracted, and locally focused to grasp common interests directly, and therefore requiring managers.",
@@ -176,27 +156,27 @@
             "href": "wiki:Public Opinion (book)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "manufacture of consent",
+        "engineering of consent"
+      ],
+      "floatingTerms": [
+        "spectator democracy",
+        "bewildered herd"
+      ],
+      "terms": [
+        "manufacture of consent",
+        "engineering of consent",
+        "spectator democracy",
+        "bewildered herd"
+      ]
     },
     {
       "id": "contesting-the-model",
       "name": "Contesting the Model",
       "color": "teal",
       "fact": "Critics press the propaganda model on two fronts: a structural analysis is not automatically a testable one, and treating audiences as passive filter-output ignores the audience agency real readers exercise -- but Chomsky and Herman's own answer is that the filters demonstrate their power precisely by adapting their target across eras rather than disappearing.",
-      "seeds": [
-        "structural analysis",
-        "audience agency"
-      ],
-      "floatingTerms": [
-        "testability critique",
-        "filter adaptation"
-      ],
-      "terms": [
-        "structural analysis",
-        "audience agency",
-        "testability critique",
-        "filter adaptation"
-      ],
       "termInfo": {
         "audience agency": "The observation that the model traces what reaches an audience but says comparatively little about how skeptically, selectively, or resistantly that audience actually receives it.",
         "filter adaptation": "The claim that a filter's specific target changes with history -- anticommunism giving way to terrorism, for instance -- while its underlying function stays the same.",
@@ -210,7 +190,21 @@
             "href": "wiki:Propaganda model"
           }
         ]
-      }
+      },
+      "seeds": [
+        "structural analysis",
+        "audience agency"
+      ],
+      "floatingTerms": [
+        "testability critique",
+        "filter adaptation"
+      ],
+      "terms": [
+        "structural analysis",
+        "audience agency",
+        "testability critique",
+        "filter adaptation"
+      ]
     }
   ],
   "bridges": [
@@ -336,5 +330,7 @@
         "name": "Claude"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 }

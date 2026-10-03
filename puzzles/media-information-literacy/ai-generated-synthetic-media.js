@@ -7,6 +7,37 @@ export default definePuzzle(import.meta.url, {
   "id": "ai-generated-synthetic-media",
   "title": "AI-generated and synthetic media",
   "category": "media-information-literacy",
+  "subcategories": {
+    "media-information-literacy": "verification-fact-checking"
+  },
+  "info": {
+    "citations": [
+      {
+        "title": "C2PA Explainer (specification 2.4)",
+        "url": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
+      },
+      {
+        "title": "Content Credentials",
+        "url": "https://contentcredentials.org/"
+      },
+      {
+        "title": "NIST AI Challenges: Forensics",
+        "url": "https://ai-challenges.nist.gov/forensics"
+      },
+      {
+        "title": "FTC: Scammers use AI to enhance their family emergency schemes",
+        "url": "https://consumer.ftc.gov/consumer-alerts/2023/03/scammers-use-ai-enhance-their-family-emergency-schemes"
+      },
+      {
+        "title": "About Reuters Fact Check",
+        "url": "https://www.reuters.com/fact-check/about/"
+      },
+      {
+        "title": "Liar's dividend",
+        "url": "https://en.wikipedia.org/wiki/Liar%27s_dividend"
+      }
+    ]
+  },
   "clusters": [
     {
       "id": "synthetic-media-forms",
@@ -24,17 +55,6 @@ export default definePuzzle(import.meta.url, {
         "cloned voice"
       ],
       "termInfo": {
-        "deepfake video": {
-          "text": "Video generated or altered to make a person appear to say or do something that did not occur.",
-          "links": [
-            {
-              "href": "wiki:Deepfake"
-            },
-            {
-              "href": "https://ai-challenges.nist.gov/forensics"
-            }
-          ]
-        },
         "cloned voice": {
           "text": "Synthetic speech made to imitate a particular person's vocal characteristics, sometimes from only a short sample.",
           "links": [
@@ -46,14 +66,14 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "generated image": {
-          "text": "An image produced by a generative model from a prompt or other inputs rather than captured directly by a camera.",
+        "deepfake video": {
+          "text": "Video generated or altered to make a person appear to say or do something that did not occur.",
           "links": [
             {
-              "href": "wiki:Text-to-image model"
+              "href": "wiki:Deepfake"
             },
             {
-              "href": "https://contentcredentials.org/"
+              "href": "https://ai-challenges.nist.gov/forensics"
             }
           ]
         },
@@ -62,6 +82,17 @@ export default definePuzzle(import.meta.url, {
           "links": [
             {
               "href": "wiki:Forgery"
+            },
+            {
+              "href": "https://contentcredentials.org/"
+            }
+          ]
+        },
+        "generated image": {
+          "text": "An image produced by a generative model from a prompt or other inputs rather than captured directly by a camera.",
+          "links": [
+            {
+              "href": "wiki:Text-to-image model"
             },
             {
               "href": "https://contentcredentials.org/"
@@ -107,17 +138,6 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "metadata": {
-          "text": "Structured information about a file, such as creation details, device data, software actions or descriptive fields.",
-          "links": [
-            {
-              "href": "wiki:Metadata"
-            },
-            {
-              "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
-            }
-          ]
-        },
         "digital signature": {
           "text": "A cryptographic mechanism used to verify that signed provenance data has not been changed and came from the stated signer.",
           "links": [
@@ -139,6 +159,17 @@ export default definePuzzle(import.meta.url, {
               "href": "https://contentcredentials.org/"
             }
           ]
+        },
+        "metadata": {
+          "text": "Structured information about a file, such as creation details, device data, software actions or descriptive fields.",
+          "links": [
+            {
+              "href": "wiki:Metadata"
+            },
+            {
+              "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
+            }
+          ]
         }
       },
       "info": {
@@ -153,32 +184,77 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "detection-signals",
+      "name": "Detection signals",
+      "color": "magenta",
+      "fact": "Detection signals are read from the media itself, through an embedded watermark, a classifier's estimate or expert examination, so they can work without a record attached by the creator, but they can also be wrong or removed.",
+      "terms": [
+        "AI-content detector",
+        "invisible watermark",
+        "forensic analysis"
+      ],
+      "seeds": [
+        "AI-content detector",
+        "forensic analysis"
+      ],
+      "termInfo": {
+        "AI-content detector": {
+          "text": "Software that estimates whether media or text was produced by a generative model, giving a probability rather than proof.",
+          "links": [
+            {
+              "href": "wiki:Artificial intelligence content detection"
+            },
+            {
+              "href": "https://ai-challenges.nist.gov/forensics"
+            }
+          ]
+        },
+        "forensic analysis": {
+          "text": "Systematic examination of digital media for manipulation traces, inconsistencies or technical evidence about how it was produced.",
+          "links": [
+            {
+              "href": "wiki:Digital forensics"
+            },
+            {
+              "href": "https://ai-challenges.nist.gov/forensics"
+            }
+          ]
+        },
+        "invisible watermark": {
+          "text": "A signal embedded in the pixels or audio of generated media that people cannot perceive but software can look for, and that can survive some copying.",
+          "links": [
+            {
+              "href": "wiki:Digital watermarking"
+            },
+            {
+              "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://ai-challenges.nist.gov/forensics"
+          }
+        ]
+      }
+    },
+    {
       "id": "human-verification",
       "name": "Human verification",
       "color": "amber",
-      "fact": "Technical signals help, but people still need to check the original publisher, seek independent corroboration, use a known contact channel and consult forensic analysis.",
+      "fact": "Technical signals help, but people still need to check the original publisher, seek independent corroboration and use a known contact channel.",
       "terms": [
         "original publisher",
         "independent corroboration",
-        "known-channel check",
-        "forensic analysis"
+        "known-channel check"
       ],
       "seeds": [
         "original publisher",
         "independent corroboration"
       ],
       "termInfo": {
-        "original publisher": {
-          "text": "The verified organization or account that first released the media and can confirm whether the circulating item belongs to its output.",
-          "links": [
-            {
-              "href": "wiki:Publishing"
-            },
-            {
-              "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
-            }
-          ]
-        },
         "independent corroboration": {
           "text": "Evidence from other reliable sources that supports or contradicts the event, identity or claim depicted in the media.",
           "links": [
@@ -201,14 +277,11 @@ export default definePuzzle(import.meta.url, {
             }
           ]
         },
-        "forensic analysis": {
-          "text": "Systematic examination of digital media for manipulation traces, inconsistencies or technical evidence about how it was produced.",
+        "original publisher": {
+          "text": "The verified organization or account that first released the media and can confirm whether the circulating item belongs to its output.",
           "links": [
             {
-              "href": "wiki:Digital forensics"
-            },
-            {
-              "href": "https://ai-challenges.nist.gov/forensics"
+              "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
             }
           ]
         }
@@ -253,11 +326,33 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "origin-evidence",
+      "term": "origin evidence",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Origin evidence bridges provenance and detection: a signed record is declared by the creating tool and can be stripped when metadata is lost, while a watermark or detector reads the content itself and can fail in different situations, so neither replaces the other.",
+      "info": {
+        "text": "Evidence about whether, and by what tool, media was generated, whether declared alongside the file or inferred from it.",
+        "links": [
+          {
+            "href": "https://spec.c2pa.org/specifications/specifications/2.4/explainer/Explainer.html"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": [
+        "Content Credentials",
+        "invisible watermark"
+      ]
+    },
+    {
       "id": "authentication",
       "term": "authentication",
       "clusters": [
         1,
-        2
+        3
       ],
       "fact": "Authentication bridges provenance signals and human verification: signatures and credentials can confirm a technical record, while people must still decide whether the signer, publisher and underlying claim deserve trust.",
       "info": {
@@ -290,13 +385,27 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "summary": "When convincing fakes are cheap, appearance proves little. This lesson separates the kinds of evidence that still help, and why none of them works alone.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Generative tools can now produce convincing video, cloned voices, images and documents. A realistic look is no longer evidence that something happened, so the useful question changes from \"does this look real?\" to \"what kind of evidence do I have, and how can it fail?\"\n\n## Three kinds of evidence\n\nThe first kind is a **recorded origin**. A creating tool or publisher can attach a signed record of how an asset was made and edited. A valid signature shows who signed and that the record has not been altered. It does not show that the content is true, and the record can be missing or stripped when a file is re-saved or re-shared.\n\nThe second kind is **inferred from the content itself**: an imperceptible watermark, a classifier's estimate, or expert forensic examination. These work without the creator's cooperation, but they give probabilities, not proof. Watermarks can be degraded, detectors make mistakes in both directions, and they fail in different situations than a signed record does. That difference is why one does not replace the other.\n\nThe third kind is **human checking of the claim and its source**: finding who first published the item, seeing whether independent reliable sources report the same event, and confirming a request through a phone number or account already known to be genuine. These checks work even when no tool can classify the file, and they are what turn technical signals into a decision about trust.\n\n## Why it matters beyond catching fakes\n\nCheap fabrication has a second effect. Once people know convincing fakes exist, genuine recordings can be dismissed as fake. This is called the *liar's dividend*. Documented origin and independent corroboration therefore matter twice: they expose fabrications, and they let authentic material be believed."
+    }
+  },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
         "name": "generative assistance",
         "kind": "generative"
+      },
+      {
+        "name": "Claude Code"
       }
     ]
-  }
+  },
+  "dateCreated": "2026-10-02",
+  "dateModified": "2026-10-02"
 });

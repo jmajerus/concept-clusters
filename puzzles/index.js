@@ -259,6 +259,11 @@ import massiveStarsRemnantsAndRecycling from "./astronomy/massive-stars-remnants
 import solarSystemInner from "./astronomy/solar-system-inner.js";
 import solarSystemOuter from "./astronomy/solar-system-outer.js";
 import stellarFormationAndSunlikeEvolution from "./astronomy/stellar-formation-and-sunlike-evolution.js";
+import climateChangeAndManufacturedDoubt from "./atmospheric-science/climate-change-and-manufactured-doubt.js";
+import fungalDiseasesVegetables from "./botany/fungal-diseases-vegetables.js";
+import manulColdSteppeCat from "./zoology/manul-cold-steppe-cat.js";
+import manulUnderPressure from "./zoology/manul-under-pressure.js";
+import personPlaceAndTime from "./public-health/person-place-and-time.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -528,6 +533,11 @@ export const PUZZLES = [
   solarSystemInner,
   solarSystemOuter,
   stellarFormationAndSunlikeEvolution,
+  climateChangeAndManufacturedDoubt,
+  fungalDiseasesVegetables,
+  manulColdSteppeCat,
+  manulUnderPressure,
+  personPlaceAndTime,
 ];
 
 export default PUZZLES;
