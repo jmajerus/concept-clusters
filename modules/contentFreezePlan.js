@@ -136,13 +136,15 @@ function puzzleDetailsFromRows(rows = [], categoryRegistry = CATEGORIES) {
  * @param {{
  *   contentDocuments?: object | null,
  *   gitIds?: { puzzles?: string[], catalogues?: string[], categories?: string[] },
- *   categoryRegistry?: Record<string, any>
+ *   categoryRegistry?: Record<string, any>,
+ *   gitCategoryRegistry?: Record<string, any>
  * }} options
  */
 export async function loadContentFreezePlan({
   contentDocuments,
   gitIds = { puzzles: [], catalogues: [], categories: [] },
-  categoryRegistry = CATEGORIES
+  categoryRegistry = CATEGORIES,
+  gitCategoryRegistry = categoryRegistry
 } = {}) {
   if (!contentDocuments) return emptyContentFreezePlan();
   const [publishedPuzzles, publishedCatalogues, publishedCategories] = await Promise.all([
@@ -157,7 +159,8 @@ export async function loadContentFreezePlan({
     gitPuzzleIds: gitIds.puzzles || [],
     gitCatalogueIds: gitIds.catalogues || [],
     gitCategoryIds: gitIds.categories || [],
-    categoryRegistry
+    categoryRegistry,
+    gitCategoryRegistry
   });
 }
 
@@ -196,10 +199,15 @@ function withoutReserved(rowsOrIds = []) {
   });
 }
 
+export function gitCategoryRegistryFromContentService(contentService = {}) {
+  const source = contentService || {};
+  return source.state?.categories || source.categories || {};
+}
+
 export function gitIdsFromContentService(contentService = {}) {
   const source = contentService || {};
   const catalogues = source.state?.catalogues || source.catalogues || [];
-  const categories = source.state?.categories || source.categories || {};
+  const categories = gitCategoryRegistryFromContentService(source);
   const puzzles = source.puzzles || source.state?.puzzles || [];
   const puzzleIds = source.knownPuzzleIds instanceof Set
     ? [...source.knownPuzzleIds]
@@ -283,7 +291,8 @@ function resolveFreezeDependencies({
   gitPuzzleIds,
   gitCatalogueIds,
   gitCategoryIds,
-  categoryRegistry = CATEGORIES
+  categoryRegistry = CATEGORIES,
+  gitCategoryRegistry = categoryRegistry
 }) {
   const rows = {
     puzzle: activeRowsById(publishedPuzzles),
@@ -340,7 +349,9 @@ function resolveFreezeDependencies({
     }
   }
 
-  // A category id already in git does not mean its subcategory registry is.
+  // A category id already in the checkout does not mean its subcategory
+  // registry is. The authoring registry passed in for id resolution already
+  // includes published D1 subcategories, so this check uses the git registry.
   // Cue the published category when a shipping puzzle names a subcategory
   // that snapshot registers and this checkout does not.
   function requireSubcategoryRegistrations(puzzleId, document) {
@@ -350,7 +361,7 @@ function resolveFreezeDependencies({
       if (typeof subcategoryId !== "string" || !subcategoryId.trim()) continue;
       const categoryId = categoryIdFor(category, categoryRegistry);
       if (!categoryId) continue;
-      const gitSubcategories = categoryMetadataFor(categoryId, categoryRegistry)?.subcategories;
+      const gitSubcategories = categoryMetadataFor(categoryId, gitCategoryRegistry)?.subcategories;
       if (gitSubcategories?.[subcategoryId]) continue;
       const publishedSubcategories = rows.category.get(categoryId)?.document?.subcategories;
       if (!publishedSubcategories
@@ -431,7 +442,8 @@ function automaticIdsFor(dependencies, kind) {
  *   gitPuzzleIds?: string[],
  *   gitCatalogueIds?: string[],
  *   gitCategoryIds?: string[],
- *   categoryRegistry?: Record<string, any>
+ *   categoryRegistry?: Record<string, any>,
+ *   gitCategoryRegistry?: Record<string, any>
  * }} options
  */
 export function planContentFreeze({
@@ -441,7 +453,8 @@ export function planContentFreeze({
   gitPuzzleIds = [],
   gitCatalogueIds = [],
   gitCategoryIds = [],
-  categoryRegistry = CATEGORIES
+  categoryRegistry = CATEGORIES,
+  gitCategoryRegistry = categoryRegistry
 } = {}) {
   const dependencies = resolveFreezeDependencies({
     publishedPuzzles,
@@ -450,7 +463,8 @@ export function planContentFreeze({
     gitPuzzleIds,
     gitCatalogueIds,
     gitCategoryIds,
-    categoryRegistry
+    categoryRegistry,
+    gitCategoryRegistry
   });
   const automaticPuzzles = automaticIdsFor(dependencies, "puzzle");
   const automaticCatalogues = automaticIdsFor(dependencies, "catalogue");

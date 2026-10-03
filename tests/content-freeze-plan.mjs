@@ -448,4 +448,33 @@ export async function run() {
   });
   assert.deepEqual(authorCuedCategory.categories.update, ["media-information-literacy"]);
   assert.deepEqual(authorCuedCategory.dependencies.automatic, []);
+
+  // Freeze resolves ids against the merged authoring registry, which already
+  // contains published subcategory registrations. The checkout does not.
+  const mergedAheadOfGit = planContentFreeze({
+    publishedPuzzles: [{
+      id: "media-literacy",
+      cuedForFreezeAt: "2026-10-03T00:00:00.000Z",
+      document: {
+        category: "media-information-literacy",
+        subcategories: { "media-information-literacy": "verification-fact-checking" }
+      }
+    }],
+    publishedCategories: [literacyCategory],
+    gitPuzzleIds: ["media-literacy"],
+    gitCategoryIds: ["media-information-literacy"],
+    categoryRegistry: {
+      "Media & Information Literacy": {
+        slug: "media-information-literacy",
+        subcategories: literacyCategory.document.subcategories
+      }
+    },
+    gitCategoryRegistry: literacyRegistry
+  });
+  assert.deepEqual(mergedAheadOfGit.categories.update, ["media-information-literacy"]);
+  assert.deepEqual(mergedAheadOfGit.dependencies.automatic, [{
+    kind: "category",
+    id: "media-information-literacy",
+    requiredBy: [{ kind: "puzzle", id: "media-literacy" }]
+  }]);
 }

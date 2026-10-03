@@ -12,6 +12,7 @@ import { loadWikiLinkHealth } from "./wikiLinkCheck.js";
 import {
   emptyContentFreezePlan,
   gitIdsFromContentService,
+  gitCategoryRegistryFromContentService,
   isCuedForFreeze,
   loadContentFreezePlan
 } from "./contentFreezePlan.js";
@@ -187,7 +188,8 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
           return loadContentFreezePlan({
             contentDocuments: resolved.contentDocuments,
             gitIds: gitIdsFromContentService(contentService),
-            categoryRegistry
+            categoryRegistry,
+            gitCategoryRegistry: gitCategoryRegistryFromContentService(contentService)
           });
         } catch {
           return emptyContentFreezePlan();

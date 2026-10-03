@@ -104,7 +104,7 @@ async function freezeFromOriginCheckout(additionalContext, githubConfig) {
     { GitHubRepositoryClient },
     { D1FreezePublicationRepository },
     { createFreezePublicationService },
-    { loadContentFreezePlan, gitIdsFromContentService },
+    { loadContentFreezePlan, gitIdsFromContentService, gitCategoryRegistryFromContentService },
     { loadMergedCategoryRegistry },
     { applyContentFreeze },
     { createContentInterchangeService },
@@ -143,7 +143,8 @@ async function freezeFromOriginCheckout(additionalContext, githubConfig) {
   const plan = await loadContentFreezePlan({
     contentDocuments: resolved.contentDocuments,
     gitIds: gitIdsFromContentService(contentService),
-    categoryRegistry
+    categoryRegistry,
+    gitCategoryRegistry: gitCategoryRegistryFromContentService(contentService)
   });
 
   const result = await applyContentFreeze({
