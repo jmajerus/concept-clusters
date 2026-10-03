@@ -780,7 +780,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!document.learningIntroduction) {
     advisory.push({
       id: "learning-introduction",
-      message: "No learningIntroduction. Prefer a lesson on the learning objective and how the ideas relate when the subject is technical, sequential, or easy to misframe; leave unset when title and clusters already orient clearly."
+      message: "No learningIntroduction. A lesson helps in almost every case, because the author cannot know what the player already knows."
     });
   }
 

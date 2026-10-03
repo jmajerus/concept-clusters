@@ -921,15 +921,11 @@ until a richer schema is justified.
 button **Lesson** (the dialog title still defaults to **Before You Begin**).
 Write the lesson the subject needs, in the order the subject needs: domain
 knowledge, vocabulary, framing, examples, how the ideas relate, and why the
-groupings hold. Omit the field only when the board title and clusters
-already orient clearly. Prefer a lesson for technical, sequential, or
-easy-to-misframe subjects. Write about the **subject**, not the puzzle
+groupings hold. Write one in almost every case: the author cannot know
+what the player already knows. Write about the **subject**, not the puzzle
 mechanism. Do not author a preview, a teaser, or a split.
 
-Play shows the start of that text, then **Continue reading** for the rest.
-The cut is made in play, at a paragraph boundary. Once the board and its
-lenses are complete, the same dialog opens on the full text. A short lesson
-is shown whole.
+Play shows the whole lesson in the dialog before the board.
 
 The three requirement levels deliberately behave differently:
 
@@ -939,8 +935,8 @@ The three requirement levels deliberately behave differently:
   puzzle** without reading.
 - `required` holds the board until the learner chooses **Start puzzle** in
   the lesson. Use this sparingly, for example when the puzzle depends on a
-  particular source. That choice acknowledges the lesson at the preview or
-  after Continue reading. Closing the dialog, including Escape, returns to
+  particular source. Choosing **Start puzzle** acknowledges the lesson.
+  Closing the dialog, including Escape, returns to
   the invitation and leaves the board held.
 
 A read or skipped choice is stored separately from puzzle progress. It is

@@ -100,9 +100,7 @@ import {
 } from "./modules/learningIntroduction.js";
 import {
   loadLearningIntroductionStatus,
-  loadShowFullLessons,
-  saveLearningIntroductionStatus,
-  saveShowFullLessons
+  saveLearningIntroductionStatus
 } from "./modules/learningIntroductionStore.js";
 import {
   clearPlayerSession,
@@ -184,13 +182,6 @@ if (playSource === "d1" && overviewSearchInputEl) {
 }
 const overviewListEl = document.getElementById("overview-list");
 const overviewRelatedCataloguesEl = document.getElementById("overview-related-catalogues");
-const showFullLessonsEl = document.getElementById("show-full-lessons");
-if (showFullLessonsEl) {
-  showFullLessonsEl.checked = loadShowFullLessons(localStorage);
-  showFullLessonsEl.addEventListener("change", () => {
-    saveShowFullLessons(localStorage, showFullLessonsEl.checked);
-  });
-}
 const overviewShareBtn = document.getElementById("overview-share-btn");
 const overviewShareStatusEl = document.getElementById("overview-share-status");
 const lensPanelEl = document.getElementById("lens-panel");
@@ -976,17 +967,8 @@ function puzzleAboutFacts(puzzle) {
   };
 }
 
-function puzzleFullyComplete() {
-  if (!state?.puzzle || layoutAuthoringMode || authoringStudio?.isConstruct()) return false;
-  if (state.learningGated || state.made !== state.need) return false;
-  if (state.puzzle.lenses?.length) return state.phase === "complete";
-  return true;
-}
-
 // One slot: "Lesson" when the puzzle has an authored introduction (with its
-// read/skip gate), "About" otherwise. The dialog previews the lesson and
-// offers Continue reading until the board and its lenses are complete,
-// or until the visitor's "Always show full lessons" preference is on.
+// read/skip gate), "About" otherwise. The dialog shows the whole lesson.
 function updateLearningIntroduction() {
   const introduction = state?.learningIntroduction || null;
   const gated = !layoutAuthoringMode && learningIntroductionGate(
@@ -1011,7 +993,6 @@ function updateLearningIntroduction() {
     introduction,
     about: puzzleAboutFacts(state.puzzle),
     gate: gated,
-    lessonExpanded: puzzleFullyComplete(),
     status: state.learningIntroductionStatus
   } : null;
 }

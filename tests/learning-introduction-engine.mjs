@@ -8,15 +8,11 @@ import {
 import {
   decodeAuthoredEscapedNewlines,
   learningIntroductionGate,
-  LESSON_PREVIEW_CHARACTERS,
-  normalizedLearningIntroduction,
-  truncateLearningMarkdown
+  normalizedLearningIntroduction
 } from "../modules/learningIntroduction.js";
 import {
   loadLearningIntroductionStatus,
-  loadShowFullLessons,
-  saveLearningIntroductionStatus,
-  saveShowFullLessons
+  saveLearningIntroductionStatus
 } from "../modules/learningIntroductionStore.js";
 import {
   definePuzzle,
@@ -57,18 +53,6 @@ export async function run() {
   assert.equal(learningIntroductionGate({ requirement: "required" }, "skipped"), true);
   assert.equal(learningIntroductionGate({ requirement: "required" }, "read"), false);
   assert.equal(learningIntroductionGate({ requirement: "optional" }, null), false);
-
-  const opening = "Visible opening.";
-  const rest = "R".repeat(LESSON_PREVIEW_CHARACTERS);
-  const cut = truncateLearningMarkdown(`${opening}\n\n${rest}`);
-  assert.equal(cut.preview, opening);
-  assert.equal(cut.remainder, rest);
-  assert.deepEqual(truncateLearningMarkdown("Short only."), {
-    preview: "Short only.",
-    remainder: ""
-  });
-  const oneBlock = "A".repeat(LESSON_PREVIEW_CHARACTERS + 40);
-  assert.equal(truncateLearningMarkdown(oneBlock).remainder, "");
 
   const packagedPuzzle = definePuzzle(
     new URL("../puzzles/public-health/from-evidence-to-action.js", import.meta.url),
@@ -165,13 +149,6 @@ export async function run() {
       }
     }
   );
-  const lessonPreference = memoryStorage();
-  assert.equal(loadShowFullLessons(lessonPreference), false);
-  assert.equal(saveShowFullLessons(lessonPreference, true), true);
-  assert.equal(loadShowFullLessons(lessonPreference), true);
-  assert.equal(saveShowFullLessons(lessonPreference, false), true);
-  assert.equal(loadShowFullLessons(lessonPreference), false);
-
   const assetErrors = await validateLearningIntroduction(unsafeAsset);
   assert.ok(assetErrors.some(error => error.includes("non-empty alt text")));
   assert.ok(assetErrors.some(error => error.includes("invalid or missing")));

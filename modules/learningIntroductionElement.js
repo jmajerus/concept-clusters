@@ -1,8 +1,4 @@
-import {
-  loadLearningIntroduction,
-  truncateLearningMarkdown
-} from "./learningIntroduction.js";
-import { loadShowFullLessons } from "./learningIntroductionStore.js";
+import { loadLearningIntroduction } from "./learningIntroduction.js";
 import { RECORDING_START_DATE } from "./authoringDomains.js";
 import { resolveLessonByline } from "./authoringProvenance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
@@ -71,8 +67,6 @@ class LearningIntroductionElement extends HTMLElement {
   #loading = null;
   #abortController = null;
   #returnFocus = null;
-  #lessonExpanded = false;
-  #focusRemainder = false;
   #initialized = false;
 
   constructor() {
@@ -168,7 +162,6 @@ class LearningIntroductionElement extends HTMLElement {
         .lesson figure { margin: 16px 0; text-align: center; }
         .lesson img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px; }
         .lesson figcaption { margin-top: 5px; color: var(--ink-soft); font-size: 13px; }
-        button.continue-reading { margin-top: 4px; }
         .sources { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--rule); }
         .sources h3 { margin: 0 0 5px; font-size: 14px; }
         .sources ul { margin: 0; padding-left: 20px; }
@@ -282,7 +275,6 @@ class LearningIntroductionElement extends HTMLElement {
 
   async openLesson(returnFocus = document.activeElement) {
     if (!this.#model) return false;
-    this.#lessonExpanded = this.#model.lessonExpanded === true;
     this.#returnFocus = returnFocus;
     this.#render();
     const dialog = this.shadowRoot.getElementById("dialog");
@@ -302,7 +294,6 @@ class LearningIntroductionElement extends HTMLElement {
     this.#abortController = null;
     this.#loading = null;
     this.#loaded = null;
-    this.#lessonExpanded = false;
     this.closeLesson();
     this.shadowRoot?.getElementById("lesson")?.replaceChildren();
   }
@@ -448,38 +439,12 @@ class LearningIntroductionElement extends HTMLElement {
     const lesson = root.getElementById("lesson");
     const status = root.getElementById("lesson-status");
     const finish = root.getElementById("finish");
-    const { preview, remainder } = truncateLearningMarkdown(this.#loaded.markdown);
-    const showAll = loadShowFullLessons(localStorage) || this.#lessonExpanded || !remainder;
     const options = {
       baseUrl: this.#loaded.baseUrl,
       resolveAssetUrl: src =>
         resolvePuzzleResourceUrl(this.#model.puzzle, src, this.#loaded.baseUrl).href
     };
-    lesson.replaceChildren();
-    if (showAll && remainder && this.#focusRemainder) {
-      const continued = document.createElement("div");
-      continued.id = "lesson-remainder";
-      continued.tabIndex = -1;
-      continued.appendChild(renderSafeMarkdown(remainder, options));
-      lesson.append(renderSafeMarkdown(preview, options), continued);
-      this.#focusRemainder = false;
-      continued.focus();
-    } else {
-      lesson.appendChild(renderSafeMarkdown(showAll ? this.#loaded.markdown : preview, options));
-    }
-    if (!showAll) {
-      const more = document.createElement("button");
-      more.id = "continue-reading";
-      more.className = "continue-reading primary";
-      more.type = "button";
-      more.textContent = "Continue reading";
-      more.addEventListener("click", () => {
-        this.#lessonExpanded = true;
-        this.#focusRemainder = true;
-        this.#paintLoaded();
-      });
-      lesson.appendChild(more);
-    }
+    lesson.replaceChildren(renderSafeMarkdown(this.#loaded.markdown, options));
     status.hidden = true;
     finish.hidden = false;
     finish.textContent = this.#model.gate ? "Start puzzle" : "Return to puzzle";

@@ -327,14 +327,12 @@ is the better browse home.
 A learning introduction is one optional Markdown document. Write the lesson
 the subject needs, in the order the subject needs: the learning objective,
 the domain (vocabulary, stakes, why this subject matters), and how the ideas
-relate, including the groupings and why they hold. Omit the field when the
-title and cluster names already orient clearly; prefer it when the subject
-is technical, sequential, or easy to misframe.
+relate, including the groupings and why they hold. Write one in almost
+every case: the author cannot know what the player already knows.
 
 Write it about the **subject**, not the puzzle. It should not mention
 clusters, bridges, lenses, boards, or sorting. Do not author a preview, a
-teaser, or a split. Play shows the start, then Continue reading, and opens
-the full text once the puzzle and its lenses are complete. Mark it
+teaser, or a split. Play shows the whole lesson before the board. Mark it
 `required` only when the puzzle truly depends on it; otherwise prefer
 `recommended` or `optional`. `required` holds the board until the learner
 chooses Start puzzle in the lesson. Closing the dialog returns to the

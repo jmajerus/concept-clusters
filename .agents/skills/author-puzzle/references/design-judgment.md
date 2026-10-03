@@ -53,9 +53,8 @@ module disagree, trust the module.
   **subject**: the learning objective, the domain, and how the ideas relate,
   including the groupings and why they hold. No clusters, bridges, lenses,
   boards, sorting, or gameplay instructions. Do not author a preview, a
-  teaser, or a split. Play shows the start, then Continue reading, and the
-  full text once the board and its lenses are complete. Omit when the title
-  and clusters already orient clearly; prefer a lesson for technical,
-  sequential, or easy-to-misframe subjects. `required` holds the board until
+  teaser, or a split. Play shows the whole lesson before the board. Write
+  one in almost every case: the author cannot know what the player already
+  knows. `required` holds the board until
   the learner chooses Start puzzle in the lesson and should be rare; most lessons should
   be `optional` or `recommended`.

@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
-import { LESSON_PREVIEW_CHARACTERS } from "../modules/learningIntroduction.js";
 
-export const name = "learning lesson: preview, continue reading, full text at the end";
+export const name = "learning lesson: the dialog shows the whole lesson";
 
 const ready = page => page.waitForFunction(() => window.CC?.state);
-const REST = `The chapter may name the groups. ${"word ".repeat(LESSON_PREVIEW_CHARACTERS)}`;
+const REST = "The chapter may name the groups. The later section still belongs in the first reading.";
 
 function puzzle(id, { lenses } = {}) {
   return {
@@ -34,7 +33,7 @@ function puzzle(id, { lenses } = {}) {
       requirement: "recommended",
       title: "Before You Begin: Groups",
       content: {
-        text: `Orientation stays in the preview.\n\n${REST}`,
+        text: `Orientation opens the lesson.\n\n${REST}`,
         mediaType: "text/markdown"
       }
     },
@@ -54,10 +53,9 @@ function lessonText(page) {
   return page.evaluate(() => {
     const root = document.querySelector("#learning-introduction")?.shadowRoot;
     const lesson = root?.getElementById("lesson");
-    const more = root?.getElementById("continue-reading");
     return {
       text: lesson?.textContent || "",
-      continueReading: !!more && !more.hidden
+      continueReading: !!root?.getElementById("continue-reading")
     };
   });
 }
@@ -72,41 +70,23 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=graph`);
   await ready(page);
   await page.evaluate(() => localStorage.clear());
+  assert.equal(await page.locator("#show-full-lessons").count(), 0);
+  assert.equal(await page.locator("#library-preferences").count(), 0);
 
-  await openFixture(page, puzzle("lesson-preview-plain"));
+  await openFixture(page, puzzle("lesson-whole"));
   await page.click("#learning-introduction #read");
-  await page.waitForFunction(() => {
-    const lesson = document.querySelector("#learning-introduction")
-      ?.shadowRoot?.getElementById("lesson");
-    return lesson?.textContent?.includes("Orientation stays in the preview");
-  });
-  let shown = await lessonText(page);
-  assert.match(shown.text, /Orientation stays in the preview/);
-  assert.equal(shown.text.includes("The chapter may name the groups"), false);
-  assert.equal(shown.continueReading, true);
-  await page.click("#learning-introduction #continue-reading");
-  assert.equal(await page.evaluate(() => document.querySelector("#learning-introduction")
-    ?.shadowRoot?.activeElement?.id), "lesson-remainder");
-  shown = await lessonText(page);
-  assert.match(shown.text, /The chapter may name the groups/);
-  assert.equal(shown.continueReading, false);
-  await page.click("#learning-introduction #finish");
-
-  await page.evaluate(() => CC.showSolution());
-  await page.waitForFunction(() => CC.state.phase === "complete");
-  await page.click("#learning-review");
   await page.waitForFunction(() => {
     const lesson = document.querySelector("#learning-introduction")
       ?.shadowRoot?.getElementById("lesson");
     return lesson?.textContent?.includes("The chapter may name the groups");
   });
-  shown = await lessonText(page);
-  assert.match(shown.text, /Orientation stays in the preview/);
+  let shown = await lessonText(page);
+  assert.match(shown.text, /Orientation opens the lesson/);
   assert.match(shown.text, /The chapter may name the groups/);
   assert.equal(shown.continueReading, false);
-  await page.click("#learning-introduction #close");
+  await page.click("#learning-introduction #finish");
 
-  const lensPuzzle = puzzle("lesson-preview-lenses", {
+  const lensPuzzle = puzzle("lesson-whole-lenses", {
     lenses: [{
       id: "floating",
       prompt: "Which term was left to place?",
@@ -120,10 +100,13 @@ export async function run(page, baseURL) {
   await page.waitForFunction(() => CC.state.phase === "lens-selecting");
   await page.click("#learning-review");
   await page.waitForFunction(() => {
-    const root = document.querySelector("#learning-introduction")?.shadowRoot;
-    return root?.getElementById("continue-reading") &&
-      !root.getElementById("lesson")?.textContent?.includes("The chapter may name the groups");
+    const lesson = document.querySelector("#learning-introduction")
+      ?.shadowRoot?.getElementById("lesson");
+    return lesson?.textContent?.includes("The chapter may name the groups");
   });
+  shown = await lessonText(page);
+  assert.match(shown.text, /The chapter may name the groups/);
+  assert.equal(shown.continueReading, false);
   await page.click("#learning-introduction #close");
   await page.locator(".node").filter({
     has: page.locator("text").filter({ hasText: /^c$/ })
@@ -132,32 +115,14 @@ export async function run(page, baseURL) {
   await page.waitForFunction(() => CC.state.phase === "complete");
   await page.click("#learning-review");
   await page.waitForFunction(() => {
-    const root = document.querySelector("#learning-introduction")?.shadowRoot;
-    const lesson = root?.getElementById("lesson");
-    return lesson?.textContent?.includes("The chapter may name the groups") &&
-      !root.getElementById("continue-reading");
+    const lesson = document.querySelector("#learning-introduction")
+      ?.shadowRoot?.getElementById("lesson");
+    return lesson?.textContent?.includes("The chapter may name the groups");
   });
-
-  await page.click("#learning-introduction #close");
-  await page.click("#browse-puzzles");
-  await page.click("#library-preferences summary");
-  await page.click("#show-full-lessons");
-  assert.equal(await page.evaluate(() => localStorage.getItem("ccShowFullLessons")), "1");
-  await openFixture(page, puzzle("lesson-preview-preference"));
-  await page.click("#learning-introduction #read");
-  await page.waitForFunction(() => {
-    const root = document.querySelector("#learning-introduction")?.shadowRoot;
-    return root?.getElementById("lesson")?.textContent?.includes("The chapter may name the groups") &&
-      !root.getElementById("continue-reading") &&
-      !root.getElementById("show-full-lessons");
-  });
-  await page.click("#learning-introduction #close");
-  await page.click("#browse-puzzles");
-  await page.click("#show-full-lessons");
-  await openFixture(page, puzzle("lesson-preview-preference"));
-  await page.click("#learning-introduction #read");
-  await page.waitForFunction(() => document.querySelector("#learning-introduction")
-    ?.shadowRoot?.getElementById("continue-reading"));
+  shown = await lessonText(page);
+  assert.match(shown.text, /Orientation opens the lesson/);
+  assert.match(shown.text, /The chapter may name the groups/);
+  assert.equal(shown.continueReading, false);
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

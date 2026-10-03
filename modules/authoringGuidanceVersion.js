@@ -153,7 +153,11 @@
 // 6.7: same review bar. check_puzzle_links also reports reachability of
 // other http(s) links, including citation URLs. Inconclusive is not a
 // broken link, and a live response is not a reading of the page.
+// 6.8: same review bar. Play shows the whole learning introduction before
+// the board.
+// 6.9: same review bar. A learning introduction helps in almost every case.
+// The author cannot know what the player already knows.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 7
+  minor: 9
 });

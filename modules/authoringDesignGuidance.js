@@ -282,9 +282,8 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   how the ideas relate, including the groupings and why they hold. Write
   about the **subject**. Do not mention clusters, bridges, lenses, boards,
   sorting, or how play works. Do not author a preview, a teaser, or a split.
-  Play shows the start, then Continue reading, and opens the full text once
-  the board and its lenses are complete. Omit the whole field when the board
-  title and cluster names already orient clearly. requirement: optional and
+  Play shows the whole lesson before the board. Write one in almost every
+  case: the author cannot know what the player already knows. requirement: optional and
   recommended both leave the board reachable without reading (recommended
   leads with the invitation first); required holds the board until the
   learner chooses Start puzzle in the lesson. Closing the dialog returns
@@ -537,13 +536,13 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   every term that answers the question. Bound the wording so plausible
   excluded terms are not also defensibly correct. Order multiple lenses
   as a progression instead of unrelated trivia.
-- Prefer a learningIntroduction when orientation helps. Write one lesson
+- Prefer a learningIntroduction. A lesson helps in almost every case,
+  because the author cannot know what the player already knows. Write one lesson
   about the subject: the learning objective, the domain, and how the ideas
   relate, including the groupings and why they hold. No clusters, bridges,
   lenses, boards, sorting instructions, or gameplay instructions. Do not
-  author a preview, a teaser, or a split. Play shows the start, then
-  Continue reading, and the full text once the board and its lenses are
-  complete. Omit the field when the board already orients clearly. Reserve
+  author a preview, a teaser, or a split. Play shows the whole lesson before
+  the board. Reserve
   required for material the puzzle truly depends on; otherwise prefer
   optional or recommended. required holds the board until the learner
   chooses Start puzzle in the lesson. Closing the dialog returns to the
