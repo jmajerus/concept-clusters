@@ -21,6 +21,7 @@
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
+import { matchReviewIssue, nextReviewIssueId } from "./contentDocumentRepository.js";
 import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "./draftReviewPage.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
@@ -843,13 +844,24 @@ export function createLocalDraftReviewHandler({
             return true;
           }
           if (action === "open") {
-            issueId = `issue-${crypto.randomUUID()}`;
+            const threads = await contentDocuments.listPuzzleReviewIssues({
+              id: puzzleId,
+              includeResolved: true,
+              uncapped: true
+            });
+            issueId = nextReviewIssueId(threads);
           } else {
-            const issue = issueId ? await contentDocuments.getPuzzleReviewIssue({ id: puzzleId, issueId }) : null;
+            const threads = await contentDocuments.listPuzzleReviewIssues({
+              id: puzzleId,
+              includeResolved: true,
+              uncapped: true
+            });
+            const issue = matchReviewIssue(threads, issueId);
             if (!issue) {
               html(res, "<p>That review issue does not exist for this puzzle.</p>", 404);
               return true;
             }
+            issueId = issue.issueId;
             if ((action === "note" || action === "resolve") && issue.status !== "open") {
               html(res, "<p>Reopen this issue before adding a note or resolving it.</p>", 400);
               return true;

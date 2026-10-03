@@ -565,7 +565,28 @@ export async function run() {
     assert.equal(openIssue.status, 303);
     const openIssues = await contentDocuments.listPuzzleReviewIssues({ id: "energy-flow" });
     assert.equal(openIssues.length, 1);
+    assert.equal(openIssues[0].number, 1);
+    assert.equal(openIssues[0].issueId, "1");
     assert.equal(openIssues[0].summary, "Verify the bridge source");
+    const afterOpen = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review/review-issues"
+    }, afterOpen), true);
+    assert.equal(afterOpen.status, 200);
+    assert.match(afterOpen.body, /Issue 1/);
+    assert.match(afterOpen.body, /Verify the bridge source/);
+    assert.doesNotMatch(afterOpen.body, /issue-[0-9a-f]{8}-/);
+    const noted = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review/review-issues", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=review-issue&issue_action=note&issue_id=1&comments=Still+checking+the+source"
+    }), noted), true);
+    assert.equal(noted.status, 303);
+    const notedIssues = await contentDocuments.listPuzzleReviewIssues({ id: "energy-flow" });
+    assert.equal(notedIssues.length, 1);
+    assert.equal(notedIssues[0].events.at(-1).comments, "Still checking the source");
 
     const markedReady = createResponse();
     assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {

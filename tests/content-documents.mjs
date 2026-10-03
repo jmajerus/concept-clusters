@@ -386,6 +386,7 @@ export async function run() {
   });
   assert.deepEqual(await repo.listPuzzleReviewIssues({ id: "unpublished-handoff" }), [{
     issueId: "issue-unpublished-handoff",
+    number: 1,
     status: "open",
     openedAt: handoffTime,
     openedBy: "agent",
@@ -445,6 +446,12 @@ export async function run() {
   assert.equal(revisionIssue.openingRevision, 3);
   assert.equal(revisionIssue.lastRecordedRevision, 5);
   assert.equal(revisionIssue.draftRevisedSinceOpening, true);
+  assert.equal(revisionIssue.number, 2);
+  const numberedHandoff = (await repo.listPuzzleReviewIssues({
+    id: "unpublished-handoff",
+    includeResolved: true
+  })).find(issue => issue.issueId === "issue-unpublished-handoff");
+  assert.equal(numberedHandoff.number, 1);
 
   const beforeProposals = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
   const proposal = {

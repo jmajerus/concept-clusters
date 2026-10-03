@@ -349,9 +349,55 @@ function reviewIssueThreads(events) {
     thread.events.push(event);
     threads.set(event.issueId, thread);
   }
-  return [...threads.values()].sort((left, right) =>
-    String(right.lastActivityAt).localeCompare(String(left.lastActivityAt))
+  const opened = [...threads.values()].sort((left, right) =>
+    String(left.openedAt).localeCompare(String(right.openedAt))
+    || (Number(left.events[0]?.id) || 0) - (Number(right.events[0]?.id) || 0)
+    || String(left.issueId).localeCompare(String(right.issueId))
   );
+  const usedNumbers = new Set();
+  for (const thread of opened) {
+    const parsed = /^[1-9]\d*$/.test(thread.issueId) ? Number(thread.issueId) : null;
+    if (parsed != null && parsed <= Number.MAX_SAFE_INTEGER && !usedNumbers.has(parsed)) {
+      thread.number = parsed;
+      usedNumbers.add(parsed);
+    }
+  }
+  let nextNumber = 1;
+  for (const thread of opened) {
+    if (Number.isInteger(thread.number)) continue;
+    while (usedNumbers.has(nextNumber)) nextNumber += 1;
+    thread.number = nextNumber;
+    usedNumbers.add(nextNumber);
+    nextNumber += 1;
+  }
+  return opened.sort((left, right) =>
+    String(right.lastActivityAt).localeCompare(String(left.lastActivityAt))
+    || right.number - left.number
+  );
+}
+
+export function nextReviewIssueId(issues) {
+  const highest = (Array.isArray(issues) ? issues : []).reduce(
+    (max, issue) => Math.max(max, Number(issue.number) || 0),
+    0
+  );
+  return String(highest + 1);
+}
+
+export function matchReviewIssue(issues, handle) {
+  const wanted = String(handle || "").trim();
+  if (!wanted) return null;
+  return issues.find(issue => issue.issueId === wanted)
+    || issues.find(issue => String(issue.number) === wanted)
+    || null;
+}
+
+function limitReviewIssues(threads, { limit = 50, includeResolved = false, uncapped = false } = {}) {
+  if (uncapped) return threads;
+  const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
+  return threads
+    .filter(issue => includeResolved || issue.status === "open")
+    .slice(0, cappedLimit);
 }
 
 export class ContentDocumentNotFoundError extends Error {
@@ -675,17 +721,18 @@ export class D1ContentDocumentRepository {
     return row ? reviewEventRecord(row) : null;
   }
 
-  async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
+  async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false, uncapped = false }) {
     assertDraftId(id);
-    const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
     const result = await this.database.prepare(`
       SELECT * FROM puzzle_review_events
       WHERE puzzle_id = ? AND issue_id IS NOT NULL
       ORDER BY reviewed_at ASC, id ASC
     `).bind(id).all();
-    return reviewIssueThreads(result.results.map(reviewEventRecord))
-      .filter(issue => includeResolved || issue.status === "open")
-      .slice(0, cappedLimit);
+    return limitReviewIssues(reviewIssueThreads(result.results.map(reviewEventRecord)), {
+      limit,
+      includeResolved,
+      uncapped
+    });
   }
 
   async getPuzzleReviewIssue({ id, issueId }) {
@@ -1245,16 +1292,13 @@ export function createMemoryContentDocumentRepository() {
       const row = reviewEvents.find(event => event.puzzle_id === id && event.id === eventId);
       return row ? reviewEventRecord(row) : null;
     },
-    async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
+    async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false, uncapped = false }) {
       assertDraftId(id);
-      const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
       const events = reviewEvents
         .filter(event => event.puzzle_id === id && event.issue_id)
         .sort((left, right) => String(left.reviewed_at).localeCompare(String(right.reviewed_at)) || left.id - right.id)
         .map(reviewEventRecord);
-      return reviewIssueThreads(events)
-        .filter(issue => includeResolved || issue.status === "open")
-        .slice(0, cappedLimit);
+      return limitReviewIssues(reviewIssueThreads(events), { limit, includeResolved, uncapped });
     },
     async getPuzzleReviewIssue({ id, issueId }) {
       assertDraftId(id);

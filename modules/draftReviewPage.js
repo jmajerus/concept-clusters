@@ -1352,6 +1352,12 @@ function reviewCandidateLabel(event) {
   return "Unnamed agent";
 }
 
+function reviewActorLabel(event) {
+  if (event?.reviewerKind === "human") return "human";
+  const stamped = reviewCandidateLabel(event);
+  return stamped === "Unnamed agent" ? "agent" : stamped;
+}
+
 function reviewChoiceCandidates(draft) {
   return (Array.isArray(draft.reviewCandidates) ? draft.reviewCandidates : [])
     .filter(event => event?.eventType === "proposed" && event.proposal);
@@ -1688,19 +1694,23 @@ export function renderPuzzleReviewIssuesPage({
 }) {
   const draftId = draft.draftId;
   const action = `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`;
-  const issueEvents = issue => (issue.events || []).map(event => `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.draftRevision ? ` · draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`).join("");
+  const issueEvents = issue => (issue.events || []).map(event => `<li><strong>${escapeHtml(reviewActorLabel(event))}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.draftRevision ? ` · draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`).join("");
   const issueRevisionEvidence = issue => {
     if (!issue.draftRevisedSinceOpening) return "";
     return `Draft revised from revision ${issue.openingRevision} to ${issue.lastRecordedRevision} while this issue was open.`;
   };
+  const issueHeading = issue => Number.isInteger(issue.number)
+    ? `Issue ${issue.number}`
+    : (issue.status === "open" ? "Open issue" : "Resolved issue");
+  const issueHandle = issue => Number.isInteger(issue.number) ? String(issue.number) : issue.issueId;
   const issueCard = issue => `<section class="submit-pr">
-    <h2>${escapeHtml(issue.status === "open" ? "Open issue" : "Resolved issue")}</h2>
-    <p class="meta"><code>${escapeHtml(issue.issueId)}</code> · opened ${escapeHtml(issue.openedAt)} · last activity ${escapeHtml(issue.lastActivityAt)}</p>
+    <h2>${escapeHtml(issueHeading(issue))}</h2>
+    <p class="meta">${escapeHtml(issue.status === "open" ? "Open" : "Resolved")} · opened by ${escapeHtml(reviewActorLabel((issue.events || [])[0] || { reviewerKind: issue.openedBy }))} · ${escapeHtml(issue.openedAt)} · last activity ${escapeHtml(issue.lastActivityAt)}</p>
     <p class="review-note">${escapeHtml(issue.summary || "")}</p>
     ${issueRevisionEvidence(issue) ? `<p class="meta">${escapeHtml(issueRevisionEvidence(issue))}</p>` : ""}
     <ol class="review-events">${issueEvents(issue)}</ol>
     ${chronicleOnly ? "" : `<form class="review-issues-form" method="post" action="${action}">
-      <input type="hidden" name="issue_id" value="${escapeHtml(issue.issueId)}">
+      <input type="hidden" name="issue_id" value="${escapeHtml(issueHandle(issue))}">
       <label>Update this issue
         <select name="issue_action">
           ${issue.status === "open" ? '<option value="note">Add note</option><option value="resolve">Mark resolved</option>' : '<option value="reopen">Reopen</option>'}
@@ -1735,7 +1745,7 @@ export function renderPuzzleReviewIssuesPage({
     <h2>Completed review history</h2>
     ${completedEvents.length ? `<ol class="review-events">${completedEvents.map(event => {
       const decision = decisionEventDetail(event, publishedSnapshots, events);
-      return `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${decision ? ` · ${escapeHtml(decision)}` : ""}${!decision && event.draftRevision ? event.outcome === "changed" ? ` · changes recorded in draft revision ${escapeHtml(event.draftRevision)}` : ` · reviewed draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`;
+      return `<li><strong>${escapeHtml(reviewActorLabel(event))}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${decision ? ` · ${escapeHtml(decision)}` : ""}${!decision && event.draftRevision ? event.outcome === "changed" ? ` · changes recorded in draft revision ${escapeHtml(event.draftRevision)}` : ` · reviewed draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}</li>`;
     }).join("")}</ol>` : '<p class="meta">No completed reviews recorded.</p>'}
     ${chronicleOnly ? `<p class="meta">This working copy was discarded. Accepted and rejected reviews remain on this record.</p>` : `<section class="submit-pr">
       <h2>Human review</h2>

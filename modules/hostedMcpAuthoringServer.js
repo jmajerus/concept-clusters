@@ -63,7 +63,7 @@ import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
-import { publishedRowOrNull } from "./contentDocumentRepository.js";
+import { matchReviewIssue, nextReviewIssueId, publishedRowOrNull } from "./contentDocumentRepository.js";
 import {
   SEEDED_ROUTE_MCP,
   puzzleIdIsLive,
@@ -247,6 +247,15 @@ function clipClientLabel(value) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed ? trimmed.slice(0, 200) : null;
+}
+
+function reviewClientStamp(ctx, mcpServer) {
+  const identity = identifyMcpAssistanceClient({ ctx, server: mcpServer });
+  return {
+    clientSystem: clipClientLabel(identity?.system || null),
+    clientModel: clipClientLabel(identity?.model || null),
+    clientName: clipClientLabel(identity?.clientName || observedMcpClientLabel({ ctx, server: mcpServer }))
+  };
 }
 
 function safe(handler) {
@@ -1524,16 +1533,35 @@ export function createAuthoringMcpServer({
       context.addIssue({ code: "custom", path: ["issue_id"], message: "open creates the issue id; omit issue_id" });
     }
     if (["note", "resolve", "reopen"].includes(input.action) && !input.issue_id) {
-      context.addIssue({ code: "custom", path: ["issue_id"], message: `${input.action} requires issue_id` });
+      context.addIssue({ code: "custom", path: ["issue_id"], message: `${input.action} requires the issue number` });
     }
     if (!["complete", "begin", "propose"].includes(input.action) && !hasComments) {
       context.addIssue({ code: "custom", path: ["comments"], message: `${input.action} requires non-empty comments` });
     }
   });
 
+  function presentReviewIssue(issue) {
+    const presented = { ...issue, events: (issue.events || []).map(event => {
+      const presentedEvent = { ...event };
+      delete presentedEvent.issueId;
+      return presentedEvent;
+    }) };
+    delete presented.issueId;
+    return presented;
+  }
+
+  async function reviewIssueFromHandle(puzzleId, handle) {
+    const issues = await contentDocuments.listPuzzleReviewIssues({
+      id: puzzleId,
+      includeResolved: true,
+      uncapped: true
+    });
+    return matchReviewIssue(issues, handle);
+  }
+
   server.registerTool("list_puzzle_review_issues", {
     title: "List puzzle review issues",
-    description: "List actionable unresolved agent handoff threads for a puzzle draft. Issues are a persistent track independent of completed review comments; create one with record_agent_puzzle_review action=open. Set include_resolved only when auditing history or choosing a resolved issue to reopen. Use an issue id from this result when adding a note, resolving, or reopening that specific issue.",
+    description: "List actionable unresolved agent handoff threads for a puzzle draft. Issues are a persistent track independent of completed review comments; create one with record_agent_puzzle_review action=open. The tracking id is a small integer per puzzle, starting at 1. Pass that number as issue_id when adding a note, resolving, or reopening. Set include_resolved only when auditing history or choosing a resolved issue to reopen.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       include_resolved: z.boolean().default(false)
@@ -1551,7 +1579,7 @@ export function createAuthoringMcpServer({
       puzzleId,
       draftId: draft_id,
       includeResolved: include_resolved,
-      issues
+      issues: issues.map(presentReviewIssue)
     });
   })));
 
@@ -1579,7 +1607,7 @@ export function createAuthoringMcpServer({
   server.registerTool("record_agent_puzzle_review", {
     title: "Record agent review or handoff issue",
     description:
-      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. If that baseline already exists and the working copy is an open proposal, begin restores the baseline so the next review is independent. action=propose files the current document as one candidate against that published revision, omitting changes that only repeat an open proposal, then restores the working copy to the baseline. Pass stack_on true to build on the preceding open proposal instead; the server chooses that proposal, so there is no proposal id to pass. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues to obtain an issue id before note, resolve, or reopen. The server derives timestamps, draft revision, and guidance version; it never records a human review. Choosing a winner is a human action on the drafts page.",
+      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. action=begin snapshots the current document as the review baseline before edits and does not record a review. If that baseline already exists and the working copy is an open proposal, begin restores the baseline so the next review is independent. action=propose files the current document as one candidate against that published revision, omitting changes that only repeat an open proposal, then restores the working copy to the baseline. Pass stack_on true to build on the preceding open proposal instead; the server chooses that proposal, so there is no proposal id to pass. Do not leave unresolved concerns only in that completion comment: create one independent persistent issue per concern with action=open and comments. Open handoffs do not require validity or advance a review timestamp. Use list_puzzle_review_issues and pass that issue's number as issue_id before note, resolve, or reopen. The tracking id is that small integer. The server derives timestamps, draft revision, and guidance version; it never records a human review. Choosing a winner is a human action on the drafts page.",
     inputSchema: agentReviewInput,
     annotations: WRITE
   }, tracked("record_agent_puzzle_review", safe(async ({ draft_id, action, issue_id, outcome, comments, stack_on }, ctx) => {
@@ -1790,8 +1818,7 @@ export function createAuthoringMcpServer({
           ? "Removing changes already filed in an open proposal leaves an invalid draft. Pass stack_on true to file this working copy on top of the preceding review."
           : `Draft ${draft_id} is not valid; fix and validate it before filing a proposal.`);
       }
-      const identity = identifyMcpAssistanceClient({ ctx, server });
-      const clientName = clipClientLabel(identity?.clientName || observedMcpClientLabel({ ctx, server }));
+      const stamp = reviewClientStamp(ctx, server);
       const filed = await contentDocuments.recordPuzzleAgentReview({
         id: puzzleId,
         eventType: "proposed",
@@ -1799,9 +1826,7 @@ export function createAuthoringMcpServer({
         proposal: proposalDocument,
         basePublishedRevision,
         draftRevision: stored.revision,
-        clientSystem: clipClientLabel(identity?.system || null),
-        clientModel: clipClientLabel(identity?.model || null),
-        clientName
+        ...stamp
       });
       const restored = await draftRepository.save({
         draftId: draft_id,
@@ -1821,7 +1846,7 @@ export function createAuthoringMcpServer({
           eventId: filed?.id || null,
           basePublishedRevision,
           stackOn: preceding ? true : null,
-          clientSystem: identity?.system || null,
+          clientSystem: stamp.clientSystem,
           action
         }
       );
@@ -1840,7 +1865,8 @@ export function createAuthoringMcpServer({
         outcome: outcome || "changed",
         comments: reviewComments,
         draftRevision: stored.revision,
-        guidance: AUTHORING_GUIDANCE_VERSION
+        guidance: AUTHORING_GUIDANCE_VERSION,
+        ...reviewClientStamp(ctx, server)
       });
       const issueReminder = reviewComments && OPEN_ISSUE_LANGUAGE.test(reviewComments)
         ? "This completion comment may describe unresolved work. Open a separate action=open issue for each concern that remains."
@@ -1859,22 +1885,29 @@ export function createAuthoringMcpServer({
     }
 
     let issueId = issue_id || null;
+    let issue = null;
     if (action === "open") {
-      issueId = `issue-${crypto.randomUUID()}`;
+      const threads = await contentDocuments.listPuzzleReviewIssues({
+        id: puzzleId,
+        includeResolved: true,
+        uncapped: true
+      });
+      issueId = nextReviewIssueId(threads);
     } else {
-      if (typeof contentDocuments?.getPuzzleReviewIssue !== "function") {
+      if (typeof contentDocuments?.listPuzzleReviewIssues !== "function") {
         throw new Error("Updating a review issue requires D1 issue-thread support.");
       }
-      const issue = await contentDocuments.getPuzzleReviewIssue({ id: puzzleId, issueId });
+      issue = await reviewIssueFromHandle(puzzleId, issueId);
       if (!issue) throw new Error(`Unknown review issue ${issueId} for ${puzzleId}.`);
+      issueId = issue.issueId;
       if (action === "resolve" && issue.status !== "open") {
-        throw new Error(`Review issue ${issueId} is already resolved; reopen it before resolving again.`);
+        throw new Error(`Review issue ${issue.number} is already resolved; reopen it before resolving again.`);
       }
       if (action === "reopen" && issue.status !== "resolved") {
-        throw new Error(`Review issue ${issueId} is already open; add a note instead.`);
+        throw new Error(`Review issue ${issue.number} is already open; add a note instead.`);
       }
       if (action === "note" && issue.status !== "open") {
-        throw new Error(`Review issue ${issueId} is resolved; reopen it before adding a note.`);
+        throw new Error(`Review issue ${issue.number} is resolved; reopen it before adding a note.`);
       }
     }
     const eventType = { open: "open", note: "note", resolve: "resolved", reopen: "reopened" }[action];
@@ -1884,16 +1917,19 @@ export function createAuthoringMcpServer({
       draftRevision: stored.revision,
       guidance: AUTHORING_GUIDANCE_VERSION,
       issueId,
-      eventType
+      eventType,
+      ...reviewClientStamp(ctx, server)
     });
-    return success(`${action === "open" ? "Opened" : action === "resolve" ? "Resolved" : action === "reopen" ? "Reopened" : "Added a note to"} review issue for ${puzzleId}.`, {
+    issue = await reviewIssueFromHandle(puzzleId, issueId);
+    const verb = action === "open" ? "Opened" : action === "resolve" ? "Resolved" : action === "reopen" ? "Reopened" : "Added a note to";
+    return success(`${verb} review issue ${issue.number} for ${puzzleId}.`, {
       puzzleId,
       draftId: draft_id,
       draftRevision: stored.revision,
       action,
-      issueId,
       comments: reviewComments,
-      guidance: AUTHORING_GUIDANCE_VERSION
+      guidance: AUTHORING_GUIDANCE_VERSION,
+      issue: presentReviewIssue(issue)
     });
   })));
 

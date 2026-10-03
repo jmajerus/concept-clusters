@@ -904,20 +904,34 @@ export async function run() {
   const issuePage = renderPuzzleReviewIssuesPage({
     draft: { ...baseDraft, document: baseDraft.document },
     issues: [{
-      issueId: "issue-source-check",
+      issueId: "issue-26e7ca85-2f10-49d4-8264-4485a7f7f2bf",
+      number: 1,
       status: "open",
       openedAt: "2026-09-10T12:00:00.000Z",
       openedBy: "agent",
       summary: "Verify the primary source.",
       lastActivityAt: "2026-09-10T12:00:00.000Z",
-      events: [{ reviewerKind: "agent", reviewedAt: "2026-09-10T12:00:00.000Z", eventType: "open", comments: "Verify the primary source." }]
+      events: [{
+        reviewerKind: "agent",
+        clientSystem: "Cursor (Grok 4.7)",
+        clientName: "cursor-vscode",
+        reviewedAt: "2026-09-10T12:00:00.000Z",
+        eventType: "open",
+        comments: "Verify the primary source."
+      }]
     }],
     events: [{ reviewerKind: "human", reviewedAt: "2026-09-09T12:00:00.000Z", issueId: null, eventType: "review", outcome: "changed", comments: "Keep the revised bridge wording." }],
     lastAgentReviewedAt: "2026-09-08T12:00:00.000Z",
     lastHumanReviewedAt: "2026-09-09T12:00:00.000Z"
   });
   assert.match(issuePage, /Open a new issue/);
-  assert.match(issuePage, /issue-source-check/);
+  assert.match(issuePage, /Issue 1/);
+  assert.match(issuePage, /opened by Cursor \(Grok 4\.7\)/);
+  assert.match(issuePage, /<strong>Cursor \(Grok 4\.7\)<\/strong>/);
+  assert.doesNotMatch(issuePage, /<strong>agent<\/strong>/);
+  assert.match(issuePage, /Verify the primary source/);
+  assert.match(issuePage, /name="issue_id" value="1"/);
+  assert.doesNotMatch(issuePage, /issue-26e7ca85-2f10-49d4-8264-4485a7f7f2bf/);
   assert.match(issuePage, /Mark resolved/);
   assert.match(issuePage, /Mark reviewed by human/);
 
