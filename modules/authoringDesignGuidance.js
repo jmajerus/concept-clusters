@@ -277,9 +277,14 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
 - learningIntroduction ("Before You Begin") is one optional Markdown document.
   Write the lesson the subject needs, in the order the subject needs: the
   learning objective, the domain (vocabulary, stakes, why it matters), and
-  how the ideas relate, including the groupings and why they hold. Write
-  about the **subject**. Do not mention clusters, bridges, lenses, boards,
-  sorting, or how play works. Do not author a preview, a teaser, or a split.
+  how the ideas relate, including the groupings and why they hold. Teach
+  the vocabulary the subject turns on, and say what those ideas are, at
+  the depth the subject needs. Keep the subject's order. Where that lesson
+  reaches a board term whose meaning is not plain from the words themselves,
+  use the term and say what it is. A long board is not a list to work
+  through. Write about the **subject**. Do not mention clusters,
+  bridges, lenses, boards, sorting, or how play works. Those words name
+  the machinery. Do not author a preview, a teaser, or a split.
   Play shows the whole lesson before the board. Write one in almost every
   case: the author cannot know what the player already knows. requirement: optional and
   recommended both leave the board reachable without reading (recommended
@@ -537,8 +542,13 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
 - Prefer a learningIntroduction. A lesson helps in almost every case,
   because the author cannot know what the player already knows. Write one lesson
   about the subject: the learning objective, the domain, and how the ideas
-  relate, including the groupings and why they hold. No clusters, bridges,
-  lenses, boards, sorting instructions, or gameplay instructions. Do not
+  relate, including the groupings and why they hold. Teach the vocabulary
+  the subject turns on, and say what those ideas are, at the depth the
+  subject needs. Keep the subject's order. Where that lesson reaches a
+  board term whose meaning is not plain from the words themselves, use the
+  term and say what it is. A long board is not a list to work through. No
+  clusters, bridges, lenses, boards, sorting instructions, or
+  gameplay instructions. Those words name the machinery. Do not
   author a preview, a teaser, or a split. Play shows the whole lesson before
   the board. Reserve
   required for material the puzzle truly depends on; otherwise prefer

@@ -159,7 +159,10 @@
 // The author cannot know what the player already knows.
 // 6.10: same review bar. Cluster and lens color are not agent fields. The
 // server assigns a cluster hue and keeps a stored one; agents omit both.
+// 6.11: same review bar. The lesson follows the subject's order. Where it
+// reaches a board term whose meaning is not plain from the words themselves,
+// it uses the term. A long board is not a list to work through.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 10
+  minor: 11
 });

@@ -330,16 +330,20 @@ the domain (vocabulary, stakes, why this subject matters), and how the ideas
 relate, including the groupings and why they hold. Write one in almost
 every case: the author cannot know what the player already knows.
 
-Write it about the **subject**, not the puzzle. It should not mention
-clusters, bridges, lenses, boards, or sorting. Do not author a preview, a
-teaser, or a split. Play shows the whole lesson before the board. Mark it
-`required` only when the puzzle truly depends on it; otherwise prefer
-`recommended` or `optional`. `required` holds the board until the learner
-chooses Start puzzle in the lesson. Closing the dialog returns to the
-invitation.
+Write it about the **subject**. Teach the vocabulary the subject turns on,
+and say what those ideas are, at the depth the subject needs. Keep the
+subject's order. Where that lesson reaches a board term whose meaning is
+not plain from the words themselves, use the term and say what it is. A
+long board is not a list to work through. It should not mention
+clusters, bridges, lenses, boards, or sorting. Those words name the
+machinery. Do not author a preview, a teaser, or a split. Play shows the
+whole lesson before the board. Mark it `required` only when the puzzle
+truly depends on it; otherwise prefer `recommended` or `optional`.
+`required` holds the board until the learner chooses Start puzzle in the
+lesson. Closing the dialog returns to the invitation.
 
-Instructional content should point toward richer resources rather than trying
-to teach everything inline. Preserve exact citations discovered during
+Links and citations point onward. The lesson still teaches what the subject
+needs. Preserve exact citations discovered during
 research instead of planning to reconstruct them later. MCP agents do not
 receive or write puzzle-level `provenance`; the server stamps an identifiable
 MCP client where possible, and human editors correct attribution when needed.

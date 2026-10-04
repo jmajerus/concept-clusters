@@ -51,8 +51,13 @@ module disagree, trust the module.
 - **Lenses** default to sequential reclassification. Use `quiz` or `assignment` when the pedagogy needs them, not by habit. Trivia often leans `quiz` plus `preSolve: true`, but that is not a rule. Fit each lens to a learning objective worth a second look. A focused question whose honest answers are one, two, or three terms is a complete lens, not a stub to pad toward 6. A cinematography example: Dutch tilt and dolly zoom as the two Disturbance techniques that make space geometrically wrong, excluding whip pan and slow zoom, is a complete two-target reinforcing lens. Cross-cutting is welcome when those answers already span clusters; it is not a higher grade of lens and not a reason to churn, concatenate a second clause, recruit extra terms, or drop the lens. Reinforcing one cluster's color is valid when that is the honest question. The legal 1-6 unique targets are a range, not a fill target. Include every answering term and omit every non-answering term. Bound the prompt and check the most plausible excluded node.
 - **`learningIntroduction`** is optional. Write one lesson about the
   **subject**: the learning objective, the domain, and how the ideas relate,
-  including the groupings and why they hold. No clusters, bridges, lenses,
-  boards, sorting, or gameplay instructions. Do not author a preview, a
+  including the groupings and why they hold. Teach the vocabulary the
+  subject turns on, and say what those ideas are, at the depth the subject
+  needs. Keep the subject's order. Where that lesson reaches a board term
+  whose meaning is not plain from the words themselves, use the term and
+  say what it is. A long board is not a list to work through. No
+  clusters, bridges, lenses, boards, sorting, or gameplay instructions.
+  Those words name the machinery. Do not author a preview, a
   teaser, or a split. Play shows the whole lesson before the board. Write
   one in almost every case: the author cannot know what the player already
   knows. `required` holds the board until

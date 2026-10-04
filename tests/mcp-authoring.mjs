@@ -501,6 +501,9 @@ export async function run() {
       /Vocabulary-in-context|lexical-disambiguation|near-synonym/
     );
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction \("Before You Begin"\)/);
+    assert.match(guidance.result.structuredContent.markdown, /vocabulary the subject turns on/);
+    assert.match(guidance.result.structuredContent.markdown, /not plain from the words themselves/);
+    assert.match(guidance.result.structuredContent.markdown, /not a list to work through/);
     assert.match(guidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(guidance.result.structuredContent.markdown, /two-character sequence/);
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction\.credit/);

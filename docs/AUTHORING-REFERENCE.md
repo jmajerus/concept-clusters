@@ -921,9 +921,15 @@ until a richer schema is justified.
 button **Lesson** (the dialog title still defaults to **Before You Begin**).
 Write the lesson the subject needs, in the order the subject needs: domain
 knowledge, vocabulary, framing, examples, how the ideas relate, and why the
-groupings hold. Write one in almost every case: the author cannot know
-what the player already knows. Write about the **subject**, not the puzzle
-mechanism. Do not author a preview, a teaser, or a split.
+groupings hold. Teach the vocabulary the subject turns on, and say what
+those ideas are, at the depth the subject needs. Keep the subject's order.
+Where that lesson reaches a board term whose meaning is not plain from the
+words themselves, use the term and say what it is. A long board is not a
+list to work through. Write one in almost every case:
+the author cannot know what the player already knows. Write about the
+**subject**. Do not mention clusters, bridges, lenses, boards, sorting, or
+how play works. Those words name the machinery. Do not author a preview, a
+teaser, or a split.
 
 Play shows the whole lesson in the dialog before the board.
 
