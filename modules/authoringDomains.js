@@ -452,7 +452,11 @@ function omitClassificationFields(domain) {
 const LEGACY_PEDAGOGY_SHELF_FIELDS = ["tags", "level"];
 
 function adoptLegacyShelfFields(classification, sources) {
-  const next = isObject(classification) ? { ...classification } : {};
+  // A non-object projection is invalid stored data. Leave it untouched so
+  // assembleAuthoredDocument rejects it instead of silently normalizing it
+  // to an empty shelf that a later save could overwrite.
+  if (!isObject(classification)) return classification;
+  const next = { ...classification };
   for (const key of LEGACY_PEDAGOGY_SHELF_FIELDS) {
     if (hasOwn(next, key)) continue;
     for (const source of sources) {

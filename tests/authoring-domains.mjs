@@ -118,6 +118,14 @@ export async function run() {
   });
   assert.equal(clearedStore.tags, undefined);
   assert.equal(clearedStore.level, undefined);
+  assert.throws(
+    () => assembleStoredDomainDocuments({
+      content: JSON.parse(fresh.content),
+      pedagogy: legacyPedagogy,
+      classification: []
+    }),
+    /Classification domain must be a JSON object/
+  );
   const rewritten = domainColumnsForSave({
     content: fresh.content,
     pedagogy: JSON.stringify(legacyPedagogy),
