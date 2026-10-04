@@ -374,10 +374,14 @@ See the [taxonomy reference](AUTHORING-REFERENCE.md#categories-and-subcategories
 formal prerequisite graph. Give each entry a specific reason to click and
 prefer connections that browsing the same catalogue would not already expose.
 
-Tags are informal Library-search terms, not a controlled vocabulary. `level`
-is optional and should remain unset unless introductory, intermediate, or
-advanced is a genuinely confident editorial judgment. Never infer it merely
-from cluster count or board size.
+Tags and `level` are shelf fields, saved with classification alongside
+category and subcategory. Tags are informal Library-search terms, not a
+controlled vocabulary. Add one only when the word is absent from the title,
+category, citations, subcategory titles, and board terms, which search
+already matches. `level` stays unset unless introductory, intermediate, or
+advanced is a comparison with the hardest puzzles already in that category.
+Never infer it from cluster count, board size, or how specialized the
+draft's own terms feel.
 
 See [related puzzles](AUTHORING-REFERENCE.md#related-puzzles),
 [tags](AUTHORING-REFERENCE.md#tags), and [learning

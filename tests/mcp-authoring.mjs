@@ -407,6 +407,10 @@ export async function run() {
     }
     assert.ok(phasedSchemas.publication.schema.properties.language);
     assert.ok(phasedSchemas.publication.schema.properties.relatedPuzzles);
+    assert.equal(phasedSchemas.publication.schema.properties.tags, undefined);
+    assert.equal(phasedSchemas.publication.schema.properties.level, undefined);
+    assert.ok(phasedSchemas.classification.schema.properties.tags);
+    assert.ok(phasedSchemas.classification.schema.properties.level);
     assert.match(phasedSchemas.core.schema.description, /write domain "content"/);
     assert.match(phasedSchemas.review.schema.description, /domain=pedagogy/);
 
@@ -1464,6 +1468,41 @@ export async function run() {
     assert.deepEqual(shelfDocument.subcategories, { biology: "foundations" });
     assert.deepEqual(shelfDocument.lenses, beforeShelf.lenses);
     assert.deepEqual(shelfDocument.clusters, beforeShelf.clusters);
+
+    const taggedShelf = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "energy-flow",
+        domain: "classification",
+        expected_revision: afterShelf.result.structuredContent.draft.revision,
+        document: {
+          category: "biology",
+          subcategories: { biology: "foundations" },
+          tags: ["book"],
+          level: "intermediate"
+        }
+      }
+    });
+    assert.equal(taggedShelf.result.isError, undefined);
+    const keptShelf = await request("tools/call", {
+      name: "reassign_puzzle_classifications",
+      arguments: {
+        assignments: [{
+          puzzle_id: "energy-flow",
+          category: "biology",
+          subcategories: { biology: "foundations" }
+        }]
+      }
+    });
+    assert.equal(keptShelf.result.structuredContent.results[0].ok, true);
+    const afterKeep = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "energy-flow", domain: "classification" }
+    });
+    const keptDocument = afterKeep.result.structuredContent.draft.document;
+    assert.deepEqual(keptDocument.tags, ["book"]);
+    assert.equal(keptDocument.level, "intermediate");
+    assert.equal(keptDocument.category, "biology");
 
     // A held publish that fails validation does not undo the classification
     // save, and ok stays true so a caller does not retry a write that landed.

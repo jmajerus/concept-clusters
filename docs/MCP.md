@@ -49,12 +49,13 @@ infrastructure and are not fields an agent has to author.
 
 For smaller authoring payloads, `get_puzzle_draft` and
 `save_puzzle_draft` accept `domain: "content"`, `domain: "classification"`, or `domain: "pedagogy"`.
-Shelf placement (`category`, `categories`, `subcategories`) is
-`domain: "classification"`. `reassign_puzzle_classifications` writes that
-projection for many puzzles in one call.
+Shelf placement (`category`, `categories`, `subcategories`, `tags`, and
+`level`) is `domain: "classification"`. `reassign_puzzle_classifications`
+writes category membership for many puzzles in one call and keeps existing
+tags and level.
 Content is the core puzzle write surface. Classification is the shelf.
-Pedagogy is the annotation and learning write surface, plus tags, level,
-related puzzles, and language. Pedagogy includes content and classification
+Pedagogy is the annotation and learning write surface, plus related puzzles
+and language. Pedagogy includes content and classification
 as read-only `context`. Focused responses omit protected attribution/editorial metadata
 and system metadata, retaining only the draft id and revision needed for the
 next save. The complete-document compatibility path also omits protected

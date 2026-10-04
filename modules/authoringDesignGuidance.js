@@ -281,8 +281,8 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   the vocabulary the subject turns on, and say what those ideas are, at
   the depth the subject needs. Keep the subject's order. Where that lesson
   reaches a board term whose meaning is not plain from the words themselves,
-  use the term and say what it is. A long board is not a list to work
-  through. Write about the **subject**. Do not mention clusters,
+  use the term and say what it is. A long board is not a list to work through.
+  Write about the **subject**. Do not mention clusters,
   bridges, lenses, boards, sorting, or how play works. Those words name
   the machinery. Do not author a preview, a teaser, or a split.
   Play shows the whole lesson before the board. Write one in almost every
@@ -341,21 +341,23 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   external metadata, while the entries array is the player-facing next-choice
   order.
 - tags is an optional array of freeform strings -- deliberately informal,
-  no vocabulary or registry, just words the puzzle should be findable by
-  in the Library search box (which matches tags alongside title, category,
-  citation authors/titles, subcategory titles, and board terms, with no
-  special syntax). Tag a puzzle built directly from a named book "book",
-  and put the book's author on info.citations so the puzzle is findable
-  by that name.
-- level is an optional string ("introductory", "intermediate", or
-  "advanced") that adds the puzzle to that level's auto-catalogue --
-  synthesized on the fly from whichever puzzles currently carry it, the
-  same way All/New Puzzles already are, never authored or stored. Leave
-  it unset by default; only set it when genuinely confident where a
-  puzzle sits, not as a routine field to fill in on every new puzzle --
-  "introductory" vs. "advanced" is a real editorial call, not something
-  to infer reflexively from cluster count or category. Most puzzles
-  should stay unclassified.
+  no vocabulary or registry. It is a shelf field, saved with
+  domain=classification, not part of the lesson. The Library search box
+  already matches title, category, citation authors/titles, subcategory
+  titles, and board terms. Add a tag only when the word a reader would
+  type is absent from all of those. A puzzle built directly from a named
+  book can carry "book"; put the book's author on info.citations either
+  way, because the search box already matches that name.
+- level is an optional shelf field ("introductory", "intermediate", or
+  "advanced"), saved with domain=classification. Setting it adds the
+  puzzle to that level's auto-catalogue -- synthesized on the fly from
+  whichever puzzles currently carry it, the same way All/New Puzzles
+  already are, never authored or stored as its own catalogue. Leave it
+  unset. Set it only when a comparison with the hardest puzzles already
+  in that category makes the mark clear. "Advanced" means the prior
+  knowledge matches that category's ceiling, not that this draft's terms
+  feel specialized. Do not infer it from cluster count, board size, or
+  how uncommon the words are. Most puzzles should stay unclassified.
 - A category may optionally register subcategories once it has enough
   puzzles to benefit from a recognizable internal split (field, period,
   genre) -- subject classification only, never difficulty or a curated
@@ -456,9 +458,10 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   Do not fill toward 32.
 - Include \`category\` on the complete document in \`create_puzzle_draft\`. Add
   \`subcategories\` when one applies, as { categoryId: subcategoryId }. Omit
-  \`categories\` when the puzzle has one home. A later shelf edit is a
-  domain=classification save. A domain=content save omits \`category\`,
-  \`categories\`, and \`subcategories\` and leaves the shelf as it is.
+  \`categories\` when the puzzle has one home. Leave \`tags\` and \`level\`
+  unset. A later shelf edit is a domain=classification save. A domain=content
+  save omits \`category\`, \`categories\`, \`subcategories\`, \`tags\`, and
+  \`level\` and leaves the shelf as it is.
 - Carry approved inventory connections onto the board as bridges. Do not
   invent extras to make the graph connected. A disconnected board or no
   bridges is acceptable. Write each bridge fact now and make its local
@@ -581,25 +584,28 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
 
 const CLASSIFICATION_PHASE_GUIDANCE = `## Classification pass
 
-- This pass owns the puzzle's shelf: primary \`category\`, optional \`categories\`, and optional \`subcategories\`.
+- This pass owns the puzzle's shelf: primary \`category\`, optional \`categories\`, optional \`subcategories\`, optional \`tags\`, and optional \`level\`.
 - \`category\` is the disciplinary home. When \`categories\` is present it is the full membership and its first id matches \`category\`. \`subcategories\` maps a category id to one registered subcategory id.
-- Retrieve get_puzzle_draft with domain=classification and save that same domain. The payload replaces the whole classification projection. Omitting \`categories\` or \`subcategories\` clears them. Omitting \`category\` clears the home; validate and publish still require one.
+- \`tags\` is an optional array of freeform search words, not a registry and not a catalogue. The Library search box already matches title, category, citation authors and titles, subcategory titles, and board terms. Add a tag only when the word a reader would type is absent from all of those.
+- \`level\` is an optional string ("introductory", "intermediate", or "advanced") that adds the puzzle to that level's auto-catalogue. Leave it unset. Set it only when a comparison with the hardest puzzles already in this category makes the mark clear. "Advanced" means the prior knowledge matches that category's ceiling, not that this draft's terms feel specialized. Most puzzles stay unclassified.
+- Retrieve get_puzzle_draft with domain=classification and save that same domain. The payload replaces the whole classification projection. Omitting \`categories\`, \`subcategories\`, \`tags\`, or \`level\` clears them. Omitting \`category\` clears the home; validate and publish still require one.
 - Register a category, and any subcategory id, on the category document before a puzzle references it.
-- Do not send lenses, the learning introduction, tags, level, or the board in this projection.`;
+- Do not send lenses, the learning introduction, related puzzles, language, or the board in this projection.`;
 
 const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 
-- Add only useful discovery and stewardship metadata: tags, level, related puzzles, and language.
+- Add only useful stewardship metadata: related puzzles and language.
   Most are optional; omission is better than filler. The server supplies
   timestamps, revision metadata, and MCP-client attribution; protected
   provenance and rights metadata are not authored in this pass. Shelf
-  placement is the classification pass, saved with domain=classification.
+  placement, including tags and level, is the classification pass, saved
+  with domain=classification. Leave level unset unless a comparison with
+  that category's existing ceiling supports it.
 - Do not include learningIntroduction.credit, provenance, creator, license, or
   derivedFrom in an MCP document. Do not invent a reviewer name or treat roles
   or per-scope assistance entries as publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
-  already obvious from the same catalogue. Set level only when the editorial
-  judgment is genuinely clear.
+  already obvious from the same catalogue.
 - This pass binds to write domain pedagogy: retrieve get_puzzle_draft with
   domain=pedagogy, preserve lenses and learningIntroduction already present,
   and save that same domain. Do not send a publication-only object as a
@@ -609,7 +615,7 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   \`save_puzzle_draft\` for a confirmed final edit; this publishes a valid
   document to authoring play in that same call, but it remains held and is
   not cued for Freeze. Cue and Freeze are outside MCP. Set
-  \`category\` / \`categories\` / \`subcategories\` with domain=classification.
+  \`category\` / \`categories\` / \`subcategories\` / \`tags\` / \`level\` with domain=classification.
   A category is
   registered when its category-editor document is published to D1; create_category
   or update_category creates or revises that document, and a new category should
@@ -759,15 +765,20 @@ learningIntroduction with domain=pedagogy.`,
 - Preserve the authored puzzleKind: "vocabulary-context"; the profile argument
   selects guidance, while the kind is content metadata. The taxonomy category
   is saved with domain=classification, not in this pass.
-- Publish only useful discovery metadata: tags, level, related puzzles, and
-  language. Do not flatten the puzzle into a
-  generic quiz description: its purpose is to teach precise usage among close
-  lexical neighbors.`,
+- Publish related puzzles and language when they help. Tags and level are
+  classification, saved with domain=classification. Leave level unset unless
+  this neighborhood matches the hardest boards already in the category. Do
+  not flatten the puzzle into a generic quiz description: its purpose is to
+  teach precise usage among close lexical neighbors.`,
   classification: `## Vocabulary-in-context classification pass
 
 - Keep Vocabulary as the stable taxonomy category when the puzzle belongs in
-  that cross-disciplinary collection. Save category, categories, and
-  subcategories with domain=classification.
+  that cross-disciplinary collection. Save category, categories,
+  subcategories, tags, and level with domain=classification.
+- Do not mark the puzzle advanced because the adjectives are uncommon. Level
+  compares prior knowledge with the hardest boards already in the category,
+  and most puzzles stay unset. A tag is only for a search word that title,
+  category, citations, subcategories, and board terms do not already cover.
 - Do not change category merely to select this profile, and do not send the
   board or the lenses in this projection.`
 });
@@ -873,15 +884,19 @@ lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
 
 - Preserve puzzleKind: "trivia-quiz" as the authored puzzle type; the MCP
   profile selects guidance but does not replace the document field. Publish
-  only useful discovery metadata for the actual puzzle: tags, level, related
-  puzzles, and language. The taxonomy category is saved with
-  domain=classification.`,
+  related puzzles and language when they help. Tags and level are
+  classification, saved with domain=classification. Leave level unset unless
+  a comparison with that category's existing ceiling supports it.`,
   classification: `## Trivia-quiz classification pass
 
 - Choose category for discovery and disciplinary home, independently of this
   profile. Trivia is the current domain-less category convention for
   cross-disciplinary fact collections; use a disciplinary category when that
-  is the better browse home. Save it with domain=classification.
+  is the better browse home. Save category, tags, and level with
+  domain=classification. Leave level unset unless a comparison with that
+  category's existing ceiling supports it. Add a tag only for a search word
+  the title, category, citations, subcategories, and board terms do not
+  already cover.
 - Do not infer or require profile=trivia-quiz from category=trivia, and do
   not change category just to select this profile.`
 });
@@ -907,7 +922,7 @@ const AUTHORING_PROFILE_GUIDANCE = Object.freeze({
 classification, or publication for the focused brief. Core owns semantic neighborhoods and
 bridge cores in content; review checks usage distinctions across the
 accumulated draft; pedagogy authors contextual lenses and learning
-introductions; classification sets the shelf; publication adds ordinary discovery metadata.`
+introductions; classification sets the shelf, including tags and level; publication adds related puzzles and language.`
   }),
   [TRIVIA_QUIZ_PROFILE]: Object.freeze({
     overview: TRIVIA_QUIZ_PROFILE_OVERVIEW,
@@ -915,8 +930,8 @@ introductions; classification sets the shelf; publication adds ordinary discover
     routing: `Request profile=trivia-quiz with phase=core, review, pedagogy,
 classification, or publication for the focused brief. Core co-designs the board and its question
 space; review checks factual accuracy, group coherence, and answer mappings;
-pedagogy authors the quiz sequence; classification chooses the taxonomy;
-publication adds ordinary discovery metadata.`
+pedagogy authors the quiz sequence; classification sets the shelf, including tags and level;
+publication adds related puzzles and language.`
   })
 });
 
@@ -953,8 +968,8 @@ export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
 A puzzle's category association is on the puzzle document: stable category id in \`category\`,
 optional \`categories\`, and optional \`subcategories\`. Save that projection with
 domain=classification. To move many puzzles at once, call
-reassign_puzzle_classifications; it writes the same projection and does not
-edit lenses. Save after the category-editor document is published to D1. A
+reassign_puzzle_classifications; it sets category membership, keeps tags
+and level, and does not edit lenses. Save after the category-editor document is published to D1. A
 published category document is the registration event. Create category
 metadata (title, domain, blurb, subcategory definitions) with create_category /
 update_category — the same D1

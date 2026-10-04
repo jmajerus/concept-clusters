@@ -37,6 +37,10 @@ export async function run() {
   assert.ok(CLASSIFICATION_ROOT_FIELDS.has("category"));
   assert.ok(CLASSIFICATION_ROOT_FIELDS.has("categories"));
   assert.ok(CLASSIFICATION_ROOT_FIELDS.has("subcategories"));
+  assert.ok(CLASSIFICATION_ROOT_FIELDS.has("tags"));
+  assert.ok(CLASSIFICATION_ROOT_FIELDS.has("level"));
+  assert.equal(PEDAGOGY_ROOT_FIELDS.has("tags"), false);
+  assert.equal(PEDAGOGY_ROOT_FIELDS.has("level"), false);
   assert.ok(PEDAGOGY_BRIDGE_FIELDS.has("relationKind"));
   assert.ok(CONTENT_BRIDGE_FIELDS.has("fact"));
   assert.ok(!CONTENT_BRIDGE_FIELDS.has("relationKind"));
@@ -96,6 +100,8 @@ export async function run() {
   }
   assert.ok(publication.schema.properties.language);
   assert.ok(publication.schema.properties.relatedPuzzles);
+  assert.equal(publication.schema.properties.tags, undefined);
+  assert.equal(publication.schema.properties.level, undefined);
   assert.equal(publication.schema.properties.categories, undefined);
   assert.equal(publication.schema.properties.subcategories, undefined);
   assert.match(publication.schema.description, /write domain "pedagogy"/);
@@ -106,6 +112,8 @@ export async function run() {
   assert.ok(classification.schema.properties.categories);
   assert.ok(classification.schema.properties.subcategories);
   assert.equal(classification.schema.properties.lenses, undefined);
+  assert.ok(classification.schema.properties.tags);
+  assert.ok(classification.schema.properties.level);
   assert.match(classification.schema.description, /write domain "classification"/);
 
   const review = simplifiedPuzzleSchemaResult("review");
@@ -177,9 +185,21 @@ export async function run() {
     title: "Edited content"
   });
   const pedagogyEdit = applyAuthoredDomain(document, "pedagogy", {
-    ...pedagogyProjection.document,
+    ...pedagogyProjection.document
+  });
+  const classificationEdit = applyAuthoredDomain(document, "classification", {
+    ...projectAuthoredDocument(document, "classification").document,
     tags: ["updated"]
   });
+  assert.deepEqual(classificationEdit.tags, ["updated"]);
+  assert.equal(classificationEdit.lenses.length, document.lenses.length);
+  assert.throws(
+    () => applyAuthoredDomain(document, "pedagogy", {
+      ...pedagogyProjection.document,
+      tags: ["updated"]
+    }),
+    /tags belongs to the classification domain/
+  );
   for (const field of ["creator", "license", "derivedFrom"]) {
     assert.equal(pedagogyProjection.document[field], undefined);
   }
@@ -198,6 +218,14 @@ export async function run() {
   for (const field of AUTHORING_PHASE_PASSES.publication.root) {
     assert.ok(PEDAGOGY_ROOT_FIELDS.has(field));
   }
+  for (const field of AUTHORING_PHASE_PASSES.classification.root) {
+    assert.ok(CLASSIFICATION_ROOT_FIELDS.has(field), field);
+  }
+  assert.equal(pedagogyProjection.document.tags, undefined);
+  assert.deepEqual(
+    projectAuthoredDocument(document, "classification").document.tags,
+    ["demo"]
+  );
 
   // Protected attribution/editorial fields remain outside focused writes,
   // but their stored values survive either authored-domain replacement.

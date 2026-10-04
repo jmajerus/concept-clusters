@@ -311,6 +311,8 @@ describe("hosted authoring Worker", () => {
       expect(phaseSchemas.publication.schema.properties[field]).toBeUndefined();
     }
     expect(phaseSchemas.publication.schema.properties.language).toBeDefined();
+    expect(phaseSchemas.publication.schema.properties.tags).toBeUndefined();
+    expect(phaseSchemas.publication.schema.properties.level).toBeUndefined();
     expect(phaseSchemas.publication.domain).toBe("pedagogy");
     expect(phaseSchemas.core.domain).toBe("content");
     expect(phaseSchemas.core.schema.properties.puzzleKind).toBeDefined();

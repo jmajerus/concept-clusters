@@ -162,7 +162,11 @@
 // 6.11: same review bar. The lesson follows the subject's order. Where it
 // reaches a board term whose meaning is not plain from the words themselves,
 // it uses the term. A long board is not a list to work through.
+// 6.12: same review bar. tags and level are classification shelf fields.
+// Leave level unset unless it matches that category's existing ceiling.
+// Add a tag only for a search word the title, category, citations,
+// subcategories, and board terms do not already cover.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 11
+  minor: 12
 });

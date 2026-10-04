@@ -16,6 +16,7 @@ import {
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,
   AUTHORING_WRITE_DOMAINS,
+  domainColumnsForSave,
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
@@ -77,19 +78,11 @@ async function runDraftWrite(statement) {
 }
 
 function domainColumnValues(current, domain, domains) {
-  const needsSplit = current.classification_json == null;
-  return {
-    content: domain === "content" || current.content_json == null || needsSplit
-      ? domains.content
-      : current.content_json,
-    pedagogy: domain === "pedagogy" || current.pedagogy_json == null || needsSplit
-      ? domains.pedagogy
-      : current.pedagogy_json,
-    classification: domain === "classification" || needsSplit
-      ? domains.classification
-      : current.classification_json,
-    provenance: domains.provenance
-  };
+  return domainColumnsForSave({
+    content: current.content_json,
+    pedagogy: current.pedagogy_json,
+    classification: current.classification_json
+  }, domain, domains);
 }
 
 function reviewStackLoadedFromRow(row) {

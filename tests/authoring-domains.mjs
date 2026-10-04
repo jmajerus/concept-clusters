@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import {
   applyAuthoredDomain,
   assembleAuthoredDocument,
+  assembleStoredDomainDocuments,
+  domainColumnsForSave,
   partitionAuthoredDocument,
   projectAuthoredDocument,
   storedDomainDocuments
@@ -66,6 +68,71 @@ export async function run() {
   assert.equal(domains.content.category, undefined);
   assert.equal(domains.classification.category, "science");
   assert.equal(domains.pedagogy.categories, undefined);
+
+  const shelfDocument = { ...document, tags: ["book"], level: "advanced" };
+  const shelfDomains = partitionAuthoredDocument(shelfDocument);
+  assert.deepEqual(shelfDomains.classification.tags, ["book"]);
+  assert.equal(shelfDomains.classification.level, "advanced");
+  assert.equal(shelfDomains.pedagogy.tags, undefined);
+  assert.equal(shelfDomains.pedagogy.level, undefined);
+  assert.throws(
+    () => applyAuthoredDomain(shelfDocument, "pedagogy", {
+      ...projectAuthoredDocument(shelfDocument, "pedagogy").document,
+      tags: ["book"]
+    }),
+    /tags belongs to the classification domain/
+  );
+  const clearedLevel = applyAuthoredDomain(shelfDocument, "classification", {
+    category: "science",
+    tags: ["book"]
+  });
+  assert.deepEqual(clearedLevel.tags, ["book"]);
+  assert.equal(clearedLevel.level, undefined);
+  assert.equal(clearedLevel.language, "en");
+
+  const fresh = storedDomainDocuments(shelfDocument);
+  const legacyPedagogy = JSON.parse(fresh.pedagogy);
+  const legacyClassification = JSON.parse(fresh.classification);
+  legacyPedagogy.tags = legacyClassification.tags;
+  legacyPedagogy.level = legacyClassification.level;
+  delete legacyClassification.tags;
+  delete legacyClassification.level;
+  const lifted = assembleStoredDomainDocuments({
+    content: JSON.parse(fresh.content),
+    pedagogy: legacyPedagogy,
+    classification: legacyClassification
+  });
+  assert.deepEqual(lifted.tags, ["book"]);
+  assert.equal(lifted.level, "advanced");
+  const preferred = assembleStoredDomainDocuments({
+    content: JSON.parse(fresh.content),
+    pedagogy: legacyPedagogy,
+    classification: { ...legacyClassification, tags: ["kept"] }
+  });
+  assert.deepEqual(preferred.tags, ["kept"]);
+  assert.equal(preferred.level, "advanced");
+  const clearedStore = assembleStoredDomainDocuments({
+    content: JSON.parse(fresh.content),
+    pedagogy: { ...JSON.parse(fresh.pedagogy) },
+    classification: legacyClassification
+  });
+  assert.equal(clearedStore.tags, undefined);
+  assert.equal(clearedStore.level, undefined);
+  const rewritten = domainColumnsForSave({
+    content: fresh.content,
+    pedagogy: JSON.stringify(legacyPedagogy),
+    classification: JSON.stringify(legacyClassification)
+  }, "pedagogy", fresh);
+  assert.deepEqual(JSON.parse(rewritten.classification).tags, ["book"]);
+  assert.equal(JSON.parse(rewritten.classification).level, "advanced");
+  assert.equal(JSON.parse(rewritten.pedagogy).tags, undefined);
+  assert.equal(JSON.parse(rewritten.pedagogy).level, undefined);
+  const stable = domainColumnsForSave({
+    content: fresh.content,
+    pedagogy: fresh.pedagogy,
+    classification: fresh.classification
+  }, "pedagogy", storedDomainDocuments({ ...shelfDocument, tags: ["other"] }));
+  assert.deepEqual(JSON.parse(stable.classification).tags, ["book"]);
 
   const content = projectAuthoredDocument(document, "content");
   assert.equal(content.document.provenance, undefined);

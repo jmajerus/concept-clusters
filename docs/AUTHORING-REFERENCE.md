@@ -736,8 +736,11 @@ gets one.
 
 `tags` is an optional array of freeform strings, deliberately informal
 — not a vocabulary, not validated against a registry, just words for a
-puzzle to be found by. The same spirit as `relatedPuzzles.entries[].via`
-above, applied at the puzzle level instead of one relationship.
+puzzle to be found by. It is a shelf field, saved with classification,
+not part of the lesson. The same spirit as `relatedPuzzles.entries[].via`
+above, applied at the puzzle level instead of one relationship. Add a
+tag only when the word is absent from the title, category, citations,
+subcategory titles, and board terms.
 
 Findable through the Library search box, which matches title, category,
 tags, citation authors and titles, subcategory titles, and board terms
@@ -767,11 +770,14 @@ has to be enumerable for "which level catalogues currently exist" to be
 answerable at all (see below).
 
 Deliberately opt-in and omitted by default, not something every puzzle
-needs. "Introductory" vs. "advanced" is a real, recurring editorial
-judgment call -- unlike `category` (usually obvious from subject matter)
-or the position-derived New Puzzles catalogue (zero judgment either way).
-Set it only when you're actually confident where a puzzle sits; leaving
-it unset is always the safe default, not a gap to fill in.
+needs. It is a shelf field, saved with classification. "Introductory"
+vs. "advanced" is a comparison with the hardest puzzles already in that
+category, unlike `category` (usually obvious from subject matter) or the
+position-derived New Puzzles catalogue (zero judgment either way).
+"Advanced" means the prior knowledge matches that category's ceiling,
+not that the draft's own terms feel specialized. Set it only when that
+comparison is clear; leaving it unset is the normal result, not a gap
+to fill in.
 
 Setting it does one thing: the puzzle becomes a member of that level's
 auto-catalogue (`level-introductory`, `level-intermediate`,
