@@ -418,8 +418,10 @@ function serverInstructions() {
     "domain=classification, or domain=pedagogy and " +
     "save_puzzle_draft with the same domain; the server preserves protected provenance and system state " +
     "and materializes the complete document for validation and publication. Pedagogy responses include " +
-    "content and classification as read-only context. Classification owns category, categories, and " +
-    "subcategories. Move many puzzles with reassign_puzzle_classifications instead of editing each " +
+    "content and classification as read-only context. Classification owns category, categories, " +
+    "subcategories, tags, and level. Leave level unset unless it matches that category's existing " +
+    "ceiling, and add a tag only for a search word the title, category, citations, subcategories, " +
+    "and board terms do not already cover. Move many puzzles with reassign_puzzle_classifications instead of editing each " +
     "lesson. The complete domain remains available for compatibility. " +
     "For compact, bounded vocabulary-context requests, co-design the near-synonym cluster and its lenses " +
     "in one integrated cycle, then substitute every playable term into each drafted lens before saving. " +
@@ -447,7 +449,7 @@ function serverInstructions() {
     "create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for that draft_id. " +
     "A draft that has never been created uses create_puzzle_draft. " +
     mcpPublicationBoundaryGuidance() + " " +
-    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and publishing remains held from Cue/Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
+    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. Leave tags and level unset there. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and publishing remains held from Cue/Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
 
 export function createAuthoringMcpServer({
@@ -1342,7 +1344,7 @@ export function createAuthoringMcpServer({
   server.registerTool("reassign_puzzle_classifications", {
     title: "Reassign puzzle classifications",
     description:
-      "Write the classification projection for many puzzles in one call. Each assignment sets category, and optionally categories and subcategories, for one puzzle id. The server opens a working copy from the published row when this owner has none, then saves domain=classification. Lenses and the board are left unchanged. One bad assignment does not hide the others: the result lists each puzzle id with ok or errors. ok means that classification save succeeded. Set publish_to_authoring=true to publish each successful save held; a publication failure leaves ok true and reports published false with publicationErrors. It does not Cue or Freeze. Call this tool one invocation at a time.",
+      "Write the classification projection for many puzzles in one call. Each assignment sets category, and optionally categories and subcategories, for one puzzle id. Existing tags and level are kept. The server opens a working copy from the published row when this owner has none, then saves domain=classification. Lenses and the board are left unchanged. One bad assignment does not hide the others: the result lists each puzzle id with ok or errors. ok means that classification save succeeded. Set publish_to_authoring=true to publish each successful save held; a publication failure leaves ok true and reports published false with publicationErrors. It does not Cue or Freeze. Call this tool one invocation at a time.",
     inputSchema: z.object({
       assignments: z.array(z.object({
         puzzle_id: draftIdSchema,
@@ -1387,6 +1389,9 @@ export function createAuthoringMcpServer({
         });
         const draftId = opened.draftId || opened.id || puzzleId;
         const previousDocument = documentForEditor(opened.document);
+        const existingShelf = projectAuthoredDocument(previousDocument, "classification").document;
+        if (existingShelf.tags !== undefined) projection.tags = existingShelf.tags;
+        if (existingShelf.level !== undefined) projection.level = existingShelf.level;
         const nextDocument = applyAuthoredDomain(previousDocument, "classification", projection);
         const substantial = isSubstantialChange(computeChangeScore(previousDocument, nextDocument));
         const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(

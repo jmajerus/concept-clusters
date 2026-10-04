@@ -18,6 +18,7 @@ import {
   assertNoWriteOnceDrift,
   assembleAuthoredDocument,
   assembleStoredDomainDocuments,
+  domainColumnsForSave,
   partitionAuthoredDocument,
   storedDomainDocuments
 } from "./authoringDomains.js";
@@ -302,23 +303,16 @@ export function createPuzzleDraftStore({ directory }) {
         : null;
       // Legacy rows keep category inside content and categories inside
       // pedagogy. The first focused save rewrites every projection together
-      // so those fields are not stored twice.
-      const needsSplit = !storedDomains || storedDomains.classification == null;
-      const domains = !storedDomains
-        ? nextDomains
-        : needsSplit
-          ? {
-            ...storedDomains,
-            content: nextDomains.content,
-            pedagogy: nextDomains.pedagogy,
-            classification: nextDomains.classification,
-            provenance: nextDomains.provenance
-          }
-          : {
-            ...storedDomains,
-            [domain]: nextDomains[domain],
-            provenance: nextDomains.provenance
-          };
+      // so those fields are not stored twice. tags and level that still sit
+      // on a sibling projection are moved the same way.
+      const columns = domainColumnsForSave({
+        content: storedDomains?.content ?? null,
+        pedagogy: storedDomains?.pedagogy ?? null,
+        classification: storedDomains?.classification ?? null
+      }, domain, nextDomains);
+      const domains = storedDomains
+        ? { ...storedDomains, ...columns }
+        : nextDomains;
       const record = {
         ...raw,
         revision: raw.revision + 1,

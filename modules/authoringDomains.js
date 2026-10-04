@@ -447,6 +447,69 @@ function omitClassificationFields(domain) {
   return next;
 }
 
+// tags and level joined classification after classification_json already
+// existed, so older rows still store them on the pedagogy projection.
+const LEGACY_PEDAGOGY_SHELF_FIELDS = ["tags", "level"];
+
+function adoptLegacyShelfFields(classification, sources) {
+  // A non-object projection is invalid stored data. Leave it untouched so
+  // assembleAuthoredDocument rejects it instead of silently normalizing it
+  // to an empty shelf that a later save could overwrite.
+  if (!isObject(classification)) return classification;
+  const next = { ...classification };
+  for (const key of LEGACY_PEDAGOGY_SHELF_FIELDS) {
+    if (hasOwn(next, key)) continue;
+    for (const source of sources) {
+      if (isObject(source) && hasOwn(source, key)) {
+        next[key] = clone(source[key]);
+        break;
+      }
+    }
+  }
+  return next;
+}
+
+export function projectionHoldsLegacyShelfFields(value) {
+  if (value == null || value === "") return false;
+  let parsed = value;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return false;
+    }
+  }
+  if (!isObject(parsed)) return false;
+  return LEGACY_PEDAGOGY_SHELF_FIELDS.some(key => hasOwn(parsed, key));
+}
+
+/**
+ * Choose which stored domain columns a focused save should write.
+ * A missing classification column, or tags/level still stored on a sibling
+ * projection, rewrites every column from the freshly partitioned document
+ * so those shelf fields are not kept twice and a later clear can stick.
+ */
+export function domainColumnsForSave(current, domain, next) {
+  const needsSplit = current?.classification == null;
+  const needsShelfMove = !needsSplit && (
+    projectionHoldsLegacyShelfFields(current?.pedagogy) ||
+    projectionHoldsLegacyShelfFields(current?.content)
+  );
+  const rewriteAll = needsSplit || needsShelfMove;
+  return {
+    content: domain === "content" || current?.content == null || rewriteAll
+      ? next.content
+      : current.content,
+    pedagogy: domain === "pedagogy" || current?.pedagogy == null || rewriteAll
+      ? next.pedagogy
+      : current.pedagogy,
+    classification: domain === "classification" || rewriteAll
+      ? next.classification
+      : current.classification,
+    provenance: next.provenance
+  };
+}
+
 /**
  * Return an agent-facing projection. Pedagogy receives content as read-only
  * context because annotations reference clusters and bridges. Content and
@@ -709,17 +772,21 @@ export function assembleStoredDomainDocuments({
   const fallback = document ? partitionAuthoredDocument(document) : null;
   // A stored classification column is authoritative, including when it omits
   // a field. Legacy rows leave the column null and still carry those fields
-  // inside the content and pedagogy blobs.
+  // inside the content and pedagogy blobs. tags and level that still sit on
+  // a sibling projection are adopted when the classification column lacks
+  // that key, then stripped, so a read does not drop them.
   const classificationProvided = classification !== null && classification !== undefined;
+  const contentSource = content ?? fallback?.content ?? {};
+  const pedagogySource = pedagogy ?? fallback?.pedagogy ?? {};
   return assembleAuthoredDocument({
     content: classificationProvided
-      ? omitClassificationFields(content ?? fallback?.content ?? {})
-      : (content ?? fallback?.content ?? {}),
+      ? omitClassificationFields(contentSource)
+      : contentSource,
     pedagogy: classificationProvided
-      ? omitClassificationFields(pedagogy ?? fallback?.pedagogy ?? {})
-      : (pedagogy ?? fallback?.pedagogy ?? {}),
+      ? omitClassificationFields(pedagogySource)
+      : pedagogySource,
     classification: classificationProvided
-      ? classification
+      ? adoptLegacyShelfFields(classification, [pedagogySource, contentSource])
       : (fallback?.classification ?? {}),
     provenance: provenance ?? fallback?.provenance
   });

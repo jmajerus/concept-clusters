@@ -75,8 +75,8 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
 
   categories: { domain: "classification", kind: "authored", contextFor: ["content", "pedagogy"] },
   subcategories: { domain: "classification", kind: "authored", contextFor: ["content", "pedagogy"] },
-  tags: { domain: "pedagogy", kind: "authored" },
-  level: { domain: "pedagogy", kind: "authored" },
+  tags: { domain: "classification", kind: "authored", contextFor: ["content", "pedagogy"] },
+  level: { domain: "classification", kind: "authored", contextFor: ["content", "pedagogy"] },
   lenses: { domain: "pedagogy", kind: "authored" },
   lensMode: { domain: "pedagogy", kind: "authored" },
   preSolve: { domain: "pedagogy", kind: "authored" },
@@ -201,15 +201,17 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
   }),
   classification: Object.freeze({
     writeDomain: "classification",
-    root: Object.freeze(["category", "categories", "subcategories"])
+    root: Object.freeze([
+      "category", "categories", "subcategories", "tags", "level"
+    ])
   }),
   publication: Object.freeze({
     writeDomain: "pedagogy",
     // Protected creator/license/derivedFrom values stay in storage but are
-    // not exposed through MCP authoring passes. Shelf placement is the
-    // classification pass, not this one.
+    // not exposed through MCP authoring passes. Shelf placement, including
+    // tags and level, is the classification pass, not this one.
     root: Object.freeze([
-      "tags", "level", "relatedPuzzles", "language"
+      "relatedPuzzles", "language"
     ])
   })
 });

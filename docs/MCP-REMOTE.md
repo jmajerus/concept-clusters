@@ -120,11 +120,12 @@ accumulating draft:
 3. `pedagogy` owns lenses and learning introductions. They may be authored at
    different times: revisiting this phase to add a later introduction must
    preserve lenses already present unless they independently need revision.
-4. `classification` sets the shelf: primary category, full membership, and
-   subcategory placement. Get and save that projection with
-   `domain=classification`.
-5. `publication` adds only useful discovery and publication metadata
-   (tags, level, related puzzles, and language). Attribution and
+4. `classification` sets the shelf: primary category, full membership,
+   subcategory placement, tags, and level. Get and save that projection with
+   `domain=classification`. Leave level unset unless it matches that
+   category's existing ceiling. Add a tag only for a search word the title,
+   category, citations, subcategories, and board terms do not already cover.
+5. `publication` adds related puzzles and language. Attribution and
    rights metadata stay protected and are not part of the agent schema.
 
 For `profile: "vocabulary-context"`, the core pass treats clusters as tight
