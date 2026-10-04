@@ -537,8 +537,9 @@ export async function run() {
     assert.equal(coreGuidance.result.structuredContent.phase, "core");
     assert.equal(coreGuidance.result.structuredContent.preserveExisting, true);
     assert.match(coreGuidance.result.structuredContent.markdown, /one accumulating/);
-    assert.match(coreGuidance.result.structuredContent.markdown, /exact citation shape/);
-    assert.match(coreGuidance.result.structuredContent.markdown, /do not plan to rediscover/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /record it immediately as a link/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /goes on puzzle info\.citations when you find it/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /Do not plan to rediscover/);
     assert.doesNotMatch(coreGuidance.result.structuredContent.markdown, /termRole/);
     assert.match(coreGuidance.result.structuredContent.markdown, /appropriate level of granularity/);
     assert.match(coreGuidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);

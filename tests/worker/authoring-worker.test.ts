@@ -557,9 +557,12 @@ describe("hosted authoring Worker", () => {
     expect(coreGuidance.result.structuredContent.preserveExisting).toBe(true);
     expect(coreGuidance.result.structuredContent.markdown).toMatch(/one accumulating/);
     expect(coreGuidance.result.structuredContent.markdown).toMatch(/puzzleKind/);
-    expect(coreGuidance.result.structuredContent.markdown).toMatch(/exact citation shape/);
     expect(coreGuidance.result.structuredContent.markdown)
-      .toMatch(/do not plan to rediscover/);
+      .toMatch(/record it immediately as a link/);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .toMatch(/goes on puzzle info\.citations when you find it/);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .toMatch(/Do not plan to rediscover/);
     expect(coreGuidance.result.structuredContent.markdown)
       .toMatch(/Carry approved inventory connections/);
     expect(coreGuidance.result.structuredContent.markdown)
