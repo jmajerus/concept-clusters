@@ -321,6 +321,49 @@ export async function run() {
     DraftFieldError
   );
 
+  const levelForm = parseFieldEditForm(new URLSearchParams({
+    confirm: "save-field",
+    expected_revision: "1",
+    section: "puzzle",
+    field: "classification",
+    category: "Science",
+    tags: "book, usage",
+    level: "advanced"
+  }));
+  assert.equal(levelForm.classification.level, "advanced");
+  assert.deepEqual(levelForm.classification.tags, ["book", "usage"]);
+  const leveled = applyDraftFieldValue({
+    ...document,
+    category: "Science",
+    tags: ["old"],
+    level: "intermediate"
+  }, levelForm, "");
+  assert.equal(leveled.level, "advanced");
+  assert.deepEqual(leveled.tags, ["book", "usage"]);
+  assert.equal(leveled.category, "Science");
+  const clearedLevel = applyDraftFieldValue(leveled, {
+    section: "puzzle",
+    field: "classification",
+    classification: { ...levelForm.classification, level: "", tags: [] }
+  }, "");
+  assert.equal(clearedLevel.level, undefined);
+  assert.equal(clearedLevel.tags, undefined);
+  assert.throws(
+    () => applyDraftFieldValue(document, {
+      section: "puzzle",
+      field: "classification",
+      classification: {
+        category: "Science",
+        categories: [],
+        subcategories: {},
+        tags: [],
+        relatedEntries: [],
+        level: "expert"
+      }
+    }, ""),
+    /level must be one of/
+  );
+
   const form = parseFieldEditForm(new URLSearchParams({
     confirm: "save-field",
     expected_revision: "3",

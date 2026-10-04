@@ -4,6 +4,7 @@
 // trust a hidden "before" value in the form.
 
 import { documentForEditor, documentForStorage } from "./authoredPuzzleDocument.js";
+import { PUZZLE_LEVELS } from "../puzzles/categories.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
 import {
@@ -267,6 +268,7 @@ function parseClassification(params) {
     categories,
     subcategories,
     tags: unique((params.get("tags") || "").split(/[\n,]/)),
+    level: (params.get("level") || "").trim(),
     relatedEntries
   };
 }
@@ -502,6 +504,14 @@ export function applyDraftFieldValue(document, form, value) {
       else delete next.subcategories;
       if (classification.tags.length) next.tags = classification.tags;
       else delete next.tags;
+      const level = classification.level || "";
+      if (!level) delete next.level;
+      else if (PUZZLE_LEVELS.includes(level) || level === document.level) next.level = level;
+      else {
+        throw new DraftFieldError(
+          `level must be one of ${PUZZLE_LEVELS.join(", ")}`
+        );
+      }
       if (classification.relatedEntries.length) next.relatedPuzzles = { entries: classification.relatedEntries };
       else delete next.relatedPuzzles;
     }

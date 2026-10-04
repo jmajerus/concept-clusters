@@ -26,6 +26,7 @@ import {
   categoryMetadataFor,
   categoryTitleFor,
   primaryCategoryForPuzzle,
+  PUZZLE_LEVELS,
   subcategoryIdForPuzzle
 } from "../puzzles/categories.js";
 import {
@@ -274,6 +275,11 @@ function collectionMark(collection, item, ...fields) {
 function badge(label, tone = "neutral") {
   if (label === undefined || label === null || label === "") return "";
   return `<span class="badge badge-${tone}">${escapeHtml(label)}</span>`;
+}
+
+function levelLabel(level) {
+  if (!level) return "";
+  return level.charAt(0).toUpperCase() + level.slice(1);
 }
 
 // At-a-glance badges for renderClassificationEditor's own per-category
@@ -1880,7 +1886,17 @@ function renderClassificationEditor({
     <button type="button" data-remove-row>Remove</button>
   </fieldset>`;
   const rows = [...related, {}].map(relatedRow).join("");
-  return `<h2>Classification &amp; relationships</h2><copy-field><details><summary>Edit classification, tags, and related puzzles</summary>
+  const currentLevel = typeof document.level === "string" ? document.level : "";
+  const levelOptions = [
+    `<option value=""${currentLevel ? "" : " selected"}>Unset</option>`,
+    ...PUZZLE_LEVELS.map(level =>
+      `<option value="${level}"${level === currentLevel ? " selected" : ""}>${levelLabel(level)}</option>`
+    ),
+    currentLevel && !PUZZLE_LEVELS.includes(currentLevel)
+      ? `<option value="${escapeHtml(currentLevel)}" selected>${escapeHtml(currentLevel)} (unrecognized)</option>`
+      : ""
+  ].join("");
+  return `<h2>Classification &amp; relationships</h2><copy-field><details><summary>Edit classification, tags, level, and related puzzles</summary>
     ${slot.hidden}
     <classification-editor>
     <p><label>Primary category <select${slot.form} name="${slot.prefix}category" required data-primary-category>${options}</select></label></p>
@@ -1888,6 +1904,7 @@ function renderClassificationEditor({
     <fieldset class="secondary-categories"><legend>Secondary categories</legend>${secondary}</fieldset>
     </classification-editor>
     <p><label>Tags (comma-separated)<input${slot.form} name="${slot.prefix}tags" value="${escapeHtml((document.tags || []).join(", "))}"></label></p>
+    <p><label>Level <select${slot.form} name="${slot.prefix}level">${levelOptions}</select></label></p>
     <datalist id="${relatedListId}">${relatedOptions}</datalist><repeatable-list><div data-rows>${rows}</div><template>${relatedRow()}</template><button type="button" data-add-row>Add related puzzle</button></repeatable-list>
   </details></copy-field>`;
 }
@@ -2233,12 +2250,14 @@ export function renderDraftPage(draft, {
         .filter(name => categoryIdFor(name, categoryRegistry) !== primaryCategoryId)
         .map(name => badge(categoryTitleFor(name, categoryRegistry))).join("")}
       ${subcategoryBadges(document.subcategories, categoryRegistry)}
+      ${badge(levelLabel(document.level))}
       ${(document.tags || []).map(tag => badge(tag)).join("")}
       ${derivedLarge(puzzleNodeCount(document)) ? badge("large") : ""}
     </p>
     ${renderWas(diff?.fields?.category)}
     ${renderSubcategoriesWas(diff?.fields?.subcategories, categoryRegistry)}
     ${renderWas(diff?.fields?.tags)}
+    ${renderWas(diff?.fields?.level)}
     ${renderPuzzleMeta(document)}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}

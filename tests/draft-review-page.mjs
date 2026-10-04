@@ -226,6 +226,23 @@ export async function run() {
     "no leftover static subcategories line outside the badge/editor");
   assert.match(subcategoryPage, /<p class="diff-was">was: Biology: Genomics<\/p>/);
 
+  const levelPage = renderDraftPage({
+    ...baseDraft,
+    document: { ...baseDraft.document, level: "advanced", tags: ["book"] },
+    publishedDiff: {
+      fields: {
+        level: { before: "intermediate", after: "advanced" }
+      }
+    }
+  });
+  assert.match(levelPage, /<span class="badge[^"]*">Advanced<\/span>/);
+  assert.match(levelPage, /<option value="advanced" selected>Advanced<\/option>/);
+  assert.match(levelPage, /<p class="diff-was">was: intermediate<\/p>/);
+  assert.match(levelPage, /name="c\d+\.level"/);
+  const unsetLevelPage = renderDraftPage(baseDraft);
+  assert.match(unsetLevelPage, /<option value="" selected>Unset<\/option>/);
+  assert.doesNotMatch(unsetLevelPage, /<span class="badge[^"]*">Advanced<\/span>/);
+
   // A puzzle authored with only `categories` (array), no singular `category`
   // -- a legitimate shape per categoriesForPuzzle(). The primary <select>
   // used to match document.category directly, so nothing matched, the
