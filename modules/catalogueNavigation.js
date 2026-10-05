@@ -135,9 +135,10 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
   // so stale puzzle/category links still degrade to a playable puzzle.
   // ?admin is the reviewer shortcut, not a stale link: it should open the
   // Library so the next puzzle is chosen, rather than a random board.
+  // A mode on its own keeps the default playable puzzle.
   if (!params.toString()) return { kind: "library" };
   const keys = [...params.keys()];
-  if (keys.length && keys.every(key => key === "admin" || key === "mode")) {
+  if (params.has("admin") && keys.every(key => key === "admin" || key === "mode")) {
     return { kind: "library" };
   }
   return { kind: "default" };
