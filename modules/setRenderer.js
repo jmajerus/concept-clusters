@@ -110,7 +110,7 @@ export function createSetRenderer({
     // authoring order — otherwise a player who plays many puzzles could
     // learn that earlier list positions tend to belong to earlier clusters.
     const freeNodes = nodes
-      .filter(n => !(n.gs.length === 1 && n.connected.length))
+      .filter(n => !n.connected.length)
       .map(n => ({ id: n.id, w: n.w, word: n.word }))
       .sort((a, b) => compareWordOrder(a.word, b.word));
 
@@ -1096,6 +1096,10 @@ export function createSetRenderer({
       const initialBridges = connectedBridges(state);
       if (initialBridges.length > 0) {
         initialBridges.forEach(n => {
+          // A pin belongs to the mode that set it. Circle places the
+          // bridge from its own clusters.
+          n.fx = null;
+          n.fy = null;
           if (n.x === undefined) {
             const c = state.setLayout.csNodes[n.connected[0]];
             n.x = c.x + (Math.random() - 0.5) * 40;

@@ -28,6 +28,11 @@ import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
+import {
+  applyStarBridgePreconnect,
+  remainingLinkCount
+} from "./modules/starBridgePreconnect.js";
+import { starBridgePreconnectEnabled } from "./modules/starLayoutRepository.js";
 import { BOARD_CANVAS, boardCanvas, boardFrameMaxWidth, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
@@ -1006,7 +1011,8 @@ function recordLearningIntroductionStatus(status, puzzleId) {
   if (wasGated && !state.learningGated) {
     const presolvePending = state.autoPresolvePending === true;
     const sharedPending = pendingInitialSharedParams;
-    if (!presolvePending && !sharedPending) {
+    const completePending = state.preconnectedCompletePending === true;
+    if (!presolvePending && !sharedPending && !completePending) {
       setMessage(
         status === "read"
           ? "Introduction complete. Organize the ideas on the board."
@@ -1023,6 +1029,9 @@ function recordLearningIntroductionStatus(status, puzzleId) {
     } else if (presolvePending) {
       state.autoPresolvePending = false;
       beginAutomaticPresolve();
+    } else if (completePending) {
+      state.preconnectedCompletePending = false;
+      finishPreconnectedBoard();
     }
   }
 }
@@ -1241,6 +1250,38 @@ function updateLensInterface({ paint = true } = {}) {
   updateModeControls();
   updateSolutionHint();
   if (paint) state.paint?.();
+}
+
+// Pre-connect can leave a board with nothing left to place. Completion
+// normally runs from the tap that makes the last link, so a board that
+// loads already finished would stay in "assembling" and never open lenses,
+// related puzzles, or the completed session. This is that same ending,
+// without inventing a tap.
+function finishPreconnectedBoard() {
+  if (!state || state.phase !== "assembling" || state.made !== state.need) return;
+  const alreadyRecorded = state.skipPreconnectedCompletionTrack === true;
+  const hasLenses = !!state.puzzle.lenses?.length;
+  if (!alreadyRecorded) {
+    setMessage(
+      hasLenses
+        ? "Map complete. Now examine it through a different lens."
+        : "Concept map complete. Well done.",
+      "good"
+    );
+    state.onPuzzleSolved?.();
+    if (hasLenses) {
+      state.detangle?.();
+      state.beginLensSequence?.();
+      return;
+    }
+    trackPuzzleCompleted(state.puzzle.id, mode, state);
+  }
+  if (hasLenses) return;
+  state.phase = "complete";
+  overviewRenderer.showRelatedPuzzles(state.puzzle);
+  updateLearningIntroduction();
+  if (!alreadyRecorded) persistPlayerSession({ captureLayout: true });
+  state.paint?.();
 }
 
 function beginAutomaticPresolve() {
@@ -2020,6 +2061,13 @@ function applyLoadedPuzzle(puzzle, index, {
   svg.selectAll("*").remove();
 
   const built = authoringBoard || buildNodesAndLinks(puzzle);
+  // The connection is part of the shared board, not of one renderer.
+  // Applying it only for the mode that happened to load would drop those
+  // bridges when the player switches layout.
+  if (!authoringConstruct && starBridgePreconnectEnabled(puzzle)) {
+    applyStarBridgePreconnect(puzzle, built.nodes, built.links);
+    built.need = remainingLinkCount(built.nodes);
+  }
   const { nodes, links, need } = built;
   state = {
     puzzle, nodes, links, selected: null, made: 0,
@@ -2110,6 +2158,11 @@ function applyLoadedPuzzle(puzzle, index, {
       (puzzle.preSolve || automaticallyPreSolved) && state.made !== state.need) {
     if (state.learningGated) state.autoPresolvePending = true;
     else beginAutomaticPresolve();
+  }
+  if (!authoringConstruct && state.phase === "assembling" && state.made === state.need) {
+    state.skipPreconnectedCompletionTrack = savedSession?.completed === true;
+    if (state.learningGated) state.preconnectedCompletePending = true;
+    else finishPreconnectedBoard();
   }
   if (persistInitial && !savedSession) persistPlayerSession();
   layoutAuthoring.onPuzzleLoaded();

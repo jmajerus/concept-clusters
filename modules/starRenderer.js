@@ -25,7 +25,8 @@ import {
   publishedStarLayoutFor,
   starFreeStripEnabled,
   starFreeStripCapacityNeeded,
-  starSeedBesideTitleEnabled
+  starSeedBesideTitleEnabled,
+  starBridgePreconnectEnabled
 } from "./starLayoutRepository.js";
 import {
   centeredRect,
@@ -208,6 +209,16 @@ export function createStarRenderer({
         const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
         return [boardCx + ringR * Math.cos(angle), boardMidY + ringR * Math.sin(angle)];
       });
+    const useBridgePreconnect = starBridgePreconnectEnabled(puzzle);
+    // Pre-connected bridges use the chord order as their ring. The live
+    // title home follows that same order so the force sim does not pull
+    // the titles back to puzzle-array slots.
+    const titleHome = ring.map(point => point.slice());
+    if (useBridgePreconnect && nClusters > 1) {
+      computeClusterOrder(puzzle).forEach((ci, slot) => {
+        titleHome[ci] = ring[slot].slice();
+      });
+    }
 
     // One label per cluster, square-cornered (see the CSS: no `rx`, plain
     // fill:none outline) so it reads as "not a term" at a glance -- kept
@@ -215,7 +226,7 @@ export function createStarRenderer({
     // entry there as a real, tappable term (scoring, sharing, etc.).
     const titleNodes = puzzle.clusters.map((c, ci) => ({
       isTitleNode: true, ci, word: c.name, w: pillWidth(c.name),
-      x: ring[ci][0], y: ring[ci][1]
+      x: titleHome[ci][0], y: titleHome[ci][1]
     }));
     const allLayoutNodes = [...nodes, ...titleNodes];
     const displayedLinkTarget = link => {
@@ -237,13 +248,77 @@ export function createStarRenderer({
     });
     const displayedLinks = () => [...links, ...singleSeedAnchors];
 
+    // Titles and bridge nodes only. Seeds and the other terms join after
+    // this settle, and the bridge seats stay pinned so the later term
+    // sim does not walk the corridors off. Restoring a layout clears
+    // pins. A layout captured while pre-connect was on keeps the saved
+    // bridge coordinates and only re-pins them; any older layout is
+    // seated again so those bridges still land in the corridors.
+    const pinPreconnectedBridges = () => {
+      if (!useBridgePreconnect) return;
+      nodes.filter(node => node.gs.length > 1 && node.connected.length).forEach(node => {
+        const point = clampPoint(node, node);
+        node.x = node.fx = point.x;
+        node.y = node.fy = point.y;
+        node.vx = 0;
+        node.vy = 0;
+      });
+    };
+    const seatPreconnectedBridges = () => {
+      if (!useBridgePreconnect) return;
+      const bridgeNodes = nodes.filter(node => node.gs.length > 1 && node.connected.length);
+      if (!bridgeNodes.length) return;
+      const heldTitles = titleNodes.map(title => ({ x: title.x, y: title.y }));
+      bridgeNodes.forEach(node => {
+        const points = node.connected.map(ci => titleNodes[ci]).filter(Boolean);
+        if (!points.length) return;
+        node.x = points.reduce((sum, point) => sum + point.x, 0) / points.length;
+        node.y = points.reduce((sum, point) => sum + point.y, 0) / points.length;
+        node.vx = 0;
+        node.vy = 0;
+      });
+      titleNodes.forEach(title => {
+        title.fx = title.x;
+        title.fy = title.y;
+      });
+      const skeletonLinks = [];
+      bridgeNodes.forEach(node => {
+        node.connected.forEach(ci => {
+          if (titleNodes[ci]) skeletonLinks.push({ source: node, target: titleNodes[ci] });
+        });
+      });
+      const skeleton = [...titleNodes, ...bridgeNodes];
+      const settle = d3.forceSimulation(skeleton).stop();
+      if (d3.randomLcg) settle.randomSource(d3.randomLcg(0.42));
+      settle
+        .force("link", d3.forceLink(skeletonLinks).distance(92).strength(0.85))
+        .force("charge", d3.forceManyBody().strength(-30))
+        .force("collide", d3.forceCollide().radius(d => d.w / 2 + 12).iterations(2))
+        .force("x", d3.forceX(d => d.isTitleNode ? d.fx : d.x).strength(d => d.isTitleNode ? 1 : 0.2))
+        .force("y", d3.forceY(d => d.isTitleNode ? d.fy : d.y).strength(d => d.isTitleNode ? 1 : 0.2))
+        .alpha(1)
+        .alphaDecay(0.04);
+      for (let tick = 0; tick < 160; tick++) settle.tick();
+      settle.stop();
+      titleNodes.forEach((title, index) => {
+        title.fx = null;
+        title.fy = null;
+        title.vx = 0;
+        title.vy = 0;
+        title.x = heldTitles[index].x;
+        title.y = heldTitles[index].y;
+      });
+      pinPreconnectedBridges();
+    };
+    seatPreconnectedBridges();
+
     // Seeds (and any other already-connected terms) sit beside their title
     // so clusterPull starts from a sensible spot. Classic Star leaves seeds
     // to the force sim unless an admin local try opts in (strip implies this).
     if (useSeedBesideTitle) {
       const seedsByCluster = new Map();
       nodes.forEach(node => {
-        if (!node.connected.length) return;
+        if (!node.connected.length || node.gs.length > 1) return;
         const ci = node.connected[0];
         if (!seedsByCluster.has(ci)) seedsByCluster.set(ci, []);
         seedsByCluster.get(ci).push(node);
@@ -304,13 +379,14 @@ export function createStarRenderer({
       .force("clusterPull", d3.forceLink(buildClusterLinks()).distance(70).strength(0.6))
       .force("charge", d3.forceManyBody().strength(-240))
       .force("collide", d3.forceCollide().radius(d => d.w / 2 + 14))
-      .force("titleHomeX", d3.forceX(d => d.isTitleNode ? ring[d.ci][0] : d.x).strength(d => d.isTitleNode ? 0.3 : 0))
-      .force("titleHomeY", d3.forceY(d => d.isTitleNode ? ring[d.ci][1] : d.y).strength(d => d.isTitleNode ? 0.3 : 0));
+      .force("titleHomeX", d3.forceX(d => d.isTitleNode ? titleHome[d.ci][0] : d.x).strength(d => d.isTitleNode ? 0.3 : 0))
+      .force("titleHomeY", d3.forceY(d => d.isTitleNode ? titleHome[d.ci][1] : d.y).strength(d => d.isTitleNode ? 0.3 : 0));
     setSim(sim);
 
     state.getStarFreeStripReport = () => ({
       useFreeStrip,
       useSeedBesideTitle,
+      useBridgePreconnect,
       capacityNeeded: starFreeStripCapacityNeeded(puzzle, W, H),
       freeStripActive,
       freeCount: nodes.filter(node => !node.connected.length).length,
@@ -1975,7 +2051,8 @@ export function createStarRenderer({
           }),
           // See graph capture: a solved-board snapshot is reused on the
           // next visit instead of running Star's layout search again.
-          capturedSolved: state.made === state.need
+          capturedSolved: state.made === state.need,
+          bridgePreconnect: useBridgePreconnect
         };
       },
       apply(layout, options = {}) {
@@ -2026,6 +2103,8 @@ export function createStarRenderer({
           node.vx = 0;
           node.vy = 0;
         }
+        if (layout.bridgePreconnect) pinPreconnectedBridges();
+        else seatPreconnectedBridges();
         state.solutionLayout = state.made === state.need
           ? layout.solutionLayout
           : null;

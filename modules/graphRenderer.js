@@ -36,6 +36,14 @@ export function createGraphRenderer({
     const state = getState();
     const W = getW(), H = getH();
     const { nodes, links, puzzle } = state;
+    // Star pins a pre-connected bridge in its own corridor. This mode
+    // places that same connected node with its own forces.
+    nodes.forEach(node => {
+      if (node.gs.length > 1 && node.connected.length) {
+        node.fx = null;
+        node.fy = null;
+      }
+    });
     // Self-contained, like buildSetGraph's own layer setup — this used to
     // rely on loadPuzzle having already cleared the SVG, which was true
     // when it was the only caller, but setMode() now calls buildGraph()
