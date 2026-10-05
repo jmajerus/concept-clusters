@@ -34,7 +34,7 @@ import {
   remainingLinkCount
 } from "./modules/starBridgePreconnect.js";
 import { starBridgePreconnectEnabled } from "./modules/starLayoutRepository.js";
-import { BOARD_CANVAS, boardCanvas, boardFrameMaxWidth, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
+import { BOARD_CANVAS, boardCanvas, boardDisplayFrame, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { boardWithFlag } from "./modules/starLayoutRepository.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
@@ -2002,13 +2002,15 @@ function applyBoardSize(puzzle) {
   const chosen = boardCanvas(puzzle, mode);
   const expanded = chosen.width > BOARD_CANVAS.standard.width;
   wrapEl.classList.toggle("wide", expanded);
-  const frame = boardFrameMaxWidth(chosen);
+  const frame = boardDisplayFrame(puzzle, mode);
   if (frame) wrapEl.style.setProperty("--board-max-width", `${frame}px`);
   else wrapEl.style.removeProperty("--board-max-width");
   // A narrow viewport cannot show the wider container, so a non-large
-  // puzzle falls back to the standard canvas. A large puzzle keeps the
+  // puzzle falls back to the standard canvas. Measure the viewport, not
+  // the wrap: a size factor sets the wrap's max-width, and that width
+  // would otherwise look like a narrow window. A large puzzle keeps the
   // expanded viewBox anyway: that size is what keeps its labels apart.
-  const narrow = expanded && wrapEl.getBoundingClientRect().width < 900;
+  const narrow = expanded && window.innerWidth < 900;
   const size = expanded && narrow && !puzzleUsesLargeBoard(puzzle)
     ? BOARD_CANVAS.standard
     : chosen;

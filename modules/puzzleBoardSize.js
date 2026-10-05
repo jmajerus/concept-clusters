@@ -184,7 +184,7 @@ function scaleCanvas(canvas, factor) {
   return { width, height };
 }
 
-export function boardCanvas(puzzle, mode) {
+function baseCanvas(puzzle, mode) {
   const nodes = puzzleNodeCount(puzzle);
   const clusters = Array.isArray(puzzle?.clusters) ? puzzle.clusters.length : 0;
   let canvas = BOARD_CANVAS.standard;
@@ -192,7 +192,27 @@ export function boardCanvas(puzzle, mode) {
   else if (derivedLarge(nodes)) {
     canvas = mode === "sets" ? BOARD_CANVAS.circleWide : BOARD_CANVAS.wide;
   } else if (mode !== "graph" && clusters >= 2) canvas = BOARD_CANVAS.wide;
-  return scaleCanvas(growCanvas(canvas, boardLoad(puzzle)), boardSizeFactor(puzzle));
+  return growCanvas(canvas, boardLoad(puzzle));
+}
+
+export function boardCanvas(puzzle, mode) {
+  return scaleCanvas(baseCanvas(puzzle, mode), boardSizeFactor(puzzle));
+}
+
+// Node text is 12.5px in board units, and the board fills .wrap. The
+// frame scales with the size factor so a label stays the same size on
+// screen. Derived growth still leaves the stylesheet floor alone.
+const STANDARD_FRAME = 680;
+
+export function boardDisplayFrame(puzzle, mode) {
+  const grown = baseCanvas(puzzle, mode);
+  const fitted = boardFrameMaxWidth(grown);
+  const factor = boardSizeFactor(puzzle);
+  if (factor === 1) return fitted;
+  const natural = fitted ?? (
+    grown.width <= BOARD_CANVAS.standard.width ? STANDARD_FRAME : WIDE_FRAME_FLOOR
+  );
+  return Math.round(natural * factor);
 }
 
 // Null keeps the stylesheet default: 680px, or 1000px once .wrap.wide is on.

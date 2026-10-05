@@ -5,6 +5,7 @@ import {
   NODE_CAP_STANDARD,
   NODE_CAP_XLARGE,
   boardCanvas,
+  boardDisplayFrame,
   boardFrameMaxWidth,
   boardSizeFactor,
   canonicalBoardSizeFactor,
@@ -150,6 +151,12 @@ export async function run() {
   const tighter = boardCanvas({ ...longLabels, board: { sizeFactor: 0.75 } }, "graph");
   assert.ok(roomy.width > 1080 && roomy.height > 700);
   assert.ok(tighter.width < 1080 && tighter.height < 700);
+  assert.equal(boardDisplayFrame(longLabels, "graph"), 1125);
+  assert.equal(boardDisplayFrame({ ...longLabels, board: { sizeFactor: 0.75 } }, "graph"), 844);
+  assert.equal(boardDisplayFrame({ ...longLabels, board: { sizeFactor: 1.25 } }, "graph"), 1406);
+  const ordinaryGraph = puzzleWithTerms(12);
+  assert.equal(boardDisplayFrame(ordinaryGraph, "graph"), null);
+  assert.equal(boardDisplayFrame({ ...ordinaryGraph, board: { sizeFactor: 0.75 } }, "graph"), 510);
   assert.deepEqual(boardCanvas(longLabels, "graph"), { width: 1080, height: 700 });
   assert.deepEqual(boardCanvas(longLabels, "sets"), { width: 1180, height: 880 });
   assert.equal(boardFrameMaxWidth(boardCanvas(longLabels, "graph")), 1125);

@@ -59,7 +59,7 @@ body {
 }
 
 .wrap {
-  max-width: 680px;
+  max-width: var(--board-max-width, 680px);
   margin: 0 auto;
   padding: 28px 20px 48px;
 }

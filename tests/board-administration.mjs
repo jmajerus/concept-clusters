@@ -99,7 +99,28 @@ export async function run(page) {
     null, { timeout: 15000 });
     await waitForBoard(page);
     const beforeWidth = await page.evaluate(() => document.getElementById("board").viewBox.baseVal.width);
+    const labelHeight = () => page.evaluate(() => {
+      const text = document.querySelector("#board .node text");
+      return text ? text.getBoundingClientRect().height : 0;
+    });
+    const derivedLabelHeight = await labelHeight();
+    assert.ok(derivedLabelHeight > 0);
     assert.match(await page.textContent("#board-size-factor-readout"), /0%/);
+    await page.evaluate(() => {
+      const input = document.getElementById("board-size-factor-input");
+      input.value = "0.75";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await page.waitForFunction(start => {
+      const box = document.getElementById("board").viewBox.baseVal;
+      const readout = document.getElementById("board-size-factor-readout")?.textContent || "";
+      return box.width < start && readout.includes("-25%");
+    }, beforeWidth, { timeout: 15000 });
+    const tighterLabelHeight = await labelHeight();
+    assert.ok(
+      Math.abs(tighterLabelHeight - derivedLabelHeight) / derivedLabelHeight < 0.08,
+      `label height ${tighterLabelHeight} drifted from ${derivedLabelHeight}`
+    );
     await page.evaluate(() => {
       const input = document.getElementById("board-size-factor-input");
       input.value = "1.2";
