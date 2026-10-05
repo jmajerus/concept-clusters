@@ -15,8 +15,26 @@ function queryWithMode(params, mode) {
   }
   // URLSearchParams serializes a flag as `play=`. Keep author-facing links
   // compact while retaining standard URLSearchParams parsing at the reader.
-  const query = params.toString().replace(/(^|&)play=(?=&|$)/, "$1play");
+  const query = params.toString()
+    .replace(/(^|&)admin=(?=&|$)/, "$1admin")
+    .replace(/(^|&)play=(?=&|$)/, "$1play");
   return `/?${query}`;
+}
+
+export function reviewQuery(puzzleId, mode = null) {
+  if (!SLUG_RE.test(puzzleId)) {
+    throw new Error(`Invalid puzzle id: ${puzzleId}`);
+  }
+  return queryWithMode(new URLSearchParams({ puzzle: puzzleId, admin: "" }), mode);
+}
+
+export function draftReviewQuery(draftId, mode = null, revision = null) {
+  if (!SLUG_RE.test(draftId)) {
+    throw new Error(`Invalid draft id: ${draftId}`);
+  }
+  const params = new URLSearchParams({ puzzle: draftId, admin: "", play: "" });
+  if (Number.isInteger(revision) && revision > 0) params.set("revision", String(revision));
+  return queryWithMode(params, mode);
 }
 
 export function playQuery(puzzleId, mode = null) {

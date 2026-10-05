@@ -19,7 +19,7 @@ import {
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { diffPublishedDraft, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
-import { draftBoardQuery, draftPlayQuery, playQuery } from "./stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery, draftReviewQuery, playQuery, reviewQuery } from "./stagingPlayLinks.js";
 import {
   CATEGORIES,
   categoryIdFor,
@@ -848,7 +848,8 @@ function listIntro(variant) {
        corpus. Recent gathers working copies by last
        update. Open a row to review copy; that starts a working copy if you
        do not already have one. New puzzle opens a blank board. Play
-       unpublished boards on this server (\`/?puzzle=\`). Catalogues are edited at
+       opens the clean preview. Review, in that same column, opens the
+       board with puzzle meta, stats, and Edit layout. Catalogues are edited at
        <a href="/admin/catalogues">/admin/catalogues</a>.`
     : `One path: working copy → Publish (authoring play, held) → Cue → LAN
        Freeze (git) → GitHub production. Status is where this id sits on that
@@ -1101,10 +1102,12 @@ function renderCorpusPlayCell(item, variant) {
   if (variant !== "local") return "";
   try {
     if (item.hasWorkingCopy && item.draftId) {
-      return `<td><a href="${escapeHtml(draftPlayQuery(item.draftId))}">Play</a></td>`;
+      return `<td><a href="${escapeHtml(draftPlayQuery(item.draftId))}">Play</a>
+        · <a href="${escapeHtml(draftReviewQuery(item.draftId))}">Review</a></td>`;
     }
     if (item.published && item.id) {
-      return `<td><a href="${escapeHtml(playQuery(item.id))}">Play</a></td>`;
+      return `<td><a href="${escapeHtml(playQuery(item.id))}">Play</a>
+        · <a href="${escapeHtml(reviewQuery(item.id))}">Review</a></td>`;
     }
   } catch {
     return "<td></td>";
@@ -1338,8 +1341,8 @@ function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
     return `This page is for design copy. Open board opens
        <code>/?puzzle=</code> in a new tab, in Construct, and leaves this
        page as it is. Play is a clean player preview
-       (<code>/?puzzle=&amp;play</code>), the same chrome as
-       <code>/</code>; add <code>&amp;admin</code> for layout tools.
+       (<code>/?puzzle=&amp;play</code>). Review, beside Play on the
+       puzzle list, opens that board with puzzle meta, stats, and Edit layout.
        Publish writes the shared D1 row. Cue means you are done with this
        puzzle and returns to the list; Freeze on
        <a href="/admin">Admin</a> is the only thing that writes git.`;

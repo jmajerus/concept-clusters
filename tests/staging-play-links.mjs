@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { draftBoardQuery, draftPlayQuery, playQuery, stagingPlayItems } from "../modules/stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery, draftReviewQuery, playQuery, reviewQuery, stagingPlayItems } from "../modules/stagingPlayLinks.js";
 
 export const name = "Staging play links: LAN Play, not Cloudflare preview";
 
@@ -9,6 +9,8 @@ export async function run() {
   assert.equal(draftBoardQuery("energy-flow-review"), "/?puzzle=energy-flow-review");
   assert.equal(draftPlayQuery("energy-flow-review"), "/?puzzle=energy-flow-review&play");
   assert.equal(draftPlayQuery("energy-flow-review", "star"), "/?puzzle=energy-flow-review&play&mode=star");
+  assert.equal(reviewQuery("energy-flow"), "/?puzzle=energy-flow&admin");
+  assert.equal(draftReviewQuery("energy-flow-review"), "/?puzzle=energy-flow-review&admin&play");
   assert.deepEqual(
     stagingPlayItems("energy-flow").map(([label, href]) => [label, href]),
     [

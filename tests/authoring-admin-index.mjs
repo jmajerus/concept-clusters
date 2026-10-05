@@ -39,8 +39,7 @@ export async function run(page) {
   assert.match(pageHtml, /href="\/admin\/drafts"/);
   assert.match(pageHtml, /href="\/admin\/catalogues"/);
   assert.match(pageHtml, /href="\/admin\/categories"/);
-  assert.match(pageHtml, /href="\/\?admin"/);
-  assert.match(pageHtml, /Review board/);
+  assert.doesNotMatch(pageHtml, /href="\/\?admin"/);
   assert.match(pageHtml, /Play this server/);
   assert.match(pageHtml, /Publish writes the shared live/);
   assert.match(pageHtml, /<h2>Freeze<\/h2>/);
