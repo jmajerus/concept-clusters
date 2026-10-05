@@ -101,6 +101,7 @@ describe("D1 draft repository", () => {
       layout: layoutDocument
     });
     expect(publishedWithLayout.layout).toEqual(layoutDocument);
+    expect(publishedWithLayout.firstPublishedAt).toBe(publishedWithLayout.publishedAt);
     const republished = await contentDocuments.publish({
       kind: "puzzle",
       id: "d1-draft-fixture",
@@ -108,6 +109,7 @@ describe("D1 draft repository", () => {
       actor
     });
     expect(republished.layout).toEqual(layoutDocument);
+    expect(republished.firstPublishedAt).toBe(publishedWithLayout.firstPublishedAt);
 
     await expect(repository.get({
       draftId: "d1-draft-fixture",

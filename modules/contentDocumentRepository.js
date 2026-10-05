@@ -87,6 +87,7 @@ function publishedRecord(row) {
     contentHash: row.content_hash,
     publishedBy: row.published_by,
     publishedAt: row.published_at,
+    firstPublishedAt: row.first_published_at || row.published_at,
     updatedAt: row.updated_at,
     lastAgentReviewedAt: row.last_agent_reviewed_at || null,
     lastHumanReviewedAt: row.last_human_reviewed_at || null,
@@ -771,12 +772,12 @@ export class D1ContentDocumentRepository {
         this.database.prepare(`
           INSERT OR IGNORE INTO published_documents (
             kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at, last_agent_reviewed_at,
+            published_by, published_at, first_published_at, updated_at, last_agent_reviewed_at,
             cued_for_freeze_at, cued_for_freeze_by, layout_json
-          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed', ?)
+          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, ?, 'git-seed', ?)
         `).bind(
           item.kind, item.id, titleOf(sourceDocument), documentJson, contentHash,
-          now, now, now, now, layoutJson
+          now, now, now, now, now, layoutJson
         ),
         this.database.prepare(`
           INSERT OR IGNORE INTO published_document_revisions (
@@ -836,12 +837,12 @@ export class D1ContentDocumentRepository {
           this.database.prepare(`
             INSERT INTO published_documents (
               kind, id, title, document, content_hash, revision,
-              published_by, published_at, updated_at, last_agent_reviewed_at,
+              published_by, published_at, first_published_at, updated_at, last_agent_reviewed_at,
               layout_json
-            ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
           `).bind(
             kind, id, titleOf(sourceDocument), documentJson, contentHash,
-            publishedBy, now, now, now, layoutJson
+            publishedBy, now, now, now, now, layoutJson
           ),
           this.database.prepare(`
             INSERT INTO published_document_revisions (
@@ -1119,6 +1120,7 @@ export function createMemoryContentDocumentRepository() {
           revision: 1,
           published_by: "git-seed",
           published_at: now,
+          first_published_at: now,
           updated_at: now,
           last_agent_reviewed_at: now,
           last_human_reviewed_at: null,
@@ -1181,6 +1183,7 @@ export function createMemoryContentDocumentRepository() {
         revision: nextRevision,
         published_by: publishedBy,
         published_at: now,
+        first_published_at: existing?.first_published_at || existing?.published_at || now,
         updated_at: now,
         last_agent_reviewed_at: existing?.last_agent_reviewed_at || now,
         last_human_reviewed_at: existing?.last_human_reviewed_at || null,

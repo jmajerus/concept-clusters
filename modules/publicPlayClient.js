@@ -26,7 +26,13 @@ export function createPublicPuzzleLoader(staticManifest, index) {
   const rows = new Map(index.puzzles.map(entry => [entry.id, entry]));
   const orderedIds = [
     ...staticManifest.map(entry => entry.id).filter(id => rows.has(id)),
-    ...index.puzzles.map(entry => entry.id).filter(id => !staticById.has(id))
+    ...[...index.puzzles]
+      .filter(entry => !staticById.has(entry.id))
+      .sort((left, right) =>
+        String(left.firstPublishedAt || left.dateCreated || "")
+          .localeCompare(String(right.firstPublishedAt || right.dateCreated || ""))
+        || left.id.localeCompare(right.id))
+      .map(entry => entry.id)
   ];
   const entries = orderedIds.map(id => {
     const published = rows.get(id);

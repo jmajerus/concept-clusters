@@ -11,7 +11,7 @@
 // as stdio MCP. Player analytics /admin remains this Worker's dashboard.
 
 import { handleAdmin } from "./admin.js";
-import { handlePublicPlayRequest, htmlWithPublicPlayMeta } from "../modules/publicPlayService.js";
+import { handleCachedPublicPlayRequest, htmlWithPublicPlayMeta } from "../modules/publicPlayService.js";
 
 const ALLOWED_EVENTS = new Set(["puzzle_load", "puzzle_completed"]);
 
@@ -22,18 +22,24 @@ export default {
       return handleEvent(request, env);
     }
     if (url.pathname === "/api/publications" || url.pathname.startsWith("/api/puzzles/")) {
-      return handlePublicPlayRequest(request, env);
+      return handleCachedPublicPlayRequest(request, env, ctx);
     }
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
       return handleAdmin(request, env);
     }
     if ((url.pathname === "/" || url.pathname === "/index.html") && request.method === "GET") {
-      const asset = await env.ASSETS.fetch(request);
+      const assetRequest = new Request(request);
+      for (const header of ["If-None-Match", "If-Modified-Since", "If-Match", "If-Unmodified-Since", "If-Range"]) {
+        assetRequest.headers.delete(header);
+      }
+      const asset = await env.ASSETS.fetch(assetRequest);
       if (!asset.ok) return asset;
       const headers = new Headers(asset.headers);
       headers.delete("Content-Length");
       headers.delete("Content-Encoding");
       headers.delete("ETag");
+      headers.delete("Last-Modified");
+      headers.set("Cache-Control", "no-cache");
       return new Response(htmlWithPublicPlayMeta(await asset.text()), {
         status: asset.status, headers
       });

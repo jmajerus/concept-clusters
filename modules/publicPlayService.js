@@ -34,6 +34,12 @@ function sortedJson(value) {
   return value;
 }
 
+function byFirstPublication(left, right) {
+  return String(left.firstPublishedAt || left.publishedAt || "")
+    .localeCompare(String(right.firstPublishedAt || right.publishedAt || ""))
+    || String(left.id).localeCompare(String(right.id));
+}
+
 export async function buildPublicPlayIndex(repository, { staticManifest = [] } = {}) {
   const [puzzles, categories, catalogues] = await Promise.all([
     repository.listPublished({ kind: "puzzle" }),
@@ -42,7 +48,7 @@ export async function buildPublicPlayIndex(repository, { staticManifest = [] } =
   ]);
   const categoryRegistry = categoriesRegistryFromDocuments(categories.map(row => row.document));
   const staticById = new Map(staticManifest.map(entry => [entry.id, entry]));
-  const entries = puzzles.map(row => {
+  const entries = [...puzzles].sort(byFirstPublication).map(row => {
     const { puzzle, errors } = compilePublishedPuzzle(row.document);
     if (!puzzle) {
       // An invalid published document remains visible as a load failure;
@@ -55,6 +61,7 @@ export async function buildPublicPlayIndex(repository, { staticManifest = [] } =
     const staticBrowse = staticById.get(row.id)?.browse;
     return {
       id: row.id,
+      firstPublishedAt: row.firstPublishedAt || row.publishedAt || null,
       contentFingerprint,
       layoutFingerprint,
       dateCreated: puzzle?.dateCreated || null,
@@ -65,7 +72,8 @@ export async function buildPublicPlayIndex(repository, { staticManifest = [] } =
   return {
     puzzles: entries,
     categories: categoryRegistry,
-    catalogues: catalogues.map(row => catalogueFromDocument(row.document)).filter(Boolean)
+    catalogues: [...catalogues].sort(byFirstPublication)
+      .map(row => catalogueFromDocument(row.document)).filter(Boolean)
   };
 }
 
@@ -117,4 +125,40 @@ export async function handlePublicPlayRequest(request, env, { repository: suppli
     console.error("Public play read failed", error);
     return response({ error: "Publication database unavailable" }, 503, NO_STORE);
   }
+}
+
+// Only the public GET routes use the Cache API. Keeping cache access here
+// avoids putting the authenticated /admin handler or transformed HTML behind
+// a Worker-wide cache. Stored copies have an edge TTL; returned copies tell
+// browsers to revalidate, so a second browser visit can see a fresh index.
+export async function handleCachedPublicPlayRequest(
+  request,
+  env,
+  ctx,
+  { cache = globalThis.caches?.default, repository = null } = {}
+) {
+  if (request.method !== "GET" || !cache) {
+    return handlePublicPlayRequest(request, env, { repository });
+  }
+  try {
+    const hit = await cache.match(request);
+    if (hit) {
+      const headers = new Headers(hit.headers);
+      headers.set("Cache-Control", CACHE_CONTROL);
+      return new Response(hit.body, { status: hit.status, headers });
+    }
+  } catch (error) {
+    console.error("Public play cache read failed", error);
+  }
+  const result = await handlePublicPlayRequest(request, env, { repository });
+  if (result.ok && result.headers.get("Cache-Control") === CACHE_CONTROL) {
+    const copy = result.clone();
+    copy.headers.set("Cache-Control", "public, max-age=30");
+    const write = cache.put(request, copy).catch(error => {
+      console.error("Public play cache write failed", error);
+    });
+    if (ctx?.waitUntil) ctx.waitUntil(write);
+    else await write;
+  }
+  return result;
 }

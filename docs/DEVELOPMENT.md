@@ -668,8 +668,9 @@ plus a few small backend pieces that need somewhere to run:
   browse metadata, and withdrawals. The Worker omits browse records that
   equal the frozen manifest, keeping the response small. The browser loads
   a frozen module when its board and layout fingerprints match D1; otherwise
-  it loads `/api/puzzles/<id>.json` on demand. Both routes cache at the edge
-  for 30 seconds while browsers revalidate. In an open tab, the index is
+  it loads `/api/puzzles/<id>.json` on demand. The public Worker uses the
+  route-scoped Cache API to cache successful responses at the edge for 30
+  seconds while browsers revalidate. In an open tab, the index is
   checked on the next navigation after 30 seconds; a changed index reloads
   the selected route. If the index cannot be checked, public play shows a
   retry message instead of serving a potentially withdrawn frozen puzzle.
@@ -732,8 +733,10 @@ cron with:
 curl http://localhost:8787/cdn-cgi/handler/scheduled
 ```
 
-**Deploy**: `npx wrangler deploy`. Before the first public-play deploy,
-verify that D1 contains published rows for the frozen corpus: an absent row
+**Deploy**: Apply D1 migrations with `npm run authoring:d1:migrate:remote`
+before deploying either Worker, then run `npx wrangler deploy` for the public
+Worker. Before the first public-play deploy, verify that D1 contains published
+rows for the frozen corpus: an absent row
 will be absent from the public Library. Puzzle gameplay is reviewed on the
 LAN authoring checkout (`/?draft=<id>&view=play`, without writing git).
 Publishing in D1 makes a puzzle or correction playable after the cache
