@@ -58,6 +58,7 @@ export function isAuthoringAdminIndexPath(pathname) {
 
 export function authoringAdminNav() {
   return `<a href="/admin">Admin</a>
+    · <a href="/?admin">Review board</a>
     · <a href="/admin/drafts">Puzzles</a>
     · <a href="/admin/catalogues">Catalogues</a>
     · <a href="/admin/categories">Categories</a>
@@ -381,6 +382,12 @@ export function renderAdminIndexPage({
           <td><a href="/admin/categories">Categories</a></td>
           <td>Taxonomy documents: title, domain, blurb. Membership stays
           derived from puzzles.</td>
+        </tr>
+        <tr>
+          <td><a href="/?admin">Review board</a></td>
+          <td>Library with reviewer chrome: puzzle meta, collection stats,
+          Edit layout, and board experiments on an open working copy.
+          Choosing a puzzle stays on that board.</td>
         </tr>
         <tr>
           <td><a href="/">Play this server</a></td>

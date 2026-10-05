@@ -45,9 +45,9 @@
       "alignment": "left"
     },
     {
-      "label": "$(key) Admin",
-      "task": "Open admin",
-      "tooltip": "npm run admin -- local game with &admin (starts server if needed)",
+      "label": "$(play) Local",
+      "task": "Open local",
+      "tooltip": "npm run local -- open the local game to try code before commit (starts the server if needed)",
       "alignment": "left"
     },
     {

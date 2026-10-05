@@ -78,7 +78,7 @@ non-blocking authoring flags as prompts for judgment, not automatic failures.
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
 review. Play is a clean player preview of the working copy
 (`/?draft=<id>&view=play`); Open board (`/?draft=<id>`) is Construct.
-Neither writes git. Add `&admin` for layout tools. In `?author=layout`,
+Neither writes git. The Review board link on `/admin` (`/?admin`) adds puzzle meta, collection stats, and Edit layout; choosing a puzzle stays on that board. In `?author=layout`,
 `Save Layout` stores the confirmed layout override for the selected Graph,
 Star, or Circle mode on the working copy; it does not publish the puzzle.
 **Publish** writes the

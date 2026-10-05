@@ -85,9 +85,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Open admin",
+      "label": "Open local",
       "type": "npm",
-      "script": "admin",
+      "script": "local",
       "problemMatcher": [],
       "presentation": {
         "reveal": "silent",

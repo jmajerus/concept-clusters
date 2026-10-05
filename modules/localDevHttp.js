@@ -1,5 +1,5 @@
 // Shared local HTTP bootstrap for `npm run dev`, optional Worker mode,
-// and `npm run admin`. All three used to wire the draft-review handler,
+// and `npm run local`. All three used to wire the draft-review handler,
 // listen on 8787, and print the same EADDRINUSE copy. Wrangler stays off
 // unless `--worker` or DEV_WORKER is set.
 import { spawn, spawnSync } from "node:child_process";
@@ -134,7 +134,7 @@ export function portBusyMessage(port, tryCommand) {
 }
 
 export function suggestedBusyCommand({ worker = false, command = "npm run dev" } = {}) {
-  if (command === "npm run admin") return `npm run admin -- ${SUGGESTED_PORT}`;
+  if (command === "npm run local") return `npm run local -- ${SUGGESTED_PORT}`;
   if (worker) return `npm run dev -- --worker ${SUGGESTED_PORT}`;
   return `npm run dev -- ${SUGGESTED_PORT}`;
 }
