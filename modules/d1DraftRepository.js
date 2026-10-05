@@ -61,14 +61,23 @@ function assembleRowDocument(row) {
 const CLASSIFICATION_COLUMN_MIGRATION =
   "puzzle_drafts.classification_json is missing. Apply d1/migrations/0028_classification_domain.sql before writing drafts.";
 
+// SELECT and UPDATE say "no such column: name". INSERT says
+// "table puzzle_drafts has no column named name".
+function sqliteMissingColumn(message, column) {
+  const text = String(message || "");
+  const name = column.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`no such column:?\\s*${name}\\b`, "i").test(text)
+    || new RegExp(`has no column named\\s+${name}\\b`, "i").test(text);
+}
+
 function rethrowMissingDomainColumn(error) {
   const message = String(error?.message || error);
-  if (/no such column/i.test(message) && /administration_json/i.test(message)) {
+  if (sqliteMissingColumn(message, "administration_json")) {
     throw new Error(
       "puzzle_drafts.administration_json is missing. Apply d1/migrations/0030_administration_domain.sql before writing drafts."
     );
   }
-  if (/no such column/i.test(message) && /classification_json/i.test(message)) {
+  if (sqliteMissingColumn(message, "classification_json")) {
     throw new Error(CLASSIFICATION_COLUMN_MIGRATION);
   }
   throw error;
@@ -234,7 +243,7 @@ export class D1DraftRepository extends DraftRepository {
       // still writes classification_json. A database missing the column fails
       // here instead of accepting a draft that later saves cannot update.
       const message = String(error?.message || error);
-      if (/no such column/i.test(message) && /document_stale/i.test(message)) {
+      if (sqliteMissingColumn(message, "document_stale")) {
         result = await runDraftWrite(this.database.prepare(insert({
           names: `id, puzzle_id, owner_subject, title, status,
             document, content_hash, base_commit_sha,

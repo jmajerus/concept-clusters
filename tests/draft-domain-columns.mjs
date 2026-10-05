@@ -273,6 +273,31 @@ export async function run() {
     );
     assert.equal(attemptedSql.length, 2);
     assert.match(attemptedSql[1], /classification_json/);
+
+    async function rejectMissingInsert(column, migration) {
+      const repository = new D1DraftRepository({
+        prepare() {
+          return {
+            bind() {
+              return this;
+            },
+            async run() {
+              throw new Error(`table puzzle_drafts has no column named ${column}`);
+            }
+          };
+        }
+      });
+      await assert.rejects(
+        () => repository.create({
+          draftId: "unmigrated-insert",
+          document,
+          actor: { subject: "owner" }
+        }),
+        migration
+      );
+    }
+    await rejectMissingInsert("administration_json", /0030_administration_domain/);
+    await rejectMissingInsert("classification_json", /0028_classification_domain/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

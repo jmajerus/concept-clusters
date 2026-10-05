@@ -8,6 +8,7 @@ const puzzles = [{ id: "energy-flow", title: "Energy flow", category: "science" 
 export async function run() {
   assert.equal(parseCatalogueRoute(new URLSearchParams("admin"), puzzles, []).kind, "library");
   assert.equal(parseCatalogueRoute(new URLSearchParams("admin=&mode=star"), puzzles, []).kind, "library");
+  assert.equal(parseCatalogueRoute(new URLSearchParams("mode=star"), puzzles, []).kind, "default");
   assert.equal(parseCatalogueRoute(new URLSearchParams(""), puzzles, []).kind, "library");
   assert.equal(parseCatalogueRoute(new URLSearchParams("puzzle=missing"), puzzles, []).kind, "default");
 
