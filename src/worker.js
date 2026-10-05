@@ -29,7 +29,10 @@ export default {
     }
     if ((url.pathname === "/" || url.pathname === "/index.html") && request.method === "GET") {
       const assetRequest = new Request(request);
-      for (const header of ["If-None-Match", "If-Modified-Since", "If-Match", "If-Unmodified-Since", "If-Range"]) {
+      for (const header of [
+        "If-None-Match", "If-Modified-Since", "If-Match",
+        "If-Unmodified-Since", "If-Range", "Accept-Encoding"
+      ]) {
         assetRequest.headers.delete(header);
       }
       const asset = await env.ASSETS.fetch(assetRequest);
