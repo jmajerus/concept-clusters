@@ -1,6 +1,6 @@
 // Mode-neutral layout authoring UI: the ?author=layout panel (prepare,
 // local drafts, validated save) and the Star-only ?admin layout actions
-// (local free-strip / seed-beside-title tries).
+// (local free-strip / seed-beside-title / bridge pre-connect tries).
 //
 // Production and the authoring-server player both gate the actions with
 // ?admin so a reviewer at `/` sees the same chrome as production.
@@ -24,7 +24,10 @@ import {
   starFreeStripCapacityNeeded,
   STAR_FREE_STRIP_STORAGE_KEY,
   starSeedBesideTitleEnabled,
-  STAR_SEED_BESIDE_TITLE_STORAGE_KEY
+  STAR_SEED_BESIDE_TITLE_STORAGE_KEY,
+  repositoryStarBridgePreconnect,
+  starBridgePreconnectEnabled,
+  STAR_BRIDGE_PRECONNECT_STORAGE_KEY
 } from "./starLayoutRepository.js";
 
 function readJsonObject(storage, key) {
@@ -74,6 +77,8 @@ export function createLayoutAuthoringController({
   const starFreeStripBtn = document.getElementById("star-free-strip-btn");
   const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
   const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
+  const starBridgePreconnectBtn = document.getElementById("star-bridge-preconnect-btn");
+  const starBridgePreconnectExportBtn = document.getElementById("star-bridge-preconnect-export-btn");
   const savesToAuthoringServer = typeof saveLayout === "function";
   let savingLayout = false;
 
@@ -94,14 +99,18 @@ export function createLayoutAuthoringController({
 
   syncLayoutActionVisibility();
 
-  function reloadStarBoard() {
+  function reloadBoard(nextMode = getMode()) {
     const params = new URLSearchParams(location.search);
-    params.set("mode", "star");
+    params.set("mode", nextMode);
     const state = getState();
     if (state?.puzzle?.id && !params.get("draft")) {
       params.set("puzzle", state.puzzle.id);
     }
     location.assign(`${location.pathname}?${params.toString()}`);
+  }
+
+  function reloadStarBoard() {
+    reloadBoard("star");
   }
 
   function boardSize() {
@@ -372,6 +381,15 @@ export function createLayoutAuthoringController({
       : seedEnabled
         ? "Local try: connected seeds start beside their titles"
         : "Local try: place connected seeds beside titles on cold start";
+    const preconnect = starBridgePreconnectEnabled(state.puzzle);
+    const preconnectLocked = repositoryStarBridgePreconnect(state.puzzle);
+    starBridgePreconnectBtn.textContent = preconnect
+      ? "Clear bridge pre-connect"
+      : "Pre-connect bridges";
+    starBridgePreconnectExportBtn.hidden = preconnect === preconnectLocked;
+    starBridgePreconnectExportBtn.textContent = preconnect
+      ? "Export bridge pre-connect flag"
+      : "Export clear-bridge-pre-connect flag";
   }
 
   if (adminMode && !layoutAuthoringMode) {
@@ -428,6 +446,28 @@ export function createLayoutAuthoringController({
       else overrides[id] = true;
       storage.setItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY, JSON.stringify(overrides));
       reloadStarBoard();
+    });
+    starBridgePreconnectBtn.addEventListener("click", () => {
+      const state = getState();
+      if (!state?.puzzle) return;
+      const id = state.puzzle.id;
+      const overrides = readJsonObject(storage, STAR_BRIDGE_PRECONNECT_STORAGE_KEY);
+      const next = !starBridgePreconnectEnabled(state.puzzle);
+      overrides[id] = next;
+      if (next === repositoryStarBridgePreconnect(state.puzzle)) delete overrides[id];
+      storage.setItem(STAR_BRIDGE_PRECONNECT_STORAGE_KEY, JSON.stringify(overrides));
+      reloadBoard();
+    });
+    starBridgePreconnectExportBtn.addEventListener("click", () => {
+      const state = getState();
+      if (!state?.puzzle) return;
+      const preconnect = starBridgePreconnectEnabled(state.puzzle);
+      downloadJson(`${state.puzzle.id}-star-bridge-preconnect.json`, {
+        schemaVersion: 1,
+        kind: "star-bridge-preconnect",
+        puzzleId: state.puzzle.id,
+        preconnect
+      });
     });
   }
 

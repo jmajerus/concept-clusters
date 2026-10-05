@@ -42,6 +42,7 @@ import * as starPrettyPrint from "./star-pretty-print.mjs";
 import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
 import * as layoutAuthoringModes from "./layout-authoring-modes.mjs";
 import * as starFreeStrip from "./star-free-strip.mjs";
+import * as starBridgePreconnect from "./star-bridge-preconnect.mjs";
 import * as playerSessions from "./player-sessions.mjs";
 import * as circlePrettyPrint from "./circle-pretty-print.mjs";
 import * as graphPrettyPrint from "./graph-pretty-print.mjs";
@@ -132,7 +133,7 @@ import * as wikiLinkCheck from "./wiki-link-check.mjs";
 const allTests = [
   mcpAuthoringDomains,
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
-  starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, playerSessions,
+  starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, starBridgePreconnect, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction, learningLessonSection,
@@ -166,7 +167,7 @@ const quickTests = [
 
 const standardTests = [
   ...quickTests,
-  mobileLayout, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
+  mobileLayout, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip, starBridgePreconnect,
   learningLessonSection,
   authoringAdminIndex, localCatalogueReview, localDevHttp, localDevHousekeep, playCorpus
 ];
@@ -186,11 +187,11 @@ const sideTests = {
     learningIntroductionEngine, learningLevel, domainCatalogues,
     multiCategory, subcategories, domains, infoLinks,
     librarySearch, librarySearchEngine, boot, puzzleManifest,
-    starFreeStrip, playCorpus, geometryVisibleSegment, singleClusterLayout
+    starFreeStrip, starBridgePreconnect, playCorpus, geometryVisibleSegment, singleClusterLayout
   ]),
   authoring: new Set([
     mcpAuthoringDomains, starLayoutAuthoring, layoutAuthoringModes,
-    starFreeStrip, puzzleSymmetryFlags, nodeCaseAudit, contentServices,
+    starFreeStrip, starBridgePreconnect, puzzleSymmetryFlags, nodeCaseAudit, contentServices,
     authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage,
     authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit,
     localDraftReview, draftIdRename, localCatalogueReview, contentDocuments,

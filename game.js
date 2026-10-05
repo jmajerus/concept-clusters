@@ -28,6 +28,11 @@ import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
+import {
+  applyStarBridgePreconnect,
+  remainingLinkCount
+} from "./modules/starBridgePreconnect.js";
+import { starBridgePreconnectEnabled } from "./modules/starLayoutRepository.js";
 import { BOARD_CANVAS, boardCanvas, boardFrameMaxWidth, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
@@ -2020,6 +2025,13 @@ function applyLoadedPuzzle(puzzle, index, {
   svg.selectAll("*").remove();
 
   const built = authoringBoard || buildNodesAndLinks(puzzle);
+  // The connection is part of the shared board, not of one renderer.
+  // Applying it only for the mode that happened to load would drop those
+  // bridges when the player switches layout.
+  if (!authoringConstruct && starBridgePreconnectEnabled(puzzle)) {
+    applyStarBridgePreconnect(puzzle, built.nodes, built.links);
+    built.need = remainingLinkCount(built.nodes);
+  }
   const { nodes, links, need } = built;
   state = {
     puzzle, nodes, links, selected: null, made: 0,

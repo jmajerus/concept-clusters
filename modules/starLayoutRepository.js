@@ -1,4 +1,5 @@
 import { STAR_FREE_STRIP } from "../puzzles/layouts/star/free-strip.js";
+import { STAR_BRIDGE_PRECONNECT } from "../puzzles/layouts/star/bridge-preconnect.js";
 import { pillWidth } from "./puzzleGraph.js";
 import { layoutForMode } from "./layoutDocument.js";
 import { validateStarLayoutDocument } from "./starLayoutSchema.js";
@@ -39,6 +40,7 @@ function wordHash(word) {
 }
 
 // Cold-start free terms: non-seed cluster members plus every bridge.
+// Pre-connected bridges are already on the board, so they are not free.
 export function starColdStartFreeTermWidths(puzzle) {
   const terms = [];
   puzzle.clusters.forEach(cluster => {
@@ -46,7 +48,9 @@ export function starColdStartFreeTermWidths(puzzle) {
       if (!cluster.seeds.includes(term)) terms.push(term);
     });
   });
-  puzzle.bridges.forEach(bridge => terms.push(bridge.term));
+  if (!starBridgePreconnectEnabled(puzzle)) {
+    puzzle.bridges.forEach(bridge => terms.push(bridge.term));
+  }
   terms.sort((a, b) => wordHash(a) - wordHash(b) || a.localeCompare(b));
   return terms.map(pillWidth);
 }
@@ -97,12 +101,38 @@ export function starFreeStripEnabled(puzzle, { width, height } = {}) {
   return starFreeStripCapacityNeeded(puzzle, width, height);
 }
 
+export const STAR_SEED_BESIDE_TITLE_STORAGE_KEY = "ccStarSeedBesideTitleOverrides";
+
+export const STAR_BRIDGE_PRECONNECT_STORAGE_KEY = "ccStarBridgePreconnectOverrides";
+
+// Editorial boolean: when true, every mode's cold start connects each
+// bridge to its clusters. Absent / false leaves bridges for the player.
+// localStorage overrides (set from &admin) win for local experimentation.
+export function repositoryStarBridgePreconnect(puzzle) {
+  return STAR_BRIDGE_PRECONNECT[puzzle.id] === true;
+}
+
+export function starBridgePreconnectEnabled(puzzle) {
+  if (!puzzle) return false;
+  if (typeof localStorage !== "undefined") {
+    try {
+      const overrides = JSON.parse(
+        localStorage.getItem(STAR_BRIDGE_PRECONNECT_STORAGE_KEY) || "{}"
+      );
+      if (Object.prototype.hasOwnProperty.call(overrides, puzzle.id)) {
+        return overrides[puzzle.id] === true;
+      }
+    } catch {
+      // Fall through.
+    }
+  }
+  return repositoryStarBridgePreconnect(puzzle);
+}
+
 // Local admin try only (no sparse registry yet): place already-connected
 // seeds beside their titles on Star cold start. Free-strip mode implies
 // this, because the strip owns the top of the board and seeds need a
 // sensible play-area start. Default classic Star leaves seeds to force.
-export const STAR_SEED_BESIDE_TITLE_STORAGE_KEY = "ccStarSeedBesideTitleOverrides";
-
 export function starSeedBesideTitleEnabled(puzzle, options = {}) {
   if (starFreeStripEnabled(puzzle, options)) return true;
   if (typeof localStorage !== "undefined") {
@@ -120,4 +150,4 @@ export function starSeedBesideTitleEnabled(puzzle, options = {}) {
   return false;
 }
 
-export { STAR_FREE_STRIP };
+export { STAR_FREE_STRIP, STAR_BRIDGE_PRECONNECT };
