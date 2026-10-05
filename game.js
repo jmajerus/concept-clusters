@@ -35,6 +35,7 @@ import {
 } from "./modules/starBridgePreconnect.js";
 import { starBridgePreconnectEnabled } from "./modules/starLayoutRepository.js";
 import { BOARD_CANVAS, boardCanvas, boardFrameMaxWidth, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
+import { boardWithFlag } from "./modules/starLayoutRepository.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
@@ -1952,7 +1953,8 @@ layoutAuthoring = createLayoutAuthoringController({
   saveBoardFlags: playSource === "d1"
     ? args => saveBoardFlags({ ...args, draftId: overlayDraftId })
     : null,
-  getDraftId: () => overlayDraftId
+  getDraftId: () => overlayDraftId,
+  previewBoardSize
 });
 
 // ---------- layout authoring ----------
@@ -1963,6 +1965,37 @@ layoutAuthoring = createLayoutAuthoringController({
 
 function puzzleUsesLargeBoard(puzzle) {
   return derivedLarge(puzzleNodeCount(puzzle));
+}
+
+let boardSizeRebuildTimer = null;
+
+function rebuildBoardForSize() {
+  if (!state) return;
+  if (state.stopRenderer) state.stopRenderer();
+  state.setLayout = null;
+  state.solutionLayout = null;
+  state.prettyPrint = null;
+  state.prettyPrintPromise = null;
+  state.setLayersReady = false;
+  buildForMode();
+}
+
+// Live administration preview. The viewBox changes immediately. The layout
+// follows on a short delay so dragging the factor stays responsive, and a
+// committed value rebuilds at once.
+function previewBoardSize(factor, { rebuild = "schedule" } = {}) {
+  if (!state?.puzzle) return null;
+  const stored = factor !== 1 ? factor : undefined;
+  const board = boardWithFlag(state.puzzle, "sizeFactor", stored);
+  if (board) state.puzzle.board = board;
+  else delete state.puzzle.board;
+  applyBoardSize(state.puzzle);
+  clearTimeout(boardSizeRebuildTimer);
+  if (rebuild === "now") rebuildBoardForSize();
+  else if (rebuild === "schedule") {
+    boardSizeRebuildTimer = setTimeout(rebuildBoardForSize, 180);
+  }
+  return { width: W, height: H };
 }
 
 function applyBoardSize(puzzle) {

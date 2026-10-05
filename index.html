@@ -110,10 +110,15 @@
         <button id="layout-author-btn" type="button">Edit layout</button>
         <button id="star-free-strip-btn" type="button" hidden>Use free-term strip</button>
         <button id="star-bridge-preconnect-btn" type="button" hidden>Pre-connect bridges</button>
+        <label id="board-size-factor" hidden>
+          Board size
+          <input id="board-size-factor-input" type="range" min="0.75" max="1.25" step="0.05" value="1" aria-describedby="board-size-factor-readout">
+          <output id="board-size-factor-readout">0%</output>
+        </label>
         <span id="admin-layout-hint" class="admin-layout-hint">
           Final layout: Prepare → drag → Save Layout on the authoring server;
           cue the puzzle for the next Freeze when it is ready for production.
-          Free-term strip and bridge pre-connect save on the open working copy.
+          Free-term strip, bridge pre-connect, and board size save on the open working copy.
         </span>
       </div>
       <!-- Admin-only, revealed by the Stats button above, not &admin

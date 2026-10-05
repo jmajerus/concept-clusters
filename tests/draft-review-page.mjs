@@ -155,6 +155,9 @@ export async function run() {
   assert.match(draftPage, /Board experiments/);
   assert.match(draftPage, /Free-term strip/);
   assert.match(draftPage, /Bridge pre-connect/);
+  assert.match(draftPage, /Board size/);
+  assert.match(draftPage, /\+20%/);
+  assert.match(draftPage, /-25%/);
   assert.doesNotMatch(draftPage, /badge-ok">authoring play</);
   const publishedNoticeList = renderDraftListPage([{ ...baseDraft }], {
     notice: {

@@ -20,6 +20,7 @@ import {
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { diffPublishedDraft, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
 import { draftBoardQuery, draftPlayQuery, draftReviewQuery, playQuery, reviewQuery } from "./stagingPlayLinks.js";
+import { boardSizeFactorChoices } from "./puzzleBoardSize.js";
 import {
   CATEGORIES,
   categoryIdFor,
@@ -1917,12 +1918,19 @@ function renderBoardExperiments({ edit, document }) {
   const board = document?.board && typeof document.board === "object" ? document.board : {};
   const strip = board.starFreeStrip === true ? "true" : board.starFreeStrip === false ? "false" : "";
   const preconnect = board.bridgePreconnect === true ? "true" : "";
+  const sizeFactor = typeof board.sizeFactor === "number" ? String(board.sizeFactor) : "";
   const stripSlot = copyHidden(edit, { section: "board", field: "starFreeStrip" });
   const preSlot = copyHidden(edit, { section: "board", field: "bridgePreconnect" });
+  const sizeSlot = copyHidden(edit, { section: "board", field: "sizeFactor" });
   const option = (value, label, selected) =>
     `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
+  const sizeOptions = boardSizeFactorChoices().map(factor => {
+    const percent = Math.round((factor - 1) * 100);
+    const label = `${percent > 0 ? "+" : ""}${percent}%`;
+    return option(String(factor), label, sizeFactor === String(factor));
+  }).join("");
   return `<h2>Board experiments</h2>
-    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them.</p>
+    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them. The review board shows the size change as the factor moves.</p>
     ${stripSlot.hidden}
     <p><label>Free-term strip
       <select${stripSlot.form} name="${stripSlot.prefix}value">
@@ -1936,6 +1944,13 @@ function renderBoardExperiments({ edit, document }) {
       <select${preSlot.form} name="${preSlot.prefix}value">
         ${option("", "Off", preconnect === "")}
         ${option("true", "On", preconnect === "true")}
+      </select>
+    </label></p>
+    ${sizeSlot.hidden}
+    <p><label>Board size
+      <select${sizeSlot.form} name="${sizeSlot.prefix}value">
+        ${option("", "0%", sizeFactor === "")}
+        ${sizeOptions}
       </select>
     </label></p>`;
 }

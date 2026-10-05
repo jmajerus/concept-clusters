@@ -725,8 +725,26 @@ export async function run() {
     assert.deepEqual(errors, []);
     assert.deepEqual(puzzle.board, { starFreeStrip: false, bridgePreconnect: true });
     assert.equal(documentForMcp(input).board, undefined);
+    const sized = puzzleFromAuthoredDocument(validPuzzle({ board: { sizeFactor: 1.2 } }));
+    assert.deepEqual(sized.errors, []);
+    assert.equal(sized.puzzle.board.sizeFactor, 1.2);
+    const derivedSize = puzzleFromAuthoredDocument(validPuzzle({ board: { sizeFactor: 1 } }));
+    assert.deepEqual(derivedSize.errors, []);
+    assert.equal(derivedSize.puzzle.board, undefined);
     assert.equal(
       SimplifiedPuzzleInputSchema.safeParse(validPuzzle({ board: { extra: true } })).success,
+      false
+    );
+    assert.equal(
+      puzzleFromAuthoredDocument(validPuzzle({ board: { sizeFactor: 0.75 } })).puzzle.board.sizeFactor,
+      0.75
+    );
+    assert.equal(
+      SimplifiedPuzzleInputSchema.safeParse(validPuzzle({ board: { sizeFactor: 1.13 } })).success,
+      false
+    );
+    assert.equal(
+      SimplifiedPuzzleInputSchema.safeParse(validPuzzle({ board: { sizeFactor: 1.3 } })).success,
       false
     );
     assert.equal(SimplifiedPuzzleInputSchema.safeParse(validPuzzle()).success, true);

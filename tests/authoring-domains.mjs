@@ -72,7 +72,7 @@ export async function run() {
 
   const flagged = {
     ...document,
-    board: { starFreeStrip: false, bridgePreconnect: true }
+    board: { starFreeStrip: false, bridgePreconnect: true, sizeFactor: 1.2 }
   };
   const flaggedDomains = partitionAuthoredDocument(flagged);
   assert.equal(flaggedDomains.content.board, undefined);

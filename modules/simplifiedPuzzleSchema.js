@@ -12,6 +12,7 @@
 // reach the runtime puzzle model.
 import * as z from "zod/v4";
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
+import { canonicalBoardSizeFactor } from "./puzzleBoardSize.js";
 import { lessonCreditFieldDescription } from "./authoringSettings.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
@@ -362,7 +363,11 @@ export const SimplifiedPuzzleInputSchema = z.object({
   // receive this object; see the administration domain.
   board: z.object({
     starFreeStrip: z.boolean().optional(),
-    bridgePreconnect: z.boolean().optional()
+    bridgePreconnect: z.boolean().optional(),
+    sizeFactor: z.number().refine(value => {
+      const factor = canonicalBoardSizeFactor(value);
+      return factor != null;
+    }, { message: "sizeFactor must be a 0.05 step from 0.75 to 1.25" }).optional()
   }).strict().optional(),
   // Pass-through publication metadata -- not semantically validated by
   // contentValidation.js, just carried through unchanged. `layout` (renderer
@@ -593,6 +598,8 @@ function boardAdministration(board) {
   if (board.bridgePreconnect === true || board.bridgePreconnect === false) {
     next.bridgePreconnect = board.bridgePreconnect;
   }
+  const sizeFactor = canonicalBoardSizeFactor(board.sizeFactor);
+  if (sizeFactor != null && sizeFactor !== 1) next.sizeFactor = sizeFactor;
   return Object.keys(next).length ? next : undefined;
 }
 

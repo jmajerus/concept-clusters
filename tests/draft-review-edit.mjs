@@ -758,4 +758,24 @@ export async function run() {
     value: ""
   }, "");
   assert.equal(omitted.board, undefined);
+  const sized = applyDraftFieldValue(omitted, {
+    section: "board",
+    field: "sizeFactor",
+    value: "1.2"
+  }, "1.2");
+  assert.equal(sized.board.sizeFactor, 1.2);
+  const derivedSize = applyDraftFieldValue(sized, {
+    section: "board",
+    field: "sizeFactor",
+    value: ""
+  }, "");
+  assert.equal(derivedSize.board, undefined);
+  assert.throws(
+    () => applyDraftFieldValue(omitted, {
+      section: "board",
+      field: "sizeFactor",
+      value: "1.13"
+    }, "1.13"),
+    /sizeFactor/
+  );
 }

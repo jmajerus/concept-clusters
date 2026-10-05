@@ -37,9 +37,11 @@ async function waitForBoard(page) {
   await page.waitForFunction(expected => {
     const strip = document.getElementById("star-free-strip-btn");
     const preconnect = document.getElementById("star-bridge-preconnect-btn");
+    const size = document.getElementById("board-size-factor");
     return window.CC?.state?.puzzle?.id === expected
       && strip && !strip.hidden && !strip.disabled
-      && preconnect && !preconnect.hidden && !preconnect.disabled;
+      && preconnect && !preconnect.hidden && !preconnect.disabled
+      && size && !size.hidden;
   }, draftId, { timeout: 15000 });
 }
 
@@ -95,23 +97,49 @@ export async function run(page) {
       window.CC?.state?.puzzle?.board?.starFreeStrip === true
       && window.CC.state.puzzle.board.bridgePreconnect === true,
     null, { timeout: 15000 });
+    await waitForBoard(page);
+    const beforeWidth = await page.evaluate(() => document.getElementById("board").viewBox.baseVal.width);
+    assert.match(await page.textContent("#board-size-factor-readout"), /0%/);
+    await page.evaluate(() => {
+      const input = document.getElementById("board-size-factor-input");
+      input.value = "1.2";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await page.waitForFunction(start => {
+      const box = document.getElementById("board").viewBox.baseVal;
+      const readout = document.getElementById("board-size-factor-readout")?.textContent || "";
+      return box.width > start && readout.includes("+20%");
+    }, beforeWidth, { timeout: 15000 });
+    await page.evaluate(() => {
+      document.getElementById("board-size-factor-input")
+        .dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    let sized = null;
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      sized = await draftStore.getDraft(draftId);
+      if (sized.document.board?.sizeFactor === 1.2) break;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    const savedWithSize = { ...savedBoard, sizeFactor: 1.2 };
+    assert.deepEqual(sized.document.board, savedWithSize);
 
-    const content = partitionAuthoredDocument(stored.document).content;
+    const content = partitionAuthoredDocument(sized.document).content;
     const focused = await draftStore.replaceDomain({
       draftId,
       domain: "content",
       projection: { ...content, title: "Retitled by a content save" },
-      expectedRevision: stored.revision
+      expectedRevision: sized.revision
     });
     assert.equal(focused.document.title, "Retitled by a content save");
-    assert.deepEqual(focused.document.board, savedBoard);
+    assert.deepEqual(focused.document.board, savedWithSize);
     assert.equal(focused.documentStale, true);
 
     await page.goto(boardURL, { waitUntil: "networkidle" });
     await page.waitForFunction(() =>
       document.getElementById("puzzle-title")?.textContent === "Retitled by a content save"
       && window.CC?.state?.puzzle?.board?.starFreeStrip === true
-      && window.CC.state.puzzle.board.bridgePreconnect === true,
+      && window.CC.state.puzzle.board.bridgePreconnect === true
+      && window.CC.state.puzzle.board.sizeFactor === 1.2,
     null, { timeout: 15000 });
   } finally {
     server.close();

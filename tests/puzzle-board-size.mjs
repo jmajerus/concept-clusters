@@ -6,6 +6,8 @@ import {
   NODE_CAP_XLARGE,
   boardCanvas,
   boardFrameMaxWidth,
+  boardSizeFactor,
+  canonicalBoardSizeFactor,
   boardLoad,
   derivedLarge,
   largeField,
@@ -135,6 +137,19 @@ export async function run() {
   };
   assert.equal(puzzleNodeCount(longLabels), 17);
   assert.ok(puzzleTermCharacters(longLabels) < 450);
+  assert.equal(canonicalBoardSizeFactor(1), 1);
+  assert.equal(canonicalBoardSizeFactor(1.2), 1.2);
+  assert.equal(canonicalBoardSizeFactor(0.75), 0.75);
+  assert.equal(canonicalBoardSizeFactor(1.25), 1.25);
+  assert.equal(canonicalBoardSizeFactor(0.7), null);
+  assert.equal(canonicalBoardSizeFactor(1.3), null);
+  assert.equal(canonicalBoardSizeFactor(1.13), null);
+  assert.equal(boardSizeFactor({ board: { sizeFactor: 1.2 } }), 1.2);
+  assert.equal(boardSizeFactor({}), 1);
+  const roomy = boardCanvas({ ...longLabels, board: { sizeFactor: 1.2 } }, "graph");
+  const tighter = boardCanvas({ ...longLabels, board: { sizeFactor: 0.75 } }, "graph");
+  assert.ok(roomy.width > 1080 && roomy.height > 700);
+  assert.ok(tighter.width < 1080 && tighter.height < 700);
   assert.deepEqual(boardCanvas(longLabels, "graph"), { width: 1080, height: 700 });
   assert.deepEqual(boardCanvas(longLabels, "sets"), { width: 1180, height: 880 });
   assert.equal(boardFrameMaxWidth(boardCanvas(longLabels, "graph")), 1125);

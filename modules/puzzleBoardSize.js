@@ -144,6 +144,46 @@ function growCanvas(canvas, load) {
   return { width, height };
 }
 
+// Administrative adjustment on top of the derived canvas. 1 leaves the
+// heuristic alone. Each step is 5%, from a quarter smaller to a quarter larger.
+export const BOARD_SIZE_FACTOR_MIN = 0.75;
+export const BOARD_SIZE_FACTOR_MAX = 1.25;
+export const BOARD_SIZE_FACTOR_STEP = 0.05;
+
+export function canonicalBoardSizeFactor(value) {
+  const number = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(number)) return null;
+  const steps = Math.round((number - BOARD_SIZE_FACTOR_MIN) / BOARD_SIZE_FACTOR_STEP);
+  const snapped = Math.round((BOARD_SIZE_FACTOR_MIN + steps * BOARD_SIZE_FACTOR_STEP) * 100) / 100;
+  if (Math.abs(number - snapped) > 0.001) return null;
+  if (snapped < BOARD_SIZE_FACTOR_MIN || snapped > BOARD_SIZE_FACTOR_MAX) return null;
+  return snapped;
+}
+
+export function boardSizeFactorChoices() {
+  const choices = [];
+  const count = Math.round((BOARD_SIZE_FACTOR_MAX - BOARD_SIZE_FACTOR_MIN) / BOARD_SIZE_FACTOR_STEP);
+  for (let step = 0; step <= count; step += 1) {
+    const value = Math.round((BOARD_SIZE_FACTOR_MIN + step * BOARD_SIZE_FACTOR_STEP) * 100) / 100;
+    if (value !== 1) choices.push(value);
+  }
+  return choices;
+}
+
+export function boardSizeFactor(puzzle) {
+  const factor = canonicalBoardSizeFactor(puzzle?.board?.sizeFactor);
+  return factor == null ? 1 : factor;
+}
+
+function scaleCanvas(canvas, factor) {
+  if (!(factor > 0) || factor === 1) return canvas;
+  const width = Math.round((canvas.width * factor) / 10) * 10;
+  const height = Math.round((canvas.height * factor) / 10) * 10;
+  if (width < 10 || height < 10) return canvas;
+  if (width === canvas.width && height === canvas.height) return canvas;
+  return { width, height };
+}
+
 export function boardCanvas(puzzle, mode) {
   const nodes = puzzleNodeCount(puzzle);
   const clusters = Array.isArray(puzzle?.clusters) ? puzzle.clusters.length : 0;
@@ -152,7 +192,7 @@ export function boardCanvas(puzzle, mode) {
   else if (derivedLarge(nodes)) {
     canvas = mode === "sets" ? BOARD_CANVAS.circleWide : BOARD_CANVAS.wide;
   } else if (mode !== "graph" && clusters >= 2) canvas = BOARD_CANVAS.wide;
-  return growCanvas(canvas, boardLoad(puzzle));
+  return scaleCanvas(growCanvas(canvas, boardLoad(puzzle)), boardSizeFactor(puzzle));
 }
 
 // Null keeps the stylesheet default: 680px, or 1000px once .wrap.wide is on.

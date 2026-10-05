@@ -18,6 +18,7 @@ import {
   generativeHostKey
 } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
+import { canonicalBoardSizeFactor } from "./puzzleBoardSize.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
 export const SAVE_WORKING_COPY_CONFIRM = "save-working-copy";
@@ -41,7 +42,7 @@ const FIELDS_BY_SECTION = {
   lens: new Set(["prompt", "explanation", "reason"]),
   learning: new Set(["title", "summary", "content.text", "credit", "links"]),
   provenance: new Set(["collaboration", "generativeModel", "reasoning", "switch", "editor"]),
-  board: new Set(["starFreeStrip", "bridgePreconnect"])
+  board: new Set(["starFreeStrip", "bridgePreconnect", "sizeFactor"])
 };
 
 function isListField(field) {
@@ -562,7 +563,16 @@ export function applyDraftFieldValue(document, form, value) {
     const board = next.board && typeof next.board === "object" && !Array.isArray(next.board)
       ? { ...next.board }
       : {};
-    if (value === "" || value == null) delete board[field];
+    if (field === "sizeFactor") {
+      if (value === "" || value == null || value === "1" || value === 1) delete board.sizeFactor;
+      else {
+        const factor = canonicalBoardSizeFactor(value);
+        if (factor == null || factor === 1) {
+          throw new DraftFieldError("sizeFactor must be a 0.05 step from 0.75 to 1.25, or omitted");
+        }
+        board.sizeFactor = factor;
+      }
+    } else if (value === "" || value == null) delete board[field];
     else if (value === "true" || value === true) board[field] = true;
     else if (value === "false" || value === false) board[field] = false;
     else throw new DraftFieldError(`${field} must be true, false, or omitted`);

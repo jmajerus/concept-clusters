@@ -19,6 +19,10 @@ import {
   starBridgePreconnectEnabled,
   boardWithFlag
 } from "./starLayoutRepository.js";
+import {
+  boardSizeFactor,
+  canonicalBoardSizeFactor
+} from "./puzzleBoardSize.js";
 
 export function createLayoutAuthoringController({
   layoutAuthoringMode,
@@ -30,7 +34,8 @@ export function createLayoutAuthoringController({
   showSolution,
   saveLayout = null,
   saveBoardFlags = null,
-  getDraftId = () => null
+  getDraftId = () => null,
+  previewBoardSize = null
 }) {
   const layoutAuthoringEl = document.getElementById("layout-authoring");
   const layoutAuthoringDraftStateEl = document.getElementById("layout-authoring-draft-state");
@@ -47,7 +52,11 @@ export function createLayoutAuthoringController({
   const layoutAuthorBtn = document.getElementById("layout-author-btn");
   const starFreeStripBtn = document.getElementById("star-free-strip-btn");
   const starBridgePreconnectBtn = document.getElementById("star-bridge-preconnect-btn");
+  const boardSizeFactorEl = document.getElementById("board-size-factor");
+  const boardSizeFactorInput = document.getElementById("board-size-factor-input");
+  const boardSizeFactorReadout = document.getElementById("board-size-factor-readout");
   const adminLayoutHintEl = document.getElementById("admin-layout-hint");
+  let savedSizeFactor = 1;
   const savesToAuthoringServer = typeof saveLayout === "function";
   let savingLayout = false;
 
@@ -328,22 +337,53 @@ export function createLayoutAuthoringController({
   function setBoardFlagStatus(text) {
     if (!adminLayoutHintEl) return;
     adminLayoutHintEl.textContent = text ||
-      "Final layout: Prepare → drag → Save Layout on the authoring server; cue the puzzle for the next Freeze when it is ready for production. Free-term strip and bridge pre-connect save on the open working copy.";
+      "Final layout: Prepare → drag → Save Layout on the authoring server; cue the puzzle for the next Freeze when it is ready for production. Free-term strip, bridge pre-connect, and board size save on the open working copy.";
+  }
+
+  function setBoardControlsDisabled(disabled) {
+    if (starFreeStripBtn) starFreeStripBtn.disabled = disabled;
+    if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled;
+    if (boardSizeFactorInput) boardSizeFactorInput.disabled = disabled;
+  }
+
+  function sizeReadout(factor, size) {
+    const percent = Math.round((factor - 1) * 100);
+    const label = percent === 0 ? "0%" : `${percent > 0 ? "+" : ""}${percent}%`;
+    if (!size?.width || !size?.height) return label;
+    return `${label} · ${size.width}×${size.height}`;
+  }
+
+  function syncBoardSizeControl() {
+    const state = getState();
+    const canWrite = workingCopyCanWriteBoard();
+    if (boardSizeFactorEl) boardSizeFactorEl.hidden = !canWrite;
+    if (!boardSizeFactorInput || !state?.puzzle || !canWrite) return;
+    const factor = boardSizeFactor(state.puzzle);
+    savedSizeFactor = factor;
+    boardSizeFactorInput.value = String(factor);
+    if (boardSizeFactorReadout) {
+      boardSizeFactorReadout.textContent = sizeReadout(factor, getBoard());
+    }
   }
 
   async function persistBoardFlag(key, value, reload) {
     const state = getState();
     if (!state?.puzzle || !workingCopyCanWriteBoard()) return;
     const board = boardWithFlag(state.puzzle, key, value);
-    starFreeStripBtn.disabled = true;
-    starBridgePreconnectBtn.disabled = true;
+    setBoardControlsDisabled(true);
     try {
       await saveBoardFlags({ board });
-      reload();
+      if (key === "sizeFactor") savedSizeFactor = typeof value === "number" && value !== 1 ? value : 1;
+      if (typeof reload === "function") reload();
+      else setBoardControlsDisabled(false);
     } catch (error) {
       setBoardFlagStatus(error instanceof Error ? error.message : String(error));
-      starFreeStripBtn.disabled = false;
-      starBridgePreconnectBtn.disabled = false;
+      setBoardControlsDisabled(false);
+      if (key === "sizeFactor") {
+        boardSizeFactorInput.value = String(savedSizeFactor);
+        previewBoardSize?.(savedSizeFactor, { rebuild: "now" });
+        syncBoardSizeControl();
+      }
     }
   }
 
@@ -352,6 +392,7 @@ export function createLayoutAuthoringController({
     const canWrite = workingCopyCanWriteBoard();
     if (starFreeStripBtn) starFreeStripBtn.hidden = !canWrite;
     if (starBridgePreconnectBtn) starBridgePreconnectBtn.hidden = !canWrite;
+    syncBoardSizeControl();
     if (!state?.puzzle || !canWrite) return;
     const board = boardSize();
     const enabled = starFreeStripEnabled(state.puzzle, board);
@@ -394,6 +435,25 @@ export function createLayoutAuthoringController({
       if (!state?.puzzle) return;
       const next = !starBridgePreconnectEnabled(state.puzzle);
       persistBoardFlag("bridgePreconnect", next ? true : undefined, () => reloadBoard());
+    });
+
+    boardSizeFactorInput?.addEventListener("input", () => {
+      const factor = canonicalBoardSizeFactor(boardSizeFactorInput.value);
+      if (factor == null || typeof previewBoardSize !== "function") return;
+      const size = previewBoardSize(factor);
+      if (boardSizeFactorReadout && size) {
+        boardSizeFactorReadout.textContent = sizeReadout(factor, size);
+      }
+    });
+    boardSizeFactorInput?.addEventListener("change", () => {
+      const factor = canonicalBoardSizeFactor(boardSizeFactorInput.value);
+      if (factor == null) return;
+      previewBoardSize?.(factor, { rebuild: "now" });
+      const size = getBoard();
+      if (boardSizeFactorReadout) {
+        boardSizeFactorReadout.textContent = sizeReadout(factor, size);
+      }
+      persistBoardFlag("sizeFactor", factor !== 1 ? factor : undefined, null);
     });
   }
 
