@@ -9,6 +9,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { puzzleBrowseFromFull } from "../modules/puzzleBrowse.js";
+import { puzzleContentFingerprint, puzzleLayoutFingerprint } from "../modules/publicPlayVersion.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const INDEX_PATH = join(ROOT, "puzzles", "index.js");
@@ -189,6 +190,8 @@ export async function buildPuzzleManifest({
       module: moduleRel,
       ...(patch ? { patch } : {}),
       ...(published ? { published } : {}),
+      contentFingerprint: puzzleContentFingerprint(registryPuzzle),
+      layoutFingerprint: puzzleLayoutFingerprint(registryPuzzle.layout, registryPuzzle.starLayout),
       browse: puzzleBrowseFromFull(registryPuzzle)
     });
   }

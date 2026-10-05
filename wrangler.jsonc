@@ -14,9 +14,9 @@
     // .wrangler/ and watching that from assets.directory "." restart-loops.
     "directory": "./site",
     "binding": "ASSETS",
-    // /api/* and /admin* must reach the Worker script, not be resolved
-    // as (nonexistent) static files.
-    "run_worker_first": ["/api/*", "/admin", "/admin/*"]
+    // The HTML entry points need a public-play bootstrap meta tag; API and
+    // admin routes also need to reach the Worker script.
+    "run_worker_first": ["/", "/index.html", "/api/*", "/admin", "/admin/*"]
   },
   "vars": {
     // Not a secret -- the account ID is not sensitive on its own, only
@@ -24,6 +24,14 @@
     // as a secret below). Matches Letter Punk's own wrangler.toml.
     "ACCOUNT_ID": "eec00739050a8a4cbf359a1dedb8cad3"
   },
+  "d1_databases": [
+    {
+      "binding": "AUTHORING_DB",
+      "database_name": "concept-clusters-authoring",
+      "database_id": "726254cf-2847-42a0-b061-7900342cfd7c",
+      "migrations_dir": "d1/migrations"
+    }
+  ],
   "analytics_engine_datasets": [
     { "binding": "ANALYTICS", "dataset": "concept_clusters_events" }
   ]

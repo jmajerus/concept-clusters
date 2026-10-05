@@ -1,9 +1,9 @@
-// Cloudflare Worker serving the static site (env.ASSETS from site/) plus
-// gameplay analytics and an admin dashboard over them. Analytics writes are
+// Cloudflare Worker serving the static site (env.ASSETS from site/),
+// published D1 play, gameplay analytics, and an admin dashboard. Analytics writes are
 // opt-out-safe: a missing binding, malformed payload, or network hiccup
 // degrades to a no-op. The weekly Wikipedia link-health check lives in the
 // authoring Worker (src/authoring-worker.ts), which has the D1 binding the
-// published corpus is read from.
+// published corpus is also read from.
 //
 // Local MCP /admin/drafts and the authoring /admin index are not handled
 // here. `npm run dev -- --worker` serves those routes from Node in front
@@ -11,6 +11,7 @@
 // as stdio MCP. Player analytics /admin remains this Worker's dashboard.
 
 import { handleAdmin } from "./admin.js";
+import { handlePublicPlayRequest, htmlWithPublicPlayMeta } from "../modules/publicPlayService.js";
 
 const ALLOWED_EVENTS = new Set(["puzzle_load", "puzzle_completed"]);
 
@@ -20,8 +21,22 @@ export default {
     if (request.method === "POST" && url.pathname === "/api/event") {
       return handleEvent(request, env);
     }
+    if (url.pathname === "/api/publications" || url.pathname.startsWith("/api/puzzles/")) {
+      return handlePublicPlayRequest(request, env);
+    }
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
       return handleAdmin(request, env);
+    }
+    if ((url.pathname === "/" || url.pathname === "/index.html") && request.method === "GET") {
+      const asset = await env.ASSETS.fetch(request);
+      if (!asset.ok) return asset;
+      const headers = new Headers(asset.headers);
+      headers.delete("Content-Length");
+      headers.delete("Content-Encoding");
+      headers.delete("ETag");
+      return new Response(htmlWithPublicPlayMeta(await asset.text()), {
+        status: asset.status, headers
+      });
     }
     return env.ASSETS.fetch(request);
   },
