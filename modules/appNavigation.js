@@ -91,6 +91,17 @@ export function createAppNavigation({
     return `${location.origin}${routeUrl(location.pathname, route, null)}`;
   }
 
+  // ?admin is reviewer chrome for the playable board. Keep it across
+  // Library and puzzle navigation, and open the chosen puzzle in play so
+  // a working copy does not replace that board with Construct.
+  function urlFor(route, mode = preservedUrlMode()) {
+    const admin = new URLSearchParams(location.search).has("admin");
+    return routeUrl(location.pathname, route, mode, {
+      admin,
+      play: admin && route.kind === "puzzle"
+    });
+  }
+
   function navigateTo(route, { replace = false, focus = true } = {}) {
     if (layoutAuthoringMode) return;
 
@@ -106,21 +117,17 @@ export function createAppNavigation({
       history.replaceState(
         { conceptClusters: true },
         "",
-        routeUrl(
-          location.pathname,
-          {
-            kind: "puzzle",
-            puzzleId: currentState.puzzle.id,
-            catalogueId: activeCatalogue?.id,
-            category: originCategory,
-            subcategoryId: originSubcategory
-          },
-          preservedUrlMode()
-        )
+        urlFor({
+          kind: "puzzle",
+          puzzleId: currentState.puzzle.id,
+          catalogueId: activeCatalogue?.id,
+          category: originCategory,
+          subcategoryId: originSubcategory
+        })
       );
     }
 
-    const url = routeUrl(location.pathname, route, preservedUrlMode());
+    const url = urlFor(route);
     history[replace ? "replaceState" : "pushState"](
       { conceptClusters: true },
       "",

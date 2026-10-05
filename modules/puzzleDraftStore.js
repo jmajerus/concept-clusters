@@ -110,7 +110,8 @@ export function createPuzzleDraftStore({ directory }) {
         content,
         pedagogy,
         classification,
-        provenance: storedDomainValue(record, "provenance", "Stored provenance domain")
+        provenance: storedDomainValue(record, "provenance", "Stored provenance domain"),
+        administration: storedDomainValue(record, "administration", "Stored administration domain")
       })
     };
   }

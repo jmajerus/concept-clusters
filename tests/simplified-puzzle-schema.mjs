@@ -716,6 +716,22 @@ export async function run() {
     assert.equal(document.language, "en");
   }
 
+  // Administration flags ride on the runtime puzzle and stay out of MCP reads.
+  {
+    const input = validPuzzle({
+      board: { starFreeStrip: false, bridgePreconnect: true }
+    });
+    const { puzzle, errors } = puzzleFromAuthoredDocument(input);
+    assert.deepEqual(errors, []);
+    assert.deepEqual(puzzle.board, { starFreeStrip: false, bridgePreconnect: true });
+    assert.equal(documentForMcp(input).board, undefined);
+    assert.equal(
+      SimplifiedPuzzleInputSchema.safeParse(validPuzzle({ board: { extra: true } })).success,
+      false
+    );
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(validPuzzle()).success, true);
+  }
+
   // version and lesson-progress revision stay off the document. Publication
   // dates are kept. A raw document that also carries version still fails the
   // strict schema until the compatibility fold removes it.

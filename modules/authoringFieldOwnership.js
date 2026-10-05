@@ -10,6 +10,7 @@ export const AUTHORING_DOMAINS = Object.freeze([
   "content",
   "classification",
   "pedagogy",
+  "administration",
   "provenance",
   "system"
 ]);
@@ -40,7 +41,7 @@ export const AUTHORING_PHASES = Object.freeze([
 
 /**
  * @typedef {object} FieldOwnership
- * @property {"content" | "classification" | "pedagogy" | "provenance" | "system"} domain
+ * @property {"content" | "classification" | "pedagogy" | "administration" | "provenance" | "system"} domain
  * @property {FieldKind} kind
  * @property {boolean} [identity] stable cross-domain identity for this field
  * @property {boolean} [writeOnce] authored when the draft is created and
@@ -86,6 +87,11 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
   license: { domain: "pedagogy", kind: "protected" },
   derivedFrom: { domain: "pedagogy", kind: "protected" },
   language: { domain: "pedagogy", kind: "authored" },
+
+  // Experimental play flags. A person sets them while a feature is still
+  // administrative. Agents never see or replace this object. Promoting a
+  // field later moves its ownership into content or pedagogy.
+  board: { domain: "administration", kind: "protected" },
 
   provenance: { domain: "provenance", kind: "protected" },
 

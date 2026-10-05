@@ -154,6 +154,7 @@ export function puzzleToSimplified(
     ...(source.relatedPuzzles ? { relatedPuzzles: clone(source.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(source.provenance ? { provenance: clone(source.provenance) } : {}),
+    ...(source.board && typeof source.board === "object" ? { board: clone(source.board) } : {}),
     ...(source.creator ? { creator: source.creator } : {}),
     ...(source.license ? { license: source.license } : {}),
     ...(source.derivedFrom ? { derivedFrom: source.derivedFrom } : {}),

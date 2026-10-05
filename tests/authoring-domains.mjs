@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   applyAuthoredDomain,
   assembleAuthoredDocument,
+  assembleAuthoredDocumentFromDraftRow,
   assembleStoredDomainDocuments,
   domainColumnsForSave,
   partitionAuthoredDocument,
@@ -68,6 +69,40 @@ export async function run() {
   assert.equal(domains.content.category, undefined);
   assert.equal(domains.classification.category, "science");
   assert.equal(domains.pedagogy.categories, undefined);
+
+  const flagged = {
+    ...document,
+    board: { starFreeStrip: false, bridgePreconnect: true }
+  };
+  const flaggedDomains = partitionAuthoredDocument(flagged);
+  assert.equal(flaggedDomains.content.board, undefined);
+  assert.deepEqual(flaggedDomains.administration, flagged.board);
+  assert.deepEqual(assembleAuthoredDocument(flaggedDomains), flagged);
+  assert.equal(projectAuthoredDocument(flagged, "content").document.board, undefined);
+  assert.equal(projectAuthoredDocument(flagged, "pedagogy").document.board, undefined);
+  assert.equal(projectAuthoredDocument(flagged, "classification").document.board, undefined);
+  assert.throws(
+    () => applyAuthoredDomain(flagged, "content", {
+      ...flaggedDomains.content,
+      board: { bridgePreconnect: false }
+    }),
+    /board is protected/
+  );
+  const edited = applyAuthoredDomain(flagged, "content", flaggedDomains.content);
+  assert.deepEqual(edited.board, flagged.board);
+  assert.equal(
+    storedDomainDocuments(edited).administration,
+    JSON.stringify(flagged.board)
+  );
+  const preserved = assembleAuthoredDocumentFromDraftRow({
+    document_stale: 1,
+    content_json: storedDomainDocuments(edited).content,
+    pedagogy_json: storedDomainDocuments(edited).pedagogy,
+    classification_json: storedDomainDocuments(edited).classification,
+    provenance_json: storedDomainDocuments(edited).provenance,
+    administration_json: storedDomainDocuments(edited).administration
+  });
+  assert.deepEqual(preserved.board, flagged.board);
 
   const shelfDocument = { ...document, tags: ["book"], level: "advanced" };
   const shelfDomains = partitionAuthoredDocument(shelfDocument);

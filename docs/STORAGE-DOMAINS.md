@@ -30,15 +30,22 @@ Write-domain scoping makes ownership explicit at the authoring boundary. The
 agent is given the smallest useful document for the pass it is performing;
 the infrastructure preserves and recombines the other domains.
 
-## The five domains
+## The domains
 
 | Domain | Purpose | Current owner | Focused agent access |
 |---|---|---|---|
 | `content` | Educational meaning: puzzle identity, copy, clusters, and bridge core | Agent | Read/write |
 | `classification` | Disciplinary home, membership, subcategory placement, search tags, and optional level | Agent | Read/write; id and title are read-only context |
 | `pedagogy` | Relationships, lenses, learning introductions, related puzzles, and language | Agent | Read/write; content and classification are read-only context |
+| `administration` | Experimental play flags on `board`, such as the free-term strip and bridge pre-connect | Author | Protected. Not an agent write domain |
 | `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
 | `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document, except `dateCreated` and `dateModified`, which publication stamps onto the puzzle |
+
+The agent-write domains stay three: content, classification, and pedagogy. Administration is a separate human projection because its stimulus is an admin turning an experiment on or off, which is not a contribution event and not a board, shelf, or lesson edit. Provenance records who contributed, and it changes when contribution changes. The shared rule is only mechanical: a content, classification, or pedagogy save must not see or replace `board`.
+
+`board.starFreeStrip` forces the strip when true, keeps the classic Star board when false, and leaves the capacity heuristic in place when omitted. `board.bridgePreconnect` starts every bridge connected in Graph, Star, and Circle when true. Omitted or false leaves bridges for the player. Drafts store the object in `administration_json`. Publish still writes one assembled puzzle document, so play reads `puzzle.board` and a change alters the content fingerprint.
+
+Promotion is a later, explicit change for one field after it has been vetted. Move that field's ownership to content or pedagogy, set its kind to authored or derived, add it to that domain's phase, and backfill draft rows from `administration_json` into the destination column. The player-facing key stays `board`. Until that promotion, agents cannot set or clear these flags. Do not add a domain per experiment; the field list stays this one closed object.
 
 The agent-write domains are broad enough to be useful authoring surfaces.
 Content includes the core of a bridge and its cluster membership. Classification
@@ -75,7 +82,7 @@ That is a schema decision, not a silent consequence of partitioning.
 says *when*: the field is authored as the draft is created and immutable on
 later authored saves. Today the only one is the document `id`.
 
-It is a lifecycle constraint *inside* an owned field, not a fifth storage
+It is a lifecycle constraint *inside* an owned field, not another storage
 domain and not a replacement for `kind` or `identity`. Those flags stack.
 The document `id` is `authored`, `identity: true`, and `writeOnce: true`: an
 agent chooses it at birth, later saves match on it, and authored writes may

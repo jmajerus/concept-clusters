@@ -214,7 +214,9 @@ export function createAuthoringStudio({
       params.delete("play");
       if (params.get("view") === "play") params.delete("view");
     }
-    const query = params.toString().replace(/(^|&)play=(?=&|$)/, "$1play");
+    const query = params.toString()
+      .replace(/(^|&)admin=(?=&|$)/, "$1admin")
+      .replace(/(^|&)play=(?=&|$)/, "$1play");
     const next = `${location.pathname}?${query}`;
     if (`${location.pathname}${location.search}` !== next) {
       history.replaceState({ conceptClusters: true }, "", next);
@@ -254,7 +256,9 @@ export function createAuthoringStudio({
       const params = new URLSearchParams(location.search);
       if (!params.has("play") && params.get("view") !== "play") {
         params.set("play", "");
-        const query = params.toString().replace(/(^|&)play=(?=&|$)/, "$1play");
+        const query = params.toString()
+          .replace(/(^|&)admin=(?=&|$)/, "$1admin")
+          .replace(/(^|&)play=(?=&|$)/, "$1play");
         location.assign(`${location.pathname}?${query}`);
         return;
       }

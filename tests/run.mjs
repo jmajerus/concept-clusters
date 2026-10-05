@@ -119,6 +119,7 @@ import * as playCorpus from "./play-corpus.mjs";
 import * as publicPlay from "./public-play.mjs";
 import * as publicPlayBrowser from "./public-play-browser.mjs";
 import * as catalogues from "./catalogues.mjs";
+import * as catalogueNavigation from "./catalogue-navigation.mjs";
 import * as metaCatalogues from "./meta-catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
 import * as subcategories from "./subcategories.mjs";
@@ -137,7 +138,7 @@ const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
   starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, starBridgePreconnect, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
-  conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
+  conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, catalogueNavigation, metaCatalogues,
   learningIntroductionEngine, learningIntroduction, learningLessonSection,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringAssistanceLog, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus, publicPlay, publicPlayBrowser,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
@@ -162,7 +163,7 @@ const quickTests = [
   mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness,
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
-  authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, geometryVisibleSegment,
+  authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
   singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
@@ -185,7 +186,7 @@ const sideTests = {
     starDetangle, starPrettyPrint, playerSessions,
     circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
     conceptLenses, lensEngine, lensAssignment, lensQuiz,
-    catalogues, metaCatalogues, learningIntroduction, learningLessonSection,
+    catalogues, catalogueNavigation, metaCatalogues, learningIntroduction, learningLessonSection,
     learningIntroductionEngine, learningLevel, domainCatalogues,
     multiCategory, subcategories, domains, infoLinks,
     librarySearch, librarySearchEngine, boot, puzzleManifest, publicPlay,

@@ -61,8 +61,13 @@ function assembleRowDocument(row) {
 const CLASSIFICATION_COLUMN_MIGRATION =
   "puzzle_drafts.classification_json is missing. Apply d1/migrations/0028_classification_domain.sql before writing drafts.";
 
-function rethrowMissingClassificationColumn(error) {
+function rethrowMissingDomainColumn(error) {
   const message = String(error?.message || error);
+  if (/no such column/i.test(message) && /administration_json/i.test(message)) {
+    throw new Error(
+      "puzzle_drafts.administration_json is missing. Apply d1/migrations/0030_administration_domain.sql before writing drafts."
+    );
+  }
   if (/no such column/i.test(message) && /classification_json/i.test(message)) {
     throw new Error(CLASSIFICATION_COLUMN_MIGRATION);
   }
@@ -73,7 +78,7 @@ async function runDraftWrite(statement) {
   try {
     return await statement.run();
   } catch (error) {
-    rethrowMissingClassificationColumn(error);
+    rethrowMissingDomainColumn(error);
   }
 }
 
@@ -189,7 +194,8 @@ export class D1DraftRepository extends DraftRepository {
       domains.content,
       domains.pedagogy,
       domains.classification,
-      domains.provenance
+      domains.provenance,
+      domains.administration
     ];
     // Both identities are gated: the row id keys the drafts list and the admin
     // URL, and puzzle_id is what a later Publish writes to.
@@ -211,9 +217,9 @@ export class D1DraftRepository extends DraftRepository {
         names: `id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
           created_at, updated_at, revision, document_stale,
-          content_json, pedagogy_json, classification_json, provenance_json, opened_from_published,
+          content_json, pedagogy_json, classification_json, provenance_json, administration_json, opened_from_published,
           review_base_published_revision`,
-        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, ?, ?"
+        values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, ?, ?, ?"
       })).bind(
         ...bindModern,
         seededFromPublished ? 1 : 0,
@@ -233,8 +239,8 @@ export class D1DraftRepository extends DraftRepository {
           names: `id, puzzle_id, owner_subject, title, status,
             document, content_hash, base_commit_sha,
             created_at, updated_at, revision,
-            content_json, pedagogy_json, classification_json, provenance_json`,
-          values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?, ?"
+            content_json, pedagogy_json, classification_json, provenance_json, administration_json`,
+          values: "?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?"
         })).bind(...bindModern, ...gateBindings));
       } else {
         throw error;
@@ -395,7 +401,7 @@ export class D1DraftRepository extends DraftRepository {
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
           document_stale = 0,
-          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof materialized.id === "string" ? materialized.id : null,
@@ -407,6 +413,7 @@ export class D1DraftRepository extends DraftRepository {
       domains.pedagogy,
       domains.classification,
       domains.provenance,
+      domains.administration,
       draftId,
       owner.subject,
       expectedRevision
@@ -483,7 +490,7 @@ export class D1DraftRepository extends DraftRepository {
       SET puzzle_id = ?, title = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
           document_stale = 1,
-          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof materialized.id === "string" ? materialized.id : null,
@@ -494,6 +501,7 @@ export class D1DraftRepository extends DraftRepository {
       columns.pedagogy,
       columns.classification,
       columns.provenance,
+      columns.administration,
       draftId,
       owner.subject,
       expectedRevision
@@ -536,7 +544,7 @@ export class D1DraftRepository extends DraftRepository {
     const result = await runDraftWrite(this.database.prepare(`
       UPDATE puzzle_drafts
       SET document = ?, content_hash = ?, document_stale = 0,
-          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?,
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?,
           updated_at = ?
       WHERE id = ? AND owner_subject = ? AND revision = ? AND document_stale = 1
     `).bind(
@@ -546,6 +554,7 @@ export class D1DraftRepository extends DraftRepository {
       domains.pedagogy,
       domains.classification,
       domains.provenance,
+      domains.administration,
       now,
       draftId,
       owner.subject,
@@ -594,7 +603,7 @@ export class D1DraftRepository extends DraftRepository {
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
           revision = revision + 1, validation_json = NULL, updated_at = ?,
           document_stale = 0,
-          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?
+          content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
       WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof materialized.id === "string" ? materialized.id : null,
@@ -606,6 +615,7 @@ export class D1DraftRepository extends DraftRepository {
       domains.pedagogy,
       domains.classification,
       domains.provenance,
+      domains.administration,
       draftId,
       owner.subject,
       expectedRevision

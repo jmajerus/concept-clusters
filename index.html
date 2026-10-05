@@ -108,21 +108,12 @@
            puzzle or draft. -->
       <div id="admin-layout-actions" hidden>
         <button id="layout-author-btn" type="button">Edit layout</button>
-        <button id="star-free-strip-btn" type="button">Use free-term strip</button>
-        <button id="star-free-strip-export-btn" type="button" hidden>Export strip flag</button>
-        <button id="star-seed-beside-title-btn" type="button">Seed beside titles</button>
-        <button id="star-bridge-preconnect-btn" type="button">Pre-connect bridges</button>
-        <button id="star-bridge-preconnect-export-btn" type="button" hidden>Export bridge pre-connect flag</button>
-        <span class="admin-layout-hint">
+        <button id="star-free-strip-btn" type="button" hidden>Use free-term strip</button>
+        <button id="star-bridge-preconnect-btn" type="button" hidden>Pre-connect bridges</button>
+        <span id="admin-layout-hint" class="admin-layout-hint">
           Final layout: Prepare → drag → Save Layout on the authoring server;
           cue the puzzle for the next Freeze when it is ready for production.
-          Cluttered opening: auto when free terms fit neither a top row nor
-          a left column; toggle locally, then export to lock the boolean with
-          <code>node tools/import-star-free-strip.mjs &lt;file&gt;</code>.
-          Seed-beside-title is a local cold-start try (implied by strip).
-          Bridge pre-connect starts those bridges connected in Graph, Star,
-          and Circle. Export locks it with
-          <code>node tools/import-star-bridge-preconnect.mjs &lt;file&gt;</code>.
+          Free-term strip and bridge pre-connect save on the open working copy.
         </span>
       </div>
       <!-- Admin-only, revealed by the Stats button above, not &admin

@@ -357,6 +357,13 @@ export const SimplifiedPuzzleInputSchema = z.object({
   relatedPuzzles: RelatedPuzzlesSchema.optional(),
   learningIntroduction: LearningIntroductionSchema.optional(),
   provenance: ProvenanceSchema.optional(),
+  // Human-only experimental play flags. Omitted fields keep today's default:
+  // the strip heuristic, and bridges left for the player. Agents do not
+  // receive this object; see the administration domain.
+  board: z.object({
+    starFreeStrip: z.boolean().optional(),
+    bridgePreconnect: z.boolean().optional()
+  }).strict().optional(),
   // Pass-through publication metadata -- not semantically validated by
   // contentValidation.js, just carried through unchanged. `layout` (renderer
   // layout curation) deliberately isn't offered here: it's a positional/
@@ -577,6 +584,18 @@ function deriveClusterIds(clusters) {
   });
 }
 
+function boardAdministration(board) {
+  if (!board || typeof board !== "object" || Array.isArray(board)) return undefined;
+  const next = {};
+  if (board.starFreeStrip === true || board.starFreeStrip === false) {
+    next.starFreeStrip = board.starFreeStrip;
+  }
+  if (board.bridgePreconnect === true || board.bridgePreconnect === false) {
+    next.bridgePreconnect = board.bridgePreconnect;
+  }
+  return Object.keys(next).length ? next : undefined;
+}
+
 export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = {}) {
   const categoryFields = canonicalizePuzzleCategoryReferences(input, categoryRegistry);
   const clusterIds = deriveClusterIds(input.clusters);
@@ -666,6 +685,7 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     ...(input.relatedPuzzles ? { relatedPuzzles: clone(input.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(input.provenance ? { provenance: clone(input.provenance) } : {}),
+    ...(boardAdministration(input.board) ? { board: boardAdministration(input.board) } : {}),
     ...(input.creator ? { creator: input.creator } : {}),
     ...(input.license ? { license: input.license } : {}),
     ...(input.derivedFrom ? { derivedFrom: input.derivedFrom } : {}),
