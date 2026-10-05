@@ -203,7 +203,7 @@ export async function run() {
     after: puzzleDocument
   }]);
   const puzzleUpdate = puzzleDatabase.batches[0][0];
-  assert.match(puzzleUpdate.sql, /content_json = \?, pedagogy_json = \?, classification_json = \?, provenance_json = \?/);
+  assert.match(puzzleUpdate.sql, /content_json = \?, pedagogy_json = \?, classification_json = \?, provenance_json = \?, administration_json = \?/);
   const storedContent = JSON.parse(puzzleUpdate.params[5]);
   const storedPedagogy = JSON.parse(puzzleUpdate.params[6]);
   assert.equal(storedContent.bridges[0].relationKind, undefined);

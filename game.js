@@ -43,6 +43,7 @@ import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
 import { saveLayout } from "./modules/layoutApi.js";
+import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
 import { createCatalogueStudio, bindCatalogueCardDrag } from "./modules/catalogueStudio.js";
@@ -1799,7 +1800,19 @@ overviewRenderer = createOverviewRenderer({
   openDraft: draftId => {
     const id = String(draftId || "").trim();
     if (!id) return;
-    window.location.assign(`/?puzzle=${encodeURIComponent(id)}`);
+    const current = new URLSearchParams(location.search);
+    const next = new URLSearchParams();
+    next.set("puzzle", id);
+    // The admin shortcut is the reviewer board. A working-copy card opened
+    // from that session stays on that board instead of Construct.
+    if (current.has("admin")) {
+      next.set("admin", "");
+      next.set("play", "");
+    }
+    const query = next.toString()
+      .replace(/(^|&)admin=(?=&|$)/, "$1admin")
+      .replace(/(^|&)play=(?=&|$)/, "$1play");
+    window.location.assign(`${location.pathname}?${query}`);
   },
   persistCurrentPuzzle: () => {
     if (state) persistPlayerSession({ captureLayout: true });
@@ -1935,10 +1948,12 @@ layoutAuthoring = createLayoutAuthoringController({
   showSolution,
   saveLayout: playSource === "d1"
     ? args => saveLayout({ ...args, draftId: overlayDraftId })
-    : null
+    : null,
+  saveBoardFlags: playSource === "d1"
+    ? args => saveBoardFlags({ ...args, draftId: overlayDraftId })
+    : null,
+  getDraftId: () => overlayDraftId
 });
-// tests/star-free-strip.mjs pokes this after mutating STAR_FREE_STRIP in-page.
-window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 
 // ---------- layout authoring ----------
 // The ?author=layout panel and ?admin layout actions live in

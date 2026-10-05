@@ -338,11 +338,16 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
   const pedagogy = {};
   const classification = {};
   let provenance;
+  let administration;
 
   for (const [key, value] of Object.entries(authored)) {
     if (key === "bridges") continue;
     if (key === "provenance") {
       provenance = clone(value);
+    } else if (key === "board") {
+      // Split this off before the content fallback. An unknown key would
+      // otherwise become content, and a content save could replace it.
+      if (isObject(value) && Object.keys(value).length) administration = clone(value);
     } else if (CLASSIFICATION_STORED_ROOT_FIELDS.has(key)) {
       classification[key] = clone(value);
     } else if (PEDAGOGY_STORED_ROOT_FIELDS.has(key)) {
@@ -363,6 +368,7 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
     content,
     pedagogy,
     classification,
+    administration,
     provenance,
     system: clone(system) || {}
   };
@@ -377,6 +383,7 @@ export function assembleAuthoredDocument({
   content = {},
   pedagogy = {},
   classification = {},
+  administration = undefined,
   provenance = undefined
 } = {}) {
   assertObject(content, "Content domain");
@@ -392,6 +399,11 @@ export function assembleAuthoredDocument({
   }
   for (const [key, value] of Object.entries(classification)) {
     document[key] = clone(value);
+  }
+  if (isObject(administration) && Object.keys(administration).length) {
+    document.board = clone(administration);
+  } else {
+    delete document.board;
   }
   if (provenance !== undefined && provenance !== null) {
     document.provenance = clone(provenance);
@@ -506,7 +518,8 @@ export function domainColumnsForSave(current, domain, next) {
     classification: domain === "classification" || rewriteAll
       ? next.classification
       : current.classification,
-    provenance: next.provenance
+    provenance: next.provenance,
+    administration: next.administration
   };
 }
 
@@ -714,6 +727,7 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     content: current.content,
     pedagogy: current.pedagogy,
     classification: current.classification,
+    administration: current.administration,
     provenance: current.provenance
   };
   if (domain === "content") {
@@ -758,7 +772,10 @@ export function storedDomainDocuments(document) {
     classification: JSON.stringify(domains.classification),
     provenance: domains.provenance === undefined
       ? null
-      : JSON.stringify(domains.provenance)
+      : JSON.stringify(domains.provenance),
+    administration: domains.administration === undefined
+      ? null
+      : JSON.stringify(domains.administration)
   };
 }
 
@@ -767,7 +784,8 @@ export function assembleStoredDomainDocuments({
   content = null,
   pedagogy = null,
   classification = null,
-  provenance = null
+  provenance = null,
+  administration = null
 } = {}) {
   const fallback = document ? partitionAuthoredDocument(document) : null;
   // A stored classification column is authoritative, including when it omits
@@ -788,7 +806,8 @@ export function assembleStoredDomainDocuments({
     classification: classificationProvided
       ? adoptLegacyShelfFields(classification, [pedagogySource, contentSource])
       : (fallback?.classification ?? {}),
-    provenance: provenance ?? fallback?.provenance
+    provenance: provenance ?? fallback?.provenance,
+    administration: administration ?? fallback?.administration
   });
 }
 
@@ -823,6 +842,9 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
   const provenance = row.provenance_json == null
     ? null
     : parseJson(row.provenance_json, "Stored provenance domain");
+  const administration = row.administration_json == null
+    ? null
+    : parseJson(row.administration_json, "Stored administration domain");
   const stale = Number(row.document_stale || 0) === 1;
   if (stale) {
     if (content == null || pedagogy == null) {
@@ -835,10 +857,11 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
       content,
       pedagogy,
       classification,
-      provenance
+      provenance,
+      administration
     });
   }
-  if (content != null || pedagogy != null || classification != null || provenance != null) {
+  if (content != null || pedagogy != null || classification != null || provenance != null || administration != null) {
     return assembleStoredDomainDocuments({
       document: row.document == null
         ? undefined
@@ -848,7 +871,8 @@ export function assembleAuthoredDocumentFromDraftRow(row, {
       content,
       pedagogy,
       classification,
-      provenance
+      provenance,
+      administration
     });
   }
   if (row.document == null) {

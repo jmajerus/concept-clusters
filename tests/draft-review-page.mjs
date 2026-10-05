@@ -152,6 +152,9 @@ export async function run() {
   assert.doesNotMatch(draftPage, /value="revert-published"/);
   assert.match(draftPage, /value="delete-draft"/);
   assert.match(draftPage, /badge-warn">working copy</);
+  assert.match(draftPage, /Board experiments/);
+  assert.match(draftPage, /Free-term strip/);
+  assert.match(draftPage, /Bridge pre-connect/);
   assert.doesNotMatch(draftPage, /badge-ok">authoring play</);
   const publishedNoticeList = renderDraftListPage([{ ...baseDraft }], {
     notice: {

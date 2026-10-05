@@ -1,16 +1,11 @@
 // Mode-neutral layout authoring UI: the ?author=layout panel (prepare,
-// local drafts, validated save) and the Star-only ?admin layout actions
-// (local free-strip / seed-beside-title / bridge pre-connect tries).
+// local drafts, validated save) and the working-copy board experiments
+// (free-term strip and bridge pre-connect).
 //
 // Production and the authoring-server player both gate the actions with
 // ?admin so a reviewer at `/` sees the same chrome as production.
-//
-// Schema, draft storage, and committed overrides live in
-// layoutDocument.js / layoutStore.js / starLayoutRepository.js.
-// This module is the browser controller over those, using the same
-// factory-with-injected-dependencies convention as createOverviewRenderer
-// and createAppNavigation. Player-loop policy (skip sessions and the
-// learning gate) stays in game.js.
+// Experiment toggles save only when a working copy is open. Public play
+// keeps metadata and stats and cannot change the published record.
 
 import { layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
 import {
@@ -19,37 +14,11 @@ import {
   saveLayoutDraft
 } from "./layoutStore.js";
 import {
-  repositoryStarFreeStrip,
   starFreeStripEnabled,
   starFreeStripCapacityNeeded,
-  STAR_FREE_STRIP_STORAGE_KEY,
-  starSeedBesideTitleEnabled,
-  STAR_SEED_BESIDE_TITLE_STORAGE_KEY,
-  repositoryStarBridgePreconnect,
   starBridgePreconnectEnabled,
-  STAR_BRIDGE_PRECONNECT_STORAGE_KEY
+  boardWithFlag
 } from "./starLayoutRepository.js";
-
-function readJsonObject(storage, key) {
-  try {
-    const value = JSON.parse(storage.getItem(key) || "{}");
-    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-  } catch {
-    return {};
-  }
-}
-
-function downloadJson(filename, data) {
-  const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], {
-    type: "application/json"
-  });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
 
 export function createLayoutAuthoringController({
   layoutAuthoringMode,
@@ -59,7 +28,9 @@ export function createLayoutAuthoringController({
   getMode,
   getBoard,
   showSolution,
-  saveLayout = null
+  saveLayout = null,
+  saveBoardFlags = null,
+  getDraftId = () => null
 }) {
   const layoutAuthoringEl = document.getElementById("layout-authoring");
   const layoutAuthoringDraftStateEl = document.getElementById("layout-authoring-draft-state");
@@ -75,10 +46,8 @@ export function createLayoutAuthoringController({
   const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
   const layoutAuthorBtn = document.getElementById("layout-author-btn");
   const starFreeStripBtn = document.getElementById("star-free-strip-btn");
-  const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
-  const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
   const starBridgePreconnectBtn = document.getElementById("star-bridge-preconnect-btn");
-  const starBridgePreconnectExportBtn = document.getElementById("star-bridge-preconnect-export-btn");
+  const adminLayoutHintEl = document.getElementById("admin-layout-hint");
   const savesToAuthoringServer = typeof saveLayout === "function";
   let savingLayout = false;
 
@@ -352,44 +321,47 @@ export function createLayoutAuthoringController({
     }
   });
 
+  function workingCopyCanWriteBoard() {
+    return adminMode && typeof saveBoardFlags === "function" && Boolean(getDraftId());
+  }
+
+  function setBoardFlagStatus(text) {
+    if (!adminLayoutHintEl) return;
+    adminLayoutHintEl.textContent = text ||
+      "Final layout: Prepare → drag → Save Layout on the authoring server; cue the puzzle for the next Freeze when it is ready for production. Free-term strip and bridge pre-connect save on the open working copy.";
+  }
+
+  async function persistBoardFlag(key, value, reload) {
+    const state = getState();
+    if (!state?.puzzle || !workingCopyCanWriteBoard()) return;
+    const board = boardWithFlag(state.puzzle, key, value);
+    starFreeStripBtn.disabled = true;
+    starBridgePreconnectBtn.disabled = true;
+    try {
+      await saveBoardFlags({ board });
+      reload();
+    } catch (error) {
+      setBoardFlagStatus(error instanceof Error ? error.message : String(error));
+      starFreeStripBtn.disabled = false;
+      starBridgePreconnectBtn.disabled = false;
+    }
+  }
+
   function syncStarFreeStripButtons() {
     const state = getState();
-    if (!state?.puzzle) return;
+    const canWrite = workingCopyCanWriteBoard();
+    if (starFreeStripBtn) starFreeStripBtn.hidden = !canWrite;
+    if (starBridgePreconnectBtn) starBridgePreconnectBtn.hidden = !canWrite;
+    if (!state?.puzzle || !canWrite) return;
     const board = boardSize();
     const enabled = starFreeStripEnabled(state.puzzle, board);
-    const repoEnabled = repositoryStarFreeStrip(state.puzzle);
-    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle, board);
-    // Strip implies seed-beside-title; the seed button still reflects the
-    // local override when strip is off.
-    const overrides = readJsonObject(storage, STAR_SEED_BESIDE_TITLE_STORAGE_KEY);
-    const seedOverride = overrides[state.puzzle.id] === true;
     starFreeStripBtn.textContent = enabled
       ? "Clear free-term strip"
       : "Use free-term strip";
-    // Show export only when the effective setting would change the sparse
-    // registry (capacity auto-on with no lock still differs from repo).
-    starFreeStripExportBtn.hidden = enabled === repoEnabled;
-    starFreeStripExportBtn.textContent = enabled
-      ? "Export strip flag"
-      : "Export clear-strip flag";
-    starSeedBesideTitleBtn.textContent = seedOverride
-      ? "Clear seed-beside-title"
-      : "Seed beside titles";
-    starSeedBesideTitleBtn.disabled = enabled;
-    starSeedBesideTitleBtn.title = enabled
-      ? "Implied by free-term strip"
-      : seedEnabled
-        ? "Local try: connected seeds start beside their titles"
-        : "Local try: place connected seeds beside titles on cold start";
     const preconnect = starBridgePreconnectEnabled(state.puzzle);
-    const preconnectLocked = repositoryStarBridgePreconnect(state.puzzle);
     starBridgePreconnectBtn.textContent = preconnect
       ? "Clear bridge pre-connect"
       : "Pre-connect bridges";
-    starBridgePreconnectExportBtn.hidden = preconnect === preconnectLocked;
-    starBridgePreconnectExportBtn.textContent = preconnect
-      ? "Export bridge pre-connect flag"
-      : "Export clear-bridge-pre-connect flag";
   }
 
   if (adminMode && !layoutAuthoringMode) {
@@ -409,65 +381,19 @@ export function createLayoutAuthoringController({
       location.assign(`${location.pathname}?${params.toString()}`);
     });
 
-    starFreeStripBtn.addEventListener("click", () => {
+    starFreeStripBtn?.addEventListener("click", () => {
       const state = getState();
       if (!state?.puzzle) return;
-      const id = state.puzzle.id;
-      const board = boardSize();
-      const overrides = readJsonObject(storage, STAR_FREE_STRIP_STORAGE_KEY);
-      const next = !starFreeStripEnabled(state.puzzle, board);
-      overrides[id] = next;
-      // Drop the override only when it matches the non-override default
-      // (repo lock or capacity heuristic). A forced-off against capacity
-      // must keep override:false or the heuristic would turn strip back on.
-      const defaultOn = repositoryStarFreeStrip(state.puzzle) ||
-        starFreeStripCapacityNeeded(state.puzzle, board.width, board.height);
-      if (next === defaultOn) delete overrides[id];
-      storage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
-      reloadStarBoard();
+      const size = boardSize();
+      const next = !starFreeStripEnabled(state.puzzle, size);
+      const heuristic = starFreeStripCapacityNeeded(state.puzzle, size.width, size.height);
+      persistBoardFlag("starFreeStrip", next === heuristic ? undefined : next, reloadStarBoard);
     });
-    starFreeStripExportBtn.addEventListener("click", () => {
+    starBridgePreconnectBtn?.addEventListener("click", () => {
       const state = getState();
       if (!state?.puzzle) return;
-      const freeStrip = starFreeStripEnabled(state.puzzle, boardSize());
-      downloadJson(`${state.puzzle.id}-star-free-strip.json`, {
-        schemaVersion: 1,
-        kind: "star-free-strip",
-        puzzleId: state.puzzle.id,
-        freeStrip
-      });
-    });
-    starSeedBesideTitleBtn.addEventListener("click", () => {
-      const state = getState();
-      if (!state?.puzzle || starFreeStripEnabled(state.puzzle, boardSize())) return;
-      const id = state.puzzle.id;
-      const overrides = readJsonObject(storage, STAR_SEED_BESIDE_TITLE_STORAGE_KEY);
-      if (overrides[id] === true) delete overrides[id];
-      else overrides[id] = true;
-      storage.setItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY, JSON.stringify(overrides));
-      reloadStarBoard();
-    });
-    starBridgePreconnectBtn.addEventListener("click", () => {
-      const state = getState();
-      if (!state?.puzzle) return;
-      const id = state.puzzle.id;
-      const overrides = readJsonObject(storage, STAR_BRIDGE_PRECONNECT_STORAGE_KEY);
       const next = !starBridgePreconnectEnabled(state.puzzle);
-      overrides[id] = next;
-      if (next === repositoryStarBridgePreconnect(state.puzzle)) delete overrides[id];
-      storage.setItem(STAR_BRIDGE_PRECONNECT_STORAGE_KEY, JSON.stringify(overrides));
-      reloadBoard();
-    });
-    starBridgePreconnectExportBtn.addEventListener("click", () => {
-      const state = getState();
-      if (!state?.puzzle) return;
-      const preconnect = starBridgePreconnectEnabled(state.puzzle);
-      downloadJson(`${state.puzzle.id}-star-bridge-preconnect.json`, {
-        schemaVersion: 1,
-        kind: "star-bridge-preconnect",
-        puzzleId: state.puzzle.id,
-        preconnect
-      });
+      persistBoardFlag("bridgePreconnect", next ? true : undefined, () => reloadBoard());
     });
   }
 

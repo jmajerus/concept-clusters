@@ -734,4 +734,28 @@ export async function run() {
     contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high" }]
   });
 
+  const stripped = applyDraftFieldValue(document, {
+    section: "board",
+    field: "starFreeStrip",
+    value: "true"
+  }, "true");
+  assert.equal(stripped.board.starFreeStrip, true);
+  const both = applyDraftFieldValue(stripped, {
+    section: "board",
+    field: "bridgePreconnect",
+    value: "true"
+  }, "true");
+  assert.deepEqual(both.board, { starFreeStrip: true, bridgePreconnect: true });
+  const automatic = applyDraftFieldValue(both, {
+    section: "board",
+    field: "starFreeStrip",
+    value: ""
+  }, "");
+  assert.deepEqual(automatic.board, { bridgePreconnect: true });
+  const omitted = applyDraftFieldValue(automatic, {
+    section: "board",
+    field: "bridgePreconnect",
+    value: ""
+  }, "");
+  assert.equal(omitted.board, undefined);
 }

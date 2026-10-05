@@ -370,7 +370,7 @@ export async function applyD1Changes(
             SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
                 revision = revision + 1, validation_json = NULL, updated_at = ?,
                 document_stale = 0,
-                content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?
+                content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
             WHERE id = ? AND owner_subject = ? AND revision = ?
           `).bind(
             typeof change.after.id === "string" ? change.after.id : null,
@@ -382,6 +382,7 @@ export async function applyD1Changes(
             domains.pedagogy,
             domains.classification,
             domains.provenance,
+            domains.administration,
             row.id,
             row.owner_subject,
             Number(row.revision)

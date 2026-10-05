@@ -1909,6 +1909,34 @@ function renderClassificationEditor({
   </details></copy-field>`;
 }
 
+function renderBoardExperiments({ edit, document }) {
+  if (!edit?.draftId) return "";
+  const board = document?.board && typeof document.board === "object" ? document.board : {};
+  const strip = board.starFreeStrip === true ? "true" : board.starFreeStrip === false ? "false" : "";
+  const preconnect = board.bridgePreconnect === true ? "true" : "";
+  const stripSlot = copyHidden(edit, { section: "board", field: "starFreeStrip" });
+  const preSlot = copyHidden(edit, { section: "board", field: "bridgePreconnect" });
+  const option = (value, label, selected) =>
+    `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
+  return `<h2>Board experiments</h2>
+    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them.</p>
+    ${stripSlot.hidden}
+    <p><label>Free-term strip
+      <select${stripSlot.form} name="${stripSlot.prefix}value">
+        ${option("", "Automatic", strip === "")}
+        ${option("true", "On", strip === "true")}
+        ${option("false", "Off", strip === "false")}
+      </select>
+    </label></p>
+    ${preSlot.hidden}
+    <p><label>Bridge pre-connect
+      <select${preSlot.form} name="${preSlot.prefix}value">
+        ${option("", "Off", preconnect === "")}
+        ${option("true", "On", preconnect === "true")}
+      </select>
+    </label></p>`;
+}
+
 function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [] }) {
   if (!edit?.draftId) return "";
 
@@ -2259,6 +2287,7 @@ export function renderDraftPage(draft, {
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.level)}
     ${renderPuzzleMeta(document)}
+    ${renderBoardExperiments({ edit, document })}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}
     ${renderInfo(document.info, {

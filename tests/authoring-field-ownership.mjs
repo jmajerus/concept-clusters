@@ -47,6 +47,10 @@ export async function run() {
   assert.ok(BRIDGE_IDENTITY_FIELDS.has("id"));
   assert.ok(BRIDGE_IDENTITY_FIELDS.has("term"));
   assert.ok(PROTECTED_ROOT_FIELDS.has("provenance"));
+  assert.ok(PROTECTED_ROOT_FIELDS.has("board"));
+  assert.ok(MCP_EXCLUDED_ROOT_FIELDS.has("board"));
+  assert.equal(ROOT_FIELD_OWNERSHIP.board.domain, "administration");
+  assert.equal(ROOT_FIELD_OWNERSHIP.board.kind, "protected");
   for (const field of ["creator", "license", "derivedFrom"]) {
     assert.ok(PROTECTED_ROOT_FIELDS.has(field));
     assert.ok(MCP_EXCLUDED_ROOT_FIELDS.has(field));
@@ -124,7 +128,7 @@ export async function run() {
   assert.match(review.schema.description, /cross-domain/);
 
   const completeSchema = simplifiedPuzzleSchemaResult("complete").schema;
-  for (const field of ["provenance", "creator", "license", "derivedFrom"]) {
+  for (const field of ["provenance", "creator", "license", "derivedFrom", "board"]) {
     assert.equal(completeSchema.properties[field], undefined);
   }
   for (const field of [

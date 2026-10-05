@@ -133,11 +133,17 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
   // The unqualified site root is the main Library landing page. Keep
   // parameterized-but-unrecognized routes on the existing default fallback
   // so stale puzzle/category links still degrade to a playable puzzle.
+  // ?admin is the reviewer shortcut, not a stale link: it should open the
+  // Library so the next puzzle is chosen, rather than a random board.
   if (!params.toString()) return { kind: "library" };
+  const keys = [...params.keys()];
+  if (keys.length && keys.every(key => key === "admin" || key === "mode")) {
+    return { kind: "library" };
+  }
   return { kind: "default" };
 }
 
-export function routeSearch(route, mode) {
+export function routeSearch(route, mode, flags = {}) {
   const params = new URLSearchParams();
   switch (route.kind) {
     case "library":
@@ -186,10 +192,18 @@ export function routeSearch(route, mode) {
       break;
   }
   if (VALID_MODES.has(mode)) params.set("mode", mode);
-  const query = params.toString().replace(/^library=(?=&|$)/, "library");
+  if (flags.admin) params.set("admin", "");
+  // Admin review is the playable board. A puzzle opened from that session
+  // stays in play, including on the authoring server where a working copy
+  // would otherwise open in Construct.
+  if (flags.admin && flags.play && route.kind === "puzzle") params.set("play", "");
+  const query = params.toString()
+    .replace(/^library=(?=&|$)/, "library")
+    .replace(/(^|&)admin=(?=&|$)/, "$1admin")
+    .replace(/(^|&)play=(?=&|$)/, "$1play");
   return query ? `?${query}` : "";
 }
 
-export function routeUrl(pathname, route, mode) {
-  return `${pathname}${routeSearch(route, mode)}`;
+export function routeUrl(pathname, route, mode, flags) {
+  return `${pathname}${routeSearch(route, mode, flags)}`;
 }

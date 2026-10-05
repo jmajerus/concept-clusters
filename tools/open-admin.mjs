@@ -1,5 +1,6 @@
 // Local admin entry: ensure the static dev server is up, then open the
-// game with &admin so puzzle meta, Stats, and Edit layout appear.
+// Library with &admin. Choosing a puzzle keeps that reviewer board
+// (puzzle meta, Stats, and Edit layout) instead of opening Construct.
 // Same server as `npm run dev` (default port 8787). If that port is
 // already taken, assume an existing `npm run dev` and only open the tab.
 import { spawn } from "node:child_process";
