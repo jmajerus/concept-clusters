@@ -35,7 +35,8 @@ export function createAppNavigation({
   // both `views` and this module -- currently just the header library
   // picker in game.js -- in sync with whichever catalogue is now active,
   // without this module needing to know that picker exists.
-  onContextChange
+  onContextChange,
+  beforeRenderRoute = null
 }) {
   let activeCatalogue = catalogueById(
     ALL_PUZZLES_CATALOGUE_ID,
@@ -190,6 +191,7 @@ export function createAppNavigation({
   }
 
   async function renderCurrentRoute({ initial = false, focus = false } = {}) {
+    if (beforeRenderRoute && await beforeRenderRoute({ initial }) === false) return;
     const params = new URLSearchParams(location.search);
     const draftId = params.get("draft");
     if (draftId && loadDraftOverlay) {

@@ -6,6 +6,8 @@ export const PUZZLE_MANIFEST = [
     "id": "energy-flow",
     "module": "./science/energy-flow.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:6f54a7162e450428",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "energy-flow",
       "title": "Energy flow in living systems",
@@ -39,6 +41,8 @@ export const PUZZLE_MANIFEST = [
     "id": "math-foundations",
     "module": "./math/math-foundations.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:fd7631f367cc7000",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "math-foundations",
       "title": "Math foundations",
@@ -69,6 +73,8 @@ export const PUZZLE_MANIFEST = [
     "id": "states-of-matter",
     "module": "./science/states-of-matter.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:f7555ea5fe892e99",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "states-of-matter",
       "title": "States of matter",
@@ -97,6 +103,8 @@ export const PUZZLE_MANIFEST = [
     "id": "democracy-history",
     "module": "./history-society/democracy-history.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:9ba1618079f708e4",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "democracy-history",
       "title": "Democracy through history",
@@ -127,6 +135,8 @@ export const PUZZLE_MANIFEST = [
     "id": "sentence-structure",
     "module": "./language-arts/sentence-structure.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:54773372568ea6c8",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "sentence-structure",
       "title": "English sentence structure",
@@ -156,6 +166,8 @@ export const PUZZLE_MANIFEST = [
     "id": "body-systems",
     "module": "./science/body-systems.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:416acd9a38e82396",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "body-systems",
       "title": "Human body systems",
@@ -186,6 +198,8 @@ export const PUZZLE_MANIFEST = [
     "id": "algebra-basics",
     "module": "./math/algebra-basics.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:97703cb1141ccbcf",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "algebra-basics",
       "title": "Algebra basics",
@@ -215,6 +229,8 @@ export const PUZZLE_MANIFEST = [
     "id": "data-probability",
     "module": "./math/data-probability.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:09ca168444f01533",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "data-probability",
       "title": "Data & probability",
@@ -245,6 +261,8 @@ export const PUZZLE_MANIFEST = [
     "id": "ancient-civilizations",
     "module": "./history-society/ancient-civilizations.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:885ff9672806cf77",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "ancient-civilizations",
       "title": "Ancient civilizations",
@@ -275,6 +293,8 @@ export const PUZZLE_MANIFEST = [
     "id": "economic-systems",
     "module": "./history-society/economic-systems.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:c10b7c174f2fcca5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "economic-systems",
       "title": "Economic systems",
@@ -304,6 +324,8 @@ export const PUZZLE_MANIFEST = [
     "id": "literary-devices",
     "module": "./language-arts/literary-devices.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:ce9d2262dff8b61f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "literary-devices",
       "title": "Literary devices",
@@ -333,6 +355,8 @@ export const PUZZLE_MANIFEST = [
     "id": "poetic-forms",
     "module": "./language-arts/poetic-forms.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:343919f36f30c631",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "poetic-forms",
       "title": "Poetic forms",
@@ -361,6 +385,8 @@ export const PUZZLE_MANIFEST = [
     "id": "authoritarian-regimes",
     "module": "./history-society/authoritarian-regimes.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:61a6770032e3685e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "authoritarian-regimes",
       "title": "20th-century authoritarian regimes",
@@ -390,6 +416,8 @@ export const PUZZLE_MANIFEST = [
     "id": "psychology-schools",
     "module": "./psychology/psychology-schools.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:44871da3228abf98",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "psychology-schools",
       "title": "Schools of psychology",
@@ -419,6 +447,8 @@ export const PUZZLE_MANIFEST = [
     "id": "sociology-paradigms",
     "module": "./sociology/sociology-paradigms.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:30e3b1cb8641e325",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "sociology-paradigms",
       "title": "Sociological paradigms",
@@ -448,6 +478,8 @@ export const PUZZLE_MANIFEST = [
     "id": "epistemology-schools",
     "module": "./philosophy/epistemology-schools.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:fdf1b55c35ace100",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "epistemology-schools",
       "title": "Theories of knowledge",
@@ -475,6 +507,8 @@ export const PUZZLE_MANIFEST = [
     "id": "fundamental-forces",
     "module": "./science/fundamental-forces.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:05c51e7f009deda3",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "fundamental-forces",
       "title": "Fundamental forces of physics",
@@ -511,6 +545,8 @@ export const PUZZLE_MANIFEST = [
     "id": "philosophy-branches",
     "module": "./philosophy/philosophy-branches.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:15f6cbbbdd930818",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "philosophy-branches",
       "title": "Branches of philosophy",
@@ -547,6 +583,8 @@ export const PUZZLE_MANIFEST = [
     "id": "revolutions-modern-world",
     "module": "./history-society/revolutions-modern-world.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:236fd47207197b8a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "revolutions-modern-world",
       "title": "Revolutions of the modern world",
@@ -583,6 +621,8 @@ export const PUZZLE_MANIFEST = [
     "id": "media-literacy",
     "module": "./media-information-literacy/media-literacy.js",
     "published": "2026-07-23",
+    "contentFingerprint": "fnv1a64:624d4442de52f2e2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "media-literacy",
       "title": "Misinformation & media literacy",
@@ -628,6 +668,8 @@ export const PUZZLE_MANIFEST = [
     "id": "social-media-hygiene",
     "module": "./media-information-literacy/social-media-hygiene.js",
     "published": "2026-07-24",
+    "contentFingerprint": "fnv1a64:b56dae06e3a84f98",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "social-media-hygiene",
       "title": "Social media hygiene",
@@ -688,6 +730,8 @@ export const PUZZLE_MANIFEST = [
     "id": "quotations-and-attribution",
     "module": "./media-information-literacy/quotations-and-attribution.js",
     "published": "2026-07-24",
+    "contentFingerprint": "fnv1a64:14ae956c34390fcc",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "quotations-and-attribution",
       "title": "Quotations and attribution",
@@ -768,6 +812,8 @@ export const PUZZLE_MANIFEST = [
     "id": "images-out-of-context",
     "module": "./media-information-literacy/images-out-of-context.js",
     "published": "2026-07-24",
+    "contentFingerprint": "fnv1a64:6e52f7c0dafef9d5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "images-out-of-context",
       "title": "Images out of context",
@@ -867,6 +913,8 @@ export const PUZZLE_MANIFEST = [
     "id": "ai-generated-synthetic-media",
     "module": "./media-information-literacy/ai-generated-synthetic-media.js",
     "published": "2026-07-24",
+    "contentFingerprint": "fnv1a64:79e7ada77a959920",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "ai-generated-synthetic-media",
       "title": "AI-generated and synthetic media",
@@ -948,6 +996,8 @@ export const PUZZLE_MANIFEST = [
     "id": "breathing-gas-exchange",
     "module": "./physiology-medicine/breathing-gas-exchange.js",
     "published": "2026-07-24",
+    "contentFingerprint": "fnv1a64:7b1f96363327b3d1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "breathing-gas-exchange",
       "title": "Breathing and gas exchange",
@@ -978,6 +1028,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-the-heart-pumps",
     "module": "./physiology-medicine/how-the-heart-pumps.js",
     "published": "2026-07-24",
+    "contentFingerprint": "fnv1a64:7f929983f6fb013f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-the-heart-pumps",
       "title": "How the heart pumps",
@@ -1008,6 +1060,8 @@ export const PUZZLE_MANIFEST = [
     "id": "integumentary-system",
     "module": "./physiology-medicine/integumentary-system.js",
     "published": "2026-07-24",
+    "contentFingerprint": "fnv1a64:3ada6711512172dc",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "integumentary-system",
       "title": "The integumentary system",
@@ -1037,6 +1091,8 @@ export const PUZZLE_MANIFEST = [
     "id": "maintaining-homeostasis",
     "module": "./physiology-medicine/maintaining-homeostasis.js",
     "published": "2026-07-25",
+    "contentFingerprint": "fnv1a64:d4f413399e1999a5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "maintaining-homeostasis",
       "title": "Maintaining homeostasis",
@@ -1102,6 +1158,8 @@ export const PUZZLE_MANIFEST = [
     "id": "interpreting-a-text",
     "module": "./humanities/interpreting-a-text.js",
     "published": "2026-07-27",
+    "contentFingerprint": "fnv1a64:ab395cc9dc8ad31c",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "interpreting-a-text",
       "title": "Interpreting a text",
@@ -1163,6 +1221,8 @@ export const PUZZLE_MANIFEST = [
     "id": "reading-a-painting",
     "module": "./humanities/reading-a-painting.js",
     "published": "2026-07-27",
+    "contentFingerprint": "fnv1a64:a404dae82fc9eb1e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "reading-a-painting",
       "title": "Reading a painting",
@@ -1225,6 +1285,8 @@ export const PUZZLE_MANIFEST = [
     "id": "myth-ritual-and-symbol",
     "module": "./humanities/myth-ritual-and-symbol.js",
     "published": "2026-07-27",
+    "contentFingerprint": "fnv1a64:afccefe1b1d2ef11",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "myth-ritual-and-symbol",
       "title": "Myth, ritual, and symbol",
@@ -1288,6 +1350,8 @@ export const PUZZLE_MANIFEST = [
     "id": "lacans-three-registers",
     "module": "./psychology/lacans-three-registers.js",
     "published": "2026-07-27",
+    "contentFingerprint": "fnv1a64:b2df974f83bea0fa",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "lacans-three-registers",
       "title": "Lacan's three registers",
@@ -1338,6 +1402,8 @@ export const PUZZLE_MANIFEST = [
     "id": "climate-and-livelihoods",
     "module": "./geography/climate-and-livelihoods.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:b6e5513f516f0ba6",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "climate-and-livelihoods",
       "title": "Climate and livelihoods across regions",
@@ -1405,6 +1471,8 @@ export const PUZZLE_MANIFEST = [
     "id": "river-basins-and-human-life",
     "module": "./geography/river-basins-and-human-life.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:dd2e1588ed818607",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "river-basins-and-human-life",
       "title": "River basins and human life",
@@ -1477,6 +1545,8 @@ export const PUZZLE_MANIFEST = [
     "id": "evidence-and-inference-across-disciplines",
     "module": "./media-information-literacy/evidence-and-inference-across-disciplines.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:5baae17927846160",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "evidence-and-inference-across-disciplines",
       "title": "Evidence and inference across disciplines",
@@ -1540,6 +1610,8 @@ export const PUZZLE_MANIFEST = [
     "id": "revolutions-as-a-process",
     "module": "./history-society/revolutions-as-a-process.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:b30b542caf4502f9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "revolutions-as-a-process",
       "title": "Revolutions as a process",
@@ -1620,6 +1692,8 @@ export const PUZZLE_MANIFEST = [
     "id": "signals-and-regulation-in-the-body",
     "module": "./physiology-medicine/signals-and-regulation-in-the-body.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:12dc7c8775c89736",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "signals-and-regulation-in-the-body",
       "title": "Signals and regulation in the body",
@@ -1695,6 +1769,8 @@ export const PUZZLE_MANIFEST = [
     "id": "performance-creates-meaning",
     "module": "./humanities/performance-creates-meaning.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:4fba50c274c4da7f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "performance-creates-meaning",
       "title": "Performance creates meaning",
@@ -1776,6 +1852,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-web-canon",
     "module": "./computer-science/the-web-canon.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:006287d3bac0f761",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-web-canon",
       "title": "The Web Canon",
@@ -1847,6 +1925,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-webs-bargain",
     "module": "./computer-science/the-webs-bargain.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:f52914b47b6026e9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-webs-bargain",
       "title": "The Web's Bargain",
@@ -1919,6 +1999,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-programmers-bargain",
     "module": "./computer-science/the-programmers-bargain.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:8c21ce9bcc770ae5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-programmers-bargain",
       "title": "The Programmer's Bargain",
@@ -1988,6 +2070,8 @@ export const PUZZLE_MANIFEST = [
     "id": "language-design-choices",
     "module": "./computer-science/language-design-choices.js",
     "published": "2026-08-07",
+    "contentFingerprint": "fnv1a64:420af88a377444c1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "language-design-choices",
       "title": "Language design choices",
@@ -2032,6 +2116,8 @@ export const PUZZLE_MANIFEST = [
     "id": "research-languages-and-future-directions",
     "module": "./computer-science/research-languages-and-future-directions.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:2d2d8204d3978f56",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "research-languages-and-future-directions",
       "title": "Research languages and future directions",
@@ -2119,6 +2205,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-research-language-to-production",
     "module": "./computer-science/from-research-language-to-production.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:8d8cb5cf47e0f8b4",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "from-research-language-to-production",
       "title": "From research language to production",
@@ -2207,6 +2295,8 @@ export const PUZZLE_MANIFEST = [
     "id": "designing-for-programmer-ergonomics",
     "module": "./computer-science/designing-for-programmer-ergonomics.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:f3e2eaabf7760865",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "designing-for-programmer-ergonomics",
       "title": "Designing for programmer ergonomics",
@@ -2306,6 +2396,8 @@ export const PUZZLE_MANIFEST = [
     "id": "where-failures-stop",
     "module": "./computer-science/where-failures-stop.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:36e3e4d47a2d45cb",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "where-failures-stop",
       "title": "Where failures stop",
@@ -2423,6 +2515,8 @@ export const PUZZLE_MANIFEST = [
     "id": "learning-from-examples",
     "module": "./computer-science/learning-from-examples.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:e7d71ea2057e1aad",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "learning-from-examples",
       "title": "Learning from examples",
@@ -2484,6 +2578,8 @@ export const PUZZLE_MANIFEST = [
     "id": "neural-networks-layer-by-layer",
     "module": "./computer-science/neural-networks-layer-by-layer.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:ccb0c77134665b47",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "neural-networks-layer-by-layer",
       "title": "Neural networks, layer by layer",
@@ -2550,6 +2646,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-language-models-generate-text",
     "module": "./computer-science/how-language-models-generate-text.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:875670549a8bca14",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-language-models-generate-text",
       "title": "How language models generate text",
@@ -2616,6 +2714,8 @@ export const PUZZLE_MANIFEST = [
     "id": "choice-under-influence",
     "module": "./computer-science/choice-under-influence.js",
     "published": "2026-07-31",
+    "contentFingerprint": "fnv1a64:b663566f5a34abc1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "choice-under-influence",
       "title": "Choice Under Influence",
@@ -2666,6 +2766,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-hidden-transaction",
     "module": "./computer-science/the-hidden-transaction.js",
     "published": "2026-07-31",
+    "contentFingerprint": "fnv1a64:458e0fb021d4b18e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-hidden-transaction",
       "title": "The Hidden Transaction",
@@ -2718,6 +2820,8 @@ export const PUZZLE_MANIFEST = [
     "id": "manufactured-pressure",
     "module": "./computer-science/manufactured-pressure.js",
     "published": "2026-07-31",
+    "contentFingerprint": "fnv1a64:4e02b8572cf01165",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "manufactured-pressure",
       "title": "Manufactured Pressure",
@@ -2770,6 +2874,8 @@ export const PUZZLE_MANIFEST = [
     "id": "control-and-exit",
     "module": "./computer-science/control-and-exit.js",
     "published": "2026-07-31",
+    "contentFingerprint": "fnv1a64:c82fb5ab5fbb2d19",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "control-and-exit",
       "title": "Control and Exit",
@@ -2825,6 +2931,8 @@ export const PUZZLE_MANIFEST = [
     "id": "after-the-click",
     "module": "./computer-science/after-the-click.js",
     "published": "2026-07-31",
+    "contentFingerprint": "fnv1a64:9dbfeb130659f0c0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "after-the-click",
       "title": "After the Click",
@@ -2883,6 +2991,8 @@ export const PUZZLE_MANIFEST = [
     "id": "when-manipulation-becomes-normal",
     "module": "./business-organizations/when-manipulation-becomes-normal.js",
     "published": "2026-07-31",
+    "contentFingerprint": "fnv1a64:6e27791cef68b142",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "when-manipulation-becomes-normal",
       "title": "When Manipulation Becomes Normal",
@@ -2941,6 +3051,8 @@ export const PUZZLE_MANIFEST = [
     "id": "restoring-honest-choice",
     "module": "./business-organizations/restoring-honest-choice.js",
     "published": "2026-08-01",
+    "contentFingerprint": "fnv1a64:f31b1e6ad79f4973",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "restoring-honest-choice",
       "title": "Restoring Honest Choice",
@@ -3009,6 +3121,8 @@ export const PUZZLE_MANIFEST = [
     "id": "when-systems-stop-seeing-people",
     "module": "./history-society/when-systems-stop-seeing-people.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:5132da2ae9d5aa6d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "when-systems-stop-seeing-people",
       "title": "When systems stop seeing people",
@@ -3077,6 +3191,8 @@ export const PUZZLE_MANIFEST = [
     "id": "distortion-and-magnification",
     "module": "./sociology/distortion-and-magnification.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:dc6e5edda0d74d12",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "distortion-and-magnification",
       "title": "Distortion and magnification",
@@ -3149,6 +3265,8 @@ export const PUZZLE_MANIFEST = [
     "id": "restorative-patterns",
     "module": "./humanities/restorative-patterns.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:a109c84a0e1989b1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "restorative-patterns",
       "title": "Restorative patterns",
@@ -3216,6 +3334,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-person-to-object",
     "module": "./humanities/from-person-to-object.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:7c250cc5938cb808",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "from-person-to-object",
       "title": "From person to object",
@@ -3291,6 +3411,8 @@ export const PUZZLE_MANIFEST = [
     "id": "when-correction-fails",
     "module": "./history-society/when-correction-fails.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:ea5ffcfca95b1105",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "when-correction-fails",
       "title": "When correction fails",
@@ -3366,6 +3488,8 @@ export const PUZZLE_MANIFEST = [
     "id": "moral-disengagement-and-moral-inversion",
     "module": "./psychology/moral-disengagement-and-moral-inversion.js",
     "published": "2026-07-30",
+    "contentFingerprint": "fnv1a64:c9fec2c5b7bcd524",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "moral-disengagement-and-moral-inversion",
       "title": "Moral disengagement and moral inversion",
@@ -3448,6 +3572,8 @@ export const PUZZLE_MANIFEST = [
     "id": "closing-the-loop",
     "module": "./engineering/closing-the-loop.js",
     "published": "2026-07-31",
+    "contentFingerprint": "fnv1a64:29424add1ba1405e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "closing-the-loop",
       "title": "Closing the Loop",
@@ -3495,6 +3621,8 @@ export const PUZZLE_MANIFEST = [
     "id": "circuit-theory-basics",
     "module": "./engineering/circuit-theory-basics.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:faec83048a721c20",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "circuit-theory-basics",
       "title": "Circuit Theory Basics",
@@ -3558,6 +3686,8 @@ export const PUZZLE_MANIFEST = [
     "id": "microcontroller-families",
     "module": "./engineering/microcontroller-families.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:5ac991970a0b562e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "microcontroller-families",
       "title": "Microcontroller Families",
@@ -3622,6 +3752,8 @@ export const PUZZLE_MANIFEST = [
     "id": "microcontroller-applications",
     "module": "./engineering/microcontroller-applications.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:1588a4c0dd52d8c1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "microcontroller-applications",
       "title": "Microcontroller Applications",
@@ -3686,6 +3818,8 @@ export const PUZZLE_MANIFEST = [
     "id": "what-public-health-does",
     "module": "./public-health/what-public-health-does.js",
     "published": "2026-08-01",
+    "contentFingerprint": "fnv1a64:b3cc81891de0ba50",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "what-public-health-does",
       "title": "What Public Health Does",
@@ -3734,6 +3868,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-evidence-to-action",
     "module": "./public-health/from-evidence-to-action.js",
     "published": "2026-08-01",
+    "contentFingerprint": "fnv1a64:838b0d4b14337a45",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "from-evidence-to-action",
       "title": "From Evidence to Action",
@@ -3801,6 +3937,8 @@ export const PUZZLE_MANIFEST = [
     "id": "what-survived-the-record",
     "module": "./media-information-literacy/what-survived-the-record.js",
     "published": "2026-08-01",
+    "contentFingerprint": "fnv1a64:d176e85d9b7e1503",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "what-survived-the-record",
       "title": "What survived the record",
@@ -3885,6 +4023,8 @@ export const PUZZLE_MANIFEST = [
     "id": "counted-and-modeled",
     "module": "./media-information-literacy/counted-and-modeled.js",
     "published": "2026-08-01",
+    "contentFingerprint": "fnv1a64:cee09ffeeba65a6b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "counted-and-modeled",
       "title": "Counted and modeled",
@@ -3962,6 +4102,8 @@ export const PUZZLE_MANIFEST = [
     "id": "before-it-crosses",
     "module": "./science/before-it-crosses.js",
     "published": "2026-08-01",
+    "contentFingerprint": "fnv1a64:891ae7e169caf3d2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "before-it-crosses",
       "title": "Before it crosses",
@@ -4046,6 +4188,8 @@ export const PUZZLE_MANIFEST = [
     "id": "building-atoms-and-ions",
     "module": "./chemistry/building-atoms-and-ions.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:bd8b05557107a7dc",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "building-atoms-and-ions",
       "title": "Building atoms and ions",
@@ -4120,6 +4264,8 @@ export const PUZZLE_MANIFEST = [
     "id": "why-atoms-bond",
     "module": "./chemistry/why-atoms-bond.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:cf73aa593cd89362",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "why-atoms-bond",
       "title": "Why atoms bond",
@@ -4198,6 +4344,8 @@ export const PUZZLE_MANIFEST = [
     "id": "reading-chemical-reactions",
     "module": "./chemistry/reading-chemical-reactions.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:6833a2f32fdd8805",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "reading-chemical-reactions",
       "title": "Reading and balancing chemical equations",
@@ -4272,6 +4420,8 @@ export const PUZZLE_MANIFEST = [
     "id": "energy-rate-and-equilibrium",
     "module": "./chemistry/energy-rate-and-equilibrium.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:7cebc93cc88c6d2a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "energy-rate-and-equilibrium",
       "title": "Energy, rate, and equilibrium",
@@ -4365,6 +4515,8 @@ export const PUZZLE_MANIFEST = [
     "id": "inside-the-cell",
     "module": "./biology/inside-the-cell.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:640ab3853e73b6fe",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "inside-the-cell",
       "title": "Inside the cell",
@@ -4453,6 +4605,8 @@ export const PUZZLE_MANIFEST = [
     "id": "cell-division-and-inheritance",
     "module": "./biology/cell-division-and-inheritance.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:d59355e4acd62da0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "cell-division-and-inheritance",
       "title": "Cell division and inheritance",
@@ -4541,6 +4695,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-populations-evolve",
     "module": "./biology/how-populations-evolve.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:045dfc0bfc473793",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-populations-evolve",
       "title": "How populations evolve",
@@ -4630,6 +4786,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-dna-to-gene-expression",
     "module": "./biology/from-dna-to-gene-expression.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:cc5ad2092d18a066",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "from-dna-to-gene-expression",
       "title": "From DNA to gene expression",
@@ -4706,6 +4864,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-reads-to-a-genome",
     "module": "./biology/from-reads-to-a-genome.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:3d7023d338e959af",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "from-reads-to-a-genome",
       "title": "From reads to a genome",
@@ -4783,6 +4943,8 @@ export const PUZZLE_MANIFEST = [
     "id": "reading-genetic-variation",
     "module": "./biology/reading-genetic-variation.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:471cfd9a9bdc70e5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "reading-genetic-variation",
       "title": "Reading genetic variation",
@@ -4869,6 +5031,8 @@ export const PUZZLE_MANIFEST = [
     "id": "when-biology-becomes-data",
     "module": "./biology/when-biology-becomes-data.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:5599f14893e67ea6",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "when-biology-becomes-data",
       "title": "When biology becomes data",
@@ -4951,6 +5115,8 @@ export const PUZZLE_MANIFEST = [
     "id": "aligning-biological-sequences",
     "module": "./computer-science/aligning-biological-sequences.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:f5e418a4fb7cecb9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "aligning-biological-sequences",
       "title": "Aligning biological sequences",
@@ -5030,6 +5196,8 @@ export const PUZZLE_MANIFEST = [
     "id": "reproducible-bioinformatics-workflows",
     "module": "./computer-science/reproducible-bioinformatics-workflows.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:160633d48c550e72",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "reproducible-bioinformatics-workflows",
       "title": "Reproducible bioinformatics workflows",
@@ -5113,6 +5281,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-a-picture-directs-the-eye",
     "module": "./art/how-a-picture-directs-the-eye.js",
     "published": "2026-08-02",
+    "contentFingerprint": "fnv1a64:a94796a8fae10988",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-a-picture-directs-the-eye",
       "title": "How a Picture Directs the Eye",
@@ -5175,6 +5345,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-work-of-color",
     "module": "./art/the-work-of-color.js",
     "published": "2026-08-02",
+    "contentFingerprint": "fnv1a64:93f28a403fed4efb",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-work-of-color",
       "title": "The Work of Color",
@@ -5245,6 +5417,8 @@ export const PUZZLE_MANIFEST = [
     "id": "why-art-changes-what-it-sees",
     "module": "./art/why-art-changes-what-it-sees.js",
     "published": "2026-08-02",
+    "contentFingerprint": "fnv1a64:bbf9e09aa56b4366",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "why-art-changes-what-it-sees",
       "title": "Why Art Changes What It Sees",
@@ -5318,6 +5492,8 @@ export const PUZZLE_MANIFEST = [
     "id": "where-meaning-comes-from",
     "module": "./art/where-meaning-comes-from.js",
     "published": "2026-08-02",
+    "contentFingerprint": "fnv1a64:1ea68152a48003ca",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "where-meaning-comes-from",
       "title": "Where Meaning Comes From",
@@ -5405,6 +5581,8 @@ export const PUZZLE_MANIFEST = [
     "id": "what-a-test-result-means",
     "module": "./public-health/what-a-test-result-means.js",
     "published": "2026-08-03",
+    "contentFingerprint": "fnv1a64:4879ee45886d098d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "what-a-test-result-means",
       "title": "What a Test Result Means",
@@ -5474,6 +5652,8 @@ export const PUZZLE_MANIFEST = [
     "id": "film-classics",
     "module": "./trivia/film-classics.js",
     "published": "2026-08-03",
+    "contentFingerprint": "fnv1a64:2b5ff290dae802ce",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "film-classics",
       "title": "Film Classics",
@@ -5513,6 +5693,8 @@ export const PUZZLE_MANIFEST = [
     "id": "television-landmarks",
     "module": "./trivia/television-landmarks.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:bec6409285e1618d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "television-landmarks",
       "title": "Television Landmarks",
@@ -5570,6 +5752,8 @@ export const PUZZLE_MANIFEST = [
     "id": "popular-music-milestones",
     "module": "./trivia/popular-music-milestones.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:153b0e7b4be006f3",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "popular-music-milestones",
       "title": "Popular Music Milestones",
@@ -5639,6 +5823,8 @@ export const PUZZLE_MANIFEST = [
     "id": "video-game-history",
     "module": "./trivia/video-game-history.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:eb2ac3bb256d9e4b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "video-game-history",
       "title": "Video Game History",
@@ -5697,6 +5883,8 @@ export const PUZZLE_MANIFEST = [
     "id": "music-theory-basics",
     "module": "./music/music-theory-basics.js",
     "published": "2026-08-04",
+    "contentFingerprint": "fnv1a64:69116fe843b3a689",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "music-theory-basics",
       "title": "Music theory basics",
@@ -5734,6 +5922,8 @@ export const PUZZLE_MANIFEST = [
     "id": "film-theory-basics",
     "module": "./film/film-theory-basics.js",
     "published": "2026-08-04",
+    "contentFingerprint": "fnv1a64:2324b670c7f9a935",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "film-theory-basics",
       "title": "Film theory basics",
@@ -5772,6 +5962,8 @@ export const PUZZLE_MANIFEST = [
     "id": "data-science-basics",
     "module": "./data-science/data-science-basics.js",
     "published": "2026-08-05",
+    "contentFingerprint": "fnv1a64:0abdfdfbeac0ebc7",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "data-science-basics",
       "title": "Data science basics",
@@ -5810,6 +6002,8 @@ export const PUZZLE_MANIFEST = [
     "id": "game-theory-basics",
     "module": "./math/game-theory-basics.js",
     "published": "2026-08-05",
+    "contentFingerprint": "fnv1a64:b52383f151cb0f89",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "game-theory-basics",
       "title": "Game theory basics",
@@ -5856,6 +6050,8 @@ export const PUZZLE_MANIFEST = [
     "id": "finite-and-infinite-games",
     "module": "./philosophy/finite-and-infinite-games.js",
     "published": "2026-08-05",
+    "contentFingerprint": "fnv1a64:645fe09d69f859e6",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "finite-and-infinite-games",
       "title": "Finite and infinite games",
@@ -5903,6 +6099,8 @@ export const PUZZLE_MANIFEST = [
     "id": "evolution-of-cooperation",
     "module": "./economics/evolution-of-cooperation.js",
     "published": "2026-08-05",
+    "contentFingerprint": "fnv1a64:8922b5ba9dbac563",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "evolution-of-cooperation",
       "title": "The evolution of cooperation",
@@ -5950,6 +6148,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-couples-get-stuck",
     "module": "./psychology/how-couples-get-stuck.js",
     "published": "2026-08-06",
+    "contentFingerprint": "fnv1a64:51134f6c9865275f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-couples-get-stuck",
       "title": "How couples get stuck",
@@ -6009,6 +6209,8 @@ export const PUZZLE_MANIFEST = [
     "id": "governing-the-commons",
     "module": "./economics/governing-the-commons.js",
     "published": "2026-08-06",
+    "contentFingerprint": "fnv1a64:bc4d203b52e361a0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "governing-the-commons",
       "title": "Governing the commons",
@@ -6066,6 +6268,8 @@ export const PUZZLE_MANIFEST = [
     "id": "ways-out-of-a-conflict",
     "module": "./psychology/ways-out-of-a-conflict.js",
     "published": "2026-08-06",
+    "contentFingerprint": "fnv1a64:5d11a16b9130da38",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "ways-out-of-a-conflict",
       "title": "Ways out of a conflict",
@@ -6136,6 +6340,8 @@ export const PUZZLE_MANIFEST = [
     "id": "classical-narrative-architecture",
     "module": "./literary-theory-poetics/classical-narrative-architecture.js",
     "published": "2026-08-07",
+    "contentFingerprint": "fnv1a64:a8197214aee64ec6",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "classical-narrative-architecture",
       "title": "Classical narrative architecture",
@@ -6189,6 +6395,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-birth-of-the-drive",
     "module": "./psychology/the-birth-of-the-drive.js",
     "published": "2026-08-07",
+    "contentFingerprint": "fnv1a64:de261a0f12ad7d58",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-birth-of-the-drive",
       "title": "The Birth of the Drive",
@@ -6248,6 +6456,8 @@ export const PUZZLE_MANIFEST = [
     "id": "confronting-the-shadow",
     "module": "./psychology/confronting-the-shadow.js",
     "published": "2026-08-07",
+    "contentFingerprint": "fnv1a64:25bd3a8ad0a83403",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "confronting-the-shadow",
       "title": "Confronting the Shadow",
@@ -6307,6 +6517,8 @@ export const PUZZLE_MANIFEST = [
     "id": "models-of-the-divided-mind",
     "module": "./psychology/models-of-the-divided-mind.js",
     "published": "2026-08-07",
+    "contentFingerprint": "fnv1a64:d94d8715d9a6e19c",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "models-of-the-divided-mind",
       "title": "Models of the Divided Mind",
@@ -6378,6 +6590,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-manufactured-desire",
     "module": "./philosophy/the-manufactured-desire.js",
     "published": "2026-08-07",
+    "contentFingerprint": "fnv1a64:96931220ca38eeb7",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-manufactured-desire",
       "title": "The Manufactured Desire",
@@ -6436,6 +6650,8 @@ export const PUZZLE_MANIFEST = [
     "id": "solidarity-in-brokenness",
     "module": "./philosophy/solidarity-in-brokenness.js",
     "published": "2026-08-07",
+    "contentFingerprint": "fnv1a64:60fad47f21bb51b2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "solidarity-in-brokenness",
       "title": "Solidarity in Brokenness",
@@ -6501,6 +6717,8 @@ export const PUZZLE_MANIFEST = [
     "id": "exit-voice-and-loyalty",
     "module": "./economics/exit-voice-and-loyalty.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:3c1ae240651a4e16",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "exit-voice-and-loyalty",
       "title": "Exit, voice, and loyalty",
@@ -6557,6 +6775,8 @@ export const PUZZLE_MANIFEST = [
     "id": "why-leaving-isnt-free",
     "module": "./economics/why-leaving-isnt-free.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:4e14f76df0bd2e10",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "why-leaving-isnt-free",
       "title": "Why leaving isn't free",
@@ -6612,6 +6832,8 @@ export const PUZZLE_MANIFEST = [
     "id": "what-gets-said-in-the-open",
     "module": "./sociology/what-gets-said-in-the-open.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:bb15bfaa897fa82e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "what-gets-said-in-the-open",
       "title": "What gets said in the open",
@@ -6666,6 +6888,8 @@ export const PUZZLE_MANIFEST = [
     "id": "what-gets-said-offstage",
     "module": "./sociology/what-gets-said-offstage.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:f4cc2cfda9f6e7ca",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "what-gets-said-offstage",
       "title": "What gets said offstage",
@@ -6726,6 +6950,8 @@ export const PUZZLE_MANIFEST = [
     "id": "designed-not-to-choose",
     "module": "./psychology/designed-not-to-choose.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:cc519fade2e88aa2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "designed-not-to-choose",
       "title": "Designed not to choose",
@@ -6778,6 +7004,8 @@ export const PUZZLE_MANIFEST = [
     "id": "sound-design-in-film",
     "module": "./film/sound-design-in-film.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:a6899d05af9d426d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "sound-design-in-film",
       "title": "Sound design in film",
@@ -6839,6 +7067,8 @@ export const PUZZLE_MANIFEST = [
     "id": "film-movements",
     "module": "./film/film-movements.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:8af031e035e34e61",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "film-movements",
       "title": "Film movements: Expressionism, Neorealism, New Wave",
@@ -6893,6 +7123,8 @@ export const PUZZLE_MANIFEST = [
     "id": "genre-and-spectatorship",
     "module": "./film/genre-and-spectatorship.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:7272161191682f93",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "genre-and-spectatorship",
       "title": "Genre and spectatorship",
@@ -6954,6 +7186,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-groups-other-task",
     "module": "./business-organizations/the-groups-other-task.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:5969ba03a205521b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-groups-other-task",
       "title": "The Group's Other Task",
@@ -7017,6 +7251,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-uses-of-hierarchy",
     "module": "./business-organizations/the-uses-of-hierarchy.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:ff4a5bd1534184f7",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-uses-of-hierarchy",
       "title": "The Uses of Hierarchy",
@@ -7089,6 +7325,8 @@ export const PUZZLE_MANIFEST = [
     "id": "when-the-structure-stops-holding",
     "module": "./business-organizations/when-the-structure-stops-holding.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:746aa7fe2f82dbab",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "when-the-structure-stops-holding",
       "title": "When the Structure Stops Holding",
@@ -7146,6 +7384,8 @@ export const PUZZLE_MANIFEST = [
     "id": "taking-off-the-engineering-hat",
     "module": "./business-organizations/taking-off-the-engineering-hat.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:e59a7cac4cc10ee9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "taking-off-the-engineering-hat",
       "title": "Taking Off the Engineering Hat",
@@ -7225,6 +7465,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-leader-written-large",
     "module": "./business-organizations/the-leader-written-large.js",
     "published": "2026-08-08",
+    "contentFingerprint": "fnv1a64:aa8ad13dea86b890",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-leader-written-large",
       "title": "The Leader Written Large",
@@ -7287,6 +7529,8 @@ export const PUZZLE_MANIFEST = [
     "id": "diatonic-modes",
     "module": "./music/diatonic-modes.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:6593aafb073ac724",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "diatonic-modes",
       "title": "Diatonic modes",
@@ -7328,6 +7572,8 @@ export const PUZZLE_MANIFEST = [
     "id": "power-authority-and-the-state",
     "module": "./political-science/power-authority-and-the-state.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:a1409fac4427a36d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "power-authority-and-the-state",
       "title": "Power, Authority, and the State",
@@ -7371,6 +7617,8 @@ export const PUZZLE_MANIFEST = [
     "id": "separation-of-powers-and-federalism",
     "module": "./political-science/separation-of-powers-and-federalism.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:86f450b2227826d4",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "separation-of-powers-and-federalism",
       "title": "Separation of Powers and Federalism",
@@ -7408,6 +7656,8 @@ export const PUZZLE_MANIFEST = [
     "id": "power-over-power-to",
     "module": "./political-science/power-over-power-to.js",
     "published": "2026-08-09",
+    "contentFingerprint": "fnv1a64:c683b95a8d3744df",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "power-over-power-to",
       "title": "Power Over, Power To",
@@ -7475,6 +7725,8 @@ export const PUZZLE_MANIFEST = [
     "id": "when-attention-isnt-a-choice",
     "module": "./psychology/when-attention-isnt-a-choice.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:b7c5101ab22f8565",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "when-attention-isnt-a-choice",
       "title": "When Attention Isn't a Choice",
@@ -7539,6 +7791,8 @@ export const PUZZLE_MANIFEST = [
     "id": "flow-and-the-autotelic-self",
     "module": "./psychology/flow-and-the-autotelic-self.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:a6c17d785c631a4d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "flow-and-the-autotelic-self",
       "title": "Flow and the Autotelic Self",
@@ -7588,6 +7842,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-evolutionary-uses-of-play",
     "module": "./anthropology/the-evolutionary-uses-of-play.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:9cc34307f6edfea4",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-evolutionary-uses-of-play",
       "title": "The Evolutionary Uses of Play",
@@ -7618,6 +7874,8 @@ export const PUZZLE_MANIFEST = [
     "id": "true-self-false-self",
     "module": "./psychology/true-self-false-self.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:3d0a67ec7ff972c8",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "true-self-false-self",
       "title": "True Self, False Self",
@@ -7682,6 +7940,8 @@ export const PUZZLE_MANIFEST = [
     "id": "freedom-from-freedom-to",
     "module": "./political-science/freedom-from-freedom-to.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:c96f330bb78c9b2f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "freedom-from-freedom-to",
       "title": "Freedom From, Freedom To",
@@ -7733,6 +7993,8 @@ export const PUZZLE_MANIFEST = [
     "id": "dose-of-reality",
     "module": "./trivia/dose-of-reality.js",
     "published": "2026-08-10",
+    "contentFingerprint": "fnv1a64:088cf20209018f97",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "dose-of-reality",
       "title": "Dose of Reality",
@@ -7771,6 +8033,8 @@ export const PUZZLE_MANIFEST = [
     "id": "power-and-violence",
     "module": "./political-science/power-and-violence.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:d88b3c5fcf2d3fb1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "power-and-violence",
       "title": "Power and Violence",
@@ -7824,6 +8088,8 @@ export const PUZZLE_MANIFEST = [
     "id": "hegemony-and-consent",
     "module": "./political-science/hegemony-and-consent.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:32127864895878b2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "hegemony-and-consent",
       "title": "Hegemony and Consent",
@@ -7866,6 +8132,8 @@ export const PUZZLE_MANIFEST = [
     "id": "three-faces-of-power",
     "module": "./political-science/three-faces-of-power.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:42b2de1956dc1724",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "three-faces-of-power",
       "title": "Three Faces of Power",
@@ -7921,6 +8189,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-scaffold-and-the-timetable",
     "module": "./political-science/the-scaffold-and-the-timetable.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:bf5ae5d006f3b1d1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-scaffold-and-the-timetable",
       "title": "The Scaffold and the Timetable",
@@ -7967,6 +8237,8 @@ export const PUZZLE_MANIFEST = [
     "id": "power-without-a-center",
     "module": "./political-science/power-without-a-center.js",
     "published": "2026-08-11",
+    "contentFingerprint": "fnv1a64:517bd43cc1877cf9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "power-without-a-center",
       "title": "Power Without a Center",
@@ -8013,6 +8285,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-quiet-rebellion",
     "module": "./political-science/the-quiet-rebellion.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:f90b6868c210429d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-quiet-rebellion",
       "title": "The Quiet Rebellion",
@@ -8082,6 +8356,8 @@ export const PUZZLE_MANIFEST = [
     "id": "higher-law",
     "module": "./political-science/higher-law.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:52bfe11853997755",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "higher-law",
       "title": "Higher Law",
@@ -8125,6 +8401,8 @@ export const PUZZLE_MANIFEST = [
     "id": "two-imprisonments",
     "module": "./political-science/two-imprisonments.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:d1ed0b2fd4adf98c",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "two-imprisonments",
       "title": "Two Imprisonments",
@@ -8168,6 +8446,8 @@ export const PUZZLE_MANIFEST = [
     "id": "out-of-the-spotlight",
     "module": "./political-science/out-of-the-spotlight.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:18364fbcdfd4d0a3",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "out-of-the-spotlight",
       "title": "Out of the Spotlight",
@@ -8212,6 +8492,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-reconversion",
     "module": "./political-science/the-reconversion.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:bffa3245ff320db5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-reconversion",
       "title": "The Reconversion",
@@ -8263,6 +8545,8 @@ export const PUZZLE_MANIFEST = [
     "id": "a-radical-revolution-of-values",
     "module": "./political-science/a-radical-revolution-of-values.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:66dc094776d4e65b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "a-radical-revolution-of-values",
       "title": "A Radical Revolution of Values",
@@ -8306,6 +8590,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-military-industrial-complex",
     "module": "./political-science/the-military-industrial-complex.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:3724e314179e8458",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-military-industrial-complex",
       "title": "The Military-Industrial Complex",
@@ -8374,6 +8660,8 @@ export const PUZZLE_MANIFEST = [
     "id": "achilles-in-vietnam",
     "module": "./psychology/achilles-in-vietnam.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:a310df1730bbefc0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "achilles-in-vietnam",
       "title": "Achilles in Vietnam",
@@ -8449,6 +8737,8 @@ export const PUZZLE_MANIFEST = [
     "id": "on-killing",
     "module": "./psychology/on-killing.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:463c3ebb353754ec",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "on-killing",
       "title": "On Killing",
@@ -8524,6 +8814,8 @@ export const PUZZLE_MANIFEST = [
     "id": "war-is-a-force-that-gives-us-meaning",
     "module": "./history-society/war-is-a-force-that-gives-us-meaning.js",
     "published": "2026-08-12",
+    "contentFingerprint": "fnv1a64:0278edb66f463a9b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "war-is-a-force-that-gives-us-meaning",
       "title": "War Is a Force That Gives Us Meaning",
@@ -8596,6 +8888,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-literature-of-refusal",
     "module": "./history-society/the-literature-of-refusal.js",
     "published": "2026-08-13",
+    "contentFingerprint": "fnv1a64:34428f9fd18ca3db",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-literature-of-refusal",
       "title": "The Literature of Refusal",
@@ -8639,6 +8933,8 @@ export const PUZZLE_MANIFEST = [
     "id": "excusable-not-justifiable",
     "module": "./political-science/excusable-not-justifiable.js",
     "published": "2026-08-13",
+    "contentFingerprint": "fnv1a64:9c01a222fb4f3f2a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "excusable-not-justifiable",
       "title": "Excusable, Not Justifiable",
@@ -8712,6 +9008,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-hobbesian-imperative",
     "module": "./political-science/the-hobbesian-imperative.js",
     "published": "2026-08-14",
+    "contentFingerprint": "fnv1a64:24451bbd7b2dba3a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-hobbesian-imperative",
       "title": "The Hobbesian Imperative",
@@ -8776,6 +9074,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-civilizing-mission",
     "module": "./political-science/the-civilizing-mission.js",
     "published": "2026-08-15",
+    "contentFingerprint": "fnv1a64:03cc86e342169686",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-civilizing-mission",
       "title": "The Civilizing Mission",
@@ -8848,6 +9148,8 @@ export const PUZZLE_MANIFEST = [
     "id": "manufacturing-consent",
     "module": "./media-information-literacy/manufacturing-consent.js",
     "published": "2026-08-15",
+    "contentFingerprint": "fnv1a64:a8325bac70bbe224",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "manufacturing-consent",
       "title": "Manufacturing Consent",
@@ -8911,6 +9213,8 @@ export const PUZZLE_MANIFEST = [
     "id": "erosion-of-the-floor",
     "module": "./political-science/erosion-of-the-floor.js",
     "published": "2026-08-16",
+    "contentFingerprint": "fnv1a64:044761cee5944084",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "erosion-of-the-floor",
       "title": "Erosion of the Floor",
@@ -8959,6 +9263,8 @@ export const PUZZLE_MANIFEST = [
     "id": "human-out-of-the-loop",
     "module": "./political-science/human-out-of-the-loop.js",
     "published": "2026-08-15",
+    "contentFingerprint": "fnv1a64:7055bfa4ccf2dc05",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "human-out-of-the-loop",
       "title": "Human Out of the Loop",
@@ -8996,6 +9302,8 @@ export const PUZZLE_MANIFEST = [
     "id": "witness-without-a-sword",
     "module": "./political-science/witness-without-a-sword.js",
     "published": "2026-08-16",
+    "contentFingerprint": "fnv1a64:4119bce74bd65a2e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "witness-without-a-sword",
       "title": "The Power to Name",
@@ -9043,6 +9351,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-to-sell-a-genocide",
     "module": "./media-information-literacy/how-to-sell-a-genocide.js",
     "published": "2026-08-17",
+    "contentFingerprint": "fnv1a64:fb2e16266a88e580",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-to-sell-a-genocide",
       "title": "How to Sell a Genocide",
@@ -9124,6 +9434,8 @@ export const PUZZLE_MANIFEST = [
     "id": "getting-inside-the-room",
     "module": "./political-science/getting-inside-the-room.js",
     "published": "2026-08-16",
+    "contentFingerprint": "fnv1a64:8100dc9fa2bae75a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "getting-inside-the-room",
       "title": "Getting Inside the Room",
@@ -9203,6 +9515,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-long-game",
     "module": "./political-science/the-long-game.js",
     "published": "2026-08-17",
+    "contentFingerprint": "fnv1a64:da75a18e8d5c1f9a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-long-game",
       "title": "The Long Game",
@@ -9274,6 +9588,8 @@ export const PUZZLE_MANIFEST = [
     "id": "asymmetric-remote-warfare",
     "module": "./political-science/asymmetric-remote-warfare.js",
     "published": "2026-08-18",
+    "contentFingerprint": "fnv1a64:faf35ab5f6d955bb",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "asymmetric-remote-warfare",
       "title": "Asymmetric & Remote Warfare",
@@ -9361,6 +9677,8 @@ export const PUZZLE_MANIFEST = [
     "id": "golden-shields",
     "module": "./political-science/golden-shields.js",
     "published": "2026-08-18",
+    "contentFingerprint": "fnv1a64:72f9070a023c31e0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "golden-shields",
       "title": "Golden Shields",
@@ -9408,6 +9726,8 @@ export const PUZZLE_MANIFEST = [
     "id": "as-soon-as-made-ready",
     "module": "./political-science/as-soon-as-made-ready.js",
     "published": "2026-08-18",
+    "contentFingerprint": "fnv1a64:7d88c522a14b13ea",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "as-soon-as-made-ready",
       "title": "As Soon As Made Ready",
@@ -9454,6 +9774,8 @@ export const PUZZLE_MANIFEST = [
     "id": "beyond-the-mandate",
     "module": "./political-science/beyond-the-mandate.js",
     "published": "2026-08-18",
+    "contentFingerprint": "fnv1a64:e6c875b67e4b7cab",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "beyond-the-mandate",
       "title": "Beyond the Mandate",
@@ -9512,6 +9834,8 @@ export const PUZZLE_MANIFEST = [
     "id": "safe-legal-ethical-effective",
     "module": "./political-science/safe-legal-ethical-effective.js",
     "published": "2026-08-18",
+    "contentFingerprint": "fnv1a64:b999944892404de2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "safe-legal-ethical-effective",
       "title": "Safe, Legal, Ethical, Effective",
@@ -9575,6 +9899,8 @@ export const PUZZLE_MANIFEST = [
     "id": "acids-bases-and-ph",
     "module": "./chemistry/acids-bases-and-ph.js",
     "published": "2026-08-20",
+    "contentFingerprint": "fnv1a64:bf6da1a45f90cb34",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "acids-bases-and-ph",
       "title": "Acids, bases, and pH",
@@ -9647,6 +9973,8 @@ export const PUZZLE_MANIFEST = [
     "id": "operational-amplifiers",
     "module": "./engineering/operational-amplifiers.js",
     "published": "2026-08-20",
+    "contentFingerprint": "fnv1a64:37f323bd5e637af1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "operational-amplifiers",
       "title": "Operational Amplifiers",
@@ -9762,6 +10090,8 @@ export const PUZZLE_MANIFEST = [
     "id": "reciprocity-and-kinship-distance",
     "module": "./anthropology/reciprocity-and-kinship-distance.js",
     "published": "2026-08-20",
+    "contentFingerprint": "fnv1a64:6b274b376cb173b2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "reciprocity-and-kinship-distance",
       "title": "Reciprocity and Kinship Distance",
@@ -9820,6 +10150,8 @@ export const PUZZLE_MANIFEST = [
     "id": "rhetorical-appeals",
     "module": "./language-arts/rhetorical-appeals.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:46dce648822f38c2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "rhetorical-appeals",
       "title": "Rhetorical appeals",
@@ -9868,6 +10200,8 @@ export const PUZZLE_MANIFEST = [
     "id": "continuity-editing",
     "module": "./film/continuity-editing.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:6c78e8c065904a0c",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "continuity-editing",
       "title": "Continuity editing",
@@ -9946,6 +10280,8 @@ export const PUZZLE_MANIFEST = [
     "id": "meter-grouping-and-division",
     "module": "./music/meter-grouping-and-division.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:30abe7a8dda22b5a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "meter-grouping-and-division",
       "title": "Meter: grouping and division",
@@ -9989,6 +10325,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-light-makes-form",
     "module": "./art/how-light-makes-form.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:05eb27530bcc2483",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-light-makes-form",
       "title": "How Light Makes Form",
@@ -10078,6 +10416,8 @@ export const PUZZLE_MANIFEST = [
     "id": "story-and-discourse",
     "module": "./literary-theory-poetics/story-and-discourse.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:1e7f90812bb1a176",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "story-and-discourse",
       "title": "Story and discourse",
@@ -10151,6 +10491,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-the-kidney-forms-urine",
     "module": "./physiology-medicine/how-the-kidney-forms-urine.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:c50733ca9bf4d9f2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-the-kidney-forms-urine",
       "title": "How the kidney forms urine",
@@ -10244,6 +10586,8 @@ export const PUZZLE_MANIFEST = [
     "id": "plate-boundary-landforms",
     "module": "./science/plate-boundary-landforms.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:4a0a4a77210cb09c",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "plate-boundary-landforms",
       "title": "Where Plates Meet",
@@ -10297,6 +10641,8 @@ export const PUZZLE_MANIFEST = [
     "id": "what-the-camera-knows",
     "module": "./film/what-the-camera-knows.js",
     "published": "2026-08-22",
+    "contentFingerprint": "fnv1a64:4c7f01cf36aaef42",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "what-the-camera-knows",
       "title": "What the camera knows",
@@ -10335,6 +10681,8 @@ export const PUZZLE_MANIFEST = [
     "id": "intermolecular-forces-and-properties",
     "module": "./chemistry/intermolecular-forces-and-properties.js",
     "published": "2026-08-22",
+    "contentFingerprint": "fnv1a64:b00f5e6d743407d9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "intermolecular-forces-and-properties",
       "title": "Intermolecular forces and physical properties",
@@ -10417,6 +10765,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-grammar-of-genocide",
     "module": "./political-science/the-grammar-of-genocide.js",
     "published": "2026-08-19",
+    "contentFingerprint": "fnv1a64:bb218decaac8f36e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-grammar-of-genocide",
       "title": "The Grammar of Genocide",
@@ -10519,6 +10869,8 @@ export const PUZZLE_MANIFEST = [
     "id": "deterrence-by-presence",
     "module": "./political-science/deterrence-by-presence.js",
     "published": "2026-08-19",
+    "contentFingerprint": "fnv1a64:10f8888a92ff91ae",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "deterrence-by-presence",
       "title": "Deterrence by Presence",
@@ -10611,6 +10963,8 @@ export const PUZZLE_MANIFEST = [
     "id": "theories-of-the-sublime",
     "module": "./literary-theory-poetics/theories-of-the-sublime.js",
     "published": "2026-08-22",
+    "contentFingerprint": "fnv1a64:b3386bff77d29ac1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "theories-of-the-sublime",
       "title": "Theories of the sublime",
@@ -10693,6 +11047,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-art-represents-space",
     "module": "./art/how-art-represents-space.js",
     "published": "2026-08-25",
+    "contentFingerprint": "fnv1a64:c8072dbc11d4ba2e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "how-art-represents-space",
       "title": "How Art Represents Space",
@@ -10743,6 +11099,8 @@ export const PUZZLE_MANIFEST = [
     "id": "rites-of-passage",
     "module": "./anthropology/rites-of-passage.js",
     "published": "2026-08-21",
+    "contentFingerprint": "fnv1a64:2c5623f3f0c303d7",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "rites-of-passage",
       "title": "Rites of Passage",
@@ -10813,6 +11171,8 @@ export const PUZZLE_MANIFEST = [
     "id": "matter-waves-and-quantum-outcomes",
     "module": "./physics/matter-waves-and-quantum-outcomes.js",
     "published": "2026-08-27",
+    "contentFingerprint": "fnv1a64:afb8c88c9822e835",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "matter-waves-and-quantum-outcomes",
       "title": "Matter waves and quantum outcomes",
@@ -10889,6 +11249,8 @@ export const PUZZLE_MANIFEST = [
     "id": "light-wave-and-particle-evidence",
     "module": "./physics/light-wave-and-particle-evidence.js",
     "published": "2026-08-27",
+    "contentFingerprint": "fnv1a64:6cb7d7cd8c08c147",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "light-wave-and-particle-evidence",
       "title": "Light: wave and particle evidence",
@@ -10965,6 +11327,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-features-to-metabolic-meaning",
     "module": "./biology/from-features-to-metabolic-meaning.js",
     "published": "2026-08-28",
+    "contentFingerprint": "fnv1a64:a88b67a6b24db3cd",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "from-features-to-metabolic-meaning",
       "title": "From Features to Metabolic Meaning",
@@ -11055,6 +11419,8 @@ export const PUZZLE_MANIFEST = [
     "id": "measuring-the-metabolome",
     "module": "./biology/measuring-the-metabolome.js",
     "published": "2026-08-28",
+    "contentFingerprint": "fnv1a64:984a47d5e1ca7d31",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "measuring-the-metabolome",
       "title": "Measuring the Metabolome",
@@ -11153,6 +11519,8 @@ export const PUZZLE_MANIFEST = [
     "id": "proteomics-from-peptides-to-proteoforms",
     "module": "./biology/proteomics-from-peptides-to-proteoforms.js",
     "published": "2026-08-28",
+    "contentFingerprint": "fnv1a64:9e13a98fab17acf0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "proteomics-from-peptides-to-proteoforms",
       "title": "Proteomics: From Peptides to Proteoforms",
@@ -11243,6 +11611,8 @@ export const PUZZLE_MANIFEST = [
     "id": "epigenomics",
     "module": "./biology/epigenomics.js",
     "published": "2026-08-28",
+    "contentFingerprint": "fnv1a64:0a37199eeda45f24",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "epigenomics",
       "title": "The Epigenome",
@@ -11314,6 +11684,8 @@ export const PUZZLE_MANIFEST = [
     "id": "consonance",
     "module": "./music/consonance.js",
     "published": "2026-08-28",
+    "contentFingerprint": "fnv1a64:27d7f1f3db457be1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "consonance",
       "title": "Consonance",
@@ -11377,6 +11749,8 @@ export const PUZZLE_MANIFEST = [
     "id": "dissonance-and-its-treatment",
     "module": "./music/dissonance-and-its-treatment.js",
     "published": "2026-08-28",
+    "contentFingerprint": "fnv1a64:3e489fe7cd2b315d",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "dissonance-and-its-treatment",
       "title": "Dissonance and its treatment",
@@ -11476,6 +11850,8 @@ export const PUZZLE_MANIFEST = [
     "id": "accretive-health-scandal",
     "module": "./bioethics/accretive-health-scandal.js",
     "published": "2026-08-29",
+    "contentFingerprint": "fnv1a64:7366b4cccdcdbe29",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "accretive-health-scandal",
       "title": "The Accretive Health Scandal",
@@ -11617,6 +11993,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-manufacture-of-compliance",
     "module": "./psychology/the-manufacture-of-compliance.js",
     "published": "2026-09-04",
+    "contentFingerprint": "fnv1a64:a29dc97dd07423b0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-manufacture-of-compliance",
       "title": "The Manufacture of Compliance",
@@ -11685,6 +12063,8 @@ export const PUZZLE_MANIFEST = [
     "id": "architecture-carving-enclosure",
     "module": "./architecture/architecture-carving-enclosure.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:2e192e2631212bde",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "architecture-carving-enclosure",
       "title": "Carving and Enclosing: Mass, Void, and Threshold",
@@ -11745,6 +12125,8 @@ export const PUZZLE_MANIFEST = [
     "id": "architecture-moving-through-light",
     "module": "./architecture/architecture-moving-through-light.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:19e238ebfdcff080",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "architecture-moving-through-light",
       "title": "Moving Through Light: Path and Proportion",
@@ -11804,6 +12186,8 @@ export const PUZZLE_MANIFEST = [
     "id": "gandhis-truth",
     "module": "./political-science/gandhis-truth.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:34afce61847ed909",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "gandhis-truth",
       "title": "Gandhi's Truth",
@@ -11870,6 +12254,8 @@ export const PUZZLE_MANIFEST = [
     "id": "legible-early",
     "module": "./political-science/legible-early.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:abeb75d8c8024edf",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "legible-early",
       "title": "Legible Early",
@@ -11923,6 +12309,8 @@ export const PUZZLE_MANIFEST = [
     "id": "lymphatic-system",
     "module": "./physiology-medicine/lymphatic-system.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:36da106012af78ad",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "lymphatic-system",
       "title": "The Lymphatic System: Drainage, Surveillance, and Return",
@@ -11981,6 +12369,8 @@ export const PUZZLE_MANIFEST = [
     "id": "malignant-aggression",
     "module": "./political-science/malignant-aggression.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:5fda6a697d67a4c5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "malignant-aggression",
       "title": "Malignant Aggression",
@@ -12062,6 +12452,8 @@ export const PUZZLE_MANIFEST = [
     "id": "muscular-system",
     "module": "./physiology-medicine/muscular-system.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:971b88234f91a371",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "muscular-system",
       "title": "The muscular system",
@@ -12140,6 +12532,8 @@ export const PUZZLE_MANIFEST = [
     "id": "oath-betrayed",
     "module": "./bioethics/oath-betrayed.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:b0fd9e6355f8df53",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "oath-betrayed",
       "title": "Oath Betrayed",
@@ -12219,6 +12613,8 @@ export const PUZZLE_MANIFEST = [
     "id": "reproductive-hormones",
     "module": "./physiology-medicine/reproductive-hormones.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:6d17bf784a5b29cb",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "reproductive-hormones",
       "title": "Reproductive hormones",
@@ -12298,6 +12694,8 @@ export const PUZZLE_MANIFEST = [
     "id": "sense-and-reference",
     "module": "./linguistics/sense-and-reference.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:9f1f7d8d82b1dac5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "sense-and-reference",
       "title": "Sense and Reference",
@@ -12354,6 +12752,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-capacity-to-harm",
     "module": "./psychology/the-capacity-to-harm.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:d42b7e60de325fb8",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-capacity-to-harm",
       "title": "The Capacity to Harm",
@@ -12477,6 +12877,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-nazi-doctors",
     "module": "./psychology/the-nazi-doctors.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:95998e61230ae12e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-nazi-doctors",
       "title": "The Nazi Doctors",
@@ -12547,6 +12949,8 @@ export const PUZZLE_MANIFEST = [
     "id": "the-poem-of-force",
     "module": "./philosophy/the-poem-of-force.js",
     "published": "2026-09-08",
+    "contentFingerprint": "fnv1a64:24b9997d1156e7fa",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "the-poem-of-force",
       "title": "The Poem of Force",
@@ -12627,6 +13031,8 @@ export const PUZZLE_MANIFEST = [
     "id": "religion-ethical-foundations",
     "module": "./anthropology/religion-ethical-foundations.js",
     "published": "2026-09-11",
+    "contentFingerprint": "fnv1a64:eaffcb1cb2d36d0a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "religion-ethical-foundations",
       "title": "What Traditions Demand: The Shared Ethics of the World's Religions",
@@ -12681,6 +13087,8 @@ export const PUZZLE_MANIFEST = [
     "id": "religion-ritual-practice",
     "module": "./religion/religion-ritual-practice.js",
     "published": "2026-09-11",
+    "contentFingerprint": "fnv1a64:14f8882df8c8b41c",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "religion-ritual-practice",
       "title": "What Bodies Do With Belief: Passage, Time, Practice, and Place",
@@ -12753,6 +13161,8 @@ export const PUZZLE_MANIFEST = [
     "id": "thermodynamics",
     "module": "./physics/thermodynamics.js",
     "published": "2026-09-11",
+    "contentFingerprint": "fnv1a64:9dd203f2c748d888",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "thermodynamics",
       "title": "Thermodynamics: energy, limits, and engines",
@@ -12823,6 +13233,8 @@ export const PUZZLE_MANIFEST = [
     "id": "tropical-cyclone-machine",
     "module": "./atmospheric-science/tropical-cyclone-machine.js",
     "published": "2026-09-11",
+    "contentFingerprint": "fnv1a64:72ea96e508f77804",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "tropical-cyclone-machine",
       "title": "The Tropical Cyclone Machine",
@@ -12894,6 +13306,8 @@ export const PUZZLE_MANIFEST = [
     "id": "tropical-cyclone-threat",
     "module": "./atmospheric-science/tropical-cyclone-threat.js",
     "published": "2026-09-11",
+    "contentFingerprint": "fnv1a64:018007b17df0cd86",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "tropical-cyclone-threat",
       "title": "Tracking the Threat",
@@ -12956,6 +13370,8 @@ export const PUZZLE_MANIFEST = [
     "id": "tornadoes",
     "module": "./anthropology/tornadoes.js",
     "published": "2026-09-11",
+    "contentFingerprint": "fnv1a64:878ddf81a690088f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "tornadoes",
       "title": "Anatomy of a Tornado",
@@ -13023,6 +13439,8 @@ export const PUZZLE_MANIFEST = [
     "id": "earthquakes-cause",
     "module": "./geology/earthquakes-cause.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:48e94a341dcf51aa",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "earthquakes-cause",
       "title": "Earthquakes I: Why the Ground Breaks",
@@ -13107,6 +13525,8 @@ export const PUZZLE_MANIFEST = [
     "id": "earthquakes-shaking",
     "module": "./geology/earthquakes-shaking.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:0ea307a7b0404675",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "earthquakes-shaking",
       "title": "Earthquakes II: From Waves to Damage",
@@ -13190,6 +13610,8 @@ export const PUZZLE_MANIFEST = [
     "id": "groundwater",
     "module": "./geography/groundwater.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:6573c4e553ea0f31",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "groundwater",
       "title": "Groundwater: The Hidden Reservoir",
@@ -13261,6 +13683,8 @@ export const PUZZLE_MANIFEST = [
     "id": "groundwater-journey",
     "module": "./geography/groundwater-journey.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:b2b9e3bbd8e67f3b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "groundwater-journey",
       "title": "Groundwater: The Hidden Journey",
@@ -13318,6 +13742,8 @@ export const PUZZLE_MANIFEST = [
     "id": "hydrology-human-water",
     "module": "./geography/hydrology-human-water.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:b29fe44fe01060ed",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "hydrology-human-water",
       "title": "Human Water: measuring, fearing, managing",
@@ -13405,6 +13831,8 @@ export const PUZZLE_MANIFEST = [
     "id": "hydrology-land-and-groundwater",
     "module": "./geography/hydrology-land-and-groundwater.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:aa5f6b6ac048e3d1",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "hydrology-land-and-groundwater",
       "title": "Catchments & Groundwater: how land holds and routes water",
@@ -13466,6 +13894,8 @@ export const PUZZLE_MANIFEST = [
     "id": "hydrology-water-cycle",
     "module": "./geography/hydrology-water-cycle.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:31b897b3731ef848",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "hydrology-water-cycle",
       "title": "The Water Cycle: pools and fluxes",
@@ -13532,6 +13962,8 @@ export const PUZZLE_MANIFEST = [
     "id": "mountains-life-of-a-range",
     "module": "./geology/mountains-life-of-a-range.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:6779138daeca868a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "mountains-life-of-a-range",
       "title": "The Life of a Mountain Range",
@@ -13607,6 +14039,8 @@ export const PUZZLE_MANIFEST = [
     "id": "mountains-reading-the-range",
     "module": "./geology/mountains-reading-the-range.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:f11a15df6d120b9f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "mountains-reading-the-range",
       "title": "Reading a Range: Types and Structures",
@@ -13664,6 +14098,8 @@ export const PUZZLE_MANIFEST = [
     "id": "rocks-formation-cycle",
     "module": "./geology/rocks-formation-cycle.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:b086726e19cda1d5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "rocks-formation-cycle",
       "title": "Rocks: How They Form and Change",
@@ -13736,6 +14172,8 @@ export const PUZZLE_MANIFEST = [
     "id": "rocks-reading-evidence",
     "module": "./geology/rocks-reading-evidence.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:272b69dfe22e50de",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "rocks-reading-evidence",
       "title": "Reading a Rock: Composition, Texture, Minerals",
@@ -13803,6 +14241,8 @@ export const PUZZLE_MANIFEST = [
     "id": "russian-literature-argument",
     "module": "./literary-history/russian-literature-argument.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:0be75e2914006b40",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "russian-literature-argument",
       "title": "The Argument and the End of the Century",
@@ -13888,6 +14328,8 @@ export const PUZZLE_MANIFEST = [
     "id": "russian-literature-invention",
     "module": "./literary-history/russian-literature-invention.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:4790957ba148787f",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "russian-literature-invention",
       "title": "The Invention of Russian Literature",
@@ -13963,6 +14405,8 @@ export const PUZZLE_MANIFEST = [
     "id": "typography",
     "module": "./art/typography.js",
     "published": "2026-09-16",
+    "contentFingerprint": "fnv1a64:3658454469e2c24b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "typography",
       "title": "Typography: letterforms, families, and spacing",
@@ -14012,6 +14456,8 @@ export const PUZZLE_MANIFEST = [
     "id": "homonyms-in-context",
     "module": "./vocabulary/homonyms-in-context.js",
     "published": "2026-09-19",
+    "contentFingerprint": "fnv1a64:c8be6fb29c8b7b68",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "homonyms-in-context",
       "title": "Homonyms in Context",
@@ -14050,6 +14496,8 @@ export const PUZZLE_MANIFEST = [
     "id": "anatomy-of-villains",
     "module": "./literary-history/anatomy-of-villains.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:404306f00eca2081",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "anatomy-of-villains",
       "title": "The Anatomy of Villains: Iago and Macbeth",
@@ -14108,6 +14556,8 @@ export const PUZZLE_MANIFEST = [
     "id": "flower-anatomy",
     "module": "./botany/flower-anatomy.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:f2c46dc93f4a6728",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "flower-anatomy",
       "title": "Anatomy of a Flower",
@@ -14186,6 +14636,8 @@ export const PUZZLE_MANIFEST = [
     "id": "flower-pollination-fruit",
     "module": "./botany/flower-pollination-fruit.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:cf3bf62086882743",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "flower-pollination-fruit",
       "title": "How Flowers Work",
@@ -14266,6 +14718,8 @@ export const PUZZLE_MANIFEST = [
     "id": "unyielding-neighbors",
     "module": "./vocabulary/unyielding-neighbors.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:ded273838bfac392",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "unyielding-neighbors",
       "title": "Refusing to Yield",
@@ -14300,6 +14754,8 @@ export const PUZZLE_MANIFEST = [
     "id": "yielding-neighbors",
     "module": "./vocabulary/yielding-neighbors.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:7893e555d6134d18",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "yielding-neighbors",
       "title": "Learning to Yield",
@@ -14338,6 +14794,8 @@ export const PUZZLE_MANIFEST = [
     "id": "innate-intrinsic-inherent",
     "module": "./vocabulary/innate-intrinsic-inherent.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:b40f160cf179d8b0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "innate-intrinsic-inherent",
       "title": "Already There? Innate, Intrinsic, Inherent",
@@ -14396,6 +14854,8 @@ export const PUZZLE_MANIFEST = [
     "id": "quiet-neighbors",
     "module": "./vocabulary/quiet-neighbors.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:efce37d24edad960",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "quiet-neighbors",
       "title": "Saying Little",
@@ -14433,6 +14893,8 @@ export const PUZZLE_MANIFEST = [
     "id": "short-lived-words",
     "module": "./vocabulary/short-lived-words.js",
     "published": "2026-09-21",
+    "contentFingerprint": "fnv1a64:9c956bf6ae5cd587",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "short-lived-words",
       "title": "Here and Gone: Seven Words for the Short-Lived",
@@ -14477,6 +14939,8 @@ export const PUZZLE_MANIFEST = [
     "id": "biostatistics-design-measures-inference",
     "module": "./public-health/biostatistics-design-measures-inference.js",
     "published": "2026-09-23",
+    "contentFingerprint": "fnv1a64:35cc5407487d1b99",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "biostatistics-design-measures-inference",
       "title": "Biostatistics: Designing Studies and Measuring Risk",
@@ -14551,6 +15015,8 @@ export const PUZZLE_MANIFEST = [
     "id": "biostatistics-validity-models-diagnostics",
     "module": "./public-health/biostatistics-validity-models-diagnostics.js",
     "published": "2026-09-23",
+    "contentFingerprint": "fnv1a64:8689803a8168c4ff",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "biostatistics-validity-models-diagnostics",
       "title": "Biostatistics: Bias, Models, and Diagnostic Decisions",
@@ -14617,6 +15083,8 @@ export const PUZZLE_MANIFEST = [
     "id": "restraint-in-speech",
     "module": "./vocabulary/restraint-in-speech.js",
     "published": "2026-09-23",
+    "contentFingerprint": "fnv1a64:445158d75f706cc0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "restraint-in-speech",
       "title": "Holding Back: Five Words for Restraint in Speech",
@@ -14667,6 +15135,8 @@ export const PUZZLE_MANIFEST = [
     "id": "troublesome-neighbors",
     "module": "./vocabulary/troublesome-neighbors.js",
     "published": "2026-09-23",
+    "contentFingerprint": "fnv1a64:d803a610080b8dd8",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "troublesome-neighbors",
       "title": "Causing Trouble",
@@ -14706,6 +15176,8 @@ export const PUZZLE_MANIFEST = [
     "id": "cinematography",
     "module": "./film/cinematography.js",
     "published": "2026-09-24",
+    "contentFingerprint": "fnv1a64:c44cb444c3aa4767",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "cinematography",
       "title": "Cinematography: the visual language of film",
@@ -14743,6 +15215,8 @@ export const PUZZLE_MANIFEST = [
     "id": "octopus-play-adjudication",
     "module": "./zoology/octopus-play-adjudication.js",
     "published": "2026-09-24",
+    "contentFingerprint": "fnv1a64:e2882992bfd1a26a",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "octopus-play-adjudication",
       "title": "Is It Really Play? The Octopus Play Verdict",
@@ -14828,6 +15302,8 @@ export const PUZZLE_MANIFEST = [
     "id": "octopus-play-stages",
     "module": "./zoology/octopus-play-stages.js",
     "published": "2026-09-24",
+    "contentFingerprint": "fnv1a64:047e8191f7918e65",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "octopus-play-stages",
       "title": "Can I Eat It? How an Octopus Meets a New Object",
@@ -14917,6 +15393,8 @@ export const PUZZLE_MANIFEST = [
     "id": "digestive-absorption-control",
     "module": "./physiology-medicine/digestive-absorption-control.js",
     "published": "2026-09-26",
+    "contentFingerprint": "fnv1a64:4f48c4183edba6af",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "digestive-absorption-control",
       "title": "Digestion: absorption and control",
@@ -14969,6 +15447,8 @@ export const PUZZLE_MANIFEST = [
     "id": "digestive-breakdown",
     "module": "./physiology-medicine/digestive-breakdown.js",
     "published": "2026-09-26",
+    "contentFingerprint": "fnv1a64:0f981df2d03b2665",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "digestive-breakdown",
       "title": "Digestion: breakdown",
@@ -15022,6 +15502,8 @@ export const PUZZLE_MANIFEST = [
     "id": "religion-shared-beliefs",
     "module": "./religion/religion-shared-beliefs.js",
     "published": "2026-09-26",
+    "contentFingerprint": "fnv1a64:5e4f9b38d2fdf1d0",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "religion-shared-beliefs",
       "title": "Where Traditions Converge: The Sacred, the Human Problem, and the Path",
@@ -15078,6 +15560,8 @@ export const PUZZLE_MANIFEST = [
     "id": "statistical-mechanics",
     "module": "./physics/statistical-mechanics.js",
     "published": "2026-09-26",
+    "contentFingerprint": "fnv1a64:e1caadac7cec5ab9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "statistical-mechanics",
       "title": "Statistical mechanics: why disorder wins",
@@ -15140,6 +15624,8 @@ export const PUZZLE_MANIFEST = [
     "id": "why-the-gram-stain-works",
     "module": "./microbiology/why-the-gram-stain-works.js",
     "published": "2026-09-26",
+    "contentFingerprint": "fnv1a64:5248da9a54271148",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "why-the-gram-stain-works",
       "title": "Why the Gram stain works",
@@ -15208,6 +15694,8 @@ export const PUZZLE_MANIFEST = [
     "id": "cellular-energy",
     "module": "./biology/cellular-energy.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:3ee62f7cfd3f14bc",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "cellular-energy",
       "title": "How a cell captures and spends energy",
@@ -15267,6 +15755,8 @@ export const PUZZLE_MANIFEST = [
     "id": "chirality-isomer-classes",
     "module": "./chemistry/chirality-isomer-classes.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:18be0b1daba6f1a7",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "chirality-isomer-classes",
       "title": "Mirror Images First: Classifying Isomer Pairs and Finding Chirality",
@@ -15328,6 +15818,8 @@ export const PUZZLE_MANIFEST = [
     "id": "chirality-labels-and-light",
     "module": "./chemistry/chirality-labels-and-light.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:932ff6171fcb9db9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "chirality-labels-and-light",
       "title": "Naming and Measuring Handedness: R/S Labels, Polarized Light, and Cancellation",
@@ -15404,6 +15896,8 @@ export const PUZZLE_MANIFEST = [
     "id": "energy-flows-one-way",
     "module": "./biology/energy-flows-one-way.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:b153fa1603706d01",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "energy-flows-one-way",
       "title": "Why energy flows one way",
@@ -15447,6 +15941,8 @@ export const PUZZLE_MANIFEST = [
     "id": "functional-groups-organic",
     "module": "./chemistry/functional-groups-organic.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:f7f299ee775f6861",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "functional-groups-organic",
       "title": "Families of Organic Compounds: Reading Functional Groups",
@@ -15520,6 +16016,8 @@ export const PUZZLE_MANIFEST = [
     "id": "massive-stars-remnants-and-recycling",
     "module": "./astronomy/massive-stars-remnants-and-recycling.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:b6185ba70c9adfb4",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "massive-stars-remnants-and-recycling",
       "title": "Massive Stars, Remnants, and Recycling",
@@ -15600,6 +16098,8 @@ export const PUZZLE_MANIFEST = [
     "id": "solar-system-inner",
     "module": "./astronomy/solar-system-inner.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:329d3dea425ea2fd",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "solar-system-inner",
       "title": "The Solar System: A Star Sorts a Cloud",
@@ -15663,6 +16163,8 @@ export const PUZZLE_MANIFEST = [
     "id": "solar-system-outer",
     "module": "./astronomy/solar-system-outer.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:99a6f22622b70f9b",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "solar-system-outer",
       "title": "The Solar System: Giants, Dwarfs, and Leftovers",
@@ -15733,6 +16235,8 @@ export const PUZZLE_MANIFEST = [
     "id": "stellar-formation-and-sunlike-evolution",
     "module": "./astronomy/stellar-formation-and-sunlike-evolution.js",
     "published": "2026-09-30",
+    "contentFingerprint": "fnv1a64:aa0d299eea320cd2",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "stellar-formation-and-sunlike-evolution",
       "title": "Star Formation and the Sun-like Path",
@@ -15820,6 +16324,8 @@ export const PUZZLE_MANIFEST = [
     "id": "climate-change-and-manufactured-doubt",
     "module": "./atmospheric-science/climate-change-and-manufactured-doubt.js",
     "published": "2026-10-03",
+    "contentFingerprint": "fnv1a64:66f08429c83839bf",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "climate-change-and-manufactured-doubt",
       "title": "Climate Change and Manufactured Doubt",
@@ -15901,6 +16407,8 @@ export const PUZZLE_MANIFEST = [
     "id": "fungal-diseases-vegetables",
     "module": "./botany/fungal-diseases-vegetables.js",
     "published": "2026-10-03",
+    "contentFingerprint": "fnv1a64:7ecc6eccb11f7ef9",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "fungal-diseases-vegetables",
       "title": "Fungal Diseases on Vegetables",
@@ -15999,6 +16507,8 @@ export const PUZZLE_MANIFEST = [
     "id": "manul-cold-steppe-cat",
     "module": "./zoology/manul-cold-steppe-cat.js",
     "published": "2026-10-03",
+    "contentFingerprint": "fnv1a64:9500d62933d1f984",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "manul-cold-steppe-cat",
       "title": "The Cold-Steppe Cat",
@@ -16076,6 +16586,8 @@ export const PUZZLE_MANIFEST = [
     "id": "manul-under-pressure",
     "module": "./zoology/manul-under-pressure.js",
     "published": "2026-10-03",
+    "contentFingerprint": "fnv1a64:e3aa0501d680113e",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "manul-under-pressure",
       "title": "The Manul Under Pressure",
@@ -16165,6 +16677,8 @@ export const PUZZLE_MANIFEST = [
     "id": "person-place-and-time",
     "module": "./public-health/person-place-and-time.js",
     "published": "2026-10-03",
+    "contentFingerprint": "fnv1a64:4438b9d4a891e5c5",
+    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
     "browse": {
       "id": "person-place-and-time",
       "title": "Person, Place, and Time",

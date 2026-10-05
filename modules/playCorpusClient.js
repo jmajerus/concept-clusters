@@ -13,8 +13,8 @@ export function playCorpusUrlFromDocument(doc = globalThis.document) {
   return content && content.trim() ? content.trim() : null;
 }
 
-export async function loadPublishedPuzzle(entry) {
-  const response = await fetch(entry.module, { cache: "no-store" });
+export async function loadPublishedPuzzle(entry, { cache = "no-store" } = {}) {
+  const response = await fetch(entry.module, { cache });
   let body = {};
   try {
     body = await response.json();

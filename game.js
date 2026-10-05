@@ -1,8 +1,8 @@
 // ============================================================
 // Concept Clusters — game logic
 // ------------------------------------------------------------
-// Reads puzzle browse data (git manifest, or D1 `/play/corpus.json` on
-// the authoring server), then loads full boards on demand.
+// Reads puzzle browse data from D1 on hosted public and authoring play,
+// or the git manifest on plain static hosting; full boards load on demand.
 // Mechanic: tap a gray term, then tap a node in the cluster it
 // belongs to. Seed pairs are pre-connected as the orienting clue.
 // Bridge terms normally belong to two clusters; an experimental
@@ -24,6 +24,7 @@ import {
   loadPlayCorpus,
   playCorpusUrlFromDocument
 } from "./modules/playCorpusClient.js";
+import { createPublicPuzzleLoader, loadPublicPlayIndex, publicPlayIndexUrlFromDocument } from "./modules/publicPlayClient.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
@@ -51,12 +52,17 @@ import "./modules/learningIntroductionElement.js";
 const playCorpusUrl = typeof document !== "undefined"
   ? playCorpusUrlFromDocument()
   : null;
+const publicPlayIndexUrl = typeof document !== "undefined"
+  ? publicPlayIndexUrlFromDocument()
+  : null;
 let puzzleLoader;
 let PUZZLES;
 let CATALOGUES;
 let SEARCH_DRAFTS = [];
 let playSource = "git";
 let corpusFailures = 0;
+let publicIndexSignature = null;
+let publicIndexCheckedAt = 0;
 
 if (playCorpusUrl) {
   const corpus = await loadPlayCorpus(playCorpusUrl);
@@ -68,6 +74,23 @@ if (playCorpusUrl) {
   PUZZLES = puzzleLoader.browsePuzzles;
   SEARCH_DRAFTS = Array.isArray(corpus.drafts) ? corpus.drafts : [];
   document.body?.classList.add("authoring-play");
+} else if (publicPlayIndexUrl) {
+  const [
+    { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES },
+    index
+  ] = await Promise.all([
+    import("./puzzles/manifest.js"),
+    loadPublicPlayIndex(publicPlayIndexUrl)
+  ]);
+  replaceCategoriesRegistry(index.categories);
+  CATALOGUES = index.catalogues;
+  setCatalogueRegistry(CATALOGUES);
+  puzzleLoader = createPublicPuzzleLoader(PUZZLE_MANIFEST, index);
+  publicIndexSignature = JSON.stringify(index);
+  publicIndexCheckedAt = Date.now();
+  PUZZLES = puzzleLoader.browsePuzzles;
+  playSource = "public-d1";
+  corpusFailures = PUZZLE_MANIFEST_FAILURES.length;
 } else {
   const [
     { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES },
@@ -89,10 +112,10 @@ function logCorpusReady() {
   const count = PUZZLES.length;
   const skippedNote = corpusFailures
     ? `; ${corpusFailures} omitted from manifest at build`
-    : playSource === "d1"
+    : playSource === "d1" || playSource === "public-d1"
       ? " from D1"
       : "";
-  const payload = playSource === "d1" ? "documents" : "modules";
+  const payload = playSource === "d1" ? "documents" : playSource === "public-d1" ? "static modules or D1 documents" : "modules";
   console.info(
     `[concept-clusters] ${count} puzzle${count === 1 ? "" : "s"} in corpus` +
     `${skippedNote} (full ${payload} load on demand)`
@@ -1792,6 +1815,20 @@ overviewRenderer = createOverviewRenderer({
 
 appNavigation = createAppNavigation({
   puzzles: PUZZLES,
+  beforeRenderRoute: publicPlayIndexUrl ? async ({ initial }) => {
+    if (initial || Date.now() - publicIndexCheckedAt < 30_000) return true;
+    try {
+      const next = await loadPublicPlayIndex(publicPlayIndexUrl);
+      publicIndexCheckedAt = Date.now();
+      if (JSON.stringify(next) === publicIndexSignature) return true;
+    } catch (error) {
+      console.error("Could not refresh published puzzles", error);
+    }
+    // A changed or unavailable index cannot safely use the old route data.
+    // The current session has already been saved by navigation.
+    location.reload();
+    return false;
+  } : null,
   drafts: SEARCH_DRAFTS,
   draftPriority: playSource === "d1",
   catalogues: CATALOGUES,
