@@ -250,8 +250,20 @@ export function createStarRenderer({
 
     // Titles and bridge nodes only. Seeds and the other terms join after
     // this settle, and the bridge seats stay pinned so the later term
-    // sim does not walk the corridors off. A restored player layout runs
-    // the same seating again, because that restore clears pins.
+    // sim does not walk the corridors off. Restoring a layout clears
+    // pins. A layout captured while pre-connect was on keeps the saved
+    // bridge coordinates and only re-pins them; any older layout is
+    // seated again so those bridges still land in the corridors.
+    const pinPreconnectedBridges = () => {
+      if (!useBridgePreconnect) return;
+      nodes.filter(node => node.gs.length > 1 && node.connected.length).forEach(node => {
+        const point = clampPoint(node, node);
+        node.x = node.fx = point.x;
+        node.y = node.fy = point.y;
+        node.vx = 0;
+        node.vy = 0;
+      });
+    };
     const seatPreconnectedBridges = () => {
       if (!useBridgePreconnect) return;
       const bridgeNodes = nodes.filter(node => node.gs.length > 1 && node.connected.length);
@@ -296,13 +308,7 @@ export function createStarRenderer({
         title.x = heldTitles[index].x;
         title.y = heldTitles[index].y;
       });
-      bridgeNodes.forEach(node => {
-        const point = clampPoint(node, node);
-        node.x = node.fx = point.x;
-        node.y = node.fy = point.y;
-        node.vx = 0;
-        node.vy = 0;
-      });
+      pinPreconnectedBridges();
     };
     seatPreconnectedBridges();
 
@@ -2045,7 +2051,8 @@ export function createStarRenderer({
           }),
           // See graph capture: a solved-board snapshot is reused on the
           // next visit instead of running Star's layout search again.
-          capturedSolved: state.made === state.need
+          capturedSolved: state.made === state.need,
+          bridgePreconnect: useBridgePreconnect
         };
       },
       apply(layout, options = {}) {
@@ -2096,7 +2103,8 @@ export function createStarRenderer({
           node.vx = 0;
           node.vy = 0;
         }
-        seatPreconnectedBridges();
+        if (layout.bridgePreconnect) pinPreconnectedBridges();
+        else seatPreconnectedBridges();
         state.solutionLayout = state.made === state.need
           ? layout.solutionLayout
           : null;

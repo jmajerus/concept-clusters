@@ -1,8 +1,9 @@
 // Cold start for every mode: each bridge begins connected to every cluster
-// it joins. The stored line ends at a cluster member (ideal: false); Star
-// draws that side at the title, and Graph and Circle draw it at the member.
-// An authored ideal term, when the puzzle has one, stays a later promotion
-// once that term is placed. Seeds are not endpoints here.
+// it joins. The stored line ends at a cluster member. Star draws a non-ideal
+// side at the title, and Graph and Circle draw it at the member. An authored
+// ideal term that is already placed (a seed, for example) is resolved now,
+// the same way a later connection would promote it. Otherwise it stays a
+// later promotion once that term is placed.
 
 export function applyStarBridgePreconnect(puzzle, nodes, links) {
   let added = 0;
@@ -28,13 +29,15 @@ export function applyStarBridgePreconnect(puzzle, nodes, links) {
       const canonicalTarget = idealWord
         ? nodes.find(candidate => candidate.word === idealWord) || null
         : null;
+      const canonicalReady = !!canonicalTarget &&
+        canonicalTarget.connected.length === canonicalTarget.gs.length;
       node.connected.push(ci);
       links.push({
         source: node,
-        target,
+        target: canonicalReady ? canonicalTarget : target,
         clusterIndex: ci,
         bridge: true,
-        ideal: false,
+        ideal: canonicalReady,
         canonicalTarget
       });
       added++;

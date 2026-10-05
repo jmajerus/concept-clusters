@@ -2,7 +2,7 @@
 // off unless an admin localStorage try or the sparse registry locks it.
 // Switching modes keeps those bridges connected.
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PUZZLES } from "../puzzles/index.js";
@@ -48,7 +48,19 @@ export async function run(page, baseURL) {
     .every(node => node.connected.length === node.gs.length));
   assert.ok(snap.built.links
     .filter(link => link.bridge)
-    .every(link => link.ideal === false && link.canonicalTarget !== undefined));
+    .every(link => link.canonicalTarget !== undefined));
+  const glucoseAtp = snap.built.links.find(link =>
+    link.bridge && link.source.word === "glucose" && link.clusterIndex === 1
+  );
+  assert.equal(glucoseAtp.ideal, true);
+  assert.equal(glucoseAtp.target.word, "ATP");
+  assert.equal(glucoseAtp.canonicalTarget.word, "ATP");
+  const oxygenAerobic = snap.built.links.find(link =>
+    link.bridge && link.source.word === "oxygen" && link.clusterIndex === 1
+  );
+  assert.equal(oxygenAerobic.ideal, false);
+  assert.equal(oxygenAerobic.canonicalTarget.word, "aerobic");
+  assert.equal(oxygenAerobic.target.word, "mitochondria");
   const seed = snap.built.nodes.find(node =>
     node.word === energyFlow.clusters[0].seeds[0]
   );
@@ -99,7 +111,9 @@ export async function run(page, baseURL) {
         need: window.CC.state.need,
         bridgeLinks: bridgeLinks.length,
         memberships: bridges.reduce((sum, node) => sum + node.gs.length, 0),
-        ideals: bridgeLinks.filter(link => link.ideal).length,
+        ideals: bridgeLinks.filter(link => link.ideal).map(link =>
+          `${link.source.word}->${link.target.word}`
+        ),
         pinned: bridges.every(node => Number.isFinite(node.fx) && Number.isFinite(node.fy)),
         placed: bridges.every(node => Number.isFinite(node.x) && Number.isFinite(node.y)),
         lineCount: document.querySelectorAll("#board line.bridge-link").length,
@@ -110,12 +124,37 @@ export async function run(page, baseURL) {
     assert.equal(opened.made, 0);
     assert.equal(opened.need, classic.need - opened.memberships);
     assert.equal(opened.bridgeLinks, opened.memberships);
-    assert.equal(opened.ideals, 0);
+    assert.deepEqual(opened.ideals, ["glucose->ATP"]);
     assert.equal(opened.pinned, true);
     assert.equal(opened.placed, true);
     assert.equal(opened.lineCount, opened.memberships);
     assert.equal(opened.label, "Clear bridge pre-connect");
     assert.equal(await page.isHidden("#star-bridge-preconnect-export-btn"), false);
+
+    await page.evaluate(() => {
+      const bridge = window.CC.state.nodes.find(node =>
+        node.word === "oxygen" && node.gs.length > 1
+      );
+      bridge.x = 200;
+      bridge.y = 240;
+      bridge.fx = 200;
+      bridge.fy = 240;
+    });
+    await page.reload();
+    await page.waitForFunction(() =>
+      window.CC?.state?.getStarFreeStripReport?.().useBridgePreconnect === true &&
+      window.CC.state.nodes.some(node => node.word === "oxygen" && node.gs.length > 1)
+    );
+    const restoredBridge = await page.evaluate(() => {
+      const bridge = window.CC.state.nodes.find(node =>
+        node.word === "oxygen" && node.gs.length > 1
+      );
+      return { x: bridge.x, y: bridge.y, fx: bridge.fx, fy: bridge.fy };
+    });
+    assert.equal(restoredBridge.x, 200);
+    assert.equal(restoredBridge.y, 240);
+    assert.equal(restoredBridge.fx, 200);
+    assert.equal(restoredBridge.fy, 240);
 
     const [download] = await Promise.all([
       page.waitForEvent("download"),
@@ -132,6 +171,26 @@ export async function run(page, baseURL) {
       await writeFile(flagPath, JSON.stringify(exported));
       const checked = await importStarBridgePreconnect(flagPath, { checkOnly: true });
       assert.equal(checked.doc.preconnect, true);
+      assert.equal(checked.outputPath, null);
+
+      const repo = join(tmp, "repo");
+      await mkdir(join(repo, "puzzles", "layouts", "star"), { recursive: true });
+      const locked = await importStarBridgePreconnect(flagPath, {
+        repositoryRoot: repo,
+        registry: { "zebra-puzzle": true }
+      });
+      const lockedText = await readFile(locked.outputPath, "utf8");
+      assert.match(lockedText, /"energy-flow": true,\n {2}"zebra-puzzle": true/);
+
+      const clearPath = join(tmp, "clear.json");
+      await writeFile(clearPath, JSON.stringify({ ...exported, preconnect: false }));
+      const clearedImport = await importStarBridgePreconnect(clearPath, {
+        repositoryRoot: repo,
+        registry: { "energy-flow": true, "zebra-puzzle": true }
+      });
+      const clearedText = await readFile(clearedImport.outputPath, "utf8");
+      assert.doesNotMatch(clearedText, /energy-flow/);
+      assert.match(clearedText, /"zebra-puzzle": true/);
     } finally {
       await rm(tmp, { recursive: true, force: true });
     }
@@ -177,6 +236,123 @@ export async function run(page, baseURL) {
     const circled = await bridgeState();
     assert.equal(circled.allConnected, true);
     assert.equal(circled.bridgeLinks, circled.memberships);
+
+    const solved = {
+      id: "bridge-preconnect-solved",
+      title: "Pre-connected board",
+      category: "science",
+      clusters: [
+        {
+          id: "alpha",
+          name: "Alpha",
+          color: "teal",
+          fact: "Alpha fact.",
+          terms: ["a", "b"],
+          seeds: ["a", "b"]
+        },
+        {
+          id: "beta",
+          name: "Beta",
+          color: "blue",
+          fact: "Beta fact.",
+          terms: ["c", "d"],
+          seeds: ["c", "d"]
+        }
+      ],
+      bridges: [{
+        id: "span",
+        term: "span",
+        clusters: [0, 1],
+        fact: "Span fact."
+      }],
+      relatedPuzzles: {
+        entries: [{ id: "energy-flow", reason: "A larger energy board." }]
+      }
+    };
+    const lenses = {
+      ...solved,
+      id: "bridge-preconnect-lenses",
+      title: "Pre-connected lenses",
+      relatedPuzzles: solved.relatedPuzzles,
+      lenses: [{
+        id: "placed",
+        prompt: "Which seed is already on the board?",
+        targets: ["b"],
+        explanation: "B started placed."
+      }]
+    };
+    const gated = {
+      ...solved,
+      id: "bridge-preconnect-gated",
+      title: "Pre-connected after the introduction",
+      relatedPuzzles: { entries: [] },
+      learningIntroduction: {
+        requirement: "recommended",
+        content: { text: "Read this first.", mediaType: "text/markdown" }
+      }
+    };
+    await page.evaluate(key => {
+      localStorage.setItem(key, JSON.stringify({
+        "bridge-preconnect-solved": true,
+        "bridge-preconnect-lenses": true,
+        "bridge-preconnect-gated": true
+      }));
+    }, OVERRIDE_KEY);
+    await page.evaluate(puzzle => {
+      CC.openPuzzle(CC.registerPuzzle(puzzle));
+    }, solved);
+    await page.waitForFunction(() =>
+      CC.state?.puzzle?.id === "bridge-preconnect-solved" &&
+      CC.state.phase === "complete"
+    );
+    const finished = await page.evaluate(() => ({
+      made: CC.state.made,
+      need: CC.state.need,
+      message: document.getElementById("message").textContent,
+      related: document.querySelector("#related-puzzles .related-heading")?.textContent || "",
+      completed: JSON.parse(
+        localStorage.getItem("ccPlayerSession:v1:bridge-preconnect-solved") || "{}"
+      ).completed === true
+    }));
+    assert.equal(finished.made, 0);
+    assert.equal(finished.need, 0);
+    assert.match(finished.message, /Concept map complete/);
+    assert.equal(finished.related, "Related puzzles");
+    assert.equal(finished.completed, true);
+
+    await page.evaluate(() => {
+      CC.openPuzzle(CC.puzzleLoader.puzzleIndexForId("bridge-preconnect-solved"));
+    });
+    await page.waitForFunction(() =>
+      CC.state?.puzzle?.id === "bridge-preconnect-solved" &&
+      CC.state.phase === "complete" &&
+      document.getElementById("message").textContent.includes("Saved completed")
+    );
+
+    await page.evaluate(puzzle => {
+      CC.openPuzzle(CC.registerPuzzle(puzzle));
+    }, lenses);
+    await page.waitForFunction(() =>
+      CC.state?.puzzle?.id === "bridge-preconnect-lenses" &&
+      (CC.state.phase === "lens-selecting" || CC.state.phase === "lens-preparing")
+    );
+    await page.waitForFunction(() => CC.state?.phase === "lens-selecting");
+
+    await page.evaluate(puzzle => {
+      CC.openPuzzle(CC.registerPuzzle(puzzle));
+    }, gated);
+    await page.waitForFunction(() =>
+      CC.state?.puzzle?.id === "bridge-preconnect-gated" &&
+      CC.state.phase === "assembling" &&
+      CC.state.preconnectedCompletePending === true
+    );
+    await page.evaluate(() => {
+      document.querySelector("#learning-introduction").shadowRoot.getElementById("skip").click();
+    });
+    await page.waitForFunction(() =>
+      CC.state?.puzzle?.id === "bridge-preconnect-gated" &&
+      CC.state.phase === "complete"
+    );
   } finally {
     await clearStorage().catch(() => {});
   }
