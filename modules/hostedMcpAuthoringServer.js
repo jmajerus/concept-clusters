@@ -28,7 +28,6 @@ import {
   documentForEditor,
   documentForStorage,
   draftForMcp,
-  publishedForMcpDomain,
   withStorageCanonicalizeFlags
 } from "./authoredPuzzleDocument.js";
 import {
@@ -70,7 +69,6 @@ import {
   puzzleIdIsLive,
   shadowCreateRefusal
 } from "./draftIdRename.js";
-import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import { CATEGORY_REGISTRATION_MODES } from "./categoryDiscovery.js";
 import {
   filterAuthoringPuzzles,
@@ -183,10 +181,24 @@ const categoryDocumentSchema = z.object({
 
 const publishToAuthoringInput = Object.freeze({
   publish_to_authoring: z.boolean().default(false).describe(
-    "Also publish this valid D1 working copy to authoring play in this call. " +
-    "It remains held: this does not cue it for Freeze or write GitHub."
+    "Also publish this valid D1 working copy onto the player in this call. " +
+    "Cue and Freeze still only snapshot git."
   )
 });
+
+const PUZZLE_PUBLISH_REFUSAL =
+  "save_puzzle_draft cannot publish a puzzle. A person publishes the working copy, and that publish is what players see.";
+
+function puzzleDraftSaveSchema(shape) {
+  return z.preprocess((value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+    if (value.publish_to_authoring === true) throw new Error(PUZZLE_PUBLISH_REFUSAL);
+    if (!Object.prototype.hasOwnProperty.call(value, "publish_to_authoring")) return value;
+    const rest = { ...value };
+    delete rest.publish_to_authoring;
+    return rest;
+  }, z.object(shape).strict());
+}
 
 const catalogueWriteDocumentSchema = catalogueDocumentSchema.extend(publishToAuthoringInput);
 const metaCatalogueWriteDocumentSchema = metaCatalogueDocumentSchema.extend(publishToAuthoringInput);
@@ -449,7 +461,7 @@ function serverInstructions() {
     "create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for that draft_id. " +
     "A draft that has never been created uses create_puzzle_draft. " +
     mcpPublicationBoundaryGuidance() + " " +
-    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. Leave tags and level unset there. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and publishing remains held from Cue/Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
+    "Before making any taxonomy claim or choosing a parent category, call list_categories or get_category; those are the live D1 reads. create_puzzle_draft takes category, categories, and subcategories on the complete document. Leave tags and level unset there. A later shelf edit saves them with domain=classification. Associate catalogues via get_catalogue then update_catalogue. A category is registered when its category-editor document is published to D1; a published category document may and should exist before any puzzle references it. Never infer that a category is absent from puzzles/categories.js or another Git checkout, and never move a puzzle to a parent category because a static Git view omits a category that is published in D1. Use create_category or update_category to create or revise the category document; set publish_to_authoring=true to publish it in the same call. Those writes are D1 working copies unless published, and that publish is live on the player. Cue and Freeze only snapshot git. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category. Live content and taxonomy reads are D1-only; Git is an explicit bootstrap/import source, never an MCP fallback.";
 }
 
 export function createAuthoringMcpServer({
@@ -556,51 +568,40 @@ export function createAuthoringMcpServer({
     return (await taxonomyContext()).categoryRegistry;
   }
 
-  async function publishHeldDraft(draft, taxonomy = null) {
+  async function publishClassificationOnLivePuzzle(puzzleId, projection, taxonomy) {
     if (typeof contentDocuments?.publish !== "function") {
-      throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
+      throw new Error("Publishing a classification requires D1 content documents.");
     }
-    let current = draft;
-    const draftId = current.draftId || current.id;
-    if (await repositorySupports(draftRepository, "materialize")) {
-      current = await draftRepository.materialize({ draftId, actor });
+    const publishedBefore = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+    if (!publishedBefore || publishedBefore.withdrawnAt) {
+      return {
+        published: null,
+        publicationErrors: [
+          "Classification publish updates the shelf on a live puzzle. Publish the puzzle from the draft page first."
+        ]
+      };
     }
     const resolvedTaxonomy = taxonomy || await taxonomyContext();
-    const validation = await contentService.validatePuzzleDraft(current.document, {
+    const merged = applyAuthoredDomain(publishedBefore.document, "classification", projection);
+    const stored = documentForStorage(merged, {
+      categoryRegistry: resolvedTaxonomy.categoryRegistry
+    });
+    const validation = await contentService.validatePuzzleDraft(stored, {
       categoryRegistry: resolvedTaxonomy.categoryRegistry,
       knownPuzzleIds: resolvedTaxonomy.puzzleIds
     });
     if (!validation.valid) {
-      return { draft: current, published: null, publicationErrors: validation.errors };
-    }
-    const puzzleId = typeof current.document?.id === "string" ? current.document.id : current.puzzleId;
-    const publishedBefore = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-    const publishLayout = current.layout || publishedBefore?.layout || undefined;
-    const layoutValidation = validatePublishedPuzzleLayout({
-      document: current.document,
-      layout: publishLayout,
-      categoryRegistry: resolvedTaxonomy.categoryRegistry
-    });
-    if (!layoutValidation.valid) {
-      return {
-        draft: current,
-        published: null,
-        publicationErrors: [
-          "The saved layout must be reconfirmed after this puzzle edit.",
-          ...layoutValidation.errors
-        ]
-      };
+      return { published: null, publicationErrors: validation.errors };
     }
     const published = await contentDocuments.publish({
       kind: "puzzle",
       id: puzzleId,
-      document: documentForStorage(current.document, {
-        categoryRegistry: resolvedTaxonomy.categoryRegistry
-      }),
+      document: stored,
       actor,
-      layout: publishLayout
+      layout: publishedBefore.layout,
+      markRevised: false
     });
-    return { draft: current, published, publicationErrors: null };
+    return { published, publicationErrors: null };
   }
 
   async function authoringPuzzles({ categoryRegistry = null } = {}) {
@@ -1147,16 +1148,15 @@ export function createAuthoringMcpServer({
     title: "Save puzzle draft",
     description:
       "Every save requires expected_revision, copied from draft.revision on the latest create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has never been created uses create_puzzle_draft. " +
-      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the materialized document to authoring play in this same call. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
-    inputSchema: z.object({
+      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+    inputSchema: puzzleDraftSaveSchema({
       draft_id: draftIdSchema,
       expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive().describe(
         EXPECTED_REVISION_CONTRACT
       ),
       document: documentSchema,
       domain: authoringDomainSchema,
-      repair: z.boolean().optional(),
-      ...publishToAuthoringInput
+      repair: z.boolean().optional()
     }),
     annotations: WRITE
   }, tracked("save_puzzle_draft", safe(async ({
@@ -1164,8 +1164,7 @@ export function createAuthoringMcpServer({
     expected_revision,
     document,
     domain = "complete",
-    repair,
-    publish_to_authoring
+    repair
   }, ctx) => {
     assertNoAgentProtectedFields(document, "MCP puzzle document");
     if (domain !== "complete" && domain !== "content" && repair) {
@@ -1256,66 +1255,11 @@ export function createAuthoringMcpServer({
       stampRecord && { ...stampRecord, draftId: draft_id },
       { analytics, recordStamp }
     );
-    let published = null;
-    let publicationErrors = null;
-    if (publish_to_authoring) {
-      if (typeof contentDocuments?.publish !== "function") {
-        throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
-      }
-      if (await repositorySupports(draftRepository, "materialize")) {
-        draft = await draftRepository.materialize({ draftId: draft_id, actor });
-      }
-      const taxonomy = await taxonomyContext();
-      const validation = await contentService.validatePuzzleDraft(draft.document, {
-        categoryRegistry: taxonomy.categoryRegistry,
-        knownPuzzleIds: taxonomy.puzzleIds
-      });
-      if (validation.valid) {
-        const puzzleId = typeof draft.document?.id === "string" ? draft.document.id : draft.puzzleId;
-        const publishedBefore = await publishedRowOrNull(
-          contentDocuments,
-          "puzzle",
-          puzzleId
-        );
-        const publishLayout = draft.layout || publishedBefore?.layout || undefined;
-        const layoutValidation = validatePublishedPuzzleLayout({
-          document: draft.document,
-          layout: publishLayout,
-          categoryRegistry: taxonomy.categoryRegistry
-        });
-        if (!layoutValidation.valid) {
-          publicationErrors = [
-            "The saved layout must be reconfirmed after this puzzle edit.",
-            ...layoutValidation.errors
-          ];
-        } else {
-          published = await contentDocuments.publish({
-            kind: "puzzle",
-            id: puzzleId,
-            document: documentForStorage(draft.document, {
-              categoryRegistry: taxonomy.categoryRegistry
-            }),
-            actor,
-            // A layout is a presentation artifact, not part of the MCP
-            // document domain. If this draft has one, promote it with the
-            // document; otherwise the repository may retain the current live
-            // layout for a content-only edit.
-            layout: publishLayout
-          });
-        }
-      } else {
-        publicationErrors = validation.errors;
-      }
-    }
     const repairNote = repair && repaired.changes.length > 0
       ? ` Repaired ${repaired.changes.length} escaped-quote mistake${repaired.changes.length === 1 ? "" : "s"} (see \`repair.changes\`).`
       : "";
     return success(
-      (published
-        ? `Saved and published draft ${draft_id} to authoring play; it is held from Freeze.`
-        : publish_to_authoring
-          ? `Saved draft ${draft_id}; current revision is ${draft.revision}. Not published: it has ${publicationErrors.length} errors.`
-          : `Saved draft ${draft_id}; current revision is ${draft.revision}.`) + repairNote,
+      `Saved draft ${draft_id}; current revision is ${draft.revision}.` + repairNote,
       {
         draft: domain === "complete"
           ? draftForMcp(draft, { categoryRegistry: null })
@@ -1323,20 +1267,7 @@ export function createAuthoringMcpServer({
         ...(!normalization.document
           ? { normalization: { applied: false, errors: normalization.errors } }
           : {}),
-        ...(repair ? { repair: { applied: repaired.changes.length > 0, changes: repaired.changes } } : {}),
-        ...(publish_to_authoring
-          ? {
-            published: published
-              ? (domain === "complete"
-                ? {
-                  ...published,
-                  document: documentForMcp(published.document, { categoryRegistry: null })
-                }
-                : publishedForMcpDomain(published, domain, { categoryRegistry: null }))
-              : published,
-            publicationErrors
-          }
-          : {})
+        ...(repair ? { repair: { applied: repaired.changes.length > 0, changes: repaired.changes } } : {})
       }
     );
   })));
@@ -1344,7 +1275,7 @@ export function createAuthoringMcpServer({
   server.registerTool("reassign_puzzle_classifications", {
     title: "Reassign puzzle classifications",
     description:
-      "Write the classification projection for many puzzles in one call. Each assignment sets category, and optionally categories and subcategories, for one puzzle id. Existing tags and level are kept. The server opens a working copy from the published row when this owner has none, then saves domain=classification. Lenses and the board are left unchanged. One bad assignment does not hide the others: the result lists each puzzle id with ok or errors. ok means that classification save succeeded. Set publish_to_authoring=true to publish each successful save held; a publication failure leaves ok true and reports published false with publicationErrors. It does not Cue or Freeze. Call this tool one invocation at a time.",
+      "Write the classification projection for many puzzles in one call. Each assignment sets category, and optionally categories and subcategories, for one puzzle id. Existing tags and level are kept. The server opens a working copy from the published row when this owner has none, then saves domain=classification. Lenses and the board are left unchanged. One bad assignment does not hide the others: the result lists each puzzle id with ok or errors. ok means that classification save succeeded. Set publish_to_authoring=true to publish the shelf onto the live puzzle; the rest of that published document stays as it is. A publication failure leaves ok true and reports published false with publicationErrors. It does not Cue or Freeze. Call this tool one invocation at a time.",
     inputSchema: z.object({
       assignments: z.array(z.object({
         puzzle_id: draftIdSchema,
@@ -1421,8 +1352,11 @@ export function createAuthoringMcpServer({
         let publicationErrors = null;
         if (publish_to_authoring) {
           try {
-            const publication = await publishHeldDraft(draft, taxonomy);
-            draft = publication.draft;
+            const publication = await publishClassificationOnLivePuzzle(
+              puzzleId,
+              projectAuthoredDocument(draft.document, "classification").document,
+              taxonomy
+            );
             published = publication.published;
             publicationErrors = publication.publicationErrors;
           } catch (error) {
@@ -2036,7 +1970,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Save a new catalogue working copy to D1. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Entry puzzle ids must already exist in published D1. Call list_catalogues first.",
+    description: "Save a new catalogue working copy to D1. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; that publish is live on the player. It does not Cue or Freeze. Does not open a GitHub pull request. Entry puzzle ids must already exist in published D1. Call list_catalogues first.",
     inputSchema: catalogueWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
@@ -2058,7 +1992,7 @@ export function createAuthoringMcpServer({
     );
     return success(
       published
-        ? `Saved and published catalogue ${record.id} to authoring play; it is held from Freeze.`
+        ? `Saved and published catalogue ${record.id} onto the player. Cue and Freeze only snapshot git.`
         : `Saved catalogue working copy ${record.id}.`,
       { valid: true, errors: [], catalogue: record, published }
     );
@@ -2086,7 +2020,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_catalogue", {
     title: "Update catalogue",
-    description: "Save the complete catalogue document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Call get_catalogue first, then send it back with membership, title, or info changes.",
+    description: "Save the complete catalogue document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; that publish is live on the player. It does not Cue or Freeze. Does not open a GitHub pull request. Call get_catalogue first, then send it back with membership, title, or info changes.",
     inputSchema: catalogueWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
@@ -2108,7 +2042,7 @@ export function createAuthoringMcpServer({
     );
     return success(
       published
-        ? `Saved and published catalogue ${record.id} to authoring play; it is held from Freeze.`
+        ? `Saved and published catalogue ${record.id} onto the player. Cue and Freeze only snapshot git.`
         : `Saved catalogue working copy ${record.id}.`,
       { valid: true, errors: [], catalogue: record, published }
     );
@@ -2116,7 +2050,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_meta_catalogue", {
     title: "Update meta catalogue",
-    description: "Save a complete EXISTING meta-catalogue document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Its entries are existing non-meta catalogue ids, not puzzle ids. Call get_catalogue first and send the returned document back with changes; set relatedCatalogues to null to clear it. This tool cannot create or delete meta catalogues, and does not open a GitHub pull request.",
+    description: "Save a complete EXISTING meta-catalogue document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; that publish is live on the player. It does not Cue or Freeze. Its entries are existing non-meta catalogue ids, not puzzle ids. Call get_catalogue first and send the returned document back with changes; set relatedCatalogues to null to clear it. This tool cannot create or delete meta catalogues, and does not open a GitHub pull request.",
     inputSchema: metaCatalogueWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_meta_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
@@ -2138,7 +2072,7 @@ export function createAuthoringMcpServer({
     );
     return success(
       published
-        ? `Saved and published meta catalogue ${record.id} to authoring play; it is held from Freeze.`
+        ? `Saved and published meta catalogue ${record.id} onto the player. Cue and Freeze only snapshot git.`
         : `Saved meta catalogue working copy ${record.id}.`,
       { valid: true, errors: [], catalogue: record, published }
     );
@@ -2146,7 +2080,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_category", {
     title: "Create category",
-    description: "Create a category document in a D1 working copy. Publishing that category document registers the category; set publish_to_authoring=true to publish the valid document to authoring play in the same call, before authoring puzzles that reference it. The published row is authoritative even when Git, including puzzles/categories.js, has no matching entry. The category id is the stable join used by puzzle category/category[] references; title is display copy. The publication remains held and is not cued for Freeze. Does not open a GitHub pull request.",
+    description: "Create a category document in a D1 working copy. Publishing that category document registers the category; set publish_to_authoring=true to publish the valid document to authoring play in the same call, before authoring puzzles that reference it. The published row is authoritative even when Git, including puzzles/categories.js, has no matching entry. The category id is the stable join used by puzzle category/category[] references; title is display copy. That publish is live on the player. It does not Cue or Freeze. Does not open a GitHub pull request.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_category", safe(async ({ publish_to_authoring, ...document }) => {
@@ -2167,7 +2101,7 @@ export function createAuthoringMcpServer({
     );
     return success(
       published
-        ? `Saved and published category ${record.id} to authoring play; it is held from Freeze.`
+        ? `Saved and published category ${record.id} onto the player. Cue and Freeze only snapshot git.`
         : `Saved category working copy ${record.id}. Publish this category document before relying on it as registered live taxonomy; the category id is the stable join used by puzzle references.`,
       { valid: true, errors: [], category: record, published }
     );
@@ -2175,7 +2109,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_category", {
     title: "Update category",
-    description: "Save the complete category document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. The category id is the stable join used by puzzles; title is display copy. Renaming a title does not require puzzle rewrites, while previousTitles remains a read-compatibility ledger.",
+    description: "Save the complete category document to the D1 working copy. Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; that publish is live on the player. It does not Cue or Freeze. Does not open a GitHub pull request. The category id is the stable join used by puzzles; title is display copy. Renaming a title does not require puzzle rewrites, while previousTitles remains a read-compatibility ledger.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_category", safe(async ({ publish_to_authoring, ...document }) => {
@@ -2196,7 +2130,7 @@ export function createAuthoringMcpServer({
     );
     return success(
       published
-        ? `Saved and published category ${record.id} to authoring play; it is held from Freeze.`
+        ? `Saved and published category ${record.id} onto the player. Cue and Freeze only snapshot git.`
         : `Saved category working copy ${record.id}.`,
       { valid: true, errors: [], category: record, published }
     );

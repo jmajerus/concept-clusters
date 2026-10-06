@@ -610,11 +610,9 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   domain=pedagogy, preserve lenses and learningIntroduction already present,
   and save that same domain. Do not send a publication-only object as a
   whole-domain replacement.
-- Validate the complete accumulated document. If the caller explicitly
-  requests authoring publication, set \`publish_to_authoring=true\` on
-  \`save_puzzle_draft\` for a confirmed final edit; this publishes a valid
-  document to authoring play in that same call, but it remains held and is
-  not cued for Freeze. Cue and Freeze are outside MCP. Set
+- Validate the complete accumulated document. \`save_puzzle_draft\` writes the
+  working copy only. A person publishes that copy, and that publish is what
+  players see. Cue and Freeze are outside MCP. Set
   \`category\` / \`categories\` / \`subcategories\` / \`tags\` / \`level\` with domain=classification.
   A category is
   registered when its category-editor document is published to D1; create_category
@@ -986,8 +984,8 @@ and write D1 working copies. They do not open a GitHub pull request. Updating
 replaces the whole entries list, so preserve every entry that should remain.
 Entry puzzle ids must already exist in published D1. Preview tools
 validate that document and never write. Set publish_to_authoring=true only
-when a valid catalogue or category write is explicitly confirmed; it remains
-held and is not cued for Freeze. To edit an existing meta catalogue, call
+when a valid catalogue or category write is explicitly confirmed; that publish
+is live on the player. Cue and Freeze only snapshot git. To edit an existing meta catalogue, call
 get_catalogue and send its complete \`kind: "meta"\` document
 to update_meta_catalogue. Meta entries are existing non-meta catalogue ids;
 relatedCatalogues may point at any existing catalogue (send \`null\` to clear
@@ -1059,13 +1057,14 @@ export function localDraftReviewHint(env = envProcess()) {
 }
 
 export function mcpPublicationBoundaryGuidance() {
-  return `After validate_puzzle_draft passes, the MCP workflow is complete. If
-the caller explicitly requests authoring publication, set
-\`publish_to_authoring=true\` on a confirmed final edit; this promotes the
-valid document to a held D1 authoring snapshot in the same call. MCP has no
-Cue or Freeze operation. Cue and Freeze are outside MCP; the optional
-publication remains held until a separate human-controlled authoring workflow
-cues it.`;
+  return `After validate_puzzle_draft passes, the MCP workflow for a puzzle is complete.
+save_puzzle_draft writes the working copy only. A person publishes that copy,
+and that publish is what players see. Set \`publish_to_authoring=true\` on a
+confirmed final edit of a category, a catalogue, or a
+reassign_puzzle_classifications shelf move. Those writes go live on the
+player. A classification publish updates the shelf on the live puzzle and
+leaves the rest of that published document in place. MCP has no Cue or Freeze
+operation. Cue and Freeze are outside MCP; they snapshot git.`;
 }
 
 export function localAuthoringGuidance(env = envProcess()) {

@@ -75,7 +75,6 @@ try {
     expectedRevision,
     domain: args.domain,
     repair: args.repair,
-    publishToAuthoring: args.publishToAuthoring,
     callTool: (toolName, toolArgs) => callAuthoringMcpTool({
       toolName,
       args: toolArgs,

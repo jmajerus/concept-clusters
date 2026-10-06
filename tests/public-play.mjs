@@ -30,6 +30,7 @@ export async function run() {
   assert.equal(initialLoader.entries[0].source, "static");
   assert.ok(initialLoader.entries[0].firstPublishedAt);
   assert.equal(initialLoader.entries[0].publishedAt, initialLoader.entries[0].firstPublishedAt);
+  assert.equal(initialLoader.entries[0].contentRevisedAt, null);
   assert.equal(initial.puzzles.find(entry => entry.id === document.id).dateCreated, undefined);
   const loadedInitial = await initialLoader.loadPuzzleById(document.id);
   assert.equal(loadedInitial.id, document.id);

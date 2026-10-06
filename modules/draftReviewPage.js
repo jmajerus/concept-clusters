@@ -19,6 +19,7 @@ import {
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { diffPublishedDraft, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
+import { revisedLessonLabel, samePlayerFacingProjection } from "./playerFacingRevision.js";
 import { draftBoardQuery, draftPlayQuery, draftReviewQuery, playQuery, reviewQuery } from "./stagingPlayLinks.js";
 import { boardSizeFactorChoices } from "./puzzleBoardSize.js";
 import {
@@ -833,7 +834,7 @@ function renderPuzzlePathBadges(item, { detail = false } = {}) {
 
 function listIntro(variant) {
   return variant === "local"
-    ? `One path: working copy → Publish (authoring play, held) → Cue → Freeze on
+    ? `One path: working copy → Publish (what the player reads) → Cue → Freeze on
        <a href="/admin">Admin</a> (git) → GitHub production. Status is
        where this id sits on that path. GitHub is origin’s
        <code>puzzles/manifest.js</code> joined with the last freeze patch.
@@ -852,7 +853,7 @@ function listIntro(variant) {
        opens the clean preview. Review, in that same column, opens the
        board with puzzle meta, stats, and Edit layout. Catalogues are edited at
        <a href="/admin/catalogues">/admin/catalogues</a>.`
-    : `One path: working copy → Publish (authoring play, held) → Cue → LAN
+    : `One path: working copy → Publish (what the player reads) → Cue → LAN
        Freeze (git) → GitHub production. Status is where this id sits on that
        path. Hosted GitHub is origin only. Show Working copies is the working
        copy badge; Drafts is never in GitHub production; Modified is anything
@@ -1477,6 +1478,8 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
         <input type="hidden" name="proposal_id" value="${proposalId}">
         <input type="hidden" name="expected_revision" value="${expected}">
         ${renderLessonChoice(event, candidates)}
+        ${renderRevisedCheckbox(draft.reviewAnchorDocument && event.proposal
+          && !samePlayerFacingProjection(draft.reviewAnchorDocument, event.proposal))}
         <div class="actions">
           <button type="submit" name="confirm" value="preview-review">Play</button>
           <button type="submit" name="confirm" value="publish-review">Publish this review</button>
@@ -1497,6 +1500,11 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
       </div>
     </form>
   </section>`;
+}
+
+function renderRevisedCheckbox(show) {
+  if (!show) return "";
+  return `<p class="meta"><label><input type="checkbox" name="show_as_revised" value="1"> Show “${escapeHtml(revisedLessonLabel())}” on the lesson</label></p>`;
 }
 
 function renderSubmitForm(draft, variant = "hosted") {
@@ -1575,6 +1583,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     <div class="actions">
       ${playButton}
       <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+        ${renderRevisedCheckbox(canPublish && draft.playerTextDiffersFromPublished)}
         <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>
         <button type="submit" name="confirm" value="publish-and-cue" class="secondary"${disabled}
           title="Publish and cue for the next freeze in one step, for minor edits that don't need a separate review before cueing.">Publish &amp; Cue</button>

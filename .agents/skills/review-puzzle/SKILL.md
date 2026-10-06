@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Review a Concept Clusters puzzle
 
-Skill rev `424c66b9` · 2026-10-03
+Skill rev `5abb3607` · 2026-10-06
 
 Run **one** planner. Treat its JSON as the contract. Do not improvise a search.
 
@@ -130,7 +130,7 @@ draft has moved. Validate after
 a save; if validation requires a correction, refresh the draft and validate the
 corrected revision before recording the pass.
 
-Do not set `publish_to_authoring: true` on `save_puzzle_draft` unless the human asks. Cue and Freeze, from the drafts and admin pages, are how a puzzle reaches production; this skill is structural, not a publish action. The drafts page is the copy surface.
+`save_puzzle_draft` does not publish a puzzle. Review stays on the working copy. A person publishes from the drafts page, and that publish is what players see. Cue and Freeze snapshot git. This skill is structural, not a publish action.
 
 ## Author/critic loop (only if `mode` is `loop`)
 
@@ -142,7 +142,7 @@ Each round: **critic turn** (load [design judgment](../author-puzzle/references/
 - **stagnant**: this round's objections are substantially the same as last round's (a fix didn't land, or the critic is repeating itself);
 - **capped**: `--rounds` is reached with objections still open.
 
-Report the objections and fixes from every round, then the stop reason, before the same `suggest-review.mjs --record` step and human handoff the single-pass review ends with. `publish_to_authoring` still requires the human to ask.
+Report the objections and fixes from every round, then the stop reason, before the same `suggest-review.mjs --record` step and human handoff the single-pass review ends with. Do not publish the puzzle.
 
 ## Record
 

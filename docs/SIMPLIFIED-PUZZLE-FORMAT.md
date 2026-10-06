@@ -116,8 +116,9 @@ The MCP agent schema does not include `provenance`, `creator`, `license`,
 preserves existing values and stamps recognized MCP clients where possible;
 human editorial workflows maintain attribution and rights information.
 
-Publication times stay on the published row: `first_published_at` and
-`published_at`. Agents do not send `dateCreated` or `dateModified`, and a
+Publication times stay on the published row: `first_published_at`,
+`published_at`, and `content_revised_at` (a human mark that the player-facing
+text changed). Agents do not send `dateCreated` or `dateModified`, and a
 save or read strips them if a document still has them. The document does
 not contain `version`, `large`, or a learning-introduction `revision`.
 `large` is computed from the node count when a list or a board needs it.

@@ -6,12 +6,11 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `ca16cb22` · 2026-10-02
+Skill rev `b507737b` · 2026-10-06
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
-authoring MCP. The human Publishes on `/admin/drafts`, or
-`save_puzzle_draft` with `publish_to_authoring: true` does the same write
-for a confirmed final edit -- only when they've asked for that. A GitHub
+authoring MCP. `save_puzzle_draft` writes the working copy only. The human
+Publishes on `/admin/drafts`, and that publish is what players see. A GitHub
 pull request for this draft is opened from that same page by a human, not
 by MCP.
 Set `category` / `categories` / `subcategories` on the puzzle document.
@@ -83,7 +82,7 @@ human-approved.
 1. **No filesystem thrash.** Do not `find`, glob, or ripgrep. Do not read `docs/`, `modules/`, `tools/`, `tests/`, or any `content/puzzles/*.ccpuzzle.json` on the **inventory** pass.
 2. Use `suggest-subject.mjs` once, only for the unprofiled no-subject default;
    profile-only requests use [Profile-only selection](#profile-only-selection).
-3. **Stop when the active pass's checker says so.** Do not keep thinking after the stop gate. Do not set `publish_to_authoring: true` on `save_puzzle_draft` unless asked.
+3. **Stop when the active pass's checker says so.** Do not keep thinking after the stop gate. Do not publish the puzzle.
 4. **Inventory pass must not write puzzle JSON or call `create_puzzle_draft`.** No seeds, floatingTerms, or node-cap arithmetic.
 5. **Fit pass requires a human proceed signal** in this session (approval phrase
    or direct create/fit instruction — see table above). Never re-prompt for
@@ -466,9 +465,8 @@ Fix `blocking` → `validate_puzzle_draft` → `--record --authored` → stop-ga
 
 ### 5. Ship (only after human asks)
 
-Publish on `/admin/drafts` -- or `save_puzzle_draft` with
-`publish_to_authoring: true` for a confirmed final edit, only when
-asked -- ends this skill's job. Whatever happens to the draft after that
+Publish on `/admin/drafts` is the human's action, and it is what players see.
+This skill does not publish. Whatever happens to the draft after the stop-gate
 is the human's call, outside this session. Don't promise a delivery
 mechanism or artifact (a PR URL or otherwise) and don't wait on one;
 there's nothing further to do here.

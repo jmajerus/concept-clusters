@@ -179,7 +179,7 @@ export async function run() {
     // The whole per-puzzle GitHub-PR path (submit/preview and the
     // review-comment loop built on it) was retired once D1 Publish + Cue +
     // Freeze fully covered a single puzzle draft's path to production too
-    // (see save_puzzle_draft's publish_to_authoring flag). Freeze's own
+    // save_puzzle_draft does not publish a puzzle. Freeze's own
     // batch pull request is the only thing that still opens one.
     for (const name of [
       "submit_puzzle_for_publication",

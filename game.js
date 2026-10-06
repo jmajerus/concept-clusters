@@ -982,8 +982,8 @@ function setMessage(text, tone) {
 
 // Catalogue-card facts for the dialog's About mode and the shared footer:
 // the browse projection's titled category, curated catalogues the puzzle
-// sits in, term count, and the published row's file stamps when the play
-// index supplied them. A static or draft open has neither stamp.
+// sits in, term count, and the published row's dates when the play index
+// supplied them. A static or draft open has no publication date.
 function puzzleAboutFacts(puzzle) {
   const browse = PUZZLES.find(entry => entry.id === puzzle.id);
   const entry = puzzleLoader.entries.find(item => item.id === puzzle.id);
@@ -994,7 +994,8 @@ function puzzleAboutFacts(puzzle) {
       .filter(Boolean),
     termCount: puzzleNodeCount(puzzle),
     firstPublishedAt: entry?.firstPublishedAt || null,
-    publishedAt: entry?.publishedAt || null
+    publishedAt: entry?.publishedAt || null,
+    contentRevisedAt: entry?.contentRevisedAt || null
   };
 }
 

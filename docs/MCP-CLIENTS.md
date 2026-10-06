@@ -414,8 +414,8 @@ When the work later enters MCP catalogue/category tools, call
 Catalogue and category membership is D1: `create_category` /
 `update_category` / `create_catalogue` / `update_catalogue` /
 `update_meta_catalogue`. Those tools write D1 working copies; an explicit
-`publish_to_authoring: true` promotes a valid write to a held published
-snapshot. Cue and Freeze remain outside MCP. Call
+`publish_to_authoring: true` publishes a valid category or catalogue onto the
+player. Cue and Freeze remain outside MCP and snapshot git. Call
 `get_workflow_guidance` with `topic: "catalogue"` only when using those
 tools. This
 keeps operational instructions out of the initial context until that
@@ -439,8 +439,8 @@ it each time.
 | Draft creation and saving | Writes private draft state to D1; `save_puzzle_draft` requires `expected_revision` |
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
-| Publication | `save_puzzle_draft` with `publish_to_authoring: true` can promote a confirmed valid save to a held shared D1 snapshot. MCP exposes no Cue, Freeze, pull-request, or merge operation; hosted authoring has no git checkout and does not write `main` |
-| Categories and catalogues | Writes D1 working copies; `publish_to_authoring: true` can promote a valid write to a held shared D1 snapshot. Cue and Freeze remain outside MCP |
+| Publication | `save_puzzle_draft` writes a working copy and does not publish a puzzle. A person publishes that copy, and that publish is what players see. MCP exposes no Cue, Freeze, pull-request, or merge operation; hosted authoring has no git checkout and does not write `main` |
+| Categories and catalogues | Writes D1 working copies; `publish_to_authoring: true` publishes a valid category or catalogue onto the player. Cue and Freeze snapshot git |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
 
 Drafts are isolated by the authenticated Cloudflare Access subject. A client

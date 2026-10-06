@@ -167,7 +167,10 @@
 // subcategories, and board terms do not already cover.
 // 6.13: same review bar. dateCreated and dateModified stay off the puzzle.
 // First publication and last publication are row stamps.
+// 6.14: same review bar. save_puzzle_draft does not publish a puzzle.
+// A person publishes the working copy. That publish is what players see.
+// publish_to_authoring remains for categories, catalogues, and shelf reassignment.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 13
+  minor: 14
 });

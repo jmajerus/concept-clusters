@@ -81,13 +81,16 @@ review. Play is a clean player preview of the working copy
 Neither writes git. Review, beside Play on the puzzle list, opens that board with puzzle meta, collection stats, and Edit layout. In `?author=layout`,
 `Save Layout` stores the confirmed layout override for the selected Graph,
 Star, or Circle mode on the working copy; it does not publish the puzzle.
-**Publish** writes the
-shared D1 document and leaves the editor open; it is enabled only when the
-working copy is not already that snapshot. **Revert to published** appears
-only when the working copy differs from the D1 row. **Cue** means “I’m done
-with this”: it marks that published snapshot for the next freeze and returns
-to `/admin/drafts`. **Publish & Cue** does both operations and returns to the
-puzzle list. **Hold** keeps it in authoring play and leaves the editor open.
+**Publish** writes the shared D1 document the public player reads, and leaves
+the editor open. It is enabled only when the working copy is not already that
+snapshot. When the player-facing text differs from the live puzzle, an
+unchecked box beside Publish offers to show **Revised {month}** on the lesson.
+Leave it clear for a typo or any edit that should not be announced. **Revert
+to published** appears only when the working copy differs from the D1 row.
+**Cue** means “I’m done with this”: it marks that published snapshot for the
+next freeze and returns to `/admin/drafts`. **Publish & Cue** does both
+operations and returns to the puzzle list. **Hold** keeps the published row
+on the player and leaves the editor open.
 **Freeze** on `/admin`
 writes cued snapshots and any missing published forward dependencies into this
 git checkout; the Freeze plan labels automatic inclusions. **Remove from authoring
@@ -103,7 +106,13 @@ there is no MCP tool for the rename: it is a human admin fix.
 **New puzzle** refuses an id that is already published, because a blank draft
 under a live id shadows that board instead of editing it; open the published
 puzzle from the list to start a working copy from it.
-Cloudflare serves production from git, not a play preview.
+The public player reads published D1. Freeze writes the git snapshot that
+player uses when the fingerprints still match. Pre-acceptance review of a
+puzzle and its board stays on the working copy: Play (`/?draft=<id>&view=play`)
+and Open board. `save_puzzle_draft` does not publish a puzzle. Agents may
+still publish a category, a catalogue, or a shelf reassignment;
+`reassign_puzzle_classifications` writes the shelf onto the live puzzle and
+leaves the rest of that published document in place.
 `/admin/drafts` shows whether each id is in GitHub’s production
 `puzzles/manifest.js` joined with the last freeze (assuming that freeze
 merges). **Refresh from GitHub** on `/admin` (and on the puzzles list)

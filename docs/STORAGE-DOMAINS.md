@@ -196,9 +196,14 @@ Their publish path uses the same live row plus appended snapshot.
 stays put. `published_at` is when the row was last published. A draft's
 `created_at` and `updated_at` are the working-copy stamps. Those clocks are
 not copied onto the puzzle. `dateCreated` and `dateModified` are stripped
-when a document is saved or read. The lesson reads the two publication
-columns from the play index. An open without that index, including an
-unpublished draft, shows no publication date.
+when a document is saved or read. `content_revised_at` is set only when a
+person marks a puzzle publish whose player-facing text changed: title,
+`info`, clusters, bridges, the learning introduction, lenses, and related
+puzzles. Shelf fields, provenance, `board`, and layout do not move it. A
+first publication leaves it null. The lesson reads `first_published_at` and
+`content_revised_at` from the play index. **Revised {month}** when the mark
+falls in a later month. **First published {month}** otherwise. An open
+without that index, including an unpublished draft, shows no publication date.
 
 ## Projections and sub-schemas
 

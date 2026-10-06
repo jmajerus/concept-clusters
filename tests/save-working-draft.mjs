@@ -23,7 +23,6 @@ export async function run() {
   const parsed = parseSaveWorkingDraftArgs([
     "--domain", "content",
     "--repair",
-    "--publish-to-authoring",
     "--client-info", "{\"name\":\"kilo\"}",
     "--expected-revision", "2",
     "chirality-isomer-classes"
@@ -31,8 +30,12 @@ export async function run() {
   assert.equal(parsed.draftId, "chirality-isomer-classes");
   assert.equal(parsed.domain, "content");
   assert.equal(parsed.repair, true);
-  assert.equal(parsed.publishToAuthoring, true);
   assert.equal(parsed.expectedRevision, 2);
+  assert.throws(
+    () => parseSaveWorkingDraftArgs(["--publish-to-authoring", "chirality-isomer-classes"]),
+    error => error instanceof WorkingDraftSaveError && error.code === "usage"
+      && /cannot publish a puzzle/.test(error.message)
+  );
   assert.equal(parsed.clientInfoRaw, "{\"name\":\"kilo\"}");
   assert.throws(
     () => parseSaveWorkingDraftArgs(["--expected-revision", "0", "chirality-isomer-classes"]),
@@ -180,12 +183,11 @@ export async function run() {
     expectedRevision: 4,
     domain: "content",
     repair: true,
-    publishToAuthoring: true,
     callTool: async (name, args) => {
       if (name === "get_puzzle_draft") return loaded(4);
       assert.equal(args.domain, "content");
       assert.equal(args.repair, true);
-      assert.equal(args.publish_to_authoring, true);
+      assert.equal(args.publish_to_authoring, undefined);
       assert.equal(args.expected_revision, 4);
       return {
         isError: false,

@@ -51,6 +51,7 @@ export function createPublicPuzzleLoader(staticManifest, index) {
         : publicPuzzleUrl(id, published.contentFingerprint, published.layoutFingerprint),
       firstPublishedAt: published.firstPublishedAt || null,
       publishedAt: published.publishedAt || null,
+      contentRevisedAt: published.contentRevisedAt || null,
       browse: published.browse || frozen?.browse
     };
   });

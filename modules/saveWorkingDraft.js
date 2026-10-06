@@ -32,7 +32,7 @@ export const SAVE_WORKING_DRAFT_EXIT = Object.freeze({
 });
 
 export const SAVE_WORKING_DRAFT_USAGE =
-  "Usage: node tools/save-working-draft.mjs [--client-info '<json>'] [--meta '<json>'] [--domain complete|content|classification|pedagogy] [--repair] [--publish-to-authoring] [--expected-revision <n>] <draft-id>";
+  "Usage: node tools/save-working-draft.mjs [--client-info '<json>'] [--meta '<json>'] [--domain complete|content|classification|pedagogy] [--repair] [--expected-revision <n>] <draft-id>";
 
 function toolErrorMessage(result) {
   if (typeof result?.structured?.error === "string" && result.structured.error) {
@@ -44,7 +44,6 @@ function toolErrorMessage(result) {
 export function parseSaveWorkingDraftArgs(argv) {
   let domain = "complete";
   let repair = false;
-  let publishToAuthoring = false;
   let expectedRevision = null;
   let clientInfoRaw = null;
   let metaRaw = null;
@@ -56,8 +55,10 @@ export function parseSaveWorkingDraftArgs(argv) {
       continue;
     }
     if (arg === "--publish-to-authoring") {
-      publishToAuthoring = true;
-      continue;
+      throw new WorkingDraftSaveError(
+        "usage",
+        `save-working-draft cannot publish a puzzle. A person publishes the working copy. ${SAVE_WORKING_DRAFT_USAGE}`
+      );
     }
     if (arg === "--domain" || arg === "--client-info" || arg === "--meta" || arg === "--expected-revision") {
       const value = argv[++index];
@@ -96,7 +97,6 @@ export function parseSaveWorkingDraftArgs(argv) {
     draftId: positionals[0],
     domain,
     repair,
-    publishToAuthoring,
     expectedRevision,
     clientInfoRaw,
     metaRaw
@@ -176,8 +176,7 @@ export async function saveWorkingDraft({
   expectedRevision,
   callTool,
   domain = "complete",
-  repair = false,
-  publishToAuthoring = false
+  repair = false
 }) {
   assertDraftId(draftId);
   if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
@@ -223,7 +222,6 @@ export async function saveWorkingDraft({
   };
   if (domain !== "complete") saveArgs.domain = domain;
   if (repair) saveArgs.repair = true;
-  if (publishToAuthoring) saveArgs.publish_to_authoring = true;
 
   const saved = await callTool("save_puzzle_draft", saveArgs);
   if (saved?.isError || saved?.protocolError) {

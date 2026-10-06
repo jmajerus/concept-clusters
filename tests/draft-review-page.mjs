@@ -90,6 +90,7 @@ export async function run() {
     /name="confirm" value="publish" disabled/,
     "Publish must not be withheld when only provenance changed"
   );
+  assert.doesNotMatch(withProvenanceEdit, /name="show_as_revised"/);
 
   // The rename form is gated on the server's own liveness answer, not on the
   // page's publication flags: a withdrawn row or a git-only id is live to the
@@ -545,6 +546,24 @@ export async function run() {
   });
   assert.match(dirtyPlay, /value="publish">Publish/);
   assert.doesNotMatch(dirtyPlay, /value="publish" disabled/);
+  assert.doesNotMatch(dirtyPlay, /name="show_as_revised"/);
+  const revisedOffer = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    playerTextDiffersFromPublished: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 2,
+      counts: { changed: 2, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(revisedOffer, /name="show_as_revised" value="1"/);
+  assert.match(revisedOffer, /Show “Revised .+” on the lesson/);
+  assert.doesNotMatch(revisedOffer, /name="show_as_revised"[^>]*checked/);
   assert.match(dirtyPlay, /value="revert-published"/);
   assert.match(dirtyPlay, /value="unpublish"/);
   assert.match(dirtyPlay, /Revert to published restores the last D1 published document/);
@@ -1074,6 +1093,8 @@ export async function run() {
     }
   });
   assert.match(unchangedPublished, /No changes from the published puzzle/);
+  assert.doesNotMatch(unchangedPublished, /name="show_as_revised"/);
+  assert.doesNotMatch(draftPage, /name="show_as_revised"/);
   assert.doesNotMatch(draftPage, /from the published puzzle/);
 
   assert.match(draftPage, /<copy-field>/);
