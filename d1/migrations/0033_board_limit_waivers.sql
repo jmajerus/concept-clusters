@@ -97,6 +97,10 @@ WHERE administration_json IS NOT NULL
   AND json_valid(administration_json)
   AND json_type(administration_json, '$.clusterTermExceptions') = 'array';
 
+-- Requests belong to a draft; 0032 kept them after the draft was deleted.
+DELETE FROM puzzle_board_limit_waiver_requests
+WHERE draft_id NOT IN (SELECT id FROM puzzle_drafts);
+
 DROP INDEX IF EXISTS cluster_term_exception_requests_by_draft;
 DROP INDEX IF EXISTS cluster_term_exception_one_pending_per_scope;
 DROP INDEX IF EXISTS cluster_term_exception_events_by_puzzle;

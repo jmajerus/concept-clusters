@@ -236,9 +236,16 @@ export class D1DraftRepository extends DraftRepository {
         `).bind(...bindings),
         // Audit rows are written only if this exact document landed: a
         // concurrent save can reach the same revision number, not this hash.
+        // An identical concurrent decision (a double-submitted revoke) lands
+        // the same hash, so each target also gets at most one event per
+        // resulting revision.
         ...audit({
           sql: "EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ? AND content_hash = ?)",
-          bindings: [draftId, expectedRevision + 1, contentHash]
+          bindings: [draftId, expectedRevision + 1, contentHash],
+          firstEvent: `NOT EXISTS (SELECT 1 FROM puzzle_board_limit_waiver_events
+            WHERE draft_id = ? AND draft_revision = ? AND waiver_type = ? AND target_id = ?)`,
+          firstEventBindings: (waiverType, targetId) =>
+            [draftId, expectedRevision + 1, waiverType, targetId]
         })
       ]);
     } catch (error) {
@@ -359,13 +366,14 @@ export class D1DraftRepository extends DraftRepository {
           (puzzle_id, waiver_type, target_id, event_type, actor, event_at,
            approved_count, reason, draft_id, draft_revision)
           SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-          WHERE ${landed.sql}
+          WHERE ${landed.sql} AND ${landed.firstEvent}
             AND EXISTS (SELECT 1 FROM puzzle_board_limit_waiver_requests
               WHERE id = ? AND draft_id = ? AND status = 'granted')`)
           .bind(draft.document.id, request.waiverType, request.targetId,
             previous ? "replaced" : "granted", decidedBy, now,
             request.count, request.reason, draftId, expectedRevision + 1,
-            ...landed.bindings, request.id, draftId)
+            ...landed.bindings, ...landed.firstEventBindings(request.waiverType, request.targetId),
+            request.id, draftId)
       ];
       return this.persistBoardLimitWaiverMutation({
         draftId, document, actor, expectedRevision, requestId: request.id, audit
@@ -412,10 +420,10 @@ export class D1DraftRepository extends DraftRepository {
         (puzzle_id, waiver_type, target_id, event_type, actor, event_at,
          approved_count, reason, draft_id, draft_revision)
         SELECT ?, ?, ?, 'revoked', ?, ?, ?, ?, ?, ?
-        WHERE ${landed.sql}`)
+        WHERE ${landed.sql} AND ${landed.firstEvent}`)
         .bind(draft.document.id, waiverType, targetId, decidedBy, now,
           grant.approvedCount, grant.reason, draftId, expectedRevision + 1,
-          ...landed.bindings)
+          ...landed.bindings, ...landed.firstEventBindings(waiverType, targetId))
     ];
     return this.persistBoardLimitWaiverMutation({
       draftId, document, actor, expectedRevision, audit
@@ -950,7 +958,13 @@ export class D1DraftRepository extends DraftRepository {
           `).bind(draftId, owner, expectedRevision)
         : this.database.prepare(`
             DELETE FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
-          `).bind(draftId, owner)
+          `).bind(draftId, owner),
+      // Requests belong to the draft; drop them only if it was deleted, so a
+      // reused id never shows another draft's rationale. Audit events stay.
+      this.database.prepare(`
+        DELETE FROM puzzle_board_limit_waiver_requests
+        WHERE draft_id = ? AND NOT EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ?)
+      `).bind(draftId, draftId)
     ]);
     if (changes(result[1]) === 1) return;
     if (guarded) {

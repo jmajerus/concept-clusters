@@ -64,11 +64,18 @@ function migrationCollapsesPendingLists() {
   const database = createSqliteD1({
     before: (number, sqlite) => {
       if (number !== 33) return;
+      sqlite.prepare(`INSERT INTO puzzle_drafts
+        (id, owner_subject, status, document, content_hash, created_at, updated_at)
+        VALUES ('d', 'human', 'draft', '{}', 'h', '2026-10-01', '2026-10-01')`).run();
       const insert = sqlite.prepare(`INSERT INTO puzzle_cluster_term_exception_requests
         (draft_id, puzzle_id, cluster_id, terms_json, reason, status, requested_by, requested_at, requested_revision)
         VALUES ('d', 'p', 'c', ?, 'why', 'pending', 'me', ?, 1)`);
       insert.run(JSON.stringify(terms(8)), "2026-10-01");
       insert.run(JSON.stringify(terms(8, "u")), "2026-10-02");
+      // A request whose draft was deleted is dropped, not carried forward.
+      sqlite.prepare(`INSERT INTO puzzle_cluster_term_exception_requests
+        (draft_id, puzzle_id, cluster_id, terms_json, reason, status, requested_by, requested_at, requested_revision)
+        VALUES ('gone', 'p', 'c', '[]', 'why', 'declined', 'me', '2026-09-01', 1)`).run();
     }
   });
   const rows = database.sqlite.prepare(
@@ -117,6 +124,27 @@ async function d1GrantRevokeUndo(approvedLimit) {
   // Undo is a content operation; it must not revive the revoked grant.
   draft = await repository.popWorkingCopy({ draftId, actor, expectedRevision: draft.revision });
   assert.equal(draft.document.boardLimitWaivers, undefined);
+
+  // A double-submitted revoke lands one document and one audit event.
+  draft = await repository.grantBoardLimitWaiverDirect({
+    draftId, waiverType: "cluster-term-count", targetId: "alpha", reason, actor,
+    expectedRevision: draft.revision
+  });
+  const revoke = () => repository.revokeBoardLimitWaiver({
+    draftId, waiverType: "cluster-term-count", targetId: "alpha", actor, expectedRevision: draft.revision
+  });
+  const outcomes = await Promise.allSettled([revoke(), revoke()]);
+  assert.deepEqual(outcomes.map(outcome => outcome.status).sort(), ["fulfilled", "rejected"]);
+  const events = database.sqlite.prepare(
+    "SELECT event_type FROM puzzle_board_limit_waiver_events ORDER BY id"
+  ).all().map(row => row.event_type);
+  assert.deepEqual(events, ["granted", "revoked", "granted", "revoked"]);
+
+  // Requests go with their draft; a reused id starts with none.
+  await repository.delete({ draftId, actor });
+  await repository.create({ draftId, document: puzzleWith(terms(approvedLimit)), actor: { subject: "someone-else" } });
+  assert.deepEqual(await repository.listBoardLimitWaiverRequests({ draftId, actor: { subject: "someone-else" } }), []);
+  assert.equal(database.sqlite.prepare("SELECT count(*) n FROM puzzle_board_limit_waiver_events").get().n, 4);
 }
 
 export async function run() {
