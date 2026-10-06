@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `053734c9` · 2026-10-06
+Skill rev `fb3672d5` · 2026-10-06
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -48,7 +48,9 @@ larger size serves the lesson, save the draft and call
 `request_board_limit_waiver` with its latest revision, `waiver_type`,
 `target_id`, and a specific rationale before restructuring only to meet the
 ordinary limit. A grant allows that target up to the approved size; swapping
-terms keeps it, growing past it does not. Continue lenses and
+terms keeps it, growing past it does not. If your client supports MCP
+elicitation, the person is asked in the chat and the tool result reports the
+decision; never treat a chat message as approval. Otherwise continue lenses and
 lesson work while review is pending. A request is not an approval; a human must
 grant it before publication. The 32-node board ceiling still applies.
 

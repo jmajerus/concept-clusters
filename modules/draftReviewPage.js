@@ -1593,6 +1593,8 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
   </section>`;
 }
 
+// Board-limit waiver decisions, shown inside the Review section beside
+// review issues: both are things about this puzzle awaiting a person.
 function renderBoardLimitWaiverReview(draft) {
   const document = draft.document || {};
   const requests = draft.boardLimitWaiverRequests || [];
@@ -1667,18 +1669,19 @@ function renderBoardLimitWaiverReview(draft) {
   const history = closed.length ? `<details><summary>Previous requests (${closed.length})</summary><ul>${closed.map(request =>
     `<li>${escapeHtml(request.status)} · ${escapeHtml(request.waiverType)} · ${escapeHtml(request.targetId)} · size ${escapeHtml(String(request.count))} · ${escapeHtml(request.reason)}${request.decisionNote ? ` · ${escapeHtml(request.decisionNote)}` : ""}</li>`
   ).join("")}</ul></details>` : "";
-  if (!pending.length && !granted && !direct && !history) return "";
+  if (!pending.length && !granted && !direct && !history) return { pending: 0, html: "" };
   const supported = policies.map(policy =>
     `${escapeHtml(policy.label)}: ${escapeHtml(String(policy.normalLimit))} ordinary, ${escapeHtml(String(policy.approvedLimit))} by waiver`
   ).join("; ");
-  return `<section class="submit-pr">
-    <h2>Board limit waivers</h2>
-    <p class="meta">Supported limits: ${supported}. Each waiver applies only to its recorded puzzle, target, and approved scope. This board has ${puzzleNodeCount(document)} total nodes.</p>
-    ${pending.length ? `<h3>Pending requests</h3>${cards}` : ""}
-    ${direct ? `<h3>Grant a waiver</h3>${direct}` : ""}
-    ${granted ? `<h3>Current grants</h3>${granted}` : ""}
-    ${history}
-  </section>`;
+  return {
+    pending: pending.length,
+    html: `<h3>Board limits</h3>
+    <p class="meta">${supported}. A waiver lets one target reach its approved size, whichever terms fill it. This board has ${puzzleNodeCount(document)} total nodes.</p>
+    ${pending.length ? `<h4>Awaiting decision</h4>${cards}` : ""}
+    ${direct ? `<h4>Grant a waiver</h4>${direct}` : ""}
+    ${granted ? `<h4>Current grants</h4>${granted}` : ""}
+    ${history}`
+  };
 }
 
 function renderRevisedCheckbox(show, { hidden = false } = {}) {
@@ -1748,10 +1751,15 @@ function renderSubmitForm(draft, variant = "hosted") {
   const reviewIssues = Array.isArray(draft.reviewIssues) ? draft.reviewIssues : [];
   const openReviewIssues = reviewIssues.filter(issue => issue.status === "open");
   const reviewLink = `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`;
+  const waivers = renderBoardLimitWaiverReview(draft);
+  const waiverCount = waivers.pending
+    ? ` · ${waivers.pending} waiver request${waivers.pending === 1 ? "" : "s"} awaiting decision`
+    : "";
   const reviewSummary = `<section class="submit-pr">
     <h2>Review</h2>
-    <p class="meta">Agent review: ${escapeHtml(draft.lastAgentReviewedAt || "not recorded")} · Human review: ${escapeHtml(draft.lastHumanReviewedAt || "not recorded")} · ${openReviewIssues.length} open issue handoff${openReviewIssues.length === 1 ? "" : "s"}.</p>
+    <p class="meta">Agent review: ${escapeHtml(draft.lastAgentReviewedAt || "not recorded")} · Human review: ${escapeHtml(draft.lastHumanReviewedAt || "not recorded")} · ${openReviewIssues.length} open issue handoff${openReviewIssues.length === 1 ? "" : "s"}${waiverCount}.</p>
     <a class="play-button secondary" href="${reviewLink}">Review issues</a>
+    ${waivers.html}
   </section>`;
   const publishSection = choosingReview
     ? renderReviewChoice(draft, {
@@ -1759,7 +1767,9 @@ function renderSubmitForm(draft, variant = "hosted") {
     })
     : `<section class="submit-pr">
     <h2>Actions</h2>
-    <p class="meta">${hint}</p>
+    <p class="meta">${hint}${waivers.pending
+      ? ` ${waivers.pending} board-limit waiver request${waivers.pending === 1 ? " is" : "s are"} awaiting decision under Review; validation blocks publishing until ${waivers.pending === 1 ? "it is" : "they are"} granted or the board is restructured.`
+      : ""}</p>
     <div class="actions">
       ${playButton}
       <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
@@ -1776,7 +1786,6 @@ function renderSubmitForm(draft, variant = "hosted") {
     : `<button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>`;
   return `${publishSection}
   ${reviewSummary}
-  ${renderBoardLimitWaiverReview(draft)}
   ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
     published: draft.d1Published === true,
     withdrawn: draft.d1Withdrawn === true,

@@ -11,6 +11,8 @@ import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { diffPublishedDraft } from "../modules/draftReviewDiff.js";
 import { createSqliteD1 } from "./lib/sqlite-d1.mjs";
+import { renderDraftPage } from "../modules/draftReviewPage.js";
+import { CATEGORIES } from "../puzzles/categories.js";
 
 export const name = "board limit waivers: count-based grants, D1 audit and undo, migration, schema drift";
 
@@ -174,6 +176,19 @@ export async function run() {
       reason, expectedRevision: draft.revision, actor: reviewer
     });
     assert.equal(request.count, approvedLimit);
+
+    // The decision sits inside the Review section, counted in its summary,
+    // and Publish says why it is waiting.
+    const page = renderDraftPage({
+      ...draft, draftId, puzzleId: draftId, status: "draft",
+      validation: { valid: false, errors: [] },
+      boardLimitWaiverRequests: [request]
+    }, { categoryRegistry: CATEGORIES });
+    const review = page.slice(page.indexOf("<h2>Review</h2>"));
+    assert.match(review, /1 waiver request awaiting decision/);
+    assert.match(review.slice(0, review.indexOf("</section>")), /<h3>Board limits<\/h3>[\s\S]*Awaiting decision[\s\S]*Grant waiver/);
+    assert.equal(page.includes("<h2>Board limit waivers</h2>"), false);
+    assert.match(page, /1 board-limit waiver request is awaiting decision under Review/);
 
     draft = await store.decideBoardLimitWaiver({
       draftId, requestId: request.id, decision: "granted",

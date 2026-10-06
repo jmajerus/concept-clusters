@@ -14,6 +14,7 @@ import {
 } from "./authoringDesignGuidance.js";
 import { resolveLocalDraftActor } from "./localD1Config.js";
 import { createAuthoringMcpServer } from "./hostedMcpAuthoringServer.js";
+import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
 
@@ -62,7 +63,8 @@ function lazyRepository(resolveRepository) {
     "setReviewStackLoaded",
     "releaseReviewSession",
     "listBoardLimitWaiverRequests",
-    "requestBoardLimitWaiver"
+    "requestBoardLimitWaiver",
+    "decideBoardLimitWaiver"
   ];
   const facade = Object.fromEntries(required.map(method => [method, async (...args) => {
     const repository = await resolve();
@@ -187,6 +189,7 @@ export function createConceptClustersMcpServer({
     clientProbeLogRoot: repositoryRoot,
     clientProbeTransport: "stdio",
     wikiLinkStore: sharedWikiLinkStore,
+    draftReviewBaseUrl: localDraftReviewUrl(),
     // A normal stdio server resolves its D1 adapter lazily from env, so
     // d1Database is usually null here even though content documents are
     // available. A file-backed draft remnant without an explicit D1 content

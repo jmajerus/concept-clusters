@@ -175,7 +175,9 @@
 // request_board_limit_waiver; a grant allows that target up to the approved
 // size, whichever terms fill it.
 // Drafting continues while the request is reviewed.
+// 6.16: request_board_limit_waiver asks the person in the chat when the
+// client supports elicitation; only the tool result reports a decision.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 15
+  minor: 16
 });

@@ -92,8 +92,9 @@ A waiver is a layout allowance for one target in this puzzle: it permits that
 target up to the approved size, whichever terms fill it. If the larger size
 serves the lesson better than restructuring, save the draft and call
 \`request_board_limit_waiver\` with that rationale before restructuring only
-to meet the ordinary limit. Continue drafting while review
-is pending. A request is not an approval, and a waiver does not relax the
+to meet the ordinary limit. Where the client supports it, the person is asked
+in the chat and the tool result reports their decision; a chat message is never
+an approval by itself. Otherwise continue drafting while review is pending. A request is not an approval, and a waiver does not relax the
 32-node ceiling or any other validation rule.
 
 When a split plan is involved, the puzzle document receives only the
