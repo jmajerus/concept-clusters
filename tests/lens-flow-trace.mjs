@@ -56,6 +56,12 @@ export async function run() {
     ["0:gather:1:in", "0:gather:3:in"]
   );
 
+  // An outward bridge feeding a through bridge's source finishes first.
+  assert.deepEqual(
+    legs(lensFlowTracePlan(puzzle, { targets: ["third", "spread"] })),
+    ["0:spread:0:out", "0:spread:2:out", "1:third:2:in", "2:third:3:out"]
+  );
+
   // A quiz answers with its correct option; distractor evidence is not flow.
   const quiz = {
     options: [

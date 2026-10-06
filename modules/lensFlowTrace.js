@@ -29,8 +29,9 @@ function lensAnswerWords(lens) {
 
 // One leg per animated arm, with the beat it starts on. Bridges are
 // directed independently, so a `through` bridge whose source cluster is
-// another targeted bridge's destination waits for that bridge to finish:
-// a chain A -> x -> B -> y -> C reads as one path, not two flashes.
+// another targeted bridge's destination -- a `through` bridge's `to` or
+// any arm of an `outward` one -- waits for that bridge to finish: a chain
+// A -> x -> B -> y -> C reads as one path, not two flashes.
 // Bidirectional bridges are left alone; a pulse both ways along one arm
 // cancels into a flicker. Beats are compacted so a lone outward bridge
 // does not idle through an empty inbound beat.
@@ -41,14 +42,17 @@ export function lensFlowTracePlan(puzzle, lens) {
   );
   if (!bridges.length) return [];
 
-  const through = bridges.filter(bridge => bridge.direction.kind === "through");
+  const delivers = (bridge, clusterIndex) => bridge.direction.kind === "through"
+    ? bridge.direction.to === clusterIndex
+    : bridge.direction.kind === "outward" &&
+      (bridge.gs || bridge.clusters || []).includes(clusterIndex);
   const stages = new Map();
   const stageOf = (bridge, visiting = new Set()) => {
     if (stages.has(bridge)) return stages.get(bridge);
     if (bridge.direction.kind !== "through" || visiting.has(bridge)) return 0;
     visiting.add(bridge);
-    const predecessors = through.filter(other =>
-      other !== bridge && other.direction.to === bridge.direction.from
+    const predecessors = bridges.filter(other =>
+      other !== bridge && delivers(other, bridge.direction.from)
     );
     const stage = predecessors.length
       ? Math.max(...predecessors.map(other => stageOf(other, visiting) + 1))

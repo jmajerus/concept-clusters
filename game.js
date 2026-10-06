@@ -490,6 +490,7 @@ async function finishLensLayoutAfterModeSwitch(
       );
     }
     updateLensInterface();
+    traceRevealedLens({ redraw: true });
     persistPlayerSession({ captureLayout: true });
   }
 }
@@ -1455,15 +1456,19 @@ function restoreLensSession(savedLens) {
   }
 }
 
-// Experimental (board.lensFlowTrace). Runs only from the reveal itself,
-// never from a restored session, so reopening a puzzle does not replay it.
-function traceRevealedLens() {
+// Experimental (board.lensFlowTrace). The pulse runs only from the reveal
+// itself, never from a restored session or a mode switch, so it is not
+// replayed. The reduced-motion highlight is the same information held for
+// as long as the explanation is up, so a renderer rebuild redraws it.
+function traceRevealedLens({ redraw = false } = {}) {
   if (!lensFlowTraceEnabled(state?.puzzle)) return;
+  const reducedMotion = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (redraw && (!reducedMotion || !lensReviewIsVisible(state))) return;
   playLensFlowTrace(
     svg,
     lensFlowTracePlan(state.puzzle, currentLens(state)),
     state.bridgeArmSegment,
-    { reducedMotion: !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches }
+    { reducedMotion }
   );
 }
 
