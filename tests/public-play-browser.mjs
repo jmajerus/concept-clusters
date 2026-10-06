@@ -57,6 +57,10 @@ export async function run(page) {
     await page.goto(`${base}/?puzzle=energy-flow`);
     await waitForTitle(page, "Energy flow in living systems");
     assert.equal(boardRequests, 0, "matching frozen puzzle should load its static module");
+    assert.match(
+      await page.textContent("#learning-introduction #published"),
+      /^First published /
+    );
 
     await page.goto(`${base}/?puzzle=new-from-d1`);
     await waitForTitle(page, "New from D1");

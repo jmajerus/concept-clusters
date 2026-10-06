@@ -5,7 +5,7 @@
 // "Simplified" means the identity ceremony is gone while authored puzzle
 // content remains available. Repository-owned lifecycle metadata is excluded:
 // the infrastructure supplies revisions, hashes, and status outside this
-// document, and stamps dateCreated and dateModified onto it at publication.
+// document. Publication times stay on the published row.
 // Legacy bridge termRole is migration-only and is removed before
 // this schema is parsed. JSON-LD is interchange-only (content:export/import),
 // never a stored draft. Live authoring uses puzzleFromAuthoredDocument() to
@@ -377,11 +377,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   creator: z.string().min(1).optional(),
   license: z.string().min(1).optional(),
   derivedFrom: z.string().min(1).optional(),
-  language: z.string().min(1).optional(),
-  // System-stamped at publication. Agents do not send these; the MCP schema
-  // omits them. They stay on the stored puzzle so Freeze and play can read them.
-  dateCreated: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  dateModified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
+  language: z.string().min(1).optional()
 }).strict().superRefine((input, context) => {
   if (input.puzzleKind !== "vocabulary-context" && input.clusters.length < 2) {
     context.addIssue({
@@ -696,9 +692,7 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     ...(input.creator ? { creator: input.creator } : {}),
     ...(input.license ? { license: input.license } : {}),
     ...(input.derivedFrom ? { derivedFrom: input.derivedFrom } : {}),
-    ...(input.language ? { language: input.language } : {}),
-    ...(input.dateCreated ? { dateCreated: input.dateCreated } : {}),
-    ...(input.dateModified ? { dateModified: input.dateModified } : {})
+    ...(input.language ? { language: input.language } : {})
   };
 }
 
@@ -730,7 +724,7 @@ export function authoredDocumentForSchema(input, { categoryRegistry = CATEGORIES
       canonicalizeBridgeTermRoles(
         canonicalizePuzzleCategoryReferences(
           canonicalizeDocumentProvenance(
-            stripSystemAuthoredMetadata(input, { keepDocumentDates: true })
+            stripSystemAuthoredMetadata(input)
           ),
           categoryRegistry
         )

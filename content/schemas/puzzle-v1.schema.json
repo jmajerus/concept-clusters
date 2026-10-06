@@ -35,8 +35,6 @@
     "lenses": { "type": "array", "items": { "type": "object", "required": ["@id", "@type", "id", "prompt", "targets", "explanation"] } },
     "learningIntroduction": { "type": "object" },
     "creator": {}, "license": { "type": "string" }, "derivedFrom": {},
-    "dateCreated": { "type": "string", "format": "date" },
-    "dateModified": { "type": "string", "format": "date" },
     "language": { "type": "string" }, "version": {},
     "provenance": { "$ref": "#/$defs/provenance" },
     "layouts": { "type": "object" }

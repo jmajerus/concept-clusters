@@ -62,10 +62,9 @@ export async function buildPublicPlayIndex(repository, { staticManifest = [] } =
     return {
       id: row.id,
       firstPublishedAt: row.firstPublishedAt || row.publishedAt || null,
+      publishedAt: row.publishedAt || null,
       contentFingerprint,
       layoutFingerprint,
-      dateCreated: puzzle?.dateCreated || null,
-      dateModified: puzzle?.dateModified || null,
       ...(JSON.stringify(sortedJson(browse)) === JSON.stringify(sortedJson(staticBrowse)) ? {} : { browse })
     };
   });

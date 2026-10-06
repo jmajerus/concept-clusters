@@ -15,8 +15,6 @@ import {
 } from "../modules/contentDocumentSeed.js";
 import { DraftNotFoundError } from "../modules/draftRepository.js";
 import { createCatalogueSkeleton } from "../modules/catalogueAuthorEngine.js";
-import { RECORDING_START_DATE } from "../modules/authoringDomains.js";
-
 export const name = "content documents: memory published row, history, revert";
 
 export async function run() {
@@ -219,8 +217,9 @@ export async function run() {
     id: "old-git-puzzle",
     revision: initiallyReviewed.revision + 1
   }), null);
-  assert.equal(initiallyReviewed.document.dateCreated, "2026-01-01");
-  assert.equal(initiallyReviewed.document.dateModified, "2026-01-02");
+  assert.equal(initiallyReviewed.document.dateCreated, undefined);
+  assert.equal(initiallyReviewed.document.dateModified, undefined);
+  assert.ok(initiallyReviewed.firstPublishedAt);
   const datedBody = {
     id: "dated-puzzle",
     title: "Dated",
@@ -228,7 +227,7 @@ export async function run() {
     clusters: [],
     bridges: []
   };
-  await repo.seedPublishedIfAbsent({
+  const seededDated = await repo.seedPublishedIfAbsent({
     kind: "puzzle",
     id: "dated-puzzle",
     document: {
@@ -237,22 +236,27 @@ export async function run() {
       dateModified: "2026-01-02"
     }
   });
+  assert.equal(seededDated.document.dateCreated, undefined);
+  assert.equal(seededDated.document.dateModified, undefined);
   const unchanged = await repo.publish({
     kind: "puzzle",
     id: "dated-puzzle",
     document: { ...datedBody, dateCreated: "1999-01-01", dateModified: "1999-01-02" },
     actor
   });
-  assert.equal(unchanged.document.dateCreated, "2026-01-01");
-  assert.equal(unchanged.document.dateModified, "2026-01-02");
+  assert.equal(unchanged.document.dateCreated, undefined);
+  assert.equal(unchanged.document.dateModified, undefined);
+  assert.equal(unchanged.firstPublishedAt, seededDated.firstPublishedAt);
   const edited = await repo.publish({
     kind: "puzzle",
     id: "dated-puzzle",
     document: { ...datedBody, title: "Dated revised" },
     actor
   });
-  assert.equal(edited.document.dateCreated, "2026-01-01");
-  assert.notEqual(edited.document.dateModified, "2026-01-02");
+  assert.equal(edited.document.dateCreated, undefined);
+  assert.equal(edited.document.dateModified, undefined);
+  assert.equal(edited.title, "Dated revised");
+  assert.equal(edited.firstPublishedAt, seededDated.firstPublishedAt);
   const backfilled = await repo.seedPublishedIfAbsent({
     kind: "puzzle",
     id: "existing-corpus",
@@ -264,15 +268,16 @@ export async function run() {
       bridges: []
     }
   });
-  assert.equal(backfilled.document.dateCreated, RECORDING_START_DATE);
-  assert.equal(backfilled.document.dateModified, RECORDING_START_DATE);
+  assert.equal(backfilled.document.dateCreated, undefined);
+  assert.equal(backfilled.document.dateModified, undefined);
+  assert.ok(backfilled.firstPublishedAt);
   const backfilledRevision = await repo.getPublishedAtRevision({
     kind: "puzzle",
     id: "existing-corpus",
     revision: backfilled.revision
   });
-  assert.equal(backfilledRevision.document.dateCreated, RECORDING_START_DATE);
-  assert.equal(backfilledRevision.document.dateModified, RECORDING_START_DATE);
+  assert.equal(backfilledRevision.document.dateCreated, undefined);
+  assert.equal(backfilledRevision.document.dateModified, undefined);
   assert.equal(initiallyReviewed.document.version, undefined);
   assert.equal(initiallyReviewed.document.learningIntroduction.revision, undefined);
   assert.ok(initiallyReviewed.lastAgentReviewedAt);

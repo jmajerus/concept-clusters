@@ -84,9 +84,9 @@ const SINGLE_VOCABULARY_CLUSTER_SHAPE = Object.freeze({
     }
   }
 });
-// dateCreated and dateModified are stamped at publication and are not part
-// of the MCP authoring contract. `large` is computed from the node count
-// wherever a list or a board needs it, and is not a stored field.
+// dateCreated and dateModified are published-row stamps and are not part
+// of the puzzle document or the MCP authoring contract. `large` is computed
+// from the node count wherever a list or a board needs it, and is not a stored field.
 const generatedAuthoringProperties = Object.fromEntries(
   Object.entries(generatedSimplifiedPuzzleSchema.properties)
     .filter(([name]) => name !== "dateCreated" && name !== "dateModified"

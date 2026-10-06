@@ -105,8 +105,8 @@ function publishedRecord(row) {
   };
 }
 
-function documentForPublishedStorage(kind, document, options = {}) {
-  return publicationDocument(kind, document, options);
+function documentForPublishedStorage(kind, document) {
+  return publicationDocument(kind, document);
 }
 
 function titleOf(document) {
@@ -759,10 +759,7 @@ export class D1ContentDocumentRepository {
     for (const item of items) {
       assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(item.id);
-      const sourceDocument = documentForPublishedStorage(item.kind, item.document, {
-        now,
-        backfill: true
-      });
+      const sourceDocument = documentForPublishedStorage(item.kind, item.document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
       const contentHash = draftContentHash(documentJson);
       const layoutJson = item.kind === "puzzle"
@@ -816,10 +813,7 @@ export class D1ContentDocumentRepository {
     const existing = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? AND id = ?
     `).bind(kind, id).first();
-    const previous = existing?.document
-      ? parsedJson(existing.document, "Published document")
-      : null;
-    const sourceDocument = documentForPublishedStorage(kind, document, { previous, now });
+    const sourceDocument = documentForPublishedStorage(kind, document);
     const documentJson = serializeDraftDocument({ ...sourceDocument, id });
     const contentHash = draftContentHash(documentJson);
     if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
@@ -1103,10 +1097,7 @@ export function createMemoryContentDocumentRepository() {
       for (const item of items) {
         assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
         assertDraftId(item.id);
-        const sourceDocument = documentForPublishedStorage(item.kind, item.document, {
-          now: new Date().toISOString(),
-          backfill: true
-        });
+        const sourceDocument = documentForPublishedStorage(item.kind, item.document);
         const key = publishedKey(item.kind, item.id);
         if (published.has(key)) continue;
         const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
@@ -1147,10 +1138,7 @@ export function createMemoryContentDocumentRepository() {
       const now = new Date().toISOString();
       const key = publishedKey(kind, id);
       const existing = published.get(key);
-      const previous = existing?.document
-        ? parsedJson(existing.document, "Published document")
-        : null;
-      const sourceDocument = documentForPublishedStorage(kind, document, { previous, now });
+      const sourceDocument = documentForPublishedStorage(kind, document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id });
       if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
         throw new PublishedRevisionConflictError(kind, id);

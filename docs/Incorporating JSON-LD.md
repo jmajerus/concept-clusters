@@ -263,7 +263,7 @@ JSON-LD also gives the project a natural place for educational-content provenanc
 }
 ```
 
-That will be especially valuable for OER-derived puzzles and imported catalogues. Provenance stops being something that must be reconstructed from commit history or a separate note.
+That will be especially valuable for OER-derived puzzles and imported catalogues. Provenance stops being something that must be reconstructed from commit history or a separate note. The implemented contract keeps `creator`, `license`, and `derivedFrom` on the document. Publication times are row stamps (`first_published_at`, `published_at`) and are not stored as `dateCreated` or `dateModified`.
 
 ## Recommended file types
 
