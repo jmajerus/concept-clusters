@@ -225,7 +225,7 @@ export function diffPublishedDraft(published, draft) {
   const fields = {};
   for (const name of [
     "title", "puzzleKind", "category", "categories", "subcategories", "tags",
-    "level", "lensMode", "preSolve", "relatedPuzzles",
+    "level", "lensMode", "preSolve", "relatedPuzzles", "board",
     "learningIntroduction"
   ]) {
     const change = fieldChange(published[name], draft[name]);
@@ -260,7 +260,7 @@ export function diffPublishedDraft(published, draft) {
   return { counts, total, fields, clusters, bridges, lenses };
 }
 
-/** Content and pedagogy only. Provenance is outside the review identity. */
+/** Authored content and board settings. Provenance is outside the review identity. */
 export function samePlayablePuzzle(left, right) {
   const diff = diffPublishedDraft(left, right);
   return Boolean(diff && diff.total === 0);
@@ -268,7 +268,7 @@ export function samePlayablePuzzle(left, right) {
 
 const PLAYABLE_FIELDS = [
   "title", "puzzleKind", "category", "categories", "subcategories", "tags",
-  "level", "lensMode", "preSolve", "relatedPuzzles", "learningIntroduction"
+  "level", "lensMode", "preSolve", "relatedPuzzles", "learningIntroduction", "board"
 ];
 
 function copyValue(value) {

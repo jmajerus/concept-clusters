@@ -45,6 +45,10 @@ export async function run() {
     ...published,
   });
   assert.equal(identical.total, 0);
+  const boardChanged = { ...published, board: { bridgePreconnect: true } };
+  assert.equal(diffPublishedDraft(published, boardChanged).total, 1);
+  assert.ok(diffPublishedDraft(published, boardChanged).fields.board);
+  assert.equal(samePlayablePuzzle(published, boardChanged), false);
 
   const lensCut = {
     ...published,

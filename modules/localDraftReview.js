@@ -1771,6 +1771,11 @@ export function createLocalDraftReviewHandler({
         publishedRows
       );
       const listed = await draftStore.listDrafts({ includeDocument: true });
+      const categoryRegistry = await loadMergedCategoryRegistry({
+        contentDocuments,
+        contentService,
+        actor: publicationActor
+      });
       const publishedById = new Map(publishedRows.map(row => [row.id, row]));
       const freezeAdds = freezeAddIdsFromPublishedRows(publishedRows, gitPuzzleIds);
       const drafts = await Promise.all(listed.map(async metadata => {
@@ -1785,17 +1790,30 @@ export function createLocalDraftReviewHandler({
           ? draftMatchesCheckout(metadata.document, checkoutDocument)
           : false;
         const publishedRow = publishedById.get(puzzleId);
+        const baseline = publishedRow?.document
+          ? documentForEditor(publishedRow.document, { categoryRegistry })
+          : null;
+        const workingDocument = metadata.document
+          ? documentForEditor(metadata.document, { categoryRegistry })
+          : null;
+        const publishedDiff = baseline && workingDocument
+          ? diffPublishedDraft(baseline, workingDocument)
+          : null;
+        const unpublishedChanges = Boolean(publishedDiff && !publishedRow.withdrawnAt && (
+          publishedDiff.total > 0
+          || provenanceDiffersFromPublished(baseline, workingDocument)
+          || !valuesEqual(publishedRow.layout || null, metadata.layout || null)
+        ));
         return {
           ...mapDraftListItem(metadata, {
             inCheckout,
             matchesCheckout
           }),
-          // Runs the review page's own diff, and only for the narrow
-          // candidate set (a revision-1 working copy over a published id),
-          // so the list does not pay for a comparison per row.
+          unpublishedChanges,
+          // Reuse the publication diff for shadow detection as well.
           shadowsPublished: draftShadowsPublished({
-            published: publishedRow?.document || null,
-            draft: metadata.document || null
+            published: baseline,
+            publishedDiff
           }),
           freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
           ...freezeFlagsFromPublished(publishedRow, gitPuzzleIds)
@@ -1823,11 +1841,7 @@ export function createLocalDraftReviewHandler({
         variant: "local",
         githubProduction: githubSnapshot,
         notice,
-        categoryRegistry: await loadMergedCategoryRegistry({
-          contentDocuments,
-          contentService,
-          actor: publicationActor
-        })
+        categoryRegistry
       }));
       return true;
     }

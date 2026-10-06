@@ -137,8 +137,11 @@ public availability.
 Show **Working copies** selects unpublished puzzles. **Not in GitHub** selects
 ids absent from the GitHub snapshot, including puzzles already published in D1.
 **Modified** selects working copies of unpublished puzzles and published
-snapshots changed since the last Freeze. **Cued** selects explicit freeze
-cues. **Published only** selects published puzzles with no private working copy.
+snapshots changed since the last Freeze. **Unpublished changes** selects saved
+working copies that differ from their published D1 snapshot in content, board
+settings, provenance, or layout. The same amber badge appears on those rows;
+opening an unchanged working copy or updating its timestamps does not add it.
+**Cued** selects explicit freeze cues. **Published only** selects published puzzles with no private working copy.
 
 Git-era puzzles (authored before D1 drafts) already seed into published D1
 for public play. `/admin/drafts` lists that authoring corpus — published

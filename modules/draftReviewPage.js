@@ -825,7 +825,10 @@ function renderPuzzlePathBadges(item, { detail = false } = {}) {
   }
   const published = item.published === true || item.d1Published === true;
   if (published) {
-    return `<span class="badge badge-ok">published</span> ${renderPublishedFreezeBadges(item)}${shadow}`.trim();
+    const unpublished = hasUnpublishedChanges(item)
+      ? ' <span class="badge badge-warn">unpublished changes</span>'
+      : "";
+    return `<span class="badge badge-ok">published</span> ${renderPublishedFreezeBadges(item)}${unpublished}${shadow}`.trim();
   }
   const hasWorkingCopy = item.hasWorkingCopy === true
     || (detail && Boolean(item.draftId || item.status || item.document));
@@ -855,7 +858,10 @@ function listIntro(variant) {
        <strong>Not in GitHub</strong> selects ids absent from that snapshot;
        they may already be published in D1. <strong>Modified</strong> selects
        working copies of unpublished puzzles and published snapshots changed
-       since the last Freeze. <strong>Cued</strong> selects explicit freeze cues.
+       since the last Freeze. <strong>Unpublished changes</strong> selects saved
+       working copies that differ from their published D1 snapshot, including
+       content, board settings, provenance, or layout. <strong>Cued</strong>
+       selects explicit freeze cues.
        <strong>Published only</strong> selects published puzzles with no private
        working copy. By category browses the corpus; Recent groups working
        copies by last update. Open a row to edit its working copy, creating
@@ -934,6 +940,15 @@ function isWorkingCopyStatus(item) {
 function isPublishedLive(item) {
   return (item.published === true || item.d1Published === true)
     && item.withdrawn !== true && item.d1Withdrawn !== true;
+}
+
+function hasUnpublishedChanges(item) {
+  return isPublishedLive(item) && (
+    item.unpublishedChanges === true
+    || Number(item.publishedDiff?.total) > 0
+    || item.provenanceDiffersFromPublished === true
+    || item.layoutDiffersFromPublished === true
+  );
 }
 
 function isCuedStatus(item) {
@@ -1048,7 +1063,7 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const subcategoryCell = item.subcategoryLabels?.length
     ? escapeHtml(subcategoryText)
     : emptyValue();
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
@@ -1147,6 +1162,7 @@ const CORPUS_FILTER_SCRIPT = `
       var hasDraft = row.getAttribute("data-has-draft") === "1";
       var working = row.getAttribute("data-working-copy") === "1";
       var modified = row.getAttribute("data-modified") === "1";
+      var unpublished = row.getAttribute("data-unpublished-changes") === "1";
       var cued = row.getAttribute("data-cued") === "1";
       var github = row.getAttribute("data-github");
       var matchQuery = !query || hay.indexOf(query) !== -1;
@@ -1154,6 +1170,7 @@ const CORPUS_FILTER_SCRIPT = `
         || (scope === "working" && working)
         || (scope === "drafts" && github === "0")
         || (scope === "modified" && modified)
+        || (scope === "unpublished" && unpublished)
         || (scope === "cued" && cued)
         || (scope === "published" && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
@@ -1234,6 +1251,7 @@ export function renderDraftListPage(rows, {
            <label title="No active D1 publication — an unpublished working copy"><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
            <label title="Id absent from the GitHub snapshot; may already be published for public play"><input type="radio" name="puzzle-corpus-scope" value="drafts"> Not in GitHub</label>
            <label title="Unpublished puzzles or published snapshots changed since the last Freeze; this is a static snapshot status"><input type="radio" name="puzzle-corpus-scope" value="modified"> Modified</label>
+           <label title="Saved content, board settings, provenance, or layout differs from the published D1 snapshot"><input type="radio" name="puzzle-corpus-scope" value="unpublished"> Unpublished changes</label>
            <label title="Published D1 snapshot explicitly cued for the next Freeze into git"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
            <label title="Published in D1 with no private working copy (the Published only group under Recent)"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
          </p>

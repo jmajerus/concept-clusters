@@ -523,7 +523,7 @@ export function createPuzzleDraftStore({ directory }) {
           puzzleId: document?.id || null,
           title: document?.title || null,
           workingCopyHistoryCount: historyOf({ workingCopyStack }).length,
-          ...(includeDocument ? { document } : {})
+          ...(includeDocument ? { document, layout: _layout ?? null } : {})
         };
       })
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));

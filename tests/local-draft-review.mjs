@@ -950,6 +950,56 @@ export async function run() {
       (await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" })).layout,
       layoutOnly
     );
+    // Compare saved working copies with D1, independently of freeze cues.
+    const comparisonId = "publication-change-fixture";
+    let comparisonDraft = await draftStore.createDraft({
+      draftId: comparisonId,
+      document: { ...puzzleToSimplified(energyPuzzle), id: comparisonId }
+    });
+    await contentDocuments.publish({
+      kind: "puzzle", id: comparisonId,
+      document: comparisonDraft.document, actor: { subject: "local" }
+    });
+    async function comparisonRow() {
+      const response = createResponse();
+      await handlePublish({ method: "GET", url: "/admin/drafts" }, response);
+      assert.equal(response.status, 200);
+      return response.body.match(/<tr data-puzzle-id="publication-change-fixture"[^>]*>[\s\S]*?<\/tr>/)[0];
+    }
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    // Validation changes the row timestamp without changing the puzzle.
+    await draftStore.recordValidation(comparisonId, { valid: true, errors: [] });
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    for (const patch of [
+      { title: "Edited before republishing" },
+      { provenance: { collaboration: "human", contributors: [{ name: "Ada" }] } },
+      { board: { bridgePreconnect: true } }
+    ]) {
+      comparisonDraft = await draftStore.replaceDraft({
+        draftId: comparisonId, expectedRevision: comparisonDraft.revision,
+        document: { ...comparisonDraft.document, ...patch }
+      });
+      const changed = await comparisonRow();
+      assert.match(changed, /data-unpublished-changes="1"/);
+      assert.match(changed, /badge-warn">unpublished changes</);
+      await contentDocuments.publish({
+        kind: "puzzle", id: comparisonId,
+        document: comparisonDraft.document, actor: { subject: "local" }
+      });
+      assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    }
+    const comparisonLayout = layoutDocumentForMode("star", {
+      puzzleId: comparisonId, puzzleRevision: "fnv1a32:test",
+      nodes: { "cluster:0": { x: 150, y: 200 } }
+    });
+    await draftStore.saveLayout({ draftId: comparisonId, layout: comparisonLayout });
+    assert.match(await comparisonRow(), /data-unpublished-changes="1"/);
+    await contentDocuments.saveLayout({ id: comparisonId, layout: comparisonLayout });
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    await draftStore.clearLayout(comparisonId);
+    assert.match(await comparisonRow(), /data-unpublished-changes="1"/, "clearing a published layout is an edit too");
+    await contentDocuments.unpublish({ kind: "puzzle", id: comparisonId, actor: { subject: "local" } });
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

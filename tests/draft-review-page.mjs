@@ -715,6 +715,23 @@ export async function run() {
   assert.match(stacked, /data-modified="1"/, "an uncued publication is modified since the last freeze");
   assert.match(stacked, /data-cued="0"/);
 
+  // An unchanged copy and a freeze-only update do not imply unpublished edits.
+  assert.doesNotMatch(stacked, /badge-warn">unpublished changes</);
+  const pending = renderDraftListPage([{
+    ...baseDraft, published: true, unpublishedChanges: true, gitSeedCue: true
+  }]);
+  assert.match(pending, /badge-warn">unpublished changes</);
+  assert.match(pending, /data-unpublished-changes="1"/);
+  assert.match(pending, /data-modified="0"/, "private edits are independent of freeze status");
+  assert.match(pending, /value="unpublished"> Unpublished changes/);
+  for (const flags of [{ published: false }, { published: true, withdrawn: true }]) {
+    const inactive = renderDraftListPage([{
+      ...baseDraft, ...flags, unpublishedChanges: true
+    }]);
+    assert.doesNotMatch(inactive, /badge-warn">unpublished changes</);
+    assert.match(inactive, /data-unpublished-changes="0"/);
+  }
+
   // The four states a row can be in for the Modified / Cued scopes.
   const scopeAttrs = item => {
     const html = renderDraftListPage([{ ...baseDraft, ...item }]);
