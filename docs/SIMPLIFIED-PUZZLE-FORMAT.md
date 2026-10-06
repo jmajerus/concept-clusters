@@ -118,11 +118,10 @@ human editorial workflows maintain attribution and rights information.
 `boardLimitWaivers` is protected human-managed metadata too. Agents can
 request a supported numerical exception through `request_board_limit_waiver`;
 the request names a registered waiver type and target, while the server
-captures its exact scope and allowed value. A human grants or revokes it on
-the draft review page. The current `cluster-term-count` type allows eight
-terms for one puzzle and cluster when the exact term set is approved. Add new
-waiver policies to `modules/boardLimitWaivers.js`; requests, review, storage,
-and validation use that registry rather than caller-supplied limit values.
+records the target's current size. A human grants or revokes it on the draft
+review page. Each grant is `{ waiverType, puzzleId, targetId, approvedCount,
+reason, grantedBy, grantedAt }`. It is a layout allowance: the target may hold
+up to `approvedCount`, whichever terms fill it. The limits themselves live in `modules/boardLimitWaivers.js`.
 
 Publication times stay on the published row: `first_published_at`,
 `published_at`, and `content_revised_at` (a human mark that the player-facing
@@ -143,12 +142,12 @@ one-cluster board has no bridges.
 
 **Cluster** — `name`, `fact` required. `id` is optional, derived from `name`
 when omitted. For a single-cluster `vocabulary-context` puzzle, provide
-`terms` as the complete two-to-eight term list; eight needs a matching human-
-granted exception recorded for this puzzle and cluster. Omit `seeds`,
-`floatingTerms`, `bridges`, and `preSolve`. For other puzzles, `seeds`
-(normally two terms) and `floatingTerms` (one to six more, disjoint from
-`seeds`) define the cluster's two-to-eight terms and its initial sorting
-challenge. Seven is the ordinary maximum; nine is invalid. In those
+`terms` as the complete term list; omit `seeds`, `floatingTerms`, `bridges`,
+and `preSolve`. For other puzzles, `seeds` (normally two terms) and
+`floatingTerms` (one or more, disjoint from `seeds`) define the cluster's
+terms and its initial sorting challenge. A cluster holds two to seven terms;
+a `cluster-term-count` waiver can approve more, up to its registered ceiling
+(currently eight). In those
 seeded shapes, `terms` may optionally list the same terms in a different
 order. Term order is never shown to the player: every renderer lays a
 cluster's members out in a stable word order, so a term list reads as a set

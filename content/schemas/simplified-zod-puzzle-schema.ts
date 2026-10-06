@@ -254,8 +254,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
     waiverType: z.string().min(1),
     puzzleId: SlugSchema,
     targetId: SlugSchema,
-    approvedLimit: z.number().int().positive(),
-    approvedScope: z.record(z.string(), z.unknown()),
+    approvedCount: z.number().int().positive(),
     reason: z.string().min(1),
     grantedBy: z.string().min(1),
     grantedAt: z.string().min(1)

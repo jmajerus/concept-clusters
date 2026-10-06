@@ -170,13 +170,12 @@
 // 6.14: same review bar. save_puzzle_draft does not publish a puzzle.
 // A person publishes the working copy. That publish is what players see.
 // publish_to_authoring remains for categories, catalogues, and shelf reassignment.
-// 6.15: seven remains the ordinary cluster limit. Eight terms require a
-// human grant tied to the exact puzzle, cluster, and term set; nine remain
-// invalid. Drafting continues while the request is reviewed.
-// 6.16: numeric board waivers use one policy registry and one generic request
-// path. A waiver type fixes its own scope and allowed value; agents cannot
-// request arbitrary limit changes.
+// 6.15: numeric board limits come from one registry. A target over its
+// ordinary limit can be approved up to the registered ceiling through
+// request_board_limit_waiver; a grant allows that target up to the approved
+// size, whichever terms fill it.
+// Drafting continues while the request is reviewed.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 16
+  minor: 15
 });

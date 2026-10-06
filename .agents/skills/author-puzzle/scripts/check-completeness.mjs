@@ -5,7 +5,9 @@
 import { readFileSync } from "node:fs";
 import { NODE_CAP_XLARGE } from "../../../../modules/puzzleBoardSize.js";
 import { AUTHORING_PROFILES } from "../../../../modules/authoringProfiles.js";
-import { boardLimitWaiverErrors } from "../../../../modules/boardLimitWaivers.js";
+import { boardLimit, boardLimitWaiverErrors } from "../../../../modules/boardLimitWaivers.js";
+
+const clusterTermCeiling = boardLimit("cluster-term-count").approvedLimit;
 
 // Specialized puzzleKinds share their identifiers with the MCP authoring
 // profiles; those are the kinds with a one-cycle integrated route.
@@ -717,11 +719,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
         clusters.length === 1;
       if (singleVocabularyCluster) {
         const terms = Array.isArray(cluster.terms) ? cluster.terms : [];
-        if (terms.length < 2 || terms.length > 8) {
+        if (terms.length < 2 || terms.length > clusterTermCeiling) {
           blocking.push({
             id: "cluster-terms",
             clusterId: cluster.id || null,
-            message: `Single-cluster Vocabulary needs 2-8 terms in one terms list; eight requires a human-granted exception.`
+            message: `Single-cluster Vocabulary needs 2-${clusterTermCeiling} terms in one terms list.`
           });
         }
         if (Object.hasOwn(cluster, "seeds") || Object.hasOwn(cluster, "floatingTerms")) {
@@ -741,11 +743,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
           });
         }
         const floating = cluster.floatingTerms || [];
-        if (floating.length < 1 || floating.length > 6) {
+        if (floating.length < 1 || floating.length > clusterTermCeiling - 2) {
           blocking.push({
             id: "cluster-floating",
             clusterId: cluster.id || null,
-            message: `Cluster "${cluster.id || "?"}" needs 1-6 floatingTerms.`
+            message: `Cluster "${cluster.id || "?"}" needs 1-${clusterTermCeiling - 2} floatingTerms.`
           });
         }
         if (seeds.length === 1 && floating.length !== 1) {

@@ -27,10 +27,11 @@ import {
 import { parseReviewBaseline, serializeReviewBaseline } from "./reviewBaseline.js";
 import {
   boardLimitWaiverPolicy,
+  boardLimitWaiverRequestIsCurrent,
   grantBoardLimitWaiver,
   makeBoardLimitWaiverRequest,
   preserveCurrentBoardLimitWaivers,
-  revokeBoardLimitWaiver
+  revokeBoardLimitWaiver as withoutBoardLimitWaiver
 } from "./boardLimitWaivers.js";
 
 function parsedJson(text, label) {
@@ -267,9 +268,8 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(draftId).all();
     return (result.results || []).map(row => ({
       id: Number(row.id), draftId: row.draft_id, puzzleId: row.puzzle_id,
-      waiverType: row.waiver_type, scopeType: row.scope_type, targetId: row.target_id,
-      requestedValue: Number(row.requested_value),
-      scope: parsedJson(row.scope_json, "Board limit waiver request scope"),
+      waiverType: row.waiver_type, targetId: row.target_id,
+      count: Number(row.requested_count),
       reason: row.reason, status: row.status, requestedBy: row.requested_by,
       requestedAt: row.requested_at, requestedRevision: Number(row.requested_revision),
       decidedBy: row.decided_by || null, decidedAt: row.decided_at || null,
@@ -282,17 +282,16 @@ export class D1DraftRepository extends DraftRepository {
     if (draft.revision !== expectedRevision) {
       throw new DraftConflictError(`Draft revision conflict: expected ${expectedRevision}, current revision is ${draft.revision}`);
     }
-    const requestScope = makeBoardLimitWaiverRequest(
+    const requested = makeBoardLimitWaiverRequest(
       draft.document, waiverType, targetId, reason
     );
-    const scopeJson = JSON.stringify(requestScope.scope);
     const owner = normalizeDraftActor(actor);
     const requestedBy = owner.name || owner.email || owner.subject;
     const now = new Date().toISOString();
     const existingRequests = await this.listBoardLimitWaiverRequests({ draftId, actor });
     const existingPending = existingRequests.find(item => item.waiverType === waiverType &&
       item.targetId === targetId && item.status === "pending" &&
-      JSON.stringify(item.scope) === scopeJson);
+      item.count === requested.count);
     if (existingPending?.reason === reason.trim()) return existingPending;
     if (existingPending) {
       await this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
@@ -302,19 +301,18 @@ export class D1DraftRepository extends DraftRepository {
     }
     await this.database.prepare(`
       INSERT INTO puzzle_board_limit_waiver_requests
-        (draft_id, puzzle_id, waiver_type, scope_type, target_id, requested_value,
-         scope_json, reason, status, requested_by, requested_at, requested_revision)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)
+        (draft_id, puzzle_id, waiver_type, target_id, requested_count, reason, status,
+         requested_by, requested_at, requested_revision)
+      VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)
       ON CONFLICT DO NOTHING
     `).bind(
-      draftId, draft.document.id, requestScope.waiverType, requestScope.scopeType,
-      targetId, requestScope.requestedValue, scopeJson, requestScope.reason,
-      requestedBy, now, expectedRevision
+      draftId, draft.document.id, requested.waiverType, targetId, requested.count,
+      requested.reason, requestedBy, now, expectedRevision
     ).run();
     const requests = await this.listBoardLimitWaiverRequests({ draftId, actor });
     const request = requests.find(item => item.waiverType === waiverType &&
       item.targetId === targetId && item.status === "pending" &&
-      JSON.stringify(item.scope) === scopeJson);
+      item.count === requested.count);
     return request;
   }
 
@@ -327,19 +325,8 @@ export class D1DraftRepository extends DraftRepository {
     const request = (await this.listBoardLimitWaiverRequests({ draftId, actor }))
       .find(item => item.id === Number(requestId));
     if (!request || request.status !== "pending") throw new Error("That board limit waiver request is no longer pending.");
-    if (decision === "granted") {
-      let currentScope;
-      try {
-        currentScope = makeBoardLimitWaiverRequest(
-          draft.document, request.waiverType, request.targetId, request.reason
-        );
-      } catch {
-        currentScope = null;
-      }
-      if (!currentScope || currentScope.requestedValue !== request.requestedValue ||
-          JSON.stringify(currentScope.scope) !== JSON.stringify(request.scope)) {
-        throw new DraftConflictError("The board limit scope changed after the request. Refresh and request review for the current board state.");
-      }
+    if (decision === "granted" && !boardLimitWaiverRequestIsCurrent(draft.document, request)) {
+      throw new DraftConflictError("The target's size changed after the request. Refresh and request review for the current board state.");
     }
     const reviewer = normalizeDraftActor(actor);
     const decidedBy = reviewer.name || reviewer.email || reviewer.subject;
@@ -366,15 +353,15 @@ export class D1DraftRepository extends DraftRepository {
           .bind(decidedBy, now, note.trim() || null, request.id, draftId,
             draftId, nextRevision),
         this.database.prepare(`INSERT INTO puzzle_board_limit_waiver_events
-          (puzzle_id, waiver_type, scope_type, target_id, event_type, actor, event_at,
-           approved_value, approved_scope_json, reason, draft_id, draft_revision)
-          SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          (puzzle_id, waiver_type, target_id, event_type, actor, event_at,
+           approved_count, reason, draft_id, draft_revision)
+          SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
           WHERE EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)
             AND EXISTS (SELECT 1 FROM puzzle_board_limit_waiver_requests
               WHERE id = ? AND draft_id = ? AND status = 'granted')`)
-          .bind(draft.document.id, request.waiverType, request.scopeType, request.targetId,
-            previous ? "replaced" : "granted", decidedBy, now, request.requestedValue,
-            JSON.stringify(request.scope), request.reason, draftId, nextRevision,
+          .bind(draft.document.id, request.waiverType, request.targetId,
+            previous ? "replaced" : "granted", decidedBy, now,
+            request.count, request.reason, draftId, nextRevision,
             draftId, nextRevision, request.id, draftId)
       ];
       const saved = await this.persistBoardLimitWaiverMutation({
@@ -412,7 +399,7 @@ export class D1DraftRepository extends DraftRepository {
     const reviewer = normalizeDraftActor(actor);
     const decidedBy = reviewer.name || reviewer.email || reviewer.subject;
     const now = new Date().toISOString();
-    const document = revokeBoardLimitWaiver(draft.document, waiverType, targetId);
+    const document = withoutBoardLimitWaiver(draft.document, waiverType, targetId);
     const nextRevision = expectedRevision + 1;
     const auditStatements = [
       this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
@@ -421,13 +408,13 @@ export class D1DraftRepository extends DraftRepository {
           AND EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
         .bind(decidedBy, now, note.trim() || null, draftId, waiverType, targetId, draftId, nextRevision),
       this.database.prepare(`INSERT INTO puzzle_board_limit_waiver_events
-        (puzzle_id, waiver_type, scope_type, target_id, event_type, actor, event_at,
-         approved_value, approved_scope_json, reason, draft_id, draft_revision)
-        SELECT ?, ?, ?, ?, 'revoked', ?, ?, ?, ?, ?, ?, ?
+        (puzzle_id, waiver_type, target_id, event_type, actor, event_at,
+         approved_count, reason, draft_id, draft_revision)
+        SELECT ?, ?, ?, 'revoked', ?, ?, ?, ?, ?, ?
         WHERE EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
-        .bind(draft.document.id, waiverType, policy.scopeType,
-          targetId, decidedBy, now, grant.approvedLimit,
-          JSON.stringify(grant.approvedScope), grant.reason, draftId, nextRevision,
+        .bind(draft.document.id, waiverType,
+          targetId, decidedBy, now,
+          grant.approvedCount, grant.reason, draftId, nextRevision,
           draftId, nextRevision)
     ];
     return this.persistBoardLimitWaiverMutation({

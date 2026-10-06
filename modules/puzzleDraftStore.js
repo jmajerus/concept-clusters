@@ -28,11 +28,11 @@ import {
 } from "./layoutDocument.js";
 import { slugify } from "../puzzles/categories.js";
 import {
-  canonicalBoardLimitWaivers,
+  boardLimitWaiverRequestIsCurrent,
   makeBoardLimitWaiverRequest,
   grantBoardLimitWaiver,
   preserveCurrentBoardLimitWaivers,
-  revokeBoardLimitWaiver
+  revokeBoardLimitWaiver as withoutBoardLimitWaiver
 } from "./boardLimitWaivers.js";
 
 const MAX_DRAFT_DOCUMENT_BYTES = 2 * 1024 * 1024;
@@ -54,21 +54,6 @@ function assertDocumentSize(document) {
       `Draft document exceeds ${MAX_DRAFT_DOCUMENT_BYTES} bytes`
     );
   }
-}
-
-function canonicalLocalWaiverRequest(request) {
-  if (!request || typeof request !== "object") return request;
-  if (request.waiverType) return request;
-  const terms = Array.isArray(request.terms) ? [...request.terms].sort() : request.terms;
-  const { clusterId, terms: _legacyTerms, ...currentFields } = request;
-  return {
-    ...currentFields,
-    waiverType: "cluster-term-count",
-    scopeType: "cluster",
-    targetId: clusterId,
-    requestedValue: 8,
-    scope: { terms }
-  };
 }
 
 export function createPuzzleDraftStore({ directory }) {
@@ -149,29 +134,9 @@ export function createPuzzleDraftStore({ directory }) {
     }
     try {
       const parsed = JSON.parse(text);
-      let document = parsed.document;
-      if (document && Object.hasOwn(document, "clusterTermExceptions")) {
-        const { clusterTermExceptions, ...currentFields } = document;
-        const legacyWaivers = document.boardLimitWaivers ?? clusterTermExceptions;
-        document = legacyWaivers?.length
-          ? { ...currentFields, boardLimitWaivers: canonicalBoardLimitWaivers(legacyWaivers) }
-          : currentFields;
-      }
-      const legacyRequests = Array.isArray(parsed.clusterTermExceptionRequests)
-        ? parsed.clusterTermExceptionRequests : [];
-      const requests = Array.isArray(parsed.boardLimitWaiverRequests)
-        ? parsed.boardLimitWaiverRequests : legacyRequests;
-      const upgraded = {
-        ...parsed,
-        ...(document !== undefined ? { document } : {}),
-        ...(requests.length
-          ? { boardLimitWaiverRequests: requests.map(canonicalLocalWaiverRequest) }
-          : {}),
-        documentStale: Boolean(parsed.documentStale)
-      };
-      delete upgraded.clusterTermExceptionRequests;
       return {
-        ...upgraded
+        ...parsed,
+        documentStale: Boolean(parsed.documentStale)
       };
     } catch (error) {
       throw new Error(`Draft ${id} is not valid JSON: ${error.message}`);
@@ -441,7 +406,7 @@ export function createPuzzleDraftStore({ directory }) {
       const requests = raw.boardLimitWaiverRequests || [];
       const pendingIndex = requests.findIndex(item => item.status === "pending" &&
         item.waiverType === waiverType && item.targetId === targetId &&
-        JSON.stringify(item.scope) === JSON.stringify(waiver.scope));
+        item.count === waiver.count);
       let nextRequests = [...requests];
       const requestedBy = actor?.name || actor?.email || actor?.subject || "author";
       const now = new Date().toISOString();
@@ -483,19 +448,8 @@ export function createPuzzleDraftStore({ directory }) {
       const requestIndex = requests.findIndex(item => item.id === requestId && item.status === "pending");
       if (requestIndex < 0) throw new Error("That board limit waiver request is no longer pending.");
       const request = requests[requestIndex];
-      if (decision === "granted") {
-        let currentScope;
-        try {
-          currentScope = makeBoardLimitWaiverRequest(
-            current.document, request.waiverType, request.targetId, request.reason
-          );
-        } catch {
-          currentScope = null;
-        }
-        if (!currentScope || currentScope.requestedValue !== request.requestedValue ||
-            JSON.stringify(currentScope.scope) !== JSON.stringify(request.scope)) {
-          throw new Error("The board limit scope changed after the request. Refresh and request review for the current board state.");
-        }
+      if (decision === "granted" && !boardLimitWaiverRequestIsCurrent(current.document, request)) {
+        throw new Error("The target's size changed after the request. Refresh and request review for the current board state.");
       }
       const now = new Date().toISOString();
       const reviewer = actor?.name || actor?.email || actor?.subject || "local reviewer";
@@ -552,7 +506,7 @@ export function createPuzzleDraftStore({ directory }) {
         item.waiverType === waiverType && item.targetId === targetId
       );
       if (!grant) throw new Error("There is no current grant for that board limit scope.");
-      const document = revokeBoardLimitWaiver(current.document, waiverType, targetId);
+      const document = withoutBoardLimitWaiver(current.document, waiverType, targetId);
       const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
       const now = new Date().toISOString();
       const reviewer = actor?.name || actor?.email || actor?.subject || "local reviewer";

@@ -134,9 +134,10 @@ import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
 import * as wikiLinkCheck from "./wiki-link-check.mjs";
+import * as boardLimitWaivers from "./board-limit-waivers.mjs";
 
 const allTests = [
-  mcpAuthoringDomains,
+  mcpAuthoringDomains, boardLimitWaivers,
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
   starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, starBridgePreconnect, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
@@ -157,7 +158,7 @@ const allTests = [
 // coverage; add it to standardTests when it is routinely affordable, and to
 // quickTests only if it never touches the browser or the dev server.
 const quickTests = [
-  mcpAuthoringDomains, lensEngine, learningIntroductionEngine, simplifiedPuzzleSchema,
+  mcpAuthoringDomains, boardLimitWaivers, lensEngine, learningIntroductionEngine, simplifiedPuzzleSchema,
   puzzleSymmetryFlags, nodeCaseAudit, learningLevel, domainCatalogues, contentServices, authoringBoard, authorEngine,
   catalogueAuthorEngine, catalogueReviewPage, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename,
   contentDocuments, playerFacingRevision, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply,
@@ -212,7 +213,8 @@ const sideTests = {
     authoringAssistanceLog, authoringChangeScore, authoringDomains,
     authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
-    localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck
+    localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
+    boardLimitWaivers
   ]),
   shared: new Set([
     contentValidation,

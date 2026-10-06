@@ -41,9 +41,9 @@ import {
 import { PUZZLE_KINDS } from "./authoringProfiles.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
-import {
-  CLUSTER_TERM_EXCEPTION_LIMIT
-} from "./boardLimitWaivers.js";
+import { boardLimit } from "./boardLimitWaivers.js";
+
+const clusterTermCeiling = boardLimit("cluster-term-count").approvedLimit;
 
 const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -257,14 +257,14 @@ const ClusterSchema = z.object({
   // complete term list directly; the root refinement below selects exactly
   // one of those shapes based on puzzleKind and cluster count.
   seeds: z.array(TermSchema).min(1).max(2).optional(),
-  floatingTerms: z.array(TermSchema).min(1).max(CLUSTER_TERM_EXCEPTION_LIMIT - 2).optional(),
+  floatingTerms: z.array(TermSchema).min(1).max(clusterTermCeiling - 2).optional(),
   // In a one-cluster Vocabulary puzzle this is its complete term list. For
   // seed/floating shapes it may list the same terms in a different order
   // (notably in migrated JSON-LD); that form must contain exactly the seed
   // and floating terms, checked by puzzleFromSimplified. Order is not shown
   // to the player: renderers lay members out in a stable word order
   // (puzzleGraph.js memberDisplayOrder) so a term list reads as a set.
-  terms: z.array(TermSchema).min(2).max(CLUSTER_TERM_EXCEPTION_LIMIT).optional(),
+  terms: z.array(TermSchema).min(2).max(clusterTermCeiling).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()
 }).strict().superRefine((cluster, context) => {
@@ -337,8 +337,7 @@ const BoardLimitWaiverSchema = z.object({
   waiverType: z.string().trim().min(1),
   puzzleId: SlugSchema,
   targetId: SlugSchema,
-  approvedLimit: z.number().int().positive(),
-  approvedScope: z.record(z.string(), z.unknown()),
+  approvedCount: z.number().int().positive(),
   reason: z.string().trim().min(1),
   grantedBy: z.string().trim().min(1),
   grantedAt: z.string().min(1)

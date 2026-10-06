@@ -3,7 +3,7 @@ import { NODE_CAP_XLARGE, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { validateAuthoringProvenance } from "./authoringProvenance.js";
 import { validatePuzzleLenses } from "./lensValidation.js";
 import { PUZZLE_LEVELS } from "../puzzles/categories.js";
-import { CLUSTER_TERM_EXCEPTION_LIMIT, boardLimitWaiverErrors } from "./boardLimitWaivers.js";
+import { boardLimitWaiverErrors } from "./boardLimitWaivers.js";
 
 export const VALID_RELATION_KINDS = new Set([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
@@ -326,7 +326,8 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
       fail(`${label}: terms must be an array`);
       return;
     }
-    if (cluster.terms.length < 2 || cluster.terms.length > CLUSTER_TERM_EXCEPTION_LIMIT) {
+    // The upper bound is a registered board limit (boardLimitWaiverErrors).
+    if (cluster.terms.length < 2) {
       fail(`${label}: bad terms count (${cluster.terms.length})`);
     }
     if (!Array.isArray(cluster.seeds) || cluster.seeds.length < 1 || cluster.seeds.length > 2) {

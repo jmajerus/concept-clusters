@@ -9,13 +9,12 @@
     "boardLimitWaiver": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["waiverType", "puzzleId", "targetId", "approvedLimit", "approvedScope", "reason", "grantedBy", "grantedAt"],
+      "required": ["waiverType", "puzzleId", "targetId", "approvedCount", "reason", "grantedBy", "grantedAt"],
       "properties": {
         "waiverType": { "type": "string", "minLength": 1 },
         "puzzleId": { "$ref": "#/$defs/slug" },
         "targetId": { "$ref": "#/$defs/slug" },
-        "approvedLimit": { "type": "integer", "minimum": 1 },
-        "approvedScope": { "type": "object" },
+        "approvedCount": { "type": "integer", "minimum": 1 },
         "reason": { "type": "string", "minLength": 1 },
         "grantedBy": { "type": "string", "minLength": 1 },
         "grantedAt": { "type": "string", "minLength": 1 }

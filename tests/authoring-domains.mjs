@@ -76,7 +76,7 @@ export async function run() {
   };
   const flaggedDomains = partitionAuthoredDocument(flagged);
   assert.equal(flaggedDomains.content.board, undefined);
-  assert.deepEqual(flaggedDomains.administration, flagged.board);
+  assert.deepEqual(flaggedDomains.administration, { board: flagged.board });
   assert.deepEqual(assembleAuthoredDocument(flaggedDomains), flagged);
   assert.equal(projectAuthoredDocument(flagged, "content").document.board, undefined);
   assert.equal(projectAuthoredDocument(flagged, "pedagogy").document.board, undefined);
@@ -92,7 +92,7 @@ export async function run() {
   assert.deepEqual(edited.board, flagged.board);
   assert.equal(
     storedDomainDocuments(edited).administration,
-    JSON.stringify(flagged.board)
+    JSON.stringify({ board: flagged.board })
   );
   const preserved = assembleAuthoredDocumentFromDraftRow({
     document_stale: 1,

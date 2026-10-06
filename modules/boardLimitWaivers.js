@@ -1,40 +1,39 @@
 /**
- * Trusted registry of exceptional numeric board limits.
+ * Trusted registry of numeric board limits that a human may waive.
  *
- * A waiver type is deliberately a policy object, not a caller-supplied number.
- * To add another kind, register its normal/hard limits, target enumeration,
- * value reader, scope snapshot and snapshot validator here. The request, human
- * review, persistence and validation paths consume this same registry.
+ * Every limit here is the size of some collection on the board: the terms in a
+ * cluster, the clusters in a puzzle, and so on. A policy only says where those
+ * collections are and how big each is (`collections`), what size is ordinary
+ * (`normalLimit`), and the most a human may approve (`approvedLimit`).
+ * Requests, review, matching and validation are shared and know nothing about
+ * any one policy. A waiver is a layout allowance, not a content approval: it
+ * names a target and a size, and holds while that target stays within the
+ * approved size, whichever items fill it.
+ *
+ * Registering a limit here does not change what a renderer or schema can
+ * hold; do that first, then register the policy.
  */
-function hasDistinctNonEmptyTerms(terms, count) {
-  return Array.isArray(terms) && terms.length === count &&
-    terms.every(term => typeof term === "string" && term.trim()) &&
-    new Set(terms).size === count;
+function clusterItems(cluster) {
+  if (Array.isArray(cluster?.terms)) return cluster.terms;
+  return [
+    ...(Array.isArray(cluster?.seeds) ? cluster.seeds : []),
+    ...(Array.isArray(cluster?.floatingTerms) ? cluster.floatingTerms : [])
+  ];
 }
 
 export const BOARD_LIMIT_WAIVER_REGISTRY = Object.freeze([
   Object.freeze({
     type: "cluster-term-count",
-    label: "Cluster term count",
-    scopeType: "cluster",
+    label: "Terms per cluster",
     normalLimit: 7,
     approvedLimit: 8,
-    minimumReasonLength: 20,
-    targetLabel: cluster => cluster?.name || cluster?.id || "cluster",
-    targets: puzzle => Array.isArray(puzzle?.clusters) ? puzzle.clusters : [],
-    targetId: cluster => cluster?.id,
-    value: cluster => Array.isArray(cluster?.terms) ? cluster.terms.length : 0,
-    captureScope: cluster => ({
-      terms: [...(Array.isArray(cluster?.terms) ? cluster.terms : [])].sort()
-    }),
-    validScope: (scope, policy) => hasDistinctNonEmptyTerms(scope?.terms, policy.approvedLimit),
-    scopeMatches: (cluster, scope, policy) => {
-      const current = Array.isArray(cluster?.terms) ? [...cluster.terms].sort() : [];
-      return hasDistinctNonEmptyTerms(current, policy.approvedLimit) &&
-        JSON.stringify(current) === JSON.stringify(scope?.terms);
-    },
-    requestable: (cluster, policy) => hasDistinctNonEmptyTerms(cluster?.terms, policy.approvedLimit),
-    requestGuidance: "Explain why all eight terms do distinct work and why splitting weakens the lesson."
+    collections: puzzle => (Array.isArray(puzzle?.clusters) ? puzzle.clusters : [])
+      .map(cluster => ({
+        id: cluster?.id,
+        label: cluster?.name || cluster?.id || "cluster",
+        detail: cluster?.fact,
+        size: clusterItems(cluster).length
+      }))
   })
 ]);
 
@@ -42,46 +41,60 @@ export const BOARD_LIMIT_WAIVER_TYPES = Object.freeze(
   BOARD_LIMIT_WAIVER_REGISTRY.map(({ type }) => type)
 );
 
+export const MINIMUM_WAIVER_REASON_LENGTH = 20;
+export const WAIVER_REQUEST_GUIDANCE =
+  "Explain why the larger size serves the lesson better than restructuring the board.";
+
 export function boardLimitWaiverPolicy(type) {
   return BOARD_LIMIT_WAIVER_REGISTRY.find(policy => policy.type === type) || null;
 }
 
+/** The registered limits for one type; throws so a typo cannot silently unbound a schema. */
+export function boardLimit(type) {
+  const policy = boardLimitWaiverPolicy(type);
+  if (!policy) throw new Error(`Unknown board limit: ${type}`);
+  return { normalLimit: policy.normalLimit, approvedLimit: policy.approvedLimit };
+}
+
 export function boardLimitWaiverTypeSummaries() {
-  return BOARD_LIMIT_WAIVER_REGISTRY.map(policy => ({
-    type: policy.type,
-    label: policy.label,
-    scopeType: policy.scopeType,
-    normalLimit: policy.normalLimit,
-    approvedLimit: policy.approvedLimit,
-    minimumReasonLength: policy.minimumReasonLength,
-    requestGuidance: policy.requestGuidance
+  return BOARD_LIMIT_WAIVER_REGISTRY.map(({ type, label, normalLimit, approvedLimit }) => ({
+    type, label, normalLimit, approvedLimit,
+    minimumReasonLength: MINIMUM_WAIVER_REASON_LENGTH,
+    requestGuidance: WAIVER_REQUEST_GUIDANCE
   }));
+}
+
+/** One sentence per registered limit, for authoring guidance and schema text. */
+export function describeBoardLimits() {
+  return BOARD_LIMIT_WAIVER_REGISTRY.map(policy =>
+    `${policy.label}: ${policy.normalLimit} is the ordinary maximum; up to ${policy.approvedLimit} with a human-granted waiver (${policy.type}); more is invalid.`
+  ).join(" ");
+}
+
+function waivable(policy, size) {
+  return Number.isInteger(size) &&
+    size > policy.normalLimit && size <= policy.approvedLimit;
 }
 
 export function boardLimitWaiverTargets(puzzle, type) {
   const policy = boardLimitWaiverPolicy(type);
   if (!policy) return [];
-  return policy.targets(puzzle).map(target => ({
-    target,
-    targetId: policy.targetId(target),
-    targetLabel: policy.targetLabel(target),
-    value: policy.value(target),
-    scope: policy.captureScope(target),
-    requestable: policy.requestable(target, policy)
+  return policy.collections(puzzle).map(collection => ({
+    target: collection,
+    targetId: collection.id,
+    targetLabel: collection.label,
+    value: collection.size,
+    requestable: waivable(policy, collection.size)
   }));
 }
 
 export function boardLimitWaiverMatches(puzzle, target, grant) {
   const policy = boardLimitWaiverPolicy(grant?.waiverType);
-  if (!policy || !puzzle || !target || !grant ||
-      grant.puzzleId !== puzzle.id ||
-      grant.targetId !== policy.targetId(target) ||
-      grant.approvedLimit !== policy.approvedLimit ||
-      !policy.validScope(grant.approvedScope, policy)) {
-    return false;
-  }
-  return policy.value(target) === policy.approvedLimit &&
-    policy.scopeMatches(target, grant.approvedScope, policy);
+  return Boolean(policy && puzzle && target && grant &&
+    grant.puzzleId === puzzle.id &&
+    grant.targetId === target.id &&
+    waivable(policy, grant.approvedCount) &&
+    target.size <= grant.approvedCount);
 }
 
 function grantShapeErrors(grants) {
@@ -91,8 +104,7 @@ function grantShapeErrors(grants) {
     const policy = boardLimitWaiverPolicy(grant?.waiverType);
     if (!policy || typeof grant.puzzleId !== "string" || !grant.puzzleId.trim() ||
         typeof grant.targetId !== "string" || !grant.targetId.trim() ||
-        grant.approvedLimit !== policy.approvedLimit ||
-        !policy.validScope(grant.approvedScope, policy) ||
+        !waivable(policy, grant.approvedCount) ||
         typeof grant.reason !== "string" || !grant.reason.trim() ||
         typeof grant.grantedBy !== "string" || !grant.grantedBy.trim() ||
         typeof grant.grantedAt !== "string" || !grant.grantedAt.trim()) {
@@ -112,24 +124,20 @@ export function boardLimitWaiverErrors(puzzle) {
   const grants = Array.isArray(puzzle?.boardLimitWaivers) ? puzzle.boardLimitWaivers : [];
   const errors = [];
   for (const policy of BOARD_LIMIT_WAIVER_REGISTRY) {
-    for (const target of policy.targets(puzzle)) {
-      const value = policy.value(target);
+    for (const target of policy.collections(puzzle)) {
+      const value = target.size;
       if (value <= policy.normalLimit) continue;
-      const targetId = policy.targetId(target) || "unknown target";
-      const targetLabel = policy.targetLabel(target);
       if (value > policy.approvedLimit) {
-        errors.push(`[board-limit-hard-limit] ${targetLabel}: ${value} exceeds the absolute ${policy.label.toLowerCase()} limit of ${policy.approvedLimit}.`);
+        errors.push(`[board-limit-hard-limit] ${target.label}: ${value} exceeds the absolute ${policy.label.toLowerCase()} limit of ${policy.approvedLimit}.`);
         continue;
       }
-      const matching = grants.some(grant => boardLimitWaiverMatches(puzzle, target, grant));
-      if (!matching) {
-        const stale = grants.find(grant => grant?.waiverType === policy.type &&
-          grant?.puzzleId === puzzle?.id && grant?.targetId === targetId);
-        errors.push(
-          `[board-limit-waiver-required] ${targetLabel}: ${value} exceeds the ordinary limit of ${policy.normalLimit} and requires human approval for ${policy.type}.` +
-          (stale ? " The existing waiver covers a different scope." : "")
-        );
-      }
+      if (grants.some(grant => boardLimitWaiverMatches(puzzle, target, grant))) continue;
+      const smaller = grants.find(grant => grant?.waiverType === policy.type &&
+        grant?.puzzleId === puzzle?.id && grant?.targetId === target.id);
+      errors.push(
+        `[board-limit-waiver-required] ${target.label}: ${value} exceeds the ordinary limit of ${policy.normalLimit} and requires human approval for ${policy.type}.` +
+        (smaller ? ` The existing waiver allows ${smaller.approvedCount}.` : "")
+      );
     }
   }
   errors.push(...grantShapeErrors(grants));
@@ -141,20 +149,27 @@ export function makeBoardLimitWaiverRequest(puzzle, type, targetId, reason) {
   if (!policy) throw new Error(`Unsupported board limit waiver type: ${type}`);
   const entry = boardLimitWaiverTargets(puzzle, type)
     .find(candidate => candidate.targetId === targetId);
-  if (!entry || !entry.requestable || entry.value !== policy.approvedLimit) {
-    throw new Error(`Target ${targetId} must be eligible for the ${policy.label.toLowerCase()} waiver.`);
+  if (!entry?.requestable) {
+    throw new Error(
+      `Target ${targetId} must hold more than ${policy.normalLimit} and at most ${policy.approvedLimit} to request a ${policy.label.toLowerCase()} waiver.`
+    );
   }
-  if (typeof reason !== "string" || reason.trim().length < policy.minimumReasonLength) {
-    throw new Error(`${policy.requestGuidance} (At least ${policy.minimumReasonLength} characters.)`);
+  if (typeof reason !== "string" || reason.trim().length < MINIMUM_WAIVER_REASON_LENGTH) {
+    throw new Error(`${WAIVER_REQUEST_GUIDANCE} (At least ${MINIMUM_WAIVER_REASON_LENGTH} characters.)`);
   }
   return {
     waiverType: policy.type,
-    scopeType: policy.scopeType,
     targetId,
-    requestedValue: entry.value,
-    scope: entry.scope,
+    count: entry.value,
     reason: reason.trim()
   };
+}
+
+/** Whether a stored request still asks for the size the board needs now. */
+export function boardLimitWaiverRequestIsCurrent(puzzle, request) {
+  const entry = boardLimitWaiverTargets(puzzle, request?.waiverType)
+    .find(candidate => candidate.targetId === request?.targetId);
+  return Boolean(entry?.requestable && entry.value === request.count);
 }
 
 export function grantBoardLimitWaiver(
@@ -169,7 +184,6 @@ export function grantBoardLimitWaiver(
     throw new Error("The puzzle needs a stable id before a waiver can be granted.");
   }
   const request = makeBoardLimitWaiverRequest(puzzle, type, targetId, reason);
-  const policy = boardLimitWaiverPolicy(type);
   const grantedBy = typeof actor === "string"
     ? actor
     : actor?.name || actor?.email || actor?.subject;
@@ -177,11 +191,10 @@ export function grantBoardLimitWaiver(
     throw new Error("A human reviewer identity is required.");
   }
   const grant = {
-    waiverType: policy.type,
+    waiverType: request.waiverType,
     puzzleId: puzzle.id,
     targetId,
-    approvedLimit: policy.approvedLimit,
-    approvedScope: request.scope,
+    approvedCount: request.count,
     reason: request.reason,
     grantedBy: grantedBy.trim(),
     grantedAt
@@ -214,39 +227,4 @@ export function preserveCurrentBoardLimitWaivers(current, next) {
     delete document.boardLimitWaivers;
   }
   return document;
-}
-
-export function canonicalBoardLimitWaivers(value) {
-  if (!Array.isArray(value)) return value;
-  return value.map(grant => {
-    if (!grant || typeof grant !== "object" || Array.isArray(grant) ||
-        grant.waiverType || !Object.hasOwn(grant, "clusterId")) return grant;
-    return {
-      waiverType: "cluster-term-count",
-      puzzleId: grant.puzzleId,
-      targetId: grant.clusterId,
-      approvedLimit: grant.maxTerms,
-      approvedScope: { terms: Array.isArray(grant.approvedTerms)
-        ? [...grant.approvedTerms].sort() : grant.approvedTerms },
-      reason: grant.reason,
-      grantedBy: grant.grantedBy,
-      grantedAt: grant.grantedAt
-    };
-  });
-}
-
-// Constants used by the structural schema for this registered policy.
-export const CLUSTER_TERM_LIMIT = boardLimitWaiverPolicy("cluster-term-count").normalLimit;
-export const CLUSTER_TERM_EXCEPTION_LIMIT = boardLimitWaiverPolicy("cluster-term-count").approvedLimit;
-export function isEightDistinctTerms(terms) {
-  return hasDistinctNonEmptyTerms(terms, CLUSTER_TERM_EXCEPTION_LIMIT);
-}
-export const preserveCurrentClusterTermExceptions = preserveCurrentBoardLimitWaivers;
-export const clusterTermExceptionMatches = boardLimitWaiverMatches;
-export const clusterTermExceptionErrors = boardLimitWaiverErrors;
-export function grantClusterTermException(puzzle, clusterId, reason, actor, grantedAt) {
-  return grantBoardLimitWaiver(puzzle, "cluster-term-count", clusterId, reason, actor, grantedAt);
-}
-export function revokeClusterTermException(puzzle, clusterId) {
-  return revokeBoardLimitWaiver(puzzle, "cluster-term-count", clusterId);
 }

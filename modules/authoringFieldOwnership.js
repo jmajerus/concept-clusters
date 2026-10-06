@@ -262,14 +262,16 @@ export const PEDAGOGY_STORED_ROOT_FIELDS = fieldsMatching(
 // Document fields whose values are maintained outside the MCP agent contract.
 // Infrastructure-owned system values are separately carried by the draft
 // envelope and do not belong in this set.
-export const MCP_EXCLUDED_ROOT_FIELDS = new Set([
-  ...fieldsMatching(
-    ROOT_FIELD_OWNERSHIP,
-    meta => meta.kind === "protected" && meta.domain !== "system"
-  ),
-  // Legacy protected root, accepted only while reading older documents.
-  "clusterTermExceptions"
-]);
+// Root fields stored together in the administration envelope.
+export const ADMINISTRATION_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.domain === "administration"
+);
+
+export const MCP_EXCLUDED_ROOT_FIELDS = fieldsMatching(
+  ROOT_FIELD_OWNERSHIP,
+  meta => meta.kind === "protected" && meta.domain !== "system"
+);
 
 export const PEDAGOGY_BRIDGE_FIELDS = fieldsMatching(
   BRIDGE_FIELD_OWNERSHIP,
