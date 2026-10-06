@@ -379,10 +379,14 @@ export class D1DraftRepository extends DraftRepository {
         draftId, document, actor, expectedRevision, requestId: request.id, audit
       });
     }
-    await this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
+    const declined = await this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
       SET status = 'declined', decided_by = ?, decided_at = ?, decision_note = ?
       WHERE id = ? AND draft_id = ? AND status = 'pending'`)
       .bind(decidedBy, now, note.trim() || null, request.id, draftId).run();
+    // Someone else decided it between the read above and this write.
+    if (changes(declined) !== 1) {
+      throw new DraftConflictError("That board limit waiver request is no longer pending.");
+    }
     return this.get({ draftId, actor });
   }
 

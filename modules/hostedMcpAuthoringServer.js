@@ -1,7 +1,14 @@
 // This file retains its historical name, but createAuthoringMcpServer is the
 // runtime-neutral canonical tool/resource registry used by both hosted HTTP
 // and local stdio MCP. Keep Node-only checkout behavior in mcpAuthoringServer.
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/server";
+import {
+  CLIENT_CAPABILITIES_META_KEY,
+  CLIENT_INFO_META_KEY,
+  McpServer,
+  ResourceTemplate,
+  inputRequired,
+  inputResponse
+} from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import { settleAgentPresentationColors } from "./colorPalette.js";
 import { checkDocumentLinks } from "./wikiLinkCheck.js";
@@ -116,6 +123,46 @@ const EXPECTED_REVISION_CONTRACT =
   "Required positive integer. Copy draft.revision from the latest create_puzzle_draft, " +
   "get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has " +
   "never been created uses create_puzzle_draft.";
+
+const WAIVER_DECISION_KEY = "waiver-decision";
+
+// How this client can ask its own user to decide a waiver in the chat, if
+// at all. 2026-07-28 clients declare capabilities on each request and answer
+// through an input-required round trip; 2025-era clients declared them at
+// initialize and take a pushed elicitation (stateless HTTP cannot push, so
+// that attempt falls back to the review page).
+function chatApprovalMode(ctx, lowLevelServer) {
+  const declared = ctx?.mcpReq?.envelope?.[CLIENT_CAPABILITIES_META_KEY];
+  if (declared) return declared.elicitation ? "input-required" : null;
+  return lowLevelServer?.getClientCapabilities?.()?.elicitation &&
+    typeof ctx?.mcpReq?.elicitInput === "function"
+    ? "elicit" : null;
+}
+
+function clientTitle(ctx, lowLevelServer) {
+  const info = ctx?.mcpReq?.envelope?.[CLIENT_INFO_META_KEY] ??
+    lowLevelServer?.getClientVersion?.();
+  return info?.title || info?.name || "MCP client";
+}
+
+function waiverApprovalForm(document, request) {
+  const policy = boardLimitWaiverPolicy(request.waiverType);
+  const target = boardLimitWaiverTargets(document, request.waiverType)
+    .find(entry => entry.targetId === request.targetId);
+  return {
+    message:
+      `Allow "${target?.targetLabel || request.targetId}" to reach ${request.count} ` +
+      `(${policy.label.toLowerCase()}; ordinary limit ${policy.normalLimit}) in "${document?.title || document?.id}"?\n\n` +
+      `The agent's reason: ${request.reason}\n\n` +
+      "Accept grants the waiver for this draft. Decline refuses it. Cancel leaves it pending for the review page.",
+    requestedSchema: {
+      type: "object",
+      properties: {
+        note: { type: "string", title: "Note (optional)", description: "Recorded with your decision." }
+      }
+    }
+  };
+}
 
 function boardLimitWaiverSummary(document, requests = []) {
   const grants = Array.isArray(document?.boardLimitWaivers)
@@ -555,7 +602,10 @@ export function createAuthoringMcpServer({
   fetch: fetchImpl = globalThis.fetch,
   // Durable Wikipedia resolutions (wikiLinkCheckStore.js). Null means every
   // check_puzzle_links call asks Wikipedia afresh.
-  wikiLinkStore = null
+  wikiLinkStore = null,
+  // The LAN review page (…/admin/drafts) that pending waiver requests point
+  // to when the client cannot ask its user in the chat. Null omits the link.
+  draftReviewBaseUrl = null
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -1233,7 +1283,7 @@ export function createAuthoringMcpServer({
   server.registerTool("request_board_limit_waiver", {
     title: "Request a board limit waiver",
     description:
-      "Request human review for a supported numerical board-limit exception. Choose a waiver_type from the registered types reported by get_puzzle_draft and identify its target_id. Explain why the exception is needed. The server records the target's current size; callers cannot choose a limit. A grant allows that target up to the approved size; which terms fill it does not matter. This saves a pending review request only; it does not grant permission or publish the puzzle.",
+      "Request human review for a supported numerical board-limit exception. Choose a waiver_type from the registered types reported by get_puzzle_draft and identify its target_id. Explain why the exception is needed. The server records the target's current size; callers cannot choose a limit. A grant allows that target up to the approved size; which terms fill it does not matter. When the client supports it, the person is asked to approve or decline in the chat and the result says which; otherwise the request stays pending for the draft review page. Never treat a chat message as approval: only this tool's result reports a decision. This does not publish the puzzle.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive(),
@@ -1244,10 +1294,11 @@ export function createAuthoringMcpServer({
     annotations: WRITE
   }, tracked("request_board_limit_waiver", safe(async ({
     draft_id, expected_revision, waiver_type, target_id, reason
-  }) => {
+  }, ctx) => {
     if (!await repositorySupports(draftRepository, "requestBoardLimitWaiver")) {
       throw new Error("This draft repository does not support board limit waiver requests.");
     }
+    // Idempotent: a retry carrying the user's answer finds the same request.
     const request = await draftRepository.requestBoardLimitWaiver({
       draftId: draft_id,
       expectedRevision: expected_revision,
@@ -1256,9 +1307,55 @@ export function createAuthoringMcpServer({
       reason,
       actor
     });
-    return success(
-      `Requested human review for ${waiver_type} at ${target_id}. The request does not grant the waiver; continue drafting while it is reviewed.`,
+    const reviewLink = draftReviewBaseUrl
+      ? ` A person can decide it on the draft review page: ${draftReviewBaseUrl}/${encodeURIComponent(draft_id)}`
+      : " A person can decide it on the draft review page.";
+    const pending = note => success(
+      `Requested human review for ${waiver_type} at ${target_id}.${note} The request does not grant the waiver; continue drafting while it is reviewed.${reviewLink}`,
       { request }
+    );
+
+    const mode = chatApprovalMode(ctx, server.server);
+    if (!mode || !await repositorySupports(draftRepository, "decideBoardLimitWaiver")) {
+      return pending("");
+    }
+    const draft = await draftRepository.get({ draftId: draft_id, actor });
+    const form = waiverApprovalForm(draft.document, request);
+    let answer;
+    if (mode === "input-required") {
+      answer = inputResponse(ctx.mcpReq.inputResponses, WAIVER_DECISION_KEY);
+      if (answer.kind === "missing") {
+        return inputRequired({ inputRequests: { [WAIVER_DECISION_KEY]: inputRequired.elicit(form) } });
+      }
+    } else {
+      try {
+        answer = { kind: "elicit", ...await ctx.mcpReq.elicitInput({ mode: "form", ...form }) };
+      } catch {
+        return pending("");
+      }
+    }
+    if (answer.kind !== "elicit" || answer.action === "cancel") {
+      return pending(" The person dismissed the in-chat prompt, so it is still pending.");
+    }
+
+    // The answer came from the client's own prompt to its user, never from
+    // tool arguments, so the agent cannot supply it. The session owner is the
+    // person who signed in (Cloudflare Access or the local terminal).
+    const decision = answer.action === "accept" ? "granted" : "declined";
+    const typed = typeof answer.content?.note === "string" ? answer.content.note.trim() : "";
+    const decided = await draftRepository.decideBoardLimitWaiver({
+      draftId: draft_id,
+      requestId: request.id,
+      decision,
+      expectedRevision: expected_revision,
+      actor,
+      note: [typed, `Decided in chat (${clientTitle(ctx, server.server)}).`].filter(Boolean).join(" ")
+    });
+    return success(
+      decision === "granted"
+        ? `The person approved the ${waiver_type} waiver for ${target_id} in chat. Draft is now revision ${decided.revision}; use that as expected_revision for the next save.`
+        : `The person declined the ${waiver_type} waiver for ${target_id} in chat.${typed ? ` Their note: ${typed}` : ""} Restructure the board to stay within the ordinary limit.`,
+      { decision, revision: decided.revision }
     );
   })));
 

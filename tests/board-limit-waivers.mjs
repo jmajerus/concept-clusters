@@ -11,6 +11,8 @@ import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { diffPublishedDraft } from "../modules/draftReviewDiff.js";
 import { createSqliteD1 } from "./lib/sqlite-d1.mjs";
+import { renderDraftPage } from "../modules/draftReviewPage.js";
+import { CATEGORIES } from "../puzzles/categories.js";
 
 export const name = "board limit waivers: count-based grants, D1 audit and undo, migration, schema drift";
 
@@ -125,6 +127,24 @@ async function d1GrantRevokeUndo(approvedLimit) {
   draft = await repository.popWorkingCopy({ draftId, actor, expectedRevision: draft.revision });
   assert.equal(draft.document.boardLimitWaivers, undefined);
 
+  // A decline that loses a race to a grant elsewhere must not report success.
+  const raced = await repository.requestBoardLimitWaiver({
+    draftId, waiverType: "cluster-term-count", targetId: "alpha",
+    reason: `${reason} (second request)`, actor, expectedRevision: draft.revision
+  });
+  const prepare = database.prepare;
+  database.prepare = sql => {
+    if (sql.includes("SET status = 'declined'")) {
+      database.sqlite.prepare("UPDATE puzzle_board_limit_waiver_requests SET status = 'granted' WHERE id = ?").run(raced.id);
+      database.prepare = prepare;
+    }
+    return prepare(sql);
+  };
+  await assert.rejects(repository.decideBoardLimitWaiver({
+    draftId, requestId: raced.id, decision: "declined", actor, expectedRevision: draft.revision
+  }), /no longer pending/);
+  database.sqlite.prepare("UPDATE puzzle_board_limit_waiver_requests SET status = 'superseded' WHERE id = ?").run(raced.id);
+
   // A double-submitted revoke lands one document and one audit event.
   draft = await repository.grantBoardLimitWaiverDirect({
     draftId, waiverType: "cluster-term-count", targetId: "alpha", reason, actor,
@@ -174,6 +194,29 @@ export async function run() {
       reason, expectedRevision: draft.revision, actor: reviewer
     });
     assert.equal(request.count, approvedLimit);
+
+    // The decision sits inside the Review section, counted in its summary,
+    // and Publish says why it is waiting.
+    const page = renderDraftPage({
+      ...draft, draftId, puzzleId: draftId, status: "draft",
+      validation: { valid: false, errors: [] },
+      boardLimitWaiverRequests: [request]
+    }, { categoryRegistry: CATEGORIES });
+    const review = page.slice(page.indexOf("<h2>Review</h2>"));
+    assert.match(review, /1 waiver request awaiting decision/);
+    assert.match(review.slice(0, review.indexOf("</section>")), /<h3>Board limits<\/h3>[\s\S]*Awaiting decision[\s\S]*Grant waiver/);
+    assert.equal(page.includes("<h2>Board limit waivers</h2>"), false);
+    assert.match(page, /1 board-limit waiver request is awaiting decision under Review/);
+
+    // Once the board is back within the ordinary limit the request is stale:
+    // still listed for a decision, but no longer said to block publishing.
+    const stalePage = renderDraftPage({
+      ...draft, document: puzzleWith(terms(normalLimit)), draftId, puzzleId: draftId,
+      status: "draft", validation: { valid: true, errors: [] },
+      boardLimitWaiverRequests: [request]
+    }, { categoryRegistry: CATEGORIES });
+    assert.match(stalePage, /1 waiver request awaiting decision/);
+    assert.doesNotMatch(stalePage, /blocks publishing/);
 
     draft = await store.decideBoardLimitWaiver({
       draftId, requestId: request.id, decision: "granted",
