@@ -1669,12 +1669,19 @@ function renderBoardLimitWaiverReview(draft) {
   const history = closed.length ? `<details><summary>Previous requests (${closed.length})</summary><ul>${closed.map(request =>
     `<li>${escapeHtml(request.status)} · ${escapeHtml(request.waiverType)} · ${escapeHtml(request.targetId)} · size ${escapeHtml(String(request.count))} · ${escapeHtml(request.reason)}${request.decisionNote ? ` · ${escapeHtml(request.decisionNote)}` : ""}</li>`
   ).join("")}</ul></details>` : "";
-  if (!pending.length && !granted && !direct && !history) return { pending: 0, html: "" };
+  // Requests that still describe the board; a stale one no longer blocks publishing.
+  const blocking = pending.filter(request => {
+    const entry = targetByKey.get(`${request.waiverType}\u0000${request.targetId}`);
+    return entry?.requestable && entry.value === request.count &&
+      !grants.some(grant => boardLimitWaiverMatches(document, entry.target, grant));
+  }).length;
+  if (!pending.length && !granted && !direct && !history) return { pending: 0, blocking: 0, html: "" };
   const supported = policies.map(policy =>
     `${escapeHtml(policy.label)}: ${escapeHtml(String(policy.normalLimit))} ordinary, ${escapeHtml(String(policy.approvedLimit))} by waiver`
   ).join("; ");
   return {
     pending: pending.length,
+    blocking,
     html: `<h3>Board limits</h3>
     <p class="meta">${supported}. A waiver lets one target reach its approved size, whichever terms fill it. This board has ${puzzleNodeCount(document)} total nodes.</p>
     ${pending.length ? `<h4>Awaiting decision</h4>${cards}` : ""}
@@ -1767,8 +1774,8 @@ function renderSubmitForm(draft, variant = "hosted") {
     })
     : `<section class="submit-pr">
     <h2>Actions</h2>
-    <p class="meta">${hint}${waivers.pending
-      ? ` ${waivers.pending} board-limit waiver request${waivers.pending === 1 ? " is" : "s are"} awaiting decision under Review; validation blocks publishing until ${waivers.pending === 1 ? "it is" : "they are"} granted or the board is restructured.`
+    <p class="meta">${hint}${waivers.blocking
+      ? ` ${waivers.blocking} board-limit waiver request${waivers.blocking === 1 ? " is" : "s are"} awaiting decision under Review; validation blocks publishing until ${waivers.blocking === 1 ? "it is" : "they are"} granted or the board is restructured.`
       : ""}</p>
     <div class="actions">
       ${playButton}
