@@ -294,11 +294,11 @@ export async function run() {
     assert.equal(list.status, 200);
     assert.match(list.body, /incomplete-review-fixture/);
     assert.match(list.body, /energy-flow-review/);
-    assert.match(list.body, /One path/);
+    assert.match(list.body, /Publish makes the D1 snapshot available to public play/);
     assert.match(list.body, /value="refresh-github-production"/);
     assert.doesNotMatch(list.body, /this draft is in this checkout/);
     assert.doesNotMatch(list.body, />Checkout</);
-    assert.match(list.body, />GitHub</);
+    assert.match(list.body, />GitHub snapshot</);
     assert.doesNotMatch(list.body, /class="badge">submitted</);
     assert.match(list.body, /New puzzle opens a blank board/);
     assert.doesNotMatch(list.body, /Open existing puzzle/);
@@ -311,7 +311,7 @@ export async function run() {
     assert.match(list.body, /data-puzzle-id="energy-flow"/);
     assert.match(list.body, /href="\/admin\/drafts\/energy-flow-review"/);
     assert.match(list.body, /data-working-copy="0"/);
-    assert.match(list.body, /→ Freeze/);
+    assert.match(list.body, /Cue and Freeze refresh the static copy in git/);
     assert.doesNotMatch(list.body, /open a GitHub pull request/);
     assert.match(list.body, /href="\/\?puzzle=energy-flow-review&amp;play"/);
     assert.match(list.body, /href="\/\?puzzle=incomplete-review-fixture&amp;play"/);
@@ -325,7 +325,7 @@ export async function run() {
     assert.match(incompletePage.body, /Validation failed/);
     assert.doesNotMatch(incompletePage.body, /authoring flag/);
     assert.match(incompletePage.body, /badge-warn">working copy</);
-    assert.doesNotMatch(incompletePage.body, /badge-ok">authoring play</);
+    assert.doesNotMatch(incompletePage.body, /badge-ok">published</);
     assert.doesNotMatch(incompletePage.body, />draft</);
     assert.match(incompletePage.body, /<copy-field>/);
     assert.match(incompletePage.body, /confirm" value="save-working-copy"/);
@@ -535,7 +535,7 @@ export async function run() {
     assert.match(afterPublishGet.body, /Published[\s\S]*energy-flow[\s\S]*D1 revision 1/);
     assert.doesNotMatch(afterPublishGet.body, /<h1>Puzzles<\/h1>/);
     assert.doesNotMatch(afterPublishGet.body, /<h1>Published<\/h1>/);
-    assert.match(afterPublishGet.body, />Cue</);
+    assert.match(afterPublishGet.body, />Cue for freeze</);
     const afterPublishList = createResponse();
     assert.equal(await handlePublish({
       method: "GET",
@@ -543,9 +543,9 @@ export async function run() {
     }, afterPublishList), true);
     assert.equal(afterPublishList.status, 200);
     assert.doesNotMatch(afterPublishList.body, /role="status"/);
-    assert.match(afterPublishGet.body, /git-bundled production player is unchanged/);
-    assert.match(afterPublishGet.body, /badge-ok">authoring play/);
-    assert.match(afterPublishGet.body, />held</);
+    assert.match(afterPublishGet.body, /Public play reads the published D1 snapshot/);
+    assert.match(afterPublishGet.body, /badge-ok">published/);
+    assert.match(afterPublishGet.body, />not cued for freeze</);
     const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
     assert.equal(live.document.id, "energy-flow");
     assert.equal(live.cuedForFreezeAt, null);

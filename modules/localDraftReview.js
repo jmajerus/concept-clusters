@@ -11,10 +11,10 @@
 // GET `/admin/drafts/<id>` opens a working copy from the published snapshot
 // when one does not already exist.
 //
-// Status on this local page is the publish path: working copy → authoring
-// play (held / cued / new on next freeze) → GitHub production. D1
-// `submitted` is leftover PR-ledger state and is not shown. GitHub
-// production membership comes from the Freeze snapshot: origin’s
+// Publication status describes the D1 snapshot available to public play.
+// Freeze cues and GitHub snapshot membership describe the static copy.
+// D1 `submitted` is leftover PR-ledger state and is not shown. GitHub
+// snapshot membership comes from the Freeze snapshot: origin’s
 // puzzles/manifest.js joined with that freeze’s puzzle add/update, minus
 // remove, assuming the freeze merges.
 
@@ -1257,7 +1257,7 @@ export function createLocalDraftReviewHandler({
             actor: publicationActor
           });
           html(res, renderContentLifecycleResultPage({
-            title: "Removed from authoring play",
+            title: "Removed from public play",
             message: `Withdrew ${puzzleId}. Publish again to restore it.`,
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
           }));

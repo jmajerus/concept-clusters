@@ -8,7 +8,7 @@ import { listMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 
-export const name = "draft review page: content rendering and GitHub production badges";
+export const name = "draft review page: content rendering and GitHub snapshot badges";
 
 // draftReviewPage.js requires categoryRegistry explicitly -- no git-only
 // default, since in the authoring environment D1 is the upstream source of
@@ -146,7 +146,7 @@ export async function run() {
   const draftPage = renderDraftPage({ ...baseDraft, inCurrentBundle: null });
   assert.doesNotMatch(draftPage, /live in this Worker/);
   assert.doesNotMatch(draftPage, /not yet visible in this Worker/);
-  assert.doesNotMatch(draftPage, /in GitHub production/);
+  assert.doesNotMatch(draftPage, /in GitHub snapshot/);
   assert.doesNotMatch(draftPage, /class="badge">submitted</);
   assert.match(draftPage, /value="publish"/);
   assert.doesNotMatch(draftPage, /value="unpublish"/);
@@ -159,7 +159,7 @@ export async function run() {
   assert.match(draftPage, /Board size/);
   assert.match(draftPage, /\+20%/);
   assert.match(draftPage, /-25%/);
-  assert.doesNotMatch(draftPage, /badge-ok">authoring play</);
+  assert.doesNotMatch(draftPage, /badge-ok">published</);
   const publishedNoticeList = renderDraftListPage([{ ...baseDraft }], {
     notice: {
       kind: "puzzle",
@@ -172,7 +172,9 @@ export async function run() {
   assert.match(publishedNoticeList, /role="status"/);
   assert.match(publishedNoticeList, /Published.*review-fixture[\s\S]*D1 revision 2/);
   assert.match(publishedNoticeList, /Cued for the next freeze/);
-  assert.match(publishedNoticeList, /git-bundled production player is unchanged/);
+  assert.match(publishedNoticeList, /Public play reads the published D1 snapshot/);
+  assert.match(publishedNoticeList, /30-second cache window/);
+  assert.doesNotMatch(publishedNoticeList, /git-bundled production player is unchanged/);
   assert.doesNotMatch(publishedNoticeList, /<h1>Published<\/h1>/);
   const cuedNoticeList = renderDraftListPage([{ ...baseDraft }], {
     notice: {
@@ -196,21 +198,21 @@ export async function run() {
     readyForFreeze: true,
     freezeAdd: true
   });
-  assert.match(freezePage, /badge-ok">authoring play</);
-  assert.match(freezePage, /new on next freeze/);
+  assert.match(freezePage, /badge-ok">published</);
+  assert.match(freezePage, /add on next freeze/);
   assert.doesNotMatch(freezePage, /badge-warn">working copy</);
-  assert.match(freezePage, />Hold</);
+  assert.match(freezePage, />Clear freeze cue</);
   const reviewPage = renderDraftPage({ ...baseDraft, d1Published: true, cuedForFreeze: false });
-  assert.match(reviewPage, /badge-ok">authoring play</);
-  assert.match(reviewPage, />held</);
-  assert.match(reviewPage, />Cue</);
+  assert.match(reviewPage, /badge-ok">published</);
+  assert.match(reviewPage, />not cued for freeze</);
+  assert.match(reviewPage, />Cue for freeze</);
   const cuedPage = renderDraftPage({
     ...baseDraft,
     d1Published: true,
     cuedForFreeze: true
   });
-  assert.match(cuedPage, />cued</);
-  assert.doesNotMatch(cuedPage, />held</);
+  assert.match(cuedPage, />cued for freeze</);
+  assert.doesNotMatch(cuedPage, />not cued for freeze</);
   assert.doesNotMatch(freezePage, /value="revert-published"/);
   assert.match(freezePage, /value="unpublish"/);
   assert.match(freezePage, /value="publish" disabled/);
@@ -387,7 +389,7 @@ export async function run() {
   assert.match(identicalPlay, /value="publish" disabled/);
   assert.doesNotMatch(identicalPlay, /value="revert-published"/);
   assert.match(identicalPlay, /value="unpublish"/);
-  assert.match(identicalPlay, /authoring-play snapshot/);
+  assert.match(identicalPlay, /published D1 snapshot/);
 
   const seededReview = renderDraftPage({
     ...baseDraft,
@@ -619,23 +621,27 @@ export async function run() {
   assert.match(withHistory, /Revert to last working copy restores the previous save/);
   assert.doesNotMatch(draftPage, /value="revert-working-copy"/);
 
-  // GitHub production is a dedicated field, not D1 `submitted`.
+  // GitHub snapshot is a dedicated field, not D1 `submitted`.
   const livePage = renderDraftPage({
     ...baseDraft,
     status: "submitted",
     inGithubProduction: true
   });
-  assert.match(livePage, /in GitHub production/);
+  assert.match(livePage, /in GitHub snapshot/);
   assert.doesNotMatch(livePage, /class="badge">submitted</);
   assert.doesNotMatch(livePage, /live in this Worker/);
 
   const stalePage = renderDraftPage({
     ...baseDraft,
     status: "submitted",
+    d1Published: true,
+    cuedForFreeze: false,
     inGithubProduction: false
   });
-  assert.match(stalePage, /not in GitHub production/);
-  assert.doesNotMatch(stalePage, />in GitHub production</);
+  assert.match(stalePage, /not in GitHub snapshot/);
+  assert.match(stalePage, /badge-ok">published</, "D1 publication is independent of GitHub membership");
+  assert.match(stalePage, />not cued for freeze</, "publication is independent of the freeze cue");
+  assert.doesNotMatch(stalePage, />in GitHub snapshot</);
   assert.doesNotMatch(stalePage, /not yet visible in this Worker/);
 
   const listPage = renderDraftListPage([
@@ -649,9 +655,9 @@ export async function run() {
       subcategories: { Biology: "foundations" }
     }
   ]);
-  assert.match(listPage, /not in GitHub production/);
+  assert.match(listPage, /not in GitHub snapshot/);
   assert.match(listPage, /data-github="0"/);
-  assert.match(listPage, />GitHub</);
+  assert.match(listPage, />GitHub snapshot</);
   assert.doesNotMatch(listPage, /value="refresh-github-production"/);
   assert.doesNotMatch(listPage, />Live</);
   assert.doesNotMatch(listPage, /class="badge">submitted</);
@@ -675,7 +681,7 @@ export async function run() {
   assert.match(hostedList, /value="modified"> Modified/);
   assert.match(hostedList, /value="cued"> Cued/);
   assert.match(hostedList, /value="published"> Published only/);
-  assert.match(hostedList, /value="drafts"/);
+  assert.match(hostedList, /value="drafts"> Not in GitHub/);
   assert.match(hostedList, /By category/);
   assert.match(hostedList, /value="recent"/);
   assert.match(hostedList, /id="corpus-by-recent"/);
@@ -688,9 +694,9 @@ export async function run() {
     readyForFreeze: true,
     freezeAdd: true
   }]);
-  assert.match(freezeList, /badge-ok">authoring play</);
-  assert.match(freezeList, /new on next freeze/);
-  assert.doesNotMatch(freezeList, /published in D1/);
+  assert.match(freezeList, /badge-ok">published</);
+  assert.match(freezeList, /add on next freeze/);
+  assert.doesNotMatch(freezeList, /badge-ok">authoring play/);
 
   const stacked = renderDraftListPage([{
     ...baseDraft,
@@ -701,12 +707,12 @@ export async function run() {
     inCurrentBundle: true,
     cuedForFreeze: false
   }]);
-  assert.match(stacked, /badge-ok">authoring play</);
-  assert.match(stacked, />held</);
+  assert.match(stacked, /badge-ok">published</);
+  assert.match(stacked, />not cued for freeze</);
   assert.doesNotMatch(stacked, /badge-warn">working copy</);
   assert.match(stacked, /data-has-draft="1"/);
   assert.match(stacked, /data-working-copy="0"/);
-  assert.match(stacked, /data-modified="1"/, "held means published since the last freeze");
+  assert.match(stacked, /data-modified="1"/, "an uncued publication is modified since the last freeze");
   assert.match(stacked, /data-cued="0"/);
 
   // The four states a row can be in for the Modified / Cued scopes.
@@ -715,17 +721,17 @@ export async function run() {
     return [/data-modified="(\d)"/, /data-cued="(\d)"/].map(re => html.match(re)[1]).join("");
   };
   assert.equal(scopeAttrs({ published: true, d1Published: true, status: "published", gitSeedCue: true, cuedForFreeze: false }), "00",
-    "unbadged authoring play is exactly what the last Freeze shipped: neither");
+    "a published row with no pending freeze badge is what the last Freeze shipped: neither");
   assert.equal(scopeAttrs({ published: true, d1Published: true, status: "published", gitSeedCue: false, cuedForFreeze: true }), "11",
     "cued is modified");
   assert.equal(scopeAttrs({ published: true, d1Published: true, status: "published", freezeAdd: true, cuedForFreeze: true }), "11",
     "new to git is cued and modified");
   assert.equal(scopeAttrs({ hasWorkingCopy: true, published: false, status: "draft" }), "10",
-    "a working copy not yet in authoring play is modified, not cued");
+    "a working copy not yet published is modified, not cued");
   assert.equal(scopeAttrs({ published: true, d1Published: true, withdrawn: true, cuedForFreeze: true }), "00",
     "withdrawn rows are out of both scopes");
   assert.doesNotMatch(stacked, /this draft is in this checkout/);
-  assert.doesNotMatch(stacked, /published in D1/);
+  assert.doesNotMatch(stacked, /badge-ok">authoring play/);
   assert.doesNotMatch(stacked, />Checkout</);
   assert.doesNotMatch(stacked, /class="badge">published</);
 
@@ -845,7 +851,7 @@ export async function run() {
     [{ ...baseDraft, status: "installed", inCurrentBundle: true }],
     { variant: "local" }
   );
-  assert.match(localList, /One path/);
+  assert.match(localList, /Publish makes the D1 snapshot available to public play/);
   assert.match(localList, /joined with the last freeze patch/);
   assert.match(localList, /Refresh from GitHub on Admin/);
   assert.match(localList, /Show <strong>Working copies<\/strong>/);
@@ -853,10 +859,10 @@ export async function run() {
   assert.match(localList, /data-working-copy="1"/);
   assert.match(localList, /data-has-draft="1"/);
   assert.match(localList, /value="refresh-github-production"/);
-  assert.match(localList, /GitHub column is empty until you fetch origin/);
+  assert.match(localList, /GitHub snapshot column is empty until you fetch origin/);
   assert.doesNotMatch(localList, /this draft is in this checkout/);
   assert.doesNotMatch(localList, />Checkout</);
-  assert.match(localList, />GitHub</);
+  assert.match(localList, />GitHub snapshot</);
   assert.doesNotMatch(localList, />Live</);
   assert.match(localList, />Play</);
   assert.match(localList, /New puzzle/);
@@ -915,7 +921,7 @@ export async function run() {
   assert.match(localWorking, /badge-warn">working copy</);
   assert.doesNotMatch(localWorking, /this draft is in this checkout/);
   assert.doesNotMatch(localWorking, /this draft is not in this checkout/);
-  assert.doesNotMatch(localWorking, /badge-ok">authoring play</);
+  assert.doesNotMatch(localWorking, /badge-ok">published</);
 
   // Stored drafts are the simplified format: cluster ids as strings and
   // idealTerms as { clusterId: term }. JSON-LD is interchange-only.

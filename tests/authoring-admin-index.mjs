@@ -46,7 +46,7 @@ export async function run(page) {
   assert.match(pageHtml, />Freeze</);
   assert.match(pageHtml, /No changes cued/);
   assert.match(pageHtml, /Git-seeded snapshots already in this checkout/);
-  assert.match(pageHtml, /<h2>GitHub production<\/h2>/);
+  assert.match(pageHtml, /<h2>GitHub snapshot<\/h2>/);
   assert.doesNotMatch(pageHtml, /value="refresh-github-production"/);
   assert.match(pageHtml, /LAN authoring checkout/);
   assert.doesNotMatch(pageHtml, /No GitHub snapshot yet/);
@@ -259,7 +259,7 @@ export async function run(page) {
       }
     }
   });
-  assert.match(freezeSnapshot, /Projected GitHub production/);
+  assert.match(freezeSnapshot, /Projected GitHub snapshot/);
   assert.match(freezeSnapshot, /joined with this freeze/);
   assert.match(freezeSnapshot, /2 ids, 1 already on origin/);
   const freezeSnapshotError = renderFreezeResultPage({
@@ -280,13 +280,13 @@ export async function run(page) {
       }
     }
   });
-  assert.match(refreshed, /GitHub production snapshot/);
+  assert.match(refreshed, /GitHub snapshot/);
   assert.match(refreshed, /2 ids from origin\/main/);
   assert.match(refreshed, /href="\/admin\/drafts"/);
   const refreshFailed = renderGithubRefreshResultPage({
     error: "git fetch origin failed"
   });
-  assert.match(refreshFailed, /Could not refresh GitHub production/);
+  assert.match(refreshFailed, /Could not refresh GitHub snapshot/);
   assert.match(refreshFailed, /git fetch origin failed/);
   const refreshCached = renderGithubRefreshResultPage({
     result: {
@@ -327,7 +327,7 @@ export async function run(page) {
   assert.equal(refreshedCount, 1);
   assert.equal(frozenCount, 0);
   assert.equal(refreshRes.status, 200);
-  assert.match(refreshRes.body, /GitHub production snapshot/);
+  assert.match(refreshRes.body, /GitHub snapshot/);
   assert.match(refreshRes.body, /1 id from origin\/main/);
 
   const refreshDenied = createResponse();

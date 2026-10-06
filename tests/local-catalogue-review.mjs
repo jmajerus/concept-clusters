@@ -314,7 +314,7 @@ export async function run(page) {
   assert.equal(publishMetaPage.status, 200);
   assert.match(publishMetaPage.body, /role="status"/);
   assert.match(publishMetaPage.body, /Published[\s\S]*lab-meta-fixture[\s\S]*D1 revision 1/);
-  assert.match(publishMetaPage.body, />Cue</);
+  assert.match(publishMetaPage.body, />Cue for freeze</);
 
   const cueMeta = createResponse();
   assert.equal(await handleRequest(formRequest("/admin/catalogues/lab-meta-fixture", {
@@ -570,7 +570,7 @@ export async function run(page) {
   }, categoryPublishedPage), true);
   assert.match(categoryPublishedPage.body, /role="status"/);
   assert.match(categoryPublishedPage.body, /Published[\s\S]*science[\s\S]*D1 revision 2/);
-  assert.match(categoryPublishedPage.body, />Cue</);
+  assert.match(categoryPublishedPage.body, />Cue for freeze</);
 
   // "science" was published with domain sciences-mathematics above -- the
   // list page must read it back out of the published row's nested `document`
@@ -626,8 +626,8 @@ export async function run(page) {
     method: "GET",
     url: "/admin/categories/lab-subject"
   }, labReview), true);
-  assert.match(labReview.body, /held/);
-  assert.match(labReview.body, />Cue</);
+  assert.match(labReview.body, /not cued for freeze/);
+  assert.match(labReview.body, />Cue for freeze</);
 
   const editLabSubject = createResponse();
   assert.equal(await handleRequest(formRequest("/admin/categories/lab-subject", {
@@ -696,7 +696,7 @@ export async function run(page) {
     method: "GET",
     url: "/admin/categories/lab-subject"
   }, labFreeze), true);
-  assert.match(labFreeze.body, /new on next freeze/);
+  assert.match(labFreeze.body, /add on next freeze/);
 
   const unpublishLabSubject = createResponse();
   assert.equal(await handleRequest({
@@ -808,7 +808,7 @@ export async function run(page) {
   const reviewList = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, reviewList), true);
   assert.match(reviewList.body, /lab-catalogue-fixture/);
-  assert.match(reviewList.body, /held/);
+  assert.match(reviewList.body, /not cued for freeze/);
 
   const markLeaf = createResponse();
   assert.equal(await handleRequest({
@@ -840,7 +840,7 @@ export async function run(page) {
   const freezeList = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, freezeList), true);
   assert.match(freezeList.body, /lab-catalogue-fixture/);
-  assert.match(freezeList.body, /new on next freeze/);
+  assert.match(freezeList.body, /add on next freeze/);
 
   const unpublishLeaf = createResponse();
   assert.equal(await handleRequest({

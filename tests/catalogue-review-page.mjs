@@ -46,13 +46,13 @@ export async function run() {
   assert.match(list, /href="\/admin\/catalogues\/holding-it-together"/);
   assert.match(list, /href="\/admin"/);
   assert.match(list, /published in D1/);
-  assert.match(list, /new on next freeze/);
+  assert.match(list, /add on next freeze/);
   const reviewList = renderCatalogueListPage([
     { id: "in-review", title: "In review", published: true, entryCount: 0, kind: "leaf", readyForFreeze: false }
   ]);
-  assert.match(reviewList, /held/);
+  assert.match(reviewList, /not cued for freeze/);
   assert.match(list, /lab-only/);
-  assert.match(list, /Remove from play/);
+  assert.match(list, /Unpublish/);
   assert.match(list, /confirm" value="create-catalogue"/);
   assert.match(list, /Meta catalogue/);
   assert.doesNotMatch(list, /Export to player/);
@@ -91,7 +91,7 @@ export async function run() {
   assert.match(metaPage, /name="new_entry_id"/);
   assert.match(metaPage, /arrangements-that-hold/);
   assert.match(metaPage, /relatedCatalogues/);
-  assert.match(metaPage, /Remove from authoring play/);
+  assert.match(metaPage, /Unpublish/);
   assert.match(metaPage, /Freeze on/);
   assert.match(metaPage, /This working copy is already the published D1 snapshot/);
   assert.match(metaPage, /name="confirm" value="publish" disabled>Publish<\/button>/);
@@ -139,7 +139,7 @@ export async function run() {
     backHref: catalogueAuthorQuery("getting-started")
   });
   assert.match(published, /D1 revision 2/);
-  assert.match(published, /player bundle not updated|git-bundled production player is unchanged/);
+  assert.match(published, /Public play reads the published D1 snapshot/);
 
   const categories = renderCategoryListPage([
     {
@@ -222,7 +222,7 @@ export async function run() {
   assert.match(biology, /name="new_subcategory_id"/);
   assert.match(biology, /name="remove_subcategory"/);
   assert.match(biology, /Remove on save/);
-  assert.match(biology, /Remove from authoring play/);
+  assert.match(biology, /Unpublish/);
   assert.match(biology, /Delete working copy/);
   assert.match(biology, /<select name="domain">/);
   assert.match(biology, /name="link"/);
@@ -273,5 +273,5 @@ export async function run() {
     readyForFreeze: true,
     document: { id: "lab-subject", title: "Lab Subject" }
   });
-  assert.match(biologyNew, /new on next freeze/);
+  assert.match(biologyNew, /add on next freeze/);
 }

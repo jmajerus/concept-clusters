@@ -6,6 +6,10 @@ import {
 import { DOMAINS, RESERVED_DOMAIN_IDS } from "../puzzles/categories.js";
 
 export const PUBLISH_AND_CUE_CONFIRM = "publish-and-cue";
+export const PUBLIC_PLAY_PUBLICATION_NOTE =
+  "Public play reads the published D1 snapshot. A fresh visit or navigation " +
+  "after the 30-second cache window picks up changes. Freeze refreshes the " +
+  "static copy in git.";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -59,7 +63,7 @@ function pageShell(title, body) {
 
 export function renderFreezeAddBadge(freezeAdd) {
   return freezeAdd
-    ? '<span class="badge badge-new">new on next freeze</span>'
+    ? '<span class="badge badge-new">add on next freeze</span>'
     : "";
 }
 
@@ -76,8 +80,8 @@ export function renderPublishedFreezeBadges({
   if (!(published || d1Published) || withdrawn || d1Withdrawn) return "";
   if (freezeAdd) return renderFreezeAddBadge(true);
   if (gitSeedCue) return "";
-  if (!(cuedForFreeze || readyForFreeze)) return '<span class="badge">held</span>';
-  return '<span class="badge badge-accent">cued</span>';
+  if (!(cuedForFreeze || readyForFreeze)) return '<span class="badge">not cued for freeze</span>';
+  return '<span class="badge badge-accent">cued for freeze</span>';
 }
 
 export function renderFreezeCueForm(action, {
@@ -91,20 +95,20 @@ export function renderFreezeCueForm(action, {
     return `<form class="submit-pr" method="post" action="${escapeHtml(action)}">
       <input type="hidden" name="confirm" value="${HOLD_FROM_FREEZE_CONFIRM}">
       <h2>Freeze cue</h2>
-      <p class="meta">This snapshot is in the next freeze. Hold it to keep it
-      in authoring play — including a finished, reviewed board you want to
-      ship later with a catalogue or other puzzles.</p>
-      <p><button type="submit" class="play-button secondary">Hold</button></p>
+      <p class="meta">This published snapshot is cued for the next freeze into git.
+      Clearing its cue keeps it published for public play. Freeze can still
+      include it as a dependency of another cued document.</p>
+      <p><button type="submit" class="play-button secondary">Clear freeze cue</button></p>
     </form>`;
   }
   return `<form class="submit-pr" method="post" action="${escapeHtml(action)}">
     <input type="hidden" name="confirm" value="${CUE_FOR_FREEZE_CONFIRM}">
     <h2>Freeze cue</h2>
-    <p class="meta">Cue includes this snapshot in the next freeze and
-    means you are done with this editor, so it returns to the list. Hold
-    (the default after Publish) keeps it in authoring play only. Finished
-    or reviewed is not the same as cued.</p>
-    <p><button type="submit">Cue</button></p>
+    <p class="meta">Cue marks the published snapshot for the next freeze into git
+    and returns to the list. It is already available to public play.
+    Publish leaves it uncued; Freeze can still include it as a dependency
+    of another cued document.</p>
+    <p><button type="submit">Cue for freeze</button></p>
   </form>`;
 }
 
@@ -134,10 +138,10 @@ export function renderDocumentLifecycleForms(action, { published = false, withdr
   const unpublish = published && !withdrawn
     ? `<form class="submit-pr" method="post" action="${escapeHtml(action)}">
       <input type="hidden" name="confirm" value="unpublish">
-      <p class="meta">Removes this document from authoring play. Git seed
-      will not restore it. Publish again to bring it back. Freeze later
-      deletes the corresponding git files.</p>
-      <p><button type="submit" class="play-button secondary">Remove from authoring play</button></p>
+      <p class="meta">Unpublish withdraws this document from public play after
+      the cache refreshes. Git seed will not restore it. Publish again to bring
+      it back. Freeze later deletes the corresponding static files.</p>
+      <p><button type="submit" class="play-button secondary">Unpublish</button></p>
     </form>`
     : "";
   return `${unpublish}
@@ -198,8 +202,7 @@ export function renderContentPublicationNotice(notice) {
   return [
     '<div class="validation validation-ok" role="status">',
     message,
-    '  <p class="meta">The git-bundled production player is unchanged until a',
-    '  future Freeze.</p>',
+    '  <p class="meta">' + escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE) + '</p>',
     '</div>',
     '<script>',
     '  if (window.history && window.history.replaceState) {',
@@ -241,7 +244,7 @@ export function renderCatalogueListPage(catalogues, { notice = null } = {}) {
     <td>${item.published && !item.withdrawn
       ? `<form class="row-action" method="post" action="${escapeHtml(catalogueAdminPath(item.id))}">
            <input type="hidden" name="confirm" value="unpublish">
-           <button type="submit" class="play-button secondary">Remove from play</button>
+           <button type="submit" class="play-button secondary">Unpublish</button>
          </form>`
       : ""}</td>
   </tr>`).join("\n");
@@ -256,20 +259,21 @@ export function renderCatalogueListPage(catalogues, { notice = null } = {}) {
     <p class="meta">Documents in D1. Leaf catalogues edit as Library cards
     (\`/?catalogue=&amp;view=author\`). Meta catalogues edit here
     (\`/admin/catalogues/&lt;id&gt;\`); their entries are other catalogues.
-    <strong>Publish</strong> writes the shared D1 row.
-    Cue a published snapshot when you are done; that returns to this list.
-    Then <strong>Freeze</strong> from Admin to update the git-bundled player.
+    <strong>Publish</strong> makes the D1 snapshot available to public play
+    after the cache refreshes. Cue a published snapshot for the next freeze;
+    that returns to this list. <strong>Freeze</strong> from Admin refreshes
+    the static copy in git.
     Derived catalogues (All Puzzles,
     New, level-*, domain-*) stay out of this list.
-    <span class="badge badge-new">new on next freeze</span> marks a published
-    D1 row that git does not have yet and that you cued. <span class="badge">held</span>
-    stays in authoring play until you cue it — including a finished board
-    waiting on other puzzles.
+    <span class="badge badge-new">add on next freeze</span> marks a published
+    D1 row that git does not have yet and that you cued.
+    <span class="badge">not cued for freeze</span> remains published for
+    public play; it has no explicit freeze cue.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/catalogues">
       <h2>New catalogue</h2>
-      <p class="meta">Creates a working copy in D1. Publish makes it the live
-      authoring document. Cue and Freeze are separate actions.</p>
+      <p class="meta">Creates a working copy in D1. Publish makes it available to
+      public play after the cache refreshes. Cue and Freeze are separate actions.</p>
       <input type="hidden" name="confirm" value="create-catalogue">
       <p><label>id <input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="my-catalogue"></label></p>
       <p><label>title <input name="title" required></label></p>
@@ -301,8 +305,8 @@ export function renderContentPublishResultPage({
     : `<h1>Published</h1>
        <p class="validation validation-ok">Published <code>${escapeHtml(id)}</code>
        as D1 revision ${escapeHtml(String(published.revision))}.${cuedNote}</p>
-       <p class="meta">The git-bundled production player is unchanged until a
-       future Freeze. <a href="${escapeHtml(backHref)}">← back</a></p>`;
+       <p class="meta">${escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE)}
+       <a href="${escapeHtml(backHref)}">← back</a></p>`;
   return pageShell(title, body);
 }
 
@@ -342,11 +346,11 @@ export function renderMetaCatalogueEditPage({
   const activePublished = published && !withdrawn;
   const canPublish = !activePublished || differsFromPublished;
   const lifecycleHint = withdrawn
-    ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to authoring play."
+    ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to public play after the cache refreshes."
     : activePublished && !differsFromPublished
     ? "This working copy is already the published D1 snapshot. Edit it before publishing again."
     : activePublished
-    ? "This working copy has unpublished changes. Publish to replace the D1 snapshot."
+    ? "This working copy has unpublished changes. Publish to update the D1 snapshot used by public play."
     : "This working copy has not been published to D1 yet.";
   const publishLabel = withdrawn ? "Republish" : "Publish";
   const publishDisabled = canPublish ? "" : " disabled";
@@ -356,8 +360,8 @@ export function renderMetaCatalogueEditPage({
     · meta catalogue
     · draft revision ${escapeHtml(String(revision))}
     · ${withdrawn
-      ? "withdrawn from authoring play"
-      : published ? "has a published D1 row" : "working copy only"}
+      ? "withdrawn from public play"
+      : published ? "published for public play" : "working copy only"}
     · ${navLinks()}</p>
     <p class="meta">Entries are other catalogues, one level deep. Nested
     leaves stay off the top-level Library list unless a leaf itself sets
@@ -405,7 +409,7 @@ export function renderMetaCatalogueEditPage({
     <form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
       <p><button type="submit" name="confirm" value="publish"${publishDisabled}>${publishLabel}</button>
       <button type="submit" name="confirm" value="${PUBLISH_AND_CUE_CONFIRM}" class="secondary"${publishDisabled}
-        title="Publish and cue this snapshot for the next freeze in one step.">${publishLabel} &amp; Cue</button></p>
+        title="Publish for public play and cue this snapshot for the next freeze into git.">${publishLabel} &amp; Cue</button></p>
     </form>
     ${activePublished && differsFromPublished
       ? `<form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
@@ -559,21 +563,21 @@ export function renderCategoryListPage(categories, { notice = null } = {}) {
     ${renderContentPublicationNotice(notice)}
     <p class="meta">Shared taxonomy documents in D1. Title, domain, blurb, and
     registered subcategories. Puzzle membership stays derived.
-    <span class="badge badge-new">new on next freeze</span> marks a published
+    <span class="badge badge-new">add on next freeze</span> marks a published
     D1 row that git does not have yet and that you cued.
-    <span class="badge">held</span> stays in authoring play until you cue it.
-    A row with no cue badge is already in git. A git import cue is not one
-    you asked for, and Freeze does not treat it as a change to ship.
+    <span class="badge">not cued for freeze</span> remains published for
+    public play; it has no explicit freeze cue. A row with no freeze badge
+    came from git or was frozen already.
     <span class="badge badge-warn">unpublished changes</span> means the working
-    copy is not the D1 snapshot Freeze writes. The subcategory column is that
-    snapshot. Names under “Not on the published snapshot” exist only on the
+    copy differs from the published D1 snapshot that public play reads.
+    The subcategory column is that snapshot. Names under “Not on the published snapshot” exist only on the
     working copy.
     Cue means you are done and returns to this list.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/categories">
       <h2>New category</h2>
-      <p class="meta">Creates a working copy. Publish makes it live in
-      authoring play. Membership stays derived from puzzles.</p>
+      <p class="meta">Creates a working copy. Publish makes it available to public
+      play after the cache refreshes. Membership stays derived from puzzles.</p>
       <input type="hidden" name="confirm" value="create-category">
       <p><label>id <input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="molecular-biology"></label></p>
       <p><label>title <input name="title" required placeholder="Molecular Biology"></label></p>
@@ -607,19 +611,19 @@ export function renderCategoryEditPage({
   const publishDisabled = canPublish ? "" : " disabled";
   const publishLabel = withdrawn ? "Republish" : "Publish";
   const lifecycleHint = withdrawn
-    ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to authoring play."
+    ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to public play after the cache refreshes."
     : activePublished && !differsFromPublished
     ? "This working copy is already the published D1 snapshot. Edit it before publishing again."
     : activePublished
-    ? "This working copy has unpublished changes. Publish to replace the D1 snapshot. Freeze writes that snapshot, not this form, until you publish."
+    ? "This working copy has unpublished changes. Publish to update the D1 snapshot used by public play. Freeze writes that snapshot, not this form, until you publish."
     : "This working copy has not been published to D1 yet.";
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
     ${renderContentPublicationNotice(notice)}
     <p class="meta"><code>${escapeHtml(id)}</code>
     · draft revision ${escapeHtml(String(revision))}
     · ${withdrawn
-      ? "withdrawn from authoring play"
-      : published ? "has a published D1 row" : "working copy only"}
+      ? "withdrawn from public play"
+      : published ? "published for public play" : "working copy only"}
     ${renderPublishedFreezeBadges({
       published, withdrawn, freezeAdd, gitSeedCue,
       cuedForFreeze: cuedForFreeze || readyForFreeze
@@ -658,7 +662,7 @@ export function renderCategoryEditPage({
     <form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <p><button type="submit" name="confirm" value="publish"${publishDisabled}>${publishLabel}</button>
       <button type="submit" name="confirm" value="${PUBLISH_AND_CUE_CONFIRM}" class="secondary"${publishDisabled}
-        title="Publish and cue this snapshot for the next freeze in one step.">${publishLabel} &amp; Cue</button></p>
+        title="Publish for public play and cue this snapshot for the next freeze into git.">${publishLabel} &amp; Cue</button></p>
     </form>
     ${activePublished && differsFromPublished
       ? `<form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">

@@ -1014,7 +1014,7 @@ export function createLocalCatalogueReviewHandler({
             actor
           });
           html(res, renderContentLifecycleResultPage({
-            title: "Removed from authoring play",
+            title: "Removed from public play",
             message: `Withdrew ${catalogueId}. Publish again to restore it. Freeze later deletes the git files.`,
             backHref: isMetaCatalogueDocument(published.document)
               ? catalogueAdminPath(catalogueId)
@@ -1410,7 +1410,7 @@ export function createLocalCatalogueReviewHandler({
           }, { categoryRegistry });
           await contentDocuments.unpublish({ kind: "category", id: categoryId, actor });
           html(res, renderContentLifecycleResultPage({
-            title: "Removed from authoring play",
+            title: "Removed from public play",
             message: `Withdrew ${categoryId}. Publish again to restore it.`,
             backHref: `/admin/categories/${encodeURIComponent(categoryId)}`
           }));

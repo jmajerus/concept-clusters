@@ -20,25 +20,30 @@ lists leaf and meta catalogues from D1. The hosted Worker serves MCP only
 and has no admin pages. Leaf catalogues edit as Library
 cards at `/?catalogue=<id>&view=author`. Meta catalogues edit at
 `/admin/catalogues/<id>`; their entries are other catalogues.
-**Publish** writes the shared D1 row and leaves the current editor open.
-Create a catalogue or category from those lists. **Cue** means “I’m done with
-this”: it marks the published snapshot for the next freeze and returns to the
+**Publish** writes the shared D1 snapshot used by public play and leaves
+the current editor open. A fresh visit or navigation after the 30-second
+cache window picks up publication changes.
+Create a catalogue or category from those lists. **Cue for freeze** marks
+the published snapshot for the next freeze into git and returns to the
 relevant catalogue or category list. **Publish & Cue** combines both
-operations and also returns to the list. **Hold** leaves the snapshot in
-authoring play and keeps the editor open. **Remove from authoring play**
-withdraws the published row (git seed will not restore it). **Delete working
-copy** removes only the owner’s draft. **Freeze** from `/admin`
-updates the git-bundled player. Freeze automatically includes a missing
+operations and also returns to the list. **Clear freeze cue** removes its
+explicit cue and keeps the editor open. The snapshot stays published for
+public play. **Unpublish** withdraws the published row after the cache
+refreshes (git seed will not restore it). **Delete working copy** removes only the owner’s draft. **Freeze** from `/admin`
+refreshes the static copy in git. Freeze automatically includes a missing
 published leaf catalogue, puzzle, or category that the cued document needs;
 the Admin plan shows the parent for each inclusion. Derived catalogues (`all`, `new`, `level-*`)
-stay out of that list. A **new on next freeze** badge marks a published
-D1 catalogue that git does not have yet. MCP `create_catalogue` and
-`update_catalogue` write the same D1 drafts for leaf catalogues;
+stay out of that list. An **add on next freeze** badge marks a cued, published
+D1 catalogue that git does not have yet. **Not cued for freeze** means it has
+no explicit cue; it remains available to public play and may still be
+included in Freeze as a dependency of another cued document. MCP
+`create_catalogue` and `update_catalogue` write the same D1 drafts for leaf catalogues;
 `update_meta_catalogue` updates an existing meta catalogue.
 
 LAN play at `/` uses those published D1 catalogues (and puzzles, and
-categories) rather than `catalogues/*.js`. Production still bundles the
-git modules until freeze.
+categories). Public play also reads published D1 categories and catalogues;
+it reuses static puzzle modules when their content and layout fingerprints
+match the published snapshot.
 
 ## Canonical puzzle ownership
 
