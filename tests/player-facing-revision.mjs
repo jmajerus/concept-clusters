@@ -3,6 +3,7 @@ import { createMemoryContentDocumentRepository } from "../modules/contentDocumen
 import {
   contentRevisedStamp,
   lessonPublicationLine,
+  revisedMarkChangesLessonLine,
   samePlayerFacingProjection
 } from "../modules/playerFacingRevision.js";
 
@@ -22,6 +23,8 @@ function puzzle(overrides = {}) {
 }
 
 export async function run() {
+  assert.equal(revisedMarkChangesLessonLine("2026-01-15T00:00:00.000Z", new Date("2026-03-02T00:00:00.000Z")), true);
+  assert.equal(revisedMarkChangesLessonLine("2026-01-15T00:00:00.000Z", new Date("2026-01-20T00:00:00.000Z")), false);
   assert.equal(lessonPublicationLine({
     firstPublishedAt: "2026-01-15T00:00:00.000Z"
   }), "First published January 2026");

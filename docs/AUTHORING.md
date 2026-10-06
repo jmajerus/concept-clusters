@@ -83,9 +83,11 @@ Neither writes git. Review, beside Play on the puzzle list, opens that board wit
 Star, or Circle mode on the working copy; it does not publish the puzzle.
 **Publish** writes the shared D1 document the public player reads, and leaves
 the editor open. It is enabled only when the working copy is not already that
-snapshot. When the player-facing text differs from the live puzzle, an
-unchecked box beside Publish offers to show **Revised {month}** on the lesson.
-Leave it clear for a typo or any edit that should not be announced. **Revert
+snapshot. When the player-facing text differs from the live puzzle and this
+month is later than first publication, an unchecked box beside Publish offers
+to show **Revised {month}** on the lesson. A republish in the first-publication
+month does not offer it, because that mark would leave the line as **First
+published**. Leave it clear for a typo or any edit that should not be announced. **Revert
 to published** appears only when the working copy differs from the D1 row.
 **Cue** means “I’m done with this”: it marks that published snapshot for the
 next freeze and returns to `/admin/drafts`. **Publish & Cue** does both

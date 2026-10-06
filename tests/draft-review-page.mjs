@@ -551,6 +551,7 @@ export async function run() {
     ...baseDraft,
     d1Published: true,
     playerTextDiffersFromPublished: true,
+    firstPublishedAt: "2020-01-15T00:00:00.000Z",
     validation: { valid: true, errors: [], flags: [] },
     publishedDiff: {
       total: 2,
@@ -564,6 +565,48 @@ export async function run() {
   assert.match(revisedOffer, /name="show_as_revised" value="1"/);
   assert.match(revisedOffer, /Show “Revised .+” on the lesson/);
   assert.doesNotMatch(revisedOffer, /name="show_as_revised"[^>]*checked/);
+  const sameMonthOffer = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    playerTextDiffersFromPublished: true,
+    firstPublishedAt: new Date().toISOString(),
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 2,
+      counts: { changed: 2, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.doesNotMatch(sameMonthOffer, /name="show_as_revised"/);
+  const shelfLessonChoice = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    firstPublishedAt: "2020-01-15T00:00:00.000Z",
+    reviewAnchorDocument: baseDraft.document,
+    reviewCandidates: [{
+      id: 1,
+      eventType: "proposed",
+      proposal: { ...baseDraft.document, category: "Math" }
+    }, {
+      id: 2,
+      eventType: "proposed",
+      proposal: {
+        ...baseDraft.document,
+        learningIntroduction: {
+          requirement: "optional",
+          content: { text: "A new lesson." }
+        }
+      }
+    }]
+  });
+  const shelfForm = shelfLessonChoice.split('name="proposal_id" value="1"')[1].split('name="proposal_id"')[0];
+  assert.match(shelfForm, /name="lesson_from" value="" checked(?! data-revised-mark)/);
+  assert.match(shelfForm, /name="lesson_from" value="2" data-revised-mark/);
+  assert.match(shelfForm, /class="meta revised-mark" hidden/);
   assert.match(dirtyPlay, /value="revert-published"/);
   assert.match(dirtyPlay, /value="unpublish"/);
   assert.match(dirtyPlay, /Revert to published restores the last D1 published document/);

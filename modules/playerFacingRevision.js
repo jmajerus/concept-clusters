@@ -51,6 +51,14 @@ export function revisedLessonLabel(now = new Date()) {
   return month ? `Revised ${month}` : "Revised";
 }
 
+// A mark in the first-publication month never changes the lesson line, so the
+// checkbox that promises that line stays hidden.
+export function revisedMarkChangesLessonLine(firstPublishedAt, now = new Date()) {
+  const first = utcMonthYear(firstPublishedAt);
+  const current = utcMonthYear(now);
+  return Boolean(first && current && first !== current);
+}
+
 // One line. Revised only when a marked revision falls in a later month than
 // the first publication. A same-month mark, an unmarked edit, and a first
 // publication all stay "First published".

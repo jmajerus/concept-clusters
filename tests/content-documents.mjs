@@ -794,6 +794,40 @@ export async function run() {
       && !error.message.includes("UNIQUE constraint failed")
       && !/SQLITE/i.test(error.message)
   );
+
+  const unmarkedRace = createCollidingPuzzleDatabase({ stamp: "lost" });
+  const unmarkedAdopted = await new D1ContentDocumentRepository(unmarkedRace.database).publish({
+    kind: "puzzle",
+    id: "race-puzzle",
+    document: { id: "race-puzzle", title: "Race revised" },
+    actor,
+    markRevised: false
+  });
+  assert.equal(unmarkedAdopted.revision, 2);
+  assert.equal(unmarkedAdopted.contentRevisedAt, null);
+
+  const droppedMark = createCollidingPuzzleDatabase({ stamp: "lost" });
+  await assert.rejects(
+    () => new D1ContentDocumentRepository(droppedMark.database).publish({
+      kind: "puzzle",
+      id: "race-puzzle",
+      document: { id: "race-puzzle", title: "Race revised" },
+      actor,
+      markRevised: true
+    }),
+    error => error instanceof PublishedRevisionConflictError
+      && !error.message.includes("UNIQUE constraint failed")
+  );
+
+  const keptMark = createCollidingPuzzleDatabase({ stamp: "kept" });
+  const markedAdopted = await new D1ContentDocumentRepository(keptMark.database).publish({
+    kind: "puzzle",
+    id: "race-puzzle",
+    document: { id: "race-puzzle", title: "Race revised" },
+    actor,
+    markRevised: true
+  });
+  assert.equal(markedAdopted.contentRevisedAt, "2026-10-06T00:00:00.000Z");
 }
 
 const PUBLISHED_REVISION_PRIMARY_KEY = "UNIQUE constraint failed: published_document_revisions.kind, published_document_revisions.id, published_document_revisions.revision: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_PRIMARYKEY)";
@@ -867,6 +901,69 @@ function createCollidingPublishedDatabase({ conflict }) {
             revision: 2
           };
         }
+        throw new Error(PUBLISHED_REVISION_PRIMARY_KEY);
+      }
+    }
+  };
+}
+
+function createCollidingPuzzleDatabase({ stamp }) {
+  const initial = { id: "race-puzzle", title: "Race" };
+  const store = {
+    row: {
+      kind: "puzzle",
+      id: "race-puzzle",
+      title: initial.title,
+      document: JSON.stringify(initial),
+      content_hash: "fnv1a64:initial",
+      revision: 1,
+      published_by: "author-1",
+      published_at: "2026-01-15T00:00:00.000Z",
+      first_published_at: "2026-01-15T00:00:00.000Z",
+      content_revised_at: null,
+      updated_at: "2026-01-15T00:00:00.000Z",
+      withdrawn_at: null,
+      layout_json: null,
+      cued_for_freeze_at: null,
+      cued_for_freeze_by: null
+    }
+  };
+  function statement(sql, params = []) {
+    return {
+      sql,
+      params,
+      bind(...next) {
+        return statement(sql, next);
+      },
+      async first() {
+        return store.row;
+      },
+      async run() {
+        return { meta: { changes: 1 } };
+      }
+    };
+  }
+  return {
+    database: {
+      prepare(sql) {
+        return statement(sql);
+      },
+      async batch(statements) {
+        const update = statements[0];
+        store.row = {
+          ...store.row,
+          title: update.params[0],
+          document: update.params[1],
+          content_hash: update.params[2],
+          revision: update.params[3],
+          published_by: update.params[4],
+          published_at: update.params[5],
+          updated_at: update.params[6],
+          withdrawn_at: null,
+          cued_for_freeze_by: update.params[7],
+          layout_json: update.params[8],
+          content_revised_at: stamp === "kept" ? "2026-10-06T00:00:00.000Z" : null
+        };
         throw new Error(PUBLISHED_REVISION_PRIMARY_KEY);
       }
     }

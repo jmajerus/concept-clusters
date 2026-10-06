@@ -1911,6 +1911,9 @@ export function createLocalDraftReviewHandler({
         currentPublishedRevision,
         reviewCandidates,
         reviewAnchorDocument,
+        firstPublishedAt: publishedRow && !publishedRow.withdrawnAt
+          ? publishedRow.firstPublishedAt || null
+          : null,
         ...publishedFlags,
         lastAgentReviewedAt: publishedRow?.lastAgentReviewedAt || null,
         lastHumanReviewedAt: publishedRow?.lastHumanReviewedAt || null,

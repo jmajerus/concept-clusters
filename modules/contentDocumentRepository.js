@@ -444,6 +444,14 @@ function samePublishedSnapshot(record, { kind, contentHash, layoutJson }) {
   return currentLayout === (layoutJson || null);
 }
 
+// An identical colliding publish can still drop a checked revision mark.
+// Adopting it is safe only when this publish did not need a new stamp, or
+// the stamp that won is newer than the one this publish read.
+function revisedMarkLanded(record, { marked = false, previousStamp = null } = {}) {
+  if (!marked) return true;
+  return (record?.contentRevisedAt || null) !== (previousStamp || null);
+}
+
 export async function publishedRowOrNull(contentDocuments, kind, id) {
   if (!contentDocuments || !id) return null;
   try {
@@ -848,7 +856,14 @@ export class D1ContentDocumentRepository {
         ? existing?.layout_json || null
         : serializeLayoutDocument(layout)
       : null;
-    const snapshot = { kind, id, contentHash, layoutJson };
+    const snapshot = {
+      kind,
+      id,
+      contentHash,
+      layoutJson,
+      marked: revised.marked,
+      previousStamp: existing?.content_revised_at || null
+    };
     if (!existing) {
       try {
         await this.database.batch([
@@ -920,9 +935,12 @@ export class D1ContentDocumentRepository {
     return this.getPublished({ kind, id });
   }
 
-  async adoptUnchangedPublication({ kind, id, contentHash, layoutJson }) {
+  async adoptUnchangedPublication({ kind, id, contentHash, layoutJson, marked = false, previousStamp = null }) {
     const current = await this.getPublished({ kind, id });
-    if (samePublishedSnapshot(current, { kind, contentHash, layoutJson })) return current;
+    if (samePublishedSnapshot(current, { kind, contentHash, layoutJson })
+      && revisedMarkLanded(current, { marked, previousStamp })) {
+      return current;
+    }
     throw new PublishedRevisionConflictError(kind, id);
   }
 
@@ -1199,7 +1217,11 @@ export function createMemoryContentDocumentRepository() {
       if (revisions.has(revisionKey)) {
         const current = published.get(key);
         const record = current ? publishedRecord(current) : null;
-        if (samePublishedSnapshot(record, { kind, contentHash, layoutJson })) {
+        if (samePublishedSnapshot(record, { kind, contentHash, layoutJson })
+          && revisedMarkLanded(record, {
+            marked: revised.marked,
+            previousStamp: existing?.content_revised_at || null
+          })) {
           for (const event of reviewDecisionInputs(reviewDecisions, Number(current.revision))) {
             reviewEvents.push(storedReviewEventRow(reviewEvents.length + 1, id, now, event));
           }

@@ -599,6 +599,7 @@ export function createAuthoringMcpServer({
       document: stored,
       actor,
       layout: publishedBefore.layout,
+      expectedRevision: publishedBefore.revision,
       markRevised: false
     });
     return { published, publicationErrors: null };
