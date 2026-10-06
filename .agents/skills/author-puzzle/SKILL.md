@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `b507737b` · 2026-10-06
+Skill rev `053734c9` · 2026-10-06
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -40,6 +40,17 @@ Never write those into `docs/`, `.agents/`, or `/tmp`.
 - The working file is the document only. Pass `expected_revision` separately. Do not assemble the save body with `printf` or `cat`.
 - To save `working/<id>.json`, run `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>` with the revision this file was based on. The helper submits that token. If the draft has moved, it exits and writes nothing. After a successful save it records the new revision in `working/<id>.revision`, and a later save of that same baseline can omit the flag. It does not create a missing draft, and it does not adopt whatever revision is current.
 - Prefer the native tool (`concept-clusters_save_puzzle_draft` in Kilo) when you pass the revision yourself. Use `node tools/mcp-call.mjs` only when that native tool is not listed.
+
+Some numeric limits (such as terms per cluster) have an ordinary maximum and a
+higher ceiling a human can approve. `get_puzzle_draft` reports each registered
+waiver type with both numbers. If a target is over its ordinary limit and the
+larger size serves the lesson, save the draft and call
+`request_board_limit_waiver` with its latest revision, `waiver_type`,
+`target_id`, and a specific rationale before restructuring only to meet the
+ordinary limit. A grant allows that target up to the approved size; swapping
+terms keeps it, growing past it does not. Continue lenses and
+lesson work while review is pending. A request is not an approval; a human must
+grant it before publication. The 32-node board ceiling still applies.
 
 ## Passes (pick one)
 
@@ -285,7 +296,7 @@ node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --aut
 
 - Board: genuine near-synonyms only. A single cluster is valid and needs no
   invented foil cluster: put the complete term set in `terms` (2–7 is the
-  validity limit, not a target); omit
+  ordinary limit, not a target); omit
   `seeds`, `floatingTerms`, `bridges`, and `preSolve` (the game pre-solves that
   cluster before its lenses). Use seeds/floating terms and a per-puzzle
   `preSolve` choice only when multiple clusters make sorting meaningful.

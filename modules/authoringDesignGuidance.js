@@ -18,6 +18,10 @@ import {
   TRIVIA_QUIZ_PROFILE,
   VOCABULARY_CONTEXT_PROFILE
 } from "./authoringProfiles.js";
+import { boardLimit, describeBoardLimits } from "./boardLimitWaivers.js";
+
+const CLUSTER_TERMS = boardLimit("cluster-term-count");
+const BOARD_LIMITS = describeBoardLimits();
 
 const CREDIT_PREFERRED_EXAMPLE = preferredLessonCreditExample(AUTHORING_SETTINGS);
 const CREDIT_HUMAN_EXAMPLE = fillAuthoringTemplate(
@@ -66,7 +70,7 @@ for it. A minimal example:
 
 A cluster's \`seeds\` (normally two; one only for a minimum-size two-term
 cluster, paired with exactly one \`floatingTerm\`) plus \`floatingTerms\` (one
-to five) become its full term list. The default topic-based kind uses two to
+to ${CLUSTER_TERMS.normalLimit - 2}) become its full term list. The default topic-based kind uses two to
 six clusters; use the active specialized profile and schema for its permitted
 range. A bridge's \`clusters\`
 names exactly two cluster \`id\`s (three for a ternary bridge) -- not
@@ -82,6 +86,15 @@ genuine distinct terms. Split into relatedPuzzles when the subject has a
 natural seam that teaches better as two lessons, and whenever it needs more
 than 32 nodes, rather than compressing the lesson onto one board. Bridge terms are ordinary authored concepts; there is
 no separate pedagogical-role field.
+
+Some numeric limits can be exceeded with a human-granted waiver. ${BOARD_LIMITS}
+A waiver is a layout allowance for one target in this puzzle: it permits that
+target up to the approved size, whichever terms fill it. If the larger size
+serves the lesson better than restructuring, save the draft and call
+\`request_board_limit_waiver\` with that rationale before restructuring only
+to meet the ordinary limit. Continue drafting while review
+is pending. A request is not an approval, and a waiver does not relax the
+32-node ceiling or any other validation rule.
 
 When a split plan is involved, the puzzle document receives only the
 player-facing \`relatedPuzzles.info\` and \`relatedPuzzles.entries\`. The plan's
@@ -444,7 +457,7 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
 - Establish id, title, and two to six conceptually distinct
   clusters for the default topic-based kind (follow the active specialized
   profile and schema for its permitted range), with their facts and terms.
-  Each cluster needs two immediately recognizable seeds and one to five
+  Each cluster needs two immediately recognizable seeds and one to ${CLUSTER_TERMS.normalLimit - 2}
   floating terms -- or,
   for a minimum-size two-term cluster only, one seed and one floating
   term. No trap words: every term must have a deliberate, defensible home in
@@ -684,7 +697,8 @@ const VOCABULARY_CONTEXT_PROFILE_GUIDANCE = Object.freeze({
   Use term information when an individual term needs a sharper usage note.
 - For exactly one cluster, author the complete term list in the "terms"
   field; omit "seeds", "floatingTerms", "bridges", and "preSolve". Two to
-  seven terms is the validity limit, not a target: a dictionary synonym
+  ${CLUSTER_TERMS.normalLimit} terms is the ordinary limit, not a target; a
+  board-limit waiver can approve up to ${CLUSTER_TERMS.approvedLimit}. A dictionary synonym
   paragraph's group size is a legitimate result, a number picked in advance
   is not. That board has no grouping decision and is automatically solved
   before its lenses.

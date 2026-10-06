@@ -60,7 +60,9 @@ function lazyRepository(resolveRepository) {
     "rememberReviewBaseline",
     "readReviewBaseline",
     "setReviewStackLoaded",
-    "releaseReviewSession"
+    "releaseReviewSession",
+    "listBoardLimitWaiverRequests",
+    "requestBoardLimitWaiver"
   ];
   const facade = Object.fromEntries(required.map(method => [method, async (...args) => {
     const repository = await resolve();

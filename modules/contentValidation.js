@@ -3,6 +3,7 @@ import { NODE_CAP_XLARGE, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { validateAuthoringProvenance } from "./authoringProvenance.js";
 import { validatePuzzleLenses } from "./lensValidation.js";
 import { PUZZLE_LEVELS } from "../puzzles/categories.js";
+import { boardLimitWaiverErrors } from "./boardLimitWaivers.js";
 
 export const VALID_RELATION_KINDS = new Set([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
@@ -268,6 +269,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   errors.push(...validateAuthoringProvenance(puzzle.provenance));
   if (!Array.isArray(puzzle.clusters)) return [...errors, "clusters must be an array"];
   if (!Array.isArray(puzzle.bridges)) return [...errors, "bridges must be an array"];
+  errors.push(...boardLimitWaiverErrors(puzzle));
   const minimumClusters = puzzle.puzzleKind === "vocabulary-context" ? 1 : 2;
   if (puzzle.clusters.length < minimumClusters || puzzle.clusters.length > 6) {
     fail(`bad cluster count (${puzzle.clusters.length})`);
@@ -324,7 +326,8 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
       fail(`${label}: terms must be an array`);
       return;
     }
-    if (cluster.terms.length < 2 || cluster.terms.length > 7) {
+    // The upper bound is a registered board limit (boardLimitWaiverErrors).
+    if (cluster.terms.length < 2) {
       fail(`${label}: bad terms count (${cluster.terms.length})`);
     }
     if (!Array.isArray(cluster.seeds) || cluster.seeds.length < 1 || cluster.seeds.length > 2) {

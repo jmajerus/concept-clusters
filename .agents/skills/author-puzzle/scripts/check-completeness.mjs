@@ -5,6 +5,9 @@
 import { readFileSync } from "node:fs";
 import { NODE_CAP_XLARGE } from "../../../../modules/puzzleBoardSize.js";
 import { AUTHORING_PROFILES } from "../../../../modules/authoringProfiles.js";
+import { boardLimit, boardLimitWaiverErrors } from "../../../../modules/boardLimitWaivers.js";
+
+const clusterTermCeiling = boardLimit("cluster-term-count").approvedLimit;
 
 // Specialized puzzleKinds share their identifiers with the MCP authoring
 // profiles; those are the kinds with a one-cycle integrated route.
@@ -675,6 +678,14 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!clusters.length) {
     blocking.push({ id: "no-clusters", message: "Document has no clusters." });
   }
+  if (checkBoardStructure) {
+    // Grants are protected and absent from working JSON, so a missing waiver
+    // is advisory here; stored-draft validation, which sees grants, enforces it.
+    for (const message of boardLimitWaiverErrors(document)) {
+      const id = message.match(/^\[([^\]]+)\]/)?.[1] || "board-limit-waiver";
+      (id === "board-limit-waiver-required" ? advisory : blocking).push({ id, message });
+    }
+  }
 
   let termsTotal = 0;
   let termsWithNotes = 0;
@@ -710,11 +721,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
         clusters.length === 1;
       if (singleVocabularyCluster) {
         const terms = Array.isArray(cluster.terms) ? cluster.terms : [];
-        if (terms.length < 2 || terms.length > 7) {
+        if (terms.length < 2 || terms.length > clusterTermCeiling) {
           blocking.push({
             id: "cluster-terms",
             clusterId: cluster.id || null,
-            message: `Single-cluster Vocabulary needs 2-7 terms in one terms list.`
+            message: `Single-cluster Vocabulary needs 2-${clusterTermCeiling} terms in one terms list.`
           });
         }
         if (Object.hasOwn(cluster, "seeds") || Object.hasOwn(cluster, "floatingTerms")) {
@@ -734,11 +745,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
           });
         }
         const floating = cluster.floatingTerms || [];
-        if (floating.length < 1 || floating.length > 5) {
+        if (floating.length < 1 || floating.length > clusterTermCeiling - 2) {
           blocking.push({
             id: "cluster-floating",
             clusterId: cluster.id || null,
-            message: `Cluster "${cluster.id || "?"}" needs 1-5 floatingTerms.`
+            message: `Cluster "${cluster.id || "?"}" needs 1-${clusterTermCeiling - 2} floatingTerms.`
           });
         }
         if (seeds.length === 1 && floating.length !== 1) {

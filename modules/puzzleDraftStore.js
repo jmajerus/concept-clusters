@@ -27,6 +27,13 @@ import {
   serializeLayoutDocument
 } from "./layoutDocument.js";
 import { slugify } from "../puzzles/categories.js";
+import {
+  boardLimitWaiverRequestIsCurrent,
+  makeBoardLimitWaiverRequest,
+  grantBoardLimitWaiver,
+  preserveCurrentBoardLimitWaivers,
+  revokeBoardLimitWaiver as withoutBoardLimitWaiver
+} from "./boardLimitWaivers.js";
 
 const MAX_DRAFT_DOCUMENT_BYTES = 2 * 1024 * 1024;
 
@@ -220,7 +227,8 @@ export function createPuzzleDraftStore({ directory }) {
         );
       }
       const current = materializeRecord(raw);
-      const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
+      const preservedDocument = preserveCurrentBoardLimitWaivers(current.document, document);
+      const materialized = assembleAuthoredDocument(partitionAuthoredDocument(preservedDocument));
       // Enforced at the store, not at one caller: every complete-document
       // save lands here, including the construct board's PUT of a whole
       // document, which is not routed through the MCP boundary.
@@ -358,8 +366,13 @@ export function createPuzzleDraftStore({ directory }) {
       const stack = historyOf(raw);
       const previous = stack.pop();
       if (!previous) throw new DraftEmptyHistoryError(draftId);
+      const current = materializeRecord(raw);
+      const restoredDomains = partitionAuthoredDocument(previous.document);
+      // Content undo must not roll back a human's current board settings or
+      // a later grant/revocation decision.
+      restoredDomains.administration = partitionAuthoredDocument(current.document).administration;
       const materialized = assembleAuthoredDocument(
-        partitionAuthoredDocument(previous.document)
+        restoredDomains
       );
       const record = {
         ...raw,
@@ -373,6 +386,153 @@ export function createPuzzleDraftStore({ directory }) {
       };
       await writeRecord(record);
       return publicRecord(record);
+    });
+  }
+
+  async function listBoardLimitWaiverRequests(input) {
+    const draftId = typeof input === "string" ? input : input?.draftId;
+    const raw = await readRawRecord(draftId);
+    return clone(raw.boardLimitWaiverRequests || []);
+  }
+
+  async function requestBoardLimitWaiver({ draftId, waiverType, targetId, reason, expectedRevision, actor }) {
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (raw.revision !== expectedRevision) {
+        throw new Error(`Draft revision conflict: expected ${expectedRevision}, current revision is ${raw.revision}`);
+      }
+      const current = materializeRecord(raw);
+      const waiver = makeBoardLimitWaiverRequest(current.document, waiverType, targetId, reason);
+      const requests = raw.boardLimitWaiverRequests || [];
+      const pendingIndex = requests.findIndex(item => item.status === "pending" &&
+        item.waiverType === waiverType && item.targetId === targetId &&
+        item.count === waiver.count);
+      let nextRequests = [...requests];
+      const requestedBy = actor?.name || actor?.email || actor?.subject || "author";
+      const now = new Date().toISOString();
+      if (pendingIndex >= 0) {
+        const pending = requests[pendingIndex];
+        if (pending.reason === reason.trim()) return clone(pending);
+        nextRequests[pendingIndex] = {
+          ...pending,
+          status: "superseded",
+          decidedBy: requestedBy,
+          decidedAt: now,
+          decisionNote: "Superseded by an updated author rationale.",
+          events: [...(pending.events || []), {
+            eventType: "superseded", actor: requestedBy, at: now,
+            note: "Superseded by an updated author rationale."
+          }]
+        };
+      }
+      const request = {
+        id: crypto.randomUUID(), draftId, puzzleId: current.document.id,
+        ...waiver, status: "pending",
+        requestedBy,
+        requestedAt: now, requestedRevision: expectedRevision
+      };
+      await writeRecord({ ...raw, boardLimitWaiverRequests: [...nextRequests, request] });
+      return clone(request);
+    });
+  }
+
+  async function decideBoardLimitWaiver({ draftId, requestId, decision, expectedRevision, actor, note = "" }) {
+    if (!["granted", "declined"].includes(decision)) throw new Error("Decision must be granted or declined.");
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (raw.revision !== expectedRevision) {
+        throw new Error(`Draft revision conflict: expected ${expectedRevision}, current revision is ${raw.revision}`);
+      }
+      const current = materializeRecord(raw);
+      const requests = raw.boardLimitWaiverRequests || [];
+      const requestIndex = requests.findIndex(item => item.id === requestId && item.status === "pending");
+      if (requestIndex < 0) throw new Error("That board limit waiver request is no longer pending.");
+      const request = requests[requestIndex];
+      if (decision === "granted" && !boardLimitWaiverRequestIsCurrent(current.document, request)) {
+        throw new Error("The target's size changed after the request. Refresh and request review for the current board state.");
+      }
+      const now = new Date().toISOString();
+      const reviewer = actor?.name || actor?.email || actor?.subject || "local reviewer";
+      let document = current.document;
+      if (decision === "granted") {
+        document = grantBoardLimitWaiver(
+          document, request.waiverType, request.targetId, request.reason, reviewer, now
+        );
+      }
+      const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
+      const stack = historyOf(raw);
+      if (decision === "granted") stack.push({ document: clone(current.document), contentHash: raw.contentHash, savedAt: now });
+      const nextRequests = requests.map((item, index) => {
+        if (index === requestIndex) {
+          return {
+            ...item, status: decision, decidedBy: reviewer, decidedAt: now,
+            decisionNote: note.trim() || null,
+            events: [...(item.events || []), { eventType: decision, actor: reviewer, at: now, note: note.trim() || null }]
+          };
+        }
+        if (decision === "granted" && item.waiverType === request.waiverType &&
+            item.targetId === request.targetId && item.status === "granted") {
+          return {
+            ...item, status: "replaced", decidedBy: reviewer, decidedAt: now,
+            decisionNote: note.trim() || null,
+            events: [...(item.events || []), { eventType: "replaced", actor: reviewer, at: now, note: note.trim() || null }]
+          };
+        }
+        return item;
+      });
+      await writeRecord({
+        ...raw,
+        revision: decision === "granted" ? raw.revision + 1 : raw.revision,
+        contentHash: decision === "granted" ? draftContentHash(materialized) : raw.contentHash,
+        updatedAt: now,
+        document: clone(materialized),
+        documentStale: false,
+        domains: storedDomainDocuments(materialized),
+        workingCopyStack: stack,
+        boardLimitWaiverRequests: nextRequests
+      });
+      return publicRecord(materializeRecord(await readRawRecord(draftId)));
+    });
+  }
+
+  async function revokeBoardLimitWaiver({ draftId, waiverType, targetId, expectedRevision, actor, note = "" }) {
+    return withDraftMutation(draftId, async () => {
+      const raw = await readRawRecord(draftId);
+      if (raw.revision !== expectedRevision) {
+        throw new Error(`Draft revision conflict: expected ${expectedRevision}, current revision is ${raw.revision}`);
+      }
+      const current = materializeRecord(raw);
+      const grant = current.document.boardLimitWaivers?.find(item =>
+        item.waiverType === waiverType && item.targetId === targetId
+      );
+      if (!grant) throw new Error("There is no current grant for that board limit scope.");
+      const document = withoutBoardLimitWaiver(current.document, waiverType, targetId);
+      const materialized = assembleAuthoredDocument(partitionAuthoredDocument(document));
+      const now = new Date().toISOString();
+      const reviewer = actor?.name || actor?.email || actor?.subject || "local reviewer";
+      const stack = historyOf(raw);
+      stack.push({ document: clone(current.document), contentHash: raw.contentHash, savedAt: now });
+      const requests = (raw.boardLimitWaiverRequests || []).map(request =>
+        request.waiverType === waiverType && request.targetId === targetId && request.status === "granted"
+          ? { ...request, status: "revoked", decidedBy: reviewer, decidedAt: now,
+              decisionNote: note.trim() || null,
+              events: [...(request.events || []), { eventType: "revoked", actor: reviewer, at: now, note: note.trim() || null }] }
+          : request
+      );
+      await writeRecord({
+        ...raw, revision: raw.revision + 1, contentHash: draftContentHash(materialized),
+        updatedAt: now, document: clone(materialized), documentStale: false,
+        domains: storedDomainDocuments(materialized), workingCopyStack: stack,
+        boardLimitWaiverRequests: requests
+      });
+      return publicRecord(materializeRecord(await readRawRecord(draftId)));
+    });
+  }
+
+  async function grantBoardLimitWaiverDirect(input) {
+    const request = await requestBoardLimitWaiver(input);
+    return decideBoardLimitWaiver({
+      ...input, requestId: request.id, decision: "granted"
     });
   }
 
@@ -597,6 +757,11 @@ export function createPuzzleDraftStore({ directory }) {
     recordValidation,
     saveLayout,
     clearLayout,
+    listBoardLimitWaiverRequests,
+    requestBoardLimitWaiver,
+    decideBoardLimitWaiver,
+    grantBoardLimitWaiverDirect,
+    revokeBoardLimitWaiver,
     markInstalled,
     markUninstalled,
     markSubmitted,

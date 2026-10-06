@@ -1,4 +1,5 @@
 import * as z from "zod/v4";
+import { describeBoardLimits } from "./boardLimitWaivers.js";
 import {
   AUTHORING_PHASE_PASSES,
   AUTHORING_PHASES,
@@ -15,7 +16,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.24.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.25.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
@@ -114,7 +115,7 @@ export const SIMPLIFIED_PUZZLE_SCHEMA = Object.freeze({
     structuredClone(SINGLE_VOCABULARY_CLUSTER_SHAPE)
   ],
   description:
-    "MCP agent authoring contract for puzzle content and pedagogy. A single-cluster vocabulary-context puzzle uses one flat terms list and is automatically pre-solved before its lenses. Protected attribution and human-managed editorial metadata are maintained outside this document; language remains optional authored metadata. Omit cluster color and lens color; the server assigns a cluster hue and keeps a stored one. Keep total nodes (all cluster terms plus bridges) at or below 32. That ceiling is a refusal point, not a size to fill. Canvas size is derived; do not split or drop terms to change it. Split into relatedPuzzles when the subject has a natural seam that teaches better as two lessons, and whenever the board would exceed 32.",
+    "MCP agent authoring contract for puzzle content and pedagogy. " + describeBoardLimits() + " Request a waiver through request_board_limit_waiver; it allows one target up to the approved size and callers cannot choose a limit. A single-cluster vocabulary-context puzzle uses one flat terms list and is automatically pre-solved before its lenses. Protected attribution and human-managed editorial metadata are maintained outside this document; language remains optional authored metadata. Omit cluster color and lens color; the server assigns a cluster hue and keeps a stored one. Keep total nodes (all cluster terms plus bridges) at or below 32. That ceiling is a refusal point, not a size to fill. Canvas size is derived; do not split or drop terms to change it. Split into relatedPuzzles when the subject has a natural seam that teaches better as two lessons, and whenever the board would exceed 32.",
   // Zod deliberately keeps these input fields permissive so a legacy title
   // can be canonicalized before parsing. The discoverable authoring contract
   // should nevertheless teach clients to send the new stable-id shape.

@@ -20,6 +20,7 @@ import {
   PEDAGOGY_STORED_ROOT_FIELDS,
   PROTECTED_ROOT_FIELDS,
   ROOT_FIELD_OWNERSHIP,
+  ADMINISTRATION_ROOT_FIELDS,
   RETIRED_ROOT_FIELDS,
   SYSTEM_ROOT_FIELDS
 } from "./authoringFieldOwnership.js";
@@ -41,6 +42,12 @@ function isObject(value) {
 
 function assertObject(value, label) {
   if (!isObject(value)) throw new Error(`${label} must be a JSON object`);
+}
+
+// Empty administration values are dropped rather than stored.
+function hasAdministrationValue(value) {
+  return Array.isArray(value) ? value.length > 0
+    : isObject(value) && Object.keys(value).length > 0;
 }
 
 function hasOwn(value, key) {
@@ -262,10 +269,13 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
     if (key === "bridges") continue;
     if (key === "provenance") {
       provenance = clone(value);
-    } else if (key === "board") {
+    } else if (ADMINISTRATION_ROOT_FIELDS.has(key)) {
       // Split this off before the content fallback. An unknown key would
       // otherwise become content, and a content save could replace it.
-      if (isObject(value) && Object.keys(value).length) administration = clone(value);
+      if (hasAdministrationValue(value)) {
+        administration ||= {};
+        administration[key] = clone(value);
+      }
     } else if (CLASSIFICATION_STORED_ROOT_FIELDS.has(key)) {
       classification[key] = clone(value);
     } else if (PEDAGOGY_STORED_ROOT_FIELDS.has(key)) {
@@ -318,10 +328,28 @@ export function assembleAuthoredDocument({
   for (const [key, value] of Object.entries(classification)) {
     document[key] = clone(value);
   }
+  if (administration !== undefined && administration !== null) {
+    assertObject(administration, "Administration domain");
+  }
   if (isObject(administration) && Object.keys(administration).length) {
-    document.board = clone(administration);
+    // Local draft files written before the envelope stored board flags as the
+    // whole projection; they take the envelope shape on their next write.
+    if (Object.keys(administration).some(key => ADMINISTRATION_ROOT_FIELDS.has(key))) {
+      const unknownEnvelopeKeys = Object.keys(administration)
+        .filter(key => !ADMINISTRATION_ROOT_FIELDS.has(key));
+      if (unknownEnvelopeKeys.length) {
+        throw new Error(
+          `Administration envelope contains unsupported field${unknownEnvelopeKeys.length === 1 ? "" : "s"}: ${unknownEnvelopeKeys.join(", ")}`
+        );
+      }
+      for (const [key, value] of Object.entries(administration)) {
+        if (hasAdministrationValue(value)) document[key] = clone(value);
+      }
+    } else {
+      document.board = clone(administration);
+    }
   } else {
-    delete document.board;
+    for (const key of ADMINISTRATION_ROOT_FIELDS) delete document[key];
   }
   if (provenance !== undefined && provenance !== null) {
     document.provenance = clone(provenance);

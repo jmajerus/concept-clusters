@@ -58,6 +58,34 @@ export function createLocalDraftRepository(draftStore) {
         expectedRevision
       });
     },
+    async requestBoardLimitWaiver(input) {
+      if (typeof draftStore.requestBoardLimitWaiver !== "function") {
+        throw new Error("This draft store does not support board limit waiver requests");
+      }
+      return draftStore.requestBoardLimitWaiver(input);
+    },
+    async listBoardLimitWaiverRequests({ draftId }) {
+      if (typeof draftStore.listBoardLimitWaiverRequests !== "function") return [];
+      return draftStore.listBoardLimitWaiverRequests(draftId);
+    },
+    async decideBoardLimitWaiver(input) {
+      if (typeof draftStore.decideBoardLimitWaiver !== "function") {
+        throw new Error("This draft store does not support board limit waiver decisions");
+      }
+      return draftStore.decideBoardLimitWaiver(input);
+    },
+    async grantBoardLimitWaiverDirect(input) {
+      if (typeof draftStore.grantBoardLimitWaiverDirect !== "function") {
+        throw new Error("This draft store does not support direct board limit waiver grants");
+      }
+      return draftStore.grantBoardLimitWaiverDirect(input);
+    },
+    async revokeBoardLimitWaiver(input) {
+      if (typeof draftStore.revokeBoardLimitWaiver !== "function") {
+        throw new Error("This draft store does not support board limit waiver decisions");
+      }
+      return draftStore.revokeBoardLimitWaiver(input);
+    },
     async materialize({ draftId }) {
       if (typeof draftStore.materializeDraft !== "function") {
         return this.get({ draftId });

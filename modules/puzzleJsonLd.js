@@ -19,7 +19,7 @@ const PUZZLE_KEYS = new Set([
   "preSolve", "tags", "level",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
   "derivedFrom", "dateCreated", "dateModified", "language", "version",
-  "provenance", "layouts"
+  "provenance", "layouts", "boardLimitWaivers"
 ]);
 
 function clone(value) {
@@ -176,6 +176,8 @@ export function puzzleToJsonLd(
       ...clone(lens)
     })) } : {}),
     ...(introduction ? { learningIntroduction: introduction } : {}),
+    ...(categorySource.boardLimitWaivers?.length
+      ? { boardLimitWaivers: clone(categorySource.boardLimitWaivers) } : {}),
     clusters,
     bridges
   };
@@ -258,6 +260,8 @@ export function puzzleFromJsonLd(document) {
     ...(document.preSolve || automaticallyPreSolved ? { preSolve: true } : {}),
     ...(document.lenses ? { lenses: document.lenses.map(({ "@id": _id, "@type": _type, ...lens }) => clone(lens)) } : {}),
     ...(document.learningIntroduction ? { learningIntroduction: clone(document.learningIntroduction) } : {}),
+    ...(document.boardLimitWaivers?.length
+      ? { boardLimitWaivers: clone(document.boardLimitWaivers) } : {}),
     clusters,
     bridges
   };

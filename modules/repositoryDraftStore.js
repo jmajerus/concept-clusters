@@ -77,6 +77,22 @@ export function createRepositoryDraftStore({ repository, actor }) {
         provenance
       }));
     },
+    async requestBoardLimitWaiver(input) {
+      return repository.requestBoardLimitWaiver({ ...input, actor });
+    },
+    async listBoardLimitWaiverRequests(input) {
+      const draftId = typeof input === "string" ? input : input?.draftId;
+      return repository.listBoardLimitWaiverRequests({ draftId, actor });
+    },
+    async decideBoardLimitWaiver(input) {
+      return record(await repository.decideBoardLimitWaiver({ ...input, actor }));
+    },
+    async grantBoardLimitWaiverDirect(input) {
+      return record(await repository.grantBoardLimitWaiverDirect({ ...input, actor }));
+    },
+    async revokeBoardLimitWaiver(input) {
+      return record(await repository.revokeBoardLimitWaiver({ ...input, actor }));
+    },
     async materializeDraft(draftId) {
       if (typeof repository.materialize !== "function") {
         return getDraft(draftId);

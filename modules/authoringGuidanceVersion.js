@@ -170,7 +170,12 @@
 // 6.14: same review bar. save_puzzle_draft does not publish a puzzle.
 // A person publishes the working copy. That publish is what players see.
 // publish_to_authoring remains for categories, catalogues, and shelf reassignment.
+// 6.15: numeric board limits come from one registry. A target over its
+// ordinary limit can be approved up to the registered ceiling through
+// request_board_limit_waiver; a grant allows that target up to the approved
+// size, whichever terms fill it.
+// Drafting continues while the request is reviewed.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 14
+  minor: 15
 });

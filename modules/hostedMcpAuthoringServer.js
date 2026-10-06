@@ -59,6 +59,13 @@ import {
   samePlayablePuzzle
 } from "./draftReviewDiff.js";
 import { MCP_EXCLUDED_ROOT_FIELDS } from "./authoringFieldOwnership.js";
+import {
+  BOARD_LIMIT_WAIVER_TYPES,
+  boardLimitWaiverPolicy,
+  boardLimitWaiverMatches,
+  boardLimitWaiverTargets,
+  boardLimitWaiverTypeSummaries
+} from "./boardLimitWaivers.js";
 import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
@@ -109,6 +116,77 @@ const EXPECTED_REVISION_CONTRACT =
   "Required positive integer. Copy draft.revision from the latest create_puzzle_draft, " +
   "get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has " +
   "never been created uses create_puzzle_draft.";
+
+function boardLimitWaiverSummary(document, requests = []) {
+  const grants = Array.isArray(document?.boardLimitWaivers)
+    ? document.boardLimitWaivers : [];
+  const grantFields = grant => grant ? {
+    approvedCount: grant.approvedCount ?? null,
+    reason: grant.reason || "",
+    grantedBy: grant.grantedBy || "",
+    grantedAt: grant.grantedAt || "",
+    grantPuzzleId: grant.puzzleId
+  } : {};
+  const requestFields = request => request ? {
+    requestStatus: request.status || null,
+    requestReason: request.reason || "",
+    requestedAt: request.requestedAt || ""
+  } : {};
+  const scopes = [];
+  const seenTargets = new Set();
+  for (const type of BOARD_LIMIT_WAIVER_TYPES) {
+    const policy = boardLimitWaiverPolicy(type);
+    for (const entry of boardLimitWaiverTargets(document, type)) {
+      seenTargets.add(`${type}\u0000${entry.targetId}`);
+      const related = item => item?.waiverType === type && item?.targetId === entry.targetId;
+      const relatedGrant = grants.find(related) || null;
+      const matchingGrant = grants.find(item => boardLimitWaiverMatches(document, entry.target, item));
+      const relatedRequests = requests.filter(related);
+      const pending = relatedRequests.find(request => request.status === "pending" &&
+        request.count === entry.value) || null;
+      const status = entry.value > policy.approvedLimit ? "hard-limit"
+        : matchingGrant ? "granted"
+          : pending ? "pending-review"
+            : relatedGrant ? (entry.value <= policy.normalLimit ? "unused-grant" : "grant-mismatch")
+              : relatedRequests.length ? "stale-review-request"
+                : entry.value > policy.normalLimit ? "approval-required"
+                  : "within-limit";
+      if (status === "within-limit") continue;
+      scopes.push({
+        waiverType: type,
+        label: policy.label,
+        targetId: entry.targetId,
+        targetLabel: entry.targetLabel,
+        currentValue: entry.value,
+        normalLimit: policy.normalLimit,
+        approvedLimit: policy.approvedLimit,
+        requestable: entry.requestable,
+        status,
+        ...grantFields(relatedGrant),
+        ...requestFields(pending || relatedRequests[0])
+      });
+    }
+  }
+  // Grants and requests whose target is gone (or whose type is no longer
+  // registered) stay visible rather than silently disappearing.
+  const orphan = item => !seenTargets.has(`${item?.waiverType}\u0000${item?.targetId}`);
+  for (const [records, status, fields] of [
+    [grants, "target-missing", grantFields],
+    [requests, "request-target-missing", requestFields]
+  ]) {
+    for (const item of records.filter(orphan)) {
+      scopes.push({
+        waiverType: item?.waiverType || null,
+        label: boardLimitWaiverPolicy(item?.waiverType)?.label || "Unsupported board limit waiver",
+        targetId: item?.targetId || null,
+        status,
+        count: item?.count ?? item?.approvedCount ?? null,
+        ...fields(item)
+      });
+    }
+  }
+  return { types: boardLimitWaiverTypeSummaries(), scopes };
+}
 const OPEN_ISSUE_LANGUAGE = /\b(?:unresolved|needs?|need to|follow[- ]?up|future work|worth (?:developing|investigating|reviewing)|candidate|open question|could)\b/i;
 const infoSchema = z.object({
   text: z.string().min(1),
@@ -1142,7 +1220,46 @@ export function createAuthoringMcpServer({
     const { flags } = withStorageCanonicalizeFlags(stored.document, {}, {
       categoryRegistry: registry
     });
-    return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, { draft, flags });
+    const waiverRequests = await repositorySupports(draftRepository, "listBoardLimitWaiverRequests")
+      ? await draftRepository.listBoardLimitWaiverRequests({ draftId: draft_id, actor })
+      : [];
+    return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, {
+      draft,
+      flags,
+      boardLimitWaivers: boardLimitWaiverSummary(stored.document, waiverRequests)
+    });
+  })));
+
+  server.registerTool("request_board_limit_waiver", {
+    title: "Request a board limit waiver",
+    description:
+      "Request human review for a supported numerical board-limit exception. Choose a waiver_type from the registered types reported by get_puzzle_draft and identify its target_id. Explain why the exception is needed. The server records the target's current size; callers cannot choose a limit. A grant allows that target up to the approved size; which terms fill it does not matter. This saves a pending review request only; it does not grant permission or publish the puzzle.",
+    inputSchema: z.object({
+      draft_id: draftIdSchema,
+      expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive(),
+      waiver_type: z.enum([...BOARD_LIMIT_WAIVER_TYPES]),
+      target_id: z.string().min(1),
+      reason: z.string().trim().min(1).max(2000)
+    }),
+    annotations: WRITE
+  }, tracked("request_board_limit_waiver", safe(async ({
+    draft_id, expected_revision, waiver_type, target_id, reason
+  }) => {
+    if (!await repositorySupports(draftRepository, "requestBoardLimitWaiver")) {
+      throw new Error("This draft repository does not support board limit waiver requests.");
+    }
+    const request = await draftRepository.requestBoardLimitWaiver({
+      draftId: draft_id,
+      expectedRevision: expected_revision,
+      waiverType: waiver_type,
+      targetId: target_id,
+      reason,
+      actor
+    });
+    return success(
+      `Requested human review for ${waiver_type} at ${target_id}. The request does not grant the waiver; continue drafting while it is reviewed.`,
+      { request }
+    );
   })));
 
   server.registerTool("save_puzzle_draft", {

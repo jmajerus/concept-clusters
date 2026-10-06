@@ -6,6 +6,7 @@
 // list so a draft migration does not look like a wording change.
 
 import { partitionAuthoredDocument } from "./authoringDomains.js";
+import { ADMINISTRATION_ROOT_FIELDS } from "./authoringFieldOwnership.js";
 import { PEDAGOGY_BRIDGE_FIELDS } from "./authoringFieldOwnership.js";
 
 import { authoredLinks, authoredLearningLinks, hoistDocumentCitations } from "./termInfo.js";
@@ -255,11 +256,13 @@ export function diffPublishedDraft(published, draft) {
   draft = hoistDocumentCitations(draft);
   const counts = { changed: 0, added: 0, removed: 0 };
   const fields = {};
-  for (const name of [
+  // Administration fields (board settings, limit waivers) are publishable
+  // changes on their own, e.g. revoking an unused waiver.
+  for (const name of new Set([
     "title", "puzzleKind", "category", "categories", "subcategories", "tags",
-    "level", "lensMode", "preSolve", "relatedPuzzles", "board", "language",
-    "learningIntroduction"
-  ]) {
+    "level", "lensMode", "preSolve", "relatedPuzzles", "language",
+    "learningIntroduction", ...ADMINISTRATION_ROOT_FIELDS
+  ])) {
     const change = fieldChange(published[name], draft[name]);
     if (change) {
       fields[name] = change;
