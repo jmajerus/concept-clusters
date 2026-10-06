@@ -89,15 +89,17 @@ to show **Revised {month}** on the lesson. A republish in the first-publication
 month does not offer it, because that mark would leave the line as **First
 published**. Leave it clear for a typo or any edit that should not be announced. **Revert
 to published** appears only when the working copy differs from the D1 row.
-**Cue** means “I’m done with this”: it marks that published snapshot for the
-next freeze and returns to `/admin/drafts`. **Publish & Cue** does both
-operations and returns to the puzzle list. **Hold** keeps the published row
-on the player and leaves the editor open.
+**Cue for freeze** marks the published snapshot for the next freeze into
+git and returns to `/admin/drafts`. **Publish & Cue** does both
+operations and returns to the puzzle list. **Clear freeze cue** removes the
+explicit cue and leaves the editor open. The D1 snapshot stays published for
+public play; Freeze can still include it as a dependency of another cued
+document.
 **Freeze** on `/admin`
 writes cued snapshots and any missing published forward dependencies into this
-git checkout; the Freeze plan labels automatic inclusions. **Remove from authoring
-play** withdraws that published row; **Delete working copy** removes only
-the draft. **Rename puzzle**, under **Puzzle id**, fixes a slug an agent chose
+git checkout; the Freeze plan labels automatic inclusions. **Unpublish**
+withdraws the D1 snapshot from public play after the cache refreshes;
+**Delete working copy** removes only the draft. **Rename puzzle**, under **Puzzle id**, fixes a slug an agent chose
 badly or a title typo it inherited; it is offered only while the puzzle has
 never been published, because a live id is an identity other puzzles and
 catalogues may point at. The working copy moves to the new id and its
@@ -115,7 +117,7 @@ and Open board. `save_puzzle_draft` does not publish a puzzle. Agents may
 still publish a category, a catalogue, or a shelf reassignment;
 `reassign_puzzle_classifications` writes the shelf onto the live puzzle and
 leaves the rest of that published document in place.
-`/admin/drafts` shows whether each id is in GitHub’s production
+`/admin/drafts` shows whether each id is in the GitHub static snapshot’s
 `puzzles/manifest.js` joined with the last freeze (assuming that freeze
 merges). **Refresh from GitHub** on `/admin` (and on the puzzles list)
 fetches origin into that local snapshot without freezing. It prefers the
@@ -123,13 +125,31 @@ GitHub API when configured, so it does not need to write `.git`. If it
 falls back to `git fetch` and `.git/FETCH_HEAD` is not writable, it uses
 the last origin ref this checkout already has. Freeze still
 fetches origin first; a failed fetch does not fail the freeze.
-Status on `/admin/drafts` is that path — not checkout lifecycle or a pile of
-overlapping “published” badges. GitHub is origin joined with the last freeze.
-Show **Working copies** is the working copy badge (not yet in authoring
-play). **Drafts** is never in GitHub production. **Modified** is anything changed since the last Freeze: a working copy, or authoring play badged held, cued, or new to git (an unbadged authoring-play row is exactly what the last Freeze shipped). **Cued** is the subset already cued for the next Freeze. **Published only** is authoring play with no private draft.
+Status on `/admin/drafts` describes D1 publication and the static snapshot
+separately. **Published** means public play can read the D1 snapshot after
+the 30-second cache window, on a fresh visit or the next navigation in an
+open tab. Working copy edits stay private until published. **Not cued for
+freeze**, **cued for freeze**, and **add on next freeze** describe the
+static snapshot workflow. The GitHub column reports id membership, including
+the last freeze projection; it does not compare document versions or determine
+public availability.
+
+Show **Working copies** selects saved copies with no active D1 publication,
+including withdrawn puzzles. **Published only** requires an active publication
+and no working copy; withdrawn puzzles without a copy remain accessible under
+**All**. **Not in GitHub** selects
+ids absent from the GitHub snapshot, including puzzles already published in D1.
+**Modified** selects working copies of unpublished puzzles and published
+snapshots changed since the last Freeze. **Unpublished changes** selects saved
+working copies that differ from their published D1 snapshot in content, board
+settings, provenance, or layout. The **Unpublished Changes** column shows compact
+amber **Content**, **Classification**, **Pedagogy**, **Admin**, **Provenance**, and
+**Layout** badges for the domains that differ from the live snapshot;
+opening an unchanged working copy or updating its timestamps does not add it.
+**Cued** selects explicit freeze cues. **Published only** selects published puzzles with no private working copy.
 
 Git-era puzzles (authored before D1 drafts) already seed into published D1
-for authoring play. `/admin/drafts` lists that authoring corpus — published
+for public play. `/admin/drafts` lists that authoring corpus — published
 D1 plus your working copies — by category or by recent working-copy update,
 the same way catalogues list published ∪ drafts. Opening a published-only
 row starts a working copy

@@ -5,6 +5,9 @@
 // Link-field folds (`link` vs `links`) are compared as the same destination
 // list so a draft migration does not look like a wording change.
 
+import { partitionAuthoredDocument } from "./authoringDomains.js";
+import { PEDAGOGY_BRIDGE_FIELDS } from "./authoringFieldOwnership.js";
+
 import { authoredLinks, authoredLearningLinks, hoistDocumentCitations } from "./termInfo.js";
 
 const INFO_LINK_KEYS = ["links", "link", "linkLabel", "extraLink", "seeAlso"];
@@ -62,6 +65,35 @@ function canon(value) {
 
 export function valuesEqual(left, right) {
   return JSON.stringify(canon(left)) === JSON.stringify(canon(right));
+}
+
+/** Changed publication domains, using the same ownership as focused writes. */
+export function unpublishedChangeDomains(published, draft, {
+  publishedLayout = null, draftLayout = null
+} = {}) {
+  if (!published || !draft) return [];
+  const before = partitionAuthoredDocument(hoistDocumentCitations(published));
+  const after = partitionAuthoredDocument(hoistDocumentCitations(draft));
+  // Annotation-free bridge identities are context for pedagogy, not edits to it.
+  for (const parts of [before, after]) {
+    const annotations = (parts.pedagogy.bridges || []).filter(bridge =>
+      [...PEDAGOGY_BRIDGE_FIELDS].some(key => bridge[key] != null)
+    );
+    if (annotations.length) parts.pedagogy.bridges = annotations;
+    else delete parts.pedagogy.bridges;
+  }
+  const changed = ["content", "classification", "pedagogy", "administration"]
+    .filter(domain => {
+      const left = before[domain] || {};
+      const right = after[domain] || {};
+      // Compare each root value so authored language and protected attribution
+      // are included, while nested system metadata still follows review policy.
+      return [...new Set([...Object.keys(left), ...Object.keys(right)])]
+        .some(key => !valuesEqual(left[key], right[key]));
+    });
+  if (provenanceDiffersFromPublished(published, draft)) changed.push("provenance");
+  if (!valuesEqual(publishedLayout, draftLayout)) changed.push("layout");
+  return changed;
 }
 
 function fieldChange(before, after) {
@@ -225,7 +257,7 @@ export function diffPublishedDraft(published, draft) {
   const fields = {};
   for (const name of [
     "title", "puzzleKind", "category", "categories", "subcategories", "tags",
-    "level", "lensMode", "preSolve", "relatedPuzzles",
+    "level", "lensMode", "preSolve", "relatedPuzzles", "board", "language",
     "learningIntroduction"
   ]) {
     const change = fieldChange(published[name], draft[name]);
@@ -260,7 +292,7 @@ export function diffPublishedDraft(published, draft) {
   return { counts, total, fields, clusters, bridges, lenses };
 }
 
-/** Content and pedagogy only. Provenance is outside the review identity. */
+/** Authored content and board settings. Provenance is outside the review identity. */
 export function samePlayablePuzzle(left, right) {
   const diff = diffPublishedDraft(left, right);
   return Boolean(diff && diff.total === 0);
@@ -268,7 +300,7 @@ export function samePlayablePuzzle(left, right) {
 
 const PLAYABLE_FIELDS = [
   "title", "puzzleKind", "category", "categories", "subcategories", "tags",
-  "level", "lensMode", "preSolve", "relatedPuzzles", "learningIntroduction"
+  "level", "lensMode", "preSolve", "relatedPuzzles", "learningIntroduction", "board", "language"
 ];
 
 function copyValue(value) {

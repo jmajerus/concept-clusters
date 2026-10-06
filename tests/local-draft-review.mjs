@@ -294,11 +294,11 @@ export async function run() {
     assert.equal(list.status, 200);
     assert.match(list.body, /incomplete-review-fixture/);
     assert.match(list.body, /energy-flow-review/);
-    assert.match(list.body, /One path/);
+    assert.match(list.body, /Publish makes the D1 snapshot available to public play/);
     assert.match(list.body, /value="refresh-github-production"/);
     assert.doesNotMatch(list.body, /this draft is in this checkout/);
     assert.doesNotMatch(list.body, />Checkout</);
-    assert.match(list.body, />GitHub</);
+    assert.match(list.body, />GitHub snapshot</);
     assert.doesNotMatch(list.body, /class="badge">submitted</);
     assert.match(list.body, /New puzzle opens a blank board/);
     assert.doesNotMatch(list.body, /Open existing puzzle/);
@@ -311,7 +311,7 @@ export async function run() {
     assert.match(list.body, /data-puzzle-id="energy-flow"/);
     assert.match(list.body, /href="\/admin\/drafts\/energy-flow-review"/);
     assert.match(list.body, /data-working-copy="0"/);
-    assert.match(list.body, /→ Freeze/);
+    assert.match(list.body, /Cue and Freeze refresh the static copy in git/);
     assert.doesNotMatch(list.body, /open a GitHub pull request/);
     assert.match(list.body, /href="\/\?puzzle=energy-flow-review&amp;play"/);
     assert.match(list.body, /href="\/\?puzzle=incomplete-review-fixture&amp;play"/);
@@ -325,7 +325,7 @@ export async function run() {
     assert.match(incompletePage.body, /Validation failed/);
     assert.doesNotMatch(incompletePage.body, /authoring flag/);
     assert.match(incompletePage.body, /badge-warn">working copy</);
-    assert.doesNotMatch(incompletePage.body, /badge-ok">authoring play</);
+    assert.doesNotMatch(incompletePage.body, /badge-ok">published</);
     assert.doesNotMatch(incompletePage.body, />draft</);
     assert.match(incompletePage.body, /<copy-field>/);
     assert.match(incompletePage.body, /confirm" value="save-working-copy"/);
@@ -535,7 +535,7 @@ export async function run() {
     assert.match(afterPublishGet.body, /Published[\s\S]*energy-flow[\s\S]*D1 revision 1/);
     assert.doesNotMatch(afterPublishGet.body, /<h1>Puzzles<\/h1>/);
     assert.doesNotMatch(afterPublishGet.body, /<h1>Published<\/h1>/);
-    assert.match(afterPublishGet.body, />Cue</);
+    assert.match(afterPublishGet.body, />Cue for freeze</);
     const afterPublishList = createResponse();
     assert.equal(await handlePublish({
       method: "GET",
@@ -543,9 +543,9 @@ export async function run() {
     }, afterPublishList), true);
     assert.equal(afterPublishList.status, 200);
     assert.doesNotMatch(afterPublishList.body, /role="status"/);
-    assert.match(afterPublishGet.body, /git-bundled production player is unchanged/);
-    assert.match(afterPublishGet.body, /badge-ok">authoring play/);
-    assert.match(afterPublishGet.body, />held</);
+    assert.match(afterPublishGet.body, /Public play reads the published D1 snapshot/);
+    assert.match(afterPublishGet.body, /badge-ok">published/);
+    assert.match(afterPublishGet.body, />not cued for freeze</);
     const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
     assert.equal(live.document.id, "energy-flow");
     assert.equal(live.cuedForFreezeAt, null);
@@ -950,6 +950,64 @@ export async function run() {
       (await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" })).layout,
       layoutOnly
     );
+    // Compare saved working copies with D1, independently of freeze cues.
+    const comparisonId = "publication-change-fixture";
+    let comparisonDraft = await draftStore.createDraft({
+      draftId: comparisonId,
+      document: { ...puzzleToSimplified(energyPuzzle), id: comparisonId }
+    });
+    await contentDocuments.publish({
+      kind: "puzzle", id: comparisonId,
+      document: comparisonDraft.document, actor: { subject: "local" }
+    });
+    async function comparisonRow() {
+      const response = createResponse();
+      await handlePublish({ method: "GET", url: "/admin/drafts" }, response);
+      assert.equal(response.status, 200);
+      return response.body.match(/<tr data-puzzle-id="publication-change-fixture"[^>]*>[\s\S]*?<\/tr>/)[0];
+    }
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    // Validation changes the row timestamp without changing the puzzle.
+    await draftStore.recordValidation(comparisonId, { valid: true, errors: [] });
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    for (const patch of [
+      { title: "Edited before republishing" },
+      { provenance: { collaboration: "human", contributors: [{ name: "Ada" }] } },
+      { board: { bridgePreconnect: true } }
+    ]) {
+      comparisonDraft = await draftStore.replaceDraft({
+        draftId: comparisonId, expectedRevision: comparisonDraft.revision,
+        document: { ...comparisonDraft.document, ...patch }
+      });
+      const changed = await comparisonRow();
+      assert.match(changed, /data-unpublished-changes="1"/);
+      const domain = patch.title ? "content" : patch.provenance ? "provenance" : "administration";
+      assert.match(changed, new RegExp(`data-change-domain="${domain}"`));
+      assert.equal((changed.match(/data-change-domain=/g) || []).length, 1);
+      await contentDocuments.publish({
+        kind: "puzzle", id: comparisonId,
+        document: comparisonDraft.document, actor: { subject: "local" }
+      });
+      assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    }
+    const comparisonLayout = layoutDocumentForMode("star", {
+      puzzleId: comparisonId, puzzleRevision: "fnv1a32:test",
+      nodes: { "cluster:0": { x: 150, y: 200 } }
+    });
+    await draftStore.saveLayout({ draftId: comparisonId, layout: comparisonLayout });
+    assert.match(await comparisonRow(), /data-change-domain="layout"/);
+    await contentDocuments.saveLayout({ id: comparisonId, layout: comparisonLayout });
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    await draftStore.clearLayout(comparisonId);
+    assert.match(await comparisonRow(), /data-unpublished-changes="1"/, "clearing a published layout is an edit too");
+    const unpublishResult = createResponse();
+    await handlePublish(postRequest(`/admin/drafts/${comparisonId}`, {
+      origin: "http://127.0.0.1:8787", host: "127.0.0.1:8787", body: "confirm=unpublish"
+    }), unpublishResult);
+    assert.equal(unpublishResult.status, 200);
+    assert.match(unpublishResult.body, /<h1>Unpublished<\/h1>/);
+    assert.match(unpublishResult.body, /cached for up to 30 seconds/);
+    assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

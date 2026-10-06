@@ -82,11 +82,11 @@ export function createCatalogueStudio({
     const activePublished = published && !withdrawn;
     const canPublish = !activePublished || differsFromPublished;
     const lifecycleHint = withdrawn
-      ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to authoring play."
+      ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to public play after the cache refreshes."
       : activePublished && !differsFromPublished
       ? "This working copy is already the published D1 snapshot. Edit it before publishing again."
       : activePublished
-      ? "This working copy has unpublished changes. Publish to replace the D1 snapshot."
+      ? "This working copy has unpublished changes. Publish to update the D1 snapshot used by public play."
       : "This working copy has not been published to D1 yet.";
     let body = `
       <div class="authoring-inspector">
@@ -121,7 +121,7 @@ export function createCatalogueStudio({
       <form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
         <p><button type="submit" name="confirm" value="publish"${canPublish ? "" : " disabled"}>${withdrawn ? "Republish" : "Publish"}</button>
         <button type="submit" name="confirm" value="publish-and-cue" class="secondary"${canPublish ? "" : " disabled"}
-          title="Publish and cue this snapshot for the next freeze in one step.">${withdrawn ? "Republish" : "Publish"} &amp; Cue</button></p>
+          title="Publish for public play and cue this snapshot for the next freeze into git.">${withdrawn ? "Republish" : "Publish"} &amp; Cue</button></p>
       </form>
       ${activePublished && differsFromPublished
         ? `<form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
@@ -135,14 +135,15 @@ export function createCatalogueStudio({
                cuedForFreeze ? "hold-from-freeze" : "cue-for-freeze"
              }">
              <p><button type="submit" class="play-button secondary">${
-               cuedForFreeze ? "Hold from Freeze" : "Cue"
+               cuedForFreeze ? "Clear freeze cue" : "Cue for freeze"
              }</button></p>
            </form>`
         : ""}
       <p class="meta"><a href="/admin/catalogues">All catalogues</a>
-      · ${lifecycleHint} Publish writes the shared D1 row. Cue means you are
-      done with this snapshot and returns to the catalogue list; Freeze from
-      <a href="/admin">Admin</a> updates the git-bundled player.</p>`;
+      · ${lifecycleHint} Publish makes the snapshot available to public play
+      after the cache refreshes. Cue for freeze returns to the catalogue list;
+      clearing its cue keeps it published. Freeze from
+      <a href="/admin">Admin</a> refreshes the static copy in git.</p>`;
     return body;
   }
 

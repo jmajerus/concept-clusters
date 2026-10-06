@@ -11,10 +11,10 @@
 // GET `/admin/drafts/<id>` opens a working copy from the published snapshot
 // when one does not already exist.
 //
-// Status on this local page is the publish path: working copy → authoring
-// play (held / cued / new on next freeze) → GitHub production. D1
-// `submitted` is leftover PR-ledger state and is not shown. GitHub
-// production membership comes from the Freeze snapshot: origin’s
+// Publication status describes the D1 snapshot available to public play.
+// Freeze cues and GitHub snapshot membership describe the static copy.
+// D1 `submitted` is leftover PR-ledger state and is not shown. GitHub
+// snapshot membership comes from the Freeze snapshot: origin’s
 // puzzles/manifest.js joined with that freeze’s puzzle add/update, minus
 // remove, assuming the freeze merges.
 
@@ -98,7 +98,7 @@ import {
 } from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { checkDocumentLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
-import { draftShadowsPublished, provenanceDiffersFromPublished } from "./draftReviewDiff.js";
+import { draftShadowsPublished, provenanceDiffersFromPublished, unpublishedChangeDomains } from "./draftReviewDiff.js";
 import { samePlayerFacingProjection } from "./playerFacingRevision.js";
 import {
   freezeFlagsFromPublished,
@@ -1257,8 +1257,8 @@ export function createLocalDraftReviewHandler({
             actor: publicationActor
           });
           html(res, renderContentLifecycleResultPage({
-            title: "Removed from authoring play",
-            message: `Withdrew ${puzzleId}. Publish again to restore it.`,
+            title: "Unpublished",
+            message: `Withdrew ${puzzleId}. Public listings may remain cached for up to 30 seconds. Publish again to restore it.`,
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
           }));
         } catch (error) {
@@ -1771,6 +1771,11 @@ export function createLocalDraftReviewHandler({
         publishedRows
       );
       const listed = await draftStore.listDrafts({ includeDocument: true });
+      const categoryRegistry = await loadMergedCategoryRegistry({
+        contentDocuments,
+        contentService,
+        actor: publicationActor
+      });
       const publishedById = new Map(publishedRows.map(row => [row.id, row]));
       const freezeAdds = freezeAddIdsFromPublishedRows(publishedRows, gitPuzzleIds);
       const drafts = await Promise.all(listed.map(async metadata => {
@@ -1785,17 +1790,32 @@ export function createLocalDraftReviewHandler({
           ? draftMatchesCheckout(metadata.document, checkoutDocument)
           : false;
         const publishedRow = publishedById.get(puzzleId);
+        const baseline = publishedRow?.document
+          ? documentForEditor(publishedRow.document, { categoryRegistry })
+          : null;
+        const workingDocument = metadata.document
+          ? documentForEditor(metadata.document, { categoryRegistry })
+          : null;
+        const publishedDiff = baseline && workingDocument
+          ? diffPublishedDraft(baseline, workingDocument)
+          : null;
+        const unpublishedDomains = baseline && workingDocument && !publishedRow.withdrawnAt
+          ? unpublishedChangeDomains(baseline, workingDocument, {
+            publishedLayout: publishedRow.layout || null,
+            draftLayout: metadata.layout || null
+          })
+          : [];
         return {
           ...mapDraftListItem(metadata, {
             inCheckout,
             matchesCheckout
           }),
-          // Runs the review page's own diff, and only for the narrow
-          // candidate set (a revision-1 working copy over a published id),
-          // so the list does not pay for a comparison per row.
+          unpublishedChanges: unpublishedDomains.length > 0,
+          unpublishedChangeDomains: unpublishedDomains,
+          // Reuse the publication diff for shadow detection as well.
           shadowsPublished: draftShadowsPublished({
-            published: publishedRow?.document || null,
-            draft: metadata.document || null
+            published: baseline,
+            publishedDiff
           }),
           freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
           ...freezeFlagsFromPublished(publishedRow, gitPuzzleIds)
@@ -1823,11 +1843,7 @@ export function createLocalDraftReviewHandler({
         variant: "local",
         githubProduction: githubSnapshot,
         notice,
-        categoryRegistry: await loadMergedCategoryRegistry({
-          contentDocuments,
-          contentService,
-          actor: publicationActor
-        })
+        categoryRegistry
       }));
       return true;
     }

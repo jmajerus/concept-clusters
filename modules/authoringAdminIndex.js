@@ -280,7 +280,8 @@ function renderFreezeSection({
     release pull request together. Missing forward dependencies are automatically cued when D1 has
     a published snapshot not yet in git. A category already in git is cued too when a shipping
     puzzle names a subcategory that the published category registers and this checkout does not.
-    A missing, withdrawn, or git-only dependency blocks Freeze. Held published boards stay in authoring play only.
+    A missing, withdrawn, or git-only dependency blocks Freeze. Published boards
+    remain available to public play without a freeze cue.
     Puzzle entries below show their category and subcategory assignments;
     <code>(none)</code> means the puzzle document has no subcategory assignment.
     ${applyHint} Git-seeded snapshots already in this checkout stay out of
@@ -314,7 +315,7 @@ function renderGithubProductionSection({
 } = {}) {
   if (!canRefreshGithubProduction) {
     return `<section class="github-prod">
-      <h2>GitHub production</h2>
+      <h2>GitHub snapshot</h2>
       <p class="meta">The Puzzles GitHub column on this Worker is origin’s
       <code>puzzles/manifest.js</code>, fetched per isolate. Refresh the
       local snapshot on the LAN authoring checkout
@@ -323,7 +324,7 @@ function renderGithubProductionSection({
   }
   const status = githubProductionSnapshotLabel(githubProduction);
   return `<section class="github-prod">
-    <h2>GitHub production</h2>
+    <h2>GitHub snapshot</h2>
     <p class="meta">The Puzzles GitHub column reads a local snapshot of origin’s
     <code>puzzles/manifest.js</code>. Freeze also refreshes it (joined with the
     freeze patch) when something is cued. Use this when Freeze is locked
@@ -367,8 +368,8 @@ export function renderAdminIndexPage({
       <tbody>
         <tr>
           <td><a href="/admin/drafts">Puzzles</a></td>
-          <td>Published authoring play plus your working copies, grouped by
-          category. Design-copy review, Publish, Cue or Hold for the next
+          <td>Published D1 puzzles plus your working copies, grouped by
+          category. Design-copy review, Publish for public play, and Cue for the next
           freeze. LAN Open board is <code>/?puzzle=</code>.</td>
         </tr>
         <tr>
@@ -432,18 +433,19 @@ export function renderFreezeResultPage({ result = null, error = null } = {}) {
   const originCount = Array.isArray(snapshot?.originIds) ? snapshot.originIds.length : null;
   const githubNote = result?.githubProductionError
     ? `<p class="meta">Wrote the freeze, but could not refresh the GitHub
-      production snapshot: ${escapeHtml(result.githubProductionError)}</p>`
+      snapshot: ${escapeHtml(result.githubProductionError)}</p>`
     : snapshot?.projectedFromFreeze
-      ? `<p class="meta">Projected GitHub production as origin
+      ? `<p class="meta">Projected GitHub snapshot as origin
         <code>${escapeHtml(snapshot.ref || "origin")}</code>
         joined with this freeze
         (${idCount} id${idCount === 1 ? "" : "s"}${
           originCount == null ? "" : `, ${originCount} already on origin`
         }).
-        Newly frozen ids show as in GitHub production until the next freeze.
-        That assumes this freeze merges; origin itself updates when it does.</p>`
+        Newly frozen ids show as in the GitHub snapshot until the next freeze.
+        That assumes this freeze merges; origin itself updates when it does.
+        Public play reads publication in D1 independently of this column.</p>`
       : snapshot
-      ? `<p class="meta">Refreshed GitHub production snapshot
+      ? `<p class="meta">Refreshed GitHub snapshot
         (${idCount} id${idCount === 1 ? "" : "s"} from
         <code>${escapeHtml(snapshot.ref || "origin")}</code>).
         Puzzles list uses this until the next freeze.</p>`
@@ -468,8 +470,8 @@ export function renderFreezeResultPage({ result = null, error = null } = {}) {
 
 export function renderGithubRefreshResultPage({ result = null, error = null } = {}) {
   if (error) {
-    return freezeResultShell("Could not refresh GitHub production",
-      `<h1>Could not refresh GitHub production</h1>
+    return freezeResultShell("Could not refresh GitHub snapshot",
+      `<h1>Could not refresh GitHub snapshot</h1>
       <p class="meta">${escapeHtml(error)}</p>
       <p class="meta"><a href="/admin">← Admin</a>
       · <a href="/admin/drafts">Puzzles</a></p>`);
@@ -481,8 +483,8 @@ export function renderGithubRefreshResultPage({ result = null, error = null } = 
     ? `Read <code>puzzles/manifest.js</code> from GitHub
       (<code>${escapeHtml(ref)}</code>)`
     : `Read origin <code>${escapeHtml(ref)}</code>`;
-  return freezeResultShell("GitHub production snapshot",
-    `<h1>GitHub production snapshot</h1>
+  return freezeResultShell("GitHub snapshot",
+    `<h1>GitHub snapshot</h1>
     <p>${how}
     (${idCount} id${idCount === 1 ? "" : "s"}). The Puzzles GitHub column
     uses this file until Freeze or another refresh.</p>

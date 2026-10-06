@@ -5,11 +5,16 @@
 // structurally. Copy fields can be edited in place (or restored to the
 // published wording). Structure is authored on the LAN construct canvas
 // (`/?puzzle=`) or via optional MCP. Freeze on `/admin` writes cued D1
-// snapshots into git. Publish writes the shared D1 row.
+// snapshots into git. Publish makes the D1 snapshot available to public play
+// after the cache refreshes.
 
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
-import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
+import {
+  PUBLIC_PLAY_PUBLICATION_NOTE,
+  renderFreezeCueForm,
+  renderPublishedFreezeBadges
+} from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import { RENAME_DRAFT_CONFIRM } from "./draftIdRename.js";
 import {
@@ -796,18 +801,17 @@ function pageShell(title, body) {
 
 // `inGithubProduction` is null when there is no snapshot (Refresh from
 // GitHub / Freeze has not written one yet, or the hosted GitHub fetch
-// failed). Do not treat that as "not in GitHub production". Status follows
-// the publish path: working copy → authoring play (held | cued | new on
-// next freeze) → GitHub.
-function renderGithubProductionStatus(inGithubProduction) {
+// failed). It describes membership in the static snapshot, independently
+// of publication in D1 and availability to public play.
+function renderGithubSnapshotStatus(inGithubProduction) {
   if (inGithubProduction === null || inGithubProduction === undefined) return "";
   return inGithubProduction
-    ? '<span class="badge badge-ok">in GitHub production</span>'
-    : '<span class="badge">not in GitHub production</span>';
+    ? '<span class="badge badge-ok">in GitHub snapshot</span>'
+    : '<span class="badge">not in GitHub snapshot</span>';
 }
 
 // A shadow working copy is otherwise indistinguishable from a legitimate one
-// in this list: same id, same "authoring play" row, same working-copy badge.
+// in this list: same id, same "published" row, same working-copy badge.
 // That invisibility is what let one sit unnoticed beside a finished board.
 const SHADOW_BADGE = '<span class="badge badge-warn" title="Almost none of the published puzzle survives in this working copy: it is a separate document under the same id, not an edit of the live board. Publishing it would replace the live puzzle.">shadow</span>';
 
@@ -821,64 +825,63 @@ function renderPuzzlePathBadges(item, { detail = false } = {}) {
   }
   const published = item.published === true || item.d1Published === true;
   if (published) {
-    return `<span class="badge badge-ok">authoring play</span> ${renderPublishedFreezeBadges(item)}${shadow}`.trim();
+    const unpublished = detail && hasUnpublishedChanges(item)
+      ? ' <span class="badge badge-warn">unpublished changes</span>'
+      : "";
+    return `<span class="badge badge-ok">published</span> ${renderPublishedFreezeBadges(item)}${unpublished}${shadow}`.trim();
   }
   const hasWorkingCopy = item.hasWorkingCopy === true
     || (detail && Boolean(item.draftId || item.status || item.document));
   if (hasWorkingCopy || detail) {
     return `<span class="badge badge-warn">working copy</span>${shadow}`;
   }
-  if (item.inGit) return '<span class="badge">in git</span>';
+  if (item.inGit) return '<span class="badge">git snapshot only</span>';
   return "";
 }
 
 function listIntro(variant) {
-  return variant === "local"
-    ? `One path: working copy → Publish (what the player reads) → Cue → Freeze on
-       <a href="/admin">Admin</a> (git) → GitHub production. Status is
-       where this id sits on that path. GitHub is origin’s
-       <code>puzzles/manifest.js</code> joined with the last freeze patch.
-       Refresh from GitHub on Admin fills that column without freezing.
-       Show <strong>Working copies</strong> is the working copy badge: not
-       yet in authoring play. <strong>Drafts</strong> is never in GitHub
-       production (needs a GitHub snapshot). <strong>Modified</strong> is
-       anything changed since the last Freeze: a working copy, or authoring
-       play badged held, cued, or new to git (an unbadged authoring-play row
-       is exactly what the last Freeze shipped). <strong>Cued</strong> is the
-       subset already cued for the next Freeze. <strong>Published only</strong>
-       is authoring play with no private draft. By category browses the
-       corpus. Recent gathers working copies by last
-       update. Open a row to review copy; that starts a working copy if you
-       do not already have one. New puzzle opens a blank board. Play
-       opens the clean preview. Review, in that same column, opens the
-       board with puzzle meta, stats, and Edit layout. Catalogues are edited at
+  const snapshotSource = variant === "local"
+    ? `The GitHub snapshot column is origin’s <code>puzzles/manifest.js</code>
+       joined with the last freeze patch (assuming it merges).
+       Refresh from GitHub on Admin updates that column.`
+    : `The GitHub snapshot column is origin’s <code>puzzles/manifest.js</code>.`;
+  const playHelp = variant === "local"
+    ? `New puzzle opens a blank board. Play opens the working-copy preview.
+       Review opens the board with puzzle meta, stats, and Edit layout. Catalogues are edited at
        <a href="/admin/catalogues">/admin/catalogues</a>.`
-    : `One path: working copy → Publish (what the player reads) → Cue → LAN
-       Freeze (git) → GitHub production. Status is where this id sits on that
-       path. Hosted GitHub is origin only. Show Working copies is the working
-       copy badge; Drafts is never in GitHub production; Modified is anything
-       changed since the last Freeze (a working copy, or authoring play held,
-       cued, or new to git); Cued is the subset cued for the next Freeze;
-       Published only is authoring play with no private draft. By category
-       browses the corpus.
-       Recent gathers working copies by last update. Open a row to review
-       copy; that starts a working copy if you do not already have one.
-       Play unpublished boards on the LAN authoring checkout, not here.`
+    : `Play unpublished working copies on the LAN authoring checkout.`;
+  return `Publish makes the D1 snapshot available to public play after the
+       cache refreshes. Cue and Freeze refresh the static copy in git.
+       Published puzzles remain available when they are not cued for freeze.
+       ${snapshotSource}
+       Show <strong>Working copies</strong> selects unpublished puzzles.
+       <strong>Not in GitHub</strong> selects ids absent from that snapshot;
+       they may already be published in D1. <strong>Modified</strong> selects
+       working copies of unpublished puzzles and published snapshots changed
+       since the last Freeze. <strong>Unpublished changes</strong> selects saved
+       working copies that differ from their published D1 snapshot, including
+       content, classification, pedagogy, admin settings, provenance, or layout.
+       Badges in the Unpublished Changes column identify the changed domains. <strong>Cued</strong>
+       selects explicit freeze cues.
+       <strong>Published only</strong> selects published puzzles with no private
+       working copy. By category browses the corpus; Recent groups working
+       copies by last update. Open a row to edit its working copy, creating
+       one from the published snapshot if needed. ${playHelp}`;
 }
 
 function renderGithubRefreshForm(snapshot) {
   const hasSnapshot = Array.isArray(snapshot?.ids) && snapshot.ids.length;
   const status = hasSnapshot
-    ? `GitHub column from <code>${escapeHtml(snapshot.ref || "origin")}</code>
+    ? `GitHub snapshot column from <code>${escapeHtml(snapshot.ref || "origin")}</code>
        (${snapshot.ids.length} id${snapshot.ids.length === 1 ? "" : "s"})${
          snapshot.fetchedAt ? `, fetched ${escapeHtml(snapshot.fetchedAt)}` : ""
        }.`
-    : `GitHub column is empty until you fetch origin. Freeze is not required.`;
+    : `GitHub snapshot column is empty until you fetch origin. Freeze is not required.`;
   return `<section class="submit-pr">
     <p class="meta">${status}</p>
     <div class="actions">
       <form method="post" action="/admin">
-        <button type="submit" name="confirm" value="${GITHUB_REFRESH_CONFIRM}" class="secondary">Refresh GitHub column</button>
+        <button type="submit" name="confirm" value="${GITHUB_REFRESH_CONFIRM}" class="secondary">Refresh GitHub snapshot column</button>
       </form>
     </div>
   </section>`;
@@ -925,19 +928,45 @@ function renderNewPuzzleForm(categoryRegistry = CATEGORIES) {
 }
 
 function isWorkingCopyStatus(item) {
-  return item.withdrawn !== true
-    && item.published !== true
-    && item.hasWorkingCopy === true;
+  return item.hasWorkingCopy === true && !isPublishedLive(item);
 }
 
 // Show-scope predicates. A published row carries the freeze flags from
 // contentFreezePlan.js: gitSeedCue means the published snapshot is exactly
-// what the last Freeze shipped (no badge); otherwise it is held, cued, or
-// new to git -- all "modified since the last freeze". A working copy not
-// yet in authoring play is modified too.
+// what the last Freeze shipped (no freeze badge); otherwise it is uncued,
+// cued, or new to git -- all "modified since the last freeze". An unpublished
+// working copy is modified too.
 function isPublishedLive(item) {
   return (item.published === true || item.d1Published === true)
     && item.withdrawn !== true && item.d1Withdrawn !== true;
+}
+
+function hasUnpublishedChanges(item) {
+  return isPublishedLive(item) && (
+    item.unpublishedChangeDomains?.length > 0
+    || item.unpublishedChanges === true
+    || Number(item.publishedDiff?.total) > 0
+    || item.provenanceDiffersFromPublished === true
+    || item.layoutDiffersFromPublished === true
+  );
+}
+
+const UNPUBLISHED_DOMAIN_LABELS = {
+  content: "Content",
+  classification: "Classification",
+  pedagogy: "Pedagogy",
+  administration: "Admin",
+  provenance: "Provenance",
+  layout: "Layout"
+};
+
+function renderUnpublishedDomains(item) {
+  if (!isPublishedLive(item)) return emptyValue();
+  const domains = item.unpublishedChangeDomains || [];
+  return Object.entries(UNPUBLISHED_DOMAIN_LABELS)
+    .filter(([domain]) => domains.includes(domain))
+    .map(([domain, label]) => `<span class="badge badge-warn" data-change-domain="${domain}" title="${label} differs from the published D1 snapshot">${label}</span>`)
+    .join(" ") || emptyValue();
 }
 
 function isCuedStatus(item) {
@@ -1019,14 +1048,14 @@ function groupRecentWorkingCopies(items, now = new Date()) {
 
 function publishedOnlyRows(items) {
   return items
-    .filter(item => !item.hasWorkingCopy)
+    .filter(item => !item.hasWorkingCopy && isPublishedLive(item))
     .sort((left, right) => String(left.title).localeCompare(String(right.title)));
 }
 
 function corpusTableHead(variant, { includeCategory = false } = {}) {
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const categoryColumn = includeCategory ? "<th>Category</th>" : "";
-  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Secondary categories</th><th>Subcategories</th><th>Status</th><th>GitHub</th>${playColumn}<th>Updated</th></tr></thead>`;
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Secondary categories</th><th>Subcategories</th><th>Status</th><th>Unpublished Changes</th><th>GitHub snapshot</th>${playColumn}<th>Updated</th></tr></thead>`;
 }
 
 function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
@@ -1052,14 +1081,15 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const subcategoryCell = item.subcategoryLabels?.length
     ? escapeHtml(subcategoryText)
     : emptyValue();
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
     <td>${secondaryCategoryCell}</td>
     <td>${subcategoryCell}</td>
     <td>${renderPuzzlePathBadges(item)}</td>
-    <td>${renderGithubProductionStatus(item.inGithubProduction)}</td>
+    <td>${renderUnpublishedDomains(item)}</td>
+    <td>${renderGithubSnapshotStatus(item.inGithubProduction)}</td>
     ${playCell}
     <td>${escapeHtml(item.updatedAt || "")}</td>
   </tr>`;
@@ -1150,7 +1180,9 @@ const CORPUS_FILTER_SCRIPT = `
       var hay = (row.getAttribute("data-filter") || "").toLowerCase();
       var hasDraft = row.getAttribute("data-has-draft") === "1";
       var working = row.getAttribute("data-working-copy") === "1";
+      var publishedLive = row.getAttribute("data-published-live") === "1";
       var modified = row.getAttribute("data-modified") === "1";
+      var unpublished = row.getAttribute("data-unpublished-changes") === "1";
       var cued = row.getAttribute("data-cued") === "1";
       var github = row.getAttribute("data-github");
       var matchQuery = !query || hay.indexOf(query) !== -1;
@@ -1158,8 +1190,9 @@ const CORPUS_FILTER_SCRIPT = `
         || (scope === "working" && working)
         || (scope === "drafts" && github === "0")
         || (scope === "modified" && modified)
+        || (scope === "unpublished" && unpublished)
         || (scope === "cued" && cued)
-        || (scope === "published" && !hasDraft);
+        || (scope === "published" && publishedLive && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
     });
     root.querySelectorAll(".corpus-group").forEach(function (group) {
@@ -1211,11 +1244,17 @@ export function renderDraftListPage(rows, {
       includeCategory: true
     })
     : "";
+  const recentInactive = renderCorpusGroup({
+    title: "Unpublished without a working copy",
+    rows: items.filter(item => !item.hasWorkingCopy && !isPublishedLive(item)),
+    variant,
+    includeCategory: true
+  });
   const forms = variant === "local" ? renderNewPuzzleForm(categoryRegistry) : "";
   const githubRefresh = variant === "local" ? renderGithubRefreshForm(githubProduction) : "";
   const empty = items.length
     ? ""
-    : "<p>No puzzles in authoring play yet.</p>";
+    : "<p>No puzzles or working copies yet.</p>";
   const body = `<div class="puzzle-corpus">
        <h1>Puzzles</h1>
        ${renderPublicationNotice(notice)}
@@ -1225,7 +1264,7 @@ export function renderDraftListPage(rows, {
        <p class="meta">${items.length} puzzle${items.length === 1 ? "" : "s"}
          · ${workingCount} working cop${workingCount === 1 ? "y" : "ies"}${
            neverGithubCount
-             ? ` · ${neverGithubCount} not in GitHub production`
+             ? ` · ${neverGithubCount} not in GitHub snapshot`
              : ""
          }</p>
        ${forms}
@@ -1235,11 +1274,12 @@ export function renderDraftListPage(rows, {
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Show</span>
            <label><input type="radio" name="puzzle-corpus-scope" value="all" checked> All</label>
-           <label title="Not yet in authoring play — the working copy badge"><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
-           <label title="Never in GitHub production"><input type="radio" name="puzzle-corpus-scope" value="drafts"> Drafts</label>
-           <label title="Changed since the last Freeze: a working copy, or in authoring play as held, cued, or new to git"><input type="radio" name="puzzle-corpus-scope" value="modified"> Modified</label>
-           <label title="In authoring play and cued for the next Freeze"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
-           <label title="In authoring play, no private draft (the Published only group under Recent)"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
+           <label title="No active D1 publication — an unpublished working copy"><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
+           <label title="Id absent from the GitHub snapshot; may already be published for public play"><input type="radio" name="puzzle-corpus-scope" value="drafts"> Not in GitHub</label>
+           <label title="Unpublished puzzles or published snapshots changed since the last Freeze; this is a static snapshot status"><input type="radio" name="puzzle-corpus-scope" value="modified"> Modified</label>
+           <label title="Saved content, board settings, provenance, or layout differs from the published D1 snapshot"><input type="radio" name="puzzle-corpus-scope" value="unpublished"> Unpublished changes</label>
+           <label title="Published D1 snapshot explicitly cued for the next Freeze into git"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
+           <label title="Published in D1 with no private working copy (the Published only group under Recent)"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
          </p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Arrange</span>
@@ -1248,7 +1288,7 @@ export function renderDraftListPage(rows, {
          </p>
        </div>
        <div id="corpus-by-category" hidden>${categoryGroups}</div>
-       <div id="corpus-by-recent">${recentWorking}${recentPublished}</div>
+       <div id="corpus-by-recent">${recentWorking}${recentPublished}${recentInactive}</div>
        ${empty}
      </div>
      <script>${CORPUS_FILTER_SCRIPT}</script>`;
@@ -1326,18 +1366,15 @@ function renderDraftFreshness(draft, variant) {
   </script>`;
 }
 
-function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
+function submitHint(variant, { valid, alreadyPublished = false }) {
   if (!valid) {
     return `Fix validation errors on this page or through the authoring
        conversation before publishing.`;
   }
-  if (alreadyAuthoringPlay) {
-    return variant === "local"
-      ? `This working copy is the authoring-play snapshot. Cue or Hold the
-         freeze gate. Publish again after you edit.`
-      : `This working copy is the authoring-play snapshot. Cue or Hold the
-         freeze gate. Publish again after you edit. Play unpublished boards
-         on the LAN authoring checkout, not here.`;
+  if (alreadyPublished) {
+    return `This working copy is the published D1 snapshot. Publish again after
+       you edit. Cue for freeze marks the published snapshot for the next
+       freeze into git. Clearing the cue keeps it published for public play.`;
   }
   if (variant === "local") {
     return `This page is for design copy. Open board opens
@@ -1345,14 +1382,16 @@ function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
        page as it is. Play is a clean player preview
        (<code>/?puzzle=&amp;play</code>). Review, beside Play on the
        puzzle list, opens that board with puzzle meta, stats, and Edit layout.
-       Publish writes the shared D1 row. Cue means you are done with this
-       puzzle and returns to the list; Freeze on
+       Publish makes the D1 snapshot available to public play after the cache
+       refreshes. Cue for freeze marks it for the next static snapshot and
+       returns to the list; Freeze on
        <a href="/admin">Admin</a> is the only thing that writes git.`;
   }
   return `This page is for design copy. Play unpublished boards on the LAN
      authoring checkout (<code>/?puzzle=</code>), not on Cloudflare. Publish
-     writes the shared D1 row. Cue means you are done with this puzzle and
-     returns to the list; Freeze on the LAN Admin page writes git. Hosted authoring
+     makes the D1 snapshot available to public play after the cache refreshes.
+     Cue for freeze marks it for the next static snapshot and returns to the
+     list; Freeze on the LAN Admin page writes git. Hosted authoring
      has no git checkout.`;
 }
 
@@ -1568,10 +1607,10 @@ function renderSubmitForm(draft, variant = "hosted") {
   const differsFromPublished = d1Published && (
     documentDiffersFromPublished || layoutDiffersFromPublished || provenanceDiffers
   );
-  const alreadyAuthoringPlay = d1Published && !differsFromPublished;
-  const canPublish = valid && !alreadyAuthoringPlay;
+  const alreadyPublished = d1Published && !differsFromPublished;
+  const canPublish = valid && !alreadyPublished;
   const disabled = canPublish ? "" : " disabled";
-  const hint = submitHint(variant, { valid, alreadyAuthoringPlay });
+  const hint = submitHint(variant, { valid, alreadyPublished });
   const playButton = variant === "local" ? renderPlayAction(draft, { valid }) : "";
   const choosingReview = reviewChoiceCandidates(draft).length > 0;
   const reviewOpenedDraft = !choosingReview && draft.openedFromPublished === true;
@@ -1589,7 +1628,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     ? `<button type="submit" name="confirm" value="undo-review" class="secondary">Undo review</button>`
     : "";
   const unpublish = d1Published
-    ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>`
+    ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Unpublish</button>`
     : "";
   const workingMeta = [
     "Copy edits on this page stay in the browser until you Save working copy. Construct auto-saves board structure.",
@@ -1609,7 +1648,7 @@ function renderSubmitForm(draft, variant = "hosted") {
       ? `Revert to published restores the last D1 published document${layoutDiffersFromPublished ? " and layout" : ""}.`
       : "",
     d1Published
-      ? "Remove from authoring play withdraws the published row (Freeze later deletes git files)."
+      ? "Unpublish withdraws the D1 snapshot from public play after the cache refreshes. Freeze later deletes the static files."
       : "",
     choosingReview ? "" : "Delete working copy removes only this draft."
   ].filter(Boolean).join(" ");
@@ -1635,7 +1674,7 @@ function renderSubmitForm(draft, variant = "hosted") {
           && revisedMarkChangesLessonLine(draft.firstPublishedAt))}
         <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>
         <button type="submit" name="confirm" value="publish-and-cue" class="secondary"${disabled}
-          title="Publish and cue for the next freeze in one step, for minor edits that don't need a separate review before cueing.">Publish &amp; Cue</button>
+          title="Publish for public play and cue the snapshot for the next freeze into git.">Publish &amp; Cue</button>
       </form>
     </div>
   </section>`;
@@ -1676,7 +1715,7 @@ function renderSubmitForm(draft, variant = "hosted") {
 // Fixing a puzzle id is rare and human: an agent chose an over-long slug, or
 // the title it was given was misspelled and the slug inherited the typo.
 // Only offered before the puzzle is published, because an id that is live in
-// authoring play or git is an identity other rows may point at.
+// public play or git is an identity other rows may point at.
 //
 // `puzzleIdIsLive` is the server's own answer to that question, computed with
 // the same helper the rename POST uses, so the form is never offered for an
@@ -1690,9 +1729,9 @@ function renderRenameDraftForm(draft) {
     || draft.inGithubProduction === true) {
     return `<section class="submit-pr">
       <h2>Puzzle id</h2>
-      <p class="meta"><code>${escapeHtml(currentId)}</code> is published, so other
-        puzzles and catalogues may point at it. Remove it from authoring play
-        before changing the id.</p>
+      <p class="meta"><code>${escapeHtml(currentId)}</code> has been published, so other
+        puzzles and catalogues may point at it. Its id cannot be renamed here,
+        even after unpublishing. Changing it requires a migration.</p>
     </section>`;
   }
   return `<section class="submit-pr">
@@ -2277,8 +2316,7 @@ function renderPublicationNotice(notice) {
     as D1 revision ${escapeHtml(String(notice.revision))}.${cued ? " Cued for the next freeze." : ""}`;
   return `<div class="validation validation-ok" role="status">
     ${message}
-    <p class="meta">The git-bundled production player is unchanged until a
-    future Freeze.</p>
+    <p class="meta">${escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE)}</p>
   </div>
   <script>
     if (window.history && window.history.replaceState) {
@@ -2334,9 +2372,11 @@ export function renderDraftPage(draft, {
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
       ${renderPuzzlePathBadges(draft, { detail: true })}
-      ${renderGithubProductionStatus(draft.inGithubProduction)}
-      updated ${escapeHtml(draft.updatedAt)}
+      ${renderGithubSnapshotStatus(draft.inGithubProduction)}
+      working copy updated ${escapeHtml(draft.updatedAt)}
     </p>
+    <p class="meta">${escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE)}
+      Working copy edits stay private until you publish.</p>
     ${renderDiffSummary(diff, {
       layoutDiffersFromPublished: draft.layoutDiffersFromPublished,
       provenanceDiffersFromPublished: draft.provenanceDiffersFromPublished === true,
