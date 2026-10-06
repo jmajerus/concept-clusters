@@ -175,8 +175,11 @@ authored columns so the split is complete. The materialized `document`
 column is left as it was and `document_stale` is set. A complete save
 rewrites `document` and every domain column and clears the stale flag.
 `materialize` refreshes `document` from the domain columns without
-incrementing `revision`. An assembled document identical to the stored one
-does not bump `revision` and does not record history.
+incrementing `revision`. A complete save whose assembled document matches
+the current one leaves `revision` alone and records no history, unless
+`document_stale` is set. That save refreshes the cache: `revision`
+increments, and history is not pushed, because the assembled puzzle did
+not change. A caller still has to send the new `expected_revision`.
 
 Distinct saves push the previous assembled document onto
 `puzzle_draft_history`. That row is the full document. The stack keeps 40
