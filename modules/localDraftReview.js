@@ -98,7 +98,7 @@ import {
 } from "./contentDocumentRepository.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { checkDocumentLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
-import { draftShadowsPublished, provenanceDiffersFromPublished } from "./draftReviewDiff.js";
+import { draftShadowsPublished, provenanceDiffersFromPublished, unpublishedChangeDomains } from "./draftReviewDiff.js";
 import { samePlayerFacingProjection } from "./playerFacingRevision.js";
 import {
   freezeFlagsFromPublished,
@@ -1799,17 +1799,19 @@ export function createLocalDraftReviewHandler({
         const publishedDiff = baseline && workingDocument
           ? diffPublishedDraft(baseline, workingDocument)
           : null;
-        const unpublishedChanges = Boolean(publishedDiff && !publishedRow.withdrawnAt && (
-          publishedDiff.total > 0
-          || provenanceDiffersFromPublished(baseline, workingDocument)
-          || !valuesEqual(publishedRow.layout || null, metadata.layout || null)
-        ));
+        const unpublishedDomains = baseline && workingDocument && !publishedRow.withdrawnAt
+          ? unpublishedChangeDomains(baseline, workingDocument, {
+            publishedLayout: publishedRow.layout || null,
+            draftLayout: metadata.layout || null
+          })
+          : [];
         return {
           ...mapDraftListItem(metadata, {
             inCheckout,
             matchesCheckout
           }),
-          unpublishedChanges,
+          unpublishedChanges: unpublishedDomains.length > 0,
+          unpublishedChangeDomains: unpublishedDomains,
           // Reuse the publication diff for shadow detection as well.
           shadowsPublished: draftShadowsPublished({
             published: baseline,

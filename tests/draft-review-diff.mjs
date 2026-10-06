@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   diffPublishedDraft,
+  unpublishedChangeDomains,
   documentForChosenProposal,
   documentKeepingProvenance,
   documentWithLesson,
@@ -45,6 +46,31 @@ export async function run() {
     ...published,
   });
   assert.equal(identical.total, 0);
+  assert.deepEqual(unpublishedChangeDomains(published, published), []);
+  const domainCases = [
+    [{ title: "New title" }, ["content"]],
+    [{ category: "Science" }, ["classification"]],
+    [{ tags: ["new tag"] }, ["classification"]],
+    [{ learningIntroduction: { markdown: "New lesson" } }, ["pedagogy"]],
+    [{ language: "fr" }, ["pedagogy"]],
+    [{ board: { bridgePreconnect: true } }, ["administration"]],
+    [{ provenance: { collaboration: "human" } }, ["provenance"]],
+    [{ updatedAt: "2026-10-06", dateModified: "2026-10-06" }, []],
+    [{ bridges: [...published.bridges, { id: "new", term: "new", clusters: [] }] }, ["content"]],
+    [{ bridges: [{ ...published.bridges[0], fact: "New bridge fact" }] }, ["content"]],
+    [{ bridges: [{ ...published.bridges[0], relationKind: "causes" }] }, ["pedagogy"]],
+    [{ bridges: [{ ...published.bridges[0], fact: "New fact", relationKind: "causes" }] }, ["content", "pedagogy"]],
+    [{ title: "New title", tags: ["new"], lensMode: "guided" }, ["content", "classification", "pedagogy"]]
+  ];
+  for (const [patch, expected] of domainCases) {
+    assert.deepEqual(unpublishedChangeDomains(published, { ...published, ...patch }), expected);
+  }
+  assert.deepEqual(unpublishedChangeDomains(published, published, {
+    publishedLayout: { nodes: { a: { x: 1, y: 2 } } }
+  }), ["layout"], "clearing a live layout is a layout change");
+  assert.deepEqual(unpublishedChangeDomains(null, published), []);
+  assert.equal(diffPublishedDraft(published, { ...published, language: "fr" }).total, 1,
+    "language-only edits must also enable publication");
   const boardChanged = { ...published, board: { bridgePreconnect: true } };
   assert.equal(diffPublishedDraft(published, boardChanged).total, 1);
   assert.ok(diffPublishedDraft(published, boardChanged).fields.board);

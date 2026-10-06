@@ -825,7 +825,7 @@ function renderPuzzlePathBadges(item, { detail = false } = {}) {
   }
   const published = item.published === true || item.d1Published === true;
   if (published) {
-    const unpublished = hasUnpublishedChanges(item)
+    const unpublished = detail && hasUnpublishedChanges(item)
       ? ' <span class="badge badge-warn">unpublished changes</span>'
       : "";
     return `<span class="badge badge-ok">published</span> ${renderPublishedFreezeBadges(item)}${unpublished}${shadow}`.trim();
@@ -860,7 +860,8 @@ function listIntro(variant) {
        working copies of unpublished puzzles and published snapshots changed
        since the last Freeze. <strong>Unpublished changes</strong> selects saved
        working copies that differ from their published D1 snapshot, including
-       content, board settings, provenance, or layout. <strong>Cued</strong>
+       content, classification, pedagogy, admin settings, provenance, or layout.
+       Badges in the Unpublished Changes column identify the changed domains. <strong>Cued</strong>
        selects explicit freeze cues.
        <strong>Published only</strong> selects published puzzles with no private
        working copy. By category browses the corpus; Recent groups working
@@ -944,11 +945,30 @@ function isPublishedLive(item) {
 
 function hasUnpublishedChanges(item) {
   return isPublishedLive(item) && (
-    item.unpublishedChanges === true
+    item.unpublishedChangeDomains?.length > 0
+    || item.unpublishedChanges === true
     || Number(item.publishedDiff?.total) > 0
     || item.provenanceDiffersFromPublished === true
     || item.layoutDiffersFromPublished === true
   );
+}
+
+const UNPUBLISHED_DOMAIN_LABELS = {
+  content: "Content",
+  classification: "Classification",
+  pedagogy: "Pedagogy",
+  administration: "Admin",
+  provenance: "Provenance",
+  layout: "Layout"
+};
+
+function renderUnpublishedDomains(item) {
+  if (!isPublishedLive(item)) return emptyValue();
+  const domains = item.unpublishedChangeDomains || [];
+  return Object.entries(UNPUBLISHED_DOMAIN_LABELS)
+    .filter(([domain]) => domains.includes(domain))
+    .map(([domain, label]) => `<span class="badge badge-warn" data-change-domain="${domain}" title="${label} differs from the published D1 snapshot">${label}</span>`)
+    .join(" ") || emptyValue();
 }
 
 function isCuedStatus(item) {
@@ -1037,7 +1057,7 @@ function publishedOnlyRows(items) {
 function corpusTableHead(variant, { includeCategory = false } = {}) {
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const categoryColumn = includeCategory ? "<th>Category</th>" : "";
-  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Secondary categories</th><th>Subcategories</th><th>Status</th><th>GitHub snapshot</th>${playColumn}<th>Updated</th></tr></thead>`;
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Secondary categories</th><th>Subcategories</th><th>Status</th><th>Unpublished Changes</th><th>GitHub snapshot</th>${playColumn}<th>Updated</th></tr></thead>`;
 }
 
 function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
@@ -1070,6 +1090,7 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
     <td>${secondaryCategoryCell}</td>
     <td>${subcategoryCell}</td>
     <td>${renderPuzzlePathBadges(item)}</td>
+    <td>${renderUnpublishedDomains(item)}</td>
     <td>${renderGithubSnapshotStatus(item.inGithubProduction)}</td>
     ${playCell}
     <td>${escapeHtml(item.updatedAt || "")}</td>
