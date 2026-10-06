@@ -1257,8 +1257,8 @@ export function createLocalDraftReviewHandler({
             actor: publicationActor
           });
           html(res, renderContentLifecycleResultPage({
-            title: "Removed from public play",
-            message: `Withdrew ${puzzleId}. Publish again to restore it.`,
+            title: "Unpublished",
+            message: `Withdrew ${puzzleId}. Public listings may remain cached for up to 30 seconds. Publish again to restore it.`,
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
           }));
         } catch (error) {

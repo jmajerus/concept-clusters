@@ -1000,7 +1000,13 @@ export async function run() {
     assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
     await draftStore.clearLayout(comparisonId);
     assert.match(await comparisonRow(), /data-unpublished-changes="1"/, "clearing a published layout is an edit too");
-    await contentDocuments.unpublish({ kind: "puzzle", id: comparisonId, actor: { subject: "local" } });
+    const unpublishResult = createResponse();
+    await handlePublish(postRequest(`/admin/drafts/${comparisonId}`, {
+      origin: "http://127.0.0.1:8787", host: "127.0.0.1:8787", body: "confirm=unpublish"
+    }), unpublishResult);
+    assert.equal(unpublishResult.status, 200);
+    assert.match(unpublishResult.body, /<h1>Unpublished<\/h1>/);
+    assert.match(unpublishResult.body, /cached for up to 30 seconds/);
     assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
   } finally {
     await rm(directory, { recursive: true, force: true });

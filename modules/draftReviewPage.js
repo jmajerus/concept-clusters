@@ -928,9 +928,7 @@ function renderNewPuzzleForm(categoryRegistry = CATEGORIES) {
 }
 
 function isWorkingCopyStatus(item) {
-  return item.withdrawn !== true
-    && item.published !== true
-    && item.hasWorkingCopy === true;
+  return item.hasWorkingCopy === true && !isPublishedLive(item);
 }
 
 // Show-scope predicates. A published row carries the freeze flags from
@@ -1050,7 +1048,7 @@ function groupRecentWorkingCopies(items, now = new Date()) {
 
 function publishedOnlyRows(items) {
   return items
-    .filter(item => !item.hasWorkingCopy)
+    .filter(item => !item.hasWorkingCopy && isPublishedLive(item))
     .sort((left, right) => String(left.title).localeCompare(String(right.title)));
 }
 
@@ -1083,7 +1081,7 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const subcategoryCell = item.subcategoryLabels?.length
     ? escapeHtml(subcategoryText)
     : emptyValue();
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
@@ -1182,6 +1180,7 @@ const CORPUS_FILTER_SCRIPT = `
       var hay = (row.getAttribute("data-filter") || "").toLowerCase();
       var hasDraft = row.getAttribute("data-has-draft") === "1";
       var working = row.getAttribute("data-working-copy") === "1";
+      var publishedLive = row.getAttribute("data-published-live") === "1";
       var modified = row.getAttribute("data-modified") === "1";
       var unpublished = row.getAttribute("data-unpublished-changes") === "1";
       var cued = row.getAttribute("data-cued") === "1";
@@ -1193,7 +1192,7 @@ const CORPUS_FILTER_SCRIPT = `
         || (scope === "modified" && modified)
         || (scope === "unpublished" && unpublished)
         || (scope === "cued" && cued)
-        || (scope === "published" && !hasDraft);
+        || (scope === "published" && publishedLive && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
     });
     root.querySelectorAll(".corpus-group").forEach(function (group) {
@@ -1245,6 +1244,12 @@ export function renderDraftListPage(rows, {
       includeCategory: true
     })
     : "";
+  const recentInactive = renderCorpusGroup({
+    title: "Unpublished without a working copy",
+    rows: items.filter(item => !item.hasWorkingCopy && !isPublishedLive(item)),
+    variant,
+    includeCategory: true
+  });
   const forms = variant === "local" ? renderNewPuzzleForm(categoryRegistry) : "";
   const githubRefresh = variant === "local" ? renderGithubRefreshForm(githubProduction) : "";
   const empty = items.length
@@ -1283,7 +1288,7 @@ export function renderDraftListPage(rows, {
          </p>
        </div>
        <div id="corpus-by-category" hidden>${categoryGroups}</div>
-       <div id="corpus-by-recent">${recentWorking}${recentPublished}</div>
+       <div id="corpus-by-recent">${recentWorking}${recentPublished}${recentInactive}</div>
        ${empty}
      </div>
      <script>${CORPUS_FILTER_SCRIPT}</script>`;
@@ -1724,9 +1729,9 @@ function renderRenameDraftForm(draft) {
     || draft.inGithubProduction === true) {
     return `<section class="submit-pr">
       <h2>Puzzle id</h2>
-      <p class="meta"><code>${escapeHtml(currentId)}</code> is published, so other
-        puzzles and catalogues may point at it. Unpublish it
-        before changing the id.</p>
+      <p class="meta"><code>${escapeHtml(currentId)}</code> has been published, so other
+        puzzles and catalogues may point at it. Its id cannot be renamed here,
+        even after unpublishing. Changing it requires a migration.</p>
     </section>`;
   }
   return `<section class="submit-pr">

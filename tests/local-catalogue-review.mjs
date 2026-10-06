@@ -713,6 +713,8 @@ export async function run(page) {
   }, unpublishLabSubject), true);
   assert.equal(unpublishLabSubject.status, 200);
   assert.match(unpublishLabSubject.body, /Withdrew lab-subject/);
+  assert.match(unpublishLabSubject.body, /<h1>Unpublished<\/h1>/);
+  assert.match(unpublishLabSubject.body, /cached for up to 30 seconds/);
 
   const renamedUnused = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/categories/lab-subject", {
@@ -857,6 +859,8 @@ export async function run(page) {
   }, unpublishLeaf), true);
   assert.equal(unpublishLeaf.status, 200);
   assert.match(unpublishLeaf.body, /Withdrew lab-catalogue-fixture/);
+  assert.match(unpublishLeaf.body, /<h1>Unpublished<\/h1>/);
+  assert.match(unpublishLeaf.body, /cached for up to 30 seconds/);
 
   if (page?.goto) {
     await exerciseCatalogueEditor(page, handleRequest);

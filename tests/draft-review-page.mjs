@@ -107,8 +107,13 @@ export async function run() {
   );
   assert.match(
     renderDraftPage({ ...baseDraft, puzzleIdIsLive: true }),
-    /is published, so other/
+    /has been published, so other/
   );
+
+  const withdrawnDetail = renderDraftPage({ ...baseDraft, puzzleIdIsLive: true, d1Withdrawn: true });
+  assert.match(withdrawnDetail, /even after unpublishing/);
+  assert.match(withdrawnDetail, /requires a migration/);
+  assert.doesNotMatch(withdrawnDetail, /Unpublish it/);
 
   // A withdrawn id is still spoken for, so a shadow over one keeps its badge
   // rather than being collapsed into "withdrawn".
@@ -738,6 +743,19 @@ export async function run() {
     assert.doesNotMatch(inactive, /data-change-domain=/);
   }
 
+  const withdrawnCorpus = renderDraftListPage([
+    { id: "withdrawn-copy", draftId: "withdrawn-copy", published: true, withdrawn: true },
+    { id: "withdrawn-only", hasWorkingCopy: false, published: true, withdrawn: true },
+    { id: "live-only", hasWorkingCopy: false, published: true }
+  ]);
+  assert.match(withdrawnCorpus, /data-puzzle-id="withdrawn-copy"[^>]*data-working-copy="1"[^>]*data-published-live="0"/);
+  assert.match(withdrawnCorpus, /data-puzzle-id="withdrawn-only"[^>]*data-has-draft="0"[^>]*data-published-live="0"/);
+  const publishedGroup = withdrawnCorpus.match(/<h2>Published only<\/h2>[\s\S]*?<\/section>/)[0];
+  assert.match(publishedGroup, /live-only/);
+  assert.doesNotMatch(publishedGroup, /withdrawn-only/);
+  assert.match(withdrawnCorpus.split('id="corpus-by-recent"')[1], /withdrawn-only/,
+    "withdrawn rows without a copy remain accessible in Recent under All");
+
   // The four states a row can be in for the Modified / Cued scopes.
   const scopeAttrs = item => {
     const html = renderDraftListPage([{ ...baseDraft, ...item }]);
@@ -751,8 +769,8 @@ export async function run() {
     "new to git is cued and modified");
   assert.equal(scopeAttrs({ hasWorkingCopy: true, published: false, status: "draft" }), "10",
     "a working copy not yet published is modified, not cued");
-  assert.equal(scopeAttrs({ published: true, d1Published: true, withdrawn: true, cuedForFreeze: true }), "00",
-    "withdrawn rows are out of both scopes");
+  assert.equal(scopeAttrs({ published: true, d1Published: true, withdrawn: true, cuedForFreeze: true }), "10",
+    "a withdrawn working copy is unpublished and modified, but not cued");
   assert.doesNotMatch(stacked, /this draft is in this checkout/);
   assert.doesNotMatch(stacked, /badge-ok">authoring play/);
   assert.doesNotMatch(stacked, />Checkout</);

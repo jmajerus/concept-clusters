@@ -128,8 +128,26 @@ export async function run() {
     const live = createResponse();
     assert.equal(await handleRequest(renameRequest(takenId, "some-new-slug"), live), true);
     assert.equal(live.status, 409);
-    assert.match(live.body, /already published/);
+    assert.match(live.body, /has been published/);
+    assert.match(live.body, /even after unpublishing/);
+    assert.match(live.body, /requires a migration/);
     await assert.rejects(() => draftStore.getDraft("some-new-slug"), /not found|Unknown draft|ENOENT/i);
+
+    const withdrawnId = "withdrawn-rename-fixture";
+    const withdrawnDraft = await draftStore.createDraft({
+      draftId: withdrawnId,
+      document: contentService.createPuzzleSkeleton({
+        id: withdrawnId, title: "Previously published", category: contentService.state.puzzles[0].category
+      })
+    });
+    await contentDocuments.publish({ kind: "puzzle", id: withdrawnId,
+      document: withdrawnDraft.document, actor: { subject: "local" } });
+    await contentDocuments.unpublish({ kind: "puzzle", id: withdrawnId, actor: { subject: "local" } });
+    const withdrawnRename = createResponse();
+    await handleRequest(renameRequest(withdrawnId, "withdrawn-new-slug"), withdrawnRename);
+    assert.equal(withdrawnRename.status, 409);
+    assert.match(withdrawnRename.body, /even after unpublishing/);
+    assert.match(withdrawnRename.body, /requires a migration/);
 
     // Renaming a draft onto an id another draft already holds is refused.
     await draftStore.createDraft({

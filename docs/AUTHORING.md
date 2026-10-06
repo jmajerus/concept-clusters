@@ -134,7 +134,10 @@ static snapshot workflow. The GitHub column reports id membership, including
 the last freeze projection; it does not compare document versions or determine
 public availability.
 
-Show **Working copies** selects unpublished puzzles. **Not in GitHub** selects
+Show **Working copies** selects saved copies with no active D1 publication,
+including withdrawn puzzles. **Published only** requires an active publication
+and no working copy; withdrawn puzzles without a copy remain accessible under
+**All**. **Not in GitHub** selects
 ids absent from the GitHub snapshot, including puzzles already published in D1.
 **Modified** selects working copies of unpublished puzzles and published
 snapshots changed since the last Freeze. **Unpublished changes** selects saved

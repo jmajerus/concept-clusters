@@ -12,9 +12,9 @@
 // The guard that makes that safe is "never published": an id that has never
 // been published cannot be the target of another puzzle's relatedPuzzles,
 // because that reference would have failed validation. So a rename here has
-// no inbound references to chase. Once a puzzle is in authoring play or in
-// git, its id is an identity other rows may point at -- remove it from
-// authoring play first, or treat the change as a migration.
+// no inbound references to chase. Once a puzzle has been published in D1 or
+// git, its id is an identity other rows may point at. Changing it requires
+// a migration, even after unpublishing.
 
 import { publishedRowOrNull } from "./contentDocumentRepository.js";
 
@@ -52,7 +52,7 @@ async function draftExists(getDraft, draftId) {
 
 /**
  * True when this id already names a real puzzle -- a published D1 row
- * (including a withdrawn one, whose id is still spoken for until Freeze) or a
+ * (including a withdrawn one, whose id is still spoken for) or a
  * puzzle in the git corpus.
  *
  * The one definition of "this id is taken", shared by every path that can
@@ -144,9 +144,9 @@ export async function renamePuzzleDraftId({
   for (const existing of new Set([draftId, currentId])) {
     if (await puzzleIdIsLive({ contentDocuments, contentService, puzzleId: existing })) {
       throw new DraftRenameError(
-        `${existing} is already published, so its id is an identity other puzzles `
-        + "and catalogues may point at. Remove it from authoring play first, or "
-        + "keep the id.",
+        `${existing} has been published, so its id is an identity other puzzles `
+        + "and catalogues may point at. It cannot be renamed here, even after "
+        + "unpublishing. Changing it requires a migration.",
         409
       );
     }
