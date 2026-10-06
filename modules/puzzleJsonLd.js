@@ -180,7 +180,7 @@ export function puzzleToJsonLd(
     bridges
   };
   for (const key of [
-    "creator", "license", "derivedFrom", "dateCreated", "dateModified",
+    "creator", "license", "derivedFrom",
     "language", "version", "provenance"
   ]) {
     if (categorySource[key] !== undefined) document[key] = clone(categorySource[key]);
@@ -262,7 +262,7 @@ export function puzzleFromJsonLd(document) {
     bridges
   };
   for (const key of [
-    "creator", "license", "derivedFrom", "dateCreated", "dateModified",
+    "creator", "license", "derivedFrom",
     "language", "version", "provenance"
   ]) {
     if (document[key] !== undefined) puzzle[key] = clone(document[key]);

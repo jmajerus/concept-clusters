@@ -283,8 +283,9 @@ export async function run() {
   assert.equal(converted.document.info.citations.length, 1);
   assert.equal(converted.document.learningIntroduction.citations, undefined);
 
-  // Publication dates stay on the simplified puzzle and the generated module.
-  // version and the lesson revision do not.
+  // Publication file stamps, version, and the lesson revision stay off the
+  // simplified puzzle and the generated module. JSON-LD interchange drops
+  // the stamps too.
   const runtimeWithSystemMetadata = {
     ...puzzleFromJsonLd(jsonLd),
     dateCreated: "2026-01-01",
@@ -296,24 +297,25 @@ export async function run() {
     }
   };
   const interchangeWithMetadata = puzzleToJsonLd(runtimeWithSystemMetadata);
-  assert.equal(interchangeWithMetadata.dateCreated, "2026-01-01");
-  assert.equal(interchangeWithMetadata.dateModified, "2026-01-02");
+  assert.equal(interchangeWithMetadata.dateCreated, undefined);
+  assert.equal(interchangeWithMetadata.dateModified, undefined);
   assert.equal(interchangeWithMetadata.version, 7);
   assert.equal(interchangeWithMetadata.learningIntroduction.revision, 4);
   const publishedWithMetadata = puzzleForCanonicalPublication(runtimeWithSystemMetadata);
-  assert.equal(publishedWithMetadata.puzzle.dateCreated, "2026-01-01");
-  assert.equal(publishedWithMetadata.puzzle.dateModified, "2026-01-02");
+  assert.equal(publishedWithMetadata.puzzle.dateCreated, undefined);
+  assert.equal(publishedWithMetadata.puzzle.dateModified, undefined);
   assert.equal(publishedWithMetadata.puzzle.large, undefined);
   assert.equal(publishedWithMetadata.puzzle.version, undefined);
   assert.equal(publishedWithMetadata.puzzle.learningIntroduction.revision, undefined);
-  assert.equal(publishedWithMetadata.simplified.dateCreated, "2026-01-01");
+  assert.equal(publishedWithMetadata.simplified.dateCreated, undefined);
+  assert.equal(publishedWithMetadata.simplified.dateModified, undefined);
   const generatedWithMetadata = generatedPuzzleModule(
     runtimeWithSystemMetadata,
     "content/puzzles/canonicalization-fixture.ccpuzzle.json",
     "puzzles/fixture/canonicalization-fixture.js"
   );
-  assert.equal(generatedWithMetadata.includes('"dateCreated"'), true);
-  assert.equal(generatedWithMetadata.includes('"dateModified"'), true);
+  assert.equal(generatedWithMetadata.includes('"dateCreated"'), false);
+  assert.equal(generatedWithMetadata.includes('"dateModified"'), false);
   assert.equal(generatedWithMetadata.includes('"large"'), false);
   assert.equal(generatedWithMetadata.includes('"revision"'), false);
 

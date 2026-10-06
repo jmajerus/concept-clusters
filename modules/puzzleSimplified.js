@@ -158,9 +158,7 @@ export function puzzleToSimplified(
     ...(source.creator ? { creator: source.creator } : {}),
     ...(source.license ? { license: source.license } : {}),
     ...(source.derivedFrom ? { derivedFrom: source.derivedFrom } : {}),
-    ...(source.language ? { language: source.language } : {}),
-    ...(source.dateCreated ? { dateCreated: source.dateCreated } : {}),
-    ...(source.dateModified ? { dateModified: source.dateModified } : {})
+    ...(source.language ? { language: source.language } : {})
   };
 }
 
@@ -174,9 +172,7 @@ export function puzzleToSimplified(
 export function puzzleForCanonicalPublication(puzzle, options) {
   const next = hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
-      stripSystemAuthoredMetadata(canonicalizeDocumentProvenance(clone(puzzle)), {
-        keepDocumentDates: true
-      })
+      stripSystemAuthoredMetadata(canonicalizeDocumentProvenance(clone(puzzle)))
     )
   );
   const canonical = canonicalizePuzzleCategoryReferences(

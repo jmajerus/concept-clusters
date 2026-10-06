@@ -29,8 +29,8 @@ export function createPublicPuzzleLoader(staticManifest, index) {
     ...[...index.puzzles]
       .filter(entry => !staticById.has(entry.id))
       .sort((left, right) =>
-        String(left.firstPublishedAt || left.dateCreated || "")
-          .localeCompare(String(right.firstPublishedAt || right.dateCreated || ""))
+        String(left.firstPublishedAt || "")
+          .localeCompare(String(right.firstPublishedAt || ""))
         || left.id.localeCompare(right.id))
       .map(entry => entry.id)
   ];
@@ -49,19 +49,15 @@ export function createPublicPuzzleLoader(staticManifest, index) {
       module: useStatic
         ? frozen.module
         : publicPuzzleUrl(id, published.contentFingerprint, published.layoutFingerprint),
-      dateCreated: published.dateCreated,
-      dateModified: published.dateModified,
+      firstPublishedAt: published.firstPublishedAt || null,
+      publishedAt: published.publishedAt || null,
       browse: published.browse || frozen?.browse
     };
   });
   return createPuzzleLoader(entries, {
     loadPuzzle: async entry => {
       if (entry.source !== "static") return loadPublishedPuzzle(entry, { cache: "default" });
-      const puzzle = await staticLoader.loadPuzzleById(entry.id);
-      // Preserve definePuzzle's non-enumerable module origin for lesson assets.
-      if (entry.dateCreated) puzzle.dateCreated = entry.dateCreated;
-      if (entry.dateModified) puzzle.dateModified = entry.dateModified;
-      return puzzle;
+      return staticLoader.loadPuzzleById(entry.id);
     }
   });
 }

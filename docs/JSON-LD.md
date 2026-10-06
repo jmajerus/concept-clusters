@@ -224,17 +224,15 @@ when present:
 creator
 license
 derivedFrom
-dateCreated
-dateModified
 language
 version
 provenance
 ```
 
-`dateCreated` and `dateModified` are system-stamped on the simplified puzzle
-and travel with it through Freeze. Agents do not send them. `version` stays
-off the stored puzzle. An import does not ask an agent to reproduce any of
-these values.
+`dateCreated` and `dateModified` are not puzzle fields. Publication times
+stay on the published row, and import drops the two keys if an older file
+still has them. `version` stays off the stored puzzle. An import does not
+ask an agent to reproduce any of these values.
 
 `provenance` is the optional two-axis authoring record and the current model
 of record for authoring attribution

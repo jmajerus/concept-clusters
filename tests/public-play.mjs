@@ -28,7 +28,13 @@ export async function run() {
   const frozen = PUZZLE_MANIFEST.find(entry => entry.id === document.id);
   const initialLoader = createPublicPuzzleLoader([frozen], initial);
   assert.equal(initialLoader.entries[0].source, "static");
-  assert.equal((await initialLoader.loadPuzzleById(document.id)).id, document.id);
+  assert.ok(initialLoader.entries[0].firstPublishedAt);
+  assert.equal(initialLoader.entries[0].publishedAt, initialLoader.entries[0].firstPublishedAt);
+  assert.equal(initial.puzzles.find(entry => entry.id === document.id).dateCreated, undefined);
+  const loadedInitial = await initialLoader.loadPuzzleById(document.id);
+  assert.equal(loadedInitial.id, document.id);
+  assert.equal(loadedInitial.dateCreated, undefined);
+  assert.equal(loadedInitial.dateModified, undefined);
   assert.equal(initial.categories.Science.slug, "science");
   assert.match(htmlWithPublicPlayMeta("<head></head>"), /cc-public-play-index/);
   const firstPublishedAt = (await repository.getPublished({ kind: "puzzle", id: document.id })).firstPublishedAt;

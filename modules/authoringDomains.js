@@ -99,29 +99,6 @@ export function assertCurrentAuthoredDocument(document, label = "Authored docume
   return assertNoRetiredAuthoringFields(document, label);
 }
 
-/**
- * Remove repository-owned metadata from a simplified authoring document.
- *
- * This is deliberately a compatibility fold rather than a JSON-LD fold:
- * JSON-LD remains allowed to carry its own publication metadata at the
- * explicit interchange boundary.  Old drafts and generated puzzle files can
- * therefore be read once, while newly saved authoring documents cannot make
- * an agent reproduce timestamps or revision tokens.
- */
-export const RECORDING_START_DATE = "2026-10-02";
-
-const DOCUMENT_DATE_FIELDS = new Set(["dateCreated", "dateModified"]);
-const ISO_DAY = /^(\d{4}-\d{2}-\d{2})$/;
-
-export function publicationDay(now) {
-  const match = /^(\d{4}-\d{2}-\d{2})/.exec(typeof now === "string" ? now : "");
-  return match ? match[1] : RECORDING_START_DATE;
-}
-
-function validPublicationDay(value) {
-  return typeof value === "string" && ISO_DAY.test(value) ? value : null;
-}
-
 function stableDocument(value) {
   if (Array.isArray(value)) return value.map(stableDocument);
   if (!value || typeof value !== "object") return value;
@@ -134,15 +111,20 @@ export function sameStoredDocument(left, right) {
   return JSON.stringify(stableDocument(left)) === JSON.stringify(stableDocument(right));
 }
 
-// `dateCreated` and `dateModified` are the two system fields that stay on
-// the puzzle. Everything else in SYSTEM_ROOT_FIELDS is row metadata.
-// `large` is derived at read time and is never stored.
-export function stripSystemAuthoredMetadata(document, { keepDocumentDates = false } = {}) {
+/**
+ * Remove repository-owned metadata from a simplified authoring document.
+ *
+ * Old drafts and generated puzzle files can be read once. A newly saved
+ * document cannot make an agent reproduce revision tokens or file stamps.
+ * `dateCreated` and `dateModified` are those stamps: they live on the
+ * published row (`first_published_at`, `published_at`) and are dropped here.
+ * `large` is derived at read time and is never stored.
+ */
+export function stripSystemAuthoredMetadata(document) {
   if (!isObject(document) || Object.hasOwn(document, "@context")) return document;
   assertNoRetiredAuthoringFields(document);
   let next = document;
   for (const key of SYSTEM_ROOT_FIELDS) {
-    if (keepDocumentDates && DOCUMENT_DATE_FIELDS.has(key)) continue;
     if (!hasOwn(document, key)) continue;
     if (next === document) next = { ...document };
     delete next[key];
@@ -160,84 +142,20 @@ export function stripSystemAuthoredMetadata(document, { keepDocumentDates = fals
   return next;
 }
 
-export function samePuzzlePublicationBody(left, right) {
-  return JSON.stringify(stableDocument(stripSystemAuthoredMetadata(left)))
-    === JSON.stringify(stableDocument(stripSystemAuthoredMetadata(right)));
-}
-
-// Publish stamps the dates. A puzzle stored without them keeps dateCreated
-// at the recording-start day and moves dateModified only when the body
-// changes. An unchanged body leaves both alone. Agent-supplied dates are
-// not an input: callers pass the body with those fields removed. Import
-// does not write the recording-start day; readers apply it when the dates
-// are missing.
-export function stampPublicationDates(document, {
-  previous = null,
-  now,
-  contentUnchanged = false,
-  backfill = false
-} = {}) {
-  const day = publicationDay(now);
-  const previousCreated = validPublicationDay(previous?.dateCreated);
-  const previousModified = validPublicationDay(previous?.dateModified);
-  if (backfill || (previous && !previousCreated)) {
-    return {
-      ...document,
-      dateCreated: RECORDING_START_DATE,
-      dateModified: contentUnchanged || backfill
-        ? RECORDING_START_DATE
-        : day
-    };
-  }
-  if (!previousCreated) {
-    return { ...document, dateCreated: day, dateModified: day };
-  }
-  return {
-    ...document,
-    dateCreated: previousCreated,
-    dateModified: contentUnchanged ? (previousModified || previousCreated) : day
-  };
-}
-
-export function publicationDocument(kind, document, {
-  previous = null,
-  now,
-  backfill = false
-} = {}) {
+export function publicationDocument(kind, document) {
   assertCurrentAuthoredDocument(document, `${kind} document`);
-  if (kind !== "puzzle") {
-    const stripped = stripSystemAuthoredMetadata(document);
-    // Puzzle documents use `domain` for authoring-partition metadata, so the
-    // strip removes it. On a category document the same key is the subject
-    // domain and must survive publication.
-    if (kind === "category" && typeof document.domain === "string" && document.domain) {
-      return { ...stripped, domain: document.domain };
-    }
-    return stripped;
+  const stripped = stripSystemAuthoredMetadata(document);
+  // Puzzle documents use `domain` for authoring-partition metadata, so the
+  // strip removes it. On a category document the same key is the subject
+  // domain and must survive publication.
+  if (kind === "category" && typeof document.domain === "string" && document.domain) {
+    return { ...stripped, domain: document.domain };
   }
-  const body = stripSystemAuthoredMetadata(document);
-  if (backfill) {
-    const kept = stripSystemAuthoredMetadata(document, { keepDocumentDates: true });
-    const dateCreated = validPublicationDay(kept.dateCreated);
-    const dateModified = validPublicationDay(kept.dateModified);
-    if (dateCreated && dateModified) {
-      return { ...body, dateCreated, dateModified };
-    }
-    return body;
-  }
-  return stampPublicationDates(body, {
-    previous,
-    now,
-    contentUnchanged: previous ? samePuzzlePublicationBody(previous, document) : false
-  });
+  return stripped;
 }
 
 export function puzzleDocumentFromStorage(document) {
-  const kept = stripSystemAuthoredMetadata(document, { keepDocumentDates: true });
-  if (validPublicationDay(kept.dateCreated) && validPublicationDay(kept.dateModified)) {
-    return kept;
-  }
-  return stampPublicationDates(stripSystemAuthoredMetadata(document), { backfill: true });
+  return stripSystemAuthoredMetadata(document);
 }
 
 function bridgeIdentity(bridge) {
@@ -900,10 +818,6 @@ export default {
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,
   stripSystemAuthoredMetadata,
-  RECORDING_START_DATE,
-  publicationDay,
-  stampPublicationDates,
-  samePuzzlePublicationBody,
   publicationDocument,
   puzzleDocumentFromStorage
 };

@@ -41,7 +41,7 @@ export function generatedPuzzleModule(
     "modules/puzzleManifest.js"
   );
   if (!manifestImport.startsWith(".")) manifestImport = `./${manifestImport}`;
-  const authoredPuzzle = stripSystemAuthoredMetadata(puzzle, { keepDocumentDates: true });
+  const authoredPuzzle = stripSystemAuthoredMetadata(puzzle);
   const header = `// Generated from ${canonicalRelativePath}.\n` +
     "// Edit the canonical simplified source rather than editing this file directly.\n\n" +
     `import { definePuzzle } from "${manifestImport}";\n\n`;

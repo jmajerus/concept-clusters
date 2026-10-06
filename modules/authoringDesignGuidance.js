@@ -574,8 +574,8 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   Do not include the human-managed legacy field learningIntroduction.credit.
   Do not put byline text in content.text.
   Never add dateCreated, dateModified, version, or
-  learningIntroduction.revision. Publication stamps dateCreated and
-  dateModified; version and the lesson revision stay off the document.
+  learningIntroduction.revision. Publication times stay on the published
+  row; version and the lesson revision stay off the document.
   Do not send large. Lists and play compute it from the node count.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
   they do not have to be authored together. It is normal to add or revise a

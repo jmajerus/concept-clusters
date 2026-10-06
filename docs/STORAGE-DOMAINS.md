@@ -39,7 +39,7 @@ the infrastructure preserves and recombines the other domains.
 | `pedagogy` | Relationships, lenses, learning introductions, related puzzles, and language | Agent | Read/write; content and classification are read-only context |
 | `administration` | Experimental play flags on `board`, such as the free-term strip, bridge pre-connect, and board size factor | Author | Protected. Not an agent write domain |
 | `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
-| `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document, except `dateCreated` and `dateModified`, which publication stamps onto the puzzle |
+| `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document |
 
 The agent-write domains stay three: content, classification, and pedagogy. Administration is a separate human projection because its stimulus is an admin turning an experiment on or off, which is not a contribution event and not a board, shelf, or lesson edit. Provenance records who contributed, and it changes when contribution changes. The shared rule is only mechanical: a content, classification, or pedagogy save must not see or replace `board`.
 
@@ -147,11 +147,55 @@ storage projection for compatibility; they are not moved into the separate
 For puzzle drafts, D1 stores projections for the three authored domains as the
 durable write surface. The complete `document` column is a materialized cache
 refreshed on complete saves and on validate/publish (`materialize`). Focused
-domain saves update only the selected projection and mark the cache stale;
-reads assemble from the domain columns. The materialized document keeps
-publication and player-facing paths independent of the domain model. The
-system domain remains in D1 columns and response metadata rather than being
-duplicated in a `system` document field.
+domain saves replace the selected authored projection, preserve the other
+domains, and mark the cache stale; reads assemble from the domain columns.
+The materialized document keeps publication and player-facing paths
+independent of the domain model. The system domain remains in D1 columns and
+response metadata rather than being duplicated in a `system` document field.
+How that write lands in a row, on the undo stack, and in the publish ledger
+is described in [How a save is stored](#how-a-save-is-stored).
+
+## How a save is stored
+
+A puzzle draft is one row in `puzzle_drafts`. `revision` is an
+optimistic-concurrency counter on that row. A save updates the row and
+increments the counter. The caller must send the `expected_revision` it last
+read; a mismatch fails and leaves the row unchanged.
+
+Each projection is one JSON column: `content_json`, `classification_json`,
+and `pedagogy_json`, plus the protected `provenance_json` and
+`administration_json` columns. A column holds the whole projection. Changing
+one field inside content replaces `content_json`. On a focused save of a
+draft whose domain columns are already split, the other two authored columns
+keep the stored text. `provenance_json` and `administration_json` are written
+again from the assembled document, so a content save cannot drop them. The
+first focused save on a row that still lacks `classification_json`, or that
+still keeps shelf fields inside content or pedagogy, rewrites all three
+authored columns so the split is complete. The materialized `document`
+column is left as it was and `document_stale` is set. A complete save
+rewrites `document` and every domain column and clears the stale flag.
+`materialize` refreshes `document` from the domain columns without
+incrementing `revision`. An assembled document identical to the stored one
+does not bump `revision` and does not record history.
+
+Distinct saves push the previous assembled document onto
+`puzzle_draft_history`. That row is the full document. The stack keeps 40
+snapshots; older ones are deleted. Its `seq` is the undo order. Revert pops
+one snapshot. `revision` is a different counter.
+
+Publish copies the assembled document onto the single `published_documents`
+row for that id and appends the same full document to
+`published_document_revisions`. Catalogue and category working copies stay
+one `document` column on `content_drafts`. They have no domain projections.
+Their publish path uses the same live row plus appended snapshot.
+
+`first_published_at` is when that published row was first written, and it
+stays put. `published_at` is when the row was last published. A draft's
+`created_at` and `updated_at` are the working-copy stamps. Those clocks are
+not copied onto the puzzle. `dateCreated` and `dateModified` are stripped
+when a document is saved or read. The lesson reads the two publication
+columns from the play index. An open without that index, including an
+unpublished draft, shows no publication date.
 
 ## Projections and sub-schemas
 

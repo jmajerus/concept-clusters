@@ -276,7 +276,5 @@ export default definePuzzle(import.meta.url, {
         "model": "Claude Sonnet 5"
       }
     ]
-  },
-  "dateCreated": "2026-10-02",
-  "dateModified": "2026-10-03"
+  }
 });

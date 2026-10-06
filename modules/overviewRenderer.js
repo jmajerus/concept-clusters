@@ -1765,11 +1765,11 @@ export function createOverviewRenderer({
 
   // Admin-only (see index.html's #puzzle-meta comment) -- a raw dump of
   // whichever optional metadata fields this puzzle actually has, not a
-  // fixed report. dateCreated and dateModified are stamped at publication.
+  // fixed report. Publication times stay on the published row.
   // creator, license, derivedFrom, version, and language are still unset.
   // tags is populated on some puzzles.
   const ADMIN_META_FIELDS = [
-    "tags", "dateCreated", "dateModified", "creator", "license",
+    "tags", "creator", "license",
     "derivedFrom", "language", "version"
   ];
 

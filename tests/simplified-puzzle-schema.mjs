@@ -750,8 +750,8 @@ export async function run() {
     assert.equal(SimplifiedPuzzleInputSchema.safeParse(validPuzzle()).success, true);
   }
 
-  // version and lesson-progress revision stay off the document. Publication
-  // dates are kept. A raw document that also carries version still fails the
+  // version, lesson-progress revision, and publication file stamps stay off
+  // the document. A raw document that also carries version still fails the
   // strict schema until the compatibility fold removes it.
   {
     const legacyMetadata = validPuzzle({
@@ -767,14 +767,14 @@ export async function run() {
     assert.equal(SimplifiedPuzzleInputSchema.safeParse(legacyMetadata).success, false);
     const { puzzle, errors } = puzzleFromAuthoredDocument(legacyMetadata);
     assert.deepEqual(errors, []);
-    assert.equal(puzzle.dateCreated, "2026-01-01");
-    assert.equal(puzzle.dateModified, "2026-01-02");
+    assert.equal(puzzle.dateCreated, undefined);
+    assert.equal(puzzle.dateModified, undefined);
     assert.equal(puzzle.version, undefined);
     assert.equal(puzzle.learningIntroduction.revision, undefined);
     const normalized = normalizeAuthoredPuzzleDocument(legacyMetadata);
     assert.deepEqual(normalized.errors, []);
-    assert.equal(normalized.document.dateCreated, "2026-01-01");
-    assert.equal(normalized.document.dateModified, "2026-01-02");
+    assert.equal(normalized.document.dateCreated, undefined);
+    assert.equal(normalized.document.dateModified, undefined);
     assert.equal(normalized.document.version, undefined);
     assert.equal(normalized.document.learningIntroduction.revision, undefined);
   }

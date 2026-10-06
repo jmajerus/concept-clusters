@@ -1,5 +1,4 @@
 import { loadLearningIntroduction } from "./learningIntroduction.js";
-import { RECORDING_START_DATE } from "./authoringDomains.js";
 import { resolveLessonByline } from "./authoringProvenance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
@@ -16,11 +15,10 @@ function safeExternalUrl(raw) {
   }
 }
 
-// Month granularity: the stamp is git's first-add of the puzzle's files,
-// which runs a few days late for the boards that predate the per-file
-// split, and a player has no use for the day anyway.
+// Month granularity. The player has no use for the day, and the value is a
+// row timestamp (`first_published_at` / `published_at`), not a field on the puzzle.
 function monthYear(isoDate) {
-  const match = /^(\d{4})-(\d{2})-\d{2}$/.exec(isoDate || "");
+  const match = /^(\d{4})-(\d{2})-\d{2}/.exec(isoDate || "");
   if (!match) return "";
   const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
   return date.toLocaleDateString("en-US", {
@@ -30,18 +28,14 @@ function monthYear(isoDate) {
   });
 }
 
-function publishedLabel(published) {
-  const label = monthYear(published);
-  return label ? `First published ${label}` : "";
-}
-
-function documentDateLine(puzzle) {
-  const created = monthYear(puzzle?.dateCreated || RECORDING_START_DATE);
-  const modified = monthYear(puzzle?.dateModified || puzzle?.dateCreated || RECORDING_START_DATE);
-  if (created && modified && created !== modified) {
-    return `Created ${created} · Updated ${modified}`;
+function publicationLine(about) {
+  const first = monthYear(about?.firstPublishedAt);
+  const latest = monthYear(about?.publishedAt);
+  if (first && latest && first !== latest) {
+    return `First published ${first} · Updated ${latest}`;
   }
-  return created ? `Created ${created}` : "";
+  const label = first || latest;
+  return label ? `First published ${label}` : "";
 }
 
 function aboutEyebrow(about) {
@@ -323,8 +317,7 @@ class LearningIntroductionElement extends HTMLElement {
     const root = this.shadowRoot;
     if (introduction) this.#renderLesson();
     else this.#renderAbout();
-    const published = documentDateLine(puzzle)
-      || publishedLabel(this.#model.about?.published);
+    const published = publicationLine(this.#model.about);
     const publishedLine = root.getElementById("published");
     publishedLine.textContent = published;
     publishedLine.hidden = !published;

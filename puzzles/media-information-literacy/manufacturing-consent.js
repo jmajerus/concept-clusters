@@ -317,7 +317,5 @@ export default definePuzzle(import.meta.url, {
         "name": "Claude"
       }
     ]
-  },
-  "dateCreated": "2026-10-02",
-  "dateModified": "2026-10-02"
+  }
 });

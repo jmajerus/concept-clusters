@@ -504,7 +504,5 @@ export default definePuzzle(import.meta.url, {
         "name": "Claude Code"
       }
     ]
-  },
-  "dateCreated": "2026-10-02",
-  "dateModified": "2026-10-03"
+  }
 });

@@ -116,13 +116,10 @@ The MCP agent schema does not include `provenance`, `creator`, `license`,
 preserves existing values and stamps recognized MCP clients where possible;
 human editorial workflows maintain attribution and rights information.
 
-Publication stamps `dateCreated` and `dateModified` (`YYYY-MM-DD`) onto the
-puzzle. Agents do not send them. A puzzle with neither date is read as
-`2026-10-02` for both; that default is not written back into an existing
-puzzle. A first publication sets both to that day. A later publication keeps
-`dateCreated` and moves `dateModified` only when the document changes. The
-document does not contain `version`, `large`, or a learning-introduction
-`revision`.
+Publication times stay on the published row: `first_published_at` and
+`published_at`. Agents do not send `dateCreated` or `dateModified`, and a
+save or read strips them if a document still has them. The document does
+not contain `version`, `large`, or a learning-introduction `revision`.
 `large` is computed from the node count when a list or a board needs it.
 Revision tokens, hashes, status, and the other lifecycle fields stay on the
 D1 row.

@@ -189,7 +189,5 @@ export default definePuzzle(import.meta.url, {
         "reasoning": "medium"
       }
     ]
-  },
-  "dateCreated": "2026-10-02",
-  "dateModified": "2026-10-02"
+  }
 });

@@ -138,9 +138,8 @@
 // subject, including how the ideas relate. Authors do not write a short
 // spoiler-free opening, a teaser, or a split. Play previews the text and
 // offers Continue reading; the full text opens after the puzzle is complete.
-// 6.3: same review bar. dateCreated and dateModified are stamped at
-// publication and stay on the puzzle. Agents do not send them. large is
-// computed from the node count and is not a stored field.
+// 6.3: same review bar. Agents do not send dateCreated or dateModified.
+// large is computed from the node count and is not a stored field.
 // 6.4: same review bar. Writing a lesson copies the board links that text
 // relies on into info.citations in the same pass. Those URLs may stay on
 // their nodes. They are not also lesson links.
@@ -166,7 +165,9 @@
 // Leave level unset unless it matches that category's existing ceiling.
 // Add a tag only for a search word the title, category, citations,
 // subcategories, and board terms do not already cover.
+// 6.13: same review bar. dateCreated and dateModified stay off the puzzle.
+// First publication and last publication are row stamps.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 12
+  minor: 13
 });

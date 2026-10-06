@@ -234,9 +234,9 @@ let playerLayoutSaveTimer = null;
 const pageParams = new URLSearchParams(location.search);
 const layoutAuthoringMode = pageParams.get("author") === "layout";
 // Undocumented, admin-only: reveals #puzzle-meta (raw optional puzzle
-// fields -- tags, dateCreated/dateModified once populated, etc.) below
-// the puzzle title, collection stats, and Library `text:` full-content
-// search. Not linked from anywhere in the UI.
+// fields -- tags, creator, license, and the other optional document
+// fields) below the puzzle title, collection stats, and Library `text:`
+// full-content search. Not linked from anywhere in the UI.
 const adminMode = pageParams.has("admin");
 // &admin also on production, which has no /admin/drafts route (that lives
 // only on the authoring server -- see src/worker.js) -- so the "Edit this
@@ -982,8 +982,8 @@ function setMessage(text, tone) {
 
 // Catalogue-card facts for the dialog's About mode and the shared footer:
 // the browse projection's titled category, curated catalogues the puzzle
-// sits in, term count, and the manifest's first-published stamp (absent
-// for D1 overlay plays and runtime-registered fixtures).
+// sits in, term count, and the published row's file stamps when the play
+// index supplied them. A static or draft open has neither stamp.
 function puzzleAboutFacts(puzzle) {
   const browse = PUZZLES.find(entry => entry.id === puzzle.id);
   const entry = puzzleLoader.entries.find(item => item.id === puzzle.id);
@@ -993,7 +993,8 @@ function puzzleAboutFacts(puzzle) {
       .map(catalogue => catalogue.title)
       .filter(Boolean),
     termCount: puzzleNodeCount(puzzle),
-    published: entry?.published || null
+    firstPublishedAt: entry?.firstPublishedAt || null,
+    publishedAt: entry?.publishedAt || null
   };
 }
 

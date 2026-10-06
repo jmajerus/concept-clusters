@@ -287,7 +287,7 @@ function levelLabel(level) {
 // subcategory selection just below -- same badge treatment category/tags
 // already get, at-a-glance and next to where it's actually edited, rather
 // than a static line in renderPuzzleMeta's block of genuinely immutable
-// fields (creator, license, dateCreated, ...) that have no editor on this
+// fields (creator, license, language, ...) that have no editor on this
 // page at all. Shows the subcategory's title, not its raw id, matching the
 // editor's own dropdown labels.
 // Shared by the at-a-glance badges and the diff "was:" line -- "Category:
@@ -1777,8 +1777,6 @@ function renderPuzzleMeta(document) {
     ["creator", document.creator],
     ["license", document.license],
     ["derived from", document.derivedFrom],
-    ["created", document.dateCreated],
-    ["modified", document.dateModified],
     ["language", document.language],
     ["version", document.version]
   ].filter(([, value]) => typeof value === "string" && value.trim());
