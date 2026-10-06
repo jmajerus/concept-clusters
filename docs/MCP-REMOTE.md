@@ -8,35 +8,34 @@ and model APIs, see
 [Connecting AI clients to the hosted MCP server](MCP-CLIENTS.md).
 
 ```text
-Local stdio MCP ── D1 drafts ── optional held publication
-Remote HTTP MCP  ── D1 drafts ── optional held publication
-Human authoring workflow ───────────────────── Cue + LAN Freeze ── GitHub
+Local stdio MCP ── D1 working copies
+Remote HTTP MCP  ── D1 working copies
+Human Publish ── published D1 (what the player reads) ── Cue + Freeze ── git snapshot
 ```
 
 The lifecycle boundary is intentional. Authoring D1 is the sole runtime source
-of truth for MCP reads, play, and working copies. Git Freeze is a snapshot out
-of that store. Git-to-D1 seeding is an explicit bootstrap/import operation;
-MCP never silently falls back to Git or seeds a missing row while answering a
-read. An MCP working copy is created by `create_puzzle_draft`, optionally with
-`seed_from_published`, but that option requires the puzzle already to have a
-published D1 row. Production play still loads Git.
+of truth for MCP reads, play, and working copies. A puzzle publish writes the
+row the public player reads. Git Freeze is a snapshot out of that store, used
+when the static fingerprints still match. Git-to-D1 seeding is an explicit
+bootstrap/import operation; MCP never silently falls back to Git or seeds a
+missing row while answering a read. An MCP working copy is created by
+`create_puzzle_draft`, optionally with `seed_from_published`, but that option
+requires the puzzle already to have a published D1 row.
 
 A draft is one mutable row: an integer `revision` is an optimistic-concurrency
 token for multi-pass saves (`expected_revision` on `save_puzzle_draft`), not a
-ledger of old documents. Real publication history is Git, once a Cue and a
-Freeze carry a puzzle's authoring-play snapshot into a release pull request.
-D1 holds the current working state and the held published authoring-play
-snapshot of something not yet frozen.
+ledger of old documents. D1 holds the working copy and the published row. Cue
+and Freeze copy a published snapshot into git.
 
 An agent may compose an entire simplified puzzle and store it in one
 `create_puzzle_draft` call. Guidance/schema phases are optional aids, not
 server-side gates, and draft create/save have no approval token. A client may
 still require a human confirmation for any state-changing MCP call; that is a
 client policy (for example, Claude Web’s), outside the Worker’s control.
-Publishing to authoring play is opt-in per call (`publish_to_authoring` on
-category, catalogue, and puzzle-draft writes) rather than a server-side gate;
-the human-only boundary is Cue and Freeze, which is what actually reaches
-production.
+`save_puzzle_draft` does not publish a puzzle. A person publishes the working
+copy, and that publish is what players see. `publish_to_authoring` remains on
+category, catalogue, and shelf-reassignment writes, and those publishes are
+live on the player. Cue and Freeze snapshot git.
 
 `document` is the simplified format
 ([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md)) -- the only
@@ -187,14 +186,13 @@ Neither surface exposes checkout installation any more (`preview_import` /
 truth); Admin Freeze is the only thing that writes the checkout.
 
 The MCP endpoint is tool-only: it has no visual editor, buttons, page
-navigation, or Cue/Freeze operation. `save_puzzle_draft` with
-`publish_to_authoring: true` can promote a confirmed valid edit to a held
-published D1 snapshot in the same call (see below), but it does not Cue it.
-Hosted authoring has no git checkout and does not write the base branch;
-this repo does not auto-deploy the player-facing Worker on push. Only LAN
-Freeze writes git and opens the release pull request that eventually
-reaches production; merging that pull request stays a separate human
-action, so Freeze does not update the bundled player by itself.
+navigation, or Cue/Freeze operation. `save_puzzle_draft` writes the working
+copy only. Hosted authoring has no git checkout and does not write the base
+branch; this repo does not auto-deploy the player-facing Worker on push. Only
+LAN Freeze writes git and opens the release pull request; merging that pull
+request stays a separate human action. The player already reads the published
+D1 row, so Freeze updates the git snapshot rather than the first moment a
+puzzle can be played.
 
 `list_categories` and `get_category` read the category editor's D1 working
 copies and published rows, with D1 puzzle rows used only for puzzle counts and
@@ -211,10 +209,11 @@ optional domain, or subcategory definitions), use `create_category` or
 `update_category` as a D1 working copy and publish that category document
 before authoring puzzles that reference it. Set the puzzle document's
 `category` to that category's stable id. `create_category`, `update_category`,
-`create_catalogue`, `update_catalogue`, `update_meta_catalogue`, and
-`save_puzzle_draft` accept `publish_to_authoring: true` to promote their
-valid D1 working copy in the same call. That publishes it held, never cued:
-a human still chooses Cue and Freeze before production.
+`create_catalogue`, `update_catalogue`, and `update_meta_catalogue` accept
+`publish_to_authoring: true` to publish that valid working copy onto the
+player in the same call. `save_puzzle_draft` does not.
+`reassign_puzzle_classifications` accepts the flag and publishes the shelf
+onto the live puzzle, leaving the rest of that published document in place.
 
 `create_catalogue` / `preview_catalogue_creation` and their update
 counterparts `update_catalogue` / `preview_update_catalogue` use published D1
@@ -271,12 +270,8 @@ stale or the draft does not exist, and it does not substitute the current
 revision. Distinct saves push the
 previous working copy onto a
 capped D1 stack (`puzzle_draft_history`). A revert operation pops one save at
-a time. Set `publish_to_authoring: true` on a confirmed final edit to also
-publish the saved document to authoring play in that same call. Only a valid
-document publishes (an invalid one still saves; the response reports why
-nothing was published); either way it remains held, not cued for Freeze.
-`create_puzzle_draft` does not take this flag -- publish only a document
-that has actually been reviewed and saved.
+a time. `save_puzzle_draft` does not publish. A person publishes the working
+copy after review. `create_puzzle_draft` does not publish either.
 
 `delete_puzzle_draft` removes a draft's row outright, for cleaning up an
 abandoned or test draft.
@@ -296,10 +291,10 @@ large instructional assets belong in R2 or the repository, not a draft row.
 
 ## Human publication boundary
 
-MCP tool calls end at draft creation, saving, validation, and optional
-`publish_to_authoring`. The endpoint has no visual review surface, page
-navigation, Cue, or Freeze operation. `publish_to_authoring` promotes a valid
-save to held D1 authoring play; it does not mark the snapshot cued.
+Puzzle MCP calls end at draft creation, saving, and validation. The endpoint
+has no visual review surface, page navigation, or Cue/Freeze operation.
+Category, catalogue, and shelf publishes with `publish_to_authoring` are live
+on the player. A puzzle publish is a human action on the draft page.
 
 The separate HTML authoring workflow, including review controls and list
 navigation, is documented in [AUTHORING.md](AUTHORING.md) and

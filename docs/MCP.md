@@ -52,7 +52,8 @@ For smaller authoring payloads, `get_puzzle_draft` and
 Shelf placement (`category`, `categories`, `subcategories`, `tags`, and
 `level`) is `domain: "classification"`. `reassign_puzzle_classifications`
 writes category membership for many puzzles in one call and keeps existing
-tags and level.
+tags and level. With `publish_to_authoring: true` it publishes that shelf
+onto the live puzzle and leaves the rest of the published document in place.
 Content is the core puzzle write surface. Classification is the shelf.
 Pedagogy is the annotation and learning write surface, plus related puzzles
 and language. Pedagogy includes content and classification
@@ -229,10 +230,9 @@ The following progressive workflow remains useful for agents that need it:
    that were already authored.
 6. Call `validate_puzzle_draft` and correct every reported error against the
    complete accumulated document.
-7. Stop after `validate_puzzle_draft`. MCP has no publication-cue or Freeze
-   operation. If explicitly requested, `save_puzzle_draft` accepts
-   `publish_to_authoring: true` to promote a confirmed valid save to a held
-   D1 authoring snapshot in the same call; it does not Cue that snapshot.
+7. Stop after `validate_puzzle_draft`. `save_puzzle_draft` writes the working
+   copy only. A person publishes that copy, and that publish is what players
+   see. MCP has no Cue or Freeze operation; those snapshot git.
    Set `category` /
    `categories` / `subcategories` on the draft after its category-editor
    document is published to D1. That category publication is the registration
@@ -258,9 +258,9 @@ require a complete valid puzzle.
 |---|---|---|
 | Published content | `list_puzzles`, `search_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `list_catalogues`, `get_catalogue` | Both |
 | Guidance and contract | `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` | Both |
-| Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft` (`publish_to_authoring: true` promotes a valid save to held D1 authoring play; Cue/Freeze remains human-only), `list_puzzle_drafts`, `delete_puzzle_draft` | Both |
+| Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft` (working copy only; a person publishes the puzzle), `list_puzzle_drafts`, `delete_puzzle_draft`, `reassign_puzzle_classifications` (`publish_to_authoring: true` publishes the shelf onto the live puzzle) | Both |
 | Validation | `validate_puzzle_draft` | Both |
-| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (`publish_to_authoring: true` promotes a valid write to held D1 authoring play; Cue/Freeze remains human-only) | Both |
+| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (`publish_to_authoring: true` publishes that document onto the player; Cue/Freeze only snapshot git) | Both |
 
 `search_puzzles` covers the authoring corpus and your working copies
 (one row per id; a draft overlays the active authoring document). Set
@@ -300,11 +300,11 @@ It is not the default, and it is not a sync path into D1.
 
 ## Publication boundary
 
-MCP writes D1 working copies and, when explicitly requested, can promote a
-valid save to a held published D1 snapshot with
-`publish_to_authoring: true`. MCP has no Cue or Freeze operation; those are
-human-controlled lifecycle steps outside the protocol. For the separate HTML
-authoring workflow, see [AUTHORING.md](AUTHORING.md) and
+MCP writes puzzle working copies. A person publishes a puzzle, and that
+publish is what the public player reads. `publish_to_authoring: true` remains
+on category, catalogue, and shelf-reassignment writes, and those publishes
+are live on the player. MCP has no Cue or Freeze operation; those snapshot
+git. For the HTML authoring workflow, see [AUTHORING.md](AUTHORING.md) and
 [CATALOGUES.md](CATALOGUES.md).
 
 ## Removed MCP surfaces

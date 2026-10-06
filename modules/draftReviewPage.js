@@ -18,7 +18,8 @@ import {
   WORKING_COPY_FORM_ID
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
-import { diffPublishedDraft, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
+import { diffPublishedDraft, documentWithLesson, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
+import { revisedLessonLabel, revisedMarkChangesLessonLine, samePlayerFacingProjection } from "./playerFacingRevision.js";
 import { draftBoardQuery, draftPlayQuery, draftReviewQuery, playQuery, reviewQuery } from "./stagingPlayLinks.js";
 import { boardSizeFactorChoices } from "./puzzleBoardSize.js";
 import {
@@ -833,7 +834,7 @@ function renderPuzzlePathBadges(item, { detail = false } = {}) {
 
 function listIntro(variant) {
   return variant === "local"
-    ? `One path: working copy → Publish (authoring play, held) → Cue → Freeze on
+    ? `One path: working copy → Publish (what the player reads) → Cue → Freeze on
        <a href="/admin">Admin</a> (git) → GitHub production. Status is
        where this id sits on that path. GitHub is origin’s
        <code>puzzles/manifest.js</code> joined with the last freeze patch.
@@ -852,7 +853,7 @@ function listIntro(variant) {
        opens the clean preview. Review, in that same column, opens the
        board with puzzle meta, stats, and Edit layout. Catalogues are edited at
        <a href="/admin/catalogues">/admin/catalogues</a>.`
-    : `One path: working copy → Publish (authoring play, held) → Cue → LAN
+    : `One path: working copy → Publish (what the player reads) → Cue → LAN
        Freeze (git) → GitHub production. Status is where this id sits on that
        path. Hosted GitHub is origin only. Show Working copies is the working
        copy badge; Drafts is never in GitHub production; Modified is anything
@@ -1423,15 +1424,37 @@ function lessonDonors(event, candidates) {
   });
 }
 
-function renderLessonChoice(event, candidates) {
+function composedReviewDocument(proposal, donor) {
+  return donor ? documentWithLesson(proposal, donor.proposal) : proposal;
+}
+
+function lessonChoiceMarksRevision(anchor, proposal, donor) {
+  return Boolean(anchor && proposal)
+    && !samePlayerFacingProjection(anchor, composedReviewDocument(proposal, donor));
+}
+
+// Radio values whose composed proposal would change the lesson line. "" is
+// the review's own lesson.
+function revisedMarkChoices(anchor, event, candidates, firstPublishedAt) {
+  const marks = new Set();
+  if (!revisedMarkChangesLessonLine(firstPublishedAt) || !event?.proposal) return marks;
+  if (lessonChoiceMarksRevision(anchor, event.proposal, null)) marks.add("");
+  for (const donor of lessonDonors(event, candidates)) {
+    if (lessonChoiceMarksRevision(anchor, event.proposal, donor)) marks.add(String(donor.id));
+  }
+  return marks;
+}
+
+function renderLessonChoice(event, candidates, marks = new Set()) {
   const donors = lessonDonors(event, candidates);
   if (!donors.length) return "";
   const keepLabel = lessonContentText(event.proposal) ? "Keep this review's lesson" : "No lesson";
+  const markAttr = value => marks.has(value) ? " data-revised-mark" : "";
   const options = donors.map(other =>
-    `<label><input type="radio" name="lesson_from" value="${escapeHtml(String(other.id))}"> Use ${escapeHtml(reviewCandidateLabel(other))}'s lesson</label>`
+    `<label><input type="radio" name="lesson_from" value="${escapeHtml(String(other.id))}"${markAttr(String(other.id))}> Use ${escapeHtml(reviewCandidateLabel(other))}'s lesson</label>`
   ).join("");
   return `<fieldset class="lesson-choice"><legend>Lesson</legend>
-      <label><input type="radio" name="lesson_from" value="" checked> ${keepLabel}</label>
+      <label><input type="radio" name="lesson_from" value="" checked${markAttr("")}> ${keepLabel}</label>
       ${options}
     </fieldset>`;
 }
@@ -1467,6 +1490,12 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
       ? `<p class="meta">Also includes ${included.map(other => escapeHtml(reviewCandidateLabel(other))).join(" and ")}'s changes.</p>`
       : "";
     const proposalId = escapeHtml(String(event.id));
+    const marks = revisedMarkChoices(
+      draft.reviewAnchorDocument,
+      event,
+      candidates,
+      draft.firstPublishedAt
+    );
     return `<article class="review-candidate">
       <h3>${escapeHtml(reviewCandidateLabel(event))}</h3>
       ${event.comments ? `<p class="review-note">${escapeHtml(event.comments)}</p>` : ""}
@@ -1476,7 +1505,8 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
       <form method="post" action="${action}">
         <input type="hidden" name="proposal_id" value="${proposalId}">
         <input type="hidden" name="expected_revision" value="${expected}">
-        ${renderLessonChoice(event, candidates)}
+        ${renderLessonChoice(event, candidates, marks)}
+        ${renderRevisedCheckbox(marks.size > 0, { hidden: !marks.has("") })}
         <div class="actions">
           <button type="submit" name="confirm" value="preview-review">Play</button>
           <button type="submit" name="confirm" value="publish-review">Publish this review</button>
@@ -1489,6 +1519,26 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
     <p class="meta">These proposals are alternatives to the published puzzle. A later review files only its own changes. Pass stack_on to put it on top of the preceding review. When another review wrote a lesson, you can use that lesson with the review you play or publish. Play loads one into the working copy. Publish this review publishes that stored proposal and rejects the others. Keep published rejects every proposal.</p>
     ${boardButton ? `<div class="actions">${boardButton}</div>` : ""}
     ${cards}
+    <script>
+    (() => {
+      for (const form of document.querySelectorAll("form")) {
+        const mark = form.querySelector(".revised-mark");
+        const radios = [...form.querySelectorAll('input[name="lesson_from"]')];
+        if (!mark || !radios.length) continue;
+        const sync = () => {
+          const selected = radios.find(radio => radio.checked);
+          const offered = Boolean(selected && selected.hasAttribute("data-revised-mark"));
+          mark.hidden = !offered;
+          if (!offered) {
+            const box = mark.querySelector("input");
+            if (box) box.checked = false;
+          }
+        };
+        for (const radio of radios) radio.addEventListener("change", sync);
+        sync();
+      }
+    })();
+    </script>
     <form method="post" action="${action}">
       <input type="hidden" name="confirm" value="keep-published">
       <input type="hidden" name="expected_revision" value="${expected}">
@@ -1497,6 +1547,12 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
       </div>
     </form>
   </section>`;
+}
+
+function renderRevisedCheckbox(show, { hidden = false } = {}) {
+  if (!show) return "";
+  const hiddenAttr = hidden ? " hidden" : "";
+  return `<p class="meta revised-mark"${hiddenAttr}><label><input type="checkbox" name="show_as_revised" value="1"> Show “${escapeHtml(revisedLessonLabel())}” on the lesson</label></p>`;
 }
 
 function renderSubmitForm(draft, variant = "hosted") {
@@ -1575,6 +1631,8 @@ function renderSubmitForm(draft, variant = "hosted") {
     <div class="actions">
       ${playButton}
       <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+        ${renderRevisedCheckbox(canPublish && draft.playerTextDiffersFromPublished
+          && revisedMarkChangesLessonLine(draft.firstPublishedAt))}
         <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>
         <button type="submit" name="confirm" value="publish-and-cue" class="secondary"${disabled}
           title="Publish and cue for the next freeze in one step, for minor edits that don't need a separate review before cueing.">Publish &amp; Cue</button>

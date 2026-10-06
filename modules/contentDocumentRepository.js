@@ -15,6 +15,7 @@ import {
   parseLayoutDocument,
   serializeLayoutDocument
 } from "./layoutDocument.js";
+import { contentRevisedStamp } from "./playerFacingRevision.js";
 
 export const CONTENT_DRAFT_KINDS = Object.freeze(["catalogue", "category"]);
 export const PUBLISHED_DOCUMENT_KINDS = Object.freeze([
@@ -88,6 +89,7 @@ function publishedRecord(row) {
     publishedBy: row.published_by,
     publishedAt: row.published_at,
     firstPublishedAt: row.first_published_at || row.published_at,
+    contentRevisedAt: row.content_revised_at || null,
     updatedAt: row.updated_at,
     lastAgentReviewedAt: row.last_agent_reviewed_at || null,
     lastHumanReviewedAt: row.last_human_reviewed_at || null,
@@ -425,11 +427,29 @@ function isPublishedPrimaryKeyError(error) {
   return message.includes("UNIQUE constraint failed: published_document");
 }
 
+function rethrowMissingContentRevisedColumn(error) {
+  const message = String(error?.message || error);
+  if (/no such column:?\s*content_revised_at\b/i.test(message)
+    || /has no column named\s+content_revised_at\b/i.test(message)) {
+    throw new Error(
+      "published_documents.content_revised_at is missing. Apply d1/migrations/0031_content_revised_at.sql before publishing."
+    );
+  }
+}
+
 function samePublishedSnapshot(record, { kind, contentHash, layoutJson }) {
   if (!record || record.withdrawnAt || record.contentHash !== contentHash) return false;
   if (kind !== "puzzle") return true;
   const currentLayout = record.layout ? serializeLayoutDocument(record.layout) : null;
   return currentLayout === (layoutJson || null);
+}
+
+// An identical colliding publish can still drop a checked revision mark.
+// Adopting it is safe only when this publish did not need a new stamp, or
+// the stamp that won is newer than the one this publish read.
+function revisedMarkLanded(record, { marked = false, previousStamp = null } = {}) {
+  if (!marked) return true;
+  return (record?.contentRevisedAt || null) !== (previousStamp || null);
 }
 
 export async function publishedRowOrNull(contentDocuments, kind, id) {
@@ -801,7 +821,8 @@ export class D1ContentDocumentRepository {
    * }} options
    */
   async publish({
-    kind, id, document, actor, layout = undefined, expectedRevision = null, reviewDecisions = null
+    kind, id, document, actor, layout = undefined, expectedRevision = null,
+    reviewDecisions = null, markRevised = false
   }) {
     assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
     assertDraftId(id);
@@ -816,6 +837,17 @@ export class D1ContentDocumentRepository {
     const sourceDocument = documentForPublishedStorage(kind, document);
     const documentJson = serializeDraftDocument({ ...sourceDocument, id });
     const contentHash = draftContentHash(documentJson);
+    const previousDocument = existing?.document
+      ? parsedJson(existing.document, "Published document")
+      : null;
+    const revised = contentRevisedStamp({
+      kind,
+      previousDocument,
+      nextDocument: sourceDocument,
+      markRevised,
+      now,
+      previousStamp: existing?.content_revised_at || null
+    });
     if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
       throw new PublishedRevisionConflictError(kind, id);
     }
@@ -824,27 +856,36 @@ export class D1ContentDocumentRepository {
         ? existing?.layout_json || null
         : serializeLayoutDocument(layout)
       : null;
-    const snapshot = { kind, id, contentHash, layoutJson };
+    const snapshot = {
+      kind,
+      id,
+      contentHash,
+      layoutJson,
+      marked: revised.marked,
+      previousStamp: existing?.content_revised_at || null
+    };
     if (!existing) {
       try {
         await this.database.batch([
           this.database.prepare(`
-            INSERT INTO published_documents (
-              kind, id, title, document, content_hash, revision,
-              published_by, published_at, first_published_at, updated_at, last_agent_reviewed_at,
-              layout_json
-            ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
-          `).bind(
-            kind, id, titleOf(sourceDocument), documentJson, contentHash,
-            publishedBy, now, now, now, now, layoutJson
-          ),
-          this.database.prepare(`
-            INSERT INTO published_document_revisions (
-              kind, id, revision, document, content_hash, published_by, published_at
-            ) VALUES (?, ?, 1, ?, ?, ?, ?)
-          `).bind(kind, id, documentJson, contentHash, publishedBy, now)
+          INSERT INTO published_documents (
+            kind, id, title, document, content_hash, revision,
+            published_by, published_at, first_published_at, updated_at, last_agent_reviewed_at,
+            layout_json, content_revised_at
+          ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          kind, id, titleOf(sourceDocument), documentJson, contentHash,
+          publishedBy, now, now, now, now, layoutJson, null
+        ),
+        this.database.prepare(`
+          INSERT INTO published_document_revisions (
+            kind, id, revision, document, content_hash, published_by, published_at,
+            content_revised_at
+          ) VALUES (?, ?, 1, ?, ?, ?, ?, ?)
+        `).bind(kind, id, documentJson, contentHash, publishedBy, now, null)
         ]);
       } catch (error) {
+        rethrowMissingContentRevisedColumn(error);
         if (!isPublishedPrimaryKeyError(error)) throw error;
         return this.adoptUnchangedPublication(snapshot);
       }
@@ -861,20 +902,27 @@ export class D1ContentDocumentRepository {
           UPDATE published_documents
           SET title = ?, document = ?, content_hash = ?, revision = ?,
               published_by = ?, published_at = ?, updated_at = ?, withdrawn_at = NULL,
-              cued_for_freeze_at = NULL, cued_for_freeze_by = ?, layout_json = ?
+              cued_for_freeze_at = NULL, cued_for_freeze_by = ?, layout_json = ?,
+              content_revised_at = ?
           WHERE kind = ? AND id = ? AND revision = ?
         `).bind(
           titleOf(sourceDocument), documentJson, contentHash, nextRevision,
-          publishedBy, now, now, null, layoutJson, kind, id, Number(existing.revision)
+          publishedBy, now, now, null, layoutJson, revised.live,
+          kind, id, Number(existing.revision)
         ),
         this.database.prepare(`
           INSERT INTO published_document_revisions (
-            kind, id, revision, document, content_hash, published_by, published_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).bind(kind, id, nextRevision, documentJson, contentHash, publishedBy, now),
+            kind, id, revision, document, content_hash, published_by, published_at,
+            content_revised_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          kind, id, nextRevision, documentJson, contentHash, publishedBy, now,
+          revised.marked ? now : null
+        ),
         ...decisionInserts
       ]);
     } catch (error) {
+      rethrowMissingContentRevisedColumn(error);
       if (!isPublishedPrimaryKeyError(error)) throw error;
       const current = await this.adoptUnchangedPublication(snapshot);
       if (decisionInputs.length) {
@@ -887,9 +935,12 @@ export class D1ContentDocumentRepository {
     return this.getPublished({ kind, id });
   }
 
-  async adoptUnchangedPublication({ kind, id, contentHash, layoutJson }) {
+  async adoptUnchangedPublication({ kind, id, contentHash, layoutJson, marked = false, previousStamp = null }) {
     const current = await this.getPublished({ kind, id });
-    if (samePublishedSnapshot(current, { kind, contentHash, layoutJson })) return current;
+    if (samePublishedSnapshot(current, { kind, contentHash, layoutJson })
+      && revisedMarkLanded(current, { marked, previousStamp })) {
+      return current;
+    }
     throw new PublishedRevisionConflictError(kind, id);
   }
 
@@ -1127,7 +1178,8 @@ export function createMemoryContentDocumentRepository() {
       }
     },
     async publish({
-      kind, id, document, actor, layout = undefined, expectedRevision = null, reviewDecisions = null
+      kind, id, document, actor, layout = undefined, expectedRevision = null,
+      reviewDecisions = null, markRevised = false
     }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(id);
@@ -1140,6 +1192,17 @@ export function createMemoryContentDocumentRepository() {
       const existing = published.get(key);
       const sourceDocument = documentForPublishedStorage(kind, document);
       const documentJson = serializeDraftDocument({ ...sourceDocument, id });
+      const previousDocument = existing?.document
+        ? parsedJson(existing.document, "Published document")
+        : null;
+      const revised = contentRevisedStamp({
+        kind,
+        previousDocument,
+        nextDocument: sourceDocument,
+        markRevised,
+        now,
+        previousStamp: existing?.content_revised_at || null
+      });
       if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
         throw new PublishedRevisionConflictError(kind, id);
       }
@@ -1154,7 +1217,11 @@ export function createMemoryContentDocumentRepository() {
       if (revisions.has(revisionKey)) {
         const current = published.get(key);
         const record = current ? publishedRecord(current) : null;
-        if (samePublishedSnapshot(record, { kind, contentHash, layoutJson })) {
+        if (samePublishedSnapshot(record, { kind, contentHash, layoutJson })
+          && revisedMarkLanded(record, {
+            marked: revised.marked,
+            previousStamp: existing?.content_revised_at || null
+          })) {
           for (const event of reviewDecisionInputs(reviewDecisions, Number(current.revision))) {
             reviewEvents.push(storedReviewEventRow(reviewEvents.length + 1, id, now, event));
           }
@@ -1178,11 +1245,15 @@ export function createMemoryContentDocumentRepository() {
         withdrawn_at: null,
         layout_json: layoutJson,
         cued_for_freeze_at: null,
-        cued_for_freeze_by: null
+        cued_for_freeze_by: null,
+        content_revised_at: revised.live
       };
       const decisionInputs = reviewDecisionInputs(reviewDecisions, nextRevision);
       published.set(key, row);
-      revisions.set(revisionKey, row);
+      revisions.set(revisionKey, {
+        ...row,
+        content_revised_at: revised.marked ? now : null
+      });
       for (const event of decisionInputs) {
         reviewEvents.push(storedReviewEventRow(reviewEvents.length + 1, id, now, event));
       }

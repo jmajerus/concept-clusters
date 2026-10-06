@@ -69,7 +69,8 @@ export function parseSubmitForm(params) {
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
     isSaveWorkingCopy: confirm === SAVE_WORKING_COPY_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,
-    isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM
+    isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM,
+    markRevised: params.get("show_as_revised") === "1"
   };
 }
 

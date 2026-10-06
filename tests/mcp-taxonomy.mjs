@@ -16,6 +16,8 @@ import {
 } from "../modules/categoryDiscovery.js";
 import { validateCategoryDocument } from "../modules/categoryValidation.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
+import { redactMcpExcludedDocumentFields } from "../modules/authoredPuzzleDocument.js";
+import { applyAuthoredDomain } from "../modules/authoringDomains.js";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
 import {
   expectedStarLayoutNodeKeys,
@@ -36,10 +38,9 @@ function stubDraftRepository() {
   };
 }
 
-// Minimal in-memory draft repository, just for exercising
-// save_puzzle_draft's publish_to_authoring flag below -- the file's other
-// server uses stubDraftRepository (list/get only; no puzzle draft tool is
-// called against it).
+// Minimal in-memory draft repository for the puzzle-draft tools below.
+// The file's other server uses stubDraftRepository (list/get only; no puzzle
+// draft tool is called against it).
 function inMemoryDraftRepository(seed) {
   const drafts = new Map(Object.entries(seed));
   return {
@@ -57,6 +58,25 @@ function inMemoryDraftRepository(seed) {
           `Draft revision conflict: expected ${expectedRevision}, current revision is ${row.revision}`
         );
       }
+      const next = {
+        ...row,
+        document,
+        revision: row.revision + 1,
+        puzzleId: typeof document?.id === "string" ? document.id : row.puzzleId
+      };
+      drafts.set(draftId, next);
+      return { ...next };
+    },
+    async saveDomain({ draftId, expectedRevision, domain, projection, provenance }) {
+      const row = drafts.get(draftId);
+      if (!row) throw new Error(`Unknown draft: ${draftId}`);
+      if (row.revision !== expectedRevision) {
+        throw new Error(
+          `Draft revision conflict: expected ${expectedRevision}, current revision is ${row.revision}`
+        );
+      }
+      let document = applyAuthoredDomain(row.document, domain, projection);
+      if (provenance !== undefined) document = { ...document, provenance };
       const next = {
         ...row,
         document,
@@ -123,6 +143,10 @@ async function connect(server) {
     request,
     call: async (name, args = {}) => {
       const response = await request("tools/call", { name, arguments: args });
+      if (response.result?.isError && !response.result.structuredContent) {
+        const text = (response.result.content || []).map(item => item.text).join("\n");
+        return { error: text || "tool error" };
+      }
       return response.result.structuredContent;
     },
     close: () => clientTransport.close()
@@ -437,9 +461,8 @@ export async function run() {
     await noD1Server.close();
   }
 
-  // save_puzzle_draft's publish_to_authoring flag promotes a confirmed final
-  // edit to the same held D1 authoring snapshot as the human workflow.
-  // Superseded submit_puzzle_for_publication and preview_repository_import.
+  // save_puzzle_draft does not publish a puzzle. A shelf reassignment can
+  // publish classification onto a live puzzle without releasing other draft text.
   const publishFixtureId = "mcp-taxonomy-publish-fixture";
   const publishFixtureDocument = {
     ...puzzleToSimplified(gitPuzzle),
@@ -463,63 +486,59 @@ export async function run() {
   });
   const { call: publishCall, close: closePublish } = await connect(publishServer);
   try {
-    const saved = await publishCall("save_puzzle_draft", {
+    const refused = await publishCall("save_puzzle_draft", {
       draft_id: publishFixtureId,
       expected_revision: 1,
       document: publishFixtureDocument,
       publish_to_authoring: true
     });
+    assert.match(refused.error, /cannot publish a puzzle/);
+    await assert.rejects(
+      () => contentDocuments.getPublished({ kind: "puzzle", id: publishFixtureId }),
+      /Unknown puzzle/
+    );
+
+    await contentDocuments.publish({
+      kind: "puzzle",
+      id: publishFixtureId,
+      document: publishFixtureDocument,
+      actor,
+      layout: publishFixtureLayout
+    });
+    const unreviewedLesson = "Unreviewed lesson that must stay on the working copy.";
+    const saved = await publishCall("save_puzzle_draft", {
+      draft_id: publishFixtureId,
+      expected_revision: 1,
+      document: {
+        ...redactMcpExcludedDocumentFields(publishFixtureDocument),
+        learningIntroduction: {
+          requirement: "optional",
+          content: { text: unreviewedLesson }
+        }
+      }
+    });
+    assert.ok(saved.draft, JSON.stringify(saved));
     assert.equal(saved.draft.revision, 2);
-    assert.equal(saved.published.id, publishFixtureId);
-    assert.equal(saved.published.cuedForFreezeAt, null);
-    assert.equal(saved.publicationErrors, null);
-    assert.deepEqual(
-      (await contentDocuments.getPublished({ kind: "puzzle", id: publishFixtureId })).layout,
-      publishFixtureLayout
+    assert.equal(saved.published, undefined);
+
+    const reassigned = await publishCall("reassign_puzzle_classifications", {
+      publish_to_authoring: true,
+      assignments: [{
+        puzzle_id: publishFixtureId,
+        category: publishFixtureDocument.category
+      }]
+    });
+    assert.equal(reassigned.results[0].ok, true);
+    assert.equal(reassigned.results[0].published, true);
+    const live = await contentDocuments.getPublished({ kind: "puzzle", id: publishFixtureId });
+    assert.doesNotMatch(JSON.stringify(live.document), /Unreviewed lesson/);
+    assert.equal(live.contentRevisedAt, null);
+    assert.deepEqual(live.layout, publishFixtureLayout);
+    const draftAfter = await publishCall("get_puzzle_draft", { draft_id: publishFixtureId });
+    assert.match(
+      draftAfter.draft.document.learningIntroduction.content.text,
+      /Unreviewed lesson/
     );
-
-    // A document edit still saves (drafts stay permissive) but does not
-    // publish when its previously confirmed layout is stale.
-    const changedFixtureDocument = {
-      ...publishFixtureDocument,
-      clusters: publishFixtureDocument.clusters.map((cluster, index) =>
-        index === 0 ? { ...cluster, name: `${cluster.name} revised` } : cluster
-      )
-    };
-    const invalidLayoutSaved = await publishCall("save_puzzle_draft", {
-      draft_id: publishFixtureId,
-      expected_revision: 2,
-      document: changedFixtureDocument,
-      publish_to_authoring: true
-    });
-    assert.equal(invalidLayoutSaved.draft.revision, 3);
-    assert.equal(invalidLayoutSaved.published, null);
-    assert.ok(invalidLayoutSaved.publicationErrors.some(error => /reconfirmed/i.test(error)));
-    assert.equal(
-      (await contentDocuments.getPublished({ kind: "puzzle", id: publishFixtureId })).revision,
-      1
-    );
-
-    // An invalid document still saves but does not publish either.
-    const invalidDocumentSaved = await publishCall("save_puzzle_draft", {
-      draft_id: publishFixtureId,
-      expected_revision: 3,
-      document: { ...changedFixtureDocument, clusters: [] },
-      publish_to_authoring: true
-    });
-    assert.equal(invalidDocumentSaved.draft.revision, 4);
-    assert.equal(invalidDocumentSaved.published, null);
-    assert.ok(invalidDocumentSaved.publicationErrors.length > 0);
-
-    // Without the flag, a save never touches authoring play.
-    const plainSaved = await publishCall("save_puzzle_draft", {
-      draft_id: publishFixtureId,
-      expected_revision: 4,
-      document: publishFixtureDocument
-    });
-    assert.equal(plainSaved.draft.revision, 5);
-    assert.equal(plainSaved.published, undefined);
-    assert.equal(plainSaved.publicationErrors, undefined);
   } finally {
     await closePublish();
   }

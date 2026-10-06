@@ -99,6 +99,7 @@ import {
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { checkDocumentLinks, wikiLinkFlags } from "./wikiLinkCheck.js";
 import { draftShadowsPublished, provenanceDiffersFromPublished } from "./draftReviewDiff.js";
+import { samePlayerFacingProjection } from "./playerFacingRevision.js";
 import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
@@ -256,6 +257,8 @@ export async function mapDraftDetail(record, {
       puzzleId
     }),
     publishedDiff,
+    playerTextDiffersFromPublished: Boolean(baseline)
+      && !samePlayerFacingProjection(baseline, document),
     shadowsPublished: draftShadowsPublished({ published: baseline, publishedDiff }),
     provenanceDiffersFromPublished: provenanceDiffersFromPublished(baseline, document),
     layoutDiffersFromPublished,
@@ -1183,7 +1186,8 @@ export function createLocalDraftReviewHandler({
             id: puzzleId,
             document: documentForStorage(authoredDocument, { categoryRegistry }),
             actor: publicationActor,
-            layout: publishLayout
+            layout: publishLayout,
+            markRevised: form.markRevised === true
           });
           if (reviewSessionOpen(record)) {
             await recordReviewDecision(contentDocuments, {
@@ -1543,6 +1547,7 @@ export function createLocalDraftReviewHandler({
             document: documentForStorage(authoredDocument, { categoryRegistry }),
             actor: publicationActor,
             layout: publishLayout,
+            markRevised: form.markRevised === true,
             expectedRevision: publishedBefore.revision,
             reviewDecisions: [
               {
@@ -1906,6 +1911,9 @@ export function createLocalDraftReviewHandler({
         currentPublishedRevision,
         reviewCandidates,
         reviewAnchorDocument,
+        firstPublishedAt: publishedRow && !publishedRow.withdrawnAt
+          ? publishedRow.firstPublishedAt || null
+          : null,
         ...publishedFlags,
         lastAgentReviewedAt: publishedRow?.lastAgentReviewedAt || null,
         lastHumanReviewedAt: publishedRow?.lastHumanReviewedAt || null,

@@ -3,6 +3,7 @@ import { resolveLessonByline } from "./authoringProvenance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
 import { authoredLearningLinks, formatCitation, linkLabel, resolveLink } from "./termInfo.js";
+import { lessonPublicationLine } from "./playerFacingRevision.js";
 
 const TAG_NAME = "cc-learning-introduction";
 
@@ -15,27 +16,8 @@ function safeExternalUrl(raw) {
   }
 }
 
-// Month granularity. The player has no use for the day, and the value is a
-// row timestamp (`first_published_at` / `published_at`), not a field on the puzzle.
-function monthYear(isoDate) {
-  const match = /^(\d{4})-(\d{2})-\d{2}/.exec(isoDate || "");
-  if (!match) return "";
-  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC"
-  });
-}
-
 function publicationLine(about) {
-  const first = monthYear(about?.firstPublishedAt);
-  const latest = monthYear(about?.publishedAt);
-  if (first && latest && first !== latest) {
-    return `First published ${first} · Updated ${latest}`;
-  }
-  const label = first || latest;
-  return label ? `First published ${label}` : "";
+  return lessonPublicationLine(about);
 }
 
 function aboutEyebrow(about) {

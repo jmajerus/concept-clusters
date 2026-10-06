@@ -68,6 +68,7 @@ import * as catalogueReviewPage from "./catalogue-review-page.mjs";
 import * as authoringAdminIndex from "./authoring-admin-index.mjs";
 import * as localCatalogueReview from "./local-catalogue-review.mjs";
 import * as contentDocuments from "./content-documents.mjs";
+import * as playerFacingRevision from "./player-facing-revision.mjs";
 import * as contentDocumentCitations from "./content-document-citations.mjs";
 import * as categoryRenamePreviousTitles from "./category-rename-previous-titles.mjs";
 import * as categoryRenamePropagation from "./category-rename-propagation.mjs";
@@ -141,7 +142,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, catalogueNavigation, metaCatalogues,
   learningIntroductionEngine, learningIntroduction, learningLessonSection,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename, localCatalogueReview, contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringAssistanceLog, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus, boardAdministration, publicPlay, publicPlayBrowser,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename, localCatalogueReview, contentDocuments, playerFacingRevision, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest,   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringAssistanceLog, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus, boardAdministration, publicPlay, publicPlayBrowser,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
@@ -159,7 +160,7 @@ const quickTests = [
   mcpAuthoringDomains, lensEngine, learningIntroductionEngine, simplifiedPuzzleSchema,
   puzzleSymmetryFlags, nodeCaseAudit, learningLevel, domainCatalogues, contentServices, authoringBoard, authorEngine,
   catalogueAuthorEngine, catalogueReviewPage, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename,
-  contentDocuments, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply,
+  contentDocuments, playerFacingRevision, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply,
   freezePublication, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy,
   mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness,
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
@@ -199,6 +200,7 @@ const sideTests = {
     authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage,
     authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit,
     localDraftReview, draftIdRename, localCatalogueReview, contentDocuments,
+    playerFacingRevision,
     contentDocumentCitations, categoryRenamePreviousTitles,
     categoryRenamePropagation, contentFreezePlan, contentFreezeApply,
     freezePublication, githubProductionManifest, mcpAuthoring,

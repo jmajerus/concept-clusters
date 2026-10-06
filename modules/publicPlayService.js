@@ -63,6 +63,7 @@ export async function buildPublicPlayIndex(repository, { staticManifest = [] } =
       id: row.id,
       firstPublishedAt: row.firstPublishedAt || row.publishedAt || null,
       publishedAt: row.publishedAt || null,
+      contentRevisedAt: row.contentRevisedAt || null,
       contentFingerprint,
       layoutFingerprint,
       ...(JSON.stringify(sortedJson(browse)) === JSON.stringify(sortedJson(staticBrowse)) ? {} : { browse })
