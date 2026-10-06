@@ -679,9 +679,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
     blocking.push({ id: "no-clusters", message: "Document has no clusters." });
   }
   if (checkBoardStructure) {
+    // Grants are protected and absent from working JSON, so a missing waiver
+    // is advisory here; stored-draft validation, which sees grants, enforces it.
     for (const message of boardLimitWaiverErrors(document)) {
       const id = message.match(/^\[([^\]]+)\]/)?.[1] || "board-limit-waiver";
-      blocking.push({ id, message });
+      (id === "board-limit-waiver-required" ? advisory : blocking).push({ id, message });
     }
   }
 

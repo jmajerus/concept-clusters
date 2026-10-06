@@ -53,7 +53,14 @@ INSERT INTO puzzle_board_limit_waiver_requests (
   requested_by, requested_at, requested_revision, decided_by, decided_at, decision_note
 )
 SELECT
-  id, draft_id, puzzle_id, 'cluster-term-count', cluster_id, json_array_length(terms_json), reason, status,
+  id, draft_id, puzzle_id, 'cluster-term-count', cluster_id, json_array_length(terms_json),
+  reason,
+  -- 0032 kept one pending request per term list; two lists of the same
+  -- length collapse to one size here, so only the newest stays pending.
+  CASE WHEN status = 'pending' AND ROW_NUMBER() OVER (
+    PARTITION BY draft_id, cluster_id, json_array_length(terms_json), status
+    ORDER BY requested_at DESC, id DESC
+  ) > 1 THEN 'superseded' ELSE status END,
   requested_by, requested_at, requested_revision, decided_by, decided_at, decision_note
 FROM puzzle_cluster_term_exception_requests;
 

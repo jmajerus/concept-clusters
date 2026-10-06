@@ -179,7 +179,7 @@ export class D1DraftRepository extends DraftRepository {
     actor,
     expectedRevision,
     requestId = null,
-    auditStatements = []
+    audit = () => []
   }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor);
@@ -234,7 +234,12 @@ export class D1DraftRepository extends DraftRepository {
               content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
           WHERE id = ? AND owner_subject = ? AND revision = ?${requestGuard}
         `).bind(...bindings),
-        ...auditStatements
+        // Audit rows are written only if this exact document landed: a
+        // concurrent save can reach the same revision number, not this hash.
+        ...audit({
+          sql: "EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ? AND content_hash = ?)",
+          bindings: [draftId, expectedRevision + 1, contentHash]
+        })
       ]);
     } catch (error) {
       rethrowMissingDomainColumn(error);
@@ -338,36 +343,33 @@ export class D1DraftRepository extends DraftRepository {
       const document = grantBoardLimitWaiver(
         draft.document, request.waiverType, request.targetId, request.reason, reviewer, now
       );
-      const nextRevision = expectedRevision + 1;
-      const auditStatements = [
+      const audit = landed => [
         this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
           SET status = 'replaced', decided_by = ?, decided_at = ?, decision_note = ?
           WHERE draft_id = ? AND waiver_type = ? AND target_id = ? AND status = 'granted' AND id != ?
-            AND EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
+            AND ${landed.sql}`)
           .bind(decidedBy, now, note.trim() || null, draftId, request.waiverType, request.targetId,
-            request.id, draftId, nextRevision),
+            request.id, ...landed.bindings),
         this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
           SET status = 'granted', decided_by = ?, decided_at = ?, decision_note = ?
           WHERE id = ? AND draft_id = ? AND status = 'pending'
-            AND EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
-          .bind(decidedBy, now, note.trim() || null, request.id, draftId,
-            draftId, nextRevision),
+            AND ${landed.sql}`)
+          .bind(decidedBy, now, note.trim() || null, request.id, draftId, ...landed.bindings),
         this.database.prepare(`INSERT INTO puzzle_board_limit_waiver_events
           (puzzle_id, waiver_type, target_id, event_type, actor, event_at,
            approved_count, reason, draft_id, draft_revision)
           SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-          WHERE EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)
+          WHERE ${landed.sql}
             AND EXISTS (SELECT 1 FROM puzzle_board_limit_waiver_requests
               WHERE id = ? AND draft_id = ? AND status = 'granted')`)
           .bind(draft.document.id, request.waiverType, request.targetId,
             previous ? "replaced" : "granted", decidedBy, now,
-            request.count, request.reason, draftId, nextRevision,
-            draftId, nextRevision, request.id, draftId)
+            request.count, request.reason, draftId, expectedRevision + 1,
+            ...landed.bindings, request.id, draftId)
       ];
-      const saved = await this.persistBoardLimitWaiverMutation({
-        draftId, document, actor, expectedRevision, requestId: request.id, auditStatements
+      return this.persistBoardLimitWaiverMutation({
+        draftId, document, actor, expectedRevision, requestId: request.id, audit
       });
-      return saved;
     }
     await this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
       SET status = 'declined', decided_by = ?, decided_at = ?, decision_note = ?
@@ -400,25 +402,23 @@ export class D1DraftRepository extends DraftRepository {
     const decidedBy = reviewer.name || reviewer.email || reviewer.subject;
     const now = new Date().toISOString();
     const document = withoutBoardLimitWaiver(draft.document, waiverType, targetId);
-    const nextRevision = expectedRevision + 1;
-    const auditStatements = [
+    const audit = landed => [
       this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
         SET status = 'revoked', decided_by = ?, decided_at = ?, decision_note = ?
         WHERE draft_id = ? AND waiver_type = ? AND target_id = ? AND status = 'granted'
-          AND EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
-        .bind(decidedBy, now, note.trim() || null, draftId, waiverType, targetId, draftId, nextRevision),
+          AND ${landed.sql}`)
+        .bind(decidedBy, now, note.trim() || null, draftId, waiverType, targetId, ...landed.bindings),
       this.database.prepare(`INSERT INTO puzzle_board_limit_waiver_events
         (puzzle_id, waiver_type, target_id, event_type, actor, event_at,
          approved_count, reason, draft_id, draft_revision)
         SELECT ?, ?, ?, 'revoked', ?, ?, ?, ?, ?, ?
-        WHERE EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
-        .bind(draft.document.id, waiverType,
-          targetId, decidedBy, now,
-          grant.approvedCount, grant.reason, draftId, nextRevision,
-          draftId, nextRevision)
+        WHERE ${landed.sql}`)
+        .bind(draft.document.id, waiverType, targetId, decidedBy, now,
+          grant.approvedCount, grant.reason, draftId, expectedRevision + 1,
+          ...landed.bindings)
     ];
     return this.persistBoardLimitWaiverMutation({
-      draftId, document, actor, expectedRevision, auditStatements
+      draftId, document, actor, expectedRevision, audit
     });
   }
 
@@ -865,7 +865,9 @@ export class D1DraftRepository extends DraftRepository {
     const restored = parsedJson(previous.document, "Stored working copy");
     const materialized = assembleStoredDomainDocuments({
       document: restored,
-      administration: partitionAuthoredDocument(current.document).administration
+      // Keep the current administration, including none: undefined would
+      // fall back to the restored document and revive a revoked grant.
+      administration: partitionAuthoredDocument(current.document).administration ?? {}
     });
     const documentJson = serializeDraftDocument(materialized);
     const domains = storedDomainDocuments(materialized);

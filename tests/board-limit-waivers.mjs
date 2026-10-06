@@ -8,8 +8,11 @@ import {
   boardLimitWaiverErrors
 } from "../modules/boardLimitWaivers.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
+import { D1DraftRepository } from "../modules/d1DraftRepository.js";
+import { diffPublishedDraft } from "../modules/draftReviewDiff.js";
+import { createSqliteD1 } from "./lib/sqlite-d1.mjs";
 
-export const name = "board limit waivers: count-based request, grant, revoke, schema drift";
+export const name = "board limit waivers: count-based grants, D1 audit and undo, migration, schema drift";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const draftId = "waiver-board";
@@ -55,8 +58,70 @@ async function staticSchemaDrift() {
   assert.ok(normalLimit < approvedLimit);
 }
 
+// 0032 allowed one pending request per term list; 0033 collapses lists to a
+// size, so same-length pending lists must not collide on the new index.
+function migrationCollapsesPendingLists() {
+  const database = createSqliteD1({
+    before: (number, sqlite) => {
+      if (number !== 33) return;
+      const insert = sqlite.prepare(`INSERT INTO puzzle_cluster_term_exception_requests
+        (draft_id, puzzle_id, cluster_id, terms_json, reason, status, requested_by, requested_at, requested_revision)
+        VALUES ('d', 'p', 'c', ?, 'why', 'pending', 'me', ?, 1)`);
+      insert.run(JSON.stringify(terms(8)), "2026-10-01");
+      insert.run(JSON.stringify(terms(8, "u")), "2026-10-02");
+    }
+  });
+  const rows = database.sqlite.prepare(
+    "SELECT requested_count, status FROM puzzle_board_limit_waiver_requests ORDER BY requested_at"
+  ).all().map(row => ({ ...row }));
+  assert.deepEqual(rows, [
+    { requested_count: 8, status: "superseded" },
+    { requested_count: 8, status: "pending" }
+  ]);
+}
+
+async function d1GrantRevokeUndo(approvedLimit) {
+  const database = createSqliteD1();
+  const repository = new D1DraftRepository(database);
+  const actor = { subject: "human", name: "Reviewer" };
+  let draft = await repository.create({ draftId, document: puzzleWith(terms(approvedLimit)), actor });
+  const request = await repository.requestBoardLimitWaiver({
+    draftId, waiverType: "cluster-term-count", targetId: "alpha", reason, actor,
+    expectedRevision: draft.revision
+  });
+
+  // A save that lands between the preflight read and the batch takes the
+  // revision this grant expected; no audit row may claim the grant happened.
+  const batch = database.batch.bind(database);
+  database.batch = async statements => {
+    database.sqlite.prepare("UPDATE puzzle_drafts SET revision = revision + 1, content_hash = 'other' WHERE id = ?").run(draftId);
+    database.batch = batch;
+    return batch(statements);
+  };
+  await assert.rejects(repository.decideBoardLimitWaiver({
+    draftId, requestId: request.id, decision: "granted", actor, expectedRevision: draft.revision
+  }), /revision conflict/i);
+  assert.equal(database.sqlite.prepare("SELECT status FROM puzzle_board_limit_waiver_requests").get().status, "pending");
+  assert.equal(database.sqlite.prepare("SELECT count(*) n FROM puzzle_board_limit_waiver_events").get().n, 0);
+
+  draft = await repository.get({ draftId, actor });
+  draft = await repository.decideBoardLimitWaiver({
+    draftId, requestId: request.id, decision: "granted", actor, expectedRevision: draft.revision
+  });
+  assert.equal(draft.document.boardLimitWaivers.length, 1);
+  draft = await repository.revokeBoardLimitWaiver({
+    draftId, waiverType: "cluster-term-count", targetId: "alpha", actor, expectedRevision: draft.revision
+  });
+  assert.equal(draft.document.boardLimitWaivers, undefined);
+
+  // Undo is a content operation; it must not revive the revoked grant.
+  draft = await repository.popWorkingCopy({ draftId, actor, expectedRevision: draft.revision });
+  assert.equal(draft.document.boardLimitWaivers, undefined);
+}
+
 export async function run() {
   await staticSchemaDrift();
+  migrationCollapsesPendingLists();
 
   const { normalLimit, approvedLimit } = boardLimit("cluster-term-count");
   assert.deepEqual(codes(puzzleWith(terms(normalLimit))), []);
@@ -115,7 +180,13 @@ export async function run() {
     assert.equal(draft.document.boardLimitWaivers, undefined);
     const history = await store.listBoardLimitWaiverRequests(draftId);
     assert.deepEqual(history.map(item => item.status), ["revoked"]);
+
+    // A waiver-only change (here, revoking) is a publishable difference.
+    const published = { ...draft.document, boardLimitWaivers: [grant] };
+    assert.ok(diffPublishedDraft(published, draft.document).fields.boardLimitWaivers);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+
+  await d1GrantRevokeUndo(approvedLimit);
 }
