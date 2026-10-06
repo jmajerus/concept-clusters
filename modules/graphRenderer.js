@@ -131,6 +131,17 @@ export function createGraphRenderer({
         .attr("aria-hidden", "true");
     };
     state.drawLinks();
+    // The arm a directed bridge's arrow rides, for the lens flow trace.
+    state.bridgeArmSegment = (term, clusterIndex) => {
+      const link = links.find(candidate => candidate.bridge &&
+        candidate.source.word === term && candidate.target.gs[0] === clusterIndex);
+      return link
+        ? {
+          bridgePoint: { x: link.source.x, y: link.source.y },
+          clusterPoint: { x: link.target.x, y: link.target.y }
+        }
+        : null;
+    };
 
     // No manual drag offsets exist in this mode's model at all (the force
     // simulation owns every node's position) -- see buildSetGraph's own

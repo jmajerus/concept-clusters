@@ -719,11 +719,11 @@ export async function run() {
   // Administration flags ride on the runtime puzzle and stay out of MCP reads.
   {
     const input = validPuzzle({
-      board: { starFreeStrip: false, bridgePreconnect: true }
+      board: { starFreeStrip: false, bridgePreconnect: true, lensFlowTrace: true }
     });
     const { puzzle, errors } = puzzleFromAuthoredDocument(input);
     assert.deepEqual(errors, []);
-    assert.deepEqual(puzzle.board, { starFreeStrip: false, bridgePreconnect: true });
+    assert.deepEqual(puzzle.board, { starFreeStrip: false, bridgePreconnect: true, lensFlowTrace: true });
     assert.equal(documentForMcp(input).board, undefined);
     const sized = puzzleFromAuthoredDocument(validPuzzle({ board: { sizeFactor: 1.2 } }));
     assert.deepEqual(sized.errors, []);

@@ -157,6 +157,12 @@ import {
   sequentialLensResultText,
   toggleLensSelection
 } from "./modules/lensEngine.js";
+import {
+  clearLensFlowTrace,
+  lensFlowTraceEnabled,
+  lensFlowTracePlan,
+  playLensFlowTrace
+} from "./modules/lensFlowTrace.js";
 
 const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). The size comes from
@@ -1449,6 +1455,18 @@ function restoreLensSession(savedLens) {
   }
 }
 
+// Experimental (board.lensFlowTrace). Runs only from the reveal itself,
+// never from a restored session, so reopening a puzzle does not replay it.
+function traceRevealedLens() {
+  if (!lensFlowTraceEnabled(state?.puzzle)) return;
+  playLensFlowTrace(
+    svg,
+    lensFlowTracePlan(state.puzzle, currentLens(state)),
+    state.bridgeArmSegment,
+    { reducedMotion: !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches }
+  );
+}
+
 function finishLensSequence() {
   if (!state?.puzzle?.lenses?.length) return;
   state.phase = "complete";
@@ -1461,6 +1479,7 @@ function finishLensSequence() {
   overviewRenderer.showRelatedPuzzles(state.puzzle);
   trackPuzzleCompleted(state.puzzle.id, mode, state);
   updateLensInterface();
+  traceRevealedLens();
   updateLearningIntroduction();
   persistPlayerSession({ captureLayout: true });
 }
@@ -1504,6 +1523,7 @@ lensCheckBtn.addEventListener("click", () => {
     state.phase = "lens-revealed";
     setMessage("Review the highlighted answer and explanation.", "good");
     updateLensInterface();
+    traceRevealedLens();
     persistPlayerSession();
     return;
   }
@@ -1515,6 +1535,7 @@ lensCheckBtn.addEventListener("click", () => {
   state.phase = "lens-revealed";
   setMessage("Review the highlighted answer set and explanation.", "good");
   updateLensInterface();
+  traceRevealedLens();
   persistPlayerSession();
 });
 
@@ -1524,6 +1545,7 @@ lensNextBtn.addEventListener("click", () => {
     finishLensSequence();
     return;
   }
+  clearLensFlowTrace(svg);
   state.lensIndex++;
   if (state.lensMode === "quiz") {
     state.lensQuizSelection = null;

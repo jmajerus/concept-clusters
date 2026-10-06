@@ -653,6 +653,30 @@ body.authoring-construct #share-status {
   pointer-events: none;
 }
 
+/* Experimental lens flow trace (board.lensFlowTrace). A bright comet
+   travels each directed arm once; reduced motion lights the whole arm
+   instead. Both sit above the arrows and under the pills. */
+.lens-flow-pulse,
+.lens-flow-highlight {
+  stroke: var(--bridge);
+  stroke-linecap: round;
+  fill: none;
+  pointer-events: none;
+}
+
+/* The bridge line it rides is already --bridge, so the comet needs a
+   light core to read as something moving along it. */
+.lens-flow-pulse {
+  stroke: color-mix(in srgb, var(--bridge) 30%, white);
+  stroke-width: 6;
+  filter: drop-shadow(0 0 3px var(--bridge)) drop-shadow(0 0 6px var(--bridge));
+}
+
+.lens-flow-highlight {
+  stroke-width: 5;
+  stroke-opacity: 0.55;
+}
+
 /* ---------- nodes ---------- */
 .node { cursor: pointer; }
 .node rect, .node polygon { stroke-width: 1.6; transition: fill 120ms, stroke 120ms; }
