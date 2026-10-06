@@ -1456,19 +1456,18 @@ function restoreLensSession(savedLens) {
   }
 }
 
-// Experimental (board.lensFlowTrace). The pulse runs only from the reveal
-// itself, never from a restored session or a mode switch, so it is not
-// replayed. The reduced-motion highlight is the same information held for
-// as long as the explanation is up, so a renderer rebuild redraws it.
+// Experimental (board.lensFlowTrace). Plays on the reveal and again
+// whenever the board is rebuilt under a still-visible explanation (a mode
+// switch, or reopening a saved session there): the new representation
+// is worth seeing the flow in too, and a rebuild clears the old overlay.
 function traceRevealedLens({ redraw = false } = {}) {
   if (!lensFlowTraceEnabled(state?.puzzle)) return;
-  const reducedMotion = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  if (redraw && (!reducedMotion || !lensReviewIsVisible(state))) return;
+  if (redraw && !lensReviewIsVisible(state)) return;
   playLensFlowTrace(
     svg,
     lensFlowTracePlan(state.puzzle, currentLens(state)),
     state.bridgeArmSegment,
-    { reducedMotion }
+    { reducedMotion: !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches }
   );
 }
 
