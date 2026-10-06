@@ -758,6 +758,12 @@ export async function run() {
     value: ""
   }, "");
   assert.equal(omitted.board, undefined);
+  const traced = applyDraftFieldValue(omitted, {
+    section: "board",
+    field: "lensFlowTrace",
+    value: "true"
+  }, "true");
+  assert.deepEqual(traced.board, { lensFlowTrace: true });
   const sized = applyDraftFieldValue(omitted, {
     section: "board",
     field: "sizeFactor",

@@ -377,6 +377,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   board: z.object({
     starFreeStrip: z.boolean().optional(),
     bridgePreconnect: z.boolean().optional(),
+    lensFlowTrace: z.boolean().optional(),
     sizeFactor: z.number().refine(value => {
       const factor = canonicalBoardSizeFactor(value);
       return factor != null;
@@ -610,6 +611,7 @@ function boardAdministration(board) {
   if (board.bridgePreconnect === true || board.bridgePreconnect === false) {
     next.bridgePreconnect = board.bridgePreconnect;
   }
+  if (board.lensFlowTrace === true) next.lensFlowTrace = true;
   const sizeFactor = canonicalBoardSizeFactor(board.sizeFactor);
   if (sizeFactor != null && sizeFactor !== 1) next.sizeFactor = sizeFactor;
   return Object.keys(next).length ? next : undefined;

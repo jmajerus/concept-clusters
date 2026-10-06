@@ -42,7 +42,7 @@ const FIELDS_BY_SECTION = {
   lens: new Set(["prompt", "explanation", "reason"]),
   learning: new Set(["title", "summary", "content.text", "credit", "links"]),
   provenance: new Set(["collaboration", "generativeModel", "reasoning", "switch", "editor"]),
-  board: new Set(["starFreeStrip", "bridgePreconnect", "sizeFactor"])
+  board: new Set(["starFreeStrip", "bridgePreconnect", "lensFlowTrace", "sizeFactor"])
 };
 
 function isListField(field) {

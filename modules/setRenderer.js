@@ -1746,6 +1746,16 @@ export function createSetRenderer({
     updateSolutionHint();
     state.paint = () => buildSetGraph();
     state.drawLinks = () => {};
+    // The exterior part of the arm the bridge's arrow rides, for the
+    // lens flow trace -- the pulse stays off the circle's interior too.
+    state.bridgeArmSegment = (term, clusterIndex) => {
+      const bridge = state.puzzle.bridges.find(candidate => candidate.term === term);
+      const segment = bridge && bridgeLineSegments(bridge)
+        .find(candidate => candidate.side === clusterIndex && !candidate.partial);
+      return segment
+        ? { bridgePoint: segment.bridgePoint, clusterPoint: segment.directionPoint }
+        : null;
+    };
     state.prepareCanonicalResolution = null;
     state.onPuzzleSolved = () => {
       reclaimStripOnSolve();

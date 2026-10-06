@@ -2123,9 +2123,11 @@ function renderBoardExperiments({ edit, document }) {
   const board = document?.board && typeof document.board === "object" ? document.board : {};
   const strip = board.starFreeStrip === true ? "true" : board.starFreeStrip === false ? "false" : "";
   const preconnect = board.bridgePreconnect === true ? "true" : "";
+  const flowTrace = board.lensFlowTrace === true ? "true" : "";
   const sizeFactor = typeof board.sizeFactor === "number" ? String(board.sizeFactor) : "";
   const stripSlot = copyHidden(edit, { section: "board", field: "starFreeStrip" });
   const preSlot = copyHidden(edit, { section: "board", field: "bridgePreconnect" });
+  const flowSlot = copyHidden(edit, { section: "board", field: "lensFlowTrace" });
   const sizeSlot = copyHidden(edit, { section: "board", field: "sizeFactor" });
   const option = (value, label, selected) =>
     `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
@@ -2149,6 +2151,13 @@ function renderBoardExperiments({ edit, document }) {
       <select${preSlot.form} name="${preSlot.prefix}value">
         ${option("", "Off", preconnect === "")}
         ${option("true", "On", preconnect === "true")}
+      </select>
+    </label></p>
+    ${flowSlot.hidden}
+    <p><label>Lens flow trace
+      <select${flowSlot.form} name="${flowSlot.prefix}value">
+        ${option("", "Off", flowTrace === "")}
+        ${option("true", "On", flowTrace === "true")}
       </select>
     </label></p>
     ${sizeSlot.hidden}

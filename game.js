@@ -157,6 +157,12 @@ import {
   sequentialLensResultText,
   toggleLensSelection
 } from "./modules/lensEngine.js";
+import {
+  clearLensFlowTrace,
+  lensFlowTraceEnabled,
+  lensFlowTracePlan,
+  playLensFlowTrace
+} from "./modules/lensFlowTrace.js";
 
 const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). The size comes from
@@ -484,6 +490,7 @@ async function finishLensLayoutAfterModeSwitch(
       );
     }
     updateLensInterface();
+    traceRevealedLens({ redraw: true });
     persistPlayerSession({ captureLayout: true });
   }
 }
@@ -1449,6 +1456,22 @@ function restoreLensSession(savedLens) {
   }
 }
 
+// Experimental (board.lensFlowTrace). The pulse runs only from the reveal
+// itself, never from a restored session or a mode switch, so it is not
+// replayed. The reduced-motion highlight is the same information held for
+// as long as the explanation is up, so a renderer rebuild redraws it.
+function traceRevealedLens({ redraw = false } = {}) {
+  if (!lensFlowTraceEnabled(state?.puzzle)) return;
+  const reducedMotion = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (redraw && (!reducedMotion || !lensReviewIsVisible(state))) return;
+  playLensFlowTrace(
+    svg,
+    lensFlowTracePlan(state.puzzle, currentLens(state)),
+    state.bridgeArmSegment,
+    { reducedMotion }
+  );
+}
+
 function finishLensSequence() {
   if (!state?.puzzle?.lenses?.length) return;
   state.phase = "complete";
@@ -1461,6 +1484,7 @@ function finishLensSequence() {
   overviewRenderer.showRelatedPuzzles(state.puzzle);
   trackPuzzleCompleted(state.puzzle.id, mode, state);
   updateLensInterface();
+  traceRevealedLens();
   updateLearningIntroduction();
   persistPlayerSession({ captureLayout: true });
 }
@@ -1504,6 +1528,7 @@ lensCheckBtn.addEventListener("click", () => {
     state.phase = "lens-revealed";
     setMessage("Review the highlighted answer and explanation.", "good");
     updateLensInterface();
+    traceRevealedLens();
     persistPlayerSession();
     return;
   }
@@ -1515,6 +1540,7 @@ lensCheckBtn.addEventListener("click", () => {
   state.phase = "lens-revealed";
   setMessage("Review the highlighted answer set and explanation.", "good");
   updateLensInterface();
+  traceRevealedLens();
   persistPlayerSession();
 });
 
@@ -1524,6 +1550,7 @@ lensNextBtn.addEventListener("click", () => {
     finishLensSequence();
     return;
   }
+  clearLensFlowTrace(svg);
   state.lensIndex++;
   if (state.lensMode === "quiz") {
     state.lensQuizSelection = null;
