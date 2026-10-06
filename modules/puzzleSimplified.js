@@ -15,6 +15,7 @@ import {
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { stripSystemAuthoredMetadata } from "./authoringDomains.js";
+import { canonicalBoardLimitWaivers } from "./boardLimitWaivers.js";
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -65,6 +66,7 @@ export function puzzleToSimplified(
   const source = canonicalCategories
     ? canonicalizePuzzleCategoryReferences(withProvenance, categoryRegistry)
     : withProvenance;
+  const sourceWaivers = source.boardLimitWaivers ?? source.clusterTermExceptions;
   const clusterIds = stableIds(source.clusters, cluster => cluster.name);
   const bridgeIds = stableIds(source.bridges, bridge => bridge.term);
   const singleVocabularyCluster = source.puzzleKind === "vocabulary-context" &&
@@ -154,6 +156,8 @@ export function puzzleToSimplified(
     ...(source.relatedPuzzles ? { relatedPuzzles: clone(source.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(source.provenance ? { provenance: clone(source.provenance) } : {}),
+    ...(sourceWaivers?.length
+      ? { boardLimitWaivers: clone(canonicalBoardLimitWaivers(sourceWaivers)) } : {}),
     ...(source.board && typeof source.board === "object" ? { board: clone(source.board) } : {}),
     ...(source.creator ? { creator: source.creator } : {}),
     ...(source.license ? { license: source.license } : {}),

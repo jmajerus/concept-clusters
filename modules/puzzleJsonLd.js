@@ -12,6 +12,7 @@ import {
   validatePuzzleJsonLdProfile
 } from "./jsonLdProfile.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
+import { canonicalBoardLimitWaivers } from "./boardLimitWaivers.js";
 
 const PUZZLE_KEYS = new Set([
   "@context", "@id", "@type", "schemaVersion", "id", "title", "category", "puzzleKind",
@@ -19,7 +20,7 @@ const PUZZLE_KEYS = new Set([
   "preSolve", "tags", "level",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
   "derivedFrom", "dateCreated", "dateModified", "language", "version",
-  "provenance", "layouts"
+  "provenance", "layouts", "boardLimitWaivers", "clusterTermExceptions"
 ]);
 
 function clone(value) {
@@ -89,6 +90,7 @@ export function puzzleToJsonLd(
   const categorySource = canonicalCategories
     ? canonicalizePuzzleCategoryReferences(withProvenance, categoryRegistry)
     : withProvenance;
+  const sourceWaivers = categorySource.boardLimitWaivers ?? categorySource.clusterTermExceptions;
   const clusterIds = stableLocalIds(categorySource.clusters, "cluster", cluster => cluster.name);
   const bridgeIds = stableLocalIds(categorySource.bridges, "bridge", bridge => bridge.term);
   const automaticallyPreSolved = categorySource.puzzleKind === "vocabulary-context" &&
@@ -176,6 +178,8 @@ export function puzzleToJsonLd(
       ...clone(lens)
     })) } : {}),
     ...(introduction ? { learningIntroduction: introduction } : {}),
+    ...(sourceWaivers?.length
+      ? { boardLimitWaivers: clone(canonicalBoardLimitWaivers(sourceWaivers)) } : {}),
     clusters,
     bridges
   };
@@ -189,7 +193,15 @@ export function puzzleToJsonLd(
   return copyExtensions(categorySource, document, PUZZLE_KEYS);
 }
 
-export function puzzleFromJsonLd(document) {
+export function puzzleFromJsonLd(input) {
+  let document = input;
+  if (input && Object.hasOwn(input, "clusterTermExceptions")) {
+    const { clusterTermExceptions, ...currentFields } = input;
+    const sourceWaivers = input.boardLimitWaivers ?? clusterTermExceptions;
+    document = sourceWaivers?.length
+      ? { ...currentFields, boardLimitWaivers: canonicalBoardLimitWaivers(sourceWaivers) }
+      : currentFields;
+  }
   const profileErrors = validatePuzzleJsonLdProfile(document);
   if (profileErrors.length) {
     throw new Error(`Invalid Concept Clusters puzzle JSON-LD:\n- ${profileErrors.join("\n- ")}`);
@@ -258,6 +270,8 @@ export function puzzleFromJsonLd(document) {
     ...(document.preSolve || automaticallyPreSolved ? { preSolve: true } : {}),
     ...(document.lenses ? { lenses: document.lenses.map(({ "@id": _id, "@type": _type, ...lens }) => clone(lens)) } : {}),
     ...(document.learningIntroduction ? { learningIntroduction: clone(document.learningIntroduction) } : {}),
+    ...(document.boardLimitWaivers?.length
+      ? { boardLimitWaivers: clone(canonicalBoardLimitWaivers(document.boardLimitWaivers)) } : {}),
     clusters,
     bridges
   };

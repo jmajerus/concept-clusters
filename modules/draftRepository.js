@@ -117,6 +117,21 @@ export class DraftRepository {
   async saveDomain(_input) {
     throw new Error("DraftRepository.saveDomain is not implemented");
   }
+  async requestBoardLimitWaiver(_input) {
+    throw new Error("DraftRepository.requestBoardLimitWaiver is not implemented");
+  }
+  async listBoardLimitWaiverRequests(_input) {
+    throw new Error("DraftRepository.listBoardLimitWaiverRequests is not implemented");
+  }
+  async decideBoardLimitWaiver(_input) {
+    throw new Error("DraftRepository.decideBoardLimitWaiver is not implemented");
+  }
+  async grantBoardLimitWaiverDirect(_input) {
+    throw new Error("DraftRepository.grantBoardLimitWaiverDirect is not implemented");
+  }
+  async revokeBoardLimitWaiver(_input) {
+    throw new Error("DraftRepository.revokeBoardLimitWaiver is not implemented");
+  }
   async materialize(_input) {
     throw new Error("DraftRepository.materialize is not implemented");
   }

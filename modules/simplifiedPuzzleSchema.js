@@ -41,6 +41,9 @@ import {
 import { PUZZLE_KINDS } from "./authoringProfiles.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
+import {
+  CLUSTER_TERM_EXCEPTION_LIMIT
+} from "./boardLimitWaivers.js";
 
 const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -254,14 +257,14 @@ const ClusterSchema = z.object({
   // complete term list directly; the root refinement below selects exactly
   // one of those shapes based on puzzleKind and cluster count.
   seeds: z.array(TermSchema).min(1).max(2).optional(),
-  floatingTerms: z.array(TermSchema).min(1).max(5).optional(),
+  floatingTerms: z.array(TermSchema).min(1).max(CLUSTER_TERM_EXCEPTION_LIMIT - 2).optional(),
   // In a one-cluster Vocabulary puzzle this is its complete term list. For
   // seed/floating shapes it may list the same terms in a different order
   // (notably in migrated JSON-LD); that form must contain exactly the seed
   // and floating terms, checked by puzzleFromSimplified. Order is not shown
   // to the player: renderers lay members out in a stable word order
   // (puzzleGraph.js memberDisplayOrder) so a term list reads as a set.
-  terms: z.array(TermSchema).min(2).max(7).optional(),
+  terms: z.array(TermSchema).min(2).max(CLUSTER_TERM_EXCEPTION_LIMIT).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()
 }).strict().superRefine((cluster, context) => {
@@ -330,6 +333,17 @@ const BridgeSchema = z.object({
   idealTerms: z.record(z.string().min(1), z.string().min(1)).optional()
 }).strict();
 
+const BoardLimitWaiverSchema = z.object({
+  waiverType: z.string().trim().min(1),
+  puzzleId: SlugSchema,
+  targetId: SlugSchema,
+  approvedLimit: z.number().int().positive(),
+  approvedScope: z.record(z.string(), z.unknown()),
+  reason: z.string().trim().min(1),
+  grantedBy: z.string().trim().min(1),
+  grantedAt: z.string().min(1)
+}).strict();
+
 export const SimplifiedPuzzleInputSchema = z.object({
   id: SlugSchema,
   title: z.string().min(1),
@@ -369,6 +383,9 @@ export const SimplifiedPuzzleInputSchema = z.object({
       return factor != null;
     }, { message: "sizeFactor must be a 0.05 step from 0.75 to 1.25" }).optional()
   }).strict().optional(),
+  // Protected human-granted permissions. Agent-facing projections redact
+  // this field and write boundaries reject attempts to supply it.
+  boardLimitWaivers: z.array(BoardLimitWaiverSchema).optional(),
   // Pass-through publication metadata -- not semantically validated by
   // contentValidation.js, just carried through unchanged. `layout` (renderer
   // layout curation) deliberately isn't offered here: it's a positional/
@@ -689,6 +706,8 @@ export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = 
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(input.provenance ? { provenance: clone(input.provenance) } : {}),
     ...(boardAdministration(input.board) ? { board: boardAdministration(input.board) } : {}),
+    ...(input.boardLimitWaivers?.length
+      ? { boardLimitWaivers: clone(input.boardLimitWaivers) } : {}),
     ...(input.creator ? { creator: input.creator } : {}),
     ...(input.license ? { license: input.license } : {}),
     ...(input.derivedFrom ? { derivedFrom: input.derivedFrom } : {}),

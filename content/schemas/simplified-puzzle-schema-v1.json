@@ -6,6 +6,21 @@
   "additionalProperties": false,
   "required": ["id", "title", "category", "clusters"],
   "$defs": {
+    "boardLimitWaiver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["waiverType", "puzzleId", "targetId", "approvedLimit", "approvedScope", "reason", "grantedBy", "grantedAt"],
+      "properties": {
+        "waiverType": { "type": "string", "minLength": 1 },
+        "puzzleId": { "$ref": "#/$defs/slug" },
+        "targetId": { "$ref": "#/$defs/slug" },
+        "approvedLimit": { "type": "integer", "minimum": 1 },
+        "approvedScope": { "type": "object" },
+        "reason": { "type": "string", "minLength": 1 },
+        "grantedBy": { "type": "string", "minLength": 1 },
+        "grantedAt": { "type": "string", "minLength": 1 }
+      }
+    },
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
     "categoryId": {
       "type": "string",
@@ -124,13 +139,13 @@
           "floatingTerms": {
             "type": "array",
             "minItems": 1,
-            "maxItems": 5,
+            "maxItems": 6,
             "items": { "type": "string", "minLength": 1 }
           },
           "terms": {
             "type": "array",
             "minItems": 2,
-            "maxItems": 7,
+            "maxItems": 8,
             "items": { "type": "string", "minLength": 1 },
             "description": "The complete term list for a single-cluster vocabulary-context puzzle; otherwise an optional ordering override for seeds plus floatingTerms."
           },
@@ -276,6 +291,11 @@
           "items": { "$ref": "#/$defs/linkEntry" }
         }
       }
+    },
+    "boardLimitWaivers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/boardLimitWaiver" },
+      "description": "Protected human-granted exceptions; accepted only at administrative and publication boundaries."
     },
     "provenance": {
       "type": "object",

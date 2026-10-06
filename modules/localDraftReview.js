@@ -926,6 +926,54 @@ export function createLocalDraftReviewHandler({
       const params = await readNodeUrlEncoded(req);
       const form = parseSubmitForm(params);
       const draftId = decodeURIComponent(match[1]);
+      if (["grant-board-limit-waiver", "decline-board-limit-waiver", "revoke-board-limit-waiver"].includes(form.confirm)) {
+        if (typeof publicationActor?.subject !== "string" || !publicationActor.subject.trim()) {
+          html(res, "<p>An authenticated human reviewer is required for board limit waiver decisions.</p>", 403);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const expectedRevision = Number.parseInt(params.get("expected_revision"), 10);
+          const note = String(params.get("decision_note") || "").trim();
+          if (form.confirm === "revoke-board-limit-waiver") {
+            await draftStore.revokeBoardLimitWaiver({
+              draftId,
+              waiverType: String(params.get("waiver_type") || ""),
+              targetId: String(params.get("target_id") || ""),
+              expectedRevision,
+              actor: publicationActor,
+              note
+            });
+          } else if (params.has("request_id")) {
+            await draftStore.decideBoardLimitWaiver({
+              draftId,
+              requestId: String(params.get("request_id") || ""),
+              decision: form.confirm === "grant-board-limit-waiver" ? "granted" : "declined",
+              expectedRevision,
+              actor: publicationActor,
+              note
+            });
+          } else {
+            await draftStore.grantBoardLimitWaiverDirect({
+              draftId,
+              waiverType: String(params.get("waiver_type") || ""),
+              targetId: String(params.get("target_id") || ""),
+              reason: String(params.get("reason") || ""),
+              expectedRevision,
+              actor: publicationActor
+            });
+          }
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          const status = isDraftConflictError(error) ? 409 : (error.status || 400);
+          html(res, `<p>${escapeHtml(formatActionError(error))}</p>`, status);
+        }
+        return true;
+      }
       if (form.isSaveWorkingCopy) {
         try {
           const record = await draftStore.getDraft(draftId);
@@ -1914,6 +1962,9 @@ export function createLocalDraftReviewHandler({
       const reviewIssues = puzzleId && contentDocuments?.listPuzzleReviewIssues
         ? await contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: true })
         : [];
+      const boardLimitWaiverRequests = draftId && typeof draftStore.listBoardLimitWaiverRequests === "function"
+        ? await draftStore.listBoardLimitWaiverRequests({ draftId })
+        : [];
       const currentPublishedRevision = publishedRow && !publishedRow.withdrawnAt
         && Number.isInteger(publishedRow.revision)
         ? publishedRow.revision
@@ -1935,6 +1986,7 @@ export function createLocalDraftReviewHandler({
         lastHumanReviewedAt: publishedRow?.lastHumanReviewedAt || null,
         reviewEvents,
         reviewIssues,
+        boardLimitWaiverRequests,
         inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
       }, {
         variant: "local",

@@ -23,6 +23,7 @@ import {
   RETIRED_ROOT_FIELDS,
   SYSTEM_ROOT_FIELDS
 } from "./authoringFieldOwnership.js";
+import { canonicalBoardLimitWaivers } from "./boardLimitWaivers.js";
 
 export {
   AUTHORING_DOMAINS,
@@ -262,10 +263,15 @@ export function partitionAuthoredDocument(document, { system = {} } = {}) {
     if (key === "bridges") continue;
     if (key === "provenance") {
       provenance = clone(value);
-    } else if (key === "board") {
+    } else if (key === "board" || key === "boardLimitWaivers" || key === "clusterTermExceptions") {
       // Split this off before the content fallback. An unknown key would
       // otherwise become content, and a content save could replace it.
-      if (isObject(value) && Object.keys(value).length) administration = clone(value);
+      administration ||= {};
+      if (key === "board" && isObject(value) && Object.keys(value).length) {
+        administration.board = clone(value);
+      } else if ((key === "boardLimitWaivers" || key === "clusterTermExceptions") && Array.isArray(value) && value.length) {
+        administration.boardLimitWaivers = clone(canonicalBoardLimitWaivers(value));
+      }
     } else if (CLASSIFICATION_STORED_ROOT_FIELDS.has(key)) {
       classification[key] = clone(value);
     } else if (PEDAGOGY_STORED_ROOT_FIELDS.has(key)) {
@@ -318,8 +324,33 @@ export function assembleAuthoredDocument({
   for (const [key, value] of Object.entries(classification)) {
     document[key] = clone(value);
   }
+  if (administration !== undefined && administration !== null) {
+    assertObject(administration, "Administration domain");
+  }
   if (isObject(administration) && Object.keys(administration).length) {
-    document.board = clone(administration);
+    // Read old administration_json rows that stored board flags as the whole
+    // projection, then assemble the current envelope on the next write.
+    if (hasOwn(administration, "board") || hasOwn(administration, "boardLimitWaivers") ||
+        hasOwn(administration, "clusterTermExceptions")) {
+      const unknownEnvelopeKeys = Object.keys(administration).filter(key =>
+        key !== "board" && key !== "boardLimitWaivers" && key !== "clusterTermExceptions"
+      );
+      if (unknownEnvelopeKeys.length) {
+        throw new Error(
+          `Administration envelope contains unsupported field${unknownEnvelopeKeys.length === 1 ? "" : "s"}: ${unknownEnvelopeKeys.join(", ")}`
+        );
+      }
+      if (isObject(administration.board) && Object.keys(administration.board).length) {
+        document.board = clone(administration.board);
+      }
+      if (Array.isArray(administration.boardLimitWaivers) && administration.boardLimitWaivers.length) {
+        document.boardLimitWaivers = clone(canonicalBoardLimitWaivers(administration.boardLimitWaivers));
+      } else if (Array.isArray(administration.clusterTermExceptions) && administration.clusterTermExceptions.length) {
+        document.boardLimitWaivers = clone(canonicalBoardLimitWaivers(administration.clusterTermExceptions));
+      }
+    } else {
+      document.board = clone(administration);
+    }
   } else {
     delete document.board;
   }

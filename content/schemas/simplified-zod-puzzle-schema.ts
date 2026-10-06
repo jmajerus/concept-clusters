@@ -169,10 +169,10 @@ export const SimplifiedPuzzleInputSchema = z.object({
         color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted
         fact: z.string().min(1), // Teaching note
         seeds: z.array(TermSchema).min(1).max(2).optional(),
-        floatingTerms: z.array(TermSchema).min(1).max(5).optional(),
+        floatingTerms: z.array(TermSchema).min(1).max(6).optional(),
         // Complete term list for a one-cluster vocabulary puzzle; for other
         // cluster shapes this can also preserve an explicit display order.
-        terms: z.array(TermSchema).min(2).max(7).optional(),
+        terms: z.array(TermSchema).min(2).max(8).optional(),
         termInfo: z.record(z.string().min(1), InfoValueSchema).optional(), // string or {text,links}
         info: InfoValueSchema.optional()
       }).strict().superRefine((cluster, context) => {
@@ -249,6 +249,17 @@ export const SimplifiedPuzzleInputSchema = z.object({
 
   relatedPuzzles: RelatedPuzzlesSchema.optional(),
   learningIntroduction: LearningIntroductionSchema.optional(),
+  // Protected; infrastructure supplies human approval records.
+  boardLimitWaivers: z.array(z.object({
+    waiverType: z.string().min(1),
+    puzzleId: SlugSchema,
+    targetId: SlugSchema,
+    approvedLimit: z.number().int().positive(),
+    approvedScope: z.record(z.string(), z.unknown()),
+    reason: z.string().min(1),
+    grantedBy: z.string().min(1),
+    grantedAt: z.string().min(1)
+  }).strict()).optional(),
   provenance: z.object({
     collaboration: z.enum(["human", "humanPrimary", "aiPrimary", "ai"]).optional(),
     contributors: z.array(z.union([

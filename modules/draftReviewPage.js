@@ -55,6 +55,11 @@ import { modelSuggestionsForHost } from "./authoringModelSuggestions.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { CLASSIFICATION_EDITOR_SCRIPT } from "./classificationEditorElement.js";
 import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
+import {
+  boardLimitWaiverMatches,
+  boardLimitWaiverTargets,
+  boardLimitWaiverTypeSummaries
+} from "./boardLimitWaivers.js";
 
 function knownGenerativeHostSystems() {
   const labels = AUTHORING_SETTINGS.hosts?.labels || {};
@@ -1588,6 +1593,103 @@ function renderReviewChoice(draft, { boardButton = "" } = {}) {
   </section>`;
 }
 
+function renderBoardLimitWaiverReview(draft) {
+  const document = draft.document || {};
+  const requests = draft.boardLimitWaiverRequests || [];
+  const grants = Array.isArray(document.boardLimitWaivers)
+    ? document.boardLimitWaivers.filter(grant => grant && typeof grant === "object" && !Array.isArray(grant))
+    : [];
+  const policies = boardLimitWaiverTypeSummaries();
+  const targets = policies.flatMap(policy => boardLimitWaiverTargets(document, policy.type)
+    .map(entry => ({ ...entry, policy })));
+  const targetByKey = new Map(targets.map(entry => [`${entry.policy.type}\u0000${entry.targetId}`, entry]));
+  const revision = escapeHtml(String(draft.revision ?? ""));
+  const action = `/admin/drafts/${encodeURIComponent(draft.draftId)}`;
+  const pending = requests.filter(request => request.status === "pending");
+  const cards = pending.map(request => {
+    const entry = targetByKey.get(`${request.waiverType}\u0000${request.targetId}`);
+    const current = entry && entry.value === request.requestedValue &&
+      JSON.stringify(entry.scope) === JSON.stringify(request.scope);
+    const scopeText = request.scope?.terms?.join(", ")
+      || JSON.stringify(request.scope || {});
+    return `<article class="review-candidate">
+      <h3>${escapeHtml(entry?.targetLabel || request.targetId)} · ${escapeHtml(request.waiverType)}</h3>
+      <p class="meta">Requested by ${escapeHtml(request.requestedBy || "author")} · ${escapeHtml(request.requestedAt || "")}</p>
+      <p><strong>Requested value:</strong> ${escapeHtml(String(request.requestedValue))} for ${escapeHtml(scopeText)}</p>
+      <p>${escapeHtml(request.reason)}</p>
+      ${current ? "" : `<p class="validation-flags">The board limit scope changed after this request. Refresh and request review for the current board state.</p>`}
+      <form method="post" action="${action}">
+        <input type="hidden" name="expected_revision" value="${revision}">
+        <input type="hidden" name="request_id" value="${escapeHtml(String(request.id))}">
+        <label>Decision note <textarea name="decision_note" rows="2"></textarea></label>
+        <div class="actions">
+          ${current ? `<button type="submit" name="confirm" value="grant-board-limit-waiver">Grant waiver</button>` : ""}
+          <button type="submit" name="confirm" value="decline-board-limit-waiver" class="secondary">Decline</button>
+        </div>
+      </form>
+    </article>`;
+  }).join("");
+  const granted = grants.map(grant => {
+    const entry = targetByKey.get(`${grant.waiverType}\u0000${grant.targetId}`);
+    const active = entry && boardLimitWaiverMatches(document, entry.target, grant);
+    const scopeText = grant.approvedScope?.terms?.join(", ")
+      || JSON.stringify(grant.approvedScope || {});
+    return `<article class="review-candidate">
+      <h3>${escapeHtml(entry?.targetLabel || grant.targetId)} · ${active ? "waiver active" : "unused grant"}</h3>
+      <p><strong>Waiver:</strong> ${escapeHtml(grant.waiverType)} · limit ${escapeHtml(String(grant.approvedLimit))}</p>
+      <p><strong>Approved scope:</strong> ${escapeHtml(scopeText)}</p>
+      <p>${escapeHtml(grant.reason)}</p>
+      <p class="meta">Granted by ${escapeHtml(grant.grantedBy)} · ${escapeHtml(grant.grantedAt)}</p>
+      <form method="post" action="${action}">
+        <input type="hidden" name="expected_revision" value="${revision}">
+        <input type="hidden" name="waiver_type" value="${escapeHtml(grant.waiverType)}">
+        <input type="hidden" name="target_id" value="${escapeHtml(grant.targetId)}">
+        <label>Revocation note <textarea name="decision_note" rows="2"></textarea></label>
+        <button type="submit" name="confirm" value="revoke-board-limit-waiver" class="secondary">Revoke waiver</button>
+      </form>
+    </article>`;
+  }).join("");
+  const direct = targets.filter(entry => entry.requestable &&
+    entry.value === entry.policy.approvedLimit &&
+    !grants.some(grant => grant.waiverType === entry.policy.type &&
+      grant.targetId === entry.targetId && boardLimitWaiverMatches(document, entry.target, grant)) &&
+    !pending.some(request => request.waiverType === entry.policy.type &&
+      request.targetId === entry.targetId && request.requestedValue === entry.value &&
+      JSON.stringify(request.scope) === JSON.stringify(entry.scope))
+  ).map(entry => {
+    const scopeText = entry.scope?.terms?.join(", ") || JSON.stringify(entry.scope);
+    return `<article class="review-candidate">
+      <h3>${escapeHtml(entry.targetLabel)} · ${escapeHtml(entry.policy.label)}</h3>
+      <p><strong>Current / approved value:</strong> ${escapeHtml(String(entry.value))} / ${escapeHtml(String(entry.policy.approvedLimit))}</p>
+      <p><strong>Scope:</strong> ${escapeHtml(scopeText)}</p>
+      ${entry.target?.fact ? `<p>${escapeHtml(entry.target.fact)}</p>` : ""}
+      <form method="post" action="${action}">
+        <input type="hidden" name="expected_revision" value="${revision}">
+        <input type="hidden" name="waiver_type" value="${escapeHtml(entry.policy.type)}">
+        <input type="hidden" name="target_id" value="${escapeHtml(entry.targetId)}">
+        <label>Reason for this waiver<textarea name="reason" rows="3" minlength="${escapeHtml(String(entry.policy.minimumReasonLength))}" required></textarea></label>
+        <button type="submit" name="confirm" value="grant-board-limit-waiver">Grant waiver</button>
+      </form>
+    </article>`;
+  }).join("");
+  const closed = requests.filter(request => request.status !== "pending");
+  const history = closed.length ? `<details><summary>Previous requests (${closed.length})</summary><ul>${closed.map(request =>
+    `<li>${escapeHtml(request.status)} · ${escapeHtml(request.waiverType)} · ${escapeHtml(request.targetId)} · ${escapeHtml(JSON.stringify(request.scope || {}))} · ${escapeHtml(request.reason)}${request.decisionNote ? ` · ${escapeHtml(request.decisionNote)}` : ""}</li>`
+  ).join("")}</ul></details>` : "";
+  if (!pending.length && !granted && !direct && !history) return "";
+  const supported = policies.map(policy =>
+    `${escapeHtml(policy.label)}: ${escapeHtml(String(policy.normalLimit))} ordinary, ${escapeHtml(String(policy.approvedLimit))} by waiver`
+  ).join("; ");
+  return `<section class="submit-pr">
+    <h2>Board limit waivers</h2>
+    <p class="meta">Supported limits: ${supported}. Each waiver applies only to its recorded puzzle, target, and approved scope. This board has ${puzzleNodeCount(document)} total nodes.</p>
+    ${pending.length ? `<h3>Pending requests</h3>${cards}` : ""}
+    ${direct ? `<h3>Grant a waiver</h3>${direct}` : ""}
+    ${granted ? `<h3>Current grants</h3>${granted}` : ""}
+    ${history}
+  </section>`;
+}
+
 function renderRevisedCheckbox(show, { hidden = false } = {}) {
   if (!show) return "";
   const hiddenAttr = hidden ? " hidden" : "";
@@ -1683,6 +1785,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     : `<button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>`;
   return `${publishSection}
   ${reviewSummary}
+  ${renderBoardLimitWaiverReview(draft)}
   ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
     published: draft.d1Published === true,
     withdrawn: draft.d1Withdrawn === true,

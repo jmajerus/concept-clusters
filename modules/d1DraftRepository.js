@@ -17,6 +17,7 @@ import {
   assembleAuthoredDocumentFromDraftRow,
   AUTHORING_WRITE_DOMAINS,
   domainColumnsForSave,
+  partitionAuthoredDocument,
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
@@ -24,6 +25,13 @@ import {
   serializeLayoutDocument
 } from "./layoutDocument.js";
 import { parseReviewBaseline, serializeReviewBaseline } from "./reviewBaseline.js";
+import {
+  boardLimitWaiverPolicy,
+  grantBoardLimitWaiver,
+  makeBoardLimitWaiverRequest,
+  preserveCurrentBoardLimitWaivers,
+  revokeBoardLimitWaiver
+} from "./boardLimitWaivers.js";
 
 function parsedJson(text, label) {
   try {
@@ -162,6 +170,269 @@ export class D1DraftRepository extends DraftRepository {
     super();
     if (!database) throw new Error("A D1 database binding is required");
     this.database = database;
+  }
+
+  async persistBoardLimitWaiverMutation({
+    draftId,
+    document,
+    actor,
+    expectedRevision,
+    requestId = null,
+    auditStatements = []
+  }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor);
+    const current = await this.database.prepare(`
+      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner.subject).first();
+    if (!current) throw new DraftNotFoundError(draftId);
+    if (Number(current.revision) !== expectedRevision) {
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${Number(current.revision)}`
+      );
+    }
+    const currentDocument = assembleRowDocument(current);
+    const materialized = assembleStoredDomainDocuments({ document });
+    assertNoWriteOnceDrift(
+      currentDocument, materialized, "stored draft document"
+    );
+    const documentJson = serializeDraftDocument(materialized);
+    const previousAssembled = serializeDraftDocument(currentDocument);
+    const domains = storedDomainDocuments(materialized);
+    const contentHash = draftContentHash(documentJson);
+    const now = new Date().toISOString();
+    const requestGuard = requestId == null ? "" : `
+      AND EXISTS (
+        SELECT 1 FROM puzzle_board_limit_waiver_requests
+        WHERE id = ? AND draft_id = ? AND status = 'pending'
+      )`;
+    const bindings = [
+      typeof materialized.id === "string" ? materialized.id : null,
+      typeof materialized.title === "string" ? materialized.title : null,
+      documentJson,
+      contentHash,
+      now,
+      domains.content,
+      domains.pedagogy,
+      domains.classification,
+      domains.provenance,
+      domains.administration,
+      draftId,
+      owner.subject,
+      expectedRevision,
+      ...(requestId == null ? [] : [requestId, draftId])
+    ];
+    let results;
+    try {
+      results = await this.database.batch([
+        this.database.prepare(`
+          UPDATE puzzle_drafts
+          SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
+              revision = revision + 1, validation_json = NULL, updated_at = ?,
+              document_stale = 0,
+              content_json = ?, pedagogy_json = ?, classification_json = ?, provenance_json = ?, administration_json = ?
+          WHERE id = ? AND owner_subject = ? AND revision = ?${requestGuard}
+        `).bind(...bindings),
+        ...auditStatements
+      ]);
+    } catch (error) {
+      rethrowMissingDomainColumn(error);
+    }
+    if (changes(results?.[0]) !== 1) {
+      const latest = await this.get({ draftId, actor });
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
+      );
+    }
+    if (previousAssembled !== documentJson) {
+      await pushWorkingCopyHistory(this.database, {
+        draftId,
+        previousDocumentJson: previousAssembled,
+        previousContentHash: current.content_hash,
+        now
+      });
+    }
+    return this.get({ draftId, actor });
+  }
+
+  async listBoardLimitWaiverRequests({ draftId, actor }) {
+    const owner = normalizeDraftActor(actor);
+    const owned = await this.database.prepare(`
+      SELECT 1 FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner.subject).first();
+    if (!owned) throw new DraftNotFoundError(draftId);
+    const result = await this.database.prepare(`
+      SELECT * FROM puzzle_board_limit_waiver_requests
+      WHERE draft_id = ? ORDER BY requested_at DESC, id DESC
+    `).bind(draftId).all();
+    return (result.results || []).map(row => ({
+      id: Number(row.id), draftId: row.draft_id, puzzleId: row.puzzle_id,
+      waiverType: row.waiver_type, scopeType: row.scope_type, targetId: row.target_id,
+      requestedValue: Number(row.requested_value),
+      scope: parsedJson(row.scope_json, "Board limit waiver request scope"),
+      reason: row.reason, status: row.status, requestedBy: row.requested_by,
+      requestedAt: row.requested_at, requestedRevision: Number(row.requested_revision),
+      decidedBy: row.decided_by || null, decidedAt: row.decided_at || null,
+      decisionNote: row.decision_note || null
+    }));
+  }
+
+  async requestBoardLimitWaiver({ draftId, waiverType, targetId, reason, actor, expectedRevision }) {
+    const draft = await this.get({ draftId, actor });
+    if (draft.revision !== expectedRevision) {
+      throw new DraftConflictError(`Draft revision conflict: expected ${expectedRevision}, current revision is ${draft.revision}`);
+    }
+    const requestScope = makeBoardLimitWaiverRequest(
+      draft.document, waiverType, targetId, reason
+    );
+    const scopeJson = JSON.stringify(requestScope.scope);
+    const owner = normalizeDraftActor(actor);
+    const requestedBy = owner.name || owner.email || owner.subject;
+    const now = new Date().toISOString();
+    const existingRequests = await this.listBoardLimitWaiverRequests({ draftId, actor });
+    const existingPending = existingRequests.find(item => item.waiverType === waiverType &&
+      item.targetId === targetId && item.status === "pending" &&
+      JSON.stringify(item.scope) === scopeJson);
+    if (existingPending?.reason === reason.trim()) return existingPending;
+    if (existingPending) {
+      await this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
+        SET status = 'superseded', decided_by = ?, decided_at = ?, decision_note = ?
+        WHERE id = ? AND draft_id = ? AND status = 'pending'`)
+        .bind(requestedBy, now, "Superseded by an updated author rationale.", existingPending.id, draftId).run();
+    }
+    await this.database.prepare(`
+      INSERT INTO puzzle_board_limit_waiver_requests
+        (draft_id, puzzle_id, waiver_type, scope_type, target_id, requested_value,
+         scope_json, reason, status, requested_by, requested_at, requested_revision)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)
+      ON CONFLICT DO NOTHING
+    `).bind(
+      draftId, draft.document.id, requestScope.waiverType, requestScope.scopeType,
+      targetId, requestScope.requestedValue, scopeJson, requestScope.reason,
+      requestedBy, now, expectedRevision
+    ).run();
+    const requests = await this.listBoardLimitWaiverRequests({ draftId, actor });
+    const request = requests.find(item => item.waiverType === waiverType &&
+      item.targetId === targetId && item.status === "pending" &&
+      JSON.stringify(item.scope) === scopeJson);
+    return request;
+  }
+
+  async decideBoardLimitWaiver({ draftId, requestId, decision, actor, expectedRevision, note = "" }) {
+    if (!["granted", "declined"].includes(decision)) throw new Error("Decision must be granted or declined.");
+    const draft = await this.get({ draftId, actor });
+    if (draft.revision !== expectedRevision) {
+      throw new DraftConflictError(`Draft revision conflict: expected ${expectedRevision}, current revision is ${draft.revision}`);
+    }
+    const request = (await this.listBoardLimitWaiverRequests({ draftId, actor }))
+      .find(item => item.id === Number(requestId));
+    if (!request || request.status !== "pending") throw new Error("That board limit waiver request is no longer pending.");
+    if (decision === "granted") {
+      let currentScope;
+      try {
+        currentScope = makeBoardLimitWaiverRequest(
+          draft.document, request.waiverType, request.targetId, request.reason
+        );
+      } catch {
+        currentScope = null;
+      }
+      if (!currentScope || currentScope.requestedValue !== request.requestedValue ||
+          JSON.stringify(currentScope.scope) !== JSON.stringify(request.scope)) {
+        throw new DraftConflictError("The board limit scope changed after the request. Refresh and request review for the current board state.");
+      }
+    }
+    const reviewer = normalizeDraftActor(actor);
+    const decidedBy = reviewer.name || reviewer.email || reviewer.subject;
+    const now = new Date().toISOString();
+    if (decision === "granted") {
+      const previous = (draft.document.boardLimitWaivers || []).some(item =>
+        item.waiverType === request.waiverType && item.targetId === request.targetId
+      );
+      const document = grantBoardLimitWaiver(
+        draft.document, request.waiverType, request.targetId, request.reason, reviewer, now
+      );
+      const nextRevision = expectedRevision + 1;
+      const auditStatements = [
+        this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
+          SET status = 'replaced', decided_by = ?, decided_at = ?, decision_note = ?
+          WHERE draft_id = ? AND waiver_type = ? AND target_id = ? AND status = 'granted' AND id != ?
+            AND EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
+          .bind(decidedBy, now, note.trim() || null, draftId, request.waiverType, request.targetId,
+            request.id, draftId, nextRevision),
+        this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
+          SET status = 'granted', decided_by = ?, decided_at = ?, decision_note = ?
+          WHERE id = ? AND draft_id = ? AND status = 'pending'
+            AND EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
+          .bind(decidedBy, now, note.trim() || null, request.id, draftId,
+            draftId, nextRevision),
+        this.database.prepare(`INSERT INTO puzzle_board_limit_waiver_events
+          (puzzle_id, waiver_type, scope_type, target_id, event_type, actor, event_at,
+           approved_value, approved_scope_json, reason, draft_id, draft_revision)
+          SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          WHERE EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)
+            AND EXISTS (SELECT 1 FROM puzzle_board_limit_waiver_requests
+              WHERE id = ? AND draft_id = ? AND status = 'granted')`)
+          .bind(draft.document.id, request.waiverType, request.scopeType, request.targetId,
+            previous ? "replaced" : "granted", decidedBy, now, request.requestedValue,
+            JSON.stringify(request.scope), request.reason, draftId, nextRevision,
+            draftId, nextRevision, request.id, draftId)
+      ];
+      const saved = await this.persistBoardLimitWaiverMutation({
+        draftId, document, actor, expectedRevision, requestId: request.id, auditStatements
+      });
+      return saved;
+    }
+    await this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
+      SET status = 'declined', decided_by = ?, decided_at = ?, decision_note = ?
+      WHERE id = ? AND draft_id = ? AND status = 'pending'`)
+      .bind(decidedBy, now, note.trim() || null, request.id, draftId).run();
+    return this.get({ draftId, actor });
+  }
+
+  async grantBoardLimitWaiverDirect({ draftId, waiverType, targetId, reason, actor, expectedRevision }) {
+    const request = await this.requestBoardLimitWaiver({
+      draftId, waiverType, targetId, reason, actor, expectedRevision
+    });
+    return this.decideBoardLimitWaiver({
+      draftId, requestId: request.id, decision: "granted", actor, expectedRevision
+    });
+  }
+
+  async revokeBoardLimitWaiver({ draftId, waiverType, targetId, actor, expectedRevision, note = "" }) {
+    const policy = boardLimitWaiverPolicy(waiverType);
+    if (!policy) throw new Error(`Unsupported board limit waiver type: ${waiverType}`);
+    const draft = await this.get({ draftId, actor });
+    if (draft.revision !== expectedRevision) {
+      throw new DraftConflictError(`Draft revision conflict: expected ${expectedRevision}, current revision is ${draft.revision}`);
+    }
+    const grant = (draft.document.boardLimitWaivers || []).find(item =>
+      item.waiverType === waiverType && item.targetId === targetId
+    );
+    if (!grant) throw new Error("There is no current grant for that board limit scope.");
+    const reviewer = normalizeDraftActor(actor);
+    const decidedBy = reviewer.name || reviewer.email || reviewer.subject;
+    const now = new Date().toISOString();
+    const document = revokeBoardLimitWaiver(draft.document, waiverType, targetId);
+    const nextRevision = expectedRevision + 1;
+    const auditStatements = [
+      this.database.prepare(`UPDATE puzzle_board_limit_waiver_requests
+        SET status = 'revoked', decided_by = ?, decided_at = ?, decision_note = ?
+        WHERE draft_id = ? AND waiver_type = ? AND target_id = ? AND status = 'granted'
+          AND EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
+        .bind(decidedBy, now, note.trim() || null, draftId, waiverType, targetId, draftId, nextRevision),
+      this.database.prepare(`INSERT INTO puzzle_board_limit_waiver_events
+        (puzzle_id, waiver_type, scope_type, target_id, event_type, actor, event_at,
+         approved_value, approved_scope_json, reason, draft_id, draft_revision)
+        SELECT ?, ?, ?, ?, 'revoked', ?, ?, ?, ?, ?, ?, ?
+        WHERE EXISTS (SELECT 1 FROM puzzle_drafts WHERE id = ? AND revision = ?)`)
+        .bind(draft.document.id, waiverType, policy.scopeType,
+          targetId, decidedBy, now, grant.approvedLimit,
+          JSON.stringify(grant.approvedScope), grant.reason, draftId, nextRevision,
+          draftId, nextRevision)
+    ];
+    return this.persistBoardLimitWaiverMutation({
+      draftId, document, actor, expectedRevision, auditStatements
+    });
   }
 
   /**
@@ -387,18 +658,21 @@ export class D1DraftRepository extends DraftRepository {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${Number(current.revision)}`
       );
     }
-    const materialized = assembleStoredDomainDocuments({ document });
+    const currentDocument = assembleRowDocument(current);
+    const materialized = assembleStoredDomainDocuments({
+      document: preserveCurrentBoardLimitWaivers(currentDocument, document)
+    });
     // Enforced at the repository, not at one caller: puzzle_id is recomputed
     // from the document on every save, so any writer that could move or drop
     // the id would split the row key from the document identity. The admin
     // board PUTs a whole document straight to this method.
     assertNoWriteOnceDrift(
-      assembleRowDocument(current),
+      currentDocument,
       materialized,
       "stored draft document"
     );
     const documentJson = serializeDraftDocument(materialized);
-    const previousAssembled = serializeDraftDocument(assembleRowDocument(current));
+    const previousAssembled = serializeDraftDocument(currentDocument);
     if (previousAssembled === documentJson && Number(current.document_stale || 0) !== 1) {
       return this.get({ draftId, actor });
     }
@@ -602,7 +876,10 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(draftId).first();
     if (!previous) throw new DraftEmptyHistoryError(draftId);
     const restored = parsedJson(previous.document, "Stored working copy");
-    const materialized = assembleStoredDomainDocuments({ document: restored });
+    const materialized = assembleStoredDomainDocuments({
+      document: restored,
+      administration: partitionAuthoredDocument(current.document).administration
+    });
     const documentJson = serializeDraftDocument(materialized);
     const domains = storedDomainDocuments(materialized);
     const contentHash = draftContentHash(documentJson);

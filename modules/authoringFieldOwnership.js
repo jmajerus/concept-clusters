@@ -92,6 +92,7 @@ export const ROOT_FIELD_OWNERSHIP = Object.freeze({
   // administrative. Agents never see or replace this object. Promoting a
   // field later moves its ownership into content or pedagogy.
   board: { domain: "administration", kind: "protected" },
+  boardLimitWaivers: { domain: "administration", kind: "protected" },
 
   provenance: { domain: "provenance", kind: "protected" },
 
@@ -261,10 +262,14 @@ export const PEDAGOGY_STORED_ROOT_FIELDS = fieldsMatching(
 // Document fields whose values are maintained outside the MCP agent contract.
 // Infrastructure-owned system values are separately carried by the draft
 // envelope and do not belong in this set.
-export const MCP_EXCLUDED_ROOT_FIELDS = fieldsMatching(
-  ROOT_FIELD_OWNERSHIP,
-  meta => meta.kind === "protected" && meta.domain !== "system"
-);
+export const MCP_EXCLUDED_ROOT_FIELDS = new Set([
+  ...fieldsMatching(
+    ROOT_FIELD_OWNERSHIP,
+    meta => meta.kind === "protected" && meta.domain !== "system"
+  ),
+  // Legacy protected root, accepted only while reading older documents.
+  "clusterTermExceptions"
+]);
 
 export const PEDAGOGY_BRIDGE_FIELDS = fieldsMatching(
   BRIDGE_FIELD_OWNERSHIP,

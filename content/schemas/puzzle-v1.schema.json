@@ -37,6 +37,10 @@
     "creator": {}, "license": { "type": "string" }, "derivedFrom": {},
     "language": { "type": "string" }, "version": {},
     "provenance": { "$ref": "#/$defs/provenance" },
+    "boardLimitWaivers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/boardLimitWaiver" }
+    },
     "layouts": { "type": "object" }
   },
   "allOf": [
@@ -50,6 +54,21 @@
     }
   ],
   "$defs": {
+    "boardLimitWaiver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["waiverType", "puzzleId", "targetId", "approvedLimit", "approvedScope", "reason", "grantedBy", "grantedAt"],
+      "properties": {
+        "waiverType": { "type": "string", "minLength": 1 },
+        "puzzleId": { "$ref": "#/$defs/slug" },
+        "targetId": { "$ref": "#/$defs/slug" },
+        "approvedLimit": { "type": "integer", "minimum": 1 },
+        "approvedScope": { "type": "object" },
+        "reason": { "$ref": "#/$defs/nonEmpty" },
+        "grantedBy": { "$ref": "#/$defs/nonEmpty" },
+        "grantedAt": { "$ref": "#/$defs/nonEmpty" }
+      }
+    },
     "nonEmpty": { "type": "string", "minLength": 1 },
     "categoryId": {
       "type": "string",
@@ -110,7 +129,7 @@
         "id": { "$ref": "#/$defs/slug" }, "name": { "$ref": "#/$defs/nonEmpty" },
         "color": { "enum": ["teal", "blue", "amber", "magenta", "olive", "brown", "cyan"] },
         "fact": { "$ref": "#/$defs/nonEmpty" },
-        "terms": { "type": "array", "minItems": 2, "maxItems": 7, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+        "terms": { "type": "array", "minItems": 2, "maxItems": 8, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
         "seeds": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true, "description": "Normally 2; 1 only for a minimum-size 2-term cluster." },
         "termInfo": { "type": "object" }, "info": { "$ref": "#/$defs/info" }
       }

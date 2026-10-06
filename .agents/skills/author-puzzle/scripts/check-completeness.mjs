@@ -5,6 +5,7 @@
 import { readFileSync } from "node:fs";
 import { NODE_CAP_XLARGE } from "../../../../modules/puzzleBoardSize.js";
 import { AUTHORING_PROFILES } from "../../../../modules/authoringProfiles.js";
+import { boardLimitWaiverErrors } from "../../../../modules/boardLimitWaivers.js";
 
 // Specialized puzzleKinds share their identifiers with the MCP authoring
 // profiles; those are the kinds with a one-cycle integrated route.
@@ -675,6 +676,12 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!clusters.length) {
     blocking.push({ id: "no-clusters", message: "Document has no clusters." });
   }
+  if (checkBoardStructure) {
+    for (const message of boardLimitWaiverErrors(document)) {
+      const id = message.match(/^\[([^\]]+)\]/)?.[1] || "board-limit-waiver";
+      blocking.push({ id, message });
+    }
+  }
 
   let termsTotal = 0;
   let termsWithNotes = 0;
@@ -710,11 +717,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
         clusters.length === 1;
       if (singleVocabularyCluster) {
         const terms = Array.isArray(cluster.terms) ? cluster.terms : [];
-        if (terms.length < 2 || terms.length > 7) {
+        if (terms.length < 2 || terms.length > 8) {
           blocking.push({
             id: "cluster-terms",
             clusterId: cluster.id || null,
-            message: `Single-cluster Vocabulary needs 2-7 terms in one terms list.`
+            message: `Single-cluster Vocabulary needs 2-8 terms in one terms list; eight requires a human-granted exception.`
           });
         }
         if (Object.hasOwn(cluster, "seeds") || Object.hasOwn(cluster, "floatingTerms")) {
@@ -734,11 +741,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
           });
         }
         const floating = cluster.floatingTerms || [];
-        if (floating.length < 1 || floating.length > 5) {
+        if (floating.length < 1 || floating.length > 6) {
           blocking.push({
             id: "cluster-floating",
             clusterId: cluster.id || null,
-            message: `Cluster "${cluster.id || "?"}" needs 1-5 floatingTerms.`
+            message: `Cluster "${cluster.id || "?"}" needs 1-6 floatingTerms.`
           });
         }
         if (seeds.length === 1 && floating.length !== 1) {
