@@ -322,6 +322,64 @@ current contract. Historical document snapshots are handled by the one-time
 cleanup described in the [implementation notes](dev-briefs/authoring-domain-scoping-implementation.md),
 not by asking an agent to preserve obsolete formats.
 
+## How we got here
+
+Each domain answered a specific problem with the arrangement before it. In
+the order they arrived:
+
+**System (August to October 2026).** The first MCP authoring drafts were single mutable
+rows (last write won), and lifecycle values such as `dateCreated`,
+`dateModified`, `version`, and `large` travelled inside the authored
+document. An agent returning a document was also returning bookkeeping it
+could not verify. That state now lives in D1 columns: a revision token for
+optimistic concurrency, a bounded undo stack, and publication clocks on the
+published row. The agent never reproduces it, so the infrastructure can rely
+on it.
+
+**Provenance (late August 2026).** Attribution began inside the document as
+`generativeAssistance` (scope, role, and date per contribution) plus a
+client-attribution list, so whoever saved the document, an agent included,
+could change or drop it. It became a compact two-axis `provenance` record
+(contributors and collaboration mode) that agents cannot write, stamped by
+the server for recognized MCP clients, with each MCP call kept separately in
+an append-only audit table. Attribution reflects who contributed rather than
+what a save happened to say.
+
+**Content and pedagogy (September 2026).** Every MCP save was a complete
+document: an agent revising one lens returned the clusters, the bridges, and
+every other field unchanged. That is the integrity burden the position paper
+describes. Splitting the document into a content projection (board and copy)
+and a pedagogy projection (relationships, lenses, lesson), each its own D1
+column with the complete document as a materialized cache, lets a pass read
+and replace only its own part while the infrastructure reassembles the rest.
+
+**Classification (October 2026).** The shelf fields (category, membership,
+subcategory, tags, level) sat inside the content and pedagogy projections, so
+moving a puzzle between categories rewrote projections that also held its
+board or its lesson. As its own projection, classification changes on its
+own, including across many puzzles at once, and reaches content and pedagogy
+as read-only context.
+
+**Administration (October 2026).** Experimental play flags began as admin
+tooling outside the document; the Star free-term strip, for example, was a
+browser-local override with export and import scripts. Nothing owned them,
+so they had no protected place in the document and no rule keeping an agent
+save away from them. The administration projection gives them one: a
+human-set object that agents never see, preserved across every domain save,
+from which a vetted field can later be promoted.
+
+**Layout (September and October 2026).** Star layouts began as exact
+positions exported from local authoring and committed to the repository. Any
+puzzle edit made them stale, and a stale layout was dropped in favour of the
+algorithmic one. They moved into D1 beside the document, first on the
+published row, then on drafts, then mode-neutral for all three renderers, so
+a layout could be saved and published without a content revision. Board size
+and the free-term strip joined them as layout settings. A saved layout now
+outlives the edits that outdate it, read as a hint or adapted rather than
+discarded; an automatic pass can give every board one without overriding an
+author's; and a board with a saved layout finishes immediately instead of
+after a live search.
+
 ## The next boundary
 
 Classification is the shelf: category, membership, subcategory, search tags,
