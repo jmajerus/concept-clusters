@@ -43,6 +43,19 @@ export async function run() {
   // Star ranks crossings first, overlaps last.
   assert.equal(defectsWorse("star", { lineCrossings: 0, overlaps: 3 }, { lineCrossings: 1, overlaps: 0 }), true);
   assert.equal(hasDefects("sets", { hardOverlaps: 0, lineCrossings: 0, lineHeadingIntersections: 0, lineCircleIntersections: 1 }), true);
+  // Star's total line-through count includes titles: clearing a title hit
+  // while adding several pill hits is worse, not better.
+  assert.equal(defectsWorse("star",
+    { lineCrossings: 0, edgeNodeIntersections: 1, edgeTitleIntersections: 1, overlaps: 0 },
+    { lineCrossings: 0, edgeNodeIntersections: 5, edgeTitleIntersections: 0, overlaps: 0 }), true);
+  // Circle weighs lines through headings and circles the same.
+  const circleBase = { hardOverlaps: 0, lineCrossings: 0 };
+  assert.equal(defectsWorse("sets",
+    { ...circleBase, lineHeadingIntersections: 1, lineCircleIntersections: 0 },
+    { ...circleBase, lineHeadingIntersections: 0, lineCircleIntersections: 3 }), true);
+  assert.equal(defectsWorse("sets",
+    { ...circleBase, lineHeadingIntersections: 1, lineCircleIntersections: 0 },
+    { ...circleBase, lineHeadingIntersections: 0, lineCircleIntersections: 1 }), false);
   assert.equal(hasDefects("graph", clean), false);
 
   // Crafted: net counted drags reach the threshold, per mode.
@@ -59,6 +72,12 @@ export async function run() {
   // Malformed records read as no effort.
   assert.deepEqual(normalizeEffort(null), {});
   assert.deepEqual(normalizeEffort({ graph: { kept: -1, worsened: "x" }, bogus: { kept: 3 } }), {});
+  // One bad counter voids that mode's record rather than leaving the
+  // valid-looking part to make the board count as crafted.
+  assert.deepEqual(normalizeEffort({ graph: { kept: 3, worsened: "x" } }), {});
+  assert.deepEqual(normalizeEffort({ graph: { kept: 3, worsened: 0 }, star: { kept: 2, buildKept: 1.5 } }), {
+    graph: { kept: 3, worsened: 0, buildKept: 0, buildWorsened: 0 }
+  });
   assert.deepEqual(normalizeEffort({ star: { kept: 2 } }), {
     star: { kept: 2, worsened: 0, buildKept: 0, buildWorsened: 0 }
   });

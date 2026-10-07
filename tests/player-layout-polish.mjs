@@ -175,6 +175,18 @@ export async function run(page, baseURL) {
         `${mode}: repair moved ${shifted.length} items (reported ${reported}): ${shifted.join(", ")}`);
     }
 
+    // Star: a crafted board left "animated" by an earlier detangle still
+    // keeps the player's arrangement on the next polish.
+    if (mode === "star") {
+      await solveAsPlayer(page, baseURL, mode, moves);
+      await page.evaluate(() => window.CC.state.detangle());
+      await page.waitForFunction(() => window.CC.state.solutionLayout === "animated", null, { timeout: 60000 });
+      await page.evaluate(() => { window.CC.state.layoutEffort = { star: { kept: 3, worsened: 0 } }; });
+      await polish(page);
+      assert.match(await page.textContent("#message"), /Your layout kept/, "star: an animated crafted board was replaced");
+      assert.notEqual(await page.evaluate(() => window.CC.state.layoutSource?.kind), "fixed");
+    }
+
     // A board nobody arranged polishes straight to the saved layout.
     await solveAsPlayer(page, baseURL, mode, moves);
     await page.evaluate(({ mode, layout }) => {

@@ -33,9 +33,7 @@ import {
   rectsOverlap,
   segmentFromPoints,
   segmentIntersectionPoint,
-  segmentIntersectsRect,
   segmentRectIntersectionPoint,
-  segmentsIntersect,
   visibleSegmentLengthOutsidePills
 } from "./geometry.js";
 import {
@@ -255,8 +253,11 @@ export function createStarRenderer({
 
     // A light count of the board's defects, available as soon as the board
     // exists. The detangler's own evaluation (authoringLayoutMetrics) takes
-    // over once it has run; until then this lets a player's post-solve drag
-    // be judged better or worse (playerLayoutEffort.js).
+    // over once it has run; until then this lets a player's drag be judged
+    // better or worse (playerLayoutEffort.js). It uses the same geometry as
+    // the detangler's evaluateLayout -- line-through clearance 4, overlap
+    // padding 4 on each pill, titles included in edgeNodeIntersections --
+    // so a drag scores the same either side of the first detangle.
     const liveLayoutMetrics = () => {
       const edges = displayedLinks().map(link => ({
         source: link.source,
@@ -269,19 +270,19 @@ export function createStarRenderer({
           const a = edges[i], b = edges[j];
           if (a.source === b.source || a.source === b.target ||
               a.target === b.source || a.target === b.target) continue;
-          if (segmentsIntersect(segments[i], segments[j])) lineCrossings++;
+          if (segmentIntersectionPoint(segments[i], segments[j])) lineCrossings++;
         }
         allLayoutNodes.forEach(node => {
           if (node === edges[i].source || node === edges[i].target) return;
-          if (!segmentIntersectsRect(segments[i], centeredRect(node, node.w, 30, 2))) return;
+          if (!segmentRectIntersectionPoint(segments[i], centeredRect(node, node.w, 30), 4)) return;
+          edgeNodeIntersections++;
           if (node.isTitleNode) edgeTitleIntersections++;
-          else edgeNodeIntersections++;
         });
       }
       for (let i = 0; i < allLayoutNodes.length; i++) {
         for (let j = i + 1; j < allLayoutNodes.length; j++) {
           const a = allLayoutNodes[i], b = allLayoutNodes[j];
-          if (rectsOverlap(centeredRect(a, a.w, 30), centeredRect(b, b.w, 30), 4)) overlaps++;
+          if (rectsOverlap(centeredRect(a, a.w, 30, 4), centeredRect(b, b.w, 30, 4))) overlaps++;
         }
       }
       return { lineCrossings, edgeTitleIntersections, edgeNodeIntersections, overlaps, overlappingPairs: [] };
@@ -1011,8 +1012,16 @@ export function createStarRenderer({
         };
       };
 
-      const compareMoves = (a, b) =>
-        a.after.crossingCount - b.after.crossingCount ||
+      // Set by run() for a board the player arranged: moves are then ranked
+      // by the defects they leave and how far they travel, with no spacing
+      // or fan preferences that could pick a farther move.
+      let preservingPlayerLayout = false;
+      const compareMoves = (a, b) => preservingPlayerLayout
+        ? a.after.crossingCount - b.after.crossingCount ||
+          a.after.edgeNodeIntersectionCount - b.after.edgeNodeIntersectionCount ||
+          a.after.overlaps - b.after.overlaps ||
+          a.distance - b.distance
+        : a.after.crossingCount - b.after.crossingCount ||
         a.after.edgeNodeIntersectionCount - b.after.edgeNodeIntersectionCount ||
         a.after.overlaps - b.after.overlaps ||
         a.after.shortVisibleBridgeLegCount - b.after.shortVisibleBridgeLegCount ||
@@ -1488,6 +1497,7 @@ export function createStarRenderer({
         const toSaved = state.completedViaShowSolution || !!state.polishToSaved;
         state.preservePlayerLayout = false;
         state.polishToSaved = false;
+        preservingPlayerLayout = preserve;
         if (!preserve && toSaved && savedStarTargets()) {
           state.solutionLayout = "animated";
           updateSolutionHint();

@@ -12,12 +12,22 @@
 // positions and only repairs actual defects; a board nobody arranged
 // polishes straight to the saved layout.
 
-// Defects in each mode, most severe first, as the engines rank them.
+// Defects in each mode as severity tiers, most severe first, the way each
+// engine ranks them: Graph's scoreGraphGeometry, Circle's
+// scoreCircleCandidate (lines through headings and through circles weigh
+// the same, so they share a tier), and Star's detangle compareLayouts
+// (whose edgeNodeIntersections already counts lines through titles). A
+// tier listing several metrics compares their sum.
 export const LAYOUT_DEFECTS = Object.freeze({
   graph: ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"],
-  sets: ["hardOverlaps", "lineCrossings", "lineHeadingIntersections", "lineCircleIntersections"],
-  star: ["lineCrossings", "edgeTitleIntersections", "edgeNodeIntersections", "overlaps"]
+  sets: ["hardOverlaps", "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
+  star: ["lineCrossings", "edgeNodeIntersections", "overlaps"]
 });
+
+function tierCount(metrics, tier) {
+  const keys = Array.isArray(tier) ? tier : [tier];
+  return keys.reduce((sum, key) => sum + (Number(metrics?.[key]) || 0), 0);
+}
 
 // Board units a pill must travel for a drag to count as deliberate rather
 // than a nudge or a tap that wandered.
@@ -35,8 +45,8 @@ const COUNT_KEYS = ["kept", "worsened", "buildKept", "buildWorsened"];
 
 /** True when `after` has more defects than `before`, most severe first. */
 export function defectsWorse(mode, before, after) {
-  for (const key of LAYOUT_DEFECTS[mode] || []) {
-    const was = Number(before?.[key]) || 0, now = Number(after?.[key]) || 0;
+  for (const tier of LAYOUT_DEFECTS[mode] || []) {
+    const was = tierCount(before, tier), now = tierCount(after, tier);
     if (was !== now) return now > was;
   }
   return false;
@@ -44,7 +54,7 @@ export function defectsWorse(mode, before, after) {
 
 /** True when the metrics show any defect at all. */
 export function hasDefects(mode, metrics) {
-  return (LAYOUT_DEFECTS[mode] || []).some(key => (Number(metrics?.[key]) || 0) > 0);
+  return (LAYOUT_DEFECTS[mode] || []).some(tier => tierCount(metrics, tier) > 0);
 }
 
 /**
@@ -57,18 +67,22 @@ export function classifyDrag({ mode, before, after, displacement }) {
   return defectsWorse(mode, before, after) ? "worsened" : "kept";
 }
 
-function count(value) {
-  return Number.isInteger(value) && value >= 0 ? value : 0;
-}
+const validCount = value => Number.isInteger(value) && value >= 0;
 
-/** Effort as stored in a player session; anything malformed reads as none. */
+/**
+ * Effort as stored in a player session. A mode whose record has any
+ * invalid counter reads as no effort for that mode -- a partly corrupt
+ * record must never be what makes a board count as the player's.
+ * Omitted counters are zero.
+ */
 export function normalizeEffort(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   const effort = {};
   Object.keys(LAYOUT_DEFECTS).forEach(mode => {
     const entry = value[mode];
-    if (!entry || typeof entry !== "object") return;
-    const counts = Object.fromEntries(COUNT_KEYS.map(key => [key, count(entry[key])]));
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return;
+    if (COUNT_KEYS.some(key => entry[key] !== undefined && !validCount(entry[key]))) return;
+    const counts = Object.fromEntries(COUNT_KEYS.map(key => [key, entry[key] ?? 0]));
     if (COUNT_KEYS.some(key => counts[key])) effort[mode] = counts;
   });
   return effort;

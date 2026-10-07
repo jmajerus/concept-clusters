@@ -1987,7 +1987,14 @@ export function createSetRenderer({
         const animated = await animatePositionTargets({
           targets,
           duration: layoutTransitionDuration(450),
-          render: repositionAll,
+          // A pinned bridge is drawn from its pin, so carry the pin along
+          // with each interpolated step or it would jump at the end.
+          render: () => {
+            targets.forEach((_, node) => {
+              if (node.fx != null) { node.fx = node.x; node.fy = node.y; }
+            });
+            repositionAll();
+          },
           isCurrent: () => getState() === state,
           resetVelocity: true
         });

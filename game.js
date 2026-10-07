@@ -918,11 +918,18 @@ showSolutionBtn.addEventListener("click", () => {
   // board polishes straight to the saved layout when there is one.
   const crafted = !!state && isCrafted(state.layoutEffort, mode);
   if (mode === "star" && state && state.made === state.need) {
-    if (state.solutionLayout === "animated" && state.prettyPrint) {
+    if (crafted && state.detangle && ["animated", null, undefined].includes(state.solutionLayout)) {
+      // Checked first: an earlier pass (a detangle, or the one before
+      // lenses) can leave the board "animated", whose next step would
+      // otherwise replace the player's arrangement.
+      state.preservePlayerLayout = true;
+      state.polishToSaved = false;
+      state.detangle();
+    } else if (state.solutionLayout === "animated" && state.prettyPrint) {
       state.prettyPrint();
     } else if (!state.solutionLayout && state.detangle) {
-      state.preservePlayerLayout = crafted;
-      state.polishToSaved = !crafted;
+      state.preservePlayerLayout = false;
+      state.polishToSaved = true;
       state.detangle();
     } else {
       showSolution();
