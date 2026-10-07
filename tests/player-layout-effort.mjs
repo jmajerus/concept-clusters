@@ -1,0 +1,76 @@
+import assert from "node:assert/strict";
+import {
+  CRAFTED_DRAGS,
+  DELIBERATE_DRAG,
+  classifyDrag,
+  defectsWorse,
+  hasDefects,
+  isCrafted,
+  normalizeEffort,
+  recordDrag
+} from "../modules/playerLayoutEffort.js";
+import { loadPlayerSession, playerSessionKey, savePlayerSession } from "../modules/playerSessionStore.js";
+
+export const name = "player layout effort: deliberate drags, kept or worsened, decide whose layout it is";
+
+function memoryStorage() {
+  const values = new Map();
+  return {
+    getItem: key => (values.has(key) ? values.get(key) : null),
+    setItem: (key, value) => values.set(key, String(value)),
+    removeItem: key => values.delete(key)
+  };
+}
+
+export async function run() {
+  const clean = { hardOverlaps: 0, lineCrossings: 0, edgeNodeIntersections: 0 };
+  const crossed = { ...clean, lineCrossings: 1 };
+  const obstructed = { ...clean, edgeNodeIntersections: 2 };
+
+  // A nudge is not a decision.
+  assert.equal(classifyDrag({ mode: "graph", before: clean, after: clean, displacement: DELIBERATE_DRAG - 1 }), null);
+  // Taste counts: spreading lines apart changes no defect.
+  assert.equal(classifyDrag({ mode: "graph", before: clean, after: clean, displacement: 80 }), "kept");
+  // So does fixing something.
+  assert.equal(classifyDrag({ mode: "graph", before: crossed, after: clean, displacement: 40 }), "kept");
+  // Making it worse counts against.
+  assert.equal(classifyDrag({ mode: "graph", before: clean, after: crossed, displacement: 40 }), "worsened");
+  // Severity order: trading a crossing for two lines through pills is not worse.
+  assert.equal(defectsWorse("graph", crossed, obstructed), false);
+  assert.equal(defectsWorse("graph", obstructed, crossed), true);
+  // Star ranks crossings first, overlaps last.
+  assert.equal(defectsWorse("star", { lineCrossings: 0, overlaps: 3 }, { lineCrossings: 1, overlaps: 0 }), true);
+  assert.equal(hasDefects("sets", { hardOverlaps: 0, lineCrossings: 0, lineHeadingIntersections: 0, lineCircleIntersections: 1 }), true);
+  assert.equal(hasDefects("graph", clean), false);
+
+  // Crafted: net counted drags reach the threshold, per mode.
+  let effort = {};
+  for (let i = 0; i < CRAFTED_DRAGS - 1; i++) effort = recordDrag(effort, "graph", "kept");
+  assert.equal(isCrafted(effort, "graph"), false);
+  effort = recordDrag(effort, "graph", "kept");
+  assert.equal(isCrafted(effort, "graph"), true);
+  assert.equal(isCrafted(effort, "star"), false, "effort is per mode");
+  effort = recordDrag(effort, "graph", "worsened");
+  assert.equal(isCrafted(effort, "graph"), false, "a worsening drag counts against");
+  assert.deepEqual(recordDrag(effort, "graph", null), effort);
+
+  // Malformed records read as no effort.
+  assert.deepEqual(normalizeEffort(null), {});
+  assert.deepEqual(normalizeEffort({ graph: { kept: -1, worsened: "x" }, bogus: { kept: 3 } }), {});
+  assert.deepEqual(normalizeEffort({ star: { kept: 2 } }), { star: { kept: 2, worsened: 0 } });
+
+  // Stored with the player's session, and a bad record never costs the session.
+  const storage = memoryStorage();
+  const puzzle = { id: "effort-lab", clusters: [{ name: "A", terms: ["a", "b"] }], bridges: [] };
+  assert.equal(savePlayerSession(storage, puzzle, {
+    currentMode: "graph",
+    layouts: {},
+    effort: { graph: { kept: 3, worsened: 1 } }
+  }), true);
+  assert.deepEqual(loadPlayerSession(storage, puzzle).effort, { graph: { kept: 3, worsened: 1 } });
+  const raw = JSON.parse(storage.getItem(playerSessionKey(puzzle)));
+  storage.setItem(playerSessionKey(puzzle), JSON.stringify({ ...raw, effort: "corrupt" }));
+  const recovered = loadPlayerSession(storage, puzzle);
+  assert.ok(recovered, "session survives a malformed effort record");
+  assert.deepEqual(recovered.effort, {});
+}

@@ -135,6 +135,8 @@ import * as circleMemberOrder from "./circle-member-order.mjs";
 import * as layoutHints from "./layout-hints.mjs";
 import * as layoutBoardSettings from "./layout-board-settings.mjs";
 import * as graphLayoutRepair from "./graph-layout-repair.mjs";
+import * as playerLayoutEffort from "./player-layout-effort.mjs";
+import * as playerLayoutPolish from "./player-layout-polish.mjs";
 import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
@@ -153,7 +155,7 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, graphLayoutRepair, singleClusterLayout,
+  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -173,7 +175,7 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
-  circleMemberOrder, layoutHints, layoutBoardSettings, graphLayoutRepair, singleClusterLayout,
+  circleMemberOrder, layoutHints, layoutBoardSettings, graphLayoutRepair, playerLayoutEffort, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
@@ -199,7 +201,7 @@ const sideTests = {
     learningIntroductionEngine, learningLevel, domainCatalogues,
     multiCategory, subcategories, domains, infoLinks,
     librarySearch, librarySearchEngine, boot, puzzleManifest, publicPlay,
-    starFreeStrip, starBridgePreconnect, playCorpus, publicPlayBrowser, geometryVisibleSegment, circleMemberOrder, graphLayoutRepair, singleClusterLayout
+    starFreeStrip, starBridgePreconnect, playCorpus, publicPlayBrowser, geometryVisibleSegment, circleMemberOrder, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, singleClusterLayout
   ]),
   authoring: new Set([
     mcpAuthoringDomains, starLayoutAuthoring, layoutAuthoringModes,

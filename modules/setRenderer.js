@@ -53,6 +53,7 @@ import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
 import { layoutBudget } from "./layoutBudget.js";
+import { defectsWorse, hasDefects } from "./playerLayoutEffort.js";
 import {
   angleDistance,
   circleLayoutHint,
@@ -1281,6 +1282,7 @@ export function createSetRenderer({
         }
         const node = state.setLayout.csNodes[d.ci];
         node.fx = node.x; node.fy = node.y;
+        state.onPlayerDragStart?.(node);
       })
       .on("drag", (e, d) => {
         const { x, y } = keepClusterOutside(e.x, e.y, d.ci);
@@ -1309,7 +1311,10 @@ export function createSetRenderer({
         // Graph mode's own drag does for individual terms.
         if (refreshMemberOrder()) repositionAll();
         if (authoring) state.onAuthorLayoutChanged?.("drag");
-        else state.onPlayerLayoutChanged?.("player");
+        else {
+          state.onPlayerDragEnd?.(state.setLayout.csNodes[d.ci]);
+          state.onPlayerLayoutChanged?.("player");
+        }
       });
 
     clusterLayer.selectAll("g.set-cluster")
@@ -1384,6 +1389,7 @@ export function createSetRenderer({
         // already-dragged pill looks identical to a genuine tap here.
         d._dragStartX = d.x; d._dragStartY = d.y;
         d._dragStartFx = d.fx; d._dragStartFy = d.fy;
+        state.onPlayerDragStart?.(d);
         if (lensLayoutEditable(state)) {
           state.setSim.stop();
         } else if (!e.active) {
@@ -1433,7 +1439,10 @@ export function createSetRenderer({
         } else {
           if (refreshMemberOrder()) repositionAll();
           if (authoring) state.onAuthorLayoutChanged?.("drag");
-          else state.onPlayerLayoutChanged?.("player");
+          else {
+            state.onPlayerDragEnd?.(d);
+            state.onPlayerLayoutChanged?.("player");
+          }
         }
       });
 
@@ -1909,6 +1918,106 @@ export function createSetRenderer({
       reclaimStripOnSolve();
       if (!state.completedViaShowSolution) state.onPlayerLayoutChanged?.("player");
     };
+    // Polish for a board the player arranged (playerLayoutEffort.js): keep
+    // their circles and bridges where they are, and move one only when a
+    // short nudge strictly reduces defects. A board with nothing wrong
+    // stays exactly as is.
+    state.repairPlayerLayout = async () => {
+      if (state.made !== state.need) return { cancelled: true };
+      state.solutionLayout = "polishing";
+      updateSolutionHint();
+      state.setSim.stop();
+      const W = getW(), H = getH();
+      const strip = state.setLayout.stripHeight;
+      const clampCircle = node => {
+        node.x = Math.max(node.r + 24, Math.min(W - node.r - 24, node.x));
+        node.y = Math.max(strip + 24 + node.r, Math.min(H - node.r - 24, node.y));
+      };
+      const clampBridge = node => {
+        node.x = Math.max(20, Math.min(W - 20, node.x));
+        node.y = Math.max(strip + 20, Math.min(H - 20, node.y));
+      };
+      const movable = [
+        ...state.setLayout.csNodes.map(node => [node, clampCircle]),
+        ...connectedBridges(state).map(node => [node, clampBridge])
+      ];
+      const start = new Map(movable.map(([node]) => [node, { x: node.x, y: node.y }]));
+      let metrics = circleLayoutMetrics();
+      for (let round = 0; round < 6 && hasDefects("sets", metrics); round++) {
+        let improved = false;
+        for (const [node, clamp] of movable) {
+          const from = { x: node.x, y: node.y };
+          let best = null;
+          // Small steps first; a bridge dropped deep inside a circle needs
+          // to travel past its radius. A larger step only wins when it
+          // does strictly better than every smaller one.
+          for (const radius of [16, 32, 56, 84, 120, 170, 230]) {
+            for (let k = 0; k < 8; k++) {
+              node.x = from.x + radius * Math.cos(k * Math.PI / 4);
+              node.y = from.y + radius * Math.sin(k * Math.PI / 4);
+              clamp(node);
+              const trial = circleLayoutMetrics();
+              // Keep the move only when the best so far has more defects
+              // than this trial, i.e. the trial is strictly better.
+              if (defectsWorse("sets", trial, best?.metrics || metrics)) {
+                best = { x: node.x, y: node.y, metrics: trial };
+              }
+            }
+          }
+          if (best) {
+            node.x = best.x;
+            node.y = best.y;
+            metrics = best.metrics;
+            improved = true;
+          } else {
+            node.x = from.x;
+            node.y = from.y;
+          }
+        }
+        if (!improved) break;
+      }
+      const targets = new Map();
+      start.forEach((from, node) => {
+        if (Math.hypot(node.x - from.x, node.y - from.y) > 0.5) targets.set(node, { x: node.x, y: node.y });
+        node.x = from.x;
+        node.y = from.y;
+      });
+      if (targets.size) {
+        svg.classed("circle-polishing", true);
+        const animated = await animatePositionTargets({
+          targets,
+          duration: layoutTransitionDuration(450),
+          render: repositionAll,
+          isCurrent: () => getState() === state,
+          resetVelocity: true
+        });
+        if (!animated || getState() !== state) {
+          svg.classed("circle-polishing", false);
+          return { cancelled: true };
+        }
+        targets.forEach((point, node) => {
+          node.x = point.x;
+          node.y = point.y;
+          if (node.fx != null) { node.fx = node.x; node.fy = node.y; }
+        });
+        refreshMemberOrder();
+        repositionAll();
+        await afterNextPaint();
+        svg.classed("circle-polishing", false);
+      }
+      state.circleLayoutStats = { ...circleLayoutMetrics(), playerLayout: true, moved: targets.size };
+      state.solutionLayout = "pretty";
+      updateSolutionHint();
+      setMessage(
+        targets.size
+          ? "Your layout kept — only its crossings and overlaps were repaired."
+          : "Your layout kept as you arranged it.",
+        "good"
+      );
+      state.onPlayerLayoutChanged?.("automatic");
+      return state.circleLayoutStats;
+    };
+
     state.detangle = prettyPrintCircleLayout;
     state.prettyPrint = prettyPrintCircleLayout;
     state.layoutAdapter = {
