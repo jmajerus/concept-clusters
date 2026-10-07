@@ -787,4 +787,5 @@ Builds" for production deploys from `main`, or a manual deploy.
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
 6. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
 7. **Assessment mode** — no seeds shown; grade the structure students build
-9. **Touch/mobile polish** — larger hit targets, pinch-zoom on the board
+8. **Touch/mobile polish** — larger hit targets, pinch-zoom on the board
+9. **Player data export/import** — download everything the game keeps in local storage (progress, per-mode board arrangements, layout effort, learning-introduction acknowledgements) as one JSON file, and load it on another machine; standard browser download and file picker, no accounts or server. Share links already carry a single puzzle's progress, but not layouts
