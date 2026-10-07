@@ -41,6 +41,7 @@ import {
   segmentsIntersect as segmentIntersection
 } from "./geometry.js";
 import { pillWidth, bridgePoints, compareWordOrder, memberDisplayOrder } from "./puzzleGraph.js";
+import { chooseMemberOrder } from "./circleMemberOrder.js";
 import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
@@ -756,46 +757,6 @@ export function createSetRenderer({
     return state.setLayout.memberOrder?.get(ci) || memberDisplayOrder(state.puzzle.clusters[ci]);
   }
 
-  // Length of the segment from `from` towards `to` that lies inside the
-  // circle (centre c, radius r) -- the stretch an ideal line spends
-  // passing under the circle's other pills.
-  function interiorLength(from, to, c, r) {
-    const dx = to.x - from.x, dy = to.y - from.y;
-    const fx = from.x - c.x, fy = from.y - c.y;
-    const a = dx * dx + dy * dy;
-    if (a === 0) return 0;
-    const b = 2 * (fx * dx + fy * dy);
-    const k = fx * fx + fy * fy - r * r;
-    const t = (-b + Math.sqrt(Math.max(0, b * b - 4 * a * k))) / (2 * a);
-    return Math.min(1, Math.max(0, t)) * Math.sqrt(a);
-  }
-
-  // Every distinct-slot placement of `targets` into `slotCount` rows, with
-  // the remaining terms keeping their display order in the free rows.
-  function* targetPlacements(terms, targets) {
-    const rest = terms.filter(term => !targets.includes(term));
-    const slots = new Array(terms.length).fill(null);
-    function* place(i) {
-      if (i === targets.length) {
-        let next = 0;
-        yield slots.map(slot => slot ?? rest[next++]);
-        return;
-      }
-      for (let s = 0; s < slots.length; s++) {
-        if (slots[s] !== null) continue;
-        slots[s] = targets[i];
-        yield* place(i + 1);
-        slots[s] = null;
-      }
-    }
-    yield* place(0);
-  }
-
-  const MEMBER_ORDER_MAX_CANDIDATES = 5000;
-  // A new order must shorten the total interior line by at least this much,
-  // so two near-equal orders do not trade places as bridges drift.
-  const MEMBER_ORDER_HYSTERESIS = 12;
-
   // Re-stacks each circle so the terms its connected ideal lines end on
   // sit in the rows nearest where those lines enter, minimising how far
   // each line runs under other pills. Run on discrete events (repaint,
@@ -819,53 +780,26 @@ export function createSetRenderer({
         if (current) { setLayout.memberOrder.delete(ci); changed = true; }
         return;
       }
-      const c = clusterPos(ci);
       const { r } = setLayout.clusterBoxes[ci];
-      const cost = terms => {
-        const offsets = memberRowOffsets(puzzle, terms, r);
-        return arms.reduce((sum, arm) => sum + interiorLength(
-          { x: c.x, y: c.y + offsets.get(arm.term) }, arm.point, c, r
-        ), 0);
-      };
-      const terms = memberDisplayOrder(cluster);
-      const targets = [...new Set(arms.map(arm => arm.term))];
-      let best = null, bestCost = Infinity;
-      if (countPlacements(terms.length, targets.length) <= MEMBER_ORDER_MAX_CANDIDATES) {
-        for (const candidate of targetPlacements(terms, targets)) {
-          const value = cost(candidate);
-          if (value < bestCost) { best = candidate; bestCost = value; }
-        }
-      } else {
-        // Too many targets to try every placement: seat them one at a time,
-        // each in its best free row given the ones already seated.
-        let order = terms;
-        targets.forEach(target => {
-          let pick = order, pickCost = Infinity;
-          for (let s = 0; s < order.length; s++) {
-            const trial = order.filter(term => term !== target);
-            trial.splice(s, 0, target);
-            const value = cost(trial);
-            if (value < pickCost) { pick = trial; pickCost = value; }
-          }
-          order = pick;
-        });
-        best = order;
-        bestCost = cost(order);
-      }
-      const baseline = current || terms;
-      if (bestCost < cost(baseline) - MEMBER_ORDER_HYSTERESIS) {
-        setLayout.memberOrder.set(ci, best);
+      const next = chooseMemberOrder({
+        terms: memberDisplayOrder(cluster),
+        current,
+        arms,
+        center: clusterPos(ci),
+        r,
+        rowOffsets: order => memberRowOffsets(puzzle, order, r),
+        pillWidth: term => state.nodes.find(node => node.word === term)?.w ?? pillWidth(term),
+        pillHeight: PILL_H_CONST
+      });
+      if (next !== current) {
+        if (next) setLayout.memberOrder.set(ci, next);
+        else setLayout.memberOrder.delete(ci);
         changed = true;
       }
     });
     return changed;
   }
 
-  function countPlacements(n, k) {
-    let count = 1;
-    for (let i = 0; i < k; i++) count *= n - i;
-    return count;
-  }
 
   // The position a docked term or free (not-yet-connected) node sits
   // at — unchanged from before, still a deterministic formula relative

@@ -131,6 +131,7 @@ import * as infoLinks from "./info-links.mjs";
 import * as librarySearch from "./library-search.mjs";
 import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
+import * as circleMemberOrder from "./circle-member-order.mjs";
 import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
@@ -149,7 +150,7 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment, singleClusterLayout,
+  geometryVisibleSegment, circleMemberOrder, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -169,7 +170,7 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
-  singleClusterLayout,
+  circleMemberOrder, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
@@ -195,7 +196,7 @@ const sideTests = {
     learningIntroductionEngine, learningLevel, domainCatalogues,
     multiCategory, subcategories, domains, infoLinks,
     librarySearch, librarySearchEngine, boot, puzzleManifest, publicPlay,
-    starFreeStrip, starBridgePreconnect, playCorpus, publicPlayBrowser, geometryVisibleSegment, singleClusterLayout
+    starFreeStrip, starBridgePreconnect, playCorpus, publicPlayBrowser, geometryVisibleSegment, circleMemberOrder, singleClusterLayout
   ]),
   authoring: new Set([
     mcpAuthoringDomains, starLayoutAuthoring, layoutAuthoringModes,
