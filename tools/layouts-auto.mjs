@@ -42,7 +42,26 @@ const MODE_LABELS = { graph: "Graph", sets: "Circle", star: "Star" };
 const SIZE_STEP = 0.05;
 const SIZE_MAX = 1.25;
 
+// `npm run layouts:auto --all` hands npm the flag rather than the script;
+// npm passes it on as npm_config_all. Read those too, so options work with
+// or without the `--` separator.
+function npmFlags(env = process.env) {
+  const flag = name => env[`npm_config_${name}`];
+  const args = [];
+  if (flag("all") === "true") args.push("--all");
+  if (flag("write") === "true") args.push("--write");
+  // An option with a value cannot survive npm without the separator: npm
+  // keeps the flag as "true" and hands the value on as a puzzle id.
+  ["modes", "base", "lanes", "report"].forEach(name => {
+    if (flag(name) !== undefined) {
+      throw new Error(`--${name} takes a value, so put -- before the options: npm run layouts:auto -- --${name} <value> …`);
+    }
+  });
+  return args;
+}
+
 function parseArgs(argv) {
+  argv = [...npmFlags(), ...argv];
   const options = {
     ids: [],
     all: false,
@@ -72,7 +91,7 @@ function parseArgs(argv) {
     else options.ids.push(arg);
   }
   if (!options.all && !options.ids.length) {
-    throw new Error("Name one or more puzzle ids, or pass --all");
+    throw new Error("Name one or more puzzle ids, or pass --all (e.g. npm run layouts:auto -- --all)");
   }
   return options;
 }
