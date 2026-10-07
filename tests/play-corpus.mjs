@@ -356,6 +356,30 @@ export async function run(page) {
     undefined
   );
 
+  // Board settings save with the layout, beside the per-mode layouts.
+  const putBoard = async board => {
+    const response = createResponse();
+    assert.equal(await handleRequest({
+      method: "PUT",
+      url: "/admin/puzzles/lab-d1-play/layout.json",
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({ board }));
+      }
+    }, response), true);
+    return response;
+  };
+  const sizedBoard = await putBoard({ sizeFactor: 1.1 });
+  assert.equal(sizedBoard.status, 200, sizedBoard.body);
+  const afterBoard = (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout;
+  assert.equal(afterBoard.board.sizeFactor, 1.1);
+  assert.equal(afterBoard.board.source, "author");
+  assert.ok(afterBoard.modes.star && afterBoard.modes.graph, "a board save keeps the mode layouts");
+  assert.equal((await putBoard({ sizeFactor: 1.13 })).status, 400);
+  const autoBoard = await putBoard({ sizeFactor: 1.2, source: "auto" });
+  assert.equal(autoBoard.status, 409, autoBoard.body);
+  assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.sizeFactor, 1.1);
+
   for (const [mode, modeLayout] of [
     ["graph", { ...graphLayout, metrics: { ...graphLayout.metrics, lineCrossings: 1 } }],
     ["sets", { ...circleLayout, metrics: { ...circleLayout.metrics, lineCrossings: 1 } }]
@@ -446,17 +470,18 @@ export async function run(page) {
       }, clearDraftMode), true);
       assert.equal(clearDraftMode.status, 200, clearDraftMode.body);
     }
-    assert.deepEqual(
-      (await draftStore.getDraft("lab-d1-play-draft")).layout,
-      emptyLayoutDocument()
-    );
+    // Clearing every mode leaves the inherited board settings in place:
+    // they are not a mode layout.
+    const clearedLayout = (await draftStore.getDraft("lab-d1-play-draft")).layout;
+    assert.deepEqual(clearedLayout.modes, emptyLayoutDocument().modes);
+    assert.equal(clearedLayout.board.sizeFactor, 1.1);
     const clearedDraftLayout = createResponse();
     assert.equal(await handleExistingDraft({
       method: "GET",
       url: "/admin/drafts/lab-d1-play-draft/layout.json",
       headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
     }, clearedDraftLayout), true);
-    assert.deepEqual(JSON.parse(clearedDraftLayout.body).layout, emptyLayoutDocument());
+    assert.deepEqual(JSON.parse(clearedDraftLayout.body).layout, clearedLayout);
   } finally {
     await rm(existingDraftDirectory, { recursive: true, force: true });
   }

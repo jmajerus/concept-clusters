@@ -734,25 +734,13 @@ export async function run() {
     contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high" }]
   });
 
-  const stripped = applyDraftFieldValue(document, {
-    section: "board",
-    field: "starFreeStrip",
-    value: "true"
-  }, "true");
-  assert.equal(stripped.board.starFreeStrip, true);
-  const both = applyDraftFieldValue(stripped, {
+  const preconnected = applyDraftFieldValue(document, {
     section: "board",
     field: "bridgePreconnect",
     value: "true"
   }, "true");
-  assert.deepEqual(both.board, { starFreeStrip: true, bridgePreconnect: true });
-  const automatic = applyDraftFieldValue(both, {
-    section: "board",
-    field: "starFreeStrip",
-    value: ""
-  }, "");
-  assert.deepEqual(automatic.board, { bridgePreconnect: true });
-  const omitted = applyDraftFieldValue(automatic, {
+  assert.deepEqual(preconnected.board, { bridgePreconnect: true });
+  const omitted = applyDraftFieldValue(preconnected, {
     section: "board",
     field: "bridgePreconnect",
     value: ""
@@ -764,24 +752,12 @@ export async function run() {
     value: "true"
   }, "true");
   assert.deepEqual(traced.board, { lensFlowTrace: true });
-  const sized = applyDraftFieldValue(omitted, {
-    section: "board",
-    field: "sizeFactor",
-    value: "1.2"
-  }, "1.2");
-  assert.equal(sized.board.sizeFactor, 1.2);
-  const derivedSize = applyDraftFieldValue(sized, {
-    section: "board",
-    field: "sizeFactor",
-    value: ""
-  }, "");
-  assert.equal(derivedSize.board, undefined);
-  assert.throws(
-    () => applyDraftFieldValue(omitted, {
-      section: "board",
-      field: "sizeFactor",
-      value: "1.13"
-    }, "1.13"),
-    /sizeFactor/
-  );
+  // Board size and the free-term strip are layout settings: this form no
+  // longer writes them into the puzzle document.
+  for (const field of ["starFreeStrip", "sizeFactor"]) {
+    assert.throws(
+      () => applyDraftFieldValue(omitted, { section: "board", field, value: "true" }, "true"),
+      new RegExp(`Unknown field "${field}"`)
+    );
+  }
 }

@@ -35,6 +35,7 @@ export function createLayoutAuthoringController({
   showSolution,
   saveLayout = null,
   saveBoardFlags = null,
+  saveLayoutBoard = null,
   getDraftId = () => null,
   previewBoardSize = null
 }) {
@@ -469,14 +470,22 @@ export function createLayoutAuthoringController({
     }
   });
 
+  // Bridge pre-connect changes play, so it stays on the working copy.
   function workingCopyCanWriteBoard() {
     return adminMode && typeof saveBoardFlags === "function" && Boolean(getDraftId());
+  }
+
+  // Board size and the Star free-term strip are layout settings: they save
+  // with the layout, to the open working copy or else the published puzzle.
+  const LAYOUT_BOARD_FLAGS = new Set(["sizeFactor", "starFreeStrip"]);
+  function layoutCanWriteBoard() {
+    return adminMode && typeof saveLayoutBoard === "function";
   }
 
   function setBoardFlagStatus(text) {
     if (!adminLayoutHintEl) return;
     adminLayoutHintEl.textContent = text ||
-      "Final layout: Prepare → drag → Save Layout on the authoring server; cue the puzzle for the next Freeze when it is ready for production. Free-term strip, bridge pre-connect, and board size save on the open working copy.";
+      "Final layout: Prepare → drag → Save Layout, once per mode. Board size and the free-term strip save with the layout, to the open draft or else the published puzzle. Bridge pre-connect saves on the open working copy.";
   }
 
   function setBoardControlsDisabled(disabled) {
@@ -494,7 +503,7 @@ export function createLayoutAuthoringController({
 
   function syncBoardSizeControl() {
     const state = getState();
-    const canWrite = workingCopyCanWriteBoard();
+    const canWrite = layoutCanWriteBoard();
     if (boardSizeFactorEl) boardSizeFactorEl.hidden = !canWrite;
     if (!boardSizeFactorInput || !state?.puzzle || !canWrite) return;
     const factor = boardSizeFactor(state.puzzle);
@@ -507,12 +516,21 @@ export function createLayoutAuthoringController({
 
   async function persistBoardFlag(key, value, reload) {
     const state = getState();
-    if (!state?.puzzle || !workingCopyCanWriteBoard()) return;
-    const board = boardWithFlag(state.puzzle, key, value);
+    const viaLayout = LAYOUT_BOARD_FLAGS.has(key);
+    if (!state?.puzzle || !(viaLayout ? layoutCanWriteBoard() : workingCopyCanWriteBoard())) return;
     setBoardControlsDisabled(true);
     try {
-      await saveBoardFlags({ board });
-      if (key === "sizeFactor") savedSizeFactor = typeof value === "number" && value !== 1 ? value : 1;
+      if (viaLayout) {
+        // An explicit value, even the default (null), records the author's
+        // choice so the automatic layout pass leaves it alone.
+        state.puzzle.layout = await saveLayoutBoard({
+          puzzleId: state.puzzle.id,
+          board: { [key]: value === undefined ? null : value }
+        });
+      } else {
+        await saveBoardFlags({ board: boardWithFlag(state.puzzle, key, value) });
+      }
+      if (key === "sizeFactor") savedSizeFactor = typeof value === "number" ? value : 1;
       if (typeof reload === "function") reload();
       else setBoardControlsDisabled(false);
     } catch (error) {
@@ -528,20 +546,24 @@ export function createLayoutAuthoringController({
 
   function syncStarFreeStripButtons() {
     const state = getState();
-    const canWrite = workingCopyCanWriteBoard();
-    if (starFreeStripBtn) starFreeStripBtn.hidden = !canWrite;
-    if (starBridgePreconnectBtn) starBridgePreconnectBtn.hidden = !canWrite;
+    const canWriteLayout = layoutCanWriteBoard();
+    const canWriteCopy = workingCopyCanWriteBoard();
+    if (starFreeStripBtn) starFreeStripBtn.hidden = !canWriteLayout;
+    if (starBridgePreconnectBtn) starBridgePreconnectBtn.hidden = !canWriteCopy;
     syncBoardSizeControl();
-    if (!state?.puzzle || !canWrite) return;
-    const board = boardSize();
-    const enabled = starFreeStripEnabled(state.puzzle, board);
-    starFreeStripBtn.textContent = enabled
-      ? "Clear free-term strip"
-      : "Use free-term strip";
-    const preconnect = starBridgePreconnectEnabled(state.puzzle);
-    starBridgePreconnectBtn.textContent = preconnect
-      ? "Clear bridge pre-connect"
-      : "Pre-connect bridges";
+    if (!state?.puzzle) return;
+    if (canWriteLayout && starFreeStripBtn) {
+      const enabled = starFreeStripEnabled(state.puzzle, boardSize());
+      starFreeStripBtn.textContent = enabled
+        ? "Clear free-term strip"
+        : "Use free-term strip";
+    }
+    if (canWriteCopy && starBridgePreconnectBtn) {
+      const preconnect = starBridgePreconnectEnabled(state.puzzle);
+      starBridgePreconnectBtn.textContent = preconnect
+        ? "Clear bridge pre-connect"
+        : "Pre-connect bridges";
+    }
   }
 
   if (adminMode && !layoutAuthoringMode) {
@@ -592,7 +614,7 @@ export function createLayoutAuthoringController({
       if (boardSizeFactorReadout) {
         boardSizeFactorReadout.textContent = sizeReadout(factor, size);
       }
-      persistBoardFlag("sizeFactor", factor !== 1 ? factor : undefined, null);
+      persistBoardFlag("sizeFactor", factor, null);
     });
   }
 

@@ -133,6 +133,7 @@ import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 import * as circleMemberOrder from "./circle-member-order.mjs";
 import * as layoutHints from "./layout-hints.mjs";
+import * as layoutBoardSettings from "./layout-board-settings.mjs";
 import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
@@ -151,7 +152,7 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment, circleMemberOrder, layoutHints, singleClusterLayout,
+  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -171,7 +172,7 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
-  circleMemberOrder, layoutHints, singleClusterLayout,
+  circleMemberOrder, layoutHints, layoutBoardSettings, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
@@ -225,7 +226,7 @@ const sideTests = {
     jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema,
     categoryReferenceMigration, contentCanonicalization,
     nonCryptographicHash, skillRevisionStamp,
-    puzzleBoardSize, geometryVisibleSegment, layoutHints, wikiLinkCheck
+    puzzleBoardSize, geometryVisibleSegment, layoutHints, layoutBoardSettings, wikiLinkCheck
   ])
 };
 

@@ -43,7 +43,7 @@ import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
-import { saveLayout } from "./modules/layoutApi.js";
+import { saveLayout, saveLayoutBoard } from "./modules/layoutApi.js";
 import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
@@ -1981,6 +1981,9 @@ layoutAuthoring = createLayoutAuthoringController({
     : null,
   saveBoardFlags: playSource === "d1"
     ? args => saveBoardFlags({ ...args, draftId: overlayDraftId })
+    : null,
+  saveLayoutBoard: playSource === "d1"
+    ? args => saveLayoutBoard({ ...args, draftId: overlayDraftId })
     : null,
   getDraftId: () => overlayDraftId,
   previewBoardSize

@@ -170,8 +170,16 @@ export function boardSizeFactorChoices() {
   return choices;
 }
 
+// Board size is a layout setting: the layout document's board.sizeFactor
+// (null there means the default), else the value older puzzle documents
+// carried in their administration `board`. Kept inline rather than via
+// layoutDocument.js, which imports this module.
 export function boardSizeFactor(puzzle) {
-  const factor = canonicalBoardSizeFactor(puzzle?.board?.sizeFactor);
+  const layoutBoard = puzzle?.layout?.board;
+  const value = layoutBoard && Object.prototype.hasOwnProperty.call(layoutBoard, "sizeFactor")
+    ? layoutBoard.sizeFactor
+    : puzzle?.board?.sizeFactor;
+  const factor = canonicalBoardSizeFactor(value);
   return factor == null ? 1 : factor;
 }
 

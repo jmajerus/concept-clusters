@@ -47,9 +47,11 @@ import {
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
+  autoBoardConflict,
   autoEnvelopeConflict,
   autoLayoutConflict,
   emptyLayoutDocument,
+  layoutDocumentWithBoard,
   layoutDocumentForMode,
   layoutForMode,
   mergePublishLayout,
@@ -624,7 +626,10 @@ export function createLocalDraftReviewHandler({
             : inheritedLayout
               ? await draftStore.saveLayout({
                 draftId,
-                layout: emptyLayoutDocument()
+                // Board settings survive clearing every mode layout.
+                layout: normalizeLayoutDocument(inheritedLayout)?.board
+                  ? layoutDocumentWithBoard({}, { schemaVersion: 1, modes: {}, board: normalizeLayoutDocument(inheritedLayout).board })
+                  : emptyLayoutDocument()
               })
               : await draftStore.clearLayout(draftId);
           json(res, {
@@ -639,6 +644,43 @@ export function createLocalDraftReviewHandler({
           ? body.layout
           : body;
         const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
+        // Board settings (size, Star free-term strip) save into the layout
+        // document beside the per-mode layouts; see layoutDocumentWithBoard.
+        if (body && Object.prototype.hasOwnProperty.call(body, "board") && !mode) {
+          const incoming = body.board && typeof body.board === "object" ? body.board : {};
+          const changes = stampLayoutSaved({
+            ...incoming,
+            source: incoming.source === "auto" ? "auto" : "author"
+          });
+          const boardConflict = autoBoardConflict(changes, inheritedLayout);
+          if (boardConflict) {
+            json(res, { error: boardConflict, draftId }, 409);
+            return true;
+          }
+          const boardLayout = layoutDocumentWithBoard(changes, inheritedLayout);
+          const boardRegistry = await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor: publicationActor
+          });
+          const boardValidation = validatePublishedPuzzleLayout({
+            document: documentForEditor(record.document, { categoryRegistry: boardRegistry }),
+            layout: boardLayout,
+            categoryRegistry: boardRegistry
+          });
+          if (!boardValidation.valid) {
+            json(res, { error: "Layout is invalid", draftId, errors: boardValidation.errors }, 400);
+            return true;
+          }
+          const savedBoard = await draftStore.saveLayout({ draftId, layout: boardLayout });
+          json(res, {
+            draftId,
+            revision: savedBoard.revision,
+            layout: savedBoard.layout || boardLayout,
+            warnings: boardValidation.warnings
+          });
+          return true;
+        }
         const modePayload = mode && submitted?.modes
           ? layoutForMode(submitted, mode)
           : submitted;

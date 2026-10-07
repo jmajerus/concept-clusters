@@ -23,8 +23,10 @@ import {
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   layoutDocumentForMode,
+  autoBoardConflict,
   autoEnvelopeConflict,
   autoLayoutConflict,
+  layoutDocumentWithBoard,
   layoutForMode,
   normalizeLayoutDocument,
   stampLayoutSaved
@@ -190,6 +192,17 @@ export function createLocalPlayCorpusHandler({
         if (req.method === "DELETE") {
           const mode = requestUrl.searchParams.get("mode");
           if (!mode) {
+            // Clearing every mode layout keeps the board settings: they
+            // are a separate choice, never removed as a side effect.
+            const keptBoard = normalizeLayoutDocument(published.layout)?.board;
+            if (keptBoard) {
+              const kept = await contentDocuments.saveLayout({
+                id,
+                layout: layoutDocumentWithBoard({}, { schemaVersion: 1, modes: {}, board: keptBoard })
+              });
+              json(res, { id, revision: kept.revision, layout: kept.layout || null });
+              return true;
+            }
             const cleared = await contentDocuments.clearLayout({ id });
             json(res, { id, revision: cleared.revision, layout: null });
             return true;
@@ -209,6 +222,38 @@ export function createLocalPlayCorpusHandler({
           ? body.layout
           : body;
         const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
+        // Board settings (size, Star free-term strip) save into the layout
+        // document beside the per-mode layouts; see layoutDocumentWithBoard.
+        if (body && Object.prototype.hasOwnProperty.call(body, "board") && !mode) {
+          const incoming = body.board && typeof body.board === "object" ? body.board : {};
+          const changes = stampLayoutSaved({
+            ...incoming,
+            source: incoming.source === "auto" ? "auto" : "author"
+          });
+          const boardConflict = autoBoardConflict(changes, published.layout);
+          if (boardConflict) {
+            json(res, { error: boardConflict, id }, 409);
+            return true;
+          }
+          const boardLayout = layoutDocumentWithBoard(changes, published.layout);
+          const boardValidation = validatePublishedPuzzleLayout({
+            document: published.document,
+            layout: boardLayout,
+            categoryRegistry: undefined
+          });
+          if (!boardValidation.valid) {
+            json(res, { error: "Layout is invalid", id, errors: boardValidation.errors }, 400);
+            return true;
+          }
+          const savedBoard = await contentDocuments.saveLayout({ id, layout: boardLayout });
+          json(res, {
+            id,
+            revision: savedBoard.revision,
+            layout: savedBoard.layout || boardLayout,
+            warnings: boardValidation.warnings
+          });
+          return true;
+        }
         const { puzzle, errors } = compilePublishedPuzzle(published.document);
         if (!puzzle) {
           json(res, {
