@@ -234,11 +234,59 @@ export function createLayoutAuthoringController({
     return result.valid ? layout : null;
   }
 
+  function savedModeLayout(state) {
+    return layoutForMode(state?.puzzle?.layout, getMode()) || null;
+  }
+
+  // Solving the board runs each renderer's polish pass, which already
+  // prefers the saved layout when it validates (Star also needs it
+  // uncrossed at this size). Report which one the author got, and when the
+  // polish passed it over, still show it for repair if it fits the terms.
+  async function reconcileSavedLayout(preparingState, saved) {
+    const label = MODE_LABELS[getMode()];
+    const strict = validateAuthorLayout(saved);
+    const polishUsedSaved = getMode() === "star"
+      ? preparingState.prettyPrintStats?.source === "curated"
+      : strict.valid;
+    if (polishUsedSaved) return { text: `Loaded saved ${label} layout`, tone: "good" };
+    const loose = strict.valid ? strict : validateAuthorLayout(saved, { allowUnsafe: true });
+    if (!loose.valid) {
+      return {
+        text: `Saved ${label} layout no longer fits this board (${loose.errors.join("; ")}); generated one instead`,
+        tone: "error"
+      };
+    }
+    const applied = await preparingState.layoutAdapter.apply(saved, {
+      purpose: "authoring",
+      allowUnsafe: !strict.valid,
+      ...boardSize()
+    });
+    if (getState() !== preparingState) return null;
+    if (!applied?.valid) {
+      return {
+        text: `Saved ${label} layout could not be applied (${(applied?.errors || []).join("; ")}); generated one instead`,
+        tone: "error"
+      };
+    }
+    const problems = strict.valid
+      ? "it has line crossings at this size"
+      : strict.errors.join("; ");
+    return {
+      text: `Loaded saved ${label} layout, but players get a generated one until it is repaired and saved: ${problems}`,
+      tone: "error"
+    };
+  }
+
   async function prepareLayoutAuthoringBoard() {
     const preparingState = getState();
     if (!layoutAuthoringMode || !preparingState) return;
+    const label = MODE_LABELS[getMode()];
+    const saved = savedModeLayout(preparingState);
+    // Only a fresh solve starts from the saved layout. Prepare on an
+    // already-solved board is the explicit "generate a new one" request.
+    const fromSaved = Boolean(saved) && preparingState.made !== preparingState.need;
     layoutAuthoringPrepareBtn.disabled = true;
-    setLayoutAuthoringStatus("Preparing the generated solution…");
+    setLayoutAuthoringStatus(fromSaved ? `Loading saved ${label} layout…` : "Generating a layout…");
     try {
       let generatedLayoutPromise = null;
       if (preparingState.made !== preparingState.need) {
@@ -256,14 +304,20 @@ export function createLayoutAuthoringController({
         await preparingState.prettyPrint();
       }
       if (getState() !== preparingState) return;
-      setLayoutAuthoringStatus("Generated layout ready — drag any node to edit it.", "good");
+      const source = fromSaved
+        ? await reconcileSavedLayout(preparingState, saved)
+        : saved
+          ? { text: `Generated a new layout; the saved ${label} layout stays until you save over it`, tone: "good" }
+          : { text: `No saved ${label} layout; generated one`, tone: "good" };
+      if (!source || getState() !== preparingState) return;
+      setLayoutAuthoringStatus(`${source.text}. Drag any node to edit it.`, source.tone);
       updateLayoutAuthoringPanel();
-      if (authoringPrepared()) {
+      if (source.tone === "good" && authoringPrepared()) {
         const metrics = layoutMetrics();
         const validation = validateAuthorLayout(captureAuthorLayout());
         if (!validation.valid) {
           setLayoutAuthoringStatus(
-            `Generated layout ready — ${validation.errors.join("; ")} Drag to repair the layout before saving.`,
+            `${source.text}. ${validation.errors.join("; ")} Drag to repair the layout before saving.`,
             "error"
           );
         } else if (metricTotal(metrics, [
@@ -273,7 +327,7 @@ export function createLayoutAuthoringController({
           "lineCircleIntersections"
         ]) > 0 || metricTotal(metrics, ["overlaps", "hardOverlaps"]) > 0) {
           setLayoutAuthoringStatus(
-            "Generated layout ready — overlaps/through-pills are advisory; drag to tidy if you want, or save when it looks right.",
+            `${source.text}. Overlaps/through-pills are advisory; drag to tidy if you want, or save when it looks right.`,
             "good"
           );
         }
@@ -492,6 +546,13 @@ export function createLayoutAuthoringController({
     };
     setLayoutAuthoringStatus("");
     updateLayoutAuthoringPanel();
+    // Start from the saved override when there is one, rather than an
+    // unsolved board that hides it until Prepare.
+    if (savedModeLayout(state) && state.made !== state.need) {
+      setTimeout(() => {
+        if (getState() === state) prepareLayoutAuthoringBoard();
+      }, 0);
+    }
   }
 
   return {

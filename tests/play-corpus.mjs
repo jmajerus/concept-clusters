@@ -713,6 +713,13 @@ export async function run(page) {
       const draftModes = (await draftStore.getDraft("lab-browser-unpublished-draft")).layout?.modes || {};
       assert.ok(draftModes.star && draftModes.graph, "Graph save should keep the Star override");
 
+      // Re-entering a mode with a saved override starts from it unprompted.
+      await page.click("#mode-star");
+      await page.waitForFunction(() =>
+        window.CC?.mode === "star"
+        && document.getElementById("layout-authoring-status")?.textContent?.startsWith("Loaded saved Star layout"),
+      null, { timeout: 15000 });
+
       await page.goto(`${baseURL}/index.html?library`, { waitUntil: "networkidle" });
       await page.waitForFunction(() => window.CC?.playSource === "d1", null, { timeout: 60000 });
       assert.equal(await page.evaluate(() => CC.playSource), "d1");
