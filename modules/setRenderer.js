@@ -736,6 +736,137 @@ export function createSetRenderer({
     return getState().setLayout.csNodes[ci];
   }
 
+  // A solved circle stacks its terms in one column. Each term's vertical
+  // centre, relative to the circle's centre, for a given stacking order.
+  function memberRowOffsets(puzzle, terms, r) {
+    const offsets = new Map();
+    let y = -r + HEAD_CONST + PAD_CONST - 4 + PILL_H_CONST / 2;
+    terms.forEach(term => {
+      offsets.set(term, y);
+      y += PILL_H_CONST + PILL_GAP_CONST + (mayCarryIdealTag(puzzle, term) ? TAG_H : 0);
+    });
+    return offsets;
+  }
+
+  // Stack in display order, not the document's term order: on a
+  // pre-solved board the latter is usually the lens order. A circle with
+  // a connected ideal line may hold a geometry-chosen order instead (see
+  // refreshMemberOrder), which reveals nothing the drawn line does not.
+  function memberOrderFor(state, ci) {
+    return state.setLayout.memberOrder?.get(ci) || memberDisplayOrder(state.puzzle.clusters[ci]);
+  }
+
+  // Length of the segment from `from` towards `to` that lies inside the
+  // circle (centre c, radius r) -- the stretch an ideal line spends
+  // passing under the circle's other pills.
+  function interiorLength(from, to, c, r) {
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const fx = from.x - c.x, fy = from.y - c.y;
+    const a = dx * dx + dy * dy;
+    if (a === 0) return 0;
+    const b = 2 * (fx * dx + fy * dy);
+    const k = fx * fx + fy * fy - r * r;
+    const t = (-b + Math.sqrt(Math.max(0, b * b - 4 * a * k))) / (2 * a);
+    return Math.min(1, Math.max(0, t)) * Math.sqrt(a);
+  }
+
+  // Every distinct-slot placement of `targets` into `slotCount` rows, with
+  // the remaining terms keeping their display order in the free rows.
+  function* targetPlacements(terms, targets) {
+    const rest = terms.filter(term => !targets.includes(term));
+    const slots = new Array(terms.length).fill(null);
+    function* place(i) {
+      if (i === targets.length) {
+        let next = 0;
+        yield slots.map(slot => slot ?? rest[next++]);
+        return;
+      }
+      for (let s = 0; s < slots.length; s++) {
+        if (slots[s] !== null) continue;
+        slots[s] = targets[i];
+        yield* place(i + 1);
+        slots[s] = null;
+      }
+    }
+    yield* place(0);
+  }
+
+  const MEMBER_ORDER_MAX_CANDIDATES = 5000;
+  // A new order must shorten the total interior line by at least this much,
+  // so two near-equal orders do not trade places as bridges drift.
+  const MEMBER_ORDER_HYSTERESIS = 12;
+
+  // Re-stacks each circle so the terms its connected ideal lines end on
+  // sit in the rows nearest where those lines enter, minimising how far
+  // each line runs under other pills. Run on discrete events (repaint,
+  // drag end, settle, polish, apply), never per tick.
+  function refreshMemberOrder() {
+    const state = getState();
+    const { puzzle, setLayout } = state;
+    if (!setLayout) return false;
+    setLayout.memberOrder = setLayout.memberOrder || new Map();
+    let changed = false;
+    puzzle.clusters.forEach((cluster, ci) => {
+      const arms = [];
+      connectedBridges(state).forEach(bridge => {
+        if (!bridge.connected.includes(ci)) return;
+        const link = state.links.find(l => l.source === bridge && l.clusterIndex === ci);
+        if (!link?.ideal || !cluster.terms.includes(link.target.word)) return;
+        arms.push({ term: link.target.word, point: pillTarget(bridge) });
+      });
+      const current = setLayout.memberOrder.get(ci) || null;
+      if (!arms.length) {
+        if (current) { setLayout.memberOrder.delete(ci); changed = true; }
+        return;
+      }
+      const c = clusterPos(ci);
+      const { r } = setLayout.clusterBoxes[ci];
+      const cost = terms => {
+        const offsets = memberRowOffsets(puzzle, terms, r);
+        return arms.reduce((sum, arm) => sum + interiorLength(
+          { x: c.x, y: c.y + offsets.get(arm.term) }, arm.point, c, r
+        ), 0);
+      };
+      const terms = memberDisplayOrder(cluster);
+      const targets = [...new Set(arms.map(arm => arm.term))];
+      let best = null, bestCost = Infinity;
+      if (countPlacements(terms.length, targets.length) <= MEMBER_ORDER_MAX_CANDIDATES) {
+        for (const candidate of targetPlacements(terms, targets)) {
+          const value = cost(candidate);
+          if (value < bestCost) { best = candidate; bestCost = value; }
+        }
+      } else {
+        // Too many targets to try every placement: seat them one at a time,
+        // each in its best free row given the ones already seated.
+        let order = terms;
+        targets.forEach(target => {
+          let pick = order, pickCost = Infinity;
+          for (let s = 0; s < order.length; s++) {
+            const trial = order.filter(term => term !== target);
+            trial.splice(s, 0, target);
+            const value = cost(trial);
+            if (value < pickCost) { pick = trial; pickCost = value; }
+          }
+          order = pick;
+        });
+        best = order;
+        bestCost = cost(order);
+      }
+      const baseline = current || terms;
+      if (bestCost < cost(baseline) - MEMBER_ORDER_HYSTERESIS) {
+        setLayout.memberOrder.set(ci, best);
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  function countPlacements(n, k) {
+    let count = 1;
+    for (let i = 0; i < k; i++) count *= n - i;
+    return count;
+  }
+
   // The position a docked term or free (not-yet-connected) node sits
   // at — unchanged from before, still a deterministic formula relative
   // to its cluster (docked) or a fixed strip slot (free). A connected
@@ -750,16 +881,8 @@ export function createSetRenderer({
       const ci = n.gs[0];
       const c = clusterPos(ci);
       const { r } = state.setLayout.clusterBoxes[ci];
-      // Stack in display order, not the document's term order: on a
-      // pre-solved board the latter is usually the lens order.
-      const terms = memberDisplayOrder(state.puzzle.clusters[ci]);
-      const ti = terms.indexOf(n.word);
-      const startY = -r + HEAD_CONST + PAD_CONST - 4;
-      let dy = 0;
-      for (let i = 0; i < ti; i++) {
-        dy += PILL_H_CONST + PILL_GAP_CONST + (mayCarryIdealTag(state.puzzle, terms[i]) ? TAG_H : 0);
-      }
-      return { x: c.x, y: c.y + startY + dy + PILL_H_CONST / 2 };
+      const offset = memberRowOffsets(state.puzzle, memberOrderFor(state, ci), r).get(n.word);
+      return { x: c.x, y: c.y + offset };
     }
     // Bridge, connected: a drag writes fx/fy immediately and may leave the
     // simulation stopped (a solved board). Read the pin first so the
@@ -1185,6 +1308,7 @@ export function createSetRenderer({
         // placement convention this mode has always had for drags),
         // rather than releasing it back to the simulation the way
         // Graph mode's own drag does for individual terms.
+        if (refreshMemberOrder()) repositionAll();
         if (authoring) state.onAuthorLayoutChanged?.("drag");
         else state.onPlayerLayoutChanged?.("player");
       });
@@ -1308,6 +1432,7 @@ export function createSetRenderer({
           handleTap(d);
           setTimeout(() => el.focus(), 0);
         } else {
+          if (refreshMemberOrder()) repositionAll();
           if (authoring) state.onAuthorLayoutChanged?.("drag");
           else state.onPlayerLayoutChanged?.("player");
         }
@@ -1533,6 +1658,7 @@ export function createSetRenderer({
       state.solutionLayout = state.made === state.need && layout.solutionLayout === "pretty"
         ? "pretty"
         : null;
+      refreshMemberOrder();
       repositionAll();
       updateSolutionHint();
       return { valid: true, errors: [] };
@@ -1612,6 +1738,7 @@ export function createSetRenderer({
             node.vy = 0;
           });
           state.solutionLayout = "pretty";
+          refreshMemberOrder();
           repositionAll();
           await afterNextPaint();
           svg.classed("circle-polishing", false);
@@ -1670,6 +1797,7 @@ export function createSetRenderer({
           node.vy = 0;
         });
         state.setLayout.stripHeight = STRIP_MARGIN;
+        refreshMemberOrder();
         repositionAll();
         // Keep transform transitions disabled until the browser has
         // actually committed the exact final coordinates. In reduced
@@ -1740,6 +1868,11 @@ export function createSetRenderer({
       }
       repositionAll();
     });
+    // Bridges drift after a connection; re-stack once the board settles.
+    state.setSim.on("end.memberOrder", () => {
+      if (getState() === state && refreshMemberOrder()) repositionAll();
+    });
+    refreshMemberOrder();
     repositionAll();
 
     countEl.textContent = state.progressLabel || `${state.made} of ${state.need} links`;
