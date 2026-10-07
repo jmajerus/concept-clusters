@@ -56,6 +56,8 @@ import {
   validateStarLayoutDocument,
   validateStarPlayerLayoutDocument
 } from "./starLayoutSchema.js";
+import { layoutForMode } from "./layoutDocument.js";
+import { starLayoutTargets } from "./layoutHints.js";
 import {
   bridgeArmArrows,
   bridgeArrowPoints,
@@ -1213,10 +1215,23 @@ export function createStarRenderer({
           : null
       });
       authoringLayoutMetrics = () => layoutMetrics(evaluateLayout());
-      const targetMapForLayout = layout => new Map(
-        [...starLayoutTargetMap(layout, allLayoutNodes)]
-          .map(([node, target]) => [node, clampTarget(node, target)])
-      );
+      // A saved Star layout is never dropped for a stale revision, a new
+      // board size, or a crossing: exact when it still matches, otherwise
+      // adapted (layoutHints.js), and either way reported to authoring.
+      const savedStarTargets = () => {
+        if (state.ignoreSavedLayout) return null;
+        const layout = layoutForMode(puzzle.layout, "star") || puzzle.starLayout;
+        if (!layout) return null;
+        const board = { width: W, height: H };
+        const exact = !!publishedStarLayoutFor(puzzle, W, H);
+        const result = starLayoutTargets(layout, puzzle, allLayoutNodes, board, { exact });
+        if (!result) return null;
+        return {
+          ...result,
+          errors: exact ? null : validateStarLayoutDocument(layout, puzzle, board).errors,
+          targets: new Map([...result.targets].map(([node, target]) => [node, clampTarget(node, target)]))
+        };
+      };
 
       state.prettyPrint = () => {
         if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
@@ -1232,33 +1247,24 @@ export function createStarRenderer({
 
           const original = capturePositions();
           const originalLayout = evaluateLayout();
-          const curatedLayout = publishedStarLayoutFor(puzzle, W, H);
-          if (curatedLayout) {
-            const curatedTargets = targetMapForLayout(curatedLayout);
-            allLayoutNodes.forEach(node => {
-              const target = curatedTargets.get(node);
-              node.x = target.x; node.y = target.y;
-            });
-            const curatedGeometry = evaluateLayout();
-            restorePositions(original);
-            // Published-layout validation catches stale/malformed data. Live
-            // geometry only rejects real line crossings — residual through-
-            // pills / padded overlaps / unrelated-title clearance were the
-            // author's call when they saved the override.
-            if (curatedGeometry.crossingCount === 0) {
-              if (!await animateLayout(curatedTargets)) return { cancelled: true };
-              allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
-              state.prettyPrintStats = {
-                ...layoutMetrics(evaluateLayout()),
-                source: "curated"
-              };
-              state.solutionLayout = "pretty";
-              updateSolutionHint();
-              setMessage("Solution shown — Star layout polished.", "good");
-              state.onAuthorLayoutChanged?.("placement");
-              state.onPlayerLayoutChanged?.("automatic");
-              return state.prettyPrintStats;
-            }
+          state.layoutSource = { kind: "generated" };
+          const curated = savedStarTargets();
+          if (curated) {
+            if (!await animateLayout(curated.targets)) return { cancelled: true };
+            allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+            state.prettyPrintStats = {
+              ...layoutMetrics(evaluateLayout()),
+              source: "curated"
+            };
+            state.layoutSource = curated.exact
+              ? { kind: "fixed" }
+              : { kind: "adapted", placed: curated.placed, fixedErrors: curated.errors };
+            state.solutionLayout = "pretty";
+            updateSolutionHint();
+            setMessage("Solution shown — Star layout polished.", "good");
+            state.onAuthorLayoutChanged?.("placement");
+            state.onPlayerLayoutChanged?.("automatic");
+            return state.prettyPrintStats;
           }
 
           if (nClusters === 1) {
@@ -1433,30 +1439,14 @@ export function createStarRenderer({
         await wait(0);
         if (getState() !== state || getSim() !== sim) return { cancelled: true };
 
-        // Curated final layouts are the escape hatch for boards the
-        // detangler cannot finish quickly/cleanly. When one exists and its
-        // live geometry is not crossed, skip the multi-second settle +
-        // drag search and animate straight to the override (the polish
-        // pass players like, without the long pre-show). A live player
-        // completion keeps their arrangement and only uncrosses in place.
-        const curatedLayout = state.completedViaShowSolution
-          ? publishedStarLayoutFor(puzzle, W, H)
-          : null;
-        if (curatedLayout) {
-          const preview = capturePositions();
-          const curatedTargets = targetMapForLayout(curatedLayout);
-          allLayoutNodes.forEach(node => {
-            const target = curatedTargets.get(node);
-            node.x = target.x;
-            node.y = target.y;
-          });
-          const curatedGeometry = evaluateLayout();
-          restorePositions(preview);
-          if (curatedGeometry.crossingCount === 0) {
-            state.solutionLayout = "animated";
-            updateSolutionHint();
-            return state.prettyPrint();
-          }
+        // A saved layout is the escape hatch for boards the detangler cannot
+        // finish quickly or cleanly: skip the multi-second settle and drag
+        // search and animate straight to it. A live player completion keeps
+        // their arrangement and only uncrosses in place.
+        if (state.completedViaShowSolution && savedStarTargets()) {
+          state.solutionLayout = "animated";
+          updateSolutionHint();
+          return state.prettyPrint();
         }
 
         // Show-solution on a lone cluster otherwise spends the settle

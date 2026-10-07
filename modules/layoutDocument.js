@@ -132,3 +132,36 @@ export function serializeLayoutDocument(layout) {
   }
   return json;
 }
+
+// Save endpoints stamp each mode's layout when it is saved, so publishing
+// a working copy can tell which of two layouts for a mode is newer.
+export function stampLayoutSaved(value, savedAt = new Date().toISOString()) {
+  return value && typeof value === "object" ? { ...value, savedAt } : value;
+}
+
+/**
+ * The layout a publish should write. The working copy's layout normally
+ * wins, but a mode saved directly on the published puzzle after the
+ * working copy last saved that mode is kept, so publishing an older
+ * working copy never overwrites newer layout work. `keptPublished` lists
+ * those modes so the author can be told.
+ */
+export function mergePublishLayout(draftLayout, publishedLayout) {
+  const draft = normalizeLayoutDocument(draftLayout);
+  const published = normalizeLayoutDocument(publishedLayout);
+  if (!draft) return { layout: published ?? undefined, keptPublished: [] };
+  if (!published) return { layout: draft, keptPublished: [] };
+  const modes = { ...draft.modes };
+  const keptPublished = [];
+  Object.entries(published.modes).forEach(([mode, value]) => {
+    const mine = draft.modes[mode];
+    if (!mine) return;
+    const theirs = Date.parse(value?.savedAt || "");
+    const ours = Date.parse(mine?.savedAt || "");
+    if (Number.isFinite(theirs) && (!Number.isFinite(ours) || theirs > ours)) {
+      modes[mode] = clone(value);
+      keptPublished.push(mode);
+    }
+  });
+  return { layout: { schemaVersion: LAYOUT_DOCUMENT_SCHEMA_VERSION, modes }, keptPublished };
+}

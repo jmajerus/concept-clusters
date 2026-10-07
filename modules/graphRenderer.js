@@ -493,7 +493,6 @@ export function createGraphRenderer({
         if (!candidate || getState() !== state) return { cancelled: true };
         state.layoutSource = {
           kind: candidate.source,
-          hintRejected: !!candidate.hintRejected,
           fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null
         };
         const targets = new Map(nodes.map(node => [

@@ -55,7 +55,6 @@ import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
 import {
   angleDistance,
   circleLayoutHint,
-  fewerDefects,
   layoutIsFixed,
   rotateOffset
 } from "./layoutHints.js";
@@ -541,14 +540,12 @@ export function createSetRenderer({
   // equally good generated one. See graphLayout.js for the same rule.
   const HINT_ROTATION_PREFERENCE = 240;
   const HINT_BRIDGE_PREFERENCE = 40;
-  const CIRCLE_DEFECT_KEYS = [
-    "hardOverlaps", "lineCrossings", "lineHeadingIntersections", "lineCircleIntersections"
-  ];
 
-  // With a hint (see layoutHints.js) the hinted order is searched first,
-  // near the hinted rotation and with each bridge's saved spot as a
-  // candidate; a clean result is taken as is. Otherwise the full search
-  // runs and the hint wins unless it finds strictly fewer defects.
+  // With a hint (see layoutHints.js) only the hinted order is searched,
+  // nearest the hinted rotation and with each bridge's saved spot as a
+  // candidate, so a saved arrangement is repaired within itself and never
+  // swapped for a different order. Remaining defects are reported, not
+  // hidden by replacing the arrangement.
   function computePrettyCircleLayout(hint = null) {
     const state = getState();
     const { puzzle } = state;
@@ -567,7 +564,14 @@ export function createSetRenderer({
     // left when that fits; otherwise the ring search below can still find
     // a clean spot, and the polish animation goes there in one motion.
     if (n === 1 && completedBridges.length === 0 && !pinnedCircles.has(0)) {
-      const home = singleClusterCircleHome(csNodes[0].r, W, H, stripHeight + 24);
+      // A lone circle keeps its saved spot, held inside the board.
+      const saved = hint?.centres?.[0];
+      const home = saved
+        ? {
+          x: Math.max(csNodes[0].r + 24, Math.min(W - csNodes[0].r - 24, saved.x)),
+          y: Math.max(stripHeight + 24 + csNodes[0].r, Math.min(H - csNodes[0].r - 24, saved.y))
+        }
+        : singleClusterCircleHome(csNodes[0].r, W, H, stripHeight + 24);
       const circle = { id: csNodes[0].id, r: csNodes[0].r, ...home };
       const evaluated = scoreCircleCandidate(
         puzzle,
@@ -578,7 +582,7 @@ export function createSetRenderer({
         W,
         H
       );
-      if (evaluated.metrics.hardOverlaps === 0) {
+      if (saved || evaluated.metrics.hardOverlaps === 0) {
         return {
           score: evaluated.score,
           metrics: evaluated.metrics,
@@ -586,7 +590,7 @@ export function createSetRenderer({
           bridges: new Map(),
           order: [0],
           rotation: Math.atan2(home.y - centerY, home.x - W / 2),
-          source: "generated"
+          source: saved ? "hint" : "generated"
         };
       }
     }
@@ -744,14 +748,7 @@ export function createSetRenderer({
 
     if (hint && n > 1) {
       const hinted = search([hint.order], [hint.rotation, ...rotations], hint);
-      if (hinted && CIRCLE_DEFECT_KEYS.every(key => hinted.metrics[key] === 0)) {
-        return { ...hinted, source: "hint" };
-      }
-      const general = search(orders, rotations, null);
-      if (!hinted) return { ...general, source: "generated" };
-      return fewerDefects(general.metrics, hinted.metrics, CIRCLE_DEFECT_KEYS)
-        ? { ...general, source: "generated", hintRejected: true }
-        : { ...hinted, source: "hint" };
+      if (hinted) return { ...hinted, source: "hint" };
     }
     return { ...search(orders, rotations, null), source: "generated" };
   }
@@ -1769,7 +1766,6 @@ export function createSetRenderer({
         if (!candidate || getState() !== state) return { cancelled: true };
         state.layoutSource = {
           kind: candidate.source,
-          hintRejected: !!candidate.hintRejected,
           fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null
         };
         const targets = new Map([

@@ -269,67 +269,53 @@ export function createLayoutAuthoringController({
   // prefers the saved layout when it validates (Star also needs it
   // uncrossed at this size). Report which one the author got, and when the
   // polish passed it over, still show it for repair if it fits the terms.
-  // Graph and Circle report how they used the saved layout (see
-  // state.layoutSource in their renderers).
-  function hintSourceMessage(preparingState, saved, label) {
-    const source = preparingState.layoutSource || { kind: "generated" };
-    if (source.kind === "fixed") return { text: `Loaded saved ${label} layout (fixed positions)`, tone: "good" };
-    const outdated = source.fixedErrors?.length
-      ? `Fixed ${label} layout no longer fits (${source.fixedErrors.join("; ")}); `
-      : "";
-    if (source.kind === "hint") {
-      return {
-        text: outdated
-          ? `${outdated}used it as a hint (arrangement kept, positions recomputed)`
-          : `Loaded saved ${label} layout as a hint (arrangement kept, positions recomputed)`,
-        tone: outdated ? "error" : "good"
-      };
-    }
-    return {
-      text: source.hintRejected
-        ? `${outdated}saved ${label} arrangement gave more crossings or overlaps here than a fresh search; generated one instead`
-        : `${outdated}saved ${label} layout could not be read as a hint; generated one instead`,
-      tone: "error"
-    };
+  // Defects the shown layout still has, for the author's attention. A
+  // saved layout is shown with them rather than replaced.
+  function defectSummary(metrics) {
+    if (!metrics) return null;
+    const crossings = Number(metrics.lineCrossings) || 0;
+    const overlaps = Number(metrics.hardOverlaps ?? metrics.overlaps) || 0;
+    const parts = [
+      crossings ? `${crossings} line crossing${crossings === 1 ? "" : "s"}` : null,
+      overlaps ? `${overlaps} overlap${overlaps === 1 ? "" : "s"}` : null
+    ].filter(Boolean);
+    return parts.length ? parts.join(" and ") : null;
   }
 
-  async function reconcileSavedLayout(preparingState, saved) {
+  // Every renderer reports how it used the saved layout in
+  // state.layoutSource: exactly ("fixed"), as an arrangement ("hint",
+  // Graph and Circle), or scaled and matched to an edited puzzle
+  // ("adapted", Star). It never swaps a saved layout for a fresh one.
+  async function reconcileSavedLayout(preparingState) {
     const label = MODE_LABELS[getMode()];
-    if (modeSupportsHints()) {
-      const message = hintSourceMessage(preparingState, saved, label);
-      return { ...message, text: message.text.charAt(0).toUpperCase() + message.text.slice(1) };
-    }
-    const strict = validateAuthorLayout(saved);
-    const polishUsedSaved = getMode() === "star"
-      ? preparingState.prettyPrintStats?.source === "curated"
-      : strict.valid;
-    if (polishUsedSaved) return { text: `Loaded saved ${label} layout`, tone: "good" };
-    const loose = strict.valid ? strict : validateAuthorLayout(saved, { allowUnsafe: true });
-    if (!loose.valid) {
+    const source = preparingState.layoutSource || { kind: "generated" };
+    const outdated = source.fixedErrors?.length ? source.fixedErrors.join("; ") : null;
+    let text;
+    if (source.kind === "fixed") {
+      text = `Loaded saved ${label} layout (fixed positions)`;
+    } else if (source.kind === "hint") {
+      text = outdated
+        ? `Fixed ${label} layout no longer fits (${outdated}); kept its arrangement as a hint`
+        : `Loaded saved ${label} layout as a hint (arrangement kept, positions recomputed)`;
+    } else if (source.kind === "adapted") {
+      const placed = source.placed
+        ? `, placing ${source.placed} item${source.placed === 1 ? "" : "s"} it did not have`
+        : "";
+      text = `Saved ${label} layout no longer matches exactly (${outdated || "board or puzzle changed"}); adapted it to this board${placed}`;
+    } else {
       return {
-        text: `Saved ${label} layout no longer fits this board (${loose.errors.join("; ")}); generated one instead`,
+        text: `Saved ${label} layout could not be read (wrong puzzle or no usable positions); generated one instead`,
         tone: "error"
       };
     }
-    const applied = await preparingState.layoutAdapter.apply(saved, {
-      purpose: "authoring",
-      allowUnsafe: !strict.valid,
-      ...boardSize()
-    });
-    if (getState() !== preparingState) return null;
-    if (!applied?.valid) {
+    const defects = defectSummary(layoutMetrics());
+    if (defects) {
       return {
-        text: `Saved ${label} layout could not be applied (${(applied?.errors || []).join("; ")}); generated one instead`,
+        text: `${text}. Still at this size: ${defects}. Players see this layout as is until it is repaired and saved`,
         tone: "error"
       };
     }
-    const problems = strict.valid
-      ? "it has line crossings at this size"
-      : strict.errors.join("; ");
-    return {
-      text: `Loaded saved ${label} layout, but players get a generated one until it is repaired and saved: ${problems}`,
-      tone: "error"
-    };
+    return { text, tone: outdated || source.kind === "adapted" ? "error" : "good" };
   }
 
   async function prepareLayoutAuthoringBoard() {
@@ -368,7 +354,7 @@ export function createLayoutAuthoringController({
       }
       if (getState() !== preparingState) return;
       const source = fromSaved
-        ? await reconcileSavedLayout(preparingState, saved)
+        ? await reconcileSavedLayout(preparingState)
         : saved
           ? { text: `Generated a new layout; the saved ${label} layout stays until you save over it`, tone: "good" }
           : { text: `No saved ${label} layout; generated one`, tone: "good" };

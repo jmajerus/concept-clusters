@@ -33,13 +33,13 @@ export function layoutIsFixed(layout) {
  */
 export function validateLayoutHintShape(mode, layout, puzzle) {
   const errors = [];
-  const label = mode === "graph" ? "Graph" : "Circle";
+  const label = { graph: "Graph", sets: "Circle", star: "Star" }[mode] || mode;
   if (!isObject(layout)) return { valid: false, errors: [`${label} layout must be an object`] };
   if (layout.puzzleId !== puzzle.id) errors.push(`${label} layout puzzleId must be "${puzzle.id}"`);
   if (layout.fixed != null && typeof layout.fixed !== "boolean") {
     errors.push(`${label} layout fixed must be true or false`);
   }
-  const groups = mode === "graph" ? [["nodes", true]] : [["circles", true], ["bridges", false]];
+  const groups = mode === "sets" ? [["circles", true], ["bridges", false]] : [["nodes", true]];
   groups.forEach(([key, required]) => {
     const points = layout[key];
     if (points == null && !required) return;
@@ -50,6 +50,7 @@ export function validateLayoutHintShape(mode, layout, puzzle) {
     Object.entries(points).forEach(([name, point]) => {
       if (!finitePoint(point)) errors.push(`${name} must have finite x/y coordinates`);
     });
+    if (required && !Object.keys(points).length) errors.push(`${label} layout ${key} has no positions`);
   });
   if (mode === "sets" && layout.clusterTerms != null && !isObject(layout.clusterTerms)) {
     errors.push("Circle layout clusterTerms must be an object");
@@ -88,6 +89,10 @@ function ringHint(centres, board) {
   const known = centres
     .map((centre, ci) => (centre ? { ci, centre } : null))
     .filter(Boolean);
+  // A lone cluster has no ring to read, only its own spot.
+  if (centres.length === 1 && known.length === 1) {
+    return { order: [0], rotation: 0, angles: new Map([[0, 0]]), middle: known[0].centre };
+  }
   if (known.length < 2) return null;
   const middle = mean(known.map(entry => entry.centre));
   known.forEach(entry => { entry.angle = boardAngle(entry.centre, middle, board); });
@@ -204,7 +209,12 @@ export function circleLayoutHint(layout, puzzle, board) {
       dy: (Number(point.y) - centroid.y) * scaleY
     });
   });
-  return { order: ring.order, rotation: ring.rotation, bridgeOffsets };
+  return {
+    order: ring.order,
+    rotation: ring.rotation,
+    bridgeOffsets,
+    centres: centres.map(centre => (centre ? { x: centre.x * scaleX, y: centre.y * scaleY } : null))
+  };
 }
 
 // Turn an offset by the change in its group's angle on the ring.
@@ -213,13 +223,95 @@ export function rotateOffset(offset, angle) {
   return { x: offset.dx * cos - offset.dy * sin, y: offset.dx * sin + offset.dy * cos };
 }
 
-// Lexicographic defect comparison: the hint keeps its arrangement unless
-// the full search finds strictly fewer defects of some kind, most severe
-// first.
-export function fewerDefects(candidate, incumbent, keys) {
-  for (const key of keys) {
-    const a = candidate[key] || 0, b = incumbent[key] || 0;
-    if (a !== b) return a < b;
+
+/**
+ * Star targets from a saved Star layout, never discarding it. A layout
+ * that still matches exactly is used as is. Otherwise it is adapted:
+ * positions scale to the current board, each cluster title is matched to
+ * the saved title nearest its saved terms (so reordered clusters keep
+ * their places), and only nodes the layout never saw are placed here --
+ * terms around their cluster's title, bridges between their titles.
+ * Returns null only when the layout belongs to another puzzle or has no
+ * usable positions.
+ */
+export function starLayoutTargets(layout, puzzle, layoutNodes, board, { exact = false } = {}) {
+  if (!isObject(layout) || layout.puzzleId !== puzzle.id || !isObject(layout.nodes)) return null;
+  const saved = key => (finitePoint(layout.nodes[key])
+    ? { x: Number(layout.nodes[key].x), y: Number(layout.nodes[key].y) }
+    : null);
+  if (exact) {
+    return {
+      exact: true,
+      placed: 0,
+      targets: new Map(layoutNodes.map(node => [node, saved(node.isTitleNode ? `cluster:${node.ci}` : `term:${node.word}`)]))
+    };
   }
-  return false;
+  const savedBoard = boardOf(layout, board);
+  const sx = board.width / savedBoard.width, sy = board.height / savedBoard.height;
+  const scaled = point => (point ? { x: point.x * sx, y: point.y * sy } : null);
+  const targets = new Map();
+  let placed = 0;
+
+  const terms = layoutNodes.filter(node => !node.isTitleNode);
+  terms.forEach(node => {
+    const point = scaled(saved(`term:${node.word}`));
+    if (point) targets.set(node, point);
+  });
+
+  // Titles: the saved title nearest the centroid of the cluster's saved
+  // member terms, else the same index.
+  const savedTitles = Object.keys(layout.nodes)
+    .filter(key => key.startsWith("cluster:"))
+    .map(key => ({ key, point: scaled(saved(key)) }))
+    .filter(entry => entry.point);
+  const claimed = new Set();
+  const titles = layoutNodes.filter(node => node.isTitleNode);
+  titles.forEach(node => {
+    const members = puzzle.clusters[node.ci].terms
+      .map(word => scaled(saved(`term:${word}`)))
+      .filter(Boolean);
+    let pick = null;
+    if (members.length) {
+      const centre = mean(members);
+      savedTitles.forEach(entry => {
+        if (claimed.has(entry.key)) return;
+        const distance = Math.hypot(entry.point.x - centre.x, entry.point.y - centre.y);
+        if (!pick || distance < pick.distance) pick = { ...entry, distance };
+      });
+    } else {
+      const same = savedTitles.find(entry => entry.key === `cluster:${node.ci}` && !claimed.has(entry.key));
+      if (same) pick = same;
+    }
+    if (pick) {
+      claimed.add(pick.key);
+      targets.set(node, pick.point);
+    } else if (members.length) {
+      targets.set(node, mean(members));
+      placed++;
+    } else {
+      targets.set(node, { x: node.x, y: node.y });
+      placed++;
+    }
+  });
+
+  // Nodes the layout never saw: a term on a ring around its title, a
+  // bridge between the titles it joins.
+  const titleTarget = ci => targets.get(titles.find(node => node.ci === ci));
+  const perCluster = new Map();
+  terms.forEach(node => {
+    if (targets.has(node)) return;
+    placed++;
+    const anchors = (node.gs || []).map(titleTarget).filter(Boolean);
+    if (anchors.length > 1) {
+      targets.set(node, mean(anchors));
+      return;
+    }
+    const anchor = anchors[0] || { x: board.width / 2, y: board.height / 2 };
+    const ci = node.gs?.[0] ?? -1;
+    const slot = perCluster.get(ci) || 0;
+    perCluster.set(ci, slot + 1);
+    const angle = Math.PI / 2 + slot * 0.9;
+    targets.set(node, { x: anchor.x + 95 * Math.cos(angle), y: anchor.y + 95 * Math.sin(angle) });
+  });
+  return { exact: false, placed, targets };
 }

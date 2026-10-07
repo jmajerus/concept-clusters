@@ -8,13 +8,15 @@ import { layoutIsFixed, validateLayoutHintShape } from "./layoutHints.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { validateStarLayoutDocument } from "./starLayoutSchema.js";
 
-// Modes whose engines can use a saved layout as a hint (layoutHints.js).
+// Modes whose layouts can be marked as hints rather than fixed positions.
+// Star layouts are always fixed, but like the others are adapted rather
+// than dropped once an edit outdates them (layoutHints.js).
 const HINT_MODES = new Set(["graph", "sets"]);
 
 /**
  * A layout carried along with a content edit is checked leniently: a fixed
- * Graph or Circle layout the edit has outdated is still accepted, because
- * players get it as a hint, and `warnings` say why. `savingMode` names the
+ * layout the edit has outdated is still accepted, because players get it
+ * as a hint (Graph, Circle) or adapted (Star), and `warnings` say why. `savingMode` names the
  * mode an author is saving right now; a fixed layout for that mode must
  * match the puzzle exactly, and a hint only needs a usable shape.
  */
@@ -52,23 +54,19 @@ export function validatePublishedPuzzleLayout({
   const warnings = [];
   layouts.forEach(([mode, value]) => {
     const prefix = message => `${mode}: ${message}`;
-    if (!HINT_MODES.has(mode)) {
-      const result = validators[mode](value);
-      if (!result.valid) validationErrors.push(...result.errors.map(prefix));
-      return;
-    }
     const shape = validateLayoutHintShape(mode, value, puzzle);
     if (!shape.valid) {
       validationErrors.push(...shape.errors.map(prefix));
       return;
     }
-    if (!layoutIsFixed(value)) return;
+    if (HINT_MODES.has(mode) && !layoutIsFixed(value)) return;
     const exact = validators[mode](value);
     if (exact.valid) return;
     if (mode === savingMode) {
       validationErrors.push(...exact.errors.map(prefix));
     } else {
-      warnings.push(...exact.errors.map(error => prefix(`${error} (players get it as a hint)`)));
+      const fallback = HINT_MODES.has(mode) ? "players get it as a hint" : "players get it adapted to the edit";
+      warnings.push(...exact.errors.map(error => prefix(`${error} (${fallback})`)));
     }
   });
   return { valid: validationErrors.length === 0, errors: validationErrors, warnings };

@@ -24,7 +24,8 @@ import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   layoutDocumentForMode,
   layoutForMode,
-  normalizeLayoutDocument
+  normalizeLayoutDocument,
+  stampLayoutSaved
 } from "./layoutDocument.js";
 
 const LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/;
@@ -219,7 +220,7 @@ export function createLocalPlayCorpusHandler({
           ? layoutForMode(layout, mode)
           : layout;
         const layoutDocument = mode
-          ? layoutDocumentForMode(mode, modePayload, published.layout)
+          ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), published.layout)
           : normalizeLayoutDocument(layout);
         const validation = validatePublishedPuzzleLayout({
           document: published.document,

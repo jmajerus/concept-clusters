@@ -16,7 +16,7 @@ import {
   segmentsIntersect
 } from "./geometry.js";
 import { singleClusterTermHome } from "./lensLayout.js";
-import { angleDistance, fewerDefects, rotateOffset } from "./layoutHints.js";
+import { angleDistance, rotateOffset } from "./layoutHints.js";
 
 const PILL_H = 30;
 const SEARCH_CLUSTER_CAP = 7;
@@ -24,7 +24,6 @@ const SEARCH_CLUSTER_CAP = 7;
 // turns away from the saved rotation: enough to keep the saved look among
 // equally clean candidates, never enough to accept a real defect.
 const HINT_ROTATION_PREFERENCE = 240;
-const DEFECT_KEYS = ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"];
 const rounded = value => Math.round(value * 100) / 100;
 
 function permutationsWithFirstFixed(count) {
@@ -191,7 +190,9 @@ function seedCandidate(puzzle, nodes, anchors, width, height, hint = null) {
       const anchor = offset && anchors[offset.ci];
       const savedAngle = offset && hint.clusterAngles.get(offset.ci);
       if (!anchor || savedAngle == null) return;
-      const turned = rotateOffset(offset, (anchor.angle ?? savedAngle) - savedAngle);
+      // A lone cluster has no ring slot to turn with.
+      const turn = puzzle.clusters.length === 1 ? 0 : (anchor.angle ?? savedAngle) - savedAngle;
+      const turned = rotateOffset(offset, turn);
       positions.set(node.id, { x: anchor.x + turned.x, y: anchor.y + turned.y });
     });
   }
@@ -280,34 +281,27 @@ export function scoreGraphGeometry(nodes, links, width, height) {
 }
 
 /**
- * Best solved Graph layout. With a `hint` (see layoutHints.js), the hinted
- * cluster order is searched first near the hinted rotation with terms
- * seeded at their saved offsets; a clean result is taken as is. Otherwise
- * the full search runs, and the hint still wins unless that search finds
- * strictly fewer defects. `source` reports which one was used.
+ * Best solved Graph layout. With a `hint` (see layoutHints.js) only the
+ * hinted cluster order is searched -- across rotations, nearest the saved
+ * one, with terms seeded at their saved offsets -- so a saved arrangement
+ * is repaired within itself, never swapped for a different order. Any
+ * defect it keeps is reported by the caller, not hidden by replacing it.
+ * `source` says whether a hint was used.
  */
 export function computePrettyGraphLayout({
   d3, puzzle, nodes, links, width, height, hint = null
 }) {
-  if (hint && puzzle.clusters.length > 1) {
-    const rotations = [
-      hint.rotation,
-      ...Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12)
-    ];
+  if (hint) {
+    const rotations = puzzle.clusters.length === 1
+      ? [0]
+      : [hint.rotation, ...Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12)];
     const hinted = searchGraphLayouts({
       d3, puzzle, nodes, links, width, height,
       orders: [hint.order],
       rotations,
       hint
     });
-    if (hinted && DEFECT_KEYS.every(key => hinted.metrics[key] === 0)) {
-      return { ...hinted, source: "hint" };
-    }
-    const general = searchGraphLayouts({ d3, puzzle, nodes, links, width, height });
-    if (!hinted) return { ...general, source: "generated" };
-    return fewerDefects(general.metrics, hinted.metrics, DEFECT_KEYS)
-      ? { ...general, source: "generated", hintRejected: true }
-      : { ...hinted, source: "hint" };
+    if (hinted) return { ...hinted, source: "hint" };
   }
   return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height }), source: "generated" };
 }

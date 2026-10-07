@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
-import { layoutRevision } from "../modules/layoutDocument.js";
+import { layoutRevision, mergePublishLayout } from "../modules/layoutDocument.js";
 import {
   angleDistance,
   circleLayoutHint,
   graphLayoutHint,
   layoutIsFixed,
+  starLayoutTargets,
   validateLayoutHintShape
 } from "../modules/layoutHints.js";
 import { validatePublishedPuzzleLayout } from "../modules/layoutPublication.js";
@@ -187,10 +188,73 @@ export async function run() {
     layout: envelope({ graph: { ...broken, fixed: false } })
   });
   assert.equal(malformed.valid, false);
-  // Star keeps exact-only rules for now.
-  const star = validatePublishedPuzzleLayout({
+  // Star: a saved layout is never dropped. Build the renderer's node list
+  // (terms and bridges, plus one title per cluster) and a saved layout.
+  const starNodes = p => [
+    ...p.clusters.flatMap((cluster, ci) => cluster.terms.map(word => ({ word, gs: [ci] }))),
+    ...p.bridges.map(bridge => ({ word: bridge.term, gs: bridge.clusters })),
+    ...p.clusters.map((cluster, ci) => ({ isTitleNode: true, ci, word: cluster.name, x: 1, y: 1 }))
+  ];
+  const starSaved = {
+    schemaVersion: 1,
+    puzzleId: puzzle.id,
+    puzzleRevision: layoutRevision(puzzle),
+    board: BOARD,
+    nodes: Object.fromEntries([
+      ...puzzle.clusters.map((_, ci) => [`cluster:${ci}`, centres[ci]]),
+      ...puzzle.clusters.flatMap((cluster, ci) => cluster.terms.map((term, i) => [
+        `term:${term}`, { x: centres[ci].x + 50 * Math.cos(i), y: centres[ci].y + 50 * Math.sin(i) }
+      ])),
+      ...puzzle.bridges.map(bridge => [`term:${bridge.term}`, { x: 500, y: 350 }])
+    ])
+  };
+  const exactStar = starLayoutTargets(starSaved, puzzle, starNodes(puzzle), BOARD, { exact: true });
+  assert.equal(exactStar.exact, true);
+  assert.equal(exactStar.placed, 0);
+  // A wider board scales positions rather than discarding them.
+  const wideStar = starLayoutTargets(starSaved, puzzle, starNodes(puzzle), { width: 1500, height: 700 });
+  const wideA = [...wideStar.targets].find(([node]) => node.word === "a one")[1];
+  assert.ok(Math.abs(wideA.x - starSaved.nodes["term:a one"].x * 1.5) < 1e-6);
+  // Reordered clusters keep their titles beside their own terms, and a
+  // new term is the only node placed fresh.
+  const starEdited = compile(documentWith(["b", "a", "c", "d"], { extra: ["d", "d four"] }));
+  const adapted = starLayoutTargets(starSaved, starEdited, starNodes(starEdited), BOARD);
+  assert.equal(adapted.exact, false);
+  assert.equal(adapted.placed, 1);
+  const titleOf = name => [...adapted.targets].find(([node]) => node.isTitleNode && node.word === name)[1];
+  assert.deepEqual(titleOf("a"), centres[0]);
+  assert.deepEqual(titleOf("b"), centres[1]);
+  assert.equal(starLayoutTargets({ ...starSaved, puzzleId: "other" }, puzzle, starNodes(puzzle), BOARD), null);
+
+  // Publishing a working copy never overwrites a newer published layout.
+  const at = iso => ({ savedAt: iso, nodes: {} });
+  const older = envelope({ graph: at("2026-10-01T00:00:00Z"), star: at("2026-10-05T00:00:00Z") });
+  const newer = envelope({ graph: at("2026-10-03T00:00:00Z"), star: at("2026-10-04T00:00:00Z") });
+  const merged = mergePublishLayout(older, newer);
+  assert.deepEqual(merged.keptPublished, ["graph"]);
+  assert.equal(merged.layout.modes.graph.savedAt, "2026-10-03T00:00:00Z");
+  assert.equal(merged.layout.modes.star.savedAt, "2026-10-05T00:00:00Z");
+  // Without stamps (older saves) the working copy wins, as before.
+  assert.deepEqual(mergePublishLayout(envelope({ graph: { nodes: {} } }), envelope({ graph: { nodes: {} } })).keptPublished, []);
+  // No working-copy layout: the published one carries over.
+  assert.equal(mergePublishLayout(null, newer).layout.modes.graph.savedAt, "2026-10-03T00:00:00Z");
+
+  // Star: a layout with no positions is unusable; a stale one is carried
+  // through a content edit with a warning, but saving it must match.
+  const emptyStar = validatePublishedPuzzleLayout({
     document,
     layout: envelope({ star: { schemaVersion: 1, puzzleId: puzzle.id, nodes: {} } })
   });
-  assert.equal(star.valid, false);
+  assert.equal(emptyStar.valid, false);
+  const staleStar = validatePublishedPuzzleLayout({
+    document: editedDocument,
+    layout: envelope({ star: starSaved })
+  });
+  assert.equal(staleStar.valid, true, staleStar.errors.join("; "));
+  assert.ok(staleStar.warnings.some(warning => warning.includes("adapted")));
+  assert.equal(validatePublishedPuzzleLayout({
+    document: editedDocument,
+    layout: envelope({ star: starSaved }),
+    savingMode: "star"
+  }).valid, false);
 }

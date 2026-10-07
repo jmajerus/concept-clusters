@@ -2433,8 +2433,14 @@ function renderPublicationNotice(notice) {
     as D1 revision ${escapeHtml(String(notice.revision))} for the next freeze.`
     : `<strong>Published</strong> <code>${escapeHtml(notice.id)}</code>
     as D1 revision ${escapeHtml(String(notice.revision))}.${cued ? " Cued for the next freeze." : ""}`;
+  const modeNames = { star: "Star", graph: "Graph", sets: "Circle" };
+  const kept = (notice.layoutKept || []).map(mode => modeNames[mode]).filter(Boolean);
+  const keptNote = kept.length
+    ? `<p class="meta">Kept the newer ${escapeHtml(kept.join(" and "))} layout already saved on the published puzzle; this working copy's older copy was not published.</p>`
+    : "";
   return `<div class="validation validation-ok" role="status">
     ${message}
+    ${keptNote}
     <p class="meta">${escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE)}</p>
   </div>
   <script>
@@ -2444,6 +2450,7 @@ function renderPublicationNotice(notice) {
           cleanUrl.searchParams.delete("cued");
           cleanUrl.searchParams.delete("puzzle_id");
           cleanUrl.searchParams.delete("revision");
+          cleanUrl.searchParams.delete("layout_kept");
           window.history.replaceState(null, "", cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
     }
   </script>`;
