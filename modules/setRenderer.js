@@ -40,7 +40,14 @@ import {
   segmentIntersectsRect,
   segmentsIntersect as segmentIntersection
 } from "./geometry.js";
-import { pillWidth, bridgePoints, compareWordOrder, memberDisplayOrder } from "./puzzleGraph.js";
+import { pillWidth, bridgePoints, compareWordOrder } from "./puzzleGraph.js";
+import {
+  chooseMemberOrder,
+  circleRadius,
+  compactMemberOrder,
+  stackFitRadius,
+  stackRows
+} from "./circleMemberOrder.js";
 import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
@@ -87,6 +94,18 @@ const STRIP_MARGIN = 16;
 // fitting formula.
 const CIRCLE_PILL_CLEARANCE = HEAD_CONST + PAD_CONST - 4;
 
+// Row geometry shared by circle sizing and member stacking. A term that
+// may carry an ideal-tag caption reserves room for it below its pill.
+function stackMetrics(puzzle) {
+  return {
+    width: pillWidth,
+    height: term => PILL_H_CONST + (mayCarryIdealTag(puzzle, term) ? TAG_H : 0),
+    gap: PILL_GAP_CONST,
+    pillHeight: PILL_H_CONST,
+    pad: PAD_CONST
+  };
+}
+
 export function createSetRenderer({
   svg, getState, getW, getH, getSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -101,7 +120,7 @@ export function createSetRenderer({
   // here, continuously, rather than this doing a one-shot solve.
   function computeSetLayout(puzzle, nodes) {
     const W = getW(), H = getH();
-    const PILL_H = 30, PILL_GAP = 6, HEAD_H = 22, PAD = 16;
+    const PILL_H = 30;
 
     // Free (not-yet-connected) nodes are packed into a reserved strip along
     // the top of the board, left-to-right with simple row wrapping — a
@@ -132,13 +151,18 @@ export function createSetRenderer({
     // below), so their text width must NOT count toward the circle's
     // size, or a puzzle with long cluster names gets needlessly
     // oversized circles that then can't help but overlap.
-    const clusterBoxes = puzzle.clusters.map(c => {
-      const contentW = Math.max(...c.terms.map(pillWidth)) + PAD * 2;
-      const termsH = c.terms.reduce((sum, t) =>
-        sum + PILL_H + PILL_GAP + (mayCarryIdealTag(puzzle, t) ? TAG_H : 0), 0) - PILL_GAP;
-      const contentH = HEAD_H + termsH + PAD * 2;
-      return { r: Math.hypot(contentW, contentH) / 2 };
-    });
+    // Each circle fits its compact stack (widest terms mid-column), widened
+    // only as far as letting any ideal-line target take an end row needs.
+    // Fixed for the game, so re-stacking never resizes a circle.
+    const metrics = stackMetrics(puzzle);
+    const baseOrders = puzzle.clusters.map(c => compactMemberOrder(c.terms, pillWidth, compareWordOrder));
+    const clusterBoxes = puzzle.clusters.map((c, ci) => ({
+      r: circleRadius(
+        baseOrders[ci],
+        c.terms.filter(term => mayCarryIdealTag(puzzle, term)),
+        metrics
+      )
+    }));
 
     // A simple ring is enough of a starting point — no overlap solving
     // needed here anymore, since the live simulation (charge + collide)
@@ -159,7 +183,7 @@ export function createSetRenderer({
       };
     });
 
-    return { clusterBoxes, csNodes, freePositions, stripHeight };
+    return { clusterBoxes, baseOrders, csNodes, freePositions, stripHeight };
   }
 
   // computeSetLayout's stripHeight is sized once, for the puzzle's
@@ -736,6 +760,67 @@ export function createSetRenderer({
     return getState().setLayout.csNodes[ci];
   }
 
+  // A solved circle stacks its terms in one column centred on the circle.
+  // Each term's vertical pill centre, relative to the circle's centre, for
+  // a given stacking order.
+  function memberRowOffsets(puzzle, terms) {
+    return new Map(stackRows(terms, stackMetrics(puzzle)).map(row => [row.term, row.centre]));
+  }
+
+  // Stack in the compact base order, not the document's term order: on a
+  // pre-solved board the latter is usually the lens order. A circle with
+  // a connected ideal line may hold a geometry-chosen order instead (see
+  // refreshMemberOrder), which reveals nothing the drawn line does not.
+  function memberOrderFor(state, ci) {
+    return state.setLayout.memberOrder?.get(ci) || state.setLayout.baseOrders[ci];
+  }
+
+  // Re-stacks each circle so the terms its connected ideal lines end on
+  // sit in the rows nearest where those lines enter, minimising how far
+  // each line runs under other pills. Run on discrete events (repaint,
+  // drag end, settle, polish, apply), never per tick.
+  function refreshMemberOrder() {
+    const state = getState();
+    const { puzzle, setLayout } = state;
+    if (!setLayout) return false;
+    setLayout.memberOrder = setLayout.memberOrder || new Map();
+    let changed = false;
+    puzzle.clusters.forEach((cluster, ci) => {
+      const arms = [];
+      connectedBridges(state).forEach(bridge => {
+        if (!bridge.connected.includes(ci)) return;
+        const link = state.links.find(l => l.source === bridge && l.clusterIndex === ci);
+        if (!link?.ideal || !cluster.terms.includes(link.target.word)) return;
+        arms.push({ term: link.target.word, point: pillTarget(bridge) });
+      });
+      const current = setLayout.memberOrder.get(ci) || null;
+      if (!arms.length) {
+        if (current) { setLayout.memberOrder.delete(ci); changed = true; }
+        return;
+      }
+      const { r } = setLayout.clusterBoxes[ci];
+      const metrics = stackMetrics(puzzle);
+      const next = chooseMemberOrder({
+        terms: setLayout.baseOrders[ci],
+        current,
+        arms,
+        center: clusterPos(ci),
+        r,
+        rowOffsets: order => memberRowOffsets(puzzle, order),
+        pillWidth,
+        pillHeight: PILL_H_CONST,
+        fits: order => stackFitRadius(order, metrics) <= r + 0.5
+      });
+      if (next !== current) {
+        if (next) setLayout.memberOrder.set(ci, next);
+        else setLayout.memberOrder.delete(ci);
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+
   // The position a docked term or free (not-yet-connected) node sits
   // at — unchanged from before, still a deterministic formula relative
   // to its cluster (docked) or a fixed strip slot (free). A connected
@@ -750,16 +835,8 @@ export function createSetRenderer({
       const ci = n.gs[0];
       const c = clusterPos(ci);
       const { r } = state.setLayout.clusterBoxes[ci];
-      // Stack in display order, not the document's term order: on a
-      // pre-solved board the latter is usually the lens order.
-      const terms = memberDisplayOrder(state.puzzle.clusters[ci]);
-      const ti = terms.indexOf(n.word);
-      const startY = -r + HEAD_CONST + PAD_CONST - 4;
-      let dy = 0;
-      for (let i = 0; i < ti; i++) {
-        dy += PILL_H_CONST + PILL_GAP_CONST + (mayCarryIdealTag(state.puzzle, terms[i]) ? TAG_H : 0);
-      }
-      return { x: c.x, y: c.y + startY + dy + PILL_H_CONST / 2 };
+      const offset = memberRowOffsets(state.puzzle, memberOrderFor(state, ci)).get(n.word);
+      return { x: c.x, y: c.y + offset };
     }
     // Bridge, connected: a drag writes fx/fy immediately and may leave the
     // simulation stopped (a solved board). Read the pin first so the
@@ -1185,6 +1262,7 @@ export function createSetRenderer({
         // placement convention this mode has always had for drags),
         // rather than releasing it back to the simulation the way
         // Graph mode's own drag does for individual terms.
+        if (refreshMemberOrder()) repositionAll();
         if (authoring) state.onAuthorLayoutChanged?.("drag");
         else state.onPlayerLayoutChanged?.("player");
       });
@@ -1308,6 +1386,7 @@ export function createSetRenderer({
           handleTap(d);
           setTimeout(() => el.focus(), 0);
         } else {
+          if (refreshMemberOrder()) repositionAll();
           if (authoring) state.onAuthorLayoutChanged?.("drag");
           else state.onPlayerLayoutChanged?.("player");
         }
@@ -1533,6 +1612,7 @@ export function createSetRenderer({
       state.solutionLayout = state.made === state.need && layout.solutionLayout === "pretty"
         ? "pretty"
         : null;
+      refreshMemberOrder();
       repositionAll();
       updateSolutionHint();
       return { valid: true, errors: [] };
@@ -1612,6 +1692,7 @@ export function createSetRenderer({
             node.vy = 0;
           });
           state.solutionLayout = "pretty";
+          refreshMemberOrder();
           repositionAll();
           await afterNextPaint();
           svg.classed("circle-polishing", false);
@@ -1670,6 +1751,7 @@ export function createSetRenderer({
           node.vy = 0;
         });
         state.setLayout.stripHeight = STRIP_MARGIN;
+        refreshMemberOrder();
         repositionAll();
         // Keep transform transitions disabled until the browser has
         // actually committed the exact final coordinates. In reduced
@@ -1740,6 +1822,11 @@ export function createSetRenderer({
       }
       repositionAll();
     });
+    // Bridges drift after a connection; re-stack once the board settles.
+    state.setSim.on("end.memberOrder", () => {
+      if (getState() === state && refreshMemberOrder()) repositionAll();
+    });
+    refreshMemberOrder();
     repositionAll();
 
     countEl.textContent = state.progressLabel || `${state.made} of ${state.need} links`;
