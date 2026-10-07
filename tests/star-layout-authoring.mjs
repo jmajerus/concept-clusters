@@ -29,9 +29,10 @@ export async function run(page, baseURL) {
 
   await page.waitForFunction(() => !document.getElementById("layout-authoring")?.hidden);
   assert.equal(await page.getAttribute("#layout-authoring", "hidden"), null);
-  assert.equal(await page.isDisabled("#mode-graph"), true);
-  assert.equal(await page.isDisabled("#mode-star"), true);
-  assert.equal(await page.isDisabled("#mode-sets"), true);
+  // Mode buttons stay live: each one reloads into that mode's authoring board.
+  assert.equal(await page.isDisabled("#mode-graph"), false);
+  assert.equal(await page.isDisabled("#mode-star"), false);
+  assert.equal(await page.isDisabled("#mode-sets"), false);
   assert.equal(await page.evaluate(() => window.CC.mode), "star");
   assert.notEqual(
     await page.getAttribute("#layout-authoring-save-layout", "hidden"),

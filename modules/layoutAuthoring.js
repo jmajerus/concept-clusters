@@ -7,7 +7,7 @@
 // Experiment toggles save only when a working copy is open. Public play
 // keeps metadata and stats and cannot change the published record.
 
-import { layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
+import { LAYOUT_MODES, layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
 import {
   clearLayoutDraft,
   loadLayoutDraft,
@@ -81,7 +81,9 @@ export function createLayoutAuthoringController({
     const params = new URLSearchParams(location.search);
     params.set("mode", nextMode);
     const state = getState();
-    if (state?.puzzle?.id && !params.get("draft")) {
+    // A working copy keeps whichever URL opened it; rewriting puzzle= to
+    // the published id would silently leave the draft.
+    if (state?.puzzle?.id && !params.get("draft") && !getDraftId()) {
       params.set("puzzle", state.puzzle.id);
     }
     location.assign(`${location.pathname}?${params.toString()}`);
@@ -143,6 +145,25 @@ export function createLayoutAuthoringController({
       typeof currentAdapter().capture === "function";
   }
 
+  // Mode names as the player's mode buttons label them.
+  const MODE_LABELS = { star: "Star", graph: "Graph", sets: "Circle" };
+
+  // Save Layout writes to the open working copy when one is loaded and to
+  // the published row otherwise. Only the published row reaches players.
+  function savedLayoutState(state) {
+    const modes = LAYOUT_MODES.filter(mode => layoutForMode(state.puzzle?.layout, mode));
+    if (!modes.length) return null;
+    const where = getDraftId() ? "draft" : "published";
+    return `Saved on ${where}: ${modes.map(mode => MODE_LABELS[mode]).join(", ")}`;
+  }
+
+  function savedLayoutMessage(mode) {
+    const draftId = getDraftId();
+    return draftId
+      ? `${MODE_LABELS[mode]} layout saved to draft "${draftId}". Publish the draft to show it to players.`
+      : `${MODE_LABELS[mode]} layout saved to the published puzzle. Live for players.`;
+  }
+
   function setLayoutAuthoringStatus(text, tone = "") {
     if (!layoutAuthoringMode) return;
     layoutAuthoringStatusEl.textContent = text;
@@ -173,11 +194,11 @@ export function createLayoutAuthoringController({
     } else {
       layoutMetricOverlapsEl.textContent = String(overlaps);
     }
-    layoutAuthoringDraftStateEl.textContent = savesToAuthoringServer && layoutForMode(state.puzzle?.layout, getMode())
-      ? "D1 layout saved"
-      : draft
-        ? "Local draft saved"
-        : "No local draft";
+    const localState = draft ? "Local draft saved" : "No local draft";
+    const savedState = savesToAuthoringServer ? savedLayoutState(state) : null;
+    layoutAuthoringDraftStateEl.textContent = savedState
+      ? `${savedState} · ${localState}`
+      : localState;
 
     layoutAuthoringSaveBtn.disabled = !prepared;
     layoutAuthoringLoadBtn.disabled = !prepared || !draft;
@@ -310,9 +331,9 @@ export function createLayoutAuthoringController({
     if (!savesToAuthoringServer) return;
     savingLayout = true;
     updateLayoutAuthoringPanel();
-    setLayoutAuthoringStatus("Saving layout to D1…");
+    const mode = getMode();
+    setLayoutAuthoringStatus(getDraftId() ? "Saving layout to draft…" : "Saving layout to published puzzle…");
     try {
-      const mode = getMode();
       const saved = await saveLayout({ puzzleId: state.puzzle.id, mode, layout });
       const savedModeLayout = layoutForMode(saved, mode) || layout;
       state.puzzle.layout = saved || layoutDocumentForMode(mode, layout);
@@ -321,7 +342,7 @@ export function createLayoutAuthoringController({
         state.lastSavedStarLayout = savedModeLayout;
       }
       state.lastSavedLayout = savedModeLayout;
-      setLayoutAuthoringStatus("Layout saved to D1.", "good");
+      setLayoutAuthoringStatus(savedLayoutMessage(mode), "good");
     } catch (error) {
       setLayoutAuthoringStatus(`Could not save layout: ${error.message}`, "error");
     } finally {
@@ -475,6 +496,7 @@ export function createLayoutAuthoringController({
 
   return {
     onPuzzleLoaded,
-    syncStarFreeStripButtons
+    syncStarFreeStripButtons,
+    reloadBoard
   };
 }

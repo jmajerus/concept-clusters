@@ -687,12 +687,31 @@ export async function run(page) {
       });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
-        document.getElementById("layout-authoring-status")?.textContent === "Layout saved to D1.",
+        document.getElementById("layout-authoring-status")?.textContent?.includes("saved to draft"),
       null, { timeout: 15000 });
       assert.ok(
         (await draftStore.getDraft("lab-browser-unpublished-draft")).layout,
         "Save Layout did not persist the unpublished draft override"
       );
+
+      // Each mode saves its own override: a mode click reloads into that
+      // mode on the same working copy, and the save keeps the Star entry.
+      await page.click("#mode-graph");
+      await page.waitForFunction(() =>
+        window.CC?.mode === "graph"
+        && window.CC?.state?.puzzle?.id === "lab-browser-unpublished"
+        && !document.getElementById("layout-authoring")?.hidden,
+      null, { timeout: 15000 });
+      await page.click("#layout-authoring-prepare");
+      await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, {
+        timeout: 15000
+      });
+      await page.click("#layout-authoring-save-layout");
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout saved to draft"),
+      null, { timeout: 15000 });
+      const draftModes = (await draftStore.getDraft("lab-browser-unpublished-draft")).layout?.modes || {};
+      assert.ok(draftModes.star && draftModes.graph, "Graph save should keep the Star override");
 
       await page.goto(`${baseURL}/index.html?library`, { waitUntil: "networkidle" });
       await page.waitForFunction(() => window.CC?.playSource === "d1", null, { timeout: 60000 });
@@ -730,7 +749,7 @@ export async function run(page) {
       });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
-        document.getElementById("layout-authoring-status")?.textContent === "Layout saved to D1.",
+        document.getElementById("layout-authoring-status")?.textContent?.includes("saved to the published puzzle"),
       null, { timeout: 15000 });
       assert.ok(
         (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,

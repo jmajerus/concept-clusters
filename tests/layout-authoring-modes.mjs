@@ -23,7 +23,7 @@ async function authoringMode(page, baseURL, mode) {
   assert.equal(await page.evaluate(() => window.CC.mode), mode);
   assert.equal(new URL(page.url()).searchParams.get("mode"), mode);
   for (const id of ["#mode-graph", "#mode-star", "#mode-sets"]) {
-    assert.equal(await page.isDisabled(id), true, `${id} remained enabled in layout authoring`);
+    assert.equal(await page.isDisabled(id), false, `${id} should switch modes in layout authoring`);
   }
   for (const name of ["capture", "apply", "validate", "metrics"]) {
     assert.equal(

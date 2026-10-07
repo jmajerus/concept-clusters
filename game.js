@@ -329,11 +329,6 @@ puzzleMetaEl.hidden = !adminMode;
 puzzleEditLinkEl.hidden = !canEditPuzzles;
 puzzleStatsBtn.hidden = !adminMode;
 if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.togglePuzzleStats());
-if (layoutAuthoringMode) {
-  modeGraphBtn.disabled = true;
-  modeStarBtn.disabled = true;
-  modeSetsBtn.disabled = true;
-}
 
 // What's draggable genuinely differs by mode — every node in Graph and
 // Star modes, but only circles and bridge pills in Sets (a docked term
@@ -391,9 +386,9 @@ function updateModeControls() {
   modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
-  modeGraphBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
-  modeStarBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
-  modeSetsBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy || authoringStudio?.isConstruct();
+  modeGraphBtn.disabled = lensPreparing || layoutBusy;
+  modeStarBtn.disabled = lensPreparing || layoutBusy;
+  modeSetsBtn.disabled = lensPreparing || layoutBusy || authoringStudio?.isConstruct();
   updateDragHint();
 }
 
@@ -584,7 +579,13 @@ function restorePlayerSession(session) {
 
 function setMode(newMode) {
   if (authoringStudio?.isConstruct() && newMode === "sets") return;
-  if (layoutAuthoringMode && newMode !== mode) return;
+  // Layout authoring never switches in place: a carried-over board is not
+  // a clean starting point for that mode's override. Reload into the new
+  // mode instead. Drags already autosave to the local draft.
+  if (layoutAuthoringMode) {
+    if (newMode !== mode) layoutAuthoring.reloadBoard(newMode);
+    return;
+  }
   if (state?.phase === "lens-preparing") return;
   const switchingLensPhase = lensPhaseActive(state);
   clearTimeout(playerLayoutSaveTimer);
