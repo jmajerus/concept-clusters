@@ -26,7 +26,6 @@ import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { diffPublishedDraft, documentWithLesson, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
 import { revisedLessonLabel, revisedMarkChangesLessonLine, samePlayerFacingProjection } from "./playerFacingRevision.js";
 import { draftBoardQuery, draftPlayQuery, draftReviewQuery, playQuery, reviewQuery } from "./stagingPlayLinks.js";
-import { boardSizeFactorChoices } from "./puzzleBoardSize.js";
 import {
   CATEGORIES,
   categoryIdFor,
@@ -2121,31 +2120,14 @@ function renderClassificationEditor({
 function renderBoardExperiments({ edit, document }) {
   if (!edit?.draftId) return "";
   const board = document?.board && typeof document.board === "object" ? document.board : {};
-  const strip = board.starFreeStrip === true ? "true" : board.starFreeStrip === false ? "false" : "";
   const preconnect = board.bridgePreconnect === true ? "true" : "";
   const flowTrace = board.lensFlowTrace === true ? "true" : "";
-  const sizeFactor = typeof board.sizeFactor === "number" ? String(board.sizeFactor) : "";
-  const stripSlot = copyHidden(edit, { section: "board", field: "starFreeStrip" });
   const preSlot = copyHidden(edit, { section: "board", field: "bridgePreconnect" });
   const flowSlot = copyHidden(edit, { section: "board", field: "lensFlowTrace" });
-  const sizeSlot = copyHidden(edit, { section: "board", field: "sizeFactor" });
   const option = (value, label, selected) =>
     `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
-  const sizeOptions = boardSizeFactorChoices().map(factor => {
-    const percent = Math.round((factor - 1) * 100);
-    const label = `${percent > 0 ? "+" : ""}${percent}%`;
-    return option(String(factor), label, sizeFactor === String(factor));
-  }).join("");
   return `<h2>Board experiments</h2>
-    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them. The review board shows the size change as the factor moves.</p>
-    ${stripSlot.hidden}
-    <p><label>Free-term strip
-      <select${stripSlot.form} name="${stripSlot.prefix}value">
-        ${option("", "Automatic", strip === "")}
-        ${option("true", "On", strip === "true")}
-        ${option("false", "Off", strip === "false")}
-      </select>
-    </label></p>
+    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them. Board size and the Star free-term strip are layout settings: change them in layout authoring, where they save with the layout.</p>
     ${preSlot.hidden}
     <p><label>Bridge pre-connect
       <select${preSlot.form} name="${preSlot.prefix}value">
@@ -2158,13 +2140,6 @@ function renderBoardExperiments({ edit, document }) {
       <select${flowSlot.form} name="${flowSlot.prefix}value">
         ${option("", "Off", flowTrace === "")}
         ${option("true", "On", flowTrace === "true")}
-      </select>
-    </label></p>
-    ${sizeSlot.hidden}
-    <p><label>Board size
-      <select${sizeSlot.form} name="${sizeSlot.prefix}value">
-        ${option("", "0%", sizeFactor === "")}
-        ${sizeOptions}
       </select>
     </label></p>`;
 }

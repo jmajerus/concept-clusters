@@ -1,5 +1,5 @@
 import { pillWidth } from "./puzzleGraph.js";
-import { layoutForMode } from "./layoutDocument.js";
+import { layoutBoardSetting, layoutForMode } from "./layoutDocument.js";
 import { validateStarLayoutDocument } from "./starLayoutSchema.js";
 
 export function publishedStarLayoutFor(puzzle, width, height) {
@@ -10,10 +10,10 @@ export function publishedStarLayoutFor(puzzle, width, height) {
   return null;
 }
 
-// Editorial boolean on puzzle.board. true forces the strip, false keeps the
-// classic Star board, and an omitted field keeps the capacity heuristic.
+// Layout setting (see layoutBoardSetting). true forces the strip, false
+// keeps the classic Star board, and unset keeps the capacity heuristic.
 export function starFreeStripEnabled(puzzle, { width, height } = {}) {
-  const flag = puzzle?.board?.starFreeStrip;
+  const flag = layoutBoardSetting(puzzle, "starFreeStrip");
   if (flag === true) return true;
   if (flag === false) return false;
   return starFreeStripCapacityNeeded(puzzle, width, height);
