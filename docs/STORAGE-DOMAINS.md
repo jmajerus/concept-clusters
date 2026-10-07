@@ -387,10 +387,19 @@ and optional level. Those marks can change without rewriting the board or the
 lesson. Related puzzles and language stay in pedagogy. A related-puzzle entry
 needs a reason written against the lesson, and language describes the prose
 of this document. Further separation may be worthwhile where a field has a
-distinct owner or where a different model needs a different context. The
-criterion is whether the separation removes real decision and integrity
-burden without turning the authoring contract into a collection of fragments
-that must be mentally reconstructed by the agent.
+distinct owner or where a different model needs a different context.
+
+The two kinds of domain carry different costs. Every additional agent-write
+domain is another projection an agent may have to read, choose between, and
+reason across, so the criterion for one is whether the separation removes
+real decision and integrity burden without turning the authoring contract
+into a collection of fragments that must be mentally reconstructed by the
+agent. A protected domain costs the agent nothing: it never appears in the
+agent's contract, and once the infrastructure preserves domains across agent
+saves (reassembling administration and provenance into the document, keeping
+system and layout beside it), adding one is mostly a matter of declaring its
+fields and storage. The bar for a new
+protected domain is a distinct owner or lifecycle, not a burden test.
 
 The provenance and invocation-capture side of the design is described in
 [PROVENANCE-STAMPS.md](PROVENANCE-STAMPS.md).
