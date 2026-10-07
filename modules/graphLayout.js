@@ -16,9 +16,14 @@ import {
   segmentsIntersect
 } from "./geometry.js";
 import { singleClusterTermHome } from "./lensLayout.js";
+import { angleDistance, rotateOffset } from "./layoutHints.js";
 
 const PILL_H = 30;
 const SEARCH_CLUSTER_CAP = 7;
+// Score units (px of total line length) per radian a hinted candidate
+// turns away from the saved rotation: enough to keep the saved look among
+// equally clean candidates, never enough to accept a real defect.
+const HINT_ROTATION_PREFERENCE = 240;
 const rounded = value => Math.round(value * 100) / 100;
 
 function permutationsWithFirstFixed(count) {
@@ -105,7 +110,7 @@ function endpointId(endpoint) {
   return typeof endpoint === "object" ? endpoint.id : endpoint;
 }
 
-function seedCandidate(puzzle, nodes, anchors, width, height) {
+function seedCandidate(puzzle, nodes, anchors, width, height, hint = null) {
   const positions = new Map();
   const bridgeDestinations = new Map();
   puzzle.bridges.forEach(bridge => {
@@ -175,6 +180,22 @@ function seedCandidate(puzzle, nodes, anchors, width, height) {
     const point = bridgeDestinations.get(bridge.term);
     positions.set(node.id, point);
   });
+
+  // A hint keeps each saved term where it sat relative to its cluster,
+  // turned with the cluster's new slot on the ring. Terms the saved layout
+  // never saw keep the default fan above.
+  if (hint) {
+    nodes.forEach(node => {
+      const offset = hint.termOffsets.get(node.word);
+      const anchor = offset && anchors[offset.ci];
+      const savedAngle = offset && hint.clusterAngles.get(offset.ci);
+      if (!anchor || savedAngle == null) return;
+      // A lone cluster has no ring slot to turn with.
+      const turn = puzzle.clusters.length === 1 ? 0 : (anchor.angle ?? savedAngle) - savedAngle;
+      const turned = rotateOffset(offset, turn);
+      positions.set(node.id, { x: anchor.x + turned.x, y: anchor.y + turned.y });
+    });
+  }
   return positions;
 }
 
@@ -259,17 +280,43 @@ export function scoreGraphGeometry(nodes, links, width, height) {
   };
 }
 
+/**
+ * Best solved Graph layout. With a `hint` (see layoutHints.js) only the
+ * hinted cluster order is searched -- across rotations, nearest the saved
+ * one, with terms seeded at their saved offsets -- so a saved arrangement
+ * is repaired within itself, never swapped for a different order. Any
+ * defect it keeps is reported by the caller, not hidden by replacing it.
+ * `source` says whether a hint was used.
+ */
 export function computePrettyGraphLayout({
-  d3, puzzle, nodes, links, width, height
+  d3, puzzle, nodes, links, width, height, hint = null
+}) {
+  if (hint) {
+    const rotations = puzzle.clusters.length === 1
+      ? [0]
+      : [hint.rotation, ...Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12)];
+    const hinted = searchGraphLayouts({
+      d3, puzzle, nodes, links, width, height,
+      orders: [hint.order],
+      rotations,
+      hint
+    });
+    if (hinted) return { ...hinted, source: "hint" };
+  }
+  return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height }), source: "generated" };
+}
+
+function searchGraphLayouts({
+  d3, puzzle, nodes, links, width, height, orders: hintedOrders = null, rotations: hintedRotations = null, hint = null
 }) {
   const pinned = new Map(nodes
     .filter(node => Number.isFinite(node.fx) && Number.isFinite(node.fy))
     .map(node => [node.id, { x: node.fx, y: node.fy }]));
   const loneCluster = puzzle.clusters.length === 1;
-  const orders = permutationsWithFirstFixed(puzzle.clusters.length);
-  const rotations = loneCluster
+  const orders = hintedOrders || permutationsWithFirstFixed(puzzle.clusters.length);
+  const rotations = hintedRotations || (loneCluster
     ? [0]
-    : Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12);
+    : Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12));
   const scales = loneCluster ? [1] : [0.88, 1];
   const placements = loneCluster ? loneClusterPlacements(width, height) : [null];
   let best = null;
@@ -277,7 +324,7 @@ export function computePrettyGraphLayout({
   orders.forEach(order => rotations.forEach(rotation => scales.forEach(scale => {
     placements.forEach(placement => {
     const anchors = clusterAnchors(order, rotation, width, height, scale, placement);
-    const seeded = seedCandidate(puzzle, nodes, anchors, width, height);
+    const seeded = seedCandidate(puzzle, nodes, anchors, width, height, hint);
     const clones = nodes.map(node => {
       const point = pinned.get(node.id) || seeded.get(node.id) || {
         x: width / 2,
@@ -342,7 +389,8 @@ export function computePrettyGraphLayout({
     simulation.stop();
     // A clean lower-left home beats an equally clean step toward center.
     // One real overlap or spoke collision still outweighs that preference.
-    const placed = metrics.score + (placement?.blend || 0) * 4000;
+    const placed = metrics.score + (placement?.blend || 0) * 4000 +
+      (hint ? angleDistance(rotation, hint.rotation) * HINT_ROTATION_PREFERENCE : 0);
     if (!best || placed < best.placed) {
       best = {
         placed,

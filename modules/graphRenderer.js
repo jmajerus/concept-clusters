@@ -9,6 +9,7 @@ import { bridgePoints, seedInitialPositions } from "./puzzleGraph.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { computePrettyGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
+import { graphLayoutHint, layoutIsFixed } from "./layoutHints.js";
 import {
   afterNextPaint,
   animatePositionTargets,
@@ -436,11 +437,16 @@ export function createGraphRenderer({
         // the button apparently inert until the search finished.
         await afterNextPaint();
         if (getState() !== state) return { cancelled: true };
-        const curatedLayout = layoutForMode(puzzle.layout, "graph");
-        const curatedValidation = curatedLayout
+        // Only a fixed layout that still matches this puzzle and board is
+        // applied exactly. Anything else saved -- a hint, or a fixed layout
+        // an edit has outdated -- steers the search instead.
+        // Prepare on an already solved board asks for a fresh layout.
+        const curatedLayout = state.ignoreSavedLayout ? null : layoutForMode(puzzle.layout, "graph");
+        const curatedValidation = curatedLayout && layoutIsFixed(curatedLayout)
           ? validateGraphLayoutDocument(curatedLayout, puzzle, { width: W, height: H })
           : null;
         if (curatedValidation?.valid) {
+          state.layoutSource = { kind: "fixed" };
           const curatedTargets = new Map(nodes.map(node => [
             node,
             curatedLayout.nodes[`term:${node.word}`]
@@ -478,10 +484,17 @@ export function createGraphRenderer({
           state.onPlayerLayoutChanged?.("automatic");
           return state.graphLayoutStats;
         }
+        const hint = curatedLayout
+          ? graphLayoutHint(curatedLayout, puzzle, { width: W, height: H })
+          : null;
         const candidate = computePrettyGraphLayout({
-          d3, puzzle, nodes, links: state.links, width: W, height: H
+          d3, puzzle, nodes, links: state.links, width: W, height: H, hint
         });
         if (!candidate || getState() !== state) return { cancelled: true };
+        state.layoutSource = {
+          kind: candidate.source,
+          fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null
+        };
         const targets = new Map(nodes.map(node => [
           node, candidate.positions.get(node.id)
         ]));

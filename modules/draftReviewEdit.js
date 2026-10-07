@@ -832,22 +832,30 @@ export function draftFieldRedirectPath(draftId) {
 export function draftListPublicationRedirectPath({
   puzzleId,
   cued = false,
-  notice = "published"
+  notice = "published",
+  layoutKept = [],
+  layoutFallback = []
 } = {}) {
   const query = new URLSearchParams({ notice });
   if (puzzleId) query.set("puzzle_id", puzzleId);
   if (cued) query.set("cued", "1");
+  if (layoutKept.length) query.set("layout_kept", layoutKept.join(","));
+  if (layoutFallback.length) query.set("layout_fallback", layoutFallback.join(","));
   return `/admin/drafts?${query}`;
 }
 
 export function draftEditorPublicationRedirectPath({
   draftId,
   puzzleId,
-  revision
+  revision,
+  layoutKept = [],
+  layoutFallback = []
 } = {}) {
   const query = new URLSearchParams({ notice: "published" });
   if (puzzleId) query.set("puzzle_id", puzzleId);
   if (Number.isInteger(Number(revision))) query.set("revision", String(revision));
+  if (layoutKept.length) query.set("layout_kept", layoutKept.join(","));
+  if (layoutFallback.length) query.set("layout_fallback", layoutFallback.join(","));
   return `${draftFieldRedirectPath(draftId)}?${query}`;
 }
 
@@ -868,7 +876,13 @@ export function draftPublicationNoticeFromSearch(searchParams, rows, {
     id,
     revision,
     action,
-    cued: action === "cued" || searchParams.get("cued") === "1"
+    cued: action === "cued" || searchParams.get("cued") === "1",
+    layoutKept: (searchParams.get("layout_kept") || "")
+      .split(",")
+      .filter(mode => ["star", "graph", "sets"].includes(mode)),
+    layoutFallback: (searchParams.get("layout_fallback") || "")
+      .split(",")
+      .filter(mode => ["star", "graph", "sets"].includes(mode))
   };
 }
 

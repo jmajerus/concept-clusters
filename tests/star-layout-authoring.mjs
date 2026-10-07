@@ -147,8 +147,9 @@ export async function run(page, baseURL) {
   assert.equal(curatedLayout.puzzleId, "fundamental-forces");
   assert.equal(curatedLayout.metrics.lineCrossings, 0);
   assert.equal(curatedLayout.metrics.overlaps, 0);
+  // Authoring loads a saved layout on its own after the reset; pressing
+  // Prepare again on that solved board would ask for a fresh one instead.
   await page.click("#reset");
-  await page.click("#layout-authoring-prepare");
   await page.waitForFunction(() =>
     window.CC.state.solutionLayout === "pretty" &&
     window.CC.state.prettyPrintStats?.source === "curated"
@@ -156,6 +157,22 @@ export async function run(page, baseURL) {
   assert.equal(
     await page.evaluate(() => window.CC.state.prettyPrintStats.source),
     "curated"
+  );
+
+  // A saved layout an edit has outdated is adapted, never dropped.
+  await page.evaluate(() => {
+    const layout = window.CC.state.puzzle.layout.modes.star;
+    layout.puzzleRevision = "fnv1a32:stale000";
+  });
+  await page.click("#reset");
+  await page.waitForFunction(() =>
+    window.CC.state.solutionLayout === "pretty" &&
+    window.CC.state.layoutSource?.kind === "adapted"
+  );
+  assert.equal(await page.evaluate(() => window.CC.state.prettyPrintStats.source), "curated");
+  assert.match(
+    await page.textContent("#layout-authoring-status"),
+    /adapted it to this board/
   );
 
   // Preparing again must not overwrite a previously hand-edited draft.

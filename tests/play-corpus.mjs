@@ -34,6 +34,14 @@ import {
 import { startServer, serverURL } from "./lib/server.mjs";
 
 export const heavy = true; // among the longest browser tests; the runner starts it first
+// Save endpoints stamp each mode's layout with savedAt (see
+// stampLayoutSaved); compare the layout itself.
+const unstamped = value => {
+  if (!value || typeof value !== "object") return value;
+  const { savedAt, ...rest } = value;
+  return rest;
+};
+
 export const name = "authoring play corpus: D1 Library navigation without git modules";
 
 const actor = { subject: "local-author" };
@@ -314,9 +322,9 @@ export async function run(page) {
     kind: "puzzle",
     id: "lab-d1-play"
   })).layout;
-  assert.deepEqual(mergedPublishedLayout.modes.star, layout);
-  assert.deepEqual(mergedPublishedLayout.modes.graph, graphLayout);
-  assert.deepEqual(mergedPublishedLayout.modes.sets, circleLayout);
+  assert.deepEqual(unstamped(mergedPublishedLayout.modes.star), layout);
+  assert.deepEqual(unstamped(mergedPublishedLayout.modes.graph), graphLayout);
+  assert.deepEqual(unstamped(mergedPublishedLayout.modes.sets), circleLayout);
 
   for (const [mode, modeLayout] of [
     ["graph", { ...graphLayout, metrics: { ...graphLayout.metrics, lineCrossings: 1 } }],
@@ -359,8 +367,8 @@ export async function run(page) {
     id: "lab-d1-play"
   })).layout;
   assert.equal(afterGraphClear.modes.graph, undefined);
-  assert.deepEqual(afterGraphClear.modes.star, layout);
-  assert.deepEqual(afterGraphClear.modes.sets, circleLayout);
+  assert.deepEqual(unstamped(afterGraphClear.modes.star), layout);
+  assert.deepEqual(unstamped(afterGraphClear.modes.sets), circleLayout);
 
   // A working copy starts without its own layout column. Its first selected
   // mode save must inherit the published envelope, or publishing that draft
@@ -395,9 +403,9 @@ export async function run(page) {
     }, saveExistingGraph), true);
     assert.equal(saveExistingGraph.status, 200, saveExistingGraph.body);
     const existingDraftLayout = (await draftStore.getDraft("lab-d1-play-draft")).layout;
-    assert.deepEqual(existingDraftLayout.modes.star, layout);
-    assert.deepEqual(existingDraftLayout.modes.graph, graphLayout);
-    assert.deepEqual(existingDraftLayout.modes.sets, circleLayout);
+    assert.deepEqual(unstamped(existingDraftLayout.modes.star), layout);
+    assert.deepEqual(unstamped(existingDraftLayout.modes.graph), graphLayout);
+    assert.deepEqual(unstamped(existingDraftLayout.modes.sets), circleLayout);
 
     for (const mode of ["star", "sets", "graph"]) {
       const clearDraftMode = createResponse();
@@ -501,8 +509,8 @@ export async function run(page) {
     const unpublishedMergedLayout = (await draftStore.getDraft(
       "lab-unpublished-layout-draft"
     )).layout;
-    assert.deepEqual(unpublishedMergedLayout.modes.star, unpublishedLayout);
-    assert.deepEqual(unpublishedMergedLayout.modes.graph, unpublishedGraphLayout);
+    assert.deepEqual(unstamped(unpublishedMergedLayout.modes.star), unpublishedLayout);
+    assert.deepEqual(unstamped(unpublishedMergedLayout.modes.graph), unpublishedGraphLayout);
     await assert.rejects(
       repo.getPublished({ kind: "puzzle", id: "lab-unpublished-layout" }),
       /Unknown puzzle/
@@ -708,10 +716,13 @@ export async function run(page) {
       });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
-        document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout saved to draft"),
+        document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout as a hint saved to draft"),
       null, { timeout: 15000 });
       const draftModes = (await draftStore.getDraft("lab-browser-unpublished-draft")).layout?.modes || {};
       assert.ok(draftModes.star && draftModes.graph, "Graph save should keep the Star override");
+      // New Graph saves default to a hint; Star stays exact.
+      assert.equal(draftModes.graph.fixed, false);
+      assert.notEqual(draftModes.star.fixed, false);
 
       // Re-entering a mode with a saved override starts from it unprompted.
       await page.click("#mode-star");

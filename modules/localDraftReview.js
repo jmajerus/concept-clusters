@@ -50,7 +50,9 @@ import {
   emptyLayoutDocument,
   layoutDocumentForMode,
   layoutForMode,
-  normalizeLayoutDocument
+  mergePublishLayout,
+  normalizeLayoutDocument,
+  stampLayoutSaved
 } from "./layoutDocument.js";
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import { draftPlayQuery } from "./stagingPlayLinks.js";
@@ -639,7 +641,7 @@ export function createLocalDraftReviewHandler({
           ? layoutForMode(submitted, mode)
           : submitted;
         const layout = mode
-          ? layoutDocumentForMode(mode, modePayload, inheritedLayout)
+          ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), inheritedLayout)
           : normalizeLayoutDocument(submitted);
         const categoryRegistry = await loadMergedCategoryRegistry({
           contentDocuments,
@@ -660,7 +662,8 @@ export function createLocalDraftReviewHandler({
         const validation = validatePublishedPuzzleLayout({
           document: documentForEditor(record.document, { categoryRegistry }),
           layout,
-          categoryRegistry
+          categoryRegistry,
+          savingMode: mode
         });
         if (!validation.valid) {
           json(res, {
@@ -674,7 +677,8 @@ export function createLocalDraftReviewHandler({
         json(res, {
           draftId,
           revision: saved.revision,
-          layout: saved.layout || layout
+          layout: saved.layout || layout,
+          warnings: validation.warnings
         });
       } catch (error) {
         if (isMissingDraft(error)) {
@@ -1213,7 +1217,12 @@ export function createLocalDraftReviewHandler({
             "puzzle",
             puzzleId
           );
-          const publishLayout = record.layout ?? publishedBefore?.layout ?? undefined;
+          // An older working copy never overwrites a layout saved on the
+          // published puzzle since; those modes are kept and reported.
+          const { layout: publishLayout, keptPublished } = mergePublishLayout(
+            record.layout,
+            publishedBefore?.layout
+          );
           const layoutValidation = validatePublishedPuzzleLayout({
             document: authoredDocument,
             layout: publishLayout,
@@ -1259,12 +1268,16 @@ export function createLocalDraftReviewHandler({
           const location = form.isPublishAndCue
             ? draftListPublicationRedirectPath({
               puzzleId,
-              cued: true
+              cued: true,
+              layoutKept: keptPublished,
+              layoutFallback: layoutValidation.fallbackModes
             })
             : draftEditorPublicationRedirectPath({
               draftId,
               puzzleId,
-              revision: published.revision
+              revision: published.revision,
+              layoutKept: keptPublished,
+              layoutFallback: layoutValidation.fallbackModes
             });
           res.writeHead(303, {
             Location: location,
@@ -1573,7 +1586,12 @@ export function createLocalDraftReviewHandler({
             || !samePlayablePuzzle(baseDocument, publishedBefore.document)) {
             throw new PublishedRevisionConflictError("puzzle", puzzleId);
           }
-          const publishLayout = record.layout ?? publishedBefore?.layout ?? undefined;
+          // An older working copy never overwrites a layout saved on the
+          // published puzzle since; those modes are kept and reported.
+          const { layout: publishLayout, keptPublished } = mergePublishLayout(
+            record.layout,
+            publishedBefore?.layout
+          );
           const layoutValidation = validatePublishedPuzzleLayout({
             document: authoredDocument,
             layout: publishLayout,
@@ -1624,7 +1642,9 @@ export function createLocalDraftReviewHandler({
             Location: draftEditorPublicationRedirectPath({
               draftId,
               puzzleId,
-              revision: published.revision
+              revision: published.revision,
+              layoutKept: keptPublished,
+              layoutFallback: layoutValidation.fallbackModes
             }),
             "Cache-Control": "no-store"
           });
