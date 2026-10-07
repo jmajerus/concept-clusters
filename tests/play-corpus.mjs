@@ -338,6 +338,19 @@ export async function run(page) {
   }, autoOverAuthor), true);
   assert.equal(autoOverAuthor.status, 409, autoOverAuthor.body);
   assert.match(autoOverAuthor.body, /never replaces/);
+  // ...including when the write sends a whole layout document, no mode.
+  const unscopedAuto = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({
+        layout: { schemaVersion: 1, modes: { graph: { ...graphLayout, source: "auto", fixed: false } } }
+      }));
+    }
+  }, unscopedAuto), true);
+  assert.equal(unscopedAuto.status, 409, unscopedAuto.body);
   assert.equal(
     (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.modes.graph.source,
     undefined

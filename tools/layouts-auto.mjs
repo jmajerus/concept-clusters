@@ -11,7 +11,7 @@
 //   --modes graph,sets,star   modes to lay out (default: all three)
 //   --write                   save results; without it this is a dry run
 //   --base <url>              authoring server (default http://127.0.0.1:8787)
-//   --lanes <n>               boards solved at once (default 2)
+//   --lanes <n>               puzzles laid out at once (default 2)
 //   --report <path>           also write the full results as JSON
 //
 // Needs the local authoring server (`npm run dev`), which reads and writes
@@ -63,12 +63,14 @@ function parseArgs(argv) {
   return options;
 }
 
-// Defects players would notice, most severe first, per mode, from the
-// renderer's own metrics. (Graph's hardOverlaps already includes overlaps.)
+// Defects players would notice, most severe first, per mode, in the order
+// each engine's own scoring ranks them (graphLayout scoreGraphGeometry,
+// setRenderer scoreCircleCandidate, starRenderer comparePrettyLayouts).
+// Graph's hardOverlaps already includes overlaps.
 const DEFECT_KEYS = {
   graph: ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"],
   sets: ["hardOverlaps", "lineCrossings", "lineHeadingIntersections", "lineCircleIntersections"],
-  star: ["overlaps", "lineCrossings", "edgeNodeIntersections"]
+  star: ["lineCrossings", "edgeTitleIntersections", "edgeNodeIntersections", "overlaps"]
 };
 
 function defects(mode, metrics) {
@@ -274,22 +276,29 @@ async function main() {
       ids = await page.evaluate(() => window.CC.PUZZLES.map(puzzle => puzzle.id));
       await page.close();
     }
-    const jobs = ids.flatMap(id => options.modes.map(mode => ({ id, mode })));
-    console.log(`${options.write ? "Laying out" : "Dry run:"} ${jobs.length} boards (${ids.length} puzzles × ${options.modes.length} modes), ${options.lanes} at a time.`);
+    // Lanes run different puzzles at once, but one puzzle's modes run in
+    // turn: each save rewrites that puzzle's whole layout document, so two
+    // modes saved at once could erase each other.
+    ids = [...new Set(ids)];
+    const queue = [...ids];
+    const total = ids.length * options.modes.length;
+    console.log(`${options.write ? "Laying out" : "Dry run:"} ${total} boards (${ids.length} puzzles × ${options.modes.length} modes), ${options.lanes} puzzles at a time.`);
     const rows = [];
     let done = 0;
-    await Promise.all(Array.from({ length: Math.min(options.lanes, jobs.length) }, async () => {
-      while (jobs.length) {
-        const { id, mode } = jobs.shift();
-        let row;
-        try {
-          row = await layOut(browser, options, id, mode);
-        } catch (error) {
-          row = { id, mode, error: error.message.split("\n")[0] };
+    await Promise.all(Array.from({ length: Math.min(options.lanes, queue.length) }, async () => {
+      while (queue.length) {
+        const id = queue.shift();
+        for (const mode of options.modes) {
+          let row;
+          try {
+            row = await layOut(browser, options, id, mode);
+          } catch (error) {
+            row = { id, mode, error: error.message.split("\n")[0] };
+          }
+          rows.push(row);
+          done++;
+          if (done % 25 === 0) console.log(`  ${done} boards done`);
         }
-        rows.push(row);
-        done++;
-        if (done % 25 === 0) console.log(`  ${done} boards done`);
       }
     }));
     console.log(`\n${summarize(rows, options)}`);

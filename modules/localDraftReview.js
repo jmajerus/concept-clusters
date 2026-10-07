@@ -47,6 +47,7 @@ import {
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
+  autoEnvelopeConflict,
   autoLayoutConflict,
   emptyLayoutDocument,
   layoutDocumentForMode,
@@ -641,7 +642,9 @@ export function createLocalDraftReviewHandler({
         const modePayload = mode && submitted?.modes
           ? layoutForMode(submitted, mode)
           : submitted;
-        const conflict = mode ? autoLayoutConflict(mode, modePayload, inheritedLayout) : null;
+        const conflict = mode
+          ? autoLayoutConflict(mode, modePayload, inheritedLayout)
+          : autoEnvelopeConflict(submitted, inheritedLayout);
         if (conflict) {
           json(res, { error: conflict, draftId }, 409);
           return true;

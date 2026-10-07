@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
 import {
+  autoEnvelopeConflict,
   autoLayoutConflict,
   layoutRevision,
   mergePublishLayout
@@ -299,6 +300,16 @@ export async function run() {
   assert.equal(autoLayoutConflict("graph", { source: "auto" }, envelope({ graph: autoAt("2026-10-01T00:00:00Z") })), null);
   assert.equal(autoLayoutConflict("graph", { source: "author" }, envelope({ graph: autoAt("2026-10-01T00:00:00Z") })), null);
   assert.equal(autoLayoutConflict("graph", { source: "auto" }, null), null);
+  // A whole-document write is checked mode by mode.
+  assert.match(autoEnvelopeConflict(
+    envelope({ star: autoAt("2026-10-06T00:00:00Z"), graph: autoAt("2026-10-06T00:00:00Z") }),
+    envelope({ graph: at("2026-10-01T00:00:00Z") })
+  ), /never replaces/);
+  assert.equal(autoEnvelopeConflict(
+    envelope({ star: autoAt("2026-10-06T00:00:00Z") }),
+    envelope({ graph: at("2026-10-01T00:00:00Z") })
+  ), null);
+  assert.equal(autoEnvelopeConflict("not a layout", null), null);
 
   // No working-copy layout: the published one carries over.
   assert.equal(mergePublishLayout(null, newer).layout.modes.graph.savedAt, "2026-10-03T00:00:00Z");
