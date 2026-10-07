@@ -274,6 +274,19 @@ export function layoutDocumentWithBoard(changes, existing = null) {
   };
 }
 
+/**
+ * Who chose a puzzle's board size, by the same precedence boardSizeFactor
+ * reads it: a size in the layout document decides, and is the author's
+ * unless tagged automatic; without one, an older puzzle document's
+ * board.sizeFactor (always an author's) counts. null when nobody has.
+ */
+export function boardSizeOwner(layoutBoard, legacySizeFactor) {
+  if (layoutBoard && Object.prototype.hasOwnProperty.call(layoutBoard, "sizeFactor")) {
+    return layoutSource(layoutBoard);
+  }
+  return legacySizeFactor != null ? "author" : null;
+}
+
 // An automatic board size never replaces one an author chose.
 export function autoBoardConflict(incoming, existing) {
   if (layoutSource(incoming) !== "auto") return null;

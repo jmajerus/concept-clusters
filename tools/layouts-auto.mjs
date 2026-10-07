@@ -35,6 +35,7 @@
 
 import { writeFileSync } from "node:fs";
 import { chromium } from "playwright";
+import { boardSizeOwner } from "../modules/layoutDocument.js";
 
 const MODES = ["graph", "sets", "star"];
 const MODE_LABELS = { graph: "Graph", sets: "Circle", star: "Star" };
@@ -182,18 +183,22 @@ async function solve(page, mode, { dropAuto }) {
 
 // Who owns the puzzle's board size and layouts, read from the first board.
 async function readOwnership(page, modes) {
-  return page.evaluate(modes => {
+  const read = await page.evaluate(modes => {
     const puzzle = window.CC.state.puzzle;
     const layout = puzzle.layout || {};
-    const board = layout.board || {};
-    const authorSize = (Object.prototype.hasOwnProperty.call(board, "sizeFactor") && board.source !== "auto")
-      || puzzle.board?.sizeFactor != null;
-    const authorModes = modes.filter(mode => {
-      const saved = layout.modes?.[mode];
-      return saved && saved.source !== "auto";
-    });
-    return { authorSize, authorModes };
+    return {
+      layoutBoard: layout.board || null,
+      legacySizeFactor: puzzle.board?.sizeFactor ?? null,
+      authorModes: modes.filter(mode => {
+        const saved = layout.modes?.[mode];
+        return saved && saved.source !== "auto";
+      })
+    };
   }, modes);
+  return {
+    authorSize: boardSizeOwner(read.layoutBoard, read.legacySizeFactor) === "author",
+    authorModes: read.authorModes
+  };
 }
 
 async function currentSize(page) {

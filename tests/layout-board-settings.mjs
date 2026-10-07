@@ -6,6 +6,7 @@ import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import {
   autoBoardConflict,
   autoEnvelopeConflict,
+  boardSizeOwner,
   boardSettingsErrors,
   layoutBoardSetting,
   layoutDocumentForMode,
@@ -102,6 +103,15 @@ export async function run() {
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+
+  // Board size ownership follows the reading precedence: a layout size
+  // decides; a leftover legacy value is only a fallback.
+  assert.equal(boardSizeOwner({ sizeFactor: 1.1, source: "auto" }, 1.2), "auto");
+  assert.equal(boardSizeOwner({ sizeFactor: 1.1 }, null), "author");
+  assert.equal(boardSizeOwner({ sizeFactor: null, source: "author" }, 1.2), "author");
+  assert.equal(boardSizeOwner({ starFreeStrip: true }, 1.2), "author");
+  assert.equal(boardSizeOwner(null, 1.2), "author");
+  assert.equal(boardSizeOwner(null, null), null);
 
   // Validation.
   assert.deepEqual(boardSettingsErrors({ sizeFactor: 1.1, starFreeStrip: null, source: "author", savedAt: "x" }, canonicalBoardSizeFactor), []);
