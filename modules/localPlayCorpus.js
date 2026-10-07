@@ -23,6 +23,7 @@ import {
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   layoutDocumentForMode,
+  autoLayoutConflict,
   layoutForMode,
   normalizeLayoutDocument,
   stampLayoutSaved
@@ -219,6 +220,11 @@ export function createLocalPlayCorpusHandler({
         const modePayload = mode && layout?.modes
           ? layoutForMode(layout, mode)
           : layout;
+        const conflict = mode ? autoLayoutConflict(mode, modePayload, published.layout) : null;
+        if (conflict) {
+          json(res, { error: conflict, id }, 409);
+          return true;
+        }
         const layoutDocument = mode
           ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), published.layout)
           : normalizeLayoutDocument(layout);

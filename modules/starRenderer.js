@@ -58,6 +58,7 @@ import {
 } from "./starLayoutSchema.js";
 import { layoutForMode } from "./layoutDocument.js";
 import { starLayoutTargets } from "./layoutHints.js";
+import { layoutBudget } from "./layoutBudget.js";
 import {
   bridgeArmArrows,
   bridgeArrowPoints,
@@ -1334,18 +1335,20 @@ export function createStarRenderer({
           // exploring every relative order. Exhaustive order search stays
           // inexpensive through five clusters; larger puzzles retain the
           // previous derived/reversed pair to avoid factorial growth.
-          const orders = nClusters <= 5
+          const budget = layoutBudget(state.layoutBudget).star;
+          const orders = nClusters <= budget.exhaustiveClusters
             ? permute(baseOrder.slice(1)).map(rest => [baseOrder[0], ...rest])
             : [
                 baseOrder,
                 [baseOrder[0], ...baseOrder.slice(1).reverse()]
               ];
 
+          const rotationSteps = nClusters * budget.rotationsPerSlot;
           orders.forEach(order => {
-            for (let rotation = 0; rotation < nClusters; rotation++) {
+            for (let rotation = 0; rotation < rotationSteps; rotation++) {
               evaluateTargets(buildPrettyTargets(
                 order,
-                -Math.PI / 2 + rotation * 2 * Math.PI / nClusters
+                -Math.PI / 2 + rotation * 2 * Math.PI / rotationSteps
               ));
             }
           });
@@ -1361,7 +1364,7 @@ export function createStarRenderer({
             const baseRotation =
               -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
             baseOrder.forEach(ci => {
-              for (const fraction of [-0.7, -0.35, 0.35, 0.7]) {
+              for (const fraction of budget.offsetFractions) {
                 evaluateTargets(buildPrettyTargets(
                   baseOrder,
                   baseRotation,
@@ -1382,11 +1385,11 @@ export function createStarRenderer({
           restorePositions(best.positions);
           let repairedLayout = best.layout;
           let repairMoves = 0;
-          while (repairedLayout.visualIntersectionCount > 0 && repairMoves < 8) {
+          while (repairedLayout.visualIntersectionCount > 0 && repairMoves < budget.repairMoves) {
             const direct = bestImprovingMove(repairedLayout);
             const plan = direct
               ? [direct]
-              : repairMoves <= 6
+              : repairMoves <= budget.repairMoves - 2
                 ? findSetupPair(repairedLayout)
                 : [];
             if (!plan.length) break;

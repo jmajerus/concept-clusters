@@ -52,6 +52,7 @@ import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
+import { layoutBudget } from "./layoutBudget.js";
 import {
   angleDistance,
   circleLayoutHint,
@@ -596,14 +597,16 @@ export function createSetRenderer({
     }
     const orders = permutations(Array.from({ length: n - 1 }, (_, i) => i + 1))
       .map(rest => [0, ...rest]);
-    const rotations = Array.from({ length: Math.max(8, n * 4) }, (_, i) =>
-      -Math.PI / 2 + i * 2 * Math.PI / Math.max(8, n * 4)
+    const budget = layoutBudget(state.layoutBudget).circle;
+    const rotationCount = Math.max(budget.minRotations, n * budget.rotationsPerCluster);
+    const rotations = Array.from({ length: rotationCount }, (_, i) =>
+      -Math.PI / 2 + i * 2 * Math.PI / rotationCount
     );
     // Dense Circle puzzles need more than the compact live-simulation
     // radius: four large containers may only fit when the angular slots
     // approach the board bounds. Bounds and label geometry are scored
     // explicitly below, so safely search those larger radii too.
-    const scales = [0.82, 0.92, 1, 1.15, 1.3, 1.45, 1.6, 1.75];
+    const scales = budget.scaleSteps;
     // A rectangular board can have a feasible near-boundary layout that
     // a single uniform ellipse scale misses: widening both axes enough
     // to separate the top/bottom pair may push the left/right pair out

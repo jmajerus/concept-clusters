@@ -2199,6 +2199,8 @@ function applyLoadedPuzzle(puzzle, index, {
     modeSwitchPolishing: false,
     modeSwitchLayoutPromise: null,
     layoutAuthoring: layoutAuthoringMode,
+    // &layoutBudget=extended: the offline layout pass's larger search.
+    layoutBudget: pageParams.get("layoutBudget") === "extended" ? "extended" : "standard",
     restoringSession: false,
     learningIntroduction,
     learningIntroductionStatus,

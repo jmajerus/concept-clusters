@@ -158,9 +158,14 @@ export function createLayoutAuthoringController({
     const modes = LAYOUT_MODES.filter(mode => layoutForMode(state.puzzle?.layout, mode));
     if (!modes.length) return null;
     const where = getDraftId() ? "draft" : "published";
-    const names = modes.map(mode => layoutIsFixed(layoutForMode(state.puzzle.layout, mode))
-      ? MODE_LABELS[mode]
-      : `${MODE_LABELS[mode]} (hint)`);
+    const names = modes.map(mode => {
+      const layout = layoutForMode(state.puzzle.layout, mode);
+      const tags = [
+        layout.source === "auto" ? "auto" : null,
+        layoutIsFixed(layout) ? null : "hint"
+      ].filter(Boolean);
+      return tags.length ? `${MODE_LABELS[mode]} (${tags.join(" ")})` : MODE_LABELS[mode];
+    });
     return `Saved on ${where}: ${names.join(", ")}`;
   }
 
@@ -287,7 +292,11 @@ export function createLayoutAuthoringController({
   // Graph and Circle), or scaled and matched to an edited puzzle
   // ("adapted", Star). It never swaps a saved layout for a fresh one.
   async function reconcileSavedLayout(preparingState) {
-    const label = MODE_LABELS[getMode()];
+    const saved = layoutForMode(preparingState.puzzle?.layout, getMode());
+    // Automatic layouts come from tools/layouts-auto.mjs, not an author.
+    const label = saved?.source === "auto"
+      ? `automatic ${MODE_LABELS[getMode()]}`
+      : MODE_LABELS[getMode()];
     const source = preparingState.layoutSource || { kind: "generated" };
     const outdated = source.fixedErrors?.length ? source.fixedErrors.join("; ") : null;
     let text;
@@ -429,6 +438,7 @@ export function createLayoutAuthoringController({
     // pass the renderer's full check.
     const fixed = !modeSupportsHints() || !!layoutAuthoringFixedInput?.checked;
     if (layout && modeSupportsHints()) layout.fixed = fixed;
+    if (layout) layout.source = "author";
     const validation = validateAuthorLayout(layout, { allowUnsafe: !fixed });
     if (!validation.valid) {
       setLayoutAuthoringStatus(validation.errors.join("; "), "error");

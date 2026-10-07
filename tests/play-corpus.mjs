@@ -326,6 +326,23 @@ export async function run(page) {
   assert.deepEqual(unstamped(mergedPublishedLayout.modes.graph), graphLayout);
   assert.deepEqual(unstamped(mergedPublishedLayout.modes.sets), circleLayout);
 
+  // The automatic layout pass never replaces an author's layout.
+  const autoOverAuthor = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json?mode=graph",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({ mode: "graph", layout: { ...graphLayout, source: "auto", fixed: false } }));
+    }
+  }, autoOverAuthor), true);
+  assert.equal(autoOverAuthor.status, 409, autoOverAuthor.body);
+  assert.match(autoOverAuthor.body, /never replaces/);
+  assert.equal(
+    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.modes.graph.source,
+    undefined
+  );
+
   for (const [mode, modeLayout] of [
     ["graph", { ...graphLayout, metrics: { ...graphLayout.metrics, lineCrossings: 1 } }],
     ["sets", { ...circleLayout, metrics: { ...circleLayout.metrics, lineCrossings: 1 } }]

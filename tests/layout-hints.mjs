@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
-import { layoutRevision, mergePublishLayout } from "../modules/layoutDocument.js";
+import {
+  autoLayoutConflict,
+  layoutRevision,
+  mergePublishLayout
+} from "../modules/layoutDocument.js";
 import {
   angleDistance,
   circleLayoutHint,
@@ -278,6 +282,24 @@ export async function run() {
   assert.equal(merged.layout.modes.star.savedAt, "2026-10-05T00:00:00Z");
   // Without stamps (older saves) the working copy wins, as before.
   assert.deepEqual(mergePublishLayout(envelope({ graph: { nodes: {} } }), envelope({ graph: { nodes: {} } })).keptPublished, []);
+  // An automatic layout never overwrites an author's on publish, even when
+  // newer; an author layout replaces an automatic one regardless of age.
+  const autoAt = iso => ({ ...at(iso), source: "auto" });
+  assert.deepEqual(mergePublishLayout(
+    envelope({ graph: autoAt("2026-10-06T00:00:00Z") }),
+    envelope({ graph: at("2026-10-01T00:00:00Z") })
+  ).keptPublished, ["graph"]);
+  assert.deepEqual(mergePublishLayout(
+    envelope({ graph: at("2026-10-01T00:00:00Z") }),
+    envelope({ graph: autoAt("2026-10-06T00:00:00Z") })
+  ).keptPublished, []);
+  // Saving: automatic over author is refused, author over anything and
+  // automatic over automatic are fine.
+  assert.match(autoLayoutConflict("graph", { source: "auto" }, envelope({ graph: at("2026-10-01T00:00:00Z") })), /never replaces/);
+  assert.equal(autoLayoutConflict("graph", { source: "auto" }, envelope({ graph: autoAt("2026-10-01T00:00:00Z") })), null);
+  assert.equal(autoLayoutConflict("graph", { source: "author" }, envelope({ graph: autoAt("2026-10-01T00:00:00Z") })), null);
+  assert.equal(autoLayoutConflict("graph", { source: "auto" }, null), null);
+
   // No working-copy layout: the published one carries over.
   assert.equal(mergePublishLayout(null, newer).layout.modes.graph.savedAt, "2026-10-03T00:00:00Z");
 

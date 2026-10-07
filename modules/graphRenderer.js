@@ -10,6 +10,7 @@ import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { computePrettyGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
 import { graphLayoutHint, layoutIsFixed } from "./layoutHints.js";
+import { layoutBudget } from "./layoutBudget.js";
 import {
   afterNextPaint,
   animatePositionTargets,
@@ -488,7 +489,8 @@ export function createGraphRenderer({
           ? graphLayoutHint(curatedLayout, puzzle, { width: W, height: H })
           : null;
         const candidate = computePrettyGraphLayout({
-          d3, puzzle, nodes, links: state.links, width: W, height: H, hint
+          d3, puzzle, nodes, links: state.links, width: W, height: H, hint,
+          budget: layoutBudget(state.layoutBudget).graph
         });
         if (!candidate || getState() !== state) return { cancelled: true };
         state.layoutSource = {

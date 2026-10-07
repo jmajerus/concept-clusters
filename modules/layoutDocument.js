@@ -133,6 +133,23 @@ export function serializeLayoutDocument(layout) {
   return json;
 }
 
+// Who made a saved layout: an author in layout authoring, or the automatic
+// layout pass (tools/layouts-auto.mjs). Layouts saved before the tag
+// existed were all made by authors.
+export function layoutSource(value) {
+  return value?.source === "auto" ? "auto" : "author";
+}
+
+// An automatic layout never replaces an author's. Returns the reason to
+// refuse a save, or null when it may proceed.
+export function autoLayoutConflict(mode, incoming, existing) {
+  if (layoutSource(incoming) !== "auto") return null;
+  const current = normalizeLayoutDocument(existing)?.modes?.[mode];
+  return current && layoutSource(current) === "author"
+    ? `An author's ${mode} layout is saved for this puzzle; the automatic layout pass never replaces it.`
+    : null;
+}
+
 // Save endpoints stamp each mode's layout when it is saved, so publishing
 // a working copy can tell which of two layouts for a mode is newer.
 export function stampLayoutSaved(value, savedAt = new Date().toISOString()) {
@@ -141,10 +158,12 @@ export function stampLayoutSaved(value, savedAt = new Date().toISOString()) {
 
 /**
  * The layout a publish should write. The working copy's layout normally
- * wins, but a mode saved directly on the published puzzle after the
- * working copy last saved that mode is kept, so publishing an older
- * working copy never overwrites newer layout work. `keptPublished` lists
- * those modes so the author can be told.
+ * wins, but the published puzzle's layout for a mode is kept when it is an
+ * author's and the working copy's is automatic, or when both are by the
+ * same kind of maker and the published one was saved later. Publishing an
+ * older working copy so never overwrites newer layout work, and an
+ * automatic layout never overwrites an author's. `keptPublished` lists
+ * the modes kept so the author can be told.
  */
 export function mergePublishLayout(draftLayout, publishedLayout) {
   const draft = normalizeLayoutDocument(draftLayout);
@@ -158,7 +177,10 @@ export function mergePublishLayout(draftLayout, publishedLayout) {
     if (!mine) return;
     const theirs = Date.parse(value?.savedAt || "");
     const ours = Date.parse(mine?.savedAt || "");
-    if (Number.isFinite(theirs) && (!Number.isFinite(ours) || theirs > ours)) {
+    const sameMaker = layoutSource(mine) === layoutSource(value);
+    const authorOverAuto = layoutSource(value) === "author" && layoutSource(mine) === "auto";
+    const newer = Number.isFinite(theirs) && (!Number.isFinite(ours) || theirs > ours);
+    if (authorOverAuto || (sameMaker && newer)) {
       modes[mode] = clone(value);
       keptPublished.push(mode);
     }
