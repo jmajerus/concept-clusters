@@ -626,6 +626,14 @@ body.authoring-construct #share-status {
   cursor: default;
   opacity: 0.55;
 }
+.layout-authoring-fixed {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.layout-authoring-fixed[hidden] { display: none; }
 
 /* ---------- links ---------- */
 .link { stroke: #b9bfcd; stroke-width: 1.6; }

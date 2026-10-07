@@ -223,7 +223,8 @@ export function createLocalPlayCorpusHandler({
           : normalizeLayoutDocument(layout);
         const validation = validatePublishedPuzzleLayout({
           document: published.document,
-          layout: layoutDocument
+          layout: layoutDocument,
+          savingMode: mode
         });
         if (!validation.valid) {
           json(res, { error: "Layout is invalid", id, errors: validation.errors }, 400);

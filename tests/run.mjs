@@ -132,6 +132,7 @@ import * as librarySearch from "./library-search.mjs";
 import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 import * as circleMemberOrder from "./circle-member-order.mjs";
+import * as layoutHints from "./layout-hints.mjs";
 import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
@@ -150,7 +151,7 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment, circleMemberOrder, singleClusterLayout,
+  geometryVisibleSegment, circleMemberOrder, layoutHints, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -170,7 +171,7 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
-  circleMemberOrder, singleClusterLayout,
+  circleMemberOrder, layoutHints, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
@@ -224,7 +225,7 @@ const sideTests = {
     jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema,
     categoryReferenceMigration, contentCanonicalization,
     nonCryptographicHash, skillRevisionStamp,
-    puzzleBoardSize, geometryVisibleSegment, wikiLinkCheck
+    puzzleBoardSize, geometryVisibleSegment, layoutHints, wikiLinkCheck
   ])
 };
 

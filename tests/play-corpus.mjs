@@ -708,10 +708,13 @@ export async function run(page) {
       });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
-        document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout saved to draft"),
+        document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout as a hint saved to draft"),
       null, { timeout: 15000 });
       const draftModes = (await draftStore.getDraft("lab-browser-unpublished-draft")).layout?.modes || {};
       assert.ok(draftModes.star && draftModes.graph, "Graph save should keep the Star override");
+      // New Graph saves default to a hint; Star stays exact.
+      assert.equal(draftModes.graph.fixed, false);
+      assert.notEqual(draftModes.star.fixed, false);
 
       // Re-entering a mode with a saved override starts from it unprompted.
       await page.click("#mode-star");

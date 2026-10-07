@@ -19,6 +19,7 @@ import {
   starBridgePreconnectEnabled,
   boardWithFlag
 } from "./starLayoutRepository.js";
+import { layoutIsFixed } from "./layoutHints.js";
 import {
   boardSizeFactor,
   canonicalBoardSizeFactor
@@ -48,6 +49,8 @@ export function createLayoutAuthoringController({
   const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
   const layoutAuthoringSaveLayoutBtn = document.getElementById("layout-authoring-save-layout");
   const layoutAuthoringClearBtn = document.getElementById("layout-authoring-clear");
+  const layoutAuthoringFixedEl = document.getElementById("layout-authoring-fixed");
+  const layoutAuthoringFixedInput = document.getElementById("layout-authoring-fixed-input");
   const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
   const layoutAuthorBtn = document.getElementById("layout-author-btn");
   const starFreeStripBtn = document.getElementById("star-free-strip-btn");
@@ -65,6 +68,7 @@ export function createLayoutAuthoringController({
   // player pages can still preview and keep a browser-local draft, but must
   // not present a file-export path that authors could mistake for publishing.
   layoutAuthoringSaveLayoutBtn.hidden = !savesToAuthoringServer;
+  if (layoutAuthoringFixedEl) layoutAuthoringFixedEl.hidden = !savesToAuthoringServer;
   layoutAuthoringSaveLayoutBtn.textContent = "Save Layout";
 
   function isConstructView() {
@@ -154,14 +158,37 @@ export function createLayoutAuthoringController({
     const modes = LAYOUT_MODES.filter(mode => layoutForMode(state.puzzle?.layout, mode));
     if (!modes.length) return null;
     const where = getDraftId() ? "draft" : "published";
-    return `Saved on ${where}: ${modes.map(mode => MODE_LABELS[mode]).join(", ")}`;
+    const names = modes.map(mode => layoutIsFixed(layoutForMode(state.puzzle.layout, mode))
+      ? MODE_LABELS[mode]
+      : `${MODE_LABELS[mode]} (hint)`);
+    return `Saved on ${where}: ${names.join(", ")}`;
   }
 
-  function savedLayoutMessage(mode) {
+  function savedLayoutMessage(mode, fixed) {
     const draftId = getDraftId();
+    const kind = fixed ? "layout (fixed positions)" : "layout as a hint";
     return draftId
-      ? `${MODE_LABELS[mode]} layout saved to draft "${draftId}". Publish the draft to show it to players.`
-      : `${MODE_LABELS[mode]} layout saved to the published puzzle. Live for players.`;
+      ? `${MODE_LABELS[mode]} ${kind} saved to draft "${draftId}". Publish the draft to show it to players.`
+      : `${MODE_LABELS[mode]} ${kind} saved to the published puzzle. Live for players.`;
+  }
+
+  // Graph and Circle can use a saved layout as a hint (layoutHints.js);
+  // Star always applies its saved layout exactly for now.
+  function modeSupportsHints(mode = getMode()) {
+    return mode === "graph" || mode === "sets";
+  }
+
+  // The checkbox shows the saved layout's kind; with nothing saved, a new
+  // save defaults to a hint.
+  function syncFixedCheckbox(state) {
+    if (!layoutAuthoringFixedInput) return;
+    const saved = layoutForMode(state?.puzzle?.layout, getMode());
+    const hints = modeSupportsHints();
+    layoutAuthoringFixedInput.disabled = !hints;
+    layoutAuthoringFixedInput.checked = !hints || (saved ? layoutIsFixed(saved) : false);
+    layoutAuthoringFixedEl.title = hints
+      ? "Checked: players get these exact positions. Unchecked: the layout engine keeps this arrangement but recomputes positions, so the layout survives puzzle edits and board-size changes."
+      : "Star layouts always use exact positions for now.";
   }
 
   function setLayoutAuthoringStatus(text, tone = "") {
@@ -242,8 +269,36 @@ export function createLayoutAuthoringController({
   // prefers the saved layout when it validates (Star also needs it
   // uncrossed at this size). Report which one the author got, and when the
   // polish passed it over, still show it for repair if it fits the terms.
+  // Graph and Circle report how they used the saved layout (see
+  // state.layoutSource in their renderers).
+  function hintSourceMessage(preparingState, saved, label) {
+    const source = preparingState.layoutSource || { kind: "generated" };
+    if (source.kind === "fixed") return { text: `Loaded saved ${label} layout (fixed positions)`, tone: "good" };
+    const outdated = source.fixedErrors?.length
+      ? `Fixed ${label} layout no longer fits (${source.fixedErrors.join("; ")}); `
+      : "";
+    if (source.kind === "hint") {
+      return {
+        text: outdated
+          ? `${outdated}used it as a hint (arrangement kept, positions recomputed)`
+          : `Loaded saved ${label} layout as a hint (arrangement kept, positions recomputed)`,
+        tone: outdated ? "error" : "good"
+      };
+    }
+    return {
+      text: source.hintRejected
+        ? `${outdated}saved ${label} arrangement gave more crossings or overlaps here than a fresh search; generated one instead`
+        : `${outdated}saved ${label} layout could not be read as a hint; generated one instead`,
+      tone: "error"
+    };
+  }
+
   async function reconcileSavedLayout(preparingState, saved) {
     const label = MODE_LABELS[getMode()];
+    if (modeSupportsHints()) {
+      const message = hintSourceMessage(preparingState, saved, label);
+      return { ...message, text: message.text.charAt(0).toUpperCase() + message.text.slice(1) };
+    }
     const strict = validateAuthorLayout(saved);
     const polishUsedSaved = getMode() === "star"
       ? preparingState.prettyPrintStats?.source === "curated"
@@ -291,12 +346,20 @@ export function createLayoutAuthoringController({
       let generatedLayoutPromise = null;
       if (preparingState.made !== preparingState.need) {
         showSolution();
-      } else if (preparingState.layoutAdapter?.autoLayout) {
-        generatedLayoutPromise = preparingState.layoutAdapter.autoLayout();
-      } else if (preparingState.detangle) {
-        generatedLayoutPromise = preparingState.detangle();
+      } else {
+        // An explicit regenerate: renderers skip the saved layout for it.
+        preparingState.ignoreSavedLayout = true;
+        if (preparingState.layoutAdapter?.autoLayout) {
+          generatedLayoutPromise = preparingState.layoutAdapter.autoLayout();
+        } else if (preparingState.detangle) {
+          generatedLayoutPromise = preparingState.detangle();
+        }
       }
-      if (generatedLayoutPromise?.then) await generatedLayoutPromise;
+      try {
+        if (generatedLayoutPromise?.then) await generatedLayoutPromise;
+      } finally {
+        preparingState.ignoreSavedLayout = false;
+      }
       if (preparingState.detanglePromise) await preparingState.detanglePromise;
       if (preparingState.prettyPrintPromise) await preparingState.prettyPrintPromise;
       if (getState() !== preparingState) return;
@@ -376,7 +439,11 @@ export function createLayoutAuthoringController({
     if (!authoringPrepared()) return;
     const state = getState();
     const layout = captureAuthorLayout();
-    const validation = validateAuthorLayout(layout);
+    // A hint only needs to describe the arrangement; exact positions must
+    // pass the renderer's full check.
+    const fixed = !modeSupportsHints() || !!layoutAuthoringFixedInput?.checked;
+    if (layout && modeSupportsHints()) layout.fixed = fixed;
+    const validation = validateAuthorLayout(layout, { allowUnsafe: !fixed });
     if (!validation.valid) {
       setLayoutAuthoringStatus(validation.errors.join("; "), "error");
       updateLayoutAuthoringPanel();
@@ -396,7 +463,8 @@ export function createLayoutAuthoringController({
         state.lastSavedStarLayout = savedModeLayout;
       }
       state.lastSavedLayout = savedModeLayout;
-      setLayoutAuthoringStatus(savedLayoutMessage(mode), "good");
+      setLayoutAuthoringStatus(savedLayoutMessage(mode, fixed), "good");
+      syncFixedCheckbox(state);
     } catch (error) {
       setLayoutAuthoringStatus(`Could not save layout: ${error.message}`, "error");
     } finally {
@@ -545,6 +613,7 @@ export function createLayoutAuthoringController({
       else updateLayoutAuthoringPanel();
     };
     setLayoutAuthoringStatus("");
+    syncFixedCheckbox(state);
     updateLayoutAuthoringPanel();
     // Start from the saved override when there is one, rather than an
     // unsolved board that hides it until Prepare.

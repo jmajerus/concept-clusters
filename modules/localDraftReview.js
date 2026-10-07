@@ -660,7 +660,8 @@ export function createLocalDraftReviewHandler({
         const validation = validatePublishedPuzzleLayout({
           document: documentForEditor(record.document, { categoryRegistry }),
           layout,
-          categoryRegistry
+          categoryRegistry,
+          savingMode: mode
         });
         if (!validation.valid) {
           json(res, {

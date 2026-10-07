@@ -53,6 +53,13 @@ import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
 import {
+  angleDistance,
+  circleLayoutHint,
+  fewerDefects,
+  layoutIsFixed,
+  rotateOffset
+} from "./layoutHints.js";
+import {
   afterNextPaint,
   animatePositionTargets,
   layoutTransitionDuration
@@ -529,7 +536,20 @@ export function createSetRenderer({
     };
   }
 
-  function computePrettyCircleLayout() {
+  // Score units per radian a hinted candidate turns away from the saved
+  // rotation, and the head start a bridge's saved spot gets over an
+  // equally good generated one. See graphLayout.js for the same rule.
+  const HINT_ROTATION_PREFERENCE = 240;
+  const HINT_BRIDGE_PREFERENCE = 40;
+  const CIRCLE_DEFECT_KEYS = [
+    "hardOverlaps", "lineCrossings", "lineHeadingIntersections", "lineCircleIntersections"
+  ];
+
+  // With a hint (see layoutHints.js) the hinted order is searched first,
+  // near the hinted rotation and with each bridge's saved spot as a
+  // candidate; a clean result is taken as is. Otherwise the full search
+  // runs and the hint wins unless it finds strictly fewer defects.
+  function computePrettyCircleLayout(hint = null) {
     const state = getState();
     const { puzzle } = state;
     const { csNodes, clusterBoxes } = state.setLayout;
@@ -565,7 +585,8 @@ export function createSetRenderer({
           circles: [circle],
           bridges: new Map(),
           order: [0],
-          rotation: Math.atan2(home.y - centerY, home.x - W / 2)
+          rotation: Math.atan2(home.y - centerY, home.x - W / 2),
+          source: "generated"
         };
       }
     }
@@ -592,15 +613,15 @@ export function createSetRenderer({
         [scale * factor, scale]
       ])
     ]);
-    let best = null;
-
-    const bridgeCandidatePoints = (bridge, circles, laneIndex) => {
+    const bridgeCandidatePoints = (bridge, circles, laneIndex, hintPoint = null) => {
       const participants = bridge.clusters.map(ci => circles[ci]);
       const centroid = {
         x: participants.reduce((sum, circle) => sum + circle.x, 0) / participants.length,
         y: participants.reduce((sum, circle) => sum + circle.y, 0) / participants.length
       };
-      const points = [centroid];
+      const points = hintPoint
+        ? [{ x: centroid.x + hintPoint.x, y: centroid.y + hintPoint.y, hinted: true }, centroid]
+        : [centroid];
       if (participants.length === 2) {
         const [a, b] = participants;
         const dx = b.x - a.x, dy = b.y - a.y;
@@ -621,8 +642,10 @@ export function createSetRenderer({
       return points;
     };
 
-    for (const order of orders) {
-      for (const rotation of rotations) {
+    const search = (searchOrders, searchRotations, searchHint) => {
+    let best = null;
+    for (const order of searchOrders) {
+      for (const rotation of searchRotations) {
         for (const [scaleX, scaleY] of scalePairs) {
           const circles = csNodes.map(node => ({
             id: node.id,
@@ -650,7 +673,9 @@ export function createSetRenderer({
               }
               const bridge = puzzle.bridges.find(candidate => candidate.term === node.word);
               let bestPoint = null;
-              for (const point of bridgeCandidatePoints(bridge, circles, bridgeIndex)) {
+              const offset = searchHint?.bridgeOffsets.get(node.word);
+              const hintPoint = offset ? rotateOffset(offset, rotation - searchHint.rotation) : null;
+              for (const point of bridgeCandidatePoints(bridge, circles, bridgeIndex, hintPoint)) {
                 const rect = pointRect(point, node.w);
                 let hard = 0;
                 circles.forEach(circle => {
@@ -687,16 +712,22 @@ export function createSetRenderer({
                       .forEach(other => { if (segmentIntersection(segment, other)) crossings++; });
                   }
                 });
-                const score = hard * 1e9 + crossings * 1e7 + obstruction * 1e6 + length;
-                if (!bestPoint || score < bestPoint.score) bestPoint = { ...point, score };
+                const score = hard * 1e9 + crossings * 1e7 + obstruction * 1e6 + length -
+                  (point.hinted ? HINT_BRIDGE_PREFERENCE : 0);
+                if (!bestPoint || score < bestPoint.score) {
+                  bestPoint = { x: point.x, y: point.y, score };
+                }
               }
               bridgePointsByWord.set(node.word, bestPoint);
             });
           const evaluated = scoreCircleCandidate(
             puzzle, circles, bridgePointsByWord, clusterBoxes, stripHeight, W, H
           );
-          if (!best || evaluated.score < best.score) {
+          const placed = evaluated.score +
+            (searchHint ? angleDistance(rotation, searchHint.rotation) * HINT_ROTATION_PREFERENCE : 0);
+          if (!best || placed < best.placed) {
             best = {
+              placed,
               score: evaluated.score,
               metrics: evaluated.metrics,
               circles,
@@ -709,6 +740,20 @@ export function createSetRenderer({
       }
     }
     return best;
+    };
+
+    if (hint && n > 1) {
+      const hinted = search([hint.order], [hint.rotation, ...rotations], hint);
+      if (hinted && CIRCLE_DEFECT_KEYS.every(key => hinted.metrics[key] === 0)) {
+        return { ...hinted, source: "hint" };
+      }
+      const general = search(orders, rotations, null);
+      if (!hinted) return { ...general, source: "generated" };
+      return fewerDefects(general.metrics, hinted.metrics, CIRCLE_DEFECT_KEYS)
+        ? { ...general, source: "generated", hintRejected: true }
+        : { ...hinted, source: "hint" };
+    }
+    return { ...search(orders, rotations, null), source: "generated" };
   }
 
   // Two independent pieces, mirroring exactly how a bridge already
@@ -1569,6 +1614,11 @@ export function createSetRenderer({
         stripHeight: state.setLayout.stripHeight,
         circles,
         bridges,
+        // Membership at save time, so a later hint can find each circle
+        // by its terms after clusters are reordered or renamed.
+        clusterTerms: Object.fromEntries(
+          puzzle.clusters.map((cluster, ci) => [`cluster:${ci}`, [...cluster.terms]])
+        ),
         metrics: circleLayoutMetrics(),
         solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null,
         // See graph capture: a solved-board snapshot is reused on the
@@ -1644,11 +1694,15 @@ export function createSetRenderer({
         if (document.fonts?.ready) await document.fonts.ready;
         if (getState() !== state) return { cancelled: true };
         refreshHeadingWidths();
-        const curatedLayout = layoutForMode(puzzle.layout, "sets");
-        const curatedValidation = curatedLayout
+        // Only a fixed layout that still matches this puzzle and board is
+        // applied exactly; anything else saved steers the search instead.
+        // Prepare on an already solved board asks for a fresh layout.
+        const curatedLayout = state.ignoreSavedLayout ? null : layoutForMode(puzzle.layout, "sets");
+        const curatedValidation = curatedLayout && layoutIsFixed(curatedLayout)
           ? validateCircleLayoutDocument(curatedLayout, puzzle, { width: W, height: H })
           : null;
         if (curatedValidation?.valid) {
+          state.layoutSource = { kind: "fixed" };
           const targets = new Map([
             ...state.setLayout.csNodes.map(node => [
               node,
@@ -1708,8 +1762,16 @@ export function createSetRenderer({
           state.onPlayerLayoutChanged?.("automatic");
           return state.circleLayoutStats;
         }
-        const candidate = computePrettyCircleLayout();
+        const hint = curatedLayout
+          ? circleLayoutHint(curatedLayout, puzzle, { width: W, height: H })
+          : null;
+        const candidate = computePrettyCircleLayout(hint);
         if (!candidate || getState() !== state) return { cancelled: true };
+        state.layoutSource = {
+          kind: candidate.source,
+          hintRejected: !!candidate.hintRejected,
+          fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null
+        };
         const targets = new Map([
           ...state.setLayout.csNodes.map(node => [
             node, candidate.circles[node.id]

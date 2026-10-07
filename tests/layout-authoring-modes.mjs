@@ -166,6 +166,64 @@ async function circleMemberOrder(page) {
   }, arm, { timeout: 5000 });
 }
 
+// A saved Graph or Circle layout steers the solve unless it is fixed and
+// still current. Polish once, save that result back with a stale revision
+// (as a puzzle edit would leave it), and polish again from scratch.
+async function hintedSolve(page, baseURL, mode, { fixed }) {
+  await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=${mode}&moves=`);
+  await waitForGame(page);
+  await page.evaluate(() => window.CC.showSolution());
+  await page.waitForFunction(() => window.CC.state.solutionLayout === "pretty");
+  const savedOrder = await page.evaluate(({ mode, fixed }) => {
+    const state = window.CC.state;
+    const layout = state.layoutAdapter.capture({ purpose: "authoring" });
+    layout.puzzleRevision = "fnv1a32:stale000";
+    if (fixed === false) layout.fixed = false;
+    // Swap where clusters 1 and 2 sat, so the hinted order differs from
+    // the one a fresh search just chose.
+    const centre = ci => {
+      if (mode === "sets") return layout.circles[`cluster:${ci}`];
+      const points = state.puzzle.clusters[ci].terms.map(term => layout.nodes[`term:${term}`]);
+      return {
+        x: points.reduce((sum, point) => sum + point.x, 0) / points.length,
+        y: points.reduce((sum, point) => sum + point.y, 0) / points.length
+      };
+    };
+    const [c1, c2] = [centre(1), centre(2)];
+    const shift = (ci, dx, dy) => {
+      const keys = mode === "sets"
+        ? [`cluster:${ci}`]
+        : state.puzzle.clusters[ci].terms.map(term => `term:${term}`);
+      const points = mode === "sets" ? layout.circles : layout.nodes;
+      keys.forEach(key => { points[key] = { ...points[key], x: points[key].x + dx, y: points[key].y + dy }; });
+    };
+    shift(1, c2.x - c1.x, c2.y - c1.y);
+    shift(2, c1.x - c2.x, c1.y - c2.y);
+    state.puzzle.layout = { schemaVersion: 1, modes: { [mode]: layout } };
+    state.solutionLayout = null;
+    state.prettyPrintPromise = null;
+    const stats = mode === "graph" ? state.graphLayoutStats : state.circleLayoutStats;
+    return stats.order.map(ci => (ci === 1 ? 2 : ci === 2 ? 1 : ci));
+  }, { mode, fixed });
+  await page.evaluate(() => window.CC.state.layoutAdapter.autoLayout());
+  await page.waitForFunction(() => window.CC.state.solutionLayout === "pretty");
+  const result = await page.evaluate(mode => {
+    const state = window.CC.state;
+    const stats = mode === "graph" ? state.graphLayoutStats : state.circleLayoutStats;
+    return { source: state.layoutSource, order: stats.order };
+  }, mode);
+  assert.equal(result.source.kind, "hint", `${mode}: saved layout did not steer the solve`);
+  assert.deepEqual(result.order, savedOrder, `${mode}: hinted solve changed the cluster order`);
+  if (fixed === false) {
+    assert.equal(result.source.fixedErrors, null);
+  } else {
+    assert.ok(
+      result.source.fixedErrors?.some(error => error.includes("revision is stale")),
+      `${mode}: outdated fixed layout did not say why it fell back`
+    );
+  }
+}
+
 export async function run(page, baseURL) {
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
@@ -175,6 +233,8 @@ export async function run(page, baseURL) {
     const layout = await authoringMode(page, baseURL, mode);
     assert.equal(layout.schemaVersion, 1);
     await runtimeOverride(page, baseURL, mode);
+    await hintedSolve(page, baseURL, mode, { fixed: false });
+    await hintedSolve(page, baseURL, mode, { fixed: true });
     if (mode === "sets") await circleMemberOrder(page);
   }
 
