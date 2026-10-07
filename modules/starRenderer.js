@@ -251,6 +251,43 @@ export function createStarRenderer({
     });
     const displayedLinks = () => [...links, ...singleSeedAnchors];
 
+    // A light count of the board's defects, available as soon as the board
+    // exists. The detangler's own evaluation (authoringLayoutMetrics) takes
+    // over once it has run; until then this lets a player's drag be judged
+    // better or worse (playerLayoutEffort.js). It uses the same geometry as
+    // the detangler's evaluateLayout -- line-through clearance 4, overlap
+    // padding 4 on each pill, titles included in edgeNodeIntersections --
+    // so a drag scores the same either side of the first detangle.
+    const liveLayoutMetrics = () => {
+      const edges = displayedLinks().map(link => ({
+        source: link.source,
+        target: displayedLinkTarget(link)
+      })).filter(edge => edge.source && edge.target);
+      const segments = edges.map(edge => segmentFromPoints(edge.source, edge.target));
+      let lineCrossings = 0, edgeNodeIntersections = 0, edgeTitleIntersections = 0, overlaps = 0;
+      for (let i = 0; i < edges.length; i++) {
+        for (let j = i + 1; j < edges.length; j++) {
+          const a = edges[i], b = edges[j];
+          if (a.source === b.source || a.source === b.target ||
+              a.target === b.source || a.target === b.target) continue;
+          if (segmentIntersectionPoint(segments[i], segments[j])) lineCrossings++;
+        }
+        allLayoutNodes.forEach(node => {
+          if (node === edges[i].source || node === edges[i].target) return;
+          if (!segmentRectIntersectionPoint(segments[i], centeredRect(node, node.w, 30), 4)) return;
+          edgeNodeIntersections++;
+          if (node.isTitleNode) edgeTitleIntersections++;
+        });
+      }
+      for (let i = 0; i < allLayoutNodes.length; i++) {
+        for (let j = i + 1; j < allLayoutNodes.length; j++) {
+          const a = allLayoutNodes[i], b = allLayoutNodes[j];
+          if (rectsOverlap(centeredRect(a, a.w, 30, 4), centeredRect(b, b.w, 30, 4))) overlaps++;
+        }
+      }
+      return { lineCrossings, edgeTitleIntersections, edgeNodeIntersections, overlaps, overlappingPairs: [] };
+    };
+
     // Titles and bridge nodes only. Seeds and the other terms join after
     // this settle, and the bridge seats stay pinned so the later term
     // sim does not walk the corridors off. Restoring a layout clears
@@ -975,8 +1012,16 @@ export function createStarRenderer({
         };
       };
 
-      const compareMoves = (a, b) =>
-        a.after.crossingCount - b.after.crossingCount ||
+      // Set by run() for a board the player arranged: moves are then ranked
+      // by the defects they leave and how far they travel, with no spacing
+      // or fan preferences that could pick a farther move.
+      let preservingPlayerLayout = false;
+      const compareMoves = (a, b) => preservingPlayerLayout
+        ? a.after.crossingCount - b.after.crossingCount ||
+          a.after.edgeNodeIntersectionCount - b.after.edgeNodeIntersectionCount ||
+          a.after.overlaps - b.after.overlaps ||
+          a.distance - b.distance
+        : a.after.crossingCount - b.after.crossingCount ||
         a.after.edgeNodeIntersectionCount - b.after.edgeNodeIntersectionCount ||
         a.after.overlaps - b.after.overlaps ||
         a.after.shortVisibleBridgeLegCount - b.after.shortVisibleBridgeLegCount ||
@@ -1442,11 +1487,18 @@ export function createStarRenderer({
         await wait(0);
         if (getState() !== state || getSim() !== sim) return { cancelled: true };
 
-        // A saved layout is the escape hatch for boards the detangler cannot
-        // finish quickly or cleanly: skip the multi-second settle and drag
-        // search and animate straight to it. A live player completion keeps
-        // their arrangement and only uncrosses in place.
-        if (state.completedViaShowSolution && savedStarTargets()) {
+        // A board the player arranged themselves (state.preservePlayerLayout,
+        // set by the polish control from playerLayoutEffort.js) keeps their
+        // positions: no settle, no fan or spacing moves, only the corrective
+        // moves for real defects -- and then it is finished, so no second
+        // press replaces it. Any other board with a saved layout skips the
+        // multi-second settle and drag search and animates straight to it.
+        const preserve = !!state.preservePlayerLayout;
+        const toSaved = state.completedViaShowSolution || !!state.polishToSaved;
+        state.preservePlayerLayout = false;
+        state.polishToSaved = false;
+        preservingPlayerLayout = preserve;
+        if (!preserve && toSaved && savedStarTargets()) {
           state.solutionLayout = "animated";
           updateSolutionHint();
           return state.prettyPrint();
@@ -1462,13 +1514,15 @@ export function createStarRenderer({
         }
 
         setMessage(
-          state.completedViaShowSolution
-            ? "Solution shown — untangling the final layout…"
-            : "Clearing line crossings…",
+          preserve
+            ? "Tidying your layout…"
+            : state.completedViaShowSolution
+              ? "Solution shown — untangling the final layout…"
+              : "Clearing line crossings…",
           "good"
         );
         const settleStarted = performance.now();
-        while (sim.alpha() > SETTLED_ALPHA &&
+        while (!preserve && sim.alpha() > SETTLED_ALPHA &&
                performance.now() - settleStarted < MAX_INITIAL_SETTLE_MS) {
           await wait(50);
         }
@@ -1603,13 +1657,17 @@ export function createStarRenderer({
         if (cancelled?.cancelled) return cancelled;
         finishPhase();
 
-        activePhase = "short";
-        cancelled = await runDetanglePhase(
-          layout => layout.crossingCount === 0 &&
-            layout.shortVisibleBridgeLegCount > 0,
-          stats.moves.length + MAX_SHORT_LEG_MOVES
-        );
-        if (cancelled?.cancelled) return cancelled;
+        // Short bridge legs are spacing, a matter of taste on a board the
+        // player arranged.
+        if (!preserve) {
+          activePhase = "short";
+          cancelled = await runDetanglePhase(
+            layout => layout.crossingCount === 0 &&
+              layout.shortVisibleBridgeLegCount > 0,
+            stats.moves.length + MAX_SHORT_LEG_MOVES
+          );
+          if (cancelled?.cancelled) return cancelled;
+        }
 
         if (compareLayouts(current, bestLayout) > 0) {
           restorePositions(bestPositions);
@@ -1620,7 +1678,7 @@ export function createStarRenderer({
         // local adjustments that place multi-port clusters' ordinary terms
         // in their outward fan. These are evaluated against the title's
         // final position, so a title drag cannot invalidate the target.
-        if (stats.moves.length && current.crossingCount === 0) {
+        if (!preserve && stats.moves.length && current.crossingCount === 0) {
           for (const [node] of outwardSlots) {
             const target = outwardTarget(node);
             const beforeDistance = Math.hypot(node.x - target.x, node.y - target.y);
@@ -1641,7 +1699,7 @@ export function createStarRenderer({
         // to polish spacing without reorganizing the solved graph. An
         // already-clean board has had no virtual release and remains
         // untouched.
-        if (stats.moves.length && getState() === state && getSim() === sim) {
+        if (!preserve && stats.moves.length && getState() === state && getSim() === sim) {
           setMessage(
             state.completedViaShowSolution
               ? "Solution shown — settling the final spacing…"
@@ -1688,6 +1746,18 @@ export function createStarRenderer({
           current.overlaps === 0 &&
           current.shortVisibleBridgeLegCount === 0;
         renderPositions();
+        if (preserve && getState() === state && getSim() === sim) {
+          state.solutionLayout = "pretty";
+          updateSolutionHint();
+          state.onPlayerLayoutChanged?.("automatic");
+          setMessage(
+            stats.moves.length
+              ? "Your layout kept — only its crossings and overlaps were repaired."
+              : "Your layout kept as you arranged it.",
+            "good"
+          );
+          return stats;
+        }
         if (getState() === state && getSim() === sim) {
           state.solutionLayout = "animated";
           updateSolutionHint();
@@ -1759,6 +1829,7 @@ export function createStarRenderer({
         }
         d.fx = d.x;
         d.fy = d.y;
+        state.onPlayerDragStart?.(d);
       })
       .on("drag", (e, d) => {
         d.x = d.fx = e.x;
@@ -1777,9 +1848,13 @@ export function createStarRenderer({
           sim.stop();
           renderPositions();
           if (authoring) state.onAuthorLayoutChanged?.("drag");
-          else state.onPlayerLayoutChanged?.("player");
+          else {
+            state.onPlayerDragEnd?.(d);
+            state.onPlayerLayoutChanged?.("player");
+          }
         } else if (!e.active) {
           sim.alphaTarget(0);
+          state.onPlayerDragEnd?.(d);
           state.onPlayerLayoutChanged?.("player");
         }
       });
@@ -2131,13 +2206,7 @@ export function createStarRenderer({
         });
       },
       metrics() {
-        return authoringLayoutMetrics?.() || {
-          lineCrossings: 0,
-          edgeNodeIntersections: 0,
-          edgeTitleIntersections: 0,
-          overlaps: 0,
-          overlappingPairs: []
-        };
+        return authoringLayoutMetrics?.() || liveLayoutMetrics();
       },
       autoLayout: state.detangle
     };

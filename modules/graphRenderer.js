@@ -8,7 +8,8 @@ import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { bridgePoints, seedInitialPositions } from "./puzzleGraph.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
-import { computePrettyGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
+import { computePrettyGraphLayout, repairGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
+import { hasDefects } from "./playerLayoutEffort.js";
 import { graphLayoutHint, layoutIsFixed } from "./layoutHints.js";
 import { layoutBudget } from "./layoutBudget.js";
 import {
@@ -191,6 +192,7 @@ export function createGraphRenderer({
         }
         d.fx = d.x;
         d.fy = d.y;
+        state.onPlayerDragStart?.(d);
       })
       .on("drag", (e, d) => {
         d.x = d.fx = e.x;
@@ -220,7 +222,10 @@ export function createGraphRenderer({
           sim.alphaTarget(0);
         }
         if (authoring) state.onAuthorLayoutChanged?.("drag");
-        else state.onPlayerLayoutChanged?.("player");
+        else {
+          state.onPlayerDragEnd?.(d);
+          state.onPlayerLayoutChanged?.("player");
+        }
       });
 
     const nodeG = nodeLayer.selectAll("g").data(nodes).join("g")
@@ -544,6 +549,61 @@ export function createGraphRenderer({
       };
       state.prettyPrintPromise = run();
       return state.prettyPrintPromise;
+    };
+
+    // Polish for a board the player arranged (playerLayoutEffort.js): keep
+    // their positions, and move only pills a strictly defect-reducing
+    // single move can fix. A board with nothing wrong stays exactly as is.
+    state.repairPlayerLayout = async () => {
+      if (state.made !== state.need) return { cancelled: true };
+      state.solutionLayout = "polishing";
+      updateSolutionHint();
+      sim.stop();
+      let moved = 0;
+      if (hasDefects("graph", graphLayoutMetrics())) {
+        const repaired = repairGraphLayout({
+          // The player's pins are their choices, but a pin caught in a
+          // crossing or overlap may still move the least it takes.
+          nodes: nodes.map(node => ({ ...node, fx: null, fy: null })),
+          links: state.links,
+          width: W,
+          height: H,
+          positions: new Map(nodes.map(node => [node.id, { x: node.x, y: node.y }]))
+        });
+        const targets = new Map(nodes
+          .map(node => [node, repaired.positions.get(node.id)])
+          .filter(([node, point]) => point && Math.hypot(point.x - node.x, point.y - node.y) > 0.5));
+        moved = targets.size;
+        if (moved) {
+          svg.classed("graph-polishing", true);
+          const animated = await animatePositionTargets({
+            targets,
+            duration: layoutTransitionDuration(450),
+            render: renderPositions,
+            isCurrent: () => getState() === state,
+            resetVelocity: true
+          });
+          svg.classed("graph-polishing", false);
+          if (!animated || getState() !== state) return { cancelled: true };
+          targets.forEach((point, node) => {
+            node.x = point.x;
+            node.y = point.y;
+            if (node.fx != null) { node.fx = node.x; node.fy = node.y; }
+          });
+          renderPositions();
+        }
+      }
+      state.graphLayoutStats = { ...graphLayoutMetrics(), playerLayout: true, moved };
+      state.solutionLayout = "pretty";
+      updateSolutionHint();
+      setMessage(
+        moved
+          ? "Your layout kept — only its crossings and overlaps were repaired."
+          : "Your layout kept as you arranged it.",
+        "good"
+      );
+      state.onPlayerLayoutChanged?.("automatic");
+      return state.graphLayoutStats;
     };
 
     state.detangle = prettyPrintGraphLayout;

@@ -44,6 +44,7 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
 import { saveLayout, saveLayoutBoard } from "./modules/layoutApi.js";
 import { layoutDocumentWithBoard } from "./modules/layoutDocument.js";
+import { classifyDrag, isCrafted, recordDrag } from "./modules/playerLayoutEffort.js";
 import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
@@ -525,7 +526,8 @@ function persistPlayerSession({ captureLayout = false } = {}) {
     moves: semanticMovesForState(state),
     layouts,
     completed: state.phase === "complete",
-    lens: captureLensSession()
+    lens: captureLensSession(),
+    effort: state.layoutEffort || {}
   });
 }
 
@@ -911,10 +913,23 @@ showSolutionBtn.addEventListener("click", () => {
   // events and future callers): a busy or finished solution control is
   // never actionable.
   if (showSolutionBtn.disabled) return;
+  // A board the player has arranged themselves (playerLayoutEffort.js)
+  // keeps their positions: polishing only repairs real defects. Any other
+  // board polishes straight to the saved layout when there is one.
+  const crafted = !!state && isCrafted(state.layoutEffort, mode);
   if (mode === "star" && state && state.made === state.need) {
-    if (state.solutionLayout === "animated" && state.prettyPrint) {
+    if (crafted && state.detangle && ["animated", null, undefined].includes(state.solutionLayout)) {
+      // Checked first: an earlier pass (a detangle, or the one before
+      // lenses) can leave the board "animated", whose next step would
+      // otherwise replace the player's arrangement.
+      state.preservePlayerLayout = true;
+      state.polishToSaved = false;
+      state.detangle();
+    } else if (state.solutionLayout === "animated" && state.prettyPrint) {
       state.prettyPrint();
     } else if (!state.solutionLayout && state.detangle) {
+      state.preservePlayerLayout = false;
+      state.polishToSaved = true;
       state.detangle();
     } else {
       showSolution();
@@ -925,7 +940,8 @@ showSolutionBtn.addEventListener("click", () => {
              !["polishing", "pretty"].includes(state.solutionLayout)) {
     // Gameplay has already committed the authored bridge topology; a
     // completed board only needs its renderer's optional layout pass.
-    state.layoutAdapter.autoLayout();
+    if (crafted && state.repairPlayerLayout) state.repairPlayerLayout();
+    else state.layoutAdapter.autoLayout();
   } else {
     showSolution();
   }
@@ -2210,6 +2226,8 @@ function applyLoadedPuzzle(puzzle, index, {
     modeSwitchPolishing: false,
     modeSwitchLayoutPromise: null,
     layoutAuthoring: layoutAuthoringMode,
+    // Deliberate post-solve drags per mode (playerLayoutEffort.js).
+    layoutEffort: savedSession?.effort || {},
     // &layoutBudget=extended: the offline layout pass's larger search, which
     // can take most of a minute. Only the D1 authoring player honours it, so
     // a shared public link cannot make a player's Show Solution run it.
@@ -2270,6 +2288,39 @@ function applyLoadedPuzzle(puzzle, index, {
   };
   state.onProgressChanged = () => persistPlayerSession();
   state.onPlayerLayoutChanged = () => schedulePlayerLayoutSave();
+  // A player's drag is measured from start to end: how far the pill
+  // travelled and whether the board got worse. Drags while the board is
+  // still being built count at reduced weight (playerLayoutEffort.js).
+  // That record decides whether polishing keeps the player's arrangement.
+  let playerDrag = null;
+  state.onPlayerDragStart = node => {
+    playerDrag = null;
+    if (state.layoutAuthoring) return;
+    const metrics = state.layoutAdapter?.metrics?.();
+    if (!metrics) return;
+    playerDrag = {
+      node,
+      x: node.x,
+      y: node.y,
+      mode: state.layoutAdapter.mode,
+      before: metrics,
+      building: state.made !== state.need
+    };
+  };
+  state.onPlayerDragEnd = node => {
+    const start = playerDrag;
+    playerDrag = null;
+    if (!start || start.node !== node || state.layoutAdapter?.mode !== start.mode) return;
+    const kind = classifyDrag({
+      mode: start.mode,
+      before: start.before,
+      after: state.layoutAdapter.metrics(),
+      displacement: Math.hypot(node.x - start.x, node.y - start.y)
+    });
+    if (!kind) return;
+    state.layoutEffort = recordDrag(state.layoutEffort, start.mode, kind, { building: start.building });
+    schedulePlayerLayoutSave();
+  };
   updateModeControls();
   updateSolutionHint();
   updateLearningIntroduction();

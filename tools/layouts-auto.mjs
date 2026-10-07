@@ -77,19 +77,23 @@ function parseArgs(argv) {
   return options;
 }
 
-// Defects players would notice, most severe first, per mode, in the order
-// each engine's own scoring ranks them (graphLayout scoreGraphGeometry,
-// setRenderer scoreCircleCandidate, starRenderer comparePrettyLayouts).
-// Graph's hardOverlaps already includes overlaps.
-const DEFECT_KEYS = {
+// Defects players would notice as severity tiers, most severe first, the
+// way each engine's own scoring ranks a finished layout (graphLayout
+// scoreGraphGeometry, setRenderer scoreCircleCandidate, starRenderer
+// comparePrettyLayouts). Graph's hardOverlaps already includes overlaps;
+// Circle weighs lines through headings and through circles the same, so
+// they share a tier (a tier listing several metrics compares their sum).
+const DEFECT_TIERS = {
   graph: ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"],
-  sets: ["hardOverlaps", "lineCrossings", "lineHeadingIntersections", "lineCircleIntersections"],
+  sets: ["hardOverlaps", "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
   star: ["lineCrossings", "edgeTitleIntersections", "edgeNodeIntersections", "overlaps"]
 };
+const tierKeys = tier => (Array.isArray(tier) ? tier : [tier]);
+const tierCount = (counts, tier) => tierKeys(tier).reduce((sum, key) => sum + (counts?.[key] || 0), 0);
 
 function defects(mode, metrics) {
   if (!metrics) return { total: null };
-  const found = Object.fromEntries(DEFECT_KEYS[mode]
+  const found = Object.fromEntries(DEFECT_TIERS[mode].flatMap(tierKeys)
     .map(key => [key, Number(metrics[key]) || 0])
     .filter(([, count]) => count > 0));
   return { ...found, total: Object.values(found).reduce((sum, count) => sum + count, 0) };
@@ -98,8 +102,8 @@ function defects(mode, metrics) {
 // Fewer defects of the most severe kind wins, as in the engines' own
 // scoring; a crossing is never traded for a few lines through pills.
 function fewerDefects(mode, a, b) {
-  for (const key of DEFECT_KEYS[mode]) {
-    const x = a[key] || 0, y = b[key] || 0;
+  for (const tier of DEFECT_TIERS[mode]) {
+    const x = tierCount(a, tier), y = tierCount(b, tier);
     if (x !== y) return x < y;
   }
   return false;
@@ -110,7 +114,7 @@ function fewerDefects(mode, a, b) {
 function severityVector(rows) {
   const vector = [0, 0, 0, 0];
   rows.forEach(row => {
-    DEFECT_KEYS[row.mode].forEach((key, rank) => { vector[rank] += row.defects?.[key] || 0; });
+    DEFECT_TIERS[row.mode].forEach((tier, rank) => { vector[rank] += tierCount(row.defects, tier); });
   });
   return vector;
 }

@@ -1,5 +1,6 @@
 import { layoutRevision } from "./layoutDocument.js";
 import { normalizedLensMode } from "./lensEngine.js";
+import { normalizeEffort } from "./playerLayoutEffort.js";
 
 export const PLAYER_SESSION_SCHEMA_VERSION = 1;
 export const PLAYER_SESSION_MODES = ["graph", "star", "sets"];
@@ -105,7 +106,9 @@ export function loadPlayerSession(storage, puzzle) {
         !validLensSession(session.lens, puzzle)) {
       return null;
     }
-    return session;
+    // Layout effort is optional: a malformed record reads as none rather
+    // than costing the player their whole session.
+    return { ...session, effort: normalizeEffort(session.effort) };
   } catch {
     return null;
   }
@@ -116,7 +119,8 @@ export function savePlayerSession(storage, puzzle, {
   moves = [],
   layouts = {},
   completed = false,
-  lens = null
+  lens = null,
+  effort = {}
 }) {
   if (!PLAYER_SESSION_MODES.includes(currentMode) ||
       !Array.isArray(moves) ||
@@ -136,7 +140,8 @@ export function savePlayerSession(storage, puzzle, {
     moves,
     layouts,
     completed: !!completed,
-    lens
+    lens,
+    effort: normalizeEffort(effort)
   };
   try {
     storage.setItem(playerSessionKey(puzzle), JSON.stringify(session));
