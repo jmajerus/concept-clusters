@@ -57,7 +57,8 @@ export async function saveLayoutBoard({
   );
   const body = await responseBody(response);
   if (!response.ok) {
-    throw new Error(body.error || (body.errors || []).join("; ") || `Board settings save failed (${response.status})`);
+    // Validation replies carry a generic error plus the specific reasons.
+    throw new Error((body.errors || []).join("; ") || body.error || `Board settings save failed (${response.status})`);
   }
   return body.layout;
 }

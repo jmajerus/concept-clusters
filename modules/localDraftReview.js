@@ -47,6 +47,7 @@ import {
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
+  LayoutConflictError,
   autoBoardConflict,
   autoEnvelopeConflict,
   autoLayoutConflict,
@@ -594,151 +595,164 @@ export function createLocalDraftReviewHandler({
         return true;
       }
       const draftId = decodeURIComponent(layoutMatch[1]);
-      try {
-        const record = await draftStore.getDraft(draftId);
-        // A newly opened working copy has no layout column of its own yet.
-        // Treat the current published envelope as its starting snapshot so a
-        // first Graph/Circle save cannot replace an existing Star override.
-        // Once the draft has saved a layout, that full snapshot remains the
-        // draft's authority for subsequent mode updates and clears.
-        const published = await publishedRowOrNull(
-          contentDocuments,
-          "puzzle",
-          record.document?.id
-        );
-        const inheritedLayout = record.layout ?? published?.layout ?? null;
-        if (req.method === "GET" || req.method === "HEAD") {
-          json(res, {
-            draftId,
-            revision: record.revision,
-            layout: inheritedLayout
-          });
-          return true;
-        }
-        if (req.method !== "PUT" && req.method !== "DELETE") return false;
-        if (req.method === "DELETE") {
-          const mode = requestUrl.searchParams.get("mode");
-          const cleared = mode
-            ? await draftStore.saveLayout({
+      // Each write is conditional on the draft this request read. When
+      // another save lands in between, re-read and rebuild from the newer
+      // layout, so neither save erases the other and author-over-auto is
+      // re-checked.
+      let bodyPayload = null;
+      for (let attempt = 0; ; attempt++) {
+        try {
+          const record = await draftStore.getDraft(draftId);
+          // A newly opened working copy has no layout column of its own yet.
+          // Treat the current published envelope as its starting snapshot so a
+          // first Graph/Circle save cannot replace an existing Star override.
+          // Once the draft has saved a layout, that full snapshot remains the
+          // draft's authority for subsequent mode updates and clears.
+          const published = await publishedRowOrNull(
+            contentDocuments,
+            "puzzle",
+            record.document?.id
+          );
+          const inheritedLayout = record.layout ?? published?.layout ?? null;
+          if (req.method === "GET" || req.method === "HEAD") {
+            json(res, {
               draftId,
-              layout: layoutDocumentForMode(mode, null, inheritedLayout)
-            })
-            : inheritedLayout
-              ? await draftStore.saveLayout({
-                draftId,
-                // Board settings survive clearing every mode layout.
-                layout: normalizeLayoutDocument(inheritedLayout)?.board
-                  ? layoutDocumentWithBoard({}, { schemaVersion: 1, modes: {}, board: normalizeLayoutDocument(inheritedLayout).board })
-                  : emptyLayoutDocument()
-              })
-              : await draftStore.clearLayout(draftId);
-          json(res, {
-            draftId,
-            revision: cleared.revision,
-            layout: cleared.layout || null
-          });
-          return true;
-        }
-        const { json: body } = await readRequestPayload(req);
-        const submitted = body && Object.prototype.hasOwnProperty.call(body, "layout")
-          ? body.layout
-          : body;
-        const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
-        // Board settings (size, Star free-term strip) save into the layout
-        // document beside the per-mode layouts; see layoutDocumentWithBoard.
-        if (body && Object.prototype.hasOwnProperty.call(body, "board") && !mode) {
-          const incoming = body.board && typeof body.board === "object" ? body.board : {};
-          const changes = stampLayoutSaved({
-            ...incoming,
-            source: incoming.source === "auto" ? "auto" : "author"
-          });
-          const boardConflict = autoBoardConflict(changes, inheritedLayout);
-          if (boardConflict) {
-            json(res, { error: boardConflict, draftId }, 409);
+              revision: record.revision,
+              layout: inheritedLayout
+            });
             return true;
           }
-          const boardLayout = layoutDocumentWithBoard(changes, inheritedLayout);
-          const boardRegistry = await loadMergedCategoryRegistry({
+          if (req.method !== "PUT" && req.method !== "DELETE") return false;
+          if (req.method === "DELETE") {
+            const mode = requestUrl.searchParams.get("mode");
+            const cleared = mode
+              ? await draftStore.saveLayout({
+                draftId,
+                expectedUpdatedAt: record.updatedAt,
+                layout: layoutDocumentForMode(mode, null, inheritedLayout)
+              })
+              : inheritedLayout
+                ? await draftStore.saveLayout({
+                  draftId,
+                  expectedUpdatedAt: record.updatedAt,
+                  // Board settings survive clearing every mode layout.
+                  layout: normalizeLayoutDocument(inheritedLayout)?.board
+                    ? layoutDocumentWithBoard({}, { schemaVersion: 1, modes: {}, board: normalizeLayoutDocument(inheritedLayout).board })
+                    : emptyLayoutDocument()
+                })
+                : await draftStore.clearLayout(draftId);
+            json(res, {
+              draftId,
+              revision: cleared.revision,
+              layout: cleared.layout || null
+            });
+            return true;
+          }
+          // The body is read once; a retry rebuilds from it.
+          bodyPayload ||= readRequestPayload(req);
+          const { json: body } = await bodyPayload;
+          const submitted = body && Object.prototype.hasOwnProperty.call(body, "layout")
+            ? body.layout
+            : body;
+          const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
+          // Board settings (size, Star free-term strip) save into the layout
+          // document beside the per-mode layouts; see layoutDocumentWithBoard.
+          if (body && Object.prototype.hasOwnProperty.call(body, "board") && !mode) {
+            const incoming = body.board && typeof body.board === "object" ? body.board : {};
+            const changes = stampLayoutSaved({
+              ...incoming,
+              source: incoming.source === "auto" ? "auto" : "author"
+            });
+            const boardConflict = autoBoardConflict(changes, inheritedLayout);
+            if (boardConflict) {
+              json(res, { error: boardConflict, draftId }, 409);
+              return true;
+            }
+            const boardLayout = layoutDocumentWithBoard(changes, inheritedLayout);
+            const boardRegistry = await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            });
+            const boardValidation = validatePublishedPuzzleLayout({
+              document: documentForEditor(record.document, { categoryRegistry: boardRegistry }),
+              layout: boardLayout,
+              categoryRegistry: boardRegistry
+            });
+            if (!boardValidation.valid) {
+              json(res, { error: "Layout is invalid", draftId, errors: boardValidation.errors }, 400);
+              return true;
+            }
+            const savedBoard = await draftStore.saveLayout({ draftId, layout: boardLayout, expectedUpdatedAt: record.updatedAt });
+            json(res, {
+              draftId,
+              revision: savedBoard.revision,
+              layout: savedBoard.layout || boardLayout,
+              warnings: boardValidation.warnings
+            });
+            return true;
+          }
+          const modePayload = mode && submitted?.modes
+            ? layoutForMode(submitted, mode)
+            : submitted;
+          const conflict = mode
+            ? autoLayoutConflict(mode, modePayload, inheritedLayout)
+            : autoEnvelopeConflict(submitted, inheritedLayout);
+          if (conflict) {
+            json(res, { error: conflict, draftId }, 409);
+            return true;
+          }
+          const layout = mode
+            ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), inheritedLayout)
+            : normalizeLayoutDocument(submitted);
+          const categoryRegistry = await loadMergedCategoryRegistry({
             contentDocuments,
             contentService,
             actor: publicationActor
           });
-          const boardValidation = validatePublishedPuzzleLayout({
-            document: documentForEditor(record.document, { categoryRegistry: boardRegistry }),
-            layout: boardLayout,
-            categoryRegistry: boardRegistry
-          });
-          if (!boardValidation.valid) {
-            json(res, { error: "Layout is invalid", draftId, errors: boardValidation.errors }, 400);
+          const { puzzle, errors } = puzzleFromAuthoredDocument(
+            documentForEditor(record.document, { categoryRegistry })
+          );
+          if (!puzzle) {
+            json(res, {
+              error: "Draft puzzle document is not valid simplified content",
+              draftId,
+              errors
+            }, 400);
             return true;
           }
-          const savedBoard = await draftStore.saveLayout({ draftId, layout: boardLayout });
+          const validation = validatePublishedPuzzleLayout({
+            document: documentForEditor(record.document, { categoryRegistry }),
+            layout,
+            categoryRegistry,
+            savingMode: mode
+          });
+          if (!validation.valid) {
+            json(res, {
+              error: "Layout is invalid",
+              draftId,
+              errors: validation.errors
+            }, 400);
+            return true;
+          }
+          const saved = await draftStore.saveLayout({ draftId, layout, expectedUpdatedAt: record.updatedAt });
           json(res, {
             draftId,
-            revision: savedBoard.revision,
-            layout: savedBoard.layout || boardLayout,
-            warnings: boardValidation.warnings
+            revision: saved.revision,
+            layout: saved.layout || layout,
+            warnings: validation.warnings
           });
           return true;
-        }
-        const modePayload = mode && submitted?.modes
-          ? layoutForMode(submitted, mode)
-          : submitted;
-        const conflict = mode
-          ? autoLayoutConflict(mode, modePayload, inheritedLayout)
-          : autoEnvelopeConflict(submitted, inheritedLayout);
-        if (conflict) {
-          json(res, { error: conflict, draftId }, 409);
+        } catch (error) {
+          if (error instanceof LayoutConflictError && attempt < 2) continue;
+          if (isMissingDraft(error)) {
+            json(res, { error: "Draft not found", detail: formatActionError(error) }, 404);
+            return true;
+          }
+          json(res, { error: formatActionError(error) }, error.status || 400);
           return true;
         }
-        const layout = mode
-          ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), inheritedLayout)
-          : normalizeLayoutDocument(submitted);
-        const categoryRegistry = await loadMergedCategoryRegistry({
-          contentDocuments,
-          contentService,
-          actor: publicationActor
-        });
-        const { puzzle, errors } = puzzleFromAuthoredDocument(
-          documentForEditor(record.document, { categoryRegistry })
-        );
-        if (!puzzle) {
-          json(res, {
-            error: "Draft puzzle document is not valid simplified content",
-            draftId,
-            errors
-          }, 400);
-          return true;
-        }
-        const validation = validatePublishedPuzzleLayout({
-          document: documentForEditor(record.document, { categoryRegistry }),
-          layout,
-          categoryRegistry,
-          savingMode: mode
-        });
-        if (!validation.valid) {
-          json(res, {
-            error: "Layout is invalid",
-            draftId,
-            errors: validation.errors
-          }, 400);
-          return true;
-        }
-        const saved = await draftStore.saveLayout({ draftId, layout });
-        json(res, {
-          draftId,
-          revision: saved.revision,
-          layout: saved.layout || layout,
-          warnings: validation.warnings
-        });
-      } catch (error) {
-        if (isMissingDraft(error)) {
-          json(res, { error: "Draft not found", detail: formatActionError(error) }, 404);
-          return true;
-        }
-        json(res, { error: formatActionError(error) }, error.status || 400);
       }
-      return true;
     }
 
     if (req.method === "POST" && urlPath === "/admin/drafts") {

@@ -134,6 +134,17 @@ export function serializeLayoutDocument(layout) {
   return json;
 }
 
+// A layout write found the row changed since the caller read it. Save
+// endpoints re-read, re-check, and retry, so a concurrent save is never
+// erased by one built on the older layout.
+export class LayoutConflictError extends Error {
+  constructor(id) {
+    super(`The layout for "${id}" changed while it was being saved.`);
+    this.name = "LayoutConflictError";
+    this.status = 409;
+  }
+}
+
 // Who made a saved layout: an author in layout authoring, or the automatic
 // layout pass (tools/layouts-auto.mjs). Layouts saved before the tag
 // existed were all made by authors.

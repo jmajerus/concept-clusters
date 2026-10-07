@@ -23,6 +23,7 @@ import {
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
+  LayoutConflictError,
   layoutDocumentForMode,
   serializeLayoutDocument
 } from "./layoutDocument.js";
@@ -549,9 +550,12 @@ export function createPuzzleDraftStore({ directory }) {
     });
   }
 
-  async function saveLayout({ draftId, layout }) {
+  async function saveLayout({ draftId, layout, expectedUpdatedAt = null }) {
     return withDraftMutation(draftId, async () => {
       const raw = await readRawRecord(draftId);
+      if (expectedUpdatedAt != null && raw.updatedAt !== expectedUpdatedAt) {
+        throw new LayoutConflictError(draftId);
+      }
       const layoutJson = serializeLayoutDocument(layout);
       const record = {
         ...raw,

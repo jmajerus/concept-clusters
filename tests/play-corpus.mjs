@@ -380,6 +380,51 @@ export async function run(page) {
   assert.equal(autoBoard.status, 409, autoBoard.body);
   assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.sizeFactor, 1.1);
 
+  // Writes are conditional on the row the request read: a stale write is
+  // refused, and the endpoint re-reads and retries so a save that landed in
+  // between is kept rather than erased.
+  const readBefore = await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" });
+  await new Promise(resolve => setTimeout(resolve, 2));
+  await repo.saveLayout({ id: "lab-d1-play", layout: readBefore.layout });
+  await assert.rejects(
+    repo.saveLayout({ id: "lab-d1-play", layout: readBefore.layout, expectedUpdatedAt: readBefore.updatedAt }),
+    error => error.name === "LayoutConflictError"
+  );
+  let interleaved = false;
+  const racingRepo = Object.create(repo);
+  racingRepo.saveLayout = async args => {
+    if (!interleaved && args.expectedUpdatedAt) {
+      interleaved = true;
+      // Another author save lands after this request read the row.
+      const current = await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" });
+      await new Promise(resolve => setTimeout(resolve, 2));
+      await repo.saveLayout({
+        id: "lab-d1-play",
+        layout: { ...current.layout, board: { ...current.layout.board, starFreeStrip: true } }
+      });
+    }
+    return repo.saveLayout(args);
+  };
+  const racingHandler = createLocalPlayCorpusHandler({
+    contentDocuments: racingRepo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root
+  });
+  const raced = createResponse();
+  assert.equal(await racingHandler({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({ board: { sizeFactor: 1.15 } }));
+    }
+  }, raced), true);
+  assert.equal(raced.status, 200, raced.body);
+  assert.ok(interleaved);
+  const afterRace = (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board;
+  assert.equal(afterRace.sizeFactor, 1.15, "the retried save applied");
+  assert.equal(afterRace.starFreeStrip, true, "the save that landed in between was kept");
+
   for (const [mode, modeLayout] of [
     ["graph", { ...graphLayout, metrics: { ...graphLayout.metrics, lineCrossings: 1 } }],
     ["sets", { ...circleLayout, metrics: { ...circleLayout.metrics, lineCrossings: 1 } }]
@@ -474,7 +519,7 @@ export async function run(page) {
     // they are not a mode layout.
     const clearedLayout = (await draftStore.getDraft("lab-d1-play-draft")).layout;
     assert.deepEqual(clearedLayout.modes, emptyLayoutDocument().modes);
-    assert.equal(clearedLayout.board.sizeFactor, 1.1);
+    assert.equal(clearedLayout.board.sizeFactor, 1.15);
     const clearedDraftLayout = createResponse();
     assert.equal(await handleExistingDraft({
       method: "GET",

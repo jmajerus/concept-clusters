@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import {
   autoBoardConflict,
   autoEnvelopeConflict,
@@ -69,6 +73,35 @@ export async function run() {
   assert.equal(autoBoardConflict({ source: "author" }, envelope({ sizeFactor: 1.1, source: "auto" })), null);
   // A whole-document write carrying automatic board settings is checked too.
   assert.match(autoEnvelopeConflict(envelope({ sizeFactor: 1.2, source: "auto" }), envelope({ sizeFactor: 1 })), /never replaces/);
+
+  // Draft layout writes can be conditional on the draft not having changed.
+  const directory = await mkdtemp(join(tmpdir(), "cc-layout-board-"));
+  try {
+    const store = createPuzzleDraftStore({ directory });
+    await store.createDraft({
+      draftId: "board-cas",
+      document: {
+        id: "board-cas",
+        title: "Board CAS",
+        category: "Science",
+        clusters: [
+          { name: "Alpha", fact: "Alpha.", seeds: ["a1", "a2"], floatingTerms: ["a3"] },
+          { name: "Beta", fact: "Beta.", seeds: ["b1", "b2"], floatingTerms: ["b3"] }
+        ],
+        bridges: [{ term: "link", clusters: ["alpha", "beta"], fact: "Link." }]
+      }
+    });
+    const read = await store.getDraft("board-cas");
+    await new Promise(resolve => setTimeout(resolve, 2));
+    await store.saveLayout({ draftId: "board-cas", layout: envelope({ sizeFactor: 1.1 }), expectedUpdatedAt: read.updatedAt });
+    await assert.rejects(
+      store.saveLayout({ draftId: "board-cas", layout: envelope({ sizeFactor: 1.2 }), expectedUpdatedAt: read.updatedAt }),
+      error => error.name === "LayoutConflictError"
+    );
+    assert.equal((await store.getDraft("board-cas")).layout.board.sizeFactor, 1.1);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 
   // Validation.
   assert.deepEqual(boardSettingsErrors({ sizeFactor: 1.1, starFreeStrip: null, source: "author", savedAt: "x" }, canonicalBoardSizeFactor), []);

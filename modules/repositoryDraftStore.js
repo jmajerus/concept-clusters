@@ -145,11 +145,11 @@ export function createRepositoryDraftStore({ repository, actor }) {
     async recordValidation(draftId, validation) {
       return repository.recordValidation({ draftId, validation, actor });
     },
-    async saveLayout({ draftId, layout }) {
+    async saveLayout({ draftId, layout, expectedUpdatedAt = null }) {
       if (typeof repository.saveLayout !== "function") {
         throw new Error("Draft layout storage is not available.");
       }
-      return record(await repository.saveLayout({ draftId, layout, actor }));
+      return record(await repository.saveLayout({ draftId, layout, actor, expectedUpdatedAt }));
     },
     async clearLayout(draftId) {
       if (typeof repository.clearLayout !== "function") {

@@ -12,6 +12,7 @@ import {
   puzzleDocumentFromStorage
 } from "./authoringDomains.js";
 import {
+  LayoutConflictError,
   parseLayoutDocument,
   serializeLayoutDocument
 } from "./layoutDocument.js";
@@ -592,7 +593,9 @@ export class D1ContentDocumentRepository {
     return publishedRevisionSnapshot(kind, row);
   }
 
-  async saveLayout({ id, layout }) {
+  // `expectedUpdatedAt` makes the write conditional on the row not having
+  // changed since the caller read it (LayoutConflictError otherwise).
+  async saveLayout({ id, layout, expectedUpdatedAt = null }) {
     assertDraftId(id);
     const current = await this.getPublished({ kind: "puzzle", id });
     if (current.withdrawnAt) throw new Error(`Cannot save a layout for withdrawn puzzle "${id}"`);
@@ -602,8 +605,12 @@ export class D1ContentDocumentRepository {
       UPDATE published_documents
       SET layout_json = ?, updated_at = ?
       WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
-    `).bind(layoutJson, now, id).run();
-    if (changes(result) !== 1) throw new ContentDocumentNotFoundError("puzzle", id);
+        AND (? IS NULL OR updated_at = ?)
+    `).bind(layoutJson, now, id, expectedUpdatedAt, expectedUpdatedAt).run();
+    if (changes(result) !== 1) {
+      if (expectedUpdatedAt != null) throw new LayoutConflictError(id);
+      throw new ContentDocumentNotFoundError("puzzle", id);
+    }
     return this.getPublished({ kind: "puzzle", id });
   }
 
@@ -1114,13 +1121,16 @@ export function createMemoryContentDocumentRepository() {
         .filter(row => includeWithdrawn || !row.withdrawnAt)
         .sort((left, right) => String(left.title || left.id).localeCompare(right.title || right.id));
     },
-    async saveLayout({ id, layout }) {
+    async saveLayout({ id, layout, expectedUpdatedAt = null }) {
       assertDraftId(id);
       const current = await repository.getPublished({ kind: "puzzle", id });
       if (current.withdrawnAt) throw new Error(`Cannot save a layout for withdrawn puzzle "${id}"`);
       const layoutJson = serializeLayoutDocument(layout);
       const key = publishedKey("puzzle", id);
       const row = published.get(key);
+      if (expectedUpdatedAt != null && row.updated_at !== expectedUpdatedAt) {
+        throw new LayoutConflictError(id);
+      }
       published.set(key, {
         ...row,
         layout_json: layoutJson,

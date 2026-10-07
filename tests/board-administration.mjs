@@ -171,6 +171,32 @@ export async function run(page) {
       && window.CC.state.puzzle.board?.bridgePreconnect === true
       && window.CC.state.puzzle.layout.board.sizeFactor === 1.2,
     null, { timeout: 15000 });
+
+    // Changing a size that is already saved still resizes the board: the
+    // preview stages the layout setting, which takes precedence.
+    await waitForBoard(page);
+    const savedWidth = await page.evaluate(() => document.getElementById("board").viewBox.baseVal.width);
+    await page.evaluate(() => {
+      const input = document.getElementById("board-size-factor-input");
+      input.value = "1";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await page.waitForFunction(start => {
+      const box = document.getElementById("board").viewBox.baseVal;
+      const readout = document.getElementById("board-size-factor-readout")?.textContent || "";
+      return box.width < start && readout.startsWith("0%");
+    }, savedWidth, { timeout: 15000 });
+    await page.evaluate(() => {
+      document.getElementById("board-size-factor-input")
+        .dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    let resized = null;
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      resized = await draftStore.getDraft(draftId);
+      if (resized.layout?.board?.sizeFactor === 1) break;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    assert.equal(resized.layout.board.sizeFactor, 1, "back to the default is saved as an explicit choice");
   } finally {
     server.close();
     await rm(directory, { recursive: true, force: true });
