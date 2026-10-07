@@ -523,7 +523,8 @@ export function createGraphRenderer({
           ...candidate.metrics,
           order: candidate.order,
           rotation: candidate.rotation,
-          scale: candidate.scale
+          scale: candidate.scale,
+          repaired: !!candidate.repaired
         };
         state.solutionLayout = "pretty";
         updateSolutionHint();
