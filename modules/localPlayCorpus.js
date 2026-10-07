@@ -24,6 +24,7 @@ import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   layoutDocumentForMode,
   autoBoardConflict,
+  autoEnvelopeConflict,
   autoLayoutConflict,
   layoutDocumentWithBoard,
   layoutForMode,
@@ -265,7 +266,9 @@ export function createLocalPlayCorpusHandler({
         const modePayload = mode && layout?.modes
           ? layoutForMode(layout, mode)
           : layout;
-        const conflict = mode ? autoLayoutConflict(mode, modePayload, published.layout) : null;
+        const conflict = mode
+          ? autoLayoutConflict(mode, modePayload, published.layout)
+          : autoEnvelopeConflict(layout, published.layout);
         if (conflict) {
           json(res, { error: conflict, id }, 409);
           return true;

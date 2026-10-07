@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   autoBoardConflict,
+  autoEnvelopeConflict,
   boardSettingsErrors,
   layoutBoardSetting,
   layoutDocumentForMode,
@@ -66,6 +67,8 @@ export async function run() {
   assert.equal(autoBoardConflict({ source: "auto" }, envelope({ sizeFactor: 1.1, source: "auto" })), null);
   assert.equal(autoBoardConflict({ source: "auto" }, null), null);
   assert.equal(autoBoardConflict({ source: "author" }, envelope({ sizeFactor: 1.1, source: "auto" })), null);
+  // A whole-document write carrying automatic board settings is checked too.
+  assert.match(autoEnvelopeConflict(envelope({ sizeFactor: 1.2, source: "auto" }), envelope({ sizeFactor: 1 })), /never replaces/);
 
   // Validation.
   assert.deepEqual(boardSettingsErrors({ sizeFactor: 1.1, starFreeStrip: null, source: "author", savedAt: "x" }, canonicalBoardSizeFactor), []);

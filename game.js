@@ -2202,8 +2202,12 @@ function applyLoadedPuzzle(puzzle, index, {
     modeSwitchPolishing: false,
     modeSwitchLayoutPromise: null,
     layoutAuthoring: layoutAuthoringMode,
-    // &layoutBudget=extended: the offline layout pass's larger search.
-    layoutBudget: pageParams.get("layoutBudget") === "extended" ? "extended" : "standard",
+    // &layoutBudget=extended: the offline layout pass's larger search, which
+    // can take most of a minute. Only the D1 authoring player honours it, so
+    // a shared public link cannot make a player's Show Solution run it.
+    layoutBudget: playSource === "d1" && pageParams.get("layoutBudget") === "extended"
+      ? "extended"
+      : "standard",
     restoringSession: false,
     learningIntroduction,
     learningIntroductionStatus,

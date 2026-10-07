@@ -151,6 +151,22 @@ export function autoLayoutConflict(mode, incoming, existing) {
     : null;
 }
 
+// The same check for a write that sends a whole layout document rather
+// than one mode: every mode it carries is checked.
+export function autoEnvelopeConflict(incoming, existing) {
+  let document;
+  try {
+    document = normalizeLayoutDocument(incoming);
+  } catch {
+    return null; // malformed; validation rejects it
+  }
+  for (const [mode, value] of Object.entries(document?.modes || {})) {
+    const conflict = autoLayoutConflict(mode, value, existing);
+    if (conflict) return conflict;
+  }
+  return document?.board ? autoBoardConflict(document.board, existing) : null;
+}
+
 // Save endpoints stamp each mode's layout when it is saved, so publishing
 // a working copy can tell which of two layouts for a mode is newer.
 export function stampLayoutSaved(value, savedAt = new Date().toISOString()) {
