@@ -72,7 +72,7 @@ async function dragPill(page, mode) {
   for (const [dx, dy] of [[60, 40], [-60, -40], [60, -40], [-60, 40]]) {
     const recorded = () => page.evaluate(mode => {
       const entry = window.CC.state.layoutEffort?.[mode];
-      return entry ? entry.kept + entry.worsened : 0;
+      return entry ? entry.kept + entry.worsened + entry.buildKept + entry.buildWorsened : 0;
     }, mode);
     const before = await recorded();
     const start = await page.evaluate(mode => {
@@ -105,6 +105,16 @@ export async function run(page, baseURL) {
 
   for (const mode of ["graph", "sets", "star"]) {
     const { moves, layout } = await solutionAndLayout(page, baseURL, mode);
+
+    // Arranging while the board is still being built is recorded too, as
+    // build-phase effort.
+    await openFresh(page, baseURL, mode);
+    await page.waitForTimeout(3000);
+    await dragPill(page, mode);
+    assert.deepEqual(await page.evaluate(mode => {
+      const entry = window.CC.state.layoutEffort?.[mode];
+      return [entry.buildKept + entry.buildWorsened, entry.kept + entry.worsened];
+    }, mode), [1, 0], `${mode}: a drag while building should count as build effort`);
 
     // A real drag on the solved board is recorded with the session.
     await solveAsPlayer(page, baseURL, mode, moves);

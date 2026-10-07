@@ -2281,16 +2281,24 @@ function applyLoadedPuzzle(puzzle, index, {
   };
   state.onProgressChanged = () => persistPlayerSession();
   state.onPlayerLayoutChanged = () => schedulePlayerLayoutSave();
-  // A drag on a solved board is measured from start to end: how far the
-  // pill travelled and whether the board got worse. That record decides
-  // whether polishing keeps the player's own arrangement.
+  // A player's drag is measured from start to end: how far the pill
+  // travelled and whether the board got worse. Drags while the board is
+  // still being built count at reduced weight (playerLayoutEffort.js).
+  // That record decides whether polishing keeps the player's arrangement.
   let playerDrag = null;
   state.onPlayerDragStart = node => {
     playerDrag = null;
-    if (state.made !== state.need || state.layoutAuthoring) return;
+    if (state.layoutAuthoring) return;
     const metrics = state.layoutAdapter?.metrics?.();
     if (!metrics) return;
-    playerDrag = { node, x: node.x, y: node.y, mode: state.layoutAdapter.mode, before: metrics };
+    playerDrag = {
+      node,
+      x: node.x,
+      y: node.y,
+      mode: state.layoutAdapter.mode,
+      before: metrics,
+      building: state.made !== state.need
+    };
   };
   state.onPlayerDragEnd = node => {
     const start = playerDrag;
@@ -2303,7 +2311,7 @@ function applyLoadedPuzzle(puzzle, index, {
       displacement: Math.hypot(node.x - start.x, node.y - start.y)
     });
     if (!kind) return;
-    state.layoutEffort = recordDrag(state.layoutEffort, start.mode, kind);
+    state.layoutEffort = recordDrag(state.layoutEffort, start.mode, kind, { building: start.building });
     schedulePlayerLayoutSave();
   };
   updateModeControls();

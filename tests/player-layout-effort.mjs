@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import {
+  BUILD_DRAG_WEIGHT,
   CRAFTED_DRAGS,
+  effortScore,
   DELIBERATE_DRAG,
   classifyDrag,
   defectsWorse,
@@ -57,7 +59,27 @@ export async function run() {
   // Malformed records read as no effort.
   assert.deepEqual(normalizeEffort(null), {});
   assert.deepEqual(normalizeEffort({ graph: { kept: -1, worsened: "x" }, bogus: { kept: 3 } }), {});
-  assert.deepEqual(normalizeEffort({ star: { kept: 2 } }), { star: { kept: 2, worsened: 0 } });
+  assert.deepEqual(normalizeEffort({ star: { kept: 2 } }), {
+    star: { kept: 2, worsened: 0, buildKept: 0, buildWorsened: 0 }
+  });
+
+  // Drags while building count, at reduced weight.
+  let building = {};
+  const buildDragsToCraft = Math.ceil(CRAFTED_DRAGS / BUILD_DRAG_WEIGHT);
+  for (let i = 0; i < buildDragsToCraft - 1; i++) {
+    building = recordDrag(building, "star", "kept", { building: true });
+  }
+  assert.equal(isCrafted(building, "star"), false);
+  building = recordDrag(building, "star", "kept", { building: true });
+  assert.equal(isCrafted(building, "star"), true, "enough build-phase arranging makes a board the player's");
+  assert.equal(effortScore(building, "star"), buildDragsToCraft * BUILD_DRAG_WEIGHT);
+  building = recordDrag(building, "star", "worsened", { building: true });
+  assert.equal(effortScore(building, "star"), (buildDragsToCraft - 1) * BUILD_DRAG_WEIGHT);
+  // Mixed: one tidying drag after the solve plus two while building.
+  let mixed = recordDrag({}, "graph", "kept");
+  mixed = recordDrag(mixed, "graph", "kept", { building: true });
+  mixed = recordDrag(mixed, "graph", "kept", { building: true });
+  assert.equal(isCrafted(mixed, "graph"), true);
 
   // Stored with the player's session, and a bad record never costs the session.
   const storage = memoryStorage();
@@ -65,9 +87,11 @@ export async function run() {
   assert.equal(savePlayerSession(storage, puzzle, {
     currentMode: "graph",
     layouts: {},
-    effort: { graph: { kept: 3, worsened: 1 } }
+    effort: { graph: { kept: 3, worsened: 1, buildKept: 2 } }
   }), true);
-  assert.deepEqual(loadPlayerSession(storage, puzzle).effort, { graph: { kept: 3, worsened: 1 } });
+  assert.deepEqual(loadPlayerSession(storage, puzzle).effort, {
+    graph: { kept: 3, worsened: 1, buildKept: 2, buildWorsened: 0 }
+  });
   const raw = JSON.parse(storage.getItem(playerSessionKey(puzzle)));
   storage.setItem(playerSessionKey(puzzle), JSON.stringify({ ...raw, effort: "corrupt" }));
   const recovered = loadPlayerSession(storage, puzzle);

@@ -4,10 +4,13 @@
 // lines spread wider, room to watch a direction animate, or just taste.
 // None of that shows up as fewer defects, so effort is counted by
 // deliberate drags, not by score: a drag that moves a pill a real
-// distance counts unless it makes the board worse. Once a player has
-// crafted a board this way, polishing keeps their positions and only
-// repairs actual defects; a board nobody arranged polishes straight to the
-// saved layout.
+// distance counts unless it makes the board worse. Drags while the board
+// is still being built count too, at half weight: they place clusters and
+// untangle as the player goes, but the force simulation keeps adjusting
+// that arrangement, so it is coarser intent than tidying a solved board.
+// Once a player has crafted a board this way, polishing keeps their
+// positions and only repairs actual defects; a board nobody arranged
+// polishes straight to the saved layout.
 
 // Defects in each mode, most severe first, as the engines rank them.
 export const LAYOUT_DEFECTS = Object.freeze({
@@ -23,6 +26,12 @@ export const DELIBERATE_DRAG = 30;
 // Net counted drags (deliberate and not worsening, less worsening ones)
 // at which a board is the player's own.
 export const CRAFTED_DRAGS = 2;
+
+// What a drag made while the board was still being built counts for,
+// against 1 for a drag on the solved board.
+export const BUILD_DRAG_WEIGHT = 0.5;
+
+const COUNT_KEYS = ["kept", "worsened", "buildKept", "buildWorsened"];
 
 /** True when `after` has more defects than `before`, most severe first. */
 export function defectsWorse(mode, before, after) {
@@ -59,22 +68,31 @@ export function normalizeEffort(value) {
   Object.keys(LAYOUT_DEFECTS).forEach(mode => {
     const entry = value[mode];
     if (!entry || typeof entry !== "object") return;
-    const kept = count(entry.kept), worsened = count(entry.worsened);
-    if (kept || worsened) effort[mode] = { kept, worsened };
+    const counts = Object.fromEntries(COUNT_KEYS.map(key => [key, count(entry[key])]));
+    if (COUNT_KEYS.some(key => counts[key])) effort[mode] = counts;
   });
   return effort;
 }
 
-export function recordDrag(effort, mode, kind) {
+/** Add one classified drag; `building` when the board was not yet solved. */
+export function recordDrag(effort, mode, kind, { building = false } = {}) {
   if (!kind || !LAYOUT_DEFECTS[mode]) return normalizeEffort(effort);
   const next = normalizeEffort(effort);
-  const entry = next[mode] || { kept: 0, worsened: 0 };
-  next[mode] = { ...entry, [kind]: entry[kind] + 1 };
+  const entry = next[mode] || Object.fromEntries(COUNT_KEYS.map(key => [key, 0]));
+  const key = building ? (kind === "kept" ? "buildKept" : "buildWorsened") : kind;
+  next[mode] = { ...entry, [key]: entry[key] + 1 };
   return next;
+}
+
+/** Net weighted effort for a mode: solved-board drags count 1, build drags ½. */
+export function effortScore(effort, mode) {
+  const entry = normalizeEffort(effort)[mode];
+  if (!entry) return 0;
+  return entry.kept - entry.worsened +
+    BUILD_DRAG_WEIGHT * (entry.buildKept - entry.buildWorsened);
 }
 
 /** Whether the player has made this mode's board their own. */
 export function isCrafted(effort, mode) {
-  const entry = normalizeEffort(effort)[mode];
-  return !!entry && entry.kept - entry.worsened >= CRAFTED_DRAGS;
+  return effortScore(effort, mode) >= CRAFTED_DRAGS;
 }
