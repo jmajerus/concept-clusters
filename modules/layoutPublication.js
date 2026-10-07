@@ -16,7 +16,8 @@ const HINT_MODES = new Set(["graph", "sets"]);
 /**
  * A layout carried along with a content edit is checked leniently: a fixed
  * layout the edit has outdated is still accepted, because players get it
- * as a hint (Graph, Circle) or adapted (Star), and `warnings` say why. `savingMode` names the
+ * as a hint (Graph, Circle) or adapted (Star); `warnings` say why and
+ * `fallbackModes` lists those modes so the author can be told. `savingMode` names the
  * mode an author is saving right now; a fixed layout for that mode must
  * match the puzzle exactly, and a hint only needs a usable shape.
  */
@@ -33,18 +34,19 @@ export function validatePublishedPuzzleLayout({
     return {
       valid: false,
       errors: unsupportedModes.map(mode => `Unsupported layout mode "${mode}"`),
-      warnings: []
+      warnings: [],
+      fallbackModes: []
     };
   }
   const layouts = [
     ...LAYOUT_MODES.map(mode => [mode, normalized?.modes?.[mode] || null])
   ].filter(([, value]) => value);
-  if (!layouts.length) return { valid: true, errors: [], warnings: [] };
+  if (!layouts.length) return { valid: true, errors: [], warnings: [], fallbackModes: [] };
 
   const { puzzle, errors } = puzzleFromAuthoredDocument(document, {
     categoryRegistry
   });
-  if (!puzzle) return { valid: false, errors, warnings: [] };
+  if (!puzzle) return { valid: false, errors, warnings: [], fallbackModes: [] };
   const validators = {
     star: value => validateStarLayoutDocument(value, puzzle),
     graph: value => validateGraphLayoutDocument(value, puzzle),
@@ -52,6 +54,7 @@ export function validatePublishedPuzzleLayout({
   };
   const validationErrors = [];
   const warnings = [];
+  const fallbackModes = [];
   layouts.forEach(([mode, value]) => {
     const prefix = message => `${mode}: ${message}`;
     const shape = validateLayoutHintShape(mode, value, puzzle);
@@ -67,7 +70,8 @@ export function validatePublishedPuzzleLayout({
     } else {
       const fallback = HINT_MODES.has(mode) ? "players get it as a hint" : "players get it adapted to the edit";
       warnings.push(...exact.errors.map(error => prefix(`${error} (${fallback})`)));
+      fallbackModes.push(mode);
     }
   });
-  return { valid: validationErrors.length === 0, errors: validationErrors, warnings };
+  return { valid: validationErrors.length === 0, errors: validationErrors, warnings, fallbackModes };
 }

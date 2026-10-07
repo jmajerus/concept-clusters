@@ -7,7 +7,11 @@
 // arrangement instead of its positions: the cyclic order of clusters
 // around the board centre, the overall rotation, each term's offset from
 // its cluster's centre (Graph), and each bridge's offset from the clusters
-// it joins (Circle). That arrangement survives renamed or added terms, a
+// it joins (Circle). Cluster angles are measured around the saved clusters'
+// own centroid, which lies inside the shape they form, so the cyclic order
+// read back is that shape's order even when the layout sits off-centre;
+// the engines then lay that order on their ring around the board centre.
+// That arrangement survives renamed or added terms, a
 // different board size, and smaller or larger circles, where exact
 // coordinates do not.
 
@@ -109,10 +113,17 @@ function ringHint(centres, board) {
   return { order, rotation, angles, middle };
 }
 
+// Saved board size, falling back to the current board for each dimension
+// that is not a finite positive number (a malformed one would mirror or
+// collapse the arrangement).
 function boardOf(layout, fallback) {
-  const width = Number(layout.board?.width) || fallback.width;
-  const height = Number(layout.board?.height) || fallback.height;
-  return { width, height };
+  const usable = value => Number.isFinite(value) && value > 0;
+  const width = Number(layout.board?.width);
+  const height = Number(layout.board?.height);
+  return {
+    width: usable(width) ? width : fallback.width,
+    height: usable(height) ? height : fallback.height
+  };
 }
 
 /**

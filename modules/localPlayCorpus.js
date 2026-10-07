@@ -235,7 +235,8 @@ export function createLocalPlayCorpusHandler({
         json(res, {
           id,
           revision: saved.revision,
-          layout: saved.layout || layoutDocument
+          layout: saved.layout || layoutDocument,
+          warnings: validation.warnings
         });
       } catch (error) {
         json(res, { error: error instanceof Error ? error.message : String(error) }, 400);

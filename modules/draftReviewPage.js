@@ -2438,9 +2438,17 @@ function renderPublicationNotice(notice) {
   const keptNote = kept.length
     ? `<p class="meta">Kept the newer ${escapeHtml(kept.join(" and "))} layout already saved on the published puzzle; this working copy's older copy was not published.</p>`
     : "";
+  const fallback = notice.layoutFallback || [];
+  const fallbackNote = fallback.length
+    ? `<p class="meta">Saved layouts this edit no longer matches exactly: ${escapeHtml(fallback
+      .filter(mode => modeNames[mode])
+      .map(mode => `${modeNames[mode]} (players get it ${mode === "star" ? "adapted to the edit" : "as a hint: same arrangement, positions recomputed"})`)
+      .join("; "))}. Re-save in layout authoring to fix positions again.</p>`
+    : "";
   return `<div class="validation validation-ok" role="status">
     ${message}
     ${keptNote}
+    ${fallbackNote}
     <p class="meta">${escapeHtml(PUBLIC_PLAY_PUBLICATION_NOTE)}</p>
   </div>
   <script>
@@ -2451,6 +2459,7 @@ function renderPublicationNotice(notice) {
           cleanUrl.searchParams.delete("puzzle_id");
           cleanUrl.searchParams.delete("revision");
           cleanUrl.searchParams.delete("layout_kept");
+          cleanUrl.searchParams.delete("layout_fallback");
           window.history.replaceState(null, "", cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
     }
   </script>`;

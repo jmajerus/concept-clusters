@@ -677,7 +677,8 @@ export function createLocalDraftReviewHandler({
         json(res, {
           draftId,
           revision: saved.revision,
-          layout: saved.layout || layout
+          layout: saved.layout || layout,
+          warnings: validation.warnings
         });
       } catch (error) {
         if (isMissingDraft(error)) {
@@ -1268,13 +1269,15 @@ export function createLocalDraftReviewHandler({
             ? draftListPublicationRedirectPath({
               puzzleId,
               cued: true,
-              layoutKept: keptPublished
+              layoutKept: keptPublished,
+              layoutFallback: layoutValidation.fallbackModes
             })
             : draftEditorPublicationRedirectPath({
               draftId,
               puzzleId,
               revision: published.revision,
-              layoutKept: keptPublished
+              layoutKept: keptPublished,
+              layoutFallback: layoutValidation.fallbackModes
             });
           res.writeHead(303, {
             Location: location,
@@ -1640,7 +1643,8 @@ export function createLocalDraftReviewHandler({
               draftId,
               puzzleId,
               revision: published.revision,
-              layoutKept: keptPublished
+              layoutKept: keptPublished,
+              layoutFallback: layoutValidation.fallbackModes
             }),
             "Cache-Control": "no-store"
           });

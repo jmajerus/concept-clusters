@@ -10,6 +10,10 @@ import {
   validateLayoutHintShape
 } from "../modules/layoutHints.js";
 import { validatePublishedPuzzleLayout } from "../modules/layoutPublication.js";
+import {
+  draftEditorPublicationRedirectPath,
+  draftPublicationNoticeFromSearch
+} from "../modules/draftReviewEdit.js";
 
 export const name = "layout hints: saved arrangements survive puzzle edits and board changes";
 
@@ -147,6 +151,34 @@ export async function run() {
   delete legacyCircle.clusterTerms;
   assert.deepEqual(circleLayoutHint(legacyCircle, puzzle, BOARD).order, order);
 
+  // A lone cluster (vocabulary puzzles) still yields a hint: its terms'
+  // offsets for Graph, its saved spot for Circle.
+  const solo = compile({
+    id: "hint-solo",
+    title: "Solo",
+    category: "Test",
+    puzzleKind: "vocabulary-context",
+    clusters: [{ id: "a", name: "a", fact: "Fact.", seeds: ["a one", "a two"], floatingTerms: ["a three"] }],
+    bridges: []
+  });
+  const soloGraph = graphLayoutHint({
+    puzzleId: solo.id,
+    board: BOARD,
+    nodes: { "term:a one": { x: 100, y: 500 }, "term:a two": { x: 150, y: 520 }, "term:a three": { x: 130, y: 470 } }
+  }, solo, BOARD);
+  assert.deepEqual(soloGraph.order, [0]);
+  assert.equal(soloGraph.termOffsets.size, 3);
+  const soloCircle = circleLayoutHint({
+    puzzleId: solo.id, board: BOARD, circles: { "cluster:0": { x: 200, y: 450 } }
+  }, solo, BOARD);
+  assert.deepEqual(soloCircle.centres[0], { x: 200, y: 450 });
+
+  // A malformed saved board size falls back to the current board instead
+  // of mirroring or collapsing the arrangement.
+  const badBoard = circleLayoutHint({ ...circle, board: { width: -1000, height: Infinity } }, puzzle, BOARD);
+  assert.deepEqual(badBoard.order, order);
+  assert.deepEqual(badBoard.centres[0], centres[0]);
+
   // Fixed flag: layouts saved before it existed are fixed.
   assert.equal(layoutIsFixed({}), true);
   assert.equal(layoutIsFixed({ fixed: true }), true);
@@ -167,6 +199,16 @@ export async function run() {
   });
   assert.equal(stale.valid, true, stale.errors.join("; "));
   assert.ok(stale.warnings.some(warning => warning.includes("players get it as a hint")));
+  assert.deepEqual(stale.fallbackModes, ["graph"]);
+  // ...and the author is told on the publication notice.
+  const redirect = new URL(draftEditorPublicationRedirectPath({
+    draftId: "hint-lab-draft",
+    puzzleId: puzzle.id,
+    revision: 3,
+    layoutFallback: stale.fallbackModes
+  }), "http://local");
+  const notice = draftPublicationNoticeFromSearch(redirect.searchParams, { id: puzzle.id, revision: 3 });
+  assert.deepEqual(notice.layoutFallback, ["graph"]);
   // ...but saving it as fixed positions right now must match exactly.
   const savingStale = validatePublishedPuzzleLayout({
     document: editedDocument,
