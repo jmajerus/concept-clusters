@@ -189,16 +189,17 @@ the puzzle's `lensMode` -- that consistency is checked downstream (see
 
 ## What's authored elsewhere
 
-**Layout curation** -- positional/visual placement data for a renderer,
-authored through its own dedicated schema (`modules/starLayoutSchema.js`,
-`modules/graphLayoutSchema.js`, and `modules/circleLayoutSchema.js`), not part
-of puzzle content or this format's field set. On the D1-backed authoring
-server, `?author=layout&mode=graph|star|sets` saves a
-mode-neutral layout document to the current working copy's
-`puzzle_drafts.layout_json`; publishing the puzzle promotes it to
-`published_documents.layout_json`, and Freeze materializes it in the generated
-puzzle module. Deployed player pages do not offer a layout file export;
-algorithmic layout is the default for every mode without an override.
+**Layout** -- where a solved board's pieces go in each mode, plus the board
+settings (canvas size and the Star free-term strip), authored through its own
+schemas (`modules/starLayoutSchema.js`, `modules/graphLayoutSchema.js`, and
+`modules/circleLayoutSchema.js`) and stored beside the puzzle document, not in
+it: `puzzle_drafts.layout_json` and `published_documents.layout_json`. Layouts
+come from layout authoring (`?author=layout&mode=graph|star|sets`) or the
+automatic layout pass; Freeze materializes the published layout in the
+generated puzzle module. See "Saved layouts" in
+[AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#saved-layouts). A
+`board.sizeFactor` or `board.starFreeStrip` in a puzzle document applies only
+when the layout has no value of its own.
 Everything else a puzzle can express, this format can author directly.
 
 ## Validation layers

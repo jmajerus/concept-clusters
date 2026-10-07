@@ -92,6 +92,7 @@ checkout, and a clean CI checkout would have passed straight through it.
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
 | `tests/` | Regression suite — `npm run test:quick` (node-only), `npm test` / `npm run test:standard` (standard, with browser), `npm run test:extended` (see below) |
+| `tools/layouts-auto.mjs` | Automatic layout pass over published puzzles (`npm run layouts:auto`): live then extended search, Graph repair, board-size escalation, and (with `--write`) automatic layouts that never replace an author's — see "Saved layouts" in [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#saved-layouts) |
 | `tools/check-wiki-links.mjs` | Verifies `termInfo`/bridge/cluster `info` Wikipedia links resolve — run with `npm run check-wiki-links` (see below) |
 | `site/` | Symlinked public tree Wrangler serves as Worker static assets (`wrangler.jsonc` `assets.directory`); keeps `.wrangler/` out of the asset watcher |
 | `src/worker.js` | Cloudflare Worker: serves static assets, the D1-backed public publication read routes, `/api/event`, and `/admin` (see "Deployment & analytics" below) |
@@ -174,11 +175,17 @@ anything ever imports from it directly):
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
 | `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM; authoring play searches facts/lessons/drafts | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
-| `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the mode-neutral `?author=layout` panel and `?admin` layout action, while keeping free-strip controls Star-only | `layoutDocument.js`, `layoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
-| `layoutApi.js` | Browser save/clear client; sends the selected renderer mode and receives the merged layout envelope | `layoutDocument.js`, D1 authoring routes |
+| `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons, reloadBoard }`; owns the mode-neutral `?author=layout` panel (saved-layout loading and reporting, the Fixed positions checkbox) and the `?admin` layout actions, including board size and the free-term strip | `layoutDocument.js`, `layoutHints.js`, `layoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
+| `layoutApi.js` | Browser save/clear client: one mode's layout (`saveLayout`) or the board settings (`saveLayoutBoard`); receives the merged layout document | `layoutDocument.js`, D1 authoring routes |
+| `layoutDocument.js` | The layout document: per-mode entries and board settings, merge and normalize, `savedAt` stamps, author/auto `source`, the publish merge (`mergePublishLayout`), auto-over-author checks, `boardSizeOwner`, and `LayoutConflictError` for conditional writes | `puzzleBoardSize.js` |
+| `layoutHints.js` | Reads a saved layout as an arrangement: Graph and Circle hints (cluster order, rotation, offsets) and Star adaptation; the minimal hint-shape check | nothing — pure |
+| `layoutPublication.js` | Save- and publish-time layout validation: strict for an exact layout being saved, shape-only for hints, lenient with `warnings`/`fallbackModes` for layouts a content edit outdated | `layoutDocument.js`, the three layout schemas |
+| `layoutBudget.js` | Search budgets: `standard` (live play) and `extended` (the automatic pass, `&layoutBudget=extended` on the D1 authoring player only) | nothing — data |
+| `playerLayoutEffort.js` | Classifies player drags and decides whether a board is the player's own (see "Saved player sessions") | nothing — pure |
+| `circleMemberOrder.js` | Circle member stacking: compact base order, circle radius, and the re-stack that keeps ideal lines clear of other pills | `geometry.js` |
 | `graphLayoutSchema.js` / `circleLayoutSchema.js` | Renderer-independent validation for authored Graph/Circle documents | `layoutDocument.js` revision fingerprint |
 | `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct inspectors; `/?draft=&view=play` hides the studio | `authorEngine.js`, `authoringBoard.js` |
-| `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
+| `graphLayout.js` | Deterministic Graph candidate generation and scoring, hint-steered search, and `repairGraphLayout` (single-pill moves that strictly reduce defects) | `geometry.js`, `layoutHints.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies (optional `onBackgroundClick` for construct) |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
@@ -212,7 +219,7 @@ on globals; import what you need instead.
 Each puzzle has a revision-aware local record under
 `ccPlayerSession:v1:<puzzle-id>`. It stores semantic connection pairs,
 the puzzle's last-used mode, completion state, optional Concept Lens
-progress, and a map of independent mode layouts. Lens progress includes
+progress, a map of independent mode layouts, and layout effort. Lens progress includes
 the current round, selection/reveal phase, and selected term words.
 Connection pairs use term text rather than transient numeric node ids;
 the compact numeric representation remains exclusive to share URLs.
@@ -225,6 +232,25 @@ player-session snapshot shape. Star resumes term and cluster-title
 positions, Graph resumes its term positions and player pins, and Circle
 resumes cluster centers and connected bridge pills (ordinary terms remain
 deterministically positioned inside their circle).
+
+Layout effort (`modules/playerLayoutEffort.js`) records how much the player
+has arranged each mode's board, so polishing can respect it. Each renderer
+reports the start and end of a player drag (`onPlayerDragStart` /
+`onPlayerDragEnd` on `state`); `game.js` measures the board's defects with
+the renderer's own `metrics()` before and after, in that engine's severity
+order. A drag that moves a pill at least 30 board units is deliberate. It
+counts unless it made the board worse, so a drag made purely for taste
+counts as much as one that fixes a crossing, and a worsening drag counts
+against. Drags on the solved board weigh 1; drags while the board is still
+being built weigh ½, since the force simulation keeps adjusting what they
+place. The record per mode is `{ kept, worsened, buildKept, buildWorsened }`.
+At a net weighted score of 2 the board is the player's: the polish control
+then calls the renderer's `repairPlayerLayout` (Graph, Circle) or runs Star's
+detangle with `preservePlayerLayout`, which keeps positions and moves only
+pieces involved in a real crossing or overlap. Otherwise polishing goes to
+the saved layout (Star via `polishToSaved`, skipping its live detangle). A
+mode record with any invalid counter reads as no effort and never invalidates
+the rest of the session.
 
 Restoration precedence is:
 

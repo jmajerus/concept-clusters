@@ -1544,74 +1544,153 @@ into focused, linked puzzles through `relatedPuzzles` when the subject has a
 natural seam that teaches better as two lessons, and whenever an honest
 treatment needs more than 32 nodes.
 
-## Optional authored layout overrides
+## Saved layouts
 
-Each renderer's pretty-printer is the default for every puzzle. Only a puzzle
-whose final presentation still needs editorial placement should add a custom
-override.
+Each renderer can lay out a solved board on its own, but that search runs
+while the player waits: from about a second on most boards to more than a
+minute on the densest. A saved layout removes the wait. The board goes
+straight into the polish animation instead of searching first, so every
+puzzle should have one. Most come from the automatic layout pass, described
+below. An author's own layout, from layout authoring, always takes
+precedence over an automatic one.
 
-Open the puzzle locally with the desired mode and layout-authoring mode
-selected (`graph`, `star`, or `sets`; `sets` is labelled Circle):
+### Exact positions and hints
+
+A Graph or Circle layout is saved either as **exact positions** or as a
+**hint**:
+
+- **Exact positions** (the "Fixed positions" checkbox checked): while the
+  puzzle and board size still match what was saved, players get these
+  positions with no search at all.
+- **Hint** (unchecked, the default for a mode with no saved layout yet):
+  the engine keeps the saved arrangement (the order of
+  clusters around the board, the rotation, and each term's or bridge's
+  offset) and recomputes positions. That is a short search, about a second,
+  on every load.
+
+An exact layout already carries its hint. Once a puzzle edit or a board-size
+change makes the exact positions stale, the engine uses the same saved
+layout as a hint automatically. So exact is the faster choice and loses
+nothing in resilience to edits. Star layouts are always exact; a stale Star
+layout is adapted instead: positions are scaled to the board, each cluster
+title stays beside its own terms, and only nodes the layout has never seen
+are placed fresh.
+
+**A saved layout is never discarded.** Stale, wrong-sized, or crossed
+layouts are used as hints or adapted, and their remaining problems are
+reported, but nothing ever replaces them with a fresh search.
+
+### Layout authoring
+
+Open the puzzle in layout-authoring mode (`sets` is labelled Circle):
 
 ```text
 http://localhost:8787/?puzzle=revolutions-modern-world&mode=sets&author=layout
 ```
 
-The authoring panel can prepare the generated solution, after which
-dragging a term or cluster title becomes literal placement: the force
-simulation stays stopped when the node is released. Drafts are stored in
-that browser's local storage and are specific to the puzzle revision and
-board dimensions. Local storage is only a workspace, never the published
-source of truth.
+From the admin view, **Edit layout** opens the same panel. The mode buttons
+stay live: choosing another mode reloads the panel in that mode on the same
+puzzle or working copy.
 
-`Save Layout` is enabled for the selected renderer after its generated layout
-has been prepared. Line crossings are blocking validation errors where the
-renderer reports them; other geometry metrics are guidance for author
-judgment. On the authoring server, a draft opened from a working copy
-validates and stores a mode-neutral layout document with that copy in
-`puzzle_drafts.layout_json`; it does not publish the puzzle. The draft's D1
-play preview uses that saved override automatically. When there is no draft
-overlay, the same button uses the published endpoint and updates only the
-selected mode inside `published_documents.layout_json`; it does not publish a
-new document revision or discard overrides for the other modes.
+- **On open**, a puzzle with a saved layout for the mode solves straight
+  into it. The status line says what loaded and what problems remain, for
+  example "Loaded saved Graph layout as a hint (arrangement kept, positions
+  recomputed)" or "Saved Star layout no longer matches exactly (…); adapted
+  it to this board". Automatic layouts are labelled as such.
+- **Prepare layout** solves an unsolved board. On a board that is already
+  solved, it generates a fresh layout, ignoring the saved one.
+- **Dragging** a term or cluster title is literal placement: the force
+  simulation stays stopped. Drags save to a browser-local draft (Save draft,
+  Load draft, Clear draft), which is scratch space and never published.
+- **Save Layout** saves the current mode's layout, as exact positions or a
+  hint per the checkbox. Exact positions must pass the renderer's full check;
+  a hint needs only a usable shape. With a working copy open, it saves to that
+  draft (publish the draft to show it to players). Otherwise it saves straight
+  to the published puzzle, live for players, without publishing a new
+  document revision. Saving one mode never discards the others.
+- **Board size** (the slider, in 5% steps from −25% to +25%) and the **Star
+  free-term strip** button save with the layout the same way: to the open
+  draft or else the published puzzle, with no content publish. Setting the
+  size back to 0% is recorded as an explicit choice, which the automatic pass
+  then leaves alone.
 
-The persisted shape is intentionally small and extensible:
+The layout endpoints are `/admin/drafts/<draft-id>/layout.json` and
+`/admin/puzzles/<puzzle-id>/layout.json`. A save carries one mode's layout,
+`{ "mode": "graph", "layout": … }`, or board settings, `{ "board": … }`; the
+server merges it into the stored document:
 
 ```json
 {
   "schemaVersion": 1,
   "modes": {
-    "star": { "...": "validated Star layout" },
-    "graph": { "...": "validated Graph layout" },
-    "sets": { "...": "validated Circle layout" }
-  }
+    "star": { "...": "Star layout" },
+    "graph": { "...": "Graph layout", "fixed": true },
+    "sets": { "...": "Circle layout", "fixed": false }
+  },
+  "board": { "sizeFactor": 1.1, "starFreeStrip": true }
 }
 ```
 
-The draft endpoint is `/admin/drafts/<draft-id>/layout.json`; the published
-override endpoint is `/admin/puzzles/<puzzle-id>/layout.json`.
+Each mode entry and the board settings also record `source` (`author` or
+`auto`) and `savedAt`.
 
-When the puzzle is ready, `Publish` promotes the confirmed layout to the
-puzzle's `published_documents.layout_json` column along with the puzzle
-document. A content-only edit may retain the current live layout; if the
-puzzle geometry changed enough to make it stale, Publish asks the author to
-confirm a new layout first.
+### Publishing
 
-The final `Save Layout` control is available only on the D1 authoring server;
-deployed player pages do not offer a layout file export or publication path.
-Cue the published puzzle and run the next Freeze; Freeze materializes the
-published layout on the generated puzzle module, so no separate layout JSON
-file or static registry is needed.
+**Publish** carries the working copy's layout to the published puzzle, with
+two protections. If a mode, or the board settings, was saved directly on the
+published puzzle more recently than on the working copy, the newer one is
+kept. And an author's layout is never replaced by an automatic one. The
+publication notice says when the published puzzle's version was kept.
+
+A content edit can make a saved layout stale. That never blocks publishing:
+the notice names each mode whose exact layout players get as a hint
+or adapted. Re-save it in layout authoring to fix exact positions again.
+
+Freeze writes the published layout into the generated puzzle module, so no
+separate layout file or registry is needed.
+
+### The automatic layout pass
+
+```text
+npm run layouts:auto -- <puzzle-id> [...]
+npm run layouts:auto -- --all
+```
+
+The pass solves published puzzles in a headless browser against the local
+authoring server (`npm run dev`) and reports each board's remaining problems.
+It is a dry run unless given `--write`, which saves results to the live
+publication rows players see; start with a few puzzles before `--all`. Other
+options: `--modes graph,sets,star`, `--lanes <n>` (puzzles at once), and
+`--report <file>` (full results as JSON).
+
+For each board, strategies run in order until the board is clean: the live
+search, then a larger search budget, which for Graph ends with a local
+repair of single pills. Where the board size is the pass's to choose, it
+grows the board in 5% steps up to +25% until every mode is clean, and keeps
+the smallest size that works. The size is the pass's to choose only when no
+author has set one and no mode has an author's layout, since a new size would
+move those layouts. Otherwise the current size stays and the report suggests
+the size at which the board would come out clean.
+
+Results are saved with `source: "auto"`: as exact positions when they pass
+the full check, otherwise as hints. An author's layout or board size is
+measured and reported, never replaced, and the server refuses an automatic
+save over one. Restart `npm run dev` after pulling changes to these routes:
+the server loads them at startup.
+
+### What players get
+
+Show Solution, and the polish button on a board nobody arranged, go to the
+saved layout, with the polish animation. A board the player arranged
+themselves keeps their positions: polishing then moves only the pieces
+involved in an actual crossing or overlap, or nothing at all on a clean
+board. How the game decides that a board is the player's is in
+[DEVELOPMENT.md](DEVELOPMENT.md#saved-player-sessions).
+
 Run `npm run validate` and `npm test` (the standard suite; `npm run test:quick` is the node-only loop between edits) before committing. Use
 `npm run test:authoring` for the authoring-side standard slice and reserve
 `npm run test:extended` for shared
 rendering/layout changes and occasional release-level verification.
-
-At runtime, the second `Show solution` click uses a matching published
-layout when one exists. A missing, stale, wrong-sized, or geometrically
-unsafe override falls back to the algorithmic pretty-printer. This keeps
-custom layout data optional and prevents a puzzle edit from silently
-reusing obsolete coordinates.
 
 ## Cluster colors
 
