@@ -38,6 +38,31 @@ export async function saveLayout({
   return body.layout || layoutDocumentForMode(mode, layout);
 }
 
+// Board settings (size, Star free-term strip) save into the same layout
+// document. `null` for a key is an explicit "use the default".
+export async function saveLayoutBoard({
+  puzzleId,
+  draftId = null,
+  board,
+  fetchImpl = fetch
+}) {
+  const response = await fetchImpl(
+    layoutPath({ puzzleId, draftId }),
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({ board })
+    }
+  );
+  const body = await responseBody(response);
+  if (!response.ok) {
+    // Validation replies carry a generic error plus the specific reasons.
+    throw new Error((body.errors || []).join("; ") || body.error || `Board settings save failed (${response.status})`);
+  }
+  return body.layout;
+}
+
 export async function clearLayout({
   puzzleId,
   draftId = null,

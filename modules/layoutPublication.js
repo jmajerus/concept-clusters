@@ -1,7 +1,8 @@
 // Shared publication-time validation for presentation layout overrides.
 // Layouts are stored alongside, but outside, the authored puzzle document.
 
-import { LAYOUT_MODES, normalizeLayoutDocument } from "./layoutDocument.js";
+import { LAYOUT_MODES, boardSettingsErrors, normalizeLayoutDocument } from "./layoutDocument.js";
+import { canonicalBoardSizeFactor } from "./puzzleBoardSize.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
 import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { layoutIsFixed, validateLayoutHintShape } from "./layoutHints.js";
@@ -37,6 +38,11 @@ export function validatePublishedPuzzleLayout({
       warnings: [],
       fallbackModes: []
     };
+  }
+  const boardErrors = boardSettingsErrors(normalized?.board, canonicalBoardSizeFactor)
+    .map(error => `board: ${error}`);
+  if (boardErrors.length) {
+    return { valid: false, errors: boardErrors, warnings: [], fallbackModes: [] };
   }
   const layouts = [
     ...LAYOUT_MODES.map(mode => [mode, normalized?.modes?.[mode] || null])

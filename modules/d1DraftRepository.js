@@ -21,6 +21,7 @@ import {
   storedDomainDocuments
 } from "./authoringDomains.js";
 import {
+  LayoutConflictError,
   parseLayoutDocument,
   serializeLayoutDocument
 } from "./layoutDocument.js";
@@ -996,7 +997,9 @@ export class D1DraftRepository extends DraftRepository {
     return validation;
   }
 
-  async saveLayout({ draftId, layout, actor }) {
+  // `expectedUpdatedAt` makes the write conditional on the draft not having
+  // changed since the caller read it (LayoutConflictError otherwise).
+  async saveLayout({ draftId, layout, actor, expectedUpdatedAt = null }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor).subject;
     const layoutJson = serializeLayoutDocument(layout);
@@ -1005,8 +1008,12 @@ export class D1DraftRepository extends DraftRepository {
       UPDATE puzzle_drafts
       SET layout_json = ?, updated_at = ?
       WHERE id = ? AND owner_subject = ?
-    `).bind(layoutJson, now, draftId, owner).run();
-    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+        AND (? IS NULL OR updated_at = ?)
+    `).bind(layoutJson, now, draftId, owner, expectedUpdatedAt, expectedUpdatedAt).run();
+    if (changes(result) !== 1) {
+      if (expectedUpdatedAt != null) throw new LayoutConflictError(draftId);
+      throw new DraftNotFoundError(draftId);
+    }
     return this.get({ draftId, actor });
   }
 

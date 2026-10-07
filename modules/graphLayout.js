@@ -26,9 +26,9 @@ const SEARCH_CLUSTER_CAP = 7;
 const HINT_ROTATION_PREFERENCE = 240;
 const rounded = value => Math.round(value * 100) / 100;
 
-function permutationsWithFirstFixed(count) {
+function permutationsWithFirstFixed(count, cap = SEARCH_CLUSTER_CAP) {
   const identity = Array.from({ length: count }, (_, i) => i);
-  if (count > SEARCH_CLUSTER_CAP) return [identity];
+  if (count > cap) return [identity];
   const rest = identity.slice(1);
   const out = [];
   const visit = index => {
@@ -289,35 +289,40 @@ export function scoreGraphGeometry(nodes, links, width, height) {
  * `source` says whether a hint was used.
  */
 export function computePrettyGraphLayout({
-  d3, puzzle, nodes, links, width, height, hint = null
+  d3, puzzle, nodes, links, width, height, hint = null, budget = null
 }) {
+  const ringRotations = count => Array.from({ length: count }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / count);
   if (hint) {
     const rotations = puzzle.clusters.length === 1
       ? [0]
-      : [hint.rotation, ...Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12)];
+      : [hint.rotation, ...ringRotations(budget?.rotations || 12)];
     const hinted = searchGraphLayouts({
       d3, puzzle, nodes, links, width, height,
       orders: [hint.order],
       rotations,
-      hint
+      hint,
+      budget
     });
     if (hinted) return { ...hinted, source: "hint" };
   }
-  return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height }), source: "generated" };
+  return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height, budget }), source: "generated" };
 }
 
 function searchGraphLayouts({
-  d3, puzzle, nodes, links, width, height, orders: hintedOrders = null, rotations: hintedRotations = null, hint = null
+  d3, puzzle, nodes, links, width, height, orders: hintedOrders = null, rotations: hintedRotations = null, hint = null,
+  budget = null
 }) {
   const pinned = new Map(nodes
     .filter(node => Number.isFinite(node.fx) && Number.isFinite(node.fy))
     .map(node => [node.id, { x: node.fx, y: node.fy }]));
   const loneCluster = puzzle.clusters.length === 1;
-  const orders = hintedOrders || permutationsWithFirstFixed(puzzle.clusters.length);
+  const orders = hintedOrders ||
+    permutationsWithFirstFixed(puzzle.clusters.length, budget?.clusterCap ?? SEARCH_CLUSTER_CAP);
+  const rotationCount = budget?.rotations || 12;
   const rotations = hintedRotations || (loneCluster
     ? [0]
-    : Array.from({ length: 12 }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / 12));
-  const scales = loneCluster ? [1] : [0.88, 1];
+    : Array.from({ length: rotationCount }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / rotationCount));
+  const scales = loneCluster ? [1] : (budget?.scales || [0.88, 1]);
   const placements = loneCluster ? loneClusterPlacements(width, height) : [null];
   let best = null;
 

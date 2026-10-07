@@ -23,6 +23,11 @@ import {
 import { validatePublishedPuzzleLayout } from "./layoutPublication.js";
 import {
   layoutDocumentForMode,
+  LayoutConflictError,
+  autoBoardConflict,
+  autoEnvelopeConflict,
+  autoLayoutConflict,
+  layoutDocumentWithBoard,
   layoutForMode,
   normalizeLayoutDocument,
   stampLayoutSaved
@@ -184,64 +189,128 @@ export function createLocalPlayCorpusHandler({
         json(res, { error: "Puzzle withdrawn from authoring play", id }, 409);
         return true;
       }
-      try {
-        if (req.method === "DELETE") {
-          const mode = requestUrl.searchParams.get("mode");
-          if (!mode) {
-            const cleared = await contentDocuments.clearLayout({ id });
-            json(res, { id, revision: cleared.revision, layout: null });
+      // Each write is conditional on the row this request read. When another
+      // save lands in between, re-read and rebuild from the newer layout, so
+      // neither save erases the other and author-over-auto is re-checked.
+      for (let attempt = 0; ; attempt++) {
+        try {
+          if (req.method === "DELETE") {
+            const mode = requestUrl.searchParams.get("mode");
+            if (!mode) {
+              // Clearing every mode layout keeps the board settings: they
+              // are a separate choice, never removed as a side effect.
+              const keptBoard = normalizeLayoutDocument(published.layout)?.board;
+              if (keptBoard) {
+                const kept = await contentDocuments.saveLayout({
+                  id,
+                  expectedUpdatedAt: published.updatedAt,
+                  layout: layoutDocumentWithBoard({}, { schemaVersion: 1, modes: {}, board: keptBoard })
+                });
+                json(res, { id, revision: kept.revision, layout: kept.layout || null });
+                return true;
+              }
+              const cleared = await contentDocuments.clearLayout({ id });
+              json(res, { id, revision: cleared.revision, layout: null });
+              return true;
+            }
+            const saved = await contentDocuments.saveLayout({
+              id,
+              expectedUpdatedAt: published.updatedAt,
+              layout: layoutDocumentForMode(mode, null, published.layout)
+            });
+            json(res, {
+              id,
+              revision: saved.revision,
+              layout: saved.layout || null
+            });
             return true;
           }
-          const saved = await contentDocuments.saveLayout({
-            id,
-            layout: layoutDocumentForMode(mode, null, published.layout)
+          const layout = body && Object.prototype.hasOwnProperty.call(body, "layout")
+            ? body.layout
+            : body;
+          const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
+          // Board settings (size, Star free-term strip) save into the layout
+          // document beside the per-mode layouts; see layoutDocumentWithBoard.
+          if (body && Object.prototype.hasOwnProperty.call(body, "board") && !mode) {
+            const incoming = body.board && typeof body.board === "object" ? body.board : {};
+            const changes = stampLayoutSaved({
+              ...incoming,
+              source: incoming.source === "auto" ? "auto" : "author"
+            });
+            const boardConflict = autoBoardConflict(changes, published.layout);
+            if (boardConflict) {
+              json(res, { error: boardConflict, id }, 409);
+              return true;
+            }
+            const boardLayout = layoutDocumentWithBoard(changes, published.layout);
+            const boardValidation = validatePublishedPuzzleLayout({
+              document: published.document,
+              layout: boardLayout,
+              categoryRegistry: undefined
+            });
+            if (!boardValidation.valid) {
+              json(res, { error: "Layout is invalid", id, errors: boardValidation.errors }, 400);
+              return true;
+            }
+            const savedBoard = await contentDocuments.saveLayout({ id, layout: boardLayout, expectedUpdatedAt: published.updatedAt });
+            json(res, {
+              id,
+              revision: savedBoard.revision,
+              layout: savedBoard.layout || boardLayout,
+              warnings: boardValidation.warnings
+            });
+            return true;
+          }
+          const { puzzle, errors } = compilePublishedPuzzle(published.document);
+          if (!puzzle) {
+            json(res, {
+              error: "Published puzzle document is not valid simplified content",
+              id,
+              errors
+            }, 400);
+            return true;
+          }
+          const modePayload = mode && layout?.modes
+            ? layoutForMode(layout, mode)
+            : layout;
+          const conflict = mode
+            ? autoLayoutConflict(mode, modePayload, published.layout)
+            : autoEnvelopeConflict(layout, published.layout);
+          if (conflict) {
+            json(res, { error: conflict, id }, 409);
+            return true;
+          }
+          const layoutDocument = mode
+            ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), published.layout)
+            : normalizeLayoutDocument(layout);
+          const validation = validatePublishedPuzzleLayout({
+            document: published.document,
+            layout: layoutDocument,
+            savingMode: mode
           });
+          if (!validation.valid) {
+            json(res, { error: "Layout is invalid", id, errors: validation.errors }, 400);
+            return true;
+          }
+          const saved = await contentDocuments.saveLayout({ id, layout: layoutDocument, expectedUpdatedAt: published.updatedAt });
           json(res, {
             id,
             revision: saved.revision,
-            layout: saved.layout || null
+            layout: saved.layout || layoutDocument,
+            warnings: validation.warnings
           });
           return true;
-        }
-        const layout = body && Object.prototype.hasOwnProperty.call(body, "layout")
-          ? body.layout
-          : body;
-        const mode = body?.mode || requestUrl.searchParams.get("mode") || null;
-        const { puzzle, errors } = compilePublishedPuzzle(published.document);
-        if (!puzzle) {
+        } catch (error) {
+          if (error instanceof LayoutConflictError && attempt < 2) {
+            published = await contentDocuments.getPublished({ kind: "puzzle", id });
+            continue;
+          }
           json(res, {
-            error: "Published puzzle document is not valid simplified content",
-            id,
-            errors
-          }, 400);
+            error: error instanceof Error ? error.message : String(error)
+          }, error instanceof LayoutConflictError ? 409 : 400);
           return true;
         }
-        const modePayload = mode && layout?.modes
-          ? layoutForMode(layout, mode)
-          : layout;
-        const layoutDocument = mode
-          ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), published.layout)
-          : normalizeLayoutDocument(layout);
-        const validation = validatePublishedPuzzleLayout({
-          document: published.document,
-          layout: layoutDocument,
-          savingMode: mode
-        });
-        if (!validation.valid) {
-          json(res, { error: "Layout is invalid", id, errors: validation.errors }, 400);
-          return true;
-        }
-        const saved = await contentDocuments.saveLayout({ id, layout: layoutDocument });
-        json(res, {
-          id,
-          revision: saved.revision,
-          layout: saved.layout || layoutDocument,
-          warnings: validation.warnings
-        });
-      } catch (error) {
-        json(res, { error: error instanceof Error ? error.message : String(error) }, 400);
       }
-      return true;
     }
     if (req.method !== "GET" && req.method !== "HEAD") return false;
     const puzzleMatch = urlPath.match(/^\/play\/puzzles\/([^/]+)\.json$/);

@@ -159,11 +159,13 @@ export async function run() {
   assert.match(draftPage, /value="delete-draft"/);
   assert.match(draftPage, /badge-warn">working copy</);
   assert.match(draftPage, /Board experiments/);
-  assert.match(draftPage, /Free-term strip/);
   assert.match(draftPage, /Bridge pre-connect/);
-  assert.match(draftPage, /Board size/);
-  assert.match(draftPage, /\+20%/);
-  assert.match(draftPage, /-25%/);
+  assert.match(draftPage, /Lens flow trace/);
+  // Board size and the free-term strip are layout settings now, edited in
+  // layout authoring rather than on this form.
+  assert.doesNotMatch(draftPage, /<label>Free-term strip/);
+  assert.doesNotMatch(draftPage, /<label>Board size/);
+  assert.match(draftPage, /change them in layout authoring/);
   assert.doesNotMatch(draftPage, /badge-ok">published</);
   const publishedNoticeList = renderDraftListPage([{ ...baseDraft }], {
     notice: {

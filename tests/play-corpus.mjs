@@ -326,6 +326,105 @@ export async function run(page) {
   assert.deepEqual(unstamped(mergedPublishedLayout.modes.graph), graphLayout);
   assert.deepEqual(unstamped(mergedPublishedLayout.modes.sets), circleLayout);
 
+  // The automatic layout pass never replaces an author's layout.
+  const autoOverAuthor = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json?mode=graph",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({ mode: "graph", layout: { ...graphLayout, source: "auto", fixed: false } }));
+    }
+  }, autoOverAuthor), true);
+  assert.equal(autoOverAuthor.status, 409, autoOverAuthor.body);
+  assert.match(autoOverAuthor.body, /never replaces/);
+  // ...including when the write sends a whole layout document, no mode.
+  const unscopedAuto = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({
+        layout: { schemaVersion: 1, modes: { graph: { ...graphLayout, source: "auto", fixed: false } } }
+      }));
+    }
+  }, unscopedAuto), true);
+  assert.equal(unscopedAuto.status, 409, unscopedAuto.body);
+  assert.equal(
+    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.modes.graph.source,
+    undefined
+  );
+
+  // Board settings save with the layout, beside the per-mode layouts.
+  const putBoard = async board => {
+    const response = createResponse();
+    assert.equal(await handleRequest({
+      method: "PUT",
+      url: "/admin/puzzles/lab-d1-play/layout.json",
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() {
+        yield Buffer.from(JSON.stringify({ board }));
+      }
+    }, response), true);
+    return response;
+  };
+  const sizedBoard = await putBoard({ sizeFactor: 1.1 });
+  assert.equal(sizedBoard.status, 200, sizedBoard.body);
+  const afterBoard = (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout;
+  assert.equal(afterBoard.board.sizeFactor, 1.1);
+  assert.equal(afterBoard.board.source, "author");
+  assert.ok(afterBoard.modes.star && afterBoard.modes.graph, "a board save keeps the mode layouts");
+  assert.equal((await putBoard({ sizeFactor: 1.13 })).status, 400);
+  const autoBoard = await putBoard({ sizeFactor: 1.2, source: "auto" });
+  assert.equal(autoBoard.status, 409, autoBoard.body);
+  assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.sizeFactor, 1.1);
+
+  // Writes are conditional on the row the request read: a stale write is
+  // refused, and the endpoint re-reads and retries so a save that landed in
+  // between is kept rather than erased.
+  const readBefore = await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" });
+  await new Promise(resolve => setTimeout(resolve, 2));
+  await repo.saveLayout({ id: "lab-d1-play", layout: readBefore.layout });
+  await assert.rejects(
+    repo.saveLayout({ id: "lab-d1-play", layout: readBefore.layout, expectedUpdatedAt: readBefore.updatedAt }),
+    error => error.name === "LayoutConflictError"
+  );
+  let interleaved = false;
+  const racingRepo = Object.create(repo);
+  racingRepo.saveLayout = async args => {
+    if (!interleaved && args.expectedUpdatedAt) {
+      interleaved = true;
+      // Another author save lands after this request read the row.
+      const current = await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" });
+      await new Promise(resolve => setTimeout(resolve, 2));
+      await repo.saveLayout({
+        id: "lab-d1-play",
+        layout: { ...current.layout, board: { ...current.layout.board, starFreeStrip: true } }
+      });
+    }
+    return repo.saveLayout(args);
+  };
+  const racingHandler = createLocalPlayCorpusHandler({
+    contentDocuments: racingRepo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root
+  });
+  const raced = createResponse();
+  assert.equal(await racingHandler({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({ board: { sizeFactor: 1.15 } }));
+    }
+  }, raced), true);
+  assert.equal(raced.status, 200, raced.body);
+  assert.ok(interleaved);
+  const afterRace = (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board;
+  assert.equal(afterRace.sizeFactor, 1.15, "the retried save applied");
+  assert.equal(afterRace.starFreeStrip, true, "the save that landed in between was kept");
+
   for (const [mode, modeLayout] of [
     ["graph", { ...graphLayout, metrics: { ...graphLayout.metrics, lineCrossings: 1 } }],
     ["sets", { ...circleLayout, metrics: { ...circleLayout.metrics, lineCrossings: 1 } }]
@@ -416,17 +515,18 @@ export async function run(page) {
       }, clearDraftMode), true);
       assert.equal(clearDraftMode.status, 200, clearDraftMode.body);
     }
-    assert.deepEqual(
-      (await draftStore.getDraft("lab-d1-play-draft")).layout,
-      emptyLayoutDocument()
-    );
+    // Clearing every mode leaves the inherited board settings in place:
+    // they are not a mode layout.
+    const clearedLayout = (await draftStore.getDraft("lab-d1-play-draft")).layout;
+    assert.deepEqual(clearedLayout.modes, emptyLayoutDocument().modes);
+    assert.equal(clearedLayout.board.sizeFactor, 1.15);
     const clearedDraftLayout = createResponse();
     assert.equal(await handleExistingDraft({
       method: "GET",
       url: "/admin/drafts/lab-d1-play-draft/layout.json",
       headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
     }, clearedDraftLayout), true);
-    assert.deepEqual(JSON.parse(clearedDraftLayout.body).layout, emptyLayoutDocument());
+    assert.deepEqual(JSON.parse(clearedDraftLayout.body).layout, clearedLayout);
   } finally {
     await rm(existingDraftDirectory, { recursive: true, force: true });
   }

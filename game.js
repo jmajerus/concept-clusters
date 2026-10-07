@@ -35,7 +35,6 @@ import {
 } from "./modules/starBridgePreconnect.js";
 import { starBridgePreconnectEnabled } from "./modules/starLayoutRepository.js";
 import { BOARD_CANVAS, boardCanvas, boardDisplayFrame, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
-import { boardWithFlag } from "./modules/starLayoutRepository.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
@@ -43,7 +42,8 @@ import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
-import { saveLayout } from "./modules/layoutApi.js";
+import { saveLayout, saveLayoutBoard } from "./modules/layoutApi.js";
+import { layoutDocumentWithBoard } from "./modules/layoutDocument.js";
 import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
@@ -1982,6 +1982,9 @@ layoutAuthoring = createLayoutAuthoringController({
   saveBoardFlags: playSource === "d1"
     ? args => saveBoardFlags({ ...args, draftId: overlayDraftId })
     : null,
+  saveLayoutBoard: playSource === "d1"
+    ? args => saveLayoutBoard({ ...args, draftId: overlayDraftId })
+    : null,
   getDraftId: () => overlayDraftId,
   previewBoardSize
 });
@@ -2014,10 +2017,10 @@ function rebuildBoardForSize() {
 // committed value rebuilds at once.
 function previewBoardSize(factor, { rebuild = "schedule" } = {}) {
   if (!state?.puzzle) return null;
-  const stored = factor !== 1 ? factor : undefined;
-  const board = boardWithFlag(state.puzzle, "sizeFactor", stored);
-  if (board) state.puzzle.board = board;
-  else delete state.puzzle.board;
+  // Board size is a layout setting, read from the layout document first,
+  // so the preview stages it there. A failed save previews the saved
+  // factor again, which restores it.
+  state.puzzle.layout = layoutDocumentWithBoard({ sizeFactor: factor }, state.puzzle.layout);
   applyBoardSize(state.puzzle);
   clearTimeout(boardSizeRebuildTimer);
   if (rebuild === "now") rebuildBoardForSize();
@@ -2199,6 +2202,12 @@ function applyLoadedPuzzle(puzzle, index, {
     modeSwitchPolishing: false,
     modeSwitchLayoutPromise: null,
     layoutAuthoring: layoutAuthoringMode,
+    // &layoutBudget=extended: the offline layout pass's larger search, which
+    // can take most of a minute. Only the D1 authoring player honours it, so
+    // a shared public link cannot make a player's Show Solution run it.
+    layoutBudget: playSource === "d1" && pageParams.get("layoutBudget") === "extended"
+      ? "extended"
+      : "standard",
     restoringSession: false,
     learningIntroduction,
     learningIntroductionStatus,
