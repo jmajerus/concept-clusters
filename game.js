@@ -34,7 +34,7 @@ import {
   remainingLinkCount
 } from "./modules/starBridgePreconnect.js";
 import { starBridgePreconnectEnabled } from "./modules/starLayoutRepository.js";
-import { BOARD_CANVAS, boardCanvas, boardDisplayFrame, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
+import { BOARD_CANVAS, boardCanvas, boardDisplayFrame, canonicalBoardSizeFactor, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
@@ -238,6 +238,11 @@ let state = null; // { nodes, links, selected, made, need }
 let currentIndex = 0;
 let playerLayoutSaveTimer = null;
 const pageParams = new URLSearchParams(location.search);
+// &boardSize=<factor> on the D1 authoring player tries a board size without
+// saving it: the automatic layout pass's size escalation.
+const trialBoardSize = playSource === "d1"
+  ? canonicalBoardSizeFactor(pageParams.get("boardSize"))
+  : null;
 const layoutAuthoringMode = pageParams.get("author") === "layout";
 // Undocumented, admin-only: reveals #puzzle-meta (raw optional puzzle
 // fields -- tags, creator, license, and the other optional document
@@ -2154,6 +2159,9 @@ function applyLoadedPuzzle(puzzle, index, {
   overviewRenderer.showPuzzleMeta(puzzle);
   if (canEditPuzzles) {
     puzzleEditLinkEl.href = `/admin/drafts/${encodeURIComponent(puzzle.id)}`;
+  }
+  if (trialBoardSize != null) {
+    puzzle.layout = layoutDocumentWithBoard({ sizeFactor: trialBoardSize }, puzzle.layout);
   }
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";

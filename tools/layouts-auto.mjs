@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-// Automatic layout pass: solve published puzzles in a headless browser,
-// spending the extended search budget on boards the live search leaves
-// defects on; report each board's remaining defects, and (with --write)
-// save the results as automatic layouts.
+// Automatic layout pass: solve published puzzles in a headless browser
+// with successively stronger strategies, report each board's remaining
+// defects, and (with --write) save the results as automatic layouts.
 //
 //   npm run layouts:auto -- <puzzle-id> [...]   specific puzzles
 //   npm run layouts:auto -- --all               every published puzzle
@@ -17,16 +16,30 @@
 // Needs the local authoring server (`npm run dev`), which reads and writes
 // the same D1 publication rows players see: --write changes live boards.
 //
-// Automatic layouts are tagged source: "auto". An author's saved layout for
-// a mode is measured and reported, never replaced; the save endpoints
-// enforce that too. Graph and Circle results are saved as hints; Star
-// results as Star layouts (always exact), so they adapt after later edits.
+// Per board the strategies run in order until the board is clean:
+//   1. the live (standard) search;
+//   2. the extended search budget (layoutBudget.js), which for Graph also
+//      repairs single pills left in an overlap or across a line.
+// Per puzzle, when its board size is the pass's to choose, the board grows
+// in 5% steps up to +25% until every mode is clean, keeping the smallest
+// size that is, else the size with the fewest defects. The board size is
+// the pass's to choose only when no author has set one and no mode has an
+// author's layout, which a new size would move; otherwise the size where
+// the board would be clean is reported as a suggestion.
+//
+// Automatic layouts and sizes are tagged source: "auto". An author's saved
+// layout or board size is measured and reported, never replaced; the save
+// endpoints enforce that too. Graph and Circle results are saved as exact
+// positions when they pass the strict check (else as hints), Star results
+// as Star layouts; all of them adapt rather than vanish after later edits.
 
 import { writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 
 const MODES = ["graph", "sets", "star"];
 const MODE_LABELS = { graph: "Graph", sets: "Circle", star: "Star" };
+const SIZE_STEP = 0.05;
+const SIZE_MAX = 1.25;
 
 function parseArgs(argv) {
   const options = {
@@ -91,12 +104,33 @@ function fewerDefects(mode, a, b) {
   return false;
 }
 
+// Defects across a puzzle's modes as counts per severity rank, so whole
+// sizes can be compared: rank 0 is each mode's most severe kind.
+function severityVector(rows) {
+  const vector = [0, 0, 0, 0];
+  rows.forEach(row => {
+    DEFECT_KEYS[row.mode].forEach((key, rank) => { vector[rank] += row.defects?.[key] || 0; });
+  });
+  return vector;
+}
+
+function lessVector(a, b) {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] < b[i];
+  return false;
+}
+
+const percent = size => {
+  const value = Math.round((size - 1) * 100);
+  return value === 0 ? "0%" : `${value > 0 ? "+" : ""}${value}%`;
+};
+
 // Open the published puzzle, not a working copy: on the authoring server
 // ?puzzle=<id> opens the draft when one exists, so load by corpus index.
-async function openBoard(browser, options, id, mode, budget) {
+async function openBoard(browser, options, id, mode, budget, size = null) {
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto(`${options.base}/?library&mode=${mode}&layoutBudget=${budget}`);
+  const sizeParam = size == null ? "" : `&boardSize=${size}`;
+  await page.goto(`${options.base}/?library&mode=${mode}&layoutBudget=${budget}${sizeParam}`);
   await page.waitForFunction(() => window.CC?.PUZZLES?.length, null, { timeout: 60000 });
   const found = await page.evaluate(async id => {
     const index = window.CC.PUZZLES.findIndex(puzzle => puzzle.id === id);
@@ -119,6 +153,9 @@ async function openBoard(browser, options, id, mode, budget) {
   if (await page.evaluate(() => window.CC.mode) !== mode) {
     throw new Error(`Board opened in ${await page.evaluate(() => window.CC.mode)} mode, not ${mode}`);
   }
+  if (await page.evaluate(() => window.CC.playSource) !== "d1") {
+    throw new Error("The page is not reading the D1 corpus; is this the local authoring server?");
+  }
   return page;
 }
 
@@ -138,8 +175,66 @@ async function solve(page, mode, { dropAuto }) {
   await page.waitForFunction(() => window.CC.state.solutionLayout === "pretty", null, { timeout: 600000 });
   return page.evaluate(() => ({
     metrics: window.CC.state.layoutAdapter.metrics(),
-    source: window.CC.state.layoutSource || null
+    source: window.CC.state.layoutSource || null,
+    repaired: !!window.CC.state.graphLayoutStats?.repaired
   }));
+}
+
+// Who owns the puzzle's board size and layouts, read from the first board.
+async function readOwnership(page, modes) {
+  return page.evaluate(modes => {
+    const puzzle = window.CC.state.puzzle;
+    const layout = puzzle.layout || {};
+    const board = layout.board || {};
+    const authorSize = (Object.prototype.hasOwnProperty.call(board, "sizeFactor") && board.source !== "auto")
+      || puzzle.board?.sizeFactor != null;
+    const authorModes = modes.filter(mode => {
+      const saved = layout.modes?.[mode];
+      return saved && saved.source !== "auto";
+    });
+    return { authorSize, authorModes };
+  }, modes);
+}
+
+async function currentSize(page) {
+  return page.evaluate(() => {
+    const puzzle = window.CC.state.puzzle;
+    const board = puzzle.layout?.board;
+    const value = board && Object.prototype.hasOwnProperty.call(board, "sizeFactor")
+      ? board.sizeFactor
+      : puzzle.board?.sizeFactor;
+    return typeof value === "number" ? value : 1;
+  });
+}
+
+// One board at one size: an author's layout is only measured; otherwise
+// the strategies run in order until the board is clean. Returns the row
+// and the page holding the best result, left open for saving.
+async function layOutBoard(browser, options, id, mode, size, authorLayout) {
+  const row = { id, mode, size };
+  const live = await openBoard(browser, options, id, mode, "standard", size);
+  if (authorLayout) {
+    const result = await solve(live, mode, { dropAuto: false });
+    row.action = "author layout kept";
+    row.defects = defects(mode, result.metrics);
+    return { row, page: live };
+  }
+  const liveResult = await solve(live, mode, { dropAuto: true });
+  row.standardDefects = defects(mode, liveResult.metrics);
+  row.defects = row.standardDefects;
+  row.strategy = "live search";
+  if (row.standardDefects.total === 0) return { row, page: live };
+  const extended = await openBoard(browser, options, id, mode, "extended", size);
+  const extendedResult = await solve(extended, mode, { dropAuto: true });
+  const extendedDefects = defects(mode, extendedResult.metrics);
+  if (fewerDefects(mode, extendedDefects, row.standardDefects)) {
+    await live.close();
+    row.defects = extendedDefects;
+    row.strategy = extendedResult.repaired ? "extended search + repair" : "extended search";
+    return { row, page: extended };
+  }
+  await extended.close();
+  return { row, page: live };
 }
 
 // Saved as exact positions when they pass the strict check, so players get
@@ -168,98 +263,165 @@ async function saveLayout(page, id, mode) {
   }, { id, mode });
 }
 
-// One board: an author's layout is only measured. Otherwise solve with the
-// live search, and only when that leaves defects spend the extended search;
-// the result with fewer defects is the one reported and saved.
-async function layOut(browser, options, id, mode) {
-  const row = { id, mode };
-  const started = Date.now();
-  const pages = [];
+async function saveBoardSize(page, id, size) {
+  return page.evaluate(async ({ id, size }) => {
+    const reply = await fetch(`/admin/puzzles/${encodeURIComponent(id)}/layout.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({ board: { sizeFactor: size, source: "auto" } })
+    });
+    const body = await reply.json().catch(() => ({}));
+    return { ok: reply.ok, status: reply.status, error: body.error, errors: body.errors };
+  }, { id, size });
+}
+
+const describeSave = response => (response.ok
+  ? null
+  : `${response.status}: ${[response.error, ...(response.errors || [])].filter(Boolean).join("; ")}`);
+
+// One puzzle, all requested modes, one board size at a time.
+async function layOutPuzzle(browser, options, id) {
+  const probe = await openBoard(browser, options, id, options.modes[0], "standard");
+  let ownership, saved;
   try {
-    const live = await openBoard(browser, options, id, mode, "standard");
-    pages.push(live);
-    if (await live.evaluate(() => window.CC.playSource) !== "d1") {
-      throw new Error("The page is not reading the D1 corpus; is this the local authoring server?");
-    }
-    const saved = await live.evaluate(mode => {
-      const layout = window.CC.state.puzzle.layout?.modes?.[mode];
-      return layout ? { source: layout.source || "author" } : null;
-    }, mode);
-    row.saved = saved?.source || null;
-
-    if (saved && saved.source !== "auto") {
-      const result = await solve(live, mode, { dropAuto: false });
-      row.action = "author layout kept";
-      row.defects = defects(mode, result.metrics);
-      return row;
-    }
-
-    const liveResult = await solve(live, mode, { dropAuto: true });
-    row.standardDefects = defects(mode, liveResult.metrics);
-    row.defects = row.standardDefects;
-    row.budget = "standard";
-    let best = live;
-    if (row.standardDefects.total > 0) {
-      const extended = await openBoard(browser, options, id, mode, "extended");
-      pages.push(extended);
-      const extendedResult = await solve(extended, mode, { dropAuto: true });
-      const extendedDefects = defects(mode, extendedResult.metrics);
-      if (fewerDefects(mode, extendedDefects, row.standardDefects)) {
-        row.defects = extendedDefects;
-        row.budget = "extended";
-        best = extended;
-      }
-    }
-    if (!options.write) {
-      row.action = "dry run";
-      return row;
-    }
-    const response = await saveLayout(best, id, mode);
-    row.action = response.ok
-      ? (mode === "star" || response.fixed ? "saved" : "saved as hint")
-      : `not saved (${response.status}: ${[response.error, ...(response.errors || [])].filter(Boolean).join("; ")})`;
-    return row;
+    ownership = await readOwnership(probe, options.modes);
+    saved = await currentSize(probe);
   } finally {
-    row.ms = Date.now() - started;
-    await Promise.all(pages.map(page => page.close()));
+    await probe.close();
+  }
+  const sizeIsOurs = !ownership.authorSize && !ownership.authorModes.length;
+  // The pass starts its own sizes from the default; otherwise the size in
+  // use stays the base.
+  const base = sizeIsOurs ? 1 : saved;
+  const sizes = [base];
+  for (let size = base + SIZE_STEP; size <= SIZE_MAX + 1e-9; size += SIZE_STEP) {
+    sizes.push(Math.round(size * 100) / 100);
+  }
+
+  let best = null;   // { size, rows, pages }
+  let cleanAt = null;
+  for (const size of sizes) {
+    const rows = [], pages = [];
+    try {
+      for (const mode of options.modes) {
+        const { row, page } = await layOutBoard(
+          browser, options, id, mode, size, ownership.authorModes.includes(mode)
+        );
+        rows.push(row);
+        pages.push(page);
+      }
+    } catch (error) {
+      await Promise.all(pages.map(page => page.close()));
+      throw error;
+    }
+    const vector = severityVector(rows);
+    const clean = vector.every(count => count === 0);
+    if (clean && cleanAt == null) cleanAt = size;
+    if (!best || lessVector(vector, best.vector)) {
+      if (best) await Promise.all(best.pages.map(page => page.close()));
+      best = { size, rows, pages, vector };
+    } else {
+      await Promise.all(pages.map(page => page.close()));
+    }
+    // A size the pass may not apply is only explored to find where the
+    // board would be clean; stop there, or at once when nothing is wrong.
+    if (clean) break;
+  }
+
+  // The size to report and save: the best one when the size is ours,
+  // otherwise the current size, with any clean size as a suggestion.
+  let chosen = best;
+  try {
+    if (!sizeIsOurs && best.size !== base) {
+      await Promise.all(best.pages.map(page => page.close()));
+      const rows = [], pages = [];
+      for (const mode of options.modes) {
+        const { row, page } = await layOutBoard(
+          browser, options, id, mode, base, ownership.authorModes.includes(mode)
+        );
+        rows.push(row);
+        pages.push(page);
+      }
+      chosen = { size: base, rows, pages };
+    }
+    const summary = {
+      id,
+      size: chosen.size,
+      sizeOwner: ownership.authorSize ? "author" : ownership.authorModes.length ? "author layouts" : "auto",
+      suggestedSize: !sizeIsOurs && cleanAt != null && cleanAt !== base ? cleanAt : null,
+      rows: chosen.rows
+    };
+    if (!options.write) {
+      chosen.rows.forEach(row => { row.action ||= "dry run"; });
+      return summary;
+    }
+    if (sizeIsOurs) {
+      const sized = await saveBoardSize(chosen.pages[0], id, chosen.size);
+      summary.sizeAction = sized.ok ? "saved" : `not saved (${describeSave(sized)})`;
+    }
+    for (let i = 0; i < chosen.rows.length; i++) {
+      const row = chosen.rows[i];
+      if (row.action === "author layout kept") continue;
+      const response = await saveLayout(chosen.pages[i], id, row.mode);
+      row.action = response.ok
+        ? (row.mode === "star" || response.fixed ? "saved" : "saved as hint")
+        : `not saved (${describeSave(response)})`;
+    }
+    return summary;
+  } finally {
+    const open = new Set([...best.pages, ...chosen.pages]);
+    await Promise.all([...open].map(page => page.close().catch(() => {})));
   }
 }
 
-function summarize(rows, options) {
+function summarize(puzzles, options) {
+  const rows = puzzles.flatMap(puzzle => puzzle.rows || []);
   const lines = [];
   options.modes.forEach(mode => {
     const forMode = rows.filter(row => row.mode === mode);
-    const failed = forMode.filter(row => row.error);
-    const ok = forMode.filter(row => !row.error);
-    const clean = ok.filter(row => row.defects?.total === 0);
-    const author = ok.filter(row => row.action === "author layout kept");
-    const saved = ok.filter(row => row.action?.startsWith("saved"));
-    let line = `${MODE_LABELS[mode]}: ${ok.length} boards, ${clean.length} clean, ${ok.length - clean.length} with defects`;
+    const clean = forMode.filter(row => row.defects?.total === 0);
+    const author = forMode.filter(row => row.action === "author layout kept");
+    const saved = forMode.filter(row => row.action?.startsWith("saved"));
+    const extended = forMode.filter(row => row.strategy?.startsWith("extended")).length;
+    let line = `${MODE_LABELS[mode]}: ${forMode.length} boards, ${clean.length} clean, ${forMode.length - clean.length} with defects`;
+    if (extended) line += `, ${extended} improved by the extended search`;
     if (author.length) line += `, ${author.length} author layouts kept`;
     if (options.write) line += `, ${saved.length} saved`;
-    const tried = ok.filter(row => row.standardDefects?.total > 0);
-    if (tried.length) {
-      const improved = tried.filter(row => row.budget === "extended").length;
-      line += `; extended search improved ${improved} of ${tried.length} boards the live search left defects on`;
-    }
-    if (failed.length) line += `, ${failed.length} failed`;
     lines.push(line);
   });
-  const attention = rows.filter(row => !row.error && row.defects?.total > 0);
+  const grown = puzzles.filter(puzzle => puzzle.sizeOwner === "auto" && puzzle.size !== 1);
+  if (grown.length) {
+    lines.push("", "Board size grown by the pass:");
+    grown.forEach(puzzle => lines.push(`  ${puzzle.id}: ${percent(puzzle.size)}${puzzle.sizeAction ? ` (${puzzle.sizeAction})` : ""}`));
+  }
+  const suggested = puzzles.filter(puzzle => puzzle.suggestedSize != null);
+  if (suggested.length) {
+    lines.push("", `Clean at a larger board size (yours to set; the pass leaves ${"an author's"} size and layouts alone):`);
+    suggested.forEach(puzzle => lines.push(`  ${puzzle.id}: ${percent(puzzle.suggestedSize)} (now ${percent(puzzle.size)}, ${puzzle.sizeOwner})`));
+  }
+  const attention = rows.filter(row => row.defects?.total > 0);
   if (attention.length) {
-    lines.push("", "Boards needing attention:");
+    lines.push("", "Boards still needing attention:");
     attention
       .sort((a, b) => b.defects.total - a.defects.total || a.id.localeCompare(b.id))
       .forEach(row => {
         const { total, ...kinds } = row.defects;
         const detail = Object.entries(kinds).map(([kind, count]) => `${kind} ${count}`).join(", ");
-        lines.push(`  ${row.id} [${MODE_LABELS[row.mode]}${row.action === "author layout kept" ? ", author layout" : ""}]: ${detail}`);
+        const notes = [row.action === "author layout kept" ? "author layout" : null, percent(row.size)].filter(Boolean);
+        lines.push(`  ${row.id} [${MODE_LABELS[row.mode]}, ${notes.join(", ")}]: ${detail}`);
       });
   }
-  const failures = rows.filter(row => row.error);
+  const unsaved = rows.filter(row => row.action?.startsWith("not saved"))
+    .concat(puzzles.filter(puzzle => puzzle.sizeAction?.startsWith("not saved")).map(puzzle => ({ id: puzzle.id, mode: null, action: puzzle.sizeAction })));
+  if (unsaved.length) {
+    lines.push("", "Not saved:");
+    unsaved.forEach(row => lines.push(`  ${row.id}${row.mode ? ` [${MODE_LABELS[row.mode]}]` : " [board size]"}: ${row.action}`));
+  }
+  const failures = puzzles.filter(puzzle => puzzle.error);
   if (failures.length) {
     lines.push("", "Failed:");
-    failures.forEach(row => lines.push(`  ${row.id} [${MODE_LABELS[row.mode]}]: ${row.error}`));
+    failures.forEach(puzzle => lines.push(`  ${puzzle.id}: ${puzzle.error}`));
   }
   return lines.join("\n");
 }
@@ -276,34 +438,30 @@ async function main() {
       ids = await page.evaluate(() => window.CC.PUZZLES.map(puzzle => puzzle.id));
       await page.close();
     }
-    // Lanes run different puzzles at once, but one puzzle's modes run in
-    // turn: each save rewrites that puzzle's whole layout document, so two
-    // modes saved at once could erase each other.
+    // Lanes run different puzzles at once; one puzzle's boards run in turn,
+    // since each save rewrites that puzzle's whole layout document.
     ids = [...new Set(ids)];
     const queue = [...ids];
-    const total = ids.length * options.modes.length;
-    console.log(`${options.write ? "Laying out" : "Dry run:"} ${total} boards (${ids.length} puzzles × ${options.modes.length} modes), ${options.lanes} puzzles at a time.`);
-    const rows = [];
-    let done = 0;
+    console.log(`${options.write ? "Laying out" : "Dry run:"} ${ids.length} puzzles × ${options.modes.length} modes, ${options.lanes} puzzles at a time.`);
+    const puzzles = [];
     await Promise.all(Array.from({ length: Math.min(options.lanes, queue.length) }, async () => {
       while (queue.length) {
         const id = queue.shift();
-        for (const mode of options.modes) {
-          let row;
-          try {
-            row = await layOut(browser, options, id, mode);
-          } catch (error) {
-            row = { id, mode, error: error.message.split("\n")[0] };
-          }
-          rows.push(row);
-          done++;
-          if (done % 25 === 0) console.log(`  ${done} boards done`);
+        const started = Date.now();
+        let result;
+        try {
+          result = await layOutPuzzle(browser, options, id);
+        } catch (error) {
+          result = { id, error: error.message.split("\n")[0] };
         }
+        result.ms = Date.now() - started;
+        puzzles.push(result);
+        if (puzzles.length % 10 === 0) console.log(`  ${puzzles.length} puzzles done`);
       }
     }));
-    console.log(`\n${summarize(rows, options)}`);
+    console.log(`\n${summarize(puzzles, options)}`);
     if (options.report) {
-      writeFileSync(options.report, `${JSON.stringify(rows, null, 2)}\n`);
+      writeFileSync(options.report, `${JSON.stringify(puzzles, null, 2)}\n`);
       console.log(`\nFull results: ${options.report}`);
     }
     if (!options.write) console.log("\nDry run: nothing was saved. Pass --write to save automatic layouts.");

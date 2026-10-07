@@ -280,15 +280,102 @@ export function scoreGraphGeometry(nodes, links, width, height) {
   };
 }
 
+const REPAIR_DEFECTS = ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"];
+const REPAIR_RADII = [18, 36, 60, 90];
+
+function fewerRepairDefects(a, b) {
+  for (const key of REPAIR_DEFECTS) {
+    if (a[key] !== b[key]) return a[key] < b[key];
+  }
+  return false;
+}
+
+/**
+ * Local repair after the search: move one node at a time to nearby spots,
+ * keeping a move only when it strictly reduces defects (overlaps, then
+ * crossings, then lines through pills). Pinned nodes stay put. The
+ * candidate search settles whole arrangements and can leave a single pill
+ * a few pixels into another or across one line; this is the targeted fix
+ * a person would make by dragging that pill.
+ */
+export function repairGraphLayout({ nodes, links, width, height, positions, rounds = 6 }) {
+  const clones = nodes.map(node => {
+    const point = positions.get(node.id) || { x: node.x, y: node.y };
+    return {
+      id: node.id,
+      word: node.word,
+      w: node.w,
+      gs: node.gs,
+      x: point.x,
+      y: point.y,
+      pinned: Number.isFinite(node.fx) && Number.isFinite(node.fy)
+    };
+  });
+  const byId = new Map(clones.map(node => [node.id, node]));
+  const cloneLinks = links.map(link => ({
+    source: byId.get(endpointId(link.source)),
+    target: byId.get(endpointId(link.target))
+  }));
+  let metrics = scoreGraphGeometry(clones, cloneLinks, width, height);
+  for (let round = 0; round < rounds; round++) {
+    if (REPAIR_DEFECTS.every(key => metrics[key] === 0)) break;
+    let improved = false;
+    for (const node of clones) {
+      if (node.pinned) continue;
+      const start = { x: node.x, y: node.y };
+      let best = null;
+      for (const radius of REPAIR_RADII) {
+        for (let k = 0; k < 8; k++) {
+          const angle = k * Math.PI / 4;
+          node.x = start.x + radius * Math.cos(angle);
+          node.y = start.y + radius * Math.sin(angle);
+          clampNode(node, width, height);
+          const trial = scoreGraphGeometry(clones, cloneLinks, width, height);
+          if (fewerRepairDefects(trial, best?.metrics || metrics)) {
+            best = { x: node.x, y: node.y, metrics: trial };
+          }
+        }
+      }
+      if (best) {
+        node.x = best.x;
+        node.y = best.y;
+        metrics = best.metrics;
+        improved = true;
+      } else {
+        node.x = start.x;
+        node.y = start.y;
+      }
+    }
+    if (!improved) break;
+  }
+  return {
+    metrics,
+    positions: new Map(clones.map(node => [node.id, { x: rounded(node.x), y: rounded(node.y) }]))
+  };
+}
+
 /**
  * Best solved Graph layout. With a `hint` (see layoutHints.js) only the
  * hinted cluster order is searched -- across rotations, nearest the saved
  * one, with terms seeded at their saved offsets -- so a saved arrangement
  * is repaired within itself, never swapped for a different order. Any
  * defect it keeps is reported by the caller, not hidden by replacing it.
- * `source` says whether a hint was used.
+ * `source` says whether a hint was used. Under a budget with `repair`,
+ * a result left with defects then gets repairGraphLayout.
  */
-export function computePrettyGraphLayout({
+export function computePrettyGraphLayout(options) {
+  const result = searchForPrettyGraphLayout(options);
+  const { budget } = options;
+  if (!result || !budget?.repair || REPAIR_DEFECTS.every(key => result.metrics[key] === 0)) {
+    return result;
+  }
+  const repaired = repairGraphLayout({ ...options, positions: result.positions });
+  return fewerRepairDefects(repaired.metrics, result.metrics)
+    ? { ...result, ...repaired, repaired: true }
+    : result;
+}
+
+function searchForPrettyGraphLayout({
   d3, puzzle, nodes, links, width, height, hint = null, budget = null
 }) {
   const ringRotations = count => Array.from({ length: count }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / count);
