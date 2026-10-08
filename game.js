@@ -42,7 +42,7 @@ import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
-import { saveLayout, saveLayoutBoard } from "./modules/layoutApi.js";
+import { layoutPassStatus, saveLayout, saveLayoutBoard, startLayoutPass } from "./modules/layoutApi.js";
 import { layoutDocumentWithBoard } from "./modules/layoutDocument.js";
 import { classifyDrag, isCrafted, recordDrag } from "./modules/playerLayoutEffort.js";
 import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
@@ -2005,6 +2005,10 @@ layoutAuthoring = createLayoutAuthoringController({
     : null,
   saveLayoutBoard: playSource === "d1"
     ? args => saveLayoutBoard({ ...args, draftId: overlayDraftId })
+    : null,
+  // The automatic layout pass needs the local authoring server.
+  layoutPass: playSource === "d1"
+    ? { start: startLayoutPass, status: layoutPassStatus }
     : null,
   getDraftId: () => overlayDraftId,
   previewBoardSize

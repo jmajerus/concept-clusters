@@ -634,6 +634,15 @@ body.authoring-construct #share-status {
   color: var(--ink-soft);
 }
 .layout-authoring-fixed[hidden] { display: none; }
+.layout-authoring-pass {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+.layout-authoring-pass[hidden] { display: none; }
+.layout-authoring-pass ul { margin: 4px 0 0; padding-left: 18px; }
+.layout-authoring-pass [data-tone="error"] { color: var(--error); }
+.layout-authoring-pass [data-tone="good"] { color: var(--success); }
 
 /* ---------- links ---------- */
 .link { stroke: #b9bfcd; stroke-width: 1.6; }

@@ -14,6 +14,7 @@ import {
   htmlWithPlayCorpusMeta,
   PLAY_CORPUS_META_NAME
 } from "../modules/playCorpus.js";
+import { createLayoutPassJobs } from "../modules/layoutPassJobs.js";
 import { createLocalPlayCorpusHandler } from "../modules/localPlayCorpus.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { createPuzzleLoader } from "../modules/puzzleLoader.js";
@@ -710,11 +711,31 @@ export async function run(page) {
         lensMode: "sequential"
       }
     });
+    // The panel's layout pass, with the tool replaced by a canned report.
+    const passRuns = [];
+    const fakeLayoutPass = createLayoutPassJobs({
+      run: async options => {
+        passRuns.push(options);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        return {
+          id: options.id,
+          size: 1.1,
+          sizeOwner: "auto",
+          suggestedSize: null,
+          ...(options.write ? { sizeAction: "saved" } : {}),
+          rows: [
+            { mode: "graph", defects: { total: 0 }, strategy: "live search", action: options.write ? "saved" : "dry run" },
+            { mode: "star", defects: { total: 0 }, action: "author layout kept" }
+          ]
+        };
+      }
+    });
     const handleBrowserPlay = createLocalPlayCorpusHandler({
       contentDocuments: repo,
       contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
       listDrafts: () => draftStore.listDrafts({ includeDocument: true }),
-      repositoryRoot: root
+      repositoryRoot: root,
+      layoutPassJobs: fakeLayoutPass
     });
     const handleDrafts = createLocalDraftReviewHandler({
       draftStore,
@@ -873,6 +894,30 @@ export async function run(page) {
         (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
         "Save Layout did not persist the D1 override"
       );
+
+      // Run layout pass is a dry run with a per-mode report; Save automatic
+      // layouts confirms, runs with write, and reloads to show the result.
+      assert.equal(await page.isHidden("#layout-authoring-run-pass"), false);
+      assert.equal(await page.isHidden("#layout-authoring-save-pass"), true);
+      await page.click("#layout-authoring-run-pass");
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-pass")?.textContent?.includes("Dry run finished"),
+      null, { timeout: 15000 });
+      const dryReport = await page.textContent("#layout-authoring-pass");
+      assert.match(dryReport, /Board size \+10%/);
+      assert.match(dryReport, /Graph: clean — live search/);
+      assert.match(dryReport, /Star: clean — your layout, kept/);
+      assert.equal(await page.isHidden("#layout-authoring-save-pass"), false);
+      page.once("dialog", dialog => dialog.accept());
+      await Promise.all([
+        page.waitForNavigation({ timeout: 20000 }),
+        page.click("#layout-authoring-save-pass")
+      ]);
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-pass")?.textContent?.includes("Automatic layouts saved"),
+      null, { timeout: 15000 });
+      assert.deepEqual(passRuns.map(run => [run.id, run.write]), [["lab-d1-play", false], ["lab-d1-play", true]]);
+      assert.match(passRuns[0].base, /^http:\/\/127\.0\.0\.1:/);
 
       await page.goto(`${baseURL}/?puzzle=lab-d1-play`, { waitUntil: "networkidle" });
       await page.waitForFunction(() =>
