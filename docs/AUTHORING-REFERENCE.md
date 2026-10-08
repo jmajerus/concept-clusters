@@ -1662,8 +1662,10 @@ layout was saved, a hint whose saved starting point had defects, or a fixed
 layout the puzzle or board size has outdated, which players get as a hint or
 adapted, unchecked. The list judges from the saved layout alone, without
 laying out boards. **Layouts to fix** shows the puzzles with a missing or
-marked mode. Running the pass on them clears missing and outdated layouts;
-what stays marked needs an author.
+marked mode. Running the pass on them fills missing modes and replaces
+outdated automatic layouts. It never replaces an author's layout, so an
+outdated author layout stays marked until an author saves it again; that,
+and whatever else stays marked, needs an author.
 
 For one puzzle, use the layout-authoring panel on the local authoring
 server. **Run layout pass** is a dry run: it reports, per mode, the problems

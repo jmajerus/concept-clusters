@@ -18,17 +18,31 @@ import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 export const DEFECT_TIERS = {
   graph: ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"],
   sets: ["hardOverlaps", "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
-  star: ["lineCrossings", "edgeTitleIntersections", "edgeNodeIntersections", "overlaps"]
+  star: ["lineCrossings", "edgeTitleIntersections", ["edgeNodeIntersections", "edgeIntersections"], "overlaps"]
 };
 
 export const tierKeys = tier => (Array.isArray(tier) ? tier : [tier]);
 export const tierCount = (counts, tier) => tierKeys(tier).reduce((sum, key) => sum + (counts?.[key] || 0), 0);
 
+// Star's edgeNodeIntersections counts lines through titles and pills
+// together. Split it so each hit is counted once: titles, then pills only.
+// A layout saved before the title count was recorded keeps the combined
+// count as edgeIntersections (a line through a pill or a title).
+function disjointStarCounts(metrics) {
+  const combined = Number(metrics.edgeNodeIntersections) || 0;
+  if (metrics.edgeTitleIntersections == null) {
+    return { ...metrics, edgeNodeIntersections: 0, edgeIntersections: combined };
+  }
+  const titles = Number(metrics.edgeTitleIntersections) || 0;
+  return { ...metrics, edgeTitleIntersections: titles, edgeNodeIntersections: Math.max(0, combined - titles) };
+}
+
 /** Nonzero defect counts by metric, plus their total (null without metrics). */
 export function layoutDefects(mode, metrics) {
   if (!metrics) return { total: null };
+  const counts = mode === "star" ? disjointStarCounts(metrics) : metrics;
   const found = Object.fromEntries(DEFECT_TIERS[mode].flatMap(tierKeys)
-    .map(key => [key, Number(metrics[key]) || 0])
+    .map(key => [key, Number(counts[key]) || 0])
     .filter(([, count]) => count > 0));
   return { ...found, total: Object.values(found).reduce((sum, count) => sum + count, 0) };
 }

@@ -15,6 +15,9 @@ import {
   validateLayoutHintShape
 } from "../modules/layoutHints.js";
 import { validatePublishedPuzzleLayout } from "../modules/layoutPublication.js";
+import { layoutAttention, layoutDefects } from "../modules/layoutAttention.js";
+import { boardCanvas } from "../modules/puzzleBoardSize.js";
+import { validateStarLayoutDocument } from "../modules/starLayoutSchema.js";
 import {
   draftEditorPublicationRedirectPath,
   draftPublicationNoticeFromSearch
@@ -332,4 +335,37 @@ export async function run() {
     layout: envelope({ star: starSaved }),
     savingMode: "star"
   }).valid, false);
+
+  // Star counts lines through titles inside edgeNodeIntersections; defects
+  // split them so each hit counts once, and a layout saved before the
+  // title count existed keeps a neutral combined count.
+  assert.deepEqual(
+    layoutDefects("star", { lineCrossings: 0, edgeNodeIntersections: 3, edgeTitleIntersections: 1, overlaps: 0 }),
+    { edgeTitleIntersections: 1, edgeNodeIntersections: 2, total: 3 }
+  );
+  assert.deepEqual(
+    layoutDefects("star", { lineCrossings: 0, edgeNodeIntersections: 2, overlaps: 0 }),
+    { edgeIntersections: 2, total: 2 }
+  );
+  assert.deepEqual(layoutDefects("graph", { lineCrossings: 1, hardOverlaps: 0 }), { lineCrossings: 1, total: 1 });
+  assert.deepEqual(layoutDefects("graph", null), { total: null });
+  const starMetrics = metrics => ({ ...starSaved, metrics });
+  assert.equal(validateStarLayoutDocument(starMetrics({ lineCrossings: 0, edgeNodeIntersections: 1, overlaps: 0 }), puzzle).errors
+    .some(error => error.includes("edgeTitleIntersections")), false, "the title count is optional");
+  assert.ok(validateStarLayoutDocument(starMetrics({ lineCrossings: 0, edgeNodeIntersections: 1, edgeTitleIntersections: 2, overlaps: 0 }), puzzle).errors
+    .some(error => error.includes("edgeTitleIntersections")), "titles are among the combined count");
+
+  // Attention: a fixed layout is outdated by a puzzle edit or a board-size
+  // change; a hint never is.
+  const starBoard = boardCanvas(puzzle, "star");
+  const freshStar = { ...starSaved, board: starBoard, metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 } };
+  const graphHintLayout = { ...graph, fixed: false };
+  const attention = layoutAttention({ document, layout: envelope({ star: freshStar, graph: graphHintLayout }) });
+  assert.equal(attention.star.stale, false);
+  assert.equal(attention.star.defects.total, 0);
+  assert.equal(attention.graph.stale, false, "a hint is never outdated");
+  assert.equal(attention.sets, undefined);
+  assert.equal(layoutAttention({ document: editedDocument, layout: envelope({ star: freshStar }) }).star.stale, true);
+  assert.equal(layoutAttention({ document, layout: envelope({ star: { ...freshStar, board: BOARD } }) }).star.stale,
+    BOARD.width !== starBoard.width || BOARD.height !== starBoard.height);
 }

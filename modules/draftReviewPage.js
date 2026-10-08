@@ -1009,6 +1009,7 @@ const DEFECT_LABELS = {
   lineCrossings: ["line crossing", "line crossings"],
   edgeNodeIntersections: ["line through a pill", "lines through pills"],
   edgeTitleIntersections: ["line through a title", "lines through titles"],
+  edgeIntersections: ["line through a pill or title", "lines through pills or titles"],
   lineHeadingIntersections: ["line through a heading", "lines through headings"],
   lineCircleIntersections: ["line through a circle", "lines through circles"],
   hardOverlaps: ["overlap", "overlaps"],
