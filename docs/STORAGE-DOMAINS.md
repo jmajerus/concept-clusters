@@ -267,9 +267,23 @@ shared [field-ownership map](dev-briefs/authoring-domain-scoping-implementation.
 schemas consume. Phase schemas bind to a write domain when they are a pure
 subset (`core` → content; `classification` → classification;
 `pedagogy` / `publication` → pedagogy); `review`
-remains a cross-domain inspection view. A future refinement can make pass
-writes themselves composable (patch vs whole-domain replace), so a narrow
-phase-shaped response is never mistaken for a complete domain replacement.
+remains a cross-domain inspection view.
+
+Several passes share the pedagogy domain: the pedagogy pass writes lenses and
+the learning introduction, the review pass writes bridge annotations, and the
+publication pass writes `relatedPuzzles` and `language`. Agent saves to the
+pedagogy and classification domains are therefore
+[JSON Merge Patches (RFC 7396)](https://www.rfc-editor.org/rfc/rfc7396), with
+pedagogy `bridges` merged by bridge `id` or `term` (the merge-key idea from
+Kubernetes strategic merge patch). A pass-shaped payload carries only that
+pass's fields and cannot erase another pass's work; `null` is the explicit
+removal. The save response lists removed paths in `cleared`. Content saves
+remain whole-projection replacements because content is authored in one pass.
+
+The patch is resolved at the MCP boundary (`applyAuthoredDomainPatch` in
+`modules/authoringDomains.js`) into a complete domain projection. Storage and
+internal callers such as `reassign_puzzle_classifications` keep using the
+replace-only `applyAuthoredDomain`.
 
 ## Canonicalization, batch migration, and history
 

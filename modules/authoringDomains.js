@@ -710,6 +710,138 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
   return assembleAuthoredDocument(next);
 }
 
+// RFC 7396 JSON Merge Patch: null removes a member, an object merges
+// recursively, and any other value (arrays included) replaces the target.
+function mergePatch(target, patch) {
+  if (!isObject(patch)) return clone(patch);
+  const result = isObject(target) ? clone(target) : {};
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === null) delete result[key];
+    else result[key] = mergePatch(result[key], value);
+  }
+  return result;
+}
+
+// RFC 7396 would replace the bridges array whole. Annotations are layered on
+// content-owned bridges instead, so each patch entry merges into the bridge
+// with the same id or term, the way a merge key works in a Kubernetes
+// strategic merge patch. Bridges the patch does not name keep their
+// annotations.
+function mergeBridgeAnnotations(currentBridges, patchBridges) {
+  if (patchBridges === null) {
+    return Array.isArray(currentBridges)
+      ? currentBridges.map(bridge => (isObject(bridge) ? bridgeIdentity(bridge) : clone(bridge)))
+      : undefined;
+  }
+  if (!Array.isArray(patchBridges)) return clone(patchBridges);
+  const result = Array.isArray(currentBridges) ? clone(currentBridges) : [];
+  patchBridges.forEach((entry, index) => {
+    if (!isObject(entry)) {
+      throw new Error(`bridges[${index}] must be an object naming a bridge by id or term`);
+    }
+    const identity = bridgeIdentity(entry);
+    if (!identity.id && !identity.term) {
+      throw new Error(`bridges[${index}] must name a bridge by id or term`);
+    }
+    const target = result.findIndex(candidate =>
+      isObject(candidate) &&
+      ((identity.id && candidate.id === identity.id) ||
+        (identity.term && candidate.term === identity.term))
+    );
+    if (target < 0) result.push(mergePatch({}, entry));
+    else result[target] = mergePatch(result[target], entry);
+  });
+  return result;
+}
+
+function bridgeLabel(bridge, index) {
+  return bridge?.id || bridge?.term || String(index);
+}
+
+function removedPaths(before, after, prefix = "") {
+  const removed = [];
+  if (!isObject(before)) return removed;
+  for (const [key, value] of Object.entries(before)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (!isObject(after) || !hasOwn(after, key)) {
+      removed.push(path);
+    } else if (isObject(value)) {
+      removed.push(...removedPaths(value, after[key], path));
+    }
+  }
+  return removed;
+}
+
+/**
+ * Authored fields a domain save removed, as readable paths. A save response
+ * lists them so an agent never has to guess whether a write dropped data.
+ * Bridge annotations are reported per bridge by id or term.
+ */
+export function clearedDomainFields(previousDocument, nextDocument, domain) {
+  const before = projectAuthoredDocument(previousDocument, domain).document;
+  const after = projectAuthoredDocument(nextDocument, domain).document;
+  const { bridges: beforeBridges, ...beforeRoot } = before;
+  const { bridges: afterBridges, ...afterRoot } = after;
+  const cleared = removedPaths(beforeRoot, afterRoot);
+  if (domain === "pedagogy" && Array.isArray(beforeBridges)) {
+    const nextBridges = Array.isArray(afterBridges) ? afterBridges : [];
+    beforeBridges.forEach((bridge, index) => {
+      if (!isObject(bridge)) return;
+      const match = nextBridges.find(candidate =>
+        isObject(candidate) &&
+        ((bridge.id && candidate.id === bridge.id) ||
+          (bridge.term && candidate.term === bridge.term))
+      );
+      for (const key of PEDAGOGY_BRIDGE_FIELDS) {
+        if (hasOwn(bridge, key) && !(match && hasOwn(match, key))) {
+          cleared.push(`bridges[${bridgeLabel(bridge, index)}].${key}`);
+        }
+      }
+    });
+  } else if (domain === "content" && beforeBridges !== undefined && afterBridges === undefined) {
+    cleared.push("bridges");
+  }
+  return cleared;
+}
+
+/**
+ * Apply an agent's domain save. Pedagogy and classification payloads are
+ * JSON Merge Patches (RFC 7396) over that domain's current projection:
+ * omitted fields are kept, `null` removes a field, objects merge, and arrays
+ * replace. Pedagogy `bridges` entries merge into the bridge with the same id
+ * or term. A content payload remains a full replacement of the content
+ * projection, because content is authored in one pass and removing a cluster
+ * or term is ordinary editing.
+ *
+ * Several authoring passes (pedagogy, review, publication) share the pedagogy
+ * domain. Under replacement, each of them had to resend the fields the
+ * others own or erase them; under merge patch, a payload shaped like one pass
+ * is safe in any order.
+ *
+ * Returns the next document and the authored paths the save removed.
+ */
+export function applyAuthoredDomainPatch(currentDocument, domain, patch) {
+  if (domain === "content") {
+    const document = applyAuthoredDomain(currentDocument, domain, patch);
+    return { document, cleared: clearedDomainFields(currentDocument, document, domain) };
+  }
+  if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
+    throw new Error(`Only ${AUTHORING_WRITE_DOMAINS.join(" and ")} are agent-writable domains`);
+  }
+  assertObject(currentDocument, "Current authored document");
+  assertDomainPayload(domain, patch);
+  const base = projectAuthoredDocument(currentDocument, domain).document;
+  const { bridges: patchBridges, ...rootPatch } = patch;
+  const merged = mergePatch(base, rootPatch);
+  if (domain === "pedagogy" && hasOwn(patch, "bridges")) {
+    const bridges = mergeBridgeAnnotations(base.bridges, patchBridges);
+    if (bridges === undefined) delete merged.bridges;
+    else merged.bridges = bridges;
+  }
+  const document = applyAuthoredDomain(currentDocument, domain, merged);
+  return { document, cleared: clearedDomainFields(currentDocument, document, domain) };
+}
+
 export function storedDomainDocuments(document) {
   const domains = partitionAuthoredDocument(document);
   return {
@@ -842,6 +974,8 @@ export default {
   assembleAuthoredDocument,
   projectAuthoredDocument,
   applyAuthoredDomain,
+  applyAuthoredDomainPatch,
+  clearedDomainFields,
   storedDomainDocuments,
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,

@@ -39,6 +39,7 @@ import {
 } from "./authoredPuzzleDocument.js";
 import {
   applyAuthoredDomain,
+  applyAuthoredDomainPatch,
   AUTHORING_READ_DOMAINS,
   assertNoAgentProtectedFields,
   assertNoWriteOnceDrift,
@@ -553,7 +554,9 @@ function serverInstructions() {
     "links and citation details during the research that found them rather than rediscovering them. " +
     "For a focused authoring pass, call get_puzzle_draft with domain=content, " +
     "domain=classification, or domain=pedagogy and " +
-    "save_puzzle_draft with the same domain; the server preserves protected provenance and system state " +
+    "save_puzzle_draft with the same domain; pedagogy and classification saves are JSON Merge Patches " +
+    "(RFC 7396), so send only the fields the pass changes and null to remove one. The server preserves " +
+    "protected provenance and system state " +
     "and materializes the complete document for validation and publication. Pedagogy responses include " +
     "content and classification as read-only context. Classification owns category, categories, " +
     "subcategories, tags, and level. Leave level unset unless it matches that category's existing " +
@@ -1363,7 +1366,7 @@ export function createAuthoringMcpServer({
     title: "Save puzzle draft",
     description:
       "Every save requires expected_revision, copied from draft.revision on the latest create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has never been created uses create_puzzle_draft. " +
-      "Replace the complete agent-authored document, or replace only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+      "Replace the complete agent-authored document, or write only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. domain=pedagogy and domain=classification saves are JSON Merge Patches (RFC 7396) over that domain: send only the fields you change; omitted fields are kept, null removes a field, objects merge, and arrays replace. Pedagogy `bridges` entries name a bridge by id or term and merge only the annotation fields given into that bridge; other bridges keep theirs. domain=content replaces the whole content projection. Every domain save response lists the authored paths it removed in `cleared`. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: puzzleDraftSaveSchema({
       draft_id: draftIdSchema,
       expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive().describe(
@@ -1388,13 +1391,18 @@ export function createAuthoringMcpServer({
       );
     }
     let previousDocument = null;
+    let cleared = [];
     const repairedInput = repair
       ? repairEscapedQuotes(document)
       : { document, changes: [] };
     if (domain !== "complete") {
       const previous = await draftRepository.get({ draftId: draft_id, actor });
       previousDocument = documentForEditor(previous.document);
-      document = applyAuthoredDomain(previousDocument, domain, repairedInput.document);
+      ({ document, cleared } = applyAuthoredDomainPatch(
+        previousDocument,
+        domain,
+        repairedInput.document
+      ));
     } else {
       previousDocument = (await draftRepository.get({ draftId: draft_id, actor })).document;
     }
@@ -1473,9 +1481,13 @@ export function createAuthoringMcpServer({
     const repairNote = repair && repaired.changes.length > 0
       ? ` Repaired ${repaired.changes.length} escaped-quote mistake${repaired.changes.length === 1 ? "" : "s"} (see \`repair.changes\`).`
       : "";
+    const clearedNote = cleared.length
+      ? ` This save removed ${cleared.join(", ")} (see \`cleared\`).`
+      : "";
     return success(
-      `Saved draft ${draft_id}; current revision is ${draft.revision}.` + repairNote,
+      `Saved draft ${draft_id}; current revision is ${draft.revision}.` + repairNote + clearedNote,
       {
+        ...(domain !== "complete" ? { cleared } : {}),
         draft: domain === "complete"
           ? draftForMcp(draft, { categoryRegistry: null })
           : draftForMcpDomain(draft, domain, { categoryRegistry: null }),

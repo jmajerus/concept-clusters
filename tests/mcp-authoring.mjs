@@ -565,7 +565,7 @@ export async function run() {
       arguments: { phase: "review" }
     });
     assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
-    assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the surface/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the\s+surface/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /more than 32 nodes/);
     assert.doesNotMatch(
       reviewGuidance.result.structuredContent.markdown,

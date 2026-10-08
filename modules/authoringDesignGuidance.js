@@ -442,7 +442,15 @@ change only what this pass improves. A phase response is a focused working
 view, not a smaller replacement format. Use phase=complete whenever the whole
 contract or guidance is needed, and always validate the complete draft before
 publication. Phases are reusable concern areas, not irreversible lifecycle
-gates: revisit any phase whenever that part of the puzzle needs more work.`;
+gates: revisit any phase whenever that part of the puzzle needs more work.
+
+A domain=pedagogy or domain=classification save is a JSON Merge Patch
+(RFC 7396) over that domain: send only the fields this pass changes. Omitted
+fields are kept, \`null\` removes a field, objects merge, and arrays replace.
+Pedagogy \`bridges\` entries merge into the bridge with the same id or term,
+so a bridge annotation edit sends only the bridges it changes. A
+domain=content save replaces the whole content projection. The save response
+lists every field it removed in \`cleared\`.`;
 
 const CORE_PHASE_GUIDANCE = `## Core and research pass
 
@@ -523,6 +531,10 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   search is not inferred.
 - Check that always-visible info and completion-gated facts remain distinct;
   no hover or help surface should silently replace text the player already read.
+- Bridge annotations (relationKind, direction, idealTerms, conceptId) are
+  saved with domain=pedagogy. Send \`bridges\` entries naming each changed
+  bridge by id or term with only the annotation fields you change; \`null\`
+  removes one.
 - Add relationKind only when the bridge clearly fits dynamic, foundation,
   cross-cutting, contrast, continuity, or evaluation. It classifies the
   relationship described by the bridge fact. Leave it unset when ambiguous.
@@ -602,7 +614,7 @@ const CLASSIFICATION_PHASE_GUIDANCE = `## Classification pass
 - \`category\` is the disciplinary home. When \`categories\` is present it is the full membership and its first id matches \`category\`. \`subcategories\` maps a category id to one registered subcategory id.
 - \`tags\` is an optional array of freeform search words, not a registry and not a catalogue. The Library search box already matches title, category, citation authors and titles, subcategory titles, and board terms. Add a tag only when the word a reader would type is absent from all of those.
 - \`level\` is an optional string ("introductory", "intermediate", or "advanced") that adds the puzzle to that level's auto-catalogue. Leave it unset. Set it only when a comparison with the hardest puzzles already in this category makes the mark clear. "Advanced" means the prior knowledge matches that category's ceiling, not that this draft's terms feel specialized. Most puzzles stay unclassified.
-- Retrieve get_puzzle_draft with domain=classification and save that same domain. The payload replaces the whole classification projection. Omitting \`categories\`, \`subcategories\`, \`tags\`, or \`level\` clears them. Omitting \`category\` clears the home; validate and publish still require one.
+- Retrieve get_puzzle_draft with domain=classification and save that same domain as a merge patch: send only the shelf fields you change. Send \`null\` to clear \`categories\`, \`subcategories\`, \`tags\`, or \`level\`; omitting one keeps it. \`subcategories\` merges by category id, so \`{ "biology": null }\` removes one entry. Validate and publish require a \`category\`.
 - Register a category, and any subcategory id, on the category document before a puzzle references it.
 - Do not send lenses, the learning introduction, related puzzles, language, or the board in this projection.`;
 
@@ -620,10 +632,9 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   or per-scope assistance entries as publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue.
-- This pass binds to write domain pedagogy: retrieve get_puzzle_draft with
-  domain=pedagogy, preserve lenses and learningIntroduction already present,
-  and save that same domain. Do not send a publication-only object as a
-  whole-domain replacement.
+- This pass binds to write domain pedagogy: save domain=pedagogy with only
+  \`relatedPuzzles\` and \`language\`. The merge patch keeps lenses, the
+  learning introduction, and bridge annotations as they are.
 - Validate the complete accumulated document. \`save_puzzle_draft\` writes the
   working copy only. A person publishes that copy, and that publish is what
   players see. Cue and Freeze are outside MCP. Set

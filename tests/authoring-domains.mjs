@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   applyAuthoredDomain,
+  applyAuthoredDomainPatch,
   assembleAuthoredDocument,
   assembleAuthoredDocumentFromDraftRow,
   assembleStoredDomainDocuments,
@@ -372,4 +373,102 @@ export async function run() {
   assert.equal(legacyDomains.pedagogy.dateModified, undefined);
   assert.equal(legacyDomains.pedagogy.learningIntroduction.revision, undefined);
   assert.equal(assembleAuthoredDocument(legacyDomains).version, undefined);
+
+  // Agent domain saves: pedagogy and classification are RFC 7396 merge
+  // patches, so a pass-shaped payload cannot erase another pass's fields.
+  const lensOnly = applyAuthoredDomainPatch(document, "pedagogy", {
+    lenses: [{ id: "lens", prompt: "New prompt", explanation: "Explanation" }]
+  });
+  assert.equal(lensOnly.document.lenses[0].prompt, "New prompt");
+  assert.equal(lensOnly.document.bridges[0].relationKind, "contrast");
+  assert.deepEqual(lensOnly.document.bridges[0].idealTerms, { alpha: "one" });
+  assert.equal(lensOnly.document.language, "en");
+  assert.equal(lensOnly.document.learningIntroduction.credit, "By Jane Doe");
+  assert.deepEqual(lensOnly.cleared, []);
+
+  const twoBridges = {
+    ...document,
+    bridges: [document.bridges[0], {
+      id: "plain",
+      term: "Plain",
+      clusters: ["alpha", "beta"],
+      fact: "Plain fact",
+      relationKind: "foundation"
+    }]
+  };
+  const annotated = applyAuthoredDomainPatch(twoBridges, "pedagogy", {
+    bridges: [{ term: "Plain", relationKind: "dynamic" }, { id: "shared", idealTerms: null }]
+  });
+  assert.equal(annotated.document.bridges[1].relationKind, "dynamic");
+  assert.equal(annotated.document.bridges[1].fact, "Plain fact");
+  assert.equal(annotated.document.bridges[0].relationKind, "contrast");
+  assert.equal(annotated.document.bridges[0].idealTerms, undefined);
+  assert.deepEqual(annotated.document.lenses, document.lenses);
+  assert.deepEqual(annotated.cleared, ["bridges[shared].idealTerms"]);
+
+  const unannotated = applyAuthoredDomainPatch(twoBridges, "pedagogy", { bridges: null });
+  assert.equal(unannotated.document.bridges[0].relationKind, undefined);
+  assert.equal(unannotated.document.bridges[1].fact, "Plain fact");
+  assert.deepEqual(unannotated.cleared, [
+    "bridges[shared].relationKind",
+    "bridges[shared].direction",
+    "bridges[shared].idealTerms",
+    "bridges[plain].relationKind"
+  ]);
+
+  const lessonEdit = applyAuthoredDomainPatch(document, "pedagogy", {
+    learningIntroduction: { content: { text: "Rewritten" } },
+    language: null
+  });
+  assert.equal(lessonEdit.document.learningIntroduction.content.text, "Rewritten");
+  assert.equal(lessonEdit.document.learningIntroduction.requirement, "optional");
+  assert.equal(lessonEdit.document.learningIntroduction.credit, "By Jane Doe");
+  assert.equal(lessonEdit.document.language, undefined);
+  assert.deepEqual(lessonEdit.cleared, ["language"]);
+
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "pedagogy", {
+      bridges: [{ term: "Missing", relationKind: "dynamic" }]
+    }),
+    /must identify an existing content bridge/
+  );
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "pedagogy", {
+      bridges: [{ relationKind: "dynamic" }]
+    }),
+    /must name a bridge by id or term/
+  );
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "pedagogy", {
+      bridges: [{ id: "shared", fact: null }]
+    }),
+    /fact belongs to the content domain/
+  );
+
+  const shelved = {
+    ...document,
+    categories: ["science", "biology"],
+    subcategories: { science: "foundations", biology: "genomics" },
+    tags: ["book"]
+  };
+  const shelf = applyAuthoredDomainPatch(shelved, "classification", {
+    subcategories: { biology: null },
+    tags: null
+  });
+  assert.equal(shelf.document.category, "science");
+  assert.deepEqual(shelf.document.categories, ["science", "biology"]);
+  assert.deepEqual(shelf.document.subcategories, { science: "foundations" });
+  assert.equal(shelf.document.tags, undefined);
+  assert.deepEqual(shelf.cleared, ["subcategories.biology", "tags"]);
+  assert.throws(
+    () => applyAuthoredDomainPatch(shelved, "classification", { lenses: null }),
+    /lenses belongs to the pedagogy domain/
+  );
+
+  // Content stays a whole-projection replacement.
+  const { info: _info, ...contentNoInfo } = projectAuthoredDocument(document, "content").document;
+  const contentReplace = applyAuthoredDomainPatch(document, "content", contentNoInfo);
+  assert.equal(contentReplace.document.info, undefined);
+  assert.equal(contentReplace.document.bridges[0].relationKind, "contrast");
+  assert.deepEqual(contentReplace.cleared, ["info"]);
 }

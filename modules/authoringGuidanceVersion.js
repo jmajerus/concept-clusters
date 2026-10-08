@@ -177,7 +177,10 @@
 // Drafting continues while the request is reviewed.
 // 6.16: request_board_limit_waiver asks the person in the chat when the
 // client supports elicitation; only the tool result reports a decision.
+// 6.17: same review bar. Pedagogy and classification saves are JSON Merge
+// Patches (RFC 7396): omitted fields are kept and null removes one. Pedagogy
+// bridges merge by id or term. Save responses list removed paths in `cleared`.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 16
+  minor: 17
 });

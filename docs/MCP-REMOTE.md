@@ -97,11 +97,26 @@ boundary, not just prose guidance:
 
 Focused draft responses carry only `draftId`, `revision`, the selected domain,
 and its document/context. Protected attribution/editorial values and system
-metadata stay outside every agent document. Saves preserve those values while
-replacing authored fields, materialize the complete document, and follow the
-same validation/publication path. Omitting an optional field from the selected
-projection removes it. The legacy human-owned `learningIntroduction.credit`
-is not exposed and is preserved when its introduction remains present.
+metadata stay outside every agent document. Saves preserve those values,
+materialize the complete document, and follow the same validation/publication
+path. Write semantics differ by domain:
+
+- A `pedagogy` or `classification` save is a
+  [JSON Merge Patch (RFC 7396)](https://www.rfc-editor.org/rfc/rfc7396) over
+  that domain's current projection. Omitted fields are kept, `null` removes a
+  field, objects merge recursively, and arrays replace. Pedagogy `bridges` is
+  the one keyed array: each entry names a bridge by `id` or `term` and merges
+  its annotation fields into that bridge, like a merge key in a Kubernetes
+  strategic merge patch. Bridges the patch does not name keep their
+  annotations; `bridges: null` removes every annotation.
+- A `content` save replaces the whole content projection. Omitting an optional
+  field removes it.
+
+Every focused save response carries `cleared`, the authored paths the save
+removed (bridge annotations as `bridges[<id or term>].<field>`), so an agent
+can confirm what a write dropped instead of inferring it. The legacy
+human-owned `learningIntroduction.credit` is not exposed and is preserved when
+its introduction remains present.
 `repair: true` is accepted for complete or content saves, not classification or pedagogy saves,
 because it repairs content-domain fields. The save still requires
 `expected_revision`.
@@ -146,8 +161,9 @@ is the current browse convention for cross-disciplinary material, not the
 profile selector; the profile can be used with a disciplinary category.
 
 Before every later pass, call `get_puzzle_draft`, edit the latest document or
-selected domain, preserve all fields outside the selected domain, and send the
-full latest selected projection when saving. Focused `get_authoring_schema`
+selected domain, and preserve all fields outside the selected domain. A
+content save sends the full latest content projection; a pedagogy or
+classification save sends only the fields the pass changes. Focused `get_authoring_schema`
 responses bind pure phases to a write `domain` (`core` → `content`;
 `classification` → `classification`; `pedagogy` / `publication` → `pedagogy`);
 `review` omits `domain` because it mixes content inspection with pedagogy
@@ -262,8 +278,9 @@ The tracked D1 migrations create:
 `save_puzzle_draft` requires `expected_revision` matching the draft's current
 generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
 A matching complete save replaces the current document; a matching focused
-save replaces only the selected domain, reassembles the complete document, and
-then bumps the integer. A stale token fails closed. `tools/save-working-draft.mjs`
+save writes only the selected domain (a merge patch for pedagogy and
+classification, a replacement for content), reassembles the complete
+document, and then bumps the integer. A stale token fails closed. `tools/save-working-draft.mjs`
 reads `working/<id>.json` and submits `--expected-revision` (or the recorded
 `working/<id>.revision` baseline). It does not write when that baseline is
 stale or the draft does not exist, and it does not substitute the current
