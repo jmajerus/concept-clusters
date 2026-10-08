@@ -1341,28 +1341,40 @@ export function createStarRenderer({
             restorePositions(candidate.positions);
             let repairedLayout = candidate.layout;
             let repairMoves = 0;
-            while (repairedLayout.visualIntersectionCount > 0 && repairMoves < budget.repairMoves) {
-              const direct = bestImprovingMove(repairedLayout);
-              const plan = direct
-                ? [direct]
-                : repairMoves <= budget.repairMoves - 2
-                  ? findSetupPair(repairedLayout)
-                  : [];
-              if (!plan.length) break;
-              const beforePlan = repairedLayout;
-              const beforePositions = capturePositions();
-              plan.forEach(move => {
-                move.node.x = move.target.x;
-                move.node.y = move.target.y;
-                repairedLayout = evaluateLayout();
-              });
-              if (compareLayouts(repairedLayout, beforePlan) >= 0) {
-                restorePositions(beforePositions);
-                repairedLayout = beforePlan;
-                break;
+            // Move ranking is gated by activePhase, which a detangle may have
+            // left anywhere: clear crossings first, then lines through pills
+            // and titles, as the detangler's own phases do.
+            const phaseBefore = activePhase;
+            const phases = [
+              ["crossings", layout => layout.crossingCount > 0],
+              ["edges", layout => layout.crossingCount === 0 && layout.visualIntersectionCount > 0]
+            ];
+            for (const [phase, pending] of phases) {
+              activePhase = phase;
+              while (pending(repairedLayout) && repairMoves < budget.repairMoves) {
+                const direct = bestImprovingMove(repairedLayout);
+                const plan = direct
+                  ? [direct]
+                  : repairMoves <= budget.repairMoves - 2
+                    ? findSetupPair(repairedLayout)
+                    : [];
+                if (!plan.length) break;
+                const beforePlan = repairedLayout;
+                const beforePositions = capturePositions();
+                plan.forEach(move => {
+                  move.node.x = move.target.x;
+                  move.node.y = move.target.y;
+                  repairedLayout = evaluateLayout();
+                });
+                if (compareLayouts(repairedLayout, beforePlan) >= 0) {
+                  restorePositions(beforePositions);
+                  repairedLayout = beforePlan;
+                  break;
+                }
+                repairMoves += plan.length;
               }
-              repairMoves += plan.length;
             }
+            activePhase = phaseBefore;
             return compareLayouts(repairedLayout, candidate.layout) < 0
               ? { positions: capturePositions(), layout: repairedLayout, deviation: candidate.deviation }
               : candidate;
