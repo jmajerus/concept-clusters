@@ -40,6 +40,9 @@ export function createStarLayoutDocument({ puzzle, width, height, layoutNodes, m
     metrics: {
       lineCrossings: Number(metrics.lineCrossings) || 0,
       edgeNodeIntersections: Number(metrics.edgeNodeIntersections) || 0,
+      // The lines through titles among edgeNodeIntersections, which counts
+      // titles and pills together.
+      edgeTitleIntersections: Number(metrics.edgeTitleIntersections) || 0,
       overlaps: Number(metrics.overlaps) || 0
     }
   };
@@ -179,6 +182,12 @@ export function validateStarLayoutDocument(
         errors.push(`metrics.${name} must be a non-negative integer`);
       }
     });
+    // Optional: layouts saved before it was recorded have only the total.
+    const titles = layout.metrics.edgeTitleIntersections;
+    if (titles != null && (!Number.isInteger(titles) || titles < 0 ||
+        titles > layout.metrics.edgeNodeIntersections)) {
+      errors.push("metrics.edgeTitleIntersections must be a non-negative integer no greater than edgeNodeIntersections");
+    }
     // Line crossings are the only hard geometry reject: residual through-
     // pills and padded AABB "overlaps" are often invisible or acceptable,
     // and curated authoring is the escape hatch for that judgment call.
