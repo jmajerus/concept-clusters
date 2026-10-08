@@ -444,13 +444,14 @@ contract or guidance is needed, and always validate the complete draft before
 publication. Phases are reusable concern areas, not irreversible lifecycle
 gates: revisit any phase whenever that part of the puzzle needs more work.
 
-A domain=pedagogy or domain=classification save is a JSON Merge Patch
-(RFC 7396) over that domain: send only the fields this pass changes. Omitted
-fields are kept, \`null\` removes a field, objects merge, and arrays replace.
-Pedagogy \`bridges\` entries merge into the bridge with the same id or term,
-so a bridge annotation edit sends only the bridges it changes. A
-domain=content save replaces the whole content projection. The save response
-lists every field it removed in \`cleared\`.`;
+Every focused domain save (content, pedagogy, classification) is a JSON
+Merge Patch (RFC 7396) over that domain: send only the fields this pass
+changes. Omitted fields are kept, \`null\` removes a field, objects merge, and
+arrays replace whole, so a changed \`clusters\` array still lists every
+cluster that should remain. The one exception is pedagogy \`bridges\`: entries
+merge into the bridge with the same id or term, so a bridge annotation edit
+sends only the bridges it changes. The save response lists everything it
+removed in \`cleared\`, including array items such as \`clusters[beta]\`.`;
 
 const CORE_PHASE_GUIDANCE = `## Core and research pass
 

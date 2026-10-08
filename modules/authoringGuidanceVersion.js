@@ -177,9 +177,10 @@
 // Drafting continues while the request is reviewed.
 // 6.16: request_board_limit_waiver asks the person in the chat when the
 // client supports elicitation; only the tool result reports a decision.
-// 6.17: same review bar. Pedagogy and classification saves are JSON Merge
-// Patches (RFC 7396): omitted fields are kept and null removes one. Pedagogy
-// bridges merge by id or term. Save responses list removed paths in `cleared`.
+// 6.17: same review bar. Every focused domain save (content, pedagogy,
+// classification) is a JSON Merge Patch (RFC 7396): omitted fields are kept,
+// null removes one, arrays replace. Pedagogy bridges merge by id or term.
+// Save responses list removed fields and array items in `cleared`.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
   minor: 17

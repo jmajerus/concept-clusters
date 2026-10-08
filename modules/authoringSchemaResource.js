@@ -154,11 +154,9 @@ function phaseDescription(phase, pass) {
     return (
       `${base} This pass binds to write domain "${pass.writeDomain}": retrieve ` +
       `get_puzzle_draft with domain=${pass.writeDomain}, edit, and save that same ` +
-      "domain. " + (pass.writeDomain === "content"
-        ? "A content save replaces the whole content projection, so send every " +
-          "content field the draft should keep."
-        : "That save is a JSON Merge Patch (RFC 7396): send only the fields this " +
-          "pass changes; omitted fields are kept and null removes a field.")
+      "domain. That save is a JSON Merge Patch (RFC 7396): send only the fields " +
+      "this pass changes; omitted fields are kept, null removes a field, and " +
+      "arrays replace whole."
     );
   }
   return (
@@ -167,7 +165,7 @@ function phaseDescription(phase, pass) {
     "direction, idealTerms) belong to the pedagogy domain and are saved with " +
     "domain=pedagogy as a merge patch: send bridges entries naming each changed " +
     "bridge by id or term with only the annotation fields you change. Do not save " +
-    "this phase shape as a content domain replacement."
+    "this phase shape with domain=content; its bridges carry pedagogy fields."
   );
 }
 

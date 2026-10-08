@@ -754,18 +754,47 @@ function mergeBridgeAnnotations(currentBridges, patchBridges) {
   return result;
 }
 
-function bridgeLabel(bridge, index) {
-  return bridge?.id || bridge?.term || String(index);
+// Array items are compared by their identity key so a reordered or edited
+// item is not reported as removed. Keyless items fall back to deep equality.
+const ITEM_KEYS = ["id", "term", "name", "url"];
+
+function itemKey(item) {
+  if (typeof item === "string" || typeof item === "number") return String(item);
+  if (!isObject(item)) return null;
+  for (const key of ITEM_KEYS) {
+    if (typeof item[key] === "string" && item[key]) return item[key];
+  }
+  return null;
+}
+
+function itemMatches(left, right) {
+  if (!isObject(left) || !isObject(right)) return left === right;
+  return ITEM_KEYS.some(key =>
+    typeof left[key] === "string" && left[key] && left[key] === right[key]
+  );
 }
 
 function removedPaths(before, after, prefix = "") {
   const removed = [];
+  if (Array.isArray(before)) {
+    const next = Array.isArray(after) ? after : [];
+    before.forEach((item, index) => {
+      const key = itemKey(item);
+      const path = `${prefix}[${key ?? index}]`;
+      const match = key === null
+        ? next.find(candidate => sameStoredDocument(candidate, item))
+        : next.find(candidate => itemMatches(item, candidate));
+      if (match === undefined) removed.push(path);
+      else if (isObject(item)) removed.push(...removedPaths(item, match, path));
+    });
+    return removed;
+  }
   if (!isObject(before)) return removed;
   for (const [key, value] of Object.entries(before)) {
     const path = prefix ? `${prefix}.${key}` : key;
     if (!isObject(after) || !hasOwn(after, key)) {
       removed.push(path);
-    } else if (isObject(value)) {
+    } else if (isObject(value) || Array.isArray(value)) {
       removed.push(...removedPaths(value, after[key], path));
     }
   }
@@ -773,58 +802,47 @@ function removedPaths(before, after, prefix = "") {
 }
 
 /**
- * Authored fields a domain save removed, as readable paths. A save response
- * lists them so an agent never has to guess whether a write dropped data.
- * Bridge annotations are reported per bridge by id or term.
+ * Everything a domain save removed, as readable paths: fields
+ * (`info.citations`), array items by their id, term, name, or value
+ * (`clusters[alpha]`, `clusters[alpha].seeds[two]`, `tags[book]`), and
+ * fields inside matched items (`bridges[shared].idealTerms`). A save
+ * response lists them so an agent never has to guess whether a write
+ * dropped data, including when it sent a partial array.
  */
 export function clearedDomainFields(previousDocument, nextDocument, domain) {
   const before = projectAuthoredDocument(previousDocument, domain).document;
   const after = projectAuthoredDocument(nextDocument, domain).document;
-  const { bridges: beforeBridges, ...beforeRoot } = before;
-  const { bridges: afterBridges, ...afterRoot } = after;
-  const cleared = removedPaths(beforeRoot, afterRoot);
-  if (domain === "pedagogy" && Array.isArray(beforeBridges)) {
-    const nextBridges = Array.isArray(afterBridges) ? afterBridges : [];
-    beforeBridges.forEach((bridge, index) => {
-      if (!isObject(bridge)) return;
-      const match = nextBridges.find(candidate =>
-        isObject(candidate) &&
-        ((bridge.id && candidate.id === bridge.id) ||
-          (bridge.term && candidate.term === bridge.term))
-      );
-      for (const key of PEDAGOGY_BRIDGE_FIELDS) {
-        if (hasOwn(bridge, key) && !(match && hasOwn(match, key))) {
-          cleared.push(`bridges[${bridgeLabel(bridge, index)}].${key}`);
-        }
-      }
-    });
-  } else if (domain === "content" && beforeBridges !== undefined && afterBridges === undefined) {
-    cleared.push("bridges");
-  }
-  return cleared;
+  // Presentational colors are server-settled, never agent-authored.
+  const withoutColors = projection => Array.isArray(projection.clusters)
+    ? {
+      ...projection,
+      clusters: projection.clusters.map(cluster => {
+        if (!isObject(cluster)) return cluster;
+        const { color: _color, ...rest } = cluster;
+        return rest;
+      })
+    }
+    : projection;
+  return removedPaths(withoutColors(before), withoutColors(after));
 }
 
 /**
- * Apply an agent's domain save. Pedagogy and classification payloads are
- * JSON Merge Patches (RFC 7396) over that domain's current projection:
+ * Apply an agent's focused domain save. Every focused domain payload is a
+ * JSON Merge Patch (RFC 7396) over that domain's current projection:
  * omitted fields are kept, `null` removes a field, objects merge, and arrays
- * replace. Pedagogy `bridges` entries merge into the bridge with the same id
- * or term. A content payload remains a full replacement of the content
- * projection, because content is authored in one pass and removing a cluster
- * or term is ordinary editing.
+ * replace. The one exception is pedagogy `bridges`: that projection holds
+ * only annotations layered on content-owned bridges, so each entry merges
+ * into the bridge with the same id or term.
  *
  * Several authoring passes (pedagogy, review, publication) share the pedagogy
- * domain. Under replacement, each of them had to resend the fields the
- * others own or erase them; under merge patch, a payload shaped like one pass
- * is safe in any order.
+ * domain, and agents carry one habit across domains. Under replacement, a
+ * pass-shaped payload erased other passes' fields, and a content save of
+ * one changed field erased the board. Under merge patch, a payload that
+ * carries only what changed is safe in every domain.
  *
  * Returns the next document and the authored paths the save removed.
  */
 export function applyAuthoredDomainPatch(currentDocument, domain, patch) {
-  if (domain === "content") {
-    const document = applyAuthoredDomain(currentDocument, domain, patch);
-    return { document, cleared: clearedDomainFields(currentDocument, document, domain) };
-  }
   if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
     throw new Error(`Only ${AUTHORING_WRITE_DOMAINS.join(" and ")} are agent-writable domains`);
   }
@@ -832,12 +850,17 @@ export function applyAuthoredDomainPatch(currentDocument, domain, patch) {
   assertDomainPayload(domain, patch);
   const base = projectAuthoredDocument(currentDocument, domain).document;
   const { bridges: patchBridges, ...rootPatch } = patch;
-  const merged = mergePatch(base, rootPatch);
+  const merged = mergePatch(base, domain === "pedagogy" ? rootPatch : patch);
   if (domain === "pedagogy" && hasOwn(patch, "bridges")) {
     const bridges = mergeBridgeAnnotations(base.bridges, patchBridges);
     if (bridges === undefined) delete merged.bridges;
     else merged.bridges = bridges;
   }
+  // `merged` is the complete projection, so an absent write-once field here
+  // means the patch removed it with null rather than leaving it unsaid.
+  assertNoWriteOnceDrift(currentDocument, merged, `${domain} domain document`, {
+    allowAbsent: domain !== "content"
+  });
   const document = applyAuthoredDomain(currentDocument, domain, merged);
   return { document, cleared: clearedDomainFields(currentDocument, document, domain) };
 }

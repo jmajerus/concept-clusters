@@ -465,10 +465,33 @@ export async function run() {
     /lenses belongs to the pedagogy domain/
   );
 
-  // Content stays a whole-projection replacement.
-  const { info: _info, ...contentNoInfo } = projectAuthoredDocument(document, "content").document;
-  const contentReplace = applyAuthoredDomainPatch(document, "content", contentNoInfo);
-  assert.equal(contentReplace.document.info, undefined);
-  assert.equal(contentReplace.document.bridges[0].relationKind, "contrast");
-  assert.deepEqual(contentReplace.cleared, ["info"]);
+  // Content follows the same rule: a one-field save keeps the board.
+  const retitled = applyAuthoredDomainPatch(document, "content", { title: "Retitled" });
+  assert.equal(retitled.document.title, "Retitled");
+  assert.deepEqual(retitled.document.clusters.map(cluster => cluster.id), ["alpha", "beta"]);
+  assert.equal(retitled.document.bridges[0].fact, "Shared fact");
+  assert.equal(retitled.document.bridges[0].relationKind, "contrast");
+  assert.equal(retitled.document.info.text, "Core information");
+  assert.deepEqual(retitled.cleared, []);
+
+  const noInfo = applyAuthoredDomainPatch(document, "content", { info: null });
+  assert.equal(noInfo.document.info, undefined);
+  assert.deepEqual(noInfo.cleared, ["info"]);
+
+  // Arrays replace whole; cleared names the items a partial array dropped.
+  const contentClusters = projectAuthoredDocument(document, "content").document.clusters;
+  const partial = applyAuthoredDomainPatch(document, "content", {
+    clusters: [{ ...contentClusters[0], seeds: ["one"], floatingTerms: ["three", "two"] }]
+  });
+  assert.equal(partial.document.clusters.length, 1);
+  assert.deepEqual(partial.cleared, ["clusters[alpha].seeds[two]", "clusters[beta]"]);
+
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "content", { id: null }),
+    /id is set when a draft is created/
+  );
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "content", { lenses: [] }),
+    /lenses belongs to the pedagogy domain/
+  );
 }
