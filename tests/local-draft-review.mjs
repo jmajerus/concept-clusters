@@ -998,6 +998,31 @@ export async function run() {
     assert.match(await comparisonRow(), /data-change-domain="layout"/);
     await contentDocuments.saveLayout({ id: comparisonId, layout: comparisonLayout });
     assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
+    // The Layouts column reads the published layout for a published-only row
+    // and the working copy's layout once a working copy exists.
+    const layoutSourceId = "layout-source-fixture";
+    const layoutSourceDocument = { ...puzzleToSimplified(energyPuzzle), id: layoutSourceId };
+    await contentDocuments.publish({
+      kind: "puzzle", id: layoutSourceId,
+      document: layoutSourceDocument, actor: { subject: "local" }
+    });
+    const starLayout = source => layoutDocumentForMode("star", {
+      puzzleId: layoutSourceId, puzzleRevision: "fnv1a32:test", source,
+      nodes: { "cluster:0": { x: 150, y: 200 } }
+    });
+    await contentDocuments.saveLayout({ id: layoutSourceId, layout: starLayout("auto") });
+    async function layoutSourceRow() {
+      const response = createResponse();
+      await handlePublish({ method: "GET", url: "/admin/drafts" }, response);
+      return response.body.match(/<tr data-puzzle-id="layout-source-fixture"[^>]*>[\s\S]*?<\/tr>/)[0];
+    }
+    assert.match(await layoutSourceRow(), /data-layout-mode="star" data-layout-source="auto"/);
+    await draftStore.createDraft({ draftId: layoutSourceId, document: layoutSourceDocument });
+    await draftStore.saveLayout({ draftId: layoutSourceId, layout: starLayout("author") });
+    const workingRow = await layoutSourceRow();
+    assert.match(workingRow, /data-has-draft="1"/);
+    assert.match(workingRow, /data-layout-mode="star" data-layout-source="author"/,
+      "a working copy's row shows the working copy's layout");
     await draftStore.clearLayout(comparisonId);
     assert.match(await comparisonRow(), /data-unpublished-changes="1"/, "clearing a published layout is an edit too");
     const unpublishResult = createResponse();

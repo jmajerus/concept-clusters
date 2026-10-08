@@ -1943,6 +1943,7 @@ export function createLocalDraftReviewHandler({
             inCheckout,
             matchesCheckout
           }),
+          workingLayout: metadata.layout || null,
           unpublishedChanges: unpublishedDomains.length > 0,
           unpublishedChangeDomains: unpublishedDomains,
           // Reuse the publication diff for shadow detection as well.
@@ -1966,8 +1967,13 @@ export function createLocalDraftReviewHandler({
           publishedById.get(row.id),
           gitPuzzleIds
         );
+        // The Layouts column describes the working copy when there is one.
+        const savedLayout = row.hasWorkingCopy
+          ? row.workingLayout || null
+          : publishedById.get(row.id)?.layout || null;
         return withGithubProduction({
           ...row,
+          savedLayout,
           ...fromPublished,
           freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
         }, githubSnapshot);
