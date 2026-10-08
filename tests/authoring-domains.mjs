@@ -552,6 +552,14 @@ export async function run() {
   assert.deepEqual(mostly.kept, ["lenses[l3]"]);
 
   assert.throws(
+    () => applyAuthoredDomainPatch(document, "pedagogy", { bridges: {} }),
+    /bridges must be a list of items, or null/
+  );
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "content", { clusters: "oops" }),
+    /clusters must be a list of items, or null/
+  );
+  assert.throws(
     () => applyAuthoredDomainPatch(document, "classification", {
       tags: [{ $patch: "replace" }]
     }),

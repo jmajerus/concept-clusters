@@ -186,7 +186,7 @@ export async function run() {
       name: "save_puzzle_draft",
       arguments: {
         draft_id: "domain-mcp",
-        expected_revision: pedagogySave.result.structuredContent.draft.revision,
+        expected_revision: patchSave.result.structuredContent.draft.revision,
         domain: "pedagogy",
         document: { ...pedagogyDraft.document, clusters: [] }
       }

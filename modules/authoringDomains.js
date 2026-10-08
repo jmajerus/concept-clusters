@@ -779,6 +779,9 @@ function mergeKeyedList(base, patch, path, keys) {
 // recursively, and a value replaces the target. Arrays listed in KEYED_LISTS
 // merge by item identity instead of replacing.
 function mergePatch(target, patch, path = "") {
+  if (KEYED_LISTS[path] && !Array.isArray(patch)) {
+    throw new Error(`${path} must be a list of items, or null to remove it`);
+  }
   if (Array.isArray(patch)) {
     const keys = KEYED_LISTS[path];
     if (keys) return mergeKeyedList(target, patch, path, keys);
