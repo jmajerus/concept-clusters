@@ -38,6 +38,7 @@
 import { writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { boardSizeOwner } from "../modules/layoutDocument.js";
+import { DEFECT_TIERS, layoutDefects, tierCount } from "../modules/layoutAttention.js";
 
 const MODES = ["graph", "sets", "star"];
 const MODE_LABELS = { graph: "Graph", sets: "Circle", star: "Star" };
@@ -98,28 +99,6 @@ function parseArgs(argv) {
     throw new Error("Name one or more puzzle ids, or pass --all (e.g. npm run layouts:auto -- --all)");
   }
   return options;
-}
-
-// Defects players would notice as severity tiers, most severe first, the
-// way each engine's own scoring ranks a finished layout (graphLayout
-// scoreGraphGeometry, setRenderer scoreCircleCandidate, starRenderer
-// comparePrettyLayouts). Graph's hardOverlaps already includes overlaps;
-// Circle weighs lines through headings and through circles the same, so
-// they share a tier (a tier listing several metrics compares their sum).
-const DEFECT_TIERS = {
-  graph: ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"],
-  sets: ["hardOverlaps", "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
-  star: ["lineCrossings", "edgeTitleIntersections", "edgeNodeIntersections", "overlaps"]
-};
-const tierKeys = tier => (Array.isArray(tier) ? tier : [tier]);
-const tierCount = (counts, tier) => tierKeys(tier).reduce((sum, key) => sum + (counts?.[key] || 0), 0);
-
-function defects(mode, metrics) {
-  if (!metrics) return { total: null };
-  const found = Object.fromEntries(DEFECT_TIERS[mode].flatMap(tierKeys)
-    .map(key => [key, Number(metrics[key]) || 0])
-    .filter(([, count]) => count > 0));
-  return { ...found, total: Object.values(found).reduce((sum, count) => sum + count, 0) };
 }
 
 // Fewer defects of the most severe kind wins, as in the engines' own
@@ -248,17 +227,17 @@ async function layOutBoard(browser, options, id, mode, size, authorLayout) {
   if (authorLayout) {
     const result = await solve(live, mode, { dropAuto: false });
     row.action = "author layout kept";
-    row.defects = defects(mode, result.metrics);
+    row.defects = layoutDefects(mode, result.metrics);
     return { row, page: live };
   }
   const liveResult = await solve(live, mode, { dropAuto: true });
-  row.standardDefects = defects(mode, liveResult.metrics);
+  row.standardDefects = layoutDefects(mode, liveResult.metrics);
   row.defects = row.standardDefects;
   row.strategy = "live search";
   if (row.standardDefects.total === 0) return { row, page: live };
   const extended = await openBoard(browser, options, id, mode, "extended", size);
   const extendedResult = await solve(extended, mode, { dropAuto: true });
-  const extendedDefects = defects(mode, extendedResult.metrics);
+  const extendedDefects = layoutDefects(mode, extendedResult.metrics);
   if (fewerDefects(mode, extendedDefects, row.standardDefects)) {
     await live.close();
     row.defects = extendedDefects;

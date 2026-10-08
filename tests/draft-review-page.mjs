@@ -696,7 +696,7 @@ export async function run() {
   assert.match(hostedList, /href="\/admin"/);
   assert.match(hostedList, /href="\/admin\/catalogues"/);
   assert.doesNotMatch(hostedList, />Layouts</, "the Layouts column is local-only");
-  assert.doesNotMatch(hostedList, /Missing layouts/);
+  assert.doesNotMatch(hostedList, /Layouts to fix/);
 
   // Layouts column: one chip per mode, coloured by who saved it, labelled
   // with how the board uses it; a mode with nothing saved is "–".
@@ -718,7 +718,7 @@ export async function run() {
     }
   }], { variant: "local" });
   assert.match(layoutList, />Layouts<\/th>/);
-  assert.match(layoutList, /value="layouts"> Missing layouts/);
+  assert.match(layoutList, /value="layouts"> Layouts to fix/);
   assert.match(layoutList, /data-layout-mode="graph" data-layout-source="auto" data-layout-use="hint"[^>]*>G hint</);
   assert.match(layoutList, /data-layout-mode="star" data-layout-source="author" data-layout-use="fixed"[^>]*>S fixed</,
     "Star layouts are always fixed");
@@ -726,8 +726,35 @@ export async function run() {
   assert.match(layoutList, /data-layout-mode="graph" data-layout-source="author" data-layout-use="fixed"[^>]*>G fixed</,
     "a layout saved without the flag is fixed");
   assert.match(layoutList, /data-layout-mode="star" data-layout-source="auto"[^>]*>S fixed</);
-  assert.match(layoutList, /data-draft-id="review-fixture-3"[^>]*data-layout-missing="0"/, "every mode saved");
-  assert.match(layoutList, /data-draft-id="review-fixture"[^>]*data-layout-missing="1"/, "Circle unsaved");
+  assert.match(layoutList, /data-draft-id="review-fixture-3"[^>]*data-layout-fix="0"/, "every mode saved and sound");
+  assert.match(layoutList, /data-draft-id="review-fixture"[^>]*data-layout-fix="1"/, "Circle unsaved");
+  assert.doesNotMatch(layoutList, /data-layout-repair/);
+
+  // A chip needing repair is marked "!", with the reason in its tooltip:
+  // saved defects, a hint's defective starting point, or an outdated layout
+  // (whose saved metrics no longer apply, so staleness alone is reported).
+  const repairList = renderDraftListPage([{
+    ...baseDraft,
+    savedLayout: {
+      schemaVersion: 1,
+      modes: {
+        graph: { nodes: {} },
+        star: { nodes: {} },
+        sets: { fixed: false, nodes: {} }
+      }
+    },
+    layoutAttention: {
+      graph: { fixed: true, stale: false, defects: { lineCrossings: 1, total: 1 } },
+      star: { fixed: true, stale: true, defects: { edgeNodeIntersections: 2, total: 2 } },
+      sets: { fixed: false, stale: false, defects: { lineCircleIntersections: 2, total: 2 } }
+    }
+  }], { variant: "local" });
+  assert.match(repairList, /data-layout-mode="graph"[^>]*data-layout-repair="1" title="Graph: saved by an author, fixed positions\. Needs repair: 1 line crossing when saved">G fixed !</);
+  assert.match(repairList, /data-layout-mode="star"[^>]*data-layout-repair="1" title="Star: [^"]*changed since it was saved; players get it adapted, unchecked">S fixed !</);
+  assert.doesNotMatch(repairList, /lines? through (a pill|pills)/, "an outdated layout's saved metrics are not reported");
+  assert.match(repairList, /data-layout-mode="sets"[^>]*title="Circle: [^"]*saved starting point had 2 lines through circles; players get a fresh search from it">C hint !</);
+  assert.match(repairList, /class="badge layout-chip layout-chip-author layout-chip-repair"/);
+  assert.match(repairList, /data-layout-fix="1"/);
   const freezeList = renderDraftListPage([{
     ...baseDraft,
     d1Published: true,

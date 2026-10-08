@@ -645,6 +645,7 @@ const PAGE_STYLE = `
   .layout-chip-author { background: #dcfce7; }
   .layout-chip-auto { background: #dbeafe; }
   .layout-chip-none { background: #eee; color: #666; }
+  .layout-chip-repair { box-shadow: inset 0 0 0 1.5px #dc2626; color: #991b1b; font-weight: 600; }
   .validation { padding: 10px 14px; border-radius: 6px; margin: 16px 0; }
   .validation-ok { background: #dcfce7; }
   .validation-fail { background: #fee2e2; }
@@ -1000,18 +1001,52 @@ function savedLayoutModes(item) {
     if (!saved) return { mode, letter, name, saved: null };
     const source = layoutSource(saved);
     const use = mode === "star" || layoutIsFixed(saved) ? "fixed" : "hint";
-    return { mode, letter, name, saved: { source, use } };
+    return { mode, letter, name, saved: { source, use }, repair: repairReason(mode, use, item.layoutAttention?.[mode]) };
   });
 }
 
+const DEFECT_LABELS = {
+  lineCrossings: ["line crossing", "line crossings"],
+  edgeNodeIntersections: ["line through a pill", "lines through pills"],
+  edgeTitleIntersections: ["line through a title", "lines through titles"],
+  lineHeadingIntersections: ["line through a heading", "lines through headings"],
+  lineCircleIntersections: ["line through a circle", "lines through circles"],
+  hardOverlaps: ["overlap", "overlaps"],
+  overlaps: ["overlap", "overlaps"]
+};
+
+// Why a saved layout needs a person, or null. An outdated fixed layout's
+// saved metrics no longer describe the board players get, so staleness is
+// the whole reason then. A hint's metrics describe its starting point, not
+// the board searched from it.
+function repairReason(mode, use, attention) {
+  if (!attention) return null;
+  if (attention.stale) {
+    const fallback = mode === "star" ? "adapted" : "as a hint";
+    return `the puzzle or board size changed since it was saved; players get it ${fallback}, unchecked`;
+  }
+  const defects = attention.defects || {};
+  if (!(defects.total > 0)) return null;
+  const listed = Object.entries(defects)
+    .filter(([key]) => key !== "total" && DEFECT_LABELS[key])
+    .map(([key, count]) => `${count} ${DEFECT_LABELS[key][count === 1 ? 0 : 1]}`)
+    .join(", ");
+  return use === "hint"
+    ? `its saved starting point had ${listed}; players get a fresh search from it`
+    : `${listed} when saved`;
+}
+
 function renderSavedLayouts(modes) {
-  return `<span class="layout-chips">${modes.map(({ mode, letter, name, saved }) => {
+  return `<span class="layout-chips">${modes.map(({ mode, letter, name, saved, repair }) => {
     if (!saved) {
       return `<span class="badge layout-chip layout-chip-none" data-layout-mode="${mode}" data-layout-source="none" title="${name}: no saved layout (live search)">${letter} –</span>`;
     }
     const who = saved.source === "auto" ? "the automatic layout pass" : "an author";
     const how = saved.use === "hint" ? "used as a hint" : "fixed positions";
-    return `<span class="badge layout-chip layout-chip-${saved.source}" data-layout-mode="${mode}" data-layout-source="${saved.source}" data-layout-use="${saved.use}" title="${name}: saved by ${who}, ${how}">${letter} ${saved.use}</span>`;
+    const repairClass = repair ? " layout-chip-repair" : "";
+    const repairAttr = repair ? ` data-layout-repair="1"` : "";
+    const repairNote = repair ? `. Needs repair: ${repair}` : "";
+    return `<span class="badge layout-chip layout-chip-${saved.source}${repairClass}" data-layout-mode="${mode}" data-layout-source="${saved.source}" data-layout-use="${saved.use}"${repairAttr} title="${escapeHtml(`${name}: saved by ${who}, ${how}${repairNote}`)}">${letter} ${saved.use}${repair ? " !" : ""}</span>`;
   }).join("")}</span>`;
 }
 
@@ -1101,7 +1136,7 @@ function publishedOnlyRows(items) {
 function corpusTableHead(variant, { includeCategory = false } = {}) {
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const layoutsColumn = variant === "local"
-    ? `<th title="Saved layout per mode. Green: author. Blue: automatic pass. Grey –: none (live search).">Layouts</th>`
+    ? `<th title="Saved layout per mode. Green: author. Blue: automatic pass. Grey –: none (live search). Red outline and !: needs repair (see the chip's tooltip).">Layouts</th>`
     : "";
   const categoryColumn = includeCategory ? "<th>Category</th>" : "";
   return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Secondary categories</th><th>Subcategories</th><th>Status</th><th>Unpublished Changes</th>${layoutsColumn}<th>GitHub snapshot</th>${playColumn}<th>Updated</th></tr></thead>`;
@@ -1133,8 +1168,8 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const local = variant === "local";
   const layoutModes = local ? savedLayoutModes(item) : [];
   const layoutsCell = local ? `<td>${renderSavedLayouts(layoutModes)}</td>` : "";
-  const layoutMissing = layoutModes.some(entry => !entry.saved) ? "1" : "0";
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-missing="${layoutMissing}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  const layoutToFix = layoutModes.some(entry => !entry.saved || entry.repair) ? "1" : "0";
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-fix="${layoutToFix}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
@@ -1238,7 +1273,7 @@ const CORPUS_FILTER_SCRIPT = `
       var modified = row.getAttribute("data-modified") === "1";
       var unpublished = row.getAttribute("data-unpublished-changes") === "1";
       var cued = row.getAttribute("data-cued") === "1";
-      var layoutMissing = row.getAttribute("data-layout-missing") === "1";
+      var layoutToFix = row.getAttribute("data-layout-fix") === "1";
       var github = row.getAttribute("data-github");
       var matchQuery = !query || hay.indexOf(query) !== -1;
       var matchScope = scope === "all"
@@ -1247,7 +1282,7 @@ const CORPUS_FILTER_SCRIPT = `
         || (scope === "modified" && modified)
         || (scope === "unpublished" && unpublished)
         || (scope === "cued" && cued)
-        || (scope === "layouts" && layoutMissing)
+        || (scope === "layouts" && layoutToFix)
         || (scope === "published" && publishedLive && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
     });
@@ -1336,7 +1371,7 @@ export function renderDraftListPage(rows, {
            <label title="Saved content, board settings, provenance, or layout differs from the published D1 snapshot"><input type="radio" name="puzzle-corpus-scope" value="unpublished"> Unpublished changes</label>
            <label title="Published D1 snapshot explicitly cued for the next Freeze into git"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
            <label title="Published in D1 with no private working copy (the Published only group under Recent)"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
-           ${variant === "local" ? `<label title="At least one mode (Graph, Star, Circle) has no saved layout and runs live search"><input type="radio" name="puzzle-corpus-scope" value="layouts"> Missing layouts</label>` : ""}
+           ${variant === "local" ? `<label title="At least one mode (Graph, Star, Circle) has no saved layout, or a saved layout needs repair (! on its chip)"><input type="radio" name="puzzle-corpus-scope" value="layouts"> Layouts to fix</label>` : ""}
          </p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Arrange</span>

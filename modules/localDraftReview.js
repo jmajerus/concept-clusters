@@ -18,6 +18,7 @@
 // puzzles/manifest.js joined with that freeze’s puzzle add/update, minus
 // remove, assuming the freeze merges.
 
+import { layoutAttention } from "./layoutAttention.js";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
@@ -1944,6 +1945,15 @@ export function createLocalDraftReviewHandler({
             matchesCheckout
           }),
           workingLayout: metadata.layout || null,
+          // Checked against the working document: an edit outdates a fixed
+          // layout the working copy inherited as well as one it saved.
+          workingLayoutAttention: workingDocument
+            ? layoutAttention({
+              document: workingDocument,
+              layout: metadata.layout ?? publishedRow?.layout ?? null,
+              categoryRegistry
+            })
+            : {},
           unpublishedChanges: unpublishedDomains.length > 0,
           unpublishedChangeDomains: unpublishedDomains,
           // Reuse the publication diff for shadow detection as well.
@@ -1974,9 +1984,20 @@ export function createLocalDraftReviewHandler({
         const savedLayout = row.hasWorkingCopy
           ? row.workingLayout ?? publishedLayout
           : publishedLayout;
+        const publishedRow = publishedById.get(row.id);
+        const layoutAttentionByMode = row.hasWorkingCopy
+          ? row.workingLayoutAttention || {}
+          : publishedRow?.document && publishedLayout
+            ? layoutAttention({
+              document: documentForEditor(publishedRow.document, { categoryRegistry }),
+              layout: publishedLayout,
+              categoryRegistry
+            })
+            : {};
         return withGithubProduction({
           ...row,
           savedLayout,
+          layoutAttention: layoutAttentionByMode,
           ...fromPublished,
           freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
         }, githubSnapshot);

@@ -1016,7 +1016,10 @@ export async function run() {
       await handlePublish({ method: "GET", url: "/admin/drafts" }, response);
       return response.body.match(/<tr data-puzzle-id="layout-source-fixture"[^>]*>[\s\S]*?<\/tr>/)[0];
     }
-    assert.match(await layoutSourceRow(), /data-layout-mode="star" data-layout-source="auto"/);
+    const publishedOnlyRow = await layoutSourceRow();
+    assert.match(publishedOnlyRow, /data-layout-mode="star" data-layout-source="auto"/);
+    // Its puzzle revision is a placeholder, so the fixed layout is outdated.
+    assert.match(publishedOnlyRow, /data-layout-mode="star"[^>]*data-layout-repair="1"[^>]*changed since it was saved/);
     await draftStore.createDraft({ draftId: layoutSourceId, document: layoutSourceDocument });
     assert.match(await layoutSourceRow(), /data-layout-mode="star" data-layout-source="auto"/,
       "a working copy with no layout of its own inherits the published one");

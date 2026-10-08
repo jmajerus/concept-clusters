@@ -1653,6 +1653,18 @@ separate layout file or registry is needed.
 
 ### The automatic layout pass
 
+The puzzle list's **Layouts** column shows what each puzzle has saved, one
+chip per mode (G, S, C), for the working copy when there is one. Green is an
+author's layout, blue the automatic pass's, grey `–` none (live search); the
+text says whether the board uses it as fixed positions or a hint. A chip
+marked `!` needs repair, and its tooltip says why: defects recorded when the
+layout was saved, a hint whose saved starting point had defects, or a fixed
+layout the puzzle or board size has outdated, which players get as a hint or
+adapted, unchecked. The list judges from the saved layout alone, without
+laying out boards. **Layouts to fix** shows the puzzles with a missing or
+marked mode. Running the pass on them clears missing and outdated layouts;
+what stays marked needs an author.
+
 For one puzzle, use the layout-authoring panel on the local authoring
 server. **Run layout pass** is a dry run: it reports, per mode, the problems
 left and the strategy that got there, plus the board size the pass chose or
