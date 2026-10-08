@@ -1968,9 +1968,12 @@ export function createLocalDraftReviewHandler({
           gitPuzzleIds
         );
         // The Layouts column describes the working copy when there is one.
+        // Until a working copy saves a layout of its own it inherits the
+        // published one, as the layout route and publishing both treat it.
+        const publishedLayout = publishedById.get(row.id)?.layout || null;
         const savedLayout = row.hasWorkingCopy
-          ? row.workingLayout || null
-          : publishedById.get(row.id)?.layout || null;
+          ? row.workingLayout ?? publishedLayout
+          : publishedLayout;
         return withGithubProduction({
           ...row,
           savedLayout,

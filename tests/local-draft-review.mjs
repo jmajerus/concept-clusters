@@ -1018,6 +1018,8 @@ export async function run() {
     }
     assert.match(await layoutSourceRow(), /data-layout-mode="star" data-layout-source="auto"/);
     await draftStore.createDraft({ draftId: layoutSourceId, document: layoutSourceDocument });
+    assert.match(await layoutSourceRow(), /data-layout-mode="star" data-layout-source="auto"/,
+      "a working copy with no layout of its own inherits the published one");
     await draftStore.saveLayout({ draftId: layoutSourceId, layout: starLayout("author") });
     const workingRow = await layoutSourceRow();
     assert.match(workingRow, /data-has-draft="1"/);
