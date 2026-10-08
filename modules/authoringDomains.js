@@ -615,7 +615,8 @@ function assertDomainPayload(domain, incoming) {
     incoming.bridges.forEach((bridge, index) => {
       if (!isObject(bridge)) return;
       for (const key of Object.keys(bridge)) {
-        if (key !== "id" && key !== "term" && !PEDAGOGY_BRIDGE_FIELDS.has(key)) {
+        if (key !== "id" && key !== "term" && key !== "$patch" &&
+            !PEDAGOGY_BRIDGE_FIELDS.has(key)) {
           throw new Error(`bridges[${index}].${key} belongs to the content domain`);
         }
       }
@@ -708,6 +709,264 @@ export function applyAuthoredDomain(currentDocument, domain, incoming) {
     }
   }
   return assembleAuthoredDocument(next);
+}
+
+// Lists of items with a stable identity merge item by item, the way
+// Kubernetes strategic merge patch treats lists with a merge key. The first
+// key is the id; the second is the field an id is derived from when omitted.
+// Every other list (terms, tags, categories, citations, links) replaces
+// whole, as in RFC 7396.
+const KEYED_LISTS = Object.freeze({
+  clusters: ["id", "name"],
+  bridges: ["id", "term"],
+  lenses: ["id"],
+  "lenses[].options": ["id"],
+  "relatedPuzzles.entries": ["id"]
+});
+
+const PATCH_DIRECTIVE = "$patch";
+
+function keyedItemsMatch(keys, patchItem, baseItem) {
+  const [primary, secondary] = keys;
+  if (!isObject(patchItem) || !isObject(baseItem)) return false;
+  if (patchItem[primary] && baseItem[primary]) {
+    return patchItem[primary] === baseItem[primary];
+  }
+  return !!secondary && !!patchItem[secondary] &&
+    patchItem[secondary] === baseItem[secondary];
+}
+
+function keyedLabel(keys, item) {
+  return keys.map(key => item?.[key]).find(value => typeof value === "string" && value);
+}
+
+function withoutDirective(item) {
+  const { [PATCH_DIRECTIVE]: _directive, ...rest } = item;
+  return rest;
+}
+
+function mergeKeyedList(base, patch, path, keys) {
+  if (patch.some(item => isObject(item) && item[PATCH_DIRECTIVE] === "replace")) {
+    return patch
+      .filter(item => !(isObject(item) && item[PATCH_DIRECTIVE] === "replace"))
+      .map(item => mergePatch(undefined, withoutDirective(item), `${path}[]`));
+  }
+  const result = Array.isArray(base) ? clone(base) : [];
+  patch.forEach((item, index) => {
+    if (!isObject(item) || !keyedLabel(keys, item)) {
+      throw new Error(
+        `${path}[${index}] must name its item by ${keys.join(" or ")}`
+      );
+    }
+    const directive = item[PATCH_DIRECTIVE];
+    if (directive !== undefined && directive !== "delete") {
+      throw new Error(
+        `${path}[${index}].$patch must be "delete" on an item or "replace" as its own list entry`
+      );
+    }
+    const target = result.findIndex(candidate => keyedItemsMatch(keys, item, candidate));
+    if (directive === "delete") {
+      if (target >= 0) result.splice(target, 1);
+      return;
+    }
+    if (target < 0) result.push(mergePatch(undefined, item, `${path}[]`));
+    else result[target] = mergePatch(result[target], item, `${path}[]`);
+  });
+  return result;
+}
+
+// RFC 7396 JSON Merge Patch: null removes a member, an object merges
+// recursively, and a value replaces the target. Arrays listed in KEYED_LISTS
+// merge by item identity instead of replacing.
+function mergePatch(target, patch, path = "") {
+  if (KEYED_LISTS[path] && !Array.isArray(patch)) {
+    throw new Error(`${path} must be a list of items, or null to remove it`);
+  }
+  if (Array.isArray(patch)) {
+    const keys = KEYED_LISTS[path];
+    if (keys) return mergeKeyedList(target, patch, path, keys);
+    if (patch.some(item => isObject(item) && hasOwn(item, PATCH_DIRECTIVE))) {
+      throw new Error(`${path} replaces whole; $patch applies only to keyed lists`);
+    }
+    return clone(patch);
+  }
+  if (!isObject(patch)) return clone(patch);
+  if (hasOwn(patch, PATCH_DIRECTIVE) && !path.endsWith("[]")) {
+    throw new Error(`${path || "document"}.$patch applies only to items of keyed lists`);
+  }
+  const result = isObject(target) ? clone(target) : {};
+  for (const [key, value] of Object.entries(patch)) {
+    if (key === PATCH_DIRECTIVE) continue;
+    const childPath = path ? `${path}.${key}` : key;
+    if (value === null) delete result[key];
+    else result[key] = mergePatch(result[key], value, childPath);
+  }
+  return result;
+}
+
+function clusterTermSet(cluster) {
+  return new Set([
+    ...(Array.isArray(cluster?.seeds) ? cluster.seeds : []),
+    ...(Array.isArray(cluster?.floatingTerms) ? cluster.floatingTerms : []),
+    ...(Array.isArray(cluster?.terms) ? cluster.terms : [])
+  ]);
+}
+
+// A merged cluster keeps termInfo the patch did not mention, so a term the
+// patch moved off a cluster would leave its note behind. Drop those notes
+// unless the patch set them on purpose; `cleared` reports each one.
+function pruneRemovedTermInfo(base, merged, patch) {
+  if (!Array.isArray(base?.clusters) || !Array.isArray(merged?.clusters)) return;
+  const keys = KEYED_LISTS.clusters;
+  const patchClusters = Array.isArray(patch?.clusters) ? patch.clusters : [];
+  for (const cluster of merged.clusters) {
+    if (!isObject(cluster?.termInfo)) continue;
+    const before = base.clusters.find(candidate => keyedItemsMatch(keys, cluster, candidate));
+    if (!before) continue;
+    const explicit = patchClusters.find(candidate => keyedItemsMatch(keys, candidate, cluster));
+    const after = clusterTermSet(cluster);
+    for (const term of clusterTermSet(before)) {
+      if (after.has(term) || !hasOwn(cluster.termInfo, term)) continue;
+      if (isObject(explicit?.termInfo) && hasOwn(explicit.termInfo, term)) continue;
+      delete cluster.termInfo[term];
+    }
+    if (!Object.keys(cluster.termInfo).length) delete cluster.termInfo;
+  }
+}
+
+// Keyed lists the patch named mostly but not wholly. Leaving an item out of a
+// keyed list keeps it, so this is usually an agent expecting omission to
+// delete; the response says which items stayed and how to remove them.
+function keptKeyedItems(base, patch, path = "") {
+  const kept = [];
+  if (!isObject(base) || !isObject(patch)) return kept;
+  for (const [key, value] of Object.entries(patch)) {
+    const childPath = path ? `${path}.${key}` : key;
+    const keys = KEYED_LISTS[childPath];
+    if (!keys || !Array.isArray(value) || !Array.isArray(base[key])) continue;
+    if (value.some(item => isObject(item) && hasOwn(item, PATCH_DIRECTIVE))) continue;
+    const omitted = base[key].filter(item =>
+      !value.some(candidate => keyedItemsMatch(keys, candidate, item))
+    );
+    const named = base[key].length - omitted.length;
+    if (omitted.length && named > base[key].length / 2) {
+      kept.push(...omitted.map(item => `${childPath}[${keyedLabel(keys, item)}]`));
+    }
+  }
+  return kept;
+}
+
+// Array items are compared by their identity key so a reordered or edited
+// item is not reported as removed. Keyless items fall back to deep equality.
+const ITEM_KEYS = ["id", "term", "name", "url"];
+
+function itemKey(item) {
+  if (typeof item === "string" || typeof item === "number") return String(item);
+  if (!isObject(item)) return null;
+  for (const key of ITEM_KEYS) {
+    if (typeof item[key] === "string" && item[key]) return item[key];
+  }
+  return null;
+}
+
+function itemMatches(left, right) {
+  if (!isObject(left) || !isObject(right)) return left === right;
+  return ITEM_KEYS.some(key =>
+    typeof left[key] === "string" && left[key] && left[key] === right[key]
+  );
+}
+
+function removedPaths(before, after, prefix = "") {
+  const removed = [];
+  if (Array.isArray(before)) {
+    const next = Array.isArray(after) ? after : [];
+    before.forEach((item, index) => {
+      const key = itemKey(item);
+      const path = `${prefix}[${key ?? index}]`;
+      const match = key === null
+        ? next.find(candidate => sameStoredDocument(candidate, item))
+        : next.find(candidate => itemMatches(item, candidate));
+      if (match === undefined) removed.push(path);
+      else if (isObject(item)) removed.push(...removedPaths(item, match, path));
+    });
+    return removed;
+  }
+  if (!isObject(before)) return removed;
+  for (const [key, value] of Object.entries(before)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (!isObject(after) || !hasOwn(after, key)) {
+      removed.push(path);
+    } else if (isObject(value) || Array.isArray(value)) {
+      removed.push(...removedPaths(value, after[key], path));
+    }
+  }
+  return removed;
+}
+
+/**
+ * Everything a domain save removed, as readable paths: fields
+ * (`info.citations`), array items by their id, term, name, or value
+ * (`clusters[alpha]`, `clusters[alpha].seeds[two]`, `tags[book]`), and
+ * fields inside matched items (`bridges[shared].idealTerms`). A save
+ * response lists them so an agent never has to guess whether a write
+ * dropped data, including when it sent a partial array.
+ */
+export function clearedDomainFields(previousDocument, nextDocument, domain) {
+  const before = projectAuthoredDocument(previousDocument, domain).document;
+  const after = projectAuthoredDocument(nextDocument, domain).document;
+  // Presentational colors are server-settled, never agent-authored.
+  const withoutColors = projection => Array.isArray(projection.clusters)
+    ? {
+      ...projection,
+      clusters: projection.clusters.map(cluster => {
+        if (!isObject(cluster)) return cluster;
+        const { color: _color, ...rest } = cluster;
+        return rest;
+      })
+    }
+    : projection;
+  return removedPaths(withoutColors(before), withoutColors(after));
+}
+
+/**
+ * Apply an agent's focused domain save. Every focused domain payload is a
+ * JSON Merge Patch (RFC 7396) over that domain's current projection:
+ * omitted fields are kept, `null` removes a field, and objects merge. Lists
+ * of identified items (clusters, bridges, lenses, lens options, related-
+ * puzzle entries) merge item by item by id, as in a Kubernetes strategic
+ * merge patch: `{ id, "$patch": "delete" }` removes an item and a
+ * `{ "$patch": "replace" }` entry replaces the whole list. Every other list
+ * replaces whole.
+ *
+ * Several authoring passes (pedagogy, review, publication) share the pedagogy
+ * domain, and agents carry one habit across domains. Under replacement, a
+ * pass-shaped payload erased other passes' fields, and a save of one changed
+ * cluster erased the rest of the board. Under this patch, a payload that
+ * carries only what changed is safe in every domain.
+ *
+ * Returns the next document, the authored paths the save removed, and keyed
+ * items it kept although the payload named most of their list.
+ */
+export function applyAuthoredDomainPatch(currentDocument, domain, patch) {
+  if (!AUTHORING_WRITE_DOMAINS.includes(domain)) {
+    throw new Error(`Only ${AUTHORING_WRITE_DOMAINS.join(" and ")} are agent-writable domains`);
+  }
+  assertObject(currentDocument, "Current authored document");
+  assertDomainPayload(domain, patch);
+  const base = projectAuthoredDocument(currentDocument, domain).document;
+  const merged = mergePatch(base, patch);
+  if (domain === "content") pruneRemovedTermInfo(base, merged, patch);
+  // `merged` is the complete projection, so an absent write-once field here
+  // means the patch removed it with null rather than leaving it unsaid.
+  assertNoWriteOnceDrift(currentDocument, merged, `${domain} domain document`, {
+    allowAbsent: domain !== "content"
+  });
+  const document = applyAuthoredDomain(currentDocument, domain, merged);
+  return {
+    document,
+    cleared: clearedDomainFields(currentDocument, document, domain),
+    kept: keptKeyedItems(base, patch)
+  };
 }
 
 export function storedDomainDocuments(document) {
@@ -842,6 +1101,8 @@ export default {
   assembleAuthoredDocument,
   projectAuthoredDocument,
   applyAuthoredDomain,
+  applyAuthoredDomainPatch,
+  clearedDomainFields,
   storedDomainDocuments,
   assembleStoredDomainDocuments,
   assembleAuthoredDocumentFromDraftRow,

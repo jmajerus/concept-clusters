@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Review a Concept Clusters puzzle
 
-Skill rev `5abb3607` · 2026-10-06
+Skill rev `85f37fa7` · 2026-10-08
 
 Run **one** planner. Treat its JSON as the contract. Do not improvise a search.
 
@@ -122,6 +122,11 @@ On that prompt, resolve the authoring workspace once, then read only the exact s
 Compare the board to that source map and loss ledger before retaining or changing the even clusters. Re-read each cluster for two terms doing one job, and for a fact that already names a missing concept; fix those on the board. That is not a licence to add or drop terms just to break an even count.
 
 If those artifacts are absent (common for early published puzzles, which were often sparse as well as even), write the concept-gathering inventory in this review. That map is the repair. It is not a board edit and not an open issue. Stop when it is saved. Fit it onto the board only after the human approves it. Gathering the concepts the small even clusters left out usually changes the counts. If the counts are still even afterward, keep them. Do not change bridges because of the prompt.
+
+Focused domain saves are merge patches: send only what changed, and `null` to
+remove a field. Deleting a key from the payload does not remove it. Clusters,
+bridges, and lenses merge by id; remove one with `"$patch": "delete"`. Check
+`cleared` and `kept` in the save response.
 
 For every save, pass the latest `draft.revision` as its own `expected_revision`
 argument on the native tool. `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>`

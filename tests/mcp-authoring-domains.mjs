@@ -158,11 +158,35 @@ export async function run() {
     assert.equal(complete.bridges[0].relationKind, "continuity");
     assert.equal(complete.provenance, undefined);
 
-    const rejected = await session.request("tools/call", {
+    // A pass-shaped merge patch keeps everything it omits and reports what
+    // its nulls removed.
+    const sharedBridge = pedagogyDraft.document.bridges[0];
+    const patchSave = await session.request("tools/call", {
       name: "save_puzzle_draft",
       arguments: {
         draft_id: "domain-mcp",
         expected_revision: pedagogySave.result.structuredContent.draft.revision,
+        domain: "pedagogy",
+        document: { bridges: [{ term: sharedBridge.term, relationKind: null }] }
+      }
+    });
+    assert.equal(patchSave.result.isError, undefined);
+    const patchLabel = sharedBridge.id || sharedBridge.term;
+    assert.deepEqual(
+      patchSave.result.structuredContent.cleared,
+      [`bridges[${patchLabel}].relationKind`]
+    );
+    assert.deepEqual(patchSave.result.structuredContent.kept, []);
+    assert.match(patchSave.result.content[0].text, /This save removed/);
+    const patched = patchSave.result.structuredContent.draft.document;
+    assert.equal(patched.bridges[0].relationKind, undefined);
+    assert.deepEqual(patched.lenses, pedagogyDraft.document.lenses);
+
+    const rejected = await session.request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "domain-mcp",
+        expected_revision: patchSave.result.structuredContent.draft.revision,
         domain: "pedagogy",
         document: { ...pedagogyDraft.document, clusters: [] }
       }

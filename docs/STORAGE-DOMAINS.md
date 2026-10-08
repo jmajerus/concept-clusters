@@ -267,9 +267,33 @@ shared [field-ownership map](dev-briefs/authoring-domain-scoping-implementation.
 schemas consume. Phase schemas bind to a write domain when they are a pure
 subset (`core` → content; `classification` → classification;
 `pedagogy` / `publication` → pedagogy); `review`
-remains a cross-domain inspection view. A future refinement can make pass
-writes themselves composable (patch vs whole-domain replace), so a narrow
-phase-shaped response is never mistaken for a complete domain replacement.
+remains a cross-domain inspection view.
+
+Several passes share the pedagogy domain: the pedagogy pass writes lenses and
+the learning introduction, the review pass writes bridge annotations, and the
+publication pass writes `relatedPuzzles` and `language`. Every focused agent
+save is therefore a
+[JSON Merge Patch (RFC 7396)](https://www.rfc-editor.org/rfc/rfc7396), with
+pedagogy `bridges` merged by bridge `id` or `term` (the merge-key idea from
+Kubernetes strategic merge patch). A pass-shaped payload carries only that
+pass's fields and cannot erase another pass's work; `null` is the explicit
+removal. The same rule holds in every domain, so agents carry one write habit.
+
+Lists follow one rule as well. A list of identified items (clusters, bridges,
+lenses, lens options, related-puzzle entries) merges item by item by its id,
+using Kubernetes strategic-merge-patch list semantics: an item left out is
+kept, `"$patch": "delete"` removes one, and a `"$patch": "replace"` entry
+replaces the list. Pedagogy `bridges` is an ordinary keyed list under this
+rule, not an exception. Lists of plain values and ordered reference lists
+(terms, tags, categories, citations, links) replace whole. Editing one item is
+far more common than deleting one, so this trades a wiped board for an item
+that survives by mistake, which the save response flags in `kept`. Removals
+are listed in `cleared`.
+
+The patch is resolved at the MCP boundary (`applyAuthoredDomainPatch` in
+`modules/authoringDomains.js`) into a complete domain projection. Storage and
+internal callers such as `reassign_puzzle_classifications` keep using the
+replace-only `applyAuthoredDomain`.
 
 ## Canonicalization, batch migration, and history
 

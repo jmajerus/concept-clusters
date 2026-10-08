@@ -177,7 +177,14 @@
 // Drafting continues while the request is reviewed.
 // 6.16: request_board_limit_waiver asks the person in the chat when the
 // client supports elicitation; only the tool result reports a decision.
+// 6.17: same review bar. Every focused domain save (content, pedagogy,
+// classification) is a JSON Merge Patch (RFC 7396): omitted fields are kept
+// and null removes one. Lists of clusters, bridges, lenses, lens options, and
+// relatedPuzzles entries merge by id (Kubernetes strategic-merge-patch list
+// semantics, with "$patch": "delete" / "replace"); other lists replace whole.
+// Save responses report removals in `cleared` and likely-unintended keeps in
+// `kept`.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 16
+  minor: 17
 });
