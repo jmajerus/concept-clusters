@@ -1574,7 +1574,9 @@ layout as a hint automatically. So exact is the faster choice and loses
 nothing in resilience to edits. Star layouts are always exact; a stale Star
 layout is adapted instead: positions are scaled to the board, each cluster
 title stays beside its own terms, and only nodes the layout has never seen
-are placed fresh.
+are placed fresh. The adapted board then settles around those positions and
+gets the same repair as a generated one, so a freshly placed term does not
+land on a pill or a line.
 
 **A saved layout is never discarded.** Stale, wrong-sized, or crossed
 layouts are used as hints or adapted, and their remaining problems are
