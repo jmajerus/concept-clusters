@@ -982,9 +982,10 @@ function renderUnpublishedDomains(item) {
 
 // One chip per mode, in mode-button order (Graph, Star, Circle). Colour is
 // who made the saved layout (author or the automatic pass); the text is how
-// Graph and Circle use it (fixed positions or a hint). Star starts from its
-// saved positions either way. "–" means nothing is saved, so the board runs
-// live search. Rows describe the working copy when there is one.
+// the board uses it: fixed positions or a hint. Star layouts are always
+// fixed, adapted to the board when they no longer match. "–" means nothing
+// is saved, so the board runs live search. Rows describe the working copy
+// when there is one.
 const LAYOUT_CHIP_MODES = [
   ["graph", "G", "Graph"],
   ["star", "S", "Star"],
@@ -998,7 +999,7 @@ function savedLayoutModes(item) {
     const saved = layout?.modes?.[mode] || null;
     if (!saved) return { mode, letter, name, saved: null };
     const source = layoutSource(saved);
-    const use = mode === "star" ? null : (layoutIsFixed(saved) ? "fixed" : "hint");
+    const use = mode === "star" || layoutIsFixed(saved) ? "fixed" : "hint";
     return { mode, letter, name, saved: { source, use } };
   });
 }
@@ -1009,11 +1010,8 @@ function renderSavedLayouts(modes) {
       return `<span class="badge layout-chip layout-chip-none" data-layout-mode="${mode}" data-layout-source="none" title="${name}: no saved layout (live search)">${letter} –</span>`;
     }
     const who = saved.source === "auto" ? "the automatic layout pass" : "an author";
-    const how = saved.use === "fixed" ? ", fixed positions"
-      : saved.use === "hint" ? ", used as a hint"
-        : "";
-    const text = saved.use ? `${letter} ${saved.use}` : letter;
-    return `<span class="badge layout-chip layout-chip-${saved.source}" data-layout-mode="${mode}" data-layout-source="${saved.source}"${saved.use ? ` data-layout-use="${saved.use}"` : ""} title="${name}: saved by ${who}${how}">${text}</span>`;
+    const how = saved.use === "hint" ? "used as a hint" : "fixed positions";
+    return `<span class="badge layout-chip layout-chip-${saved.source}" data-layout-mode="${mode}" data-layout-source="${saved.source}" data-layout-use="${saved.use}" title="${name}: saved by ${who}, ${how}">${letter} ${saved.use}</span>`;
   }).join("")}</span>`;
 }
 

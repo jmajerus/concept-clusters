@@ -175,6 +175,26 @@ export async function run(page, baseURL) {
     /adapted it to this board/
   );
 
+  // An adapted layout settles and is repaired rather than shown as placed:
+  // stack two saved terms on one spot, as a renamed term placed fresh or a
+  // board-size change can, and the polished board pulls them apart.
+  const stacked = await page.evaluate(() => {
+    const nodes = window.CC.state.puzzle.layout.modes.star.nodes;
+    const [first, second] = Object.keys(nodes).filter(key => key.startsWith("term:"));
+    nodes[second] = { ...nodes[first] };
+    return [first, second];
+  });
+  await page.click("#reset");
+  await page.waitForFunction(() =>
+    window.CC.state.solutionLayout === "pretty" &&
+    window.CC.state.layoutSource?.kind === "adapted"
+  );
+  assert.equal(
+    await page.evaluate(() => window.CC.state.prettyPrintStats.overlaps),
+    0,
+    `stacked ${stacked.join(" and ")} still overlap after polishing`
+  );
+
   // Preparing again must not overwrite a previously hand-edited draft.
   assert.equal(
     await page.evaluate(() => {

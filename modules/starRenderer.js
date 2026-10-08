@@ -1293,10 +1293,114 @@ export function createStarRenderer({
 
           const original = capturePositions();
           const originalLayout = evaluateLayout();
+          // Settle every node toward its target with light charge and
+          // collision, scored by how far it strays from the targets.
+          const relaxTowards = targets => {
+            allLayoutNodes.forEach(node => {
+              const target = targets.get(node);
+              node.x = target.x; node.y = target.y;
+              node.vx = 0; node.vy = 0;
+            });
+            const layoutSim = d3.forceSimulation(allLayoutNodes).stop();
+            if (d3.randomLcg) layoutSim.randomSource(d3.randomLcg(0.42));
+            layoutSim
+              .force("targetX", d3.forceX(node => targets.get(node).x)
+                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
+              .force("targetY", d3.forceY(node => targets.get(node).y)
+                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
+              .force("charge", d3.forceManyBody().strength(-18))
+              .force("collide", d3.forceCollide().radius(node => node.w / 2 + 12).iterations(2))
+              .alpha(1)
+              .alphaDecay(0.035)
+              .velocityDecay(0.45);
+            for (let tick = 0; tick < 160; tick++) {
+              layoutSim.tick();
+              allLayoutNodes.forEach(node => {
+                const clamped = clampTarget(node, node);
+                node.x = clamped.x; node.y = clamped.y;
+              });
+            }
+            layoutSim.stop();
+            const layout = evaluateLayout();
+            const deviation = allLayoutNodes.reduce((sum, node) => {
+              const target = targets.get(node);
+              return sum + Math.hypot(node.x - target.x, node.y - target.y);
+            }, 0);
+            return { positions: capturePositions(), layout, deviation };
+          };
+
+
+          // Force relaxation can nudge an otherwise good candidate into a
+          // simple local obstruction. Apply the same geometry-verified
+          // corrective moves available to the animated detangler -- the
+          // obvious human fix, rotating a cluster endpoint or moving the
+          // obstructed node -- without accepting a line through a pill
+          // merely because the candidate had attractive aggregate spacing.
+          const repairCandidate = candidate => {
+            const budget = layoutBudget(state.layoutBudget).star;
+            restorePositions(candidate.positions);
+            let repairedLayout = candidate.layout;
+            let repairMoves = 0;
+            // Move ranking is gated by activePhase, which a detangle may have
+            // left anywhere: clear crossings first, then lines through pills
+            // and titles, as the detangler's own phases do.
+            const phaseBefore = activePhase;
+            const phases = [
+              ["crossings", layout => layout.crossingCount > 0],
+              ["edges", layout => layout.crossingCount === 0 && layout.visualIntersectionCount > 0]
+            ];
+            for (const [phase, pending] of phases) {
+              activePhase = phase;
+              while (pending(repairedLayout) && repairMoves < budget.repairMoves) {
+                const direct = bestImprovingMove(repairedLayout);
+                const plan = direct
+                  ? [direct]
+                  : repairMoves <= budget.repairMoves - 2
+                    ? findSetupPair(repairedLayout)
+                    : [];
+                if (!plan.length) break;
+                const beforePlan = repairedLayout;
+                const beforePositions = capturePositions();
+                plan.forEach(move => {
+                  move.node.x = move.target.x;
+                  move.node.y = move.target.y;
+                  repairedLayout = evaluateLayout();
+                });
+                if (compareLayouts(repairedLayout, beforePlan) >= 0) {
+                  restorePositions(beforePositions);
+                  repairedLayout = beforePlan;
+                  break;
+                }
+                repairMoves += plan.length;
+              }
+            }
+            activePhase = phaseBefore;
+            return compareLayouts(repairedLayout, candidate.layout) < 0
+              ? { positions: capturePositions(), layout: repairedLayout, deviation: candidate.deviation }
+              : candidate;
+          };
+
           state.layoutSource = { kind: "generated" };
           const curated = savedStarTargets();
           if (curated) {
-            if (!await animateLayout(curated.targets)) return { cancelled: true };
+            // An exact layout is shown as saved. An adapted one (edited
+            // puzzle, new board size) settles around its saved positions and
+            // is repaired, so terms it placed fresh do not land on lines or
+            // pills; the unsettled version wins when settling fixes nothing.
+            let targets = curated.targets;
+            if (!curated.exact) {
+              allLayoutNodes.forEach(node => {
+                const target = targets.get(node);
+                node.x = target.x; node.y = target.y;
+              });
+              const asAdapted = { positions: capturePositions(), layout: evaluateLayout(), deviation: 0 };
+              const settled = relaxTowards(targets);
+              const pick = comparePrettyLayouts(settled, asAdapted) < 0 ? settled : asAdapted;
+              const repaired = repairCandidate(pick);
+              restorePositions(original);
+              targets = new Map(repaired.positions.map(({ node, x, y }) => [node, { x, y }]));
+            }
+            if (!await animateLayout(targets)) return { cancelled: true };
             allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
             state.prettyPrintStats = {
               ...layoutMetrics(evaluateLayout()),
@@ -1332,37 +1436,7 @@ export function createStarRenderer({
 
           let best = { positions: original, layout: originalLayout, deviation: Infinity };
           const evaluateTargets = targets => {
-            allLayoutNodes.forEach(node => {
-              const target = targets.get(node);
-              node.x = target.x; node.y = target.y;
-              node.vx = 0; node.vy = 0;
-            });
-            const layoutSim = d3.forceSimulation(allLayoutNodes).stop();
-            if (d3.randomLcg) layoutSim.randomSource(d3.randomLcg(0.42));
-            layoutSim
-              .force("targetX", d3.forceX(node => targets.get(node).x)
-                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
-              .force("targetY", d3.forceY(node => targets.get(node).y)
-                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
-              .force("charge", d3.forceManyBody().strength(-18))
-              .force("collide", d3.forceCollide().radius(node => node.w / 2 + 12).iterations(2))
-              .alpha(1)
-              .alphaDecay(0.035)
-              .velocityDecay(0.45);
-            for (let tick = 0; tick < 160; tick++) {
-              layoutSim.tick();
-              allLayoutNodes.forEach(node => {
-                const clamped = clampTarget(node, node);
-                node.x = clamped.x; node.y = clamped.y;
-              });
-            }
-            layoutSim.stop();
-            const layout = evaluateLayout();
-            const deviation = allLayoutNodes.reduce((sum, node) => {
-              const target = targets.get(node);
-              return sum + Math.hypot(node.x - target.x, node.y - target.y);
-            }, 0);
-            const candidate = { positions: capturePositions(), layout, deviation };
+            const candidate = relaxTowards(targets);
             if (comparePrettyLayouts(candidate, best) < 0) best = candidate;
           };
 
@@ -1420,45 +1494,7 @@ export function createStarRenderer({
             });
           }
 
-          // Force relaxation can nudge an otherwise good ring candidate
-          // into a simple local obstruction. Before presenting anything,
-          // apply the same geometry-verified corrective moves available
-          // to the animated detangler. This captures the obvious human
-          // fix—rotating a cluster endpoint or moving the obstructed
-          // node—without accepting a line through a pill merely because
-          // the global candidate had attractive aggregate spacing.
-          restorePositions(best.positions);
-          let repairedLayout = best.layout;
-          let repairMoves = 0;
-          while (repairedLayout.visualIntersectionCount > 0 && repairMoves < budget.repairMoves) {
-            const direct = bestImprovingMove(repairedLayout);
-            const plan = direct
-              ? [direct]
-              : repairMoves <= budget.repairMoves - 2
-                ? findSetupPair(repairedLayout)
-                : [];
-            if (!plan.length) break;
-            const beforePlan = repairedLayout;
-            const beforePositions = capturePositions();
-            plan.forEach(move => {
-              move.node.x = move.target.x;
-              move.node.y = move.target.y;
-              repairedLayout = evaluateLayout();
-            });
-            if (compareLayouts(repairedLayout, beforePlan) >= 0) {
-              restorePositions(beforePositions);
-              repairedLayout = beforePlan;
-              break;
-            }
-            repairMoves += plan.length;
-          }
-          if (compareLayouts(repairedLayout, best.layout) < 0) {
-            best = {
-              positions: capturePositions(),
-              layout: repairedLayout,
-              deviation: best.deviation
-            };
-          }
+          best = repairCandidate(best);
 
           restorePositions(original);
           const targetMap = new Map(best.positions.map(({ node, x, y }) => [node, { x, y }]));

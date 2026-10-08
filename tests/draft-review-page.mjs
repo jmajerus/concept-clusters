@@ -699,7 +699,7 @@ export async function run() {
   assert.doesNotMatch(hostedList, /Missing layouts/);
 
   // Layouts column: one chip per mode, coloured by who saved it, labelled
-  // with how Graph and Circle use it; a mode with nothing saved is "–".
+  // with how the board uses it; a mode with nothing saved is "–".
   const layoutList = renderDraftListPage([{
     ...baseDraft,
     savedLayout: {
@@ -720,11 +720,12 @@ export async function run() {
   assert.match(layoutList, />Layouts<\/th>/);
   assert.match(layoutList, /value="layouts"> Missing layouts/);
   assert.match(layoutList, /data-layout-mode="graph" data-layout-source="auto" data-layout-use="hint"[^>]*>G hint</);
-  assert.match(layoutList, /data-layout-mode="star" data-layout-source="author"[^>]*>S</);
+  assert.match(layoutList, /data-layout-mode="star" data-layout-source="author" data-layout-use="fixed"[^>]*>S fixed</,
+    "Star layouts are always fixed");
   assert.match(layoutList, /data-layout-mode="sets" data-layout-source="none"[^>]*>C –</);
   assert.match(layoutList, /data-layout-mode="graph" data-layout-source="author" data-layout-use="fixed"[^>]*>G fixed</,
     "a layout saved without the flag is fixed");
-  assert.match(layoutList, /data-layout-mode="star" data-layout-source="auto"[^>]*>S</);
+  assert.match(layoutList, /data-layout-mode="star" data-layout-source="auto"[^>]*>S fixed</);
   assert.match(layoutList, /data-draft-id="review-fixture-3"[^>]*data-layout-missing="0"/, "every mode saved");
   assert.match(layoutList, /data-draft-id="review-fixture"[^>]*data-layout-missing="1"/, "Circle unsaved");
   const freezeList = renderDraftListPage([{
