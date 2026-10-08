@@ -176,6 +176,7 @@ export async function run() {
       patchSave.result.structuredContent.cleared,
       [`bridges[${patchLabel}].relationKind`]
     );
+    assert.deepEqual(patchSave.result.structuredContent.kept, []);
     assert.match(patchSave.result.content[0].text, /This save removed/);
     const patched = patchSave.result.structuredContent.draft.document;
     assert.equal(patched.bridges[0].relationKind, undefined);

@@ -104,21 +104,40 @@ path. Write semantics differ by domain:
 - Every focused save (`content`, `pedagogy`, or `classification`) is a
   [JSON Merge Patch (RFC 7396)](https://www.rfc-editor.org/rfc/rfc7396) over
   that domain's current projection. Omitted fields are kept, `null` removes a
-  field, objects merge recursively, and arrays replace whole. A content save
-  that changes one cluster still sends the complete `clusters` array.
-- Pedagogy `bridges` is the one keyed array. That projection holds only
-  annotations layered on content-owned bridges, so each entry names a bridge
-  by `id` or `term` and merges its annotation fields into that bridge, like a
-  merge key in a Kubernetes strategic merge patch. Bridges the patch does not
-  name keep their annotations; `bridges: null` removes every annotation.
+  field, and objects merge recursively.
+- Lists of identified items merge item by item, using the list semantics of
+  a [Kubernetes strategic merge patch](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/update-api-object-kubectl-patch/):
+
+  | List | Merge key |
+  |---|---|
+  | `clusters` | `id`, or `name` when the entry has no id |
+  | `bridges` (content and pedagogy) | `id`, or `term` when the entry has no id |
+  | `lenses`, `lenses[].options`, `relatedPuzzles.entries` | `id` |
+
+  An entry patches the item it names, an unknown key appends a new item, and
+  items the patch leaves out are kept in place. `{ "id": "beta",
+  "$patch": "delete" }` removes an item. A `{ "$patch": "replace" }` entry
+  makes the rest of that list a whole replacement, which is also how to
+  reorder. A pedagogy `bridges` entry carries only annotation fields; deleting
+  it removes that bridge's annotations, not the bridge.
+- Every other list (`seeds`, `floatingTerms`, `terms`, `tags`, `categories`,
+  citations, links, lens `targets`) replaces whole, as in RFC 7396. `$patch`
+  is rejected anywhere except an item of a keyed list.
+- When a content patch moves a term off a cluster, that term's `termInfo`
+  note is removed too, unless the same patch sets it.
 - A `complete` save replaces the whole agent-authored document.
 
-Every focused save response carries `cleared`: everything the save removed,
-as paths. Fields appear by name (`info.citations`), array items by their id,
-term, name, or value (`clusters[beta]`, `clusters[alpha].seeds[two]`,
-`tags[book]`), and fields inside kept items by both
-(`bridges[shared].idealTerms`). An agent can confirm what a write dropped,
-including items a partial array left out, instead of inferring it. The legacy
+Every focused save response carries two reports:
+
+- `cleared`: everything the save removed, as paths. Fields appear by name
+  (`info.citations`), list items by id, term, name, or value
+  (`clusters[beta]`, `clusters[alpha].seeds[two]`, `tags[book]`), and fields
+  inside kept items by both (`bridges[shared].idealTerms`).
+- `kept`: keyed items left in place although the patch named most of their
+  list (more than half, with none marked). That shape usually means an agent
+  expected omission to delete; the response message says how to remove them.
+
+An agent can confirm what a write changed instead of inferring it. The legacy
 human-owned `learningIntroduction.credit` is not exposed and is preserved when
 its introduction remains present.
 `repair: true` is accepted for complete or content saves, not classification or pedagogy saves,

@@ -446,12 +446,18 @@ gates: revisit any phase whenever that part of the puzzle needs more work.
 
 Every focused domain save (content, pedagogy, classification) is a JSON
 Merge Patch (RFC 7396) over that domain: send only the fields this pass
-changes. Omitted fields are kept, \`null\` removes a field, objects merge, and
-arrays replace whole, so a changed \`clusters\` array still lists every
-cluster that should remain. The one exception is pedagogy \`bridges\`: entries
-merge into the bridge with the same id or term, so a bridge annotation edit
-sends only the bridges it changes. The save response lists everything it
-removed in \`cleared\`, including array items such as \`clusters[beta]\`.`;
+changes. Omitted fields are kept, \`null\` removes a field, and objects merge.
+Lists of identified items merge item by item, as in a Kubernetes strategic
+merge patch: \`clusters\` by id (or name), \`bridges\` by id (or term), and
+\`lenses\`, lens \`options\`, and \`relatedPuzzles.entries\` by id. Send only
+the items you change; items you leave out are kept, and an unknown id is
+added. Remove an item with \`{ "id": "...", "$patch": "delete" }\`. To
+replace or reorder a whole list, include \`{ "$patch": "replace" }\` as one of
+its entries. Every other list (terms, tags, categories, citations, links,
+lens targets) replaces whole. A term moved off a cluster takes its termInfo
+note with it unless the patch sets that note. The save response lists
+everything it removed in \`cleared\`, and in \`kept\` any item it left in
+place although your list named most of its siblings.`;
 
 const CORE_PHASE_GUIDANCE = `## Core and research pass
 

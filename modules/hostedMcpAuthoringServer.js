@@ -555,8 +555,9 @@ function serverInstructions() {
     "For a focused authoring pass, call get_puzzle_draft with domain=content, " +
     "domain=classification, or domain=pedagogy and " +
     "save_puzzle_draft with the same domain; every focused domain save is a JSON Merge Patch " +
-    "(RFC 7396), so send only the fields the pass changes and null to remove one. Arrays replace whole, " +
-    "except pedagogy bridges, which merge by id or term. The server preserves " +
+    "(RFC 7396), so send only the fields the pass changes and null to remove one. Lists of clusters, " +
+    "bridges, lenses, lens options, and relatedPuzzles entries merge item by item by id; other lists " +
+    "replace whole. The server preserves " +
     "protected provenance and system state " +
     "and materializes the complete document for validation and publication. Pedagogy responses include " +
     "content and classification as read-only context. Classification owns category, categories, " +
@@ -1367,7 +1368,7 @@ export function createAuthoringMcpServer({
     title: "Save puzzle draft",
     description:
       "Every save requires expected_revision, copied from draft.revision on the latest create_puzzle_draft, get_puzzle_draft, or save_puzzle_draft result for this draft_id. A draft that has never been created uses create_puzzle_draft. " +
-      "Replace the complete agent-authored document, or write only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. Every focused domain save (domain=content, domain=pedagogy, domain=classification) is a JSON Merge Patch (RFC 7396) over that domain: send only the fields you change; omitted fields are kept, null removes a field, objects merge, and arrays replace whole, so an edited clusters array must still list every cluster that should remain. The one exception is pedagogy `bridges`: entries name a bridge by id or term and merge only the annotation fields given into that bridge; other bridges keep theirs. Every domain save response lists what it removed in `cleared`: fields, array items by id, term, name, or value (for example clusters[beta] or clusters[alpha].seeds[two]), and fields inside kept items. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
+      "Replace the complete agent-authored document, or write only the requested agent domain, using optimistic revision matching. Phased guidance is optional and no server approval is required for a draft save. Every focused domain save (domain=content, domain=pedagogy, domain=classification) is a JSON Merge Patch (RFC 7396) over that domain: send only the fields you change; omitted fields are kept, null removes a field, and objects merge. Lists of identified items merge item by item, as in a Kubernetes strategic merge patch: clusters match by id (or name), bridges by id (or term), and lenses, lens options, and relatedPuzzles entries by id. A list entry patches the item it names, an unknown one is appended, and items left out are kept. Remove an item with {\"id\": \"...\", \"$patch\": \"delete\"}; put {\"$patch\": \"replace\"} in a list to replace it whole, for example to reorder. Every other list (terms, tags, categories, citations, links, lens targets) replaces whole. When a patch moves a term off a cluster, that term's termInfo note goes too unless the patch sets it. Every domain save response lists what it removed in `cleared` (fields, list items such as clusters[beta] or clusters[alpha].seeds[two], and fields inside kept items) and, in `kept`, keyed items left in place although the patch named most of their list. With domain=content, domain=classification, or domain=pedagogy, the server updates that domain column only and defers rewriting the materialized document cache (document_stale); other domains and protected attribution/editorial metadata are preserved and cannot be supplied by an agent. The first save of a draft that predates classification rewrites the content, pedagogy, and classification columns together so category fields are not stored twice. Pedagogy receives content and classification as read-only context. The complete-document path remains available for clients that edit all authored content at once, but protected metadata is hidden and preserved. This input remains permissive so invalid intermediate documents can be saved. This tool does not publish a puzzle. A person publishes the working copy, and that publish is what players see. Set repair=true on complete or content saves to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving; repair is not accepted for classification or pedagogy saves because it is content-domain-only. The response always echoes every change made under `repair`, never silently.",
     inputSchema: puzzleDraftSaveSchema({
       draft_id: draftIdSchema,
       expected_revision: z.number({ error: EXPECTED_REVISION_CONTRACT }).int().positive().describe(
@@ -1393,13 +1394,14 @@ export function createAuthoringMcpServer({
     }
     let previousDocument = null;
     let cleared = [];
+    let kept = [];
     const repairedInput = repair
       ? repairEscapedQuotes(document)
       : { document, changes: [] };
     if (domain !== "complete") {
       const previous = await draftRepository.get({ draftId: draft_id, actor });
       previousDocument = documentForEditor(previous.document);
-      ({ document, cleared } = applyAuthoredDomainPatch(
+      ({ document, cleared, kept } = applyAuthoredDomainPatch(
         previousDocument,
         domain,
         repairedInput.document
@@ -1485,10 +1487,14 @@ export function createAuthoringMcpServer({
     const clearedNote = cleared.length
       ? ` This save removed ${cleared.join(", ")} (see \`cleared\`).`
       : "";
+    const keptNote = kept.length
+      ? ` Kept ${kept.join(", ")}: leaving an item out of a keyed list keeps it. ` +
+        "Send that item with \"$patch\": \"delete\" to remove it (see `kept`)."
+      : "";
     return success(
-      `Saved draft ${draft_id}; current revision is ${draft.revision}.` + repairNote + clearedNote,
+      `Saved draft ${draft_id}; current revision is ${draft.revision}.` + repairNote + clearedNote + keptNote,
       {
-        ...(domain !== "complete" ? { cleared } : {}),
+        ...(domain !== "complete" ? { cleared, kept } : {}),
         draft: domain === "complete"
           ? draftForMcp(draft, { categoryRegistry: null })
           : draftForMcpDomain(draft, domain, { categoryRegistry: null }),

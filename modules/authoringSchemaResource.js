@@ -155,8 +155,9 @@ function phaseDescription(phase, pass) {
       `${base} This pass binds to write domain "${pass.writeDomain}": retrieve ` +
       `get_puzzle_draft with domain=${pass.writeDomain}, edit, and save that same ` +
       "domain. That save is a JSON Merge Patch (RFC 7396): send only the fields " +
-      "this pass changes; omitted fields are kept, null removes a field, and " +
-      "arrays replace whole."
+      "this pass changes; omitted fields are kept and null removes a field. " +
+      "Lists of clusters, bridges, lenses, lens options, and relatedPuzzles " +
+      "entries merge item by item by id; other lists replace whole."
     );
   }
   return (

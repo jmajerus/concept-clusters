@@ -436,7 +436,7 @@ export async function run() {
     () => applyAuthoredDomainPatch(document, "pedagogy", {
       bridges: [{ relationKind: "dynamic" }]
     }),
-    /must name a bridge by id or term/
+    /must name its item by id or term/
   );
   assert.throws(
     () => applyAuthoredDomainPatch(document, "pedagogy", {
@@ -478,13 +478,97 @@ export async function run() {
   assert.equal(noInfo.document.info, undefined);
   assert.deepEqual(noInfo.cleared, ["info"]);
 
-  // Arrays replace whole; cleared names the items a partial array dropped.
+  // Keyed lists merge by item identity; a partial list keeps the rest.
   const contentClusters = projectAuthoredDocument(document, "content").document.clusters;
   const partial = applyAuthoredDomainPatch(document, "content", {
-    clusters: [{ ...contentClusters[0], seeds: ["one"], floatingTerms: ["three", "two"] }]
+    clusters: [{ id: "alpha", seeds: ["one"], floatingTerms: ["three", "two"] }]
   });
-  assert.equal(partial.document.clusters.length, 1);
-  assert.deepEqual(partial.cleared, ["clusters[alpha].seeds[two]", "clusters[beta]"]);
+  assert.deepEqual(partial.document.clusters.map(cluster => cluster.id), ["alpha", "beta"]);
+  assert.equal(partial.document.clusters[0].fact, "Alpha fact");
+  assert.deepEqual(partial.cleared, ["clusters[alpha].seeds[two]"]);
+  assert.deepEqual(partial.kept, []);
+
+  const byName = applyAuthoredDomainPatch(document, "content", {
+    clusters: [{ name: "Beta", fact: "New beta fact" }],
+    bridges: [{ term: "Shared", fact: "New shared fact" }]
+  });
+  assert.equal(byName.document.clusters[1].fact, "New beta fact");
+  assert.equal(byName.document.bridges[0].fact, "New shared fact");
+  assert.equal(byName.document.bridges[0].relationKind, "contrast");
+
+  const deleted = applyAuthoredDomainPatch(document, "content", {
+    clusters: [{ id: "beta", $patch: "delete" }]
+  });
+  assert.deepEqual(deleted.document.clusters.map(cluster => cluster.id), ["alpha"]);
+  assert.deepEqual(deleted.cleared, ["clusters[beta]"]);
+  assert.equal(JSON.stringify(deleted.document).includes("$patch"), false);
+
+  const reordered = applyAuthoredDomainPatch(document, "content", {
+    clusters: [{ $patch: "replace" }, contentClusters[1], contentClusters[0]]
+  });
+  assert.deepEqual(reordered.document.clusters.map(cluster => cluster.id), ["beta", "alpha"]);
+  assert.deepEqual(reordered.cleared, []);
+
+  const added = applyAuthoredDomainPatch(document, "content", {
+    clusters: [{ id: "gamma", name: "Gamma", fact: "Gamma fact", seeds: ["g1", "g2"] }]
+  });
+  assert.deepEqual(added.document.clusters.map(cluster => cluster.id), ["alpha", "beta", "gamma"]);
+
+  // A term the patch moves off a cluster takes its termInfo with it, unless
+  // the patch sets that note on purpose.
+  const noted = {
+    ...document,
+    clusters: [
+      { ...document.clusters[0], termInfo: { one: "Note one", three: "Note three" } },
+      document.clusters[1]
+    ]
+  };
+  const moved = applyAuthoredDomainPatch(noted, "content", {
+    clusters: [{ id: "alpha", floatingTerms: ["seven"] }]
+  });
+  assert.deepEqual(moved.document.clusters[0].termInfo, { one: "Note one" });
+  assert.deepEqual(moved.cleared, [
+    "clusters[alpha].floatingTerms[three]",
+    "clusters[alpha].termInfo.three"
+  ]);
+  const keptNote = applyAuthoredDomainPatch(noted, "content", {
+    clusters: [{ id: "alpha", floatingTerms: ["seven"], termInfo: { three: "Still here" } }]
+  });
+  assert.equal(keptNote.document.clusters[0].termInfo.three, "Still here");
+
+  // Naming most of a keyed list but not all of it is reported as kept.
+  const threeLenses = {
+    ...document,
+    lenses: [
+      { id: "l1", prompt: "One", explanation: "E" },
+      { id: "l2", prompt: "Two", explanation: "E" },
+      { id: "l3", prompt: "Three", explanation: "E" }
+    ]
+  };
+  const mostly = applyAuthoredDomainPatch(threeLenses, "pedagogy", {
+    lenses: [{ id: "l1", prompt: "Uno" }, { id: "l2", prompt: "Dos" }]
+  });
+  assert.deepEqual(mostly.document.lenses.map(lens => lens.prompt), ["Uno", "Dos", "Three"]);
+  assert.deepEqual(mostly.kept, ["lenses[l3]"]);
+
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "classification", {
+      tags: [{ $patch: "replace" }]
+    }),
+    /tags replaces whole/
+  );
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "content", {
+      info: { $patch: "replace", text: "x" }
+    }),
+    /info\.\$patch applies only to items of keyed lists/
+  );
+  assert.throws(
+    () => applyAuthoredDomainPatch(document, "content", {
+      clusters: [{ id: "alpha", $patch: "merge" }]
+    }),
+    /must be "delete" on an item or "replace"/
+  );
 
   assert.throws(
     () => applyAuthoredDomainPatch(document, "content", { id: null }),
