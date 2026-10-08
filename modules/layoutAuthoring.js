@@ -55,6 +55,14 @@ export function createLayoutAuthoringController({
   const runPassBtn = document.getElementById("layout-authoring-run-pass");
   const savePassBtn = document.getElementById("layout-authoring-save-pass");
   const passEl = document.getElementById("layout-authoring-pass");
+  // The progress area redraws every poll; only state changes are announced.
+  const passAnnounceEl = document.getElementById("layout-authoring-pass-announce");
+  let lastAnnounced = null;
+  const announcePass = (key, text) => {
+    if (!passAnnounceEl || key === lastAnnounced) return;
+    lastAnnounced = key;
+    passAnnounceEl.textContent = text;
+  };
   const layoutAuthoringFixedInput = document.getElementById("layout-authoring-fixed-input");
   const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
   const layoutAuthorBtn = document.getElementById("layout-author-btn");
@@ -656,16 +664,28 @@ export function createLayoutAuthoringController({
       ? `Board size ${percent(result.size)}${job.write ? (result.sizeAction ? ` (${result.sizeAction})` : "") : ""}`
       : `Board size kept at ${percent(result.size)} (set by ${result.sizeOwner === "author" ? "an author" : "an author's layouts"})` +
         (result.suggestedSize != null ? `; the board would be clean at ${percent(result.suggestedSize)}` : "");
+    // The pass reports a refused or invalid save as a "not saved (…)"
+    // action, not as a failure, so a write run is only a success when none
+    // of its saves, including the board size, was refused.
+    const notSaved = action => typeof action === "string" && action.startsWith("not saved");
+    const unsaved = job.write
+      ? rows.filter(row => notSaved(row.action)).length + (notSaved(result.sizeAction) ? 1 : 0)
+      : 0;
     const items = rows.map(row => {
       const label = MODE_LABELS[row.mode] || row.mode;
       const how = row.action === "author layout kept"
         ? "your layout, kept"
         : job.write ? row.action : row.strategy;
-      const tone = row.defects?.total === 0 ? "good" : "error";
+      const tone = notSaved(row.action) || row.defects?.total !== 0 ? "error" : "good";
       return `<li data-tone="${tone}">${escapeText(label)}: ${escapeText(describeDefects(row.defects))} — ${escapeText(how)}</li>`;
     }).join("");
-    const heading = job.write ? "Automatic layouts saved." : "Dry run finished; nothing saved yet.";
-    passEl.innerHTML = `<div>${escapeText(heading)} ${escapeText(size)}.</div><ul>${items}</ul>`;
+    const heading = !job.write
+      ? "Dry run finished; nothing saved yet."
+      : unsaved
+        ? `Automatic layouts saved with ${unsaved} not saved; see below.`
+        : "Automatic layouts saved.";
+    passEl.innerHTML = `<div${unsaved ? ' data-tone="error"' : ""}>${escapeText(heading)} ${escapeText(size)}.</div><ul>${items}</ul>`;
+    announcePass(`${job.startedAt}:done`, heading);
     passEl.hidden = false;
     // Saving is worth offering only when the dry run found something the
     // pass may write: a mode without an author's layout.
@@ -685,12 +705,14 @@ export function createLayoutAuthoringController({
     if (running) {
       passEl.hidden = false;
       passEl.textContent = `${job.write ? "Saving automatic layouts" : "Running layout pass"}… ${elapsed(job.startedAt)} (each mode, then larger boards if needed; usually under a few minutes)`;
+      announcePass(`${job.startedAt}:running`, job.write ? "Saving automatic layouts." : "Layout pass running.");
       return;
     }
     if (job.status === "failed") {
       passEl.hidden = false;
       passEl.innerHTML = `<div data-tone="error">Layout pass failed: ${escapeText(job.error)}</div>`;
       savePassBtn.hidden = true;
+      announcePass(`${job.startedAt}:failed`, `Layout pass failed: ${job.error}`);
       return;
     }
     renderPassReport(job);
@@ -725,11 +747,16 @@ export function createLayoutAuthoringController({
       "Save automatic layouts to the published puzzle? Players see them at once. " +
       "Your own saved layouts and board size are never replaced."
     )) return;
+    const puzzleId = state.puzzle.id;
     try {
-      const job = await layoutPass.start({ puzzleId: state.puzzle.id, write });
+      const job = await layoutPass.start({ puzzleId, write });
+      // Another puzzle may have loaded while the request was in flight;
+      // its panel must not show this puzzle's run.
+      if (puzzleId !== passPuzzleId) return;
       renderPassJob(job);
-      pollPass(state.puzzle.id, { reloadWhenSaved: write });
+      pollPass(puzzleId, { reloadWhenSaved: write });
     } catch (error) {
+      if (puzzleId !== passPuzzleId) return;
       passEl.hidden = false;
       passEl.innerHTML = `<div data-tone="error">${escapeText(error.message)}</div>`;
     }

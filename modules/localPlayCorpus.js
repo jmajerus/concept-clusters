@@ -177,11 +177,8 @@ export function createLocalPlayCorpusHandler({
       }
       const id = decodeURIComponent(passMatch[1]);
       const jobs = layoutPassJobs || layoutPassJobsFor(repositoryRoot);
-      if (req.method === "GET" || req.method === "HEAD") {
-        json(res, jobs.get(id));
-        return true;
-      }
-      if (req.method !== "POST") return false;
+      const reading = req.method === "GET" || req.method === "HEAD";
+      if (!reading && req.method !== "POST") return false;
       await ensureSeeded();
       let published;
       try {
@@ -195,11 +192,18 @@ export function createLocalPlayCorpusHandler({
         json(res, { error: "Puzzle withdrawn from authoring play", id }, 409);
         return true;
       }
-      let body = {};
+      if (reading) {
+        json(res, jobs.get(id));
+        return true;
+      }
+      let body;
       try {
         body = await readJsonBody(req) || {};
-      } catch {
-        body = {};
+      } catch (error) {
+        // Never guess the operation from a broken request: a malformed save
+        // must not quietly become a dry run.
+        json(res, { error: error instanceof Error ? error.message : String(error), id }, 400);
+        return true;
       }
       const base = `http://${req.headers.host || "127.0.0.1:8787"}`;
       json(res, jobs.start(id, { write: body.write === true, base }), 202);
