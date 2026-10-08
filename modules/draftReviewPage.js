@@ -9,7 +9,7 @@
 // after the cache refreshes.
 
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
-import { LAYOUT_MODES, layoutForMode, layoutSource } from "./layoutDocument.js";
+import { layoutSource, normalizeLayoutDocument } from "./layoutDocument.js";
 import { layoutIsFixed } from "./layoutHints.js";
 import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
 import {
@@ -992,8 +992,10 @@ const LAYOUT_CHIP_MODES = [
 ];
 
 function savedLayoutModes(item) {
+  // Normalize once per row; layoutForMode would normalize again per mode.
+  const layout = normalizeLayoutDocument(item.savedLayout || null);
   return LAYOUT_CHIP_MODES.map(([mode, letter, name]) => {
-    const saved = layoutForMode(item.savedLayout || null, mode);
+    const saved = layout?.modes?.[mode] || null;
     if (!saved) return { mode, letter, name, saved: null };
     const source = layoutSource(saved);
     const use = mode === "star" ? null : (layoutIsFixed(saved) ? "fixed" : "hint");
@@ -1001,12 +1003,8 @@ function savedLayoutModes(item) {
   });
 }
 
-function hasMissingLayout(item) {
-  return savedLayoutModes(item).some(entry => !entry.saved);
-}
-
-function renderSavedLayouts(item) {
-  return `<span class="layout-chips">${savedLayoutModes(item).map(({ mode, letter, name, saved }) => {
+function renderSavedLayouts(modes) {
+  return `<span class="layout-chips">${modes.map(({ mode, letter, name, saved }) => {
     if (!saved) {
       return `<span class="badge layout-chip layout-chip-none" data-layout-mode="${mode}" data-layout-source="none" title="${name}: no saved layout (live search)">${letter} –</span>`;
     }
@@ -1135,8 +1133,9 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
     ? escapeHtml(subcategoryText)
     : emptyValue();
   const local = variant === "local";
-  const layoutsCell = local ? `<td>${renderSavedLayouts(item)}</td>` : "";
-  const layoutMissing = local && hasMissingLayout(item) ? "1" : "0";
+  const layoutModes = local ? savedLayoutModes(item) : [];
+  const layoutsCell = local ? `<td>${renderSavedLayouts(layoutModes)}</td>` : "";
+  const layoutMissing = layoutModes.some(entry => !entry.saved) ? "1" : "0";
   return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-missing="${layoutMissing}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
