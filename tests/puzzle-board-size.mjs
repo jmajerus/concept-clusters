@@ -172,8 +172,31 @@ export async function run() {
   assert.deepEqual(boardCanvas(heavy, "sets"), { width: 1190, height: 880 });
   assert.equal(boardFrameMaxWidth(boardCanvas(heavy, "graph")), 1135);
 
+  // Published puzzles that the label-surplus and edge-load rules above have
+  // already grown off their preset. Pinned here so any further corpus drift
+  // still shows up as a failure rather than passing silently.
+  const grownCanvas = {
+    "octopus-play-stages": {
+      graph: { width: 1080, height: 700 },
+      star: { width: 1080, height: 700 },
+      sets: { width: 1180, height: 880 }
+    },
+    "functional-groups-organic": {
+      graph: { width: 970, height: 630 },
+      star: { width: 970, height: 630 },
+      sets: { width: 1060, height: 790 }
+    }
+  };
   for (const puzzle of PUZZLES) {
     for (const mode of ["graph", "star", "sets"]) {
+      if (grownCanvas[puzzle.id]) {
+        assert.deepEqual(
+          boardCanvas(puzzle, mode),
+          grownCanvas[puzzle.id][mode],
+          `${puzzle.id} ${mode} should stay on its grown canvas`
+        );
+        continue;
+      }
       assert.equal(
         boardCanvas(puzzle, mode),
         legacyCanvas(puzzle, mode),

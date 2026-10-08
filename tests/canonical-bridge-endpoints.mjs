@@ -9,6 +9,22 @@ export async function run(page, baseURL) {
     if (message.type() === "error") errors.push(message.text());
   });
 
+  // Pin the fixture shape this test exercises -- an oxygen bridge with a
+  // canonical term on both sides -- so editorial changes to the live
+  // energy-flow puzzle cannot silently remove the case under test.
+  await page.route("**/puzzles/science/energy-flow.js", async route => {
+    const response = await route.fetch();
+    const source = (await response.text())
+      .replace("export default definePuzzle(", "const puzzle = definePuzzle(");
+    await route.fulfill({
+      response,
+      body: `${source}
+puzzle.bridges.find(bridge => bridge.term === "oxygen").idealTerms = ["chlorophyll", "aerobic"];
+export default puzzle;
+`
+    });
+  });
+
   for (const mode of ["graph", "star", "sets"]) {
     await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=${mode}&moves=`);
     await page.waitForSelector("#puzzle-title:not(:empty)");

@@ -118,11 +118,24 @@ export async function run(page, baseURL) {
     assert.equal(rendered.arrowCount, 2, `${mode}: a completed directed bridge renders two arrows`);
     if (mode === "sets") {
       await page.evaluate(() => CC.state.setSim.stop());
-      const box = await page.evaluate(() => {
-        const group = [...document.querySelectorAll("g.node")]
-          .find(element => element.__data__?.word === "lost leverage");
-        const rect = group.querySelector(".bridge-shape").getBoundingClientRect();
-        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      // The pill keeps sliding on screen after the simulation stops; press
+      // only once its box holds still, or the mousedown misses it.
+      const box = await page.evaluate(async () => {
+        const measure = () => {
+          const group = [...document.querySelectorAll("g.node")]
+            .find(element => element.__data__?.word === "lost leverage");
+          const rect = group.querySelector(".bridge-shape").getBoundingClientRect();
+          return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+        };
+        const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
+        let last = measure();
+        for (let still = 0, tries = 0; still < 5 && tries < 300; tries++) {
+          await frame();
+          const next = measure();
+          still = Math.hypot(next.x - last.x, next.y - last.y) < 0.5 ? still + 1 : 0;
+          last = next;
+        }
+        return last;
       });
       const before = await page.evaluate(() => {
         const bridge = CC.state.nodes.find(node => node.word === "lost leverage");
@@ -261,7 +274,11 @@ export async function run(page, baseURL) {
       const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
       return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
     };
-    const onLine = [...arrows].every(arrow => {
+    // The settled layout can park the pill almost on top of a canonical
+    // term; bridgeArrowPoints leaves an arm under 12px without geometry.
+    const drawn = [...arrows].filter(arrow => arrow.getAttribute("points"));
+    if (!drawn.length) return { lines: lines.length, arrows: arrows.length, onLine: false };
+    const onLine = drawn.every(arrow => {
       const points = arrow.getAttribute("points").split(" ").map(pair => pair.split(",").map(Number));
       const cx = (points[0][0] + points[1][0] + points[2][0]) / 3;
       const cy = (points[0][1] + points[1][1] + points[2][1]) / 3;

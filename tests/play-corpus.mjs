@@ -1018,7 +1018,10 @@ export async function run(page) {
         document.body.classList.contains("authoring-construct")
         && document.getElementById("authoring-studio")
         && !document.getElementById("authoring-studio").hidden
-        && !new URL(location.href).searchParams.has("play"),
+        && !new URL(location.href).searchParams.has("play")
+        // The studio shows before its reload settles; Play enables only
+        // once play.json answers, so the next goto cannot abort that fetch.
+        && !document.querySelector('#authoring-studio button[data-mode="play"]')?.disabled,
       null, { timeout: 15000 });
 
       await page.goto(`${baseURL}/?puzzle=lab-d1-play&play`, { waitUntil: "networkidle" });

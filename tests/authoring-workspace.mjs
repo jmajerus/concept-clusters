@@ -38,7 +38,7 @@ export async function run() {
     localAuthoringGuidance({ AUTHORING_DRAFT_REVIEW_URL: "http://authoring.lan:8787" }),
     /(?:admin\/drafts|Open board|click Publish)/
   );
-  assert.match(localAuthoringGuidance(), /MCP has no\s+Cue or Freeze operation/);
+  assert.match(localAuthoringGuidance(), /MCP has no\s+Cue or Freeze\s+operation/);
   assert.doesNotMatch(
     localAuthoringGuidance({ AUTHORING_DRAFT_REVIEW_URL: "http://authoring.lan:8787" }),
     /needs npm run dev/

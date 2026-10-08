@@ -121,14 +121,13 @@ export async function run(page) {
     actor,
     document: {
       ...literacyPublished.document,
+      // Add a shelf the live taxonomy will never publish, on top of
+      // whatever the published snapshot already has.
       subcategories: {
-        "propaganda-disinformation": {
-          title: "Propaganda & Disinformation",
-          info: { text: "Campaigns." }
-        },
-        "verification-fact-checking": {
-          title: "Verification & Fact-Checking",
-          info: { text: "Checking." }
+        ...literacyPublished.document.subcategories,
+        "fixture-unpublished-shelf": {
+          title: "Fixture Unpublished Shelf",
+          info: { text: "Test-only." }
         }
       }
     }
@@ -149,7 +148,7 @@ export async function run(page) {
   );
   assert.match(literacyRow, /published in D1/);
   assert.match(literacyRow, /unpublished changes/);
-  assert.match(literacyRow, /Not on the published snapshot/);
+  assert.match(literacyRow, /Not on the published snapshot:.*Fixture Unpublished Shelf/);
   assert.match(literacyRow, /Propaganda &amp; Disinformation \(4\)|Propaganda &amp; Disinformation/);
   assert.doesNotMatch(literacyRow, /badge-accent">cued/);
   const literacyEdit = createResponse();
