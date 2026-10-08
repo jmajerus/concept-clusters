@@ -350,6 +350,7 @@ button:disabled {
 #puzzle-view.learning-gated .mode-row,
 #puzzle-view.learning-gated #progress,
 #puzzle-view.learning-gated #board-stage,
+#puzzle-view.learning-gated #cluster-legend,
 #puzzle-view.learning-gated #lens-panel,
 #puzzle-view.learning-gated #lens-assignment,
 #puzzle-view.learning-gated #layout-authoring,
@@ -360,6 +361,51 @@ button:disabled {
 #puzzle-view.learning-gated > footer {
   display: none !important;
 }
+
+/* Graph mode's color key (modules/clusterLegend.js). Chips wrap, so a
+   large board takes a second line rather than scrolling sideways. */
+#cluster-legend {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#cluster-legend[hidden] { display: none; }
+.legend-chip {
+  --chip: var(--ink-soft); --chip-bg: var(--panel); --chip-line: var(--rule);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 8px;
+  border: 1px solid var(--chip-line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: default;
+}
+.legend-chip:focus-visible { outline: 2px solid var(--chip); outline-offset: 1px; }
+.legend-swatch {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--chip-bg);
+  border: 2px solid var(--chip-line);
+  flex: none;
+}
+.legend-chip.complete { background: var(--chip-bg); color: var(--chip); font-weight: 600; }
+.legend-chip.complete .legend-name::after { content: " ✓"; }
+.legend-chip.bridge { border-style: dashed; color: var(--bridge); }
+.legend-chip.c-teal { --chip: var(--teal); --chip-bg: var(--teal-bg); --chip-line: var(--teal-line); }
+.legend-chip.c-blue { --chip: var(--blue); --chip-bg: var(--blue-bg); --chip-line: var(--blue-line); }
+.legend-chip.c-amber { --chip: var(--amber); --chip-bg: var(--amber-bg); --chip-line: var(--amber-line); }
+.legend-chip.c-magenta { --chip: var(--magenta); --chip-bg: var(--magenta-bg); --chip-line: var(--magenta-line); }
+.legend-chip.c-olive { --chip: var(--olive); --chip-bg: var(--olive-bg); --chip-line: var(--olive-line); }
+.legend-chip.c-brown { --chip: var(--brown); --chip-bg: var(--brown-bg); --chip-line: var(--brown-line); }
+.legend-chip.c-cyan { --chip: var(--cyan); --chip-bg: var(--cyan-bg); --chip-line: var(--cyan-line); }
+.legend-chip.bridge { --chip: var(--bridge); --chip-bg: var(--bridge-bg); --chip-line: var(--bridge-line); }
 
 /* ---------- board: the graph-paper signature ---------- */
 #board-stage {

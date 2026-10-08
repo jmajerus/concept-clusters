@@ -37,6 +37,7 @@ import { starBridgePreconnectEnabled } from "./modules/starLayoutRepository.js";
 import { BOARD_CANVAS, boardCanvas, boardDisplayFrame, canonicalBoardSizeFactor, derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
+import { createClusterLegend } from "./modules/clusterLegend.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
@@ -1938,6 +1939,11 @@ function onBoardTap(node, event) {
   handleTap(node);
 }
 
+const clusterLegend = createClusterLegend({
+  container: document.getElementById("cluster-legend"),
+  svg, isDone, isBridge
+});
+
 const { buildGraph } = createGraphRenderer({
   svg,
   getState: () => state,
@@ -1948,7 +1954,8 @@ const { buildGraph } = createGraphRenderer({
   isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
   updateSolutionHint, countEl, setMessage,
-  onBackgroundClick: event => authoringStudio?.handleBackgroundClick(event)
+  onBackgroundClick: event => authoringStudio?.handleBackgroundClick(event),
+  onPaint: paintedState => clusterLegend.update(paintedState)
 });
 
 const { buildStarGraph } = createStarRenderer({
@@ -1986,6 +1993,7 @@ const { buildSetGraph } = createSetRenderer({
 // used by both loadPuzzle and setMode rather than repeating the same
 // three-way branch in each.
 function buildForMode() {
+  if (mode !== "graph") clusterLegend.hide();
   (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : buildSetGraph)();
 }
 

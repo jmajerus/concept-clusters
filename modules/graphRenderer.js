@@ -33,7 +33,8 @@ import { singleClusterTermHome } from "./lensLayout.js";
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onBackgroundClick = null
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onBackgroundClick = null,
+  onPaint = null
 }) {
   function buildGraph() {
     const state = getState();
@@ -336,6 +337,7 @@ export function createGraphRenderer({
       });
       countEl.textContent = state.progressLabel || `${state.made} of ${state.need} links`;
       updateSolutionHint();
+      onPaint?.(state);
     };
     state.paint();
 
