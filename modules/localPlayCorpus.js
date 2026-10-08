@@ -32,8 +32,22 @@ import {
   normalizeLayoutDocument,
   stampLayoutSaved
 } from "./layoutDocument.js";
+import { createLayoutPassJobs, spawnLayoutPass } from "./layoutPassJobs.js";
 
 const LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/;
+const LAYOUT_PASS_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layouts-auto$/;
+
+// One registry for the server: the default handler is rebuilt per request,
+// and a running pass must stay findable across requests.
+const sharedLayoutPassJobs = new Map();
+function layoutPassJobsFor(repositoryRoot) {
+  if (!sharedLayoutPassJobs.has(repositoryRoot)) {
+    sharedLayoutPassJobs.set(repositoryRoot, createLayoutPassJobs({
+      run: options => spawnLayoutPass({ ...options, repositoryRoot })
+    }));
+  }
+  return sharedLayoutPassJobs.get(repositoryRoot);
+}
 
 function json(res, body, status = 200) {
   res.writeHead(status, {
@@ -130,7 +144,8 @@ export function createLocalPlayCorpusHandler({
   contentService = null,
   listDrafts = null,
   repositoryRoot,
-  indexHtml = null
+  indexHtml = null,
+  layoutPassJobs = null
 }) {
   if (!contentDocuments) throw new Error("contentDocuments is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -149,6 +164,49 @@ export function createLocalPlayCorpusHandler({
       const markup = indexHtml
         ?? await readFile(join(repositoryRoot, "index.html"), "utf8");
       html(res, htmlWithPlayCorpusMeta(markup));
+      return true;
+    }
+    // The authoring panel's Run layout pass: POST starts the automatic
+    // layout pass for one published puzzle ({ write: true } saves its
+    // results), GET reports the running or last finished run.
+    const passMatch = urlPath.match(LAYOUT_PASS_ROUTE);
+    if (passMatch) {
+      if (!requestIsSameOriginIfSpecified(req)) {
+        json(res, { error: "Layout passes must be same-origin." }, 403);
+        return true;
+      }
+      const id = decodeURIComponent(passMatch[1]);
+      const jobs = layoutPassJobs || layoutPassJobsFor(repositoryRoot);
+      const reading = req.method === "GET" || req.method === "HEAD";
+      if (!reading && req.method !== "POST") return false;
+      await ensureSeeded();
+      let published;
+      try {
+        published = await contentDocuments.getPublished({ kind: "puzzle", id });
+      } catch (error) {
+        if (!(error instanceof ContentDocumentNotFoundError)) throw error;
+        json(res, { error: "The layout pass runs on published puzzles; this one is not published.", id }, 404);
+        return true;
+      }
+      if (published.withdrawnAt) {
+        json(res, { error: "Puzzle withdrawn from authoring play", id }, 409);
+        return true;
+      }
+      if (reading) {
+        json(res, jobs.get(id));
+        return true;
+      }
+      let body;
+      try {
+        body = await readJsonBody(req) || {};
+      } catch (error) {
+        // Never guess the operation from a broken request: a malformed save
+        // must not quietly become a dry run.
+        json(res, { error: error instanceof Error ? error.message : String(error), id }, 400);
+        return true;
+      }
+      const base = `http://${req.headers.host || "127.0.0.1:8787"}`;
+      json(res, jobs.start(id, { write: body.write === true, base }), 202);
       return true;
     }
     const layoutMatch = urlPath.match(LAYOUT_ROUTE);
@@ -389,7 +447,7 @@ export function createDefaultLocalPlayCorpusHandler({
     const isIndex = urlPath === "/" || urlPath === "/index.html";
     const isPlay = urlPath === PLAY_CORPUS_PATH
       || /^\/play\/puzzles\/[^/]+\.json$/.test(urlPath);
-    const isLayout = LAYOUT_ROUTE.test(urlPath);
+    const isLayout = LAYOUT_ROUTE.test(urlPath) || LAYOUT_PASS_ROUTE.test(urlPath);
     if (!isIndex && !isPlay && !isLayout) return false;
     try {
       workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });

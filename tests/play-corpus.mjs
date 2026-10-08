@@ -14,6 +14,7 @@ import {
   htmlWithPlayCorpusMeta,
   PLAY_CORPUS_META_NAME
 } from "../modules/playCorpus.js";
+import { createLayoutPassJobs } from "../modules/layoutPassJobs.js";
 import { createLocalPlayCorpusHandler } from "../modules/localPlayCorpus.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { createPuzzleLoader } from "../modules/puzzleLoader.js";
@@ -380,6 +381,34 @@ export async function run(page) {
   assert.equal(autoBoard.status, 409, autoBoard.body);
   assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.sizeFactor, 1.1);
 
+  // The layout-pass route checks the puzzle on reads as well as starts, and
+  // never turns a malformed request into a dry run.
+  const endpointPass = createLocalPlayCorpusHandler({
+    contentDocuments: repo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    layoutPassJobs: createLayoutPassJobs({ run: async () => ({ rows: [] }) })
+  });
+  const callPass = async (method, id, payload) => {
+    const response = createResponse();
+    assert.equal(await endpointPass({
+      method,
+      url: `/admin/puzzles/${id}/layouts-auto`,
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() {
+        if (payload !== undefined) yield Buffer.from(payload);
+      }
+    }, response), true);
+    return response;
+  };
+  assert.equal((await callPass("GET", "no-such-puzzle")).status, 404);
+  assert.equal((await callPass("POST", "no-such-puzzle", "{}")).status, 404);
+  assert.equal((await callPass("POST", "lab-d1-play", "{not json")).status, 400);
+  assert.equal(JSON.parse((await callPass("GET", "lab-d1-play")).body).status, "none");
+  const startedPass = await callPass("POST", "lab-d1-play", JSON.stringify({ write: false }));
+  assert.equal(startedPass.status, 202, startedPass.body);
+  assert.equal(JSON.parse(startedPass.body).write, false);
+
   // Writes are conditional on the row the request read: a stale write is
   // refused, and the endpoint re-reads and retries so a save that landed in
   // between is kept rather than erased.
@@ -710,11 +739,33 @@ export async function run(page) {
         lensMode: "sequential"
       }
     });
+    // The panel's layout pass, with the tool replaced by a canned report.
+    const passRuns = [];
+    const fakeLayoutPass = createLayoutPassJobs({
+      run: async options => {
+        passRuns.push(options);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        return {
+          id: options.id,
+          size: 1.1,
+          sizeOwner: "auto",
+          suggestedSize: null,
+          // The write run has its board-size save refused, as a concurrent
+          // author save would; the panel must report it, not claim success.
+          ...(options.write ? { sizeAction: "not saved (409: An author's board settings are saved)" } : {}),
+          rows: [
+            { mode: "graph", defects: { total: 0 }, strategy: "live search", action: options.write ? "saved" : "dry run" },
+            { mode: "star", defects: { total: 0 }, action: "author layout kept" }
+          ]
+        };
+      }
+    });
     const handleBrowserPlay = createLocalPlayCorpusHandler({
       contentDocuments: repo,
       contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
       listDrafts: () => draftStore.listDrafts({ includeDocument: true }),
-      repositoryRoot: root
+      repositoryRoot: root,
+      layoutPassJobs: fakeLayoutPass
     });
     const handleDrafts = createLocalDraftReviewHandler({
       draftStore,
@@ -873,6 +924,38 @@ export async function run(page) {
         (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
         "Save Layout did not persist the D1 override"
       );
+
+      // Run layout pass is a dry run with a per-mode report; Save automatic
+      // layouts confirms, runs with write, and reloads to show the result.
+      assert.equal(await page.isHidden("#layout-authoring-run-pass"), false);
+      assert.equal(await page.isHidden("#layout-authoring-save-pass"), true);
+      await page.click("#layout-authoring-run-pass");
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-pass")?.textContent?.includes("Dry run finished"),
+      null, { timeout: 15000 });
+      const dryReport = await page.textContent("#layout-authoring-pass");
+      assert.match(dryReport, /Board size \+10%/);
+      assert.match(dryReport, /Graph: clean — live search/);
+      assert.match(dryReport, /Star: clean — your layout, kept/);
+      assert.equal(await page.isHidden("#layout-authoring-save-pass"), false);
+      // Only state changes reach the screen-reader announcement.
+      assert.equal(await page.textContent("#layout-authoring-pass-announce"), "Dry run finished; nothing saved yet.");
+      page.once("dialog", dialog => dialog.accept());
+      await Promise.all([
+        page.waitForNavigation({ timeout: 20000 }),
+        page.click("#layout-authoring-save-pass")
+      ]);
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-pass")?.textContent?.includes("Automatic layouts saved"),
+      null, { timeout: 15000 });
+      assert.match(await page.textContent("#layout-authoring-pass"), /saved with 1 not saved/);
+      assert.equal(
+        await page.getAttribute("#layout-authoring-pass > div", "data-tone"),
+        "error",
+        "a partly refused save must not read as success"
+      );
+      assert.deepEqual(passRuns.map(run => [run.id, run.write]), [["lab-d1-play", false], ["lab-d1-play", true]]);
+      assert.match(passRuns[0].base, /^http:\/\/127\.0\.0\.1:/);
 
       await page.goto(`${baseURL}/?puzzle=lab-d1-play`, { waitUntil: "networkidle" });
       await page.waitForFunction(() =>

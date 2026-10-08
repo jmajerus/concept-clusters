@@ -63,6 +63,30 @@ export async function saveLayoutBoard({
   return body.layout;
 }
 
+// The automatic layout pass for one published puzzle, run by the local
+// authoring server. `start` begins a run (a dry run unless `write`), and
+// `status` reports the running or last finished run.
+export async function startLayoutPass({ puzzleId, write = false, fetchImpl = fetch }) {
+  const response = await fetchImpl(`/admin/puzzles/${encodeURIComponent(puzzleId)}/layouts-auto`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ write })
+  });
+  const body = await responseBody(response);
+  if (!response.ok) throw new Error(body.error || `Layout pass could not start (${response.status})`);
+  return body;
+}
+
+export async function layoutPassStatus({ puzzleId, fetchImpl = fetch }) {
+  const response = await fetchImpl(`/admin/puzzles/${encodeURIComponent(puzzleId)}/layouts-auto`, {
+    cache: "no-store"
+  });
+  const body = await responseBody(response);
+  if (!response.ok) throw new Error(body.error || `Layout pass status unavailable (${response.status})`);
+  return body;
+}
+
 export async function clearLayout({
   puzzleId,
   draftId = null,

@@ -12,6 +12,8 @@
 //   --base <url>              authoring server (default http://127.0.0.1:8787)
 //   --lanes <n>               puzzles laid out at once (default 2)
 //   --report <path>           also write the full results as JSON
+//   --json                    print only the results, as JSON, to stdout
+//                             (the authoring panel's Run layout pass uses it)
 //
 // Needs the local authoring server (`npm run dev`), which reads and writes
 // the same D1 publication rows players see: --write changes live boards.
@@ -69,7 +71,8 @@ function parseArgs(argv) {
     write: false,
     base: "http://127.0.0.1:8787",
     lanes: 2,
-    report: null
+    report: null,
+    json: false
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -80,6 +83,7 @@ function parseArgs(argv) {
     };
     if (arg === "--all") options.all = true;
     else if (arg === "--write") options.write = true;
+    else if (arg === "--json") options.json = true;
     else if (arg === "--modes") {
       options.modes = value().split(",").map(mode => mode.trim()).filter(Boolean);
       const unknown = options.modes.filter(mode => !MODES.includes(mode));
@@ -470,7 +474,8 @@ async function main() {
     // since each save rewrites that puzzle's whole layout document.
     ids = [...new Set(ids)];
     const queue = [...ids];
-    console.log(`${options.write ? "Laying out" : "Dry run:"} ${ids.length} puzzles × ${options.modes.length} modes, ${options.lanes} puzzles at a time.`);
+    const log = options.json ? () => {} : line => console.log(line);
+    log(`${options.write ? "Laying out" : "Dry run:"} ${ids.length} puzzles × ${options.modes.length} modes, ${options.lanes} puzzles at a time.`);
     const puzzles = [];
     await Promise.all(Array.from({ length: Math.min(options.lanes, queue.length) }, async () => {
       while (queue.length) {
@@ -484,15 +489,17 @@ async function main() {
         }
         result.ms = Date.now() - started;
         puzzles.push(result);
-        if (puzzles.length % 10 === 0) console.log(`  ${puzzles.length} puzzles done`);
+        if (puzzles.length % 10 === 0) log(`  ${puzzles.length} puzzles done`);
       }
     }));
-    console.log(`\n${summarize(puzzles, options)}`);
-    if (options.report) {
-      writeFileSync(options.report, `${JSON.stringify(puzzles, null, 2)}\n`);
-      console.log(`\nFull results: ${options.report}`);
+    if (options.report) writeFileSync(options.report, `${JSON.stringify(puzzles, null, 2)}\n`);
+    if (options.json) {
+      process.stdout.write(`${JSON.stringify({ write: options.write, puzzles })}\n`);
+      return;
     }
-    if (!options.write) console.log("\nDry run: nothing was saved. Pass --write to save automatic layouts.");
+    log(`\n${summarize(puzzles, options)}`);
+    if (options.report) log(`\nFull results: ${options.report}`);
+    if (!options.write) log("\nDry run: nothing was saved. Pass --write to save automatic layouts.");
   } finally {
     await browser.close();
   }
