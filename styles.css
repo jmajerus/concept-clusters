@@ -686,6 +686,17 @@ body.authoring-construct #share-status {
 }
 #board-size-factor input[type="range"] { flex: 1 1 120px; min-width: 0; }
 #board-size-factor output { font-variant-numeric: tabular-nums; }
+/* Layout view: each counted defect outlined on the board. */
+#board .layout-defect-marks { pointer-events: none; }
+#board .layout-defect-marks circle,
+#board .layout-defect-marks rect,
+#board .layout-defect-marks line {
+  fill: none;
+  stroke: var(--error);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 4;
+  opacity: 0.85;
+}
 .board-settings-note { margin: 0; font-size: 12px; color: var(--ink-soft); }
 #board-settings-status[data-tone="error"],
 #board-experiments-status[data-tone="error"] { color: var(--error); }

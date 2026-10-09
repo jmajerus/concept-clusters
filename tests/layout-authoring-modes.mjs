@@ -81,6 +81,23 @@ async function authoringMode(page, baseURL, mode) {
     // The panel refreshes on a layout change and lists the same name.
     await page.evaluate(() => window.CC.state.onAuthorLayoutChanged?.("placement"));
     assert.ok((await page.textContent("#layout-metric-pill-crossings")).includes(expected));
+    // Pushing a bridge onto a circle names the overlap in the panel and
+    // outlines the defects on the board.
+    const overlapLabel = await page.evaluate(() => {
+      const state = window.CC.state;
+      const bridge = state.nodes.find(node => node.gs.length > 1 && node.connected.length);
+      const ci = bridge.gs[0];
+      const circle = state.setLayout.csNodes[ci];
+      bridge.x = bridge.fx = circle.x + circle.r - 10;
+      bridge.y = bridge.fy = circle.y;
+      state.paint();
+      state.onAuthorLayoutChanged?.("drag");
+      return `${bridge.word} / “${state.puzzle.clusters[ci].name}” circle`;
+    });
+    assert.ok((await page.textContent("#layout-metric-overlaps")).includes(overlapLabel),
+      `overlap "${overlapLabel}" is named in the panel`);
+    assert.ok(await page.evaluate(() => document.querySelectorAll("#board .layout-defect-marks > *").length) > 0,
+      "defects are outlined on the board");
   }
   // Near edge reports boundsViolations apart from overlaps; Star has none.
   const nearEdge = mode === "star" ? "—" : String(layout.metrics.boundsViolations);
