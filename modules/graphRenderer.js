@@ -622,7 +622,9 @@ export function createGraphRenderer({
           allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
         }
       ),
-      metrics: graphLayoutMetrics,
+      // The layout panel names and outlines each defect; saved layouts
+      // keep the counts alone.
+      metrics: () => scoreGraphGeometry(nodes, links, W, H, { details: true }),
       autoLayout: prettyPrintGraphLayout
     };
     // A solved mode switch can stop this simulation for pretty-printing

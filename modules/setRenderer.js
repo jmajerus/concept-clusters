@@ -491,8 +491,27 @@ export function createSetRenderer({
       bridgeSegmentsForPoint(item.bridge, item.point, circles, clusterBoxes, rowOffsets)
     );
     const inkRects = headings.map(headingInkRect);
-    // With details, each obstruction is named for the layout panel.
+    // The padded checks keep layouts comfortably spaced. With details, each
+    // counted defect is also named for the layout panel -- saying whether
+    // the items actually touch or only sit closer than the spacing allows --
+    // and outlined on the board (defectMarks, in board units).
     const obstructions = details ? [] : null;
+    const overlappingPairs = details ? [] : null;
+    const nearEdgeItems = details ? [] : null;
+    const defectMarks = details ? [] : null;
+    const clusterName = ci => `“${puzzle.clusters[ci]?.name}”`;
+    const circleMark = circle => ({ kind: "circle", x: circle.x, y: circle.y, r: circle.r });
+    const rectMark = rect => ({ kind: "rect", ...rect });
+    const spacing = touching => (touching ? "" : " (closer than the spacing check allows)");
+    const rectToCircle = (rect, circle) => Math.hypot(
+      circle.x - Math.max(rect.left, Math.min(circle.x, rect.right)),
+      circle.y - Math.max(rect.top, Math.min(circle.y, rect.bottom))
+    );
+    const overlap = (label, touching, ...marks) => {
+      if (!details) return;
+      overlappingPairs.push(`${label}${spacing(touching)}`);
+      defectMarks.push(...marks);
+    };
     const metrics = {
       hardOverlaps: 0,
       circleOverlaps: 0,
@@ -513,22 +532,25 @@ export function createSetRenderer({
           circle.y - circle.r < top + EDGE_MARGIN || circle.y + circle.r > H - EDGE_MARGIN) {
         metrics.hardOverlaps++;
         metrics.boundsViolations++;
+        nearEdgeItems?.push(`${clusterName(i)} circle`);
+        defectMarks?.push(circleMark(circle));
       }
       for (let j = i + 1; j < circles.length; j++) {
-        if (Math.hypot(circle.x - circles[j].x, circle.y - circles[j].y) <
-            circle.r + circles[j].r + 24) {
+        const distance = Math.hypot(circle.x - circles[j].x, circle.y - circles[j].y);
+        if (distance < circle.r + circles[j].r + 24) {
           metrics.hardOverlaps++;
           metrics.circleOverlaps++;
+          overlap(`${clusterName(i)} / ${clusterName(j)} circles`, distance < circle.r + circles[j].r,
+            circleMark(circle), circleMark(circles[j]));
         }
       }
       for (let j = 0; j < headingRects.length; j++) {
         if (j === i) continue;
-        const rect = headingRects[j];
-        const nearestX = Math.max(rect.left, Math.min(circle.x, rect.right));
-        const nearestY = Math.max(rect.top, Math.min(circle.y, rect.bottom));
-        if (Math.hypot(circle.x - nearestX, circle.y - nearestY) < circle.r + 6) {
+        if (rectToCircle(headingRects[j], circle) < circle.r + 6) {
           metrics.hardOverlaps++;
           metrics.headingOverlaps++;
+          overlap(`${clusterName(i)} circle / ${clusterName(j)} heading`, rectToCircle(inkRects[j], circle) < circle.r,
+            circleMark(circle), rectMark(inkRects[j]));
         }
       }
     }
@@ -537,6 +559,8 @@ export function createSetRenderer({
         if (rectsOverlap(headingRects[i], headingRects[j], 6)) {
           metrics.hardOverlaps++;
           metrics.headingOverlaps++;
+          overlap(`${clusterName(i)} / ${clusterName(j)} headings`, rectsOverlap(inkRects[i], inkRects[j]),
+            rectMark(inkRects[i]), rectMark(inkRects[j]));
         }
       }
     }
@@ -546,28 +570,33 @@ export function createSetRenderer({
           rect.top < top + EDGE_MARGIN || rect.bottom > H - EDGE_MARGIN) {
         metrics.hardOverlaps++;
         metrics.boundsViolations++;
+        nearEdgeItems?.push(item.bridge.term);
+        defectMarks?.push(rectMark(rect));
       }
-      circles.forEach(circle => {
-        const nearestX = Math.max(rect.left, Math.min(circle.x, rect.right));
-        const nearestY = Math.max(rect.top, Math.min(circle.y, rect.bottom));
-        if (Math.hypot(circle.x - nearestX, circle.y - nearestY) < circle.r + 8) {
+      circles.forEach((circle, ci) => {
+        if (rectToCircle(rect, circle) < circle.r + 8) {
           metrics.hardOverlaps++;
           metrics.bridgeCircleOverlaps++;
+          overlap(`${item.bridge.term} / ${clusterName(ci)} circle`, rectToCircle(rect, circle) < circle.r,
+            rectMark(rect), circleMark(circle));
         }
       });
-      headingRects.forEach(heading => {
+      headingRects.forEach((heading, hi) => {
         if (rectsOverlap(rect, heading, 8)) {
           metrics.hardOverlaps++;
           metrics.bridgeHeadingOverlaps++;
+          overlap(`${item.bridge.term} / ${clusterName(hi)} heading`, rectsOverlap(rect, inkRects[hi]),
+            rectMark(rect), rectMark(inkRects[hi]));
         }
       });
       for (let j = i + 1; j < bridgeRects.length; j++) {
         if (rectsOverlap(rect, bridgeRects[j], 12)) {
           metrics.hardOverlaps++;
           metrics.bridgeBridgeOverlaps++;
+          overlap(`${item.bridge.term} / ${bridges[j].bridge.term}`, rectsOverlap(rect, bridgeRects[j]),
+            rectMark(rect), rectMark(bridgeRects[j]));
         }
       }
-      void item;
     });
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
@@ -575,7 +604,8 @@ export function createSetRenderer({
       inkRects.forEach((rect, hi) => {
         if (segmentIntersectsRect(segment, rect, 3)) {
           metrics.lineHeadingIntersections++;
-          obstructions?.push(`${segment.bridge} → “${puzzle.clusters[hi]?.name}” heading`);
+          obstructions?.push(`${segment.bridge} → ${clusterName(hi)} heading`);
+          defectMarks?.push({ kind: "line", ...segment }, rectMark(rect));
         }
       });
       // A line obstructs a circle it enters, not one it passes beside.
@@ -586,15 +616,19 @@ export function createSetRenderer({
           circle.x, circle.y
         ) < circle.r) {
           metrics.lineCircleIntersections++;
-          obstructions?.push(`${segment.bridge} → “${puzzle.clusters[ci]?.name}” circle`);
+          obstructions?.push(`${segment.bridge} → ${clusterName(ci)} circle`);
+          defectMarks?.push({ kind: "line", ...segment }, circleMark(circle));
         }
       });
       for (let j = i + 1; j < segments.length; j++) {
         if (segment.bridge === segments[j].bridge) continue;
-        if (segmentIntersection(segment, segments[j])) metrics.lineCrossings++;
+        if (segmentIntersection(segment, segments[j])) {
+          metrics.lineCrossings++;
+          defectMarks?.push({ kind: "line", ...segment }, { kind: "line", ...segments[j] });
+        }
       }
     }
-    if (obstructions) metrics.obstructions = obstructions;
+    if (details) Object.assign(metrics, { obstructions, overlappingPairs, nearEdgeItems, defectMarks });
     return {
       metrics,
       headings,

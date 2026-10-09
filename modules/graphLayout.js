@@ -209,7 +209,17 @@ function clampNode(node, width, height) {
 // counts as near the edge (boundsViolations), as in Circle.
 const EDGE_MARGIN = 4;
 
-export function scoreGraphGeometry(nodes, links, width, height) {
+// Graph's padded checks keep generated layouts comfortably spaced. With
+// `details`, each counted defect is also named and outlined for the layout
+// panel: overlappingPairs and obstructions (labels), nearEdgeItems, and
+// defectMarks (shapes in board units the panel draws on the board).
+const rectMark = rect => ({ kind: "rect", ...rect });
+
+export function scoreGraphGeometry(nodes, links, width, height, { details = false } = {}) {
+  const overlappingPairs = details ? [] : null;
+  const obstructions = details ? [] : null;
+  const nearEdgeItems = details ? [] : null;
+  const defectMarks = details ? [] : null;
   let overlaps = 0;
   let lineCrossings = 0;
   let edgeNodeIntersections = 0;
@@ -221,6 +231,8 @@ export function scoreGraphGeometry(nodes, links, width, height) {
     if (rect.left < EDGE_MARGIN || rect.right > width - EDGE_MARGIN ||
         rect.top < EDGE_MARGIN || rect.bottom > height - EDGE_MARGIN) {
       boundsViolations++;
+      nearEdgeItems?.push(node.word);
+      defectMarks?.push(rectMark(rect));
     }
   });
   for (let i = 0; i < nodes.length; i++) {
@@ -228,7 +240,16 @@ export function scoreGraphGeometry(nodes, links, width, height) {
       if (rectsOverlap(
         centeredRect(nodes[i], nodes[i].w, PILL_H, 4),
         centeredRect(nodes[j], nodes[j].w, PILL_H, 4)
-      )) overlaps++;
+      )) {
+        overlaps++;
+        if (details) {
+          const a = centeredRect(nodes[i], nodes[i].w, PILL_H);
+          const b = centeredRect(nodes[j], nodes[j].w, PILL_H);
+          const touching = rectsOverlap(a, b);
+          overlappingPairs.push(`${nodes[i].word} / ${nodes[j].word}${touching ? "" : " (closer than the spacing check allows)"}`);
+          defectMarks.push(rectMark(a), rectMark(b));
+        }
+      }
     }
   }
 
@@ -257,6 +278,10 @@ export function scoreGraphGeometry(nodes, links, width, height) {
         centeredRect(node, node.w, PILL_H, 3)
       )) {
         edgeNodeIntersections++;
+        if (details) {
+          obstructions.push(`${segment.source.word} – ${segment.target.word} line → ${node.word}`);
+          defectMarks.push(rectMark(centeredRect(node, node.w, PILL_H)), { kind: "line", ...segment.geometry });
+        }
       }
     });
   });
@@ -265,12 +290,16 @@ export function scoreGraphGeometry(nodes, links, width, height) {
       const a = segments[i], b = segments[j];
       if (a.source === b.source || a.source === b.target ||
           a.target === b.source || a.target === b.target) continue;
-      if (segmentsIntersect(a.geometry, b.geometry)) lineCrossings++;
+      if (segmentsIntersect(a.geometry, b.geometry)) {
+        lineCrossings++;
+        defectMarks?.push({ kind: "line", ...a.geometry }, { kind: "line", ...b.geometry });
+      }
     }
   }
 
   const hardOverlaps = overlaps + boundsViolations;
   return {
+    ...(details ? { overlappingPairs, obstructions, nearEdgeItems, defectMarks } : {}),
     hardOverlaps,
     overlaps,
     boundsViolations,

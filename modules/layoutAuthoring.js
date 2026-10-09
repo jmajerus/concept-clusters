@@ -234,6 +234,37 @@ export function createLayoutAuthoringController({
     layoutAuthoringStatusEl.dataset.tone = tone;
   }
 
+  // Every counted defect outlined in red on the board, drawn over it and
+  // never in the way of a drag; redrawn with the panel.
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  function drawDefectMarks(marks) {
+    const board = document.getElementById("board");
+    if (!board) return;
+    board.querySelector("g.layout-defect-marks")?.remove();
+    if (!Array.isArray(marks) || !marks.length) return;
+    const group = document.createElementNS(SVG_NS, "g");
+    group.setAttribute("class", "layout-defect-marks");
+    group.setAttribute("aria-hidden", "true");
+    const make = (tag, attributes) => {
+      const element = document.createElementNS(SVG_NS, tag);
+      Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, String(value)));
+      group.append(element);
+    };
+    marks.forEach(mark => {
+      if (mark.kind === "circle") make("circle", { cx: mark.x, cy: mark.y, r: mark.r + 4 });
+      else if (mark.kind === "rect") {
+        make("rect", {
+          x: mark.left - 3,
+          y: mark.top - 3,
+          width: mark.right - mark.left + 6,
+          height: mark.bottom - mark.top + 6,
+          rx: 6
+        });
+      } else if (mark.kind === "line") make("line", { x1: mark.x1, y1: mark.y1, x2: mark.x2, y2: mark.y2 });
+    });
+    board.append(group);
+  }
+
   function updateLayoutAuthoringPanel() {
     const state = getState();
     if (!layoutAuthoringMode || !state) return;
@@ -247,10 +278,15 @@ export function createLayoutAuthoringController({
       "lineCircleIntersections"
     ]);
     const { overlaps, nearEdge } = overlapCounts(metrics);
-    layoutMetricNearEdgeEl.textContent = metrics && nearEdge != null ? String(nearEdge) : "—";
+    layoutMetricNearEdgeEl.textContent = !metrics || nearEdge == null
+      ? "—"
+      : nearEdge > 0 && metrics.nearEdgeItems?.length
+        ? `${nearEdge} (${metrics.nearEdgeItems.join("; ")})`
+        : String(nearEdge);
+    drawDefectMarks(metrics?.defectMarks);
 
     layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
-    // Circle names each obstruction, so a flag can be found on the board.
+    // Graph and Circle name each obstruction, and outline it on the board.
     layoutMetricPillCrossingsEl.textContent = !metrics
       ? "—"
       : lineObstructions > 0 && metrics.obstructions?.length
