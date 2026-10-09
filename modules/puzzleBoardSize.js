@@ -76,16 +76,16 @@ export function largeField(nodeCount) {
 
 // ViewBox units, not CSS pixels. The board is width:100% of its container,
 // so a taller viewBox is a taller page and a longer reach to the lens
-// controls under it. Compact puzzles stay on the short canvas. Crowded
-// ones — many nodes, or several clusters whose links can cross — take a
-// wider canvas, and Circle's densest boards take the extra-tall one.
-// These four are floors. boardCanvas grows past them when boardLoad
-// exceeds the reference the wide floors were tuned against.
+// controls under it. Every mode shares one board, so a layout's margins and
+// the size setting mean the same thing in Graph, Star and Circle. Compact
+// puzzles stay on the short canvas. Crowded ones — many nodes, or several
+// clusters whose links can cross — take the wider canvas. These are floors.
+// boardCanvas grows past them when boardLoad exceeds the reference the wide
+// floor was tuned against.
 export const BOARD_CANVAS = {
   compact: { width: 640, height: 420 },
   standard: { width: 640, height: 460 },
-  wide: { width: 960, height: 620 },
-  circleWide: { width: 1050, height: 780 }
+  wide: { width: 960, height: 620 }
 };
 
 // The wide floors were tuned against the densest published boards: about
@@ -192,19 +192,18 @@ function scaleCanvas(canvas, factor) {
   return { width, height };
 }
 
-function baseCanvas(puzzle, mode) {
+function baseCanvas(puzzle) {
   const nodes = puzzleNodeCount(puzzle);
   const clusters = Array.isArray(puzzle?.clusters) ? puzzle.clusters.length : 0;
   let canvas = BOARD_CANVAS.standard;
   if (nodes > 0 && nodes <= COMPACT_NODE_CAP) canvas = BOARD_CANVAS.compact;
-  else if (derivedLarge(nodes)) {
-    canvas = mode === "sets" ? BOARD_CANVAS.circleWide : BOARD_CANVAS.wide;
-  } else if (mode !== "graph" && clusters >= 2) canvas = BOARD_CANVAS.wide;
+  else if (derivedLarge(nodes) || clusters >= 2) canvas = BOARD_CANVAS.wide;
   return growCanvas(canvas, boardLoad(puzzle));
 }
 
-export function boardCanvas(puzzle, mode) {
-  return scaleCanvas(baseCanvas(puzzle, mode), boardSizeFactor(puzzle));
+/** The board every mode of this puzzle uses, with its size setting applied. */
+export function boardCanvas(puzzle) {
+  return scaleCanvas(baseCanvas(puzzle), boardSizeFactor(puzzle));
 }
 
 // Node text is 12.5px in board units, and the board fills .wrap. The
@@ -212,8 +211,8 @@ export function boardCanvas(puzzle, mode) {
 // screen. Derived growth still leaves the stylesheet floor alone.
 const STANDARD_FRAME = 680;
 
-export function boardDisplayFrame(puzzle, mode) {
-  const grown = baseCanvas(puzzle, mode);
+export function boardDisplayFrame(puzzle) {
+  const grown = baseCanvas(puzzle);
   const fitted = boardFrameMaxWidth(grown);
   const factor = boardSizeFactor(puzzle);
   if (factor === 1) return fitted;
@@ -232,12 +231,7 @@ const WIDE_FRAME_FLOOR = 1000;
 
 export function boardFrameMaxWidth(canvas) {
   if (!canvas || canvas.width <= BOARD_CANVAS.standard.width) return null;
-  if (
-    canvas.width === BOARD_CANVAS.wide.width ||
-    canvas.width === BOARD_CANVAS.circleWide.width
-  ) {
-    return null;
-  }
+  if (canvas.width === BOARD_CANVAS.wide.width) return null;
   const frame = Math.round(canvas.width * WIDE_FRAME_RATIO);
   if (frame <= WIDE_FRAME_FLOOR) return null;
   return frame;
