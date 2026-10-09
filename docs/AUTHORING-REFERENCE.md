@@ -1590,7 +1590,8 @@ Open the puzzle in layout-authoring mode (`sets` is labelled Circle):
 http://localhost:8787/?puzzle=revolutions-modern-world&mode=sets&author=layout
 ```
 
-From the admin view, **Edit layout** opens the same panel. The mode buttons
+The **Layout** link beside Play on the puzzle list opens it for that puzzle or
+working copy, and **Edit layout** in the admin view does the same. The mode buttons
 stay live: choosing another mode reloads the panel in that mode on the same
 puzzle or working copy.
 
@@ -1610,11 +1611,18 @@ puzzle or working copy.
   draft (publish the draft to show it to players). Otherwise it saves straight
   to the published puzzle, live for players, without publishing a new
   document revision. Saving one mode never discards the others.
-- **Board size** (the slider, in 5% steps from −25% to +25%) and the **Star
-  free-term strip** button save with the layout the same way: to the open
-  draft or else the published puzzle, with no content publish. Setting the
-  size back to 0% is recorded as an explicit choice, which the automatic pass
-  then leaves alone.
+- The **Board settings** card beside the panel holds the settings that cover
+  every mode. **Board size** (the slider, in 5% steps from −25% to +25%) and
+  the **Star free-term strip** button (in Star mode) save with the layout the
+  same way: to the open draft or else the published puzzle, with no content
+  publish. A size change rebuilds the board; Prepare again to lay it out.
+  Setting the size back to 0% is recorded as an explicit choice, which the
+  automatic pass then leaves alone.
+- The **Experiments** card below it holds settings that change play, so they
+  save on the open working copy and are disabled without one: **Bridge
+  pre-connect**, and the **lens flow trace** (on puzzles with lenses; answer a
+  lens on the prepared board to see it). The working-copy editor's Board
+  experiments section sets the same fields.
 
 The layout endpoints are `/admin/drafts/<draft-id>/layout.json` and
 `/admin/puzzles/<puzzle-id>/layout.json`. A save carries one mode's layout,

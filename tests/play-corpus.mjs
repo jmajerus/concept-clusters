@@ -912,6 +912,14 @@ export async function run(page) {
         && !document.getElementById("layout-authoring").hidden,
       null, { timeout: 15000 });
       assert.equal(await page.textContent("#layout-authoring-save-layout"), "Save Layout");
+      // Board settings sit beside the layout card. Without a working copy,
+      // bridge pre-connect (which changes play) is shown but cannot save;
+      // the free-term strip is Star's alone.
+      assert.equal(await page.isVisible("#board-settings"), true, "board settings card");
+      assert.equal(await page.isVisible("#board-size-factor-input"), true, "board size");
+      assert.equal(await page.isDisabled("#star-bridge-preconnect-btn"), true, "pre-connect needs a working copy");
+      const layoutViewMode = await page.evaluate(() => window.CC.state.layoutAdapter?.mode);
+      assert.equal(await page.isVisible("#star-free-strip-btn"), layoutViewMode === "star", "free-term strip is Star's");
       await page.click("#layout-authoring-prepare");
       await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, {
         timeout: 15000

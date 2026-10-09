@@ -354,6 +354,7 @@ button:disabled {
 #puzzle-view.learning-gated #lens-panel,
 #puzzle-view.learning-gated #lens-assignment,
 #puzzle-view.learning-gated #layout-authoring,
+#puzzle-view.learning-gated .layout-side,
 #puzzle-view.learning-gated #message,
 #puzzle-view.learning-gated #term-info,
 #puzzle-view.learning-gated #facts,
@@ -493,14 +494,6 @@ button:disabled {
   color: var(--ink-soft);
 }
 #admin-layout-actions[hidden] { display: none; }
-#board-size-factor {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-#board-size-factor[hidden] { display: none; }
-#board-size-factor input[type="range"] { width: 140px; }
-#board-size-factor output { font-variant-numeric: tabular-nums; min-width: 9em; }
 #admin-layout-actions .admin-layout-hint code {
   font-family: ui-monospace, monospace;
   font-size: 0.92em;
@@ -632,8 +625,58 @@ body.authoring-construct #share-status {
 .authoring-check input { width: auto; }
 #authoring-studio .meta { font-size: 12px; color: var(--ink-soft); }
 
+/* The per-mode layout card and the whole-puzzle board settings card sit
+   side by side on a wide page and stack on a narrow one. */
+.layout-authoring-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
+  column-gap: 12px;
+  align-items: start;
+}
+/* The cards carry the spacing, so a page showing none leaves no gap. */
+#layout-authoring,
+.layout-side > section { margin-top: 12px; }
+.layout-side[hidden] { display: none; }
+/* Without the side cards (static pages), the layout card takes the row. */
+.layout-authoring-row:has(> .layout-side[hidden]) { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 760px) {
+  .layout-authoring-row { grid-template-columns: minmax(0, 1fr); }
+}
+#board-settings,
+#board-experiments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--panel);
+  font-size: 12.5px;
+}
+#board-size-factor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+#board-size-factor input[type="range"] { flex: 1 1 120px; min-width: 0; }
+#board-size-factor output { font-variant-numeric: tabular-nums; }
+.board-settings-note { margin: 0; font-size: 12px; color: var(--ink-soft); }
+#board-settings-status[data-tone="error"],
+#board-experiments-status[data-tone="error"] { color: var(--error); }
+.board-settings-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+/* A row whose buttons are all hidden (the Star-only strip in another mode)
+   leaves no gap. */
+.board-settings-actions:not(:has(> button:not([hidden]))) { display: none; }
+.board-settings-actions button {
+  background: var(--panel);
+  font-size: 12.5px;
+  padding: 5px 9px;
+}
+.board-settings-actions button[hidden] { display: none; }
+.board-settings-actions button:disabled { cursor: default; opacity: 0.55; }
+
 #layout-authoring {
-  margin-top: 12px;
   padding: 12px;
   border: 1px solid var(--bridge-line);
   border-radius: var(--radius);
