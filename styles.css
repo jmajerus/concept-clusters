@@ -395,6 +395,14 @@ button:disabled {
   border: 2px solid var(--chip-line);
   flex: none;
 }
+.legend-chip { position: relative; }
+.legend-chip .info-dot {
+  position: absolute;
+  top: 3px; right: 4px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--chip-line);
+}
 .legend-chip.complete { background: var(--chip-bg); color: var(--chip); font-weight: 600; }
 .legend-chip.complete .legend-name::after { content: " ✓"; }
 .legend-chip.bridge { border-style: dashed; color: var(--bridge); }

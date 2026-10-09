@@ -1941,7 +1941,9 @@ function onBoardTap(node, event) {
 
 const clusterLegend = createClusterLegend({
   container: document.getElementById("cluster-legend"),
-  svg, isDone, isBridge
+  svg, isDone, isBridge,
+  showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
+  getFocusedInfoNode: () => focusedInfoNode
 });
 
 const { buildGraph } = createGraphRenderer({

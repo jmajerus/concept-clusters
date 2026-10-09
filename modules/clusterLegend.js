@@ -3,8 +3,15 @@
 // maps each color to its cluster name. Every name shows from the start
 // (the same names Star and Circle show), and a cluster's chip fills in
 // once all its terms are placed. Hovering or focusing a chip dims every
-// term outside that cluster, so the mapping doesn't rest on color alone.
-export function createClusterLegend({ container, svg, isDone, isBridge }) {
+// term outside that cluster, so the mapping doesn't rest on color alone,
+// and shows the cluster's info under the board the same way a Star title
+// or Circle heading does.
+import { normalizeInfo } from "./termInfo.js";
+
+export function createClusterLegend({
+  container, svg, isDone, isBridge,
+  showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo, getFocusedInfoNode
+}) {
   let builtFor = null;
 
   function highlight(ci) {
@@ -14,10 +21,11 @@ export function createClusterLegend({ container, svg, isDone, isBridge }) {
   }
 
   // The authoring studio edits clusters in place, so rebuild on any
-  // change to the names, colors, or bridge presence, not just a new puzzle.
+  // change to the names, colors, info, or bridge presence, not just a new
+  // puzzle.
   function signature(state) {
     return JSON.stringify([
-      state.puzzle.clusters.map(c => [c.name, c.color]),
+      state.puzzle.clusters.map(c => [c.name, c.color, c.info]),
       state.nodes.some(isBridge)
     ]);
   }
@@ -30,6 +38,9 @@ export function createClusterLegend({ container, svg, isDone, isBridge }) {
       chip.className = `legend-chip c-${c.color || "teal"}`;
       chip.tabIndex = 0;
       chip.dataset.ci = String(ci);
+      // One stable object per chip: focusTermInfo/blurTermInfo use it as
+      // the focus-lock identity, and a chip lives until the next rebuild.
+      const infoNode = { word: c.name, info: normalizeInfo(c.info) };
       const swatch = document.createElement("span");
       swatch.className = "legend-swatch";
       swatch.setAttribute("aria-hidden", "true");
@@ -37,10 +48,24 @@ export function createClusterLegend({ container, svg, isDone, isBridge }) {
       name.className = "legend-name";
       name.textContent = c.name;
       chip.append(swatch, name);
-      chip.addEventListener("mouseenter", () => highlight(ci));
-      chip.addEventListener("mouseleave", () => highlight(null));
-      chip.addEventListener("focus", () => highlight(ci));
-      chip.addEventListener("blur", () => highlight(null));
+      // Same rule as a Star title's info-dot: only an authored blurb earns
+      // one, not a bare link.
+      if (infoNode.info?.text) {
+        const dot = document.createElement("span");
+        dot.className = "info-dot";
+        dot.setAttribute("aria-hidden", "true");
+        chip.append(dot);
+      }
+      chip.addEventListener("mouseenter", () => {
+        highlight(ci);
+        if (!getFocusedInfoNode()) showTermInfo(infoNode);
+      });
+      chip.addEventListener("mouseleave", () => {
+        highlight(null);
+        if (!getFocusedInfoNode()) clearTermInfo();
+      });
+      chip.addEventListener("focus", () => { highlight(ci); focusTermInfo(infoNode); });
+      chip.addEventListener("blur", () => { highlight(null); blurTermInfo(infoNode); });
       return chip;
     }));
     if (hasBridges) {
