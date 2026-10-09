@@ -33,4 +33,24 @@ export async function run() {
   const held = repairGraphLayout({ nodes: pinned, links: [], width, height, positions: positionsOf(pinned) });
   assert.deepEqual(held.positions.get("a"), { x: 300, y: 200 });
   assert.deepEqual(held.positions.get("b"), { x: 310, y: 205 });
+
+  // The layout panel's details: each counted defect named and outlined.
+  // Pills 4 units apart overlap only within the padded spacing check.
+  const near = scoreGraphGeometry([pill("a", 300, 200), pill("b", 384, 200)], [], width, height, { details: true });
+  assert.equal(near.overlaps, 1);
+  assert.deepEqual(near.overlappingPairs, ["a / b (closer than the spacing check allows)"]);
+  assert.deepEqual(near.defectMarks.map(mark => mark.kind), ["rect", "rect"]);
+  const touching = scoreGraphGeometry(stacked.map(node => ({ ...node })), [], width, height, { details: true });
+  assert.deepEqual(touching.overlappingPairs, ["a / b"]);
+  // A line through an unrelated pill names that pill and outlines both.
+  const through = [pill("p", 100, 200), pill("q", 500, 200), pill("r", 300, 200)];
+  const obstructed = scoreGraphGeometry(through, [{ source: through[0], target: through[1] }], width, height, { details: true });
+  assert.equal(obstructed.edgeNodeIntersections, 1);
+  assert.deepEqual(obstructed.obstructions, ["p – q line → r"]);
+  assert.deepEqual(obstructed.defectMarks.map(mark => mark.kind), ["rect", "line"]);
+  // Near the edge, by name.
+  const edge = scoreGraphGeometry([pill("e", 30, 200)], [], width, height, { details: true });
+  assert.deepEqual(edge.nearEdgeItems, ["e"]);
+  // Without details the result carries counts only.
+  assert.equal(scoreGraphGeometry(through, [], width, height).defectMarks, undefined);
 }
