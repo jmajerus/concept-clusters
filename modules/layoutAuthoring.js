@@ -88,6 +88,14 @@ export function createLayoutAuthoringController({
   let savingLayout = false;
 
   layoutAuthoringEl.hidden = !layoutAuthoringMode;
+  // In the layout view the cards follow the board directly rather than the
+  // lens, fact and related-puzzle sections; on a wide screen they become a
+  // column beside it (styles.css, .layout-authoring-view).
+  if (layoutAuthoringMode) {
+    const cardsEl = layoutAuthoringEl.closest(".layout-authoring-row");
+    document.getElementById("board-stage")?.after(cardsEl);
+    document.querySelector(".wrap")?.classList.add("layout-authoring-view");
+  }
   // Published layout overrides belong to the D1 authoring server. Static
   // player pages can still preview and keep a browser-local draft, but must
   // not present a file-export path that authors could mistake for publishing.
@@ -410,34 +418,79 @@ export function createLayoutAuthoringController({
           ? { text: `Generated a new layout; the saved ${label} layout stays until you save over it`, tone: "good" }
           : { text: `No saved ${label} layout; generated one`, tone: "good" };
       if (!source || getState() !== preparingState) return;
-      setLayoutAuthoringStatus(`${source.text}. Drag any node to edit it.`, source.tone);
-      updateLayoutAuthoringPanel();
-      if (source.tone === "good" && authoringPrepared()) {
-        const metrics = layoutMetrics();
-        const validation = validateAuthorLayout(captureAuthorLayout());
-        if (!validation.valid) {
-          setLayoutAuthoringStatus(
-            `${source.text}. ${validation.errors.join("; ")} Drag to repair the layout before saving.`,
-            "error"
-          );
-        } else if (metricTotal(metrics, [
-          "edgeNodeIntersections",
-          "edgeTitleIntersections",
-          "lineHeadingIntersections",
-          "lineCircleIntersections"
-        ]) > 0 || overlapCounts(metrics).overlaps > 0 || overlapCounts(metrics).nearEdge > 0) {
-          setLayoutAuthoringStatus(
-            `${source.text}. Overlaps, through-pills and items near the edge are advisory; drag to tidy if you want, or save when it looks right.`,
-            "good"
-          );
-        }
-      }
+      reportPreparedLayout(source);
     } catch (error) {
       setLayoutAuthoringStatus(`Could not prepare layout: ${error.message}`, "error");
     } finally {
       layoutAuthoringPrepareBtn.disabled = false;
       updateLayoutAuthoringPanel();
     }
+  }
+
+  // The status line once a layout is on the board, after Prepare or a mode
+  // switch: what loaded, then whether it needs repair before saving.
+  function reportPreparedLayout(source) {
+    setLayoutAuthoringStatus(`${source.text}. Drag any node to edit it.`, source.tone);
+    updateLayoutAuthoringPanel();
+    if (source.tone === "good" && authoringPrepared()) {
+      const metrics = layoutMetrics();
+      const validation = validateAuthorLayout(captureAuthorLayout());
+      if (!validation.valid) {
+        setLayoutAuthoringStatus(
+          `${source.text}. ${validation.errors.join("; ")} Drag to repair the layout before saving.`,
+          "error"
+        );
+      } else if (metricTotal(metrics, [
+        "edgeNodeIntersections",
+        "edgeTitleIntersections",
+        "lineHeadingIntersections",
+        "lineCircleIntersections"
+      ]) > 0 || overlapCounts(metrics).overlaps > 0 || overlapCounts(metrics).nearEdge > 0) {
+        setLayoutAuthoringStatus(
+          `${source.text}. Overlaps, through-pills and items near the edge are advisory; drag to tidy if you want, or save when it looks right.`,
+          "good"
+        );
+      }
+    }
+  }
+
+  // A mode switch rebuilt the board in place (game.js setMode): either this
+  // visit's arrangement for the mode came back, or the solved board is
+  // polishing from the mode's saved layout. An unsolved board prepares as
+  // it does on load.
+  async function onModeSwitched({ restored = false, layoutPromise = null } = {}) {
+    const state = getState();
+    if (!layoutAuthoringMode || !state) return;
+    const switchedMode = getMode();
+    const label = MODE_LABELS[switchedMode];
+    syncLayoutActionVisibility();
+    syncStarFreeStripButtons();
+    syncFixedCheckbox(state);
+    if (state.made !== state.need) {
+      setLayoutAuthoringStatus("");
+      updateLayoutAuthoringPanel();
+      if (savedModeLayout(state)) prepareLayoutAuthoringBoard();
+      return;
+    }
+    if (restored) {
+      reportPreparedLayout({ text: `Back to this visit's ${label} arrangement, unsaved drags included`, tone: "good" });
+      return;
+    }
+    const saved = savedModeLayout(state);
+    setLayoutAuthoringStatus(saved ? `Loading saved ${label} layout…` : "Generating a layout…");
+    updateLayoutAuthoringPanel();
+    try {
+      await layoutPromise;
+    } catch (error) {
+      setLayoutAuthoringStatus(`Could not lay out ${label}: ${error.message}`, "error");
+      return;
+    }
+    if (getState() !== state || getMode() !== switchedMode) return;
+    const source = saved
+      ? await reconcileSavedLayout(state)
+      : { text: `No saved ${label} layout; generated one`, tone: "good" };
+    if (!source || getState() !== state || getMode() !== switchedMode) return;
+    reportPreparedLayout(source);
   }
 
   layoutAuthoringPrepareBtn.addEventListener("click", prepareLayoutAuthoringBoard);
@@ -884,6 +937,7 @@ export function createLayoutAuthoringController({
 
   return {
     onPuzzleLoaded,
+    onModeSwitched,
     syncStarFreeStripButtons,
     reloadBoard
   };

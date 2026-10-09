@@ -853,18 +853,23 @@ export async function run(page) {
         "Save Layout did not persist the unpublished draft override"
       );
 
-      // Each mode saves its own override: a mode click reloads into that
-      // mode on the same working copy, and the save keeps the Star entry.
+      // Each mode saves its own override: a mode click switches in place on
+      // the same working copy, and the save keeps the Star entry.
+      await page.evaluate(() => { window.__sameLayoutPage = true; });
       await page.click("#mode-graph");
       await page.waitForFunction(() =>
         window.CC?.mode === "graph"
         && window.CC?.state?.puzzle?.id === "lab-browser-unpublished"
         && !document.getElementById("layout-authoring")?.hidden,
       null, { timeout: 15000 });
-      await page.click("#layout-authoring-prepare");
-      await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, {
-        timeout: 15000
-      });
+      assert.equal(await page.evaluate(() => window.__sameLayoutPage), true, "a mode switch must not reload the page");
+      assert.equal(new URL(page.url()).searchParams.get("mode"), "graph", "the URL follows the mode");
+      // The solved board polishes into Graph on its own; Prepare would
+      // generate a fresh one.
+      await page.waitForFunction(() =>
+        window.CC?.state?.solutionLayout === "pretty"
+        && /Graph layout; generated one|Loaded saved Graph/.test(document.getElementById("layout-authoring-status")?.textContent || ""),
+      null, { timeout: 15000 });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
         document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout as a hint saved to draft"),
@@ -875,8 +880,15 @@ export async function run(page) {
       assert.equal(draftModes.graph.fixed, false);
       assert.notEqual(draftModes.star.fixed, false);
 
-      // Re-entering a mode with a saved override starts from it unprompted.
+      // Returning to a mode visited this session restores its arrangement
+      // at once; a fresh load starts from the saved override unprompted.
       await page.click("#mode-star");
+      await page.waitForFunction(() =>
+        window.CC?.mode === "star"
+        && document.getElementById("layout-authoring-status")?.textContent?.startsWith("Back to this visit's Star arrangement"),
+      null, { timeout: 15000 });
+      assert.equal(await page.evaluate(() => window.__sameLayoutPage), true);
+      await page.reload({ waitUntil: "networkidle" });
       await page.waitForFunction(() =>
         window.CC?.mode === "star"
         && document.getElementById("layout-authoring-status")?.textContent?.startsWith("Loaded saved Star layout"),
@@ -916,6 +928,11 @@ export async function run(page) {
       // bridge pre-connect (which changes play) is shown but cannot save;
       // the free-term strip is Star's alone.
       assert.equal(await page.isVisible("#board-settings"), true, "board settings card");
+      assert.equal(
+        await page.evaluate(() => document.getElementById("board-stage").nextElementSibling?.classList.contains("layout-authoring-row")),
+        true,
+        "the layout view's cards follow the board"
+      );
       assert.equal(await page.isVisible("#board-size-factor-input"), true, "board size");
       assert.equal(await page.isDisabled("#star-bridge-preconnect-btn"), true, "pre-connect needs a working copy");
       const layoutViewMode = await page.evaluate(() => window.CC.state.layoutAdapter?.mode);

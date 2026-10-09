@@ -637,6 +637,31 @@ body.authoring-construct #share-status {
 #layout-authoring,
 .layout-side > section { margin-top: 12px; }
 .layout-side[hidden] { display: none; }
+/* Layout view on a wide screen: the cards become a column beside the board
+   that stays in view while scrolling. The page widens by that column, so
+   the board keeps its size. Narrower, they sit directly under the board. */
+@media (min-width: 1360px) {
+  .wrap.layout-authoring-view { max-width: calc(var(--board-max-width, 680px) + 360px); }
+  .wrap.wide.layout-authoring-view { max-width: calc(var(--board-max-width, 1000px) + 360px); }
+  .layout-authoring-view #puzzle-view {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    column-gap: 20px;
+    align-items: start;
+  }
+  .layout-authoring-view #puzzle-view > * { grid-column: 1; }
+  .layout-authoring-view #puzzle-view > .layout-authoring-row {
+    grid-column: 2;
+    /* Spans every row the main column fills; unused rows have no height. */
+    grid-row: 1 / span 40;
+    grid-template-columns: minmax(0, 1fr);
+    position: sticky;
+    top: 12px;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+  }
+  .layout-authoring-view .layout-authoring-row > :first-child { margin-top: 0; }
+}
 /* Without the side cards (static pages), the layout card takes the row. */
 .layout-authoring-row:has(> .layout-side[hidden]) { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 760px) {
