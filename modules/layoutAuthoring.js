@@ -20,6 +20,7 @@ import {
   boardWithFlag
 } from "./starLayoutRepository.js";
 import { layoutIsFixed } from "./layoutHints.js";
+import { lensFlowTraceEnabled } from "./lensFlowTrace.js";
 import {
   boardSizeFactor,
   canonicalBoardSizeFactor
@@ -72,9 +73,16 @@ export function createLayoutAuthoringController({
   const boardSizeFactorEl = document.getElementById("board-size-factor");
   const boardSizeFactorInput = document.getElementById("board-size-factor-input");
   const boardSizeFactorReadout = document.getElementById("board-size-factor-readout");
-  const boardSettingsEl = document.getElementById("board-settings");
-  const boardSettingsStatusEl = document.getElementById("board-settings-status");
-  const BOARD_SETTINGS_NOTE = boardSettingsStatusEl?.textContent.trim() || "";
+  const layoutSideEl = document.querySelector(".layout-side");
+  const lensFlowTraceBtn = document.getElementById("lens-flow-trace-btn");
+  // Each side card reports its own saves; the note it opens with returns
+  // once an error clears.
+  const flagStatusEls = {
+    layout: document.getElementById("board-settings-status"),
+    copy: document.getElementById("board-experiments-status")
+  };
+  const flagStatusNotes = Object.fromEntries(Object.entries(flagStatusEls)
+    .map(([key, el]) => [key, el?.textContent.trim() || ""]));
   let savedSizeFactor = 1;
   const savesToAuthoringServer = typeof saveLayout === "function";
   let savingLayout = false;
@@ -498,10 +506,10 @@ export function createLayoutAuthoringController({
     }
   });
 
-  // The Board settings card beside the layout card. Board size and the
-  // Star free-term strip are layout settings: they save with the layout, to
-  // the open working copy or else the published puzzle. Bridge pre-connect
-  // changes play, so it saves on the working copy only.
+  // The cards beside the layout card. Board settings (size, the Star
+  // free-term strip) save with the layout, to the open working copy or else
+  // the published puzzle. Experiments (bridge pre-connect, lens flow trace)
+  // change play, so they save on the working copy only.
   const LAYOUT_BOARD_FLAGS = new Set(["sizeFactor", "starFreeStrip"]);
   function layoutCanWriteBoard() {
     return layoutAuthoringMode && typeof saveLayoutBoard === "function";
@@ -511,18 +519,22 @@ export function createLayoutAuthoringController({
     return layoutAuthoringMode && typeof saveBoardFlags === "function" && Boolean(getDraftId());
   }
 
-  if (boardSettingsEl) boardSettingsEl.hidden = !layoutCanWriteBoard();
+  if (layoutSideEl) layoutSideEl.hidden = !layoutCanWriteBoard();
 
-  function setBoardFlagStatus(text) {
-    if (!boardSettingsStatusEl) return;
-    boardSettingsStatusEl.textContent = text || BOARD_SETTINGS_NOTE;
-    if (text) boardSettingsStatusEl.dataset.tone = "error";
-    else delete boardSettingsStatusEl.dataset.tone;
+  function setBoardFlagStatus(key, text) {
+    const card = LAYOUT_BOARD_FLAGS.has(key) ? "layout" : "copy";
+    const el = flagStatusEls[card];
+    if (!el) return;
+    el.textContent = text || flagStatusNotes[card];
+    if (text) el.dataset.tone = "error";
+    else delete el.dataset.tone;
   }
 
   function setBoardControlsDisabled(disabled) {
+    const noCopy = !workingCopyCanWriteBoard();
     if (starFreeStripBtn) starFreeStripBtn.disabled = disabled;
-    if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled || !workingCopyCanWriteBoard();
+    if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled || noCopy;
+    if (lensFlowTraceBtn) lensFlowTraceBtn.disabled = disabled || noCopy;
     if (boardSizeFactorInput) boardSizeFactorInput.disabled = disabled;
   }
 
@@ -566,7 +578,7 @@ export function createLayoutAuthoringController({
       if (typeof reload === "function") reload();
       else setBoardControlsDisabled(false);
     } catch (error) {
-      setBoardFlagStatus(error instanceof Error ? error.message : String(error));
+      setBoardFlagStatus(key, error instanceof Error ? error.message : String(error));
       setBoardControlsDisabled(false);
       if (key === "sizeFactor") {
         boardSizeFactorInput.value = String(savedSizeFactor);
@@ -582,12 +594,20 @@ export function createLayoutAuthoringController({
     const canWriteCopy = workingCopyCanWriteBoard();
     // The free-term strip is Star's alone.
     if (starFreeStripBtn) starFreeStripBtn.hidden = !canWriteLayout || getMode() !== "star";
+    const copyTitle = name => canWriteCopy
+      ? "Changes play; saves on the open working copy"
+      : `Open a working copy to change ${name}`;
     if (starBridgePreconnectBtn) {
       starBridgePreconnectBtn.hidden = !canWriteLayout;
       starBridgePreconnectBtn.disabled = !canWriteCopy;
-      starBridgePreconnectBtn.title = canWriteCopy
-        ? "Changes play; saves on the open working copy"
-        : "Open a working copy to change bridge pre-connect";
+      starBridgePreconnectBtn.title = copyTitle("bridge pre-connect");
+    }
+    // The trace plays when a lens's answer is revealed, so it is offered
+    // only where there are lenses.
+    if (lensFlowTraceBtn) {
+      lensFlowTraceBtn.hidden = !canWriteLayout || !state?.puzzle?.lenses?.length;
+      lensFlowTraceBtn.disabled = !canWriteCopy;
+      lensFlowTraceBtn.title = copyTitle("the lens flow trace");
     }
     syncBoardSizeControl();
     if (!state?.puzzle) return;
@@ -596,6 +616,11 @@ export function createLayoutAuthoringController({
       starFreeStripBtn.textContent = enabled
         ? "Clear free-term strip"
         : "Use free-term strip";
+    }
+    if (canWriteLayout && lensFlowTraceBtn) {
+      lensFlowTraceBtn.textContent = lensFlowTraceEnabled(state.puzzle)
+        ? "Turn off lens flow trace"
+        : "Turn on lens flow trace";
     }
     if (canWriteLayout && starBridgePreconnectBtn) {
       const preconnect = starBridgePreconnectEnabled(state.puzzle);
@@ -638,6 +663,12 @@ export function createLayoutAuthoringController({
       if (!state?.puzzle) return;
       const next = !starBridgePreconnectEnabled(state.puzzle);
       persistBoardFlag("bridgePreconnect", next ? true : undefined, () => reloadBoard());
+    });
+    lensFlowTraceBtn?.addEventListener("click", () => {
+      const state = getState();
+      if (!state?.puzzle) return;
+      const next = !lensFlowTraceEnabled(state.puzzle);
+      persistBoardFlag("lensFlowTrace", next ? true : undefined, () => reloadBoard());
     });
 
     boardSizeFactorInput?.addEventListener("input", () => {

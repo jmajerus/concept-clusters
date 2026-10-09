@@ -2217,7 +2217,7 @@ function renderBoardExperiments({ edit, document }) {
   const option = (value, label, selected) =>
     `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
   return `<h2>Board experiments</h2>
-    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them. Board size and the Star free-term strip are layout settings: change them in layout authoring, where they save with the layout.</p>
+    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them. Board size and the Star free-term strip are layout settings: change them in layout authoring, where they save with the layout. Its Experiments card also toggles these two on the open working copy.</p>
     ${preSlot.hidden}
     <p><label>Bridge pre-connect
       <select${preSlot.form} name="${preSlot.prefix}value">

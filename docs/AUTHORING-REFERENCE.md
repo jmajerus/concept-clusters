@@ -1617,8 +1617,12 @@ puzzle or working copy.
   same way: to the open draft or else the published puzzle, with no content
   publish. A size change rebuilds the board; Prepare again to lay it out.
   Setting the size back to 0% is recorded as an explicit choice, which the
-  automatic pass then leaves alone. **Bridge pre-connect** changes play, so
-  it saves on the open working copy and is disabled without one.
+  automatic pass then leaves alone.
+- The **Experiments** card below it holds settings that change play, so they
+  save on the open working copy and are disabled without one: **Bridge
+  pre-connect**, and the **lens flow trace** (on puzzles with lenses; answer a
+  lens on the prepared board to see it). The working-copy editor's Board
+  experiments section sets the same fields.
 
 The layout endpoints are `/admin/drafts/<draft-id>/layout.json` and
 `/admin/puzzles/<puzzle-id>/layout.json`. A save carries one mode's layout,

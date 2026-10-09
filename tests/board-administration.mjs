@@ -36,6 +36,9 @@ const puzzle = {
   ],
   bridges: [
     { term: "link", clusters: ["alpha", "beta"], fact: "Connects the two." }
+  ],
+  lenses: [
+    { id: "alpha-lens", prompt: "Which term belongs to Alpha?", targets: ["a1"], explanation: "a1 is one of Alpha's." }
   ]
 };
 
@@ -201,6 +204,22 @@ export async function run(page) {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
     assert.equal(resized.layout.board.sizeFactor, 1, "back to the default is saved as an explicit choice");
+
+    // Experiments: the lens flow trace is offered on a puzzle with lenses
+    // and, like pre-connect, saves on the working copy's document.
+    await page.goto(boardURL, { waitUntil: "networkidle" });
+    await waitForBoard(page);
+    assert.equal(await page.isVisible("#board-experiments"), true);
+    assert.equal(await page.textContent("#lens-flow-trace-btn"), "Turn on lens flow trace");
+    await page.click("#lens-flow-trace-btn");
+    await page.waitForFunction(() => window.CC?.state?.puzzle?.board?.lensFlowTrace === true, null, {
+      timeout: 15000
+    });
+    await waitForBoard(page);
+    assert.equal(await page.textContent("#lens-flow-trace-btn"), "Turn off lens flow trace");
+    const traced = await draftStore.getDraft(draftId);
+    assert.deepEqual(traced.document.board, { ...savedBoard, lensFlowTrace: true });
+    assert.equal(traced.layout.board.sizeFactor, 1, "experiments leave the layout's board settings alone");
   } finally {
     server.close();
     await rm(directory, { recursive: true, force: true });

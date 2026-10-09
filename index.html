@@ -202,12 +202,13 @@
         <span id="layout-authoring-pass-announce" class="visually-hidden" role="status" aria-live="polite"></span>
       </section>
 
-      <!-- Whole-puzzle settings beside the per-mode layout card, on the
-           authoring server only. Board size and the Star free-term strip
-           save with the layout: to the open working copy, else the
-           published puzzle. Bridge pre-connect changes play, so it saves
-           on the working copy only. -->
-      <section id="board-settings" hidden aria-labelledby="board-settings-title">
+      <!-- Whole-puzzle cards beside the per-mode layout card, on the
+           authoring server only, one save rule each. Board settings save
+           with the layout: to the open working copy, else the published
+           puzzle. Experiments change play, so they save on the working copy
+           only. -->
+      <div class="layout-side" hidden>
+      <section id="board-settings" aria-labelledby="board-settings-title">
         <strong id="board-settings-title">Board settings</strong>
         <label id="board-size-factor">
           <span>Board size</span>
@@ -217,12 +218,22 @@
         <p class="board-settings-note">All modes. A change rebuilds the board; Prepare again to lay it out.</p>
         <div class="board-settings-actions">
           <button id="star-free-strip-btn" type="button" hidden>Use free-term strip</button>
-          <button id="star-bridge-preconnect-btn" type="button">Pre-connect bridges</button>
         </div>
         <p id="board-settings-status" class="board-settings-note" role="status">
-          Size and the free-term strip save with the layout. Bridge pre-connect changes play and saves on the working copy.
+          Saves with the layout: to the open working copy, else the published puzzle.
         </p>
       </section>
+      <section id="board-experiments" aria-labelledby="board-experiments-title">
+        <strong id="board-experiments-title">Experiments</strong>
+        <div class="board-settings-actions">
+          <button id="star-bridge-preconnect-btn" type="button">Pre-connect bridges</button>
+          <button id="lens-flow-trace-btn" type="button" hidden>Turn on lens flow trace</button>
+        </div>
+        <p id="board-experiments-status" class="board-settings-note" role="status">
+          These change play, so they save on the open working copy.
+        </p>
+      </section>
+      </div>
       </div>
 
       <footer>
