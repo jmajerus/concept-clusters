@@ -1417,10 +1417,13 @@ function renderPlayAction(draft, { valid }) {
   }
   const gate = ` data-draft-preview`;
   const board = renderOpenBoardButton(draft);
+  // Layout view for this working copy, in a new tab like Open board: the
+  // author comes back here to save the working copy and publish.
+  const layout = `<a class="play-button secondary" href="${escapeHtml(layoutQuery(draftId))}" target="_blank" rel="noopener"${gate} aria-disabled="true">Layout</a>`;
   if (!valid) {
-    return `${board}<button type="button" class="play-button" disabled>Play</button>`;
+    return `${board}<button type="button" class="play-button" disabled>Play</button><button type="button" class="play-button secondary" disabled>Layout</button>`;
   }
-  return `${board}<a class="play-button" href="${escapeHtml(playHref)}"${gate} aria-disabled="true">Play</a>`;
+  return `${board}<a class="play-button" href="${escapeHtml(playHref)}"${gate} aria-disabled="true">Play</a>${layout}`;
 }
 
 function renderDraftFreshness(draft, variant) {
@@ -1474,8 +1477,9 @@ function submitHint(variant, { valid, alreadyPublished = false }) {
     return `This page is for design copy. Open board opens
        <code>/?puzzle=</code> in a new tab, in Construct, and leaves this
        page as it is. Play is a clean player preview
-       (<code>/?puzzle=&amp;play</code>). Layout, beside Play on the
-       puzzle list, opens layout authoring with the board settings.
+       (<code>/?puzzle=&amp;play</code>). Layout opens layout authoring
+       with the board settings in a new tab, so you can come back here to save
+       and publish; the puzzle list has the same link beside Play.
        Publish makes the D1 snapshot available to public play after the cache
        refreshes. Cue for freeze marks it for the next static snapshot and
        returns to the list; Freeze on

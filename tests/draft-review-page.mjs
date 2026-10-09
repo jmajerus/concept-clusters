@@ -995,6 +995,8 @@ export async function run() {
   assert.match(localPage, /\/admin\/catalogues/);
   assert.match(localPage, /class="play-button secondary" href="\/\?puzzle=review-fixture" target="_blank" rel="noopener"/);
   assert.match(localPage, /class="play-button" href="\/\?puzzle=review-fixture&amp;play"/);
+  assert.match(localPage, /class="play-button secondary" href="\/\?puzzle=review-fixture&amp;author=layout" target="_blank" rel="noopener" data-draft-preview aria-disabled="true">Layout</,
+    "Layout opens the working copy's layout view in a new tab, gated like Play");
   assert.doesNotMatch(localPage, /install-and-play/);
   assert.doesNotMatch(localPage, /value="open-pull-request"/);
   assert.doesNotMatch(localPage, /Export to player/);
