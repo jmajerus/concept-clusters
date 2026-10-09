@@ -76,13 +76,17 @@ export async function run(page) {
   });
   try {
     const baseURL = serverURL(server);
-    const boardURL = `${baseURL}/?puzzle=${draftId}&admin&play`;
+    // Board settings live in the layout view's Board settings card; the
+    // free-term strip is offered in Star mode only.
+    const boardURL = `${baseURL}/?puzzle=${draftId}&author=layout&mode=star`;
     await page.goto(`${baseURL}/index.html`, { waitUntil: "networkidle" });
     await page.evaluate(() => localStorage.clear());
     await page.goto(boardURL, { waitUntil: "networkidle" });
     await waitForBoard(page);
     assert.equal(await page.textContent("#star-free-strip-btn"), "Use free-term strip");
     assert.equal(await page.textContent("#star-bridge-preconnect-btn"), "Pre-connect bridges");
+    assert.equal(await page.isVisible("#board-settings"), true);
+    assert.equal(await page.isVisible("#layout-authoring"), true);
 
     await page.click("#star-free-strip-btn");
     await page.waitForFunction(() => window.CC?.state?.puzzle?.layout?.board?.starFreeStrip === true, null, {

@@ -975,8 +975,8 @@ export async function run() {
   assert.doesNotMatch(localList, /confirm" value="open-existing-draft"/);
   assert.match(localList, /Create and open board/);
   assert.match(localList, /href="\/\?puzzle=review-fixture&amp;play"/);
-  assert.match(localList, /href="\/\?puzzle=review-fixture&amp;admin&amp;play"/);
-  assert.match(localList, />Review</);
+  assert.match(localList, /href="\/\?puzzle=review-fixture&amp;author=layout"/);
+  assert.match(localList, />Layout</);
   assert.doesNotMatch(localList, /live in this Worker/);
   assert.doesNotMatch(localList, /asks GitHub/);
 

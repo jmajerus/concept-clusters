@@ -21,20 +21,14 @@ function queryWithMode(params, mode) {
   return `/?${query}`;
 }
 
-export function reviewQuery(puzzleId, mode = null) {
+// The layout view (layout authoring and board settings) for a published
+// puzzle or a working copy: `?puzzle=` resolves a working copy first, and
+// the layout view always plays the board.
+export function layoutQuery(puzzleId, mode = null) {
   if (!SLUG_RE.test(puzzleId)) {
     throw new Error(`Invalid puzzle id: ${puzzleId}`);
   }
-  return queryWithMode(new URLSearchParams({ puzzle: puzzleId, admin: "" }), mode);
-}
-
-export function draftReviewQuery(draftId, mode = null, revision = null) {
-  if (!SLUG_RE.test(draftId)) {
-    throw new Error(`Invalid draft id: ${draftId}`);
-  }
-  const params = new URLSearchParams({ puzzle: draftId, admin: "", play: "" });
-  if (Number.isInteger(revision) && revision > 0) params.set("revision", String(revision));
-  return queryWithMode(params, mode);
+  return queryWithMode(new URLSearchParams({ puzzle: puzzleId, author: "layout" }), mode);
 }
 
 export function playQuery(puzzleId, mode = null) {

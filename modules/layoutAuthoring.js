@@ -72,7 +72,9 @@ export function createLayoutAuthoringController({
   const boardSizeFactorEl = document.getElementById("board-size-factor");
   const boardSizeFactorInput = document.getElementById("board-size-factor-input");
   const boardSizeFactorReadout = document.getElementById("board-size-factor-readout");
-  const adminLayoutHintEl = document.getElementById("admin-layout-hint");
+  const boardSettingsEl = document.getElementById("board-settings");
+  const boardSettingsStatusEl = document.getElementById("board-settings-status");
+  const BOARD_SETTINGS_NOTE = boardSettingsStatusEl?.textContent.trim() || "";
   let savedSizeFactor = 1;
   const savesToAuthoringServer = typeof saveLayout === "function";
   let savingLayout = false;
@@ -496,27 +498,31 @@ export function createLayoutAuthoringController({
     }
   });
 
-  // Bridge pre-connect changes play, so it stays on the working copy.
-  function workingCopyCanWriteBoard() {
-    return adminMode && typeof saveBoardFlags === "function" && Boolean(getDraftId());
-  }
-
-  // Board size and the Star free-term strip are layout settings: they save
-  // with the layout, to the open working copy or else the published puzzle.
+  // The Board settings card beside the layout card. Board size and the
+  // Star free-term strip are layout settings: they save with the layout, to
+  // the open working copy or else the published puzzle. Bridge pre-connect
+  // changes play, so it saves on the working copy only.
   const LAYOUT_BOARD_FLAGS = new Set(["sizeFactor", "starFreeStrip"]);
   function layoutCanWriteBoard() {
-    return adminMode && typeof saveLayoutBoard === "function";
+    return layoutAuthoringMode && typeof saveLayoutBoard === "function";
   }
 
+  function workingCopyCanWriteBoard() {
+    return layoutAuthoringMode && typeof saveBoardFlags === "function" && Boolean(getDraftId());
+  }
+
+  if (boardSettingsEl) boardSettingsEl.hidden = !layoutCanWriteBoard();
+
   function setBoardFlagStatus(text) {
-    if (!adminLayoutHintEl) return;
-    adminLayoutHintEl.textContent = text ||
-      "Final layout: Prepare → drag → Save Layout, once per mode. Board size and the free-term strip save with the layout, to the open draft or else the published puzzle. Bridge pre-connect saves on the open working copy.";
+    if (!boardSettingsStatusEl) return;
+    boardSettingsStatusEl.textContent = text || BOARD_SETTINGS_NOTE;
+    if (text) boardSettingsStatusEl.dataset.tone = "error";
+    else delete boardSettingsStatusEl.dataset.tone;
   }
 
   function setBoardControlsDisabled(disabled) {
     if (starFreeStripBtn) starFreeStripBtn.disabled = disabled;
-    if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled;
+    if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled || !workingCopyCanWriteBoard();
     if (boardSizeFactorInput) boardSizeFactorInput.disabled = disabled;
   }
 
@@ -574,8 +580,15 @@ export function createLayoutAuthoringController({
     const state = getState();
     const canWriteLayout = layoutCanWriteBoard();
     const canWriteCopy = workingCopyCanWriteBoard();
-    if (starFreeStripBtn) starFreeStripBtn.hidden = !canWriteLayout;
-    if (starBridgePreconnectBtn) starBridgePreconnectBtn.hidden = !canWriteCopy;
+    // The free-term strip is Star's alone.
+    if (starFreeStripBtn) starFreeStripBtn.hidden = !canWriteLayout || getMode() !== "star";
+    if (starBridgePreconnectBtn) {
+      starBridgePreconnectBtn.hidden = !canWriteLayout;
+      starBridgePreconnectBtn.disabled = !canWriteCopy;
+      starBridgePreconnectBtn.title = canWriteCopy
+        ? "Changes play; saves on the open working copy"
+        : "Open a working copy to change bridge pre-connect";
+    }
     syncBoardSizeControl();
     if (!state?.puzzle) return;
     if (canWriteLayout && starFreeStripBtn) {
@@ -584,7 +597,7 @@ export function createLayoutAuthoringController({
         ? "Clear free-term strip"
         : "Use free-term strip";
     }
-    if (canWriteCopy && starBridgePreconnectBtn) {
+    if (canWriteLayout && starBridgePreconnectBtn) {
       const preconnect = starBridgePreconnectEnabled(state.puzzle);
       starBridgePreconnectBtn.textContent = preconnect
         ? "Clear bridge pre-connect"
@@ -604,11 +617,14 @@ export function createLayoutAuthoringController({
       // admin can return to the same collection afterward. A draft overlay
       // keeps the D1 route and enters Play so the board is compiled.
       params.delete("admin");
+      // A working copy keeps whichever puzzle= opened it, as reloadBoard does.
       if (params.get("draft")) params.set("view", "play");
-      else params.set("puzzle", state.puzzle.id);
+      else if (!getDraftId()) params.set("puzzle", state.puzzle.id);
       location.assign(`${location.pathname}?${params.toString()}`);
     });
+  }
 
+  if (layoutCanWriteBoard()) {
     starFreeStripBtn?.addEventListener("click", () => {
       const state = getState();
       if (!state?.puzzle) return;
@@ -636,6 +652,8 @@ export function createLayoutAuthoringController({
       const factor = canonicalBoardSizeFactor(boardSizeFactorInput.value);
       if (factor == null) return;
       previewBoardSize?.(factor, { rebuild: "now" });
+      // The rebuilt board is unpolished; the panel asks for Prepare again.
+      updateLayoutAuthoringPanel();
       const size = getBoard();
       if (boardSizeFactorReadout) {
         boardSizeFactorReadout.textContent = sizeReadout(factor, size);

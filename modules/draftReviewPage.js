@@ -27,7 +27,7 @@ import {
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { diffPublishedDraft, documentWithLesson, independentReviewDocument, lessonContentText, samePlayablePuzzle } from "./draftReviewDiff.js";
 import { revisedLessonLabel, revisedMarkChangesLessonLine, samePlayerFacingProjection } from "./playerFacingRevision.js";
-import { draftBoardQuery, draftPlayQuery, draftReviewQuery, playQuery, reviewQuery } from "./stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery, layoutQuery, playQuery } from "./stagingPlayLinks.js";
 import {
   CATEGORIES,
   categoryIdFor,
@@ -859,7 +859,7 @@ function listIntro(variant) {
     : `The GitHub snapshot column is origin’s <code>puzzles/manifest.js</code>.`;
   const playHelp = variant === "local"
     ? `New puzzle opens a blank board. Play opens the working-copy preview.
-       Review opens the board with puzzle meta, stats, and Edit layout. Catalogues are edited at
+       Layout opens layout authoring with the board settings. Catalogues are edited at
        <a href="/admin/catalogues">/admin/catalogues</a>.`
     : `Play unpublished working copies on the LAN authoring checkout.`;
   return `Publish makes the D1 snapshot available to public play after the
@@ -1226,11 +1226,11 @@ function renderCorpusPlayCell(item, variant) {
   try {
     if (item.hasWorkingCopy && item.draftId) {
       return `<td><a href="${escapeHtml(draftPlayQuery(item.draftId))}">Play</a>
-        · <a href="${escapeHtml(draftReviewQuery(item.draftId))}">Review</a></td>`;
+        · <a href="${escapeHtml(layoutQuery(item.draftId))}">Layout</a></td>`;
     }
     if (item.published && item.id) {
       return `<td><a href="${escapeHtml(playQuery(item.id))}">Play</a>
-        · <a href="${escapeHtml(reviewQuery(item.id))}">Review</a></td>`;
+        · <a href="${escapeHtml(layoutQuery(item.id))}">Layout</a></td>`;
     }
   } catch {
     return "<td></td>";
@@ -1474,8 +1474,8 @@ function submitHint(variant, { valid, alreadyPublished = false }) {
     return `This page is for design copy. Open board opens
        <code>/?puzzle=</code> in a new tab, in Construct, and leaves this
        page as it is. Play is a clean player preview
-       (<code>/?puzzle=&amp;play</code>). Review, beside Play on the
-       puzzle list, opens that board with puzzle meta, stats, and Edit layout.
+       (<code>/?puzzle=&amp;play</code>). Layout, beside Play on the
+       puzzle list, opens layout authoring with the board settings.
        Publish makes the D1 snapshot available to public play after the cache
        refreshes. Cue for freeze marks it for the next static snapshot and
        returns to the list; Freeze on
