@@ -46,6 +46,7 @@ export function createLayoutAuthoringController({
   const layoutMetricCrossingsEl = document.getElementById("layout-metric-crossings");
   const layoutMetricPillCrossingsEl = document.getElementById("layout-metric-pill-crossings");
   const layoutMetricOverlapsEl = document.getElementById("layout-metric-overlaps");
+  const layoutMetricNearEdgeEl = document.getElementById("layout-metric-near-edge");
   const layoutAuthoringPrepareBtn = document.getElementById("layout-authoring-prepare");
   const layoutAuthoringSaveBtn = document.getElementById("layout-authoring-save");
   const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
@@ -227,7 +228,12 @@ export function createLayoutAuthoringController({
       "lineHeadingIntersections",
       "lineCircleIntersections"
     ]);
-    const overlaps = metrics?.overlaps ?? metrics?.hardOverlaps ?? 0;
+    // Graph and Circle count items near the board's edge into hardOverlaps;
+    // they show as Near edge, not as overlaps.
+    const nearEdge = metrics?.boundsViolations;
+    const overlaps = metrics?.overlaps ??
+      Math.max(0, (metrics?.hardOverlaps ?? 0) - (Number(nearEdge) || 0));
+    layoutMetricNearEdgeEl.textContent = metrics && Number.isFinite(nearEdge) ? String(nearEdge) : "—";
 
     layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
     layoutMetricPillCrossingsEl.textContent = metrics ? lineObstructions : "—";

@@ -94,6 +94,9 @@ const PILL_H_CONST = 30, PILL_GAP_CONST = 6, HEAD_CONST = 22, PAD_CONST = 16;
 // reclaimStripOnSolve, which collapses the strip down to just this
 // margin once nothing's left in it to reserve room for.
 const STRIP_MARGIN = 16;
+// The gap, in board units, an item keeps from the board's edge before it
+// counts as near the edge (boundsViolations).
+const EDGE_MARGIN = 4;
 
 // The gap between a circle's own boundary and the nearest edge of its
 // nearest docked pill — exact and constant regardless of the circle's
@@ -418,6 +421,10 @@ export function createSetRenderer({
   }
 
   function scoreCircleCandidate(puzzle, circles, bridgePointsByWord, clusterBoxes, stripHeight, W, H) {
+    // Near the edge: within EDGE_MARGIN of the board, or of the free-term
+    // strip while it holds terms. A solved board keeps only the strip's
+    // bare margin, which reserves nothing.
+    const top = stripHeight > STRIP_MARGIN ? stripHeight : 0;
     const headings = computeHeadingPositions(puzzle, circles, clusterBoxes, stripHeight, W, H);
     const headingRects = headings.map(headingRect);
     const bridges = puzzle.bridges.map(bridge => ({
@@ -445,8 +452,8 @@ export function createSetRenderer({
 
     for (let i = 0; i < circles.length; i++) {
       const circle = circles[i];
-      if (circle.x - circle.r < 8 || circle.x + circle.r > W - 8 ||
-          circle.y - circle.r < stripHeight + 8 || circle.y + circle.r > H - 8) {
+      if (circle.x - circle.r < EDGE_MARGIN || circle.x + circle.r > W - EDGE_MARGIN ||
+          circle.y - circle.r < top + EDGE_MARGIN || circle.y + circle.r > H - EDGE_MARGIN) {
         metrics.hardOverlaps++;
         metrics.boundsViolations++;
       }
@@ -478,8 +485,8 @@ export function createSetRenderer({
     }
     bridgeRects.forEach((rect, i) => {
       const item = bridges[i];
-      if (rect.left < 10 || rect.right > W - 10 ||
-          rect.top < stripHeight + 10 || rect.bottom > H - 10) {
+      if (rect.left < EDGE_MARGIN || rect.right > W - EDGE_MARGIN ||
+          rect.top < top + EDGE_MARGIN || rect.bottom > H - EDGE_MARGIN) {
         metrics.hardOverlaps++;
         metrics.boundsViolations++;
       }

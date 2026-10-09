@@ -1013,6 +1013,7 @@ const DEFECT_LABELS = {
   lineHeadingIntersections: ["line through a heading", "lines through headings"],
   lineCircleIntersections: ["line through a circle", "lines through circles"],
   hardOverlaps: ["overlap", "overlaps"],
+  boundsViolations: ["item too close to the board edge", "items too close to the board edge"],
   overlaps: ["overlap", "overlaps"]
 };
 

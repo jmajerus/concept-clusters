@@ -40,6 +40,10 @@ async function authoringMode(page, baseURL, mode) {
   );
   assert.equal(layout.puzzleId, PUZZLE_ID);
   assert.equal(layout.metrics.lineCrossings, 0);
+  // Near edge reports boundsViolations apart from overlaps; Star has none.
+  const nearEdge = mode === "star" ? "—" : String(layout.metrics.boundsViolations);
+  await page.waitForFunction(expected =>
+    document.getElementById("layout-metric-near-edge").textContent === expected, nearEdge);
   return layout;
 }
 
