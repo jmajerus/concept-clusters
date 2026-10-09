@@ -684,6 +684,7 @@ export function createLayoutAuthoringController({
       if (factor == null) return;
       previewBoardSize?.(factor, { rebuild: "now" });
       // The rebuilt board is unpolished; the panel asks for Prepare again.
+      setBoardFlagStatus("");
       updateLayoutAuthoringPanel();
       const size = getBoard();
       if (boardSizeFactorReadout) {
