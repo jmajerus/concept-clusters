@@ -47,6 +47,40 @@ async function authoringMode(page, baseURL, mode) {
     assert.ok(Array.isArray(named), "Circle metrics name their obstructions");
     assert.equal(named.length, layout.metrics.lineHeadingIntersections + layout.metrics.lineCircleIntersections);
     assert.equal(layout.metrics.obstructions, undefined, "saved metrics hold counts only");
+    // A controlled obstruction: pull a bridge out past its own circle's
+    // heading, so the drawn arm runs through that heading's text.
+    const expected = await page.evaluate(() => {
+      const state = window.CC.state;
+      const line = document.querySelector("line.bridge-link");
+      const word = line.parentNode.__data__.term;
+      const side = line.__data__.side;
+      const node = state.nodes.find(candidate => candidate.word === word);
+      const heading = [...document.querySelectorAll("g.set-cluster")]
+        .find(group => group.__data__.ci === side).querySelector("text.set-heading");
+      const svg = document.getElementById("board");
+      const box = heading.getBBox();
+      const toBoard = svg.getCTM().inverse().multiply(heading.getCTM());
+      const centre = svg.createSVGPoint();
+      centre.x = box.x + box.width / 2;
+      centre.y = box.y + box.height / 2;
+      const target = centre.matrixTransform(toBoard);
+      // The arm starts at its target term, which shifts as the bridge
+      // moves; a few passes settle it.
+      for (let pass = 0; pass < 4; pass++) {
+        const arm = [...document.querySelectorAll("line.bridge-link")]
+          .find(candidate => candidate.parentNode.__data__.term === word && candidate.__data__.side === side);
+        const x1 = Number(arm.getAttribute("x1")), y1 = Number(arm.getAttribute("y1"));
+        node.x = node.fx = x1 + (target.x - x1) * 1.6;
+        node.y = node.fy = y1 + (target.y - y1) * 1.6;
+        state.paint();
+      }
+      return `${word} → “${state.puzzle.clusters[side].name}” heading`;
+    });
+    const obstructed = await page.evaluate(() => window.CC.state.layoutAdapter.metrics().obstructions);
+    assert.ok(obstructed.includes(expected), `expected "${expected}" among ${JSON.stringify(obstructed)}`);
+    // The panel refreshes on a layout change and lists the same name.
+    await page.evaluate(() => window.CC.state.onAuthorLayoutChanged?.("placement"));
+    assert.ok((await page.textContent("#layout-metric-pill-crossings")).includes(expected));
   }
   // Near edge reports boundsViolations apart from overlaps; Star has none.
   const nearEdge = mode === "star" ? "—" : String(layout.metrics.boundsViolations);

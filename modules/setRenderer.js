@@ -455,7 +455,10 @@ export function createSetRenderer({
   function bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes, rowOffsets) {
     const state = getState();
     const node = state.nodes.find(candidate => candidate.word === bridge.term);
-    return bridge.clusters.map(ci => {
+    // Only the arms that are drawn: a partly connected bridge has a line
+    // to each circle it has joined, as in bridgeLineSegments.
+    const sides = node ? bridge.clusters.filter(ci => node.connected.includes(ci)) : bridge.clusters;
+    return sides.map(ci => {
       const circle = circles[ci];
       const link = node && state.links.find(l => l.source === node && l.clusterIndex === ci);
       let targetPoint = null;
