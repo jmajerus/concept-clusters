@@ -40,6 +40,14 @@ async function authoringMode(page, baseURL, mode) {
   );
   assert.equal(layout.puzzleId, PUZZLE_ID);
   assert.equal(layout.metrics.lineCrossings, 0);
+  // Circle names each line obstruction for the panel; a saved layout keeps
+  // only the counts.
+  if (mode === "sets") {
+    const named = await page.evaluate(() => window.CC.state.layoutAdapter.metrics().obstructions);
+    assert.ok(Array.isArray(named), "Circle metrics name their obstructions");
+    assert.equal(named.length, layout.metrics.lineHeadingIntersections + layout.metrics.lineCircleIntersections);
+    assert.equal(layout.metrics.obstructions, undefined, "saved metrics hold counts only");
+  }
   // Near edge reports boundsViolations apart from overlaps; Star has none.
   const nearEdge = mode === "star" ? "—" : String(layout.metrics.boundsViolations);
   await page.waitForFunction(expected =>

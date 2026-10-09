@@ -242,7 +242,12 @@ export function createLayoutAuthoringController({
     layoutMetricNearEdgeEl.textContent = metrics && nearEdge != null ? String(nearEdge) : "—";
 
     layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
-    layoutMetricPillCrossingsEl.textContent = metrics ? lineObstructions : "—";
+    // Circle names each obstruction, so a flag can be found on the board.
+    layoutMetricPillCrossingsEl.textContent = !metrics
+      ? "—"
+      : lineObstructions > 0 && metrics.obstructions?.length
+        ? `${lineObstructions} (${metrics.obstructions.join("; ")})`
+        : String(lineObstructions);
     if (!metrics) {
       layoutMetricOverlapsEl.textContent = "—";
     } else if (overlaps > 0 && metrics.overlappingPairs?.length) {
