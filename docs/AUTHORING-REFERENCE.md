@@ -1591,9 +1591,12 @@ http://localhost:8787/?puzzle=revolutions-modern-world&mode=sets&author=layout
 ```
 
 The **Layout** link beside Play on the puzzle list opens it for that puzzle or
-working copy, and **Edit layout** in the admin view does the same. The mode buttons
-stay live: choosing another mode reloads the panel in that mode on the same
-puzzle or working copy.
+working copy, and **Edit layout** in the admin view does the same. The cards sit
+beside the board on a wide screen and directly under it otherwise. The mode
+buttons switch in place: a mode not yet visited polishes from its saved layout
+(or generates one), and returning to a mode restores the arrangement you left,
+unsaved drags included. The address bar follows the mode, so a reload opens it
+from its saved layout.
 
 - **On open**, a puzzle with a saved layout for the mode solves straight
   into it. The status line says what loaded and what problems remain, for

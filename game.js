@@ -587,20 +587,23 @@ function restorePlayerSession(session) {
 
 function setMode(newMode) {
   if (authoringStudio?.isConstruct() && newMode === "sets") return;
-  // Layout authoring never switches in place: a carried-over board is not
-  // a clean starting point for that mode's override. Reload into the new
-  // mode instead. Drags already autosave to the local draft.
-  if (layoutAuthoringMode) {
-    if (newMode !== mode) layoutAuthoring.reloadBoard(newMode);
-    return;
-  }
+  if (layoutAuthoringMode && newMode === mode) return;
   if (state?.phase === "lens-preparing") return;
   const switchingLensPhase = lensPhaseActive(state);
   clearTimeout(playerLayoutSaveTimer);
   if (state) persistPlayerSession({ captureLayout: true });
+  // Layout authoring switches in place too. Each mode's arrangement,
+  // unsaved drags included, is kept in memory for this visit (players keep
+  // theirs in the session instead); a mode not yet visited polishes from
+  // its saved layout, the same clean start a fresh load gives it.
+  if (layoutAuthoringMode && state) rememberAuthoringArrangement();
   mode = newMode;
   if (authoringStudio?.isConstruct()) constructViewMode = newMode;
-  else localStorage.setItem("ccMode", mode);
+  else if (layoutAuthoringMode) {
+    const params = new URLSearchParams(location.search);
+    params.set("mode", mode);
+    history.replaceState(history.state, "", `${location.pathname}?${params.toString()}`);
+  } else localStorage.setItem("ccMode", mode);
   updateModeControls();
   if (state) {
     state.persistedMode = mode;
@@ -625,8 +628,9 @@ function setMode(newMode) {
     // elements.
     state.setLayersReady = false;
     buildForMode();
-    const session = loadPlayerSession(localStorage, sessionStoragePuzzle());
-    const layout = session?.layouts?.[mode];
+    const layout = layoutAuthoringMode
+      ? state.authoringArrangements?.get(mode)
+      : loadPlayerSession(localStorage, sessionStoragePuzzle())?.layouts?.[mode];
     let restoredLayout = null;
     if (layout &&
         state.layoutAdapter?.mode === mode &&
@@ -662,7 +666,7 @@ function setMode(newMode) {
       } else if (state.completedViaShowSolution) {
         setMessage("Solution shown.", "good");
       }
-    } else if (state.completedViaShowSolution &&
+    } else if ((state.completedViaShowSolution || layoutAuthoringMode) &&
         state.made === state.need &&
         state.solutionLayout !== "pretty") {
       state.modeSwitchLayoutPromise = finishSolvedLayoutAfterModeSwitch(state, mode);
@@ -670,7 +674,23 @@ function setMode(newMode) {
       updateSolutionHint();
     }
     persistPlayerSession();
+    if (layoutAuthoringMode) {
+      layoutAuthoring.onModeSwitched({
+        restored: keepRestoredLayout,
+        layoutPromise: state.modeSwitchLayoutPromise
+      });
+    }
   }
+}
+
+// The layout view's per-mode memory, kept on the board state so a new
+// puzzle or a reload starts clean. Only a solved board is worth keeping.
+function rememberAuthoringArrangement() {
+  if (state.made !== state.need ||
+      state.layoutAdapter?.mode !== mode ||
+      typeof state.layoutAdapter.capture !== "function") return;
+  state.authoringArrangements ||= new Map();
+  state.authoringArrangements.set(mode, state.layoutAdapter.capture());
 }
 modeGraphBtn.addEventListener("click", () => setMode("graph"));
 modeStarBtn.addEventListener("click", () => setMode("star"));
