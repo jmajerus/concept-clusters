@@ -403,24 +403,77 @@ export function createSetRenderer({
     };
   };
 
-  function bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes) {
-    return bridge.clusters.map(ci => {
+  // A heading's drawn text, for line obstructions: headingRect's box
+  // without the placement padding (headingWidth adds 26 across) and with
+  // the text's own height. Placement keeps the generous box; a line only
+  // obstructs a heading it actually crosses.
+  const HEADING_PAD_X = 13;
+  const HEADING_INK_H = 20;
+  const headingInkRect = heading => {
+    const rect = headingRect(heading);
+    const inset = Math.min(HEADING_PAD_X, (rect.right - rect.left) / 2);
+    return {
+      left: rect.left + inset,
+      right: rect.right - inset,
+      top: heading.y - HEADING_INK_H / 2,
+      bottom: heading.y + HEADING_INK_H / 2
+    };
+  };
+
+  // Where a bridge's arm to circle `ci` starts, as drawn: at the edge of
+  // its ideal target's pill when the link is ideal (a canonical arm leaves
+  // the circle through that term), otherwise on the circle's boundary
+  // facing the bridge. Shared by drawing and scoring, so what is measured
+  // is what is on screen.
+  function armStart(point, center, r, link, targetPoint) {
+    const dx = point.x - center.x, dy = point.y - center.y;
+    const length = Math.hypot(dx, dy) || 1;
+    if (!link?.ideal || !targetPoint) {
+      return { x: center.x + (dx / length) * r, y: center.y + (dy / length) * r };
+    }
+    const tdx = point.x - targetPoint.x, tdy = point.y - targetPoint.y;
+    const tLength = Math.hypot(tdx, tdy) || 1;
+    const ux = tdx / tLength, uy = tdy / tLength;
+    const edge = rectEdgeDist(ux, uy, link.target.w / 2, PILL_H_CONST / 2);
+    return { x: targetPoint.x + ux * edge, y: targetPoint.y + uy * edge };
+  }
+
+  // Each circle's member row offsets in its current stacking order, looked
+  // up once per circle for a run of candidate scoring.
+  function candidateRowOffsets(puzzle) {
+    const cache = new Map();
+    return ci => {
+      if (!cache.has(ci)) cache.set(ci, memberRowOffsets(puzzle, memberOrderFor(getState(), ci)));
+      return cache.get(ci);
+    };
+  }
+
+  // The drawn arms of one bridge at `point`, for candidate circles. A
+  // docked ideal target sits at its row in the circle's current stacking
+  // order; polishing may re-stack afterwards (refreshMemberOrder), so a
+  // candidate's arm is the closest estimate available before then.
+  function bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes, rowOffsets) {
+    const state = getState();
+    const node = state.nodes.find(candidate => candidate.word === bridge.term);
+    // Only the arms that are drawn: a partly connected bridge has a line
+    // to each circle it has joined, as in bridgeLineSegments.
+    const sides = node ? bridge.clusters.filter(ci => node.connected.includes(ci)) : bridge.clusters;
+    return sides.map(ci => {
       const circle = circles[ci];
-      const dx = point.x - circle.x, dy = point.y - circle.y;
-      const length = Math.hypot(dx, dy) || 1;
-      const ux = dx / length, uy = dy / length;
-      return {
-        bridge: bridge.term,
-        side: ci,
-        x1: circle.x + ux * clusterBoxes[ci].r,
-        y1: circle.y + uy * clusterBoxes[ci].r,
-        x2: point.x,
-        y2: point.y
-      };
+      const link = node && state.links.find(l => l.source === node && l.clusterIndex === ci);
+      let targetPoint = null;
+      if (link?.ideal) {
+        const offset = link.target.gs?.length === 1 ? rowOffsets(ci).get(link.target.word) : null;
+        targetPoint = offset != null
+          ? { x: circle.x, y: circle.y + offset }
+          : pillTarget(link.target);
+      }
+      const start = armStart(point, circle, clusterBoxes[ci].r, link, targetPoint);
+      return { bridge: bridge.term, side: ci, x1: start.x, y1: start.y, x2: point.x, y2: point.y };
     });
   }
 
-  function scoreCircleCandidate(puzzle, circles, bridgePointsByWord, clusterBoxes, stripHeight, W, H) {
+  function scoreCircleCandidate(puzzle, circles, bridgePointsByWord, clusterBoxes, stripHeight, W, H, { details = false } = {}) {
     // Near the edge: within EDGE_MARGIN of the board, or of the free-term
     // strip while it holds terms. A solved board keeps only the strip's
     // bare margin, which reserves nothing.
@@ -433,9 +486,13 @@ export function createSetRenderer({
       node: getState().nodes.find(node => node.word === bridge.term)
     })).filter(item => item.point && item.node);
     const bridgeRects = bridges.map(item => pointRect(item.point, item.node.w));
+    const rowOffsets = candidateRowOffsets(puzzle);
     const segments = bridges.flatMap(item =>
-      bridgeSegmentsForPoint(item.bridge, item.point, circles, clusterBoxes)
+      bridgeSegmentsForPoint(item.bridge, item.point, circles, clusterBoxes, rowOffsets)
     );
+    const inkRects = headings.map(headingInkRect);
+    // With details, each obstruction is named for the layout panel.
+    const obstructions = details ? [] : null;
     const metrics = {
       hardOverlaps: 0,
       circleOverlaps: 0,
@@ -515,16 +572,21 @@ export function createSetRenderer({
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
       metrics.totalLength += Math.hypot(segment.x2 - segment.x1, segment.y2 - segment.y1);
-      headingRects.forEach(rect => {
-        if (segmentIntersectsRect(segment, rect, 5)) metrics.lineHeadingIntersections++;
+      inkRects.forEach((rect, hi) => {
+        if (segmentIntersectsRect(segment, rect, 3)) {
+          metrics.lineHeadingIntersections++;
+          obstructions?.push(`${segment.bridge} → “${puzzle.clusters[hi]?.name}” heading`);
+        }
       });
+      // A line obstructs a circle it enters, not one it passes beside.
       circles.forEach((circle, ci) => {
         if (ci === segment.side) return;
         if (segmentDistToPoint(
           segment.x1, segment.y1, segment.x2, segment.y2,
           circle.x, circle.y
-        ) < circle.r + 6) {
+        ) < circle.r) {
           metrics.lineCircleIntersections++;
+          obstructions?.push(`${segment.bridge} → “${puzzle.clusters[ci]?.name}” circle`);
         }
       });
       for (let j = i + 1; j < segments.length; j++) {
@@ -532,6 +594,7 @@ export function createSetRenderer({
         if (segmentIntersection(segment, segments[j])) metrics.lineCrossings++;
       }
     }
+    if (obstructions) metrics.obstructions = obstructions;
     return {
       metrics,
       headings,
@@ -674,9 +737,13 @@ export function createSetRenderer({
             circles[ci].x = W / 2 + baseRx * scaleX * Math.cos(angle);
             circles[ci].y = centerY + baseRy * scaleY * Math.sin(angle);
           });
-          const preliminaryHeadings = computeHeadingPositions(
+          const preliminaryHeadingPositions = computeHeadingPositions(
             puzzle, circles, clusterBoxes, stripHeight, W, H
-          ).map(headingRect);
+          );
+          const preliminaryHeadings = preliminaryHeadingPositions.map(headingRect);
+          // Lines are measured against the text itself, as in scoring.
+          const preliminaryInk = preliminaryHeadingPositions.map(headingInkRect);
+          const rowOffsets = candidateRowOffsets(puzzle);
           const bridgePointsByWord = new Map();
           completedBridges
             .slice()
@@ -705,25 +772,25 @@ export function createSetRenderer({
                   const placedNode = state.nodes.find(candidate => candidate.word === word);
                   if (rectsOverlap(rect, pointRect(placed, placedNode.w), 12)) hard++;
                 }
-                const segments = bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes);
+                const segments = bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes, rowOffsets);
                 let obstruction = 0, crossings = 0, length = 0;
                 segments.forEach(segment => {
                   length += Math.hypot(segment.x2 - segment.x1, segment.y2 - segment.y1);
-                  preliminaryHeadings.forEach(heading => {
-                    if (segmentIntersectsRect(segment, heading, 5)) obstruction++;
+                  preliminaryInk.forEach(heading => {
+                    if (segmentIntersectsRect(segment, heading, 3)) obstruction++;
                   });
                   circles.forEach((circle, ci) => {
                     if (ci !== segment.side &&
                         segmentDistToPoint(
                           segment.x1, segment.y1, segment.x2, segment.y2,
                           circle.x, circle.y
-                        ) < circle.r + 6) {
+                        ) < circle.r) {
                       obstruction++;
                     }
                   });
                   for (const [word, placed] of bridgePointsByWord) {
                     const placedBridge = puzzle.bridges.find(candidate => candidate.term === word);
-                    bridgeSegmentsForPoint(placedBridge, placed, circles, clusterBoxes)
+                    bridgeSegmentsForPoint(placedBridge, placed, circles, clusterBoxes, rowOffsets)
                       .forEach(other => { if (segmentIntersection(segment, other)) crossings++; });
                   }
                 });
@@ -988,22 +1055,8 @@ export function createSetRenderer({
       const dx = p.x - c.x, dy = p.y - c.y, len = Math.hypot(dx, dy) || 1;
       const ux = dx / len, uy = dy / len;
       const link = state.links.find(l => l.source === n && l.clusterIndex === ci);
-      const boundaryPoint = { x: c.x + ux * r, y: c.y + uy * r };
-      let x1 = boundaryPoint.x, y1 = boundaryPoint.y;
-      if (link?.ideal) {
-        const target = pillTarget(link.target);
-        const targetDx = p.x - target.x, targetDy = p.y - target.y;
-        const targetLength = Math.hypot(targetDx, targetDy) || 1;
-        const targetUx = targetDx / targetLength, targetUy = targetDy / targetLength;
-        const targetEdge = rectEdgeDist(
-          targetUx,
-          targetUy,
-          link.target.w / 2,
-          PILL_H_CONST / 2
-        );
-        x1 = target.x + targetUx * targetEdge;
-        y1 = target.y + targetUy * targetEdge;
-      }
+      const start = armStart(p, c, r, link, link?.ideal ? pillTarget(link.target) : null);
+      const x1 = start.x, y1 = start.y;
       // A partial (dashed) segment stops at the pill's own rect boundary
       // instead of continuing to its center — otherwise the pill (drawn
       // on top) covers roughly the near half of the segment.
@@ -1588,11 +1641,14 @@ export function createSetRenderer({
       });
     }
 
-    function circleLayoutMetrics() {
+    // With details, the metrics also name each line obstruction for the
+    // layout panel; saved layouts keep the counts alone.
+    function circleLayoutMetrics({ details = false } = {}) {
       const currentState = getState();
       const { csNodes, clusterBoxes } = currentState.setLayout;
+      // Where each bridge is drawn: a dragged pin before the last settle.
       const bridgePointsByWord = new Map(
-        connectedBridges(currentState).map(node => [node.word, { x: node.x, y: node.y }])
+        connectedBridges(currentState).map(node => [node.word, pillTarget(node)])
       );
       return scoreCircleCandidate(
         puzzle,
@@ -1601,7 +1657,8 @@ export function createSetRenderer({
         clusterBoxes,
         currentState.setLayout.stripHeight,
         getW(),
-        getH()
+        getH(),
+        { details }
       ).metrics;
     }
 
@@ -2048,7 +2105,7 @@ export function createSetRenderer({
           allowUnsafe: options.purpose !== "authoring" || options.allowUnsafe === true
         }
       ),
-      metrics: circleLayoutMetrics,
+      metrics: () => circleLayoutMetrics({ details: true }),
       autoLayout: prettyPrintCircleLayout
     };
 
