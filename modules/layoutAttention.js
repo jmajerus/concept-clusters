@@ -12,12 +12,14 @@ import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 // Defects players would notice as severity tiers, most severe first, the
 // way each engine's own scoring ranks a finished layout (graphLayout
 // scoreGraphGeometry, setRenderer scoreCircleCandidate, starRenderer
-// comparePrettyLayouts). Graph's hardOverlaps already includes overlaps;
+// comparePrettyLayouts). Graph's hardOverlaps already includes overlaps,
+// and Graph's and Circle's include items near the board's edge, which are
+// reported apart in the same tier (withoutEdgeOverlaps);
 // Circle weighs lines through headings and through circles the same, so
 // they share a tier (a tier listing several metrics compares their sum).
 export const DEFECT_TIERS = {
-  graph: ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"],
-  sets: ["hardOverlaps", "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
+  graph: [["hardOverlaps", "boundsViolations"], "lineCrossings", "edgeNodeIntersections"],
+  sets: [["hardOverlaps", "boundsViolations"], "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
   star: ["lineCrossings", "edgeTitleIntersections", ["edgeNodeIntersections", "edgeIntersections"], "overlaps"]
 };
 
@@ -37,10 +39,18 @@ function disjointStarCounts(metrics) {
   return { ...metrics, edgeTitleIntersections: titles, edgeNodeIntersections: Math.max(0, combined - titles) };
 }
 
+// Graph and Circle count items near the board's edge into hardOverlaps.
+// Report them as boundsViolations alone, so they are not also overlaps;
+// they share the tier, so severity is unchanged.
+function withoutEdgeOverlaps(metrics) {
+  const edge = Number(metrics.boundsViolations) || 0;
+  return { ...metrics, hardOverlaps: Math.max(0, (Number(metrics.hardOverlaps) || 0) - edge), boundsViolations: edge };
+}
+
 /** Nonzero defect counts by metric, plus their total (null without metrics). */
 export function layoutDefects(mode, metrics) {
   if (!metrics) return { total: null };
-  const counts = mode === "star" ? disjointStarCounts(metrics) : metrics;
+  const counts = mode === "star" ? disjointStarCounts(metrics) : withoutEdgeOverlaps(metrics);
   const found = Object.fromEntries(DEFECT_TIERS[mode].flatMap(tierKeys)
     .map(key => [key, Number(counts[key]) || 0])
     .filter(([, count]) => count > 0));

@@ -205,6 +205,10 @@ function clampNode(node, width, height) {
   node.y = Math.max(PILL_H / 2 + 8, Math.min(height - PILL_H / 2 - 8, node.y));
 }
 
+// The gap, in board units, a pill keeps from the board's edge before it
+// counts as near the edge (boundsViolations), as in Circle.
+const EDGE_MARGIN = 4;
+
 export function scoreGraphGeometry(nodes, links, width, height) {
   let overlaps = 0;
   let lineCrossings = 0;
@@ -214,8 +218,8 @@ export function scoreGraphGeometry(nodes, links, width, height) {
 
   nodes.forEach(node => {
     const rect = centeredRect(node, node.w, PILL_H);
-    if (rect.left < 6 || rect.right > width - 6 ||
-        rect.top < 6 || rect.bottom > height - 6) {
+    if (rect.left < EDGE_MARGIN || rect.right > width - EDGE_MARGIN ||
+        rect.top < EDGE_MARGIN || rect.bottom > height - EDGE_MARGIN) {
       boundsViolations++;
     }
   });

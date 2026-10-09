@@ -349,6 +349,16 @@ export async function run() {
   );
   assert.deepEqual(layoutDefects("graph", { lineCrossings: 1, hardOverlaps: 0 }), { lineCrossings: 1, total: 1 });
   assert.deepEqual(layoutDefects("graph", null), { total: null });
+  // Items near the board's edge are counted into hardOverlaps; they are
+  // reported on their own, not as overlaps too.
+  assert.deepEqual(
+    layoutDefects("sets", { hardOverlaps: 2, boundsViolations: 2, lineCrossings: 0 }),
+    { boundsViolations: 2, total: 2 }
+  );
+  assert.deepEqual(
+    layoutDefects("graph", { hardOverlaps: 3, overlaps: 1, boundsViolations: 2 }),
+    { hardOverlaps: 1, boundsViolations: 2, total: 3 }
+  );
   const starMetrics = metrics => ({ ...starSaved, metrics });
   assert.equal(validateStarLayoutDocument(starMetrics({ lineCrossings: 0, edgeNodeIntersections: 1, overlaps: 0 }), puzzle).errors
     .some(error => error.includes("edgeTitleIntersections")), false, "the title count is optional");

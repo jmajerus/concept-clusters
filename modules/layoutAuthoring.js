@@ -46,6 +46,7 @@ export function createLayoutAuthoringController({
   const layoutMetricCrossingsEl = document.getElementById("layout-metric-crossings");
   const layoutMetricPillCrossingsEl = document.getElementById("layout-metric-pill-crossings");
   const layoutMetricOverlapsEl = document.getElementById("layout-metric-overlaps");
+  const layoutMetricNearEdgeEl = document.getElementById("layout-metric-near-edge");
   const layoutAuthoringPrepareBtn = document.getElementById("layout-authoring-prepare");
   const layoutAuthoringSaveBtn = document.getElementById("layout-authoring-save");
   const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
@@ -227,7 +228,8 @@ export function createLayoutAuthoringController({
       "lineHeadingIntersections",
       "lineCircleIntersections"
     ]);
-    const overlaps = metrics?.overlaps ?? metrics?.hardOverlaps ?? 0;
+    const { overlaps, nearEdge } = overlapCounts(metrics);
+    layoutMetricNearEdgeEl.textContent = metrics && nearEdge != null ? String(nearEdge) : "—";
 
     layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
     layoutMetricPillCrossingsEl.textContent = metrics ? lineObstructions : "—";
@@ -289,13 +291,25 @@ export function createLayoutAuthoringController({
   // polish passed it over, still show it for repair if it fits the terms.
   // Defects the shown layout still has, for the author's attention. A
   // saved layout is shown with them rather than replaced.
+  // Graph and Circle count items near the board's edge (boundsViolations)
+  // into hardOverlaps; they are reported as near the edge, not as overlaps.
+  // nearEdge is null for Star, which keeps every item on the board.
+  function overlapCounts(metrics) {
+    const edge = Number(metrics?.boundsViolations);
+    const nearEdge = Number.isFinite(edge) ? edge : null;
+    const overlaps = metrics?.overlaps ??
+      Math.max(0, (Number(metrics?.hardOverlaps) || 0) - (nearEdge || 0));
+    return { overlaps: Number(overlaps) || 0, nearEdge };
+  }
+
   function defectSummary(metrics) {
     if (!metrics) return null;
     const crossings = Number(metrics.lineCrossings) || 0;
-    const overlaps = Number(metrics.hardOverlaps ?? metrics.overlaps) || 0;
+    const { overlaps, nearEdge } = overlapCounts(metrics);
     const parts = [
       crossings ? `${crossings} line crossing${crossings === 1 ? "" : "s"}` : null,
-      overlaps ? `${overlaps} overlap${overlaps === 1 ? "" : "s"}` : null
+      overlaps ? `${overlaps} overlap${overlaps === 1 ? "" : "s"}` : null,
+      nearEdge ? `${nearEdge} item${nearEdge === 1 ? "" : "s"} too close to the board edge` : null
     ].filter(Boolean);
     return parts.length ? parts.join(" and ") : null;
   }
@@ -396,9 +410,9 @@ export function createLayoutAuthoringController({
           "edgeTitleIntersections",
           "lineHeadingIntersections",
           "lineCircleIntersections"
-        ]) > 0 || metricTotal(metrics, ["overlaps", "hardOverlaps"]) > 0) {
+        ]) > 0 || overlapCounts(metrics).overlaps > 0 || overlapCounts(metrics).nearEdge > 0) {
           setLayoutAuthoringStatus(
-            `${source.text}. Overlaps/through-pills are advisory; drag to tidy if you want, or save when it looks right.`,
+            `${source.text}. Overlaps, through-pills and items near the edge are advisory; drag to tidy if you want, or save when it looks right.`,
             "good"
           );
         }
