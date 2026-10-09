@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import {
   chooseMemberOrder,
-  circleRadius,
   compactMemberOrder,
   interiorLength,
-  stackFitRadius,
-  visibleInteriorLength
+  pillAnchor,
+  stackFitRadius
 } from "../modules/circleMemberOrder.js";
 
 export const name = "circle member order: ideal lines reach their term without passing under other pills";
@@ -59,8 +58,21 @@ export async function run() {
       interiorLength(fromRow(3), sideArm[0].point, center, 260),
     "fixture no longer distinguishes centre-based from edge-based scoring"
   );
-  // Only the ~22px between the pill's edge and the circle is visible.
-  assert.ok(visibleInteriorLength(fromRow(3), sideArm[0].point, center, 260, 475.3 / 2, 15) < 30);
+  // From the pill's facing end only the ~22px out to the circle is inside it.
+  const sideEnd = pillAnchor(fromRow(3), sideArm[0].point, { halfW: 475.3 / 2, halfH: 15 });
+  assert.equal(sideEnd.side, "right");
+  assert.ok(interiorLength(sideEnd, sideArm[0].point, center, 260) < 30);
+
+  // Anchors: a side end faces a bridge that is more beside than above or
+  // below; top or bottom centre faces one more above or below, but only
+  // from an end row, and a bottom anchor clears the caption row.
+  const pill = { x: 0, y: 0 };
+  const size = { halfW: 50, halfH: 15, below: 14 };
+  assert.deepEqual(pillAnchor(pill, { x: -300, y: 40 }, size), { x: -50, y: 0, side: "left" });
+  assert.deepEqual(pillAnchor(pill, { x: 20, y: -300 }, { ...size, top: true }), { x: 0, y: -15, side: "top" });
+  assert.deepEqual(pillAnchor(pill, { x: 20, y: 300 }, { ...size, bottom: true }), { x: 0, y: 29, side: "bottom" });
+  assert.equal(pillAnchor(pill, { x: 20, y: -300 }, size).side, "right", "a middle row leaves from its side end");
+  assert.equal(pillAnchor(pill, { x: -20, y: 300 }, { ...size, top: true }).side, "left", "the top row does not leave downwards");
 
   // Compact order: widest in the middle, tapering both ways.
   const widths = { a: 40, bb: 60, ccc: 80, dddd: 100, eeeee: 120 };
@@ -71,15 +83,16 @@ export async function run() {
   const fitCompact = stackFitRadius(compact, metrics);
   assert.ok(fitCompact < stackFitRadius(["eeeee", "a", "bb", "ccc", "dddd"], metrics));
 
-  // The fixed radius admits each ideal term at either end. Moving a term
-  // to an end shifts the rest by a row, so even a narrow one costs a
-  // little; a wide one costs more.
-  assert.equal(circleRadius(compact, [], metrics), fitCompact);
-  const narrow = circleRadius(compact, ["a"], metrics);
-  const roomy = circleRadius(compact, ["eeeee"], metrics);
-  assert.ok(fitCompact <= narrow && narrow < roomy);
-  assert.ok(stackFitRadius(["eeeee", "a", "ccc", "dddd", "bb"], metrics) <= roomy);
-  assert.ok(stackFitRadius(["a", "ccc", "dddd", "bb", "eeeee"], metrics) <= roomy);
+  // A circle fits its compact stack only. A target whose line would need
+  // an end row the circle cannot fit stays put and leaves from a side end:
+  // the wide middle term does not fit at an end, so it is not moved there.
+  const compactFit = order => stackFitRadius(order, metrics) <= fitCompact + 0.5;
+  const rows = order => new Map(order.map((term, i) => [term, -72 + 36 * i]));
+  const seated = chooseMemberOrder({
+    terms: compact, arms: [{ term: "eeeee", point: { x: 0, y: -400 } }], center, r: fitCompact,
+    rowOffsets: rows, pillWidth: width, fits: compactFit
+  });
+  assert.ok(seated === null || seated[0] !== "eeeee", `wide term forced into an end row: ${seated}`);
 
   // Orders that would overflow the circle are never chosen.
   const topArm = [{ term: "t3", point: { x: 0, y: -400 } }];

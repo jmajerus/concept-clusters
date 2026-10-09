@@ -1,14 +1,14 @@
 // Circle mode stacks a solved cluster's terms in one column. When a
 // bridge's ideal line ends on one of those terms, the stacking order
 // decides how much of that line runs under the circle's other pills. This
-// picks the order that keeps those lines shortest inside the circle.
+// picks the order that hides the least of those lines.
 // Pure geometry: setRenderer supplies row offsets and pill sizes.
 
-import { rectEdgeDist } from "./geometry.js";
+import { centeredRect, clipSegmentToRect } from "./geometry.js";
 
 export const MEMBER_ORDER_MAX_CANDIDATES = 5000;
-// A new order must shorten the total visible interior line by at least
-// this much, so two near-equal orders do not trade places as bridges drift.
+// A new order must hide at least this much less line than the shown one,
+// so two near-equal orders do not trade places as bridges drift.
 export const MEMBER_ORDER_HYSTERESIS = 12;
 
 // Length of the segment from `from` towards `to` that lies inside the
@@ -24,16 +24,20 @@ export function interiorLength(from, to, c, r) {
   return Math.min(1, Math.max(0, t)) * Math.sqrt(a);
 }
 
-// The drawn ideal line starts at the target pill's edge, not its centre
-// (see setRenderer bridgeLineSegments), so the stretch under the target
-// itself is not part of what other pills can hide. Wide pills approached
-// from the side would otherwise be penalised by their whole half-width.
-export function visibleInteriorLength(target, point, c, r, halfW, halfH) {
+// Where an ideal line leaves its target pill (centre `target`): the end
+// facing the bridge at `point`, or the top or bottom centre when the bridge
+// is more above or below than beside and the target is in that end row of
+// its stack, so nothing sits in the way. `below` is the caption row under
+// the pill, which a bottom anchor clears. A side end is always clear: the
+// stack is one column.
+export function pillAnchor(target, point, { halfW, halfH, top = false, bottom = false, below = 0 }) {
   const dx = point.x - target.x, dy = point.y - target.y;
-  const length = Math.hypot(dx, dy);
-  if (length === 0) return 0;
-  const hidden = rectEdgeDist(dx / length, dy / length, halfW, halfH);
-  return Math.max(0, interiorLength(target, point, c, r) - hidden);
+  if (Math.abs(dy) > Math.abs(dx)) {
+    if (dy < 0 && top) return { x: target.x, y: target.y - halfH, side: "top" };
+    if (dy > 0 && bottom) return { x: target.x, y: target.y + halfH + below, side: "bottom" };
+  }
+  const sign = dx < 0 ? -1 : 1;
+  return { x: target.x + sign * halfW, y: target.y, side: sign < 0 ? "left" : "right" };
 }
 
 // Base stacking order: widest term in the middle row, then alternately the
@@ -67,22 +71,6 @@ export function stackFitRadius(order, { pad, ...metrics }) {
     r,
     Math.hypot(row.w / 2 + pad, Math.max(Math.abs(row.top), Math.abs(row.bottom)) + pad)
   ), 0);
-}
-
-function moveToEnd(order, term, last) {
-  const rest = order.filter(other => other !== term);
-  return last ? [...rest, term] : [term, ...rest];
-}
-
-// Fixed for the whole game: the compact order's fit, widened just enough
-// that each ideal-line target could sit in the top or bottom row. Bridges
-// can then pull a target to either end without the circle growing.
-export function circleRadius(order, idealTerms, metrics) {
-  return idealTerms.reduce((r, term) => Math.max(
-    r,
-    stackFitRadius(moveToEnd(order, term, false), metrics),
-    stackFitRadius(moveToEnd(order, term, true), metrics)
-  ), stackFitRadius(order, metrics));
 }
 
 function countPlacements(n, k) {
@@ -153,21 +141,37 @@ export function chooseMemberOrder({
   rowOffsets,
   pillWidth,
   pillHeight = 30,
+  captionDepth = 0,
   fits = () => true,
   hysteresis = MEMBER_ORDER_HYSTERESIS,
   maxCandidates = MEMBER_ORDER_MAX_CANDIDATES
 }) {
   if (!arms.length) return null;
+  // How much of each line runs under the circle's other pills, measured
+  // from where it is drawn: its target's anchor (pillAnchor), which depends
+  // on whether the target holds an end row.
   const cost = order => {
     const offsets = rowOffsets(order);
-    return arms.reduce((sum, arm) => sum + visibleInteriorLength(
-      { x: center.x, y: center.y + offsets.get(arm.term) },
-      arm.point,
-      center,
-      r,
-      pillWidth(arm.term) / 2,
-      pillHeight / 2
-    ), 0);
+    const pills = order.map(term => ({
+      term,
+      rect: centeredRect({ x: center.x, y: center.y + offsets.get(term) }, pillWidth(term), pillHeight)
+    }));
+    return arms.reduce((sum, arm) => {
+      const anchor = pillAnchor({ x: center.x, y: center.y + offsets.get(arm.term) }, arm.point, {
+        halfW: pillWidth(arm.term) / 2,
+        halfH: pillHeight / 2,
+        top: order[0] === arm.term,
+        bottom: order[order.length - 1] === arm.term,
+        below: captionDepth
+      });
+      const segment = { x1: anchor.x, y1: anchor.y, x2: arm.point.x, y2: arm.point.y };
+      const length = Math.hypot(segment.x2 - segment.x1, segment.y2 - segment.y1);
+      return sum + pills.reduce((hidden, pill) => {
+        if (pill.term === arm.term) return hidden;
+        const clipped = clipSegmentToRect(segment, pill.rect);
+        return clipped && clipped.t1 > clipped.t0 ? hidden + (clipped.t1 - clipped.t0) * length : hidden;
+      }, 0);
+    }, 0);
   };
   const targets = [...new Set(arms.map(arm => arm.term))];
   let best = terms, bestCost = Infinity;
