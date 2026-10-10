@@ -11,7 +11,6 @@
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { layoutSource, normalizeLayoutDocument } from "./layoutDocument.js";
 import { layoutIsFixed } from "./layoutHints.js";
-import { LENS_REVEAL_CUES, LENS_REVEAL_CUE_LABELS } from "./lensRevealCue.js";
 import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
 import {
   PUBLIC_PLAY_PUBLICATION_NOTE,
@@ -2212,42 +2211,6 @@ function renderClassificationEditor({
   </details></copy-field>`;
 }
 
-function renderBoardExperiments({ edit, document }) {
-  if (!edit?.draftId) return "";
-  const board = document?.board && typeof document.board === "object" ? document.board : {};
-  const preconnect = board.bridgePreconnect === true ? "true" : "";
-  const flowTrace = board.lensFlowTrace === true ? "true" : "";
-  const revealCue = LENS_REVEAL_CUES.includes(board.lensRevealCue) ? board.lensRevealCue : "";
-  const preSlot = copyHidden(edit, { section: "board", field: "bridgePreconnect" });
-  const flowSlot = copyHidden(edit, { section: "board", field: "lensFlowTrace" });
-  const cueSlot = copyHidden(edit, { section: "board", field: "lensRevealCue" });
-  const option = (value, label, selected) =>
-    `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
-  return `<h2>Board experiments</h2>
-    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them. Board size and the Star free-term strip are layout settings: change them in layout authoring, where they save with the layout. Its Experiments card also sets these on the open working copy.</p>
-    ${preSlot.hidden}
-    <p><label>Bridge pre-connect
-      <select${preSlot.form} name="${preSlot.prefix}value">
-        ${option("", "Off", preconnect === "")}
-        ${option("true", "On", preconnect === "true")}
-      </select>
-    </label></p>
-    ${flowSlot.hidden}
-    <p><label>Lens flow trace
-      <select${flowSlot.form} name="${flowSlot.prefix}value">
-        ${option("", "Off", flowTrace === "")}
-        ${option("true", "On", flowTrace === "true")}
-      </select>
-    </label></p>
-    ${cueSlot.hidden}
-    <p><label>Lens reveal cue
-      <select${cueSlot.form} name="${cueSlot.prefix}value">
-        ${option("", "Use the site setting", revealCue === "")}
-        ${LENS_REVEAL_CUES.map(cue => option(cue, LENS_REVEAL_CUE_LABELS[cue], revealCue === cue)).join("")}
-      </select>
-    </label></p>`;
-}
-
 function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [] }) {
   if (!edit?.draftId) return "";
 
@@ -2615,7 +2578,6 @@ export function renderDraftPage(draft, {
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.level)}
     ${renderPuzzleMeta(document)}
-    ${renderBoardExperiments({ edit, document })}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}
     ${renderInfo(document.info, {

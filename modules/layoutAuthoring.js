@@ -51,7 +51,8 @@ export function createLayoutAuthoringController({
   previewBoardSize = null,
   previewLensRevealCue = null,
   getSiteSettings = () => ({}),
-  saveSiteSettings = null
+  saveSiteSettings = null,
+  restartBoard = null
 }) {
   const layoutAuthoringEl = document.getElementById("layout-authoring");
   const layoutAuthoringDraftStateEl = document.getElementById("layout-authoring-draft-state");
@@ -134,22 +135,6 @@ export function createLayoutAuthoringController({
   }
 
   syncLayoutActionVisibility();
-
-  function reloadBoard(nextMode = getMode()) {
-    const params = new URLSearchParams(location.search);
-    params.set("mode", nextMode);
-    const state = getState();
-    // A working copy keeps whichever URL opened it; rewriting puzzle= to
-    // the published id would silently leave the draft.
-    if (state?.puzzle?.id && !params.get("draft") && !getDraftId()) {
-      params.set("puzzle", state.puzzle.id);
-    }
-    location.assign(`${location.pathname}?${params.toString()}`);
-  }
-
-  function reloadStarBoard() {
-    reloadBoard("star");
-  }
 
   function boardSize() {
     const board = getBoard();
@@ -689,7 +674,10 @@ export function createLayoutAuthoringController({
     }
   }
 
-  async function persistBoardFlag(key, value, reload) {
+  // Every card control saves in place. `afterSave` applies the saved value
+  // to the open board: a flag only a reveal reads goes straight into the
+  // puzzle in memory; one that changes how the board starts restarts it.
+  async function persistBoardFlag(key, value, afterSave = null) {
     const state = getState();
     const viaLayout = LAYOUT_BOARD_FLAGS.has(key);
     if (!state?.puzzle || !(viaLayout ? layoutCanWriteBoard() : workingCopyCanWriteBoard())) return;
@@ -706,8 +694,9 @@ export function createLayoutAuthoringController({
         await saveBoardFlags({ board: boardWithFlag(state.puzzle, key, value) });
       }
       if (key === "sizeFactor") savedSizeFactor = typeof value === "number" ? value : 1;
-      if (typeof reload === "function") reload();
-      else setBoardControlsDisabled(false);
+      setBoardFlagStatus(key, "");
+      setBoardControlsDisabled(false);
+      afterSave?.();
     } catch (error) {
       setBoardFlagStatus(key, error instanceof Error ? error.message : String(error));
       setBoardControlsDisabled(false);
@@ -865,7 +854,8 @@ export function createLayoutAuthoringController({
       // admin can return to the same collection afterward. A draft overlay
       // keeps the D1 route and enters Play so the board is compiled.
       params.delete("admin");
-      // A working copy keeps whichever puzzle= opened it, as reloadBoard does.
+      // A working copy keeps whichever URL opened it; rewriting puzzle= to
+      // the published id would silently leave the draft.
       if (params.get("draft")) params.set("view", "play");
       else if (!getDraftId()) params.set("puzzle", state.puzzle.id);
       location.assign(`${location.pathname}?${params.toString()}`);
@@ -879,30 +869,36 @@ export function createLayoutAuthoringController({
       const size = boardSize();
       const next = !starFreeStripEnabled(state.puzzle, size);
       const heuristic = starFreeStripCapacityNeeded(state.puzzle, size.width, size.height);
-      persistBoardFlag("starFreeStrip", next === heuristic ? undefined : next, reloadStarBoard);
+      // The save has already put the strip into the layout in memory.
+      persistBoardFlag("starFreeStrip", next === heuristic ? undefined : next, () => restartBoard?.());
     });
+    // Pre-connect changes how the board starts, so the board starts again.
     starBridgePreconnectBtn?.addEventListener("click", () => {
       const state = getState();
       if (!state?.puzzle) return;
-      const next = !starBridgePreconnectEnabled(state.puzzle);
-      persistBoardFlag("bridgePreconnect", next ? true : undefined, () => reloadBoard());
+      const value = starBridgePreconnectEnabled(state.puzzle) ? undefined : true;
+      persistBoardFlag("bridgePreconnect", value, () => {
+        state.puzzle.board = boardWithFlag(state.puzzle, "bridgePreconnect", value);
+        restartBoard?.();
+      });
     });
+    // Only a reveal reads the flow trace and the reveal cue, so the board
+    // and the lens progress stay as they are.
     lensFlowTraceBtn?.addEventListener("click", () => {
       const state = getState();
       if (!state?.puzzle) return;
-      const next = !lensFlowTraceEnabled(state.puzzle);
-      persistBoardFlag("lensFlowTrace", next ? true : undefined, () => reloadBoard());
+      const value = lensFlowTraceEnabled(state.puzzle) ? undefined : true;
+      persistBoardFlag("lensFlowTrace", value, () => {
+        state.puzzle.board = boardWithFlag(state.puzzle, "lensFlowTrace", value);
+        syncStarFreeStripButtons();
+      });
     });
-    // Only a reveal reads the cue, so the board and the lens progress stay
-    // as they are.
     lensRevealCueSelect?.addEventListener("change", async () => {
       const state = getState();
       if (!state?.puzzle) return;
       const value = lensRevealCueSelect.value || undefined;
       await persistBoardFlag("lensRevealCue", value, () => {
         state.puzzle.board = boardWithFlag(state.puzzle, "lensRevealCue", value);
-        setBoardFlagStatus("lensRevealCue", "");
-        setBoardControlsDisabled(false);
       });
       syncLensRevealControls();
     });
@@ -1116,7 +1112,6 @@ export function createLayoutAuthoringController({
     onPuzzleLoaded,
     onModeSwitched,
     onBoardResized,
-    syncStarFreeStripButtons,
-    reloadBoard
+    syncStarFreeStripButtons
   };
 }

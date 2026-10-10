@@ -100,16 +100,29 @@ export async function run(page) {
     assert.equal(await page.isVisible("#board-settings"), true);
     assert.equal(await page.isVisible("#layout-authoring"), true);
 
+    // Every card control applies in place: a marker on the window survives
+    // because the page never reloads. Pre-connect starts the board again,
+    // with the bridge already connected.
+    await page.evaluate(() => { window.__samePage = true; });
     await page.click("#star-free-strip-btn");
     await page.waitForFunction(() => window.CC?.state?.puzzle?.layout?.board?.starFreeStrip === true, null, {
       timeout: 15000
     });
     await waitForBoard(page);
+    assert.equal(await page.textContent("#star-free-strip-btn"), "Clear free-term strip");
+    await page.evaluate(() => { window.__boardBefore = window.CC.state; });
     await page.click("#star-bridge-preconnect-btn");
     await page.waitForFunction(() =>
       window.CC?.state?.puzzle?.layout?.board?.starFreeStrip === true
-      && window.CC.state.puzzle.board?.bridgePreconnect === true,
+      && window.CC.state.puzzle.board?.bridgePreconnect === true
+      && window.CC.state !== window.__boardBefore,
     null, { timeout: 15000 });
+    await waitForBoard(page);
+    assert.equal(await page.textContent("#star-bridge-preconnect-btn"), "Clear bridge pre-connect");
+    assert.ok(await page.evaluate(() =>
+      window.CC.state.nodes.find(node => node.word === "link").connected.length > 0
+    ), "the restarted board starts with the bridge connected");
+    assert.equal(await page.evaluate(() => window.__samePage), true, "the strip and pre-connect do not reload");
 
     const stored = await draftStore.getDraft(draftId);
     assert.deepEqual(stored.document.board, savedBoard);
@@ -220,12 +233,15 @@ export async function run(page) {
     await waitForBoard(page);
     assert.equal(await page.isVisible("#board-experiments"), true);
     assert.equal(await page.textContent("#lens-flow-trace-btn"), "Turn on lens flow trace");
+    await page.evaluate(() => { window.__sameBoard = window.CC.state; });
     await page.click("#lens-flow-trace-btn");
     await page.waitForFunction(() => window.CC?.state?.puzzle?.board?.lensFlowTrace === true, null, {
       timeout: 15000
     });
     await waitForBoard(page);
     assert.equal(await page.textContent("#lens-flow-trace-btn"), "Turn off lens flow trace");
+    assert.equal(await page.evaluate(() => window.CC.state === window.__sameBoard), true,
+      "the flow trace leaves the board as it is");
     const traced = await draftStore.getDraft(draftId);
     assert.deepEqual(traced.document.board, { ...savedBoard, lensFlowTrace: true });
     assert.equal(traced.layout.board.sizeFactor, 1, "experiments leave the layout's board settings alone");
@@ -237,11 +253,11 @@ export async function run(page) {
     assert.equal(await page.isVisible("#site-settings"), true);
     const selectedText = selector => page.$eval(selector, select => select.selectedOptions[0]?.textContent);
     assert.equal(await selectedText("#lens-reveal-cue-select"), "Use site setting (None)");
-    await page.evaluate(() => { window.__sameBoard = true; });
     await page.selectOption("#lens-reveal-cue-select", "spotlight");
     await page.waitForFunction(() => window.CC?.state?.puzzle?.board?.lensRevealCue === "spotlight"
       && !document.getElementById("lens-reveal-cue-select").disabled, null, { timeout: 15000 });
-    assert.equal(await page.evaluate(() => window.__sameBoard), true, "saving the cue does not reload");
+    assert.equal(await page.evaluate(() => window.CC.state === window.__sameBoard), true,
+      "saving the cue leaves the board as it is");
     const cued = await draftStore.getDraft(draftId);
     assert.deepEqual(cued.document.board, { ...savedBoard, lensFlowTrace: true, lensRevealCue: "spotlight" });
 

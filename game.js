@@ -2126,7 +2126,8 @@ layoutAuthoring = createLayoutAuthoringController({
       if (state && lensReviewIsVisible(state)) renderLensExplanation(currentLens(state));
       return siteSettings;
     }
-    : null
+    : null,
+  restartBoard
 });
 
 // ---------- layout authoring ----------
@@ -2507,6 +2508,20 @@ function applyLoadedPuzzle(puzzle, index, {
   layoutAuthoring.onPuzzleLoaded();
   overviewRenderer.renderPuzzleBreadcrumb(puzzle);
   if (focus) titleEl.focus();
+}
+
+// Starts the open board again from the puzzle in memory, as opening it
+// does but without a page load. The layout view's controls for how a board
+// starts (bridge pre-connect, the Star free-term strip) have already put
+// their change into state.puzzle. A restart is not a new visit, so it
+// neither becomes last-played nor counts as a load.
+function restartBoard() {
+  if (!state?.puzzle) return;
+  applyLoadedPuzzle(state.puzzle, currentIndex, {
+    restoreSession: false,
+    persistInitial: false,
+    overlay: true
+  });
 }
 
 async function loadPuzzle(index, options = {}) {
