@@ -54,6 +54,9 @@ function deploy(checkout, branch) {
 
 export async function run() {
   assert.deepEqual(parseAuthoringDeployArgs([]).pr, null);
+  assert.equal(parseAuthoringDeployArgs([]).main, false);
+  assert.equal(parseAuthoringDeployArgs(["--main"]).main, true);
+  assert.throws(() => parseAuthoringDeployArgs(["--main", "--pr", "3"]), /not both/);
   assert.equal(parseAuthoringDeployArgs(["--pr", "42"]).pr, 42);
   assert.equal(parseAuthoringDeployArgs(["--pr=7"]).pr, 7);
   assert.throws(() => parseAuthoringDeployArgs(["--pr"]), /pull request number/);
@@ -133,12 +136,48 @@ export async function run() {
     assert.doesNotMatch(html, /server-revision-stale/);
     assert.match(html, /Up to date with <code>origin\/feature\/fresh<\/code> and includes <code>origin\/main/);
 
+    // No branch: bring the current branch up to date with its origin ref.
+    git(work, ["checkout", "-q", "feature/fresh"]);
+    const freshNext = commit(work, "fresh2.txt", "fresh follow-up");
+    git(work, ["push", "-q", "origin", "feature/fresh"]);
+    const redeploy = deploy(server, null);
+    assert.equal(redeploy.status, 0, redeploy.stderr);
+    assert.equal(redeploy.restarted, true);
+    assert.equal(git(server, ["rev-parse", "HEAD"]), freshNext);
+
+    // The current branch going stale against main (a merged PR left behind) is refused.
+    git(work, ["checkout", "-q", "main"]);
+    commit(work, "c.txt", "third");
+    git(work, ["push", "-q", "origin", "main"]);
+    const behindMain = deploy(server, null);
+    assert.notEqual(behindMain.status, 0);
+    assert.equal(behindMain.restarted, false);
+    assert.match(behindMain.stderr, /missing 1 commit\(s\) from origin\/main[\s\S]*--main/);
+
+    // A deleted branch is refused even though a stale origin/<branch> ref remains.
+    git(work, ["push", "-q", "origin", "--delete", "feature/fresh"]);
+    const deleted = deploy(server, null);
+    assert.notEqual(deleted.status, 0);
+    assert.equal(deleted.restarted, false);
+    assert.match(deleted.stderr, /origin has no branch feature\/fresh/);
+
+    const backToMain = deploy(server, "main");
+    assert.equal(backToMain.status, 0, backToMain.stderr);
+    assert.equal(git(server, ["rev-parse", "--abbrev-ref", "HEAD"]), "main");
+
+    // A detached checkout has no branch to redeploy.
+    git(server, ["checkout", "-q", "--detach"]);
+    const detached = deploy(server, null);
+    assert.notEqual(detached.status, 0);
+    assert.match(detached.stderr, /not on a branch/);
+    git(server, ["checkout", "-q", "main"]);
+
     // A local commit on the server's branch is never silently discarded.
     commit(server, "local.txt", "local only");
-    const diverged = deploy(server, "feature/fresh");
+    const diverged = deploy(server, null);
     assert.notEqual(diverged.status, 0);
     assert.equal(diverged.restarted, false);
-    assert.match(diverged.stderr, /local feature\/fresh has commits/);
+    assert.match(diverged.stderr, /local main has commits/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

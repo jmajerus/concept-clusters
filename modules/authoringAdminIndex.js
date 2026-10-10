@@ -169,9 +169,9 @@ export function renderServerRevisionSection(status) {
         status.upstreamRef ? ` and includes <code>${escapeHtml(status.baseRef)}</code>` : ""}`;
   const fix = problems.length
     ? `<p class="meta">Pages may show stale results (for example false layout markers on Puzzles).
-      Redeploy from a workstation: <code>npm run authoring:deploy</code> for
-      <code>${escapeHtml(status.baseRef.replace(/^origin\//, ""))}</code>, or
-      <code>npm run authoring:deploy -- --pr &lt;number&gt;</code>.</p>`
+      Redeploy from a workstation: <code>npm run authoring:deploy</code> brings this branch up to date,
+      <code>-- --main</code> switches to <code>${escapeHtml(status.baseRef.replace(/^origin\//, ""))}</code>,
+      and <code>-- --pr &lt;number&gt;</code> switches to a pull request.</p>`
     : "";
   const fetchNote = status.fetchError
     ? `<p class="meta">Could not fetch origin (${escapeHtml(status.fetchError)}); compared with the last fetched refs.</p>`

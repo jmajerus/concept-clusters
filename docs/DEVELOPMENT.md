@@ -64,7 +64,7 @@ edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 A persistent LAN checkout running this server (e.g. as a systemd service)
 doubles as a real-environment test bed for a pull request before merging
 it: deploy the branch there (`npm run authoring:deploy -- --pr <number>`,
-or plain `npm run authoring:deploy` for `main`; see [MCP.md](MCP.md)) and
+then plain `npm run authoring:deploy` after each push; see [MCP.md](MCP.md)) and
 exercise it against the actual
 production GitHub token and D1 database, not a fresh sandbox. That
 matters specifically because it's *not* a fresh sandbox -- a CI runner
@@ -171,7 +171,7 @@ anything ever imports from it directly):
 | `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the GitHub production snapshot of `puzzles/manifest.js` | Node filesystem APIs |
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
 | `authoringServerRevision.js` | The branch and commit the LAN server started on, compared with the current checkout, `origin/main`, and the branch's origin ref, for the `/admin` Authoring server section | `githubProductionManifest.js` |
-| `authoringDeployPlan.js` | `npm run authoring:deploy` argument parsing, PR-to-branch resolution, and the remote script that switches, fast-forwards, and refuses to restart on a branch that does not include `origin/main` | — |
+| `authoringDeployPlan.js` | `npm run authoring:deploy` argument parsing, PR-to-branch resolution, and the remote script that redeploys or switches, fast-forwards, and refuses to restart on a branch that does not include `origin/main` | — |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, fingerprints, errors, and in-memory reference implementation | `nonCryptographicHash.js` |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document, optional draft layout document, `expectedRevision` OCC, and a capped working-copy undo stack | D1 binding, `draftRepository.js`, `layoutDocument.js` |

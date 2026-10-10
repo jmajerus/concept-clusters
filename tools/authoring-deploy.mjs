@@ -33,7 +33,8 @@ if (!process.env.AUTHORING_DEPLOY_PASSWORD) {
 }
 
 const baseBranch = baseBranchName();
-let branch = baseBranch;
+// null: the remote script redeploys whatever branch the server is on.
+let branch = args.main ? baseBranch : null;
 if (args.pr) {
   const view = spawnSync(
     "gh",
@@ -52,7 +53,9 @@ if (args.pr) {
   }
 }
 
-console.log(`Deploying ${branch}${args.pr ? ` (PR #${args.pr})` : ""} to the authoring server.`);
+console.log(branch
+  ? `Switching the authoring server to ${branch}${args.pr ? ` (PR #${args.pr})` : ""}.`
+  : "Redeploying the authoring server's current branch.");
 
 const remoteCommand = buildAuthoringDeployScript({ branch, baseBranch });
 

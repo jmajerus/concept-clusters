@@ -21,9 +21,25 @@
     },
     {
       "label": "$(server) Deploy Authoring",
-      "task": "Deploy Authoring",
-      "tooltip": "npm run authoring:deploy — pull and restart the LAN authoring server",
-      "alignment": "left"
+      "tooltip": "npm run authoring:deploy — refuses to restart on a branch that does not include origin/main",
+      "alignment": "left",
+      "tasks": [
+        {
+          "label": "Redeploy current branch",
+          "task": "Deploy Authoring",
+          "description": "$(sync) Pull the branch the server is on and restart"
+        },
+        {
+          "label": "Switch to main",
+          "task": "Deploy Authoring: main",
+          "description": "$(git-branch) --main"
+        },
+        {
+          "label": "Switch to a pull request…",
+          "task": "Deploy Authoring: PR",
+          "description": "$(git-pull-request) --pr <number>"
+        }
+      ]
     },
     {
       "label": "$(beaker) Test",

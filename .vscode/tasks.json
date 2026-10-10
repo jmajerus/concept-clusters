@@ -67,6 +67,18 @@
       "problemMatcher": []
     },
     {
+      "label": "Deploy Authoring: main",
+      "type": "shell",
+      "command": "npm run authoring:deploy -- --main",
+      "problemMatcher": []
+    },
+    {
+      "label": "Deploy Authoring: PR",
+      "type": "shell",
+      "command": "npm run authoring:deploy -- --pr ${input:authoringPr}",
+      "problemMatcher": []
+    },
+    {
       "label": "Test: Standard",
       "type": "npm",
       "script": "test",
@@ -103,6 +115,13 @@
         "reveal": "always",
         "panel": "shared"
       }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "authoringPr",
+      "type": "promptString",
+      "description": "Pull request number to deploy to the authoring server"
     }
   ]
 }
