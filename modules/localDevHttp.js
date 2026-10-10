@@ -7,8 +7,10 @@ import { createServer as createHttpServer, request as httpRequest } from "node:h
 import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
+import { handleAuthoringAdminIndex, SERVER_SHUTDOWN_EVENT } from "./authoringAdminIndex.js";
+import { handleGithubPushWebhook } from "./githubPushWebhook.js";
 import { loadWikiLinkHealth } from "./wikiLinkCheck.js";
+import { createServerRevisionMonitor, readGitRevision } from "./authoringServerRevision.js";
 import {
   emptyContentFreezePlan,
   gitIdsFromContentService,
@@ -153,9 +155,20 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
     repositoryRoot,
     contentService
   });
+  // The revision this process loaded; a later checkout does not change it.
+  const revisions = createServerRevisionMonitor({
+    repositoryRoot,
+    running: readGitRevision({ repositoryRoot })
+  });
   return async function handleLocalDevRequest(req, res) {
+    if (await handleGithubPushWebhook(req, res, {
+      secret: process.env.AUTHORING_GITHUB_WEBHOOK_SECRET,
+      onPush: revisions.notifyPush
+    })) return true;
     const admin = await handleAuthoringAdminIndex(req, res, {
       canApplyFreeze: true,
+      loadServerRevision: () => revisions.refresh({ fetchRemote: true }),
+      subscribeServerRevision: listener => revisions.subscribe(listener),
       loadLinkHealth: async () => {
         const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
         if (!resolved.contentDocuments || !resolved.wikiLinkStore) return null;
@@ -376,6 +389,8 @@ function boundPort(server, requestedPort) {
     : requestedPort;
 }
 
+const SHUTDOWN_GRACE_MS = 3000;
+
 function closeHttpServer(server) {
   return new Promise(resolve => {
     if (!server.listening) {
@@ -384,6 +399,11 @@ function closeHttpServer(server) {
     }
     try {
       server.close(() => resolve());
+      server.emit(SERVER_SHUTDOWN_EVENT);
+      // Any request still open after a grace period (a long poll, a stream
+      // opened some other way) must not hold the restart until systemd's
+      // stop timeout kills the process.
+      setTimeout(() => server.closeAllConnections?.(), SHUTDOWN_GRACE_MS).unref();
     } catch {
       resolve();
     }

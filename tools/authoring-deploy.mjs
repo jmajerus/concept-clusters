@@ -1,7 +1,13 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import {
+  branchFromPullRequest,
+  buildAuthoringDeployScript,
+  parseAuthoringDeployArgs
+} from "../modules/authoringDeployPlan.js";
+import { baseBranchName } from "../modules/authoringServerRevision.js";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 
 const toolsDirectory = dirname(fileURLToPath(import.meta.url));
@@ -9,23 +15,49 @@ const repositoryRoot = join(toolsDirectory, "..");
 
 loadProjectEnv({ repositoryRoot });
 
+let args;
+try {
+  args = parseAuthoringDeployArgs(process.argv.slice(2));
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
+if (args.help) {
+  console.log(args.usage);
+  process.exit(0);
+}
+
 if (!process.env.AUTHORING_DEPLOY_PASSWORD) {
   console.error("AUTHORING_DEPLOY_PASSWORD is required in .env.");
   process.exit(1);
 }
 
-// Freeze syncs puzzles/, catalogues/, and content/ from origin without
-// moving HEAD (`git checkout origin/<base> -- <dirs>`), which stages those
-// paths against the old commit. A later fast-forward then refuses. Those
-// directories are not a local source of truth — Freeze publishes through
-// GitHub — so put them back to HEAD before pulling.
-const remoteCommand = [
-  "git -C /opt/concept-clusters reset -q -- puzzles catalogues content",
-  "git -C /opt/concept-clusters checkout -q -- puzzles catalogues content",
-  "git -C /opt/concept-clusters clean -fd -- puzzles catalogues content",
-  "git -C /opt/concept-clusters pull --ff-only",
-  "sudo -S -p '' systemctl restart concept-clusters-authoring.service"
-].join(" && ");
+const baseBranch = baseBranchName();
+// null: the remote script redeploys whatever branch the server is on.
+let branch = args.main ? baseBranch : null;
+if (args.pr) {
+  const view = spawnSync(
+    "gh",
+    ["pr", "view", String(args.pr), "--json", "state,headRefName,isCrossRepository"],
+    { cwd: repositoryRoot, encoding: "utf8" }
+  );
+  if (view.status !== 0) {
+    console.error(`Could not look up PR #${args.pr} with gh: ${(view.stderr || view.error?.message || "").trim()}`);
+    process.exit(1);
+  }
+  try {
+    branch = branchFromPullRequest(args.pr, JSON.parse(view.stdout));
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+}
+
+console.log(branch
+  ? `Switching the authoring server to ${branch}${args.pr ? ` (PR #${args.pr})` : ""}.`
+  : "Redeploying the authoring server's current branch.");
+
+const remoteCommand = buildAuthoringDeployScript({ branch, baseBranch });
 
 const ssh = spawn(
   "ssh",

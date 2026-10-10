@@ -23,6 +23,11 @@ const PAGE_STYLE = `
   a { color: #2563eb; }
   table { border-collapse: collapse; width: 100%; }
   th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  .server-revision { margin: 20px 0; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .server-revision h2 { margin: 0 0 4px; font-size: 18px; }
+  .server-revision p { margin: 4px 0; }
+  .server-revision-stale { border-color: #f59e0b; background: #fffbeb; }
+  .server-revision-stale strong { color: #b45309; }
   .freeze, .github-prod { margin: 28px 0; padding: 16px; border: 1px solid #dbeafe; background: #f8fbff; border-radius: 8px; }
   .freeze h2, .github-prod h2 { margin: 0 0 8px; font-size: 18px; }
   .github-prod .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
@@ -129,6 +134,57 @@ export function renderLinkHealthPage(health) {
     better link. Each puzzle link opens its draft page, where the same findings appear as flags.</p>
     ${groups || "<p class=\"meta\">Every checked link resolves to its own article.</p>"}`;
   return freezeResultShell("Wikipedia link health", body);
+}
+
+function shortCommit(commit) {
+  return escapeHtml(String(commit || "").slice(0, 7));
+}
+
+function commitCount(count) {
+  return `${count} commit${count === 1 ? "" : "s"}`;
+}
+
+/** Status from authoringServerRevision.js loadServerRevisionStatus; empty when absent. */
+export function renderServerRevisionSection(status) {
+  if (!status?.running) return "";
+  const { running, checkout } = status;
+  const problems = [];
+  if (status.behindBase > 0) {
+    problems.push(running.branch === status.baseRef.replace(/^origin\//, "")
+      ? `${commitCount(status.behindBase)} behind <code>${escapeHtml(status.baseRef)}</code>`
+      : `missing ${commitCount(status.behindBase)} from <code>${escapeHtml(status.baseRef)}</code>`);
+  }
+  if (status.behindUpstream > 0) {
+    problems.push(`${commitCount(status.behindUpstream)} behind <code>${escapeHtml(status.upstreamRef)}</code>`);
+  }
+  if (status.checkoutMoved) {
+    problems.push(`the checkout has moved to <code>${escapeHtml(checkout.branch || "detached HEAD")}</code>
+      @ <code>${shortCommit(checkout.commit)}</code> since this server started`);
+  }
+  const comparison = status.behindBase == null
+    ? `<code>${escapeHtml(status.baseRef)}</code> is not available in this checkout`
+    : problems.length
+      ? `<strong>${problems.join("; ")}</strong>`
+      : `Up to date with <code>${escapeHtml(status.upstreamRef || status.baseRef)}</code>${
+        status.upstreamRef ? ` and includes <code>${escapeHtml(status.baseRef)}</code>` : ""}`;
+  const fix = problems.length
+    ? `<p class="meta">Pages may show stale results (for example false layout markers on Puzzles).
+      Redeploy from a workstation: <code>npm run authoring:deploy</code> brings this branch up to date,
+      <code>-- --main</code> switches to <code>${escapeHtml(status.baseRef.replace(/^origin\//, ""))}</code>,
+      and <code>-- --pr &lt;number&gt;</code> switches to a pull request.</p>`
+    : "";
+  const fetchNote = status.fetchError
+    ? `<p class="meta">Could not fetch origin (${escapeHtml(status.fetchError)}); compared with the last fetched refs.</p>`
+    : "";
+  return `<section class="server-revision${problems.length ? " server-revision-stale" : ""}">
+    <h2>Authoring server</h2>
+    <p>Running <code>${escapeHtml(running.branch || "detached HEAD")}</code>
+      @ <code>${shortCommit(running.commit)}</code>
+      <span class="meta">${escapeHtml(running.subject)}</span></p>
+    <p class="meta">${comparison}.</p>
+    ${fix}
+    ${fetchNote}
+  </section>`;
 }
 
 function freezePuzzleItem(id, detail) {
@@ -345,7 +401,8 @@ function renderGithubProductionSection({
  *   canCueAllPublished?: boolean,
  *   githubProduction?: object | null,
  *   canRefreshGithubProduction?: boolean,
- *   linkHealth?: Awaited<ReturnType<import("./wikiLinkCheck.js").loadWikiLinkHealth>> | null
+ *   linkHealth?: Awaited<ReturnType<import("./wikiLinkCheck.js").loadWikiLinkHealth>> | null,
+ *   serverRevision?: Awaited<ReturnType<import("./authoringServerRevision.js").loadServerRevisionStatus>>
  * }} [options]
  */
 export function renderAdminIndexPage({
@@ -354,12 +411,14 @@ export function renderAdminIndexPage({
   canCueAllPublished = canApplyFreeze,
   githubProduction = null,
   canRefreshGithubProduction = canApplyFreeze,
-  linkHealth = null
+  linkHealth = null,
+  serverRevision = null
 } = {}) {
   const body = `<h1>Admin</h1>
     <p class="meta">Authoring documents in D1. Publish writes the shared live
     row. Freeze validates cued snapshots and creates one release PR.
     ${authoringAdminNav()}</p>
+    ${renderServerRevisionSection(serverRevision)}
     ${renderFreezeSection({ freezePlan, canApplyFreeze, canCueAllPublished })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
     ${renderLinkHealthSummary(linkHealth)}
@@ -505,6 +564,58 @@ async function readUrlEncoded(req) {
 }
 
 export const LINK_HEALTH_PATH = "/admin/link-health";
+// Machine-readable twin of the Authoring server section, for
+// tools/authoring-status.mjs. Behind the same admin login as /admin.
+export const SERVER_REVISION_PATH = "/admin/server-revision.json";
+// Server-Sent Events: the same status on connect, then on every change.
+export const SERVER_REVISION_EVENTS_PATH = "/admin/server-revision/events";
+// Emitted on the http.Server before close() so open event streams end;
+// otherwise close() waits on them and a restart hangs until killed.
+export const SERVER_SHUTDOWN_EVENT = "concept-clusters:shutdown";
+const EVENT_STREAM_HEARTBEAT_MS = 30000;
+
+function streamServerRevision(req, res, { loadServerRevision, subscribeServerRevision }) {
+  const server = req.socket?.server;
+  // close() stops new connections but still serves requests on open
+  // keep-alive ones, so a client reconnecting during shutdown would get a
+  // fresh stream from the dying process and hold it open.
+  if (server && server.listening === false) {
+    res.writeHead(503, { "Content-Type": "text/plain; charset=utf-8", Connection: "close" });
+    res.end("Shutting down");
+    return;
+  }
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-store",
+    // Ending a stream ends its connection: a reconnect must open a new one,
+    // which reaches whichever process is listening now.
+    Connection: "close",
+    "X-Accel-Buffering": "no"
+  });
+  res.flushHeaders?.();
+  let lastSent = "";
+  const send = status => {
+    if (!status || res.writableEnded) return;
+    const data = JSON.stringify(status);
+    if (data === lastSent) return;
+    lastSent = data;
+    res.write(`data: ${data}\n\n`);
+  };
+  const unsubscribe = subscribeServerRevision(send);
+  // Comments keep idle proxies from closing the stream and let clients
+  // notice a dead connection.
+  const heartbeat = setInterval(() => res.write(": ping\n\n"), EVENT_STREAM_HEARTBEAT_MS);
+  const end = () => res.end();
+  server?.once?.(SERVER_SHUTDOWN_EVENT, end);
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    unsubscribe();
+    server?.off?.(SERVER_SHUTDOWN_EVENT, end);
+  });
+  Promise.resolve()
+    .then(() => loadServerRevision())
+    .then(send, () => {});
+}
 
 export async function handleAuthoringAdminIndex(req, res, {
   freezePlan = emptyContentFreezePlan(),
@@ -515,7 +626,9 @@ export async function handleAuthoringAdminIndex(req, res, {
   loadGithubProduction = null,
   refreshGithubProduction = null,
   cueAllPublished = null,
-  loadLinkHealth = null
+  loadLinkHealth = null,
+  loadServerRevision = null,
+  subscribeServerRevision = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
   if (urlPath === LINK_HEALTH_PATH) {
@@ -527,6 +640,35 @@ export async function handleAuthoringAdminIndex(req, res, {
     const health = loadLinkHealth ? await loadLinkHealth() : null;
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
     res.end(req.method === "HEAD" ? "" : renderLinkHealthPage(health));
+    return true;
+  }
+  if (urlPath === SERVER_REVISION_EVENTS_PATH && loadServerRevision && subscribeServerRevision) {
+    if (req.method !== "GET") {
+      res.writeHead(405, { Allow: "GET", "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end("Method Not Allowed");
+      return true;
+    }
+    streamServerRevision(req, res, { loadServerRevision, subscribeServerRevision });
+    return true;
+  }
+  if (urlPath === SERVER_REVISION_PATH && loadServerRevision) {
+    if (req.method !== "GET") {
+      res.writeHead(405, { Allow: "GET", "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end("Method Not Allowed");
+      return true;
+    }
+    let status = null;
+    let error = null;
+    try {
+      status = await loadServerRevision();
+    } catch (caught) {
+      error = caught instanceof Error ? caught.message : String(caught);
+    }
+    res.writeHead(status ? 200 : 503, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify(status || { error: error || "This server is not running from a git checkout." }));
     return true;
   }
   if (!isAuthoringAdminIndexPath(urlPath)) return false;
@@ -677,6 +819,14 @@ export async function handleAuthoringAdminIndex(req, res, {
       snapshot = null;
     }
   }
+  let serverRevision = null;
+  if (loadServerRevision && req.method !== "HEAD") {
+    try {
+      serverRevision = await loadServerRevision();
+    } catch {
+      serverRevision = null;
+    }
+  }
   res.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store"
@@ -687,7 +837,8 @@ export async function handleAuthoringAdminIndex(req, res, {
     canCueAllPublished: typeof cueAllPublished === "function",
     githubProduction: snapshot,
     canRefreshGithubProduction: typeof refreshGithubProduction === "function",
-    linkHealth
+    linkHealth,
+    serverRevision
   }));
   return true;
 }
