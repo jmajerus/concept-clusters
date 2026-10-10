@@ -59,6 +59,11 @@ export function validateLayoutHintShape(mode, layout, puzzle) {
   if (mode === "sets" && layout.clusterTerms != null && !isObject(layout.clusterTerms)) {
     errors.push("Circle layout clusterTerms must be an object");
   }
+  // Optional stacking order per circle; a mismatched one is ignored on load.
+  if (mode === "sets" && layout.memberOrders != null && (!isObject(layout.memberOrders) ||
+      !Object.values(layout.memberOrders).every(order => Array.isArray(order) && order.every(term => typeof term === "string")))) {
+    errors.push("Circle layout memberOrders must map circles to lists of terms");
+  }
   return { valid: errors.length === 0, errors };
 }
 

@@ -935,6 +935,35 @@ export function createSetRenderer({
     return state.setLayout.memberOrder?.get(ci) || state.setLayout.baseOrders[ci];
   }
 
+  // A saved layout's stacking orders (layout.memberOrders), restored where
+  // each still holds exactly this circle's terms and fits the circle, and
+  // then kept: refreshMemberOrder leaves them alone until a drag or a new
+  // layout unlocks them. Returns whether any order was restored.
+  function restoreMemberOrders(layout) {
+    const state = getState();
+    const { puzzle, setLayout } = state;
+    const saved = layout?.memberOrders;
+    if (!setLayout || !saved || typeof saved !== "object") return false;
+    const metrics = stackMetrics(puzzle);
+    const orders = new Map();
+    puzzle.clusters.forEach((cluster, ci) => {
+      const order = saved[`cluster:${ci}`];
+      if (!Array.isArray(order) || order.length !== cluster.terms.length) return;
+      if (!cluster.terms.every(term => order.includes(term))) return;
+      if (stackFitRadius(order, metrics) > setLayout.clusterBoxes[ci].r + 0.5) return;
+      orders.set(ci, [...order]);
+    });
+    if (!orders.size) return false;
+    setLayout.memberOrder = orders;
+    setLayout.memberOrderLocked = true;
+    return true;
+  }
+
+  function unlockMemberOrder() {
+    const setLayout = getState()?.setLayout;
+    if (setLayout) setLayout.memberOrderLocked = false;
+  }
+
   // Re-stacks each circle so the terms its connected ideal lines end on
   // sit in the rows nearest where those lines enter, minimising how far
   // each line runs under other pills. Run on discrete events (repaint,
@@ -943,6 +972,9 @@ export function createSetRenderer({
     const state = getState();
     const { puzzle, setLayout } = state;
     if (!setLayout) return false;
+    // A restored fixed layout keeps its saved rows until something on the
+    // board moves (unlockMemberOrder).
+    if (setLayout.memberOrderLocked) return false;
     setLayout.memberOrder = setLayout.memberOrder || new Map();
     let changed = false;
     puzzle.clusters.forEach((cluster, ci) => {
@@ -1412,6 +1444,7 @@ export function createSetRenderer({
         // placement convention this mode has always had for drags),
         // rather than releasing it back to the simulation the way
         // Graph mode's own drag does for individual terms.
+        unlockMemberOrder();
         if (refreshMemberOrder()) repositionAll();
         if (authoring) state.onAuthorLayoutChanged?.("drag");
         else {
@@ -1540,6 +1573,7 @@ export function createSetRenderer({
           handleTap(d);
           setTimeout(() => el.focus(), 0);
         } else {
+          unlockMemberOrder();
           if (refreshMemberOrder()) repositionAll();
           if (authoring) state.onAuthorLayoutChanged?.("drag");
           else {
@@ -1735,6 +1769,11 @@ export function createSetRenderer({
         clusterTerms: Object.fromEntries(
           puzzle.clusters.map((cluster, ci) => [`cluster:${ci}`, [...cluster.terms]])
         ),
+        // Each circle's stacking order as shown, so a fixed layout restores
+        // the rows exactly rather than re-deriving them.
+        memberOrders: Object.fromEntries(
+          puzzle.clusters.map((_, ci) => [`cluster:${ci}`, [...memberOrderFor(state, ci)]])
+        ),
         metrics: circleLayoutMetrics(),
         solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null,
         // See graph capture: a solved-board snapshot is reused on the
@@ -1778,7 +1817,11 @@ export function createSetRenderer({
       state.solutionLayout = state.made === state.need && layout.solutionLayout === "pretty"
         ? "pretty"
         : null;
-      refreshMemberOrder();
+      // The arrangement's own rows when it carries them, else derived.
+      if (!restoreMemberOrders(layout)) {
+        unlockMemberOrder();
+        refreshMemberOrder();
+      }
       repositionAll();
       updateSolutionHint();
       return { valid: true, errors: [] };
@@ -1862,7 +1905,11 @@ export function createSetRenderer({
             node.vy = 0;
           });
           state.solutionLayout = "pretty";
-          refreshMemberOrder();
+          // A fixed layout shows the rows it was saved with.
+          if (!restoreMemberOrders(curatedLayout)) {
+            unlockMemberOrder();
+            refreshMemberOrder();
+          }
           repositionAll();
           await afterNextPaint();
           svg.classed("circle-polishing", false);
@@ -1928,6 +1975,8 @@ export function createSetRenderer({
           node.vy = 0;
         });
         state.setLayout.stripHeight = STRIP_MARGIN;
+        // A new arrangement chooses its own rows.
+        unlockMemberOrder();
         refreshMemberOrder();
         repositionAll();
         // Keep transform transitions disabled until the browser has
@@ -2114,6 +2163,7 @@ export function createSetRenderer({
           node.y = point.y;
           if (node.fx != null) { node.fx = node.x; node.fy = node.y; }
         });
+        unlockMemberOrder();
         refreshMemberOrder();
         repositionAll();
         await afterNextPaint();

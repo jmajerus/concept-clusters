@@ -43,6 +43,33 @@ async function authoringMode(page, baseURL, mode) {
   // Circle names each line obstruction for the panel; a saved layout keeps
   // only the counts.
   if (mode === "sets") {
+    // A Circle layout carries each circle's stacking order. Applying it
+    // restores those rows exactly, and a fixed saved layout loads with them,
+    // rather than re-deriving the order from the lines.
+    assert.ok(layout.memberOrders?.["cluster:0"]?.length, "capture records stacking orders");
+    const reversed = [...layout.memberOrders["cluster:0"]].reverse();
+    const applied = await page.evaluate(order => {
+      const state = window.CC.state;
+      const arrangement = state.layoutAdapter.capture();
+      arrangement.memberOrders["cluster:0"] = order;
+      state.layoutAdapter.apply(arrangement);
+      state.paint();
+      return state.setLayout.memberOrder.get(0);
+    }, reversed);
+    assert.deepEqual(applied, reversed, "applied rows are kept");
+    await page.evaluate(order => {
+      const state = window.CC.state;
+      const saved = state.layoutAdapter.capture({ purpose: "authoring" });
+      saved.memberOrders["cluster:0"] = order;
+      saved.fixed = true;
+      state.puzzle.layout = { schemaVersion: 1, modes: { sets: saved } };
+    }, reversed);
+    await page.click("#reset");
+    await page.waitForFunction(() =>
+      window.CC.state.solutionLayout === "pretty" && window.CC.state.layoutSource?.kind === "fixed",
+    null, { timeout: 15000 });
+    assert.deepEqual(await page.evaluate(() => window.CC.state.setLayout.memberOrder.get(0)), reversed,
+      "a fixed saved layout loads with its rows");
     const named = await page.evaluate(() => window.CC.state.layoutAdapter.metrics().obstructions);
     assert.ok(Array.isArray(named), "Circle metrics name their obstructions");
     assert.equal(named.length, layout.metrics.lineHeadingIntersections + layout.metrics.lineCircleIntersections);
