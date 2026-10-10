@@ -25,7 +25,7 @@ export const REVERT_FIELD_CONFIRM = "revert-field";
 export const SAVE_CANONICAL_CONFIRM = "save-canonical-form";
 export const WORKING_COPY_FORM_ID = "draft-working-copy";
 
-const SECTIONS = new Set(["puzzle", "cluster", "term", "bridge", "lens", "learning", "provenance", "board"]);
+const SECTIONS = new Set(["puzzle", "cluster", "term", "bridge", "lens", "learning", "provenance"]);
 
 const INFO_LIST_FIELDS = new Set(["info.links", "info.citations"]);
 const LEARNING_LIST_FIELDS = new Set(["links"]);
@@ -40,10 +40,7 @@ const FIELDS_BY_SECTION = {
   bridge: new Set(["term", "fact", "info.text", "info.links"]),
   lens: new Set(["prompt", "explanation", "reason"]),
   learning: new Set(["title", "summary", "content.text", "credit", "links"]),
-  provenance: new Set(["collaboration", "generativeModel", "reasoning", "switch", "editor"]),
-  // Board size and the Star free-term strip are layout settings now; they
-  // save with the layout (layoutDocument.js), not through this form.
-  board: new Set(["bridgePreconnect", "lensFlowTrace"])
+  provenance: new Set(["collaboration", "generativeModel", "reasoning", "switch", "editor"])
 };
 
 function isListField(field) {
@@ -557,19 +554,6 @@ export function applyDraftFieldValue(document, form, value) {
       else delete lens.reasons[term];
       if (!Object.keys(lens.reasons).length) delete lens.reasons;
     }
-    return next;
-  }
-
-  if (section === "board") {
-    const board = next.board && typeof next.board === "object" && !Array.isArray(next.board)
-      ? { ...next.board }
-      : {};
-    if (value === "" || value == null) delete board[field];
-    else if (value === "true" || value === true) board[field] = true;
-    else if (value === "false" || value === false) board[field] = false;
-    else throw new DraftFieldError(`${field} must be true, false, or omitted`);
-    if (Object.keys(board).length) next.board = board;
-    else delete next.board;
     return next;
   }
 

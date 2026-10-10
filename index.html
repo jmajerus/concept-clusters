@@ -229,8 +229,44 @@
           <button id="star-bridge-preconnect-btn" type="button">Pre-connect bridges</button>
           <button id="lens-flow-trace-btn" type="button" hidden>Turn on lens flow trace</button>
         </div>
+        <!-- Lens reveal cue: this puzzle's override saves on the working
+             copy like the buttons above; Try only plays. -->
+        <div id="lens-reveal-controls" class="lens-reveal-controls" hidden>
+          <label class="board-settings-field">
+            <span>Lens reveal, this puzzle</span>
+            <select id="lens-reveal-cue-select"></select>
+          </label>
+          <div class="lens-reveal-try">
+            <label class="board-settings-field">
+              <span>Try</span>
+              <select id="lens-reveal-try-cue"></select>
+            </label>
+            <label class="board-settings-field">
+              <span>on lens</span>
+              <select id="lens-reveal-try-lens"></select>
+            </label>
+            <button id="lens-reveal-try-btn" type="button">Play</button>
+          </div>
+          <p class="board-settings-note">Try plays on this board and saves nothing.</p>
+        </div>
         <p id="board-experiments-status" class="board-settings-note" role="status">
           These change play, so they save on the open working copy.
+        </p>
+      </section>
+      <!-- Settings for every puzzle at once, live for players. A puzzle's
+           own choice in Experiments overrides them. -->
+      <section id="site-settings" aria-labelledby="site-settings-title" hidden>
+        <strong id="site-settings-title">Site settings</strong>
+        <label class="board-settings-field">
+          <span>Lens reveal cue</span>
+          <select id="site-lens-reveal-cue"></select>
+        </label>
+        <label class="board-settings-check">
+          <input id="site-lens-hover-ping" type="checkbox">
+          <span>Ping a term when its name is hovered in the explanation</span>
+        </label>
+        <p id="site-settings-status" class="board-settings-note" role="status">
+          Saves for every puzzle. Players get a change on their next page load, after up to 30 seconds of caching.
         </p>
       </section>
       </div>

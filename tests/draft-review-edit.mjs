@@ -734,30 +734,10 @@ export async function run() {
     contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high" }]
   });
 
-  const preconnected = applyDraftFieldValue(document, {
-    section: "board",
-    field: "bridgePreconnect",
-    value: "true"
-  }, "true");
-  assert.deepEqual(preconnected.board, { bridgePreconnect: true });
-  const omitted = applyDraftFieldValue(preconnected, {
-    section: "board",
-    field: "bridgePreconnect",
-    value: ""
-  }, "");
-  assert.equal(omitted.board, undefined);
-  const traced = applyDraftFieldValue(omitted, {
-    section: "board",
-    field: "lensFlowTrace",
-    value: "true"
-  }, "true");
-  assert.deepEqual(traced.board, { lensFlowTrace: true });
-  // Board size and the free-term strip are layout settings: this form no
-  // longer writes them into the puzzle document.
-  for (const field of ["starFreeStrip", "sizeFactor"]) {
-    assert.throws(
-      () => applyDraftFieldValue(omitted, { section: "board", field, value: "true" }, "true"),
-      new RegExp(`Unknown field "${field}"`)
-    );
-  }
+  // Board flags and layout settings are set in the layout view's cards
+  // only; this form has no board section.
+  assert.throws(
+    () => applyDraftFieldValue(document, { section: "board", field: "bridgePreconnect", value: "true" }, "true"),
+    /Unknown section: board/
+  );
 }

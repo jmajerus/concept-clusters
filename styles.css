@@ -668,7 +668,8 @@ body.authoring-construct #share-status {
   .layout-authoring-row { grid-template-columns: minmax(0, 1fr); }
 }
 #board-settings,
-#board-experiments {
+#board-experiments,
+#site-settings {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -699,7 +700,26 @@ body.authoring-construct #share-status {
 }
 .board-settings-note { margin: 0; font-size: 12px; color: var(--ink-soft); }
 #board-settings-status[data-tone="error"],
-#board-experiments-status[data-tone="error"] { color: var(--error); }
+#board-experiments-status[data-tone="error"],
+#site-settings-status[data-tone="error"] { color: var(--error); }
+#site-settings[hidden],
+.lens-reveal-controls[hidden] { display: none; }
+.board-settings-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.board-settings-field select { min-width: 0; max-width: 100%; font: inherit; }
+.board-settings-check { display: flex; align-items: flex-start; gap: 6px; }
+.lens-reveal-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+.lens-reveal-try { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .board-settings-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 /* A row whose buttons are all hidden (the Star-only strip in another mode)
    leaves no gap. */
@@ -825,6 +845,25 @@ body.authoring-construct #share-status {
 .lens-flow-highlight {
   stroke-width: 5;
   stroke-opacity: 0.55;
+}
+
+/* Lens reveal cue (modules/lensRevealCue.js). Rings spread from each
+   answer pill in the reveal's own green; the shade is the board's color,
+   so the spotlight reads as the rest of the board fading back. */
+.lens-reveal-cue,
+.lens-term-ping { pointer-events: none; }
+.lens-cue-ring {
+  fill: none;
+  stroke: var(--success);
+  stroke-width: 3px;
+}
+.lens-cue-shade { fill: var(--panel); }
+/* With the hover ping on, an answer named in the explanation points at
+   its pill. */
+#lens-explanation.lens-hover-ping [data-lens-term] {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 
 /* ---------- nodes ---------- */

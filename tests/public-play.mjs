@@ -12,6 +12,7 @@ import {
   htmlWithPublicPlayMeta
 } from "../modules/publicPlayService.js";
 import { PUZZLE_MANIFEST } from "../puzzles/manifest.js";
+import { createMemorySiteSettingsStore } from "../modules/siteSettings.js";
 
 export const name = "public D1 priority with frozen-module reuse";
 const actor = { subject: "test-publisher" };
@@ -37,6 +38,11 @@ export async function run() {
   assert.equal(loadedInitial.dateCreated, undefined);
   assert.equal(loadedInitial.dateModified, undefined);
   assert.equal(initial.categories.Science.slug, "science");
+  assert.deepEqual(initial.settings, {}, "no site settings store leaves every setting at its default");
+  const withSettings = await buildPublicPlayIndex(repository, {
+    siteSettings: createMemorySiteSettingsStore({ lensRevealCue: "ripple" })
+  });
+  assert.deepEqual(withSettings.settings, { lensRevealCue: "ripple" });
   assert.match(htmlWithPublicPlayMeta("<head></head>"), /cc-public-play-index/);
   const firstPublishedAt = (await repository.getPublished({ kind: "puzzle", id: document.id })).firstPublishedAt;
   const cacheRows = new Map();

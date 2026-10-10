@@ -188,6 +188,10 @@ export async function run(page) {
   assert.equal(assembled.puzzles[0].clusters[0].fact, "Alpha fact.");
   assert.deepEqual(assembled.puzzles[0].provenance, labPuzzle.provenance);
   assert.deepEqual(assembled.drafts, []);
+  assert.deepEqual(assembled.settings, {});
+  assert.deepEqual(assemblePlayCorpus({
+    settings: { lensRevealCue: "ripple", unknown: true }
+  }).settings, { lensRevealCue: "ripple" }, "the corpus carries known site settings only");
   const withDrafts = assemblePlayCorpus({
     puzzleRows: [{ id: "lab-d1-play", document: labPuzzle }],
     draftRows: [{

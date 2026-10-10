@@ -158,14 +158,12 @@ export async function run() {
   assert.doesNotMatch(draftPage, /value="revert-published"/);
   assert.match(draftPage, /value="delete-draft"/);
   assert.match(draftPage, /badge-warn">working copy</);
-  assert.match(draftPage, /Board experiments/);
-  assert.match(draftPage, /Bridge pre-connect/);
-  assert.match(draftPage, /Lens flow trace/);
-  // Board size and the free-term strip are layout settings now, edited in
-  // layout authoring rather than on this form.
-  assert.doesNotMatch(draftPage, /<label>Free-term strip/);
-  assert.doesNotMatch(draftPage, /<label>Board size/);
-  assert.match(draftPage, /change them in layout authoring/);
+  // Board flags and layout settings live in the layout view's cards only,
+  // so this page has no second set of controls to fall out of step.
+  for (const label of [/Board experiments/, /Bridge pre-connect/, /Lens flow trace/, /Lens reveal cue/,
+    /<label>Free-term strip/, /<label>Board size/]) {
+    assert.doesNotMatch(draftPage, label);
+  }
   assert.doesNotMatch(draftPage, /badge-ok">published</);
   const publishedNoticeList = renderDraftListPage([{ ...baseDraft }], {
     notice: {

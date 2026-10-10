@@ -6,6 +6,7 @@ import { puzzleBrowseFromDocument } from "./puzzleBrowse.js";
 import { puzzleContentFingerprint, puzzleLayoutFingerprint } from "./publicPlayVersion.js";
 import { PUBLIC_PLAY_INDEX_PATH, PUBLIC_PLAY_META_NAME } from "./publicPlayRoutes.js";
 import { PUZZLE_MANIFEST } from "../puzzles/manifest.js";
+import { createD1SiteSettingsStore, readSiteSettingsOrDefaults } from "./siteSettings.js";
 
 const CACHE_CONTROL = "public, max-age=0, s-maxage=30";
 const NO_STORE = "no-store";
@@ -40,11 +41,12 @@ function byFirstPublication(left, right) {
     || String(left.id).localeCompare(String(right.id));
 }
 
-export async function buildPublicPlayIndex(repository, { staticManifest = [] } = {}) {
-  const [puzzles, categories, catalogues] = await Promise.all([
+export async function buildPublicPlayIndex(repository, { staticManifest = [], siteSettings = null } = {}) {
+  const [puzzles, categories, catalogues, settings] = await Promise.all([
     repository.listPublished({ kind: "puzzle" }),
     repository.listPublished({ kind: "category" }),
-    repository.listPublished({ kind: "catalogue" })
+    repository.listPublished({ kind: "catalogue" }),
+    readSiteSettingsOrDefaults(siteSettings)
   ]);
   const categoryRegistry = categoriesRegistryFromDocuments(categories.map(row => row.document));
   const staticById = new Map(staticManifest.map(entry => [entry.id, entry]));
@@ -73,11 +75,15 @@ export async function buildPublicPlayIndex(repository, { staticManifest = [] } =
     puzzles: entries,
     categories: categoryRegistry,
     catalogues: [...catalogues].sort(byFirstPublication)
-      .map(row => catalogueFromDocument(row.document)).filter(Boolean)
+      .map(row => catalogueFromDocument(row.document)).filter(Boolean),
+    settings
   };
 }
 
-export async function handlePublicPlayRequest(request, env, { repository: suppliedRepository = null } = {}) {
+export async function handlePublicPlayRequest(request, env, {
+  repository: suppliedRepository = null,
+  siteSettings: suppliedSiteSettings = null
+} = {}) {
   const url = new URL(request.url);
   if (request.method !== "GET" && request.method !== "HEAD") {
     return response({ error: "Method not allowed" }, 405, NO_STORE);
@@ -88,7 +94,12 @@ export async function handlePublicPlayRequest(request, env, { repository: suppli
   const repository = suppliedRepository || new D1ContentDocumentRepository(env.AUTHORING_DB);
   try {
     if (url.pathname === PUBLIC_PLAY_INDEX_PATH) {
-      const result = response(await buildPublicPlayIndex(repository, { staticManifest: PUZZLE_MANIFEST }));
+      const siteSettings = suppliedSiteSettings ||
+        (env.AUTHORING_DB ? createD1SiteSettingsStore(env.AUTHORING_DB) : null);
+      const result = response(await buildPublicPlayIndex(repository, {
+        staticManifest: PUZZLE_MANIFEST,
+        siteSettings
+      }));
       return request.method === "HEAD" ? new Response(null, result) : result;
     }
     const match = url.pathname.match(PUZZLE_PATH);

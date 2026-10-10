@@ -2211,33 +2211,6 @@ function renderClassificationEditor({
   </details></copy-field>`;
 }
 
-function renderBoardExperiments({ edit, document }) {
-  if (!edit?.draftId) return "";
-  const board = document?.board && typeof document.board === "object" ? document.board : {};
-  const preconnect = board.bridgePreconnect === true ? "true" : "";
-  const flowTrace = board.lensFlowTrace === true ? "true" : "";
-  const preSlot = copyHidden(edit, { section: "board", field: "bridgePreconnect" });
-  const flowSlot = copyHidden(edit, { section: "board", field: "lensFlowTrace" });
-  const option = (value, label, selected) =>
-    `<option value="${value}"${selected ? " selected" : ""}>${label}</option>`;
-  return `<h2>Board experiments</h2>
-    <p class="meta">These stay off the agent write domains until a field is promoted into content or pedagogy. Save the working copy to keep them. Board size and the Star free-term strip are layout settings: change them in layout authoring, where they save with the layout. Its Experiments card also toggles these two on the open working copy.</p>
-    ${preSlot.hidden}
-    <p><label>Bridge pre-connect
-      <select${preSlot.form} name="${preSlot.prefix}value">
-        ${option("", "Off", preconnect === "")}
-        ${option("true", "On", preconnect === "true")}
-      </select>
-    </label></p>
-    ${flowSlot.hidden}
-    <p><label>Lens flow trace
-      <select${flowSlot.form} name="${flowSlot.prefix}value">
-        ${option("", "Off", flowTrace === "")}
-        ${option("true", "On", flowTrace === "true")}
-      </select>
-    </label></p>`;
-}
-
 function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [] }) {
   if (!edit?.draftId) return "";
 
@@ -2605,7 +2578,6 @@ export function renderDraftPage(draft, {
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.level)}
     ${renderPuzzleMeta(document)}
-    ${renderBoardExperiments({ edit, document })}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}
     ${renderInfo(document.info, {

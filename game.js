@@ -48,6 +48,7 @@ import { layoutDocumentWithBoard } from "./modules/layoutDocument.js";
 import { recentreLayoutDocument, recentreSavedModes } from "./modules/layoutRecentre.js";
 import { classifyDrag, isCrafted, recordDrag } from "./modules/playerLayoutEffort.js";
 import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
+import { saveSiteSettings } from "./modules/siteSettingsApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
 import { createCatalogueStudio, bindCatalogueCardDrag } from "./modules/catalogueStudio.js";
@@ -65,6 +66,9 @@ let PUZZLES;
 let CATALOGUES;
 let SEARCH_DRAFTS = [];
 let playSource = "git";
+// Site-wide play settings (modules/siteSettings.js). Git-only play has
+// none, so every setting keeps its default.
+let siteSettings = {};
 let corpusFailures = 0;
 let publicIndexSignature = null;
 let publicIndexCheckedAt = 0;
@@ -78,6 +82,7 @@ if (playCorpusUrl) {
   puzzleLoader = createCorpusPuzzleLoader(corpus);
   PUZZLES = puzzleLoader.browsePuzzles;
   SEARCH_DRAFTS = Array.isArray(corpus.drafts) ? corpus.drafts : [];
+  siteSettings = corpus.settings || {};
   document.body?.classList.add("authoring-play");
 } else if (publicPlayIndexUrl) {
   const [
@@ -93,6 +98,7 @@ if (playCorpusUrl) {
   puzzleLoader = createPublicPuzzleLoader(PUZZLE_MANIFEST, index);
   publicIndexSignature = JSON.stringify(index);
   publicIndexCheckedAt = Date.now();
+  siteSettings = index.settings || {};
   PUZZLES = puzzleLoader.browsePuzzles;
   playSource = "public-d1";
   corpusFailures = PUZZLE_MANIFEST_FAILURES.length;
@@ -166,6 +172,14 @@ import {
   lensFlowTracePlan,
   playLensFlowTrace
 } from "./modules/lensFlowTrace.js";
+import {
+  clearLensRevealCue,
+  lensRevealHoverPingEnabled,
+  lensRevealTargets,
+  pingLensTerm,
+  playLensRevealCue,
+  resolveLensRevealCue
+} from "./modules/lensRevealCue.js";
 
 const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). The size comes from
@@ -493,7 +507,7 @@ async function finishLensLayoutAfterModeSwitch(
       );
     }
     updateLensInterface();
-    traceRevealedLens({ redraw: true });
+    revealLensOnBoard({ redraw: true });
     persistPlayerSession({ captureLayout: true });
   }
 }
@@ -1197,6 +1211,7 @@ function renderLensQuizOptions(lens) {
 
 function renderLensExplanation(lens) {
   lensExplanationEl.replaceChildren();
+  lensExplanationEl.classList.toggle("lens-hover-ping", lensRevealHoverPingEnabled(siteSettings));
   if (!lens) return;
   const explanation = document.createElement("div");
   explanation.textContent = lens.explanation;
@@ -1208,11 +1223,24 @@ function renderLensExplanation(lens) {
     const item = document.createElement("li");
     const term = document.createElement("strong");
     term.textContent = `${word}: `;
+    term.dataset.lensTerm = word;
     item.append(term, lens.reasons[word]);
     list.appendChild(item);
   });
   if (list.children.length) lensExplanationEl.appendChild(list);
 }
+
+// Site setting lensRevealHoverPing: pointing at an answer named in the
+// explanation pings its pill on the board, and a tap does the same.
+function pingExplainedTerm(event) {
+  if (!lensRevealHoverPingEnabled(siteSettings)) return;
+  const term = event.target.closest?.("[data-lens-term]");
+  if (!term || !lensExplanationEl.contains(term)) return;
+  if (event.type === "pointerover" && term.contains(event.relatedTarget)) return;
+  pingLensTerm(svg, term.dataset.lensTerm, { reducedMotion: prefersReducedMotion() });
+}
+lensExplanationEl.addEventListener("pointerover", pingExplainedTerm);
+lensExplanationEl.addEventListener("click", pingExplainedTerm);
 
 function renderLensReview(lens) {
   if (state.lensMode === "quiz") {
@@ -1513,8 +1541,51 @@ function traceRevealedLens({ redraw = false } = {}) {
     svg,
     lensFlowTracePlan(state.puzzle, currentLens(state)),
     state.bridgeArmSegment,
-    { reducedMotion: !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches }
+    { reducedMotion: prefersReducedMotion() }
   );
+}
+
+function prefersReducedMotion() {
+  return !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+}
+
+// A reveal's board effects, in order: the reveal cue points at the answer
+// pills, then the flow trace (when on) runs along the bridges they name.
+// A rebuild under a still-visible explanation plays both again, since the
+// pills have moved.
+function revealLensOnBoard({ redraw = false } = {}) {
+  if (!state || (redraw && !lensReviewIsVisible(state))) return;
+  const revealState = state;
+  const quiz = state.lensMode === "quiz";
+  playLensRevealCue(svg, {
+    cue: state.lensMode === "assignment" ? "none" : resolveLensRevealCue({
+      puzzle: state.puzzle,
+      settings: siteSettings,
+      reducedMotion: prefersReducedMotion()
+    }),
+    targets: lensRevealTargets(currentLens(state), quiz ? null : state.lensSelections),
+    onDone: () => {
+      if (state === revealState) traceRevealedLens({ redraw });
+    }
+  });
+}
+
+// The layout view's Try: one cue on one lens's answers, saved nowhere.
+// It is asked for, so it plays even with reduced motion on, and it brings
+// the first answer into view, since the cue waits until one is on screen.
+function previewLensRevealCue({ cue, lensIndex }) {
+  const lens = state?.puzzle?.lenses?.[lensIndex];
+  if (!lens) return;
+  const targets = lensRevealTargets(lens);
+  clearLensFlowTrace(svg);
+  playLensRevealCue(svg, { cue, targets });
+  const pill = svg.selectAll("g.node")
+    .filter(node => node?.word === targets[0]?.word)
+    .node();
+  const box = pill?.getBoundingClientRect();
+  if (box && (box.top < 0 || box.bottom > window.innerHeight)) {
+    pill.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  }
 }
 
 function finishLensSequence() {
@@ -1529,7 +1600,7 @@ function finishLensSequence() {
   overviewRenderer.showRelatedPuzzles(state.puzzle);
   trackPuzzleCompleted(state.puzzle.id, mode, state);
   updateLensInterface();
-  traceRevealedLens();
+  revealLensOnBoard();
   updateLearningIntroduction();
   persistPlayerSession({ captureLayout: true });
 }
@@ -1573,7 +1644,7 @@ lensCheckBtn.addEventListener("click", () => {
     state.phase = "lens-revealed";
     setMessage("Review the highlighted answer and explanation.", "good");
     updateLensInterface();
-    traceRevealedLens();
+    revealLensOnBoard();
     persistPlayerSession();
     return;
   }
@@ -1585,7 +1656,7 @@ lensCheckBtn.addEventListener("click", () => {
   state.phase = "lens-revealed";
   setMessage("Review the highlighted answer set and explanation.", "good");
   updateLensInterface();
-  traceRevealedLens();
+  revealLensOnBoard();
   persistPlayerSession();
 });
 
@@ -1596,6 +1667,7 @@ lensNextBtn.addEventListener("click", () => {
     return;
   }
   clearLensFlowTrace(svg);
+  clearLensRevealCue(svg);
   state.lensIndex++;
   if (state.lensMode === "quiz") {
     state.lensQuizSelection = null;
@@ -2018,6 +2090,7 @@ const { buildSetGraph } = createSetRenderer({
 // used by both loadPuzzle and setMode rather than repeating the same
 // three-way branch in each.
 function buildForMode() {
+  clearLensRevealCue(svg);
   if (mode !== "graph") clusterLegend.hide();
   (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : buildSetGraph)();
 }
@@ -2044,7 +2117,17 @@ layoutAuthoring = createLayoutAuthoringController({
     ? { start: startLayoutPass, status: layoutPassStatus }
     : null,
   getDraftId: () => overlayDraftId,
-  previewBoardSize
+  previewBoardSize,
+  previewLensRevealCue,
+  getSiteSettings: () => siteSettings,
+  saveSiteSettings: playSource === "d1"
+    ? async patch => {
+      siteSettings = await saveSiteSettings({ settings: patch });
+      if (state && lensReviewIsVisible(state)) renderLensExplanation(currentLens(state));
+      return siteSettings;
+    }
+    : null,
+  restartBoard
 });
 
 // ---------- layout authoring ----------
@@ -2425,6 +2508,20 @@ function applyLoadedPuzzle(puzzle, index, {
   layoutAuthoring.onPuzzleLoaded();
   overviewRenderer.renderPuzzleBreadcrumb(puzzle);
   if (focus) titleEl.focus();
+}
+
+// Starts the open board again from the puzzle in memory, as opening it
+// does but without a page load. The layout view's controls for how a board
+// starts (bridge pre-connect, the Star free-term strip) have already put
+// their change into state.puzzle. A restart is not a new visit, so it
+// neither becomes last-played nor counts as a load.
+function restartBoard() {
+  if (!state?.puzzle) return;
+  applyLoadedPuzzle(state.puzzle, currentIndex, {
+    restoreSession: false,
+    persistInitial: false,
+    overlay: true
+  });
 }
 
 async function loadPuzzle(index, options = {}) {
