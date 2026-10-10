@@ -590,6 +590,7 @@ function setMode(newMode) {
   if (authoringStudio?.isConstruct() && newMode === "sets") return;
   if (layoutAuthoringMode && newMode === mode) return;
   if (state?.phase === "lens-preparing") return;
+  cancelPendingResize();
   const switchingLensPhase = lensPhaseActive(state);
   clearTimeout(playerLayoutSaveTimer);
   if (state) persistPlayerSession({ captureLayout: true });
@@ -2064,6 +2065,13 @@ let boardSizeRebuildTimer = null;
 // instead of asking for a new layout.
 let resizeArrangement = null;
 
+// A mode switch or a new puzzle cancels a scheduled resize rebuild and the
+// arrangement taken for it: neither belongs to the new board.
+function cancelPendingResize() {
+  clearTimeout(boardSizeRebuildTimer);
+  resizeArrangement = null;
+}
+
 function rebuildBoardForSize() {
   if (!state) return;
   if (state.stopRenderer) state.stopRenderer();
@@ -2077,8 +2085,12 @@ function rebuildBoardForSize() {
   resizeArrangement = null;
   if (!layoutAuthoringMode) return;
   let restored = false;
-  if (kept && state.made === state.need && typeof state.layoutAdapter?.apply === "function") {
-    restored = state.layoutAdapter.apply(recentreLayoutDocument(kept, { width: W, height: H }))?.valid === true;
+  // Only on the board it was taken from: a mode switch or another puzzle
+  // in between drops it (and cancels the pending rebuild; see
+  // cancelPendingResize).
+  if (kept && kept.state === state && kept.mode === mode && state.made === state.need &&
+      typeof state.layoutAdapter?.apply === "function") {
+    restored = state.layoutAdapter.apply(recentreLayoutDocument(kept.layout, { width: W, height: H }))?.valid === true;
     if (restored) updateSolutionHint();
   }
   // Kept arrangements for the other modes are re-centred when they return.
@@ -2092,7 +2104,7 @@ function previewBoardSize(factor, { rebuild = "schedule" } = {}) {
   if (!state?.puzzle) return null;
   if (layoutAuthoringMode && !resizeArrangement && state.made === state.need &&
       state.solutionLayout === "pretty" && typeof state.layoutAdapter?.capture === "function") {
-    resizeArrangement = state.layoutAdapter.capture();
+    resizeArrangement = { state, mode, layout: state.layoutAdapter.capture() };
   }
   // Board size is a layout setting, read from the layout document first,
   // so the preview stages it there. A failed save previews the saved
@@ -2161,6 +2173,7 @@ function applyLoadedPuzzle(puzzle, index, {
   selectedClusterId = null
 } = {}) {
   puzzleViewEl.classList.remove("puzzle-load-failed");
+  cancelPendingResize();
   if (state && state.puzzle.id !== puzzle.id) pendingInitialSharedParams = null;
   const learningIntroduction = normalizedLearningIntroduction(puzzle);
   const learningIntroductionStatus = learningIntroduction

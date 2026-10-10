@@ -28,6 +28,9 @@ export function recentreLayoutDocument(layout, board) {
   const dx = (board.width - saved.width) / 2;
   const dy = (board.height - saved.height) / 2;
   const next = { ...layout, board: { ...layout.board, width: board.width, height: board.height } };
+  // A Star player snapshot's free strip sits above the board, down to
+  // viewBoxY; that bound moves with the nodes.
+  if (Number.isFinite(Number(layout.board.viewBoxY))) next.board.viewBoxY = Number(layout.board.viewBoxY) + dy;
   POINT_GROUPS.forEach(group => {
     if (!isObject(layout[group])) return;
     next[group] = Object.fromEntries(Object.entries(layout[group]).map(([key, point]) => [
@@ -40,13 +43,14 @@ export function recentreLayoutDocument(layout, board) {
   return next;
 }
 
-/** Whether every saved position lies on the layout's own board. */
+/** Whether every saved position lies on the layout's own board (or its Star strip band above it). */
 export function layoutPointsFitBoard(layout) {
   const board = boardOf(layout);
   if (!board) return false;
+  const top = Math.min(0, Number(layout.board.viewBoxY) || 0);
   return POINT_GROUPS.every(group => !isObject(layout[group]) || Object.values(layout[group]).every(point =>
     !isObject(point) ||
-    (Number(point.x) >= 0 && Number(point.x) <= board.width && Number(point.y) >= 0 && Number(point.y) <= board.height)
+    (Number(point.x) >= 0 && Number(point.x) <= board.width && Number(point.y) >= top && Number(point.y) <= board.height)
   ));
 }
 

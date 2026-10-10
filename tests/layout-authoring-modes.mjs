@@ -258,8 +258,23 @@ async function circleMemberOrder(page) {
     return { index: order.indexOf(target), last: order.length - 1 };
   }, arm);
   const endRow = arm.above ? 0 : placed.last;
-  assert.ok(placed.index === endRow || placed.index > 0 && placed.index < placed.last || placed.last === 0,
-    `target in an unexpected row: ${placed.index}`);
+  const oppositeRow = arm.above ? placed.last : 0;
+  assert.notEqual(placed.index, oppositeRow, "target moved to the end row facing away from its bridge");
+  if (placed.index !== endRow) {
+    // Left in a middle row: its line must leave from a side end of its pill.
+    const start = await page.evaluate(({ bridge, target, ci }) => {
+      const line = [...document.querySelectorAll("line.bridge-link")]
+        .find(element => element.parentNode.__data__?.term === bridge && element.__data__.side === ci);
+      const pill = [...document.querySelectorAll(".set-pills g.node")]
+        .find(element => element.__data__.word === target);
+      // The pill group is translated to the pill's centre in board units.
+      const [cx, cy] = pill.getAttribute("transform").match(/-?[\d.]+/g).map(Number);
+      const halfW = pill.__data__.w / 2;
+      return { x: Number(line.getAttribute("x1")), y: Number(line.getAttribute("y1")), left: cx - halfW, right: cx + halfW, mid: cy };
+    }, arm);
+    assert.ok(Math.min(Math.abs(start.x - start.left), Math.abs(start.x - start.right)) < 2 && Math.abs(start.y - start.mid) < 2,
+      `a middle-row target's line leaves from a side end: ${JSON.stringify(start)}`);
+  }
   assert.equal(await idealLinesUnderPills(page), 0, "after the drag an ideal line passes under a member pill");
 }
 

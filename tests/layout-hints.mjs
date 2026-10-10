@@ -389,6 +389,11 @@ export async function run() {
   assert.deepEqual(moved.board, { width: 120, height: 100 });
   assert.deepEqual(moved.nodes.a, { x: 20, y: 30 });
   assert.deepEqual(moved.circles.c, { x: 60, y: 50, pinned: true });
+  // A Star player snapshot's strip band above the board moves with it.
+  const strip = recentreLayoutDocument({ board: { width: 100, height: 80, viewBoxY: -40 }, nodes: { s: { x: 30, y: -20 } } }, { width: 100, height: 60 });
+  assert.equal(strip.board.viewBoxY, -50);
+  assert.deepEqual(strip.nodes.s, { x: 30, y: -30 });
+  assert.equal(layoutPointsFitBoard(strip), true, "strip nodes within viewBoxY fit");
   const same = { board: { width: 100, height: 80 }, nodes: {} };
   assert.equal(recentreLayoutDocument(same, { width: 100, height: 80 }), same);
   assert.equal(layoutPointsFitBoard(recentreLayoutDocument({ board: { width: 100, height: 80 }, nodes: { a: { x: 2, y: 40 } } }, { width: 90, height: 80 })), false,
