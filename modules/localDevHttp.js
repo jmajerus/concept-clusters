@@ -389,6 +389,8 @@ function boundPort(server, requestedPort) {
     : requestedPort;
 }
 
+const SHUTDOWN_GRACE_MS = 3000;
+
 function closeHttpServer(server) {
   return new Promise(resolve => {
     if (!server.listening) {
@@ -398,6 +400,10 @@ function closeHttpServer(server) {
     try {
       server.close(() => resolve());
       server.emit(SERVER_SHUTDOWN_EVENT);
+      // Any request still open after a grace period (a long poll, a stream
+      // opened some other way) must not hold the restart until systemd's
+      // stop timeout kills the process.
+      setTimeout(() => server.closeAllConnections?.(), SHUTDOWN_GRACE_MS).unref();
     } catch {
       resolve();
     }

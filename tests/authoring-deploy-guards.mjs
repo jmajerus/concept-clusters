@@ -162,7 +162,7 @@ async function checkWebhook() {
 
 async function checkEventStream() {
   const listeners = new Set();
-  const server = new EventEmitter();
+  const server = Object.assign(new EventEmitter(), { listening: true });
   const req = Object.assign(new EventEmitter(), {
     method: "GET",
     url: SERVER_REVISION_EVENTS_PATH,
@@ -184,6 +184,7 @@ async function checkEventStream() {
   });
   assert.equal(res.status, 200);
   assert.match(res.headers["Content-Type"], /text\/event-stream/);
+  assert.equal(res.headers.Connection, "close", "an ended stream cannot be reused for a reconnect");
   await waitFor(() => res.chunks.length === 1, "initial event");
   for (const listener of listeners) listener({ running: { commit: "a" } });
   for (const listener of listeners) listener({ running: { commit: "b" } });
@@ -195,6 +196,21 @@ async function checkEventStream() {
   assert.equal(res.writableEnded, true, "shutdown ends the stream");
   req.emit("close");
   assert.equal(listeners.size, 0, "closing unsubscribes");
+
+  // A reconnect on a kept-alive socket after close() began is refused.
+  server.listening = false;
+  const late = { status: 0, writeHead(status) { this.status = status; }, end() {} };
+  await handleAuthoringAdminIndex(Object.assign(new EventEmitter(), {
+    method: "GET", url: SERVER_REVISION_EVENTS_PATH, socket: { server }
+  }), late, {
+    loadServerRevision: async () => ({ running: { commit: "a" } }),
+    subscribeServerRevision: listener => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    }
+  });
+  assert.equal(late.status, 503);
+  assert.equal(listeners.size, 0, "a refused stream never subscribes");
 }
 
 async function checkMonitor(root) {

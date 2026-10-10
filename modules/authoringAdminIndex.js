@@ -575,10 +575,21 @@ export const SERVER_SHUTDOWN_EVENT = "concept-clusters:shutdown";
 const EVENT_STREAM_HEARTBEAT_MS = 30000;
 
 function streamServerRevision(req, res, { loadServerRevision, subscribeServerRevision }) {
+  const server = req.socket?.server;
+  // close() stops new connections but still serves requests on open
+  // keep-alive ones, so a client reconnecting during shutdown would get a
+  // fresh stream from the dying process and hold it open.
+  if (server && server.listening === false) {
+    res.writeHead(503, { "Content-Type": "text/plain; charset=utf-8", Connection: "close" });
+    res.end("Shutting down");
+    return;
+  }
   res.writeHead(200, {
     "Content-Type": "text/event-stream; charset=utf-8",
     "Cache-Control": "no-store",
-    Connection: "keep-alive",
+    // Ending a stream ends its connection: a reconnect must open a new one,
+    // which reaches whichever process is listening now.
+    Connection: "close",
     "X-Accel-Buffering": "no"
   });
   res.flushHeaders?.();
@@ -594,7 +605,6 @@ function streamServerRevision(req, res, { loadServerRevision, subscribeServerRev
   // Comments keep idle proxies from closing the stream and let clients
   // notice a dead connection.
   const heartbeat = setInterval(() => res.write(": ping\n\n"), EVENT_STREAM_HEARTBEAT_MS);
-  const server = req.socket?.server;
   const end = () => res.end();
   server?.once?.(SERVER_SHUTDOWN_EVENT, end);
   req.on("close", () => {
