@@ -77,6 +77,12 @@
       "problemMatcher": []
     },
     {
+      "label": "Release MCP",
+      "type": "npm",
+      "script": "mcp:hosted:release",
+      "problemMatcher": []
+    },
+    {
       "label": "Deploy Authoring",
       "type": "npm",
       "script": "authoring:deploy",
@@ -116,6 +122,16 @@
       "label": "Open local",
       "type": "npm",
       "script": "local",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Open local admin",
+      "type": "npm",
+      "script": "local:admin",
       "problemMatcher": [],
       "presentation": {
         "reveal": "silent",

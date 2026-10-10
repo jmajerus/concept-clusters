@@ -49,7 +49,8 @@
     "dev:stop": "node tools/dev-housekeep.mjs --kill",
     "dev:housekeep": "node tools/dev-housekeep.mjs",
     "deploy": "wrangler deploy",
-    "local": "node tools/open-local.mjs"
+    "local": "node tools/open-local.mjs",
+    "local:admin": "node tools/open-admin.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.20.1",

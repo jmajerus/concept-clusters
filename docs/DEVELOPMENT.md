@@ -33,6 +33,12 @@ index at `/admin`, catalogues at `/admin/catalogues`, and categories at
 [CATALOGUES.md](CATALOGUES.md). Wrangler does not start unless you ask for
 Worker mode.
 
+`npm run local` starts the same server in the background if it is not
+already running, then opens the Library in a browser; `npm run local:admin`
+opens it with the reviewer board (`&admin`). The VS Code "Local" status-bar
+button offers both, plus running the server in a terminal (`npm run dev`)
+and stopping it (`npm run dev:stop`).
+
 The server's lease and authoring scratch state live outside version control:
 by default under `<repo>/.concept-clusters/authoring/` (already gitignored),
 or under `AUTHORING_DATA_DIR` when configured. Use

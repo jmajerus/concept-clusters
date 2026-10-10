@@ -1,28 +1,6 @@
 {
   "VsCodeTaskButtons.tasks": [
     {
-      "label": "$(plug) MCP",
-      "tooltip": "Restart the stdio MCP servers so every host picks up the current checkout; also start or stop the local dev server",
-      "alignment": "left",
-      "tasks": [
-        {
-          "label": "Restart stdio MCP",
-          "task": "MCP: restart stdio",
-          "description": "$(debug-restart) Stop every mcp-server.mjs for this checkout, then reconnect each host"
-        },
-        {
-          "label": "Start dev server",
-          "task": "Dev",
-          "description": "$(play) npm run dev (Worker mode: npm run dev -- --worker)"
-        },
-        {
-          "label": "Stop dev server",
-          "task": "Dev: stop",
-          "description": "$(debug-stop) npm run dev:stop"
-        }
-      ]
-    },
-    {
       "label": "$(rocket) Deploy game",
       "task": "Deploy game",
       "tooltip": "npm run deploy -- the live player-facing app",
@@ -30,10 +8,27 @@
       "color": "warning"
     },
     {
-      "label": "$(cloud-upload) Deploy MCP",
-      "task": "Deploy MCP",
-      "tooltip": "npm run mcp:hosted:deploy — deploy the Cloudflare-hosted MCP authoring Worker",
-      "alignment": "left"
+      "label": "$(plug) MCP",
+      "tooltip": "Get MCP clients onto current code: restart local stdio servers, or deploy the hosted Worker",
+      "alignment": "left",
+      "color": "warning",
+      "tasks": [
+        {
+          "label": "Restart stdio MCP",
+          "task": "MCP: restart stdio",
+          "description": "$(debug-restart) Stop this checkout's mcp-server.mjs processes; each host reconnects to current code"
+        },
+        {
+          "label": "Deploy hosted MCP",
+          "task": "Deploy MCP",
+          "description": "$(cloud-upload) npm run mcp:hosted:deploy — the Cloudflare-hosted authoring Worker"
+        },
+        {
+          "label": "Release hosted MCP",
+          "task": "Release MCP",
+          "description": "$(database) npm run mcp:hosted:release — apply remote D1 migrations, then deploy"
+        }
+      ]
     },
     {
       "label": "$(server) Deploy Authoring",
@@ -77,10 +72,31 @@
       "alignment": "left"
     },
     {
-      "label": "$(play) Local",
-      "task": "Open local",
-      "tooltip": "npm run local -- open the local game to try code before commit (starts the server if needed)",
-      "alignment": "left"
+      "label": "$(globe) Local",
+      "tooltip": "The local dev server on 127.0.0.1:8787",
+      "alignment": "left",
+      "tasks": [
+        {
+          "label": "Open in browser",
+          "task": "Open local",
+          "description": "$(link-external) Start the server in the background if needed, then open the Library"
+        },
+        {
+          "label": "Open in browser as reviewer",
+          "task": "Open local admin",
+          "description": "$(link-external) Same, with the reviewer board (&admin)"
+        },
+        {
+          "label": "Run dev server in terminal",
+          "task": "Dev",
+          "description": "$(terminal) npm run dev — logs in a terminal panel, no browser (Worker mode: npm run dev -- --worker)"
+        },
+        {
+          "label": "Stop dev server",
+          "task": "Dev: stop",
+          "description": "$(debug-stop) npm run dev:stop — however it was started"
+        }
+      ]
     },
     {
       "label": "$(cloud-download) Import layout",
