@@ -161,6 +161,8 @@ export async function run() {
   assert.match(draftPage, /Board experiments/);
   assert.match(draftPage, /Bridge pre-connect/);
   assert.match(draftPage, /Lens flow trace/);
+  assert.match(draftPage, /Lens reveal cue/);
+  assert.match(draftPage, /<option value="" selected>Use the site setting<\/option>/);
   // Board size and the free-term strip are layout settings now, edited in
   // layout authoring rather than on this form.
   assert.doesNotMatch(draftPage, /<label>Free-term strip/);

@@ -18,6 +18,7 @@ import {
   generativeHostKey
 } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
+import { LENS_REVEAL_CUES, isLensRevealCue } from "./lensRevealCue.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
 export const SAVE_WORKING_COPY_CONFIRM = "save-working-copy";
@@ -43,7 +44,7 @@ const FIELDS_BY_SECTION = {
   provenance: new Set(["collaboration", "generativeModel", "reasoning", "switch", "editor"]),
   // Board size and the Star free-term strip are layout settings now; they
   // save with the layout (layoutDocument.js), not through this form.
-  board: new Set(["bridgePreconnect", "lensFlowTrace"])
+  board: new Set(["bridgePreconnect", "lensFlowTrace", "lensRevealCue"])
 };
 
 function isListField(field) {
@@ -565,7 +566,12 @@ export function applyDraftFieldValue(document, form, value) {
       ? { ...next.board }
       : {};
     if (value === "" || value == null) delete board[field];
-    else if (value === "true" || value === true) board[field] = true;
+    else if (field === "lensRevealCue") {
+      if (!isLensRevealCue(value)) {
+        throw new DraftFieldError(`${field} must be one of ${LENS_REVEAL_CUES.join(", ")}, or omitted`);
+      }
+      board[field] = value;
+    } else if (value === "true" || value === true) board[field] = true;
     else if (value === "false" || value === false) board[field] = false;
     else throw new DraftFieldError(`${field} must be true, false, or omitted`);
     if (Object.keys(board).length) next.board = board;

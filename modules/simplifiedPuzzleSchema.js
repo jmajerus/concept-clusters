@@ -13,6 +13,7 @@
 import * as z from "zod/v4";
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import { canonicalBoardSizeFactor } from "./puzzleBoardSize.js";
+import { LENS_REVEAL_CUES, isLensRevealCue } from "./lensRevealCue.js";
 import { lessonCreditFieldDescription } from "./authoringSettings.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
@@ -378,6 +379,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
     starFreeStrip: z.boolean().optional(),
     bridgePreconnect: z.boolean().optional(),
     lensFlowTrace: z.boolean().optional(),
+    lensRevealCue: z.enum(LENS_REVEAL_CUES).optional(),
     sizeFactor: z.number().refine(value => {
       const factor = canonicalBoardSizeFactor(value);
       return factor != null;
@@ -612,6 +614,7 @@ function boardAdministration(board) {
     next.bridgePreconnect = board.bridgePreconnect;
   }
   if (board.lensFlowTrace === true) next.lensFlowTrace = true;
+  if (isLensRevealCue(board.lensRevealCue)) next.lensRevealCue = board.lensRevealCue;
   const sizeFactor = canonicalBoardSizeFactor(board.sizeFactor);
   if (sizeFactor != null && sizeFactor !== 1) next.sizeFactor = sizeFactor;
   return Object.keys(next).length ? next : undefined;

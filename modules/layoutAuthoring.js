@@ -1,6 +1,7 @@
 // Mode-neutral layout authoring UI: the ?author=layout panel (prepare,
 // local drafts, validated save) and the working-copy board experiments
-// (free-term strip and bridge pre-connect).
+// (free-term strip, bridge pre-connect, lens flow trace, lens reveal cue)
+// and the site settings card.
 //
 // Production and the authoring-server player both gate the actions with
 // ?admin so a reviewer at `/` sees the same chrome as production.
@@ -22,6 +23,14 @@ import {
 import { layoutIsFixed } from "./layoutHints.js";
 import { lensFlowTraceEnabled } from "./lensFlowTrace.js";
 import {
+  globalLensRevealCue,
+  lensRevealHoverPingEnabled,
+  LENS_REVEAL_CUE_LABELS,
+  LENS_REVEAL_CUES,
+  puzzleLensRevealCue,
+  resolveLensRevealCue
+} from "./lensRevealCue.js";
+import {
   boardSizeFactor,
   canonicalBoardSizeFactor
 } from "./puzzleBoardSize.js";
@@ -39,7 +48,10 @@ export function createLayoutAuthoringController({
   saveLayoutBoard = null,
   layoutPass = null,
   getDraftId = () => null,
-  previewBoardSize = null
+  previewBoardSize = null,
+  previewLensRevealCue = null,
+  getSiteSettings = () => ({}),
+  saveSiteSettings = null
 }) {
   const layoutAuthoringEl = document.getElementById("layout-authoring");
   const layoutAuthoringDraftStateEl = document.getElementById("layout-authoring-draft-state");
@@ -75,6 +87,16 @@ export function createLayoutAuthoringController({
   const boardSizeFactorReadout = document.getElementById("board-size-factor-readout");
   const layoutSideEl = document.querySelector(".layout-side");
   const lensFlowTraceBtn = document.getElementById("lens-flow-trace-btn");
+  const lensRevealControlsEl = document.getElementById("lens-reveal-controls");
+  const lensRevealCueSelect = document.getElementById("lens-reveal-cue-select");
+  const lensRevealTryCue = document.getElementById("lens-reveal-try-cue");
+  const lensRevealTryLens = document.getElementById("lens-reveal-try-lens");
+  const lensRevealTryBtn = document.getElementById("lens-reveal-try-btn");
+  const siteSettingsEl = document.getElementById("site-settings");
+  const siteLensRevealCue = document.getElementById("site-lens-reveal-cue");
+  const siteLensHoverPing = document.getElementById("site-lens-hover-ping");
+  const siteSettingsStatusEl = document.getElementById("site-settings-status");
+  const siteSettingsNote = siteSettingsStatusEl?.textContent.trim() || "";
   // Each side card reports its own saves; the note it opens with returns
   // once an error clears.
   const flagStatusEls = {
@@ -629,6 +651,7 @@ export function createLayoutAuthoringController({
     if (starFreeStripBtn) starFreeStripBtn.disabled = disabled;
     if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled || noCopy;
     if (lensFlowTraceBtn) lensFlowTraceBtn.disabled = disabled || noCopy;
+    if (lensRevealCueSelect) lensRevealCueSelect.disabled = disabled || noCopy;
     if (boardSizeFactorInput) boardSizeFactorInput.disabled = disabled;
   }
 
@@ -704,6 +727,7 @@ export function createLayoutAuthoringController({
       lensFlowTraceBtn.title = copyTitle("the lens flow trace");
     }
     syncBoardSizeControl();
+    syncLensRevealControls();
     if (!state?.puzzle) return;
     if (canWriteLayout && starFreeStripBtn) {
       const enabled = starFreeStripEnabled(state.puzzle, boardSize());
@@ -723,6 +747,97 @@ export function createLayoutAuthoringController({
         : "Pre-connect bridges";
     }
   }
+
+  // Lens reveal cue (modules/lensRevealCue.js). This puzzle's choice saves
+  // on the working copy; Try plays a cue on one lens's answers and saves
+  // nothing; the Site settings card saves for every puzzle. Assignment
+  // lenses have no reveal, so they are offered none of it.
+  const TRY_CUES = LENS_REVEAL_CUES.filter(cue => cue !== "none");
+  const cueOption = cue => [cue, LENS_REVEAL_CUE_LABELS[cue]];
+
+  function setOptions(select, entries, value) {
+    if (!select) return;
+    select.replaceChildren(...entries.map(([optionValue, label]) => new Option(label, optionValue)));
+    select.value = entries.some(([optionValue]) => optionValue === value) ? value : entries[0]?.[0] ?? "";
+  }
+
+  function siteSettingsCanWrite() {
+    return layoutAuthoringMode && typeof saveSiteSettings === "function";
+  }
+
+  function syncLensRevealControls() {
+    const state = getState();
+    const settings = getSiteSettings() || {};
+    const lenses = state?.puzzle?.lenses || [];
+    const offered = layoutCanWriteBoard() && lenses.length > 0 && state.lensMode !== "assignment";
+    if (lensRevealControlsEl) lensRevealControlsEl.hidden = !offered;
+    if (offered) {
+      const canWriteCopy = workingCopyCanWriteBoard();
+      setOptions(lensRevealCueSelect, [
+        ["", `Use site setting (${LENS_REVEAL_CUE_LABELS[globalLensRevealCue(settings)]})`],
+        ...LENS_REVEAL_CUES.map(cueOption)
+      ], puzzleLensRevealCue(state.puzzle) || "");
+      if (lensRevealCueSelect) {
+        lensRevealCueSelect.disabled = !canWriteCopy;
+        lensRevealCueSelect.title = canWriteCopy
+          ? "Changes play; saves on the open working copy"
+          : "Open a working copy to change this puzzle's lens reveal";
+      }
+      const effective = resolveLensRevealCue({ puzzle: state.puzzle, settings });
+      const tryCue = TRY_CUES.includes(lensRevealTryCue?.value) ? lensRevealTryCue.value
+        : effective === "none" ? "ripple" : effective;
+      setOptions(lensRevealTryCue, TRY_CUES.map(cueOption), tryCue);
+      setOptions(
+        lensRevealTryLens,
+        lenses.map((lens, index) => [String(index), String(index + 1)]),
+        lensRevealTryLens?.value || String(state.lensIndex || 0)
+      );
+    }
+    const siteOffered = siteSettingsCanWrite();
+    if (siteSettingsEl) siteSettingsEl.hidden = !siteOffered;
+    if (siteOffered) {
+      setOptions(siteLensRevealCue, LENS_REVEAL_CUES.map(cueOption), globalLensRevealCue(settings));
+      if (siteLensHoverPing) siteLensHoverPing.checked = lensRevealHoverPingEnabled(settings);
+    }
+  }
+
+  function setSiteSettingsStatus(text) {
+    if (!siteSettingsStatusEl) return;
+    siteSettingsStatusEl.textContent = text || siteSettingsNote;
+    if (text) siteSettingsStatusEl.dataset.tone = "error";
+    else delete siteSettingsStatusEl.dataset.tone;
+  }
+
+  async function persistSiteSettings(patch) {
+    if (!siteSettingsCanWrite()) return;
+    for (const control of [siteLensRevealCue, siteLensHoverPing]) {
+      if (control) control.disabled = true;
+    }
+    try {
+      await saveSiteSettings(patch);
+      setSiteSettingsStatus("");
+    } catch (error) {
+      setSiteSettingsStatus(error instanceof Error ? error.message : String(error));
+    } finally {
+      for (const control of [siteLensRevealCue, siteLensHoverPing]) {
+        if (control) control.disabled = false;
+      }
+      syncLensRevealControls();
+    }
+  }
+
+  lensRevealTryBtn?.addEventListener("click", () => {
+    previewLensRevealCue?.({
+      cue: lensRevealTryCue?.value,
+      lensIndex: Number(lensRevealTryLens?.value) || 0
+    });
+  });
+  siteLensRevealCue?.addEventListener("change", () => {
+    persistSiteSettings({ lensRevealCue: siteLensRevealCue.value });
+  });
+  siteLensHoverPing?.addEventListener("change", () => {
+    persistSiteSettings({ lensRevealHoverPing: siteLensHoverPing.checked });
+  });
 
   if (adminMode && !layoutAuthoringMode) {
     layoutAuthorBtn?.addEventListener("click", () => {
@@ -763,6 +878,19 @@ export function createLayoutAuthoringController({
       if (!state?.puzzle) return;
       const next = !lensFlowTraceEnabled(state.puzzle);
       persistBoardFlag("lensFlowTrace", next ? true : undefined, () => reloadBoard());
+    });
+    // Only a reveal reads the cue, so the board and the lens progress stay
+    // as they are.
+    lensRevealCueSelect?.addEventListener("change", async () => {
+      const state = getState();
+      if (!state?.puzzle) return;
+      const value = lensRevealCueSelect.value || undefined;
+      await persistBoardFlag("lensRevealCue", value, () => {
+        state.puzzle.board = boardWithFlag(state.puzzle, "lensRevealCue", value);
+        setBoardFlagStatus("lensRevealCue", "");
+        setBoardControlsDisabled(false);
+      });
+      syncLensRevealControls();
     });
 
     boardSizeFactorInput?.addEventListener("input", () => {

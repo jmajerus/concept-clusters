@@ -752,6 +752,21 @@ export async function run() {
     value: "true"
   }, "true");
   assert.deepEqual(traced.board, { lensFlowTrace: true });
+  const cued = applyDraftFieldValue(traced, {
+    section: "board",
+    field: "lensRevealCue",
+    value: "both"
+  }, "both");
+  assert.deepEqual(cued.board, { lensFlowTrace: true, lensRevealCue: "both" });
+  assert.throws(
+    () => applyDraftFieldValue(cued, { section: "board", field: "lensRevealCue", value: "true" }, "true"),
+    /lensRevealCue must be one of none, ripple, spotlight, both/
+  );
+  assert.deepEqual(applyDraftFieldValue(cued, {
+    section: "board",
+    field: "lensRevealCue",
+    value: ""
+  }, "").board, { lensFlowTrace: true }, "omitted returns the puzzle to the site setting");
   // Board size and the free-term strip are layout settings: this form no
   // longer writes them into the puzzle document.
   for (const field of ["starFreeStrip", "sizeFactor"]) {

@@ -23,7 +23,7 @@ export function lensFlowTraceEnabled(puzzle) {
 
 // The words the revealed lens answers with. A quiz's answer is its
 // correct option; the other options are comparison evidence, not flow.
-function lensAnswerWords(lens) {
+export function lensAnswerWords(lens) {
   if (lens?.options?.length) {
     return lens.options.find(option => option.correct)?.targets || [];
   }

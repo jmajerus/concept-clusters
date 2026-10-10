@@ -5,6 +5,7 @@
 import { isReservedCatalogueId } from "./contentDocumentSeed.js";
 import { puzzleBrowseFromDocument } from "./puzzleBrowse.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
+import { normalizeSiteSettings } from "./siteSettings.js";
 
 export const PLAY_CORPUS_META_NAME = "cc-play-corpus";
 export const PLAY_CORPUS_PATH = "/play/corpus.json";
@@ -76,7 +77,8 @@ export function assemblePlayCorpus({
   catalogueRows = [],
   categoryRows = [],
   draftRows = [],
-  puzzleOrder = []
+  puzzleOrder = [],
+  settings = {}
 } = {}) {
   const categories = categoriesRegistryFromDocuments(
     categoryRows.map(row => row?.document).filter(Boolean)
@@ -113,7 +115,8 @@ export function assemblePlayCorpus({
     puzzles,
     drafts,
     catalogues,
-    categories
+    categories,
+    settings: normalizeSiteSettings(settings)
   };
 }
 

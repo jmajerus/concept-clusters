@@ -8,6 +8,7 @@ import { createMemoryContentDocumentRepository } from "../modules/contentDocumen
 import { createLocalDraftReviewHandler } from "../modules/localDraftReview.js";
 import { createLocalPlayCorpusHandler } from "../modules/localPlayCorpus.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
+import { createMemorySiteSettingsStore } from "../modules/siteSettings.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
 export const name = "board administration: layout and working-copy board controls survive a focused save";
@@ -38,7 +39,13 @@ const puzzle = {
     { term: "link", clusters: ["alpha", "beta"], fact: "Connects the two." }
   ],
   lenses: [
-    { id: "alpha-lens", prompt: "Which term belongs to Alpha?", targets: ["a1"], explanation: "a1 is one of Alpha's." }
+    {
+      id: "alpha-lens",
+      prompt: "Which term belongs to Alpha?",
+      targets: ["a1"],
+      explanation: "a1 is one of Alpha's.",
+      reasons: { a1: "It is Alpha's first seed." }
+    }
   ]
 };
 
@@ -63,11 +70,13 @@ export async function run(page) {
   });
   const draftStore = createPuzzleDraftStore({ directory });
   await draftStore.createDraft({ draftId, document: puzzle });
+  const siteSettings = createMemorySiteSettingsStore();
   const handlePlay = createLocalPlayCorpusHandler({
     contentDocuments: createMemoryContentDocumentRepository(),
     contentService: { puzzles: [], catalogues: [], categories: {} },
     listDrafts: () => draftStore.listDrafts({ includeDocument: true }),
-    repositoryRoot: root
+    repositoryRoot: root,
+    siteSettings
   });
   const handleDrafts = createLocalDraftReviewHandler({
     draftStore,
@@ -220,6 +229,55 @@ export async function run(page) {
     const traced = await draftStore.getDraft(draftId);
     assert.deepEqual(traced.document.board, { ...savedBoard, lensFlowTrace: true });
     assert.equal(traced.layout.board.sizeFactor, 1, "experiments leave the layout's board settings alone");
+
+    // Lens reveal cue: this puzzle's choice saves on the working copy
+    // without rebuilding the board; the site setting saves for every puzzle
+    // and shows up as what "Use site setting" means.
+    assert.equal(await page.isVisible("#lens-reveal-controls"), true);
+    assert.equal(await page.isVisible("#site-settings"), true);
+    const selectedText = selector => page.$eval(selector, select => select.selectedOptions[0]?.textContent);
+    assert.equal(await selectedText("#lens-reveal-cue-select"), "Use site setting (None)");
+    await page.evaluate(() => { window.__sameBoard = true; });
+    await page.selectOption("#lens-reveal-cue-select", "spotlight");
+    await page.waitForFunction(() => window.CC?.state?.puzzle?.board?.lensRevealCue === "spotlight"
+      && !document.getElementById("lens-reveal-cue-select").disabled, null, { timeout: 15000 });
+    assert.equal(await page.evaluate(() => window.__sameBoard), true, "saving the cue does not reload");
+    const cued = await draftStore.getDraft(draftId);
+    assert.deepEqual(cued.document.board, { ...savedBoard, lensFlowTrace: true, lensRevealCue: "spotlight" });
+
+    await page.selectOption("#site-lens-reveal-cue", "ripple");
+    await page.waitForFunction(() => !document.getElementById("site-lens-reveal-cue").disabled
+      && document.getElementById("lens-reveal-cue-select").options[0]?.textContent === "Use site setting (Ripple)",
+    null, { timeout: 15000 });
+    await page.check("#site-lens-hover-ping");
+    await page.waitForFunction(() => !document.getElementById("site-lens-hover-ping").disabled, null, { timeout: 15000 });
+    assert.deepEqual(await siteSettings.read(), { lensRevealCue: "ripple", lensRevealHoverPing: true });
+
+    // Try draws a cue on the board; it keeps the last cue picked so a
+    // comparison is not reset by a save.
+    await page.selectOption("#lens-reveal-try-cue", "spotlight");
+    await page.click("#lens-reveal-try-btn");
+    await page.waitForSelector("#board g.lens-reveal-cue .lens-cue-shade", { state: "attached", timeout: 5000 });
+    await page.selectOption("#lens-reveal-try-cue", "ripple");
+    await page.click("#lens-reveal-try-btn");
+    await page.waitForSelector("#board g.lens-reveal-cue .lens-cue-ring", { state: "attached", timeout: 5000 });
+    assert.equal(await page.$("#board g.lens-reveal-cue .lens-cue-shade"), null, "a new Try replaces the last one");
+
+    // A reload reads the site setting from the play corpus.
+    await page.goto(boardURL, { waitUntil: "networkidle" });
+    await waitForBoard(page);
+    assert.equal(await page.inputValue("#site-lens-reveal-cue"), "ripple");
+    assert.equal(await page.isChecked("#site-lens-hover-ping"), true);
+    assert.equal(await page.inputValue("#lens-reveal-cue-select"), "spotlight");
+
+    // With the hover ping on, pointing at an answer named in the revealed
+    // explanation pings its pill.
+    await page.click("#layout-authoring-prepare");
+    await page.waitForFunction(() => window.CC?.state?.phase === "lens-selecting", null, { timeout: 15000 });
+    await page.click("#lens-check");
+    await page.waitForSelector("#lens-explanation.lens-hover-ping [data-lens-term='a1']", { timeout: 5000 });
+    await page.hover("#lens-explanation [data-lens-term='a1']");
+    await page.waitForSelector("#board g.lens-term-ping .lens-cue-ring", { state: "attached", timeout: 5000 });
   } finally {
     server.close();
     await rm(directory, { recursive: true, force: true });

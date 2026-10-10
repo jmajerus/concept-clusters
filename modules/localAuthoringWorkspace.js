@@ -5,6 +5,7 @@ import { createHttpD1Database } from "./httpD1Database.js";
 import { resolveLocalD1Config, resolveLocalDraftActor } from "./localD1Config.js";
 import { createRepositoryDraftStore } from "./repositoryDraftStore.js";
 import { createD1WikiLinkCheckStore } from "./wikiLinkCheckStore.js";
+import { createD1SiteSettingsStore } from "./siteSettings.js";
 import { applyAuthoredDomain } from "./authoringDomains.js";
 
 export const LOCAL_PUBLICATION_ACTOR = Object.freeze({ subject: "local" });
@@ -145,7 +146,8 @@ export async function resolveLocalAuthoringWorkspace({
     draftStore: createRepositoryDraftStore({ repository, actor: resolvedActor }),
     draftRepository: repository,
     contentDocuments: new D1ContentDocumentRepository(d1),
-    wikiLinkStore: createD1WikiLinkCheckStore(d1)
+    wikiLinkStore: createD1WikiLinkCheckStore(d1),
+    siteSettings: createD1SiteSettingsStore(d1)
   };
 }
 

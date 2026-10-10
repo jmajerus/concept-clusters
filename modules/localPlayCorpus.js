@@ -33,6 +33,11 @@ import {
   stampLayoutSaved
 } from "./layoutDocument.js";
 import { createLayoutPassJobs, spawnLayoutPass } from "./layoutPassJobs.js";
+import {
+  readSiteSettingsOrDefaults,
+  siteSettingsPatchErrors,
+  SITE_SETTINGS_PATH
+} from "./siteSettings.js";
 
 const LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/;
 const LAYOUT_PASS_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layouts-auto$/;
@@ -145,7 +150,9 @@ export function createLocalPlayCorpusHandler({
   listDrafts = null,
   repositoryRoot,
   indexHtml = null,
-  layoutPassJobs = null
+  layoutPassJobs = null,
+  siteSettings = null,
+  actor = null
 }) {
   if (!contentDocuments) throw new Error("contentDocuments is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -207,6 +214,47 @@ export function createLocalPlayCorpusHandler({
       }
       const base = `http://${req.headers.host || "127.0.0.1:8787"}`;
       json(res, jobs.start(id, { write: body.write === true, base }), 202);
+      return true;
+    }
+    // The layout view's Site settings card: GET reads every setting, PUT
+    // takes { settings } naming only the ones it changes (null restores a
+    // default) and answers with the result.
+    if (urlPath === SITE_SETTINGS_PATH) {
+      if (!requestIsSameOriginIfSpecified(req)) {
+        json(res, { error: "Site settings writes must be same-origin." }, 403);
+        return true;
+      }
+      if (!siteSettings) {
+        json(res, { error: "Site settings are not configured." }, 503);
+        return true;
+      }
+      if (req.method !== "GET" && req.method !== "HEAD" && req.method !== "PUT") return false;
+      try {
+        if (req.method !== "PUT") {
+          json(res, { settings: await siteSettings.read() });
+          return true;
+        }
+        let body;
+        try {
+          body = await readJsonBody(req);
+        } catch (error) {
+          json(res, { error: error instanceof Error ? error.message : String(error) }, 400);
+          return true;
+        }
+        const errors = siteSettingsPatchErrors(body?.settings);
+        if (errors.length) {
+          json(res, { error: "Site settings are invalid", errors }, 400);
+          return true;
+        }
+        json(res, { settings: await siteSettings.update(body.settings, { actor }) });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        json(res, {
+          error: /no such table/i.test(message)
+            ? "Site settings need D1 migration 0034 (site_settings)."
+            : message
+        }, 500);
+      }
       return true;
     }
     const layoutMatch = urlPath.match(LAYOUT_ROUTE);
@@ -374,18 +422,20 @@ export function createLocalPlayCorpusHandler({
     const puzzleMatch = urlPath.match(/^\/play\/puzzles\/([^/]+)\.json$/);
     if (urlPath === PLAY_CORPUS_PATH) {
       await ensureSeeded();
-      const [puzzleRows, catalogueRows, categoryRows, draftRows] = await Promise.all([
+      const [puzzleRows, catalogueRows, categoryRows, draftRows, settings] = await Promise.all([
         contentDocuments.listPublished({ kind: "puzzle" }),
         contentDocuments.listPublished({ kind: "catalogue" }),
         contentDocuments.listPublished({ kind: "category" }),
-        typeof listDrafts === "function" ? listDrafts() : []
+        typeof listDrafts === "function" ? listDrafts() : [],
+        readSiteSettingsOrDefaults(siteSettings)
       ]);
       json(res, assemblePlayCorpus({
         puzzleRows,
         catalogueRows,
         categoryRows,
         draftRows: Array.isArray(draftRows) ? draftRows : [],
-        puzzleOrder: puzzleIdsFromService(contentService)
+        puzzleOrder: puzzleIdsFromService(contentService),
+        settings
       }));
       return true;
     }
@@ -447,7 +497,8 @@ export function createDefaultLocalPlayCorpusHandler({
     const isIndex = urlPath === "/" || urlPath === "/index.html";
     const isPlay = urlPath === PLAY_CORPUS_PATH
       || /^\/play\/puzzles\/[^/]+\.json$/.test(urlPath);
-    const isLayout = LAYOUT_ROUTE.test(urlPath) || LAYOUT_PASS_ROUTE.test(urlPath);
+    const isLayout = LAYOUT_ROUTE.test(urlPath) || LAYOUT_PASS_ROUTE.test(urlPath) ||
+      urlPath === SITE_SETTINGS_PATH;
     if (!isIndex && !isPlay && !isLayout) return false;
     try {
       workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });
@@ -463,7 +514,9 @@ export function createDefaultLocalPlayCorpusHandler({
         listDrafts: resolved.draftStore
           ? () => resolved.draftStore.listDrafts({ includeDocument: true })
           : null,
-        repositoryRoot
+        repositoryRoot,
+        siteSettings: resolved.siteSettings || null,
+        actor: resolved.actor || null
       });
       return handleRequest(req, res);
     } catch (error) {
