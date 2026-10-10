@@ -106,8 +106,8 @@ behind the same admin login. Changes come from three sources:
   secret is set, to catch missed deliveries; 0 turns it off), and fetches
   only when a tip moved.
 
-`node tools/authoring-status.mjs --watch` holds that stream open from a
-workstation and prints one line of JSON per change for the
+`node tools/authoring-status.mjs --watch` listens on that stream from a
+workstation and prints one line of JSON per event for the
 [vscode-status-probe](https://github.com/jmajerus/vscode-status-probe)
 status-bar extension, which `.vscode/settings.json` configures
 (`statusProbe.items`, `watch: true`). Without `--watch` it prints one line
