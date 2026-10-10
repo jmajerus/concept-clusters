@@ -84,6 +84,17 @@ ref), and whether the checkout has moved since the restart. The section
 turns amber when the server is behind or the checkout has moved; pages such
 as the Puzzles list can show false results until it is redeployed.
 
+`/admin/server-revision.json` returns the same status as JSON, behind the
+same admin login. `node tools/authoring-status.mjs` reads it from a
+workstation and prints one line of JSON for the
+[vscode-status-probe](https://github.com/jmajerus/vscode-status-probe)
+status-bar extension, which `.vscode/settings.json` configures
+(`statusProbe.items`). The item reads `main`, a PR as `#267`, or a short
+branch name, with `↓N` (behind its origin branch), `✗main` (missing commits
+from main), or `⟳` (checkout moved since the restart) in amber; hover for
+detail, click for `/admin`. The script needs `AUTHORING_DRAFT_REVIEW_URL`
+and the server's `ADMIN_KEY` in the ignored `.env`.
+
 ## Files
 
 | File | Purpose |
@@ -172,6 +183,7 @@ anything ever imports from it directly):
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
 | `authoringServerRevision.js` | The branch and commit the LAN server started on, compared with the current checkout, `origin/main`, and the branch's origin ref, for the `/admin` Authoring server section | `githubProductionManifest.js` |
 | `authoringDeployPlan.js` | `npm run authoring:deploy` argument parsing, PR-to-branch resolution, and the remote script that redeploys or switches, fast-forwards, and refuses to restart on a branch that does not include `origin/main` | — |
+| `authoringStatusProbe.js` | Turns `/admin/server-revision.json` into the one-line `{ text, tooltip, level, open }` JSON that `tools/authoring-status.mjs` prints for the status-bar extension | — |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, fingerprints, errors, and in-memory reference implementation | `nonCryptographicHash.js` |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document, optional draft layout document, `expectedRevision` OCC, and a capped working-copy undo stack | D1 binding, `draftRepository.js`, `layoutDocument.js` |

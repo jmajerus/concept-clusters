@@ -564,6 +564,9 @@ async function readUrlEncoded(req) {
 }
 
 export const LINK_HEALTH_PATH = "/admin/link-health";
+// Machine-readable twin of the Authoring server section, for
+// tools/authoring-status.mjs. Behind the same admin login as /admin.
+export const SERVER_REVISION_PATH = "/admin/server-revision.json";
 
 export async function handleAuthoringAdminIndex(req, res, {
   freezePlan = emptyContentFreezePlan(),
@@ -587,6 +590,26 @@ export async function handleAuthoringAdminIndex(req, res, {
     const health = loadLinkHealth ? await loadLinkHealth() : null;
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
     res.end(req.method === "HEAD" ? "" : renderLinkHealthPage(health));
+    return true;
+  }
+  if (urlPath === SERVER_REVISION_PATH && loadServerRevision) {
+    if (req.method !== "GET") {
+      res.writeHead(405, { Allow: "GET", "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end("Method Not Allowed");
+      return true;
+    }
+    let status = null;
+    let error = null;
+    try {
+      status = await loadServerRevision();
+    } catch (caught) {
+      error = caught instanceof Error ? caught.message : String(caught);
+    }
+    res.writeHead(status ? 200 : 503, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify(status || { error: error || "This server is not running from a git checkout." }));
     return true;
   }
   if (!isAuthoringAdminIndexPath(urlPath)) return false;

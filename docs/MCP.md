@@ -119,6 +119,7 @@ the local or remote D1 database; they are independent of the stdio server.
 | `mcp` / `mcp:stdio` | Local stdio server (`tools/mcp-server.mjs`). Loads repo-root `.env`. |
 | `mcp:housekeep` | List stray `mcp-server.mjs` processes for this repo (dry run). |
 | `mcp:prune` | Stop extra stdio servers; keep the newest one. |
+| `mcp:restart` | Stop every stdio server started from this checkout, then print how each host (Claude Code, VS Code, Cursor, Codex) reconnects to a fresh one. The VS Code "MCP" status-bar button runs it. |
 | `mcp:probe-report` | Summarize captured `probe_mcp_client` call frames. |
 | `mcp:hosted:dev` | Hosted authoring Worker on localhost (`http://localhost:8788/mcp`). |
 | `authoring:d1:migrate:local` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |

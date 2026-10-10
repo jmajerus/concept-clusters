@@ -4,7 +4,12 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { renderServerRevisionSection } from "../modules/authoringAdminIndex.js";
+import {
+  handleAuthoringAdminIndex,
+  renderServerRevisionSection,
+  SERVER_REVISION_PATH
+} from "../modules/authoringAdminIndex.js";
+import { formatAuthoringStatusProbe } from "../modules/authoringStatusProbe.js";
 import {
   branchFromPullRequest,
   buildAuthoringDeployScript,
@@ -52,7 +57,56 @@ function deploy(checkout, branch) {
   return { ...result, restarted: existsSync(marker) };
 }
 
+async function requestJson(handlerOptions, method = "GET") {
+  const response = { status: 0, body: "" };
+  const res = {
+    writeHead(status) { response.status = status; },
+    end(body = "") { response.body = body; }
+  };
+  const handled = await handleAuthoringAdminIndex({ method, url: SERVER_REVISION_PATH }, res, handlerOptions);
+  return { handled, ...response };
+}
+
+function checkStatusProbe() {
+  const running = { branch: "main", commit: "f34040aabcdef", subject: "Merge #265" };
+  const adminUrl = "http://authoring.example:8787/admin";
+  const stale = formatAuthoringStatusProbe({
+    running, checkout: running, checkoutMoved: false,
+    baseRef: "origin/main", behindBase: 10, upstreamRef: null, behindUpstream: null, fetchError: null
+  }, { adminUrl });
+  assert.equal(stale.text, "$(server) main ↓10");
+  assert.equal(stale.level, "warn");
+  assert.equal(stale.open, adminUrl);
+  assert.match(stale.tooltip, /Behind origin\/main \| 10/);
+
+  const pr = { branch: "feature/authoring-deploy-guards", commit: "abc1234def", subject: "Guard" };
+  const fresh = formatAuthoringStatusProbe({
+    running: pr, checkout: pr, checkoutMoved: false,
+    baseRef: "origin/main", behindBase: 0,
+    upstreamRef: "origin/feature/authoring-deploy-guards", behindUpstream: 0, fetchError: null
+  }, { adminUrl, prNumber: 267 });
+  assert.equal(fresh.text, "$(server) #267");
+  assert.equal(fresh.level, "ok");
+
+  const drifted = formatAuthoringStatusProbe({
+    running: pr, checkout: { ...pr, commit: "9999999" }, checkoutMoved: true,
+    baseRef: "origin/main", behindBase: 2,
+    upstreamRef: "origin/feature/authoring-deploy-guards", behindUpstream: 1, fetchError: null
+  }, { adminUrl });
+  assert.equal(drifted.text, "$(server) authoring-deplo… ↓1 ✗main ⟳");
+  assert.equal(drifted.level, "warn");
+}
+
 export async function run() {
+  checkStatusProbe();
+  const ok = await requestJson({ loadServerRevision: async () => ({ running: { commit: "abc" } }) });
+  assert.equal(ok.handled, true);
+  assert.equal(ok.status, 200);
+  assert.equal(JSON.parse(ok.body).running.commit, "abc");
+  const missing = await requestJson({ loadServerRevision: async () => null });
+  assert.equal(missing.status, 503);
+  assert.equal((await requestJson({ loadServerRevision: async () => null }, "POST")).status, 405);
+
   assert.deepEqual(parseAuthoringDeployArgs([]).pr, null);
   assert.equal(parseAuthoringDeployArgs([]).main, false);
   assert.equal(parseAuthoringDeployArgs(["--main"]).main, true);

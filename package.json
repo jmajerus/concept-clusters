@@ -33,6 +33,7 @@
     "mcp:stdio": "node tools/mcp-server.mjs",
     "mcp:housekeep": "node tools/mcp-housekeep.mjs",
     "mcp:prune": "node tools/mcp-housekeep.mjs --kill --keep 1",
+    "mcp:restart": "node tools/mcp-housekeep.mjs --restart",
     "mcp:probe-report": "node tools/mcp-probe-report.mjs",
     "mcp:hosted:dev": "wrangler dev -c wrangler.authoring.jsonc",
     "mcp:hosted:deploy": "wrangler deploy -c wrangler.authoring.jsonc",

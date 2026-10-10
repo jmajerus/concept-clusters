@@ -2,6 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "MCP: restart stdio",
+      "type": "npm",
+      "script": "mcp:restart",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Dev",
       "type": "npm",
       "script": "dev",
@@ -47,6 +57,12 @@
           "endsPattern": "Concept Clusters ready at|Ready on"
         }
       }
+    },
+    {
+      "label": "Dev: stop",
+      "type": "npm",
+      "script": "dev:stop",
+      "problemMatcher": []
     },
     {
       "label": "Deploy game",
