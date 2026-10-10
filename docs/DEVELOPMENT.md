@@ -63,7 +63,9 @@ edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 
 A persistent LAN checkout running this server (e.g. as a systemd service)
 doubles as a real-environment test bed for a pull request before merging
-it: `git pull` the branch there and exercise it against the actual
+it: deploy the branch there (`npm run authoring:deploy -- --pr <number>`,
+or plain `npm run authoring:deploy` for `main`; see [MCP.md](MCP.md)) and
+exercise it against the actual
 production GitHub token and D1 database, not a fresh sandbox. That
 matters specifically because it's *not* a fresh sandbox -- a CI runner
 starts from a pristine checkout every time, so it structurally cannot
@@ -73,6 +75,14 @@ there a while, whatever state a prior run left behind. The freeze
 self-sync work in PR #182 is a concrete example: a checkout-ownership and
 git-reflog bug only existed on the LAN box's actual, previously-lived-in
 checkout, and a clean CI checkout would have passed straight through it.
+
+Node does not reload modules that are already imported, so that server
+serves the commit it started on, whatever is checked out since. The
+"Authoring server" section at the top of `/admin` shows that running branch
+and commit, how far it is behind `origin/main` (and the branch's own origin
+ref), and whether the checkout has moved since the restart. The section
+turns amber when the server is behind or the checkout has moved; pages such
+as the Puzzles list can show false results until it is redeployed.
 
 ## Files
 
@@ -134,7 +144,7 @@ anything ever imports from it directly):
 | `localD1Config.js` | Account, database, token, and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
 | `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
-| `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel) and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
+| `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus the LAN server's running revision, LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel), and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
 | `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Modified = changed since the last Freeze, Cued = cued for the next one, Published only = no private draft), Publish (stays on editor), Publish & Cue, Revert when the working copy differs, Cue/Hold (Cue returns to list), local Open board / Play, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, Publish & Cue, Cue/Hold, withdraw) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` and puzzle layout persistence | `draftRepository.js`, `layoutDocument.js` |
@@ -160,6 +170,8 @@ anything ever imports from it directly):
 | `localDevHousekeep.js` | Per-repository/per-port dev-server leases, exact PID/start-time/argv/cwd/command ownership checks, stale-lease pruning, host-independent reclamation, and graceful shutdown with verified parent/worker escalation; foreign listeners are never stopped | `authoringWorkspacePaths.js`, OS process/socket APIs |
 | `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the GitHub production snapshot of `puzzles/manifest.js` | Node filesystem APIs |
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
+| `authoringServerRevision.js` | The branch and commit the LAN server started on, compared with the current checkout, `origin/main`, and the branch's origin ref, for the `/admin` Authoring server section | `githubProductionManifest.js` |
+| `authoringDeployPlan.js` | `npm run authoring:deploy` argument parsing, PR-to-branch resolution, and the remote script that switches, fast-forwards, and refuses to restart on a branch that does not include `origin/main` | — |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, fingerprints, errors, and in-memory reference implementation | `nonCryptographicHash.js` |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document, optional draft layout document, `expectedRevision` OCC, and a capped working-copy undo stack | D1 binding, `draftRepository.js`, `layoutDocument.js` |

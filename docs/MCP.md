@@ -124,7 +124,7 @@ the local or remote D1 database; they are independent of the stdio server.
 | `authoring:d1:migrate:local` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
 | `authoring:d1:migrate:remote` | D1 migrations on the remote authoring database. |
 | `mcp:hosted:deploy` | Deploy the hosted Worker. |
-| `authoring:deploy` | From this machine, SSH to the LAN authoring server, restore `puzzles/`, `catalogues/`, and `content/` to `HEAD` (a Freeze checkout of those directories stages them and would block the pull), fast-forward pull `/opt/concept-clusters`, then restart `concept-clusters-authoring.service`. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. |
+| `authoring:deploy` | From this machine, SSH to the LAN authoring server and switch `/opt/concept-clusters` to `main` (no arguments) or an open PR's branch (`-- --pr <number>`, resolved with `gh`) in one step: fetch, restore `puzzles/`, `catalogues/`, and `content/` to `HEAD` (a Freeze checkout of those directories stages them and would block the switch), check out the branch, fast-forward it to origin, then restart `concept-clusters-authoring.service`. It refuses before restarting when the branch does not include `origin/main`, when the server's local branch has commits not on origin, or when HEAD does not end up at origin. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. `/admin` on the server shows the branch and commit it is running and how far that is behind GitHub. |
 | `mcp:hosted:release` | Remote D1 migration, then hosted Worker deploy. |
 | `mcp:hosted:types` | Regenerate Worker TypeScript types. |
 

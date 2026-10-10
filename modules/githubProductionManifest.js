@@ -95,17 +95,18 @@ function productionRef(env = process.env) {
   return `origin/${branch}`;
 }
 
-function fetchOrigin(repositoryRoot, runGit) {
+/** Returns null on success, or the fetch error message. */
+export function fetchOrigin(repositoryRoot, runGit = git, { timeout = 120000 } = {}) {
   try {
     runGit(repositoryRoot, ["fetch", "origin", "--no-write-fetch-head"], {
-      timeout: 120000
+      timeout
     });
     return null;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (!/unknown option|no-write-fetch-head/i.test(message)) return message;
     try {
-      runGit(repositoryRoot, ["fetch", "origin"], { timeout: 120000 });
+      runGit(repositoryRoot, ["fetch", "origin"], { timeout });
       return null;
     } catch (retry) {
       return retry instanceof Error ? retry.message : String(retry);

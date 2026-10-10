@@ -9,6 +9,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
 import { loadWikiLinkHealth } from "./wikiLinkCheck.js";
+import { loadServerRevisionStatus, readGitRevision } from "./authoringServerRevision.js";
 import {
   emptyContentFreezePlan,
   gitIdsFromContentService,
@@ -153,9 +154,15 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
     repositoryRoot,
     contentService
   });
+  // The revision this process loaded; a later checkout does not change it.
+  const runningRevision = readGitRevision({ repositoryRoot });
   return async function handleLocalDevRequest(req, res) {
     const admin = await handleAuthoringAdminIndex(req, res, {
       canApplyFreeze: true,
+      loadServerRevision: async () => loadServerRevisionStatus({
+        repositoryRoot,
+        running: runningRevision
+      }),
       loadLinkHealth: async () => {
         const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
         if (!resolved.contentDocuments || !resolved.wikiLinkStore) return null;

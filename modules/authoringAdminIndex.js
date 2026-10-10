@@ -23,6 +23,11 @@ const PAGE_STYLE = `
   a { color: #2563eb; }
   table { border-collapse: collapse; width: 100%; }
   th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  .server-revision { margin: 20px 0; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  .server-revision h2 { margin: 0 0 4px; font-size: 18px; }
+  .server-revision p { margin: 4px 0; }
+  .server-revision-stale { border-color: #f59e0b; background: #fffbeb; }
+  .server-revision-stale strong { color: #b45309; }
   .freeze, .github-prod { margin: 28px 0; padding: 16px; border: 1px solid #dbeafe; background: #f8fbff; border-radius: 8px; }
   .freeze h2, .github-prod h2 { margin: 0 0 8px; font-size: 18px; }
   .github-prod .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
@@ -129,6 +134,57 @@ export function renderLinkHealthPage(health) {
     better link. Each puzzle link opens its draft page, where the same findings appear as flags.</p>
     ${groups || "<p class=\"meta\">Every checked link resolves to its own article.</p>"}`;
   return freezeResultShell("Wikipedia link health", body);
+}
+
+function shortCommit(commit) {
+  return escapeHtml(String(commit || "").slice(0, 7));
+}
+
+function commitCount(count) {
+  return `${count} commit${count === 1 ? "" : "s"}`;
+}
+
+/** Status from authoringServerRevision.js loadServerRevisionStatus; empty when absent. */
+export function renderServerRevisionSection(status) {
+  if (!status?.running) return "";
+  const { running, checkout } = status;
+  const problems = [];
+  if (status.behindBase > 0) {
+    problems.push(running.branch === status.baseRef.replace(/^origin\//, "")
+      ? `${commitCount(status.behindBase)} behind <code>${escapeHtml(status.baseRef)}</code>`
+      : `missing ${commitCount(status.behindBase)} from <code>${escapeHtml(status.baseRef)}</code>`);
+  }
+  if (status.behindUpstream > 0) {
+    problems.push(`${commitCount(status.behindUpstream)} behind <code>${escapeHtml(status.upstreamRef)}</code>`);
+  }
+  if (status.checkoutMoved) {
+    problems.push(`the checkout has moved to <code>${escapeHtml(checkout.branch || "detached HEAD")}</code>
+      @ <code>${shortCommit(checkout.commit)}</code> since this server started`);
+  }
+  const comparison = status.behindBase == null
+    ? `<code>${escapeHtml(status.baseRef)}</code> is not available in this checkout`
+    : problems.length
+      ? `<strong>${problems.join("; ")}</strong>`
+      : `Up to date with <code>${escapeHtml(status.upstreamRef || status.baseRef)}</code>${
+        status.upstreamRef ? ` and includes <code>${escapeHtml(status.baseRef)}</code>` : ""}`;
+  const fix = problems.length
+    ? `<p class="meta">Pages may show stale results (for example false layout markers on Puzzles).
+      Redeploy from a workstation: <code>npm run authoring:deploy</code> for
+      <code>${escapeHtml(status.baseRef.replace(/^origin\//, ""))}</code>, or
+      <code>npm run authoring:deploy -- --pr &lt;number&gt;</code>.</p>`
+    : "";
+  const fetchNote = status.fetchError
+    ? `<p class="meta">Could not fetch origin (${escapeHtml(status.fetchError)}); compared with the last fetched refs.</p>`
+    : "";
+  return `<section class="server-revision${problems.length ? " server-revision-stale" : ""}">
+    <h2>Authoring server</h2>
+    <p>Running <code>${escapeHtml(running.branch || "detached HEAD")}</code>
+      @ <code>${shortCommit(running.commit)}</code>
+      <span class="meta">${escapeHtml(running.subject)}</span></p>
+    <p class="meta">${comparison}.</p>
+    ${fix}
+    ${fetchNote}
+  </section>`;
 }
 
 function freezePuzzleItem(id, detail) {
@@ -345,7 +401,8 @@ function renderGithubProductionSection({
  *   canCueAllPublished?: boolean,
  *   githubProduction?: object | null,
  *   canRefreshGithubProduction?: boolean,
- *   linkHealth?: Awaited<ReturnType<import("./wikiLinkCheck.js").loadWikiLinkHealth>> | null
+ *   linkHealth?: Awaited<ReturnType<import("./wikiLinkCheck.js").loadWikiLinkHealth>> | null,
+ *   serverRevision?: ReturnType<import("./authoringServerRevision.js").loadServerRevisionStatus>
  * }} [options]
  */
 export function renderAdminIndexPage({
@@ -354,12 +411,14 @@ export function renderAdminIndexPage({
   canCueAllPublished = canApplyFreeze,
   githubProduction = null,
   canRefreshGithubProduction = canApplyFreeze,
-  linkHealth = null
+  linkHealth = null,
+  serverRevision = null
 } = {}) {
   const body = `<h1>Admin</h1>
     <p class="meta">Authoring documents in D1. Publish writes the shared live
     row. Freeze validates cued snapshots and creates one release PR.
     ${authoringAdminNav()}</p>
+    ${renderServerRevisionSection(serverRevision)}
     ${renderFreezeSection({ freezePlan, canApplyFreeze, canCueAllPublished })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
     ${renderLinkHealthSummary(linkHealth)}
@@ -515,7 +574,8 @@ export async function handleAuthoringAdminIndex(req, res, {
   loadGithubProduction = null,
   refreshGithubProduction = null,
   cueAllPublished = null,
-  loadLinkHealth = null
+  loadLinkHealth = null,
+  loadServerRevision = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
   if (urlPath === LINK_HEALTH_PATH) {
@@ -677,6 +737,14 @@ export async function handleAuthoringAdminIndex(req, res, {
       snapshot = null;
     }
   }
+  let serverRevision = null;
+  if (loadServerRevision && req.method !== "HEAD") {
+    try {
+      serverRevision = await loadServerRevision();
+    } catch {
+      serverRevision = null;
+    }
+  }
   res.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store"
@@ -687,7 +755,8 @@ export async function handleAuthoringAdminIndex(req, res, {
     canCueAllPublished: typeof cueAllPublished === "function",
     githubProduction: snapshot,
     canRefreshGithubProduction: typeof refreshGithubProduction === "function",
-    linkHealth
+    linkHealth,
+    serverRevision
   }));
   return true;
 }
