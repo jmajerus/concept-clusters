@@ -43,8 +43,8 @@ import {
 import { pillWidth, bridgePoints, compareWordOrder } from "./puzzleGraph.js";
 import {
   chooseMemberOrder,
-  circleRadius,
   compactMemberOrder,
+  pillAnchor,
   stackFitRadius,
   stackRows
 } from "./circleMemberOrder.js";
@@ -162,18 +162,13 @@ export function createSetRenderer({
     // below), so their text width must NOT count toward the circle's
     // size, or a puzzle with long cluster names gets needlessly
     // oversized circles that then can't help but overlap.
-    // Each circle fits its compact stack (widest terms mid-column), widened
-    // only as far as letting any ideal-line target take an end row needs.
+    // Each circle fits its compact stack (widest terms mid-column). Ideal
+    // lines leave a target from a side end when it is not in an end row
+    // (pillAnchor), so no circle is widened to seat targets there.
     // Fixed for the game, so re-stacking never resizes a circle.
     const metrics = stackMetrics(puzzle);
     const baseOrders = puzzle.clusters.map(c => compactMemberOrder(c.terms, pillWidth, compareWordOrder));
-    const clusterBoxes = puzzle.clusters.map((c, ci) => ({
-      r: circleRadius(
-        baseOrders[ci],
-        c.terms.filter(term => mayCarryIdealTag(puzzle, term)),
-        metrics
-      )
-    }));
+    const clusterBoxes = baseOrders.map(order => ({ r: stackFitRadius(order, metrics) }));
 
     // A simple ring is enough of a starting point — no overlap solving
     // needed here anymore, since the live simulation (charge + collide)
@@ -420,22 +415,31 @@ export function createSetRenderer({
     };
   };
 
-  // Where a bridge's arm to circle `ci` starts, as drawn: at the edge of
-  // its ideal target's pill when the link is ideal (a canonical arm leaves
-  // the circle through that term), otherwise on the circle's boundary
-  // facing the bridge. Shared by drawing and scoring, so what is measured
-  // is what is on screen.
-  function armStart(point, center, r, link, targetPoint) {
+  // Where a bridge's arm to circle `ci` starts, as drawn: at its ideal
+  // target's anchor when the link is ideal (a side end, or the top or
+  // bottom centre of a target in an end row; see pillAnchor), otherwise on
+  // the circle's boundary facing the bridge. Shared by drawing, scoring
+  // and member ordering, so what is measured is what is on screen.
+  function armStart(point, center, r, link, targetPoint, rows = {}) {
     const dx = point.x - center.x, dy = point.y - center.y;
     const length = Math.hypot(dx, dy) || 1;
     if (!link?.ideal || !targetPoint) {
       return { x: center.x + (dx / length) * r, y: center.y + (dy / length) * r };
     }
-    const tdx = point.x - targetPoint.x, tdy = point.y - targetPoint.y;
-    const tLength = Math.hypot(tdx, tdy) || 1;
-    const ux = tdx / tLength, uy = tdy / tLength;
-    const edge = rectEdgeDist(ux, uy, link.target.w / 2, PILL_H_CONST / 2);
-    return { x: targetPoint.x + ux * edge, y: targetPoint.y + uy * edge };
+    return pillAnchor(targetPoint, point, {
+      halfW: link.target.w / 2,
+      halfH: PILL_H_CONST / 2,
+      top: rows.top === true,
+      bottom: rows.bottom === true,
+      below: mayCarryIdealTag(getState().puzzle, link.target.word) ? TAG_H : 0
+    });
+  }
+
+  // Whether a docked term holds the top or bottom row of its circle's
+  // current stacking order, where a line may leave it vertically.
+  function endRowsOf(state, ci, term) {
+    const order = memberOrderFor(state, ci);
+    return { top: order[0] === term, bottom: order[order.length - 1] === term };
   }
 
   // Each circle's member row offsets in its current stacking order, looked
@@ -462,13 +466,15 @@ export function createSetRenderer({
       const circle = circles[ci];
       const link = node && state.links.find(l => l.source === node && l.clusterIndex === ci);
       let targetPoint = null;
+      let rows = {};
       if (link?.ideal) {
         const offset = link.target.gs?.length === 1 ? rowOffsets(ci).get(link.target.word) : null;
         targetPoint = offset != null
           ? { x: circle.x, y: circle.y + offset }
           : pillTarget(link.target);
+        if (offset != null) rows = endRowsOf(state, ci, link.target.word);
       }
-      const start = armStart(point, circle, clusterBoxes[ci].r, link, targetPoint);
+      const start = armStart(point, circle, clusterBoxes[ci].r, link, targetPoint, rows);
       return { bridge: bridge.term, side: ci, x1: start.x, y1: start.y, x2: point.x, y2: point.y };
     });
   }
@@ -929,6 +935,35 @@ export function createSetRenderer({
     return state.setLayout.memberOrder?.get(ci) || state.setLayout.baseOrders[ci];
   }
 
+  // A saved layout's stacking orders (layout.memberOrders), restored where
+  // each still holds exactly this circle's terms and fits the circle, and
+  // then kept: refreshMemberOrder leaves them alone until a drag or a new
+  // layout unlocks them. Returns whether any order was restored.
+  function restoreMemberOrders(layout) {
+    const state = getState();
+    const { puzzle, setLayout } = state;
+    const saved = layout?.memberOrders;
+    if (!setLayout || !saved || typeof saved !== "object") return false;
+    const metrics = stackMetrics(puzzle);
+    const orders = new Map();
+    puzzle.clusters.forEach((cluster, ci) => {
+      const order = saved[`cluster:${ci}`];
+      if (!Array.isArray(order) || order.length !== cluster.terms.length) return;
+      if (!cluster.terms.every(term => order.includes(term))) return;
+      if (stackFitRadius(order, metrics) > setLayout.clusterBoxes[ci].r + 0.5) return;
+      orders.set(ci, [...order]);
+    });
+    if (!orders.size) return false;
+    setLayout.memberOrder = orders;
+    setLayout.memberOrderLocked = true;
+    return true;
+  }
+
+  function unlockMemberOrder() {
+    const setLayout = getState()?.setLayout;
+    if (setLayout) setLayout.memberOrderLocked = false;
+  }
+
   // Re-stacks each circle so the terms its connected ideal lines end on
   // sit in the rows nearest where those lines enter, minimising how far
   // each line runs under other pills. Run on discrete events (repaint,
@@ -937,6 +972,9 @@ export function createSetRenderer({
     const state = getState();
     const { puzzle, setLayout } = state;
     if (!setLayout) return false;
+    // A restored fixed layout keeps its saved rows until something on the
+    // board moves (unlockMemberOrder).
+    if (setLayout.memberOrderLocked) return false;
     setLayout.memberOrder = setLayout.memberOrder || new Map();
     let changed = false;
     puzzle.clusters.forEach((cluster, ci) => {
@@ -963,6 +1001,7 @@ export function createSetRenderer({
         rowOffsets: order => memberRowOffsets(puzzle, order),
         pillWidth,
         pillHeight: PILL_H_CONST,
+        captionDepth: TAG_H,
         fits: order => stackFitRadius(order, metrics) <= r + 0.5
       });
       if (next !== current) {
@@ -1089,7 +1128,9 @@ export function createSetRenderer({
       const dx = p.x - c.x, dy = p.y - c.y, len = Math.hypot(dx, dy) || 1;
       const ux = dx / len, uy = dy / len;
       const link = state.links.find(l => l.source === n && l.clusterIndex === ci);
-      const start = armStart(p, c, r, link, link?.ideal ? pillTarget(link.target) : null);
+      const docked = link?.ideal && link.target.gs?.length === 1;
+      const start = armStart(p, c, r, link, link?.ideal ? pillTarget(link.target) : null,
+        docked ? endRowsOf(state, ci, link.target.word) : {});
       const x1 = start.x, y1 = start.y;
       // A partial (dashed) segment stops at the pill's own rect boundary
       // instead of continuing to its center — otherwise the pill (drawn
@@ -1403,6 +1444,7 @@ export function createSetRenderer({
         // placement convention this mode has always had for drags),
         // rather than releasing it back to the simulation the way
         // Graph mode's own drag does for individual terms.
+        unlockMemberOrder();
         if (refreshMemberOrder()) repositionAll();
         if (authoring) state.onAuthorLayoutChanged?.("drag");
         else {
@@ -1531,6 +1573,7 @@ export function createSetRenderer({
           handleTap(d);
           setTimeout(() => el.focus(), 0);
         } else {
+          unlockMemberOrder();
           if (refreshMemberOrder()) repositionAll();
           if (authoring) state.onAuthorLayoutChanged?.("drag");
           else {
@@ -1726,6 +1769,11 @@ export function createSetRenderer({
         clusterTerms: Object.fromEntries(
           puzzle.clusters.map((cluster, ci) => [`cluster:${ci}`, [...cluster.terms]])
         ),
+        // Each circle's stacking order as shown, so a fixed layout restores
+        // the rows exactly rather than re-deriving them.
+        memberOrders: Object.fromEntries(
+          puzzle.clusters.map((_, ci) => [`cluster:${ci}`, [...memberOrderFor(state, ci)]])
+        ),
         metrics: circleLayoutMetrics(),
         solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null,
         // See graph capture: a solved-board snapshot is reused on the
@@ -1769,7 +1817,11 @@ export function createSetRenderer({
       state.solutionLayout = state.made === state.need && layout.solutionLayout === "pretty"
         ? "pretty"
         : null;
-      refreshMemberOrder();
+      // The arrangement's own rows when it carries them, else derived.
+      if (!restoreMemberOrders(layout)) {
+        unlockMemberOrder();
+        refreshMemberOrder();
+      }
       repositionAll();
       updateSolutionHint();
       return { valid: true, errors: [] };
@@ -1853,7 +1905,11 @@ export function createSetRenderer({
             node.vy = 0;
           });
           state.solutionLayout = "pretty";
-          refreshMemberOrder();
+          // A fixed layout shows the rows it was saved with.
+          if (!restoreMemberOrders(curatedLayout)) {
+            unlockMemberOrder();
+            refreshMemberOrder();
+          }
           repositionAll();
           await afterNextPaint();
           svg.classed("circle-polishing", false);
@@ -1919,6 +1975,8 @@ export function createSetRenderer({
           node.vy = 0;
         });
         state.setLayout.stripHeight = STRIP_MARGIN;
+        // A new arrangement chooses its own rows.
+        unlockMemberOrder();
         refreshMemberOrder();
         repositionAll();
         // Keep transform transitions disabled until the browser has
@@ -2105,6 +2163,7 @@ export function createSetRenderer({
           node.y = point.y;
           if (node.fx != null) { node.fx = node.x; node.fy = node.y; }
         });
+        unlockMemberOrder();
         refreshMemberOrder();
         repositionAll();
         await afterNextPaint();

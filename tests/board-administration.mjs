@@ -220,6 +220,36 @@ export async function run(page) {
     const traced = await draftStore.getDraft(draftId);
     assert.deepEqual(traced.document.board, { ...savedBoard, lensFlowTrace: true });
     assert.equal(traced.layout.board.sizeFactor, 1, "experiments leave the layout's board settings alone");
+
+    // A resize keeps a prepared arrangement and re-centres it: every pill
+    // moves by half the change in size, adding margin evenly all round.
+    await page.goto(boardURL, { waitUntil: "networkidle" });
+    await waitForBoard(page);
+    await page.click("#layout-authoring-prepare");
+    await page.waitForFunction(() => window.CC?.state?.solutionLayout === "pretty", null, { timeout: 15000 });
+    const before = await page.evaluate(() => {
+      const box = document.getElementById("board").viewBox.baseVal;
+      const node = window.CC.state.nodes[0];
+      return { width: box.width, height: box.height, word: node.word, x: node.x, y: node.y };
+    });
+    await page.evaluate(() => {
+      const input = document.getElementById("board-size-factor-input");
+      input.value = String(Number(input.value) + 0.1);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await page.waitForFunction(() =>
+      /re-centred/.test(document.getElementById("layout-authoring-status")?.textContent || ""),
+    null, { timeout: 15000 });
+    const after = await page.evaluate(word => {
+      const box = document.getElementById("board").viewBox.baseVal;
+      const node = window.CC.state.nodes.find(candidate => candidate.word === word);
+      return { width: box.width, height: box.height, x: node.x, y: node.y };
+    }, before.word);
+    assert.ok(after.width > before.width, "the board grew");
+    assert.ok(Math.abs((after.x - before.x) - (after.width - before.width) / 2) < 0.5, "moved by half the width change");
+    assert.ok(Math.abs((after.y - before.y) - (after.height - before.height) / 2) < 0.5, "moved by half the height change");
+    assert.equal(await page.evaluate(() => window.CC.state.solutionLayout), "pretty", "no new layout was asked for");
   } finally {
     server.close();
     await rm(directory, { recursive: true, force: true });

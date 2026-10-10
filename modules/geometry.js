@@ -51,7 +51,7 @@ export function segmentsIntersect(a, b, epsilon = 0.001) {
 // Liang-Barsky segment/rectangle clipping. Kept private so both the
 // boolean scorer and Star's diagnostic crossing-point calculation use
 // exactly the same boundary semantics.
-function clipSegmentToRect(segment, rect, pad) {
+export function clipSegmentToRect(segment, rect, pad = 0) {
   const left = rect.left - pad, right = rect.right + pad;
   const top = rect.top - pad, bottom = rect.bottom + pad;
   const dx = segment.x2 - segment.x1, dy = segment.y2 - segment.y1;

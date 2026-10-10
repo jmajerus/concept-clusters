@@ -43,6 +43,33 @@ async function authoringMode(page, baseURL, mode) {
   // Circle names each line obstruction for the panel; a saved layout keeps
   // only the counts.
   if (mode === "sets") {
+    // A Circle layout carries each circle's stacking order. Applying it
+    // restores those rows exactly, and a fixed saved layout loads with them,
+    // rather than re-deriving the order from the lines.
+    assert.ok(layout.memberOrders?.["cluster:0"]?.length, "capture records stacking orders");
+    const reversed = [...layout.memberOrders["cluster:0"]].reverse();
+    const applied = await page.evaluate(order => {
+      const state = window.CC.state;
+      const arrangement = state.layoutAdapter.capture();
+      arrangement.memberOrders["cluster:0"] = order;
+      state.layoutAdapter.apply(arrangement);
+      state.paint();
+      return state.setLayout.memberOrder.get(0);
+    }, reversed);
+    assert.deepEqual(applied, reversed, "applied rows are kept");
+    await page.evaluate(order => {
+      const state = window.CC.state;
+      const saved = state.layoutAdapter.capture({ purpose: "authoring" });
+      saved.memberOrders["cluster:0"] = order;
+      saved.fixed = true;
+      state.puzzle.layout = { schemaVersion: 1, modes: { sets: saved } };
+    }, reversed);
+    await page.click("#reset");
+    await page.waitForFunction(() =>
+      window.CC.state.solutionLayout === "pretty" && window.CC.state.layoutSource?.kind === "fixed",
+    null, { timeout: 15000 });
+    assert.deepEqual(await page.evaluate(() => window.CC.state.setLayout.memberOrder.get(0)), reversed,
+      "a fixed saved layout loads with its rows");
     const named = await page.evaluate(() => window.CC.state.layoutAdapter.metrics().obstructions);
     assert.ok(Array.isArray(named), "Circle metrics name their obstructions");
     assert.equal(named.length, layout.metrics.lineHeadingIntersections + layout.metrics.lineCircleIntersections);
@@ -181,8 +208,10 @@ function idealLinesUnderPills(page) {
 }
 
 // Circle stacks follow connected ideal lines only, and re-stack after a
-// bridge drag: a bridge dragged straight above (or below) its circle pulls
-// its target term to the top (or bottom) row.
+// bridge drag. A bridge dragged straight above (or below) its circle pulls
+// its target term to the top (or bottom) row when the term fits there;
+// otherwise the line leaves from the term's side end. Either way no ideal
+// line runs under another pill.
 async function circleMemberOrder(page) {
   assert.equal(await idealLinesUnderPills(page), 0, "an ideal line passes under a member pill");
   const arm = await page.evaluate(() => {
@@ -223,10 +252,30 @@ async function circleMemberOrder(page) {
   await page.mouse.down();
   await page.mouse.move(arm.to.x, arm.to.y, { steps: 12 });
   await page.mouse.up();
-  await page.waitForFunction(({ ci, target, above }) => {
-    const order = window.CC.state.setLayout.memberOrder?.get(ci);
-    return order && order[above ? 0 : order.length - 1] === target;
-  }, arm, { timeout: 5000 });
+  await page.waitForTimeout(600);
+  const placed = await page.evaluate(({ ci, target }) => {
+    const order = window.CC.state.setLayout.memberOrder?.get(ci) || window.CC.state.setLayout.baseOrders[ci];
+    return { index: order.indexOf(target), last: order.length - 1 };
+  }, arm);
+  const endRow = arm.above ? 0 : placed.last;
+  const oppositeRow = arm.above ? placed.last : 0;
+  assert.notEqual(placed.index, oppositeRow, "target moved to the end row facing away from its bridge");
+  if (placed.index !== endRow) {
+    // Left in a middle row: its line must leave from a side end of its pill.
+    const start = await page.evaluate(({ bridge, target, ci }) => {
+      const line = [...document.querySelectorAll("line.bridge-link")]
+        .find(element => element.parentNode.__data__?.term === bridge && element.__data__.side === ci);
+      const pill = [...document.querySelectorAll(".set-pills g.node")]
+        .find(element => element.__data__.word === target);
+      // The pill group is translated to the pill's centre in board units.
+      const [cx, cy] = pill.getAttribute("transform").match(/-?[\d.]+/g).map(Number);
+      const halfW = pill.__data__.w / 2;
+      return { x: Number(line.getAttribute("x1")), y: Number(line.getAttribute("y1")), left: cx - halfW, right: cx + halfW, mid: cy };
+    }, arm);
+    assert.ok(Math.min(Math.abs(start.x - start.left), Math.abs(start.x - start.right)) < 2 && Math.abs(start.y - start.mid) < 2,
+      `a middle-row target's line leaves from a side end: ${JSON.stringify(start)}`);
+  }
+  assert.equal(await idealLinesUnderPills(page), 0, "after the drag an ideal line passes under a member pill");
 }
 
 // A saved Graph or Circle layout steers the solve unless it is fixed and

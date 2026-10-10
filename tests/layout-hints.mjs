@@ -16,6 +16,7 @@ import {
 } from "../modules/layoutHints.js";
 import { validatePublishedPuzzleLayout } from "../modules/layoutPublication.js";
 import { layoutAttention, layoutDefects } from "../modules/layoutAttention.js";
+import { layoutPointsFitBoard, recentreLayoutDocument, recentredSavedLayout } from "../modules/layoutRecentre.js";
 import { boardCanvas } from "../modules/puzzleBoardSize.js";
 import { validateStarLayoutDocument } from "../modules/starLayoutSchema.js";
 import {
@@ -367,7 +368,7 @@ export async function run() {
 
   // Attention: a fixed layout is outdated by a puzzle edit or a board-size
   // change; a hint never is.
-  const starBoard = boardCanvas(puzzle, "star");
+  const starBoard = boardCanvas(puzzle);
   const freshStar = { ...starSaved, board: starBoard, metrics: { lineCrossings: 0, edgeNodeIntersections: 0, overlaps: 0 } };
   const graphHintLayout = { ...graph, fixed: false };
   const attention = layoutAttention({ document, layout: envelope({ star: freshStar, graph: graphHintLayout }) });
@@ -376,6 +377,31 @@ export async function run() {
   assert.equal(attention.graph.stale, false, "a hint is never outdated");
   assert.equal(attention.sets, undefined);
   assert.equal(layoutAttention({ document: editedDocument, layout: envelope({ star: freshStar }) }).star.stale, true);
-  assert.equal(layoutAttention({ document, layout: envelope({ star: { ...freshStar, board: BOARD } }) }).star.stale,
-    BOARD.width !== starBoard.width || BOARD.height !== starBoard.height);
+  // A size-only change re-centres the layout; it is outdated only when it
+  // no longer fits.
+  const roomy = { width: starBoard.width + 200, height: starBoard.height + 200 };
+  assert.equal(layoutAttention({ document, layout: envelope({ star: { ...freshStar, board: roomy } }) }).star.stale, false);
+  const cramped = { width: 120, height: 90 };
+  assert.equal(layoutAttention({ document, layout: envelope({ star: { ...freshStar, board: cramped } }) }).star.stale, true);
+
+  // Re-centring keeps every position's place relative to the board centre.
+  const moved = recentreLayoutDocument({ board: { width: 100, height: 80 }, nodes: { a: { x: 10, y: 20 } }, circles: { c: { x: 50, y: 40, pinned: true } } }, { width: 120, height: 100 });
+  assert.deepEqual(moved.board, { width: 120, height: 100 });
+  assert.deepEqual(moved.nodes.a, { x: 20, y: 30 });
+  assert.deepEqual(moved.circles.c, { x: 60, y: 50, pinned: true });
+  // A Star player snapshot's strip band above the board moves with it.
+  const strip = recentreLayoutDocument({ board: { width: 100, height: 80, viewBoxY: -40 }, nodes: { s: { x: 30, y: -20 } } }, { width: 100, height: 60 });
+  assert.equal(strip.board.viewBoxY, -50);
+  assert.deepEqual(strip.nodes.s, { x: 30, y: -30 });
+  assert.equal(layoutPointsFitBoard(strip), true, "strip nodes within viewBoxY fit");
+  const same = { board: { width: 100, height: 80 }, nodes: {} };
+  assert.equal(recentreLayoutDocument(same, { width: 100, height: 80 }), same);
+  assert.equal(layoutPointsFitBoard(recentreLayoutDocument({ board: { width: 100, height: 80 }, nodes: { a: { x: 2, y: 40 } } }, { width: 90, height: 80 })), false,
+    "shrinking past a position no longer fits");
+  // A saved fixed layout for an unchanged puzzle moves onto a new size; an
+  // edited puzzle's or a hint's does not.
+  const recentred = recentredSavedLayout(envelope({ star: freshStar }), puzzle, "star", roomy);
+  assert.equal(recentred.board.width, roomy.width);
+  assert.equal(recentredSavedLayout(envelope({ star: freshStar }), compile(editedDocument), "star", roomy), null);
+  assert.equal(recentredSavedLayout(envelope({ graph: graphHintLayout }), puzzle, "graph", roomy), null);
 }

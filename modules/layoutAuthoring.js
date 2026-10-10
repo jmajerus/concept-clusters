@@ -490,6 +490,20 @@ export function createLayoutAuthoringController({
     }
   }
 
+  // A board-size change rebuilt the board (game.js rebuildBoardForSize).
+  // A prepared arrangement comes back re-centred, so the change adds or
+  // removes margin all round; an unprepared board waits for Prepare.
+  function onBoardResized({ restored = false } = {}) {
+    if (!layoutAuthoringMode || !getState()) return;
+    syncStarFreeStripButtons();
+    if (restored) {
+      const board = getBoard();
+      reportPreparedLayout({ text: `Board resized to ${board.width}×${board.height}; your arrangement is re-centred on it`, tone: "good" });
+    } else {
+      updateLayoutAuthoringPanel();
+    }
+  }
+
   // A mode switch rebuilt the board in place (game.js setMode): either this
   // visit's arrangement for the mode came back, or the solved board is
   // polishing from the mode's saved layout. An unsolved board prepares as
@@ -776,10 +790,9 @@ export function createLayoutAuthoringController({
     boardSizeFactorInput?.addEventListener("change", () => {
       const factor = canonicalBoardSizeFactor(boardSizeFactorInput.value);
       if (factor == null) return;
+      setBoardFlagStatus("sizeFactor");
+      // The rebuild reports back through onBoardResized.
       previewBoardSize?.(factor, { rebuild: "now" });
-      // The rebuilt board is unpolished; the panel asks for Prepare again.
-      setBoardFlagStatus("");
-      updateLayoutAuthoringPanel();
       const size = getBoard();
       if (boardSizeFactorReadout) {
         boardSizeFactorReadout.textContent = sizeReadout(factor, size);
@@ -974,6 +987,7 @@ export function createLayoutAuthoringController({
   return {
     onPuzzleLoaded,
     onModeSwitched,
+    onBoardResized,
     syncStarFreeStripButtons,
     reloadBoard
   };

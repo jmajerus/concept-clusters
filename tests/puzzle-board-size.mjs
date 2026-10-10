@@ -42,12 +42,12 @@ function sizedPuzzle({ clusterSizes, bridgeCount, bridgeSpan, termLength }) {
   return { clusters, bridges };
 }
 
-function legacyCanvas(puzzle, mode) {
+// The floor a puzzle starts from before any growth; every mode shares it.
+function floorCanvas(puzzle) {
   const nodes = puzzleNodeCount(puzzle);
   const clusters = puzzle.clusters.length;
   if (nodes > 0 && nodes <= 8) return BOARD_CANVAS.compact;
-  if (derivedLarge(nodes)) return mode === "sets" ? BOARD_CANVAS.circleWide : BOARD_CANVAS.wide;
-  if (mode !== "graph" && clusters >= 2) return BOARD_CANVAS.wide;
+  if (derivedLarge(nodes) || clusters >= 2) return BOARD_CANVAS.wide;
   return BOARD_CANVAS.standard;
 }
 
@@ -69,21 +69,15 @@ export async function run() {
 
   const lone = puzzleWithTerms(5);
   lone.clusters = [lone.clusters[0]];
-  assert.equal(boardCanvas(lone, "sets"), BOARD_CANVAS.compact);
-  assert.equal(boardCanvas(lone, "star"), BOARD_CANVAS.compact);
-  assert.equal(boardCanvas(lone, "graph"), BOARD_CANVAS.compact);
-
+  // Every mode shares one board: a single compact cluster, an ordinary
+  // multi-cluster puzzle and a crowded one each get the same board in
+  // Graph, Star and Circle.
+  assert.equal(boardCanvas(lone), BOARD_CANVAS.compact);
   const ordinary = puzzleWithTerms(12);
-  assert.equal(boardCanvas(ordinary, "graph"), BOARD_CANVAS.standard);
-  assert.equal(boardCanvas(ordinary, "star"), BOARD_CANVAS.wide);
-  assert.equal(boardCanvas(ordinary, "sets"), BOARD_CANVAS.wide);
-
+  assert.equal(boardCanvas(ordinary), BOARD_CANVAS.wide);
   const crowded = puzzleWithTerms(18);
-  assert.equal(boardCanvas(crowded, "graph"), BOARD_CANVAS.wide);
-  assert.equal(boardCanvas(crowded, "star"), BOARD_CANVAS.wide);
-  assert.equal(boardCanvas(crowded, "sets"), BOARD_CANVAS.circleWide);
+  assert.equal(boardCanvas(crowded), BOARD_CANVAS.wide);
   assert.equal(boardFrameMaxWidth(BOARD_CANVAS.wide), null);
-  assert.equal(boardFrameMaxWidth(BOARD_CANVAS.circleWide), null);
   assert.equal(boardFrameMaxWidth({ width: 650, height: 480 }), null);
 
   const short = sizedPuzzle({
@@ -112,9 +106,9 @@ export async function run() {
   assert.ok(boardLoad(wordy) > boardLoad(short));
   assert.ok(boardLoad(bridged) > boardLoad(short));
 
-  assert.equal(boardCanvas(short, "graph"), BOARD_CANVAS.wide);
-  const wordyGraph = boardCanvas(wordy, "graph");
-  const bridgedGraph = boardCanvas(bridged, "graph");
+  assert.equal(boardCanvas(short), BOARD_CANVAS.wide);
+  const wordyGraph = boardCanvas(wordy);
+  const bridgedGraph = boardCanvas(bridged);
   assert.deepEqual(wordyGraph, { width: 1530, height: 990 });
   assert.deepEqual(bridgedGraph, { width: 970, height: 630 });
   assert.ok(wordyGraph.width > bridgedGraph.width);
@@ -147,19 +141,22 @@ export async function run() {
   assert.equal(canonicalBoardSizeFactor(1.13), null);
   assert.equal(boardSizeFactor({ board: { sizeFactor: 1.2 } }), 1.2);
   assert.equal(boardSizeFactor({}), 1);
-  const roomy = boardCanvas({ ...longLabels, board: { sizeFactor: 1.2 } }, "graph");
-  const tighter = boardCanvas({ ...longLabels, board: { sizeFactor: 0.75 } }, "graph");
+  const roomy = boardCanvas({ ...longLabels, board: { sizeFactor: 1.2 } });
+  const tighter = boardCanvas({ ...longLabels, board: { sizeFactor: 0.75 } });
   assert.ok(roomy.width > 1080 && roomy.height > 700);
   assert.ok(tighter.width < 1080 && tighter.height < 700);
-  assert.equal(boardDisplayFrame(longLabels, "graph"), 1125);
-  assert.equal(boardDisplayFrame({ ...longLabels, board: { sizeFactor: 0.75 } }, "graph"), 844);
-  assert.equal(boardDisplayFrame({ ...longLabels, board: { sizeFactor: 1.25 } }, "graph"), 1406);
-  const ordinaryGraph = puzzleWithTerms(12);
-  assert.equal(boardDisplayFrame(ordinaryGraph, "graph"), null);
-  assert.equal(boardDisplayFrame({ ...ordinaryGraph, board: { sizeFactor: 0.75 } }, "graph"), 510);
-  assert.deepEqual(boardCanvas(longLabels, "graph"), { width: 1080, height: 700 });
-  assert.deepEqual(boardCanvas(longLabels, "sets"), { width: 1180, height: 880 });
-  assert.equal(boardFrameMaxWidth(boardCanvas(longLabels, "graph")), 1125);
+  assert.equal(boardDisplayFrame(longLabels), 1125);
+  assert.equal(boardDisplayFrame({ ...longLabels, board: { sizeFactor: 0.75 } }), 844);
+  assert.equal(boardDisplayFrame({ ...longLabels, board: { sizeFactor: 1.25 } }), 1406);
+  // An ordinary multi-cluster puzzle keeps the stylesheet's wide frame; a
+  // size setting scales that frame.
+  assert.equal(boardDisplayFrame(ordinary), null);
+  assert.equal(boardDisplayFrame({ ...ordinary, board: { sizeFactor: 0.75 } }), 750);
+  const single = puzzleWithTerms(12);
+  single.clusters = [single.clusters[0]];
+  assert.equal(boardDisplayFrame({ ...single, board: { sizeFactor: 0.75 } }), 510);
+  assert.deepEqual(boardCanvas(longLabels), { width: 1080, height: 700 });
+  assert.equal(boardFrameMaxWidth(boardCanvas(longLabels)), 1125);
 
   const heavy = sizedPuzzle({
     clusterSizes: [7, 7, 7, 7],
@@ -168,40 +165,21 @@ export async function run() {
     termLength: 16
   });
   assert.equal(puzzleNodeCount(heavy), NODE_CAP_XLARGE);
-  assert.deepEqual(boardCanvas(heavy, "graph"), { width: 1090, height: 700 });
-  assert.deepEqual(boardCanvas(heavy, "sets"), { width: 1190, height: 880 });
-  assert.equal(boardFrameMaxWidth(boardCanvas(heavy, "graph")), 1135);
+  assert.deepEqual(boardCanvas(heavy), { width: 1090, height: 700 });
+  assert.equal(boardFrameMaxWidth(boardCanvas(heavy)), 1135);
 
   // Published puzzles that the label-surplus and edge-load rules above have
   // already grown off their preset. Pinned here so any further corpus drift
   // still shows up as a failure rather than passing silently.
   const grownCanvas = {
-    "octopus-play-stages": {
-      graph: { width: 1080, height: 700 },
-      star: { width: 1080, height: 700 },
-      sets: { width: 1180, height: 880 }
-    },
-    "functional-groups-organic": {
-      graph: { width: 970, height: 630 },
-      star: { width: 970, height: 630 },
-      sets: { width: 1060, height: 790 }
-    }
+    "octopus-play-stages": { width: 1080, height: 700 },
+    "functional-groups-organic": { width: 970, height: 630 }
   };
   for (const puzzle of PUZZLES) {
-    for (const mode of ["graph", "star", "sets"]) {
-      if (grownCanvas[puzzle.id]) {
-        assert.deepEqual(
-          boardCanvas(puzzle, mode),
-          grownCanvas[puzzle.id][mode],
-          `${puzzle.id} ${mode} should stay on its grown canvas`
-        );
-        continue;
-      }
-      assert.equal(
-        boardCanvas(puzzle, mode),
-        legacyCanvas(puzzle, mode),
-        `${puzzle.id} ${mode} should stay on its current canvas`
-      );
+    if (grownCanvas[puzzle.id]) {
+      assert.deepEqual(boardCanvas(puzzle), grownCanvas[puzzle.id], `${puzzle.id} should stay on its grown canvas`);
+      continue;
     }
+    assert.equal(boardCanvas(puzzle), floorCanvas(puzzle), `${puzzle.id} should stay on its floor canvas`);
   }
 }
