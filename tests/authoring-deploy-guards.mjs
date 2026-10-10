@@ -7,7 +7,9 @@ import { join } from "node:path";
 import {
   handleAuthoringAdminIndex,
   renderServerRevisionSection,
-  SERVER_REVISION_PATH
+  SERVER_REVISION_EVENTS_PATH,
+  SERVER_REVISION_PATH,
+  SERVER_SHUTDOWN_EVENT
 } from "../modules/authoringAdminIndex.js";
 import { formatAuthoringStatusProbe } from "../modules/authoringStatusProbe.js";
 import {
@@ -15,7 +17,18 @@ import {
   buildAuthoringDeployScript,
   parseAuthoringDeployArgs
 } from "../modules/authoringDeployPlan.js";
-import { loadServerRevisionStatus, readGitRevision } from "../modules/authoringServerRevision.js";
+import { EventEmitter } from "node:events";
+import {
+  createServerRevisionMonitor,
+  githubPollSeconds,
+  loadServerRevisionStatus,
+  readGitRevision
+} from "../modules/authoringServerRevision.js";
+import {
+  githubSignature,
+  handleGithubPushWebhook,
+  verifyGithubSignature
+} from "../modules/githubPushWebhook.js";
 
 export const name = "Authoring server deploy guards and running revision";
 
@@ -97,8 +110,138 @@ function checkStatusProbe() {
   assert.equal(drifted.level, "warn");
 }
 
+function waitFor(predicate, label, timeoutMs = 5000) {
+  const started = Date.now();
+  return new Promise((resolve, reject) => {
+    const tick = () => {
+      const value = predicate();
+      if (value) return resolve(value);
+      if (Date.now() - started > timeoutMs) return reject(new Error(`timed out waiting for ${label}`));
+      setTimeout(tick, 25);
+    };
+    tick();
+  });
+}
+
+async function checkWebhook() {
+  const secret = "s3cret";
+  const body = Buffer.from(JSON.stringify({ ref: "refs/heads/main" }));
+  assert.equal(verifyGithubSignature(secret, body, githubSignature(secret, body)), true);
+  assert.equal(verifyGithubSignature(secret, body, githubSignature("other", body)), false);
+  assert.equal(verifyGithubSignature(secret, body, undefined), false);
+
+  async function deliver({ signature, event = "push", configured = secret }) {
+    const req = {
+      method: "POST",
+      url: "/hooks/github",
+      headers: { "x-hub-signature-256": signature, "x-github-event": event },
+      async *[Symbol.asyncIterator]() { yield body; }
+    };
+    const response = { status: 0, pushes: 0 };
+    const res = { writeHead(status) { response.status = status; }, end() {} };
+    response.handled = await handleGithubPushWebhook(req, res, {
+      secret: configured,
+      onPush: () => { response.pushes += 1; }
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    return response;
+  }
+  const accepted = await deliver({ signature: githubSignature(secret, body) });
+  assert.equal(accepted.status, 202);
+  assert.equal(accepted.pushes, 1);
+  const forged = await deliver({ signature: githubSignature("guess", body) });
+  assert.equal(forged.status, 401);
+  assert.equal(forged.pushes, 0);
+  assert.equal((await deliver({ signature: githubSignature(secret, body), event: "ping" })).status, 200);
+  assert.equal((await deliver({ signature: "x", configured: "" })).handled, false, "no secret, no route");
+
+  assert.equal(githubPollSeconds({}), 60);
+  assert.equal(githubPollSeconds({ AUTHORING_GITHUB_WEBHOOK_SECRET: "x" }), 300);
+  assert.equal(githubPollSeconds({ AUTHORING_GITHUB_POLL_SECONDS: "0" }), 0);
+}
+
+async function checkEventStream() {
+  const listeners = new Set();
+  const server = new EventEmitter();
+  const req = Object.assign(new EventEmitter(), {
+    method: "GET",
+    url: SERVER_REVISION_EVENTS_PATH,
+    socket: { server }
+  });
+  const res = {
+    chunks: [],
+    writableEnded: false,
+    writeHead(status, headers) { this.status = status; this.headers = headers; },
+    write(chunk) { this.chunks.push(chunk); },
+    end() { this.writableEnded = true; }
+  };
+  await handleAuthoringAdminIndex(req, res, {
+    loadServerRevision: async () => ({ running: { commit: "a" } }),
+    subscribeServerRevision: listener => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    }
+  });
+  assert.equal(res.status, 200);
+  assert.match(res.headers["Content-Type"], /text\/event-stream/);
+  await waitFor(() => res.chunks.length === 1, "initial event");
+  for (const listener of listeners) listener({ running: { commit: "a" } });
+  for (const listener of listeners) listener({ running: { commit: "b" } });
+  assert.deepEqual(res.chunks, [
+    `data: ${JSON.stringify({ running: { commit: "a" } })}\n\n`,
+    `data: ${JSON.stringify({ running: { commit: "b" } })}\n\n`
+  ], "unchanged status is not resent");
+  server.emit(SERVER_SHUTDOWN_EVENT);
+  assert.equal(res.writableEnded, true, "shutdown ends the stream");
+  req.emit("close");
+  assert.equal(listeners.size, 0, "closing unsubscribes");
+}
+
+async function checkMonitor(root) {
+  const work = join(root, "monitor-work");
+  const origin = join(root, "monitor-origin.git");
+  const server = join(root, "monitor-server");
+  mkdirSync(work);
+  git(work, ["init", "-q"]);
+  commit(work, "a.txt", "first");
+  git(root, ["clone", "-q", "--bare", work, origin]);
+  git(work, ["remote", "add", "origin", origin]);
+  git(root, ["clone", "-q", origin, server]);
+  const running = readGitRevision({ repositoryRoot: server });
+  const monitor = createServerRevisionMonitor({
+    repositoryRoot: server,
+    running,
+    env: {},
+    pollSeconds: 0,
+    debounceMs: 20
+  });
+  const seen = [];
+  const unsubscribe = monitor.subscribe(status => seen.push(status));
+  try {
+    await monitor.refresh();
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].behindBase, 0);
+
+    // GitHub moves; the poller notices through ls-remote and fetches.
+    commit(work, "b.txt", "second");
+    git(work, ["push", "-q", "origin", "main"]);
+    await monitor.pollOrigin();
+    assert.equal(monitor.latest().behindBase, 1);
+
+    // A checkout move on disk arrives through the .git watcher alone.
+    git(server, ["merge", "-q", "--ff-only", "origin/main"]);
+    const moved = await waitFor(() => monitor.latest()?.checkoutMoved, "checkout-move event");
+    assert.equal(moved, true);
+  } finally {
+    unsubscribe();
+    monitor.close();
+  }
+}
+
 export async function run() {
   checkStatusProbe();
+  await checkWebhook();
+  await checkEventStream();
   const ok = await requestJson({ loadServerRevision: async () => ({ running: { commit: "abc" } }) });
   assert.equal(ok.handled, true);
   assert.equal(ok.status, 200);
@@ -124,6 +267,7 @@ export async function run() {
 
   const root = mkdtempSync(join(tmpdir(), "authoring-deploy-"));
   try {
+    await checkMonitor(root);
     const work = join(root, "work");
     const origin = join(root, "origin.git");
     const server = join(root, "server");
@@ -150,7 +294,7 @@ export async function run() {
     const freshHead = commit(work, "fresh.txt", "fresh feature");
     git(work, ["push", "-q", "origin", "main", "feature/stale", "feature/fresh"]);
 
-    const stale = loadServerRevisionStatus({ repositoryRoot: server, running: started });
+    const stale = await loadServerRevisionStatus({ repositoryRoot: server, running: started });
     assert.equal(stale.behindBase, 1);
     assert.equal(stale.checkoutMoved, false);
     assert.match(renderServerRevisionSection(stale), /server-revision-stale[\s\S]*1 commit behind <code>origin\/main/);
@@ -170,7 +314,7 @@ export async function run() {
     assert.equal(toMain.restarted, true);
     assert.equal(git(server, ["rev-parse", "HEAD"]), mainHead);
 
-    const moved = loadServerRevisionStatus({ repositoryRoot: server, running: started, fetchRemote: false });
+    const moved = await loadServerRevisionStatus({ repositoryRoot: server, running: started, fetchRemote: false });
     assert.equal(moved.checkoutMoved, true);
     assert.match(renderServerRevisionSection(moved), /checkout has moved/);
 
@@ -180,7 +324,7 @@ export async function run() {
     assert.equal(git(server, ["rev-parse", "--abbrev-ref", "HEAD"]), "feature/fresh");
     assert.equal(git(server, ["rev-parse", "HEAD"]), freshHead);
 
-    const current = loadServerRevisionStatus({
+    const current = await loadServerRevisionStatus({
       repositoryRoot: server,
       running: readGitRevision({ repositoryRoot: server })
     });

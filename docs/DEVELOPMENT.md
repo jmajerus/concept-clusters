@@ -84,16 +84,39 @@ ref), and whether the checkout has moved since the restart. The section
 turns amber when the server is behind or the checkout has moved; pages such
 as the Puzzles list can show false results until it is redeployed.
 
-`/admin/server-revision.json` returns the same status as JSON, behind the
-same admin login. `node tools/authoring-status.mjs` reads it from a
-workstation and prints one line of JSON for the
+`/admin/server-revision.json` returns the same status as JSON, and
+`/admin/server-revision/events` streams it as Server-Sent Events: the
+current status on connect, then a message whenever it changes. Both are
+behind the same admin login. Changes come from three sources:
+
+- **The checkout.** While a stream is open, the server watches `.git` for
+  HEAD and ref changes, so a checkout or pull on the server shows up at
+  once.
+- **A GitHub push webhook.** With `AUTHORING_GITHUB_WEBHOOK_SECRET` set in
+  the server's environment, `POST /hooks/github` accepts GitHub push
+  deliveries signed with that secret (`X-Hub-Signature-256`), fetches
+  origin, and re-evaluates. Configure the webhook in the repository's
+  settings: payload URL `https://<public host>/hooks/github`, content type
+  `application/json`, the same secret, push events only. The route sits
+  outside `/admin` because GitHub cannot log in; without the secret it does
+  not exist.
+- **A fallback poller.** While a stream is open, the server runs
+  `git ls-remote` for main and the running branch every
+  `AUTHORING_GITHUB_POLL_SECONDS` (default 60, or 300 when the webhook
+  secret is set, to catch missed deliveries; 0 turns it off), and fetches
+  only when a tip moved.
+
+`node tools/authoring-status.mjs --watch` holds that stream open from a
+workstation and prints one line of JSON per change for the
 [vscode-status-probe](https://github.com/jmajerus/vscode-status-probe)
 status-bar extension, which `.vscode/settings.json` configures
-(`statusProbe.items`). The item reads `main`, a PR as `#267`, or a short
-branch name, with `↓N` (behind its origin branch), `✗main` (missing commits
-from main), or `⟳` (checkout moved since the restart) in amber; hover for
-detail, click for `/admin`. The script needs `AUTHORING_DRAFT_REVIEW_URL`
-and the server's `ADMIN_KEY` in the ignored `.env`.
+(`statusProbe.items`, `watch: true`). Without `--watch` it prints one line
+and exits. The item reads `main`, a PR as `#267`, or a short branch name,
+with `↓N` (behind its origin branch), `✗main` (missing commits from main),
+or `⟳` (checkout moved since the restart) in amber; hover for detail, click
+for `/admin`. During a deploy the item shows `…` while the server restarts,
+then the new status. The script needs `AUTHORING_DRAFT_REVIEW_URL` and the
+server's `ADMIN_KEY` in the ignored `.env`.
 
 ## Files
 
@@ -181,7 +204,8 @@ anything ever imports from it directly):
 | `localDevHousekeep.js` | Per-repository/per-port dev-server leases, exact PID/start-time/argv/cwd/command ownership checks, stale-lease pruning, host-independent reclamation, and graceful shutdown with verified parent/worker escalation; foreign listeners are never stopped | `authoringWorkspacePaths.js`, OS process/socket APIs |
 | `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the GitHub production snapshot of `puzzles/manifest.js` | Node filesystem APIs |
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
-| `authoringServerRevision.js` | The branch and commit the LAN server started on, compared with the current checkout, `origin/main`, and the branch's origin ref, for the `/admin` Authoring server section | `githubProductionManifest.js` |
+| `authoringServerRevision.js` | The branch and commit the LAN server started on, compared with the current checkout, `origin/main`, and the branch's origin ref; `createServerRevisionMonitor` turns `.git` changes, push webhooks, and the fallback `ls-remote` poller into change events for `/admin/server-revision/events` | — |
+| `githubPushWebhook.js` | `POST /hooks/github`: verifies GitHub's `X-Hub-Signature-256` against `AUTHORING_GITHUB_WEBHOOK_SECRET` and triggers a fetch and status refresh on push | — |
 | `authoringDeployPlan.js` | `npm run authoring:deploy` argument parsing, PR-to-branch resolution, and the remote script that redeploys or switches, fast-forwards, and refuses to restart on a branch that does not include `origin/main` | — |
 | `authoringStatusProbe.js` | Turns `/admin/server-revision.json` into the one-line `{ text, tooltip, level, open }` JSON that `tools/authoring-status.mjs` prints for the status-bar extension | — |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/draft services | official MCP server SDK, Zod, shared services |

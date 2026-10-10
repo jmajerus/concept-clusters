@@ -402,7 +402,7 @@ function renderGithubProductionSection({
  *   githubProduction?: object | null,
  *   canRefreshGithubProduction?: boolean,
  *   linkHealth?: Awaited<ReturnType<import("./wikiLinkCheck.js").loadWikiLinkHealth>> | null,
- *   serverRevision?: ReturnType<import("./authoringServerRevision.js").loadServerRevisionStatus>
+ *   serverRevision?: Awaited<ReturnType<import("./authoringServerRevision.js").loadServerRevisionStatus>>
  * }} [options]
  */
 export function renderAdminIndexPage({
@@ -567,6 +567,45 @@ export const LINK_HEALTH_PATH = "/admin/link-health";
 // Machine-readable twin of the Authoring server section, for
 // tools/authoring-status.mjs. Behind the same admin login as /admin.
 export const SERVER_REVISION_PATH = "/admin/server-revision.json";
+// Server-Sent Events: the same status on connect, then on every change.
+export const SERVER_REVISION_EVENTS_PATH = "/admin/server-revision/events";
+// Emitted on the http.Server before close() so open event streams end;
+// otherwise close() waits on them and a restart hangs until killed.
+export const SERVER_SHUTDOWN_EVENT = "concept-clusters:shutdown";
+const EVENT_STREAM_HEARTBEAT_MS = 30000;
+
+function streamServerRevision(req, res, { loadServerRevision, subscribeServerRevision }) {
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-store",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no"
+  });
+  res.flushHeaders?.();
+  let lastSent = "";
+  const send = status => {
+    if (!status || res.writableEnded) return;
+    const data = JSON.stringify(status);
+    if (data === lastSent) return;
+    lastSent = data;
+    res.write(`data: ${data}\n\n`);
+  };
+  const unsubscribe = subscribeServerRevision(send);
+  // Comments keep idle proxies from closing the stream and let clients
+  // notice a dead connection.
+  const heartbeat = setInterval(() => res.write(": ping\n\n"), EVENT_STREAM_HEARTBEAT_MS);
+  const server = req.socket?.server;
+  const end = () => res.end();
+  server?.once?.(SERVER_SHUTDOWN_EVENT, end);
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    unsubscribe();
+    server?.off?.(SERVER_SHUTDOWN_EVENT, end);
+  });
+  Promise.resolve()
+    .then(() => loadServerRevision())
+    .then(send, () => {});
+}
 
 export async function handleAuthoringAdminIndex(req, res, {
   freezePlan = emptyContentFreezePlan(),
@@ -578,7 +617,8 @@ export async function handleAuthoringAdminIndex(req, res, {
   refreshGithubProduction = null,
   cueAllPublished = null,
   loadLinkHealth = null,
-  loadServerRevision = null
+  loadServerRevision = null,
+  subscribeServerRevision = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
   if (urlPath === LINK_HEALTH_PATH) {
@@ -590,6 +630,15 @@ export async function handleAuthoringAdminIndex(req, res, {
     const health = loadLinkHealth ? await loadLinkHealth() : null;
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
     res.end(req.method === "HEAD" ? "" : renderLinkHealthPage(health));
+    return true;
+  }
+  if (urlPath === SERVER_REVISION_EVENTS_PATH && loadServerRevision && subscribeServerRevision) {
+    if (req.method !== "GET") {
+      res.writeHead(405, { Allow: "GET", "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end("Method Not Allowed");
+      return true;
+    }
+    streamServerRevision(req, res, { loadServerRevision, subscribeServerRevision });
     return true;
   }
   if (urlPath === SERVER_REVISION_PATH && loadServerRevision) {

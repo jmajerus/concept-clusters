@@ -92,8 +92,8 @@
   "statusProbe.items": [
     {
       "id": "authoring-server",
-      "command": "node tools/authoring-status.mjs",
-      "intervalSeconds": 300,
+      "command": "node tools/authoring-status.mjs --watch",
+      "watch": true,
       "alignment": "left",
       "priority": -100
     }

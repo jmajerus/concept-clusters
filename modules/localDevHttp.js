@@ -7,9 +7,10 @@ import { createServer as createHttpServer, request as httpRequest } from "node:h
 import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
+import { handleAuthoringAdminIndex, SERVER_SHUTDOWN_EVENT } from "./authoringAdminIndex.js";
+import { handleGithubPushWebhook } from "./githubPushWebhook.js";
 import { loadWikiLinkHealth } from "./wikiLinkCheck.js";
-import { loadServerRevisionStatus, readGitRevision } from "./authoringServerRevision.js";
+import { createServerRevisionMonitor, readGitRevision } from "./authoringServerRevision.js";
 import {
   emptyContentFreezePlan,
   gitIdsFromContentService,
@@ -155,14 +156,19 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
     contentService
   });
   // The revision this process loaded; a later checkout does not change it.
-  const runningRevision = readGitRevision({ repositoryRoot });
+  const revisions = createServerRevisionMonitor({
+    repositoryRoot,
+    running: readGitRevision({ repositoryRoot })
+  });
   return async function handleLocalDevRequest(req, res) {
+    if (await handleGithubPushWebhook(req, res, {
+      secret: process.env.AUTHORING_GITHUB_WEBHOOK_SECRET,
+      onPush: revisions.notifyPush
+    })) return true;
     const admin = await handleAuthoringAdminIndex(req, res, {
       canApplyFreeze: true,
-      loadServerRevision: async () => loadServerRevisionStatus({
-        repositoryRoot,
-        running: runningRevision
-      }),
+      loadServerRevision: () => revisions.refresh({ fetchRemote: true }),
+      subscribeServerRevision: listener => revisions.subscribe(listener),
       loadLinkHealth: async () => {
         const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
         if (!resolved.contentDocuments || !resolved.wikiLinkStore) return null;
@@ -391,6 +397,7 @@ function closeHttpServer(server) {
     }
     try {
       server.close(() => resolve());
+      server.emit(SERVER_SHUTDOWN_EVENT);
     } catch {
       resolve();
     }
