@@ -111,7 +111,10 @@
       "command": "node tools/authoring-status.mjs --watch",
       "watch": true,
       "alignment": "left",
-      "priority": -100
+      "priority": -100,
+      "refreshOnTasks": [
+        "Deploy Authoring*"
+      ]
     }
   ],
   "chat.mcp.serverSampling": {
