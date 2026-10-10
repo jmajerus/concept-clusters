@@ -45,6 +45,7 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
 import { layoutPassStatus, saveLayout, saveLayoutBoard, startLayoutPass } from "./modules/layoutApi.js";
 import { layoutDocumentWithBoard } from "./modules/layoutDocument.js";
+import { recentreLayoutDocument, recentreSavedModes } from "./modules/layoutRecentre.js";
 import { classifyDrag, isCrafted, recordDrag } from "./modules/playerLayoutEffort.js";
 import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
 import { saveSiteSettings } from "./modules/siteSettingsApi.js";
@@ -576,7 +577,7 @@ function replaySemanticMoves(moves) {
 function restorePlayerSession(session) {
   if (!session) return;
   replaySemanticMoves(session.moves);
-  const layout = session.layouts[mode];
+  const layout = recentreLayoutDocument(session.layouts[mode], { width: W, height: H });
   if (layout &&
       state.layoutAdapter?.mode === mode &&
       typeof state.layoutAdapter.apply === "function") {
@@ -603,6 +604,7 @@ function setMode(newMode) {
   if (authoringStudio?.isConstruct() && newMode === "sets") return;
   if (layoutAuthoringMode && newMode === mode) return;
   if (state?.phase === "lens-preparing") return;
+  cancelPendingResize();
   const switchingLensPhase = lensPhaseActive(state);
   clearTimeout(playerLayoutSaveTimer);
   if (state) persistPlayerSession({ captureLayout: true });
@@ -626,9 +628,9 @@ function setMode(newMode) {
     // state gets torn down below, rather than abandoning it to keep
     // ticking a now-orphaned node array in the background.
     if (state.stopRenderer) state.stopRenderer();
-    // Board size depends on `mode` too (see applyBoardSize), so switching
-    // modes mid-game can change W/H — recompute rather than reuse a
-    // cached sets-mode layout sized for the board's previous dimensions.
+    // Every mode shares the board, but the window may have changed width
+    // since it was sized (a narrow window falls back to the standard
+    // canvas), so size it again rather than trust the last W/H.
     applyBoardSize(state.puzzle);
     state.setLayout = null;
     state.solutionLayout = null;
@@ -642,9 +644,10 @@ function setMode(newMode) {
     // elements.
     state.setLayersReady = false;
     buildForMode();
-    const layout = layoutAuthoringMode
+    // An arrangement kept from another board size is re-centred onto this one.
+    const layout = recentreLayoutDocument(layoutAuthoringMode
       ? state.authoringArrangements?.get(mode)
-      : loadPlayerSession(localStorage, sessionStoragePuzzle())?.layouts?.[mode];
+      : loadPlayerSession(localStorage, sessionStoragePuzzle())?.layouts?.[mode], { width: W, height: H });
     let restoredLayout = null;
     if (layout &&
         state.layoutAdapter?.mode === mode &&
@@ -2138,6 +2141,19 @@ function puzzleUsesLargeBoard(puzzle) {
 
 let boardSizeRebuildTimer = null;
 
+// The layout view's arrangement while the board is being resized: taken
+// once, before the first preview changes the size, and put back re-centred
+// on the rebuilt board, so a resize adds or removes margin all round
+// instead of asking for a new layout.
+let resizeArrangement = null;
+
+// A mode switch or a new puzzle cancels a scheduled resize rebuild and the
+// arrangement taken for it: neither belongs to the new board.
+function cancelPendingResize() {
+  clearTimeout(boardSizeRebuildTimer);
+  resizeArrangement = null;
+}
+
 function rebuildBoardForSize() {
   if (!state) return;
   if (state.stopRenderer) state.stopRenderer();
@@ -2147,6 +2163,20 @@ function rebuildBoardForSize() {
   state.prettyPrintPromise = null;
   state.setLayersReady = false;
   buildForMode();
+  const kept = resizeArrangement;
+  resizeArrangement = null;
+  if (!layoutAuthoringMode) return;
+  let restored = false;
+  // Only on the board it was taken from: a mode switch or another puzzle
+  // in between drops it (and cancels the pending rebuild; see
+  // cancelPendingResize).
+  if (kept && kept.state === state && kept.mode === mode && state.made === state.need &&
+      typeof state.layoutAdapter?.apply === "function") {
+    restored = state.layoutAdapter.apply(recentreLayoutDocument(kept.layout, { width: W, height: H }))?.valid === true;
+    if (restored) updateSolutionHint();
+  }
+  // Kept arrangements for the other modes are re-centred when they return.
+  layoutAuthoring.onBoardResized({ restored });
 }
 
 // Live administration preview. The viewBox changes immediately. The layout
@@ -2154,6 +2184,10 @@ function rebuildBoardForSize() {
 // committed value rebuilds at once.
 function previewBoardSize(factor, { rebuild = "schedule" } = {}) {
   if (!state?.puzzle) return null;
+  if (layoutAuthoringMode && !resizeArrangement && state.made === state.need &&
+      state.solutionLayout === "pretty" && typeof state.layoutAdapter?.capture === "function") {
+    resizeArrangement = { state, mode, layout: state.layoutAdapter.capture() };
+  }
   // Board size is a layout setting, read from the layout document first,
   // so the preview stages it there. A failed save previews the saved
   // factor again, which restores it.
@@ -2168,10 +2202,10 @@ function previewBoardSize(factor, { rebuild = "schedule" } = {}) {
 }
 
 function applyBoardSize(puzzle) {
-  const chosen = boardCanvas(puzzle, mode);
+  const chosen = boardCanvas(puzzle);
   const expanded = chosen.width > BOARD_CANVAS.standard.width;
   wrapEl.classList.toggle("wide", expanded);
-  const frame = boardDisplayFrame(puzzle, mode);
+  const frame = boardDisplayFrame(puzzle);
   if (frame) wrapEl.style.setProperty("--board-max-width", `${frame}px`);
   else wrapEl.style.removeProperty("--board-max-width");
   // A narrow viewport cannot show the wider container, so a non-large
@@ -2185,6 +2219,10 @@ function applyBoardSize(puzzle) {
     : chosen;
   [W, H] = [size.width, size.height];
   svg.attr("viewBox", `0 0 ${W} ${H}`);
+  // A saved layout from another board size, for an unchanged puzzle, is
+  // re-centred onto this board so it stays exact (in memory only). Every
+  // mode shares the board, so every mode's layout moves together.
+  puzzle.layout = recentreSavedModes(puzzle.layout, puzzle, { width: W, height: H });
 }
 
 // ---------- load / reset ----------
@@ -2217,6 +2255,7 @@ function applyLoadedPuzzle(puzzle, index, {
   selectedClusterId = null
 } = {}) {
   puzzleViewEl.classList.remove("puzzle-load-failed");
+  cancelPendingResize();
   if (state && state.puzzle.id !== puzzle.id) pendingInitialSharedParams = null;
   const learningIntroduction = normalizedLearningIntroduction(puzzle);
   const learningIntroductionStatus = learningIntroduction

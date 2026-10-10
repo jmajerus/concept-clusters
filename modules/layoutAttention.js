@@ -8,6 +8,7 @@ import { LAYOUT_MODES, layoutRevision, normalizeLayoutDocument } from "./layoutD
 import { layoutIsFixed } from "./layoutHints.js";
 import { boardCanvas } from "./puzzleBoardSize.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
+import { layoutPointsFitBoard, recentreLayoutDocument } from "./layoutRecentre.js";
 
 // Defects players would notice as severity tiers, most severe first, the
 // way each engine's own scoring ranks a finished layout (graphLayout
@@ -59,9 +60,10 @@ export function layoutDefects(mode, metrics) {
 
 /**
  * Per saved mode: `defects` (from the saved metrics), `fixed`, and `stale`
- * -- a fixed layout whose puzzle revision or board size no longer matches,
- * so players get it as a hint (Graph, Circle) or adapted (Star) and its
- * saved metrics no longer describe their board. Hints are always searched
+ * -- a fixed layout whose puzzle revision no longer matches, or whose board
+ * size differs and which no longer fits once re-centred, so players get it
+ * as a hint (Graph, Circle) or adapted (Star) and its saved metrics no
+ * longer describe their board. Hints are always searched
  * afresh, so they are never stale. Modes with nothing saved are absent.
  */
 export function layoutAttention({ document, layout, categoryRegistry = undefined }) {
@@ -82,10 +84,13 @@ export function layoutAttention({ document, layout, categoryRegistry = undefined
     const fixed = mode === "star" || layoutIsFixed(saved);
     let stale = false;
     if (fixed && sized) {
-      const board = boardCanvas(sized, mode);
+      const board = boardCanvas(sized);
+      const sameSize = Number(saved.board?.width) === board.width &&
+        Number(saved.board?.height) === board.height;
+      // A size-only change re-centres the layout (layoutRecentre.js); it is
+      // outdated only if it no longer fits.
       stale = saved.puzzleRevision !== revision ||
-        Number(saved.board?.width) !== board.width ||
-        Number(saved.board?.height) !== board.height;
+        (!sameSize && !layoutPointsFitBoard(recentreLayoutDocument(saved, board)));
     }
     result[mode] = { fixed, stale, defects: layoutDefects(mode, saved.metrics) };
   });

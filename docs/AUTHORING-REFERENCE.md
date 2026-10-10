@@ -1568,9 +1568,16 @@ A Graph or Circle layout is saved either as **exact positions** or as a
   offset) and recomputes positions. That is a short search, about a second,
   on every load.
 
-An exact layout already carries its hint. Once a puzzle edit or a board-size
-change makes the exact positions stale, the engine uses the same saved
-layout as a hint automatically. So exact is the faster choice and loses
+Every mode of a puzzle shares one board, so the size setting and a
+layout's margins mean the same thing in Graph, Star and Circle. A
+board-size change re-centres a layout: every position keeps its place
+relative to the board's centre, so growing the board adds an even margin
+all round and shrinking it takes margin away. A saved exact layout whose
+only difference is the board size stays exact wherever it still fits.
+
+An exact layout already carries its hint. Once a puzzle edit, or a size
+change it no longer fits, makes the exact positions stale, the engine uses
+the same saved layout as a hint automatically. So exact is the faster choice and loses
 nothing in resilience to edits. Star layouts are always exact; a stale Star
 layout is adapted instead: positions are scaled to the board, each cluster
 title stays beside its own terms, and only nodes the layout has never seen
@@ -1618,7 +1625,8 @@ from its saved layout.
   every mode. **Board size** (the slider, in 5% steps from −25% to +25%) and
   the **Star free-term strip** button (in Star mode) save with the layout the
   same way: to the open draft or else the published puzzle, with no content
-  publish. A size change rebuilds the board; Prepare again to lay it out.
+  publish. A size change keeps your arrangement, re-centred on the new
+  board.
   Setting the size back to 0% is recorded as an explicit choice, which the
   automatic pass then leaves alone.
 - The **Experiments** card below it holds settings that change play, so they
