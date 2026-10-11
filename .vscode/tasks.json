@@ -2,6 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "MCP: restart stdio",
+      "type": "npm",
+      "script": "mcp:restart",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Dev",
       "type": "npm",
       "script": "dev",
@@ -49,6 +59,12 @@
       }
     },
     {
+      "label": "Dev: stop",
+      "type": "npm",
+      "script": "dev:stop",
+      "problemMatcher": []
+    },
+    {
       "label": "Deploy game",
       "type": "npm",
       "script": "deploy",
@@ -61,9 +77,27 @@
       "problemMatcher": []
     },
     {
+      "label": "Release MCP",
+      "type": "npm",
+      "script": "mcp:hosted:release",
+      "problemMatcher": []
+    },
+    {
       "label": "Deploy Authoring",
       "type": "npm",
       "script": "authoring:deploy",
+      "problemMatcher": []
+    },
+    {
+      "label": "Deploy Authoring: main",
+      "type": "shell",
+      "command": "npm run authoring:deploy -- --main",
+      "problemMatcher": []
+    },
+    {
+      "label": "Deploy Authoring: PR",
+      "type": "shell",
+      "command": "npm run authoring:deploy -- --pr ${input:authoringPr}",
       "problemMatcher": []
     },
     {
@@ -95,6 +129,16 @@
       }
     },
     {
+      "label": "Open local admin",
+      "type": "npm",
+      "script": "local:admin",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Import Star layout",
       "type": "npm",
       "script": "import:star-layout",
@@ -103,6 +147,13 @@
         "reveal": "always",
         "panel": "shared"
       }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "authoringPr",
+      "type": "promptString",
+      "description": "Pull request number to deploy to the authoring server"
     }
   ]
 }

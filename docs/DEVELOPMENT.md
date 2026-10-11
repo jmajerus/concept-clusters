@@ -33,6 +33,12 @@ index at `/admin`, catalogues at `/admin/catalogues`, and categories at
 [CATALOGUES.md](CATALOGUES.md). Wrangler does not start unless you ask for
 Worker mode.
 
+`npm run local` starts the same server in the background if it is not
+already running, then opens the Library in a browser; `npm run local:admin`
+opens it with the reviewer board (`&admin`). The VS Code "Local" status-bar
+button offers both, plus running the server in a terminal (`npm run dev`)
+and stopping it (`npm run dev:stop`).
+
 The server's lease and authoring scratch state live outside version control:
 by default under `<repo>/.concept-clusters/authoring/` (already gitignored),
 or under `AUTHORING_DATA_DIR` when configured. Use
@@ -63,7 +69,9 @@ edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 
 A persistent LAN checkout running this server (e.g. as a systemd service)
 doubles as a real-environment test bed for a pull request before merging
-it: `git pull` the branch there and exercise it against the actual
+it: deploy the branch there (`npm run authoring:deploy -- --pr <number>`,
+then plain `npm run authoring:deploy` after each push; see [MCP.md](MCP.md)) and
+exercise it against the actual
 production GitHub token and D1 database, not a fresh sandbox. That
 matters specifically because it's *not* a fresh sandbox -- a CI runner
 starts from a pristine checkout every time, so it structurally cannot
@@ -73,6 +81,48 @@ there a while, whatever state a prior run left behind. The freeze
 self-sync work in PR #182 is a concrete example: a checkout-ownership and
 git-reflog bug only existed on the LAN box's actual, previously-lived-in
 checkout, and a clean CI checkout would have passed straight through it.
+
+Node does not reload modules that are already imported, so that server
+serves the commit it started on, whatever is checked out since. The
+"Authoring server" section at the top of `/admin` shows that running branch
+and commit, how far it is behind `origin/main` (and the branch's own origin
+ref), and whether the checkout has moved since the restart. The section
+turns amber when the server is behind or the checkout has moved; pages such
+as the Puzzles list can show false results until it is redeployed.
+
+`/admin/server-revision.json` returns the same status as JSON, and
+`/admin/server-revision/events` streams it as Server-Sent Events: the
+current status on connect, then a message whenever it changes. Both are
+behind the same admin login. Changes come from three sources:
+
+- **The checkout.** While a stream is open, the server watches `.git` for
+  HEAD and ref changes, so a checkout or pull on the server shows up at
+  once.
+- **A GitHub push webhook.** With `AUTHORING_GITHUB_WEBHOOK_SECRET` set in
+  the server's environment, `POST /hooks/github` accepts GitHub push
+  deliveries signed with that secret (`X-Hub-Signature-256`), fetches
+  origin, and re-evaluates. Configure the webhook in the repository's
+  settings: payload URL `https://<public host>/hooks/github`, content type
+  `application/json`, the same secret, push events only. The route sits
+  outside `/admin` because GitHub cannot log in; without the secret it does
+  not exist.
+- **A fallback poller.** While a stream is open, the server runs
+  `git ls-remote` for main and the running branch every
+  `AUTHORING_GITHUB_POLL_SECONDS` (default 60, or 300 when the webhook
+  secret is set, to catch missed deliveries; 0 turns it off), and fetches
+  only when a tip moved.
+
+`node tools/authoring-status.mjs --watch` listens on that stream from a
+workstation and prints one line of JSON per event for the
+[vscode-status-probe](https://github.com/jmajerus/vscode-status-probe)
+status-bar extension, which `.vscode/settings.json` configures
+(`statusProbe.items`, `watch: true`). Without `--watch` it prints one line
+and exits. The item reads `main`, a PR as `#267`, or a short branch name,
+with `↓N` (behind its origin branch), `✗main` (missing commits from main),
+or `⟳` (checkout moved since the restart) in amber; hover for detail, click
+for `/admin`. During a deploy the item shows `…` while the server restarts,
+then the new status. The script needs `AUTHORING_DRAFT_REVIEW_URL` and the
+server's `ADMIN_KEY` in the ignored `.env`.
 
 ## Files
 
@@ -134,7 +184,7 @@ anything ever imports from it directly):
 | `localD1Config.js` | Account, database, token, and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
 | `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
-| `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel) and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
+| `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus the LAN server's running revision, LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel), and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
 | `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Modified = changed since the last Freeze, Cued = cued for the next one, Published only = no private draft), Publish (stays on editor), Publish & Cue, Revert when the working copy differs, Cue/Hold (Cue returns to list), local Open board / Play, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, Publish & Cue, Cue/Hold, withdraw) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` and puzzle layout persistence | `draftRepository.js`, `layoutDocument.js` |
@@ -160,6 +210,10 @@ anything ever imports from it directly):
 | `localDevHousekeep.js` | Per-repository/per-port dev-server leases, exact PID/start-time/argv/cwd/command ownership checks, stale-lease pruning, host-independent reclamation, and graceful shutdown with verified parent/worker escalation; foreign listeners are never stopped | `authoringWorkspacePaths.js`, OS process/socket APIs |
 | `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the GitHub production snapshot of `puzzles/manifest.js` | Node filesystem APIs |
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
+| `authoringServerRevision.js` | The branch and commit the LAN server started on, compared with the current checkout, `origin/main`, and the branch's origin ref; `createServerRevisionMonitor` turns `.git` changes, push webhooks, and the fallback `ls-remote` poller into change events for `/admin/server-revision/events` | — |
+| `githubPushWebhook.js` | `POST /hooks/github`: verifies GitHub's `X-Hub-Signature-256` against `AUTHORING_GITHUB_WEBHOOK_SECRET` and triggers a fetch and status refresh on push | — |
+| `authoringDeployPlan.js` | `npm run authoring:deploy` argument parsing, PR-to-branch resolution, and the remote script that redeploys or switches, fast-forwards, and refuses to restart on a branch that does not include `origin/main` | — |
+| `authoringStatusProbe.js` | Turns `/admin/server-revision.json` into the one-line `{ text, tooltip, level, open }` JSON that `tools/authoring-status.mjs` prints for the status-bar extension | — |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, fingerprints, errors, and in-memory reference implementation | `nonCryptographicHash.js` |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document, optional draft layout document, `expectedRevision` OCC, and a capped working-copy undo stack | D1 binding, `draftRepository.js`, `layoutDocument.js` |

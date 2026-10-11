@@ -1,12 +1,6 @@
 {
   "VsCodeTaskButtons.tasks": [
     {
-      "label": "$(play) Dev",
-      "task": "Dev",
-      "tooltip": "npm run dev — stop from that terminal’s trash can, or Tasks: Terminate Task. Worker mode: npm run dev -- --worker",
-      "alignment": "left"
-    },
-    {
       "label": "$(rocket) Deploy game",
       "task": "Deploy game",
       "tooltip": "npm run deploy -- the live player-facing app",
@@ -14,16 +8,49 @@
       "color": "warning"
     },
     {
-      "label": "$(cloud-upload) Deploy MCP",
-      "task": "Deploy MCP",
-      "tooltip": "npm run mcp:hosted:deploy — deploy the Cloudflare-hosted MCP authoring Worker",
-      "alignment": "left"
+      "label": "$(plug) MCP",
+      "tooltip": "Get MCP clients onto current code: restart local stdio servers, or deploy the hosted Worker",
+      "alignment": "left",
+      "color": "warning",
+      "tasks": [
+        {
+          "label": "Restart stdio MCP",
+          "task": "MCP: restart stdio",
+          "description": "$(debug-restart) Stop this checkout's mcp-server.mjs processes; each host reconnects to current code"
+        },
+        {
+          "label": "Deploy hosted MCP",
+          "task": "Deploy MCP",
+          "description": "$(cloud-upload) npm run mcp:hosted:deploy — the Cloudflare-hosted authoring Worker"
+        },
+        {
+          "label": "Release hosted MCP",
+          "task": "Release MCP",
+          "description": "$(database) npm run mcp:hosted:release — apply remote D1 migrations, then deploy"
+        }
+      ]
     },
     {
       "label": "$(server) Deploy Authoring",
-      "task": "Deploy Authoring",
-      "tooltip": "npm run authoring:deploy — pull and restart the LAN authoring server",
-      "alignment": "left"
+      "tooltip": "npm run authoring:deploy — refuses to restart on a branch that does not include origin/main",
+      "alignment": "left",
+      "tasks": [
+        {
+          "label": "Redeploy current branch",
+          "task": "Deploy Authoring",
+          "description": "$(sync) Pull the branch the server is on and restart"
+        },
+        {
+          "label": "Switch to main",
+          "task": "Deploy Authoring: main",
+          "description": "$(git-branch) --main"
+        },
+        {
+          "label": "Switch to a pull request…",
+          "task": "Deploy Authoring: PR",
+          "description": "$(git-pull-request) --pr <number>"
+        }
+      ]
     },
     {
       "label": "$(beaker) Test",
@@ -45,16 +72,49 @@
       "alignment": "left"
     },
     {
-      "label": "$(play) Local",
-      "task": "Open local",
-      "tooltip": "npm run local -- open the local game to try code before commit (starts the server if needed)",
-      "alignment": "left"
+      "label": "$(globe) Local",
+      "tooltip": "The local dev server on 127.0.0.1:8787",
+      "alignment": "left",
+      "tasks": [
+        {
+          "label": "Open in browser",
+          "task": "Open local",
+          "description": "$(link-external) Start the server in the background if needed, then open the Library"
+        },
+        {
+          "label": "Open in browser as reviewer",
+          "task": "Open local admin",
+          "description": "$(link-external) Same, with the reviewer board (&admin)"
+        },
+        {
+          "label": "Run dev server in terminal",
+          "task": "Dev",
+          "description": "$(terminal) npm run dev — logs in a terminal panel, no browser (Worker mode: npm run dev -- --worker)"
+        },
+        {
+          "label": "Stop dev server",
+          "task": "Dev: stop",
+          "description": "$(debug-stop) npm run dev:stop — however it was started"
+        }
+      ]
     },
     {
       "label": "$(cloud-download) Import layout",
       "task": "Import Star layout",
       "tooltip": "npm run import:star-layout -- pick a layout JSON exported from Author Layout and save it as a curated Star override",
       "alignment": "left"
+    }
+  ],
+  "statusProbe.items": [
+    {
+      "id": "authoring-server",
+      "command": "node tools/authoring-status.mjs --watch",
+      "watch": true,
+      "alignment": "left",
+      "priority": -100,
+      "refreshOnTasks": [
+        "Deploy Authoring*"
+      ]
     }
   ],
   "chat.mcp.serverSampling": {
