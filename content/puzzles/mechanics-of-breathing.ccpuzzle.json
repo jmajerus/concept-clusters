@@ -1,0 +1,504 @@
+{
+  "id": "mechanics-of-breathing",
+  "title": "Mechanics of breathing",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "respiratory"
+  },
+  "info": {
+    "text": "Air moves into and out of the lungs only when a pressure difference drives it. The lung's elastic recoil and the airways' resistance set how much effort each breath takes, and the share of each breath that reaches the alveoli sets how much of that effort does useful work.",
+    "links": [
+      {
+        "href": "wiki:Respiration (physiology)"
+      }
+    ],
+    "citations": [
+      {
+        "title": "West's Respiratory Physiology: The Essentials, 11th ed., ch. 2, \"Ventilation,\" and ch. 7, \"Mechanics of Breathing\"",
+        "author": "John B. West and Andrew M. Luks",
+        "publisher": "Wolters Kluwer",
+        "year": "2020",
+        "url": "https://shop.lww.com/West-s-Respiratory-Physiology/p/9781975139186"
+      },
+      {
+        "title": "Lung compliance",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Lung_compliance"
+      },
+      {
+        "title": "Airway resistance",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Airway_resistance"
+      },
+      {
+        "title": "Lung volumes and capacities",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Lung_volumes_and_capacities"
+      },
+      {
+        "title": "Dead space (physiology)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Dead_space_(physiology)"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "pressure-gradients",
+      "name": "Pressure gradients",
+      "color": "teal",
+      "fact": "Air flows only from higher to lower pressure. Enlarging the chest lowers alveolar pressure below atmospheric and air flows in, while the pleural space between lung and chest wall stays below atmospheric throughout quiet breathing.",
+      "termInfo": {
+        "Boyle's law": {
+          "text": "At constant temperature, the pressure of a gas varies inversely with its volume, so enlarging the chest lowers the pressure of the air inside it.",
+          "links": [
+            {
+              "href": "wiki:Boyle's law"
+            }
+          ]
+        },
+        "alveolar pressure": "Pressure of the air inside the alveoli. It falls slightly below atmospheric during inspiration and rises above it during expiration, and that difference drives airflow.",
+        "intrapleural pressure": {
+          "text": "Pressure in the thin fluid layer between the lung and the chest wall; about −5 cmH₂O at rest, because the lung pulls inward while the chest wall pulls outward.",
+          "links": [
+            {
+              "href": "wiki:Intrapleural pressure"
+            }
+          ]
+        },
+        "transpulmonary pressure": {
+          "text": "Alveolar pressure minus intrapleural pressure: the pressure difference across the lung wall that holds the lung distended.",
+          "links": [
+            {
+              "href": "wiki:Transpulmonary pressure"
+            }
+          ]
+        }
+      },
+      "seeds": [
+        "intrapleural pressure",
+        "alveolar pressure"
+      ],
+      "floatingTerms": [
+        "transpulmonary pressure",
+        "Boyle's law"
+      ],
+      "terms": [
+        "intrapleural pressure",
+        "alveolar pressure",
+        "transpulmonary pressure",
+        "Boyle's law"
+      ]
+    },
+    {
+      "id": "elastic-recoil",
+      "name": "Elastic recoil",
+      "color": "blue",
+      "fact": "The lung tends to recoil inward, partly from elastic fibers in its tissue and largely from surface tension in the liquid lining its alveoli, which surfactant lowers. The chest wall tends to spring outward.",
+      "termInfo": {
+        "chest wall recoil": "The chest wall's tendency to spring outward, opposing the lung's inward pull.",
+        "law of Laplace": {
+          "text": "The pressure inside a bubble equals twice its surface tension divided by its radius, so at equal tension a small alveolus would empty into a larger one.",
+          "links": [
+            {
+              "href": "wiki:Young–Laplace equation"
+            }
+          ]
+        },
+        "lung compliance": {
+          "text": "The change in lung volume per unit change in transpulmonary pressure. A scarred lung, as in pulmonary fibrosis, has low compliance; a lung that has lost elastic tissue, as in emphysema, has high compliance.",
+          "links": [
+            {
+              "href": "wiki:Lung compliance"
+            }
+          ]
+        },
+        "surface tension": {
+          "text": "The inward pull at the surface of the liquid lining the alveoli, which accounts for much of the lung's recoil.",
+          "links": [
+            {
+              "href": "wiki:Surface tension"
+            }
+          ]
+        },
+        "surfactant": {
+          "text": "A phospholipid-rich film secreted by type II alveolar cells. It lowers surface tension, makes the lung easier to inflate, and keeps small alveoli open; premature infants who lack it develop respiratory distress syndrome.",
+          "links": [
+            {
+              "href": "wiki:Pulmonary surfactant"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Elastic recoil"
+          }
+        ]
+      },
+      "seeds": [
+        "lung compliance",
+        "surfactant"
+      ],
+      "floatingTerms": [
+        "surface tension",
+        "law of Laplace",
+        "chest wall recoil"
+      ],
+      "terms": [
+        "lung compliance",
+        "surfactant",
+        "surface tension",
+        "law of Laplace",
+        "chest wall recoil"
+      ]
+    },
+    {
+      "id": "airway-resistance",
+      "name": "Airway resistance",
+      "color": "amber",
+      "fact": "Resistance to airflow rises steeply as airways narrow. Most of it lies in the medium-sized bronchi; the smallest airways are so numerous, and so fully arranged in parallel, that together they add little.",
+      "termInfo": {
+        "Poiseuille's law": {
+          "text": "For smooth flow through a tube, resistance varies inversely with the fourth power of the radius: halving an airway's radius raises its resistance sixteenfold.",
+          "links": [
+            {
+              "href": "wiki:Hagen–Poiseuille equation"
+            }
+          ]
+        },
+        "bronchial smooth muscle": {
+          "text": "Muscle in the airway walls. Vagal stimulation contracts it and narrows the airways; β₂-adrenergic stimulation relaxes it. Its excessive contraction is a hallmark of asthma.",
+          "links": [
+            {
+              "href": "wiki:Bronchoconstriction"
+            }
+          ]
+        },
+        "medium-sized bronchi": "The airways down to about the seventh generation of branching, where most airway resistance lies; bronchioles narrower than 2 mm contribute less than a fifth of the total.",
+        "radial traction": "The pull of surrounding lung tissue on the airway walls, which holds airways open. It strengthens as the lung inflates, so airway resistance falls at high lung volumes."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Airway resistance"
+          }
+        ]
+      },
+      "seeds": [
+        "Poiseuille's law",
+        "bronchial smooth muscle"
+      ],
+      "floatingTerms": [
+        "medium-sized bronchi",
+        "radial traction"
+      ],
+      "terms": [
+        "Poiseuille's law",
+        "bronchial smooth muscle",
+        "medium-sized bronchi",
+        "radial traction"
+      ]
+    },
+    {
+      "id": "lung-volumes",
+      "name": "Lung volumes",
+      "color": "magenta",
+      "fact": "The air in the lungs divides into standard volumes. A spirometer records only air that moves in or out, so the volume that always stays behind, and every capacity that includes it, must be measured another way.",
+      "termInfo": {
+        "expiratory reserve volume": "The additional air that can be forced out after a normal, quiet exhalation.",
+        "residual volume": "The air left in the lungs after the most forceful possible exhalation, about 1.2 liters in a young adult. It is never breathed out, so spirometry cannot measure it.",
+        "spirometry": {
+          "text": "Measurement of how much air is breathed in and out, and how fast, using a spirometer.",
+          "links": [
+            {
+              "href": "wiki:Spirometry"
+            }
+          ]
+        },
+        "total lung capacity": "The volume of air in the lungs after the deepest possible inhalation: vital capacity plus residual volume.",
+        "vital capacity": {
+          "text": "The largest volume that can be exhaled after the deepest possible inhalation.",
+          "links": [
+            {
+              "href": "wiki:Vital capacity"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Lung volumes and capacities"
+          }
+        ]
+      },
+      "seeds": [
+        "residual volume",
+        "vital capacity"
+      ],
+      "floatingTerms": [
+        "total lung capacity",
+        "expiratory reserve volume",
+        "spirometry"
+      ],
+      "terms": [
+        "residual volume",
+        "vital capacity",
+        "total lung capacity",
+        "expiratory reserve volume",
+        "spirometry"
+      ]
+    },
+    {
+      "id": "ventilation",
+      "name": "Ventilation",
+      "color": "olive",
+      "fact": "Part of every breath only fills the conducting airways. Alveolar ventilation, the fresh air that reaches gas-exchanging alveoli each minute, is the share of minute ventilation that sets arterial carbon dioxide.",
+      "termInfo": {
+        "alveolar ventilation": "The volume of fresh air reaching the alveoli each minute: tidal volume minus dead space, times breathing rate.",
+        "anatomic dead space": "The part of each breath that only fills the conducting airways, from nose and mouth to the terminal bronchioles: about 150 mL in an adult, taking no part in gas exchange.",
+        "minute ventilation": {
+          "text": "The total volume of air breathed per minute: tidal volume times breathing rate, about 7.5 liters at rest.",
+          "links": [
+            {
+              "href": "wiki:Minute ventilation"
+            }
+          ]
+        },
+        "physiologic dead space": "All of each breath that exchanges no gas: the anatomic dead space plus any alveoli that are ventilated but not perfused. In healthy lungs it is close to the anatomic value."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Dead space (physiology)"
+          }
+        ]
+      },
+      "seeds": [
+        "minute ventilation",
+        "alveolar ventilation"
+      ],
+      "floatingTerms": [
+        "anatomic dead space",
+        "physiologic dead space"
+      ],
+      "terms": [
+        "minute ventilation",
+        "alveolar ventilation",
+        "anatomic dead space",
+        "physiologic dead space"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "pneumothorax",
+      "term": "pneumothorax",
+      "clusters": [
+        "pressure-gradients",
+        "elastic-recoil"
+      ],
+      "fact": "When air enters the pleural space through a chest wound or a ruptured lung surface, intrapleural pressure rises to atmospheric; uncoupled, the lung recoils inward and collapses while the chest wall springs outward.",
+      "info": {
+        "text": "Air in the pleural space, which uncouples the lung from the chest wall.",
+        "links": [
+          {
+            "href": "wiki:Pneumothorax"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "pressure-gradients": "intrapleural pressure",
+        "elastic-recoil": "chest wall recoil"
+      }
+    },
+    {
+      "id": "functional-residual-capacity",
+      "term": "functional residual capacity",
+      "clusters": [
+        "elastic-recoil",
+        "lung-volumes"
+      ],
+      "fact": "At the end of a quiet exhalation the lung's inward recoil exactly balances the chest wall's outward recoil; the lung volume at that balance point is the functional residual capacity, the residual volume plus the expiratory reserve volume.",
+      "info": {
+        "text": "The volume of air in the lungs at the end of a normal, passive exhalation, about 2.5 liters in an adult.",
+        "links": [
+          {
+            "href": "wiki:Functional residual capacity"
+          }
+        ]
+      },
+      "idealTerms": {
+        "elastic-recoil": "chest wall recoil"
+      }
+    },
+    {
+      "id": "work-of-breathing",
+      "term": "work of breathing",
+      "clusters": [
+        "elastic-recoil",
+        "airway-resistance"
+      ],
+      "fact": "Breathing does work against two loads: elastic recoil, which grows with the size of each breath, and airway resistance, which grows with the speed of airflow. Stiff lungs favor rapid, shallow breaths; narrowed airways favor slow, deep ones.",
+      "info": {
+        "text": "The energy spent moving the lungs and chest wall; at rest it takes only a small fraction of the body's oxygen consumption.",
+        "links": [
+          {
+            "href": "wiki:Work of breathing"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting"
+    },
+    {
+      "id": "dynamic-airway-compression",
+      "term": "dynamic airway compression",
+      "clusters": [
+        "pressure-gradients",
+        "airway-resistance"
+      ],
+      "fact": "In a forced exhalation, intrapleural pressure rises above atmospheric and squeezes the airways from outside, so beyond a moderate effort, pushing harder does not empty the lungs faster.",
+      "info": "Narrowing of the airways by surrounding pleural pressure during forced expiration, which caps maximal expiratory flow.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "pressure-gradients": "intrapleural pressure"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "pressure-gradients",
+        "to": "airway-resistance"
+      }
+    },
+    {
+      "id": "fev1-fvc-ratio",
+      "term": "FEV₁/FVC ratio",
+      "clusters": [
+        "airway-resistance",
+        "lung-volumes"
+      ],
+      "fact": "Spirometry measures the fraction of a forced vital capacity exhaled in the first second. When airway resistance rises, as in asthma or chronic obstructive pulmonary disease, the ratio falls; a value below 0.7 is the usual spirometric sign of airflow obstruction.",
+      "info": {
+        "text": "Forced expiratory volume in one second divided by forced vital capacity.",
+        "links": [
+          {
+            "href": "wiki:FEV1/FVC ratio"
+          }
+        ]
+      },
+      "relationKind": "evaluation",
+      "idealTerms": {
+        "lung-volumes": "spirometry"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "lung-volumes",
+        "to": "airway-resistance"
+      }
+    },
+    {
+      "id": "tidal-volume",
+      "term": "tidal volume",
+      "clusters": [
+        "lung-volumes",
+        "ventilation"
+      ],
+      "fact": "Tidal volume is both a lung volume and the size of each breath. The anatomic dead space is subtracted from every breath, so alveolar ventilation equals tidal volume minus dead space, times breathing rate.",
+      "info": {
+        "text": "The volume of air moved in a normal resting breath, about 500 mL in an adult.",
+        "links": [
+          {
+            "href": "wiki:Tidal volume"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "ventilation": "anatomic dead space"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "never-exhaled",
+      "prompt": "Which volumes contain air that no exhalation can expel?",
+      "explanation": "A spirometer records only air that moves, so it cannot measure these three. They are measured by gas dilution or body plethysmography instead.",
+      "targets": [
+        "residual volume",
+        "total lung capacity",
+        "functional residual capacity"
+      ],
+      "reasons": {
+        "functional residual capacity": "It is the expiratory reserve volume plus the residual volume.",
+        "residual volume": "It is the air that remains after the most forceful exhalation possible.",
+        "total lung capacity": "It is the vital capacity plus the residual volume."
+      }
+    },
+    {
+      "id": "unstable-alveoli",
+      "prompt": "What explains the tendency of small alveoli to empty into larger ones?",
+      "explanation": "Surfactant prevents this. It lowers surface tension, and lowers it most as an alveolus shrinks, so small alveoli stay open beside large ones.",
+      "targets": [
+        "surface tension",
+        "law of Laplace"
+      ],
+      "reasons": {
+        "law of Laplace": "At equal tension, the pressure inside a bubble rises as its radius falls, so a smaller alveolus has the higher pressure.",
+        "surface tension": "It pulls each alveolar surface inward, raising the pressure inside the alveolus."
+      }
+    },
+    {
+      "id": "airway-caliber",
+      "prompt": "Which mechanisms change airway caliber from breath to breath?",
+      "explanation": "Poiseuille's law states how radius sets resistance, and the medium-sized bronchi are where most resistance lies; neither changes from breath to breath. Intrapleural pressure acts on the airways through dynamic compression. Muscle tone, lung volume, and expiratory effort are what vary.",
+      "targets": [
+        "bronchial smooth muscle",
+        "radial traction",
+        "dynamic airway compression"
+      ],
+      "reasons": {
+        "bronchial smooth muscle": "Its contraction under vagal stimulation narrows the airways, and β₂-adrenergic stimulation relaxes it.",
+        "dynamic airway compression": "Positive intrapleural pressure in a forced exhalation squeezes the airways from outside.",
+        "radial traction": "Its pull on the airway walls strengthens as the lung inflates, widening the airways at high lung volumes."
+      }
+    },
+    {
+      "id": "rapid-shallow",
+      "prompt": "Which quantities fall when the same minute ventilation is taken as rapid, shallow breaths?",
+      "explanation": "The anatomic dead space stays the same size, so it takes a larger share of each smaller breath. Less fresh air reaches the alveoli, and arterial carbon dioxide rises. The work of breathing shifts from elastic toward resistive work rather than simply falling.",
+      "targets": [
+        "tidal volume",
+        "alveolar ventilation"
+      ],
+      "reasons": {
+        "alveolar ventilation": "The anatomic dead space is subtracted from every breath, so more breaths waste more of the same minute's air.",
+        "tidal volume": "Each breath is smaller, since more breaths share the same total."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "How air is moved",
+    "summary": "What creates the pressure differences that move air, what the lungs and airways resist with, how lung volumes are divided and measured, and how much of each breath reaches the alveoli.",
+    "estimatedMinutes": 8,
+    "content": {
+      "text": "Air enters and leaves the lungs about a dozen times a minute, and it moves only when a pressure difference drives it. Each breath has to overcome two loads: the elastic recoil of the lungs and chest wall, and the resistance of the airways. And only part of each breath reaches the alveoli, where gas is exchanged.\r\n\r\nThe aim of this lesson is to let you explain what each breath costs and how much of it does useful work.\r\n\r\n## Pressure drives airflow\r\n\r\nThe lungs cannot expand themselves. The diaphragm and rib muscles enlarge the chest, and by **Boyle's law** the pressure of a gas falls as its volume rises. During inspiration the **alveolar pressure**, the pressure of the air inside the alveoli, drops a little below atmospheric and air flows in; during quiet expiration it rises slightly above atmospheric and air flows out.\r\n\r\nThe lungs and chest wall are coupled by a thin film of fluid in the pleural space. The lung pulls inward and the chest wall pulls outward, so the **intrapleural pressure** in that space sits below atmospheric, about −5 cmH₂O at rest. The difference between alveolar and intrapleural pressure, the **transpulmonary pressure**, holds the lung distended. If air enters the pleural space, through a chest wound or a ruptured lung surface, that coupling is lost: in a **pneumothorax** the lung recoils inward and collapses while the chest wall springs outward.\r\n\r\n## Elastic recoil\r\n\r\n**Lung compliance** measures how easily the lung inflates: the change in volume for a given change in transpulmonary pressure. A scarred lung, as in pulmonary fibrosis, has low compliance; a lung that has lost its elastic tissue, as in emphysema, has high compliance and recoils weakly.\r\n\r\nPart of the lung's recoil comes from elastic fibers, and much of it from **surface tension** in the thin liquid layer lining the alveoli. The **law of Laplace** states that the pressure inside a bubble equals twice its surface tension divided by its radius, so at equal tension a small alveolus would empty into a larger one. **Surfactant**, a phospholipid film secreted by type II alveolar cells, keeps this from happening. It lowers surface tension, and lowers it most as an alveolus shrinks, which stabilizes small alveoli and makes the lung easier to inflate. Premature infants who have not yet produced enough of it develop respiratory distress syndrome.\r\n\r\nThe chest wall is elastic too. Left to itself it would spring outward, and **chest wall recoil** opposes the lung's inward pull. At the end of a quiet exhalation the two recoils exactly balance, and the lung volume at that point is the **functional residual capacity**.\r\n\r\n## Airway resistance\r\n\r\nAirflow also meets resistance. By **Poiseuille's law**, the resistance of a tube to smooth flow varies inversely with the fourth power of its radius: halve an airway's radius and its resistance rises sixteenfold. The narrowest airways are so numerous, and so fully arranged in parallel, that their combined resistance is small. Most resistance lies in the **medium-sized bronchi**, down to about the seventh generation of branching.\r\n\r\nAirway caliber changes from moment to moment. **Bronchial smooth muscle** in the airway walls contracts under vagal stimulation and relaxes under β₂-adrenergic stimulation; its excessive contraction is a hallmark of asthma. **Radial traction**, the pull of the surrounding lung tissue on the airway walls, holds the airways open and grows stronger as the lung inflates, so resistance falls at high lung volumes. In a forced exhalation, intrapleural pressure rises above atmospheric and squeezes the airways from outside. This **dynamic airway compression** caps expiratory flow: beyond a moderate effort, pushing harder does not empty the lungs faster.\r\n\r\nThe cost of overcoming both loads is the **work of breathing**. Elastic work grows with the size of each breath and resistive work with the speed of airflow, so people with stiff lungs tend to take rapid, shallow breaths, and people with narrowed airways slow, deep ones.\r\n\r\n## Lung volumes\r\n\r\nThe air in the lungs is divided into standard volumes. A normal resting breath is the **tidal volume**, about 500 mL. After a quiet exhalation more air can still be forced out, the **expiratory reserve volume**, and even after the most forceful exhalation the **residual volume** remains. The largest breath that can be exhaled after a full inhalation is the **vital capacity**, and the volume of air in the lungs after a full inhalation is the **total lung capacity**.\r\n\r\n**Spirometry** measures the air that moves in and out, and how fast it moves. It cannot measure the residual volume or any capacity that includes it, such as the functional residual capacity and total lung capacity; those require gas-dilution methods or body plethysmography. Spirometry does measure the **FEV₁/FVC ratio**, the fraction of a forced vital capacity exhaled in the first second. When airway resistance rises, as in asthma or chronic obstructive pulmonary disease, this ratio falls.\r\n\r\n## Ventilation and dead space\r\n\r\n**Minute ventilation** is the total air breathed per minute, tidal volume times breathing rate. Only part of it is useful. Each breath first fills the conducting airways, the **anatomic dead space** of about 150 mL, where no gas exchange takes place. The **physiologic dead space** adds any alveoli that are ventilated but not perfused; in healthy lungs it is close to the anatomic value. What remains is the **alveolar ventilation**, the fresh air reaching gas-exchanging alveoli each minute, and alveolar ventilation is what sets the level of carbon dioxide in arterial blood.\r\n\r\nBecause the dead space is subtracted from every breath, the pattern of breathing matters. The same minute ventilation taken as rapid, shallow breaths spends a larger share of each breath on dead space and leaves less alveolar ventilation.\r\n\r\n## Further reading\r\n\r\nThe standard concise account is in John B. West and Andrew M. Luks, *West's Respiratory Physiology: The Essentials*: chapter 2, \"Ventilation,\" and chapter 7, \"Mechanics of Breathing.\""
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "high"
+      }
+    ]
+  },
+  "board": {
+    "lensFlowTrace": true
+  }
+}

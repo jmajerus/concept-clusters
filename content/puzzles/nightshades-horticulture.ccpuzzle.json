@@ -1,0 +1,480 @@
+{
+  "id": "nightshades-horticulture",
+  "title": "Nightshades: The Beautiful Poison",
+  "category": "botany",
+  "subcategories": {
+    "botany": "horticulture"
+  },
+  "info": {
+    "text": "The garden's favorite family is also its most feared: tomato, potato, and pepper came from the same poisonous clan as belladonna and datura. Sort the crops from the alkaloids, and learn where the line between dinner and danger actually runs.",
+    "links": [
+      {
+        "href": "https://en.wikipedia.org/wiki/Capsaicin",
+        "label": "Capsaicin — Wikipedia"
+      },
+      {
+        "href": "https://en.wikipedia.org/wiki/Solanine",
+        "label": "Solanine — Wikipedia"
+      },
+      {
+        "href": "https://en.wikipedia.org/wiki/Tomato",
+        "label": "Tomato — Wikipedia"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Capsaicin",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Capsaicin"
+      },
+      {
+        "title": "Solanine",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Solanine"
+      },
+      {
+        "title": "Tomato",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Tomato"
+      },
+      {
+        "title": "Potato",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Potato"
+      },
+      {
+        "title": "Atropa belladonna",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Atropa_belladonna"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "summer-fruits",
+      "name": "The summer fruit vegetables",
+      "color": "teal",
+      "fact": "The heat-loving transplants: tomato and eggplant from Solanum, bell pepper from Capsicum, husked tomatillo and ground cherry from Physalis, and goji from the clan's dry-country genus — botanical fruits, every one of them.",
+      "termInfo": {
+        "tomato": {
+          "text": "Solanum lycopersicum, the garden's flagship — an Andean wild fruit domesticated in Mesoamerica and now the world's most-grown garden vegetable.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Tomato",
+              "label": "Tomato — Wikipedia"
+            }
+          ]
+        },
+        "bell pepper": {
+          "text": "Capsicum annuum carrying the recessive non-pungent mutation — the heat dial turned to zero.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Bell_pepper",
+              "label": "Bell pepper — Wikipedia"
+            }
+          ]
+        },
+        "eggplant": {
+          "text": "Solanum melongena, the Asian brinjal — a spongy fruit built to soak up oil and flavor.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Eggplant",
+              "label": "Eggplant — Wikipedia"
+            }
+          ]
+        },
+        "tomatillo": {
+          "text": "Physalis philadelphica, the salsa staple wrapped in its papery husk.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Tomatillo",
+              "label": "Tomatillo — Wikipedia"
+            }
+          ]
+        },
+        "ground cherry": {
+          "text": "Physalis pruinosa, a small sweet husked fruit that drops from the plant when ripe.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Physalis_pruinosa",
+              "label": "Physalis pruinosa — Wikipedia"
+            }
+          ]
+        },
+        "goji berry": {
+          "text": "Lycium barbarum, the 'wolfberry' — the family reaching into superfood country from its dry-country genus.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Goji",
+              "label": "Goji — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "If it's a warm-season transplant whose fruit you eat, it lives here.",
+      "seeds": [
+        "tomato",
+        "bell pepper"
+      ],
+      "floatingTerms": [
+        "eggplant",
+        "tomatillo",
+        "ground cherry",
+        "goji berry"
+      ],
+      "terms": [
+        "tomato",
+        "bell pepper",
+        "eggplant",
+        "tomatillo",
+        "ground cherry",
+        "goji berry"
+      ]
+    },
+    {
+      "id": "capsaicin-line",
+      "name": "The capsaicin line",
+      "color": "blue",
+      "fact": "One genus, one molecule: Capsicum packs capsaicin into the placental tissue around its seeds — a burn that only mammals feel, because bird receptors shrug it off. Birds spread what molars would destroy.",
+      "termInfo": {
+        "chile pepper": {
+          "text": "Capsicum's pungent fruits — heat from placental capsaicin, graded in Scoville heat units from jalapeño to reaper.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Chili_pepper",
+              "label": "Chili pepper — Wikipedia"
+            }
+          ]
+        },
+        "capsaicin": {
+          "text": "The molecule: a mammal-only irritant binding the TRPV1 receptor — a deterrent to seed-grinding molars, invisible to seed-dispersing birds.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Capsaicin",
+              "label": "Capsaicin — Wikipedia"
+            }
+          ]
+        },
+        "Scoville scale": {
+          "text": "The pungency yardstick: zero for a bell pepper, roughly 16 million for pure capsaicin.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Scoville_scale",
+              "label": "Scoville scale — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "If the burn is the point, it lives here.",
+      "seeds": [
+        "chile pepper",
+        "capsaicin"
+      ],
+      "floatingTerms": [
+        "Scoville scale"
+      ],
+      "terms": [
+        "chile pepper",
+        "capsaicin",
+        "Scoville scale"
+      ]
+    },
+    {
+      "id": "staple-side",
+      "name": "The staple side",
+      "color": "amber",
+      "fact": "The family's staple calories: the potato — world's third food crop and the tuber that remade European history — and the tamarillo, the Andean 'tree tomato' growing the same clan's fruit on a tree.",
+      "termInfo": {
+        "potato": {
+          "text": "Solanum tuberosum, the Andean tuber — stored dark to keep its light-made alkaloids down.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Potato",
+              "label": "Potato — Wikipedia"
+            }
+          ]
+        },
+        "tamarillo": {
+          "text": "Solanum betaceum, the 'tree tomato' — the same clan's fruit crop on a small Andean tree.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Tamarillo",
+              "label": "Tamarillo — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "If the crop feeds nations rather than salads, it lives here.",
+      "seeds": [
+        "potato"
+      ],
+      "floatingTerms": [
+        "tamarillo"
+      ],
+      "terms": [
+        "potato",
+        "tamarillo"
+      ]
+    },
+    {
+      "id": "alkaloid-cabinet",
+      "name": "The alkaloid cabinet",
+      "color": "magenta",
+      "fact": "The cabinet of nerve poisons: solanine synthesized in greened potatoes, nicotine in tobacco leaves, atropine in deadly nightshade — molecules aimed at animal nervous systems, and at other doses, at medicine.",
+      "termInfo": {
+        "solanine": {
+          "text": "The potato's glycoalkaloid defense, synthesized under light and concentrated near the skin — bitter where it lurks, and barely touched by boiling.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Solanine",
+              "label": "Solanine — Wikipedia"
+            }
+          ]
+        },
+        "nicotine": {
+          "text": "Tobacco's insecticide and the world's most infamous addiction — a nerve poison on both counts.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Nicotine",
+              "label": "Nicotine — Wikipedia"
+            }
+          ]
+        },
+        "atropine": {
+          "text": "Deadly nightshade's anticholinergic: dilated pupils and racing heart — poison at one dose, an ophthalmologist's tool at another.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Atropine",
+              "label": "Atropine — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "The molecules behind the family's fear — and its medicine.",
+      "seeds": [
+        "nicotine",
+        "solanine"
+      ],
+      "floatingTerms": [
+        "atropine"
+      ],
+      "terms": [
+        "nicotine",
+        "solanine",
+        "atropine"
+      ]
+    },
+    {
+      "id": "deadly-beautiful",
+      "name": "The deadly and the beautiful",
+      "color": "olive",
+      "fact": "The shadow and the ornament share one flower shape: deadly nightshade and datura behind the family's fear, petunia and flowering tobacco in the bedding flats, and angel's trumpet poisoning the gardens it beautifies.",
+      "termInfo": {
+        "deadly nightshade": {
+          "text": "Atropa belladonna — 'beautiful lady,' for the pupils its atropine dilated; every part of the plant genuinely toxic.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Atropa_belladonna",
+              "label": "Atropa belladonna — Wikipedia"
+            }
+          ]
+        },
+        "petunia": {
+          "text": "Petunia hybrida, the bedding-flat staple — the family's friendly face.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Petunia",
+              "label": "Petunia — Wikipedia"
+            }
+          ]
+        },
+        "datura": {
+          "text": "The jimsonweed genus — dramatic trumpet flowers and dangerous seeds; a weed on one continent, a deliberate ornamental on another.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Datura",
+              "label": "Datura — Wikipedia"
+            }
+          ]
+        },
+        "angel's trumpet": {
+          "text": "Brugmansia, the pendulous scented trumpets — ornamental, and toxic through and through.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Brugmansia",
+              "label": "Brugmansia — Wikipedia"
+            }
+          ]
+        },
+        "flowering tobacco": {
+          "text": "Nicotiana alata, the evening-scented bedding annual — nicotine's genus in a flower border.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Nicotiana_alata",
+              "label": "Nicotiana alata — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "Gorgeous, poisonous, or both — know which before you touch.",
+      "seeds": [
+        "deadly nightshade",
+        "petunia"
+      ],
+      "floatingTerms": [
+        "datura",
+        "angel's trumpet",
+        "flowering tobacco"
+      ],
+      "terms": [
+        "deadly nightshade",
+        "petunia",
+        "datura",
+        "angel's trumpet",
+        "flowering tobacco"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "heat-dial",
+      "term": "The heat dial",
+      "clusters": [
+        "summer-fruits",
+        "capsaicin-line"
+      ],
+      "fact": "Bell pepper and chile pepper are both Capsicum at two ends of one capsaicin dial: pungent types pack the placenta with the molecule, sweet types carry the recessive mutation that silences it.",
+      "info": "One broken acyltransferase gene at the pun1 locus is much of the difference between dinner and dare.",
+      "relationKind": "contrast"
+    },
+    {
+      "id": "greening-warning",
+      "term": "Greening",
+      "clusters": [
+        "staple-side",
+        "alkaloid-cabinet"
+      ],
+      "fact": "Light makes tubers synthesize solanine alongside chlorophyll — the green is harmless chlorophyll, the poison beneath it is not. Store potatoes dark, and trust bitterness over color.",
+      "info": "Boiling barely helps; peeling does, because 30–80% of the solanine sits in and near the skin.",
+      "direction": {
+        "kind": "through",
+        "from": "staple-side",
+        "to": "alkaloid-cabinet"
+      }
+    },
+    {
+      "id": "dose-poison",
+      "term": "Dose",
+      "clusters": [
+        "deadly-beautiful",
+        "alkaloid-cabinet"
+      ],
+      "fact": "The deadly kin supply the cabinet: atropine dilated Renaissance beauties' pupils and today's eye-exam patients', nicotine both kills and hooks, datura's scopolamine is poison and medicine — same molecules, the dose decides.",
+      "info": "Atropine sits on the WHO essential-medicines list — the poison and the antidote share a shelf.",
+      "relationKind": "cross-cutting"
+    },
+    {
+      "id": "look-alikes",
+      "term": "Look-alikes",
+      "clusters": [
+        "summer-fruits",
+        "deadly-beautiful"
+      ],
+      "fact": "The family's edible fruits grow beside toxic doppelgängers — ground cherries near woody-nightshade berries, tomato seedlings near datura volunteers — and telling them apart is a gardener's real skill.",
+      "info": "Tomato and potato leaves are themselves mild toxin factories — 'edible plant' never meant 'edible plant part.'",
+      "relationKind": "contrast"
+    },
+    {
+      "id": "choosing-attacker",
+      "term": "Nerve receptors",
+      "clusters": [
+        "capsaicin-line",
+        "alkaloid-cabinet"
+      ],
+      "fact": "The family aims its defenses: capsaicin burns only mammalian TRPV1 receptors, leaving the seed-dispersing birds untouched, while the alkaloids hit receptors and membranes across the animal kingdom.",
+      "info": "Capsaicin's targets are nociceptors — the same fibers heat and abrasion trigger, which is why the brain reads the burn as burning."
+    }
+  ],
+  "lenses": [
+    {
+      "id": "the-dial",
+      "prompt": "One Capsicum fruit is bred to hold no capsaicin at all; its sibling is bred to hold the maximum. Which two terms are the two ends of the dial?",
+      "explanation": "Bell pepper and chile pepper are one genus at two settings: the sweet type carries the recessive mutation that silences capsaicin production, the pungent type packs it into the placenta around the seeds. Birds eat both without noticing — the dial is set for mammal tongues.",
+      "targets": [
+        "bell pepper",
+        "chile pepper"
+      ],
+      "reasons": {
+        "bell pepper": "The dial at zero — the recessive non-pungent mutation.",
+        "chile pepper": "The dial at maximum — placental capsaicin, graded in Scoville units."
+      }
+    },
+    {
+      "id": "green-potato-warning",
+      "prompt": "A green-tinged potato goes straight to the compost. Which two terms together name both the crop and the toxin it built in the light?",
+      "explanation": "Light makes the tuber produce chlorophyll and solanine together — the green is only the warning label, the alkaloid underneath is the danger. Cooking barely touches glycoalkaloids, and peeling helps because most of the solanine sits in and near the skin.",
+      "targets": [
+        "potato",
+        "solanine"
+      ],
+      "reasons": {
+        "potato": "The tuber — its skin greens with chlorophyll while solanine accumulates beneath.",
+        "solanine": "The glycoalkaloid synthesized under light; bitter, and the reason storage is dark."
+      }
+    },
+    {
+      "id": "cosmetic-and-poison",
+      "prompt": "One molecule in the cabinet was a Renaissance cosmetic — dropped into eyes to dilate pupils — and its supplier is the family's most infamous namesake. Which two terms?",
+      "explanation": "Atropine is deadly nightshade's signature alkaloid: 'belladonna' means beautiful lady for exactly this pupil-widening effect, and the refined molecule still dilates eyes in every ophthalmology clinic — poison at one dose, tool at another.",
+      "targets": [
+        "atropine",
+        "deadly nightshade"
+      ],
+      "reasons": {
+        "atropine": "The anticholinergic that widens pupils — cosmetic, poison, and clinical tool by dose.",
+        "deadly nightshade": "Atropa belladonna, the supplier — the family's most infamous namesake."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "legumes-horticulture",
+        "reason": "Companion trilogy I: the legume family's nitrogen partnership — the friendly superpower beside this board's chemical warfare."
+      },
+      {
+        "id": "brassicas-horticulture",
+        "reason": "Companion trilogy II: the mustard family's oil bomb — irritation where this board poisons, canola where this board grows staples."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The beautiful poison",
+    "summary": "The nightshade family gave the world its favorite summer crops and its most infamous poisons — the same alkaloid chemistry runs through both, and a gardener who knows the difference gardens safely.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "No plant family feeds the world's gardens and frightens it in the same breath like the nightshades. Tomato, potato, pepper, and eggplant — four of the most-grown crops on earth — share one flower shape and one family tree with deadly nightshade, datura, and henbane. The botanists' name is Solanaceae; the fear is older than the name.\r\n\r\n## The crops\r\n\r\nAlmost everything edible here is a fruit: tomato and eggplant from the genus Solanum, peppers from Capsicum, the husked tomatillo and ground cherry from Physalis, goji from the dry-country genus Lycium. They are heat-loving transplants — started indoors, planted out after frost, staked or caged through summer. The one great exception is the potato, and it is a giant: an Andean tuber that became the world's third food crop and rewrote European history when it crossed the Atlantic. The tamarillo, the 'tree tomato,' shows the Andean clan's staple side was never only underground.\r\n\r\n## The chemistry\r\n\r\nThe family's fear has a chemistry set. Potatoes defend themselves with solanine, a glycoalkaloid they synthesize faster when light strikes the tuber — which is why a green-tinged potato warns of poison beneath its harmless chlorophyll, and why bitterness is the surer tell. Tobacco makes nicotine. Deadly nightshade makes atropine, the molecule that dilated Renaissance beauties' pupils and still dilates eyes in clinics today — the dose alone separates the cosmetic from the casualty. And then there is the family's most refined weapon: capsaicin, the heat of chile peppers, aimed with uncanny precision. It irritates the receptors of mammals — the seed-crushers — while birds, the seed-dispersers, cannot feel it at all. Breeders turned that dial in both directions: the chile at maximum Scoville, the bell pepper at zero, one broken gene between them.\r\n\r\n## The gardener's literacy\r\n\r\nBecause the delicious and the dangerous grow side by side, this family rewards attention. Volunteer datura appears in compost and fresh ground; woody nightshade's red berries hang where children reach; the glorious angel's trumpet poisons the patio it perfumes. Meanwhile the crops themselves carry mild defenses — tomato leaves are not salad, and a sprouted, greened potato belongs in the compost, not the pot. None of this argues against the nightshade garden; it argues for knowing which nightshade you are holding."
+    },
+    "links": [
+      {
+        "href": "https://en.wikipedia.org/wiki/Solanaceae",
+        "label": "Solanaceae — Wikipedia"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  },
+  "board": {
+    "bridgePreconnect": true,
+    "sizeFactor": 0.8
+  }
+}

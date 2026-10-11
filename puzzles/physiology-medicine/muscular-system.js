@@ -3,11 +3,13 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "muscular-system",
   "title": "The muscular system",
   "category": "physiology-medicine",
-  "large": true,
+  "subcategories": {
+    "physiology-medicine": "muscle"
+  },
   "info": {
     "text": "Nerve orders become sliding-filament force: acetylcholine fires the fiber, calcium exposes actin, myosin ratchets, and three fuel routes pay in sequence.",
     "links": [
@@ -286,7 +288,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "sarcoplasmic-calcium-release",
       "term": "sarcoplasmic calcium release",
       "clusters": [
         1,
@@ -300,7 +301,6 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "atp-driven-power-stroke",
       "term": "ATP-driven power stroke",
       "clusters": [
         0,
@@ -321,7 +321,6 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "oxygen-reserve",
       "term": "oxygen reserve",
       "clusters": [
         2,
@@ -420,3 +419,383 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "muscular-system",
+      "puzzleRevision": "fnv1a32:e4f0acca",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:actin": {
+          "x": 175.1,
+          "y": 53.06
+        },
+        "term:myosin": {
+          "x": 207.19,
+          "y": 116.61
+        },
+        "term:sarcomere": {
+          "x": 501.69,
+          "y": 22
+        },
+        "term:cross-bridge": {
+          "x": 297.49,
+          "y": 22
+        },
+        "term:troponin": {
+          "x": 609.96,
+          "y": 32.04
+        },
+        "term:calcium ions": {
+          "x": 344.23,
+          "y": 155.44
+        },
+        "term:motor unit": {
+          "x": 706.57,
+          "y": 87.6
+        },
+        "term:neuromuscular junction": {
+          "x": 858.75,
+          "y": 58.63
+        },
+        "term:acetylcholine": {
+          "x": 899.05,
+          "y": 343.87
+        },
+        "term:muscle action potential": {
+          "x": 739.69,
+          "y": 378
+        },
+        "term:muscle fiber": {
+          "x": 902.2,
+          "y": 210.38
+        },
+        "term:slow-twitch fibers": {
+          "x": 470.61,
+          "y": 581.97
+        },
+        "term:fast-twitch fibers": {
+          "x": 642.51,
+          "y": 549.85
+        },
+        "term:myoglobin": {
+          "x": 566.52,
+          "y": 285.68
+        },
+        "term:mitochondria": {
+          "x": 691.77,
+          "y": 486.9
+        },
+        "term:fatigue": {
+          "x": 382.56,
+          "y": 520.84
+        },
+        "term:ATP": {
+          "x": 222.13,
+          "y": 362.12
+        },
+        "term:creatine phosphate": {
+          "x": 128.03,
+          "y": 505.68
+        },
+        "term:glycogen": {
+          "x": 382.74,
+          "y": 409.22
+        },
+        "term:glycolysis": {
+          "x": 114.83,
+          "y": 412.6
+        },
+        "term:oxidative phosphorylation": {
+          "x": 379.17,
+          "y": 323.51
+        },
+        "term:sarcoplasmic calcium release": {
+          "x": 599.69,
+          "y": 193.8
+        },
+        "term:ATP-driven power stroke": {
+          "x": 151.06,
+          "y": 280.09
+        },
+        "term:oxygen reserve": {
+          "x": 415.5,
+          "y": 255.38
+        },
+        "cluster:0": {
+          "x": 457.3,
+          "y": 92.64
+        },
+        "cluster:1": {
+          "x": 755.78,
+          "y": 261.32
+        },
+        "cluster:2": {
+          "x": 526.77,
+          "y": 481.23
+        },
+        "cluster:3": {
+          "x": 252.57,
+          "y": 446.89
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-07T23:31:29.394Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "muscular-system",
+      "puzzleRevision": "fnv1a32:e4f0acca",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 799.87,
+          "y": 202.28,
+          "pinned": true
+        },
+        "cluster:1": {
+          "x": 719.86,
+          "y": 580.57,
+          "pinned": true
+        },
+        "cluster:2": {
+          "x": 364.12,
+          "y": 600.3,
+          "pinned": true
+        },
+        "cluster:3": {
+          "x": 226.02,
+          "y": 218.72,
+          "pinned": true
+        }
+      },
+      "bridges": {
+        "term:sarcoplasmic calcium release": {
+          "x": 921.53,
+          "y": 410.06,
+          "pinned": true
+        },
+        "term:ATP-driven power stroke": {
+          "x": 525,
+          "y": 213.24,
+          "pinned": true
+        },
+        "term:oxygen reserve": {
+          "x": 208.05,
+          "y": 439.4,
+          "pinned": true
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "actin",
+          "myosin",
+          "sarcomere",
+          "cross-bridge",
+          "troponin",
+          "calcium ions"
+        ],
+        "cluster:1": [
+          "motor unit",
+          "neuromuscular junction",
+          "acetylcholine",
+          "muscle action potential",
+          "muscle fiber"
+        ],
+        "cluster:2": [
+          "slow-twitch fibers",
+          "fast-twitch fibers",
+          "myoglobin",
+          "mitochondria",
+          "fatigue"
+        ],
+        "cluster:3": [
+          "ATP",
+          "creatine phosphate",
+          "glycogen",
+          "glycolysis",
+          "oxidative phosphorylation"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 612.5705514974961
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": false,
+      "source": "author",
+      "savedAt": "2026-10-08T13:07:42.080Z"
+    },
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "muscular-system",
+      "puzzleRevision": "fnv1a32:e4f0acca",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:actin": {
+          "x": 304.8,
+          "y": 101.9,
+          "pinned": false
+        },
+        "term:myosin": {
+          "x": 225.94,
+          "y": 126.59,
+          "pinned": false
+        },
+        "term:sarcomere": {
+          "x": 355.04,
+          "y": 24.71,
+          "pinned": false
+        },
+        "term:cross-bridge": {
+          "x": 240.9,
+          "y": 23,
+          "pinned": false
+        },
+        "term:troponin": {
+          "x": 392.01,
+          "y": 119.29,
+          "pinned": false
+        },
+        "term:calcium ions": {
+          "x": 302.99,
+          "y": 203.42,
+          "pinned": false
+        },
+        "term:motor unit": {
+          "x": 599.33,
+          "y": 159.72,
+          "pinned": false
+        },
+        "term:neuromuscular junction": {
+          "x": 741.39,
+          "y": 115.47,
+          "pinned": false
+        },
+        "term:acetylcholine": {
+          "x": 502.01,
+          "y": 88.77,
+          "pinned": false
+        },
+        "term:muscle action potential": {
+          "x": 673.16,
+          "y": 292.52,
+          "pinned": false
+        },
+        "term:muscle fiber": {
+          "x": 613.27,
+          "y": 28.07,
+          "pinned": false
+        },
+        "term:slow-twitch fibers": {
+          "x": 561.73,
+          "y": 430.24,
+          "pinned": false
+        },
+        "term:fast-twitch fibers": {
+          "x": 723.67,
+          "y": 480.5,
+          "pinned": true
+        },
+        "term:myoglobin": {
+          "x": 428.7,
+          "y": 430.31,
+          "pinned": false
+        },
+        "term:mitochondria": {
+          "x": 515.08,
+          "y": 564.88,
+          "pinned": false
+        },
+        "term:fatigue": {
+          "x": 620.58,
+          "y": 542.51,
+          "pinned": false
+        },
+        "term:ATP": {
+          "x": 144.43,
+          "y": 420.53,
+          "pinned": false
+        },
+        "term:creatine phosphate": {
+          "x": 161.76,
+          "y": 535.67,
+          "pinned": false
+        },
+        "term:glycogen": {
+          "x": 47.2,
+          "y": 474.57,
+          "pinned": false
+        },
+        "term:glycolysis": {
+          "x": 69.67,
+          "y": 372.34,
+          "pinned": false
+        },
+        "term:oxidative phosphorylation": {
+          "x": 277.96,
+          "y": 393.73,
+          "pinned": false
+        },
+        "term:sarcoplasmic calcium release": {
+          "x": 466.7,
+          "y": 262.36,
+          "pinned": false
+        },
+        "term:ATP-driven power stroke": {
+          "x": 148.43,
+          "y": 242.4,
+          "pinned": false
+        },
+        "term:oxygen reserve": {
+          "x": 371.82,
+          "y": 536.49,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3553.84,
+        "score": 3553.8446410595384
+      },
+      "solutionLayout": null,
+      "capturedSolved": true,
+      "fixed": false,
+      "source": "author",
+      "savedAt": "2026-10-08T13:08:23.455Z"
+    }
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

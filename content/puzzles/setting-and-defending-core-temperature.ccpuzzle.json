@@ -1,0 +1,672 @@
+{
+  "id": "setting-and-defending-core-temperature",
+  "title": "Setting and defending core temperature",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "integrative"
+  },
+  "info": {
+    "text": "How the hypothalamus holds core temperature near a set point by recruiting skin, muscle, fat, glands and circulation, and how fever resets that point.",
+    "links": [
+      {
+        "href": "wiki:Thermoregulation"
+      },
+      {
+        "href": "https://www.ncbi.nlm.nih.gov/books/NBK507838/"
+      },
+      {
+        "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-6-energy-and-heat-balance"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Physiology, Temperature Regulation",
+        "publisher": "StatPearls Publishing (NCBI Bookshelf)",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK507838/"
+      },
+      {
+        "title": "Anatomy and Physiology 2e, section 24.6: Energy and Heat Balance",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-6-energy-and-heat-balance"
+      },
+      {
+        "title": "Human temperature regulation under heat stress in health, disease, and injury",
+        "author": "Matthew N. Cramer, Daniel Gagnon, Orlando Laitano, Craig G. Crandall",
+        "publisher": "Physiological Reviews 102(4)",
+        "year": "2022",
+        "pages": "1907-1989",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35679471/"
+      },
+      {
+        "title": "Neural Mechanisms of Inflammation-Induced Fever",
+        "author": "Anders Blomqvist, David Engblom",
+        "publisher": "The Neuroscientist",
+        "year": "2018",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6047205/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "heat-exchange-routes",
+      "name": "Routes of heat exchange",
+      "color": "teal",
+      "fact": "The body trades heat with its surroundings by radiation, conduction and convection, which follow the temperature difference between skin and environment, and by evaporation, which removes heat whenever water vaporizes from skin or airways.",
+      "termInfo": {
+        "conduction": {
+          "text": "Direct transfer of heat between the skin and an object or medium it touches, such as a cold bench or cold water.",
+          "links": [
+            {
+              "href": "wiki:Thermal conduction"
+            }
+          ]
+        },
+        "convection": {
+          "text": "Heat carried away by moving air or water that flows past the skin, replacing the warmed layer next to it with cooler fluid.",
+          "links": [
+            {
+              "href": "wiki:Convection (heat transfer)"
+            }
+          ]
+        },
+        "evaporation": {
+          "text": "Heat absorbed as water changes to vapor on the skin or in the airways; it keeps working even when the surroundings are hotter than the skin.",
+          "links": [
+            {
+              "href": "wiki:Evaporation"
+            },
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK541107/"
+            }
+          ]
+        },
+        "radiation": {
+          "text": "Transfer of heat as infrared energy between the skin and surrounding surfaces, without direct contact; the largest route of heat loss for a resting person in a cool room.",
+          "links": [
+            {
+              "href": "wiki:Thermal radiation"
+            },
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK541107/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Heat transfer"
+          },
+          {
+            "href": "https://www.ncbi.nlm.nih.gov/books/NBK541107/"
+          }
+        ]
+      },
+      "seeds": [
+        "radiation",
+        "evaporation"
+      ],
+      "floatingTerms": [
+        "conduction",
+        "convection"
+      ],
+      "terms": [
+        "radiation",
+        "evaporation",
+        "conduction",
+        "convection"
+      ]
+    },
+    {
+      "id": "sensing-and-setting",
+      "name": "Sensing and setting temperature",
+      "color": "blue",
+      "fact": "Thermoreceptors in the skin and deep tissues report temperature to the preoptic area of the hypothalamus, which compares core temperature with a set point and recruits whichever defenses close the gap.",
+      "termInfo": {
+        "core thermoreceptors": {
+          "text": "Temperature sensors in the hypothalamus, spinal cord and abdominal organs that report the temperature of the body's interior.",
+          "links": [
+            {
+              "href": "wiki:Thermoreceptor"
+            },
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK499843/"
+            }
+          ]
+        },
+        "preoptic area": {
+          "text": "Region of the anterior hypothalamus that integrates temperature signals and acts as the body's thermostat.",
+          "links": [
+            {
+              "href": "wiki:Preoptic area"
+            },
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK499843/"
+            }
+          ]
+        },
+        "set point": {
+          "text": "The core temperature, normally near 37 °C, that the hypothalamus treats as its target; every thermoregulatory response works to return the body to it.",
+          "links": [
+            {
+              "href": "wiki:Thermoregulation"
+            },
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK499843/"
+            }
+          ]
+        },
+        "skin thermoreceptors": {
+          "text": "Nerve endings in the skin that detect warmth and, more abundantly, cold, giving early warning of environmental change before core temperature shifts.",
+          "links": [
+            {
+              "href": "wiki:Thermoreceptor"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Hypothalamus"
+          },
+          {
+            "href": "https://www.ncbi.nlm.nih.gov/books/NBK499843/"
+          }
+        ]
+      },
+      "seeds": [
+        "preoptic area",
+        "skin thermoreceptors"
+      ],
+      "floatingTerms": [
+        "core thermoreceptors",
+        "set point"
+      ],
+      "terms": [
+        "preoptic area",
+        "skin thermoreceptors",
+        "core thermoreceptors",
+        "set point"
+      ]
+    },
+    {
+      "id": "defending-against-cold",
+      "name": "Defending against cold",
+      "color": "amber",
+      "fact": "When core temperature falls below the set point, skin vessels constrict to conserve heat and hairs stand erect, while skeletal muscle, brown fat and, over weeks, thyroid hormone raise heat production.",
+      "termInfo": {
+        "brown adipose tissue": {
+          "text": "Fat tissue whose mitochondria release energy as heat rather than ATP, providing nonshivering thermogenesis, most notably in infants.",
+          "links": [
+            {
+              "href": "wiki:Brown adipose tissue"
+            }
+          ]
+        },
+        "cutaneous vasoconstriction": {
+          "text": "Narrowing of skin blood vessels, which keeps warm blood in the core and lets the skin cool, shrinking the gradient that drives heat loss.",
+          "links": [
+            {
+              "href": "wiki:Vasoconstriction"
+            },
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/books/NBK507838/"
+            }
+          ]
+        },
+        "piloerection": {
+          "text": "Contraction of tiny muscles that raise body hairs (goose bumps); in furred mammals it traps an insulating air layer, in humans the effect is small.",
+          "links": [
+            {
+              "href": "wiki:Goose bumps"
+            }
+          ]
+        },
+        "shivering": {
+          "text": "Rapid involuntary contractions of skeletal muscle that turn chemical energy into heat instead of movement.",
+          "links": [
+            {
+              "href": "wiki:Shivering"
+            }
+          ]
+        },
+        "thyroid hormone": {
+          "text": "Hormone that raises the basal metabolic rate of most tissues; prolonged cold increases its output, slowly raising heat production.",
+          "links": [
+            {
+              "href": "wiki:Thyroid hormones"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Thermogenesis"
+          },
+          {
+            "href": "https://www.ncbi.nlm.nih.gov/books/NBK507838/"
+          }
+        ]
+      },
+      "seeds": [
+        "shivering",
+        "cutaneous vasoconstriction"
+      ],
+      "floatingTerms": [
+        "piloerection",
+        "brown adipose tissue",
+        "thyroid hormone"
+      ],
+      "terms": [
+        "shivering",
+        "cutaneous vasoconstriction",
+        "piloerection",
+        "brown adipose tissue",
+        "thyroid hormone"
+      ]
+    },
+    {
+      "id": "defending-against-heat",
+      "name": "Defending against heat",
+      "color": "magenta",
+      "fact": "When core temperature rises above the set point, skin vessels dilate and cardiac output rises to carry core heat to the surface, eccrine glands secrete sweat for evaporative cooling, and repeated heat exposure brings acclimatization that makes these responses earlier and stronger.",
+      "termInfo": {
+        "cutaneous vasodilation": {
+          "text": "Widening of skin blood vessels so warm blood from the core reaches the surface, where its heat can be shed.",
+          "links": [
+            {
+              "href": "wiki:Vasodilation"
+            },
+            {
+              "href": "https://pubmed.ncbi.nlm.nih.gov/35679471/"
+            }
+          ]
+        },
+        "eccrine sweating": {
+          "text": "Secretion of watery sweat from glands spread over most of the skin, the body's most powerful means of shedding heat.",
+          "links": [
+            {
+              "href": "wiki:Eccrine sweat gland"
+            },
+            {
+              "href": "https://pubmed.ncbi.nlm.nih.gov/35679471/"
+            }
+          ]
+        },
+        "heat acclimatization": {
+          "text": "Adaptation over one to two weeks of repeated heat exposure: sweating starts sooner and is more plentiful and less salty, and plasma volume expands.",
+          "links": [
+            {
+              "href": "wiki:Acclimatization"
+            },
+            {
+              "href": "https://pubmed.ncbi.nlm.nih.gov/35679471/"
+            }
+          ]
+        },
+        "increased cardiac output": {
+          "text": "In heat, the heart pumps more blood per minute to supply the dilated skin, which strains circulation when exercise also demands blood for muscle.",
+          "links": [
+            {
+              "href": "wiki:Cardiac output"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Thermoregulation"
+          },
+          {
+            "href": "https://pubmed.ncbi.nlm.nih.gov/35679471/"
+          }
+        ]
+      },
+      "seeds": [
+        "eccrine sweating",
+        "cutaneous vasodilation"
+      ],
+      "floatingTerms": [
+        "increased cardiac output",
+        "heat acclimatization"
+      ],
+      "terms": [
+        "eccrine sweating",
+        "cutaneous vasodilation",
+        "increased cardiac output",
+        "heat acclimatization"
+      ]
+    },
+    {
+      "id": "fever",
+      "name": "Fever",
+      "color": "olive",
+      "fact": "In fever, microbial products prompt immune cells to release cytokines; these induce cyclooxygenase-2 in brain blood vessels, and the prostaglandin it makes raises the hypothalamic set point. Antipyretic drugs lower the set point by blocking cyclooxygenase.",
+      "termInfo": {
+        "antipyretics": {
+          "text": "Fever-reducing drugs such as aspirin, ibuprofen and acetaminophen, which inhibit cyclooxygenase and so let the set point return to normal.",
+          "links": [
+            {
+              "href": "wiki:Antipyretic"
+            }
+          ]
+        },
+        "cyclooxygenase-2": {
+          "text": "Enzyme induced by cytokines in the cells lining brain blood vessels; it produces the prostaglandin that resets the thermostat.",
+          "links": [
+            {
+              "href": "wiki:Cyclooxygenase-2"
+            },
+            {
+              "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6047205/"
+            }
+          ]
+        },
+        "endogenous pyrogens": {
+          "text": "Cytokines such as interleukin-1, interleukin-6 and tumor necrosis factor, released by the body's own immune cells, that signal the brain to raise the set point.",
+          "links": [
+            {
+              "href": "wiki:Cytokine"
+            },
+            {
+              "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6047205/"
+            }
+          ]
+        },
+        "exogenous pyrogens": {
+          "text": "Fever-inducing substances from outside the body, such as bacterial lipopolysaccharide, that trigger immune cells to release cytokines.",
+          "links": [
+            {
+              "href": "wiki:Lipopolysaccharide"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Fever"
+          },
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6047205/"
+          }
+        ]
+      },
+      "seeds": [
+        "endogenous pyrogens",
+        "antipyretics"
+      ],
+      "floatingTerms": [
+        "exogenous pyrogens",
+        "cyclooxygenase-2"
+      ],
+      "terms": [
+        "endogenous pyrogens",
+        "antipyretics",
+        "exogenous pyrogens",
+        "cyclooxygenase-2"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "humidity",
+      "term": "humidity",
+      "clusters": [
+        "heat-exchange-routes",
+        "defending-against-heat"
+      ],
+      "fact": "Sweat cools only as it evaporates, and evaporation slows as the surrounding air nears saturation; in hot, humid air, sweat drips away without removing heat, and the strongest heat defense loses its effect.",
+      "info": {
+        "text": "The amount of water vapor in the air; the closer air is to saturation, the less additional water can evaporate into it.",
+        "links": [
+          {
+            "href": "wiki:Humidity"
+          },
+          {
+            "href": "https://www.ncbi.nlm.nih.gov/books/NBK499843/"
+          }
+        ]
+      },
+      "idealTerms": {
+        "heat-exchange-routes": "evaporation",
+        "defending-against-heat": "eccrine sweating"
+      }
+    },
+    {
+      "id": "sympathetic-outflow",
+      "term": "sympathetic outflow",
+      "clusters": [
+        "sensing-and-setting",
+        "defending-against-cold",
+        "defending-against-heat"
+      ],
+      "fact": "Sympathetic nerves carry the preoptic area's commands to skin vessels, brown fat and sweat glands, so one efferent pathway drives both the heat-conserving and the heat-dissipating responses.",
+      "info": {
+        "text": "Signals from the sympathetic division of the autonomic nervous system; unusually, the nerves to sweat glands release acetylcholine rather than norepinephrine.",
+        "links": [
+          {
+            "href": "wiki:Sympathetic nervous system"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "sensing-and-setting": "preoptic area",
+        "defending-against-cold": "cutaneous vasoconstriction",
+        "defending-against-heat": "eccrine sweating"
+      }
+    },
+    {
+      "id": "thermoneutral-zone",
+      "term": "thermoneutral zone",
+      "clusters": [
+        "defending-against-cold",
+        "defending-against-heat"
+      ],
+      "fact": "Across the thermoneutral zone, a band of surrounding temperatures that shifts with clothing, adjusting skin blood flow alone keeps core temperature at its set point; below it heat production rises, and above it sweating begins.",
+      "info": {
+        "text": "The range of environmental temperatures in which the body needs no extra heat production or sweating to hold its core temperature.",
+        "links": [
+          {
+            "href": "wiki:Thermal neutral zone"
+          }
+        ]
+      },
+      "idealTerms": {
+        "defending-against-cold": "cutaneous vasoconstriction",
+        "defending-against-heat": "cutaneous vasodilation"
+      }
+    },
+    {
+      "id": "prostaglandin-e2",
+      "term": "prostaglandin E2",
+      "clusters": [
+        "fever",
+        "sensing-and-setting"
+      ],
+      "fact": "Cyclooxygenase-2 in brain blood-vessel cells makes prostaglandin E2, which acts on preoptic neurons to raise the set point; this is the step antipyretics block.",
+      "info": {
+        "text": "A lipid signaling molecule and the final mediator of fever, acting on EP3 receptors in the preoptic hypothalamus.",
+        "links": [
+          {
+            "href": "wiki:Prostaglandin E2"
+          },
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6047205/"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "fever": "cyclooxygenase-2",
+        "sensing-and-setting": "set point"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "fever",
+        "to": "sensing-and-setting"
+      }
+    },
+    {
+      "id": "chills",
+      "term": "chills",
+      "clusters": [
+        "fever",
+        "defending-against-cold"
+      ],
+      "fact": "When the set point jumps, a normal core temperature now registers as too cold: the person feels chilled while vasoconstriction and shivering drive temperature up to the new set point.",
+      "info": {
+        "text": "The sensation of cold, with shivering and pale skin, felt while a fever is rising.",
+        "links": [
+          {
+            "href": "wiki:Chills"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "defending-against-cold": "shivering"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "fever",
+        "to": "defending-against-cold"
+      }
+    },
+    {
+      "id": "defervescence",
+      "term": "defervescence",
+      "clusters": [
+        "fever",
+        "defending-against-heat"
+      ],
+      "fact": "When pyrogens clear or an antipyretic takes effect, the set point drops below the still-elevated core temperature, so flushing and sweating shed the excess heat as the fever breaks.",
+      "info": {
+        "text": "The falling phase of a fever, when body temperature returns to normal, typically with flushed skin and heavy sweating.",
+        "links": [
+          {
+            "href": "wiki:Fever"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "defending-against-heat": "eccrine sweating"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "fever",
+        "to": "defending-against-heat"
+      }
+    },
+    {
+      "id": "hyperthermia",
+      "term": "hyperthermia",
+      "clusters": [
+        "defending-against-heat",
+        "fever"
+      ],
+      "fact": "In hyperthermia the set point stays normal while heat gain outruns the heat defenses, as in heat stroke; antipyretics have nothing to reset, so treatment cools the body directly.",
+      "info": {
+        "text": "A rise in core temperature above the set point caused by heat gain exceeding heat loss; heat stroke is its most dangerous form.",
+        "links": [
+          {
+            "href": "wiki:Hyperthermia"
+          },
+          {
+            "href": "https://pubmed.ncbi.nlm.nih.gov/35679471/"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "fever": "antipyretics"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "routes-that-reverse",
+      "prompt": "Which routes add heat to the body once the surroundings are hotter than the skin?",
+      "explanation": "Radiation, conduction and convection follow the temperature gradient, so they carry heat outward only while the skin is warmer than its surroundings. When the environment is hotter, they deliver heat inward, and evaporation becomes the only route left for shedding heat.",
+      "targets": [
+        "radiation",
+        "conduction",
+        "convection"
+      ],
+      "reasons": {
+        "conduction": "Touching anything hotter than the skin passes heat directly into the body.",
+        "convection": "Air hotter than the skin warms it as it flows past instead of carrying heat away.",
+        "radiation": "Hot surfaces and direct sun radiate more infrared energy to the skin than the skin returns."
+      }
+    },
+    {
+      "id": "generating-heat",
+      "prompt": "Which responses generate additional heat inside the body?",
+      "explanation": "Vasoconstriction and piloerection only slow the loss of heat already present. Heat production rises through muscle contraction, the uncoupled mitochondria of brown fat, and a higher metabolic rate.",
+      "targets": [
+        "shivering",
+        "brown adipose tissue",
+        "thyroid hormone",
+        "chills"
+      ],
+      "reasons": {
+        "brown adipose tissue": "Its mitochondria release the energy of fuel oxidation directly as heat.",
+        "chills": "The shivering of a rising fever produces heat that pushes core temperature up to the new set point.",
+        "shivering": "Involuntary muscle contraction converts chemical energy into heat.",
+        "thyroid hormone": "It raises the metabolic rate of most tissues, increasing heat output over weeks."
+      }
+    },
+    {
+      "id": "fever-signal",
+      "prompt": "Which molecules take part in raising the set point during an infection?",
+      "explanation": "The fever signal passes from microbe to immune cell to brain blood vessel to hypothalamic neuron. Antipyretics act on this same chain, but by interrupting it.",
+      "targets": [
+        "exogenous pyrogens",
+        "endogenous pyrogens",
+        "cyclooxygenase-2",
+        "prostaglandin E2"
+      ],
+      "reasons": {
+        "cyclooxygenase-2": "Induced by cytokines in brain blood-vessel cells, it synthesizes the final mediator.",
+        "endogenous pyrogens": "Cytokines from those immune cells carry the signal through the blood to the brain.",
+        "exogenous pyrogens": "Microbial products such as lipopolysaccharide start the chain by activating immune cells.",
+        "prostaglandin E2": "It acts on preoptic neurons, raising the temperature they defend."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "How the body holds its temperature",
+    "summary": "A thermostat in the hypothalamus, effectors in skin, muscle, fat and circulation, and the way fever resets the target.",
+    "estimatedMinutes": 5,
+    "content": {
+      "text": "Human core temperature stays near 37 °C across a wide range of environments, even though skin temperature rises and falls with the surroundings. Holding it there is a job no single organ can do. Thermoregulation is a classic example of integrative physiology: the nervous system, skin, skeletal muscle, fat, the heart and blood vessels, endocrine glands and the immune system all take part.\r\n\r\n## Trading heat with the environment\r\n\r\nHeat moves between the body and its surroundings by four physical routes. **Radiation** transfers infrared energy between the skin and nearby surfaces. **Conduction** passes heat directly to whatever the skin touches, and **convection** carries it away in moving air or water. These three follow the temperature difference between skin and surroundings, so they cool the body only while the skin is warmer. **Evaporation** works differently: water absorbs heat as it vaporizes from skin and airways, so it keeps cooling the body even in hot surroundings. Its limit is **humidity**: as air approaches saturation, sweat can no longer evaporate, and drips away without cooling.\r\n\r\n## The thermostat\r\n\r\n**Skin thermoreceptors**, mostly sensitive to cold, give early warning of environmental change, while **core thermoreceptors** in the hypothalamus, spinal cord and abdominal organs report the temperature of the body's interior. The **preoptic area** of the hypothalamus integrates these signals and compares core temperature with a **set point**. When the two differ, it sends commands, largely through **sympathetic outflow** to skin vessels, brown fat and sweat glands, that move temperature back toward the target.\r\n\r\nWithin the **thermoneutral zone**, a band of surrounding temperatures that shifts with clothing, adjusting skin blood flow is enough. Outside it, the body calls on more costly defenses.\r\n\r\n## Defending against cold\r\n\r\n**Cutaneous vasoconstriction** narrows skin vessels, keeping warm blood in the core. **Piloerection** raises body hairs; it insulates furred mammals well but does little for humans. To produce more heat, skeletal muscle begins **shivering**, **brown adipose tissue** burns fuel for heat in place of ATP, and over weeks of cold, **thyroid hormone** raises the body's metabolic rate.\r\n\r\n## Defending against heat\r\n\r\n**Cutaneous vasodilation** opens skin vessels, and **increased cardiac output** delivers core heat to the surface. **Eccrine sweating** supplies water for evaporation, the most powerful cooling route. Over one to two weeks of repeated heat exposure, **heat acclimatization** makes sweating earlier, more plentiful and less salty, and expands plasma volume.\r\n\r\n## Fever: resetting the target\r\n\r\nIn infection, **exogenous pyrogens** such as bacterial lipopolysaccharide stimulate immune cells to release cytokines, the **endogenous pyrogens**. These induce **cyclooxygenase-2** in the cells lining brain blood vessels, which makes **prostaglandin E2**. Acting on preoptic neurons, prostaglandin E2 raises the set point.\r\n\r\nThe effectors themselves are unchanged; only the target moves. When the set point jumps, a normal body temperature now registers as too cold, and **chills** follow: vasoconstriction and shivering drive temperature up to the new level. **Antipyretics** such as aspirin, ibuprofen and acetaminophen block cyclooxygenase and let the set point fall. Then, or when the infection clears, the body is warmer than its target, and **defervescence** follows: flushing and sweating shed the excess heat as the fever breaks.\r\n\r\n**Hyperthermia** is a different condition. The set point stays normal, but heat gain from hot surroundings or hard exercise outruns the heat defenses, as in heat stroke. Since nothing has reset the thermostat, antipyretics do not help; the body has to be cooled directly."
+    },
+    "links": [
+      {
+        "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-6-energy-and-heat-balance"
+      },
+      {
+        "href": "https://www.ncbi.nlm.nih.gov/books/NBK507838/"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  },
+  "board": {
+    "lensFlowTrace": true
+  }
+}

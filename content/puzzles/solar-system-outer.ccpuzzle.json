@@ -5,7 +5,6 @@
   "subcategories": {
     "astronomy": "solar-system"
   },
-  "large": true,
   "info": {
     "text": "What the giant planets are made of, what makes a dwarf planet a dwarf, where the leftover debris is stored, and why some moons are geologically alive - the solar system from the asteroid belt outward, as the output of one sorting mechanism.",
     "citations": [
@@ -306,7 +305,11 @@
         "moons"
       ],
       "fact": "Triton circles Neptune backwards - the signature of a captured Kuiper-belt object rather than a moon born in place around its planet.",
-      "info": "A backwards (retrograde) orbit is hard to explain any other way: co-formed moons almost always orbit in the disk's direction."
+      "info": "A backwards (retrograde) orbit is hard to explain any other way: co-formed moons almost always orbit in the disk's direction.",
+      "idealTerms": {
+        "reservoirs": "Kuiper Belt",
+        "moons": "Triton"
+      }
     }
   ],
   "lenses": [

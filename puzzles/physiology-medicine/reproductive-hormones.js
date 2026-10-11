@@ -3,11 +3,13 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "reproductive-hormones",
   "title": "Reproductive hormones",
   "category": "physiology-medicine",
-  "large": true,
+  "subcategories": {
+    "physiology-medicine": "endocrine-reproductive"
+  },
   "info": {
     "text": "One pulsatile command drives two different gonadal programs plus pregnancy support: FSH and LH order the testes and ovaries, feedback closes every loop, and one loop flips positive to trigger ovulation.",
     "links": [
@@ -305,7 +307,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "gonadotropins",
       "term": "gonadotropins",
       "clusters": [
         0,
@@ -323,7 +324,6 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "human-chorionic-gonadotropin",
       "term": "human chorionic gonadotropin",
       "clusters": [
         2,
@@ -430,3 +430,395 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "reproductive-hormones",
+      "puzzleRevision": "fnv1a32:8eeba1a7",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "nodes": {
+        "term:follicle-stimulating hormone": {
+          "x": 474.83,
+          "y": 305.31,
+          "pinned": true
+        },
+        "term:luteinizing hormone": {
+          "x": 514.66,
+          "y": 121.66,
+          "pinned": false
+        },
+        "term:gonadotropin-releasing hormone": {
+          "x": 332.91,
+          "y": 210.58,
+          "pinned": false
+        },
+        "term:anterior pituitary": {
+          "x": 367.57,
+          "y": 406.73,
+          "pinned": false
+        },
+        "term:testes": {
+          "x": 751.97,
+          "y": 189.09,
+          "pinned": false
+        },
+        "term:testosterone": {
+          "x": 852.77,
+          "y": 217.36,
+          "pinned": false
+        },
+        "term:sperm production": {
+          "x": 810.99,
+          "y": 87.73,
+          "pinned": false
+        },
+        "term:Leydig cells": {
+          "x": 647.58,
+          "y": 181.19,
+          "pinned": false
+        },
+        "term:Sertoli cells": {
+          "x": 674.97,
+          "y": 57.45,
+          "pinned": false
+        },
+        "term:ovaries": {
+          "x": 826.74,
+          "y": 419.13,
+          "pinned": false
+        },
+        "term:estrogen": {
+          "x": 821.97,
+          "y": 324.01,
+          "pinned": false
+        },
+        "term:progesterone": {
+          "x": 718.94,
+          "y": 416.29,
+          "pinned": false
+        },
+        "term:ovarian follicle": {
+          "x": 912.6,
+          "y": 503.6,
+          "pinned": false
+        },
+        "term:ovulation": {
+          "x": 785.96,
+          "y": 508.68,
+          "pinned": false
+        },
+        "term:corpus luteum": {
+          "x": 661.36,
+          "y": 496.7,
+          "pinned": true
+        },
+        "term:menstruation": {
+          "x": 923.92,
+          "y": 367.87,
+          "pinned": false
+        },
+        "term:placenta": {
+          "x": 301.9,
+          "y": 518.81,
+          "pinned": false
+        },
+        "term:prolactin": {
+          "x": 227.58,
+          "y": 446.42,
+          "pinned": true
+        },
+        "term:oxytocin": {
+          "x": 221.27,
+          "y": 575.2,
+          "pinned": false
+        },
+        "term:lactation": {
+          "x": 342.13,
+          "y": 612,
+          "pinned": false
+        },
+        "term:gonadotropins": {
+          "x": 708.1,
+          "y": 290.68,
+          "pinned": true
+        },
+        "term:human chorionic gonadotropin": {
+          "x": 495.11,
+          "y": 551.46,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3385.26,
+        "score": 3385.264646267707
+      },
+      "solutionLayout": null,
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-11T17:38:50.370Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "reproductive-hormones",
+      "puzzleRevision": "fnv1a32:8eeba1a7",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 182.21,
+          "y": 300.94,
+          "pinned": true
+        },
+        "cluster:1": {
+          "x": 510.01,
+          "y": 140.3,
+          "pinned": true
+        },
+        "cluster:2": {
+          "x": 570.13,
+          "y": 475.6,
+          "pinned": true
+        },
+        "cluster:3": {
+          "x": 849.84,
+          "y": 307.95,
+          "pinned": true
+        }
+      },
+      "bridges": {
+        "term:gonadotropins": {
+          "x": 416.8,
+          "y": 307.13,
+          "pinned": false
+        },
+        "term:human chorionic gonadotropin": {
+          "x": 869.02,
+          "y": 513.49,
+          "pinned": true
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "follicle-stimulating hormone",
+          "luteinizing hormone",
+          "gonadotropin-releasing hormone",
+          "anterior pituitary"
+        ],
+        "cluster:1": [
+          "testes",
+          "testosterone",
+          "sperm production",
+          "Leydig cells",
+          "Sertoli cells"
+        ],
+        "cluster:2": [
+          "ovaries",
+          "estrogen",
+          "progesterone",
+          "ovarian follicle",
+          "ovulation",
+          "corpus luteum",
+          "menstruation"
+        ],
+        "cluster:3": [
+          "placenta",
+          "prolactin",
+          "oxytocin",
+          "lactation"
+        ]
+      },
+      "memberOrders": {
+        "cluster:0": [
+          "luteinizing hormone",
+          "gonadotropin-releasing hormone",
+          "follicle-stimulating hormone",
+          "anterior pituitary"
+        ],
+        "cluster:1": [
+          "testes",
+          "Leydig cells",
+          "sperm production",
+          "Sertoli cells",
+          "testosterone"
+        ],
+        "cluster:2": [
+          "ovaries",
+          "ovulation",
+          "progesterone",
+          "ovarian follicle",
+          "corpus luteum",
+          "menstruation",
+          "estrogen"
+        ],
+        "cluster:3": [
+          "oxytocin",
+          "prolactin",
+          "lactation",
+          "placenta"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 615.4333028029299
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-11T17:38:26.468Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "reproductive-hormones",
+      "puzzleRevision": "fnv1a32:8eeba1a7",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "nodes": {
+        "term:follicle-stimulating hormone": {
+          "x": 738.62,
+          "y": 80.09
+        },
+        "term:luteinizing hormone": {
+          "x": 820.02,
+          "y": 153.03
+        },
+        "term:gonadotropin-releasing hormone": {
+          "x": 501.94,
+          "y": 206.52
+        },
+        "term:anterior pituitary": {
+          "x": 525.69,
+          "y": 89.11
+        },
+        "term:testes": {
+          "x": 946.1,
+          "y": 210.18
+        },
+        "term:testosterone": {
+          "x": 927.2,
+          "y": 447.91
+        },
+        "term:sperm production": {
+          "x": 786.49,
+          "y": 565.02
+        },
+        "term:Leydig cells": {
+          "x": 927.2,
+          "y": 311.93
+        },
+        "term:Sertoli cells": {
+          "x": 924.05,
+          "y": 580.08
+        },
+        "term:ovaries": {
+          "x": 504.95,
+          "y": 613
+        },
+        "term:estrogen": {
+          "x": 274.84,
+          "y": 613
+        },
+        "term:progesterone": {
+          "x": 393.87,
+          "y": 613
+        },
+        "term:ovarian follicle": {
+          "x": 551.32,
+          "y": 395.63
+        },
+        "term:ovulation": {
+          "x": 351.45,
+          "y": 539.14
+        },
+        "term:corpus luteum": {
+          "x": 407.75,
+          "y": 457.4
+        },
+        "term:menstruation": {
+          "x": 454.46,
+          "y": 354.35
+        },
+        "term:placenta": {
+          "x": 239.47,
+          "y": 241.17
+        },
+        "term:prolactin": {
+          "x": 76.43,
+          "y": 195.8
+        },
+        "term:oxytocin": {
+          "x": 163.45,
+          "y": 78.09
+        },
+        "term:lactation": {
+          "x": 128.77,
+          "y": 293.85
+        },
+        "term:gonadotropins": {
+          "x": 649.31,
+          "y": 441.39
+        },
+        "term:human chorionic gonadotropin": {
+          "x": 229.83,
+          "y": 380.52
+        },
+        "cluster:0": {
+          "x": 702.96,
+          "y": 212.75
+        },
+        "cluster:1": {
+          "x": 779.2,
+          "y": 372.14
+        },
+        "cluster:2": {
+          "x": 495.84,
+          "y": 523.29
+        },
+        "cluster:3": {
+          "x": 239.04,
+          "y": 171.17
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-11T17:38:30.254Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.05,
+    "source": "author",
+    "savedAt": "2026-10-11T17:38:21.054Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

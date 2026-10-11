@@ -1,0 +1,500 @@
+// Generated from content/puzzles/buffers-and-titration.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+const puzzle = definePuzzle(import.meta.url, {
+  "id": "buffers-and-titration",
+  "title": "Buffers and titration",
+  "category": "chemistry",
+  "info": {
+    "text": "Acid and base strength explains what happens when acids and bases meet: neutralization leaves salts that are not always neutral, buffers hold pH steady, and titration measures how much acid or base a sample holds.",
+    "citations": [
+      {
+        "title": "Hydrolysis of Salts",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/14-4-hydrolysis-of-salts"
+      },
+      {
+        "title": "Buffers",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/14-6-buffers"
+      },
+      {
+        "title": "Acid-Base Titrations",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/14-7-acid-base-titrations"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-neutralization-and-salts",
+      "name": "Neutralization and salts",
+      "color": "teal",
+      "fact": "Neutralization combines an acid and a base into water and a salt. Salt hydrolysis explains why that salt's solution is not always neutral: an ion from a weak acid or weak base reacts with water.",
+      "terms": [
+        "neutralization",
+        "salt",
+        "salt hydrolysis"
+      ],
+      "seeds": [
+        "neutralization",
+        "salt"
+      ],
+      "termInfo": {
+        "neutralization": "The reaction of an acid with a base, giving water and a salt.",
+        "salt": "An ionic compound built from the base's cation and the acid's anion, such as sodium chloride or sodium acetate.",
+        "salt hydrolysis": "The reaction of a salt's ion with water. Acetate takes a proton and leaves hydroxide, so sodium acetate solution is basic; ammonium gives a proton up, so ammonium chloride solution is acidic."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Neutralization (chemistry)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cluster-resisting-change",
+      "name": "Resisting change",
+      "color": "blue",
+      "fact": "A buffer holds a weak acid and its conjugate base together so that added acid or base barely moves the pH. Buffer capacity is how much it can absorb before that fails, and the Henderson-Hasselbalch equation gives its pH.",
+      "terms": [
+        "buffer",
+        "buffer capacity",
+        "Henderson-Hasselbalch equation"
+      ],
+      "seeds": [
+        "buffer",
+        "buffer capacity"
+      ],
+      "termInfo": {
+        "buffer": "A solution of a weak acid and its conjugate base, or a weak base and its conjugate acid, that keeps pH nearly steady when a little acid or base is added.",
+        "buffer capacity": "How much acid or base a buffer can absorb before its pH changes sharply. It grows with the concentrations of the buffer's acid and conjugate base.",
+        "Henderson-Hasselbalch equation": "pH = pKa + log([A−]/[HA]). It gives a buffer's pH from the acid's pKa and the ratio of conjugate base to acid."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Buffer solution"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cluster-titration",
+      "name": "Measuring by titration",
+      "color": "amber",
+      "fact": "A titration adds a solution of known concentration until the sample is exactly consumed. The titration curve tracks pH along the way, an acid-base indicator marks the end point by changing color, and the half-equivalence point is the midpoint of a weak-acid titration.",
+      "terms": [
+        "titration",
+        "acid-base indicator",
+        "titration curve",
+        "end point",
+        "half-equivalence point"
+      ],
+      "seeds": [
+        "titration",
+        "acid-base indicator"
+      ],
+      "termInfo": {
+        "titration": "Adding a solution of known concentration to a sample until the reaction is just complete, so the amount of acid or base in the sample can be calculated.",
+        "acid-base indicator": "A weak acid whose acid and conjugate-base forms have different colors, so it changes color over a narrow pH range near its own pKa.",
+        "titration curve": "A plot of pH against the volume of solution added. It rises steeply around the equivalence point.",
+        "end point": "The point where the indicator changes color. A well-chosen indicator puts it close to the equivalence point, but the two are not the same thing.",
+        "half-equivalence point": "The point where half of a weak acid has been neutralized. The acid and its conjugate base are then equal, so the pH equals pKa."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Titration"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-conjugate-base",
+      "term": "conjugate base",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "The anion of a weak acid is a conjugate base. In a salt it takes protons from water and makes the solution basic; in a buffer it takes protons from added acid and holds the pH steady.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Conjugate acid"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": [
+        "salt hydrolysis",
+        "buffer"
+      ]
+    },
+    {
+      "id": "bridge-pka",
+      "term": "pKa",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "pKa is −log Ka. The Henderson-Hasselbalch equation sets a buffer's pH from pKa and the ratio of conjugate base to acid; at the half-equivalence point of a weak-acid titration that ratio is 1, so the measured pH equals pKa.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Acid dissociation constant"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": [
+        "Henderson-Hasselbalch equation",
+        "half-equivalence point"
+      ]
+    },
+    {
+      "id": "bridge-equivalence-point",
+      "term": "equivalence point",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "The equivalence point is where the added base has exactly neutralized the acid. When the acid is weak, the salt formed there hydrolyzes, so the equivalence point is basic rather than neutral.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Equivalence point"
+          }
+        ]
+      },
+      "idealTerms": [
+        "neutralization",
+        "titration"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "defined-by-what-has-reacted",
+      "prompt": "Which points in a titration are defined by how much of the acid has been neutralized?",
+      "explanation": "The equivalence point is where all of the acid has been neutralized, and the half-equivalence point is where half of it has. The end point is defined by the indicator's color change instead, which a well-chosen indicator places close to equivalence but not exactly on it.",
+      "targets": [
+        "equivalence point",
+        "half-equivalence point"
+      ]
+    },
+    {
+      "id": "ph-from-pka",
+      "prompt": "Which concepts give a solution's pH directly from the acid's pKa?",
+      "explanation": "The Henderson-Hasselbalch equation calculates a buffer's pH from pKa and the base-to-acid ratio, and at the half-equivalence point that ratio is 1, so pH equals pKa. An acid-base indicator changes color near its own pKa, but it shows a pH range rather than giving the solution's pH from the acid's pKa. A buffer is the solution itself, not the way its pH is found.",
+      "targets": [
+        "Henderson-Hasselbalch equation",
+        "half-equivalence point"
+      ]
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "acids-bases-and-ph",
+        "reason": "Learn strong and weak acids, Ka, and conjugate pairs first; this board applies that strength to salts, buffers, and titration."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Knowing whether an acid or base is strong or weak tells you what happens when acids and bases are combined. Three things follow from it: what neutralization leaves behind, how a solution can resist a change in pH, and how chemists measure an unknown amount of acid or base.\r\n\r\nNeutralization is the reaction of an acid with a base, giving water and a salt, an ionic compound built from the base's cation and the acid's anion. The salt's solution is neutral only when both parents were strong. If the acid was weak, its anion is a conjugate base strong enough to take protons from water, which leaves hydroxide behind. That reaction of a salt's ion with water is salt hydrolysis. Sodium acetate, the salt of acetic acid, gives a basic solution for this reason.\r\n\r\nA buffer puts that same conjugate base to work. It holds a weak acid and its conjugate base together, for example acetic acid with acetate. Added acid is taken up by the conjugate base, and added base is neutralized by the weak acid, so the pH barely moves. Buffer capacity is how much acid or base a buffer can absorb before that protection runs out. The Henderson-Hasselbalch equation, pH = pKa + log([A−]/[HA]), gives a buffer's pH from the acid's pKa, the negative logarithm of its Ka, and the ratio of conjugate base to acid.\r\n\r\nA titration adds a solution of known concentration to a sample until the reaction is just complete, so the amount in the sample can be calculated. Plotting pH against the volume added gives a titration curve. The equivalence point is where the added base has exactly neutralized the acid. When the acid is weak, the salt formed there hydrolyzes, so that point is basic rather than neutral. An acid-base indicator is itself a weak acid whose two forms have different colors. The end point is where it changes color, and choosing a suitable indicator puts the end point close to the equivalence point, though the two are not the same thing. Halfway to equivalence, the half-equivalence point, a weak acid and its conjugate base are present in equal amounts. The Henderson-Hasselbalch ratio is then 1, so the pH there equals pKa."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude Code (Claude Opus 5.5)",
+        "reasoning": "medium"
+      }
+    ]
+  }
+});
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "buffers-and-titration",
+      "puzzleRevision": "fnv1a32:12808b3a",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:neutralization": {
+          "x": 405.09,
+          "y": 521.79
+        },
+        "term:salt": {
+          "x": 133.97,
+          "y": 512.21
+        },
+        "term:salt hydrolysis": {
+          "x": 248.54,
+          "y": 261.71
+        },
+        "term:buffer": {
+          "x": 367.1,
+          "y": 200.19
+        },
+        "term:buffer capacity": {
+          "x": 374.23,
+          "y": 69.1
+        },
+        "term:Henderson-Hasselbalch equation": {
+          "x": 532.23,
+          "y": 209.39
+        },
+        "term:titration": {
+          "x": 546.39,
+          "y": 533.49
+        },
+        "term:acid-base indicator": {
+          "x": 863.81,
+          "y": 404.21
+        },
+        "term:titration curve": {
+          "x": 808.77,
+          "y": 553.48
+        },
+        "term:end point": {
+          "x": 666.03,
+          "y": 559.92
+        },
+        "term:half-equivalence point": {
+          "x": 738.55,
+          "y": 273.39
+        },
+        "term:conjugate base": {
+          "x": 378.59,
+          "y": 321.85
+        },
+        "term:pKa": {
+          "x": 622.48,
+          "y": 333.06
+        },
+        "term:equivalence point": {
+          "x": 501.45,
+          "y": 407.29
+        },
+        "cluster:0": {
+          "x": 254.07,
+          "y": 440.07
+        },
+        "cluster:1": {
+          "x": 521.41,
+          "y": 125.1
+        },
+        "cluster:2": {
+          "x": 673.4,
+          "y": 453.49
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-08T18:31:51.486Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "buffers-and-titration",
+      "puzzleRevision": "fnv1a32:12808b3a",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 434.54,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 715.19,
+          "y": 259.73,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 244.81,
+          "y": 259.73,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:conjugate base": {
+          "x": 693.76,
+          "y": 443.3,
+          "pinned": false
+        },
+        "term:pKa": {
+          "x": 454.13,
+          "y": 249.01,
+          "pinned": false
+        },
+        "term:equivalence point": {
+          "x": 488.05,
+          "y": 295.09,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "neutralization",
+          "salt",
+          "salt hydrolysis"
+        ],
+        "cluster:1": [
+          "buffer",
+          "buffer capacity",
+          "Henderson-Hasselbalch equation"
+        ],
+        "cluster:2": [
+          "titration",
+          "acid-base indicator",
+          "titration curve",
+          "end point",
+          "half-equivalence point"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 427.2878037304274
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": false,
+      "source": "author",
+      "savedAt": "2026-10-08T18:32:27.442Z"
+    },
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "buffers-and-titration",
+      "puzzleRevision": "fnv1a32:12808b3a",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:neutralization": {
+          "x": 185.79,
+          "y": 368.28,
+          "pinned": false
+        },
+        "term:salt": {
+          "x": 263.31,
+          "y": 437,
+          "pinned": false
+        },
+        "term:salt hydrolysis": {
+          "x": 331,
+          "y": 354.69,
+          "pinned": false
+        },
+        "term:buffer": {
+          "x": 441.48,
+          "y": 326.17,
+          "pinned": false
+        },
+        "term:buffer capacity": {
+          "x": 555.32,
+          "y": 334.6,
+          "pinned": false
+        },
+        "term:Henderson-Hasselbalch equation": {
+          "x": 463.1,
+          "y": 166.25,
+          "pinned": false
+        },
+        "term:titration": {
+          "x": 153.1,
+          "y": 141.06,
+          "pinned": false
+        },
+        "term:acid-base indicator": {
+          "x": 81.85,
+          "y": 257.52,
+          "pinned": false
+        },
+        "term:titration curve": {
+          "x": 118.19,
+          "y": 23,
+          "pinned": false
+        },
+        "term:end point": {
+          "x": 50.35,
+          "y": 125.23,
+          "pinned": false
+        },
+        "term:half-equivalence point": {
+          "x": 277.21,
+          "y": 64.75,
+          "pinned": false
+        },
+        "term:conjugate base": {
+          "x": 443.33,
+          "y": 437,
+          "pinned": false
+        },
+        "term:pKa": {
+          "x": 398.7,
+          "y": 28.62,
+          "pinned": false
+        },
+        "term:equivalence point": {
+          "x": 243.4,
+          "y": 234.44,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2192.95,
+        "score": 2192.9496160186295
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": false,
+      "source": "author",
+      "savedAt": "2026-10-08T18:33:05.694Z"
+    }
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

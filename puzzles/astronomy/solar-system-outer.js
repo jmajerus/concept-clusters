@@ -3,14 +3,13 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "solar-system-outer",
   "title": "The Solar System: Giants, Dwarfs, and Leftovers",
   "category": "astronomy",
   "subcategories": {
     "astronomy": "solar-system"
   },
-  "large": true,
   "info": {
     "text": "What the giant planets are made of, what makes a dwarf planet a dwarf, where the leftover debris is stored, and why some moons are geologically alive - the solar system from the asteroid belt outward, as the output of one sorting mechanism.",
     "citations": [
@@ -292,7 +291,11 @@ export default definePuzzle(import.meta.url, {
         4
       ],
       "fact": "Triton circles Neptune backwards - the signature of a captured Kuiper-belt object rather than a moon born in place around its planet.",
-      "info": "A backwards (retrograde) orbit is hard to explain any other way: co-formed moons almost always orbit in the disk's direction."
+      "info": "A backwards (retrograde) orbit is hard to explain any other way: co-formed moons almost always orbit in the disk's direction.",
+      "idealTerms": [
+        "Kuiper Belt",
+        "Triton"
+      ]
     }
   ],
   "lenses": [
@@ -371,3 +374,374 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "solar-system-outer",
+      "puzzleRevision": "fnv1a32:8bb669fb",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Jupiter": {
+          "x": 547.47,
+          "y": 412.07,
+          "pinned": false
+        },
+        "term:Saturn": {
+          "x": 623.86,
+          "y": 457.63,
+          "pinned": false
+        },
+        "term:Uranus": {
+          "x": 719.37,
+          "y": 410.15,
+          "pinned": true
+        },
+        "term:Neptune": {
+          "x": 808.14,
+          "y": 456.48,
+          "pinned": true
+        },
+        "term:Pluto": {
+          "x": 509.02,
+          "y": 95.3,
+          "pinned": false
+        },
+        "term:Ceres": {
+          "x": 542.05,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Eris": {
+          "x": 585.34,
+          "y": 93.63,
+          "pinned": false
+        },
+        "term:Haumea": {
+          "x": 552.08,
+          "y": 165.84,
+          "pinned": false
+        },
+        "term:asteroid belt": {
+          "x": 275.89,
+          "y": 298.29,
+          "pinned": false
+        },
+        "term:Kuiper Belt": {
+          "x": 136.25,
+          "y": 324.24,
+          "pinned": true
+        },
+        "term:Oort cloud": {
+          "x": 193.32,
+          "y": 213.9,
+          "pinned": true
+        },
+        "term:comets": {
+          "x": 421.13,
+          "y": 255.33,
+          "pinned": true
+        },
+        "term:Titan": {
+          "x": 350.99,
+          "y": 467.01,
+          "pinned": false
+        },
+        "term:Europa": {
+          "x": 285.1,
+          "y": 516.91,
+          "pinned": false
+        },
+        "term:Io": {
+          "x": 245.48,
+          "y": 455.37,
+          "pinned": false
+        },
+        "term:Enceladus": {
+          "x": 371.6,
+          "y": 556.77,
+          "pinned": false
+        },
+        "term:Triton": {
+          "x": 297.57,
+          "y": 403.94,
+          "pinned": false
+        },
+        "term:orbital resonance": {
+          "x": 403.08,
+          "y": 361.42,
+          "pinned": true
+        },
+        "term:clearing the neighborhood": {
+          "x": 393.54,
+          "y": 178.79,
+          "pinned": false
+        },
+        "term:tidal heating": {
+          "x": 467.05,
+          "y": 488.59,
+          "pinned": false
+        },
+        "term:capture": {
+          "x": 210.12,
+          "y": 387.7,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2527.42,
+        "score": 2527.42215493546
+      },
+      "solutionLayout": null,
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-08T20:10:48.883Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "solar-system-outer",
+      "puzzleRevision": "fnv1a32:8bb669fb",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 696.2,
+          "y": 545.6,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 353.8,
+          "y": 545.6,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 247.99,
+          "y": 341.62,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 525,
+          "y": 215.55,
+          "pinned": false
+        },
+        "cluster:4": {
+          "x": 802.01,
+          "y": 341.62,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:orbital resonance": {
+          "x": 529.42,
+          "y": 430.93,
+          "pinned": true
+        },
+        "term:clearing the neighborhood": {
+          "x": 258.54,
+          "y": 176.94,
+          "pinned": true
+        },
+        "term:tidal heating": {
+          "x": 866.5,
+          "y": 545.54,
+          "pinned": true
+        },
+        "term:capture": {
+          "x": 716.37,
+          "y": 175.84,
+          "pinned": true
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Jupiter",
+          "Saturn"
+        ],
+        "cluster:1": [
+          "Uranus",
+          "Neptune"
+        ],
+        "cluster:2": [
+          "Pluto",
+          "Ceres",
+          "Eris",
+          "Haumea"
+        ],
+        "cluster:3": [
+          "asteroid belt",
+          "Kuiper Belt",
+          "Oort cloud",
+          "comets"
+        ],
+        "cluster:4": [
+          "Titan",
+          "Europa",
+          "Io",
+          "Enceladus",
+          "Triton"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 762.7109748869461
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-08T20:09:11.186Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "solar-system-outer",
+      "puzzleRevision": "fnv1a32:8bb669fb",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Jupiter": {
+          "x": 394.25,
+          "y": 555.13
+        },
+        "term:Saturn": {
+          "x": 276.4,
+          "y": 590.29
+        },
+        "term:Uranus": {
+          "x": 782.39,
+          "y": 154.94
+        },
+        "term:Neptune": {
+          "x": 815.78,
+          "y": 257.76
+        },
+        "term:Pluto": {
+          "x": 351.81,
+          "y": 22
+        },
+        "term:Ceres": {
+          "x": 435.31,
+          "y": 22
+        },
+        "term:Eris": {
+          "x": 520.81,
+          "y": 22
+        },
+        "term:Haumea": {
+          "x": 604.31,
+          "y": 22
+        },
+        "term:asteroid belt": {
+          "x": 507.44,
+          "y": 574.41
+        },
+        "term:Kuiper Belt": {
+          "x": 521.27,
+          "y": 395.49
+        },
+        "term:Oort cloud": {
+          "x": 718.97,
+          "y": 598
+        },
+        "term:comets": {
+          "x": 616.57,
+          "y": 598
+        },
+        "term:Titan": {
+          "x": 179.56,
+          "y": 354.76
+        },
+        "term:Europa": {
+          "x": 143.69,
+          "y": 275.91
+        },
+        "term:Io": {
+          "x": 123.48,
+          "y": 201.41
+        },
+        "term:Enceladus": {
+          "x": 184.45,
+          "y": 139.84
+        },
+        "term:Triton": {
+          "x": 275.35,
+          "y": 100.02
+        },
+        "term:orbital resonance": {
+          "x": 449.53,
+          "y": 439.85
+        },
+        "term:clearing the neighborhood": {
+          "x": 543.29,
+          "y": 280.26
+        },
+        "term:tidal heating": {
+          "x": 288.04,
+          "y": 360.95
+        },
+        "term:capture": {
+          "x": 396.82,
+          "y": 246.01
+        },
+        "cluster:0": {
+          "x": 318.92,
+          "y": 481.49
+        },
+        "cluster:1": {
+          "x": 700.47,
+          "y": 240.05
+        },
+        "cluster:2": {
+          "x": 481.94,
+          "y": 119.9
+        },
+        "cluster:3": {
+          "x": 619.84,
+          "y": 461.66
+        },
+        "cluster:4": {
+          "x": 283.79,
+          "y": 220.88
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-08T20:11:21.166Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T02:19:56.497Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -9,7 +9,7 @@
     "pH"
   ],
   "info": {
-    "text": "Acids donate protons and bases accept them; in water that transfer sets hydronium and hydroxide concentrations, which pH reports on a logarithmic scale.",
+    "text": "Acids donate protons and bases accept them; how completely they do so is their strength. In water that transfer sets hydronium and hydroxide concentrations, which pH reports on a logarithmic scale.",
     "citations": [
       {
         "title": "Brønsted-Lowry Acids and Bases",
@@ -24,6 +24,13 @@
         "publisher": "OpenStax",
         "year": "2019",
         "url": "https://openstax.org/books/chemistry-2e/pages/14-2-ph-and-poh"
+      },
+      {
+        "title": "Relative Strengths of Acids and Bases",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/14-3-relative-strengths-of-acids-and-bases"
       }
     ]
   },
@@ -32,57 +39,75 @@
       "id": "cluster-donating-protons",
       "name": "Donating protons",
       "color": "teal",
-      "fact": "An acid is a proton donor; in water the donated hydrogen appears as hydronium.",
-      "seeds": [
-        "acid",
-        "hydronium"
-      ],
-      "floatingTerms": [
-        "proton donor"
-      ],
-      "terms": [
-        "acid",
-        "hydronium",
-        "proton donor"
-      ],
+      "fact": "An acid is a proton donor; in water the donated hydrogen appears as hydronium. A strong acid donates essentially all its protons to water, a weak acid only a fraction, and the acid ionization constant measures how far the donation goes.",
       "info": {
         "links": [
           {
             "href": "wiki:Acid"
+          },
+          {
+            "href": "wiki:Acid strength"
           }
         ]
-      }
+      },
+      "seeds": [
+        "acid",
+        "strong acid"
+      ],
+      "floatingTerms": [
+        "hydronium",
+        "weak acid",
+        "acid ionization constant"
+      ],
+      "terms": [
+        "acid",
+        "strong acid",
+        "hydronium",
+        "weak acid",
+        "acid ionization constant"
+      ]
     },
     {
       "id": "cluster-accepting-protons",
       "name": "Accepting protons",
       "color": "blue",
-      "fact": "A base is a proton acceptor; in water that uptake produces hydroxide.",
-      "seeds": [
-        "base",
-        "hydroxide"
-      ],
-      "floatingTerms": [
-        "proton acceptor"
-      ],
-      "terms": [
-        "base",
-        "hydroxide",
-        "proton acceptor"
-      ],
+      "fact": "A base is a proton acceptor; in water that uptake produces hydroxide. A strong base yields hydroxide completely, a weak base only partly, and the base ionization constant measures how far the uptake goes.",
       "info": {
         "links": [
           {
             "href": "wiki:Base (chemistry)"
           }
         ]
-      }
+      },
+      "seeds": [
+        "base",
+        "strong base"
+      ],
+      "floatingTerms": [
+        "hydroxide",
+        "weak base",
+        "base ionization constant"
+      ],
+      "terms": [
+        "base",
+        "strong base",
+        "hydroxide",
+        "weak base",
+        "base ionization constant"
+      ]
     },
     {
       "id": "cluster-ph-scale",
       "name": "The pH scale",
       "color": "amber",
       "fact": "pH uses a logarithmic scale to report hydronium concentration; pOH reports hydroxide the same way, and a neutral solution is the point where those concentrations are equal.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:pH"
+          }
+        ]
+      },
       "seeds": [
         "pH",
         "neutral solution"
@@ -96,14 +121,7 @@
         "neutral solution",
         "pOH",
         "logarithmic scale"
-      ],
-      "info": {
-        "links": [
-          {
-            "href": "wiki:pH"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [
@@ -114,7 +132,7 @@
         "cluster-donating-protons",
         "cluster-accepting-protons"
       ],
-      "fact": "When an acid donates a proton, the remainder is a base; the protonated base is an acid. The two species that differ by that one proton are a conjugate pair.",
+      "fact": "When an acid donates a proton, the remainder is a base; the protonated base is an acid. The two species that differ by that one proton are a conjugate pair, and their strengths run opposite: Ka × Kb = Kw, so the stronger the acid, the weaker its conjugate base.",
       "info": {
         "links": [
           {
@@ -124,8 +142,32 @@
       },
       "relationKind": "dynamic",
       "idealTerms": {
-        "cluster-donating-protons": "proton donor",
-        "cluster-accepting-protons": "proton acceptor"
+        "cluster-donating-protons": "acid",
+        "cluster-accepting-protons": "base"
+      },
+      "direction": {
+        "kind": "bidirectional"
+      }
+    },
+    {
+      "id": "bridge-amphiprotic",
+      "term": "amphiprotic",
+      "clusters": [
+        "cluster-donating-protons",
+        "cluster-accepting-protons"
+      ],
+      "fact": "Water is amphiprotic: it accepts a proton from an acid to become hydronium and donates a proton to a base to leave hydroxide.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Amphoterism"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-donating-protons": "hydronium",
+        "cluster-accepting-protons": "hydroxide"
       }
     },
     {
@@ -136,7 +178,7 @@
         "cluster-accepting-protons",
         "cluster-ph-scale"
       ],
-      "fact": "The ion-product of water, Kw = [H3O+][OH−], ties hydronium and hydroxide together so that raising one lowers the other and a neutral solution sits where they are equal.",
+      "fact": "Water's autoionization gives the ion-product of water, Kw = [H3O+][OH−], which ties hydronium and hydroxide together so that raising one lowers the other and a neutral solution sits where they are equal.",
       "info": {
         "links": [
           {
@@ -155,31 +197,37 @@
   "lenses": [
     {
       "id": "transferring-a-proton",
-      "prompt": "Which concepts name the roles when a proton moves from an acid to a base?",
-      "explanation": "An acid is a proton donor and a base is a proton acceptor. Hydronium and hydroxide are the aqueous ions that transfer produces, not the names of those roles.",
+      "prompt": "Which concepts name the roles when a proton moves from one species to another?",
+      "explanation": "An acid is the proton donor and a base is the proton acceptor. Hydronium and hydroxide are the aqueous ions that transfer produces, and strong or weak describes how far it goes, not which role a species plays.",
       "targets": [
         "acid",
-        "proton donor",
-        "base",
-        "proton acceptor"
+        "base"
       ]
     },
     {
-      "id": "reporting-ion-concentrations",
-      "prompt": "Which concepts belong to the pH scale itself, rather than the ions it reports?",
-      "explanation": "pH, pOH, and the logarithmic scale are the reporting apparatus; a neutral solution is the point on that scale where the two ion concentrations are equal. Hydronium and hydroxide are what the scale reports, and the ion-product of water is why those concentrations move inversely.",
+      "id": "how-far-the-transfer-goes",
+      "prompt": "Which concepts describe how completely an added acid or base reacts with water?",
+      "explanation": "Strong and weak name complete versus partial reaction with water, and the acid and base ionization constants put a number on how far it goes. The ion-product of water describes water's own autoionization, not the reaction of an added acid or base.",
+      "targets": [
+        "strong acid",
+        "weak acid",
+        "strong base",
+        "weak base",
+        "acid ionization constant",
+        "base ionization constant"
+      ]
+    },
+    {
+      "id": "log-of-one-ion",
+      "prompt": "Which concepts are the negative logarithm of a single ion's concentration?",
+      "explanation": "pH is −log[H3O+] and pOH is −log[OH−]. The ion-product of water multiplies both concentrations instead of taking a logarithm of one. The logarithmic scale is the method, not a value, and a neutral solution is a condition on that scale.",
       "targets": [
         "pH",
-        "pOH",
-        "logarithmic scale",
-        "neutral solution"
+        "pOH"
       ]
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "Place proton transfer between the ions that move and the equilibrium constant that constrains them in water."
-    },
     "entries": [
       {
         "id": "building-atoms-and-ions",
@@ -187,7 +235,7 @@
       },
       {
         "id": "energy-rate-and-equilibrium",
-        "reason": "Treat Kw as an equilibrium constant that keeps [H3O+] and [OH−] inversely paired."
+        "reason": "Treat Kw, Ka, and Kb as equilibrium constants that fix how far each proton transfer goes."
       },
       {
         "id": "reading-chemical-reactions",
@@ -195,12 +243,26 @@
       }
     ]
   },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "content": {
+      "text": "In the Brønsted-Lowry picture, acid-base chemistry is about one thing moving: a proton, a hydrogen ion stripped of its electron. An acid is a proton donor and a base is a proton acceptor. A proton never sits alone in water. When an acid gives one up, a water molecule takes it and becomes hydronium (H3O+). When a base takes a proton from water, the water left behind is hydroxide (OH−). Water can play either part, which makes it amphiprotic. Every transfer pairs the two roles: once an acid has given up its proton, what remains could take it back, so it is a base. The two species that differ by that single proton are a conjugate pair.\r\n\r\nAcids and bases differ in how far that transfer goes. A strong acid such as hydrochloric acid gives up essentially every proton to water. A weak acid such as acetic acid gives up only a small fraction, and the rest stays as intact molecules in equilibrium with its ions. The acid ionization constant, Ka, measures how far an acid's reaction with water goes. The base ionization constant, Kb, does the same for a base. Strength runs opposite across a conjugate pair: the stronger an acid, the weaker its conjugate base.\r\n\r\nWater also transfers protons to itself, a process called autoionization. That sets a fixed relationship: the ion-product of water, Kw = [H3O+][OH−], stays constant at a given temperature, so adding hydronium pushes hydroxide down and the reverse. A neutral solution is the point where the two concentrations are equal. For any conjugate pair, Ka × Kb = Kw.\r\n\r\nThose concentrations span many powers of ten, so chemists report them on a logarithmic scale. pH is the negative logarithm of the hydronium concentration and pOH is the same measure for hydroxide. Each step of one pH unit is a tenfold change in hydronium, and a lower pH means more hydronium, so the solution is more acidic."
+    }
+  },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Cursor"
+        "name": "Cursor (Grok 4.6)",
+        "model": "Cursor Grok 4.6"
+      },
+      {
+        "name": "Claude Code (Claude Opus 5.5)",
+        "reasoning": "medium"
       }
     ]
+  },
+  "board": {
+    "lensFlowTrace": true
   }
 }
