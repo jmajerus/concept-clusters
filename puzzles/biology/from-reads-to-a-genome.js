@@ -3,14 +3,13 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "from-reads-to-a-genome",
   "title": "From reads to a genome",
   "category": "biology",
   "subcategories": {
     "biology": "genomics"
   },
-  "large": true,
   "tags": [
     "biology",
     "genomics",
@@ -430,3 +429,343 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "from-reads-to-a-genome",
+      "puzzleRevision": "fnv1a32:71c159ef",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:DNA extraction": {
+          "x": 719.05,
+          "y": 261.5,
+          "pinned": true
+        },
+        "term:fragmentation": {
+          "x": 632.66,
+          "y": 194.45,
+          "pinned": true
+        },
+        "term:adapter": {
+          "x": 771.19,
+          "y": 190.75,
+          "pinned": true
+        },
+        "term:library preparation": {
+          "x": 722.28,
+          "y": 344.5,
+          "pinned": true
+        },
+        "term:sequencing instrument": {
+          "x": 726.83,
+          "y": 464.64,
+          "pinned": true
+        },
+        "term:base calling": {
+          "x": 538.13,
+          "y": 465.23,
+          "pinned": true
+        },
+        "term:base quality": {
+          "x": 586.23,
+          "y": 533.26,
+          "pinned": true
+        },
+        "term:read overlap": {
+          "x": 554.1,
+          "y": 122.3,
+          "pinned": true
+        },
+        "term:contig": {
+          "x": 409.17,
+          "y": 185.82,
+          "pinned": true
+        },
+        "term:scaffold": {
+          "x": 830.75,
+          "y": 124.87,
+          "pinned": true
+        },
+        "term:consensus sequence": {
+          "x": 414.64,
+          "y": 264.69,
+          "pinned": true
+        },
+        "term:gene model": {
+          "x": 380.53,
+          "y": 48.05,
+          "pinned": true
+        },
+        "term:repeat annotation": {
+          "x": 259.5,
+          "y": 159.29,
+          "pinned": true
+        },
+        "term:functional annotation": {
+          "x": 193.73,
+          "y": 111.69,
+          "pinned": true
+        },
+        "term:genome browser": {
+          "x": 178.08,
+          "y": 54.9,
+          "pinned": true
+        },
+        "term:sequencing read": {
+          "x": 540.25,
+          "y": 341.74,
+          "pinned": true
+        },
+        "term:coverage": {
+          "x": 410.83,
+          "y": 532.86,
+          "pinned": true
+        },
+        "term:long read": {
+          "x": 880.06,
+          "y": 298.95,
+          "pinned": true
+        },
+        "term:genome assembly": {
+          "x": 664.49,
+          "y": 47.96,
+          "pinned": true
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4279.8,
+        "score": 4279.8006987919925
+      },
+      "solutionLayout": null,
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-08T20:23:47.418Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "from-reads-to-a-genome",
+      "puzzleRevision": "fnv1a32:71c159ef",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 584.21,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 212.15,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 211.79,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 837.85,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:sequencing read": {
+          "x": 420.72,
+          "y": 398,
+          "pinned": false
+        },
+        "term:coverage": {
+          "x": 331.8,
+          "y": 268.12,
+          "pinned": false
+        },
+        "term:long read": {
+          "x": 556.72,
+          "y": 398,
+          "pinned": false
+        },
+        "term:genome assembly": {
+          "x": 736.58,
+          "y": 249.74,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "DNA extraction",
+          "fragmentation",
+          "adapter",
+          "library preparation"
+        ],
+        "cluster:1": [
+          "sequencing instrument",
+          "base calling",
+          "base quality"
+        ],
+        "cluster:2": [
+          "read overlap",
+          "contig",
+          "scaffold",
+          "consensus sequence"
+        ],
+        "cluster:3": [
+          "gene model",
+          "repeat annotation",
+          "functional annotation",
+          "genome browser"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 809.8680061495154
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:56:25.265Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "from-reads-to-a-genome",
+      "puzzleRevision": "fnv1a32:71c159ef",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:DNA extraction": {
+          "x": 701.81,
+          "y": 233.44
+        },
+        "term:fragmentation": {
+          "x": 668.6,
+          "y": 93.25
+        },
+        "term:adapter": {
+          "x": 520.55,
+          "y": 86.56
+        },
+        "term:library preparation": {
+          "x": 524.76,
+          "y": 236.45
+        },
+        "term:sequencing instrument": {
+          "x": 840.71,
+          "y": 27.58
+        },
+        "term:base calling": {
+          "x": 722.71,
+          "y": 355.61
+        },
+        "term:base quality": {
+          "x": 866.07,
+          "y": 389.52
+        },
+        "term:read overlap": {
+          "x": 642.89,
+          "y": 429.83
+        },
+        "term:contig": {
+          "x": 507.02,
+          "y": 593.23
+        },
+        "term:scaffold": {
+          "x": 359.82,
+          "y": 204.29
+        },
+        "term:consensus sequence": {
+          "x": 657.02,
+          "y": 590.99
+        },
+        "term:gene model": {
+          "x": 271.4,
+          "y": 288.93
+        },
+        "term:repeat annotation": {
+          "x": 180.7,
+          "y": 387.25
+        },
+        "term:functional annotation": {
+          "x": 105.19,
+          "y": 465.6
+        },
+        "term:genome browser": {
+          "x": 376.32,
+          "y": 459.57
+        },
+        "term:sequencing read": {
+          "x": 548.09,
+          "y": 334.13
+        },
+        "term:coverage": {
+          "x": 797.29,
+          "y": 521.64
+        },
+        "term:long read": {
+          "x": 397.59,
+          "y": 26.81
+        },
+        "term:genome assembly": {
+          "x": 376.73,
+          "y": 386.72
+        },
+        "cluster:0": {
+          "x": 607.14,
+          "y": 163.58
+        },
+        "cluster:1": {
+          "x": 847.06,
+          "y": 284.53
+        },
+        "cluster:2": {
+          "x": 573.35,
+          "y": 507.97
+        },
+        "cluster:3": {
+          "x": 274.08,
+          "y": 554.43
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-08T20:18:01.092Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:56:18.470Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

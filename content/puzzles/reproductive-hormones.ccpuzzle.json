@@ -2,7 +2,9 @@
   "id": "reproductive-hormones",
   "title": "Reproductive hormones",
   "category": "physiology-medicine",
-  "large": true,
+  "subcategories": {
+    "physiology-medicine": "endocrine-reproductive"
+  },
   "info": {
     "text": "One pulsatile command drives two different gonadal programs plus pregnancy support: FSH and LH order the testes and ovaries, feedback closes every loop, and one loop flips positive to trigger ovulation.",
     "links": [
@@ -34,20 +36,6 @@
       "name": "HPG command",
       "color": "teal",
       "fact": "Pulsatile GnRH from the hypothalamus sets pituitary output of FSH and LH, the two gonadotropins that drive both testes and ovaries.",
-      "seeds": [
-        "follicle-stimulating hormone",
-        "luteinizing hormone"
-      ],
-      "floatingTerms": [
-        "gonadotropin-releasing hormone",
-        "anterior pituitary"
-      ],
-      "terms": [
-        "follicle-stimulating hormone",
-        "luteinizing hormone",
-        "gonadotropin-releasing hormone",
-        "anterior pituitary"
-      ],
       "termInfo": {
         "follicle-stimulating hormone": {
           "text": "A pituitary gonadotropin driving sperm nursing in testes and follicle growth in ovaries.",
@@ -89,29 +77,27 @@
             "href": "wiki:Hypothalamus"
           }
         ]
-      }
+      },
+      "seeds": [
+        "follicle-stimulating hormone",
+        "luteinizing hormone"
+      ],
+      "floatingTerms": [
+        "gonadotropin-releasing hormone",
+        "anterior pituitary"
+      ],
+      "terms": [
+        "follicle-stimulating hormone",
+        "luteinizing hormone",
+        "gonadotropin-releasing hormone",
+        "anterior pituitary"
+      ]
     },
     {
       "id": "testicular-program",
       "name": "Testicular androgen program",
       "color": "blue",
       "fact": "Leydig cells make testosterone for male development while Sertoli cells nurse continuous sperm production under FSH.",
-      "seeds": [
-        "testes",
-        "testosterone"
-      ],
-      "floatingTerms": [
-        "sperm production",
-        "Leydig cells",
-        "Sertoli cells"
-      ],
-      "terms": [
-        "testes",
-        "testosterone",
-        "sperm production",
-        "Leydig cells",
-        "Sertoli cells"
-      ],
       "termInfo": {
         "testes": {
           "text": "The male gonads: testosterone factories that also produce sperm continuously.",
@@ -161,33 +147,29 @@
             "href": "wiki:Testicle"
           }
         ]
-      }
+      },
+      "seeds": [
+        "testes",
+        "testosterone"
+      ],
+      "floatingTerms": [
+        "sperm production",
+        "Leydig cells",
+        "Sertoli cells"
+      ],
+      "terms": [
+        "testes",
+        "testosterone",
+        "sperm production",
+        "Leydig cells",
+        "Sertoli cells"
+      ]
     },
     {
       "id": "ovarian-program",
       "name": "Ovarian cycle program",
       "color": "amber",
       "fact": "Each cycle grows a follicle, releases an egg at ovulation, and converts the remnant into a progesterone-making corpus luteum; without pregnancy the lining sheds as menstruation.",
-      "seeds": [
-        "ovaries",
-        "estrogen"
-      ],
-      "floatingTerms": [
-        "progesterone",
-        "ovarian follicle",
-        "ovulation",
-        "corpus luteum",
-        "menstruation"
-      ],
-      "terms": [
-        "ovaries",
-        "estrogen",
-        "progesterone",
-        "ovarian follicle",
-        "ovulation",
-        "corpus luteum",
-        "menstruation"
-      ],
       "termInfo": {
         "ovaries": {
           "text": "The female gonads: cyclic estrogen and progesterone source and egg reserve.",
@@ -253,27 +235,33 @@
             "href": "wiki:Ovary"
           }
         ]
-      }
+      },
+      "seeds": [
+        "ovaries",
+        "estrogen"
+      ],
+      "floatingTerms": [
+        "progesterone",
+        "ovarian follicle",
+        "ovulation",
+        "corpus luteum",
+        "menstruation"
+      ],
+      "terms": [
+        "ovaries",
+        "estrogen",
+        "progesterone",
+        "ovarian follicle",
+        "ovulation",
+        "corpus luteum",
+        "menstruation"
+      ]
     },
     {
       "id": "pregnancy-support",
       "name": "Pregnancy support program",
       "color": "magenta",
       "fact": "After conception the placenta takes over steroid production while prolactin and oxytocin prepare birth and lactation.",
-      "seeds": [
-        "placenta",
-        "prolactin"
-      ],
-      "floatingTerms": [
-        "oxytocin",
-        "lactation"
-      ],
-      "terms": [
-        "placenta",
-        "prolactin",
-        "oxytocin",
-        "lactation"
-      ],
       "termInfo": {
         "placenta": {
           "text": "The temporary organ taking over steroid production for pregnancy.",
@@ -315,7 +303,21 @@
             "href": "wiki:Placenta"
           }
         ]
-      }
+      },
+      "seeds": [
+        "placenta",
+        "prolactin"
+      ],
+      "floatingTerms": [
+        "oxytocin",
+        "lactation"
+      ],
+      "terms": [
+        "placenta",
+        "prolactin",
+        "oxytocin",
+        "lactation"
+      ]
     }
   ],
   "bridges": [

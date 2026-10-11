@@ -264,6 +264,20 @@ import fungalDiseasesVegetables from "./botany/fungal-diseases-vegetables.js";
 import manulColdSteppeCat from "./zoology/manul-cold-steppe-cat.js";
 import manulUnderPressure from "./zoology/manul-under-pressure.js";
 import personPlaceAndTime from "./public-health/person-place-and-time.js";
+import acidBaseBalance from "./physiology-medicine/acid-base-balance.js";
+import buffersAndTitration from "./chemistry/buffers-and-titration.js";
+import concentratingAndDilutingUrine from "./physiology-medicine/concentrating-and-diluting-urine.js";
+import controlOfBreathing from "./physiology-medicine/control-of-breathing.js";
+import gasExchangeAndTransport from "./physiology-medicine/gas-exchange-and-transport.js";
+import gastricAcidSecretion from "./physiology-medicine/gastric-acid-secretion.js";
+import hemostasis from "./physiology-medicine/hemostasis.js";
+import howNeuronsFireAndSignal from "./physiology-medicine/how-neurons-fire-and-signal.js";
+import legumesHorticulture from "./botany/legumes-horticulture.js";
+import mechanicsOfBreathing from "./physiology-medicine/mechanics-of-breathing.js";
+import membranesSetCellConditions from "./physiology-medicine/membranes-set-cell-conditions.js";
+import nightshadesHorticulture from "./botany/nightshades-horticulture.js";
+import regulatingArterialPressure from "./physiology-medicine/regulating-arterial-pressure.js";
+import settingAndDefendingCoreTemperature from "./physiology-medicine/setting-and-defending-core-temperature.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -538,6 +552,20 @@ export const PUZZLES = [
   manulColdSteppeCat,
   manulUnderPressure,
   personPlaceAndTime,
+  acidBaseBalance,
+  buffersAndTitration,
+  concentratingAndDilutingUrine,
+  controlOfBreathing,
+  gasExchangeAndTransport,
+  gastricAcidSecretion,
+  hemostasis,
+  howNeuronsFireAndSignal,
+  legumesHorticulture,
+  mechanicsOfBreathing,
+  membranesSetCellConditions,
+  nightshadesHorticulture,
+  regulatingArterialPressure,
+  settingAndDefendingCoreTemperature,
 ];
 
 export default PUZZLES;

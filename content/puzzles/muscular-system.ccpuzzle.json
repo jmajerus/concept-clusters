@@ -2,7 +2,9 @@
   "id": "muscular-system",
   "title": "The muscular system",
   "category": "physiology-medicine",
-  "large": true,
+  "subcategories": {
+    "physiology-medicine": "muscle"
+  },
   "info": {
     "text": "Nerve orders become sliding-filament force: acetylcholine fires the fiber, calcium exposes actin, myosin ratchets, and three fuel routes pay in sequence.",
     "links": [
@@ -34,24 +36,6 @@
       "name": "Sarcomere machine",
       "color": "teal",
       "fact": "Thin actin and thick myosin filaments ratchet past each other: calcium-bound troponin exposes actin's sites, myosin cross-bridges grab on, and power strokes shorten each sarcomere.",
-      "seeds": [
-        "actin",
-        "myosin"
-      ],
-      "floatingTerms": [
-        "sarcomere",
-        "cross-bridge",
-        "troponin",
-        "calcium ions"
-      ],
-      "terms": [
-        "actin",
-        "myosin",
-        "sarcomere",
-        "cross-bridge",
-        "troponin",
-        "calcium ions"
-      ],
       "termInfo": {
         "actin": {
           "text": "The thin filament offering binding sites for myosin heads.",
@@ -102,29 +86,31 @@
             "href": "wiki:Sarcomere"
           }
         ]
-      }
+      },
+      "seeds": [
+        "actin",
+        "myosin"
+      ],
+      "floatingTerms": [
+        "sarcomere",
+        "cross-bridge",
+        "troponin",
+        "calcium ions"
+      ],
+      "terms": [
+        "actin",
+        "myosin",
+        "sarcomere",
+        "cross-bridge",
+        "troponin",
+        "calcium ions"
+      ]
     },
     {
       "id": "excitation-command",
       "name": "Excitation command",
       "color": "blue",
       "fact": "One motor neuron plus its muscle fibers form a motor unit, fired when acetylcholine crosses the neuromuscular junction and triggers a muscle action potential.",
-      "seeds": [
-        "motor unit",
-        "neuromuscular junction"
-      ],
-      "floatingTerms": [
-        "acetylcholine",
-        "muscle action potential",
-        "muscle fiber"
-      ],
-      "terms": [
-        "motor unit",
-        "neuromuscular junction",
-        "acetylcholine",
-        "muscle action potential",
-        "muscle fiber"
-      ],
       "termInfo": {
         "motor unit": {
           "text": "One motor neuron plus all the fibers it fires as a team.",
@@ -167,29 +153,29 @@
             "href": "wiki:Neuromuscular junction"
           }
         ]
-      }
+      },
+      "seeds": [
+        "motor unit",
+        "neuromuscular junction"
+      ],
+      "floatingTerms": [
+        "acetylcholine",
+        "muscle action potential",
+        "muscle fiber"
+      ],
+      "terms": [
+        "motor unit",
+        "neuromuscular junction",
+        "acetylcholine",
+        "muscle action potential",
+        "muscle fiber"
+      ]
     },
     {
       "id": "fiber-types",
       "name": "Fiber types",
       "color": "amber",
       "fact": "Slow-twitch fibers burn oxygen steadily with myoglobin and mitochondria, resisting fatigue; fast-twitch fibers contract powerfully and tire quickly.",
-      "seeds": [
-        "slow-twitch fibers",
-        "fast-twitch fibers"
-      ],
-      "floatingTerms": [
-        "myoglobin",
-        "mitochondria",
-        "fatigue"
-      ],
-      "terms": [
-        "slow-twitch fibers",
-        "fast-twitch fibers",
-        "myoglobin",
-        "mitochondria",
-        "fatigue"
-      ],
       "termInfo": {
         "slow-twitch fibers": "Oxidative endurers: myoglobin-rich, mitochondrial, fatigue-resistant.",
         "fast-twitch fibers": "Powerful sprinters: glycolytic, fast-firing, quick to tire.",
@@ -225,29 +211,29 @@
             "href": "wiki:Skeletal muscle"
           }
         ]
-      }
+      },
+      "seeds": [
+        "slow-twitch fibers",
+        "fast-twitch fibers"
+      ],
+      "floatingTerms": [
+        "myoglobin",
+        "mitochondria",
+        "fatigue"
+      ],
+      "terms": [
+        "slow-twitch fibers",
+        "fast-twitch fibers",
+        "myoglobin",
+        "mitochondria",
+        "fatigue"
+      ]
     },
     {
       "id": "fuel-supply",
       "name": "Fuel supply",
       "color": "magenta",
       "fact": "Contraction is paid three ways in sequence: creatine phosphate for seconds, glycolysis of glycogen for minutes, oxidative phosphorylation for sustained work, all delivering ATP.",
-      "seeds": [
-        "ATP",
-        "creatine phosphate"
-      ],
-      "floatingTerms": [
-        "glycogen",
-        "glycolysis",
-        "oxidative phosphorylation"
-      ],
-      "terms": [
-        "ATP",
-        "creatine phosphate",
-        "glycogen",
-        "glycolysis",
-        "oxidative phosphorylation"
-      ],
       "termInfo": {
         "ATP": {
           "text": "The energy currency every power stroke spends.",
@@ -297,7 +283,23 @@
             "href": "wiki:Adenosine triphosphate"
           }
         ]
-      }
+      },
+      "seeds": [
+        "ATP",
+        "creatine phosphate"
+      ],
+      "floatingTerms": [
+        "glycogen",
+        "glycolysis",
+        "oxidative phosphorylation"
+      ],
+      "terms": [
+        "ATP",
+        "creatine phosphate",
+        "glycogen",
+        "glycolysis",
+        "oxidative phosphorylation"
+      ]
     }
   ],
   "bridges": [

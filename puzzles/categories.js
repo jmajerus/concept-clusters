@@ -286,9 +286,91 @@ export const CATEGORIES = {
       }
     }
   },
-  "Physiology & Medicine": {
+  Physiology: {
+    slug: "physiology-medicine",
     domain: "health-medicine",
-    info: { text: "How the body is built, and what keeps it running.", link: "wiki:Physiology" }
+    info: {
+      text: "How the human body's cells, tissues, and organ systems work, and how they coordinate to keep internal conditions stable.",
+      link: "wiki:Physiology"
+    },
+    subcategories: {
+      "blood-hemostasis": {
+        title: "Blood & Hemostasis",
+        info: {
+          text: "How blood's cells and plasma carry and defend, how they are produced, and how clotting stops bleeding.",
+          link: "wiki:Blood",
+          extraLink: "wiki:Hemostasis"
+        }
+      },
+      cardiovascular: {
+        title: "Cardiovascular Physiology",
+        info: {
+          text: "How the heart pumps, how vessels distribute flow and pressure, and how circulation is regulated.",
+          link: "wiki:Cardiovascular physiology"
+        }
+      },
+      "cellular-membrane": {
+        title: "Cellular & Membrane Physiology",
+        info: {
+          text: "How membranes, transporters, and ion gradients set the conditions every cell, nerve, and muscle depends on.",
+          link: "wiki:Cell physiology"
+        }
+      },
+      "endocrine-reproductive": {
+        title: "Endocrine & Reproductive Physiology",
+        info: {
+          text: "How hormones carry signals between organs and regulate metabolism, growth, and reproduction.",
+          link: "wiki:Endocrinology",
+          extraLink: "wiki:Reproductive physiology"
+        }
+      },
+      gastrointestinal: {
+        title: "Gastrointestinal Physiology",
+        info: {
+          text: "How the gut moves, secretes, digests, and absorbs, and how those functions are controlled.",
+          link: "wiki:Gastrointestinal physiology"
+        }
+      },
+      integrative: {
+        title: "Integrative Physiology",
+        info: {
+          text: "How systems work together to maintain homeostasis, regulate temperature, and respond to exercise and stress.",
+          link: "wiki:Homeostasis"
+        }
+      },
+      muscle: {
+        title: "Muscle Physiology",
+        info: {
+          text: "How skeletal, cardiac, and smooth muscle convert chemical energy into force, and how contraction is triggered and graded.",
+          link: "wiki:Muscle contraction"
+        }
+      },
+      neurophysiology: {
+        title: "Neurophysiology",
+        info: {
+          text: "How neurons generate and transmit signals, and how neural circuits sense, integrate, and command.",
+          link: "wiki:Neurophysiology"
+        }
+      },
+      renal: {
+        title: "Renal Physiology",
+        info: {
+          text: "How the kidneys filter, reabsorb, and secrete to regulate body fluids, electrolytes, and acid–base balance.",
+          link: "wiki:Renal physiology"
+        }
+      },
+      respiratory: {
+        title: "Respiratory Physiology",
+        info: {
+          text: "How ventilation, gas exchange, and gas transport move oxygen in and carbon dioxide out, and how breathing is controlled.",
+          link: "wiki:Respiratory physiology"
+        }
+      }
+    },
+    previousTitles: [
+      "Physiology & Medicine",
+      "Anatomy & Physiology"
+    ]
   },
   "Bioethics": {
     domain: "health-medicine",

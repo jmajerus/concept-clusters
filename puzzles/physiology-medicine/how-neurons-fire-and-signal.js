@@ -1,0 +1,988 @@
+// Generated from content/puzzles/how-neurons-fire-and-signal.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+const puzzle = definePuzzle(import.meta.url, {
+  "id": "how-neurons-fire-and-signal",
+  "title": "How neurons fire and signal",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "neurophysiology"
+  },
+  "info": {
+    "text": "A neuron spends the resting voltage its pumps maintain: synaptic inputs sum toward threshold, voltage-gated channels fire and reset an all-or-none spike, the spike travels down the axon, and at the terminal it becomes a chemical message for the next cell.",
+    "links": [
+      {
+        "href": "wiki:Action potential"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Anatomy and Physiology 2e, §12.4 The Action Potential",
+        "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-4-the-action-potential"
+      },
+      {
+        "title": "Anatomy and Physiology 2e, §12.5 Communication Between Neurons",
+        "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-5-communication-between-neurons"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "synaptic-integration",
+      "name": "Synaptic integration",
+      "color": "teal",
+      "fact": "Each active synapse produces a small graded potential in the receiving neuron: an excitatory postsynaptic potential moves the membrane toward threshold, an inhibitory one moves it away. These add together through spatial summation, across many synapses at once, and temporal summation, as inputs arrive in quick succession.",
+      "terms": [
+        "excitatory postsynaptic potential",
+        "inhibitory postsynaptic potential",
+        "graded potential",
+        "spatial summation",
+        "temporal summation"
+      ],
+      "seeds": [
+        "excitatory postsynaptic potential",
+        "inhibitory postsynaptic potential"
+      ],
+      "termInfo": {
+        "excitatory postsynaptic potential": {
+          "text": "EPSP: a small depolarization of the receiving membrane, usually from cations entering, that brings it closer to firing.",
+          "links": [
+            {
+              "href": "wiki:Excitatory postsynaptic potential"
+            }
+          ]
+        },
+        "graded potential": {
+          "text": "A local voltage change whose size varies with the strength of its stimulus and which fades with distance.",
+          "links": [
+            {
+              "href": "wiki:Graded potential"
+            }
+          ]
+        },
+        "inhibitory postsynaptic potential": {
+          "text": "IPSP: a small hyperpolarization, usually from Cl⁻ entering or K⁺ leaving, that holds the membrane further from firing.",
+          "links": [
+            {
+              "href": "wiki:Inhibitory postsynaptic potential"
+            }
+          ]
+        },
+        "spatial summation": {
+          "text": "Adding together potentials that arrive at the same time from different synapses on one neuron.",
+          "links": [
+            {
+              "href": "wiki:Summation (neurophysiology)"
+            }
+          ]
+        },
+        "temporal summation": {
+          "text": "Adding together potentials that arrive in rapid succession, each before the last has faded.",
+          "links": [
+            {
+              "href": "wiki:Summation (neurophysiology)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-5-communication-between-neurons"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rising-phase",
+      "name": "Rising phase",
+      "color": "blue",
+      "fact": "When the membrane reaches threshold, about −55 mV, the activation gates of voltage-gated sodium channels open. Na⁺ rushes in, depolarizing the membrane and opening still more channels; this positive feedback drives the voltage to about +30 mV. Once started it runs to completion, so every action potential in a given neuron is the same size: all-or-none.",
+      "terms": [
+        "threshold",
+        "voltage-gated sodium channel",
+        "activation gate",
+        "positive feedback",
+        "all-or-none"
+      ],
+      "seeds": [
+        "threshold",
+        "voltage-gated sodium channel"
+      ],
+      "termInfo": {
+        "activation gate": "The fast gate of the sodium channel, which swings open when depolarization reaches threshold.",
+        "all-or-none": {
+          "text": "Below threshold there is no action potential; at or above it, the full-size response occurs. Stimulus strength is coded by firing frequency instead.",
+          "links": [
+            {
+              "href": "wiki:All-or-none law"
+            }
+          ]
+        },
+        "positive feedback": "Each opening sodium channel lets in Na⁺ that depolarizes the membrane further, opening more channels: a self-reinforcing loop.",
+        "threshold": {
+          "text": "The membrane voltage, about −55 mV in a typical neuron, at which enough sodium channels open for an action potential to become self-sustaining.",
+          "links": [
+            {
+              "href": "wiki:Threshold potential"
+            }
+          ]
+        },
+        "voltage-gated sodium channel": {
+          "text": "A Na⁺ channel that opens when the membrane depolarizes; its rapid opening carries the upstroke of the action potential.",
+          "links": [
+            {
+              "href": "wiki:Sodium channel"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-4-the-action-potential"
+          }
+        ]
+      }
+    },
+    {
+      "id": "falling-phase",
+      "name": "Falling phase",
+      "color": "amber",
+      "fact": "At the peak, inactivation gates plug the sodium channels while slower voltage-gated potassium channels finish opening. K⁺ flows out and repolarizes the membrane; because the potassium channels close slowly, the voltage briefly dips below rest in an afterhyperpolarization before settling back.",
+      "terms": [
+        "voltage-gated potassium channel",
+        "repolarization",
+        "inactivation gate",
+        "afterhyperpolarization"
+      ],
+      "seeds": [
+        "voltage-gated potassium channel",
+        "repolarization"
+      ],
+      "termInfo": {
+        "afterhyperpolarization": {
+          "text": "The brief dip below resting voltage while potassium channels are still closing.",
+          "links": [
+            {
+              "href": "wiki:Afterhyperpolarization"
+            }
+          ]
+        },
+        "inactivation gate": "The slower gate of the sodium channel, which closes the pore shortly after it opens and stays shut until the membrane repolarizes.",
+        "repolarization": {
+          "text": "The return of the membrane voltage from its positive peak back toward the negative resting level.",
+          "links": [
+            {
+              "href": "wiki:Repolarization"
+            }
+          ]
+        },
+        "voltage-gated potassium channel": {
+          "text": "A K⁺ channel opened by depolarization more slowly than sodium channels, so its outward current arrives after the peak.",
+          "links": [
+            {
+              "href": "wiki:Voltage-gated potassium channel"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-4-the-action-potential"
+          }
+        ]
+      }
+    },
+    {
+      "id": "axonal-conduction",
+      "name": "Conduction along the axon",
+      "color": "magenta",
+      "fact": "An action potential travels by depolarizing the membrane just ahead of it. In an unmyelinated axon it regenerates at every patch of membrane, in continuous conduction; in a myelinated axon the sheath insulates the stretches between nodes of Ranvier and the signal regenerates only at the nodes, in saltatory conduction. Myelin and a larger axon diameter both raise conduction speed.",
+      "terms": [
+        "myelin",
+        "node of Ranvier",
+        "saltatory conduction",
+        "continuous conduction",
+        "axon diameter"
+      ],
+      "seeds": [
+        "myelin",
+        "node of Ranvier"
+      ],
+      "termInfo": {
+        "axon diameter": "A wider axon has lower internal resistance, so current spreads farther ahead and the impulse travels faster.",
+        "continuous conduction": "Propagation in unmyelinated axons, where every adjacent patch of membrane must fire in turn.",
+        "myelin": {
+          "text": "Layers of glial membrane wrapped around an axon that insulate it and reduce current leak.",
+          "links": [
+            {
+              "href": "wiki:Myelin"
+            }
+          ]
+        },
+        "node of Ranvier": {
+          "text": "A short gap in the myelin sheath, packed with voltage-gated sodium channels, where the action potential is regenerated.",
+          "links": [
+            {
+              "href": "wiki:Node of Ranvier"
+            }
+          ]
+        },
+        "saltatory conduction": {
+          "text": "Propagation in myelinated axons in which the action potential is regenerated only at successive nodes, much faster than continuous conduction.",
+          "links": [
+            {
+              "href": "wiki:Saltatory conduction"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Nerve conduction velocity"
+          }
+        ]
+      }
+    },
+    {
+      "id": "synaptic-transmission",
+      "name": "Synaptic transmission",
+      "color": "olive",
+      "fact": "When an action potential reaches the axon terminal, voltage-gated calcium channels open. Entering Ca²⁺ drives synaptic vesicles to fuse with the membrane and release neurotransmitter by exocytosis into the synaptic cleft. The signal ends when the transmitter is cleared, by reuptake into the neuron or nearby glia, or by enzymatic degradation, as acetylcholinesterase does at cholinergic synapses.",
+      "terms": [
+        "neurotransmitter",
+        "synaptic vesicle",
+        "voltage-gated calcium channel",
+        "exocytosis",
+        "synaptic cleft",
+        "reuptake",
+        "enzymatic degradation"
+      ],
+      "seeds": [
+        "neurotransmitter",
+        "synaptic vesicle"
+      ],
+      "termInfo": {
+        "enzymatic degradation": {
+          "text": "Ending a transmitter's action by breaking it down in the cleft, as acetylcholinesterase splits acetylcholine.",
+          "links": [
+            {
+              "href": "wiki:Acetylcholinesterase"
+            }
+          ]
+        },
+        "exocytosis": {
+          "text": "Fusion of a vesicle with the cell membrane, emptying its contents outside the cell.",
+          "links": [
+            {
+              "href": "wiki:Exocytosis"
+            }
+          ]
+        },
+        "neurotransmitter": {
+          "text": "A chemical messenger released by a neuron that acts on receptors of a target cell, such as glutamate, GABA, or acetylcholine.",
+          "links": [
+            {
+              "href": "wiki:Neurotransmitter"
+            }
+          ]
+        },
+        "reuptake": {
+          "text": "Transport of neurotransmitter back into the presynaptic neuron or a neighboring glial cell, ending its action and allowing reuse.",
+          "links": [
+            {
+              "href": "wiki:Reuptake"
+            }
+          ]
+        },
+        "synaptic cleft": "The narrow gap, roughly 20 nm wide, that neurotransmitter diffuses across to reach the receiving cell.",
+        "synaptic vesicle": {
+          "text": "A small membrane sac in the axon terminal that stores neurotransmitter until release.",
+          "links": [
+            {
+              "href": "wiki:Synaptic vesicle"
+            }
+          ]
+        },
+        "voltage-gated calcium channel": {
+          "text": "A Ca²⁺ channel in the axon terminal that opens when the arriving action potential depolarizes it; the calcium that enters triggers release.",
+          "links": [
+            {
+              "href": "wiki:Voltage-gated calcium channel"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Chemical synapse"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "axon-hillock",
+      "term": "axon hillock",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "The axon hillock is where integration becomes firing. Graded potentials from the dendrites and cell body sum here, and its dense voltage-gated sodium channels give it the lowest threshold in the neuron, so an action potential begins here only if the summed input reaches threshold.",
+      "info": {
+        "text": "The cone-shaped region where the axon leaves the cell body; with the initial segment, it is the neuron's trigger zone.",
+        "links": [
+          {
+            "href": "wiki:Axon hillock"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "graded potential",
+        "threshold"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
+    },
+    {
+      "id": "refractory-period",
+      "term": "refractory period",
+      "clusters": [
+        2,
+        3
+      ],
+      "fact": "Behind an advancing action potential, sodium channels sit inactivated and potassium channels are still open, so that stretch of membrane cannot fire again at once. This refractory period keeps the impulse moving forward along the axon and caps how often a neuron can fire.",
+      "info": {
+        "text": "Absolute while sodium channels are inactivated; relative afterward, when only a stronger-than-usual stimulus can fire the membrane.",
+        "links": [
+          {
+            "href": "wiki:Refractory period (physiology)"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 3
+      }
+    },
+    {
+      "id": "ligand-gated-ion-channel",
+      "term": "ligand-gated ion channel",
+      "clusters": [
+        4,
+        0
+      ],
+      "fact": "The ligand-gated ion channel turns the chemical signal back into an electrical one. Neurotransmitter that crosses the cleft binds this ionotropic receptor, which opens to let ions through and produces an excitatory or inhibitory postsynaptic potential depending on which ions it passes.",
+      "info": {
+        "text": "An ionotropic receptor: a channel that opens when its neurotransmitter binds, such as the nicotinic acetylcholine receptor or the GABA-A receptor.",
+        "links": [
+          {
+            "href": "wiki:Ligand-gated ion channel"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "neurotransmitter",
+        "graded potential"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 4,
+        "to": 0
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "harder-to-refire",
+      "prompt": "Which concepts make freshly fired membrane harder to fire again?",
+      "explanation": "Inactivated sodium channels cannot reopen until the membrane repolarizes, which sets the absolute refractory period. After that, potassium channels that have not yet closed and the afterhyperpolarization hold the membrane below rest, so only a stronger-than-usual stimulus reaches threshold: the relative refractory period. Repolarization is the recovery itself, restoring the conditions for firing.",
+      "targets": [
+        "inactivation gate",
+        "voltage-gated potassium channel",
+        "afterhyperpolarization",
+        "refractory period"
+      ],
+      "reasons": {
+        "afterhyperpolarization": "It leaves the membrane further from threshold than at rest, so more input is needed to fire.",
+        "inactivation gate": "While it plugs the sodium channel, no stimulus can open the channel, so the membrane cannot fire at all.",
+        "refractory period": "It names the interval during which the membrane cannot fire, or fires only with extra input.",
+        "voltage-gated potassium channel": "Its lingering outward K⁺ current opposes any new depolarization."
+      }
+    },
+    {
+      "id": "lidocaine-sites",
+      "prompt": "Lidocaine numbs by blocking voltage-gated sodium channels. At which sites does a neuron pack those channels most densely?",
+      "explanation": "The axon hillock's dense sodium channels make it the place where the spike starts, and each node of Ranvier's let the spike regenerate between stretches of myelin. Applied to a nerve, lidocaine stops regeneration at the nodes, so sensory signals never reach the spinal cord.",
+      "targets": [
+        "axon hillock",
+        "node of Ranvier"
+      ],
+      "reasons": {
+        "axon hillock": "Its high sodium channel density gives it the lowest threshold in the neuron, so action potentials begin there.",
+        "node of Ranvier": "Sodium channels cluster in these gaps in the myelin, where the action potential is regenerated."
+      }
+    },
+    {
+      "id": "demyelination",
+      "prompt": "In multiple sclerosis, immune attack strips myelin from axons in the brain and spinal cord. Which form of propagation fails in the damaged stretches?",
+      "explanation": "Without insulation, current leaks out of the axon before it reaches the next node, so the spike slows or stops there. The formerly myelinated stretches between nodes have few sodium channels, so continuous conduction cannot reliably take over; this conduction block underlies many of the disease's symptoms.",
+      "targets": [
+        "saltatory conduction"
+      ],
+      "reasons": {
+        "saltatory conduction": "It depends on myelin carrying current quickly from one node to the next, which demyelination removes."
+      }
+    },
+    {
+      "id": "prolonging-transmitter",
+      "prompt": "Some drugs prolong a neurotransmitter's action in the synaptic cleft. Which processes can such a drug block?",
+      "explanation": "A transmitter keeps acting until it is cleared, so blocking either clearance route lengthens its effect. Selective serotonin reuptake inhibitors such as fluoxetine slow serotonin's removal by its transporter; acetylcholinesterase inhibitors such as neostigmine, used in myasthenia gravis, slow the breakdown of acetylcholine. Exocytosis puts transmitter into the cleft; blocking it would shorten the signal.",
+      "targets": [
+        "reuptake",
+        "enzymatic degradation"
+      ],
+      "reasons": {
+        "enzymatic degradation": "Blocking the enzyme leaves transmitter intact, as acetylcholinesterase inhibitors do for acetylcholine.",
+        "reuptake": "Blocking the transporter leaves transmitter in the cleft, as selective serotonin reuptake inhibitors do for serotonin."
+      }
+    },
+    {
+      "id": "changing-form",
+      "prompt": "Which two channels convert the signal between electrical and chemical form?",
+      "explanation": "At the axon terminal, the voltage-gated calcium channel turns a voltage change into calcium entry, which releases transmitter. At the receiving cell, the ligand-gated ion channel turns transmitter binding back into a voltage change. Sodium and potassium channels respond to voltage and produce voltage, so the signal stays electrical through them.",
+      "targets": [
+        "voltage-gated calcium channel",
+        "ligand-gated ion channel"
+      ],
+      "reasons": {
+        "ligand-gated ion channel": "A chemical binding opens it, and the ions it passes change the membrane voltage: chemical to electrical.",
+        "voltage-gated calcium channel": "A voltage change opens it, and the calcium it admits triggers chemical release: electrical to chemical."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "From input to output",
+    "summary": "How a neuron sums its inputs, fires and resets an action potential, conducts it down the axon, and passes it to the next cell across a synapse.",
+    "estimatedMinutes": 7,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "A resting neuron holds its inside at about −70 mV, a voltage built by ion pumps and leak channels. Signaling is the controlled spending of that voltage. Inside one neuron the signal is electrical; between neurons it is usually chemical. Following a single signal from input to output shows how each step carries it or changes its form.\r\n\r\n## Inputs add up\r\n\r\nA neuron receives thousands of synapses on its dendrites and cell body. Each active synapse produces a **graded potential**, a small, local voltage change whose size depends on the strength of the input and which fades as it spreads. An **excitatory postsynaptic potential** (EPSP) is a slight depolarization, usually from positive ions entering, that moves the membrane toward firing. An **inhibitory postsynaptic potential** (IPSP) is a slight hyperpolarization, usually from chloride entering or potassium leaving, that moves it away.\r\n\r\nA single input is rarely enough. The neuron adds them together. **Spatial summation** combines inputs arriving at the same moment from different synapses; **temporal summation** combines inputs arriving in quick succession, each before the last has faded. This adding-up is the neuron's basic computation.\r\n\r\nThe sum is weighed at the **axon hillock**, where the axon leaves the cell body. Its membrane is dense with voltage-gated sodium channels, which gives it the lowest **threshold** in the cell, around −55 mV. If the summed input depolarizes the hillock to threshold, the neuron fires an action potential.\r\n\r\n## The rising phase\r\n\r\nThe **voltage-gated sodium channel** opens in response to depolarization. At threshold its **activation gate** swings open and sodium rushes in, depolarizing the membrane further and opening still more channels. This **positive feedback** drives the voltage from about −55 mV to about +30 mV in less than a millisecond.\r\n\r\nBecause the loop runs to completion once triggered, the action potential is **all-or-none**: below threshold there is no spike, and above it every spike in a given neuron is the same size. A neuron signals a stronger stimulus by firing more often.\r\n\r\n## The falling phase\r\n\r\nTwo slower events end the spike. Shortly after the activation gate opens, each sodium channel's **inactivation gate** swings shut and plugs the pore. Meanwhile the **voltage-gated potassium channel**, which responds to depolarization more slowly, finishes opening, and potassium flows out. This **repolarization** returns the membrane toward rest. The potassium channels are also slow to close, so the voltage briefly dips below rest in an **afterhyperpolarization** before settling.\r\n\r\nFor a few milliseconds after a spike, the membrane resists firing again. This is the **refractory period**. In its absolute phase, inactivated sodium channels cannot reopen at all. In its relative phase, lingering potassium current and the afterhyperpolarization mean that only a stronger-than-usual stimulus reaches threshold. The refractory period sets an upper limit on how fast a neuron can fire.\r\n\r\n## Conduction along the axon\r\n\r\nAn action potential travels by depolarizing the membrane just ahead of it to threshold. The membrane just behind it is refractory, so the spike moves only forward, away from the cell body.\r\n\r\nIn an unmyelinated axon, every adjacent patch of membrane fires in turn. This **continuous conduction** is slow. A larger **axon diameter** speeds it, because a wider axon has less internal resistance and current spreads farther ahead. Vertebrates gain most of their speed from **myelin**, layers of glial membrane wrapped around the axon that insulate it. The myelin sheath is interrupted at short, regular gaps, the **nodes of Ranvier**, which are packed with sodium channels. Current spreads quickly under the insulation and the spike regenerates only at each node, an arrangement called **saltatory conduction**, from the Latin for \"to leap.\" Large myelinated fibers conduct at more than 100 meters per second; thin unmyelinated fibers, at around one.\r\n\r\n## Synaptic transmission\r\n\r\nAt the axon terminal the electrical signal becomes chemical. The arriving spike opens **voltage-gated calcium channels**, and calcium flows in. Calcium causes **synaptic vesicles**, small membrane sacs that store **neurotransmitter**, to fuse with the terminal membrane and release their contents by **exocytosis** into the **synaptic cleft**, a gap about 20 nanometers wide.\r\n\r\nTransmitter diffuses across the cleft and binds receptors on the receiving cell. The fastest of these are **ligand-gated ion channels**, which open when their transmitter binds. The ions a channel passes determine the result: a channel that admits sodium produces an EPSP, and one that admits chloride produces an IPSP. The chemical signal has become a graded potential again, to be summed by the next neuron.\r\n\r\nThe signal also has to stop. Transmitter is cleared from the cleft by **reuptake**, transport back into the neuron or into nearby glial cells, or by **enzymatic degradation**, as when acetylcholinesterase splits acetylcholine. How long a transmitter acts depends on how quickly it is cleared.\r\n\r\nOne neuron's output is thus another neuron's input, and the cycle of summing, firing, conducting, and releasing begins again."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  },
+  "board": {
+    "lensFlowTrace": true,
+    "sizeFactor": 1.1
+  }
+});
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "how-neurons-fire-and-signal",
+      "puzzleRevision": "fnv1a32:16cffc36",
+      "board": {
+        "width": 1140,
+        "height": 740
+      },
+      "nodes": {
+        "term:excitatory postsynaptic potential": {
+          "x": 277.84,
+          "y": 305.41,
+          "pinned": false
+        },
+        "term:inhibitory postsynaptic potential": {
+          "x": 188.35,
+          "y": 545.14,
+          "pinned": false
+        },
+        "term:graded potential": {
+          "x": 476.96,
+          "y": 341.25,
+          "pinned": false
+        },
+        "term:spatial summation": {
+          "x": 82.43,
+          "y": 369.04,
+          "pinned": false
+        },
+        "term:temporal summation": {
+          "x": 91.75,
+          "y": 211.07,
+          "pinned": false
+        },
+        "term:threshold": {
+          "x": 347.68,
+          "y": 139.2,
+          "pinned": false
+        },
+        "term:voltage-gated sodium channel": {
+          "x": 478.75,
+          "y": 39.71,
+          "pinned": false
+        },
+        "term:activation gate": {
+          "x": 138.38,
+          "y": 23,
+          "pinned": false
+        },
+        "term:positive feedback": {
+          "x": 289.76,
+          "y": 23,
+          "pinned": false
+        },
+        "term:all-or-none": {
+          "x": 208.5,
+          "y": 132.22,
+          "pinned": false
+        },
+        "term:voltage-gated potassium channel": {
+          "x": 582.18,
+          "y": 506.66,
+          "pinned": false
+        },
+        "term:repolarization": {
+          "x": 398.24,
+          "y": 460.13,
+          "pinned": false
+        },
+        "term:inactivation gate": {
+          "x": 409.11,
+          "y": 605.36,
+          "pinned": false
+        },
+        "term:afterhyperpolarization": {
+          "x": 538.36,
+          "y": 717,
+          "pinned": false
+        },
+        "term:myelin": {
+          "x": 842.07,
+          "y": 583.6,
+          "pinned": false
+        },
+        "term:node of Ranvier": {
+          "x": 774.49,
+          "y": 491.61,
+          "pinned": false
+        },
+        "term:saltatory conduction": {
+          "x": 881.94,
+          "y": 707.21,
+          "pinned": false
+        },
+        "term:continuous conduction": {
+          "x": 935.87,
+          "y": 489.25,
+          "pinned": false
+        },
+        "term:axon diameter": {
+          "x": 1010.02,
+          "y": 625.47,
+          "pinned": false
+        },
+        "term:neurotransmitter": {
+          "x": 797.19,
+          "y": 177.96,
+          "pinned": false
+        },
+        "term:synaptic vesicle": {
+          "x": 768.58,
+          "y": 324.01,
+          "pinned": false
+        },
+        "term:voltage-gated calcium channel": {
+          "x": 954.18,
+          "y": 284.57,
+          "pinned": false
+        },
+        "term:exocytosis": {
+          "x": 914.73,
+          "y": 118.36,
+          "pinned": false
+        },
+        "term:synaptic cleft": {
+          "x": 836.23,
+          "y": 23,
+          "pinned": false
+        },
+        "term:reuptake": {
+          "x": 1018.38,
+          "y": 133.05,
+          "pinned": false
+        },
+        "term:enzymatic degradation": {
+          "x": 682.41,
+          "y": 60.05,
+          "pinned": false
+        },
+        "term:axon hillock": {
+          "x": 441.7,
+          "y": 209.72,
+          "pinned": false
+        },
+        "term:refractory period": {
+          "x": 733.51,
+          "y": 636.19,
+          "pinned": false
+        },
+        "term:ligand-gated ion channel": {
+          "x": 617.19,
+          "y": 238.24,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 5530.41,
+        "score": 5530.407816096025
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-11T17:43:10.254Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "how-neurons-fire-and-signal",
+      "puzzleRevision": "fnv1a32:16cffc36",
+      "board": {
+        "width": 1140,
+        "height": 740
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 971.65,
+          "y": 303.59,
+          "pinned": true
+        },
+        "cluster:1": {
+          "x": 510.87,
+          "y": 582.83,
+          "pinned": true
+        },
+        "cluster:2": {
+          "x": 198.4,
+          "y": 560.15,
+          "pinned": true
+        },
+        "cluster:3": {
+          "x": 160.7,
+          "y": 183.94,
+          "pinned": true
+        },
+        "cluster:4": {
+          "x": 653.25,
+          "y": 170.91,
+          "pinned": true
+        }
+      },
+      "bridges": {
+        "term:axon hillock": {
+          "x": 768.09,
+          "y": 494.26,
+          "pinned": true
+        },
+        "term:refractory period": {
+          "x": 242.06,
+          "y": 372.05,
+          "pinned": true
+        },
+        "term:ligand-gated ion channel": {
+          "x": 675.72,
+          "y": 427.35,
+          "pinned": true
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "excitatory postsynaptic potential",
+          "inhibitory postsynaptic potential",
+          "graded potential",
+          "spatial summation",
+          "temporal summation"
+        ],
+        "cluster:1": [
+          "threshold",
+          "voltage-gated sodium channel",
+          "activation gate",
+          "positive feedback",
+          "all-or-none"
+        ],
+        "cluster:2": [
+          "voltage-gated potassium channel",
+          "repolarization",
+          "inactivation gate",
+          "afterhyperpolarization"
+        ],
+        "cluster:3": [
+          "myelin",
+          "node of Ranvier",
+          "saltatory conduction",
+          "continuous conduction",
+          "axon diameter"
+        ],
+        "cluster:4": [
+          "neurotransmitter",
+          "synaptic vesicle",
+          "voltage-gated calcium channel",
+          "exocytosis",
+          "synaptic cleft",
+          "reuptake",
+          "enzymatic degradation"
+        ]
+      },
+      "memberOrders": {
+        "cluster:0": [
+          "spatial summation",
+          "inhibitory postsynaptic potential",
+          "excitatory postsynaptic potential",
+          "temporal summation",
+          "graded potential"
+        ],
+        "cluster:1": [
+          "threshold",
+          "positive feedback",
+          "voltage-gated sodium channel",
+          "activation gate",
+          "all-or-none"
+        ],
+        "cluster:2": [
+          "inactivation gate",
+          "voltage-gated potassium channel",
+          "afterhyperpolarization",
+          "repolarization"
+        ],
+        "cluster:3": [
+          "myelin",
+          "node of Ranvier",
+          "continuous conduction",
+          "saltatory conduction",
+          "axon diameter"
+        ],
+        "cluster:4": [
+          "exocytosis",
+          "synaptic cleft",
+          "enzymatic degradation",
+          "voltage-gated calcium channel",
+          "synaptic vesicle",
+          "neurotransmitter",
+          "reuptake"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 973.6730551202036
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-11T17:47:48.350Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "how-neurons-fire-and-signal",
+      "puzzleRevision": "fnv1a32:16cffc36",
+      "board": {
+        "width": 1140,
+        "height": 740
+      },
+      "nodes": {
+        "term:excitatory postsynaptic potential": {
+          "x": 312.35,
+          "y": 22
+        },
+        "term:inhibitory postsynaptic potential": {
+          "x": 571.81,
+          "y": 22
+        },
+        "term:graded potential": {
+          "x": 567.63,
+          "y": 386.87
+        },
+        "term:spatial summation": {
+          "x": 780.02,
+          "y": 22
+        },
+        "term:temporal summation": {
+          "x": 784.27,
+          "y": 167.28
+        },
+        "term:threshold": {
+          "x": 726.06,
+          "y": 423.04
+        },
+        "term:voltage-gated sodium channel": {
+          "x": 959.46,
+          "y": 80.21
+        },
+        "term:activation gate": {
+          "x": 1072.75,
+          "y": 218.49
+        },
+        "term:positive feedback": {
+          "x": 1004.67,
+          "y": 345.54
+        },
+        "term:all-or-none": {
+          "x": 850.67,
+          "y": 396.39
+        },
+        "term:voltage-gated potassium channel": {
+          "x": 961.37,
+          "y": 543.45
+        },
+        "term:repolarization": {
+          "x": 1032.3,
+          "y": 718
+        },
+        "term:inactivation gate": {
+          "x": 867.83,
+          "y": 718
+        },
+        "term:afterhyperpolarization": {
+          "x": 693.61,
+          "y": 718
+        },
+        "term:myelin": {
+          "x": 589.16,
+          "y": 632.98
+        },
+        "term:node of Ranvier": {
+          "x": 524.78,
+          "y": 718
+        },
+        "term:saltatory conduction": {
+          "x": 363.71,
+          "y": 718
+        },
+        "term:continuous conduction": {
+          "x": 182.93,
+          "y": 718
+        },
+        "term:axon diameter": {
+          "x": 281.99,
+          "y": 591.27
+        },
+        "term:neurotransmitter": {
+          "x": 416.74,
+          "y": 383.77
+        },
+        "term:synaptic vesicle": {
+          "x": 280.81,
+          "y": 448.2
+        },
+        "term:voltage-gated calcium channel": {
+          "x": 111.35,
+          "y": 533.33
+        },
+        "term:exocytosis": {
+          "x": 51.5,
+          "y": 374.08
+        },
+        "term:synaptic cleft": {
+          "x": 68.19,
+          "y": 251.21
+        },
+        "term:reuptake": {
+          "x": 147.52,
+          "y": 369.76
+        },
+        "term:enzymatic degradation": {
+          "x": 104.08,
+          "y": 92.99
+        },
+        "term:axon hillock": {
+          "x": 758.22,
+          "y": 311.78
+        },
+        "term:refractory period": {
+          "x": 640.59,
+          "y": 522.31
+        },
+        "term:ligand-gated ion channel": {
+          "x": 439.1,
+          "y": 209.7
+        },
+        "cluster:0": {
+          "x": 627.78,
+          "y": 234.18
+        },
+        "cluster:1": {
+          "x": 880.31,
+          "y": 275.79
+        },
+        "cluster:2": {
+          "x": 774.98,
+          "y": 580.63
+        },
+        "cluster:3": {
+          "x": 459.86,
+          "y": 557.85
+        },
+        "cluster:4": {
+          "x": 259.81,
+          "y": 281.41
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-11T17:43:00.343Z"
+    }
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -1,0 +1,571 @@
+{
+  "id": "legumes-horticulture",
+  "title": "Legumes: One Family, Many Garden Jobs",
+  "category": "botany",
+  "subcategories": {
+    "botany": "horticulture"
+  },
+  "info": {
+    "text": "One botanical family, sorted by what the grower takes from it: fresh pods, dry staples, oil, forage, and soil. The same nitrogen-fixing partnership runs under every group — and two lines, harvest stage and the oil press, explain why grocery names and botany disagree.",
+    "links": [
+      {
+        "href": "https://en.wikipedia.org/wiki/Legume",
+        "label": "Legume — Wikipedia"
+      },
+      {
+        "href": "https://en.wikipedia.org/wiki/Cover_crop",
+        "label": "Cover crop — Wikipedia"
+      },
+      {
+        "href": "https://en.wikipedia.org/wiki/Root_nodule",
+        "label": "Root nodule — Wikipedia"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Legume",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Legume"
+      },
+      {
+        "title": "Root nodule",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Root_nodule"
+      },
+      {
+        "title": "Cover crop",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Cover_crop"
+      },
+      {
+        "title": "Phaseolus vulgaris",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Phaseolus_vulgaris"
+      },
+      {
+        "title": "Peanut",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Peanut"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "fresh-pods",
+      "name": "Fresh pod vegetables",
+      "color": "teal",
+      "fact": "Grown to be eaten young: flat or fleshy pods and fresh shelled seeds taken before maturity. The FAO classes green beans and green peas as vegetable crops rather than pulses for exactly this reason — they are picked green.",
+      "termInfo": {
+        "garden pea": {
+          "text": "Pisum sativum picked while plump and green and shelled fresh — the vegetable side of the harvest-stage split; dried, the same seed becomes split pea.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Pea",
+              "label": "Pea — Wikipedia"
+            }
+          ]
+        },
+        "green bean": {
+          "text": "The immature pod of Phaseolus vulgaris, eaten whole; the same species dried gives the kidney, pinto, and navy beans on FAO's pulse list.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Green_bean",
+              "label": "Green bean — Wikipedia"
+            }
+          ]
+        },
+        "snow pea": {
+          "text": "A pea harvested for its flat, immature pod and eaten pod-and-all before the seeds swell.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Pea",
+              "label": "Pea — Wikipedia"
+            }
+          ]
+        },
+        "edamame": {
+          "text": "Immature soybean pods, steamed or boiled green — the soft-picked twin of the dry oilseed crop.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Edamame",
+              "label": "Edamame — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "If you eat the pod or the fresh seed within days of picking, it lives here.",
+      "seeds": [
+        "garden pea",
+        "green bean"
+      ],
+      "floatingTerms": [
+        "snow pea",
+        "edamame"
+      ],
+      "terms": [
+        "garden pea",
+        "green bean",
+        "snow pea",
+        "edamame"
+      ]
+    },
+    {
+      "id": "pulses",
+      "name": "Pulses: the dry staples",
+      "color": "amber",
+      "fact": "Left to dry on the plant so the seed stores for months — the protein staples that pair with cereals. FAO reserves the word pulse for legumes harvested solely for the dry seed, and recognizes eleven primary pulse crops.",
+      "termInfo": {
+        "lentil": {
+          "text": "Lens culinaris, among the oldest crops on earth; a cool-season pulse that often precedes wheat in dryland rotations.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Lentil",
+              "label": "Lentil — Wikipedia"
+            }
+          ]
+        },
+        "chickpea": {
+          "text": "Cicer arietinum, the garbanzo — a FAO primary pulse and the Mediterranean's dry staple.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Chickpea",
+              "label": "Chickpea — Wikipedia"
+            }
+          ]
+        },
+        "faba bean": {
+          "text": "Vicia faba, the broad bean — an Old World pulse that doubles as a soil-building cover in mild-winter gardens.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Vicia_faba",
+              "label": "Vicia faba — Wikipedia"
+            }
+          ]
+        },
+        "cowpea": {
+          "text": "Vigna unguiculata, the black-eyed pea — a hot-weather pulse that tolerates poor soils.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Cowpea",
+              "label": "Cowpea — Wikipedia"
+            }
+          ]
+        },
+        "pigeon pea": {
+          "text": "Cajanus cajan, a woody tropical pulse grown across South Asia and Africa.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Pigeon_pea",
+              "label": "Pigeon pea — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "If it ships dry in a sack and keeps for a year, it lives here.",
+      "seeds": [
+        "lentil",
+        "chickpea"
+      ],
+      "floatingTerms": [
+        "faba bean",
+        "cowpea",
+        "pigeon pea"
+      ],
+      "terms": [
+        "lentil",
+        "chickpea",
+        "faba bean",
+        "cowpea",
+        "pigeon pea"
+      ]
+    },
+    {
+      "id": "oilseeds",
+      "name": "Oilseed legumes",
+      "color": "blue",
+      "fact": "Grown for the crusher: oil for food and industry, protein-rich meal for feed. FAO excludes both from the pulse list for that reason — and the peanut obligingly ripens its pod underground, where it stays closed.",
+      "termInfo": {
+        "soybean": {
+          "text": "Glycine max — the world's dominant oilseed legume, crushed for oil and high-protein meal, and FAO's headline exclusion from the pulse list.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Soybean",
+              "label": "Soybean — Wikipedia"
+            }
+          ]
+        },
+        "peanut": {
+          "text": "Arachis hypogaea sets its pod underground after flowering and keeps it closed — an indehiscent legume grown mainly for oil.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Peanut",
+              "label": "Peanut — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "If the seed is worth more crushed than cooked, it lives here.",
+      "seeds": [
+        "soybean"
+      ],
+      "floatingTerms": [
+        "peanut"
+      ],
+      "terms": [
+        "soybean",
+        "peanut"
+      ]
+    },
+    {
+      "id": "soil-and-feed",
+      "name": "Forage & cover crops",
+      "color": "olive",
+      "fact": "Grown for the whole plant and never for a seed crop: cut or grazed where the harvest is feed, killed in place where it is soil. Either way, the nitrogen these plants fixed stays in the farming system.",
+      "termInfo": {
+        "alfalfa": {
+          "text": "Medicago sativa, the 'queen of forages' — cut several times a season for high-protein hay.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Alfalfa",
+              "label": "Alfalfa — Wikipedia"
+            }
+          ]
+        },
+        "white clover": {
+          "text": "Trifolium repens, the low stoloniferous legume of pastures and lawns — grazed, and quietly fixing nitrogen.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/White_clover",
+              "label": "White clover — Wikipedia"
+            }
+          ]
+        },
+        "birdsfoot trefoil": {
+          "text": "Lotus corniculatus, a non-bloating forage legume for pasture and hay.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Lotus_corniculatus",
+              "label": "Lotus corniculatus — Wikipedia"
+            }
+          ]
+        },
+        "hairy vetch": {
+          "text": "Vicia villosa, the hardy winter-annual cover crop — killed in spring to release its nitrogen to the crop that follows.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Vicia_villosa",
+              "label": "Vicia villosa — Wikipedia"
+            }
+          ]
+        },
+        "sunn hemp": {
+          "text": "Crotalaria juncea, a fast tropical green manure that builds nitrogen and suppresses weeds before it is turned in.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Crotalaria_juncea",
+              "label": "Crotalaria juncea — Wikipedia"
+            }
+          ]
+        },
+        "sweet clover": {
+          "text": "Melilotus officinalis, the deep-rooted biennial green manure whose residues suppress weeds after termination.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Melilotus_officinalis",
+              "label": "Melilotus officinalis — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "If nobody harvests a seed crop — the whole plant is the product — it lives here.",
+      "seeds": [
+        "alfalfa",
+        "white clover"
+      ],
+      "floatingTerms": [
+        "birdsfoot trefoil",
+        "hairy vetch",
+        "sunn hemp",
+        "sweet clover"
+      ],
+      "terms": [
+        "alfalfa",
+        "white clover",
+        "birdsfoot trefoil",
+        "hairy vetch",
+        "sunn hemp",
+        "sweet clover"
+      ]
+    },
+    {
+      "id": "nitrogen-fixing",
+      "name": "The nitrogen-fixing machinery",
+      "color": "brown",
+      "fact": "Rhizobia housed in root nodules turn atmospheric nitrogen into plant food; when the plant dies, that nitrogen feeds the soil. Growers match bacterial strain to crop by inoculating seed before planting.",
+      "termInfo": {
+        "rhizobia": {
+          "text": "The soil bacteria that trade fixed nitrogen for plant sugar — each legume species partners with specific strains.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Rhizobia",
+              "label": "Rhizobia — Wikipedia"
+            }
+          ]
+        },
+        "root nodule": {
+          "text": "The root organ the plant builds to house its rhizobia — pink inside, where leghemoglobin keeps oxygen in check.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Root_nodule",
+              "label": "Root nodule — Wikipedia"
+            }
+          ]
+        },
+        "nitrogen fixation": {
+          "text": "The conversion of atmospheric N2 into ammonia — the reaction that powers every other cluster on this board.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Root_nodule",
+              "label": "Root nodule — Wikipedia"
+            }
+          ]
+        },
+        "seed inoculation": "Coating seed with a host-specific rhizobial strain before planting, so the right partner is present from the start."
+      },
+      "info": "The partnership every other cluster on this board quietly runs on.",
+      "seeds": [
+        "root nodule",
+        "nitrogen fixation"
+      ],
+      "floatingTerms": [
+        "rhizobia",
+        "seed inoculation"
+      ],
+      "terms": [
+        "root nodule",
+        "nitrogen fixation",
+        "rhizobia",
+        "seed inoculation"
+      ]
+    },
+    {
+      "id": "climbing",
+      "name": "Climbing architecture",
+      "color": "magenta",
+      "fact": "Peas ascend by tendrils and pole beans by twining stems, while breeders compressed both strategies into self-supporting bush forms — the choice that decides whether a planting needs a trellis at all.",
+      "termInfo": {
+        "tendril": {
+          "text": "A modified leaf or stem tip that coils around supports — the pea's climbing tool.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Tendril",
+              "label": "Tendril — Wikipedia"
+            }
+          ]
+        },
+        "twining stem": {
+          "text": "The whole shoot winds helically up its support, as pole beans do — no special organ, just spiral growth.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Phaseolus_vulgaris",
+              "label": "Phaseolus vulgaris — Wikipedia"
+            }
+          ]
+        },
+        "bush habit": {
+          "text": "The bred, self-supporting form — determinate plants 20–60 cm tall that skip the trellis.",
+          "links": [
+            {
+              "href": "https://en.wikipedia.org/wiki/Phaseolus_vulgaris",
+              "label": "Phaseolus vulgaris — Wikipedia"
+            }
+          ]
+        }
+      },
+      "info": "How the plant gets vertical — and what you have to build for it.",
+      "seeds": [
+        "tendril",
+        "bush habit"
+      ],
+      "floatingTerms": [
+        "twining stem"
+      ],
+      "terms": [
+        "tendril",
+        "bush habit",
+        "twining stem"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "nitrogen-sharing",
+      "term": "Nitrogen sharing",
+      "clusters": [
+        "nitrogen-fixing",
+        "soil-and-feed"
+      ],
+      "fact": "A living forage legume feeds its companion grasses: fixed nitrogen moves underground while both grow, which is why mixed grass–legume swards out-perform grass alone.",
+      "info": "Pasture managers seed clover into living grass for exactly this — the legume pays the nitrogen bill while both grow.",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "nitrogen-fixing",
+        "to": "soil-and-feed"
+      }
+    },
+    {
+      "id": "green-manure",
+      "term": "Green manure",
+      "clusters": [
+        "nitrogen-fixing",
+        "soil-and-feed"
+      ],
+      "fact": "Terminated and turned in, a cover-crop legume releases its fixed nitrogen to the crop that follows — in good stands, enough to replace much of the fertilizer that crop would otherwise need.",
+      "info": "Agronomists call the payoff the fertilizer replacement value: what the next crop needs, minus what the killed legume supplies.",
+      "direction": {
+        "kind": "through",
+        "from": "nitrogen-fixing",
+        "to": "soil-and-feed"
+      }
+    },
+    {
+      "id": "crop-rotation",
+      "term": "Crop rotation",
+      "clusters": [
+        "nitrogen-fixing",
+        "pulses"
+      ],
+      "fact": "A pulse returns its nitrogen to the soil when it dies or is harvested, which is why lentils or peas so often precede wheat — fertilizer credit and a break from cereal pests in one rotation.",
+      "info": "Before synthetic fertilizer, this credit was the point of the old four-course rotation — a clover year, then wheat.",
+      "direction": {
+        "kind": "through",
+        "from": "nitrogen-fixing",
+        "to": "pulses"
+      }
+    },
+    {
+      "id": "harvest-stage",
+      "term": "Harvest stage",
+      "clusters": [
+        "fresh-pods",
+        "pulses"
+      ],
+      "fact": "One species, two crops: picked soft it is a vegetable — garden pea, edamame, green bean — dried down it is a pulse. FAO's pulse line is drawn at harvest stage, not at species.",
+      "info": "The freezer aisle hides it: frozen edamame and dried soybeans are one species at two moments, sold under two names.",
+      "relationKind": "contrast"
+    },
+    {
+      "id": "trellis",
+      "term": "Trellis",
+      "clusters": [
+        "fresh-pods",
+        "climbing"
+      ],
+      "fact": "Tendrils and twining stems made peas and pole beans the classic vertical garden; a bush form exists for each, so the same crop can be grown with or without the support.",
+      "info": "Supports must match the grip: tendrils want thin mesh or twine to coil around; twining stems want a pole thick enough to wind on."
+    },
+    {
+      "id": "oil-extraction",
+      "term": "Oil extraction",
+      "clusters": [
+        "pulses",
+        "oilseeds"
+      ],
+      "fact": "What separates a pulse from an oilseed is the press: soybeans and peanuts are excluded from FAO's pulse list because they are grown mainly for their oil.",
+      "info": "One crush, two products: the oil for kitchens and industry, the protein meal for livestock feed.",
+      "relationKind": "contrast"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "killed-in-place",
+      "prompt": "Inside the whole-plant cluster, some species exist to be killed in place — their nitrogen turned under for the next crop — while the rest are cut or grazed for feed. Which three are the kill-in-place cover crops?",
+      "explanation": "Hairy vetch, sunn hemp, and sweet clover are grown to be terminated into the soil. Alfalfa, white clover, and birdsfoot trefoil are the forage half of the cluster — their harvest is the living plant itself, cut or grazed.",
+      "color": "olive",
+      "targets": [
+        "hairy vetch",
+        "sunn hemp",
+        "sweet clover"
+      ],
+      "reasons": {
+        "hairy vetch": "The hardy winter-annual cover: mowed or turned under in spring to feed the crop that follows.",
+        "sunn hemp": "A fast tropical green manure, terminated long before seed to bank nitrogen.",
+        "sweet clover": "The deep-rooted biennial green manure, whose residues keep suppressing weeds after termination."
+      }
+    },
+    {
+      "id": "one-species-two-crops",
+      "prompt": "One species on this board is sold in two lives: picked green and steamed in the pod — and dried down for oil and feed meal. Which two terms are those two lives?",
+      "explanation": "Edamame and soybean are one species (Glycine max) at two harvest stages: soft-picked it is a vegetable, dried down it is an oilseed. Peanut fails both halves — it is never steamed green in the pod, and it was always an oilseed — and garden pea's dry twin (split pea) never joined this board.",
+      "color": "cyan",
+      "targets": [
+        "edamame",
+        "soybean"
+      ],
+      "reasons": {
+        "edamame": "The immature soybean: harvested green and steamed or boiled in the pod as a vegetable.",
+        "soybean": "The same species left to dry on the plant — the world's dominant oilseed, crushed for oil and meal."
+      }
+    },
+    {
+      "id": "the-partner",
+      "prompt": "Every plant on this board — fresh pod, dry pulse, oilseed, or hay — runs the same underground partnership. Which term names the partner itself, rather than the organ it lives in or the reaction it runs?",
+      "explanation": "Rhizobia are the partner: soil bacteria that trade fixed nitrogen for plant sugar. The root nodule is the organ the plant builds to house them, nitrogen fixation is the reaction they run inside it, and seed inoculation is how growers make sure the right strain is waiting at planting.",
+      "color": "brown",
+      "targets": [
+        "rhizobia"
+      ],
+      "reasons": {
+        "rhizobia": "The partner itself — strain-matched bacteria whose nitrogen the plant host feeds for sugar."
+      }
+    },
+    {
+      "id": "leaving-the-ground",
+      "prompt": "Two of these terms name the plant's own climbing tools — the pea's gripper and the bean's whole-stem strategy. Which two?",
+      "explanation": "The tendril is the pea's tool: a modified tip that coils around anything thin enough to grip. The twining stem is the pole bean's strategy: the whole shoot winds helically up its support. Bush habit is the bred answer that skips climbing altogether, and the root nodule is an underground structure with nothing to do with support.",
+      "color": "magenta",
+      "targets": [
+        "tendril",
+        "twining stem"
+      ],
+      "reasons": {
+        "tendril": "A modified leaf or stem tip that coils around thin supports — the pea's grip.",
+        "twining stem": "The whole shoot winds helically up a pole — the pole bean's grip."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "flower-pollination-fruit",
+        "reason": "See the machinery upstream of every pod on this board: how the flower that made each legume fruit actually works."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "One family, six jobs",
+    "summary": "Legumes fix nitrogen through an underground partnership; growers sort the family by what they harvest — fresh pods, dry staples, oil, feed, and soil — and the climbing habit decides whether you build a trellis.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "Every legume is a member of Fabaceae, the pea family — the third-largest family of flowering plants, and the one human cultivation leaned on hardest before synthetic fertilizer existed. The family's namesake is its fruit: a single pod, built from one carpel, that splits along two seams when dry. Everything growers do with legumes starts from that pod and from a second, invisible trait the family carries underground.\r\n\r\n## The partnership under every crop\r\n\r\nMost legumes host soil bacteria called rhizobia. The roots send out chemical invitations; compatible bacteria move in, and the plant builds tiny organs around them — root nodules, pink inside where an oxygen-buffering protein keeps the reaction safe. Inside these nodules the bacteria run a reaction no animal and almost no other crop plant can manage: they take atmospheric nitrogen — utterly inert N2 — and convert it into ammonia, the raw stock of amino acids and protein. The plant pays in sugar; the bacteria pay in nitrogen. It is the closest thing agriculture has to free fertility.\r\n\r\nAnd the credit does not stay on the legume's own books. When the plant dies — after harvest, after termination, after a winter kill — its nitrogen-rich tissues break down and return to the soil, available to whatever is planted next. That single fact explains the family's outsized role in rotations, in pastures, and in the old four-course systems that fed Europe before synthetic nitrogen existed.\r\n\r\n## Sorting by harvest, not by botany\r\n\r\nHorticulture divides the family by what the grower takes. Pick the pod soft and you are growing vegetables: green beans, snow peas, edamame. Let the same kinds of plants dry down and you have pulses — lentils, chickpeas, faba beans, cowpeas — the dry, storable staples that pair with cereals in the kitchen and precede them in the rotation. Grow for the crusher instead and you are in oilseed country: soybean and peanut, excluded from the pulse list precisely because their seed is worth more as oil and meal than as pantry stock. And when nobody harvests a seed crop at all, the whole plant is the product: alfalfa and the clovers cut or grazed as high-protein forage; hairy vetch and its relatives killed in place as green manure, their nitrogen turned under for the crop that follows — what agronomists tally as a fertilizer replacement value.\r\n\r\nThe lines between these groups are lines of harvest and use, not of species. Green bean and dry bean are one plant at two moments; edamame and the oilseed soybean likewise; split peas are simply mature garden peas.\r\n\r\n## The habit that shapes the garden\r\n\r\nOne more family trait shapes every planting: most of these crops climb. Peas grip with tendrils, pole beans wind their whole stem upward, and breeders have compressed both strategies into self-supporting bush forms — which is why seed catalogs offer the same crop two ways, and why the gardener's first real decision is whether to build a trellis."
+    },
+    "links": [
+      {
+        "href": "https://en.wikipedia.org/wiki/Legume",
+        "label": "Legume — Wikipedia"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

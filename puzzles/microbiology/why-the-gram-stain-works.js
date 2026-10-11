@@ -3,11 +3,10 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "why-the-gram-stain-works",
   "title": "Why the Gram stain works",
   "category": "microbiology",
-  "large": true,
   "tags": [
     "bacteria",
     "cell wall",
@@ -387,3 +386,373 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "why-the-gram-stain-works",
+      "puzzleRevision": "fnv1a32:7f5f03ed",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:thick peptidoglycan": {
+          "x": 405.52,
+          "y": 355.65,
+          "pinned": false
+        },
+        "term:teichoic acids": {
+          "x": 302.79,
+          "y": 467.6,
+          "pinned": false
+        },
+        "term:Staphylococcus aureus": {
+          "x": 497.72,
+          "y": 503.21,
+          "pinned": false
+        },
+        "term:Streptococcus": {
+          "x": 365.81,
+          "y": 584.77,
+          "pinned": false
+        },
+        "term:outer membrane": {
+          "x": 630.1,
+          "y": 205.53,
+          "pinned": false
+        },
+        "term:lipopolysaccharide": {
+          "x": 719.68,
+          "y": 86.73,
+          "pinned": false
+        },
+        "term:porins": {
+          "x": 690.42,
+          "y": 298.71,
+          "pinned": false
+        },
+        "term:periplasm": {
+          "x": 750.07,
+          "y": 216.25,
+          "pinned": false
+        },
+        "term:thin peptidoglycan": {
+          "x": 481.38,
+          "y": 209.62,
+          "pinned": false
+        },
+        "term:Escherichia coli": {
+          "x": 564.79,
+          "y": 78.87,
+          "pinned": false
+        },
+        "term:crystal violet": {
+          "x": 704.66,
+          "y": 422.11,
+          "pinned": false
+        },
+        "term:safranin": {
+          "x": 746.13,
+          "y": 531.83,
+          "pinned": false
+        },
+        "term:Gram's iodine": {
+          "x": 795.13,
+          "y": 324.56,
+          "pinned": false
+        },
+        "term:heat-fixed smear": {
+          "x": 843.22,
+          "y": 455.34,
+          "pinned": false
+        },
+        "term:penicillin": {
+          "x": 187.69,
+          "y": 213.87,
+          "pinned": false
+        },
+        "term:lysozyme": {
+          "x": 124.24,
+          "y": 297.15,
+          "pinned": false
+        },
+        "term:vancomycin": {
+          "x": 260.65,
+          "y": 130.22,
+          "pinned": false
+        },
+        "term:polymyxin": {
+          "x": 80.16,
+          "y": 205.67,
+          "pinned": false
+        },
+        "term:peptidoglycan": {
+          "x": 336.43,
+          "y": 223.84,
+          "pinned": false
+        },
+        "term:alcohol decolorizer": {
+          "x": 572.96,
+          "y": 346.33,
+          "pinned": false
+        },
+        "term:permeability barrier": {
+          "x": 404.42,
+          "y": 60.64,
+          "pinned": false
+        },
+        "term:exposed cell wall": {
+          "x": 245.61,
+          "y": 333.65,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3957.52,
+        "score": 3957.519712633985
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T02:17:19.615Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "why-the-gram-stain-works",
+      "puzzleRevision": "fnv1a32:7f5f03ed",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 198.96,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 597.04,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 841.56,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 208.44,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:peptidoglycan": {
+          "x": 474,
+          "y": 398,
+          "pinned": false
+        },
+        "term:alcohol decolorizer": {
+          "x": 630.52,
+          "y": 398,
+          "pinned": false
+        },
+        "term:permeability barrier": {
+          "x": 241.07,
+          "y": 549.56,
+          "pinned": false
+        },
+        "term:exposed cell wall": {
+          "x": 421.88,
+          "y": 353.64,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "thick peptidoglycan",
+          "teichoic acids",
+          "Staphylococcus aureus",
+          "Streptococcus"
+        ],
+        "cluster:1": [
+          "outer membrane",
+          "lipopolysaccharide",
+          "porins",
+          "periplasm",
+          "thin peptidoglycan",
+          "Escherichia coli"
+        ],
+        "cluster:2": [
+          "crystal violet",
+          "safranin",
+          "Gram's iodine",
+          "heat-fixed smear"
+        ],
+        "cluster:3": [
+          "penicillin",
+          "lysozyme",
+          "vancomycin",
+          "polymyxin"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 700.9735871794317
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T02:17:22.275Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "why-the-gram-stain-works",
+      "puzzleRevision": "fnv1a32:7f5f03ed",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:thick peptidoglycan": {
+          "x": 382.16,
+          "y": 214.67
+        },
+        "term:teichoic acids": {
+          "x": 464.63,
+          "y": 39.04
+        },
+        "term:Staphylococcus aureus": {
+          "x": 688.55,
+          "y": 107.23
+        },
+        "term:Streptococcus": {
+          "x": 624.15,
+          "y": 35.03
+        },
+        "term:outer membrane": {
+          "x": 721.04,
+          "y": 530.78
+        },
+        "term:lipopolysaccharide": {
+          "x": 883.3,
+          "y": 383.99
+        },
+        "term:porins": {
+          "x": 848.23,
+          "y": 151.48
+        },
+        "term:periplasm": {
+          "x": 802.59,
+          "y": 447
+        },
+        "term:thin peptidoglycan": {
+          "x": 629.35,
+          "y": 210.77
+        },
+        "term:Escherichia coli": {
+          "x": 694.34,
+          "y": 299.12
+        },
+        "term:crystal violet": {
+          "x": 456.48,
+          "y": 449.6
+        },
+        "term:safranin": {
+          "x": 255.57,
+          "y": 459.84
+        },
+        "term:Gram's iodine": {
+          "x": 382.39,
+          "y": 320.58
+        },
+        "term:heat-fixed smear": {
+          "x": 353.69,
+          "y": 504.81
+        },
+        "term:penicillin": {
+          "x": 51.5,
+          "y": 191.1
+        },
+        "term:lysozyme": {
+          "x": 45.2,
+          "y": 343.96
+        },
+        "term:vancomycin": {
+          "x": 86.2,
+          "y": 430.03
+        },
+        "term:polymyxin": {
+          "x": 168.67,
+          "y": 169.29
+        },
+        "term:peptidoglycan": {
+          "x": 555.66,
+          "y": 277.09
+        },
+        "term:alcohol decolorizer": {
+          "x": 566.02,
+          "y": 368.56
+        },
+        "term:permeability barrier": {
+          "x": 323.38,
+          "y": 583.57
+        },
+        "term:exposed cell wall": {
+          "x": 199.81,
+          "y": 67.09
+        },
+        "cluster:0": {
+          "x": 508.71,
+          "y": 143.1
+        },
+        "cluster:1": {
+          "x": 799.69,
+          "y": 210.51
+        },
+        "cluster:2": {
+          "x": 320.7,
+          "y": 380.64
+        },
+        "cluster:3": {
+          "x": 198.27,
+          "y": 272.09
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-08T20:31:35.409Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T02:17:16.895Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;
