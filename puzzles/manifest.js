@@ -1001,7 +1001,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "breathing-gas-exchange",
       "title": "Breathing and gas exchange",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": false,
       "_searchTerms": [
         "Breathing mechanics",
@@ -1033,7 +1033,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "how-the-heart-pumps",
       "title": "How the heart pumps",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": false,
       "_searchTerms": [
         "Heart chambers",
@@ -1065,7 +1065,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "integumentary-system",
       "title": "The integumentary system",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": false,
       "_searchTerms": [
         "Skin layers",
@@ -1096,7 +1096,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "maintaining-homeostasis",
       "title": "Maintaining homeostasis",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": false,
       "relatedPuzzles": {
         "info": {
@@ -1697,7 +1697,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "signals-and-regulation-in-the-body",
       "title": "Signals and regulation in the body",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": false,
       "relatedPuzzles": {
         "info": {
@@ -4786,8 +4786,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-dna-to-gene-expression",
     "module": "./biology/from-dna-to-gene-expression.js",
     "published": "2026-08-09",
-    "contentFingerprint": "fnv1a64:cc5ad2092d18a066",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:c229ce2963aa8d26",
+    "layoutFingerprint": "fnv1a64:f4fd9c3fd0666537",
     "browse": {
       "id": "from-dna-to-gene-expression",
       "title": "From DNA to gene expression",
@@ -4799,13 +4799,10 @@ export const PUZZLE_MANIFEST = [
         "molecular biology"
       ],
       "subcategories": {
-        "Biology": "genomics"
+        "Biology": "transcriptomics"
       },
       "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Continue from biological information to the technologies that read it and the variation those readings reveal."
-        },
         "entries": [
           {
             "id": "from-reads-to-a-genome",
@@ -4865,7 +4862,7 @@ export const PUZZLE_MANIFEST = [
     "module": "./biology/from-reads-to-a-genome.js",
     "published": "2026-08-09",
     "contentFingerprint": "fnv1a64:3d7023d338e959af",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "layoutFingerprint": "fnv1a64:83945811c60de4bb",
     "browse": {
       "id": "from-reads-to-a-genome",
       "title": "From reads to a genome",
@@ -5196,8 +5193,8 @@ export const PUZZLE_MANIFEST = [
     "id": "reproducible-bioinformatics-workflows",
     "module": "./computer-science/reproducible-bioinformatics-workflows.js",
     "published": "2026-08-09",
-    "contentFingerprint": "fnv1a64:160633d48c550e72",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:d96b98b045c793ec",
+    "layoutFingerprint": "fnv1a64:2ad61238ba4f5063",
     "browse": {
       "id": "reproducible-bioinformatics-workflows",
       "title": "Reproducible bioinformatics workflows",
@@ -9899,8 +9896,8 @@ export const PUZZLE_MANIFEST = [
     "id": "acids-bases-and-ph",
     "module": "./chemistry/acids-bases-and-ph.js",
     "published": "2026-08-20",
-    "contentFingerprint": "fnv1a64:bf6da1a45f90cb34",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:57e645f7a80217d3",
+    "layoutFingerprint": "fnv1a64:ff2637f94eb7a64b",
     "browse": {
       "id": "acids-bases-and-ph",
       "title": "Acids, bases, and pH",
@@ -9911,11 +9908,8 @@ export const PUZZLE_MANIFEST = [
         "bases",
         "pH"
       ],
-      "large": false,
+      "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Place proton transfer between the ions that move and the equilibrium constant that constrains them in water."
-        },
         "entries": [
           {
             "id": "building-atoms-and-ions",
@@ -9923,7 +9917,7 @@ export const PUZZLE_MANIFEST = [
           },
           {
             "id": "energy-rate-and-equilibrium",
-            "reason": "Treat Kw as an equilibrium constant that keeps [H3O+] and [OH−] inversely paired."
+            "reason": "Treat Kw, Ka, and Kb as equilibrium constants that fix how far each proton transfer goes."
           },
           {
             "id": "reading-chemical-reactions",
@@ -9932,7 +9926,7 @@ export const PUZZLE_MANIFEST = [
         ]
       },
       "info": {
-        "text": "Acids donate protons and bases accept them; in water that transfer sets hydronium and hydroxide concentrations, which pH reports on a logarithmic scale.",
+        "text": "Acids donate protons and bases accept them; how completely they do so is their strength. In water that transfer sets hydronium and hydroxide concentrations, which pH reports on a logarithmic scale.",
         "citations": [
           {
             "title": "Brønsted-Lowry Acids and Bases",
@@ -9947,24 +9941,40 @@ export const PUZZLE_MANIFEST = [
             "publisher": "OpenStax",
             "year": "2019",
             "url": "https://openstax.org/books/chemistry-2e/pages/14-2-ph-and-poh"
+          },
+          {
+            "title": "Relative Strengths of Acids and Bases",
+            "author": "Paul Flowers et al.",
+            "publisher": "OpenStax",
+            "year": "2019",
+            "url": "https://openstax.org/books/chemistry-2e/pages/14-3-relative-strengths-of-acids-and-bases"
           }
         ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
       },
       "_searchTerms": [
         "Donating protons",
         "acid",
+        "strong acid",
         "hydronium",
-        "proton donor",
+        "weak acid",
+        "acid ionization constant",
         "Accepting protons",
         "base",
+        "strong base",
         "hydroxide",
-        "proton acceptor",
+        "weak base",
+        "base ionization constant",
         "The pH scale",
         "pH",
         "neutral solution",
         "pOH",
         "logarithmic scale",
         "conjugate pair",
+        "amphiprotic",
         "ion-product of water"
       ]
     }
@@ -10491,51 +10501,47 @@ export const PUZZLE_MANIFEST = [
     "id": "how-the-kidney-forms-urine",
     "module": "./physiology-medicine/how-the-kidney-forms-urine.js",
     "published": "2026-08-21",
-    "contentFingerprint": "fnv1a64:c50733ca9bf4d9f2",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:f1b77a65b0ea0200",
+    "layoutFingerprint": "fnv1a64:e13c0231d458a33a",
     "browse": {
       "id": "how-the-kidney-forms-urine",
       "title": "How the kidney forms urine",
-      "category": "Physiology & Medicine",
-      "large": false,
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "renal"
+      },
+      "large": true,
       "relatedPuzzles": {
-        "info": {
-          "text": "Place urine formation next to the pressure, acid–base, and feedback systems it depends on.",
-          "links": [
-            {
-              "href": "wiki:Homeostasis"
-            }
-          ]
-        },
         "entries": [
           {
             "id": "how-the-heart-pumps",
-            "reason": "Glomerular filtration is driven by arterial hydrostatic pressure, so cardiac pumping is a precondition for forming filtrate.",
+            "reason": "Glomerular filtration is driven by arterial blood pressure, so cardiac pumping is a precondition for forming filtrate.",
             "via": [
-              "glomerulus",
+              "net filtration pressure",
               "glomerular filtration rate"
             ]
           },
           {
             "id": "maintaining-homeostasis",
-            "reason": "Reabsorbing sodium and secreting hydrogen ion are how the kidney acts as an effector for volume, osmolarity, and pH.",
+            "reason": "Reabsorbing sodium and water and secreting hydrogen ion are how the kidney acts as an effector for volume, osmolarity, and pH.",
             "via": [
-              "reabsorption",
               "sodium",
+              "water",
               "hydrogen ion"
             ]
           },
           {
             "id": "breathing-gas-exchange",
-            "reason": "The lungs expire carbon dioxide while the kidney secretes hydrogen ion; both revise acid–base balance.",
+            "reason": "The lungs expire carbon dioxide while the kidney secretes hydrogen ion and reclaims bicarbonate; both revise acid–base balance.",
             "via": [
-              "hydrogen ion"
+              "hydrogen ion",
+              "bicarbonate"
             ]
           }
         ]
       },
       "info": {
-        "text": "Urine is not simply filtered blood. The kidney first forms a large volume of filtrate, then revises that fluid by taking useful substances back into the blood and adding selected acids and wastes.",
+        "text": "Each nephron filters a large volume of plasma, then revises that filtrate by returning useful substances to the blood and secreting acid, potassium, and some drugs into it.",
         "links": [
           {
             "href": "wiki:Renal physiology"
@@ -10569,16 +10575,25 @@ export const PUZZLE_MANIFEST = [
         "Bowman's capsule",
         "podocyte",
         "glomerular filtration rate",
+        "net filtration pressure",
+        "afferent arteriole",
         "Tubular reabsorption",
-        "reabsorption",
         "glucose",
         "sodium",
+        "water",
+        "sodium–glucose cotransporter",
+        "transport maximum",
         "Tubular secretion",
-        "secretion",
         "hydrogen ion",
+        "potassium",
         "ammonium",
+        "penicillin",
         "nephron",
-        "peritubular capillary"
+        "efferent arteriole",
+        "filtered load",
+        "peritubular capillary",
+        "bicarbonate",
+        "sodium–potassium pump"
       ]
     }
   },
@@ -11858,7 +11873,7 @@ export const PUZZLE_MANIFEST = [
       "category": "Bioethics",
       "categories": [
         "Bioethics",
-        "Physiology & Medicine",
+        "Physiology",
         "Business & Organizations"
       ],
       "large": true,
@@ -12314,7 +12329,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "lymphatic-system",
       "title": "The Lymphatic System: Drainage, Surveillance, and Return",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": true,
       "info": {
         "text": "Tissue fluid constantly leaks from blood, and intestinal lacteals absorb dietary fats. The lymphatic system collects both as lymph, screens them in lymphoid organs, and returns them to venous blood.",
@@ -12452,12 +12467,15 @@ export const PUZZLE_MANIFEST = [
     "id": "muscular-system",
     "module": "./physiology-medicine/muscular-system.js",
     "published": "2026-09-08",
-    "contentFingerprint": "fnv1a64:971b88234f91a371",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:f450771569d5c9f3",
+    "layoutFingerprint": "fnv1a64:3471518b8daf12fc",
     "browse": {
       "id": "muscular-system",
       "title": "The muscular system",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "muscle"
+      },
       "large": true,
       "relatedPuzzles": {
         "entries": [
@@ -12613,12 +12631,15 @@ export const PUZZLE_MANIFEST = [
     "id": "reproductive-hormones",
     "module": "./physiology-medicine/reproductive-hormones.js",
     "published": "2026-09-08",
-    "contentFingerprint": "fnv1a64:6d17bf784a5b29cb",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:293e58f2e71193ff",
+    "layoutFingerprint": "fnv1a64:532556339aadb27c",
     "browse": {
       "id": "reproductive-hormones",
       "title": "Reproductive hormones",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "endocrine-reproductive"
+      },
       "large": true,
       "relatedPuzzles": {
         "info": {
@@ -15398,7 +15419,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "digestive-absorption-control",
       "title": "Digestion: absorption and control",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -15452,7 +15473,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "digestive-breakdown",
       "title": "Digestion: breakdown",
-      "category": "Physiology & Medicine",
+      "category": "Physiology",
       "large": false,
       "relatedPuzzles": {
         "entries": [
@@ -15625,7 +15646,7 @@ export const PUZZLE_MANIFEST = [
     "module": "./microbiology/why-the-gram-stain-works.js",
     "published": "2026-09-26",
     "contentFingerprint": "fnv1a64:5248da9a54271148",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "layoutFingerprint": "fnv1a64:93a406ca875aa552",
     "browse": {
       "id": "why-the-gram-stain-works",
       "title": "Why the Gram stain works",
@@ -16163,8 +16184,8 @@ export const PUZZLE_MANIFEST = [
     "id": "solar-system-outer",
     "module": "./astronomy/solar-system-outer.js",
     "published": "2026-09-30",
-    "contentFingerprint": "fnv1a64:99a6f22622b70f9b",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:73f7678ddad6c52e",
+    "layoutFingerprint": "fnv1a64:44111784bb2f4f21",
     "browse": {
       "id": "solar-system-outer",
       "title": "The Solar System: Giants, Dwarfs, and Leftovers",
@@ -16740,6 +16761,1295 @@ export const PUZZLE_MANIFEST = [
         "incubation period",
         "effective reproduction number",
         "Broad Street pump"
+      ]
+    }
+  },
+  {
+    "id": "acid-base-balance",
+    "module": "./physiology-medicine/acid-base-balance.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:dde7f068db6bfaf5",
+    "layoutFingerprint": "fnv1a64:fa6549a09b44c939",
+    "browse": {
+      "id": "acid-base-balance",
+      "title": "Acid–base balance",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "renal"
+      },
+      "large": false,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "buffers-and-titration",
+            "reason": "The chemistry behind this lesson: how a weak acid and its conjugate base resist a change in pH, and where the Henderson-Hasselbalch equation comes from.",
+            "via": [
+              "Henderson-Hasselbalch equation"
+            ]
+          },
+          {
+            "id": "how-the-kidney-forms-urine",
+            "reason": "Introduces the hydrogen ion and ammonium secretion, and the bicarbonate reclaiming, that this lesson builds into net acid excretion."
+          },
+          {
+            "id": "gas-exchange-and-transport",
+            "reason": "Shows how red cells turn CO₂ into bicarbonate for transport, the chemistry that links breathing to blood pH."
+          },
+          {
+            "id": "control-of-breathing",
+            "reason": "Explains the chemoreceptor reflex that drives respiratory compensation, including the deep, rapid breathing of severe metabolic acidosis."
+          }
+        ]
+      },
+      "info": {
+        "text": "Blood pH depends on the ratio of bicarbonate to dissolved CO₂. Buffers absorb a disturbance at once, the lungs adjust CO₂ within minutes, and the kidneys adjust bicarbonate over days while removing the acids that cannot be exhaled.",
+        "links": [
+          {
+            "href": "wiki:Acid–base homeostasis"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.), ch. 31: Acid–Base Regulation",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2020"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §26.4 Acid-Base Balance",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/26-4-acid-base-balance"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §26.5 Disorders of Acid-Base Balance",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/26-5-disorders-of-acid-base-balance"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Chemical buffering",
+        "bicarbonate buffer system",
+        "Henderson-Hasselbalch equation",
+        "phosphate buffer system",
+        "protein buffers",
+        "Excreting fixed acid",
+        "net acid excretion",
+        "ammonium excretion",
+        "titratable acid",
+        "type A intercalated cell",
+        "Acid–base disorders",
+        "metabolic acidosis",
+        "respiratory acidosis",
+        "metabolic alkalosis",
+        "respiratory alkalosis",
+        "anion gap",
+        "new bicarbonate",
+        "respiratory compensation",
+        "renal compensation"
+      ]
+    }
+  },
+  {
+    "id": "buffers-and-titration",
+    "module": "./chemistry/buffers-and-titration.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:5efa8eb9ecab7e68",
+    "layoutFingerprint": "fnv1a64:d5cf3a0883270142",
+    "browse": {
+      "id": "buffers-and-titration",
+      "title": "Buffers and titration",
+      "category": "Chemistry",
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "acids-bases-and-ph",
+            "reason": "Learn strong and weak acids, Ka, and conjugate pairs first; this board applies that strength to salts, buffers, and titration."
+          }
+        ]
+      },
+      "info": {
+        "text": "Acid and base strength explains what happens when acids and bases meet: neutralization leaves salts that are not always neutral, buffers hold pH steady, and titration measures how much acid or base a sample holds.",
+        "citations": [
+          {
+            "title": "Hydrolysis of Salts",
+            "author": "Paul Flowers et al.",
+            "publisher": "OpenStax",
+            "year": "2019",
+            "url": "https://openstax.org/books/chemistry-2e/pages/14-4-hydrolysis-of-salts"
+          },
+          {
+            "title": "Buffers",
+            "author": "Paul Flowers et al.",
+            "publisher": "OpenStax",
+            "year": "2019",
+            "url": "https://openstax.org/books/chemistry-2e/pages/14-6-buffers"
+          },
+          {
+            "title": "Acid-Base Titrations",
+            "author": "Paul Flowers et al.",
+            "publisher": "OpenStax",
+            "year": "2019",
+            "url": "https://openstax.org/books/chemistry-2e/pages/14-7-acid-base-titrations"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Neutralization and salts",
+        "neutralization",
+        "salt",
+        "salt hydrolysis",
+        "Resisting change",
+        "buffer",
+        "buffer capacity",
+        "Henderson-Hasselbalch equation",
+        "Measuring by titration",
+        "titration",
+        "acid-base indicator",
+        "titration curve",
+        "end point",
+        "half-equivalence point",
+        "conjugate base",
+        "pKa",
+        "equivalence point"
+      ]
+    }
+  },
+  {
+    "id": "concentrating-and-diluting-urine",
+    "module": "./physiology-medicine/concentrating-and-diluting-urine.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:624bd36abfccdc77",
+    "layoutFingerprint": "fnv1a64:9cb9301cea6912b9",
+    "browse": {
+      "id": "concentrating-and-diluting-urine",
+      "title": "Concentrating and diluting urine",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "renal"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "how-the-kidney-forms-urine",
+            "reason": "Follows the filtrate from the glomerulus through reabsorption and secretion, up to the point where this lesson sets its final concentration."
+          },
+          {
+            "id": "regulating-arterial-pressure",
+            "reason": "Antidiuretic hormone reappears there retaining water to support blood volume, alongside the sodium-balance hormones this lesson leaves aside.",
+            "via": [
+              "antidiuretic hormone"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "The kidney can make urine far more dilute or far more concentrated than plasma. A gradient built in the medulla sets how concentrated urine can become, and a hormone-controlled collecting duct decides how much of that gradient is used.",
+        "links": [
+          {
+            "href": "wiki:Renal physiology"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.), ch. 29: Urine Concentration and Dilution; Regulation of Extracellular Fluid Osmolarity and Sodium Concentration",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2020"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §25.6 Tubular Reabsorption",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-6-tubular-reabsorption"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §26.2 Water Balance",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/26-2-water-balance"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Building the medullary gradient",
+        "loop of Henle",
+        "thick ascending limb",
+        "descending limb",
+        "Na–K–2Cl cotransporter",
+        "juxtamedullary nephron",
+        "countercurrent multiplier",
+        "Preserving the gradient",
+        "vasa recta",
+        "countercurrent exchange",
+        "medullary washout",
+        "Reclaiming water in the collecting duct",
+        "collecting duct",
+        "aquaporin-2",
+        "principal cell",
+        "V2 receptor",
+        "cyclic AMP",
+        "Osmoregulation",
+        "osmoreceptors",
+        "thirst",
+        "plasma osmolality",
+        "supraoptic nucleus",
+        "posterior pituitary",
+        "antidiuretic hormone",
+        "medullary osmotic gradient",
+        "urea recycling",
+        "free water clearance"
+      ]
+    }
+  },
+  {
+    "id": "control-of-breathing",
+    "module": "./physiology-medicine/control-of-breathing.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:d485ba2c82b944d4",
+    "layoutFingerprint": "fnv1a64:9c9b6dd170d61f63",
+    "browse": {
+      "id": "control-of-breathing",
+      "title": "Control of breathing",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "respiratory"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "Breathing runs as a feedback loop: brainstem neurons generate the rhythm, sensors in the blood, brain, and lungs report on its results, and the respiratory muscles carry out the command. The loop keeps arterial carbon dioxide, oxygen, and pH within narrow limits at rest, in exercise, and at altitude.",
+        "links": [
+          {
+            "href": "wiki:Control of ventilation"
+          }
+        ],
+        "citations": [
+          {
+            "title": "West's Respiratory Physiology: The Essentials, 11th ed., ch. 8, \"Control of Ventilation\"",
+            "author": "John B. West and Andrew M. Luks",
+            "publisher": "Wolters Kluwer",
+            "year": "2020",
+            "url": "https://shop.lww.com/West-s-Respiratory-Physiology/p/9781975139186"
+          },
+          {
+            "title": "Respiratory center",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Respiratory_center"
+          },
+          {
+            "title": "Peripheral chemoreceptor",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Peripheral_chemoreceptor"
+          },
+          {
+            "title": "Muscles of respiration",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Muscles_of_respiration"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Central controller",
+        "dorsal respiratory group",
+        "ventral respiratory group",
+        "pre-Bötzinger complex",
+        "pneumotaxic center",
+        "cerebral cortex",
+        "Chemoreceptors",
+        "central chemoreceptors",
+        "carotid bodies",
+        "aortic bodies",
+        "glomus cells",
+        "Lung and airway receptors",
+        "pulmonary stretch receptors",
+        "irritant receptors",
+        "J receptors",
+        "Hering–Breuer reflex",
+        "Respiratory muscles",
+        "diaphragm",
+        "external intercostals",
+        "accessory muscles",
+        "abdominal muscles",
+        "internal intercostals",
+        "Integrated responses",
+        "exercise hyperpnea",
+        "altitude acclimatization",
+        "Kussmaul breathing",
+        "Cheyne–Stokes breathing",
+        "phrenic nerve",
+        "vagus nerve",
+        "glossopharyngeal nerve",
+        "breath-hold breaking point",
+        "hypoxic ventilatory response"
+      ]
+    }
+  },
+  {
+    "id": "gas-exchange-and-transport",
+    "module": "./physiology-medicine/gas-exchange-and-transport.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:24625429f2548d02",
+    "layoutFingerprint": "fnv1a64:65c041c073e3b441",
+    "browse": {
+      "id": "gas-exchange-and-transport",
+      "title": "Gas exchange and transport",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "respiratory"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "Oxygen crosses from the alveoli into the blood by diffusion, and how much reaches the arteries depends on how well air and blood are matched across the lung. Hemoglobin carries the oxygen to the tissues and releases it there; carbon dioxide makes the return trip mostly as bicarbonate, and each gas's carriage shifts the other's.",
+        "links": [
+          {
+            "href": "wiki:Gas exchange"
+          }
+        ],
+        "citations": [
+          {
+            "title": "West's Respiratory Physiology: The Essentials, 11th ed., chs. 3–6 (diffusion, blood flow, ventilation–perfusion relationships, and gas transport by the blood)",
+            "author": "John B. West and Andrew M. Luks",
+            "publisher": "Wolters Kluwer",
+            "year": "2020",
+            "url": "https://shop.lww.com/West-s-Respiratory-Physiology/p/9781975139186"
+          },
+          {
+            "title": "Ventilation/perfusion ratio",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Ventilation/perfusion_ratio"
+          },
+          {
+            "title": "Oxygen–hemoglobin dissociation curve",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Oxygen%E2%80%93hemoglobin_dissociation_curve"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Diffusion",
+        "Fick's law",
+        "blood–gas barrier",
+        "capillary transit time",
+        "perfusion limitation",
+        "diffusion limitation",
+        "Matching air to blood",
+        "V/Q mismatch",
+        "shunt",
+        "hypoxic pulmonary vasoconstriction",
+        "West zones",
+        "Oxygen carriage",
+        "hemoglobin",
+        "oxygen–hemoglobin dissociation curve",
+        "P₅₀",
+        "2,3-BPG",
+        "fetal hemoglobin",
+        "Carbon dioxide carriage",
+        "bicarbonate",
+        "carbonic anhydrase",
+        "chloride shift",
+        "carbamino compounds",
+        "A–a gradient",
+        "carbon monoxide",
+        "supplemental oxygen",
+        "Bohr effect",
+        "Haldane effect"
+      ]
+    }
+  },
+  {
+    "id": "gastric-acid-secretion",
+    "module": "./physiology-medicine/gastric-acid-secretion.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:8b308ed6c658b56e",
+    "layoutFingerprint": "fnv1a64:0c692267b4f9f46c",
+    "browse": {
+      "id": "gastric-acid-secretion",
+      "title": "Gastric acid secretion",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "gastrointestinal"
+      },
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "digestive-absorption-control",
+            "reason": "Step back to the survey of gut regulation, where gastrin, secretin, cholecystokinin, and the vagus nerve appear alongside hunger signals and absorption."
+          }
+        ]
+      },
+      "info": {
+        "text": "The stomach's parietal cells concentrate hydrogen ions about a million-fold above blood. How they do it, what turns them on and off, and how a meal sequences those signals.",
+        "citations": [
+          {
+            "title": "The Physiology of the Gastric Parietal Cell",
+            "author": "Amy C. Engevik, Izumi Kaji, James R. Goldenring",
+            "publisher": "Physiological Reviews 100(2)",
+            "year": "2020",
+            "pages": "573–602",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7327232/"
+          },
+          {
+            "title": "Functional anatomy and physiology of gastric secretion",
+            "author": "Mitchell L. Schubert",
+            "publisher": "Current Opinion in Gastroenterology 31(6)",
+            "year": "2015",
+            "pages": "479–485",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/26376477/"
+          },
+          {
+            "title": "23.4 The Stomach — Anatomy and Physiology 2e",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-4-the-stomach"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Pumping acid",
+        "proton pump",
+        "carbonic anhydrase",
+        "apical chloride channel",
+        "potassium recycling",
+        "chloride–bicarbonate exchanger",
+        "tubulovesicle fusion",
+        "alkaline tide",
+        "Switching acid on",
+        "gastrin",
+        "histamine",
+        "acetylcholine",
+        "gastrin-releasing peptide",
+        "H2 receptor",
+        "CCK2 receptor",
+        "M3 receptor",
+        "Applying the brakes",
+        "somatostatin",
+        "secretin",
+        "cholecystokinin",
+        "prostaglandin E2",
+        "GLP-1",
+        "Phases of a meal",
+        "cephalic phase",
+        "gastric phase",
+        "intestinal phase",
+        "sight and smell of food",
+        "stomach distension",
+        "dietary peptides",
+        "vagus nerve",
+        "second messengers",
+        "low antral pH",
+        "chyme in the duodenum"
+      ]
+    }
+  },
+  {
+    "id": "hemostasis",
+    "module": "./physiology-medicine/hemostasis.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:ecaac01461bd3f26",
+    "layoutFingerprint": "fnv1a64:576650aa1125a915",
+    "browse": {
+      "id": "hemostasis",
+      "title": "Hemostasis: how bleeding stops",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "blood-hemostasis"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "Hemostasis seals a damaged vessel with a platelet plug reinforced by fibrin, while natural anticoagulants confine the clot to the wound and fibrinolysis removes it once the vessel heals.",
+        "links": [
+          {
+            "href": "wiki:Hemostasis"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology, 14th ed., ch. 37, \"Hemostasis and Blood Coagulation\"",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2021",
+            "url": "https://www.eu.elsevierhealth.com/guyton-and-hall-textbook-of-medical-physiology-9780323640060.html"
+          },
+          {
+            "title": "A cell-based model of hemostasis",
+            "author": "Maureen Hoffman and Dougald M. Monroe III",
+            "publisher": "Thrombosis and Haemostasis 85(6): 958–965",
+            "year": "2001",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/11434702/"
+          },
+          {
+            "title": "Coagulation",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Coagulation"
+          },
+          {
+            "title": "Fibrinolysis",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Fibrinolysis"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Primary hemostasis",
+        "vascular spasm",
+        "subendothelial collagen",
+        "glycoprotein Ib",
+        "ADP",
+        "thromboxane A2",
+        "glycoprotein IIb/IIIa",
+        "Coagulation",
+        "tissue factor",
+        "fibrinogen",
+        "prothrombin",
+        "factor VIIa",
+        "intrinsic tenase",
+        "prothrombinase",
+        "factor XIIIa",
+        "Natural anticoagulants",
+        "antithrombin",
+        "protein C",
+        "protein S",
+        "thrombomodulin",
+        "tissue factor pathway inhibitor",
+        "Fibrinolysis",
+        "plasmin",
+        "tissue plasminogen activator",
+        "plasminogen",
+        "plasminogen activator inhibitor-1",
+        "α2-antiplasmin",
+        "D-dimer",
+        "von Willebrand factor",
+        "thrombin",
+        "phosphatidylserine",
+        "vitamin K",
+        "fibrin",
+        "vascular endothelium"
+      ]
+    }
+  },
+  {
+    "id": "how-neurons-fire-and-signal",
+    "module": "./physiology-medicine/how-neurons-fire-and-signal.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:19ea12bd82a0fad9",
+    "layoutFingerprint": "fnv1a64:0b2f4396440125f4",
+    "browse": {
+      "id": "how-neurons-fire-and-signal",
+      "title": "How neurons fire and signal",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "neurophysiology"
+      },
+      "large": true,
+      "info": {
+        "text": "A neuron spends the resting voltage its pumps maintain: synaptic inputs sum toward threshold, voltage-gated channels fire and reset an all-or-none spike, the spike travels down the axon, and at the terminal it becomes a chemical message for the next cell.",
+        "links": [
+          {
+            "href": "wiki:Action potential"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Anatomy and Physiology 2e, §12.4 The Action Potential",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-4-the-action-potential"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §12.5 Communication Between Neurons",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-5-communication-between-neurons"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Synaptic integration",
+        "excitatory postsynaptic potential",
+        "inhibitory postsynaptic potential",
+        "graded potential",
+        "spatial summation",
+        "temporal summation",
+        "Rising phase",
+        "threshold",
+        "voltage-gated sodium channel",
+        "activation gate",
+        "positive feedback",
+        "all-or-none",
+        "Falling phase",
+        "voltage-gated potassium channel",
+        "repolarization",
+        "inactivation gate",
+        "afterhyperpolarization",
+        "Conduction along the axon",
+        "myelin",
+        "node of Ranvier",
+        "saltatory conduction",
+        "continuous conduction",
+        "axon diameter",
+        "Synaptic transmission",
+        "neurotransmitter",
+        "synaptic vesicle",
+        "voltage-gated calcium channel",
+        "exocytosis",
+        "synaptic cleft",
+        "reuptake",
+        "enzymatic degradation",
+        "axon hillock",
+        "refractory period",
+        "ligand-gated ion channel"
+      ]
+    }
+  },
+  {
+    "id": "legumes-horticulture",
+    "module": "./botany/legumes-horticulture.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:3bbc61514ac0bb2b",
+    "layoutFingerprint": "fnv1a64:b5bda3677f053d18",
+    "browse": {
+      "id": "legumes-horticulture",
+      "title": "Legumes: One Family, Many Garden Jobs",
+      "category": "Botany",
+      "subcategories": {
+        "Botany": "horticulture"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "flower-pollination-fruit",
+            "reason": "See the machinery upstream of every pod on this board: how the flower that made each legume fruit actually works."
+          }
+        ]
+      },
+      "info": {
+        "text": "One botanical family, sorted by what the grower takes from it: fresh pods, dry staples, oil, forage, and soil. The same nitrogen-fixing partnership runs under every group — and two lines, harvest stage and the oil press, explain why grocery names and botany disagree.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Legume",
+            "label": "Legume — Wikipedia"
+          },
+          {
+            "href": "https://en.wikipedia.org/wiki/Cover_crop",
+            "label": "Cover crop — Wikipedia"
+          },
+          {
+            "href": "https://en.wikipedia.org/wiki/Root_nodule",
+            "label": "Root nodule — Wikipedia"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Legume",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Legume"
+          },
+          {
+            "title": "Root nodule",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Root_nodule"
+          },
+          {
+            "title": "Cover crop",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Cover_crop"
+          },
+          {
+            "title": "Phaseolus vulgaris",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Phaseolus_vulgaris"
+          },
+          {
+            "title": "Peanut",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Peanut"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Fresh pod vegetables",
+        "garden pea",
+        "green bean",
+        "snow pea",
+        "edamame",
+        "Pulses: the dry staples",
+        "lentil",
+        "chickpea",
+        "faba bean",
+        "cowpea",
+        "pigeon pea",
+        "Oilseed legumes",
+        "soybean",
+        "peanut",
+        "Forage & cover crops",
+        "alfalfa",
+        "white clover",
+        "birdsfoot trefoil",
+        "hairy vetch",
+        "sunn hemp",
+        "sweet clover",
+        "The nitrogen-fixing machinery",
+        "root nodule",
+        "nitrogen fixation",
+        "rhizobia",
+        "seed inoculation",
+        "Climbing architecture",
+        "tendril",
+        "bush habit",
+        "twining stem",
+        "Nitrogen sharing",
+        "Green manure",
+        "Crop rotation",
+        "Harvest stage",
+        "Trellis",
+        "Oil extraction"
+      ]
+    }
+  },
+  {
+    "id": "mechanics-of-breathing",
+    "module": "./physiology-medicine/mechanics-of-breathing.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:e902e426b44b9129",
+    "layoutFingerprint": "fnv1a64:704f7de6abcc0ef6",
+    "browse": {
+      "id": "mechanics-of-breathing",
+      "title": "Mechanics of breathing",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "respiratory"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "Air moves into and out of the lungs only when a pressure difference drives it. The lung's elastic recoil and the airways' resistance set how much effort each breath takes, and the share of each breath that reaches the alveoli sets how much of that effort does useful work.",
+        "links": [
+          {
+            "href": "wiki:Respiration (physiology)"
+          }
+        ],
+        "citations": [
+          {
+            "title": "West's Respiratory Physiology: The Essentials, 11th ed., ch. 2, \"Ventilation,\" and ch. 7, \"Mechanics of Breathing\"",
+            "author": "John B. West and Andrew M. Luks",
+            "publisher": "Wolters Kluwer",
+            "year": "2020",
+            "url": "https://shop.lww.com/West-s-Respiratory-Physiology/p/9781975139186"
+          },
+          {
+            "title": "Lung compliance",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Lung_compliance"
+          },
+          {
+            "title": "Airway resistance",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Airway_resistance"
+          },
+          {
+            "title": "Lung volumes and capacities",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Lung_volumes_and_capacities"
+          },
+          {
+            "title": "Dead space (physiology)",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Dead_space_(physiology)"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Pressure gradients",
+        "intrapleural pressure",
+        "alveolar pressure",
+        "transpulmonary pressure",
+        "Boyle's law",
+        "Elastic recoil",
+        "lung compliance",
+        "surfactant",
+        "surface tension",
+        "law of Laplace",
+        "chest wall recoil",
+        "Airway resistance",
+        "Poiseuille's law",
+        "bronchial smooth muscle",
+        "medium-sized bronchi",
+        "radial traction",
+        "Lung volumes",
+        "residual volume",
+        "vital capacity",
+        "total lung capacity",
+        "expiratory reserve volume",
+        "spirometry",
+        "Ventilation",
+        "minute ventilation",
+        "alveolar ventilation",
+        "anatomic dead space",
+        "physiologic dead space",
+        "pneumothorax",
+        "functional residual capacity",
+        "work of breathing",
+        "dynamic airway compression",
+        "FEV₁/FVC ratio",
+        "tidal volume"
+      ]
+    }
+  },
+  {
+    "id": "membranes-set-cell-conditions",
+    "module": "./physiology-medicine/membranes-set-cell-conditions.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:4a62ba1147d5238d",
+    "layoutFingerprint": "fnv1a64:ba7603ab6c7779f2",
+    "browse": {
+      "id": "membranes-set-cell-conditions",
+      "title": "How membranes set the cell's conditions",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "cellular-membrane"
+      },
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "inside-the-cell",
+            "reason": "Start with the survey of the plasma membrane and organelles before the transport and voltage details here."
+          },
+          {
+            "id": "how-the-kidney-forms-urine",
+            "reason": "See the sodium–glucose cotransporter at work: tubular glucose reabsorption runs on the sodium gradient.",
+            "via": [
+              "sodium–glucose cotransporter",
+              "sodium gradient"
+            ]
+          },
+          {
+            "id": "muscular-system",
+            "reason": "See calcium pumps and membrane excitation put to work in muscle contraction.",
+            "via": [
+              "calcium pump",
+              "resting membrane potential"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "One ATP-driven pump builds the cell's sodium and potassium gradients, and most of cellular physiology spends them: to move solutes, to hold cell volume against osmosis, and to set the resting voltage that nerve and muscle later exploit.",
+        "links": [
+          {
+            "href": "wiki:Membrane transport"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Anatomy and Physiology 2e, §3.1 The Cell Membrane",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/3-1-the-cell-membrane"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §12.4 The Action Potential",
+            "author": "J. Gordon Betts, Kelly A. Young, James A. Wise, Eddie Johnson, Brandon Poe, Dean H. Kruse, Oksana Korol, Jody E. Johnson, Mark Womble, Peter DeSaix",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/12-4-the-action-potential"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Solute diffusion",
+        "diffusion",
+        "ion channel",
+        "facilitated diffusion",
+        "uniporter",
+        "concentration gradient",
+        "Water movement",
+        "osmosis",
+        "aquaporin",
+        "osmolarity",
+        "tonicity",
+        "Primary active transport",
+        "sodium–potassium pump",
+        "ATP hydrolysis",
+        "calcium pump",
+        "proton pump",
+        "Secondary active transport",
+        "symporter",
+        "antiporter",
+        "sodium–glucose cotransporter",
+        "sodium–calcium exchanger",
+        "Resting membrane potential",
+        "resting membrane potential",
+        "equilibrium potential",
+        "Nernst equation",
+        "Goldman equation",
+        "potassium leak channel",
+        "sodium gradient",
+        "electrochemical gradient",
+        "pump–leak balance",
+        "cell volume"
+      ]
+    }
+  },
+  {
+    "id": "nightshades-horticulture",
+    "module": "./botany/nightshades-horticulture.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:f24b9d091fd09e7d",
+    "layoutFingerprint": "fnv1a64:268c8804add9fe92",
+    "browse": {
+      "id": "nightshades-horticulture",
+      "title": "Nightshades: The Beautiful Poison",
+      "category": "Botany",
+      "subcategories": {
+        "Botany": "horticulture"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "legumes-horticulture",
+            "reason": "Companion trilogy I: the legume family's nitrogen partnership — the friendly superpower beside this board's chemical warfare."
+          },
+          {
+            "id": "brassicas-horticulture",
+            "reason": "Companion trilogy II: the mustard family's oil bomb — irritation where this board poisons, canola where this board grows staples."
+          }
+        ]
+      },
+      "info": {
+        "text": "The garden's favorite family is also its most feared: tomato, potato, and pepper came from the same poisonous clan as belladonna and datura. Sort the crops from the alkaloids, and learn where the line between dinner and danger actually runs.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Capsaicin",
+            "label": "Capsaicin — Wikipedia"
+          },
+          {
+            "href": "https://en.wikipedia.org/wiki/Solanine",
+            "label": "Solanine — Wikipedia"
+          },
+          {
+            "href": "https://en.wikipedia.org/wiki/Tomato",
+            "label": "Tomato — Wikipedia"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Capsaicin",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Capsaicin"
+          },
+          {
+            "title": "Solanine",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Solanine"
+          },
+          {
+            "title": "Tomato",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Tomato"
+          },
+          {
+            "title": "Potato",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Potato"
+          },
+          {
+            "title": "Atropa belladonna",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Atropa_belladonna"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The summer fruit vegetables",
+        "tomato",
+        "bell pepper",
+        "eggplant",
+        "tomatillo",
+        "ground cherry",
+        "goji berry",
+        "The capsaicin line",
+        "chile pepper",
+        "capsaicin",
+        "Scoville scale",
+        "The staple side",
+        "potato",
+        "tamarillo",
+        "The alkaloid cabinet",
+        "nicotine",
+        "solanine",
+        "atropine",
+        "The deadly and the beautiful",
+        "deadly nightshade",
+        "petunia",
+        "datura",
+        "angel's trumpet",
+        "flowering tobacco",
+        "The heat dial",
+        "Greening",
+        "Dose",
+        "Look-alikes",
+        "Nerve receptors"
+      ]
+    }
+  },
+  {
+    "id": "regulating-arterial-pressure",
+    "module": "./physiology-medicine/regulating-arterial-pressure.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:4bb39f8f2183818a",
+    "layoutFingerprint": "fnv1a64:224a38434b31ec99",
+    "browse": {
+      "id": "regulating-arterial-pressure",
+      "title": "Regulating arterial pressure",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "cardiovascular"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "Mean arterial pressure is set by how much blood the heart pumps and how hard the arterioles resist it. A fast nervous reflex and slower kidney-driven controls adjust both to hold pressure steady.",
+        "links": [
+          {
+            "href": "wiki:Blood pressure"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2020"
+          },
+          {
+            "title": "Blood pressure control: special role of the kidneys and body fluids",
+            "author": "Arthur C. Guyton",
+            "publisher": "Science",
+            "year": "1991",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/2063193/"
+          },
+          {
+            "title": "Cardiac output",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Cardiac_output"
+          },
+          {
+            "title": "Vascular resistance",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Vascular_resistance"
+          },
+          {
+            "title": "Baroreflex",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Baroreflex"
+          },
+          {
+            "title": "Renin–angiotensin system",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Renin%E2%80%93angiotensin_system"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Cardiac output",
+        "heart rate",
+        "preload",
+        "afterload",
+        "contractility",
+        "venous return",
+        "Frank–Starling mechanism",
+        "Peripheral resistance",
+        "arterioles",
+        "vessel radius",
+        "blood viscosity",
+        "vessel length",
+        "Poiseuille's law",
+        "Baroreceptor reflex",
+        "carotid sinus",
+        "sympathetic outflow",
+        "aortic arch",
+        "medullary cardiovascular center",
+        "vagal outflow",
+        "Long-term volume control",
+        "renin",
+        "aldosterone",
+        "antidiuretic hormone",
+        "atrial natriuretic peptide",
+        "pressure natriuresis",
+        "mean arterial pressure",
+        "sinoatrial node",
+        "norepinephrine",
+        "angiotensin II",
+        "blood volume"
+      ]
+    }
+  },
+  {
+    "id": "setting-and-defending-core-temperature",
+    "module": "./physiology-medicine/setting-and-defending-core-temperature.js",
+    "published": "2026-10-11",
+    "contentFingerprint": "fnv1a64:e6c6cd1410883a53",
+    "layoutFingerprint": "fnv1a64:b00ad521b0e677e5",
+    "browse": {
+      "id": "setting-and-defending-core-temperature",
+      "title": "Setting and defending core temperature",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "integrative"
+      },
+      "large": true,
+      "info": {
+        "text": "How the hypothalamus holds core temperature near a set point by recruiting skin, muscle, fat, glands and circulation, and how fever resets that point.",
+        "links": [
+          {
+            "href": "wiki:Thermoregulation"
+          },
+          {
+            "href": "https://www.ncbi.nlm.nih.gov/books/NBK507838/"
+          },
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-6-energy-and-heat-balance"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Physiology, Temperature Regulation",
+            "publisher": "StatPearls Publishing (NCBI Bookshelf)",
+            "url": "https://www.ncbi.nlm.nih.gov/books/NBK507838/"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, section 24.6: Energy and Heat Balance",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/24-6-energy-and-heat-balance"
+          },
+          {
+            "title": "Human temperature regulation under heat stress in health, disease, and injury",
+            "author": "Matthew N. Cramer, Daniel Gagnon, Orlando Laitano, Craig G. Crandall",
+            "publisher": "Physiological Reviews 102(4)",
+            "year": "2022",
+            "pages": "1907-1989",
+            "url": "https://pubmed.ncbi.nlm.nih.gov/35679471/"
+          },
+          {
+            "title": "Neural Mechanisms of Inflammation-Induced Fever",
+            "author": "Anders Blomqvist, David Engblom",
+            "publisher": "The Neuroscientist",
+            "year": "2018",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6047205/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Routes of heat exchange",
+        "radiation",
+        "evaporation",
+        "conduction",
+        "convection",
+        "Sensing and setting temperature",
+        "preoptic area",
+        "skin thermoreceptors",
+        "core thermoreceptors",
+        "set point",
+        "Defending against cold",
+        "shivering",
+        "cutaneous vasoconstriction",
+        "piloerection",
+        "brown adipose tissue",
+        "thyroid hormone",
+        "Defending against heat",
+        "eccrine sweating",
+        "cutaneous vasodilation",
+        "increased cardiac output",
+        "heat acclimatization",
+        "Fever",
+        "endogenous pyrogens",
+        "antipyretics",
+        "exogenous pyrogens",
+        "cyclooxygenase-2",
+        "humidity",
+        "sympathetic outflow",
+        "thermoneutral zone",
+        "prostaglandin E2",
+        "chills",
+        "defervescence",
+        "hyperthermia"
       ]
     }
   }
