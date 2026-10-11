@@ -77,7 +77,8 @@ export function formatAuthoringStatusProbe(status, {
   return {
     text: [`${ICON} ${label}`, ...marks].join(" "),
     tooltip: `**Authoring server**\n\n${table}${fix}`,
-    level: marks.length || status.fetchError ? "warn" : "ok",
+    // Lag found, or no trustworthy comparison (fetch failed, no base ref).
+    level: marks.length || status.fetchError || status.behindBase == null ? "warn" : "ok",
     open: adminUrl
   };
 }

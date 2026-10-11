@@ -80,6 +80,29 @@ async function requestJson(handlerOptions, method = "GET") {
   return { handled, ...response };
 }
 
+function checkUnverifiedComparison() {
+  const running = { branch: "main", commit: "f34040aabcdef", subject: "Merge #265" };
+  const fetchFailed = {
+    running, checkout: running, checkoutMoved: false,
+    baseRef: "origin/main", behindBase: 0, upstreamRef: null, behindUpstream: null,
+    fetchError: "Could not resolve host: github.com"
+  };
+  const html = renderServerRevisionSection(fetchFailed);
+  assert.match(html, /server-revision-stale/, "a failed fetch is not shown as healthy");
+  assert.match(html, /as of the last successful fetch/);
+  assert.match(html, /Redeploying will not fix that/);
+  assert.doesNotMatch(html, /brings this branch up to date/, "no redeploy advice for a fetch failure");
+
+  const noBase = renderServerRevisionSection({ ...fetchFailed, fetchError: null, behindBase: null });
+  assert.match(noBase, /server-revision-stale/);
+  assert.match(noBase, /nothing was compared/);
+
+  const adminUrl = "http://authoring.example:8787/admin";
+  assert.equal(formatAuthoringStatusProbe(fetchFailed, { adminUrl }).level, "warn");
+  assert.equal(formatAuthoringStatusProbe({ ...fetchFailed, fetchError: null, behindBase: null }, { adminUrl }).level, "warn");
+  assert.equal(formatAuthoringStatusProbe({ ...fetchFailed, fetchError: null }, { adminUrl }).level, "ok");
+}
+
 function checkStatusProbe() {
   const running = { branch: "main", commit: "f34040aabcdef", subject: "Merge #265" };
   const adminUrl = "http://authoring.example:8787/admin";
@@ -256,6 +279,7 @@ async function checkMonitor(root) {
 
 export async function run() {
   checkStatusProbe();
+  checkUnverifiedComparison();
   await checkWebhook();
   await checkEventStream();
   const ok = await requestJson({ loadServerRevision: async () => ({ running: { commit: "abc" } }) });

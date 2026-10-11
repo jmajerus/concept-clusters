@@ -161,12 +161,17 @@ export function renderServerRevisionSection(status) {
     problems.push(`the checkout has moved to <code>${escapeHtml(checkout.branch || "detached HEAD")}</code>
       @ <code>${shortCommit(checkout.commit)}</code> since this server started`);
   }
+  // A failed fetch, or no base ref to compare with, means the comparison
+  // cannot be trusted: amber, but not redeploy advice, since a deploy
+  // fetches from this same server and would fail the same way.
+  const unverified = Boolean(status.fetchError) || status.behindBase == null;
   const comparison = status.behindBase == null
-    ? `<code>${escapeHtml(status.baseRef)}</code> is not available in this checkout`
+    ? `<strong><code>${escapeHtml(status.baseRef)}</code> is not available in this checkout</strong>, so nothing was compared`
     : problems.length
       ? `<strong>${problems.join("; ")}</strong>`
       : `Up to date with <code>${escapeHtml(status.upstreamRef || status.baseRef)}</code>${
-        status.upstreamRef ? ` and includes <code>${escapeHtml(status.baseRef)}</code>` : ""}`;
+        status.upstreamRef ? ` and includes <code>${escapeHtml(status.baseRef)}</code>` : ""}${
+        status.fetchError ? " as of the last successful fetch" : ""}`;
   const fix = problems.length
     ? `<p class="meta">Pages may show stale results (for example false layout markers on Puzzles).
       Redeploy from a workstation: <code>npm run authoring:deploy</code> brings this branch up to date,
@@ -174,9 +179,11 @@ export function renderServerRevisionSection(status) {
       and <code>-- --pr &lt;number&gt;</code> switches to a pull request.</p>`
     : "";
   const fetchNote = status.fetchError
-    ? `<p class="meta">Could not fetch origin (${escapeHtml(status.fetchError)}); compared with the last fetched refs.</p>`
+    ? `<p class="meta"><strong>Could not fetch origin</strong> (${escapeHtml(status.fetchError)}), so this
+      compares against the last fetched refs and may be out of date. Redeploying will not fix that:
+      the server itself needs to reach GitHub.</p>`
     : "";
-  return `<section class="server-revision${problems.length ? " server-revision-stale" : ""}">
+  return `<section class="server-revision${problems.length || unverified ? " server-revision-stale" : ""}">
     <h2>Authoring server</h2>
     <p>Running <code>${escapeHtml(running.branch || "detached HEAD")}</code>
       @ <code>${shortCommit(running.commit)}</code>
