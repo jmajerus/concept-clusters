@@ -2034,11 +2034,31 @@ function onBoardTap(node, event) {
   handleTap(node);
 }
 
+// A tap on a cluster's own label (Graph's legend chip, Circle's circle)
+// while a term is selected connects that term there, the same way a Star
+// title tap does: it forwards to the cluster's first seed, so the engine
+// and share-link history see an ordinary member tap. Returns whether the
+// tap was used; an unused one keeps the label's info-only behavior.
+function onClusterLabelTap(ci, event) {
+  if (authoringStudio?.isConstruct()) {
+    const cluster = state?.puzzle?.clusters?.[ci];
+    if (cluster?.id) authoringStudio.handleClusterTap(cluster.id, event);
+    return true;
+  }
+  if (!state?.selected || lensPhaseActive(state)) return false;
+  const seedWord = state.puzzle.clusters[ci]?.seeds?.[0];
+  const seed = state.nodes.find(n => n.gs.length === 1 && n.gs[0] === ci && n.word === seedWord);
+  if (!seed) return false;
+  handleTap(seed);
+  return true;
+}
+
 const clusterLegend = createClusterLegend({
   container: document.getElementById("cluster-legend"),
   svg, isDone, isBridge,
   showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode: () => focusedInfoNode
+  getFocusedInfoNode: () => focusedInfoNode,
+  onClusterTap: onClusterLabelTap
 });
 
 const { buildGraph } = createGraphRenderer({
@@ -2083,7 +2103,8 @@ const { buildSetGraph } = createSetRenderer({
   getSim: () => sim,
   isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  updateSolutionHint, countEl, setMessage
+  updateSolutionHint, countEl, setMessage,
+  onClusterTap: onClusterLabelTap
 });
 
 // Single dispatch point for "build whatever the current `mode` is",

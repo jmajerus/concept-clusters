@@ -388,6 +388,9 @@ button:disabled {
   line-height: 1.5;
   cursor: default;
 }
+/* A selected term can be tapped into a cluster from its chip; the cursor
+   is the only cue, so players who never use it never see it. */
+#cluster-legend.accepting .legend-chip[data-ci] { cursor: pointer; }
 .legend-chip:focus-visible { outline: 2px solid var(--chip); outline-offset: 1px; }
 .legend-swatch {
   width: 10px; height: 10px;
