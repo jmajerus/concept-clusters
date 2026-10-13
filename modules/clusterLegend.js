@@ -5,12 +5,15 @@
 // once all its terms are placed. Hovering or focusing a chip dims every
 // term outside that cluster, so the mapping doesn't rest on color alone,
 // and shows the cluster's info under the board the same way a Star title
-// or Circle heading does.
+// or Circle heading does. With a term selected, a chip tap connects it to
+// that cluster, as a Star title tap does; with none, a tap only focuses
+// the chip, which is how touch players read its info.
 import { normalizeInfo } from "./termInfo.js";
 
 export function createClusterLegend({
   container, svg, isDone, isBridge,
-  showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo, getFocusedInfoNode
+  showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo, getFocusedInfoNode,
+  onClusterTap
 }) {
   let builtFor = null;
 
@@ -66,6 +69,17 @@ export function createClusterLegend({
       });
       chip.addEventListener("focus", () => { highlight(ci); focusTermInfo(infoNode); });
       chip.addEventListener("blur", () => { highlight(null); blurTermInfo(infoNode); });
+      // The connect tap shows the seed it forwards to; put the chip's own
+      // info back, since the chip is what the player tapped.
+      const tap = event => {
+        if (onClusterTap?.(ci, event)) showTermInfo(infoNode);
+      };
+      chip.addEventListener("click", tap);
+      chip.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        tap(event);
+      });
       return chip;
     }));
     if (hasBridges) {
@@ -81,6 +95,7 @@ export function createClusterLegend({
     if (!state?.puzzle?.clusters?.length) { hide(); return; }
     if (builtFor !== signature(state)) build(state);
     container.hidden = false;
+    container.classList.toggle("accepting", !!state.selected);
     container.querySelectorAll(".legend-chip[data-ci]").forEach(chip => {
       const ci = Number(chip.dataset.ci);
       const members = state.nodes.filter(n => !isBridge(n) && n.gs[0] === ci);

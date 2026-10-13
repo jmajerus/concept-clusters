@@ -82,7 +82,8 @@ async function handleEvent(request, env) {
 // blob6 = city (both from request.cf, Cloudflare's GeoIP inference),
 // double1 = 1 (a plain count column for SUM()-based totals).
 // puzzle_completed: double1 = incorrectMoveCount, double2 = elapsedSeconds,
-// double3 = usedShowSolution (1/0), double4 = hadProgressBeforeShowSolution (1/0).
+// double3 = usedShowSolution (1/0), double4 = hadProgressBeforeShowSolution (1/0),
+// double5 = filledClusters (clusters filled with the Alt+Shift label shortcut).
 function buildDataPoint(event, data, geo) {
   const puzzleId = String(data.puzzleId ?? "").slice(0, 64);
   const mode = String(data.mode ?? "").slice(0, 16);
@@ -107,7 +108,8 @@ function buildDataPoint(event, data, geo) {
         incorrectMoveCount,
         elapsedSeconds,
         data.usedShowSolution === true ? 1 : 0,
-        data.hadProgressBeforeShowSolution === true ? 1 : 0
+        data.hadProgressBeforeShowSolution === true ? 1 : 0,
+        Number.isFinite(data.filledClusters) ? Number(data.filledClusters) : 0
       ],
       indexes: [puzzleId || "unknown"]
     };

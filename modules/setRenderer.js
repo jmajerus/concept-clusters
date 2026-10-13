@@ -120,7 +120,7 @@ function stackMetrics(puzzle) {
 export function createSetRenderer({
   svg, getState, getW, getH, getSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl, setMessage
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onClusterTap = null
 }) {
   // Cluster circle sizing (content-driven, unrelated to physics), a
   // stable "free area" scatter position for every node that can start
@@ -1401,6 +1401,10 @@ export function createSetRenderer({
     const { clusterBoxes } = state.setLayout;
 
     // ---- clusters: circle + heading, draggable as one unit ----
+    // A cluster's tap arrives through this drag's "end", the same as a
+    // bridge pill's (see pillDrag below): the drag suppresses the native
+    // click.
+    let clusterDragMoved = 0;
     const clusterDrag = d3.drag()
       .filter(event => {
         if (event.ctrlKey || event.button) return false;
@@ -1409,6 +1413,7 @@ export function createSetRenderer({
       .clickDistance(6)
       .subject((e, d) => clusterPos(d.ci))
       .on("start", function (e, d) {
+        clusterDragMoved = 0;
         d3.select(this).raise().classed("dragging", true); svg.classed("dragging", true);
         if (lensLayoutEditable(state)) {
           state.setSim.stop();
@@ -1420,6 +1425,7 @@ export function createSetRenderer({
         state.onPlayerDragStart?.(node);
       })
       .on("drag", (e, d) => {
+        clusterDragMoved += Math.abs(e.dx) + Math.abs(e.dy);
         const { x, y } = keepClusterOutside(e.x, e.y, d.ci);
         const node = state.setLayout.csNodes[d.ci];
         node.x = node.fx = x;
@@ -1451,7 +1457,27 @@ export function createSetRenderer({
           state.onPlayerDragEnd?.(state.setLayout.csNodes[d.ci]);
           state.onPlayerLayoutChanged?.("player");
         }
+        if (clusterDragMoved < 4) {
+          tapCluster(d.ci, e.sourceEvent);
+          // The drag also suppresses the focus a tap would give, and focus
+          // is what pins the cluster's info (touch has no hover). Deferred
+          // past d3-drag's own pointerup cleanup, as for a bridge pill.
+          const el = this;
+          setTimeout(() => el.focus(), 0);
+        }
       });
+
+    const clusterInfoNode = ci => {
+      const n = state.clusterInfoNodes[ci];
+      n.info = clusterInfoOf(ci);
+      return n;
+    };
+    // With a term selected, tapping a circle connects it there (see
+    // onClusterLabelTap in game.js). The connect tap shows the seed it
+    // forwards to, so the circle's own info goes back up afterward.
+    function tapCluster(ci, event) {
+      if (onClusterTap?.(ci, event)) showTermInfo(clusterInfoNode(ci));
+    }
 
     clusterLayer.selectAll("g.set-cluster")
       .data(puzzle.clusters.map((c, ci) => ({ c, ci })), d => d.ci)
@@ -1471,21 +1497,23 @@ export function createSetRenderer({
         // term's) this never changes after puzzle load -- unlike its
         // position below, which tracks the heading every tick.
         g.filter(d => clusterInfoOf(d.ci).text).append("circle").attr("class", "info-dot").attr("r", 3);
-        // Hover/focus only -- no click/keydown handler, unlike Star
-        // mode's title: Circle mode's connect mechanic has always gone
-        // through pills, never the circle itself, and this is purely
-        // about surfacing the cluster's fact once earned, not adding a
-        // second way to connect. mouseenter/mouseleave alone already
+        // Hover/focus surface the cluster's info; a tap (clusterDrag's
+        // "end") or Enter/Space connects a selected term, as a Star title
+        // does (see tapCluster above). mouseenter/mouseleave alone already
         // covers the mouse "read, then click a link in the panel" trip
         // (via #term-info's own mouseenter/mouseleave, see game.js) even
         // if the drag behavior's pointerdown handling suppresses a
         // genuine click-to-focus here; focus/blur exist so keyboard
         // Tab-navigation (unaffected by that, since it's not pointer-
         // based) can reach the same panel.
-        const infoNode = ci => { const n = state.clusterInfoNodes[ci]; n.info = clusterInfoOf(ci); return n; };
-        g.on("mouseenter", (e, d) => { if (!getFocusedInfoNode()) showTermInfo(infoNode(d.ci)); });
+        g.on("mouseenter", (e, d) => { if (!getFocusedInfoNode()) showTermInfo(clusterInfoNode(d.ci)); });
         g.on("mouseleave", () => { if (!getFocusedInfoNode()) clearTermInfo(); });
-        g.on("focus", (e, d) => focusTermInfo(infoNode(d.ci)));
+        g.on("keydown", (e, d) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          tapCluster(d.ci, e);
+        });
+        g.on("focus", (e, d) => focusTermInfo(clusterInfoNode(d.ci)));
         g.on("blur", (e, d) => blurTermInfo(state.clusterInfoNodes[d.ci]));
         return g;
       });

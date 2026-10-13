@@ -2013,7 +2013,7 @@ appNavigation = createAppNavigation({
 // object per loadPuzzle, a new mode string per setMode) -- the engine
 // always needs whatever's current, not a stale snapshot from whenever
 // createGameEngine happened to run.
-const { handleTap, checkClusterCompletion, showSolution } = createGameEngine({
+const { handleTap, checkClusterCompletion, fillCluster, showSolution } = createGameEngine({
   getState: () => state,
   getMode: () => mode,
   isDone,
@@ -2034,11 +2034,34 @@ function onBoardTap(node, event) {
   handleTap(node);
 }
 
+// A tap on a cluster's own label (a Star title, Graph's legend chip,
+// Circle's circle) while a term is selected connects that term there: it
+// forwards to the cluster's first seed, so the engine and share-link
+// history see an ordinary member tap. Alt+Shift on a label fills the
+// whole cluster instead. Returns whether the tap was used; an unused one
+// keeps the label's info-only behavior.
+function onClusterLabelTap(ci, event) {
+  if (authoringStudio?.isConstruct()) {
+    const cluster = state?.puzzle?.clusters?.[ci];
+    if (cluster?.id) authoringStudio.handleClusterTap(cluster.id, event);
+    return true;
+  }
+  if (!state || lensPhaseActive(state)) return false;
+  if (event?.altKey && event?.shiftKey) return fillCluster(ci);
+  if (!state.selected) return false;
+  const seedWord = state.puzzle.clusters[ci]?.seeds?.[0];
+  const seed = state.nodes.find(n => n.gs.length === 1 && n.gs[0] === ci && n.word === seedWord);
+  if (!seed) return false;
+  handleTap(seed);
+  return true;
+}
+
 const clusterLegend = createClusterLegend({
   container: document.getElementById("cluster-legend"),
   svg, isDone, isBridge,
   showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode: () => focusedInfoNode
+  getFocusedInfoNode: () => focusedInfoNode,
+  onClusterTap: onClusterLabelTap
 });
 
 const { buildGraph } = createGraphRenderer({
@@ -2066,13 +2089,7 @@ const { buildStarGraph } = createStarRenderer({
   getFocusedInfoNode: () => focusedInfoNode,
   updateSolutionHint, countEl, setMessage,
   onBackgroundClick: event => authoringStudio?.handleBackgroundClick(event),
-  onClusterTitleTap: (title, event) => {
-    if (!authoringStudio?.isConstruct()) return false;
-    const cluster = state?.puzzle?.clusters?.[title.ci];
-    if (!cluster?.id) return true;
-    authoringStudio.handleClusterTap(cluster.id, event);
-    return true;
-  }
+  onClusterTitleTap: (title, event) => onClusterLabelTap(title.ci, event)
 });
 
 const { buildSetGraph } = createSetRenderer({
@@ -2083,7 +2100,8 @@ const { buildSetGraph } = createSetRenderer({
   getSim: () => sim,
   isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  updateSolutionHint, countEl, setMessage
+  updateSolutionHint, countEl, setMessage,
+  onClusterTap: onClusterLabelTap
 });
 
 // Single dispatch point for "build whatever the current `mode` is",
@@ -2376,6 +2394,7 @@ function applyLoadedPuzzle(puzzle, index, {
     startedAt: Date.now(),
     completedViaShowSolution: false,
     hadProgressBeforeShowSolution: false,
+    filledClusterCount: 0,
     solutionLayout: null,
     prettyPrint: null,
     prettyPrintPromise: null,
