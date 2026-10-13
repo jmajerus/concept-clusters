@@ -37,6 +37,17 @@ async function clickLabel(page, mode, ci, options) {
   await page.click("[data-test-label]", options);
 }
 
+// Star and Circle put focus on the label group, not its heading text.
+async function focusLabel(page, mode, ci) {
+  await page.evaluate(({ selector, ci }) => {
+    const label = [...document.querySelectorAll(selector)].find(el => {
+      const data = el.__data__ ?? el.parentNode.__data__;
+      return data ? data.ci === ci : Number(el.dataset.ci) === ci;
+    });
+    (label.hasAttribute("tabindex") ? label : label.parentNode).focus();
+  }, { selector: labelSelector[mode], ci });
+}
+
 export async function run(page, baseURL) {
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
@@ -78,6 +89,26 @@ export async function run(page, baseURL) {
       selected: CC.state.selected?.word ?? null
     }), free.word);
     assert.deepEqual(placed, { made: 1, done: true, selected: null }, `${mode}: label tap did not connect`);
+
+    // Circle's tap goes through its drag, which suppresses native focus;
+    // the tap must still focus the cluster so its info stays pinned.
+    if (mode === "sets") {
+      assert.equal(await page.evaluate(() => document.activeElement?.__data__?.ci), free.ci,
+        "sets: tapped cluster did not take focus");
+    }
+
+    // Keyboard: Enter on a focused label is info-only with nothing
+    // selected, and connects with a term selected.
+    const alphaFree = await page.evaluate(() =>
+      CC.state.nodes.filter(n => !CC.isBridge(n) && n.gs[0] === 0 && !CC.isDone(n)).map(n => n.word));
+    await focusLabel(page, mode, 0);
+    await page.keyboard.press("Enter");
+    assert.equal(await page.evaluate(() => CC.state.made), 1, `${mode}: unselected Enter connected something`);
+    await page.evaluate(word => CC.handleTap(CC.state.nodes.find(n => n.word === word)), alphaFree[0]);
+    await focusLabel(page, mode, 0);
+    await page.keyboard.press("Enter");
+    assert.equal(await page.evaluate(word => CC.isDone(CC.state.nodes.find(n => n.word === word)), alphaFree[0]),
+      true, `${mode}: Enter on a label did not connect`);
 
     // Alt+Shift fills the rest of Alpha: the other free member and
     // the bridge's link into it, but not the bridge's other side.

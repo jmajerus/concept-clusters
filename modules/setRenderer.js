@@ -1457,7 +1457,14 @@ export function createSetRenderer({
           state.onPlayerDragEnd?.(state.setLayout.csNodes[d.ci]);
           state.onPlayerLayoutChanged?.("player");
         }
-        if (clusterDragMoved < 4) tapCluster(d.ci, e.sourceEvent);
+        if (clusterDragMoved < 4) {
+          tapCluster(d.ci, e.sourceEvent);
+          // The drag also suppresses the focus a tap would give, and focus
+          // is what pins the cluster's info (touch has no hover). Deferred
+          // past d3-drag's own pointerup cleanup, as for a bridge pill.
+          const el = this;
+          setTimeout(() => el.focus(), 0);
+        }
       });
 
     const clusterInfoNode = ci => {
