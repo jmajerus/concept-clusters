@@ -387,6 +387,9 @@ button:disabled {
   font-size: 13px;
   line-height: 1.5;
   cursor: default;
+  /* Shift+click is the fill shortcut; don't let it select chip text. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 /* A selected term can be tapped into a cluster from its chip; the cursor
    is the only cue, so players who never use it never see it. */

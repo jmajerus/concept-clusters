@@ -307,6 +307,34 @@ export function createGameEngine({
     });
   }
 
+  // ---------- fill one cluster ----------
+  // A shortcut for a player who already knows a cluster's members (Alt+
+  // Shift on its label; see onClusterLabelTap in game.js). It replays the
+  // same taps showSolution does, limited to one cluster: every unplaced
+  // member, and each bridge's link into it. Not a give-up, so it leaves
+  // the Show Solution flags alone and only counts the fill.
+  function fillCluster(ci) {
+    const state = getState();
+    const cluster = state.puzzle.clusters?.[ci];
+    if (!cluster) return false;
+    const seed = state.nodes.find(n => !isBridge(n) && n.gs[0] === ci && n.word === cluster.seeds?.[0]);
+    if (!seed) return false;
+    const pending = state.nodes.filter(n => isBridge(n)
+      ? n.gs.includes(ci) && !n.connected.includes(ci)
+      : n.gs[0] === ci && !isDone(n));
+    if (!pending.length) return false;
+
+    state.selected = null;
+    state.filledClusterCount = (state.filledClusterCount || 0) + 1;
+    // Members first, so a bridge whose canonical endpoint is one of them
+    // resolves straight to it.
+    pending.sort((a, b) => isBridge(a) - isBridge(b)).forEach(n => {
+      handleTap(n);
+      handleTap(seed);
+    });
+    return true;
+  }
+
   // ---------- show solution ----------
   // Fast-forwards to the authored solution for sharing/screenshots. Normal
   // play already canonicalizes bridge endpoints, so this only fills missing
@@ -361,5 +389,5 @@ export function createGameEngine({
     state.onProgressChanged?.();
   }
 
-  return { handleTap, checkClusterCompletion, showSolution };
+  return { handleTap, checkClusterCompletion, fillCluster, showSolution };
 }
