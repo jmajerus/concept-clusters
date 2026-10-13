@@ -38,6 +38,8 @@ import { BOARD_CANVAS, boardCanvas, boardDisplayFrame, canonicalBoardSizeFactor,
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createClusterLegend } from "./modules/clusterLegend.js";
+import { createClusterMenu } from "./modules/clusterMenu.js";
+import { createClusterSummary } from "./modules/clusterSummary.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
@@ -2013,7 +2015,7 @@ appNavigation = createAppNavigation({
 // object per loadPuzzle, a new mode string per setMode) -- the engine
 // always needs whatever's current, not a stale snapshot from whenever
 // createGameEngine happened to run.
-const { handleTap, checkClusterCompletion, fillCluster, showSolution } = createGameEngine({
+const { handleTap, checkClusterCompletion, canFillCluster, fillCluster, showSolution } = createGameEngine({
   getState: () => state,
   getMode: () => mode,
   isDone,
@@ -2056,12 +2058,100 @@ function onClusterLabelTap(ci, event) {
   return true;
 }
 
+// ---------- cluster label menu ----------
+// Right-click, long-press, or the Menu key on a cluster's label opens
+// Solve / Reset / Summary for that cluster (clusterMenu.js).
+
+// The saved moves without this cluster's: its members' placements and
+// each bridge's link into it. Star's pre-connected bridges aren't moves,
+// so a restart puts them back on its own.
+function movesWithoutCluster(ci) {
+  return semanticMovesForState(state).filter(move => {
+    const source = state.nodes.find(n => n.word === move.source);
+    const target = state.nodes.find(n => n.word === move.target);
+    return isBridge(source) ? target?.gs[0] !== ci : source?.gs[0] !== ci;
+  });
+}
+
+function canResetCluster(ci) {
+  if (!state || authoringStudio?.isConstruct() || layoutAuthoringMode || overlayDraftId) return false;
+  if (lensPhaseActive(state) || state.made === state.need) return false;
+  return movesWithoutCluster(ci).length < state.moveHistory.length;
+}
+
+// Restarts the board and replays every other move, so the result is
+// exactly the board the player would have if they had never placed this
+// cluster's terms -- fact cards included: this cluster's comes back when
+// it's finished again. The board lays itself out fresh, as Start over
+// does; a saved arrangement still has the reset terms in their old spots.
+function resetCluster(ci) {
+  if (!canResetCluster(ci)) return false;
+  const moves = movesWithoutCluster(ci);
+  const keepMode = mode;
+  const carried = {
+    incorrectMoveCount: state.incorrectMoveCount,
+    startedAt: state.startedAt,
+    filledClusterCount: state.filledClusterCount,
+    resetClusterCount: (state.resetClusterCount || 0) + 1,
+    summaryBeforeCompleteCount: state.summaryBeforeCompleteCount,
+    persistedMode: state.persistedMode
+  };
+  clearPlayerSession(localStorage, sessionStoragePuzzle());
+  restartBoard();
+  Object.assign(state, carried);
+  if (mode !== keepMode) setMode(keepMode);
+  replaySemanticMoves(moves);
+  state.paint();
+  persistPlayerSession({ captureLayout: true });
+  setMessage(`${state.puzzle.clusters[ci].name} reset — its terms are back in play.`);
+  return true;
+}
+
+const clusterSummary = createClusterSummary({ appendInfoAnchor });
+
+function openClusterSummary(ci) {
+  const unfinished = state.nodes.some(n => isBridge(n)
+    ? n.gs.includes(ci) && !n.connected.includes(ci)
+    : n.gs[0] === ci && !isDone(n));
+  if (unfinished) state.summaryBeforeCompleteCount = (state.summaryBeforeCompleteCount || 0) + 1;
+  clusterSummary.open(state, ci, { isDone, isBridge });
+}
+
+const clusterMenu = createClusterMenu({
+  items: [
+    {
+      label: "Solve cluster",
+      hint: "Alt+Shift+click",
+      enabled: ci => !!state && !lensPhaseActive(state) && !authoringStudio?.isConstruct() && canFillCluster(ci),
+      run: ci => fillCluster(ci)
+    },
+    { label: "Reset cluster", enabled: canResetCluster, run: resetCluster },
+    {
+      label: "Cluster summary",
+      hint: "shows all terms",
+      keepsFocus: true,
+      enabled: () => !!state,
+      run: openClusterSummary
+    }
+  ]
+});
+
+// Returns whether the menu took the event; otherwise the browser's own
+// menu shows, as it does in authoring construct mode.
+function onClusterContextMenu(ci, event, anchor) {
+  if (!state?.puzzle?.clusters?.[ci] || authoringStudio?.isConstruct()) return false;
+  event.preventDefault();
+  clusterMenu.open(ci, event, anchor);
+  return true;
+}
+
 const clusterLegend = createClusterLegend({
   container: document.getElementById("cluster-legend"),
   svg, isDone, isBridge,
   showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  onClusterTap: onClusterLabelTap
+  onClusterTap: onClusterLabelTap,
+  onClusterContextMenu
 });
 
 const { buildGraph } = createGraphRenderer({
@@ -2089,7 +2179,8 @@ const { buildStarGraph } = createStarRenderer({
   getFocusedInfoNode: () => focusedInfoNode,
   updateSolutionHint, countEl, setMessage,
   onBackgroundClick: event => authoringStudio?.handleBackgroundClick(event),
-  onClusterTitleTap: (title, event) => onClusterLabelTap(title.ci, event)
+  onClusterTitleTap: (title, event) => onClusterLabelTap(title.ci, event),
+  onClusterContextMenu
 });
 
 const { buildSetGraph } = createSetRenderer({
@@ -2101,7 +2192,8 @@ const { buildSetGraph } = createSetRenderer({
   isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
   updateSolutionHint, countEl, setMessage,
-  onClusterTap: onClusterLabelTap
+  onClusterTap: onClusterLabelTap,
+  onClusterContextMenu
 });
 
 // Single dispatch point for "build whatever the current `mode` is",
@@ -2395,6 +2487,8 @@ function applyLoadedPuzzle(puzzle, index, {
     completedViaShowSolution: false,
     hadProgressBeforeShowSolution: false,
     filledClusterCount: 0,
+    resetClusterCount: 0,
+    summaryBeforeCompleteCount: 0,
     solutionLayout: null,
     prettyPrint: null,
     prettyPrintPromise: null,

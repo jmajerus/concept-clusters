@@ -7,13 +7,14 @@
 // and shows the cluster's info under the board the same way a Star title
 // or Circle heading does. With a term selected, a chip tap connects it to
 // that cluster, as a Star title tap does; with none, a tap only focuses
-// the chip, which is how touch players read its info.
+// the chip, which is how touch players read its info. Right-click opens
+// the cluster's menu (clusterMenu.js).
 import { normalizeInfo } from "./termInfo.js";
 
 export function createClusterLegend({
   container, svg, isDone, isBridge,
   showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo, getFocusedInfoNode,
-  onClusterTap
+  onClusterTap, onClusterContextMenu
 }) {
   let builtFor = null;
 
@@ -75,6 +76,7 @@ export function createClusterLegend({
         if (onClusterTap?.(ci, event)) showTermInfo(infoNode);
       };
       chip.addEventListener("click", tap);
+      chip.addEventListener("contextmenu", event => onClusterContextMenu?.(ci, event, chip));
       chip.addEventListener("keydown", event => {
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();

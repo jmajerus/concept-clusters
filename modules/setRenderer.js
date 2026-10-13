@@ -120,7 +120,8 @@ function stackMetrics(puzzle) {
 export function createSetRenderer({
   svg, getState, getW, getH, getSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onClusterTap = null
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onClusterTap = null,
+  onClusterContextMenu = null
 }) {
   // Cluster circle sizing (content-driven, unrelated to physics), a
   // stable "free area" scatter position for every node that can start
@@ -1513,6 +1514,7 @@ export function createSetRenderer({
           e.preventDefault();
           tapCluster(d.ci, e);
         });
+        g.on("contextmenu", (e, d) => onClusterContextMenu?.(d.ci, e, e.currentTarget));
         g.on("focus", (e, d) => focusTermInfo(clusterInfoNode(d.ci)));
         g.on("blur", (e, d) => blurTermInfo(state.clusterInfoNodes[d.ci]));
         return g;
