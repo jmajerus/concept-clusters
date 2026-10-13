@@ -109,10 +109,16 @@ export function createClusterSummary({ appendInfoAnchor }) {
         );
         const relation = RELATION_KINDS[node.relationKind];
         const direction = bridgeDirectionText(node, puzzle);
+        // Relation and direction read as footnotes, as on the earned fact card.
+        const footnote = (label, text) => {
+          const line = el("span", "cluster-summary-footnote");
+          line.append(el("strong", null, `${label}.`), ` ${text}`);
+          return line;
+        };
         const details = [
           node.fact && el("span", null, node.fact),
-          relation && el("span", null, `${relation.label}: ${relation.description}`),
-          direction && el("span", null, `Direction: ${direction}`),
+          relation && footnote(relation.label, relation.description),
+          direction && footnote("Direction", direction),
           (node.info?.text || node.info?.link || node.info?.links?.length) && infoRun(node.info)
         ].filter(Boolean);
         if (details.length) {
