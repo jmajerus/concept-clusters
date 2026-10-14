@@ -330,8 +330,5 @@
         "reasoning": "high"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true
   }
 }

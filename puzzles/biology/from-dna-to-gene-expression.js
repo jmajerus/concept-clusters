@@ -434,10 +434,6 @@ const puzzle = definePuzzle(import.meta.url, {
         "name": "Codex"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true,
-    "sizeFactor": 1.1
   }
 });
 puzzle.layout = {
@@ -518,9 +514,9 @@ puzzle.layout = {
           "pinned": true
         },
         "term:codon": {
-          "x": 453.46,
-          "y": 178.17,
-          "pinned": false
+          "x": 480.51,
+          "y": 190.19,
+          "pinned": true
         },
         "term:transfer RNA": {
           "x": 680.64,
@@ -559,14 +555,14 @@ puzzle.layout = {
         "boundsViolations": 0,
         "lineCrossings": 0,
         "edgeNodeIntersections": 0,
-        "totalLength": 3519.49,
-        "score": 3519.485217684991
+        "totalLength": 3490.24,
+        "score": 3490.241138660725
       },
       "solutionLayout": null,
       "capturedSolved": true,
       "fixed": true,
       "source": "author",
-      "savedAt": "2026-10-11T17:50:49.993Z"
+      "savedAt": "2026-10-12T17:09:07.631Z"
     },
     "sets": {
       "schemaVersion": 1,
@@ -807,6 +803,10 @@ puzzle.layout = {
       "source": "author",
       "savedAt": "2026-10-11T17:49:29.276Z"
     }
+  },
+  "board": {
+    "sizeFactor": 1.1,
+    "lensFlowTrace": true
   }
 };
 puzzle.starLayout = puzzle.layout?.modes?.star || null;

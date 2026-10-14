@@ -472,9 +472,5 @@
         "reasoning": "high"
       }
     ]
-  },
-  "board": {
-    "bridgePreconnect": true,
-    "sizeFactor": 0.8
   }
 }

@@ -1,0 +1,281 @@
+{
+  "id": "ecology-community-interactions",
+  "title": "Eating, Competing, Living Together — How Species Interact",
+  "category": "ecology",
+  "info": {
+    "text": "The three relations that shape a community — eating one another, competing for the same resources, and living in close association — plus the defenses predation pressures prey into evolving.",
+    "links": [
+      {
+        "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+        "label": "OpenStax Biology 2e §45.6 Community Ecology"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Biology 2e, §45.6 Community Ecology",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "consuming",
+      "name": "Consuming Another Species",
+      "color": "teal",
+      "fact": "Some species kill and eat others, herbivores eat plants — and the populations of eater and eaten rise and fall together in coupled cycles.",
+      "termInfo": {
+        "predation": "Killing and eating another individual for food — the act that couples the predator's fortune to its prey's population.",
+        "herbivory": "Eating plants. It often leaves the plant alive — grazed grass regrows, browsed trees leaf again — which makes it consumption without quick death.",
+        "predator-prey cycle": "Coupled population swings: hare booms feed lynx booms, lynx booms crash the hares, and the crash starves the lynx — the roughly ten-year rhythm in Hudson's Bay fur records."
+      },
+      "info": {
+        "text": "Predation kills and eats another individual; herbivory eats plants (often without killing them). The classic signature is the coupled cycle: when snowshoe hares peak, lynx soon peak, driving hares down, and the lynx population follows a step behind — the ten-year lynx–hare cycle recorded in Hudson's Bay fur records.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+            "label": "OpenStax Biology 2e §45.6"
+          }
+        ]
+      },
+      "seeds": [
+        "predation",
+        "herbivory"
+      ],
+      "floatingTerms": [
+        "predator-prey cycle"
+      ],
+      "terms": [
+        "predation",
+        "herbivory",
+        "predator-prey cycle"
+      ]
+    },
+    {
+      "id": "prey-defenses",
+      "name": "Prey Defenses",
+      "color": "blue",
+      "fact": "Being eaten is such pressure that prey evolve armor, poison, invisibility, honest warnings — and imitations of other species' warnings.",
+      "termInfo": {
+        "mechanical defense": "Physical structures that discourage attackers: the fearsome thorns on a honey locust, a turtle's shell, a pill bug's armor.",
+        "chemical defense": "Toxins and repellents manufactured by the body: foxglove's cardiac glycosides, the fire-bellied toad's skin poison, a skunk's spray.",
+        "camouflage": "Coloration that hides the animal against its background so predators — or prey — simply pass it by.",
+        "aposematic coloration": "Honest warning advertising: bright colors announcing a toxic or foul-tasting body, like the fire-bellied toad's red belly. A predator that ignores it learns from one bad taste.",
+        "Batesian mimicry": "A harmless species imitating another species' warning signal: several harmless snakes wear the venomous coral snake's red-yellow-black rings without the venom.",
+        "Müllerian mimicry": "Two or more well-defended species converging on one shared warning and splitting the cost of teaching predators — related unpalatable butterflies converging on similar warning patterns."
+      },
+      "info": {
+        "text": "Defenses run from physical (the thorns on honey locust, a turtle's shell) and chemical (foxglove's cardiac glycosides, the fire-bellied toad's skin toxin) to hiding (camouflage), advertising (aposematic coloration — the bright warning of the fire-bellied toad and the striped skunk), and borrowing another species' reputation. Batesian mimics are harmless freeloaders on a warning; Müllerian mimics share real defenses and pool the lesson.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+            "label": "OpenStax Biology 2e §45.6"
+          }
+        ]
+      },
+      "seeds": [
+        "camouflage",
+        "chemical defense"
+      ],
+      "floatingTerms": [
+        "mechanical defense",
+        "aposematic coloration",
+        "Batesian mimicry",
+        "Müllerian mimicry"
+      ],
+      "terms": [
+        "mechanical defense",
+        "chemical defense",
+        "camouflage",
+        "aposematic coloration",
+        "Batesian mimicry",
+        "Müllerian mimicry"
+      ]
+    },
+    {
+      "id": "competition",
+      "name": "Competition Over Shared Resources",
+      "color": "amber",
+      "fact": "Two species needing the same things cannot hold the same niche: one drives the other out, or they divide the resources and stay.",
+      "termInfo": {
+        "ecological niche": "The unique set of resources a species uses — what it eats, where it lives, when it feeds. The niche is the unit over which competition happens.",
+        "competitive exclusion principle": "G. F. Gause's rule from Paramecium cultures: two species with exactly the same requirements cannot coexist — the better competitor drives the other locally extinct.",
+        "resource partitioning": "Coexistence by dividing the resource: Anolis lizards on the same island feed on insects at different heights, so close relatives overlap less and none excludes the others."
+      },
+      "info": {
+        "text": "A species' ecological niche is the unique set of resources it uses — its habitat role, food, and timing. G. F. Gause showed that two species of Paramecium competing for the same supply drive one to extinction: two species cannot occupy the same niche in a community (the competitive exclusion principle). Where close relatives do coexist, they usually do it by resource partitioning — splitting the resource, as the Anolis lizards of the same island divide it by height, feeding on insects at different elevations.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+            "label": "OpenStax Biology 2e §45.6"
+          }
+        ]
+      },
+      "seeds": [
+        "ecological niche",
+        "competitive exclusion principle"
+      ],
+      "floatingTerms": [
+        "resource partitioning"
+      ],
+      "terms": [
+        "ecological niche",
+        "competitive exclusion principle",
+        "resource partitioning"
+      ]
+    },
+    {
+      "id": "symbiosis",
+      "name": "Living in Close Association",
+      "color": "magenta",
+      "fact": "Some species live intertwined for a lifetime: both gain, one gains and the other doesn't care — or one gains at the other's slow expense.",
+      "termInfo": {
+        "symbiosis": "Any close, long-term association between individuals of two species; the three named balances — mutualism, commensalism, parasitism — are its classic types.",
+        "commensalism": "One partner benefits and the other is neither helped nor harmed: birds nesting in trees, bacteria living on human skin, clownfish sheltering in an anemone's tentacles.",
+        "mutualism": "Both partners gain: mycorrhizal fungi trade soil minerals to plant roots for photosynthetic sugars — the partnership behind most land plants.",
+        "parasitism": "The parasite takes nutrients from a living host, harming it but rarely killing it quickly: the protozoan Plasmodium cycles between human and mosquito hosts while causing malaria."
+      },
+      "info": {
+        "text": "Symbiosis is any close, long-term association between two species. In mutualism both benefit (mycorrhizal fungi trade minerals to plants for photosynthate). In commensalism one benefits and the other is unaffected (birds nesting in trees; clownfish sheltering in anemones). In parasitism the parasite gains and the host is harmed but usually kept alive — the protozoan Plasmodium causes malaria while it cycles between human and mosquito hosts.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+            "label": "OpenStax Biology 2e §45.6"
+          }
+        ]
+      },
+      "seeds": [
+        "mutualism",
+        "parasitism"
+      ],
+      "floatingTerms": [
+        "symbiosis",
+        "commensalism"
+      ],
+      "terms": [
+        "symbiosis",
+        "commensalism",
+        "mutualism",
+        "parasitism"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "br-predators-learn",
+      "term": "predators learn the lesson",
+      "clusters": [
+        "consuming",
+        "prey-defenses"
+      ],
+      "fact": "Defenses work through the predator: warning coloration teaches predators to avoid bad-tasting prey after one trial, Batesian mimics are harmless species freeloading on that lesson, and Müllerian mimics share real defenses so the lesson costs each species less.",
+      "info": {
+        "text": "OpenStax 45.6: predators learn to associate aposematic coloration with the taste of toxins; both mimicry types exploit that learning.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+            "label": "OpenStax Biology 2e §45.6"
+          }
+        ]
+      }
+    },
+    {
+      "id": "br-harm-without-killing",
+      "term": "harm without killing",
+      "clusters": [
+        "consuming",
+        "symbiosis"
+      ],
+      "fact": "A parasite consumes its host like a predator consumes prey, but it rarely kills quickly — the parasite needs the host alive long enough to complete its own reproductive cycle, which is why Plasmodium cycles through human and mosquito without immediately killing either.",
+      "info": {
+        "text": "OpenStax 45.6: parasites are unlikely to kill their hosts quickly because that would interfere with their reproductive cycle.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+            "label": "OpenStax Biology 2e §45.6"
+          }
+        ]
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "lens-warning-ads",
+      "prompt": "One board term names a defense that works by advertising loudly rather than by hiding, imitating, or repelling with hardware. Which?",
+      "explanation": "Aposematic coloration is the honest billboard; camouflage hides, the mimicries imitate, and mechanical/chemical defenses carry no signal at all.",
+      "targets": [
+        "aposematic coloration"
+      ],
+      "reasons": {
+        "aposematic coloration": "Bright warning colors that teach predators after one bad taste."
+      }
+    },
+    {
+      "id": "lens-mimicry-pair",
+      "prompt": "Two board terms name strategies built on imitation of another species. Which two?",
+      "explanation": "Batesian mimics are harmless species borrowing a warning; Müllerian mimics are defended species converging on one. Every other defense term acts with its own body.",
+      "targets": [
+        "Batesian mimicry",
+        "Müllerian mimicry"
+      ],
+      "reasons": {
+        "Batesian mimicry": "Harmless species imitates a defended species' warning.",
+        "Müllerian mimicry": "Two defended species share one warning pattern."
+      }
+    },
+    {
+      "id": "lens-peaceful-split",
+      "prompt": "Which board term names the peaceful ending of a resource fight — relatives staying on one island by dividing where they feed?",
+      "explanation": "Resource partitioning is the coexistence outcome; competitive exclusion is the rule that says one niche holds one species, and the niche is the stake, not the ending.",
+      "targets": [
+        "resource partitioning"
+      ],
+      "reasons": {
+        "resource partitioning": "Anolis lizards share one island by feeding at different heights."
+      }
+    },
+    {
+      "id": "lens-unaffected-partner",
+      "prompt": "Among the close-association terms, which one describes the balance where the uninvolved partner neither gains nor loses?",
+      "explanation": "Mutualism pays both, parasitism harms the host; commensalism is the one-sided gain with a bystander.",
+      "targets": [
+        "commensalism"
+      ],
+      "reasons": {
+        "commensalism": "One benefits; the other is neither helped nor harmed — birds nesting in trees."
+      }
+    },
+    {
+      "id": "lens-lingering-harm",
+      "prompt": "Two board terms describe relations where one species gains and the other is harmed — but is characteristically left alive. Which two?",
+      "explanation": "The cross-cut: herbivory eats without killing the plant and parasitism keeps its host alive to finish its own life cycle; predation kills, and the other terms involve no harm at all.",
+      "targets": [
+        "herbivory",
+        "parasitism"
+      ],
+      "reasons": {
+        "herbivory": "Grazing and browsing usually leave the plant living.",
+        "parasitism": "The parasite needs its host alive long enough to complete its reproductive cycle."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Does it eat you, need what you need, or live with you?",
+    "summary": "The three questions that sort community relations — consuming, competing, associating — and the defense vocabulary predation pressure wrote onto prey.",
+    "estimatedMinutes": 7,
+    "content": {
+      "text": "A community is not just a list of species; it is a web of relations among them, and most of those relations answer one of a few honest questions: does one eat the other, do they need the same things, or do they live intertwined? The vocabulary of community ecology is the vocabulary of those answers.\r\n\r\nStart with eating. **Predation** is one animal killing and eating another; **herbivory** is eating plants, usually without killing them — grazed grass regrows. When predator and prey pursue each other over years, their populations lock into a rhythm: more snowshoe hares feed more lynx, more lynx crash the hare population, and the crash starves the lynx. Hudson's Bay Company fur records show this coupled **predator-prey cycle** repeating roughly every ten years.\r\n\r\nBeing eaten is such pressure that prey carry the marks of it. Some defenses are physical — **mechanical defenses** like the honey locust's thorns or a turtle's shell. Some are **chemical defenses**: foxglove's cardiac glycosides, the fire-bellied toad's skin poison. **Camouflage** removes the prey from the predator's notice altogether. **Aposematic coloration** does the opposite of hiding: bright colors advertise \"I am bad to eat,\" and a predator that ignores the warning learns from one bad taste. That learned lesson is what makes mimicry possible. **Batesian mimicry** is a harmless species freeloading on it — harmless snakes wearing the venomous coral snake's rings. **Müllerian mimicry** is cooperation among the defended: two unpalatable species converge on one warning and share the cost of teaching the predators.\r\n\r\nWhen two species need the same things, the question becomes who gets them. Each species occupies an **ecological niche** — its own set of resources: what it eats, where it lives, when it feeds. G. F. Gause grew two species of Paramecium on one food supply and watched the weaker competitor die out, which became the **competitive exclusion principle**: two species cannot occupy the same niche in the same community. Yet close relatives often do coexist, because they divide the niche instead. That division — **resource partitioning** — is how the Anolis lizards of one island share insects by feeding at different heights.\r\n\r\nFinally, some species don't merely meet — they live attached to each other's fortunes. **Symbiosis** names any close, long-term association between two species, and it comes in three classic balances. In **mutualism** both partners gain: mycorrhizal fungi trade soil minerals to plant roots for photosynthetic sugars. In **commensalism** one gains and the other is simply unaffected: birds nest in trees and the trees go on as before. In **parasitism** one gains at the other's expense, but slowly — the parasite needs its host alive to finish its own life cycle, which is why the malaria parasite Plasmodium can cycle between humans and mosquitoes without killing quickly. Notice the echo: parasitism is predation that lingers, and every defense on a prey's body is a record of predators learning. The relations of a community are one long conversation about eating, needing, and living with."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

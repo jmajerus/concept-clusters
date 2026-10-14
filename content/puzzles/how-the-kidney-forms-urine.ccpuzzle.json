@@ -456,9 +456,5 @@
         "name": "Claude"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true,
-    "sizeFactor": 1.25
   }
 }

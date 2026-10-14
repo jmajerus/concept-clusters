@@ -261,8 +261,5 @@
         "reasoning": "medium"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true
   }
 }

@@ -388,8 +388,8 @@ const puzzle = definePuzzle(import.meta.url, {
   "relatedPuzzles": {
     "entries": [
       {
-        "id": "nervous-system",
-        "reason": "See where the order comes from: the motor neuron behind the motor unit and the action potential behind the muscle pulse."
+        "id": "how-neurons-fire-and-signal",
+        "reason": "See where the order comes from: how the motor neuron fires an action potential and releases acetylcholine across a synapse."
       }
     ]
   },
@@ -415,6 +415,9 @@ const puzzle = definePuzzle(import.meta.url, {
       {
         "name": "Muse Code (Spark 1.3)",
         "reasoning": "high"
+      },
+      {
+        "name": "Claude"
       }
     ]
   }

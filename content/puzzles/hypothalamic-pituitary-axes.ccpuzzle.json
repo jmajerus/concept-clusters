@@ -1,0 +1,500 @@
+{
+  "id": "hypothalamic-pituitary-axes",
+  "title": "Hypothalamic–pituitary axes",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "endocrine-reproductive"
+  },
+  "info": {
+    "text": "The hypothalamus commands the anterior pituitary through portal blood, and three hormone chains follow: thyroid, adrenal cortex, and growth, each held near its set level by negative feedback.",
+    "links": [
+      {
+        "href": "wiki:Neuroendocrinology"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Guyton and Hall Textbook of Medical Physiology, 14th ed.",
+        "author": "John E. Hall and Michael E. Hall",
+        "publisher": "Elsevier",
+        "year": "2021",
+        "pages": "ch. 75–78"
+      },
+      {
+        "title": "Anatomy and Physiology 2e, §17.3 The Pituitary Gland and Hypothalamus",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/17-3-the-pituitary-gland-and-hypothalamus"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "hypothalamic-pituitary-control",
+      "name": "Hypothalamic–pituitary control",
+      "color": "teal",
+      "fact": "The hypothalamus sends releasing and inhibiting hormones down the hypophyseal portal system to the anterior pituitary, whose tropic hormones drive peripheral glands; their end hormones return as negative feedback on both levels.",
+      "termInfo": {
+        "anterior pituitary": {
+          "text": "The glandular lobe that secretes TSH, ACTH, GH, FSH, LH, and prolactin on hypothalamic orders.",
+          "links": [
+            {
+              "href": "wiki:Anterior pituitary"
+            }
+          ]
+        },
+        "hypophyseal portal system": {
+          "text": "Two capillary beds in series that carry hypothalamic hormones straight to the anterior pituitary at high concentration.",
+          "links": [
+            {
+              "href": "wiki:Hypophyseal portal system"
+            }
+          ]
+        },
+        "hypothalamus": {
+          "text": "The brain region whose neurosecretory cells issue the releasing and inhibiting hormones that command the anterior pituitary.",
+          "links": [
+            {
+              "href": "wiki:Hypothalamus"
+            }
+          ]
+        },
+        "negative feedback": {
+          "text": "End hormones inhibit hypothalamic and pituitary release, holding each axis near its set level.",
+          "links": [
+            {
+              "href": "wiki:Negative feedback"
+            }
+          ]
+        },
+        "posterior pituitary": {
+          "text": "The neural lobe: hypothalamic nerve endings release ADH and oxytocin here directly, with no portal step.",
+          "links": [
+            {
+              "href": "wiki:Posterior pituitary"
+            }
+          ]
+        },
+        "tropic hormones": {
+          "text": "Pituitary hormones whose target is another endocrine gland, such as TSH, ACTH, FSH, and LH.",
+          "links": [
+            {
+              "href": "wiki:Tropic hormone"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The command structure every anterior-pituitary axis shares.",
+        "links": [
+          {
+            "href": "wiki:Pituitary gland"
+          }
+        ]
+      },
+      "seeds": [
+        "hypothalamus",
+        "anterior pituitary"
+      ],
+      "floatingTerms": [
+        "hypophyseal portal system",
+        "posterior pituitary",
+        "tropic hormones",
+        "negative feedback"
+      ],
+      "terms": [
+        "hypothalamus",
+        "anterior pituitary",
+        "hypophyseal portal system",
+        "posterior pituitary",
+        "tropic hormones",
+        "negative feedback"
+      ]
+    },
+    {
+      "id": "thyroid-axis",
+      "name": "Thyroid axis",
+      "color": "blue",
+      "fact": "TRH drives pituitary TSH, which makes the thyroid trap iodide and release mostly thyroxine; tissues convert it to the more active triiodothyronine, which raises the basal metabolic rate.",
+      "termInfo": {
+        "basal metabolic rate": {
+          "text": "Resting energy use; thyroid hormone raises it by increasing metabolism in nearly every tissue.",
+          "links": [
+            {
+              "href": "wiki:Basal metabolic rate"
+            }
+          ]
+        },
+        "iodide trapping": {
+          "text": "Active uptake of iodide into thyroid cells by the sodium–iodide symporter, the first step of hormone synthesis.",
+          "links": [
+            {
+              "href": "wiki:Sodium/iodide cotransporter"
+            }
+          ]
+        },
+        "thyroid-stimulating hormone": {
+          "text": "The pituitary tropic hormone (thyrotropin) that drives every step of thyroid hormone synthesis and release.",
+          "links": [
+            {
+              "href": "wiki:Thyroid-stimulating hormone"
+            }
+          ]
+        },
+        "thyrotropin-releasing hormone": {
+          "text": "The hypothalamic hormone that stimulates TSH release from the anterior pituitary.",
+          "links": [
+            {
+              "href": "wiki:Thyrotropin-releasing hormone"
+            }
+          ]
+        },
+        "thyroxine": {
+          "text": "T4, the thyroid's main secretory product: a long-lived prohormone carried mostly on plasma proteins and stored on thyroglobulin.",
+          "links": [
+            {
+              "href": "wiki:Thyroxine"
+            }
+          ]
+        },
+        "triiodothyronine": {
+          "text": "T3, the more potent form, made mostly by removing one iodine from T4 in peripheral tissues.",
+          "links": [
+            {
+              "href": "wiki:Triiodothyronine"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The chain that sets the body's metabolic pace.",
+        "links": [
+          {
+            "href": "wiki:Hypothalamic–pituitary–thyroid axis"
+          }
+        ]
+      },
+      "seeds": [
+        "thyroid-stimulating hormone",
+        "thyroxine"
+      ],
+      "floatingTerms": [
+        "thyrotropin-releasing hormone",
+        "triiodothyronine",
+        "iodide trapping",
+        "basal metabolic rate"
+      ],
+      "terms": [
+        "thyroid-stimulating hormone",
+        "thyroxine",
+        "thyrotropin-releasing hormone",
+        "triiodothyronine",
+        "iodide trapping",
+        "basal metabolic rate"
+      ]
+    },
+    {
+      "id": "adrenocortical-axis",
+      "name": "Adrenocortical axis",
+      "color": "amber",
+      "fact": "CRH drives pituitary ACTH, which makes the adrenal cortex secrete cortisol in a daily rhythm that peaks in the early morning; cortisol drives gluconeogenesis and restrains inflammation.",
+      "termInfo": {
+        "adrenal cortex": {
+          "text": "The outer adrenal layer. ACTH drives its cortisol-secreting zone; aldosterone, from the outermost zone, answers mainly to angiotensin II and potassium.",
+          "links": [
+            {
+              "href": "wiki:Adrenal cortex"
+            }
+          ]
+        },
+        "adrenocorticotropic hormone": {
+          "text": "The pituitary tropic hormone (corticotropin) that drives cortisol secretion by the adrenal cortex.",
+          "links": [
+            {
+              "href": "wiki:Adrenocorticotropic hormone"
+            }
+          ]
+        },
+        "anti-inflammatory effect": {
+          "text": "Cortisol's suppression of inflammatory mediators and immune responses, the basis of glucocorticoid drugs.",
+          "links": [
+            {
+              "href": "wiki:Glucocorticoid"
+            }
+          ]
+        },
+        "corticotropin-releasing hormone": {
+          "text": "The hypothalamic hormone that stimulates ACTH release; stress and the daily rhythm both raise it.",
+          "links": [
+            {
+              "href": "wiki:Corticotropin-releasing hormone"
+            }
+          ]
+        },
+        "cortisol": {
+          "text": "The main glucocorticoid: mobilizes fuel, raises blood glucose, and restrains inflammation.",
+          "links": [
+            {
+              "href": "wiki:Cortisol"
+            }
+          ]
+        },
+        "gluconeogenesis": {
+          "text": "New glucose made by the liver from amino acids and glycerol; stimulating it is cortisol's hallmark metabolic action.",
+          "links": [
+            {
+              "href": "wiki:Gluconeogenesis"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The chain that mobilizes fuel and restrains inflammation.",
+        "links": [
+          {
+            "href": "wiki:Hypothalamic–pituitary–adrenal axis"
+          }
+        ]
+      },
+      "seeds": [
+        "adrenocorticotropic hormone",
+        "cortisol"
+      ],
+      "floatingTerms": [
+        "corticotropin-releasing hormone",
+        "adrenal cortex",
+        "gluconeogenesis",
+        "anti-inflammatory effect"
+      ],
+      "terms": [
+        "adrenocorticotropic hormone",
+        "cortisol",
+        "corticotropin-releasing hormone",
+        "adrenal cortex",
+        "gluconeogenesis",
+        "anti-inflammatory effect"
+      ]
+    },
+    {
+      "id": "growth-axis",
+      "name": "Growth axis",
+      "color": "magenta",
+      "fact": "GHRH sets pulses of growth hormone, largest early in deep sleep; GH makes the liver release IGF-1, which drives cartilage growth at the epiphyseal plates.",
+      "termInfo": {
+        "epiphyseal growth plates": {
+          "text": "Cartilage plates near the ends of long bones, where chondrocyte growth lengthens bone until the plates close after puberty.",
+          "links": [
+            {
+              "href": "wiki:Epiphyseal plate"
+            }
+          ]
+        },
+        "growth hormone": {
+          "text": "The anterior pituitary hormone (somatotropin) that promotes growth and shifts fuel use from glucose toward fat.",
+          "links": [
+            {
+              "href": "wiki:Growth hormone"
+            }
+          ]
+        },
+        "growth hormone–releasing hormone": {
+          "text": "The hypothalamic hormone that stimulates growth hormone release.",
+          "links": [
+            {
+              "href": "wiki:Growth hormone–releasing hormone"
+            }
+          ]
+        },
+        "insulin-like growth factor 1": {
+          "text": "IGF-1 (somatomedin C): made mainly by the liver under GH, it carries most of GH's growth-promoting effect.",
+          "links": [
+            {
+              "href": "wiki:Insulin-like growth factor 1"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The chain that lengthens bone and builds tissue.",
+        "links": [
+          {
+            "href": "wiki:Growth hormone"
+          }
+        ]
+      },
+      "seeds": [
+        "growth hormone",
+        "insulin-like growth factor 1"
+      ],
+      "floatingTerms": [
+        "growth hormone–releasing hormone",
+        "epiphyseal growth plates"
+      ],
+      "terms": [
+        "growth hormone",
+        "insulin-like growth factor 1",
+        "growth hormone–releasing hormone",
+        "epiphyseal growth plates"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "somatostatin",
+      "term": "somatostatin",
+      "clusters": [
+        "thyroid-axis",
+        "growth-axis"
+      ],
+      "fact": "Somatostatin links the thyroid and growth axes because the same hypothalamic inhibiting hormone holds back pituitary release of both TSH and growth hormone.",
+      "info": {
+        "text": "The hypothalamic inhibiting hormone that restrains GH and TSH release.",
+        "links": [
+          {
+            "href": "wiki:Somatostatin"
+          }
+        ]
+      },
+      "idealTerms": {
+        "thyroid-axis": "thyroid-stimulating hormone",
+        "growth-axis": "growth hormone"
+      }
+    },
+    {
+      "id": "insulin-resistance",
+      "term": "insulin resistance",
+      "clusters": [
+        "adrenocortical-axis",
+        "growth-axis"
+      ],
+      "fact": "Insulin resistance links the adrenocortical and growth axes because cortisol and growth hormone both reduce tissue glucose uptake, so an excess of either raises blood glucose.",
+      "info": {
+        "text": "Reduced tissue response to insulin, induced by both cortisol and growth hormone.",
+        "links": [
+          {
+            "href": "wiki:Insulin resistance"
+          }
+        ]
+      },
+      "idealTerms": {
+        "adrenocortical-axis": "cortisol",
+        "growth-axis": "growth hormone"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "portal-signals",
+      "prompt": "Which hormones does the hypothalamus send to the pituitary through portal blood?",
+      "explanation": "Each axis begins with a hypothalamic signal carried in portal blood; somatostatin is the inhibiting one among them.",
+      "targets": [
+        "thyrotropin-releasing hormone",
+        "corticotropin-releasing hormone",
+        "growth hormone–releasing hormone",
+        "somatostatin"
+      ],
+      "reasons": {
+        "corticotropin-releasing hormone": "It travels the portal vessels to stimulate ACTH release.",
+        "growth hormone–releasing hormone": "It travels the portal vessels to stimulate GH release.",
+        "somatostatin": "It travels the same route to inhibit GH and TSH release.",
+        "thyrotropin-releasing hormone": "It travels the portal vessels to stimulate TSH release."
+      }
+    },
+    {
+      "id": "end-hormone-actions",
+      "prompt": "Which concepts name an end hormone's action on body tissues?",
+      "explanation": "These are what the axes exist to produce: the effects thyroid hormone, cortisol, and growth hormone have once they reach their targets, as distinct from the chain of signals that releases them.",
+      "targets": [
+        "basal metabolic rate",
+        "gluconeogenesis",
+        "anti-inflammatory effect",
+        "insulin resistance"
+      ],
+      "reasons": {
+        "anti-inflammatory effect": "Cortisol suppresses inflammatory mediators and immune responses.",
+        "basal metabolic rate": "Thyroid hormone raises resting energy use in nearly every tissue.",
+        "gluconeogenesis": "Cortisol drives the liver to make new glucose.",
+        "insulin resistance": "Cortisol and growth hormone both blunt tissue glucose uptake."
+      }
+    },
+    {
+      "id": "gh-to-bone",
+      "prompt": "Which concepts carry growth hormone's effect to lengthening bone?",
+      "explanation": "Growth hormone acts on bone mostly indirectly: it makes the liver release IGF-1, and IGF-1 drives cartilage growth at the plates until they close.",
+      "targets": [
+        "insulin-like growth factor 1",
+        "epiphyseal growth plates"
+      ],
+      "reasons": {
+        "epiphyseal growth plates": "The cartilage where IGF-1-driven growth actually lengthens bone.",
+        "insulin-like growth factor 1": "The liver releases it under GH, and it carries most of GH's growth-promoting effect."
+      }
+    },
+    {
+      "id": "thyroid-failure",
+      "prompt": "Which concepts rise when the thyroid gland fails?",
+      "explanation": "With little thyroid hormone left to apply negative feedback, the upstream signals climb; a high TSH is the standard sign of primary hypothyroidism.",
+      "targets": [
+        "thyroid-stimulating hormone",
+        "thyrotropin-releasing hormone"
+      ],
+      "reasons": {
+        "thyroid-stimulating hormone": "The pituitary loses its feedback brake and raises TSH output.",
+        "thyrotropin-releasing hormone": "The hypothalamus also loses its feedback brake and raises TRH output."
+      }
+    },
+    {
+      "id": "steroid-suppression",
+      "prompt": "Which concepts explain adrenal suppression during long-term steroid therapy?",
+      "explanation": "A synthetic glucocorticoid feeds back like cortisol, silencing CRH and ACTH; without ACTH the adrenal cortex atrophies and cannot respond if the drug is stopped abruptly.",
+      "targets": [
+        "negative feedback",
+        "corticotropin-releasing hormone",
+        "adrenocorticotropic hormone",
+        "adrenal cortex"
+      ],
+      "reasons": {
+        "adrenal cortex": "Deprived of ACTH, it shrinks and loses its capacity to secrete cortisol.",
+        "adrenocorticotropic hormone": "Its release falls, removing the cortex's trophic drive.",
+        "corticotropin-releasing hormone": "Its release falls under the drug's feedback.",
+        "negative feedback": "The drug acts on the hypothalamus and pituitary as cortisol would."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "reproductive-hormones",
+        "reason": "Follow the fourth anterior-pituitary chain: GnRH, FSH, and LH driving the gonads."
+      },
+      {
+        "id": "setting-and-defending-core-temperature",
+        "reason": "See thyroid hormone at work as one of the effectors that raise heat production."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "One command structure, three hormone chains",
+    "summary": "How the hypothalamus and anterior pituitary run the thyroid, adrenocortical, and growth axes under feedback.",
+    "estimatedMinutes": 5,
+    "content": {
+      "text": "The hypothalamus controls much of the endocrine system through the pituitary gland, which hangs just beneath it. The two halves of the pituitary are reached differently. The posterior pituitary is neural tissue: hypothalamic nerve endings release ADH and oxytocin there directly. The anterior pituitary is a gland, reached through the hypophyseal portal system, a short vascular link that carries hypothalamic releasing and inhibiting hormones to it at high concentration. In response, the anterior pituitary secretes tropic hormones, whose targets are other endocrine glands.\r\n\r\nThree such axes follow the same pattern. In the thyroid axis, thyrotropin-releasing hormone (TRH) prompts the pituitary to release thyroid-stimulating hormone (TSH). TSH drives iodide trapping and the release of thyroxine (T4), which tissues convert to the more potent triiodothyronine (T3); together they raise the basal metabolic rate. In the adrenocortical axis, corticotropin-releasing hormone (CRH) prompts adrenocorticotropic hormone (ACTH), which makes the adrenal cortex secrete cortisol. Cortisol stimulates gluconeogenesis and has a strong anti-inflammatory effect. In the growth axis, growth hormone–releasing hormone (GHRH) prompts growth hormone, which acts largely through insulin-like growth factor 1 (IGF-1) from the liver to lengthen bone at the epiphyseal growth plates.\r\n\r\nEach axis is held near its set level by negative feedback: the end hormone inhibits release at both the hypothalamus and the pituitary. The axes also share parts. Somatostatin, a hypothalamic inhibiting hormone, restrains both growth hormone and TSH. Cortisol and growth hormone both cause insulin resistance, so an excess of either raises blood glucose."
+    },
+    "links": [
+      {
+        "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/17-3-the-pituitary-gland-and-hypothalamus",
+        "label": "OpenStax: the pituitary gland and hypothalamus"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude Code (Claude Opus 5.5)",
+        "reasoning": "medium"
+      }
+    ]
+  }
+}

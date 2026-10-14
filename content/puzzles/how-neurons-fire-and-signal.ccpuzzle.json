@@ -520,9 +520,5 @@
         "reasoning": "medium"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true,
-    "sizeFactor": 1.1
   }
 }

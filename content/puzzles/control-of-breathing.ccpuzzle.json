@@ -530,9 +530,5 @@
         "name": "Claude Code"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true,
-    "sizeFactor": 1.2
   }
 }
