@@ -561,9 +561,6 @@ const puzzle = definePuzzle(import.meta.url, {
         "reasoning": "medium"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true
   }
 });
 puzzle.layout = {
@@ -1019,7 +1016,8 @@ puzzle.layout = {
   "board": {
     "sizeFactor": 1,
     "source": "author",
-    "savedAt": "2026-10-09T20:09:37.153Z"
+    "savedAt": "2026-10-09T20:09:37.153Z",
+    "lensFlowTrace": true
   }
 };
 puzzle.starLayout = puzzle.layout?.modes?.star || null;

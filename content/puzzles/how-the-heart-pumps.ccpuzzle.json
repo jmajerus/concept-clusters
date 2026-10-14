@@ -1,122 +1,164 @@
 {
   "id": "how-the-heart-pumps",
-  "title": "How the heart pumps",
+  "title": "The cardiac cycle",
   "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "cardiovascular"
+  },
+  "info": {
+    "text": "One heartbeat traced through the left ventricle: the pressure-driven phases of the cycle, the volumes they move, the valves that bound them, and the sounds those valves make.",
+    "links": [
+      {
+        "href": "wiki:Cardiac cycle"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+        "author": "John E. Hall and Michael E. Hall",
+        "publisher": "Elsevier",
+        "year": "2020"
+      },
+      {
+        "title": "Anatomy and Physiology 2e — 19.3 Cardiac Cycle",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-3-cardiac-cycle"
+      }
+    ]
+  },
   "clusters": [
     {
-      "id": "heart-chambers",
-      "name": "Heart chambers",
+      "id": "cycle-phases",
+      "name": "Phases of the cycle",
       "color": "teal",
-      "fact": "The atria receive blood and the ventricles pump it onward: the right heart sends blood to the lungs, while the left heart sends oxygen-rich blood to the body.",
+      "fact": "Ventricular systole opens with isovolumic contraction and continues as ejection. Diastole opens with isovolumic relaxation, moves into rapid filling, and ends as atrial contraction tops up the ventricle.",
       "termInfo": {
-        "right atrium": {
-          "text": "The upper-right chamber, which receives oxygen-poor blood returning from the body and passes it through the tricuspid valve.",
+        "atrial contraction": "The atria's contraction at the very end of diastole, adding roughly the last 20 percent of ventricular filling; sometimes called the atrial kick.",
+        "ejection": "The phase when the outlet valves stand open and blood leaves the ventricle; about 70 percent of the stroke leaves in its first third.",
+        "isovolumic contraction": {
+          "text": "The opening phase of systole: the ventricle contracts and its pressure climbs steeply while its volume stays fixed. Also called isovolumetric contraction.",
           "links": [
             {
-              "href": "wiki:Right atrium"
+              "href": "wiki:Isovolumetric contraction"
             }
           ]
         },
-        "right ventricle": {
-          "text": "The lower-right chamber, which pumps oxygen-poor blood through the pulmonary valve toward the lungs.",
+        "isovolumic relaxation": {
+          "text": "The opening phase of diastole: the ventricle relaxes and its pressure falls steeply while its volume stays fixed. Also called isovolumetric relaxation.",
           "links": [
             {
-              "href": "wiki:Right ventricle"
+              "href": "wiki:Isovolumic relaxation time"
             }
           ]
         },
-        "left atrium": {
-          "text": "The upper-left chamber, which receives oxygen-rich blood from the lungs and passes it through the mitral valve.",
-          "links": [
-            {
-              "href": "wiki:Left atrium"
-            }
-          ]
-        },
-        "left ventricle": {
-          "text": "The thick-walled lower-left chamber, which pumps oxygen-rich blood through the aortic valve to the body.",
-          "links": [
-            {
-              "href": "wiki:Left ventricle"
-            },
-            {
-              "href": "https://www.mayoclinic.org/tests-procedures/echocardiogram/about/pac-20393856"
-            }
-          ]
-        }
+        "rapid filling": "The first third of diastole, when blood that collected in the atria during systole rushes into the ventricle."
       },
       "info": {
         "links": [
           {
-            "href": "wiki:Heart chamber"
-          },
-          {
-            "href": "https://www.mayoclinic.org/diseases-conditions/aortic-valve-disease/multimedia/chambers-and-valves-of-the-heart/img-20007497"
+            "href": "wiki:Cardiac cycle"
           }
         ]
       },
       "seeds": [
-        "right atrium",
-        "left ventricle"
+        "ejection",
+        "rapid filling"
       ],
       "floatingTerms": [
-        "right ventricle",
-        "left atrium"
+        "isovolumic contraction",
+        "isovolumic relaxation",
+        "atrial contraction"
       ],
       "terms": [
-        "right atrium",
-        "right ventricle",
-        "left atrium",
-        "left ventricle"
+        "ejection",
+        "rapid filling",
+        "isovolumic contraction",
+        "isovolumic relaxation",
+        "atrial contraction"
+      ]
+    },
+    {
+      "id": "ventricular-volumes",
+      "name": "Ventricular volumes",
+      "color": "amber",
+      "fact": "The ventricle finishes filling at its end-diastolic volume, ejects a stroke volume, and keeps an end-systolic volume. Ejection fraction is the share of the end-diastolic volume ejected, about 60 percent at rest.",
+      "termInfo": {
+        "ejection fraction": {
+          "text": "The share of the filled ventricle's blood that leaves in one beat, normally about 60 percent; the standard clinical measure of how fully the ventricle empties.",
+          "links": [
+            {
+              "href": "wiki:Ejection fraction"
+            }
+          ]
+        },
+        "end-diastolic volume": {
+          "text": "The blood in the ventricle at the end of filling, about 110–120 mL at rest; it is the usual index of preload.",
+          "links": [
+            {
+              "href": "wiki:End-diastolic volume"
+            }
+          ]
+        },
+        "end-systolic volume": {
+          "text": "The blood left in the ventricle after ejection, about 40–50 mL at rest.",
+          "links": [
+            {
+              "href": "wiki:End-systolic volume"
+            }
+          ]
+        },
+        "stroke volume": "The blood ejected in one beat, about 70 mL at rest: end-diastolic volume minus end-systolic volume."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Stroke volume"
+          }
+        ]
+      },
+      "seeds": [
+        "end-diastolic volume",
+        "stroke volume"
+      ],
+      "floatingTerms": [
+        "end-systolic volume",
+        "ejection fraction"
+      ],
+      "terms": [
+        "end-diastolic volume",
+        "stroke volume",
+        "end-systolic volume",
+        "ejection fraction"
       ]
     },
     {
       "id": "heart-valves",
       "name": "Heart valves",
       "color": "blue",
-      "fact": "Four valves open and close as pressure changes, directing blood forward and preventing it from leaking backward between chambers or vessels.",
+      "fact": "Atrioventricular valves guard the ventricle's inlets and semilunar valves its outlets. All of them open and close passively with pressure, while papillary muscles keep the atrioventricular leaflets from bulging back into the atria during contraction.",
       "termInfo": {
-        "tricuspid valve": {
-          "text": "The valve between the right atrium and right ventricle; it prevents blood from flowing backward into the atrium.",
-          "links": [
-            {
-              "href": "wiki:Tricuspid valve"
-            },
-            {
-              "href": "https://www.mayoclinic.org/diseases-conditions/tricuspid-valve-disease/symptoms-causes/syc-20350609"
-            }
-          ]
-        },
-        "pulmonary valve": {
-          "text": "The valve between the right ventricle and pulmonary artery, controlling blood flow from the heart toward the lungs.",
-          "links": [
-            {
-              "href": "wiki:Pulmonary valve"
-            },
-            {
-              "href": "https://www.mayoclinic.org/diseases-conditions/pulmonary-valve-disease/symptoms-causes/syc-20350654"
-            }
-          ]
-        },
-        "mitral valve": {
-          "text": "The valve between the left atrium and left ventricle; it is also called the bicuspid valve.",
+        "atrioventricular valves": {
+          "text": "The mitral valve on the left and the tricuspid valve on the right, between each atrium and its ventricle.",
           "links": [
             {
               "href": "wiki:Mitral valve"
-            },
-            {
-              "href": "https://www.mayoclinic.org/diseases-conditions/mitral-valve-disease/symptoms-causes/syc-20355107"
             }
           ]
         },
-        "aortic valve": {
-          "text": "The valve between the left ventricle and aorta, opening when the ventricle ejects blood to the body.",
+        "papillary muscles": {
+          "text": "Muscles projecting from the ventricular wall, tethered to the atrioventricular leaflets by the chordae tendineae. They contract along with the ventricle but play no part in closing the valve.",
+          "links": [
+            {
+              "href": "wiki:Papillary muscle"
+            }
+          ]
+        },
+        "semilunar valves": {
+          "text": "The aortic and pulmonary valves at the ventricular outlets; their small openings make blood leave at high velocity.",
           "links": [
             {
               "href": "wiki:Aortic valve"
-            },
-            {
-              "href": "https://www.mayoclinic.org/diseases-conditions/aortic-valve-disease/symptoms-causes/syc-20355117"
             }
           ]
         }
@@ -125,68 +167,43 @@
         "links": [
           {
             "href": "wiki:Heart valve"
-          },
-          {
-            "href": "https://www.mayoclinic.org/diseases-conditions/heart-valve-disease/symptoms-causes/syc-20353727"
           }
         ]
       },
       "seeds": [
-        "mitral valve",
-        "aortic valve"
+        "atrioventricular valves",
+        "semilunar valves"
       ],
       "floatingTerms": [
-        "tricuspid valve",
-        "pulmonary valve"
+        "papillary muscles"
       ],
       "terms": [
-        "tricuspid valve",
-        "pulmonary valve",
-        "mitral valve",
-        "aortic valve"
+        "atrioventricular valves",
+        "semilunar valves",
+        "papillary muscles"
       ]
     },
     {
-      "id": "cardiac-cycle",
-      "name": "Cardiac cycle",
-      "color": "amber",
-      "fact": "During diastole the ventricles relax and fill; during systole they contract and eject a stroke volume, which combines with heart rate to determine cardiac output.",
+      "id": "heart-sounds",
+      "name": "Heart sounds",
+      "color": "magenta",
+      "fact": "The first and second heart sounds come from closure of the atrioventricular and semilunar valves. The fainter third and fourth sounds belong to the ventricle's filling: the inrush of rapid filling and the push of atrial contraction.",
       "termInfo": {
-        "systole": {
-          "text": "The contraction phase of the heartbeat, when ventricular pressure rises and blood is ejected.",
+        "first heart sound": "The low, slightly longer “lub” heard as ventricular contraction begins.",
+        "fourth heart sound": {
+          "text": "A faint sound just before the first heart sound, as the atria contract. It is usually too weak to hear with a stethoscope, so an audible one generally points to a stiff ventricle.",
           "links": [
             {
-              "href": "wiki:Systole"
+              "href": "wiki:Fourth heart sound"
             }
           ]
         },
-        "diastole": {
-          "text": "The relaxation and filling phase of the heartbeat, when ventricular pressure falls and blood enters the ventricles.",
+        "second heart sound": "The sharper “dub” heard as ejection ends.",
+        "third heart sound": {
+          "text": "A faint, low sound early in diastole as inrushing blood sets the ventricular walls vibrating. It can be normal in children and young adults; later in life it can signal heart failure.",
           "links": [
             {
-              "href": "wiki:Diastole"
-            }
-          ]
-        },
-        "stroke volume": {
-          "text": "The amount of blood one ventricle ejects during a single heartbeat.",
-          "links": [
-            {
-              "href": "wiki:Stroke volume"
-            },
-            {
-              "href": "https://ce.mayo.edu/nursing/content/foundations-critical-care-nursing-online-cne-course-cardiac-concepts"
-            }
-          ]
-        },
-        "cardiac output": {
-          "text": "The volume of blood a ventricle pumps in one minute, equal to heart rate multiplied by stroke volume.",
-          "links": [
-            {
-              "href": "wiki:Cardiac output"
-            },
-            {
-              "href": "https://www.mayoclinic.org/tests-procedures/echocardiogram/about/pac-20393856"
+              "href": "wiki:Third heart sound"
             }
           ]
         }
@@ -194,79 +211,165 @@
       "info": {
         "links": [
           {
-            "href": "wiki:Cardiac cycle"
-          },
-          {
-            "href": "https://www.mayoclinic.org/tests-procedures/echocardiogram/about/pac-20393856"
+            "href": "wiki:Heart sounds"
           }
         ]
       },
       "seeds": [
-        "systole",
-        "diastole"
+        "first heart sound",
+        "second heart sound"
       ],
       "floatingTerms": [
-        "stroke volume",
-        "cardiac output"
+        "third heart sound",
+        "fourth heart sound"
       ],
       "terms": [
-        "systole",
-        "diastole",
-        "stroke volume",
-        "cardiac output"
+        "first heart sound",
+        "second heart sound",
+        "third heart sound",
+        "fourth heart sound"
       ]
     }
   ],
   "bridges": [
     {
-      "id": "one-way-blood-flow",
-      "term": "one-way blood flow",
+      "id": "pressure-gradient",
+      "term": "pressure gradient",
       "clusters": [
-        "heart-chambers",
+        "cycle-phases",
         "heart-valves"
       ],
-      "fact": "One-way blood flow bridges chambers and valves: valves at the chamber openings direct blood from atria to ventricles and then out toward the lungs or body, while blocking reversal.",
+      "fact": "Every boundary between phases is a valve opening or closing as the pressure gradient across it reverses. During the two isovolumic phases, the gradients hold both valve sets shut at once.",
       "info": {
-        "text": "The forward sequence of blood through the heart, maintained by valves that close whenever flow begins to reverse.",
+        "text": "A difference in pressure that moves blood from the higher-pressure side to the lower.",
         "links": [
           {
-            "href": "wiki:Heart valve"
-          },
-          {
-            "href": "https://www.mayoclinic.org/diseases-conditions/heart-valve-disease/symptoms-causes/syc-20353727"
+            "href": "wiki:Pressure gradient"
           }
         ]
       },
       "relationKind": "dynamic"
     },
     {
-      "id": "pressure-gradient",
-      "term": "pressure gradient",
+      "id": "valve-closure",
+      "term": "valve closure",
       "clusters": [
         "heart-valves",
-        "cardiac-cycle"
+        "heart-sounds"
       ],
-      "fact": "Pressure gradient bridges valves and the cardiac cycle: a valve opens when pressure behind it exceeds pressure ahead, then closes when that difference reverses during filling or contraction.",
+      "fact": "Closure of the atrioventricular valves produces the first heart sound, and closure of the semilunar valves the second: the taut leaflets and the blood around them vibrate as each set snaps shut.",
+      "info": "The moment a valve's leaflets meet and seal; the heart's main sounds come from the vibration that follows.",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "heart-valves",
+        "to": "heart-sounds"
+      }
+    },
+    {
+      "id": "pressure-volume-loop",
+      "term": "pressure–volume loop",
+      "clusters": [
+        "cycle-phases",
+        "ventricular-volumes"
+      ],
+      "fact": "Plotting ventricular pressure against volume through one beat traces a closed loop: the isovolumic phases are its vertical sides, ejection its top, and filling its bottom, and its width is the stroke volume.",
       "info": {
-        "text": "A difference in pressure between two regions that drives blood from the higher-pressure side toward the lower-pressure side.",
+        "text": "A graph of left ventricular pressure against volume over one beat; Guyton calls it the volume–pressure diagram.",
         "links": [
           {
-            "href": "wiki:Pressure gradient"
-          },
-          {
-            "href": "https://www.mayoclinic.org/diseases-conditions/aortic-stenosis/symptoms-causes/syc-20353139"
+            "href": "wiki:Pressure–volume loop analysis in cardiology"
           }
         ]
       },
-      "relationKind": "dynamic"
+      "idealTerms": {
+        "ventricular-volumes": "stroke volume"
+      }
     }
   ],
+  "lenses": [
+    {
+      "id": "ejection-fraction-ratio",
+      "prompt": "Which volumes does ejection fraction compare?",
+      "explanation": "Ejection fraction is stroke volume divided by end-diastolic volume: the share of the filled ventricle's blood that leaves in one beat. End-systolic volume is the remainder left behind.",
+      "targets": [
+        "stroke volume",
+        "end-diastolic volume"
+      ],
+      "reasons": {
+        "end-diastolic volume": "The denominator: the blood present when contraction begins.",
+        "stroke volume": "The numerator: the blood ejected in one beat."
+      }
+    },
+    {
+      "id": "filling-phases",
+      "prompt": "Which phases add blood to the ventricle?",
+      "explanation": "Blood enters only while the atrioventricular valves stand open, first in a passive rush and then with the atria's final push. Ejection removes blood, and the two isovolumic phases hold volume fixed.",
+      "targets": [
+        "rapid filling",
+        "atrial contraction"
+      ],
+      "reasons": {
+        "atrial contraction": "The atria contract at the end of diastole and push in the last of the filling.",
+        "rapid filling": "Blood stored in the atria during systole pours in as the atrioventricular valves open."
+      }
+    },
+    {
+      "id": "every-valve-closed",
+      "prompt": "Which phases pass with every valve closed?",
+      "explanation": "A ventricle can change its pressure without changing its volume only while no valve is open. That fixed volume is what gives these two phases their name.",
+      "targets": [
+        "isovolumic contraction",
+        "isovolumic relaxation"
+      ],
+      "reasons": {
+        "isovolumic contraction": "Rising pressure has closed the atrioventricular valves but has yet to open the semilunar valves.",
+        "isovolumic relaxation": "Falling pressure has closed the semilunar valves but has yet to open the atrioventricular valves."
+      }
+    },
+    {
+      "id": "filling-sounds",
+      "prompt": "Which heart sounds belong to ventricular filling?",
+      "explanation": "The first and second sounds mark valve closures as systole begins and as ejection ends. The third and fourth come from blood entering the ventricle.",
+      "targets": [
+        "third heart sound",
+        "fourth heart sound"
+      ],
+      "reasons": {
+        "fourth heart sound": "Atrial contraction drives the last of the filling into the ventricle.",
+        "third heart sound": "Inrushing blood during rapid filling sets the ventricular walls vibrating."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "regulating-arterial-pressure",
+        "reason": "See what sets the stroke volume ejected here, and how heart rate turns it into cardiac output."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "One heartbeat, start to finish",
+    "summary": "How pressure, valves, volume, and sound change together as the left ventricle fills and empties in one beat.",
+    "estimatedMinutes": 5,
+    "content": {
+      "text": "Each heartbeat repeats the same sequence of events, and every event follows from pressure. Blood moves from higher pressure to lower, the valves open and close passively as those pressures cross, and the sounds heard through a stethoscope come from the valves closing. This lesson follows the left ventricle through one beat.\r\n\r\n## Pressure drives the valves\r\n\r\nThe heart's valves have no muscle of their own. Each one opens when the **pressure gradient** across it pushes blood forward and closes when that gradient reverses. The **atrioventricular valves** (the mitral valve on the left, the tricuspid on the right) sit between the atria and the ventricles. The **semilunar valves** (the aortic and pulmonary valves) guard the exits into the great arteries. When the ventricle contracts, the **papillary muscles** in its wall contract with it. Through cords tethered to the atrioventricular leaflets, they keep those leaflets from bulging back into the atria; closing the valve is left to pressure.\r\n\r\n## The phases\r\n\r\nVentricular contraction, or systole, begins with **isovolumic contraction**. Ventricular pressure rises above atrial pressure and closes the atrioventricular valves, but it has yet to pass aortic pressure, so the semilunar valves stay shut too. With every valve closed, the ventricle squeezes a fixed volume of blood and its pressure climbs steeply. Once that pressure exceeds aortic pressure, the aortic valve opens and **ejection** begins; most of the stroke leaves in the first third of this phase.\r\n\r\nRelaxation, or diastole, mirrors this. As ventricular pressure falls below aortic pressure, the aortic valve closes, and **isovolumic relaxation** follows with both valve sets shut again. When ventricular pressure drops below atrial pressure, the mitral valve opens and **rapid filling** carries in the blood that collected in the atria during systole. Inflow slows through mid-diastole, and **atrial contraction** at the end adds roughly the last 20 percent.\r\n\r\n## The volumes\r\n\r\nThe blood in the ventricle at the end of filling is the **end-diastolic volume**, about 110 to 120 mL in a resting adult. Ejection removes the **stroke volume**, about 70 mL, and leaves an **end-systolic volume** of about 40 to 50 mL. The **ejection fraction** is stroke volume divided by end-diastolic volume, normally about 60 percent.\r\n\r\nPlotting ventricular pressure against ventricular volume through one beat traces a closed **pressure–volume loop**. Its two vertical sides are the isovolumic phases, its top is ejection, and its bottom is filling. The loop's width is the stroke volume.\r\n\r\n## The sounds\r\n\r\n**Valve closure** produces the heart's main sounds: the taut leaflets and the blood around them vibrate as each valve set snaps shut. The **first heart sound** marks closure of the atrioventricular valves as systole begins, and the **second heart sound** marks closure of the semilunar valves as ejection ends. Two fainter sounds belong to filling. The **third heart sound** comes early in diastole, as inrushing blood sets the ventricular walls vibrating; it can be normal in children and young adults, while later in life it can signal heart failure. The **fourth heart sound** accompanies atrial contraction. It is usually too weak to hear with a stethoscope, so an audible one generally points to a stiff ventricle."
+    }
+  },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
         "name": "generative assistance",
         "kind": "generative"
+      },
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
       }
     ]
   }

@@ -638,7 +638,38 @@ export const CATEGORIES = {
     slug: "microbiology",
     domain: "life-sciences",
     info: {
-      text: "the scientific study of microorganisms, which are living things and particles too small to see with the naked eye."
+      text: "How organisms and particles too small to see with the naked eye are built, multiply, and interact with their hosts and environments.",
+      link: "wiki:Microbiology"
+    },
+    subcategories: {
+      bacteriology: {
+        title: "Bacteriology",
+        info: {
+          text: "How bacteria are structured, identified, and classified, and how they grow, exchange genes, and resist antibiotics.",
+          link: "wiki:Bacteriology"
+        }
+      },
+      mycology: {
+        title: "Mycology",
+        info: {
+          text: "How fungi, from yeasts to molds, grow, reproduce, and interact with plants, animals, and people.",
+          link: "wiki:Mycology"
+        }
+      },
+      parasitology: {
+        title: "Parasitology",
+        info: {
+          text: "How protozoan and animal parasites live in and on their hosts, and how their life cycles spread infection.",
+          link: "wiki:Parasitology"
+        }
+      },
+      virology: {
+        title: "Virology",
+        info: {
+          text: "Virology is the scientific study of biological viruses, their structure, classification, evolution, and how they infect host cells.",
+          link: "wiki:Virology"
+        }
+      }
     },
     previousTitles: [
       "microbiology"
@@ -667,6 +698,14 @@ export const CATEGORIES = {
           link: "wiki:Solar_System"
         }
       }
+    }
+  },
+  Ecology: {
+    slug: "ecology",
+    domain: "life-sciences",
+    info: {
+      text: "How organisms interact with each other and their surroundings — the flows of energy and matter that link populations, communities, and the places they live.",
+      link: "wiki:Ecology"
     }
   }
 };

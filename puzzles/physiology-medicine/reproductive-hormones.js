@@ -399,8 +399,8 @@ const puzzle = definePuzzle(import.meta.url, {
     },
     "entries": [
       {
-        "id": "endocrine-command-and-pace",
-        "reason": "Compare gonadotropin orders (FSH, LH) with the thyroid and adrenal tropic orders (TSH, ACTH)."
+        "id": "hypothalamic-pituitary-axes",
+        "reason": "Compare the gonadotropin orders (FSH, LH) with the thyroid, adrenal, and growth axes that run on the same hypothalamic–pituitary command structure."
       }
     ]
   },
@@ -426,6 +426,9 @@ const puzzle = definePuzzle(import.meta.url, {
       {
         "name": "Muse Code (Spark 1.3)",
         "reasoning": "high"
+      },
+      {
+        "name": "Claude Code"
       }
     ]
   }

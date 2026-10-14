@@ -517,10 +517,6 @@ const puzzle = definePuzzle(import.meta.url, {
         "name": "Claude Code"
       }
     ]
-  },
-  "board": {
-    "lensFlowTrace": true,
-    "sizeFactor": 1.2
   }
 });
 puzzle.layout = {
@@ -987,7 +983,8 @@ puzzle.layout = {
   "board": {
     "sizeFactor": 1.15,
     "source": "author",
-    "savedAt": "2026-10-11T17:32:31.443Z"
+    "savedAt": "2026-10-11T17:32:31.443Z",
+    "lensFlowTrace": true
   }
 };
 puzzle.starLayout = puzzle.layout?.modes?.star || null;

@@ -453,9 +453,5 @@
         "reasoning": "high"
       }
     ]
-  },
-  "board": {
-    "bridgePreconnect": true,
-    "lensFlowTrace": true
   }
 }

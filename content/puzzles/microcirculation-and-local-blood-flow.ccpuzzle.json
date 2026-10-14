@@ -1,0 +1,513 @@
+{
+  "id": "microcirculation-and-local-blood-flow",
+  "title": "Microcirculation and local blood flow",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "cardiovascular"
+  },
+  "info": {
+    "text": "Each tissue sets its own blood flow to match its needs, and the pressures across capillary walls decide how much of that flow leaks into the tissue and how much returns.",
+    "links": [
+      {
+        "href": "wiki:Microcirculation"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+        "author": "John E. Hall and Michael E. Hall",
+        "publisher": "Elsevier",
+        "year": "2020",
+        "pages": "ch. 16, 17, 25"
+      },
+      {
+        "title": "Microcirculation",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Microcirculation"
+      },
+      {
+        "title": "Starling equation",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Starling_equation"
+      },
+      {
+        "title": "Autoregulation",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Autoregulation"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "capillary-filtration",
+      "name": "Capillary filtration",
+      "color": "teal",
+      "fact": "Four Starling forces govern fluid movement across a capillary wall. Capillary pressure and interstitial colloid osmotic pressure move fluid out, and so does interstitial fluid pressure where it is slightly negative, as in loose tissue. Plasma colloid osmotic pressure pulls fluid back in. Their sum is the net filtration pressure, and the filtration coefficient converts it into a rate of flow.",
+      "termInfo": {
+        "capillary pressure": "The blood pressure inside a capillary, which pushes fluid outward; often called capillary hydrostatic pressure. It falls from about 30 mmHg at the arterial end to about 10 mmHg at the venous end.",
+        "filtration coefficient": "The rate of fluid flow across the capillary walls for each mmHg of net filtration pressure; it reflects both how permeable the walls are and how much capillary surface is open.",
+        "interstitial fluid pressure": "The pressure of the fluid between tissue cells. In loose tissue such as under the skin it is slightly below atmospheric, so it draws fluid outward.",
+        "net filtration pressure": "The sum of the outward and inward forces. Over the whole body it is a fraction of a mmHg outward, and the small surplus of filtered fluid returns by the lymph.",
+        "plasma colloid osmotic pressure": {
+          "text": "The osmotic pull of plasma proteins, chiefly albumin, which cannot easily cross the capillary wall; also called oncotic pressure. At about 28 mmHg it is the main force drawing fluid back into the capillary.",
+          "links": [
+            {
+              "href": "wiki:Oncotic pressure"
+            }
+          ]
+        },
+        "interstitial colloid osmotic pressure": "The osmotic pull of the small amount of protein that leaks into the tissue spaces, which draws fluid out of the capillary; Guyton calls it interstitial fluid colloid osmotic pressure."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Starling equation"
+          }
+        ]
+      },
+      "seeds": [
+        "capillary pressure",
+        "plasma colloid osmotic pressure"
+      ],
+      "floatingTerms": [
+        "interstitial fluid pressure",
+        "interstitial colloid osmotic pressure",
+        "filtration coefficient",
+        "net filtration pressure"
+      ],
+      "terms": [
+        "capillary pressure",
+        "plasma colloid osmotic pressure",
+        "interstitial fluid pressure",
+        "interstitial colloid osmotic pressure",
+        "filtration coefficient",
+        "net filtration pressure"
+      ]
+    },
+    {
+      "id": "metabolic-vasodilators",
+      "name": "Metabolic vasodilators",
+      "color": "blue",
+      "fact": "Working tissue releases substances that relax the smooth muscle of nearby arterioles and precapillary sphincters. The faster the metabolism, or the scarcer the oxygen, the more of them accumulate, so flow rises to match the tissue's needs.",
+      "termInfo": {
+        "adenosine": {
+          "text": "A breakdown product of ATP released when cells run short of oxygen; a leading candidate for the vasodilator that matches coronary flow to the heart's work.",
+          "links": [
+            {
+              "href": "wiki:Adenosine"
+            }
+          ]
+        },
+        "carbon dioxide": "A waste product of metabolism that relaxes arteriolar smooth muscle; it is an especially strong vasodilator in the brain.",
+        "hydrogen ions": "Accumulate as active tissue produces lactic acid and carbon dioxide; the falling pH dilates arterioles.",
+        "potassium ions": "Released from repeatedly contracting muscle and firing neurons; a local rise in potassium relaxes arteriolar smooth muscle."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Vasodilation"
+          }
+        ]
+      },
+      "seeds": [
+        "adenosine",
+        "carbon dioxide"
+      ],
+      "floatingTerms": [
+        "potassium ions",
+        "hydrogen ions"
+      ],
+      "terms": [
+        "adenosine",
+        "carbon dioxide",
+        "potassium ions",
+        "hydrogen ions"
+      ]
+    },
+    {
+      "id": "local-flow-responses",
+      "name": "Local flow responses",
+      "color": "amber",
+      "fact": "Tissues adjust their own flow without help from nerves or hormones. Flow rises with metabolic activity and after a period of blocked supply, and it returns toward normal within about a minute when arterial pressure changes. Two mechanisms explain that steadiness: vasodilators wash out or build up, and arteriolar muscle contracts when stretched.",
+      "termInfo": {
+        "active hyperemia": {
+          "text": "The rise in blood flow that accompanies increased tissue activity, such as in exercising muscle or a secreting gland.",
+          "links": [
+            {
+              "href": "wiki:Hyperaemia"
+            }
+          ]
+        },
+        "autoregulation": "A tissue's ability to hold its blood flow nearly constant across a range of arterial pressures, through a metabolic mechanism and a myogenic one.",
+        "myogenic response": {
+          "text": "The contraction of arteriolar smooth muscle when a rise in pressure stretches it, which narrows the vessel and limits flow; also called the Bayliss effect.",
+          "links": [
+            {
+              "href": "wiki:Myogenic mechanism"
+            }
+          ]
+        },
+        "reactive hyperemia": "The surge of blood flow after an artery has been briefly blocked, which roughly repays the oxygen the tissue missed."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Autoregulation"
+          }
+        ]
+      },
+      "seeds": [
+        "active hyperemia",
+        "reactive hyperemia"
+      ],
+      "floatingTerms": [
+        "autoregulation",
+        "myogenic response"
+      ],
+      "terms": [
+        "active hyperemia",
+        "reactive hyperemia",
+        "autoregulation",
+        "myogenic response"
+      ]
+    },
+    {
+      "id": "endothelial-signals",
+      "name": "Endothelial signals",
+      "color": "magenta",
+      "fact": "The cells lining blood vessels release signals that set the tone of the smooth muscle around them. Nitric oxide, released in response to shear stress, raises cyclic GMP in the smooth muscle and relaxes it; endothelin, released when the lining is damaged, constricts.",
+      "termInfo": {
+        "cyclic GMP": {
+          "text": "The second messenger that nitric oxide generates in smooth muscle by activating guanylyl cyclase; it relaxes the muscle.",
+          "links": [
+            {
+              "href": "wiki:Cyclic guanosine monophosphate"
+            }
+          ]
+        },
+        "endothelin": {
+          "text": "A peptide released by damaged endothelium that is among the most powerful vasoconstrictors known.",
+          "links": [
+            {
+              "href": "wiki:Endothelin"
+            }
+          ]
+        },
+        "nitric oxide": {
+          "text": "A gas made by endothelial nitric oxide synthase that diffuses into neighboring smooth muscle and relaxes it; first identified as endothelium-derived relaxing factor.",
+          "links": [
+            {
+              "href": "wiki:Nitric oxide"
+            }
+          ]
+        },
+        "shear stress": {
+          "text": "The drag of flowing blood along the vessel lining; faster flow raises it and prompts the endothelium to release nitric oxide.",
+          "links": [
+            {
+              "href": "wiki:Shear stress"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Endothelium"
+          }
+        ]
+      },
+      "seeds": [
+        "nitric oxide",
+        "endothelin"
+      ],
+      "floatingTerms": [
+        "shear stress",
+        "cyclic GMP"
+      ],
+      "terms": [
+        "nitric oxide",
+        "endothelin",
+        "shear stress",
+        "cyclic GMP"
+      ]
+    },
+    {
+      "id": "safeguards-against-edema",
+      "name": "Safeguards against edema",
+      "color": "olive",
+      "fact": "Interstitial fluid can rise considerably before tissue swells. While interstitial pressure stays negative the tissue spaces are stiff, so a little extra fluid raises their pressure sharply and opposes further filtration, and lymph flow can rise many times over to carry the excess away. Edema appears only once these safeguards are exhausted.",
+      "termInfo": {
+        "edema": "Excess fluid in the tissue spaces, felt and seen as swelling.",
+        "interstitial compliance": "How much the tissue spaces expand for each rise in their pressure. It is low while that pressure is negative, so added fluid quickly builds a pressure that resists more filtration.",
+        "lymph flow": {
+          "text": "The return of filtered fluid and leaked protein to the blood through lymphatic vessels; it can increase ten- to fiftyfold when filtration rises.",
+          "links": [
+            {
+              "href": "wiki:Lymph"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Edema"
+          }
+        ]
+      },
+      "seeds": [
+        "edema",
+        "lymph flow"
+      ],
+      "floatingTerms": [
+        "interstitial compliance"
+      ],
+      "terms": [
+        "edema",
+        "lymph flow",
+        "interstitial compliance"
+      ]
+    },
+    {
+      "id": "long-term-flow-control",
+      "name": "Long-term flow control",
+      "color": "brown",
+      "fact": "When a tissue's needs stay above its supply for days to weeks, the vessels themselves change. Oxygen-starved tissue releases growth factors that sprout new capillaries, and when an artery is blocked, small connecting vessels enlarge into new routes around it.",
+      "termInfo": {
+        "VEGF": {
+          "text": "Vascular endothelial growth factor, the best-known signal that oxygen-starved tissue releases to drive new vessel growth.",
+          "links": [
+            {
+              "href": "wiki:Vascular endothelial growth factor"
+            }
+          ]
+        },
+        "angiogenesis": "The growth of new blood vessels sprouting from existing ones, which raises the number of capillaries serving a tissue.",
+        "collateral circulation": {
+          "text": "Alternate routes around a blocked artery, formed as small existing connections enlarge over days to months.",
+          "links": [
+            {
+              "href": "wiki:Collateral circulation"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Angiogenesis"
+          }
+        ]
+      },
+      "seeds": [
+        "angiogenesis",
+        "VEGF"
+      ],
+      "floatingTerms": [
+        "collateral circulation"
+      ],
+      "terms": [
+        "angiogenesis",
+        "VEGF",
+        "collateral circulation"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "precapillary-sphincters",
+      "term": "precapillary sphincters",
+      "clusters": [
+        "metabolic-vasodilators",
+        "local-flow-responses"
+      ],
+      "fact": "Vasodilator metabolites relax the precapillary sphincters and metarterioles, opening more capillaries to flow; in exercising muscle this is a large part of active hyperemia.",
+      "info": {
+        "text": "Rings of smooth muscle where capillaries branch off metarterioles. They open and close in cycles, a rhythm called vasomotion, and stay open longer as vasodilators build up.",
+        "links": [
+          {
+            "href": "wiki:Precapillary sphincter"
+          }
+        ]
+      },
+      "idealTerms": {
+        "local-flow-responses": "active hyperemia"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "metabolic-vasodilators",
+        "to": "local-flow-responses"
+      }
+    },
+    {
+      "id": "flow-mediated-dilation",
+      "term": "flow-mediated dilation",
+      "clusters": [
+        "endothelial-signals",
+        "local-flow-responses"
+      ],
+      "fact": "When the microvessels in active tissue dilate, flow speeds up in the larger arteries feeding them. The higher shear stress releases nitric oxide from their lining, so the feeding arteries dilate too and the extra flow is not throttled upstream.",
+      "info": {
+        "text": "The widening of an artery in response to increased flow through it, carried out by the endothelium.",
+        "links": [
+          {
+            "href": "wiki:Flow-mediated dilation"
+          }
+        ]
+      },
+      "idealTerms": {
+        "endothelial-signals": "shear stress",
+        "local-flow-responses": "active hyperemia"
+      }
+    },
+    {
+      "id": "arteriolar-dilation",
+      "term": "arteriolar dilation",
+      "clusters": [
+        "local-flow-responses",
+        "capillary-filtration"
+      ],
+      "fact": "When local responses dilate the arterioles, less of the arterial pressure is spent upstream of the capillaries, so capillary pressure and filtration rise. That is why exercising muscle visibly swells.",
+      "info": "The widening of arterioles as their smooth muscle relaxes, which lowers resistance ahead of the capillaries.",
+      "idealTerms": {
+        "capillary-filtration": "capillary pressure"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "local-flow-responses",
+        "to": "capillary-filtration"
+      }
+    },
+    {
+      "id": "protein-washdown",
+      "term": "protein washdown",
+      "clusters": [
+        "capillary-filtration",
+        "safeguards-against-edema"
+      ],
+      "fact": "When filtration rises, the added fluid dilutes the protein in the tissue spaces and faster lymph flow carries protein away. The interstitial colloid osmotic pressure falls, weakening one of the forces that pulls fluid out.",
+      "info": "The lowering of interstitial protein concentration as filtration and lymph flow increase; Guyton's term is washdown of interstitial fluid protein.",
+      "idealTerms": {
+        "capillary-filtration": "interstitial colloid osmotic pressure",
+        "safeguards-against-edema": "lymph flow"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "safeguards-against-edema",
+        "to": "capillary-filtration"
+      }
+    },
+    {
+      "id": "tissue-hypoxia",
+      "term": "tissue hypoxia",
+      "clusters": [
+        "metabolic-vasodilators",
+        "long-term-flow-control"
+      ],
+      "fact": "A shortage of oxygen drives both timescales of control. Within seconds it releases vasodilators such as adenosine and relaxes arteriolar muscle directly; over weeks it releases VEGF and grows new vessels.",
+      "info": {
+        "text": "An oxygen supply that falls short of the tissue's demand.",
+        "links": [
+          {
+            "href": "wiki:Hypoxia (medicine)"
+          }
+        ]
+      },
+      "idealTerms": {
+        "metabolic-vasodilators": "adenosine",
+        "long-term-flow-control": "VEGF"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "outward-forces",
+      "prompt": "Which forces normally move fluid out of the capillary?",
+      "explanation": "Plasma colloid osmotic pressure is the one force pulling fluid back in. The outward forces slightly exceed it, and the lymph returns the small surplus.",
+      "targets": [
+        "capillary pressure",
+        "interstitial fluid pressure",
+        "interstitial colloid osmotic pressure"
+      ],
+      "reasons": {
+        "capillary pressure": "Blood pressure inside the capillary pushes fluid through its wall.",
+        "interstitial fluid pressure": "In loose tissue it is slightly negative, so it draws fluid outward.",
+        "interstitial colloid osmotic pressure": "Leaked protein in the tissue spaces pulls water toward it."
+      }
+    },
+    {
+      "id": "starvation-edema",
+      "prompt": "A fall in which force explains the swelling of severe protein starvation?",
+      "explanation": "Liver failure and kidney disease that loses protein in the urine produce edema the same way. Capillary pressure is unchanged; the force holding fluid in the blood is what fails.",
+      "targets": [
+        "plasma colloid osmotic pressure"
+      ],
+      "reasons": {
+        "plasma colloid osmotic pressure": "With too little albumin in the plasma, the inward pull weakens and fluid stays in the tissues."
+      }
+    },
+    {
+      "id": "dilation-upstream",
+      "prompt": "Which steps carry dilation from a working tissue up to the artery that feeds it?",
+      "explanation": "Metabolic vasodilators act mainly near where they are released, so they cannot reach the larger arteries upstream. The endothelium carries the signal there by sensing the extra flow itself. Endothelin works in the opposite direction.",
+      "targets": [
+        "shear stress",
+        "nitric oxide",
+        "cyclic GMP",
+        "flow-mediated dilation"
+      ],
+      "reasons": {
+        "cyclic GMP": "Nitric oxide raises cyclic GMP in the artery's smooth muscle, which relaxes it.",
+        "flow-mediated dilation": "The result is a wider feeding artery that keeps pace with the tissue's demand.",
+        "nitric oxide": "The lining responds to that drag by releasing nitric oxide.",
+        "shear stress": "Faster flow through the feeding artery drags harder on its lining."
+      }
+    },
+    {
+      "id": "local-constrictors",
+      "prompt": "Which local mechanisms narrow arterioles?",
+      "explanation": "Nearly every other local signal relaxes vessels. These two narrow them: one guards against too much flow when pressure rises, the other helps limit bleeding when a vessel is injured.",
+      "targets": [
+        "myogenic response",
+        "endothelin"
+      ],
+      "reasons": {
+        "endothelin": "Damaged endothelium releases this peptide, a powerful constrictor.",
+        "myogenic response": "Stretched arteriolar muscle contracts, narrowing the vessel when pressure rises."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "lymphatic-system",
+        "reason": "Follow the fluid that leaves the capillaries through the lymphatic vessels and back to the blood."
+      },
+      {
+        "id": "regulating-arterial-pressure",
+        "reason": "See how nerves and hormones set the arterial pressure that local control then divides among tissues."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "How tissues control their own blood flow",
+    "summary": "How each tissue matches its blood flow to its needs, and how pressures across the capillary wall balance fluid between blood and tissue.",
+    "estimatedMinutes": 6,
+    "content": {
+      "text": "The heart and the large arteries set the pressure that drives blood through the body, but each tissue decides how much of that blood it takes. Resting muscle needs little; working muscle may need twenty times as much. The control happens locally, in the smallest arteries and the capillaries, and it works without instructions from the brain.\r\n\r\n## Matching flow to need\r\n\r\nActive tissue releases chemicals that relax the smooth muscle around its arterioles. **Adenosine**, a breakdown product of ATP, is a leading candidate in the heart; **carbon dioxide**, **potassium ions**, and **hydrogen ions** accumulate as cells work. Many of these act on the **precapillary sphincters**, rings of smooth muscle where capillaries branch off, which open more capillaries as the chemicals build up. **Tissue hypoxia**, a shortage of oxygen, also relaxes the vessels directly and releases more of these vasodilators.\r\n\r\nThe results have names. **Active hyperemia** is the rise in flow when a tissue works harder. **Reactive hyperemia** is the surge after an artery has been briefly blocked, which roughly repays the oxygen the tissue missed. **Autoregulation** is a tissue's ability to hold its flow nearly steady when arterial pressure rises or falls. It works through the same chemicals, which wash out when flow is high and build up when it is low, and through the **myogenic response**: arteriolar muscle contracts when higher pressure stretches it.\r\n\r\n## Signals from the vessel lining\r\n\r\nThe endothelium, the single layer of cells lining every vessel, also sets vessel tone. Faster flow drags along its surface, a force called **shear stress**, and the endothelium responds by releasing **nitric oxide**. Nitric oxide diffuses into the surrounding smooth muscle, raises **cyclic GMP**, and relaxes it. This **flow-mediated dilation** lets the larger arteries upstream widen when the small vessels in a working tissue open, so the extra flow is not choked off. Damaged endothelium releases **endothelin**, one of the most powerful vasoconstrictors known.\r\n\r\n## Fluid across the capillary wall\r\n\r\nCapillary walls leak water and small solutes. Four forces, named after the physiologist Ernest Starling, decide the balance. **Capillary pressure** pushes fluid out. **Plasma colloid osmotic pressure**, the pull of proteins that stay in the blood, draws it back in. On the tissue side, the slight negative **interstitial fluid pressure** of loose tissue draws fluid out, as does the **interstitial colloid osmotic pressure** of the little protein that leaks. Their sum is the **net filtration pressure**, and the **filtration coefficient**, set by how leaky and how extensive the capillary surface is, turns it into a flow. Normally a little more fluid leaves than returns.\r\n\r\nLocal control and filtration are linked. **Arteriolar dilation** lets more of the arterial pressure reach the capillaries, raising capillary pressure and filtration, which is why exercising muscle swells.\r\n\r\n## Why tissue rarely swells\r\n\r\nExcess tissue fluid is **edema**, and several safeguards hold it off. While interstitial pressure is negative, the tissue spaces have low **interstitial compliance**: a little extra fluid raises their pressure steeply and opposes more filtration. **Lymph flow** can rise many times over to carry the excess away. And **protein washdown**, the dilution and removal of tissue protein, lowers the osmotic force pulling fluid out. Together these give a safety margin of roughly 17 mmHg.\r\n\r\n## Changes over weeks\r\n\r\nWhen a tissue's need outlasts its supply, the vessels themselves change. Oxygen-starved cells release **VEGF**, vascular endothelial growth factor, which drives **angiogenesis**, the sprouting of new capillaries. When an artery is blocked slowly, small connecting vessels enlarge into **collateral circulation** around the blockage."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  }
+}

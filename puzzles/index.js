@@ -278,6 +278,15 @@ import membranesSetCellConditions from "./physiology-medicine/membranes-set-cell
 import nightshadesHorticulture from "./botany/nightshades-horticulture.js";
 import regulatingArterialPressure from "./physiology-medicine/regulating-arterial-pressure.js";
 import settingAndDefendingCoreTemperature from "./physiology-medicine/setting-and-defending-core-temperature.js";
+import ecologyCommunityInteractions from "./ecology/ecology-community-interactions.js";
+import ecologyEnergyFlow from "./ecology/ecology-energy-flow.js";
+import ecologyNutrientCycles from "./ecology/ecology-nutrient-cycles.js";
+import ecologyPopulations from "./ecology/ecology-populations.js";
+import hypothalamicPituitaryAxes from "./physiology-medicine/hypothalamic-pituitary-axes.js";
+import microcirculationAndLocalBloodFlow from "./physiology-medicine/microcirculation-and-local-blood-flow.js";
+import regulatingBloodGlucose from "./physiology-medicine/regulating-blood-glucose.js";
+import rhythmicExcitationOfTheHeart from "./physiology-medicine/rhythmic-excitation-of-the-heart.js";
+import theAutonomicNervousSystem from "./physiology-medicine/the-autonomic-nervous-system.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` is the
 // primary stable category id; `categories` contains the full id set. Browse
@@ -566,6 +575,15 @@ export const PUZZLES = [
   nightshadesHorticulture,
   regulatingArterialPressure,
   settingAndDefendingCoreTemperature,
+  ecologyCommunityInteractions,
+  ecologyEnergyFlow,
+  ecologyNutrientCycles,
+  ecologyPopulations,
+  hypothalamicPituitaryAxes,
+  microcirculationAndLocalBloodFlow,
+  regulatingBloodGlucose,
+  rhythmicExcitationOfTheHeart,
+  theAutonomicNervousSystem,
 ];
 
 export default PUZZLES;

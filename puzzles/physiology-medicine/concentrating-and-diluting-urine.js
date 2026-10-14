@@ -440,10 +440,6 @@ const puzzle = definePuzzle(import.meta.url, {
         "reasoning": "high"
       }
     ]
-  },
-  "board": {
-    "bridgePreconnect": true,
-    "lensFlowTrace": true
   }
 });
 puzzle.layout = {
@@ -821,7 +817,9 @@ puzzle.layout = {
   "board": {
     "sizeFactor": 1.05,
     "source": "author",
-    "savedAt": "2026-10-10T03:53:59.978Z"
+    "savedAt": "2026-10-10T03:53:59.978Z",
+    "bridgePreconnect": true,
+    "lensFlowTrace": true
   }
 };
 puzzle.starLayout = puzzle.layout?.modes?.star || null;

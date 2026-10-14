@@ -1,0 +1,570 @@
+{
+  "id": "the-autonomic-nervous-system",
+  "title": "The autonomic nervous system",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "neurophysiology"
+  },
+  "info": {
+    "text": "The autonomic nervous system runs the heart, smooth muscle, and glands through two divisions built on one plan: a two-neuron chain whose anatomy, transmitters, and receptors decide where and how each division acts.",
+    "links": [
+      {
+        "href": "wiki:Autonomic nervous system"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+        "author": "John E. Hall and Michael E. Hall",
+        "publisher": "Elsevier",
+        "year": "2020"
+      },
+      {
+        "title": "Anatomy and Physiology 2e — 15.1 Divisions of the Autonomic Nervous System",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/15-1-divisions-of-the-autonomic-nervous-system"
+      },
+      {
+        "title": "Anatomy and Physiology 2e — 15.2 Autonomic Reflexes and Homeostasis",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/15-2-autonomic-reflexes-and-homeostasis"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "sympathetic-division",
+      "name": "Sympathetic division",
+      "color": "teal",
+      "fact": "Sympathetic preganglionic fibers leave the spinal cord from T1 to L2. Most synapse in the sympathetic chain beside the vertebral column; others continue to prevertebral ganglia near the aorta. Each preganglionic fiber branches to many postganglionic neurons, so the division can fire in mass discharge, the basis of the fight-or-flight response.",
+      "termInfo": {
+        "fight-or-flight response": {
+          "text": "The body-wide response to threat or exertion: faster, stronger heartbeat, higher blood pressure, wider airways, and glucose released into the blood. Guyton calls it the alarm or stress response.",
+          "links": [
+            {
+              "href": "wiki:Fight-or-flight response"
+            }
+          ]
+        },
+        "mass discharge": "Firing of large parts of the system at once, possible because one preganglionic fiber branches to many postganglionic neurons, often at several levels.",
+        "prevertebral ganglia": {
+          "text": "Ganglia in front of the aorta, such as the celiac and mesenteric ganglia, reached by fibers that pass through the chain without synapsing.",
+          "links": [
+            {
+              "href": "wiki:Prevertebral ganglia"
+            }
+          ]
+        },
+        "sympathetic chain": {
+          "text": "The paired row of ganglia beside the vertebral column, linked into a chain by fibers running up and down between them. Also called the sympathetic trunk.",
+          "links": [
+            {
+              "href": "wiki:Sympathetic trunk"
+            }
+          ]
+        },
+        "thoracolumbar outflow": "Preganglionic fibers leaving the spinal cord between the first thoracic and second lumbar segments."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Sympathetic nervous system"
+          }
+        ]
+      },
+      "seeds": [
+        "fight-or-flight response",
+        "sympathetic chain"
+      ],
+      "floatingTerms": [
+        "thoracolumbar outflow",
+        "prevertebral ganglia",
+        "mass discharge"
+      ],
+      "terms": [
+        "fight-or-flight response",
+        "sympathetic chain",
+        "thoracolumbar outflow",
+        "prevertebral ganglia",
+        "mass discharge"
+      ]
+    },
+    {
+      "id": "parasympathetic-division",
+      "name": "Parasympathetic division",
+      "color": "blue",
+      "fact": "Parasympathetic fibers leave through cranial nerves and the sacral cord, about three-quarters of them in the vagus nerve and the sacral ones in the pelvic splanchnic nerves. Long preganglionic fibers end in terminal ganglia on or in the target organ, so responses tend to be local, together favoring rest-and-digest functions.",
+      "termInfo": {
+        "craniosacral outflow": "Preganglionic fibers leaving through cranial nerves III, VII, IX, and X and the sacral spinal segments.",
+        "pelvic splanchnic nerves": {
+          "text": "The sacral parasympathetic nerves to the bladder, lower colon, rectum, and genitals. Guyton calls them the pelvic nerves.",
+          "links": [
+            {
+              "href": "wiki:Pelvic splanchnic nerves"
+            }
+          ]
+        },
+        "rest-and-digest": "The pattern of feeding and recovery: a slower heart, active gut secretion and movement, and emptying of bladder and bowel.",
+        "terminal ganglia": "Small ganglia on or within the wall of the target organ, also called intramural ganglia.",
+        "vagus nerve": {
+          "text": "Cranial nerve X, which carries about three-quarters of all parasympathetic fibers to the heart, lungs, and abdominal organs.",
+          "links": [
+            {
+              "href": "wiki:Vagus nerve"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Parasympathetic nervous system"
+          }
+        ]
+      },
+      "seeds": [
+        "rest-and-digest",
+        "vagus nerve"
+      ],
+      "floatingTerms": [
+        "craniosacral outflow",
+        "terminal ganglia",
+        "pelvic splanchnic nerves"
+      ],
+      "terms": [
+        "rest-and-digest",
+        "vagus nerve",
+        "craniosacral outflow",
+        "terminal ganglia",
+        "pelvic splanchnic nerves"
+      ]
+    },
+    {
+      "id": "cholinergic-transmission",
+      "name": "Cholinergic transmission",
+      "color": "amber",
+      "fact": "Acetylcholine is released by every preganglionic neuron and by parasympathetic postganglionic neurons. In the ganglia it acts on nicotinic receptors, fast ion channels; on target organs it acts on muscarinic receptors, which work through G proteins and can excite or inhibit.",
+      "termInfo": {
+        "acetylcholine": {
+          "text": "The transmitter of all preganglionic neurons and of parasympathetic postganglionic neurons.",
+          "links": [
+            {
+              "href": "wiki:Acetylcholine"
+            }
+          ]
+        },
+        "muscarinic receptor": {
+          "text": "A G-protein-coupled acetylcholine receptor on the organs parasympathetic fibers reach; atropine blocks it.",
+          "links": [
+            {
+              "href": "wiki:Muscarinic acetylcholine receptor"
+            }
+          ]
+        },
+        "nicotinic receptor": {
+          "text": "An acetylcholine-gated ion channel on every postganglionic neuron and on the secreting cells of the adrenal medulla.",
+          "links": [
+            {
+              "href": "wiki:Nicotinic acetylcholine receptor"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Cholinergic"
+          }
+        ]
+      },
+      "seeds": [
+        "acetylcholine",
+        "muscarinic receptor"
+      ],
+      "floatingTerms": [
+        "nicotinic receptor"
+      ],
+      "terms": [
+        "acetylcholine",
+        "muscarinic receptor",
+        "nicotinic receptor"
+      ]
+    },
+    {
+      "id": "adrenergic-transmission",
+      "name": "Adrenergic transmission",
+      "color": "magenta",
+      "fact": "Most sympathetic postganglionic neurons release norepinephrine, and the adrenal medulla adds circulating epinephrine. The receptor sets the effect: α₁ constricts vessels, α₂ curbs further transmitter release, β₁ speeds and strengthens the heart, and β₂ relaxes airway and vascular smooth muscle.",
+      "termInfo": {
+        "epinephrine": {
+          "text": "The chief hormone of the adrenal medulla, acting on α and β receptors about equally. Also called adrenaline.",
+          "links": [
+            {
+              "href": "wiki:Adrenaline"
+            }
+          ]
+        },
+        "norepinephrine": {
+          "text": "The transmitter of most sympathetic postganglionic neurons; it acts mainly on α receptors and less on β.",
+          "links": [
+            {
+              "href": "wiki:Norepinephrine"
+            }
+          ]
+        },
+        "α₁ receptor": {
+          "text": "Contracts smooth muscle in blood vessels, sphincters, and the iris dilator. Guyton writes alpha₁.",
+          "links": [
+            {
+              "href": "wiki:Alpha-1 adrenergic receptor"
+            }
+          ]
+        },
+        "α₂ receptor": {
+          "text": "Inhibits norepinephrine release from the nerve ending that carries it, and lowers sympathetic outflow from the brainstem.",
+          "links": [
+            {
+              "href": "wiki:Alpha-2 adrenergic receptor"
+            }
+          ]
+        },
+        "β₁ receptor": {
+          "text": "Raises heart rate and the force of contraction, and triggers renin release in the kidney.",
+          "links": [
+            {
+              "href": "wiki:Beta-1 adrenergic receptor"
+            }
+          ]
+        },
+        "β₂ receptor": {
+          "text": "Relaxes smooth muscle, widening the airways and dilating vessels in skeletal muscle.",
+          "links": [
+            {
+              "href": "wiki:Beta-2 adrenergic receptor"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Adrenergic receptor"
+          }
+        ]
+      },
+      "seeds": [
+        "norepinephrine",
+        "epinephrine"
+      ],
+      "floatingTerms": [
+        "α₁ receptor",
+        "α₂ receptor",
+        "β₁ receptor",
+        "β₂ receptor"
+      ],
+      "terms": [
+        "norepinephrine",
+        "epinephrine",
+        "α₁ receptor",
+        "α₂ receptor",
+        "β₁ receptor",
+        "β₂ receptor"
+      ]
+    },
+    {
+      "id": "tone-and-reflex-control",
+      "name": "Tone and reflex control",
+      "color": "olive",
+      "fact": "Both divisions fire continuously at a low rate, so a single division can raise or lower an organ's activity. Visceral afferent fibers feed autonomic reflexes integrated in the spinal cord, brainstem, and hypothalamus. An organ that loses its nerve supply develops denervation supersensitivity to circulating transmitter.",
+      "termInfo": {
+        "autonomic reflex": "A reflex whose motor arm is autonomic, such as the baroreceptor reflex or emptying of the bladder.",
+        "autonomic tone": "The steady background firing of both divisions, about one-half to two impulses a second, which lets one division adjust an organ up or down.",
+        "denervation supersensitivity": "The heightened response of an organ to its transmitter in the weeks after its autonomic nerves are cut, caused mainly by an increase in receptors.",
+        "hypothalamus": {
+          "text": "The brain region above the brainstem that coordinates autonomic output with temperature, feeding, and emotion.",
+          "links": [
+            {
+              "href": "wiki:Hypothalamus"
+            }
+          ]
+        },
+        "visceral afferent fibers": {
+          "text": "Sensory fibers that report stretch, pressure, and chemistry from the internal organs to the spinal cord and brainstem: the input side of autonomic reflexes.",
+          "links": [
+            {
+              "href": "wiki:General visceral afferent fiber"
+            }
+          ]
+        }
+      },
+      "seeds": [
+        "autonomic tone",
+        "autonomic reflex"
+      ],
+      "floatingTerms": [
+        "visceral afferent fibers",
+        "hypothalamus",
+        "denervation supersensitivity"
+      ],
+      "terms": [
+        "autonomic tone",
+        "autonomic reflex",
+        "visceral afferent fibers",
+        "hypothalamus",
+        "denervation supersensitivity"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "dual-innervation",
+      "term": "dual innervation",
+      "clusters": [
+        "sympathetic-division",
+        "parasympathetic-division"
+      ],
+      "fact": "Most organs receive both sympathetic and parasympathetic fibers, usually with opposing effects, so the balance between the two sets the organ's activity. The vagus nerve slows the heart while sympathetic fibers speed and strengthen it.",
+      "info": "Supply of one organ by both autonomic divisions.",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "parasympathetic-division": "vagus nerve"
+      }
+    },
+    {
+      "id": "adrenal-medulla",
+      "term": "adrenal medulla",
+      "clusters": [
+        "sympathetic-division",
+        "adrenergic-transmission"
+      ],
+      "fact": "The adrenal medulla is a modified sympathetic ganglion. Preganglionic fibers end directly on its chromaffin cells, which release about 80 percent epinephrine and 20 percent norepinephrine into the blood, extending sympathetic effects for minutes to every cell with adrenergic receptors.",
+      "info": {
+        "text": "The inner part of the adrenal gland, made of chromaffin cells that secrete epinephrine and norepinephrine into the blood.",
+        "links": [
+          {
+            "href": "wiki:Adrenal medulla"
+          }
+        ]
+      },
+      "idealTerms": {
+        "adrenergic-transmission": "epinephrine"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "sympathetic-division",
+        "to": "adrenergic-transmission"
+      }
+    },
+    {
+      "id": "sweat-glands",
+      "term": "sweat glands",
+      "clusters": [
+        "sympathetic-division",
+        "cholinergic-transmission"
+      ],
+      "fact": "Sweat glands are sympathetic targets whose postganglionic fibers release acetylcholine onto muscarinic receptors, so atropine blocks sympathetic sweating.",
+      "info": {
+        "text": "The eccrine glands of the skin, which cool the body by secreting sweat.",
+        "links": [
+          {
+            "href": "wiki:Sweat gland"
+          }
+        ]
+      },
+      "idealTerms": {
+        "cholinergic-transmission": "muscarinic receptor"
+      }
+    },
+    {
+      "id": "ganglionic-transmission",
+      "term": "ganglionic transmission",
+      "clusters": [
+        "sympathetic-division",
+        "parasympathetic-division",
+        "cholinergic-transmission"
+      ],
+      "fact": "In both divisions the preganglionic ending releases acetylcholine onto nicotinic receptors on the postganglionic neuron. Because the ganglionic synapse is shared, a drug that blocks it shuts down sympathetic and parasympathetic output together.",
+      "info": {
+        "text": "The relay from preganglionic to postganglionic neuron inside an autonomic ganglion.",
+        "links": [
+          {
+            "href": "wiki:Autonomic ganglion"
+          }
+        ]
+      },
+      "idealTerms": {
+        "sympathetic-division": "sympathetic chain",
+        "parasympathetic-division": "terminal ganglia",
+        "cholinergic-transmission": "nicotinic receptor"
+      }
+    },
+    {
+      "id": "vagal-tone",
+      "term": "vagal tone",
+      "clusters": [
+        "parasympathetic-division",
+        "tone-and-reflex-control"
+      ],
+      "fact": "Continuous vagal firing holds the resting heart near 70 beats a minute, below the roughly 100 a minute the sinoatrial node sets on its own, so withdrawing vagal tone is the heart's quickest way to speed up.",
+      "info": {
+        "text": "The steady parasympathetic drive the vagus nerve exerts, most familiar at the heart.",
+        "links": [
+          {
+            "href": "wiki:Vagal tone"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "parasympathetic-division": "vagus nerve",
+        "tone-and-reflex-control": "autonomic tone"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "cholinergic-sympathetic-targets",
+      "prompt": "Which sympathetic targets are stimulated by acetylcholine?",
+      "explanation": "Most sympathetic targets receive norepinephrine from postganglionic fibers. These two receive acetylcholine: sweat glands from cholinergic postganglionic fibers, the adrenal medulla straight from preganglionic ones.",
+      "targets": [
+        "sweat glands",
+        "adrenal medulla"
+      ],
+      "reasons": {
+        "adrenal medulla": "Preganglionic fibers end directly on its chromaffin cells and release acetylcholine onto nicotinic receptors.",
+        "sweat glands": "Their sympathetic postganglionic fibers release acetylcholine onto muscarinic receptors."
+      }
+    },
+    {
+      "id": "ganglionic-blockade",
+      "prompt": "Which concepts does a ganglionic blocking drug act on directly?",
+      "explanation": "Drugs such as hexamethonium block nicotinic receptors at the ganglionic synapse, which both divisions share. The adrenal medulla is stimulated through the same receptor, so its secretion falls too.",
+      "targets": [
+        "nicotinic receptor",
+        "ganglionic transmission",
+        "adrenal medulla"
+      ],
+      "reasons": {
+        "adrenal medulla": "Its chromaffin cells receive preganglionic acetylcholine through nicotinic receptors, just as postganglionic neurons do.",
+        "ganglionic transmission": "The relay it interrupts in both divisions at once.",
+        "nicotinic receptor": "The receptor the drug occupies."
+      }
+    },
+    {
+      "id": "beta-blocker-airways",
+      "prompt": "Which receptor's blockade by a nonselective beta blocker can tighten the airways?",
+      "explanation": "A nonselective beta blocker blocks β₁ and β₂ alike. Losing β₂ relaxation of bronchial smooth muscle can provoke bronchospasm in asthma, which is why β₁-selective drugs exist.",
+      "targets": [
+        "β₂ receptor"
+      ],
+      "reasons": {
+        "β₂ receptor": "It relaxes bronchial smooth muscle, so blocking it leaves constriction unopposed."
+      }
+    },
+    {
+      "id": "clonidine",
+      "prompt": "Which receptor does clonidine stimulate to lower blood pressure?",
+      "explanation": "Clonidine stimulates α₂ receptors in the brainstem, reducing sympathetic outflow to the heart and vessels.",
+      "targets": [
+        "α₂ receptor"
+      ],
+      "reasons": {
+        "α₂ receptor": "Its activation curbs sympathetic outflow and norepinephrine release."
+      }
+    },
+    {
+      "id": "atropine-heart",
+      "prompt": "Which concept does atropine abolish to speed the resting heart?",
+      "explanation": "Atropine blocks the muscarinic receptors through which acetylcholine from the vagus slows the sinoatrial node. With that steady brake gone, the heart rises toward its intrinsic rate of about 100 a minute.",
+      "targets": [
+        "vagal tone"
+      ],
+      "reasons": {
+        "vagal tone": "It is the continuous vagal brake that holds the resting rate near 70."
+      }
+    },
+    {
+      "id": "transplanted-heart",
+      "prompt": "Which concepts make a transplanted heart overrespond to circulating epinephrine?",
+      "explanation": "A transplanted heart has no autonomic nerves, so it beats near its intrinsic rate and speeds up during exercise only as adrenal hormones reach it. Its receptors multiply after denervation, amplifying that hormonal drive.",
+      "targets": [
+        "denervation supersensitivity",
+        "β₁ receptor"
+      ],
+      "reasons": {
+        "denervation supersensitivity": "Cut off from its nerves, the heart adds receptors and becomes more sensitive to circulating transmitter.",
+        "β₁ receptor": "The receptor through which epinephrine raises the heart's rate and force."
+      }
+    },
+    {
+      "id": "whole-body-sympathetic",
+      "prompt": "Which concepts let the sympathetic division act on the whole body at once?",
+      "explanation": "Divergence in the chain lets one signal fire postganglionic neurons at many levels together, and the adrenal medulla broadcasts the response through the blood to cells with no sympathetic nerve supply.",
+      "targets": [
+        "mass discharge",
+        "sympathetic chain",
+        "adrenal medulla"
+      ],
+      "reasons": {
+        "adrenal medulla": "Its hormones carry the response wherever blood flows.",
+        "mass discharge": "The division's capacity to fire as a whole.",
+        "sympathetic chain": "Preganglionic fibers branch up and down it to many postganglionic neurons."
+      }
+    },
+    {
+      "id": "bladder-reflex",
+      "prompt": "Which nerve fibers carry the bladder-emptying reflex?",
+      "explanation": "Stretch of the filling bladder is reported to the sacral cord, and parasympathetic fibers return to contract the bladder wall. Higher centers can delay or permit the reflex.",
+      "targets": [
+        "visceral afferent fibers",
+        "pelvic splanchnic nerves"
+      ],
+      "reasons": {
+        "pelvic splanchnic nerves": "They carry the parasympathetic motor signal back to contract the bladder.",
+        "visceral afferent fibers": "They carry the stretch signal from the bladder wall into the sacral cord."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "how-neurons-fire-and-signal",
+        "reason": "Review the action potential and synaptic release that every autonomic neuron uses."
+      },
+      {
+        "id": "regulating-arterial-pressure",
+        "reason": "See sympathetic and vagal output at work in the baroreceptor reflex."
+      },
+      {
+        "id": "rhythmic-excitation-of-the-heart",
+        "reason": "Meet the sinoatrial node whose rate vagal and sympathetic fibers adjust."
+      },
+      {
+        "id": "mechanics-of-breathing",
+        "reason": "Follow β₂ relaxation and vagal constriction into airway resistance."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The body's automatic controls",
+    "summary": "How two autonomic divisions built on one plan reach the organs, which transmitters and receptors set their effects, and how tone and reflexes keep them adjusted.",
+    "estimatedMinutes": 7,
+    "content": {
+      "text": "Your heart speeds when you stand, your pupils narrow in bright light, your gut moves food along, and your bladder fills and empties, all without a decision. The autonomic nervous system directs this work. It is the motor system for heart muscle, smooth muscle, and glands, and it runs on a different plan from the nerves that move the skeleton.\r\n\r\n## Two divisions, one plan\r\n\r\nA skeletal muscle is reached by a single motor neuron running from the spinal cord. An autonomic target is reached by two neurons in series. The first, the preganglionic neuron, has its cell body in the brainstem or spinal cord. The second, the postganglionic neuron, has its cell body in a ganglion outside the central nervous system and sends its fiber on to the organ. The handoff in the ganglion, **ganglionic transmission**, works the same way throughout the system: the preganglionic ending releases acetylcholine onto nicotinic receptors.\r\n\r\nThe two divisions differ in where they leave the central nervous system and where their ganglia sit. Sympathetic fibers emerge only from the thoracic and first lumbar segments of the cord, the **thoracolumbar outflow**. Most end in the **sympathetic chain**, a row of ganglia beside the vertebral column; others pass through it to **prevertebral ganglia** in the abdomen, in front of the aorta. Because these ganglia sit close to the cord, sympathetic preganglionic fibers are short and postganglionic fibers long.\r\n\r\nParasympathetic fibers leave from the brainstem and the sacral cord, the **craniosacral outflow**. About three-quarters of them travel in the **vagus nerve**, which reaches the heart, lungs, and most of the gut. The sacral fibers travel in the **pelvic splanchnic nerves** to the bladder, lower bowel, and genitals. Parasympathetic preganglionic fibers run nearly all the way to their targets and end in **terminal ganglia** on or in the organ wall, so their postganglionic fibers are very short.\r\n\r\n## Broad and local responses\r\n\r\nThe anatomy shapes the response. Each sympathetic preganglionic fiber branches to many postganglionic neurons, often at several levels of the chain, so the division can fire as a whole, in what Guyton calls **mass discharge**. In alarm this produces the **fight-or-flight response**: a faster and stronger heartbeat, higher blood pressure, wider airways, more blood to working muscle, glucose released into the blood, and digestion put on hold. Parasympathetic actions are more discrete, such as slowing the heart, narrowing a pupil, or stimulating gut secretion, and together they favor the **rest-and-digest** work of feeding and recovery.\r\n\r\nMost organs receive both divisions, and their effects usually oppose each other. This **dual innervation** lets either division push an organ in its own direction: the vagus slows the heart, while sympathetic fibers speed and strengthen it.\r\n\r\n## Transmitters and receptors\r\n\r\nEvery preganglionic neuron, and nearly every parasympathetic postganglionic neuron, releases **acetylcholine**. The receptor decides what it does. **Nicotinic receptors** are ligand-gated ion channels that carry the fast handoff in every autonomic ganglion. **Muscarinic receptors** are coupled to G proteins; they sit on the organs that parasympathetic fibers reach and can excite or inhibit depending on the tissue.\r\n\r\nMost sympathetic postganglionic neurons release **norepinephrine** instead, and its effect depends on which adrenergic receptor the target carries. **α₁ receptors** contract smooth muscle in blood vessels and sphincters. **α₂ receptors** on the nerve endings themselves curb further norepinephrine release, and in the brainstem they reduce sympathetic outflow. **β₁ receptors** speed the heart and strengthen its contraction. **β₂ receptors** relax smooth muscle, widening the airways and dilating vessels in skeletal muscle. **Epinephrine** acts on α and β receptors about equally, while norepinephrine acts mainly on α receptors.\r\n\r\nA few sympathetic targets break the pattern. The **sweat glands** receive sympathetic fibers that release acetylcholine onto muscarinic receptors.\r\n\r\n## The adrenal medulla\r\n\r\nThe **adrenal medulla** is a sympathetic ganglion turned gland. Preganglionic fibers end directly on its chromaffin cells, which behave like postganglionic neurons without axons: when stimulated, they release hormone into the blood, about 80 percent epinephrine and 20 percent norepinephrine. The blood clears these hormones slowly, so their effects outlast direct nerve stimulation several times over, and they reach cells that have no sympathetic nerve supply.\r\n\r\n## Tone, reflexes, and central control\r\n\r\nBoth divisions fire continuously at a low rate. This **autonomic tone** lets a single division raise or lower an organ's activity by firing more or less. **Vagal tone** is the clearest example: steady vagal firing holds the resting heart near 70 beats a minute, well below the roughly 100 that the sinoatrial node produces on its own.\r\n\r\nMuch of this firing is adjusted by **autonomic reflexes**. **Visceral afferent fibers** carry information from the organs, such as stretch of the bladder wall, pressure in the arteries, or distension of the gut, to the spinal cord and brainstem, which send autonomic signals back. The bladder empties this way: stretch signals enter the sacral cord, and parasympathetic outflow returns through the pelvic splanchnic nerves to contract the bladder wall. Above the reflex centers, the **hypothalamus** coordinates autonomic output with temperature regulation, feeding, and emotion, and it can launch the whole sympathetic alarm.\r\n\r\nAn organ that loses its autonomic nerve supply adapts. Within a week or two its receptors multiply, and it responds more strongly to circulating transmitter than it did before. This is **denervation supersensitivity**, and it is one reason a transplanted heart, which has no autonomic nerves, still speeds up during exercise as adrenal hormones reach it."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  }
+}
