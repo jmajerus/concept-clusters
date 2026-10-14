@@ -118,7 +118,7 @@ still publish a category, a catalogue, or a shelf reassignment;
 `reassign_puzzle_classifications` writes the shelf onto the live puzzle and
 leaves the rest of that published document in place.
 `/admin/drafts` shows whether each id is in the GitHub static snapshot’s
-`puzzles/manifest.js` joined with the last freeze (assuming that freeze
+`puzzles/index.js` registry joined with the last freeze (assuming that freeze
 merges). **Refresh from GitHub** on `/admin` (and on the puzzles list)
 fetches origin into that local snapshot without freezing. It prefers the
 GitHub API when configured, so it does not need to write `.git`. If it

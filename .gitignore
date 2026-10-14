@@ -11,3 +11,6 @@ node_modules/
 # Localflare generated files
 .localflare/
 tools/wiki-link-cache.json
+
+# Generated from puzzles/index.js at deploy, dev-server start, and test time.
+puzzles/manifest.js

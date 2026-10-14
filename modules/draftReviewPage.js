@@ -853,10 +853,10 @@ function renderPuzzlePathBadges(item, { detail = false } = {}) {
 
 function listIntro(variant) {
   const snapshotSource = variant === "local"
-    ? `The GitHub snapshot column is origin’s <code>puzzles/manifest.js</code>
+    ? `The GitHub snapshot column is origin’s <code>puzzles/index.js</code>
        joined with the last freeze patch (assuming it merges).
        Refresh from GitHub on Admin updates that column.`
-    : `The GitHub snapshot column is origin’s <code>puzzles/manifest.js</code>.`;
+    : `The GitHub snapshot column is origin’s <code>puzzles/index.js</code>.`;
   const playHelp = variant === "local"
     ? `New puzzle opens a blank board. Play opens the working-copy preview.
        Layout opens layout authoring with the board settings. Catalogues are edited at

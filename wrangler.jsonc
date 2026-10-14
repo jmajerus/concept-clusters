@@ -9,6 +9,12 @@
   "name": "concept-clusters",
   "main": "src/worker.js",
   "compatibility_date": "2026-07-22",
+  // puzzles/manifest.js is generated, never committed: build it from the
+  // registry before the Worker (publicPlayService.js) and the site assets are
+  // bundled. Runs for deploy, versions upload, and dev alike.
+  "build": {
+    "command": "node tools/build-puzzle-manifest.mjs"
+  },
   "assets": {
     // Symlinked public tree, not the repo root: wrangler writes under
     // .wrangler/ and watching that from assets.directory "." restart-loops.

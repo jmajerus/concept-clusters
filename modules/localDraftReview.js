@@ -15,7 +15,7 @@
 // Freeze cues and GitHub snapshot membership describe the static copy.
 // D1 `submitted` is leftover PR-ledger state and is not shown. GitHub
 // snapshot membership comes from the Freeze snapshot: origin’s
-// puzzles/manifest.js joined with that freeze’s puzzle add/update, minus
+// puzzles/index.js joined with that freeze’s puzzle add/update, minus
 // remove, assuming the freeze merges.
 
 import { layoutAttention } from "./layoutAttention.js";

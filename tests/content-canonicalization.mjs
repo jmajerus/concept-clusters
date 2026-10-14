@@ -142,7 +142,8 @@ async function makeGitFixture({ bothSources = false, conflictingCanonical = fals
   await writeFile(join(modulesDir, "puzzleManifest.js"),
     "export function definePuzzle(_url, puzzle) { return puzzle; }\n");
   await writeFile(join(repositoryRoot, "puzzles", "index.js"),
-    "export const PUZZLES = [\n];\n");
+    'import canonicalizationFixture from "./fixture/canonicalization-fixture.js";\n\n' +
+    "export const PUZZLES = [\n  canonicalizationFixture\n];\n");
   const categories = {
     "Political Science": { slug: "political-science" },
     Philosophy: { slug: "philosophy" }
@@ -160,13 +161,10 @@ async function makeGitFixture({ bothSources = false, conflictingCanonical = fals
     "content/puzzles/canonicalization-fixture.ccpuzzle.json",
     "puzzles/fixture/canonicalization-fixture.js"
   ));
-  const manifestEntry = {
-    id: "canonicalization-fixture",
-    module: "./fixture/canonicalization-fixture.js"
-  };
+  // Deliberately stale, as an ignored manifest left from an older checkout
+  // would be: planning must rebuild it from the registry, not trust it.
   await writeFile(join(repositoryRoot, "puzzles", "manifest.js"),
-    `export const PUZZLE_MANIFEST = ${JSON.stringify([manifestEntry])};\n` +
-    "export const PUZZLE_MANIFEST_FAILURES = [];\n");
+    "export const PUZZLE_MANIFEST = [];\nexport const PUZZLE_MANIFEST_FAILURES = [];\n");
   const jsonLdPath = join(contentDir, "canonicalization-fixture.ccpuzzle.jsonld");
   const canonicalPath = join(contentDir, "canonicalization-fixture.ccpuzzle.json");
   await writeFile(jsonLdPath, formattedJson(interchange));

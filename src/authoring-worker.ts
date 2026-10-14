@@ -157,7 +157,7 @@ function createHostedContentService() {
   });
 }
 
-// Isolate-level cache of GitHub base-branch puzzles/manifest.js. Hosted
+// Isolate-level cache of GitHub base-branch puzzles/index.js. Hosted
 // authoring has no Freeze; this is the equivalent of the LAN snapshot.
 // A failed fetch stays null for this isolate so list/detail omit the badge.
 let hostedGithubProductionSnapshot:

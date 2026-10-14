@@ -42,7 +42,6 @@ import {
   writeLocalDevLease
 } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
-import { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES } from "../puzzles/manifest.js";
 
 const DEFAULT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const DEFAULT_HOST = "127.0.0.1";
@@ -314,9 +313,15 @@ export function formatDevTimestamp(when = new Date()) {
     `${sign}${pad(Math.floor(abs / 60))}${pad(abs % 60)}`;
 }
 
-function formatManifestCorpusLine() {
-  const count = PUZZLE_MANIFEST.length;
-  const skipped = PUZZLE_MANIFEST_FAILURES.length;
+// The player's puzzles/manifest.js is generated, never committed: build it
+// from the registry on disk before serving.
+async function preparePuzzleManifest(repositoryRoot) {
+  const { buildPuzzleManifest } = await import("../tools/build-puzzle-manifest.mjs");
+  const { entries, failures } = await buildPuzzleManifest({ repositoryRoot });
+  return { count: entries.length, skipped: failures.length };
+}
+
+function formatManifestCorpusLine({ count, skipped }) {
   const skippedNote = skipped
     ? `; ${skipped} omitted from manifest at build`
     : "";
@@ -347,12 +352,12 @@ function displayBaseUrl({ host, port, env = process.env, fallbackBase }) {
   return fallbackBase || `http://${host}:${port}`;
 }
 
-function printReady(base, extras = []) {
+function printReady(base, manifest, extras = []) {
   const lines = [
     `Started at ${formatDevTimestamp()}`,
     `Concept Clusters ready at ${base}`,
     `Play (D1 published documents): ${base}/`,
-    formatManifestCorpusLine(),
+    formatManifestCorpusLine(manifest),
     `Admin: ${base}/admin`,
     `Draft review: ${base}/admin/drafts`,
     `Catalogue editor: ${base}/admin/catalogues`,
@@ -504,6 +509,7 @@ export async function startLocalStaticDev({
   env = process.env
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
+  const manifest = await preparePuzzleManifest(repositoryRoot);
   const handler = withLocalAdminAuth(
     handleRequest || createLocalDevDraftHandler(repositoryRoot),
     { host, env }
@@ -531,7 +537,7 @@ export async function startLocalStaticDev({
 
   const fallbackBase = serverURL(server);
   const base = displayBaseUrl({ host, port: actualPort, fallbackBase });
-  printReady(base, authoringReadyExtras({ host, port: actualPort, repositoryRoot, env }));
+  printReady(base, manifest, authoringReadyExtras({ host, port: actualPort, repositoryRoot, env }));
 
   let stopping = false;
   const stop = () => {
@@ -637,6 +643,7 @@ export async function startLocalWorkerDev({
   env = process.env
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
+  const manifest = await preparePuzzleManifest(repositoryRoot);
   const handler = withLocalAdminAuth(
     handleRequest || createLocalDevDraftHandler(repositoryRoot),
     { host, env }
@@ -711,7 +718,7 @@ export async function startLocalWorkerDev({
     port: actualPort,
     fallbackBase: `http://${host}:${actualPort}`
   });
-  printReady(base, [
+  printReady(base, manifest, [
     `Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`,
     ...authoringReadyExtras({ host, port: actualPort, repositoryRoot, env })
   ]);

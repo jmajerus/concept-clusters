@@ -105,7 +105,7 @@ import mathFoundations from "./math/math-foundations.js";
     assert.equal(await loadOrHydrateGithubProductionManifest({ repositoryRoot: root, env }), null);
 
     mkdirSync(join(root, "puzzles", "science"), { recursive: true });
-    writeFileSync(join(root, "puzzles", "manifest.js"), manifestSource);
+    writeFileSync(join(root, "puzzles", "index.js"), indexSource);
     writeFileSync(join(root, "puzzles", "science", "energy-flow.js"), "export default {};\n");
     git(root, ["init"]);
     git(root, ["add", "."]);
@@ -171,7 +171,7 @@ import mathFoundations from "./math/math-foundations.js";
         if (args[0] === "fetch") {
           throw new Error("error: cannot open '.git/FETCH_HEAD': Permission denied");
         }
-        if (args[0] === "show") return manifestSource;
+        if (args[0] === "show") return indexSource;
         if (args[0] === "rev-parse") return "deadbeef\n";
         throw new Error(args.join(" "));
       }
@@ -201,7 +201,7 @@ import mathFoundations from "./math/math-foundations.js";
       github: {
         baseBranch: "main",
         getBranchHead: async () => ({ commitSha: "abc" }),
-        readFile: async path => path === "puzzles/manifest.js" ? manifestSource : ""
+        readFile: async path => path === "puzzles/index.js" ? indexSource : ""
       }
     });
     assert.equal(fromApi.fetchedVia, "github-api");
@@ -210,7 +210,7 @@ import mathFoundations from "./math/math-foundations.js";
     const fromClient = await snapshotGithubProductionManifestFromClient({
       baseBranch: "main",
       getBranchHead: async () => ({ commitSha: "abc" }),
-      readFile: async path => path === "puzzles/manifest.js" ? manifestSource : ""
+      readFile: async path => path === "puzzles/index.js" ? indexSource : ""
     });
     assert.equal(fromClient.ref, "main");
     assert.deepEqual(fromClient.ids, ["energy-flow", "math-foundations"]);
