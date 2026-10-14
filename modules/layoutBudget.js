@@ -10,7 +10,7 @@
 
 const BUDGETS = {
   standard: {
-    timeLimitMs: 5000,
+    timeLimitMs: 8000,
     graph: { clusterCap: 7, rotations: 12, scales: [0.88, 1] },
     circle: { rotationsPerCluster: 4, minRotations: 8, scaleSteps: [0.82, 0.92, 1, 1.15, 1.3, 1.45, 1.6, 1.75] },
     star: { exhaustiveClusters: 5, rotationsPerSlot: 1, offsetFractions: [-0.7, -0.35, 0.35, 0.7], repairMoves: 8 }

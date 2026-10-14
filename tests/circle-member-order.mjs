@@ -107,4 +107,21 @@ export async function run() {
   const shown = ["t3", "t0", "t1", "t2", "t4", "t5"];
   const nearlyVertical = [{ term: "t3", point: { x: 2, y: -400 } }];
   assert.equal(choose({ arms: nearlyVertical, current: shown }), shown);
+
+  // Two lines leaving one side: the target whose bridge is higher takes
+  // the higher row, so the lines do not cross, even when the crossed order
+  // hides no more line.
+  const crossed = ["t0", "t3", "t1", "t2", "t4", "t5"];
+  const pair = [
+    { term: "t4", point: { x: 500, y: -300 } },
+    { term: "t3", point: { x: 500, y: 300 } }
+  ];
+  const uncrossed = choose({ arms: pair, current: crossed });
+  assert.ok(uncrossed.indexOf("t4") < uncrossed.indexOf("t3"), `lines still cross: ${uncrossed}`);
+
+  // Equal hidden line: a target whose bridge is below takes the bottom row
+  // when the circle fits it there.
+  const below = [{ term: "t2", point: { x: 300, y: 500 } }];
+  const atRow = ["t0", "t1", "t3", "t4", "t2", "t5"];
+  assert.equal(choose({ arms: below, current: atRow }).at(-1), "t2");
 }
