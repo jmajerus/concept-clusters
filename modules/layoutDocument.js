@@ -283,6 +283,43 @@ export function layoutBoardSetting(puzzle, key) {
   return puzzle?.board?.[key];
 }
 
+/**
+ * An older puzzle document with its `board` settings moved into the layout:
+ * each one the layout does not already set (an explicit null included) is
+ * copied in, and the document loses `board`. That is exactly what
+ * layoutBoardSetting reads, so play does not change. Lifted settings carry
+ * no save stamp, so any later save outranks them when a working copy is
+ * published, and no source, which reads as an author's.
+ * Returns the inputs unchanged when the document has no `board`.
+ */
+export function liftLegacyBoard(document, layout) {
+  if (!document || typeof document !== "object" || !Object.hasOwn(document, "board")) {
+    return { document, layout, lifted: [] };
+  }
+  const { board: legacy, ...rest } = document;
+  const current = normalizeLayoutDocument(layout);
+  const board = { ...(current?.board || {}) };
+  const lifted = LAYOUT_BOARD_KEYS.filter(key =>
+    legacy && typeof legacy === "object" && legacy[key] != null && !Object.hasOwn(board, key)
+  );
+  if (!lifted.length) return { document: rest, layout, lifted };
+  lifted.forEach(key => { board[key] = legacy[key]; });
+  return {
+    document: rest,
+    layout: {
+      schemaVersion: LAYOUT_DOCUMENT_SCHEMA_VERSION,
+      modes: { ...(current?.modes || {}) },
+      board
+    },
+    lifted
+  };
+}
+
+/** A document without the `board` settings that now belong to its layout. */
+export function withoutLegacyBoard(document) {
+  return liftLegacyBoard(document, null).document;
+}
+
 // The layout document after changing board settings: `changes` keys are
 // merged into the existing settings (undefined removes a key).
 export function layoutDocumentWithBoard(changes, existing = null) {

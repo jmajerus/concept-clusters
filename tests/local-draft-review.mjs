@@ -981,7 +981,9 @@ export async function run() {
       });
       const changed = await comparisonRow();
       assert.match(changed, /data-unpublished-changes="1"/);
-      const domain = patch.title ? "content" : patch.provenance ? "provenance" : "administration";
+      // An older document's board settings read as layout, where play reads
+      // them; publishing lifts them there, so the row then matches.
+      const domain = patch.title ? "content" : patch.provenance ? "provenance" : "layout";
       assert.match(changed, new RegExp(`data-change-domain="${domain}"`));
       assert.equal((changed.match(/data-change-domain=/g) || []).length, 1);
       await contentDocuments.publish({
@@ -996,7 +998,13 @@ export async function run() {
     });
     await draftStore.saveLayout({ draftId: comparisonId, layout: comparisonLayout });
     assert.match(await comparisonRow(), /data-change-domain="layout"/);
-    await contentDocuments.saveLayout({ id: comparisonId, layout: comparisonLayout });
+    // Saved the way the layout route saves a mode: the board settings the
+    // publish lifted into the published layout stay.
+    const publishedForLayout = await contentDocuments.getPublished({ kind: "puzzle", id: comparisonId });
+    await contentDocuments.saveLayout({
+      id: comparisonId,
+      layout: layoutDocumentForMode("star", comparisonLayout.modes.star, publishedForLayout.layout)
+    });
     assert.match(await comparisonRow(), /data-unpublished-changes="0"/);
     // The Layouts column reads the published layout for a published-only row
     // and the working copy's layout once a working copy exists.

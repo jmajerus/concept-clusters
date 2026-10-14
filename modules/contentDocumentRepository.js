@@ -13,6 +13,7 @@ import {
 } from "./authoringDomains.js";
 import {
   LayoutConflictError,
+  liftLegacyBoard,
   parseLayoutDocument,
   serializeLayoutDocument
 } from "./layoutDocument.js";
@@ -110,6 +111,19 @@ function publishedRecord(row) {
 
 function documentForPublishedStorage(kind, document) {
   return publicationDocument(kind, document);
+}
+
+// A stored puzzle is canonical: board settings an older document carries
+// move into its layout (liftLegacyBoard), so play reads the same values and
+// no stored document keeps `board`.
+function canonicalPuzzleWrite(kind, document, layoutJson) {
+  if (kind !== "puzzle") return { document, layoutJson };
+  const layout = layoutJson ? parseLayoutDocument(layoutJson, "Stored layout") : null;
+  const lifted = liftLegacyBoard(document, layout);
+  return {
+    document: lifted.document,
+    layoutJson: lifted.lifted.length ? serializeLayoutDocument(lifted.layout) : layoutJson
+  };
 }
 
 function titleOf(document) {
@@ -786,12 +800,13 @@ export class D1ContentDocumentRepository {
     for (const item of items) {
       assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
       assertDraftId(item.id);
-      const sourceDocument = documentForPublishedStorage(item.kind, item.document);
+      const { document: sourceDocument, layoutJson } = canonicalPuzzleWrite(
+        item.kind,
+        documentForPublishedStorage(item.kind, item.document),
+        item.kind === "puzzle" ? serializeLayoutDocument(item.layout) : null
+      );
       const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
       const contentHash = draftContentHash(documentJson);
-      const layoutJson = item.kind === "puzzle"
-        ? serializeLayoutDocument(item.layout)
-        : null;
       statements.push(
         this.database.prepare(`
           INSERT OR IGNORE INTO published_documents (
@@ -841,7 +856,15 @@ export class D1ContentDocumentRepository {
     const existing = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? AND id = ?
     `).bind(kind, id).first();
-    const sourceDocument = documentForPublishedStorage(kind, document);
+    const { document: sourceDocument, layoutJson } = canonicalPuzzleWrite(
+      kind,
+      documentForPublishedStorage(kind, document),
+      kind === "puzzle"
+        ? layout === undefined
+          ? existing?.layout_json || null
+          : serializeLayoutDocument(layout)
+        : null
+    );
     const documentJson = serializeDraftDocument({ ...sourceDocument, id });
     const contentHash = draftContentHash(documentJson);
     const previousDocument = existing?.document
@@ -858,11 +881,6 @@ export class D1ContentDocumentRepository {
     if (expectedRevision != null && Number(existing?.revision) !== expectedRevision) {
       throw new PublishedRevisionConflictError(kind, id);
     }
-    const layoutJson = kind === "puzzle"
-      ? layout === undefined
-        ? existing?.layout_json || null
-        : serializeLayoutDocument(layout)
-      : null;
     const snapshot = {
       kind,
       id,
@@ -1158,7 +1176,11 @@ export function createMemoryContentDocumentRepository() {
       for (const item of items) {
         assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
         assertDraftId(item.id);
-        const sourceDocument = documentForPublishedStorage(item.kind, item.document);
+        const { document: sourceDocument, layoutJson } = canonicalPuzzleWrite(
+          item.kind,
+          documentForPublishedStorage(item.kind, item.document),
+          item.kind === "puzzle" ? serializeLayoutDocument(item.layout) : null
+        );
         const key = publishedKey(item.kind, item.id);
         if (published.has(key)) continue;
         const documentJson = serializeDraftDocument({ ...sourceDocument, id: item.id });
@@ -1177,9 +1199,7 @@ export function createMemoryContentDocumentRepository() {
           last_agent_reviewed_at: now,
           last_human_reviewed_at: null,
           withdrawn_at: null,
-          layout_json: item.kind === "puzzle"
-            ? serializeLayoutDocument(item.layout)
-            : null,
+          layout_json: layoutJson,
           cued_for_freeze_at: now,
           cued_for_freeze_by: "git-seed"
         };
@@ -1200,7 +1220,15 @@ export function createMemoryContentDocumentRepository() {
       const now = new Date().toISOString();
       const key = publishedKey(kind, id);
       const existing = published.get(key);
-      const sourceDocument = documentForPublishedStorage(kind, document);
+      const { document: sourceDocument, layoutJson } = canonicalPuzzleWrite(
+        kind,
+        documentForPublishedStorage(kind, document),
+        kind === "puzzle"
+          ? layout === undefined
+            ? existing?.layout_json || null
+            : serializeLayoutDocument(layout)
+          : null
+      );
       const documentJson = serializeDraftDocument({ ...sourceDocument, id });
       const previousDocument = existing?.document
         ? parsedJson(existing.document, "Published document")
@@ -1217,11 +1245,6 @@ export function createMemoryContentDocumentRepository() {
         throw new PublishedRevisionConflictError(kind, id);
       }
       const nextRevision = existing ? Number(existing.revision) + 1 : 1;
-      const layoutJson = kind === "puzzle"
-        ? layout === undefined
-          ? existing?.layout_json || null
-          : serializeLayoutDocument(layout)
-        : null;
       const revisionKey = `${key}:${nextRevision}`;
       const contentHash = draftContentHash(documentJson);
       if (revisions.has(revisionKey)) {
