@@ -238,11 +238,37 @@ export function mergePublishLayout(draftLayout, publishedLayout) {
   };
 }
 
-// Board settings that belong to layout rather than to puzzle content. They
-// live at the top of the layout document, beside the per-mode layouts, and
-// save and publish the same way. `null` is an explicit "use the default",
-// which overrides a value an older puzzle document still carries.
-export const LAYOUT_BOARD_KEYS = Object.freeze(["sizeFactor", "starFreeStrip"]);
+// Board settings that belong to layout rather than to puzzle content: every
+// control on the layout page. They live at the top of the layout document,
+// beside the per-mode layouts, and save and publish the same way. `null` is
+// an explicit "use the default", which overrides a value an older puzzle
+// document still carries.
+export const LAYOUT_BOARD_KEYS = Object.freeze([
+  "sizeFactor",
+  "starFreeStrip",
+  "bridgePreconnect",
+  "lensFlowTrace",
+  "lensRevealCue"
+]);
+
+// The board settings that change play rather than drawing. They save on a
+// working copy and reach players by publishing it, never by a write to a
+// published puzzle's layout.
+export const LAYOUT_EXPERIMENT_KEYS = Object.freeze(["bridgePreconnect", "lensFlowTrace", "lensRevealCue"]);
+
+/**
+ * Experiment settings that `next` changes from `current`. Unset and null
+ * both mean the default, so moving between them is no change.
+ */
+export function changedExperimentKeys(next, current) {
+  const nextBoard = normalizeLayoutDocument(next)?.board || {};
+  const currentBoard = normalizeLayoutDocument(current)?.board || {};
+  return LAYOUT_EXPERIMENT_KEYS.filter(key => (nextBoard[key] ?? null) !== (currentBoard[key] ?? null));
+}
+
+export function experimentOnPublishedError(keys) {
+  return `${keys.join(", ")} change${keys.length === 1 ? "s" : ""} play, so ${keys.length === 1 ? "it saves" : "they save"} on a working copy; open one and publish it.`;
+}
 
 /**
  * A board setting for a runtime puzzle: the layout document's value when it
@@ -296,8 +322,11 @@ export function autoBoardConflict(incoming, existing) {
     : null;
 }
 
-/** Shape problems in a layout document's board settings. */
-export function boardSettingsErrors(board, canonicalSizeFactor) {
+/**
+ * Shape problems in a layout document's board settings. The two checks are
+ * passed in so this module stays free of the modules that read it.
+ */
+export function boardSettingsErrors(board, canonicalSizeFactor, isLensRevealCue) {
   if (board == null) return [];
   if (typeof board !== "object" || Array.isArray(board)) return ["board settings must be an object"];
   const errors = [];
@@ -309,8 +338,13 @@ export function boardSettingsErrors(board, canonicalSizeFactor) {
   if (board.sizeFactor != null && canonicalSizeFactor(board.sizeFactor) == null) {
     errors.push("board sizeFactor must be a 5% step from 0.75 to 1.25");
   }
-  if (board.starFreeStrip != null && typeof board.starFreeStrip !== "boolean") {
-    errors.push("board starFreeStrip must be true, false, or null");
+  ["starFreeStrip", "bridgePreconnect", "lensFlowTrace"].forEach(key => {
+    if (board[key] != null && typeof board[key] !== "boolean") {
+      errors.push(`board ${key} must be true, false, or null`);
+    }
+  });
+  if (board.lensRevealCue != null && !isLensRevealCue(board.lensRevealCue)) {
+    errors.push("board lensRevealCue must be a known cue or null");
   }
   if (board.source != null && !["author", "auto"].includes(board.source)) {
     errors.push('board source must be "author" or "auto"');

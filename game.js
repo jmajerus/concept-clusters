@@ -49,7 +49,6 @@ import { layoutPassStatus, saveLayout, saveLayoutBoard, startLayoutPass } from "
 import { layoutDocumentWithBoard } from "./modules/layoutDocument.js";
 import { recentreLayoutDocument, recentreSavedModes } from "./modules/layoutRecentre.js";
 import { classifyDrag, isCrafted, recordDrag } from "./modules/playerLayoutEffort.js";
-import { saveBoardFlags } from "./modules/boardAdministrationApi.js";
 import { saveSiteSettings } from "./modules/siteSettingsApi.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
@@ -2218,9 +2217,6 @@ layoutAuthoring = createLayoutAuthoringController({
   showSolution,
   saveLayout: playSource === "d1"
     ? args => saveLayout({ ...args, draftId: overlayDraftId })
-    : null,
-  saveBoardFlags: playSource === "d1"
-    ? args => saveBoardFlags({ ...args, draftId: overlayDraftId })
     : null,
   saveLayoutBoard: playSource === "d1"
     ? args => saveLayoutBoard({ ...args, draftId: overlayDraftId })

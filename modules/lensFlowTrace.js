@@ -2,8 +2,9 @@ import {
   TOWARD_BRIDGE,
   bridgeArmDirections
 } from "./bridgeDirection.js";
+import { layoutBoardSetting } from "./layoutDocument.js";
 
-// Experimental (board.lensFlowTrace): when a lens's answer is revealed,
+// Experimental layout setting (lensFlowTrace; see layoutBoardSetting): when a lens's answer is revealed,
 // run one pulse along each directed bridge that answer names, in the
 // bridge's own direction. It plays a few rounds with the explanation --
 // one pass over several edges is too quick to follow -- and then leaves
@@ -18,7 +19,7 @@ const REPEATS = 3;
 const ROUND_PAUSE_MS = 500;
 
 export function lensFlowTraceEnabled(puzzle) {
-  return puzzle?.board?.lensFlowTrace === true;
+  return layoutBoardSetting(puzzle, "lensFlowTrace") === true;
 }
 
 // The words the revealed lens answers with. A quiz's answer is its

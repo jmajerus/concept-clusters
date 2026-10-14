@@ -1,3 +1,4 @@
+import { layoutBoardSetting } from "./layoutDocument.js";
 import { lensAnswerWords } from "./lensFlowTrace.js";
 
 // Lens reveal cue: a short effect as a lens's answer is revealed, so the
@@ -7,8 +8,9 @@ import { lensAnswerWords } from "./lensFlowTrace.js";
 // resting state. The cue only points at it.
 //
 // Which cue plays, highest first: reduced motion turns it off; the
-// player's own preference (not offered yet); the puzzle's
-// board.lensRevealCue; the site setting (modules/siteSettings.js); none.
+// player's own preference (not offered yet); the puzzle's lensRevealCue
+// layout setting, where null means the site's; the site setting
+// (modules/siteSettings.js); none.
 
 export const LENS_REVEAL_CUES = ["none", "ripple", "spotlight", "both"];
 
@@ -24,7 +26,7 @@ export function isLensRevealCue(value) {
 }
 
 export function puzzleLensRevealCue(puzzle) {
-  const cue = puzzle?.board?.lensRevealCue;
+  const cue = layoutBoardSetting(puzzle, "lensRevealCue");
   return isLensRevealCue(cue) ? cue : null;
 }
 

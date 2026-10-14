@@ -384,6 +384,26 @@ export async function run(page) {
   const autoBoard = await putBoard({ sizeFactor: 1.2, source: "auto" });
   assert.equal(autoBoard.status, 409, autoBoard.body);
   assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.sizeFactor, 1.1);
+  // Experiments change play, so a published layout never takes one directly:
+  // they reach players by publishing a working copy.
+  const experiment = await putBoard({ lensFlowTrace: true });
+  assert.equal(experiment.status, 409, experiment.body);
+  assert.match(experiment.body, /working copy/);
+  assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.lensFlowTrace, undefined);
+  const wholeExperiment = createResponse();
+  assert.equal(await handleRequest({
+    method: "PUT",
+    url: "/admin/puzzles/lab-d1-play/layout.json",
+    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify({
+        layout: { ...afterBoard, board: { ...afterBoard.board, bridgePreconnect: true } }
+      }));
+    }
+  }, wholeExperiment), true);
+  assert.equal(wholeExperiment.status, 409, wholeExperiment.body);
+  // An explicit null where the setting is unset changes nothing, so it passes.
+  assert.equal((await putBoard({ sizeFactor: 1.1, lensRevealCue: null })).status, 200);
 
   // The layout-pass route checks the puzzle on reads as well as starts, and
   // never turns a malformed request into a dry run.

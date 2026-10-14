@@ -3,6 +3,7 @@
 
 import { LAYOUT_MODES, boardSettingsErrors, normalizeLayoutDocument } from "./layoutDocument.js";
 import { canonicalBoardSizeFactor } from "./puzzleBoardSize.js";
+import { isLensRevealCue } from "./lensRevealCue.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
 import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { layoutIsFixed, validateLayoutHintShape } from "./layoutHints.js";
@@ -39,7 +40,7 @@ export function validatePublishedPuzzleLayout({
       fallbackModes: []
     };
   }
-  const boardErrors = boardSettingsErrors(normalized?.board, canonicalBoardSizeFactor)
+  const boardErrors = boardSettingsErrors(normalized?.board, canonicalBoardSizeFactor, isLensRevealCue)
     .map(error => `board: ${error}`);
   if (boardErrors.length) {
     return { valid: false, errors: boardErrors, warnings: [], fallbackModes: [] };
