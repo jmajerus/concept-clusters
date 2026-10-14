@@ -53,7 +53,8 @@ export async function run() {
     [{ tags: ["new tag"] }, ["classification"]],
     [{ learningIntroduction: { markdown: "New lesson" } }, ["pedagogy"]],
     [{ language: "fr" }, ["pedagogy"]],
-    [{ board: { bridgePreconnect: true } }, ["administration"]],
+    // Board settings belong to the layout, wherever an older document keeps them.
+    [{ board: { bridgePreconnect: true } }, ["layout"]],
     [{ provenance: { collaboration: "human" } }, ["provenance"]],
     [{ updatedAt: "2026-10-06", dateModified: "2026-10-06" }, []],
     [{ bridges: [...published.bridges, { id: "new", term: "new", clusters: [] }] }, ["content"]],
@@ -71,10 +72,11 @@ export async function run() {
   assert.deepEqual(unpublishedChangeDomains(null, published), []);
   assert.equal(diffPublishedDraft(published, { ...published, language: "fr" }).total, 1,
     "language-only edits must also enable publication");
+  // `board` is layout, not document content: the document diff and the
+  // review identity leave it to the layout comparison.
   const boardChanged = { ...published, board: { bridgePreconnect: true } };
-  assert.equal(diffPublishedDraft(published, boardChanged).total, 1);
-  assert.ok(diffPublishedDraft(published, boardChanged).fields.board);
-  assert.equal(samePlayablePuzzle(published, boardChanged), false);
+  assert.equal(diffPublishedDraft(published, boardChanged).total, 0);
+  assert.equal(samePlayablePuzzle(published, boardChanged), true);
 
   const lensCut = {
     ...published,

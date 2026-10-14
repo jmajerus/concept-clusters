@@ -6,7 +6,7 @@ import { join, relative, sep } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
-import { layoutDocumentForMode } from "./layoutDocument.js";
+import { layoutDocumentForMode, liftLegacyBoard } from "./layoutDocument.js";
 import {
   formattedJson,
   generatedCatalogueModule,
@@ -119,7 +119,15 @@ export async function applyContentFreeze({
 
   async function writePuzzle(id, { create }) {
     const published = await contentDocuments.getPublished({ kind: "puzzle", id });
-    const { puzzle, errors } = puzzleFromAuthoredDocument(published.document, {
+    // Git gets the canonical pair: board settings an older snapshot still
+    // carries leave the document for the module's layout.
+    const { document, layout } = liftLegacyBoard(
+      published.document,
+      published.layout || (published.starLayout
+        ? layoutDocumentForMode("star", published.starLayout)
+        : null)
+    );
+    const { puzzle, errors } = puzzleFromAuthoredDocument(document, {
       categoryRegistry
     });
     if (!puzzle) {
@@ -136,9 +144,6 @@ export async function applyContentFreeze({
     await remember(canonicalPath);
     await remember(modulePath);
     queueWrite(files, canonicalPath, formattedJson(publishedShape.simplified));
-    const layout = published.layout || (published.starLayout
-      ? layoutDocumentForMode("star", published.starLayout)
-      : null);
     queueWrite(files, modulePath, generatedPuzzleModule(
       publishedShape.puzzle,
       canonicalRelative,

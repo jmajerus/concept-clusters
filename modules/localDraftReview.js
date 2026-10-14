@@ -54,6 +54,8 @@ import {
   autoLayoutConflict,
   emptyLayoutDocument,
   layoutDocumentWithBoard,
+  liftLegacyBoard,
+  withoutLegacyBoard,
   layoutDocumentForMode,
   layoutForMode,
   mergePublishLayout,
@@ -180,9 +182,11 @@ export function draftMatchesCheckout(draftDocument, checkoutDocument) {
   if (!draftDocument || !checkoutDocument) return false;
   const { puzzle } = puzzleFromAuthoredDocument(draftDocument);
   if (!puzzle) return false;
+  // Board settings live in the layout, so a checkout that Freeze has
+  // already lifted still matches a draft that carries them in `board`.
   return valuesEqual(
-    documentForEditor(puzzleToSimplified(puzzle), { categoryRegistry: CATEGORIES }),
-    documentForEditor(checkoutDocument, { categoryRegistry: CATEGORIES })
+    withoutLegacyBoard(documentForEditor(puzzleToSimplified(puzzle), { categoryRegistry: CATEGORIES })),
+    withoutLegacyBoard(documentForEditor(checkoutDocument, { categoryRegistry: CATEGORIES }))
   );
 }
 
@@ -241,8 +245,13 @@ export async function mapDraftDetail(record, {
     ? documentForEditor(publishedDocument, { categoryRegistry })
     : gitPublished;
   const document = documentForEditor(record.document, { categoryRegistry });
+  // Board settings an older document carries count as layout, where play
+  // reads them (see unpublishedChangeDomains).
   const layoutDiffersFromPublished = Boolean(
-    publishedDocument && !valuesEqual(publishedLayout || null, record.layout || null)
+    publishedDocument && !valuesEqual(
+      liftLegacyBoard(publishedDocument, publishedLayout || null).layout ?? null,
+      liftLegacyBoard(record.document, record.layout || null).layout ?? null
+    )
   );
   // One diff, read twice: the summary renders it and the shadow check scores
   // it. Recomputing would canonicalize and walk the whole board again.

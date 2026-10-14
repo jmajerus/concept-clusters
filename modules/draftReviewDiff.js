@@ -8,6 +8,7 @@
 import { partitionAuthoredDocument } from "./authoringDomains.js";
 import { ADMINISTRATION_ROOT_FIELDS } from "./authoringFieldOwnership.js";
 import { PEDAGOGY_BRIDGE_FIELDS } from "./authoringFieldOwnership.js";
+import { liftLegacyBoard } from "./layoutDocument.js";
 
 import { authoredLinks, authoredLearningLinks, hoistDocumentCitations } from "./termInfo.js";
 
@@ -73,8 +74,13 @@ export function unpublishedChangeDomains(published, draft, {
   publishedLayout = null, draftLayout = null
 } = {}) {
   if (!published || !draft) return [];
-  const before = partitionAuthoredDocument(hoistDocumentCitations(published));
-  const after = partitionAuthoredDocument(hoistDocumentCitations(draft));
+  // Board settings an older document carries are compared where play reads
+  // them, in the layout, so a lifted published row matches a draft that
+  // still carries the same values in `board`.
+  const publishedLift = liftLegacyBoard(published, publishedLayout);
+  const draftLift = liftLegacyBoard(draft, draftLayout);
+  const before = partitionAuthoredDocument(hoistDocumentCitations(publishedLift.document));
+  const after = partitionAuthoredDocument(hoistDocumentCitations(draftLift.document));
   // Annotation-free bridge identities are context for pedagogy, not edits to it.
   for (const parts of [before, after]) {
     const annotations = (parts.pedagogy.bridges || []).filter(bridge =>
@@ -93,7 +99,7 @@ export function unpublishedChangeDomains(published, draft, {
         .some(key => !valuesEqual(left[key], right[key]));
     });
   if (provenanceDiffersFromPublished(published, draft)) changed.push("provenance");
-  if (!valuesEqual(publishedLayout, draftLayout)) changed.push("layout");
+  if (!valuesEqual(publishedLift.layout ?? null, draftLift.layout ?? null)) changed.push("layout");
   return changed;
 }
 
@@ -256,12 +262,13 @@ export function diffPublishedDraft(published, draft) {
   draft = hoistDocumentCitations(draft);
   const counts = { changed: 0, added: 0, removed: 0 };
   const fields = {};
-  // Administration fields (board settings, limit waivers) are publishable
-  // changes on their own, e.g. revoking an unused waiver.
+  // Administration fields (limit waivers) are publishable changes on their
+  // own, e.g. revoking an unused waiver. `board` is not compared here: its
+  // settings belong to the layout (see unpublishedChangeDomains).
   for (const name of new Set([
     "title", "puzzleKind", "category", "categories", "subcategories", "tags",
     "level", "lensMode", "preSolve", "relatedPuzzles", "language",
-    "learningIntroduction", ...ADMINISTRATION_ROOT_FIELDS
+    "learningIntroduction", ...[...ADMINISTRATION_ROOT_FIELDS].filter(field => field !== "board")
   ])) {
     const change = fieldChange(published[name], draft[name]);
     if (change) {
@@ -295,7 +302,7 @@ export function diffPublishedDraft(published, draft) {
   return { counts, total, fields, clusters, bridges, lenses };
 }
 
-/** Authored content and board settings. Provenance is outside the review identity. */
+/** Authored content. Provenance and layout settings are outside the review identity. */
 export function samePlayablePuzzle(left, right) {
   const diff = diffPublishedDraft(left, right);
   return Boolean(diff && diff.total === 0);
