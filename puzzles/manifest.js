@@ -1028,31 +1028,75 @@ export const PUZZLE_MANIFEST = [
     "id": "how-the-heart-pumps",
     "module": "./physiology-medicine/how-the-heart-pumps.js",
     "published": "2026-07-24",
-    "contentFingerprint": "fnv1a64:7f929983f6fb013f",
-    "layoutFingerprint": "fnv1a64:5b9bc4ba528108e4",
+    "contentFingerprint": "fnv1a64:d231fa6db6d20aa4",
+    "layoutFingerprint": "fnv1a64:96f39bc62ff751d9",
     "browse": {
       "id": "how-the-heart-pumps",
-      "title": "How the heart pumps",
+      "title": "The cardiac cycle",
       "category": "Physiology",
-      "large": false,
+      "subcategories": {
+        "Physiology": "cardiovascular"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "regulating-arterial-pressure",
+            "reason": "See what sets the stroke volume ejected here, and how heart rate turns it into cardiac output."
+          }
+        ]
+      },
+      "info": {
+        "text": "One heartbeat traced through the left ventricle: the pressure-driven phases of the cycle, the volumes they move, the valves that bound them, and the sounds those valves make.",
+        "links": [
+          {
+            "href": "wiki:Cardiac cycle"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2020"
+          },
+          {
+            "title": "Anatomy and Physiology 2e — 19.3 Cardiac Cycle",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-3-cardiac-cycle"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
       "_searchTerms": [
-        "Heart chambers",
-        "right atrium",
-        "right ventricle",
-        "left atrium",
-        "left ventricle",
-        "Heart valves",
-        "tricuspid valve",
-        "pulmonary valve",
-        "mitral valve",
-        "aortic valve",
-        "Cardiac cycle",
-        "systole",
-        "diastole",
+        "Phases of the cycle",
+        "ejection",
+        "rapid filling",
+        "isovolumic contraction",
+        "isovolumic relaxation",
+        "atrial contraction",
+        "Ventricular volumes",
+        "end-diastolic volume",
         "stroke volume",
-        "cardiac output",
-        "one-way blood flow",
-        "pressure gradient"
+        "end-systolic volume",
+        "ejection fraction",
+        "Heart valves",
+        "atrioventricular valves",
+        "semilunar valves",
+        "papillary muscles",
+        "Heart sounds",
+        "first heart sound",
+        "second heart sound",
+        "third heart sound",
+        "fourth heart sound",
+        "pressure gradient",
+        "valve closure",
+        "pressure–volume loop"
       ]
     }
   },
@@ -4786,8 +4830,8 @@ export const PUZZLE_MANIFEST = [
     "id": "from-dna-to-gene-expression",
     "module": "./biology/from-dna-to-gene-expression.js",
     "published": "2026-08-09",
-    "contentFingerprint": "fnv1a64:c229ce2963aa8d26",
-    "layoutFingerprint": "fnv1a64:f4fd9c3fd0666537",
+    "contentFingerprint": "fnv1a64:ee25b850d9c1aa19",
+    "layoutFingerprint": "fnv1a64:1b89e7991edddb85",
     "browse": {
       "id": "from-dna-to-gene-expression",
       "title": "From DNA to gene expression",
@@ -9896,8 +9940,8 @@ export const PUZZLE_MANIFEST = [
     "id": "acids-bases-and-ph",
     "module": "./chemistry/acids-bases-and-ph.js",
     "published": "2026-08-20",
-    "contentFingerprint": "fnv1a64:57e645f7a80217d3",
-    "layoutFingerprint": "fnv1a64:ff2637f94eb7a64b",
+    "contentFingerprint": "fnv1a64:56788660244ab4d0",
+    "layoutFingerprint": "fnv1a64:131d244691cc14da",
     "browse": {
       "id": "acids-bases-and-ph",
       "title": "Acids, bases, and pH",
@@ -10501,8 +10545,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-the-kidney-forms-urine",
     "module": "./physiology-medicine/how-the-kidney-forms-urine.js",
     "published": "2026-08-21",
-    "contentFingerprint": "fnv1a64:f1b77a65b0ea0200",
-    "layoutFingerprint": "fnv1a64:e13c0231d458a33a",
+    "contentFingerprint": "fnv1a64:7aaa4eacf55feef7",
+    "layoutFingerprint": "fnv1a64:1f97d1cad74ef181",
     "browse": {
       "id": "how-the-kidney-forms-urine",
       "title": "How the kidney forms urine",
@@ -12467,7 +12511,7 @@ export const PUZZLE_MANIFEST = [
     "id": "muscular-system",
     "module": "./physiology-medicine/muscular-system.js",
     "published": "2026-09-08",
-    "contentFingerprint": "fnv1a64:f450771569d5c9f3",
+    "contentFingerprint": "fnv1a64:4fbe86a4c8e64b1a",
     "layoutFingerprint": "fnv1a64:3471518b8daf12fc",
     "browse": {
       "id": "muscular-system",
@@ -12480,8 +12524,8 @@ export const PUZZLE_MANIFEST = [
       "relatedPuzzles": {
         "entries": [
           {
-            "id": "nervous-system",
-            "reason": "See where the order comes from: the motor neuron behind the motor unit and the action potential behind the muscle pulse."
+            "id": "how-neurons-fire-and-signal",
+            "reason": "See where the order comes from: how the motor neuron fires an action potential and releases acetylcholine across a synapse."
           }
         ]
       },
@@ -12631,7 +12675,7 @@ export const PUZZLE_MANIFEST = [
     "id": "reproductive-hormones",
     "module": "./physiology-medicine/reproductive-hormones.js",
     "published": "2026-09-08",
-    "contentFingerprint": "fnv1a64:293e58f2e71193ff",
+    "contentFingerprint": "fnv1a64:1fb691fe9fd9a8b7",
     "layoutFingerprint": "fnv1a64:532556339aadb27c",
     "browse": {
       "id": "reproductive-hormones",
@@ -12647,8 +12691,8 @@ export const PUZZLE_MANIFEST = [
         },
         "entries": [
           {
-            "id": "endocrine-command-and-pace",
-            "reason": "Compare gonadotropin orders (FSH, LH) with the thyroid and adrenal tropic orders (TSH, ACTH)."
+            "id": "hypothalamic-pituitary-axes",
+            "reason": "Compare the gonadotropin orders (FSH, LH) with the thyroid, adrenal, and growth axes that run on the same hypothalamic–pituitary command structure."
           }
         ]
       },
@@ -16768,8 +16812,8 @@ export const PUZZLE_MANIFEST = [
     "id": "acid-base-balance",
     "module": "./physiology-medicine/acid-base-balance.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:dde7f068db6bfaf5",
-    "layoutFingerprint": "fnv1a64:fa6549a09b44c939",
+    "contentFingerprint": "fnv1a64:c3114d0d2ae59666",
+    "layoutFingerprint": "fnv1a64:7f5963a5da282d00",
     "browse": {
       "id": "acid-base-balance",
       "title": "Acid–base balance",
@@ -16933,8 +16977,8 @@ export const PUZZLE_MANIFEST = [
     "id": "concentrating-and-diluting-urine",
     "module": "./physiology-medicine/concentrating-and-diluting-urine.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:624bd36abfccdc77",
-    "layoutFingerprint": "fnv1a64:9cb9301cea6912b9",
+    "contentFingerprint": "fnv1a64:f87f83084b80210e",
+    "layoutFingerprint": "fnv1a64:1a18414c867db8f2",
     "browse": {
       "id": "concentrating-and-diluting-urine",
       "title": "Concentrating and diluting urine",
@@ -17028,8 +17072,8 @@ export const PUZZLE_MANIFEST = [
     "id": "control-of-breathing",
     "module": "./physiology-medicine/control-of-breathing.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:d485ba2c82b944d4",
-    "layoutFingerprint": "fnv1a64:9c9b6dd170d61f63",
+    "contentFingerprint": "fnv1a64:7c54a5a32f5c308a",
+    "layoutFingerprint": "fnv1a64:fc9e6256419e22e2",
     "browse": {
       "id": "control-of-breathing",
       "title": "Control of breathing",
@@ -17115,8 +17159,8 @@ export const PUZZLE_MANIFEST = [
     "id": "gas-exchange-and-transport",
     "module": "./physiology-medicine/gas-exchange-and-transport.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:24625429f2548d02",
-    "layoutFingerprint": "fnv1a64:65c041c073e3b441",
+    "contentFingerprint": "fnv1a64:058f5343a3c4c611",
+    "layoutFingerprint": "fnv1a64:175ff57fad1dd1ea",
     "browse": {
       "id": "gas-exchange-and-transport",
       "title": "Gas exchange and transport",
@@ -17192,8 +17236,8 @@ export const PUZZLE_MANIFEST = [
     "id": "gastric-acid-secretion",
     "module": "./physiology-medicine/gastric-acid-secretion.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:8b308ed6c658b56e",
-    "layoutFingerprint": "fnv1a64:0c692267b4f9f46c",
+    "contentFingerprint": "fnv1a64:3ea2597d9b599c5b",
+    "layoutFingerprint": "fnv1a64:9dbee700455579ab",
     "browse": {
       "id": "gastric-acid-secretion",
       "title": "Gastric acid secretion",
@@ -17281,8 +17325,8 @@ export const PUZZLE_MANIFEST = [
     "id": "hemostasis",
     "module": "./physiology-medicine/hemostasis.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:ecaac01461bd3f26",
-    "layoutFingerprint": "fnv1a64:576650aa1125a915",
+    "contentFingerprint": "fnv1a64:8e76fcbba365de43",
+    "layoutFingerprint": "fnv1a64:8490d2d9390b5a04",
     "browse": {
       "id": "hemostasis",
       "title": "Hemostasis: how bleeding stops",
@@ -17372,8 +17416,8 @@ export const PUZZLE_MANIFEST = [
     "id": "how-neurons-fire-and-signal",
     "module": "./physiology-medicine/how-neurons-fire-and-signal.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:19ea12bd82a0fad9",
-    "layoutFingerprint": "fnv1a64:0b2f4396440125f4",
+    "contentFingerprint": "fnv1a64:86b3831c75e9a82e",
+    "layoutFingerprint": "fnv1a64:b8e80d1642f2f5cd",
     "browse": {
       "id": "how-neurons-fire-and-signal",
       "title": "How neurons fire and signal",
@@ -17563,8 +17607,8 @@ export const PUZZLE_MANIFEST = [
     "id": "mechanics-of-breathing",
     "module": "./physiology-medicine/mechanics-of-breathing.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:e902e426b44b9129",
-    "layoutFingerprint": "fnv1a64:704f7de6abcc0ef6",
+    "contentFingerprint": "fnv1a64:60a55fc4ba12e9b2",
+    "layoutFingerprint": "fnv1a64:d5fe9029af2e393d",
     "browse": {
       "id": "mechanics-of-breathing",
       "title": "Mechanics of breathing",
@@ -17656,8 +17700,8 @@ export const PUZZLE_MANIFEST = [
     "id": "membranes-set-cell-conditions",
     "module": "./physiology-medicine/membranes-set-cell-conditions.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:4a62ba1147d5238d",
-    "layoutFingerprint": "fnv1a64:ba7603ab6c7779f2",
+    "contentFingerprint": "fnv1a64:d6413e99a886e1f4",
+    "layoutFingerprint": "fnv1a64:28ef24a37772bf8d",
     "browse": {
       "id": "membranes-set-cell-conditions",
       "title": "How membranes set the cell's conditions",
@@ -17757,8 +17801,8 @@ export const PUZZLE_MANIFEST = [
     "id": "nightshades-horticulture",
     "module": "./botany/nightshades-horticulture.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:f24b9d091fd09e7d",
-    "layoutFingerprint": "fnv1a64:268c8804add9fe92",
+    "contentFingerprint": "fnv1a64:8c4c77c5a151c8b3",
+    "layoutFingerprint": "fnv1a64:9a22149a46c9270e",
     "browse": {
       "id": "nightshades-horticulture",
       "title": "Nightshades: The Beautiful Poison",
@@ -17865,8 +17909,8 @@ export const PUZZLE_MANIFEST = [
     "id": "regulating-arterial-pressure",
     "module": "./physiology-medicine/regulating-arterial-pressure.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:4bb39f8f2183818a",
-    "layoutFingerprint": "fnv1a64:224a38434b31ec99",
+    "contentFingerprint": "fnv1a64:dbec867fb3a4496f",
+    "layoutFingerprint": "fnv1a64:0ca7f76f445faa18",
     "browse": {
       "id": "regulating-arterial-pressure",
       "title": "Regulating arterial pressure",
@@ -17961,8 +18005,8 @@ export const PUZZLE_MANIFEST = [
     "id": "setting-and-defending-core-temperature",
     "module": "./physiology-medicine/setting-and-defending-core-temperature.js",
     "published": "2026-10-11",
-    "contentFingerprint": "fnv1a64:e6c6cd1410883a53",
-    "layoutFingerprint": "fnv1a64:b00ad521b0e677e5",
+    "contentFingerprint": "fnv1a64:9b8c1a2874e79450",
+    "layoutFingerprint": "fnv1a64:4fd8cb35bfd57e74",
     "browse": {
       "id": "setting-and-defending-core-temperature",
       "title": "Setting and defending core temperature",
@@ -18050,6 +18094,747 @@ export const PUZZLE_MANIFEST = [
         "chills",
         "defervescence",
         "hyperthermia"
+      ]
+    }
+  },
+  {
+    "id": "ecology-community-interactions",
+    "module": "./ecology/ecology-community-interactions.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:4d1488ba04b90cc9",
+    "layoutFingerprint": "fnv1a64:a61b12d005e15425",
+    "browse": {
+      "id": "ecology-community-interactions",
+      "title": "Eating, Competing, Living Together — How Species Interact",
+      "category": "Ecology",
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "The three relations that shape a community — eating one another, competing for the same resources, and living in close association — plus the defenses predation pressures prey into evolving.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology",
+            "label": "OpenStax Biology 2e §45.6 Community Ecology"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Biology 2e, §45.6 Community Ecology",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/45-6-community-ecology"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Consuming Another Species",
+        "predation",
+        "herbivory",
+        "predator-prey cycle",
+        "Prey Defenses",
+        "mechanical defense",
+        "chemical defense",
+        "camouflage",
+        "aposematic coloration",
+        "Batesian mimicry",
+        "Müllerian mimicry",
+        "Competition Over Shared Resources",
+        "ecological niche",
+        "competitive exclusion principle",
+        "resource partitioning",
+        "Living in Close Association",
+        "symbiosis",
+        "commensalism",
+        "mutualism",
+        "parasitism",
+        "predators learn the lesson",
+        "harm without killing"
+      ]
+    }
+  },
+  {
+    "id": "ecology-energy-flow",
+    "module": "./ecology/ecology-energy-flow.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:dba8d18104ed5ddf",
+    "layoutFingerprint": "fnv1a64:23e8b21359ab1a86",
+    "browse": {
+      "id": "ecology-energy-flow",
+      "title": "Where the Energy Goes — Feeding an Ecosystem",
+      "category": "Ecology",
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "How energy enters an ecosystem through autotrophs, who eats whom across trophic levels, why each transfer loses most of the energy — and why that taper concentrates toxins at the top.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/46-2-energy-flow-through-ecosystems",
+            "label": "OpenStax Biology 2e §46.2 Energy Flow through Ecosystems"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Biology 2e, §46.1 Ecology of Ecosystems",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/46-1-ecology-of-ecosystems"
+          },
+          {
+            "title": "Biology 2e, §46.2 Energy Flow through Ecosystems",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/46-2-energy-flow-through-ecosystems"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Base: Making Food",
+        "autotroph",
+        "photoautotroph",
+        "chemoautotroph",
+        "gross primary productivity",
+        "net primary productivity",
+        "Everyone Else: Eating to Live",
+        "heterotroph",
+        "herbivore",
+        "carnivore",
+        "omnivore",
+        "decomposer",
+        "Mapping Who Eats Whom",
+        "food chain",
+        "food web",
+        "trophic level",
+        "grazing food web",
+        "detrital food web",
+        "apex consumer",
+        "Why Energy Runs Out",
+        "ecological pyramid",
+        "trophic level transfer efficiency",
+        "biomass",
+        "biomagnification",
+        "every web starts at the producers",
+        "two webs run side by side",
+        "counted by level, lost per transfer"
+      ]
+    }
+  },
+  {
+    "id": "ecology-nutrient-cycles",
+    "module": "./ecology/ecology-nutrient-cycles.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:a98d9732fdb84de2",
+    "layoutFingerprint": "fnv1a64:0fc1b22119d7fc1f",
+    "browse": {
+      "id": "ecology-nutrient-cycles",
+      "title": "Nothing Is Wasted — How Nutrients Cycle",
+      "category": "Ecology",
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "How matter — unlike energy — is recycled: the shared machinery of reservoirs and residence times, the four canonical routes (water, carbon, nitrogen, phosphorus), and what overload does to them.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/46-3-biogeochemical-cycles",
+            "label": "OpenStax Biology 2e §46.3 Biogeochemical Cycles"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Biology 2e, §46.3 Biogeochemical Cycles",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/46-3-biogeochemical-cycles"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Shared Machinery",
+        "biogeochemical cycle",
+        "reservoir",
+        "residence time",
+        "The Water Cycle",
+        "hydrosphere",
+        "evaporation",
+        "condensation",
+        "precipitation",
+        "sublimation",
+        "surface runoff",
+        "The Carbon Cycle",
+        "bicarbonate",
+        "limestone",
+        "fossil fuel",
+        "subduction",
+        "The Nitrogen Cycle",
+        "nitrogen fixation",
+        "nitrogen-fixing bacteria",
+        "ammonification",
+        "nitrification",
+        "denitrification",
+        "The Phosphorus Cycle",
+        "weathering",
+        "limiting nutrient",
+        "When Cycles Overload",
+        "eutrophication",
+        "dead zone",
+        "acid rain",
+        "the odd one out",
+        "water carries the overload",
+        "fixation cut both ways"
+      ]
+    }
+  },
+  {
+    "id": "ecology-populations",
+    "module": "./ecology/ecology-populations.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:8315fdfe47b5068d",
+    "layoutFingerprint": "fnv1a64:30b388d41dfba03b",
+    "browse": {
+      "id": "ecology-populations",
+      "title": "How Populations Grow — and Why They Stop",
+      "category": "Ecology",
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "How ecologists measure a population, model its growth with and without limits, explain what actually stops it in the wild, and read the reproductive strategy evolution wrote into it.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/biology-2e/pages/45-introduction",
+            "label": "OpenStax Biology 2e, Chapter 45: Population and Community Ecology"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Biology 2e, §45.1 Population Demography",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/45-1-population-demography"
+          },
+          {
+            "title": "Biology 2e, §45.2 Life Histories and Natural Selection",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/45-2-life-histories-and-natural-selection"
+          },
+          {
+            "title": "Biology 2e, §45.3 Environmental Limits to Population Growth",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/45-3-environmental-limits-to-population-growth"
+          },
+          {
+            "title": "Biology 2e, §45.4 Population Dynamics and Regulation",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/biology-2e/pages/45-4-population-dynamics-and-regulation"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Describing a Population",
+        "population density",
+        "clumped dispersion",
+        "quadrat",
+        "mark-and-recapture",
+        "uniform dispersion",
+        "random dispersion",
+        "life table",
+        "Growth Without Limits",
+        "exponential growth",
+        "biotic potential",
+        "J-shaped curve",
+        "Growth With Limits",
+        "carrying capacity",
+        "logistic growth",
+        "S-shaped curve",
+        "intraspecific competition",
+        "Regulation in the Wild",
+        "density-dependent factor",
+        "density-independent factor",
+        "waste accumulation",
+        "disease",
+        "weather",
+        "Life-History Tradeoffs",
+        "fecundity",
+        "parental care",
+        "semelparity",
+        "iteroparity",
+        "r-selected species",
+        "K-selected species",
+        "competition for scarce resources",
+        "survivorship records strategy",
+        "the ceiling moves",
+        "potential set by life history"
+      ]
+    }
+  },
+  {
+    "id": "hypothalamic-pituitary-axes",
+    "module": "./physiology-medicine/hypothalamic-pituitary-axes.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:8e71b9fdc38a1461",
+    "layoutFingerprint": "fnv1a64:c4dd316daf9d067d",
+    "browse": {
+      "id": "hypothalamic-pituitary-axes",
+      "title": "Hypothalamic–pituitary axes",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "endocrine-reproductive"
+      },
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "reproductive-hormones",
+            "reason": "Follow the fourth anterior-pituitary chain: GnRH, FSH, and LH driving the gonads."
+          },
+          {
+            "id": "setting-and-defending-core-temperature",
+            "reason": "See thyroid hormone at work as one of the effectors that raise heat production."
+          }
+        ]
+      },
+      "info": {
+        "text": "The hypothalamus commands the anterior pituitary through portal blood, and three hormone chains follow: thyroid, adrenal cortex, and growth, each held near its set level by negative feedback.",
+        "links": [
+          {
+            "href": "wiki:Neuroendocrinology"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology, 14th ed.",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2021",
+            "pages": "ch. 75–78"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §17.3 The Pituitary Gland and Hypothalamus",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/17-3-the-pituitary-gland-and-hypothalamus"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Hypothalamic–pituitary control",
+        "hypothalamus",
+        "anterior pituitary",
+        "hypophyseal portal system",
+        "posterior pituitary",
+        "tropic hormones",
+        "negative feedback",
+        "Thyroid axis",
+        "thyroid-stimulating hormone",
+        "thyroxine",
+        "thyrotropin-releasing hormone",
+        "triiodothyronine",
+        "iodide trapping",
+        "basal metabolic rate",
+        "Adrenocortical axis",
+        "adrenocorticotropic hormone",
+        "cortisol",
+        "corticotropin-releasing hormone",
+        "adrenal cortex",
+        "gluconeogenesis",
+        "anti-inflammatory effect",
+        "Growth axis",
+        "growth hormone",
+        "insulin-like growth factor 1",
+        "growth hormone–releasing hormone",
+        "epiphyseal growth plates",
+        "somatostatin",
+        "insulin resistance"
+      ]
+    }
+  },
+  {
+    "id": "microcirculation-and-local-blood-flow",
+    "module": "./physiology-medicine/microcirculation-and-local-blood-flow.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:3ff75a2ab8113120",
+    "layoutFingerprint": "fnv1a64:26fad0fbaf264649",
+    "browse": {
+      "id": "microcirculation-and-local-blood-flow",
+      "title": "Microcirculation and local blood flow",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "cardiovascular"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "lymphatic-system",
+            "reason": "Follow the fluid that leaves the capillaries through the lymphatic vessels and back to the blood."
+          },
+          {
+            "id": "regulating-arterial-pressure",
+            "reason": "See how nerves and hormones set the arterial pressure that local control then divides among tissues."
+          }
+        ]
+      },
+      "info": {
+        "text": "Each tissue sets its own blood flow to match its needs, and the pressures across capillary walls decide how much of that flow leaks into the tissue and how much returns.",
+        "links": [
+          {
+            "href": "wiki:Microcirculation"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2020",
+            "pages": "ch. 16, 17, 25"
+          },
+          {
+            "title": "Microcirculation",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Microcirculation"
+          },
+          {
+            "title": "Starling equation",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Starling_equation"
+          },
+          {
+            "title": "Autoregulation",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Autoregulation"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Capillary filtration",
+        "capillary pressure",
+        "plasma colloid osmotic pressure",
+        "interstitial fluid pressure",
+        "interstitial colloid osmotic pressure",
+        "filtration coefficient",
+        "net filtration pressure",
+        "Metabolic vasodilators",
+        "adenosine",
+        "carbon dioxide",
+        "potassium ions",
+        "hydrogen ions",
+        "Local flow responses",
+        "active hyperemia",
+        "reactive hyperemia",
+        "autoregulation",
+        "myogenic response",
+        "Endothelial signals",
+        "nitric oxide",
+        "endothelin",
+        "shear stress",
+        "cyclic GMP",
+        "Safeguards against edema",
+        "edema",
+        "lymph flow",
+        "interstitial compliance",
+        "Long-term flow control",
+        "angiogenesis",
+        "VEGF",
+        "collateral circulation",
+        "precapillary sphincters",
+        "flow-mediated dilation",
+        "arteriolar dilation",
+        "protein washdown",
+        "tissue hypoxia"
+      ]
+    }
+  },
+  {
+    "id": "regulating-blood-glucose",
+    "module": "./physiology-medicine/regulating-blood-glucose.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:d8dc8c55b881fa97",
+    "layoutFingerprint": "fnv1a64:c06cd34df54e03d9",
+    "browse": {
+      "id": "regulating-blood-glucose",
+      "title": "Regulating blood glucose",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "endocrine-reproductive"
+      },
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "hypothalamic-pituitary-axes",
+            "reason": "See how cortisol and growth hormone secretion is controlled, and where their insulin resistance comes from."
+          },
+          {
+            "id": "how-the-kidney-forms-urine",
+            "reason": "Follow glucose through the kidney, where it spills into urine once blood levels exceed what the tubules can reabsorb."
+          }
+        ]
+      },
+      "info": {
+        "text": "The pancreatic islets hold blood glucose in a narrow range: insulin stores fuel after meals, glucagon releases it between meals, and backup hormones defend against a fall. The brain takes up glucose without needing insulin, so that range protects its supply.",
+        "links": [
+          {
+            "href": "wiki:Blood sugar regulation"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology, 14th ed.",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2021",
+            "pages": "ch. 79"
+          },
+          {
+            "title": "Anatomy and Physiology 2e, §17.9 The Endocrine Pancreas",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/17-9-the-endocrine-pancreas"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Pancreatic islets",
+        "islets of Langerhans",
+        "beta cells",
+        "alpha cells",
+        "delta cells",
+        "glucokinase",
+        "ATP-sensitive potassium channels",
+        "Insulin's fed-state actions",
+        "insulin",
+        "GLUT4",
+        "glycogenesis",
+        "lipogenesis",
+        "potassium uptake",
+        "Fasting fuel release",
+        "glucagon",
+        "glycogenolysis",
+        "gluconeogenesis",
+        "lipolysis",
+        "ketogenesis",
+        "Counterregulatory backup",
+        "epinephrine",
+        "cortisol",
+        "growth hormone",
+        "liver glycogen",
+        "insulin resistance",
+        "hypoglycemia"
+      ]
+    }
+  },
+  {
+    "id": "rhythmic-excitation-of-the-heart",
+    "module": "./physiology-medicine/rhythmic-excitation-of-the-heart.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:c3c23c41737bf191",
+    "layoutFingerprint": "fnv1a64:c3bffcaa8aade467",
+    "browse": {
+      "id": "rhythmic-excitation-of-the-heart",
+      "title": "Rhythmic excitation of the heart",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "cardiovascular"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "how-the-heart-pumps",
+            "reason": "Follow the beat these signals start: how each wave sets off contraction, valve movement, and filling."
+          },
+          {
+            "id": "regulating-arterial-pressure",
+            "reason": "See how sympathetic and vagal nerves speed or slow the sinoatrial node to adjust heart rate."
+          },
+          {
+            "id": "how-neurons-fire-and-signal",
+            "reason": "Compare the brief nerve action potential that the heart's long one departs from."
+          }
+        ]
+      },
+      "info": {
+        "text": "The heart starts its own beat: pacemaker cells fire on their own, a conduction system carries the impulse through the heart in a fixed order and timing, the muscle answers with a long action potential, and the electrocardiogram records the whole sequence from the skin.",
+        "links": [
+          {
+            "href": "wiki:Cardiac electrophysiology"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2020"
+          },
+          {
+            "title": "Anatomy and Physiology 2e — 19.2 Cardiac Muscle and Electrical Activity",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-2-cardiac-muscle-and-electrical-activity"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Pacemaker activity",
+        "pacemaker potential",
+        "automaticity",
+        "funny current",
+        "ectopic pacemaker",
+        "Conduction pathway",
+        "AV node",
+        "Purkinje fibers",
+        "internodal pathways",
+        "bundle of His",
+        "bundle branches",
+        "Ventricular action potential",
+        "rapid depolarization",
+        "plateau",
+        "fast sodium channels",
+        "long refractory period",
+        "The electrocardiogram",
+        "P wave",
+        "QRS complex",
+        "T wave",
+        "PR interval",
+        "ST segment",
+        "sinoatrial node",
+        "gap junctions",
+        "AV nodal delay",
+        "QT interval"
+      ]
+    }
+  },
+  {
+    "id": "the-autonomic-nervous-system",
+    "module": "./physiology-medicine/the-autonomic-nervous-system.js",
+    "published": "2026-10-14",
+    "contentFingerprint": "fnv1a64:7d93a771351961bb",
+    "layoutFingerprint": "fnv1a64:7ecfcb5a3f8e4dee",
+    "browse": {
+      "id": "the-autonomic-nervous-system",
+      "title": "The autonomic nervous system",
+      "category": "Physiology",
+      "subcategories": {
+        "Physiology": "neurophysiology"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "how-neurons-fire-and-signal",
+            "reason": "Review the action potential and synaptic release that every autonomic neuron uses."
+          },
+          {
+            "id": "regulating-arterial-pressure",
+            "reason": "See sympathetic and vagal output at work in the baroreceptor reflex."
+          },
+          {
+            "id": "rhythmic-excitation-of-the-heart",
+            "reason": "Meet the sinoatrial node whose rate vagal and sympathetic fibers adjust."
+          },
+          {
+            "id": "mechanics-of-breathing",
+            "reason": "Follow β₂ relaxation and vagal constriction into airway resistance."
+          }
+        ]
+      },
+      "info": {
+        "text": "The autonomic nervous system runs the heart, smooth muscle, and glands through two divisions built on one plan: a two-neuron chain whose anatomy, transmitters, and receptors decide where and how each division acts.",
+        "links": [
+          {
+            "href": "wiki:Autonomic nervous system"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Guyton and Hall Textbook of Medical Physiology (14th ed.)",
+            "author": "John E. Hall and Michael E. Hall",
+            "publisher": "Elsevier",
+            "year": "2020"
+          },
+          {
+            "title": "Anatomy and Physiology 2e — 15.1 Divisions of the Autonomic Nervous System",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/15-1-divisions-of-the-autonomic-nervous-system"
+          },
+          {
+            "title": "Anatomy and Physiology 2e — 15.2 Autonomic Reflexes and Homeostasis",
+            "publisher": "OpenStax",
+            "year": "2022",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/15-2-autonomic-reflexes-and-homeostasis"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Sympathetic division",
+        "fight-or-flight response",
+        "sympathetic chain",
+        "thoracolumbar outflow",
+        "prevertebral ganglia",
+        "mass discharge",
+        "Parasympathetic division",
+        "rest-and-digest",
+        "vagus nerve",
+        "craniosacral outflow",
+        "terminal ganglia",
+        "pelvic splanchnic nerves",
+        "Cholinergic transmission",
+        "acetylcholine",
+        "muscarinic receptor",
+        "nicotinic receptor",
+        "Adrenergic transmission",
+        "norepinephrine",
+        "epinephrine",
+        "α₁ receptor",
+        "α₂ receptor",
+        "β₁ receptor",
+        "β₂ receptor",
+        "Tone and reflex control",
+        "autonomic tone",
+        "autonomic reflex",
+        "visceral afferent fibers",
+        "hypothalamus",
+        "denervation supersensitivity",
+        "dual innervation",
+        "adrenal medulla",
+        "sweat glands",
+        "ganglionic transmission",
+        "vagal tone"
       ]
     }
   }
