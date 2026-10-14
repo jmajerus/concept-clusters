@@ -506,7 +506,15 @@ export function createGraphRenderer({
           });
         } catch (error) {
           if (!(error instanceof LayoutTimeLimit)) throw error;
-          // The board stays as it is, unpolished and still editable.
+          // The board is left unpolished and still editable. The polish
+          // stopped the simulation before it ever ticked, so a board solved
+          // on a mode switch is still piled where the last mode left its
+          // terms, and the lens phase freezes it straight after this. Settle
+          // the forces here, synchronously, so it is at least spread out.
+          if (getState() === state) {
+            sim.alpha(1).tick(300);
+            renderPositions();
+          }
           state.solutionLayout = before;
           state.polishTimedOut = true;
           updateSolutionHint();
