@@ -8,7 +8,7 @@
 // Experiment toggles save only when a working copy is open. Public play
 // keeps metadata and stats and cannot change the published record.
 
-import { LAYOUT_MODES, layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
+import { LAYOUT_EXPERIMENT_KEYS, LAYOUT_MODES, layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
 import {
   clearLayoutDraft,
   loadLayoutDraft,
@@ -642,7 +642,7 @@ export function createLayoutAuthoringController({
   // layout document's board settings. Board settings (size, the Star
   // free-term strip) save to the open working copy or else the published
   // puzzle. Experiments change play, so they save on a working copy only.
-  const EXPERIMENT_FLAGS = new Set(["bridgePreconnect", "lensFlowTrace", "lensRevealCue"]);
+  const EXPERIMENT_FLAGS = new Set(LAYOUT_EXPERIMENT_KEYS);
   function layoutCanWriteBoard() {
     return layoutAuthoringMode && typeof saveLayoutBoard === "function";
   }

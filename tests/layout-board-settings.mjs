@@ -8,6 +8,7 @@ import {
   autoEnvelopeConflict,
   boardSizeOwner,
   boardSettingsErrors,
+  changedExperimentKeys,
   layoutBoardSetting,
   layoutDocumentForMode,
   layoutDocumentWithBoard,
@@ -139,4 +140,10 @@ export async function run() {
   assert.equal(lensFlowTraceEnabled(overridden), false);
   assert.equal(puzzleLensRevealCue(overridden), null);
   assert.equal(lensFlowTraceEnabled({ layout: envelope({ lensFlowTrace: true }) }), true);
+
+  // Experiment changes, for the published route's draft-only check.
+  assert.deepEqual(changedExperimentKeys(envelope({ lensFlowTrace: true, sizeFactor: 1.1 }), envelope({ sizeFactor: 1 })), ["lensFlowTrace"]);
+  assert.deepEqual(changedExperimentKeys(envelope({ lensRevealCue: null }), null), [], "null and unset are both the default");
+  assert.deepEqual(changedExperimentKeys(envelope({ bridgePreconnect: true }), envelope({ bridgePreconnect: true })), []);
+  assert.deepEqual(changedExperimentKeys({ schemaVersion: 1, modes: {} }, envelope({ bridgePreconnect: true })), ["bridgePreconnect"]);
 }

@@ -27,6 +27,8 @@ import {
   autoBoardConflict,
   autoEnvelopeConflict,
   autoLayoutConflict,
+  changedExperimentKeys,
+  experimentOnPublishedError,
   layoutDocumentWithBoard,
   layoutForMode,
   normalizeLayoutDocument,
@@ -349,6 +351,11 @@ export function createLocalPlayCorpusHandler({
               return true;
             }
             const boardLayout = layoutDocumentWithBoard(changes, published.layout);
+            const experiments = changedExperimentKeys(boardLayout, published.layout);
+            if (experiments.length) {
+              json(res, { error: experimentOnPublishedError(experiments), id }, 409);
+              return true;
+            }
             const boardValidation = validatePublishedPuzzleLayout({
               document: published.document,
               layout: boardLayout,
@@ -389,6 +396,13 @@ export function createLocalPlayCorpusHandler({
           const layoutDocument = mode
             ? layoutDocumentForMode(mode, stampLayoutSaved(modePayload), published.layout)
             : normalizeLayoutDocument(layout);
+          // A whole-layout write may carry the published experiments along,
+          // never change them.
+          const experiments = changedExperimentKeys(layoutDocument, published.layout);
+          if (experiments.length) {
+            json(res, { error: experimentOnPublishedError(experiments), id }, 409);
+            return true;
+          }
           const validation = validatePublishedPuzzleLayout({
             document: published.document,
             layout: layoutDocument,
