@@ -11,7 +11,7 @@ import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { computePrettyGraphLayout, repairGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
 import { hasDefects } from "./playerLayoutEffort.js";
 import { graphLayoutHint, layoutIsFixed } from "./layoutHints.js";
-import { layoutBudget } from "./layoutBudget.js";
+import { layoutBudget, layoutDeadline, LayoutTimeLimit } from "./layoutBudget.js";
 import {
   afterNextPaint,
   animatePositionTargets,
@@ -425,6 +425,8 @@ export function createGraphRenderer({
       if (state.made !== state.need) return Promise.resolve({ cancelled: true });
       if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
       const run = async () => {
+        state.polishTimedOut = false;
+        const before = state.solutionLayout;
         state.solutionLayout = "polishing";
         updateSolutionHint();
         sim.stop();
@@ -495,10 +497,22 @@ export function createGraphRenderer({
         const hint = curatedLayout
           ? graphLayoutHint(curatedLayout, puzzle, { width: W, height: H })
           : null;
-        const candidate = computePrettyGraphLayout({
-          d3, puzzle, nodes, links: state.links, width: W, height: H, hint,
-          budget: layoutBudget(state.layoutBudget).graph
-        });
+        let candidate;
+        try {
+          candidate = computePrettyGraphLayout({
+            d3, puzzle, nodes, links: state.links, width: W, height: H, hint,
+            budget: layoutBudget(state.layoutBudget).graph,
+            checkDeadline: layoutDeadline(state.layoutBudget)
+          });
+        } catch (error) {
+          if (!(error instanceof LayoutTimeLimit)) throw error;
+          // The board stays as it is, unpolished and still editable.
+          state.solutionLayout = before;
+          state.polishTimedOut = true;
+          updateSolutionHint();
+          setMessage(error.advice, "error");
+          return { timedOut: true };
+        }
         if (!candidate || getState() !== state) return { cancelled: true };
         state.layoutSource = {
           kind: candidate.source,

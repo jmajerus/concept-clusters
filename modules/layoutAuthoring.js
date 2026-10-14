@@ -451,10 +451,15 @@ export function createLayoutAuthoringController({
       if (preparingState.detanglePromise) await preparingState.detanglePromise;
       if (preparingState.prettyPrintPromise) await preparingState.prettyPrintPromise;
       if (getState() !== preparingState) return;
-      if (preparingState.solutionLayout === "animated" && preparingState.prettyPrint) {
+      if (preparingState.solutionLayout === "animated" && preparingState.prettyPrint &&
+          !preparingState.polishTimedOut) {
         await preparingState.prettyPrint();
       }
       if (getState() !== preparingState) return;
+      if (preparingState.polishTimedOut) {
+        reportPolishTimedOut(label);
+        return;
+      }
       const source = fromSaved
         ? await reconcileSavedLayout(preparingState)
         : saved
@@ -468,6 +473,16 @@ export function createLayoutAuthoringController({
       layoutAuthoringPrepareBtn.disabled = false;
       updateLayoutAuthoringPanel();
     }
+  }
+
+  // Polishing gave up rather than hang the page (layoutBudget.js): the
+  // board is left as the solve placed it, ready to drag and save.
+  function reportPolishTimedOut(label) {
+    setLayoutAuthoringStatus(
+      `${label} polishing took too long and was stopped; the board is left unpolished. Drag to arrange it, then save.`,
+      "error"
+    );
+    updateLayoutAuthoringPanel();
   }
 
   // The status line once a layout is on the board, after Prepare or a mode
@@ -543,6 +558,10 @@ export function createLayoutAuthoringController({
       return;
     }
     if (getState() !== state || getMode() !== switchedMode) return;
+    if (state.polishTimedOut) {
+      reportPolishTimedOut(label);
+      return;
+    }
     const source = saved
       ? await reconcileSavedLayout(state)
       : { text: `No saved ${label} layout; generated one`, tone: "good" };

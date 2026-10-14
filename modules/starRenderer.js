@@ -58,7 +58,7 @@ import {
 } from "./starLayoutSchema.js";
 import { layoutForMode } from "./layoutDocument.js";
 import { starLayoutTargets } from "./layoutHints.js";
-import { layoutBudget } from "./layoutBudget.js";
+import { layoutBudget, layoutDeadline, LayoutTimeLimit } from "./layoutBudget.js";
 import {
   bridgeArmArrows,
   bridgeArrowPoints,
@@ -1283,6 +1283,8 @@ export function createStarRenderer({
         if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
         const runPrettyPrint = async () => {
           if (getState() !== state || getSim() !== sim) return { cancelled: true };
+          state.polishTimedOut = false;
+          const before = state.solutionLayout;
           state.solutionLayout = "polishing";
           updateSolutionHint();
           setMessage("Solution shown — computing the polished layout…", "good");
@@ -1293,137 +1295,220 @@ export function createStarRenderer({
 
           const original = capturePositions();
           const originalLayout = evaluateLayout();
-          // Settle every node toward its target with light charge and
-          // collision, scored by how far it strays from the targets.
-          const relaxTowards = targets => {
-            allLayoutNodes.forEach(node => {
-              const target = targets.get(node);
-              node.x = target.x; node.y = target.y;
-              node.vx = 0; node.vy = 0;
-            });
-            const layoutSim = d3.forceSimulation(allLayoutNodes).stop();
-            if (d3.randomLcg) layoutSim.randomSource(d3.randomLcg(0.42));
-            layoutSim
-              .force("targetX", d3.forceX(node => targets.get(node).x)
-                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
-              .force("targetY", d3.forceY(node => targets.get(node).y)
-                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
-              .force("charge", d3.forceManyBody().strength(-18))
-              .force("collide", d3.forceCollide().radius(node => node.w / 2 + 12).iterations(2))
-              .alpha(1)
-              .alphaDecay(0.035)
-              .velocityDecay(0.45);
-            for (let tick = 0; tick < 160; tick++) {
-              layoutSim.tick();
-              allLayoutNodes.forEach(node => {
-                const clamped = clampTarget(node, node);
-                node.x = clamped.x; node.y = clamped.y;
-              });
-            }
-            layoutSim.stop();
-            const layout = evaluateLayout();
-            const deviation = allLayoutNodes.reduce((sum, node) => {
-              const target = targets.get(node);
-              return sum + Math.hypot(node.x - target.x, node.y - target.y);
-            }, 0);
-            return { positions: capturePositions(), layout, deviation };
-          };
-
-
-          // Force relaxation can nudge an otherwise good candidate into a
-          // simple local obstruction. Apply the same geometry-verified
-          // corrective moves available to the animated detangler -- the
-          // obvious human fix, rotating a cluster endpoint or moving the
-          // obstructed node -- without accepting a line through a pill
-          // merely because the candidate had attractive aggregate spacing.
-          const repairCandidate = candidate => {
-            const budget = layoutBudget(state.layoutBudget).star;
-            restorePositions(candidate.positions);
-            let repairedLayout = candidate.layout;
-            let repairMoves = 0;
-            // Move ranking is gated by activePhase, which a detangle may have
-            // left anywhere: clear crossings first, then lines through pills
-            // and titles, as the detangler's own phases do.
-            const phaseBefore = activePhase;
-            const phases = [
-              ["crossings", layout => layout.crossingCount > 0],
-              ["edges", layout => layout.crossingCount === 0 && layout.visualIntersectionCount > 0]
-            ];
-            for (const [phase, pending] of phases) {
-              activePhase = phase;
-              while (pending(repairedLayout) && repairMoves < budget.repairMoves) {
-                const direct = bestImprovingMove(repairedLayout);
-                const plan = direct
-                  ? [direct]
-                  : repairMoves <= budget.repairMoves - 2
-                    ? findSetupPair(repairedLayout)
-                    : [];
-                if (!plan.length) break;
-                const beforePlan = repairedLayout;
-                const beforePositions = capturePositions();
-                plan.forEach(move => {
-                  move.node.x = move.target.x;
-                  move.node.y = move.target.y;
-                  repairedLayout = evaluateLayout();
-                });
-                if (compareLayouts(repairedLayout, beforePlan) >= 0) {
-                  restorePositions(beforePositions);
-                  repairedLayout = beforePlan;
-                  break;
-                }
-                repairMoves += plan.length;
-              }
-            }
-            activePhase = phaseBefore;
-            return compareLayouts(repairedLayout, candidate.layout) < 0
-              ? { positions: capturePositions(), layout: repairedLayout, deviation: candidate.deviation }
-              : candidate;
-          };
-
-          state.layoutSource = { kind: "generated" };
-          const curated = savedStarTargets();
-          if (curated) {
-            // An exact layout is shown as saved. An adapted one (edited
-            // puzzle, new board size) settles around its saved positions and
-            // is repaired, so terms it placed fresh do not land on lines or
-            // pills; the unsettled version wins when settling fixes nothing.
-            let targets = curated.targets;
-            if (!curated.exact) {
+          // Throws LayoutTimeLimit rather than hang the page (layoutBudget.js).
+          const checkDeadline = layoutDeadline(state.layoutBudget);
+          try {
+            // Settle every node toward its target with light charge and
+            // collision, scored by how far it strays from the targets.
+            const relaxTowards = targets => {
+              checkDeadline();
               allLayoutNodes.forEach(node => {
                 const target = targets.get(node);
                 node.x = target.x; node.y = target.y;
+                node.vx = 0; node.vy = 0;
               });
-              const asAdapted = { positions: capturePositions(), layout: evaluateLayout(), deviation: 0 };
-              const settled = relaxTowards(targets);
-              const pick = comparePrettyLayouts(settled, asAdapted) < 0 ? settled : asAdapted;
-              const repaired = repairCandidate(pick);
-              restorePositions(original);
-              targets = new Map(repaired.positions.map(({ node, x, y }) => [node, { x, y }]));
-            }
-            if (!await animateLayout(targets)) return { cancelled: true };
-            allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
-            state.prettyPrintStats = {
-              ...layoutMetrics(evaluateLayout()),
-              source: "curated"
+              const layoutSim = d3.forceSimulation(allLayoutNodes).stop();
+              if (d3.randomLcg) layoutSim.randomSource(d3.randomLcg(0.42));
+              layoutSim
+                .force("targetX", d3.forceX(node => targets.get(node).x)
+                  .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
+                .force("targetY", d3.forceY(node => targets.get(node).y)
+                  .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
+                .force("charge", d3.forceManyBody().strength(-18))
+                .force("collide", d3.forceCollide().radius(node => node.w / 2 + 12).iterations(2))
+                .alpha(1)
+                .alphaDecay(0.035)
+                .velocityDecay(0.45);
+              for (let tick = 0; tick < 160; tick++) {
+                layoutSim.tick();
+                allLayoutNodes.forEach(node => {
+                  const clamped = clampTarget(node, node);
+                  node.x = clamped.x; node.y = clamped.y;
+                });
+              }
+              layoutSim.stop();
+              const layout = evaluateLayout();
+              const deviation = allLayoutNodes.reduce((sum, node) => {
+                const target = targets.get(node);
+                return sum + Math.hypot(node.x - target.x, node.y - target.y);
+              }, 0);
+              return { positions: capturePositions(), layout, deviation };
             };
-            state.layoutSource = curated.exact
-              ? { kind: "fixed" }
-              : { kind: "adapted", placed: curated.placed, fixedErrors: curated.errors };
-            state.solutionLayout = "pretty";
-            updateSolutionHint();
-            setMessage("Solution shown — Star layout polished.", "good");
-            state.onAuthorLayoutChanged?.("placement");
-            state.onPlayerLayoutChanged?.("automatic");
-            return state.prettyPrintStats;
-          }
 
-          if (nClusters === 1) {
-            const fan = loneClusterStarFan(titleNodes[0], nodes, W, H);
-            const targetMap = new Map([...fan].map(([node, point]) => [node, clampTarget(node, point)]));
+
+            // Force relaxation can nudge an otherwise good candidate into a
+            // simple local obstruction. Apply the same geometry-verified
+            // corrective moves available to the animated detangler -- the
+            // obvious human fix, rotating a cluster endpoint or moving the
+            // obstructed node -- without accepting a line through a pill
+            // merely because the candidate had attractive aggregate spacing.
+            const repairCandidate = candidate => {
+              const budget = layoutBudget(state.layoutBudget).star;
+              restorePositions(candidate.positions);
+              let repairedLayout = candidate.layout;
+              let repairMoves = 0;
+              // Move ranking is gated by activePhase, which a detangle may have
+              // left anywhere: clear crossings first, then lines through pills
+              // and titles, as the detangler's own phases do.
+              const phaseBefore = activePhase;
+              const phases = [
+                ["crossings", layout => layout.crossingCount > 0],
+                ["edges", layout => layout.crossingCount === 0 && layout.visualIntersectionCount > 0]
+              ];
+              for (const [phase, pending] of phases) {
+                activePhase = phase;
+                while (pending(repairedLayout) && repairMoves < budget.repairMoves) {
+                  const direct = bestImprovingMove(repairedLayout);
+                  const plan = direct
+                    ? [direct]
+                    : repairMoves <= budget.repairMoves - 2
+                      ? findSetupPair(repairedLayout)
+                      : [];
+                  if (!plan.length) break;
+                  const beforePlan = repairedLayout;
+                  const beforePositions = capturePositions();
+                  plan.forEach(move => {
+                    move.node.x = move.target.x;
+                    move.node.y = move.target.y;
+                    repairedLayout = evaluateLayout();
+                  });
+                  if (compareLayouts(repairedLayout, beforePlan) >= 0) {
+                    restorePositions(beforePositions);
+                    repairedLayout = beforePlan;
+                    break;
+                  }
+                  repairMoves += plan.length;
+                }
+              }
+              activePhase = phaseBefore;
+              return compareLayouts(repairedLayout, candidate.layout) < 0
+                ? { positions: capturePositions(), layout: repairedLayout, deviation: candidate.deviation }
+                : candidate;
+            };
+
+            state.layoutSource = { kind: "generated" };
+            const curated = savedStarTargets();
+            if (curated) {
+              // An exact layout is shown as saved. An adapted one (edited
+              // puzzle, new board size) settles around its saved positions and
+              // is repaired, so terms it placed fresh do not land on lines or
+              // pills; the unsettled version wins when settling fixes nothing.
+              let targets = curated.targets;
+              if (!curated.exact) {
+                allLayoutNodes.forEach(node => {
+                  const target = targets.get(node);
+                  node.x = target.x; node.y = target.y;
+                });
+                const asAdapted = { positions: capturePositions(), layout: evaluateLayout(), deviation: 0 };
+                const settled = relaxTowards(targets);
+                const pick = comparePrettyLayouts(settled, asAdapted) < 0 ? settled : asAdapted;
+                const repaired = repairCandidate(pick);
+                restorePositions(original);
+                targets = new Map(repaired.positions.map(({ node, x, y }) => [node, { x, y }]));
+              }
+              if (!await animateLayout(targets)) return { cancelled: true };
+              allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+              state.prettyPrintStats = {
+                ...layoutMetrics(evaluateLayout()),
+                source: "curated"
+              };
+              state.layoutSource = curated.exact
+                ? { kind: "fixed" }
+                : { kind: "adapted", placed: curated.placed, fixedErrors: curated.errors };
+              state.solutionLayout = "pretty";
+              updateSolutionHint();
+              setMessage("Solution shown — Star layout polished.", "good");
+              state.onAuthorLayoutChanged?.("placement");
+              state.onPlayerLayoutChanged?.("automatic");
+              return state.prettyPrintStats;
+            }
+
+            if (nClusters === 1) {
+              const fan = loneClusterStarFan(titleNodes[0], nodes, W, H);
+              const targetMap = new Map([...fan].map(([node, point]) => [node, clampTarget(node, point)]));
+              if (!await animateLayout(targetMap)) return { cancelled: true };
+              allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+              state.prettyPrintStats = {
+                ...layoutMetrics(evaluateLayout()),
+                source: "generated"
+              };
+              state.solutionLayout = "pretty";
+              updateSolutionHint();
+              setMessage("Solution shown — Star layout polished.", "good");
+              state.onAuthorLayoutChanged?.("placement");
+              state.onPlayerLayoutChanged?.("automatic");
+              return state.prettyPrintStats;
+            }
+
+            let best = { positions: original, layout: originalLayout, deviation: Infinity };
+            const evaluateTargets = targets => {
+              const candidate = relaxTowards(targets);
+              if (comparePrettyLayouts(candidate, best) < 0) best = candidate;
+            };
+
+            const fixedTitles = titleNodes.map(title => ({ x: title.x, y: title.y }));
+            evaluateTargets(buildPrettyTargets(null, 0, fixedTitles));
+            const baseOrder = computeClusterOrder(puzzle);
+            const permute = values => values.length <= 1
+              ? [values]
+              : values.flatMap((value, index) =>
+                  permute(values.filter((_, candidate) => candidate !== index))
+                    .map(rest => [value, ...rest])
+                );
+            // Rotation handles the first cluster's absolute ring position,
+            // so fixing it here removes circular duplicates while still
+            // exploring every relative order. Exhaustive order search stays
+            // inexpensive through five clusters; larger puzzles retain the
+            // previous derived/reversed pair to avoid factorial growth.
+            const budget = layoutBudget(state.layoutBudget).star;
+            const orders = nClusters <= budget.exhaustiveClusters
+              ? permute(baseOrder.slice(1)).map(rest => [baseOrder[0], ...rest])
+              : [
+                  baseOrder,
+                  [baseOrder[0], ...baseOrder.slice(1).reverse()]
+                ];
+
+            const rotationSteps = nClusters * budget.rotationsPerSlot;
+            orders.forEach(order => {
+              for (let rotation = 0; rotation < rotationSteps; rotation++) {
+                evaluateTargets(buildPrettyTargets(
+                  order,
+                  -Math.PI / 2 + rotation * 2 * Math.PI / rotationSteps
+                ));
+              }
+            });
+            // Equal angular slots are a strong default, not a complete
+            // search. A human can often clear a stubborn obstruction by
+            // rotating one cluster center past or away from its neighbor,
+            // which also reorients that cluster's ideal endpoints and
+            // ordinary fan. Sample those uneven arrangements explicitly.
+            // A lone cluster has no neighbor; sampling those offsets would
+            // walk its title around the board and undo the lower-left home.
+            const slotAngle = 2 * Math.PI / nClusters;
+            if (nClusters > 1) for (let rotation = 0; rotation < nClusters; rotation++) {
+              const baseRotation =
+                -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
+              baseOrder.forEach(ci => {
+                for (const fraction of budget.offsetFractions) {
+                  evaluateTargets(buildPrettyTargets(
+                    baseOrder,
+                    baseRotation,
+                    null,
+                    new Map([[ci, slotAngle * fraction]])
+                  ));
+                }
+              });
+            }
+
+            best = repairCandidate(best);
+
+            restorePositions(original);
+            const targetMap = new Map(best.positions.map(({ node, x, y }) => [node, { x, y }]));
             if (!await animateLayout(targetMap)) return { cancelled: true };
             allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+            const finalLayout = evaluateLayout();
             state.prettyPrintStats = {
-              ...layoutMetrics(evaluateLayout()),
+              ...layoutMetrics(finalLayout),
               source: "generated"
             };
             state.solutionLayout = "pretty";
@@ -1432,85 +1517,17 @@ export function createStarRenderer({
             state.onAuthorLayoutChanged?.("placement");
             state.onPlayerLayoutChanged?.("automatic");
             return state.prettyPrintStats;
+          } catch (error) {
+            if (!(error instanceof LayoutTimeLimit)) throw error;
+            // The board goes back to where the search found it, unpolished
+            // and still editable.
+            restorePositions(original);
+            state.solutionLayout = before;
+            state.polishTimedOut = true;
+            updateSolutionHint();
+            setMessage(error.advice, "error");
+            return { timedOut: true };
           }
-
-          let best = { positions: original, layout: originalLayout, deviation: Infinity };
-          const evaluateTargets = targets => {
-            const candidate = relaxTowards(targets);
-            if (comparePrettyLayouts(candidate, best) < 0) best = candidate;
-          };
-
-          const fixedTitles = titleNodes.map(title => ({ x: title.x, y: title.y }));
-          evaluateTargets(buildPrettyTargets(null, 0, fixedTitles));
-          const baseOrder = computeClusterOrder(puzzle);
-          const permute = values => values.length <= 1
-            ? [values]
-            : values.flatMap((value, index) =>
-                permute(values.filter((_, candidate) => candidate !== index))
-                  .map(rest => [value, ...rest])
-              );
-          // Rotation handles the first cluster's absolute ring position,
-          // so fixing it here removes circular duplicates while still
-          // exploring every relative order. Exhaustive order search stays
-          // inexpensive through five clusters; larger puzzles retain the
-          // previous derived/reversed pair to avoid factorial growth.
-          const budget = layoutBudget(state.layoutBudget).star;
-          const orders = nClusters <= budget.exhaustiveClusters
-            ? permute(baseOrder.slice(1)).map(rest => [baseOrder[0], ...rest])
-            : [
-                baseOrder,
-                [baseOrder[0], ...baseOrder.slice(1).reverse()]
-              ];
-
-          const rotationSteps = nClusters * budget.rotationsPerSlot;
-          orders.forEach(order => {
-            for (let rotation = 0; rotation < rotationSteps; rotation++) {
-              evaluateTargets(buildPrettyTargets(
-                order,
-                -Math.PI / 2 + rotation * 2 * Math.PI / rotationSteps
-              ));
-            }
-          });
-          // Equal angular slots are a strong default, not a complete
-          // search. A human can often clear a stubborn obstruction by
-          // rotating one cluster center past or away from its neighbor,
-          // which also reorients that cluster's ideal endpoints and
-          // ordinary fan. Sample those uneven arrangements explicitly.
-          // A lone cluster has no neighbor; sampling those offsets would
-          // walk its title around the board and undo the lower-left home.
-          const slotAngle = 2 * Math.PI / nClusters;
-          if (nClusters > 1) for (let rotation = 0; rotation < nClusters; rotation++) {
-            const baseRotation =
-              -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
-            baseOrder.forEach(ci => {
-              for (const fraction of budget.offsetFractions) {
-                evaluateTargets(buildPrettyTargets(
-                  baseOrder,
-                  baseRotation,
-                  null,
-                  new Map([[ci, slotAngle * fraction]])
-                ));
-              }
-            });
-          }
-
-          best = repairCandidate(best);
-
-          restorePositions(original);
-          const targetMap = new Map(best.positions.map(({ node, x, y }) => [node, { x, y }]));
-          if (!await animateLayout(targetMap)) return { cancelled: true };
-          allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
-          const finalLayout = evaluateLayout();
-          state.prettyPrintStats = {
-            ...layoutMetrics(finalLayout),
-            source: "generated"
-          };
-          state.solutionLayout = "pretty";
-          updateSolutionHint();
-          setMessage("Solution shown — Star layout polished.", "good");
-          state.onAuthorLayoutChanged?.("placement");
-          state.onPlayerLayoutChanged?.("automatic");
-          return state.prettyPrintStats;
         };
         state.prettyPrintPromise = runPrettyPrint();
         return state.prettyPrintPromise;

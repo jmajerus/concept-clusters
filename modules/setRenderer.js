@@ -52,7 +52,7 @@ import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
-import { layoutBudget } from "./layoutBudget.js";
+import { layoutBudget, layoutDeadline, LayoutTimeLimit } from "./layoutBudget.js";
 import { defectsWorse, hasDefects } from "./playerLayoutEffort.js";
 import {
   angleDistance,
@@ -761,11 +761,14 @@ export function createSetRenderer({
       return points;
     };
 
+    // Throws LayoutTimeLimit rather than hang the page (layoutBudget.js).
+    const checkDeadline = layoutDeadline(state.layoutBudget);
     const search = (searchOrders, searchRotations, searchHint) => {
     let best = null;
     for (const order of searchOrders) {
       for (const rotation of searchRotations) {
         for (const [scaleX, scaleY] of scalePairs) {
+          checkDeadline();
           const circles = csNodes.map(node => ({
             id: node.id,
             r: node.r,
@@ -1867,6 +1870,8 @@ export function createSetRenderer({
       if (state.made !== state.need) return Promise.resolve({ cancelled: true });
       if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
       const run = async () => {
+        state.polishTimedOut = false;
+        const before = state.solutionLayout;
         state.solutionLayout = "polishing";
         updateSolutionHint();
         state.setSim.stop();
@@ -1964,7 +1969,18 @@ export function createSetRenderer({
         const hint = curatedLayout
           ? circleLayoutHint(curatedLayout, puzzle, { width: W, height: H })
           : null;
-        const candidate = computePrettyCircleLayout(hint);
+        let candidate;
+        try {
+          candidate = computePrettyCircleLayout(hint);
+        } catch (error) {
+          if (!(error instanceof LayoutTimeLimit)) throw error;
+          // The board stays as it is, unpolished and still editable.
+          state.solutionLayout = before;
+          state.polishTimedOut = true;
+          updateSolutionHint();
+          setMessage(error.advice, "error");
+          return { timedOut: true };
+        }
         if (!candidate || getState() !== state) return { cancelled: true };
         state.layoutSource = {
           kind: candidate.source,

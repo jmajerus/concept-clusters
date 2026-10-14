@@ -409,7 +409,7 @@ export function computePrettyGraphLayout(options) {
 }
 
 function searchForPrettyGraphLayout({
-  d3, puzzle, nodes, links, width, height, hint = null, budget = null
+  d3, puzzle, nodes, links, width, height, hint = null, budget = null, checkDeadline
 }) {
   const ringRotations = count => Array.from({ length: count }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / count);
   if (hint) {
@@ -421,16 +421,17 @@ function searchForPrettyGraphLayout({
       orders: [hint.order],
       rotations,
       hint,
-      budget
+      budget,
+      checkDeadline
     });
     if (hinted) return { ...hinted, source: "hint" };
   }
-  return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height, budget }), source: "generated" };
+  return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height, budget, checkDeadline }), source: "generated" };
 }
 
 function searchGraphLayouts({
   d3, puzzle, nodes, links, width, height, orders: hintedOrders = null, rotations: hintedRotations = null, hint = null,
-  budget = null
+  budget = null, checkDeadline = () => {}
 }) {
   const pinned = new Map(nodes
     .filter(node => Number.isFinite(node.fx) && Number.isFinite(node.fy))
@@ -448,6 +449,7 @@ function searchGraphLayouts({
 
   orders.forEach(order => rotations.forEach(rotation => scales.forEach(scale => {
     placements.forEach(placement => {
+    checkDeadline();
     const anchors = clusterAnchors(order, rotation, width, height, scale, placement);
     const seeded = seedCandidate(puzzle, nodes, anchors, width, height, hint);
     const clones = nodes.map(node => {

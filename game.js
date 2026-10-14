@@ -439,7 +439,8 @@ async function finishSolvedLayoutAfterModeSwitch(switchState, switchMode) {
     if (switchState.detangle) {
       await switchState.detangle();
       if (state !== switchState || mode !== switchMode) return { cancelled: true };
-      if (switchState.prettyPrint && switchState.solutionLayout !== "pretty") {
+      if (switchState.prettyPrint && switchState.solutionLayout !== "pretty" &&
+          !switchState.polishTimedOut) {
         return await switchState.prettyPrint();
       }
       return switchState.detangleStats || { cancelled: false };
@@ -1436,8 +1437,10 @@ async function beginLensSequence() {
   // player completion already ran detangle before this freeze (an
   // uncrossing pass on Star; Graph/Circle's pretty-printer) so the last
   // connection is not locked in crossed.
+  // A polish that ran out of time (layoutBudget.js) is not run again.
   if (state.completedViaShowSolution &&
       state.solutionLayout !== "pretty" &&
+      !state.polishTimedOut &&
       typeof state.prettyPrint === "function") {
     try {
       await state.prettyPrint();
