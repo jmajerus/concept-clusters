@@ -25,6 +25,7 @@
     "content:normalize-credits": "node tools/normalize-lesson-credits.mjs",
     "content:propagate-category-renames": "node tools/propagate-category-renames.mjs",
     "content:lift-legacy-board": "node tools/lift-legacy-board.mjs",
+    "content:backfill-first-published": "node tools/backfill-first-published.mjs",
     "content:migrate-category-identifiers": "node tools/migrate-category-identifiers.mjs",
     "content:canonicalize": "node tools/canonicalize-content.mjs",
     "puzzles:ensure-registry": "node tools/ensure-puzzle-registry.mjs",

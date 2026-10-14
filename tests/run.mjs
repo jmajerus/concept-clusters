@@ -149,6 +149,7 @@ import * as wikiLinkCheck from "./wiki-link-check.mjs";
 import * as boardLimitWaivers from "./board-limit-waivers.mjs";
 import * as mcpWaiverChatApproval from "./mcp-waiver-chat-approval.mjs";
 import * as legacyBoardLift from "./legacy-board-lift.mjs";
+import * as firstPublishedBackfill from "./first-published-backfill.mjs";
 
 const allTests = [
   mcpAuthoringDomains, boardLimitWaivers, mcpWaiverChatApproval,
@@ -161,7 +162,7 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, singleClusterLayout,
+  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -181,7 +182,7 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
-  circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, singleClusterLayout,
+  circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
@@ -228,7 +229,7 @@ const sideTests = {
     authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
-    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, legacyBoardLift
+    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, legacyBoardLift, firstPublishedBackfill
   ]),
   shared: new Set([
     contentValidation,
