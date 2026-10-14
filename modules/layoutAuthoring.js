@@ -17,8 +17,7 @@ import {
 import {
   starFreeStripEnabled,
   starFreeStripCapacityNeeded,
-  starBridgePreconnectEnabled,
-  boardWithFlag
+  starBridgePreconnectEnabled
 } from "./starLayoutRepository.js";
 import { layoutIsFixed } from "./layoutHints.js";
 import { lensFlowTraceEnabled } from "./lensFlowTrace.js";
@@ -44,7 +43,6 @@ export function createLayoutAuthoringController({
   getBoard,
   showSolution,
   saveLayout = null,
-  saveBoardFlags = null,
   saveLayoutBoard = null,
   layoutPass = null,
   getDraftId = () => null,
@@ -640,23 +638,23 @@ export function createLayoutAuthoringController({
     }
   });
 
-  // The cards beside the layout card. Board settings (size, the Star
-  // free-term strip) save with the layout, to the open working copy or else
-  // the published puzzle. Experiments (bridge pre-connect, lens flow trace)
-  // change play, so they save on the working copy only.
-  const LAYOUT_BOARD_FLAGS = new Set(["sizeFactor", "starFreeStrip"]);
+  // The cards beside the layout card. Everything on them saves into the
+  // layout document's board settings. Board settings (size, the Star
+  // free-term strip) save to the open working copy or else the published
+  // puzzle. Experiments change play, so they save on a working copy only.
+  const EXPERIMENT_FLAGS = new Set(["bridgePreconnect", "lensFlowTrace", "lensRevealCue"]);
   function layoutCanWriteBoard() {
     return layoutAuthoringMode && typeof saveLayoutBoard === "function";
   }
 
   function workingCopyCanWriteBoard() {
-    return layoutAuthoringMode && typeof saveBoardFlags === "function" && Boolean(getDraftId());
+    return layoutCanWriteBoard() && Boolean(getDraftId());
   }
 
   if (layoutSideEl) layoutSideEl.hidden = !layoutCanWriteBoard();
 
   function setBoardFlagStatus(key, text) {
-    const card = LAYOUT_BOARD_FLAGS.has(key) ? "layout" : "copy";
+    const card = EXPERIMENT_FLAGS.has(key) ? "copy" : "layout";
     const el = flagStatusEls[card];
     if (!el) return;
     el.textContent = text || flagStatusNotes[card];
@@ -693,25 +691,22 @@ export function createLayoutAuthoringController({
     }
   }
 
-  // Every card control saves in place. `afterSave` applies the saved value
-  // to the open board: a flag only a reveal reads goes straight into the
-  // puzzle in memory; one that changes how the board starts restarts it.
+  // Every card control saves in place, and the saved layout document goes
+  // straight into the puzzle in memory. `afterSave` then applies it to the
+  // open board: a setting that changes how the board starts restarts it.
   async function persistBoardFlag(key, value, afterSave = null) {
     const state = getState();
-    const viaLayout = LAYOUT_BOARD_FLAGS.has(key);
-    if (!state?.puzzle || !(viaLayout ? layoutCanWriteBoard() : workingCopyCanWriteBoard())) return;
+    const experiment = EXPERIMENT_FLAGS.has(key);
+    if (!state?.puzzle || !(experiment ? workingCopyCanWriteBoard() : layoutCanWriteBoard())) return;
     setBoardControlsDisabled(true);
     try {
-      if (viaLayout) {
-        // An explicit value, even the default (null), records the author's
-        // choice so the automatic layout pass leaves it alone.
-        state.puzzle.layout = await saveLayoutBoard({
-          puzzleId: state.puzzle.id,
-          board: { [key]: value === undefined ? null : value }
-        });
-      } else {
-        await saveBoardFlags({ board: boardWithFlag(state.puzzle, key, value) });
-      }
+      // An explicit value, even the default (null), records the author's
+      // choice: it overrides a value an older puzzle document carries, and
+      // the automatic layout pass leaves it alone.
+      state.puzzle.layout = await saveLayoutBoard({
+        puzzleId: state.puzzle.id,
+        board: { [key]: value === undefined ? null : value }
+      });
       if (key === "sizeFactor") savedSizeFactor = typeof value === "number" ? value : 1;
       setBoardFlagStatus(key, "");
       setBoardControlsDisabled(false);
@@ -896,10 +891,7 @@ export function createLayoutAuthoringController({
       const state = getState();
       if (!state?.puzzle) return;
       const value = starBridgePreconnectEnabled(state.puzzle) ? undefined : true;
-      persistBoardFlag("bridgePreconnect", value, () => {
-        state.puzzle.board = boardWithFlag(state.puzzle, "bridgePreconnect", value);
-        restartBoard?.();
-      });
+      persistBoardFlag("bridgePreconnect", value, () => restartBoard?.());
     });
     // Only a reveal reads the flow trace and the reveal cue, so the board
     // and the lens progress stay as they are.
@@ -907,18 +899,13 @@ export function createLayoutAuthoringController({
       const state = getState();
       if (!state?.puzzle) return;
       const value = lensFlowTraceEnabled(state.puzzle) ? undefined : true;
-      persistBoardFlag("lensFlowTrace", value, () => {
-        state.puzzle.board = boardWithFlag(state.puzzle, "lensFlowTrace", value);
-        syncStarFreeStripButtons();
-      });
+      persistBoardFlag("lensFlowTrace", value, syncStarFreeStripButtons);
     });
     lensRevealCueSelect?.addEventListener("change", async () => {
       const state = getState();
       if (!state?.puzzle) return;
       const value = lensRevealCueSelect.value || undefined;
-      await persistBoardFlag("lensRevealCue", value, () => {
-        state.puzzle.board = boardWithFlag(state.puzzle, "lensRevealCue", value);
-      });
+      await persistBoardFlag("lensRevealCue", value);
       syncLensRevealControls();
     });
 

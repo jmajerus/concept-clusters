@@ -11,13 +11,12 @@ import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { createMemorySiteSettingsStore } from "../modules/siteSettings.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
-export const name = "board administration: layout and working-copy board controls survive a focused save";
+export const name = "board administration: every layout-page control saves with the layout and survives a focused save";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const draftId = "board-flags";
-// Bridge pre-connect changes play and stays in the puzzle document; the
-// free-term strip and board size are layout settings saved with the layout.
-const savedBoard = { bridgePreconnect: true };
+// Every control on the layout page saves into the layout document's board
+// settings; none of them touches the puzzle document or its revision.
 const layoutBoard = layout => {
   const { savedAt, ...rest } = layout?.board || {};
   return rest;
@@ -93,6 +92,7 @@ export async function run(page) {
     const boardURL = `${baseURL}/?puzzle=${draftId}&author=layout&mode=star`;
     await page.goto(`${baseURL}/index.html`, { waitUntil: "networkidle" });
     await page.evaluate(() => localStorage.clear());
+    const startRevision = (await draftStore.getDraft(draftId)).revision;
     await page.goto(boardURL, { waitUntil: "networkidle" });
     await waitForBoard(page);
     assert.equal(await page.textContent("#star-free-strip-btn"), "Use free-term strip");
@@ -114,7 +114,7 @@ export async function run(page) {
     await page.click("#star-bridge-preconnect-btn");
     await page.waitForFunction(() =>
       window.CC?.state?.puzzle?.layout?.board?.starFreeStrip === true
-      && window.CC.state.puzzle.board?.bridgePreconnect === true
+      && window.CC.state.puzzle.layout.board.bridgePreconnect === true
       && window.CC.state !== window.__boardBefore,
     null, { timeout: 15000 });
     await waitForBoard(page);
@@ -125,13 +125,13 @@ export async function run(page) {
     assert.equal(await page.evaluate(() => window.__samePage), true, "the strip and pre-connect do not reload");
 
     const stored = await draftStore.getDraft(draftId);
-    assert.deepEqual(stored.document.board, savedBoard);
-    assert.deepEqual(layoutBoard(stored.layout), { starFreeStrip: true, source: "author" });
+    assert.equal(stored.document.board, undefined);
+    assert.deepEqual(layoutBoard(stored.layout), { starFreeStrip: true, bridgePreconnect: true, source: "author" });
 
     await page.goto(boardURL, { waitUntil: "networkidle" });
     await page.waitForFunction(() =>
       window.CC?.state?.puzzle?.layout?.board?.starFreeStrip === true
-      && window.CC.state.puzzle.board?.bridgePreconnect === true,
+      && window.CC.state.puzzle.layout.board.bridgePreconnect === true,
     null, { timeout: 15000 });
     await waitForBoard(page);
     const beforeWidth = await page.evaluate(() => document.getElementById("board").viewBox.baseVal.width);
@@ -177,9 +177,9 @@ export async function run(page) {
       if (sized.layout?.board?.sizeFactor === 1.2) break;
       await new Promise(resolve => setTimeout(resolve, 50));
     }
-    const savedLayoutBoard = { starFreeStrip: true, sizeFactor: 1.2, source: "author" };
+    const savedLayoutBoard = { starFreeStrip: true, bridgePreconnect: true, sizeFactor: 1.2, source: "author" };
     assert.deepEqual(layoutBoard(sized.layout), savedLayoutBoard);
-    assert.deepEqual(sized.document.board, savedBoard, "board size stays out of the puzzle document");
+    assert.equal(sized.document.board, undefined, "board size stays out of the puzzle document");
 
     const content = partitionAuthoredDocument(sized.document).content;
     const focused = await draftStore.replaceDomain({
@@ -189,7 +189,7 @@ export async function run(page) {
       expectedRevision: sized.revision
     });
     assert.equal(focused.document.title, "Retitled by a content save");
-    assert.deepEqual(focused.document.board, savedBoard);
+    assert.equal(focused.document.board, undefined);
     assert.deepEqual(layoutBoard((await draftStore.getDraft(draftId)).layout), savedLayoutBoard);
     assert.equal(focused.documentStale, true);
 
@@ -197,7 +197,7 @@ export async function run(page) {
     await page.waitForFunction(() =>
       document.getElementById("puzzle-title")?.textContent === "Retitled by a content save"
       && window.CC?.state?.puzzle?.layout?.board?.starFreeStrip === true
-      && window.CC.state.puzzle.board?.bridgePreconnect === true
+      && window.CC.state.puzzle.layout.board.bridgePreconnect === true
       && window.CC.state.puzzle.layout.board.sizeFactor === 1.2,
     null, { timeout: 15000 });
 
@@ -228,14 +228,14 @@ export async function run(page) {
     assert.equal(resized.layout.board.sizeFactor, 1, "back to the default is saved as an explicit choice");
 
     // Experiments: the lens flow trace is offered on a puzzle with lenses
-    // and, like pre-connect, saves on the working copy's document.
+    // and, like pre-connect, saves with the working copy's layout.
     await page.goto(boardURL, { waitUntil: "networkidle" });
     await waitForBoard(page);
     assert.equal(await page.isVisible("#board-experiments"), true);
     assert.equal(await page.textContent("#lens-flow-trace-btn"), "Turn on lens flow trace");
     await page.evaluate(() => { window.__sameBoard = window.CC.state; });
     await page.click("#lens-flow-trace-btn");
-    await page.waitForFunction(() => window.CC?.state?.puzzle?.board?.lensFlowTrace === true, null, {
+    await page.waitForFunction(() => window.CC?.state?.puzzle?.layout?.board?.lensFlowTrace === true, null, {
       timeout: 15000
     });
     await waitForBoard(page);
@@ -243,8 +243,9 @@ export async function run(page) {
     assert.equal(await page.evaluate(() => window.CC.state === window.__sameBoard), true,
       "the flow trace leaves the board as it is");
     const traced = await draftStore.getDraft(draftId);
-    assert.deepEqual(traced.document.board, { ...savedBoard, lensFlowTrace: true });
-    assert.equal(traced.layout.board.sizeFactor, 1, "experiments leave the layout's board settings alone");
+    assert.equal(traced.document.board, undefined);
+    assert.equal(traced.layout.board.lensFlowTrace, true);
+    assert.equal(traced.layout.board.sizeFactor, 1, "experiments leave the other board settings alone");
 
     // Lens reveal cue: this puzzle's choice saves on the working copy
     // without rebuilding the board; the site setting saves for every puzzle
@@ -254,12 +255,16 @@ export async function run(page) {
     const selectedText = selector => page.$eval(selector, select => select.selectedOptions[0]?.textContent);
     assert.equal(await selectedText("#lens-reveal-cue-select"), "Use site setting (None)");
     await page.selectOption("#lens-reveal-cue-select", "spotlight");
-    await page.waitForFunction(() => window.CC?.state?.puzzle?.board?.lensRevealCue === "spotlight"
+    await page.waitForFunction(() => window.CC?.state?.puzzle?.layout?.board?.lensRevealCue === "spotlight"
       && !document.getElementById("lens-reveal-cue-select").disabled, null, { timeout: 15000 });
     assert.equal(await page.evaluate(() => window.CC.state === window.__sameBoard), true,
       "saving the cue leaves the board as it is");
     const cued = await draftStore.getDraft(draftId);
-    assert.deepEqual(cued.document.board, { ...savedBoard, lensFlowTrace: true, lensRevealCue: "spotlight" });
+    assert.equal(cued.layout.board.lensRevealCue, "spotlight");
+    assert.equal(cued.document.board, undefined);
+    // The edit page's Save working copy holds the revision it rendered; no
+    // control here may move it. The content save above is the only write.
+    assert.equal(cued.revision, startRevision + 1, "layout-page controls leave the draft revision alone");
 
     await page.selectOption("#site-lens-reveal-cue", "ripple");
     await page.waitForFunction(() => !document.getElementById("site-lens-reveal-cue").disabled

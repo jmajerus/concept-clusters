@@ -14,9 +14,11 @@ import {
   mergePublishLayout
 } from "../modules/layoutDocument.js";
 import { boardCanvas, boardSizeFactor, canonicalBoardSizeFactor } from "../modules/puzzleBoardSize.js";
-import { starFreeStripEnabled } from "../modules/starLayoutRepository.js";
+import { starBridgePreconnectEnabled, starFreeStripEnabled } from "../modules/starLayoutRepository.js";
+import { lensFlowTraceEnabled } from "../modules/lensFlowTrace.js";
+import { isLensRevealCue, puzzleLensRevealCue } from "../modules/lensRevealCue.js";
 
-export const name = "layout board settings: size and free-term strip live with the layout";
+export const name = "layout board settings: every layout-page setting lives with the layout";
 
 export async function run() {
   // Reading: the layout document wins; an explicit null there means the
@@ -114,8 +116,27 @@ export async function run() {
   assert.equal(boardSizeOwner(null, null), null);
 
   // Validation.
-  assert.deepEqual(boardSettingsErrors({ sizeFactor: 1.1, starFreeStrip: null, source: "author", savedAt: "x" }, canonicalBoardSizeFactor), []);
-  assert.ok(boardSettingsErrors({ sizeFactor: 1.13 }, canonicalBoardSizeFactor).length);
-  assert.ok(boardSettingsErrors({ starFreeStrip: "yes" }, canonicalBoardSizeFactor).length);
-  assert.ok(boardSettingsErrors({ bridgePreconnect: true }, canonicalBoardSizeFactor).length);
+  const errors = board => boardSettingsErrors(board, canonicalBoardSizeFactor, isLensRevealCue);
+  assert.deepEqual(errors({ sizeFactor: 1.1, starFreeStrip: null, source: "author", savedAt: "x" }), []);
+  assert.deepEqual(errors({ bridgePreconnect: true, lensFlowTrace: null, lensRevealCue: "ripple" }), []);
+  assert.ok(errors({ sizeFactor: 1.13 }).length);
+  assert.ok(errors({ starFreeStrip: "yes" }).length);
+  assert.ok(errors({ lensFlowTrace: "on" }).length);
+  assert.ok(errors({ lensRevealCue: "sparkle" }).length);
+  assert.ok(errors({ title: "x" }).length, "only board settings belong here");
+
+  // The experiments read like the other settings: the layout decides, and
+  // null there means the default over an older document's value.
+  const legacyExperiments = { lenses: [], board: { bridgePreconnect: true, lensFlowTrace: true, lensRevealCue: "both" } };
+  assert.equal(starBridgePreconnectEnabled(legacyExperiments), true);
+  assert.equal(lensFlowTraceEnabled(legacyExperiments), true);
+  assert.equal(puzzleLensRevealCue(legacyExperiments), "both");
+  const overridden = {
+    ...legacyExperiments,
+    layout: envelope({ bridgePreconnect: null, lensFlowTrace: null, lensRevealCue: null })
+  };
+  assert.equal(starBridgePreconnectEnabled(overridden), false);
+  assert.equal(lensFlowTraceEnabled(overridden), false);
+  assert.equal(puzzleLensRevealCue(overridden), null);
+  assert.equal(lensFlowTraceEnabled({ layout: envelope({ lensFlowTrace: true }) }), true);
 }

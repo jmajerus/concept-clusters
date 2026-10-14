@@ -37,16 +37,16 @@ the infrastructure preserves and recombines the other domains.
 | `content` | Educational meaning: puzzle identity, copy, clusters, and bridge core | Agent | Read/write |
 | `classification` | Disciplinary home, membership, subcategory placement, search tags, and optional level | Agent | Read/write; id and title are read-only context |
 | `pedagogy` | Relationships, lenses, learning introductions, related puzzles, and language | Agent | Read/write; content and classification are read-only context |
-| `administration` | Experimental play flags on `board`: bridge pre-connect, the lens flow trace, and the lens reveal cue | Author | Protected. Not an agent write domain |
-| `layout` | How a solved board is drawn: saved per-mode layouts and the board settings (size, Star free-term strip) | Author and the automatic layout pass | Outside the document. Never an agent write domain |
+| `administration` | Older puzzles' play flags on `board`, read only as a fallback for the matching layout settings | No current writer | Protected. Not an agent write domain |
+| `layout` | Everything the layout page sets: saved per-mode layouts and the board settings (size, Star free-term strip, bridge pre-connect, lens flow trace, lens reveal cue) | Author and the automatic layout pass | Outside the document. Never an agent write domain |
 | `provenance` | Who contributed and how human and generative work relate | Author and infrastructure | Protected |
 | `system` | Ownership, revisions, timestamps, hashes, validation, and lifecycle state | Infrastructure | Outside the document |
 
 The agent-write domains stay three: content, classification, and pedagogy. Administration is a separate human projection because its stimulus is an admin turning an experiment on or off, which is not a contribution event and not a board, shelf, or lesson edit. Provenance records who contributed, and it changes when contribution changes. The shared rule is only mechanical: a content, classification, or pedagogy save must not see or replace `board`. Layout is not part of the puzzle document at all; it is described in [The layout domain](#the-layout-domain).
 
-`board.bridgePreconnect` starts every bridge connected in Graph, Star, and Circle when true. Omitted or false leaves bridges for the player. `board.lensFlowTrace`, when true, runs a one-shot pulse along each directed bridge a lens targets as that lens's explanation appears. `board.lensRevealCue` (`none`, `ripple`, `spotlight`, or `both`) overrides the site setting of the same name for this puzzle: the short effect that points at a lens's answer pills as it is revealed. Omitted uses the site setting. All three change play rather than drawing, which is why they stay here. Drafts store the object in `administration_json`. Publish still writes one assembled puzzle document, so play reads `puzzle.board` and a change alters the content fingerprint.
+The document's `board` object holds values that older puzzles carry for settings that are now layout settings. Nothing writes it any more; drafts keep it in `administration_json`, and play reads each key only when the layout document does not set that key (see [The layout domain](#the-layout-domain)).
 
-Site settings are not part of any puzzle. They live in D1's `site_settings` table, one row per setting, and apply to every puzzle at once: `lensRevealCue` and `lensRevealHoverPing` (pointing at an answer named in a lens explanation pings its pill). A missing row is the built-in default. Public play reads them from the publication index (`/api/publications`) and the authoring server from its play corpus, and the layout view's Site settings card writes them. A puzzle's `board` flag overrides the matching site setting.
+Site settings are not part of any puzzle. They live in D1's `site_settings` table, one row per setting, and apply to every puzzle at once: `lensRevealCue` and `lensRevealHoverPing` (pointing at an answer named in a lens explanation pings its pill). A missing row is the built-in default. Public play reads them from the publication index (`/api/publications`) and the authoring server from its play corpus, and the layout view's Site settings card writes them. A puzzle's own layout setting overrides the matching site setting.
 
 Promotion is a later, explicit change for one field after it has been vetted. Move that field's ownership to content or pedagogy, set its kind to authored or derived, add it to that domain's phase, and backfill draft rows from `administration_json` into the destination column. The player-facing key stays `board`. Until that promotion, agents cannot set or clear these flags. Do not add a domain per experiment; the field list stays this one closed object.
 
@@ -212,9 +212,26 @@ without that index, including an unpublished draft, shows no publication date.
 
 ## The layout domain
 
-A saved layout says where a solved board's pieces go: per-mode positions,
-plus the board settings (canvas size and the Star free-term strip). It is
-presentation, not puzzle content, so it is not a projection of the document
+A saved layout says where a solved board's pieces go and how the board
+plays them out: per-mode positions, plus the board settings. Every control on
+the layout page writes one of these, so nothing there changes a draft's
+revision under an open edit page.
+
+| Setting | Effect |
+|---|---|
+| `sizeFactor` | Canvas size, a 5% step from 0.75 to 1.25 |
+| `starFreeStrip` | true forces Star's free-term strip, false keeps the classic board; unset uses the capacity heuristic |
+| `bridgePreconnect` | true starts every bridge connected in Graph, Star, and Circle |
+| `lensFlowTrace` | true runs a one-shot pulse along each directed bridge a lens targets as its explanation appears |
+| `lensRevealCue` | `none`, `ripple`, `spotlight`, or `both`: overrides the site setting for this puzzle |
+
+`null` for a setting is an explicit "use the default", which also overrides
+a value an older puzzle document carries in `board`. Bridge pre-connect, the
+flow trace, and the reveal cue change play, so the layout page saves them
+only on an open working copy, never straight to a published puzzle; they
+reach players when that copy is published.
+
+A layout is not puzzle content, so it is not a projection of the document
 at all. It lives beside the document in one `layout_json` column on
 `puzzle_drafts` and on `published_documents`: outside the content hash, with
 no effect on `content_revised_at`, and with its own fingerprint in the public

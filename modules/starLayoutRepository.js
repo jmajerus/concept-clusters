@@ -19,27 +19,16 @@ export function starFreeStripEnabled(puzzle, { width, height } = {}) {
   return starFreeStripCapacityNeeded(puzzle, width, height);
 }
 
-// Editorial boolean on puzzle.board. true starts every bridge connected.
-// Omitted or false leaves bridges for the player.
+// Layout setting (see layoutBoardSetting). true starts every bridge
+// connected. Unset or false leaves bridges for the player.
 export function starBridgePreconnectEnabled(puzzle) {
-  return puzzle?.board?.bridgePreconnect === true;
+  return layoutBoardSetting(puzzle, "bridgePreconnect") === true;
 }
 
 // The strip owns the top of the board, so connected seeds start beside
 // their titles. Classic Star leaves seeds to the force simulation.
 export function starSeedBesideTitleEnabled(puzzle, options = {}) {
   return starFreeStripEnabled(puzzle, options);
-}
-
-// Next administration object after one flag changes. `undefined` omits the
-// flag. An empty result means the document should drop `board`.
-export function boardWithFlag(puzzle, key, value) {
-  const board = { ...(puzzle?.board && typeof puzzle.board === "object" ? puzzle.board : {}) };
-  if (value === true || value === false || (typeof value === "number" && Number.isFinite(value)) ||
-      (typeof value === "string" && value !== "")) {
-    board[key] = value;
-  } else delete board[key];
-  return Object.keys(board).length ? board : undefined;
 }
 
 // Match starRenderer strip packing constants so the heuristic and the
