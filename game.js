@@ -73,6 +73,9 @@ let siteSettings = {};
 let corpusFailures = 0;
 let publicIndexSignature = null;
 let publicIndexCheckedAt = 0;
+// True when public play booted from the static snapshot because the
+// publication index did not answer.
+let publicIndexFallback = false;
 
 if (playCorpusUrl) {
   const corpus = await loadPlayCorpus(playCorpusUrl);
@@ -91,31 +94,51 @@ if (playCorpusUrl) {
     index
   ] = await Promise.all([
     import("./puzzles/manifest.js"),
-    loadPublicPlayIndex(publicPlayIndexUrl)
+    loadPublicPlayIndex(publicPlayIndexUrl).catch(error => {
+      console.error("Publication index unavailable; playing the static snapshot", error);
+      return null;
+    })
   ]);
-  replaceCategoriesRegistry(index.categories);
-  CATALOGUES = index.catalogues;
-  setCatalogueRegistry(CATALOGUES);
-  puzzleLoader = createPublicPuzzleLoader(PUZZLE_MANIFEST, index);
-  publicIndexSignature = JSON.stringify(index);
+  if (index) {
+    replaceCategoriesRegistry(index.categories);
+    CATALOGUES = index.catalogues;
+    setCatalogueRegistry(CATALOGUES);
+    puzzleLoader = createPublicPuzzleLoader(PUZZLE_MANIFEST, index);
+    publicIndexSignature = JSON.stringify(index);
+    siteSettings = index.settings || {};
+    PUZZLES = puzzleLoader.browsePuzzles;
+    playSource = "public-d1";
+    corpusFailures = PUZZLE_MANIFEST_FAILURES.length;
+  } else {
+    // D1 is the source of what is published; the deploy's static copy is
+    // its backup, as of the last freeze. Navigation retries the index and
+    // reloads into it once it answers.
+    await useStaticSnapshot(PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES);
+    publicIndexFallback = true;
+    showSnapshotNotice();
+  }
   publicIndexCheckedAt = Date.now();
-  siteSettings = index.settings || {};
-  PUZZLES = puzzleLoader.browsePuzzles;
-  playSource = "public-d1";
-  corpusFailures = PUZZLE_MANIFEST_FAILURES.length;
 } else {
-  const [
-    { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES },
-    { CATALOGUES: gitCatalogues }
-  ] = await Promise.all([
-    import("./puzzles/manifest.js"),
-    import("./catalogues/index.js")
-  ]);
+  const { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES } = await import("./puzzles/manifest.js");
+  await useStaticSnapshot(PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES);
+}
+
+// Play from the puzzle modules and catalogues the deploy carries.
+async function useStaticSnapshot(manifest, failures) {
+  const { CATALOGUES: gitCatalogues } = await import("./catalogues/index.js");
   CATALOGUES = gitCatalogues;
   setCatalogueRegistry(CATALOGUES);
-  puzzleLoader = createPuzzleLoader(PUZZLE_MANIFEST);
+  puzzleLoader = createPuzzleLoader(manifest);
   PUZZLES = puzzleLoader.browsePuzzles;
-  corpusFailures = PUZZLE_MANIFEST_FAILURES.length;
+  corpusFailures = failures.length;
+}
+
+function showSnapshotNotice() {
+  const notice = document.getElementById("snapshot-notice");
+  if (!notice) return;
+  notice.textContent = "The live puzzle library isn’t available right now, so these are the puzzles " +
+    "from the last site update. Recent changes will show up once it’s back.";
+  notice.hidden = false;
 }
 
 let puzzleLoadGeneration = 0;
@@ -1981,6 +2004,17 @@ appNavigation = createAppNavigation({
   puzzles: PUZZLES,
   beforeRenderRoute: publicPlayIndexUrl ? async ({ initial }) => {
     if (initial || Date.now() - publicIndexCheckedAt < 30_000) return true;
+    if (publicIndexFallback) {
+      // Stay on the snapshot until the index answers, then switch to it.
+      try {
+        await loadPublicPlayIndex(publicPlayIndexUrl);
+      } catch {
+        publicIndexCheckedAt = Date.now();
+        return true;
+      }
+      location.reload();
+      return false;
+    }
     try {
       const next = await loadPublicPlayIndex(publicPlayIndexUrl);
       publicIndexCheckedAt = Date.now();

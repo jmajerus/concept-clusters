@@ -84,14 +84,40 @@ export async function run(page) {
     await page.waitForFunction(() => !document.body.classList.contains("booting"));
     assert.notEqual(await page.locator("#puzzle-title").textContent(), "Corrected in D1");
 
+    // With the index unreachable, play falls back to the deploy's static
+    // copy and says so. That copy is as of the last freeze, so a puzzle
+    // withdrawn since is still in it: the accepted cost of having a backup.
     indexUnavailable = true;
     await page.evaluate(() => {
       const now = Date.now();
       Date.now = () => now + 31_000;
     });
     await Promise.all([page.waitForEvent("load"), page.locator("#browse-puzzles").click()]);
-    await page.locator("#boot-failure [role=alert]").waitFor({ state: "visible" });
-    assert.match(await page.locator("#boot-failure").textContent(), /couldn’t check the current published puzzles/i);
+    await page.locator("#snapshot-notice").waitFor({ state: "visible" });
+    assert.match(await page.textContent("#snapshot-notice"), /last site update/);
+    assert.equal(await page.locator("#boot-failure").isHidden(), true);
+    await page.goto(`${base}/?puzzle=energy-flow`);
+    await waitForTitle(page, "Energy flow in living systems");
+    assert.equal(await page.evaluate(() => window.CC.PUZZLES.some(puzzle => puzzle.id === "new-from-d1")), false,
+      "the snapshot carries only frozen puzzles");
+
+    // Navigation keeps the snapshot while the index is still down, and
+    // switches to live play once it answers.
+    await page.evaluate(() => {
+      const now = Date.now();
+      Date.now = () => now + 31_000;
+    });
+    await page.locator("#browse-puzzles").click();
+    await page.locator("#snapshot-notice").waitFor({ state: "visible" });
+    indexUnavailable = false;
+    await page.evaluate(() => {
+      const now = Date.now();
+      Date.now = () => now + 62_000;
+    });
+    // Back to the puzzle is a navigation like any other.
+    await Promise.all([page.waitForEvent("load"), page.evaluate(() => history.back())]);
+    await page.waitForFunction(() => window.CC?.PUZZLES?.some(puzzle => puzzle.id === "new-from-d1"));
+    assert.equal(await page.locator("#snapshot-notice").isHidden(), true);
   } finally {
     await new Promise(resolve => server.close(resolve));
   }
