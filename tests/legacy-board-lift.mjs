@@ -4,7 +4,13 @@ import {
   createMemoryContentDocumentRepository
 } from "../modules/contentDocumentRepository.js";
 import { samePlayablePuzzle, unpublishedChangeDomains } from "../modules/draftReviewDiff.js";
-import { LAYOUT_BOARD_KEYS, layoutBoardSetting, liftLegacyBoard } from "../modules/layoutDocument.js";
+import {
+  LAYOUT_BOARD_KEYS,
+  autoBoardConflict,
+  layoutBoardSetting,
+  layoutDocumentWithBoard,
+  liftLegacyBoard
+} from "../modules/layoutDocument.js";
 import { draftMatchesCheckout } from "../modules/localDraftReview.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
@@ -56,6 +62,13 @@ export async function run() {
   const fresh = liftLegacyBoard(puzzle({ board: { lensFlowTrace: true } }), envelope({ sizeFactor: 1.1, savedAt: "x" }, { star: { nodes: {} } }));
   assert.deepEqual(fresh.layout, envelope({ sizeFactor: 1.1, savedAt: "x", lensFlowTrace: true }, { star: { nodes: {} } }),
     "modes and the save stamp stay; lifted values carry no stamp of their own");
+  // A lifted setting joins the board as it stands, owner and save time
+  // included; on an automatic board, the automatic pass's next size keeps it.
+  const onAuto = liftLegacyBoard(puzzle({ board: { lensFlowTrace: true } }), envelope({ sizeFactor: 1, source: "auto", savedAt: "a" }));
+  assert.deepEqual(onAuto.layout.board, { sizeFactor: 1, source: "auto", savedAt: "a", lensFlowTrace: true });
+  const resized = { sizeFactor: 1.1, source: "auto" };
+  assert.equal(autoBoardConflict(resized, onAuto.layout), null);
+  assert.equal(layoutDocumentWithBoard(resized, onAuto.layout).board.lensFlowTrace, true);
   const plain = puzzle();
   assert.equal(liftLegacyBoard(plain, null).document, plain, "a document without board is returned as is");
 
@@ -113,15 +126,38 @@ export async function run() {
   await insert("seeded", { lensFlowTrace: true }, { at: "then", by: "git-seed" });
   await insert("held", { bridgePreconnect: true }, null);
   await insert("clean", undefined, { at: "then", by: "git-seed" });
+  await insert("disputed", { lensFlowTrace: true }, { at: "then", by: "git-seed" });
   const rows = (await database.prepare("SELECT * FROM published_documents").all()).results;
   const checkout = {
     seeded: canonical(puzzle({ id: "seeded", board: { lensFlowTrace: true } })),
     held: canonical(puzzle({ id: "held", title: "Older title" }))
   };
-  const plan = await planLegacyBoardLift({ publishedRows: rows, readCheckout: async id => checkout[id] || null });
-  assert.deepEqual(plan.rows.map(row => [row.id, row.matchesGit]), [["seeded", true], ["held", false]]);
+  // A working copy that turned the trace off keeps its puzzle waiting.
+  const draftRows = [
+    { id: "disputed", owner_subject: "author-1", administration_json: null },
+    { id: "seeded", owner_subject: "author-1", administration_json: JSON.stringify({ board: { lensFlowTrace: true } }) }
+  ];
+  const plan = await planLegacyBoardLift({ publishedRows: rows, draftRows, readCheckout: async id => checkout[id] || null });
+  assert.deepEqual(plan.rows.map(row => [row.id, row.matchesGit, row.draftsDisagree.length]),
+    [["seeded", true, 0], ["held", false, 0], ["disputed", false, 1]]);
+  // A layout saved after planning moves the update time: that row is skipped,
+  // with no history row or cue.
+  await database.prepare("UPDATE published_documents SET updated_at = 'later' WHERE id = 'held'").run();
   const result = await applyLegacyBoardLift(database, plan, { cue: true, now: "2026-10-14T00:00:00Z" });
   assert.deepEqual(result.cued, ["seeded"]);
+  assert.deepEqual(result.skipped, ["held"]);
+  assert.equal(result.applied, 1);
+  assert.equal((await repo.getPublished({ kind: "puzzle", id: "held" })).revision, 3);
+  assert.equal((await database.prepare(
+    "SELECT COUNT(*) AS n FROM published_document_revisions WHERE id = 'held'"
+  ).first()).n, 0, "a skipped row gets no history row");
+  assert.equal((await repo.getPublished({ kind: "puzzle", id: "disputed" })).revision, 3, "a disputed row waits");
+  const replanned = await planLegacyBoardLift({
+    publishedRows: (await database.prepare("SELECT * FROM published_documents").all()).results,
+    draftRows,
+    readCheckout: async id => checkout[id] || null
+  });
+  await applyLegacyBoardLift(database, { rows: replanned.rows.filter(row => row.id === "held") }, { now: "2026-10-14T00:00:01Z" });
   const seededRow = await repo.getPublished({ kind: "puzzle", id: "seeded" });
   assert.equal(seededRow.revision, 4);
   assert.equal(seededRow.document.board, undefined);
@@ -135,10 +171,11 @@ export async function run() {
   ).first();
   assert.equal(history?.published_by, LIFT_ACTOR, "the lift is its own revision in the history");
   assert.equal((await repo.getPublished({ kind: "puzzle", id: "clean" })).revision, 3, "rows without board are left alone");
-  // A second run finds nothing to do.
+  // A second run finds only the disputed row left.
   const again = await planLegacyBoardLift({
     publishedRows: (await database.prepare("SELECT * FROM published_documents").all()).results,
+    draftRows,
     readCheckout: async () => null
   });
-  assert.equal(again.rows.length, 0);
+  assert.deepEqual(again.rows.map(row => row.id), ["disputed"]);
 }

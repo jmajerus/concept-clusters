@@ -287,9 +287,16 @@ export function layoutBoardSetting(puzzle, key) {
  * An older puzzle document with its `board` settings moved into the layout:
  * each one the layout does not already set (an explicit null included) is
  * copied in, and the document loses `board`. That is exactly what
- * layoutBoardSetting reads, so play does not change. Lifted settings carry
- * no save stamp, so any later save outranks them when a working copy is
- * published, and no source, which reads as an author's.
+ * layoutBoardSetting reads, so play does not change.
+ *
+ * Board settings have one owner and one save time for the whole object, and
+ * a lifted setting takes the board's as it stands. That keeps every later
+ * decision the same as before the lift: a publish merge picks between whole
+ * boards by those, and was already choosing the document's value alongside
+ * the board it picked. With no board yet, lifted settings get neither, which
+ * reads as an author's and the oldest save. On an automatic board a lifted
+ * setting stays put: the automatic pass only ever merges in a new size, and
+ * no write to a published layout may change an experiment.
  * Returns the inputs unchanged when the document has no `board`.
  */
 export function liftLegacyBoard(document, layout) {

@@ -72,10 +72,11 @@ function hasBoard(json) {
 }
 
 // A working copy's administration column is an envelope ({ board }) or, in
-// older rows, the board object itself.
-function draftCarriesBoard(json) {
+// older rows, the board object itself. Empty values are not stored.
+function draftBoard(json) {
   const value = parsedObject(json) || {};
-  return Object.hasOwn(value, "board") || LAYOUT_BOARD_KEYS.some(key => Object.hasOwn(value, key));
+  if (Object.hasOwn(value, "board")) return value.board || {};
+  return LAYOUT_BOARD_KEYS.some(key => Object.hasOwn(value, key)) ? value : null;
 }
 
 /**
@@ -85,6 +86,11 @@ function draftCarriesBoard(json) {
  */
 export async function planLegacyBoardLift({ publishedRows, draftRows = [], readCheckout }) {
   const rows = [];
+  const draftsById = new Map();
+  for (const draft of draftRows) {
+    if (!draftsById.has(draft.id)) draftsById.set(draft.id, []);
+    draftsById.get(draft.id).push(draft);
+  }
   for (const row of publishedRows) {
     if (row.kind !== "puzzle" || row.withdrawn_at || !hasBoard(row.document)) continue;
     const document = JSON.parse(row.document);
@@ -95,9 +101,19 @@ export async function planLegacyBoardLift({ publishedRows, draftRows = [], readC
       cuedForFreezeAt: row.cued_for_freeze_at,
       cuedForFreezeBy: row.cued_for_freeze_by
     });
+    // Publishing a working copy lifts its own board only into settings the
+    // merged layout leaves unset, so it no longer overrides a lifted value.
+    // A copy that disagrees on one (it turned the setting off or changed it)
+    // would lose that change, so its puzzle waits until the copy is
+    // published or deleted.
+    const disagreeing = (draftsById.get(row.id) || []).filter(draft => {
+      const board = draftBoard(draft.administration_json) || {};
+      return lift.lifted.some(key => board[key] !== document.board[key]);
+    });
     rows.push({
       row,
       id: row.id,
+      draftsDisagree: disagreeing.map(draft => draft.owner_subject || draft.id),
       document: lift.document,
       layoutJson: lift.lifted.length ? serializeLayoutDocument(lift.layout) : row.layout_json ?? null,
       lifted: lift.lifted,
@@ -108,43 +124,59 @@ export async function planLegacyBoardLift({ publishedRows, draftRows = [], readC
     });
   }
   const drafts = draftRows
-    .filter(row => draftCarriesBoard(row.administration_json))
+    .filter(row => draftBoard(row.administration_json))
     .map(row => ({ id: row.id, ownerSubject: row.owner_subject || null }));
   return { rows, drafts };
 }
 
+// Each row's writes are one batch, and each depends on the row being the
+// one planned: the same revision and update time (a layout save or an
+// unpublish moves the time but not the revision) and still live. The history
+// row and the cue select from the row the lift just wrote, so a row that
+// changed after planning gets none of them and is reported as skipped.
 export async function applyLegacyBoardLift(database, plan, { cue = false, now = new Date().toISOString() } = {}) {
+  const lifted = [];
   const cued = [];
+  const skipped = [];
   for (const item of plan.rows) {
+    if (item.draftsDisagree.length) continue;
     const documentJson = serializeDraftDocument(item.document);
     const contentHash = await draftContentHash(documentJson);
-    const nextRevision = Number(item.row.revision) + 1;
+    const revision = Number(item.row.revision);
+    const nextRevision = revision + 1;
     const cueNow = cue && item.matchesGit && !item.authorCued;
+    const liftedRow = "kind = 'puzzle' AND id = ? AND revision = ? AND updated_at = ?";
     const results = await database.batch([
       database.prepare(`
         UPDATE published_documents
         SET document = ?, content_hash = ?, layout_json = ?, revision = ?, updated_at = ?
-        WHERE kind = 'puzzle' AND id = ? AND revision = ?
-      `).bind(documentJson, contentHash, item.layoutJson, nextRevision, now, item.id, Number(item.row.revision)),
+        WHERE kind = 'puzzle' AND id = ? AND revision = ? AND updated_at = ? AND withdrawn_at IS NULL
+      `).bind(
+        documentJson, contentHash, item.layoutJson, nextRevision, now,
+        item.id, revision, item.row.updated_at
+      ),
       database.prepare(`
         INSERT INTO published_document_revisions
           (kind, id, revision, document, content_hash, published_by, published_at)
-        VALUES ('puzzle', ?, ?, ?, ?, ?, ?)
-      `).bind(item.id, nextRevision, documentJson, contentHash, LIFT_ACTOR, now),
+        SELECT kind, id, revision, document, content_hash, ?, ?
+        FROM published_documents WHERE ${liftedRow}
+      `).bind(LIFT_ACTOR, now, item.id, nextRevision, now),
       ...(cueNow
         ? [database.prepare(`
             UPDATE published_documents
             SET cued_for_freeze_at = ?, cued_for_freeze_by = ?
-            WHERE kind = 'puzzle' AND id = ? AND revision = ?
-          `).bind(now, LIFT_ACTOR, item.id, nextRevision)]
+            WHERE ${liftedRow}
+          `).bind(now, LIFT_ACTOR, item.id, nextRevision, now)]
         : [])
     ]);
     if (Number(results[0]?.meta?.changes || 0) !== 1) {
-      throw new Error(`${item.id} changed while planning; re-run the dry run and retry.`);
+      skipped.push(item.id);
+      continue;
     }
+    lifted.push(item.id);
     if (cueNow) cued.push(item.id);
   }
-  return { applied: plan.rows.length, cued };
+  return { applied: lifted.length, cued, skipped };
 }
 
 function renderReport(report, json) {
@@ -158,16 +190,23 @@ function renderReport(report, json) {
     const notes = [
       row.lifted.length ? `lift ${row.lifted.join(", ")}` : null,
       row.dropped.length ? `drop ${row.dropped.join(", ")} (layout already decides)` : null,
-      row.authorCued ? "already cued" : row.matchesGit ? "matches git" : "differs from git"
+      row.authorCued ? "already cued" : row.matchesGit ? "matches git" : "differs from git",
+      row.draftsDisagree.length ? "WAITING: a working copy disagrees; publish or delete it first" : null
     ].filter(Boolean);
     console.log(`    - ${row.id}: ${notes.join("; ")}`);
   }
   if (report.apply) {
     console.log(`  Lifted: ${report.applied}; cued for Freeze: ${report.cued.length}`);
+    if (report.skipped.length) {
+      console.log(`  Skipped, changed since planning (run again): ${report.skipped.join(", ")}`);
+    }
   }
   console.log(`  Working copies still carrying board (lifted when published): ${report.drafts.length}`);
   for (const draft of report.drafts) console.log(`    - ${draft.id}`);
-  const uncued = report.rows.filter(row => !row.authorCued && !report.cued.includes(row.id));
+  const uncued = report.rows.filter(row =>
+    !row.authorCued && !report.cued.includes(row.id) && !report.skipped.includes(row.id) &&
+    !row.draftsDisagree.length
+  );
   if (!report.apply && report.rows.length) {
     console.log("\nRe-run with --apply to lift these rows; add --cue to cue the ones that match git.");
   } else if (uncued.length) {
@@ -187,13 +226,14 @@ async function main() {
   });
   const result = options.apply
     ? await applyLegacyBoardLift(database, plan, { cue: options.cue })
-    : { applied: 0, cued: [] };
+    : { applied: 0, cued: [], skipped: [] };
   renderReport({
     apply: options.apply,
     applied: result.applied,
     cued: result.cued,
-    rows: plan.rows.map(({ id, lifted, dropped, authorCued, matchesGit }) => ({
-      id, lifted, dropped, authorCued, matchesGit
+    skipped: result.skipped,
+    rows: plan.rows.map(({ id, lifted, dropped, authorCued, matchesGit, draftsDisagree }) => ({
+      id, lifted, dropped, authorCued, matchesGit, draftsDisagree
     })),
     drafts: plan.drafts
   }, options.json);
