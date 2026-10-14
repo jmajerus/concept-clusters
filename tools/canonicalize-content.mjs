@@ -25,7 +25,7 @@
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { cp, mkdtemp, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
 import { join, relative, resolve, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -186,6 +186,13 @@ function gitRowsById(rows = []) {
     grouped.set(row.id, list);
   }
   return grouped;
+}
+
+// Each registered puzzle module, by the id its file is named for, read from
+// the registry's import lines so a module that fails to load still counts.
+export function registeredPuzzleModules(registrySource) {
+  return [...String(registrySource).matchAll(/^import \w+ from "(\.\/[^"]+\.js)";/gm)]
+    .map(([, module]) => ({ id: module.slice(module.lastIndexOf("/") + 1, -".js".length), module }));
 }
 
 // Build the manifest against a disposable overlay containing the planned
@@ -425,21 +432,23 @@ async function planGit(rows, categoryRegistry, {
     }
   }
 
+  // Registrations come from the registry itself, never from the generated
+  // manifest: that file is not committed, so a copy on disk can predate the
+  // checkout, and it leaves out any module that fails to load, which is the
+  // very case this pass repairs.
   let manifest;
   const manifestPath = join(repositoryRoot, "puzzles", "manifest.js");
-  // Generated and never committed: build it if this checkout has none yet.
-  if (await currentFile(manifestPath) === null) await buildPuzzleManifest({ repositoryRoot });
   const manifestOriginal = await snapshot(manifestPath);
   try {
-    ({ PUZZLE_MANIFEST: manifest } = await import(
-      `${pathToFileURL(manifestPath).href}?content-canonicalization-${Date.now()}`
-    ));
+    manifest = registeredPuzzleModules(
+      await readFile(join(repositoryRoot, "puzzles", "index.js"), "utf8")
+    );
   } catch (error) {
     unresolved.push({
-      source: "git:puzzles/manifest.js",
+      source: "git:puzzles/index.js",
       kind: "puzzle",
       id: null,
-      reason: `cannot load puzzle manifest: ${error.message}`
+      reason: `cannot read puzzle registry: ${error.message}`
     });
     manifest = [];
   }
@@ -452,10 +461,10 @@ async function planGit(rows, categoryRegistry, {
     // independent migration failures.
     if (!documents.has(entry.id) && !sourceIds.has(entry.id)) {
       unresolved.push({
-        source: "git:puzzles/manifest.js",
+        source: "git:puzzles/index.js",
         kind: "puzzle",
         id: entry.id,
-        reason: "manifest puzzle has no canonical content source"
+        reason: "registered puzzle has no canonical content source"
       });
     }
   }
@@ -465,7 +474,7 @@ async function planGit(rows, categoryRegistry, {
         source: "git:content/puzzles",
         kind: "puzzle",
         id,
-        reason: "canonical content source is not registered in puzzles/manifest.js"
+        reason: "canonical content source is not registered in puzzles/index.js"
       });
     }
   }
@@ -482,7 +491,7 @@ async function planGit(rows, categoryRegistry, {
         source: "git:generated-module",
         kind: "puzzle",
         id,
-        reason: "manifest entry has no generated module path"
+        reason: "registry entry has no generated module path"
       });
       continue;
     }
@@ -510,7 +519,7 @@ async function planGit(rows, categoryRegistry, {
         source: "git:generated-module",
         kind: "puzzle",
         id,
-        reason: `manifest module is missing: ${relativePath(modulePath, repositoryRoot)}`
+        reason: `registered module is missing: ${relativePath(modulePath, repositoryRoot)}`
       });
       continue;
     }

@@ -373,9 +373,12 @@ polish passes and saved-session restoration preserve it.
 
 ## Testing
 
-The site itself has no build step and no dependencies — `tests/` is the
-one part of this project that does, since driving a real browser needs
-one. First time, or after pulling changes to `package.json`:
+The site itself has no dependencies and one build step: `puzzles/manifest.js`
+is generated from `puzzles/index.js` (`npm run puzzles:build-manifest`) and
+never committed. `npm run dev`, `wrangler dev`/`deploy`, and the test scripts
+build it; any other way of serving the folder needs that command run first.
+`tests/` is the one part of this project with dependencies, since driving a
+real browser needs one. First time, or after pulling changes to `package.json`:
 
 ```
 npm install
