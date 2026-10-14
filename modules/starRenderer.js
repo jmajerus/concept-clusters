@@ -69,7 +69,7 @@ export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode, updateSolutionHint, countEl, setMessage,
-  onBackgroundClick = null, onClusterTitleTap = null
+  onBackgroundClick = null, onClusterTitleTap = null, onClusterContextMenu = null
 }) {
   function buildStarGraph() {
     const state = getState();
@@ -1937,6 +1937,7 @@ export function createStarRenderer({
         tapTitle(d, e);
       }
     });
+    titleG.on("contextmenu", (e, d) => onClusterContextMenu?.(d.ci, e, e.currentTarget));
 
     // Two independent pieces, mirroring exactly how a bridge already
     // separates them: an optional author-curated `info` (a cluster's

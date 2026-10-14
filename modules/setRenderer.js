@@ -120,7 +120,8 @@ function stackMetrics(puzzle) {
 export function createSetRenderer({
   svg, getState, getW, getH, getSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onClusterTap = null
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onClusterTap = null,
+  onClusterContextMenu = null
 }) {
   // Cluster circle sizing (content-driven, unrelated to physics), a
   // stable "free area" scatter position for every node that can start
@@ -1405,6 +1406,9 @@ export function createSetRenderer({
     // bridge pill's (see pillDrag below): the drag suppresses the native
     // click.
     let clusterDragMoved = 0;
+    // A long-press that opened the cluster menu ends in this same drag;
+    // that release isn't a tap.
+    let clusterMenuOpened = false;
     const clusterDrag = d3.drag()
       .filter(event => {
         if (event.ctrlKey || event.button) return false;
@@ -1414,6 +1418,7 @@ export function createSetRenderer({
       .subject((e, d) => clusterPos(d.ci))
       .on("start", function (e, d) {
         clusterDragMoved = 0;
+        clusterMenuOpened = false;
         d3.select(this).raise().classed("dragging", true); svg.classed("dragging", true);
         if (lensLayoutEditable(state)) {
           state.setSim.stop();
@@ -1457,7 +1462,7 @@ export function createSetRenderer({
           state.onPlayerDragEnd?.(state.setLayout.csNodes[d.ci]);
           state.onPlayerLayoutChanged?.("player");
         }
-        if (clusterDragMoved < 4) {
+        if (clusterDragMoved < 4 && !clusterMenuOpened) {
           tapCluster(d.ci, e.sourceEvent);
           // The drag also suppresses the focus a tap would give, and focus
           // is what pins the cluster's info (touch has no hover). Deferred
@@ -1512,6 +1517,9 @@ export function createSetRenderer({
           if (e.key !== "Enter" && e.key !== " ") return;
           e.preventDefault();
           tapCluster(d.ci, e);
+        });
+        g.on("contextmenu", (e, d) => {
+          if (onClusterContextMenu?.(d.ci, e, e.currentTarget)) clusterMenuOpened = true;
         });
         g.on("focus", (e, d) => focusTermInfo(clusterInfoNode(d.ci)));
         g.on("blur", (e, d) => blurTermInfo(state.clusterInfoNodes[d.ci]));

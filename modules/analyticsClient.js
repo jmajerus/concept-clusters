@@ -31,8 +31,10 @@ export function trackPuzzleLoad(puzzleId, mode) {
 // with (incorrectMoveCount, elapsedMs) and whether Show Solution was a
 // reach-for-it-immediately click or a genuine give-up after trying
 // (usedShowSolution + hadProgressBeforeShowSolution together).
-// filledClusters counts clusters the player filled in one go with the
-// Alt+Shift label shortcut.
+// filledClusters counts clusters the player filled in one go (Alt+Shift
+// on a label, or Solve cluster in its menu); resetClusters counts Reset
+// cluster; summariesBeforeComplete counts Cluster summary opened on a
+// cluster that wasn't finished yet.
 export function trackPuzzleCompleted(puzzleId, mode, stats) {
   trackEvent("puzzle_completed", {
     puzzleId,
@@ -41,6 +43,8 @@ export function trackPuzzleCompleted(puzzleId, mode, stats) {
     elapsedMs: Date.now() - stats.startedAt,
     usedShowSolution: stats.completedViaShowSolution,
     hadProgressBeforeShowSolution: stats.hadProgressBeforeShowSolution,
-    filledClusters: stats.filledClusterCount || 0
+    filledClusters: stats.filledClusterCount || 0,
+    resetClusters: stats.resetClusterCount || 0,
+    summariesBeforeComplete: stats.summaryBeforeCompleteCount || 0
   });
 }

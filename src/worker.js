@@ -83,7 +83,8 @@ async function handleEvent(request, env) {
 // double1 = 1 (a plain count column for SUM()-based totals).
 // puzzle_completed: double1 = incorrectMoveCount, double2 = elapsedSeconds,
 // double3 = usedShowSolution (1/0), double4 = hadProgressBeforeShowSolution (1/0),
-// double5 = filledClusters (clusters filled with the Alt+Shift label shortcut).
+// double5 = filledClusters (clusters filled with the Alt+Shift shortcut or
+// the label menu), double6 = resetClusters, double7 = summariesBeforeComplete.
 function buildDataPoint(event, data, geo) {
   const puzzleId = String(data.puzzleId ?? "").slice(0, 64);
   const mode = String(data.mode ?? "").slice(0, 16);
@@ -109,7 +110,9 @@ function buildDataPoint(event, data, geo) {
         elapsedSeconds,
         data.usedShowSolution === true ? 1 : 0,
         data.hadProgressBeforeShowSolution === true ? 1 : 0,
-        Number.isFinite(data.filledClusters) ? Number(data.filledClusters) : 0
+        Number.isFinite(data.filledClusters) ? Number(data.filledClusters) : 0,
+        Number.isFinite(data.resetClusters) ? Number(data.resetClusters) : 0,
+        Number.isFinite(data.summariesBeforeComplete) ? Number(data.summariesBeforeComplete) : 0
       ],
       indexes: [puzzleId || "unknown"]
     };

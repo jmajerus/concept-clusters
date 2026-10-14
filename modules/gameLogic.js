@@ -313,16 +313,25 @@ export function createGameEngine({
   // same taps showSolution does, limited to one cluster: every unplaced
   // member, and each bridge's link into it. Not a give-up, so it leaves
   // the Show Solution flags alone and only counts the fill.
-  function fillCluster(ci) {
-    const state = getState();
+  function fillTargets(state, ci) {
     const cluster = state.puzzle.clusters?.[ci];
-    if (!cluster) return false;
-    const seed = state.nodes.find(n => !isBridge(n) && n.gs[0] === ci && n.word === cluster.seeds?.[0]);
-    if (!seed) return false;
+    const seed = cluster && state.nodes.find(n => !isBridge(n) && n.gs[0] === ci && n.word === cluster.seeds?.[0]);
+    if (!seed) return null;
     const pending = state.nodes.filter(n => isBridge(n)
       ? n.gs.includes(ci) && !n.connected.includes(ci)
       : n.gs[0] === ci && !isDone(n));
-    if (!pending.length) return false;
+    return pending.length ? { seed, pending } : null;
+  }
+
+  function canFillCluster(ci) {
+    return !!fillTargets(getState(), ci);
+  }
+
+  function fillCluster(ci) {
+    const state = getState();
+    const targets = fillTargets(state, ci);
+    if (!targets) return false;
+    const { seed, pending } = targets;
 
     state.selected = null;
     state.filledClusterCount = (state.filledClusterCount || 0) + 1;
@@ -389,5 +398,5 @@ export function createGameEngine({
     state.onProgressChanged?.();
   }
 
-  return { handleTap, checkClusterCompletion, fillCluster, showSolution };
+  return { handleTap, checkClusterCompletion, canFillCluster, fillCluster, showSolution };
 }
