@@ -141,6 +141,9 @@ async function applyGitChanges(
   let manifest = [];
   if (generated && moduleRows.length) {
     const manifestPath = join(root, "puzzles", "manifest.js");
+    // Generated and never committed: build it from the registry first.
+    const { buildPuzzleManifest } = await import("./build-puzzle-manifest.mjs");
+    await buildPuzzleManifest({ repositoryRoot: root });
     try {
       ({ PUZZLE_MANIFEST: manifest } = await import(`${pathToFileURL(manifestPath).href}?category-id-migration`));
     } catch (error) {

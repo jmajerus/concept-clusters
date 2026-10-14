@@ -1,5 +1,6 @@
 // Local snapshot of which puzzle ids are in GitHub production
-// (`puzzles/manifest.js` on the base branch — what the player boots).
+// (the `puzzles/index.js` registry on the base branch, from which each
+// deploy builds the manifest the player boots).
 // Freeze fetches origin, then joins that set with the freeze patch
 // (add/update minus remove) assuming the freeze PR merges. Refresh from
 // GitHub writes origin membership only. List pages read the file so they
@@ -130,20 +131,15 @@ export function snapshotGithubProductionManifestFromGit({
   const ref = productionRef(env);
   let originFetchError = null;
   if (fetchRemote) originFetchError = fetchOrigin(repositoryRoot, runGit);
-  let sourcePath = "puzzles/manifest.js";
+  const sourcePath = "puzzles/index.js";
   let source;
   try {
     source = runGit(repositoryRoot, ["show", `${ref}:${sourcePath}`]);
   } catch (showError) {
-    try {
-      sourcePath = "puzzles/index.js";
-      source = runGit(repositoryRoot, ["show", `${ref}:${sourcePath}`]);
-    } catch {
-      throw new Error(
-        originFetchError
-        || (showError instanceof Error ? showError.message : String(showError))
-      );
-    }
+    throw new Error(
+      originFetchError
+      || (showError instanceof Error ? showError.message : String(showError))
+    );
   }
   const ids = parseGithubProductionSource(source, { path: sourcePath }).sort();
   let sha = "";

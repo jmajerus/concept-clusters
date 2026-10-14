@@ -77,14 +77,10 @@ export async function snapshotGithubProductionManifestFromClient(github) {
   }
   const branch = github.baseBranch || "main";
   const { commitSha } = await github.getBranchHead(branch);
-  let sourcePath = "puzzles/manifest.js";
-  let source = await github.readFile(sourcePath, commitSha);
-  let ids = parseGithubProductionSource(source || "", { path: sourcePath });
-  if (!ids.length) {
-    sourcePath = "puzzles/index.js";
-    source = await github.readFile(sourcePath, commitSha);
-    ids = parseGithubProductionSource(source || "", { path: sourcePath });
-  }
+  // The registry: the manifest is built at deploy and never committed.
+  const sourcePath = "puzzles/index.js";
+  const source = await github.readFile(sourcePath, commitSha);
+  const ids = parseGithubProductionSource(source || "", { path: sourcePath });
   return {
     fetchedAt: new Date().toISOString(),
     ref: branch,

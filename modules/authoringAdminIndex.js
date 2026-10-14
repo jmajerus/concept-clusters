@@ -380,7 +380,7 @@ function renderGithubProductionSection({
     return `<section class="github-prod">
       <h2>GitHub snapshot</h2>
       <p class="meta">The Puzzles GitHub column on this Worker is origin’s
-      <code>puzzles/manifest.js</code>, fetched per isolate. Refresh the
+      <code>puzzles/index.js</code>, fetched per isolate. Refresh the
       local snapshot on the LAN authoring checkout
       (<code>npm run dev</code>).</p>
     </section>`;
@@ -389,7 +389,7 @@ function renderGithubProductionSection({
   return `<section class="github-prod">
     <h2>GitHub snapshot</h2>
     <p class="meta">The Puzzles GitHub column reads a local snapshot of origin’s
-    <code>puzzles/manifest.js</code>. Freeze also refreshes it (joined with the
+    <code>puzzles/index.js</code>. Freeze also refreshes it (joined with the
     freeze patch) when something is cued. Use this when Freeze is locked
     because nothing is cued. Fetch does not write puzzle files.</p>
     <p class="meta">${escapeHtml(status)}</p>
@@ -546,7 +546,7 @@ export function renderGithubRefreshResultPage({ result = null, error = null } = 
   const idCount = Array.isArray(snapshot?.ids) ? snapshot.ids.length : 0;
   const ref = snapshot?.ref || "origin";
   const how = snapshot?.fetchedVia === "github-api"
-    ? `Read <code>puzzles/manifest.js</code> from GitHub
+    ? `Read <code>puzzles/index.js</code> from GitHub
       (<code>${escapeHtml(ref)}</code>)`
     : `Read origin <code>${escapeHtml(ref)}</code>`;
   return freezeResultShell("GitHub snapshot",

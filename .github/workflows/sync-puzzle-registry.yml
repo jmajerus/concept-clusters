@@ -4,7 +4,8 @@ name: Sync puzzle registry
 # any on-disk modules still missing from puzzles/index.js and push a
 # follow-up commit when needed. Freeze's own commit already splices the
 # registry directly, so this should normally be a no-op; it exists for any
-# puzzles/** change that reaches main by some other path.
+# puzzles/** change that reaches main by some other path. puzzles/manifest.js
+# is generated at deploy and never committed, so it is not part of this.
 #
 # That commit is pushed with the default GITHUB_TOKEN, which GitHub Actions
 # deliberately never lets trigger other on:push workflows (anti-recursion
@@ -62,15 +63,15 @@ jobs:
         # onto the new main and retry a few times instead of giving up on
         # the first race.
         run: |
-          if git diff --quiet -- puzzles/index.js puzzles/manifest.js; then
+          if git diff --quiet -- puzzles/index.js; then
             echo "Registry already complete."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add puzzles/index.js puzzles/manifest.js
-          git commit -m "Register puzzle modules and refresh puzzles/manifest.js."
+          git add puzzles/index.js
+          git commit -m "Register puzzle modules."
           for attempt in 1 2 3 4 5; do
             if git push; then
               echo "changed=true" >> "$GITHUB_OUTPUT"

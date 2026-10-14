@@ -427,6 +427,8 @@ async function planGit(rows, categoryRegistry, {
 
   let manifest;
   const manifestPath = join(repositoryRoot, "puzzles", "manifest.js");
+  // Generated and never committed: build it if this checkout has none yet.
+  if (await currentFile(manifestPath) === null) await buildPuzzleManifest({ repositoryRoot });
   const manifestOriginal = await snapshot(manifestPath);
   try {
     ({ PUZZLE_MANIFEST: manifest } = await import(
