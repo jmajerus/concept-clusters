@@ -23,6 +23,8 @@ import {
   renderProvenanceL1,
   UNIDENTIFIED_GENERATIVE_SYSTEM
 } from "../modules/authoringProvenance.js";
+import { D1DraftRepository } from "../modules/d1DraftRepository.js";
+import { createSqliteD1 } from "./lib/sqlite-d1.mjs";
 
 export const name = "MCP client identity and lesson credit suggestions";
 
@@ -661,5 +663,42 @@ export async function run() {
       label?.system === UNIDENTIFIED_GENERATIVE_SYSTEM
     ),
     false
+  );
+
+  // The drafts page reads back what each stamped call reported, owner-scoped
+  // and oldest first, from the same records the MCP boundary writes.
+  const repository = new D1DraftRepository(createSqliteD1());
+  const actor = { subject: "editor" };
+  await repository.create({ draftId: "stamped-board", document: { id: "stamped-board" }, actor });
+  for (const [capturedAt, name] of [
+    ["2026-10-15T03:57:18.236Z", "claude-code"],
+    ["2026-10-14T02:48:40.189Z", "Anthropic/ClaudeAI"]
+  ]) {
+    const { stampRecord } = stampDocumentAssistanceFromMcp({ id: "stamped-board" }, {
+      role: "edited",
+      log: { tool: "save_puzzle_draft", draftId: "stamped-board" },
+      ctx: { mcpReq: { envelope: { "io.modelcontextprotocol/clientInfo": { name } } } }
+    });
+    await repository.recordAssistanceStamp({ record: { ...stampRecord, capturedAt }, actor });
+  }
+  assert.deepEqual(await repository.listAssistanceStamps({ draftId: "stamped-board", actor }), [
+    {
+      capturedAt: "2026-10-14T02:48:40.189Z",
+      tool: "save_puzzle_draft",
+      hostId: "claude",
+      system: "Claude",
+      clientName: "Anthropic/ClaudeAI"
+    },
+    {
+      capturedAt: "2026-10-15T03:57:18.236Z",
+      tool: "save_puzzle_draft",
+      hostId: "claude-code",
+      system: "Claude",
+      clientName: "claude-code"
+    }
+  ]);
+  assert.deepEqual(
+    await repository.listAssistanceStamps({ draftId: "stamped-board", actor: { subject: "someone-else" } }),
+    []
   );
 }

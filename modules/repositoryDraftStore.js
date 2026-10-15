@@ -84,6 +84,11 @@ export function createRepositoryDraftStore({ repository, actor }) {
       const draftId = typeof input === "string" ? input : input?.draftId;
       return repository.listBoardLimitWaiverRequests({ draftId, actor });
     },
+    async listAssistanceStamps(input) {
+      const draftId = typeof input === "string" ? input : input?.draftId;
+      if (typeof repository.listAssistanceStamps !== "function") return [];
+      return repository.listAssistanceStamps({ draftId, actor });
+    },
     async decideBoardLimitWaiver(input) {
       return record(await repository.decideBoardLimitWaiver({ ...input, actor }));
     },

@@ -1395,6 +1395,26 @@ export async function run() {
   const claudePage = claudeRowPage([{ name: "Claude (Claude Opus 5.5)" }]);
   assert.match(claudePage, /name="[^"]*claudeSurfaceHost" value="Claude"/);
   assert.match(claudePage, /type="checkbox" id="provenance-claude-code-claude" name="[^"]*claudeCodeHost" value="Claude">/);
+  // Beside it, what the frame reported for this draft's Claude calls, raw.
+  assert.doesNotMatch(claudePage, /reported by:/);
+  const reportedPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      provenance: { collaboration: "ai", contributors: [{ name: "Claude (Claude Opus 5.5)" }] }
+    },
+    assistanceStamps: [
+      { capturedAt: "2026-10-14T02:48:40.189Z", hostId: "claude", clientName: "Anthropic/ClaudeAI" },
+      { capturedAt: "2026-10-14T02:49:26.860Z", hostId: "claude", clientName: "Anthropic/ClaudeAI" },
+      { capturedAt: "2026-10-15T03:57:18.236Z", hostId: "claude-code", clientName: "claude-code" },
+      { capturedAt: "2026-10-15T04:00:00.000Z", hostId: "zcode", clientName: "zcode" }
+    ]
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  assert.match(
+    reportedPage,
+    /reported by: <code>Anthropic\/ClaudeAI<\/code> ×2 \(10-14\) · <code>claude-code<\/code> ×1 \(10-15\)<\/span>/
+  );
+  assert.doesNotMatch(reportedPage, /<code>zcode<\/code>/);
   assert.match(
     claudeRowPage([{ name: "Claude Code" }]),
     /type="checkbox" id="provenance-claude-code-claude-code" name="[^"]*claudeCodeHost" value="Claude Code" checked>/

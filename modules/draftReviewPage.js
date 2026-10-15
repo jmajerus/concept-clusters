@@ -2212,7 +2212,30 @@ function renderClassificationEditor({
   </details></copy-field>`;
 }
 
-function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [] }) {
+// What the MCP frame reported for Claude-family calls on this draft, grouped
+// by raw client name: "Anthropic/ClaudeAI ×4 (10-14) · claude-code ×1 (10-15)".
+// Shown as reported, for the editor to weigh; never stored in the puzzle.
+const CLAUDE_FAMILY_HOST_IDS = new Set(["claude", "claude-code"]);
+
+function claudeReportedBySummary(stamps = []) {
+  const groups = new Map();
+  for (const stamp of Array.isArray(stamps) ? stamps : []) {
+    if (!CLAUDE_FAMILY_HOST_IDS.has(stamp?.hostId)) continue;
+    const name = stamp.clientName || stamp.hostId;
+    const day = typeof stamp.capturedAt === "string" ? stamp.capturedAt.slice(5, 10) : "";
+    const group = groups.get(name) || { count: 0, first: day, last: day };
+    group.count += 1;
+    if (day && (!group.first || day < group.first)) group.first = day;
+    if (day && day > group.last) group.last = day;
+    groups.set(name, group);
+  }
+  return [...groups].map(([name, { count, first, last }]) => {
+    const days = first && last && first !== last ? `${first}–${last}` : first;
+    return `<code>${escapeHtml(name)}</code> ×${count}${days ? ` (${escapeHtml(days)})` : ""}`;
+  }).join(" · ");
+}
+
+function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [], assistanceStamps = [] }) {
   if (!edit?.draftId) return "";
 
   const current = document?.provenance?.collaboration || "";
@@ -2304,15 +2327,20 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
   }
   // The MCP frame credits every Claude surface as "Claude"; only the editor
   // knows when it was Claude Code.
+  const claudeReportedBy = claudeReportedBySummary(assistanceStamps);
   function claudeCodeToggle(host) {
     if (!isClaudeFamilyContributor(host)) return "";
+    const reported = claudeReportedBy
+      ? `
+      <span class="meta provenance-reported-by">reported by: ${claudeReportedBy}</span>`
+      : "";
     const claudeCodeKey = generativeHostKey(
       AUTHORING_SETTINGS.hosts?.labels?.["claude-code"]?.system || "Claude Code");
     const checked = generativeHostKey(host) === claudeCodeKey ? " checked" : "";
     const toggleId = `provenance-claude-code-${escapeHtml(host.replace(/\s+/g, "-").toLowerCase())}`;
     return `
       <input${form} type="hidden" name="${prefix}claudeSurfaceHost" value="${escapeHtml(host)}">
-      <label class="field-label" for="${toggleId}"><input${form} type="checkbox" id="${toggleId}" name="${prefix}claudeCodeHost" value="${escapeHtml(host)}"${checked}> Claude Code</label>`;
+      <label class="field-label" for="${toggleId}"><input${form} type="checkbox" id="${toggleId}" name="${prefix}claudeCodeHost" value="${escapeHtml(host)}"${checked}> Claude Code</label>${reported}`;
   }
   const clientRows = generativeHosts.map(clientRow).join("");
 
@@ -2592,7 +2620,7 @@ export function renderDraftPage(draft, {
     ${renderWas(diff?.fields?.level)}
     ${renderPuzzleMeta(document)}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
-    ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}
+    ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions, assistanceStamps: draft.assistanceStamps })}
     ${renderInfo(document.info, {
       alwaysShowReferences: true,
       hideLinksOverlappingCitations: true
