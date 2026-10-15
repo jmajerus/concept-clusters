@@ -1385,40 +1385,51 @@ export async function run() {
   assert.match(stampedProvenancePage, /add drafting client/);
   assert.doesNotMatch(stampedProvenancePage, /<option value="Codex">Codex<\/option>/);
   assert.match(stampedProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
-  // Only Claude-family rows carry the Claude Code checkbox, checked when the
-  // row already says Claude Code.
+  // Only Claude rows carry the Claude Code checkbox, addressed by the row's
+  // full name and checked when the row already says Claude Code.
   assert.doesNotMatch(stampedProvenancePage, /name="[^"]*claudeCodeHost"/);
-  const claudeRowPage = contributors => renderDraftPage({
+  assert.doesNotMatch(stampedProvenancePage, /another Claude model/);
+  const claudeRowPage = (contributors, assistanceStamps = []) => renderDraftPage({
     ...baseDraft,
-    document: { ...baseDraft.document, provenance: { collaboration: "ai", contributors } }
+    document: { ...baseDraft.document, provenance: { collaboration: "ai", contributors } },
+    assistanceStamps
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   const claudePage = claudeRowPage([{ name: "Claude (Claude Opus 5.5)" }]);
-  assert.match(claudePage, /name="[^"]*claudeSurfaceHost" value="Claude"/);
-  assert.match(claudePage, /type="checkbox" id="provenance-claude-code-claude" name="[^"]*claudeCodeHost" value="Claude">/);
-  // Beside it, what the frame reported for this draft's Claude calls, raw.
-  assert.doesNotMatch(claudePage, /reported by:/);
-  const reportedPage = renderDraftPage({
-    ...baseDraft,
-    document: {
-      ...baseDraft.document,
-      provenance: { collaboration: "ai", contributors: [{ name: "Claude (Claude Opus 5.5)" }] }
-    },
-    assistanceStamps: [
-      { capturedAt: "2026-10-14T02:48:40.189Z", hostId: "claude", clientName: "Anthropic/ClaudeAI" },
-      { capturedAt: "2026-10-14T02:49:26.860Z", hostId: "claude", clientName: "Anthropic/ClaudeAI" },
-      { capturedAt: "2026-10-15T03:57:18.236Z", hostId: "claude-code", clientName: "claude-code" },
-      { capturedAt: "2026-10-15T04:00:00.000Z", hostId: "zcode", clientName: "zcode" }
-    ]
-  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
-  assert.match(
-    reportedPage,
-    /reported by: <code>Anthropic\/ClaudeAI<\/code> ×2 \(10-14\) · <code>claude-code<\/code> ×1 \(10-15\)<\/span>/
-  );
-  assert.doesNotMatch(reportedPage, /<code>zcode<\/code>/);
+  assert.match(claudePage, /name="[^"]*modelHost" value="Claude \(Opus 5\.5\)"/);
+  assert.match(claudePage, /type="checkbox" id="provenance-claude-code-claude-\(opus-5\.5\)" name="[^"]*claudeCodeHost" value="Claude \(Opus 5\.5\)">/);
   assert.match(
     claudeRowPage([{ name: "Claude Code" }]),
     /type="checkbox" id="provenance-claude-code-claude-code" name="[^"]*claudeCodeHost" value="Claude Code" checked>/
   );
+  // Each Claude model is its own row; the blank row adds another, and the
+  // general add row no longer offers a Claude client.
+  const twoClaudePage = claudeRowPage([
+    { name: "Claude (Sonnet 5)" },
+    { name: "Claude Code (Claude Sonnet 5.5)", reasoning: "high" }
+  ]);
+  assert.match(twoClaudePage, /name="[^"]*modelHost" value="Claude \(Sonnet 5\)"/);
+  assert.match(twoClaudePage, /name="[^"]*modelHost" value="Claude Code \(Claude Sonnet 5\.5\)"/);
+  assert.match(twoClaudePage, /another Claude model<\/label>\s*<select[^>]*name="[^"]*addClaudeModel"/);
+  assert.match(twoClaudePage, /byline \(derived\):<\/span> Drafted with Claude \(Sonnet 5, Sonnet 5\.5\)/);
+  assert.doesNotMatch(twoClaudePage, /<option value="Claude Code">Claude Code<\/option>/);
+  assert.doesNotMatch(twoClaudePage, /<option value="Claude">Claude<\/option>/);
+  assert.match(stampedProvenancePage, /<option value="Claude">Claude<\/option>/);
+
+  // With the blank row, once: what the frame reported for this draft's
+  // Claude calls, raw.
+  assert.doesNotMatch(claudePage, /reported by:/);
+  const reportedPage = claudeRowPage([{ name: "Claude (Claude Opus 5.5)" }], [
+    { capturedAt: "2026-10-14T02:48:40.189Z", hostId: "claude", clientName: "Anthropic/ClaudeAI" },
+    { capturedAt: "2026-10-14T02:49:26.860Z", hostId: "claude", clientName: "Anthropic/ClaudeAI" },
+    { capturedAt: "2026-10-15T03:57:18.236Z", hostId: "claude-code", clientName: "claude-code" },
+    { capturedAt: "2026-10-15T04:00:00.000Z", hostId: "zcode", clientName: "zcode" }
+  ]);
+  assert.match(
+    reportedPage,
+    /reported by: <code>Anthropic\/ClaudeAI<\/code> ×2 \(10-14\) · <code>claude-code<\/code> ×1 \(10-15\)<\/span>/
+  );
+  assert.equal(reportedPage.match(/reported by:/g).length, 1);
+  assert.doesNotMatch(reportedPage, /<code>zcode<\/code>/);
 
   // A stored model differing only by case from a canonical suggestion must
   // still land on that option selected -- a case-sensitive comparison would

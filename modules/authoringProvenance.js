@@ -771,10 +771,13 @@ export function contributorsByKind(provenance, kind, settings = AUTHORING_SETTIN
 /** L2 agent/admin summary — mode + names; no dates/roles/scopes. */
 export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
-  const contributors = expandContributors(provenance.contributors, settings);
+  const contributors = collapseClaudeFamilyEntries(
+    expandContributors(provenance.contributors, settings), settings);
   if (!contributors.length) return null;
   const parts = contributors.map(entry => {
-    const name = entry.kind === "generative"
+    const name = entry.collapsed
+      ? entry.name
+      : entry.kind === "generative"
       ? normalizeGenerativeContributorDisplayName(entry.name, settings)
       : entry.name;
     return `${name} (${entry.kind})`;
@@ -789,7 +792,8 @@ export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
 export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
   const humans = contributorsByKind(provenance, "human", settings);
-  const generativeEntries = expandContributors(provenance.contributors, settings)
+  const generativeEntries = collapseClaudeFamilyEntries(
+    expandContributors(provenance.contributors, settings), settings)
     .filter(entry => entry.kind === "generative");
   const namedGenerative = generativeEntries.filter(entry =>
     !isUnidentifiedGenerativeContributor(entry, settings)
@@ -799,7 +803,7 @@ export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   // adds nothing a reader can use, so the player byline leaves it out. The
   // stored contributor and the admin summary still keep it.
   const generative = (namedGenerative.length ? namedGenerative : generativeEntries)
-    .map(entry => formatGenerativeBylineName(entry, settings));
+    .map(entry => entry.bylineName || formatGenerativeBylineName(entry, settings));
   const templates = settings.credit?.templates || {};
   const humanList = formatSystemsList(humans);
   const genList = formatSystemsList(generative);
@@ -928,12 +932,18 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
 
   for (const entry of expandContributors(document?.provenance?.contributors, settings)) {
     if (entry.kind !== "generative") continue;
-    const key = generativeHostKey(entry.name, settings);
+    // Claude rows may repeat with different models, so each is its own row,
+    // addressed by its full name (rowKey) rather than the shared host.
+    const rowKey = isClaudeFamilyContributor(entry.name, settings)
+      ? claudeRowKey(entry, settings)
+      : "";
+    const key = rowKey ? `claude-row:${contributorNameKey(rowKey)}` : generativeHostKey(entry.name, settings);
     if (!key || seen.has(key)) continue;
     const known = knownHostLabelForName(entry.name, settings);
     const split = splitGenerativeContributorLabel(entry.name, settings);
     seen.set(key, {
       host: known?.system || split.host,
+      ...(rowKey ? { rowKey } : {}),
       model: canonicalModelLabel(stripClientTierLabelsFromModel(entry.model || split.model || "")),
       reasoning: normalizeReasoningLevel(entry.reasoning) || "",
       switch: normalizeClientSwitch(entry.switch) || ""
@@ -1296,58 +1306,174 @@ export function claudeFamilyStampSystem(provenance, settings = AUTHORING_SETTING
 }
 
 /**
- * Rename one Claude-family contributor to "Claude Code" or back to "Claude"
- * (drafts page checkbox). Model, reasoning, and switch carry over unchanged.
+ * The editor's handle on one Claude-family row: its display name, model
+ * included ("Claude (Opus 5.5)"). Claude rows may repeat with different
+ * models, so the host alone cannot address one.
  */
-export function applyClaudeCodeSurface(document, {
-  host,
-  claudeCode,
+export function claudeRowKey(entry, settings = AUTHORING_SETTINGS) {
+  const name = typeof entry === "string" ? entry : entry?.name;
+  return nonEmptyString(name)
+    ? normalizeGenerativeContributorDisplayName(name.trim(), settings)
+    : "";
+}
+
+function sameRowKey(a, b) {
+  return contributorNameKey(a) === contributorNameKey(b);
+}
+
+/** True when the provenance has a Claude-family row with this key. */
+export function hasClaudeRow(provenance, rowKey, settings = AUTHORING_SETTINGS) {
+  return expandContributors(provenance?.contributors, settings).some(entry =>
+    entry.kind === "generative" && isClaudeFamilyContributor(entry.name, settings) &&
+    sameRowKey(claudeRowKey(entry, settings), rowKey));
+}
+
+function optionalSetting(value, normalize, field) {
+  if (value === undefined) return undefined;
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  if (!trimmed) return "";
+  const normalized = normalize(trimmed);
+  if (!normalized) throw new Error(`invalid ${field} value`);
+  return normalized;
+}
+
+/**
+ * Edit Claude-family rows by key (drafts page), all at once so a rename never
+ * shifts another row's key mid-edit. Each edit may set model, reasoning,
+ * switch, and claudeCode (the Claude Code checkbox); a field left undefined
+ * keeps its value. `added` ({ model, claudeCode }) is the blank "another
+ * Claude model" row: a model makes it a real contributor, blank adds nothing.
+ * Rows that end up with the same name merge into the first.
+ */
+export function applyClaudeRowEdits(document, {
+  rows = [],
+  added = null,
   settings = AUTHORING_SETTINGS
 } = {}) {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     throw new Error("document must be an object");
   }
-  if (!nonEmptyString(host)) throw new Error("host is required");
-  if (!isClaudeFamilyContributor(host, settings)) {
-    throw new Error(`"${host}" is not a Claude contributor`);
-  }
-
   const systems = claudeFamilySystems(settings);
-  const targetHost = claudeCode ? systems.claudeCode : systems.claude;
-  const sourceKey = generativeHostKey(host, settings);
-  const targetKey = generativeHostKey(targetHost, settings);
-  if (sourceKey === targetKey) return document;
+  const edits = rows.filter(row => nonEmptyString(row?.rowKey));
+  const addedModel = stripClientTierLabelsFromModel(
+    typeof added?.model === "string" ? added.model.trim() : "");
+  if (!edits.length && !addedModel) return document;
 
-  const contributors = [...(document.provenance?.contributors || [])];
-  const expanded = contributors.map(entry => expandProvenanceContributor(entry, settings));
-  const isGenerativeHost = (entry, key) => entry?.kind === "generative" &&
-    generativeHostKey(entry.name, settings) === key;
-  const index = expanded.findIndex(entry => isGenerativeHost(entry, sourceKey));
-  if (index < 0) return document;
-  if (expanded.some(entry => isGenerativeHost(entry, targetKey))) {
-    throw new Error(`${targetHost} is already a contributor on this document`);
+  const composeRow = ({ host, model, reasoning, switch: switchValue }) =>
+    compactProvenanceContributor({
+      kind: "generative",
+      name: formatGenerativeContributorLabel(host, model, settings),
+      ...(model ? { model } : {}),
+      ...(reasoning ? { reasoning } : {}),
+      ...(switchValue ? { switch: switchValue } : {})
+    }, settings);
+
+  const contributors = (document.provenance?.contributors || []).map(entry => {
+    const expanded = expandProvenanceContributor(entry, settings);
+    if (expanded?.kind !== "generative" || !isClaudeFamilyContributor(expanded.name, settings)) {
+      return entry;
+    }
+    const edit = edits.find(row => sameRowKey(row.rowKey, claudeRowKey(expanded, settings)));
+    if (!edit) return entry;
+    const currentHost = generativeHostKey(expanded.name, settings) ===
+      generativeHostKey(systems.claudeCode, settings) ? systems.claudeCode : systems.claude;
+    const host = edit.claudeCode === undefined
+      ? currentHost
+      : (edit.claudeCode ? systems.claudeCode : systems.claude);
+    const model = edit.model === undefined
+      ? (expanded.model || splitGenerativeContributorLabel(expanded.name, settings).model || "")
+      : stripClientTierLabelsFromModel(typeof edit.model === "string" ? edit.model.trim() : "");
+    const reasoning = optionalSetting(edit.reasoning, normalizeReasoningLevel, "reasoning");
+    const switchValue = optionalSetting(edit.switch, normalizeClientSwitch, "switch");
+    return composeRow({
+      host,
+      model,
+      reasoning: reasoning === undefined ? expanded.reasoning || "" : reasoning,
+      switch: switchValue === undefined ? expanded.switch || "" : switchValue
+    });
+  });
+  if (addedModel) {
+    contributors.push(composeRow({
+      host: added.claudeCode ? systems.claudeCode : systems.claude,
+      model: addedModel
+    }));
   }
 
-  const existing = expanded[index];
-  const model = existing.model ||
-    splitGenerativeContributorLabel(existing.name, settings).model || "";
-  contributors[index] = compactProvenanceContributor({
-    kind: "generative",
-    name: formatGenerativeContributorLabel(targetHost, model, settings),
-    ...(model ? { model } : {}),
-    ...(existing.reasoning ? { reasoning: existing.reasoning } : {}),
-    ...(existing.switch ? { switch: existing.switch } : {})
-  }, settings);
+  // Same name, same row: the first keeps its place and settings.
+  const seen = new Set();
+  const merged = contributors.filter(entry => {
+    const expanded = expandProvenanceContributor(entry, settings);
+    if (expanded?.kind !== "generative" || !isClaudeFamilyContributor(expanded.name, settings)) {
+      return true;
+    }
+    const key = contributorNameKey(claudeRowKey(expanded, settings));
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 
   const provenance = normalizeAuthoringProvenance(
-    reconcileCollaboration({ ...document.provenance, contributors }, settings),
+    reconcileCollaboration({ ...document.provenance, contributors: merged }, settings),
     settings
   );
-  if (!provenance) throw new Error("renaming the contributor left invalid provenance");
+  if (!provenance) throw new Error("editing the Claude rows left invalid provenance");
 
   const next = structuredClone(document);
   next.provenance = provenance;
   return next;
+}
+
+/**
+ * Bylines show every Claude-family row as one entry. Stored rows stay as
+ * recorded; this is display policy only, so it can change without touching
+ * data. One row renders as before. Several: "Claude Code" only when every row
+ * is Claude Code, otherwise "Claude"; distinct models in recorded order
+ * ("Claude (Sonnet 5, Sonnet 5.5)"); reasoning and switch only when every
+ * row agrees.
+ */
+function collapseClaudeFamilyEntries(entries, settings = AUTHORING_SETTINGS) {
+  const isFamily = entry => entry.kind === "generative" &&
+    isClaudeFamilyContributor(entry.name, settings);
+  const family = entries.filter(isFamily);
+  if (family.length < 2) return entries;
+
+  const systems = claudeFamilySystems(settings);
+  const claudeCodeKey = generativeHostKey(systems.claudeCode, settings);
+  const host = family.every(entry => generativeHostKey(entry.name, settings) === claudeCodeKey)
+    ? systems.claudeCode
+    : systems.claude;
+  const models = [];
+  for (const entry of family) {
+    const raw = entry.model || splitGenerativeContributorLabel(entry.name, settings).model || "";
+    const model = normalizeModelForContributor(host, stripClientTierLabelsFromModel(raw));
+    if (model && !models.some(existing => contributorNameKey(existing) === contributorNameKey(model))) {
+      models.push(model);
+    }
+  }
+  const agreed = field => {
+    const values = new Set(family.map(entry => entry[field] || ""));
+    return values.size === 1 ? [...values][0] : "";
+  };
+  const settingsAgreed = {
+    ...(agreed("reasoning") ? { reasoning: agreed("reasoning") } : {}),
+    ...(agreed("switch") ? { switch: agreed("switch") } : {})
+  };
+  // Composed here, not by the single-model name normalizer, which would read
+  // the model list as one model.
+  const inner = [models.join(", "), formatProvenanceClientTierSuffix(settingsAgreed)]
+    .filter(Boolean).join(" ");
+  const collapsed = {
+    kind: "generative",
+    name: models.length ? `${host} (${models.join(", ")})` : host,
+    ...settingsAgreed,
+    collapsed: true,
+    bylineName: inner ? `${host} (${inner})` : host
+  };
+  const first = entries.indexOf(family[0]);
+  return entries.flatMap((entry, index) => {
+    if (index === first) return [collapsed];
+    return isFamily(entry) ? [] : [entry];
+  });
 }
 
 /**

@@ -57,7 +57,7 @@ inferred: names matching known AI hosts in
 **generative**; everything else is **human**. Grow that host list when a real
 new system appears.
 
-**Client surfaces are canonical.** The client that touched the draft remains
+**Client surfaces are canonical.** Apart from Claude (below), the client that touched the draft remains
 the contributor identity everywhere: Claude and Claude Code, Gemini and
 Gemini CLI, Muse and Muse Code, Codex and ChatGPT (when identified), and
 Cursor remain separate rows, bylines, and model-editor choices. This is
@@ -68,6 +68,20 @@ for a future reporting feature, but they are inactive metadata: they do not
 participate in stamping, storage keying, API responses, or byline rendering,
 and neither is persisted on a puzzle document or assistance-stamp audit
 record.
+
+**Claude is the exception.** claude.ai web reports itself to MCP as
+`claude-code`, with the same clientInfo, `_meta` key, and `Claude-User`
+user-agent as a real Claude Code session, so the frame cannot tell them
+apart. Stamping therefore credits every Claude call as `Claude`, and once a
+puzzle credits Claude, a Claude stamp changes nothing unless it names a model
+no row has yet. The editor marks a row `Claude Code` on the drafts page and
+may add a second Claude row for a different model; rows that end up with the
+same name merge. Stored Claude rows stay as recorded, but bylines (L1) and the
+admin summary (L2) show all Claude and Claude Code rows as one entry:
+`Claude Code` only when every row is, distinct models in recorded order
+(`Claude (Sonnet 5, Sonnet 5.5)`), and reasoning or switch only when every row
+agrees. The drafts page also shows the raw client names the assistance stamps
+recorded for the draft's Claude calls.
 
 **Storage stays lean:** omit `kind` when it matches inference. Keep an explicit
 `kind` only to override inference; model detail is embedded in the contributor

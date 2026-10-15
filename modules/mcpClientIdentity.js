@@ -10,6 +10,9 @@ import {
   contributorsByKind,
   isClaudeFamilyContributor,
   claudeFamilyStampSystem,
+  hasClaudeRow,
+  applyClaudeRowEdits,
+  generativeHostKey,
   UNIDENTIFIED_GENERATIVE_SYSTEM
 } from "./authoringProvenance.js";
 import {
@@ -266,13 +269,32 @@ export function stampDocumentAssistanceFromMcp(document, {
     // generative assistance". Recording nothing, as this did before, left an
     // AI-written board asserting human authorship by default and gave the
     // editor no way to correct it.
-    // A Claude-family stamp updates the editor's "Claude Code" row in place
-    // rather than adding "Claude" beside it.
-    const system = identity?.system && isClaudeFamilyContributor(identity.system, settings)
-      ? formatGenerativeContributorLabel(
-        claudeFamilyStampSystem(base.provenance, settings), identity.model, settings)
+    // Claude rows are the editor's: once a puzzle credits Claude, a Claude
+    // stamp only adds a row for a model the frame named that no row has yet
+    // (Claude frames rarely name one). The stamp log keeps every call.
+    const claudeFamily = Boolean(identity?.system) &&
+      isClaudeFamilyContributor(identity.system, settings);
+    const stampSystem = claudeFamily
+      ? claudeFamilyStampSystem(base.provenance, settings)
       : identity?.system;
-    const provenance = system
+    const creditsClaude = claudeFamily &&
+      contributorsByKind(base.provenance, "generative", settings)
+        .some(name => isClaudeFamilyContributor(name, settings));
+    const system = claudeFamily
+      ? formatGenerativeContributorLabel(stampSystem, identity.model, settings)
+      : identity?.system;
+    const provenance = creditsClaude
+      ? (identity.model && !hasClaudeRow(base.provenance, system, settings)
+        ? applyClaudeRowEdits({ provenance: base.provenance }, {
+          added: {
+            model: identity.model,
+            claudeCode: generativeHostKey(stampSystem, settings) !==
+              generativeHostKey(identity.system, settings)
+          },
+          settings
+        }).provenance
+        : base.provenance)
+      : system
       ? upsertGenerativeProvenance(base.provenance, {
         system,
         ...(identity.model ? { model: identity.model } : {}),

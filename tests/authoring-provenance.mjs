@@ -924,4 +924,36 @@ export async function run() {
     }, { host: "Claude", model: "Sonnet 5" }).provenance.contributors.map(entry => entry.name),
     ["Claude (Sonnet 5)", "Claude"]
   );
+
+  // Bylines show every Claude-family row as one entry; stored rows stay as
+  // recorded, so this display rule can change without touching data.
+  const byline = contributors => renderProvenanceL1({ collaboration: "ai", contributors });
+  assert.equal(
+    byline([{ name: "Claude (Opus 5.5)", model: "Claude Opus 5.5", reasoning: "medium" }]),
+    "Drafted with Claude (Opus 5.5 Medium)"
+  );
+  assert.equal(byline([{ name: "Claude" }, { name: "Claude Code" }]), "Drafted with Claude");
+  assert.equal(
+    byline([{ name: "Claude (Opus 5.5)", reasoning: "high" }, { name: "Claude Code (Claude Opus 5.5)", reasoning: "high" }]),
+    "Drafted with Claude (Opus 5.5 High)"
+  );
+  assert.equal(
+    byline([{ name: "Claude (Sonnet 5)" }, { name: "Claude Code (Claude Sonnet 5.5)", reasoning: "high" }]),
+    "Drafted with Claude (Sonnet 5, Sonnet 5.5)"
+  );
+  assert.equal(
+    byline([
+      { name: "Claude Code (Claude Opus 5.5)" },
+      { name: "Cursor" },
+      { name: "Claude Code (Claude Sonnet 5.5)" }
+    ]),
+    "Drafted with Claude Code (Claude Opus 5.5, Claude Sonnet 5.5) and Cursor"
+  );
+  assert.equal(
+    renderProvenanceL2({
+      collaboration: "ai",
+      contributors: [{ name: "Claude (Sonnet 5)" }, { name: "Claude Code (Claude Sonnet 5.5)" }]
+    }),
+    "ai: Claude (Sonnet 5, Sonnet 5.5) (generative)"
+  );
 }

@@ -556,6 +556,34 @@ export async function run() {
     { name: "Claude Code (Claude Opus 5.5)", reasoning: "medium" }
   ]);
 
+  // Once a puzzle credits Claude, a Claude stamp without a model changes
+  // nothing; one naming a model no row has yet records that model as its
+  // own row, and a repeat of it adds nothing.
+  const claudeCredited = {
+    id: "demo-5",
+    provenance: { collaboration: "ai", contributors: [{ name: "Claude (Opus 5.5)", model: "Claude Opus 5.5" }] }
+  };
+  const claudeFrame = info => ({
+    role: "edited",
+    substantial: true,
+    ctx: { mcpReq: { envelope: { "io.modelcontextprotocol/clientInfo": info } } }
+  });
+  assert.deepEqual(
+    stampDocumentAssistanceFromMcp(claudeCredited, claudeFrame({ name: "claude-code" })).document.provenance,
+    claudeCredited.provenance
+  );
+  const namedModel = stampDocumentAssistanceFromMcp(
+    claudeCredited, claudeFrame({ name: "claude-code", model: "Claude Sonnet 5.5" })).document;
+  assert.deepEqual(namedModel.provenance.contributors, [
+    { name: "Claude (Opus 5.5)", model: "Claude Opus 5.5" },
+    { name: "Claude (Sonnet 5.5)", model: "Claude Sonnet 5.5" }
+  ]);
+  assert.deepEqual(
+    stampDocumentAssistanceFromMcp(namedModel, claudeFrame({ name: "claude-code", model: "Claude Sonnet 5.5" }))
+      .document.provenance,
+    namedModel.provenance
+  );
+
   // Reaching an authoring tool over MCP is itself the evidence of generative
   // authorship -- a human does not hand-call create_puzzle_draft -- so an
   // unrecognized client is still recorded as AI, just unnamed. It gets no

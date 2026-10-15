@@ -12,7 +12,8 @@ import {
   applyGenerativeContributorModel,
   applyProvenanceClientSetting,
   applyReviewedBy,
-  applyClaudeCodeSurface,
+  applyClaudeRowEdits,
+  hasClaudeRow,
   identifyUnnamedGenerativeContributor,
   soleUnidentifiedGenerativeContributor,
   unidentifiedGenerativeContributor,
@@ -352,14 +353,20 @@ function parseProvenanceModels(params) {
     .map(({ host, value }) => ({ host, model: value }));
 }
 
-// Each Claude-family row posts its host; the checkbox posts it again only
-// when checked, since an unchecked box sends nothing.
+// Each Claude row posts its key; the checkbox posts it again only when
+// checked, since an unchecked box sends nothing.
 function parseClaudeSurfaces(params) {
   const checked = new Set(params.getAll("claudeCodeHost").map(host => host.trim()));
   return params.getAll("claudeSurfaceHost")
     .map(host => host.trim())
     .filter(Boolean)
     .map(host => ({ host, claudeCode: checked.has(host) }));
+}
+
+// The blank "another Claude model" row: nothing unless a model is chosen.
+function parseAddedClaudeRow(params) {
+  const model = (params.get("addClaudeModel") || "").trim();
+  return model ? { model, claudeCode: params.has("addClaudeCode") } : null;
 }
 
 function nonEmptyIdentify(value) {
@@ -378,7 +385,7 @@ function applyProvenanceEditor(document, form) {
     const placeholder = unidentifiedGenerativeContributor(next.provenance);
     const solePlaceholder = soleUnidentifiedGenerativeContributor(next.provenance);
     let namedAs = "";
-    const models = [...(form.models || [])];
+    let models = [...(form.models || [])];
     if (placeholder && nonEmptyIdentify(form.identifyHost)) {
       namedAs = form.identifyHost.trim();
       // The placeholder's own row posts its model alongside the chosen client.
@@ -404,18 +411,47 @@ function applyProvenanceEditor(document, form) {
       ? namedAs
       : host;
 
+    // Claude rows post their full name as the host, since one puzzle may
+    // credit Claude with several models; they are edited together by key.
+    // Anything else, including adding Claude where none is credited yet,
+    // takes the host-keyed path.
+    const isClaudeRow = host => hasClaudeRow(next.provenance, retarget(host));
+    const claudeRows = new Map();
+    const claudeRow = host => {
+      const key = retarget(host);
+      if (!claudeRows.has(key)) claudeRows.set(key, { rowKey: key });
+      return claudeRows.get(key);
+    };
+    let reasonings = form.reasonings || [];
+    let switches = form.switches || [];
+    for (const { host, model } of models.filter(({ host }) => isClaudeRow(host))) {
+      claudeRow(host).model = model;
+    }
+    for (const { host, value } of reasonings.filter(({ host }) => isClaudeRow(host))) {
+      claudeRow(host).reasoning = value;
+    }
+    for (const { host, value } of switches.filter(({ host }) => isClaudeRow(host))) {
+      claudeRow(host).switch = value;
+    }
+    for (const { host, claudeCode } of form.claudeSurfaces || []) {
+      if (isClaudeRow(host)) claudeRow(host).claudeCode = claudeCode;
+    }
+    models = models.filter(({ host }) => !isClaudeRow(host));
+    reasonings = reasonings.filter(({ host }) => !isClaudeRow(host));
+    switches = switches.filter(({ host }) => !isClaudeRow(host));
+
+    next = applyClaudeRowEdits(next, {
+      rows: [...claudeRows.values()],
+      added: form.addedClaudeRow || null
+    });
     for (const { host, model } of models) {
       next = applyGenerativeContributorModel(next, { host: retarget(host), model });
     }
-    for (const { host, value } of form.reasonings || []) {
+    for (const { host, value } of reasonings) {
       next = applyProvenanceClientSetting(next, { host: retarget(host), field: "reasoning", value });
     }
-    for (const { host, value } of form.switches || []) {
+    for (const { host, value } of switches) {
       next = applyProvenanceClientSetting(next, { host: retarget(host), field: "switch", value });
-    }
-    // Last, so the rows above still address each contributor by its old name.
-    for (const { host, claudeCode } of form.claudeSurfaces || []) {
-      next = applyClaudeCodeSurface(next, { host, claudeCode });
     }
     if (form.collaboration !== undefined && form.collaboration !== "") {
       next = applyProvenanceCollaboration(next, {
@@ -693,6 +729,7 @@ export function parseFieldEditForm(params) {
     // Naming the unnamed placeholder: the row posts the client chosen for it.
     identifyHost: params.get("identifyHost") || "",
     claudeSurfaces: parseClaudeSurfaces(params),
+    addedClaudeRow: parseAddedClaudeRow(params),
     items: isListField(field) ? parseListItems(field, params) : null
     ,classification: field === "classification" ? parseClassification(params) : null
   };
