@@ -8,6 +8,8 @@ import {
   formatGenerativeContributorLabel,
   normalizeReasoningLevel,
   contributorsByKind,
+  isClaudeFamilyContributor,
+  claudeFamilyStampSystem,
   UNIDENTIFIED_GENERATIVE_SYSTEM
 } from "./authoringProvenance.js";
 import {
@@ -23,7 +25,12 @@ const HOST_FINGERPRINTS = Object.freeze([
     match: ({ name }) => name === "cursor-vscode" || /^cursor\b/i.test(name)
   },
   {
+    // claude.ai web also reports itself as claude-code (probed 2026-10-15:
+    // same clientInfo, _meta key, and Claude-User user-agent as a real Claude
+    // Code session), so the frame credits the family name only. The editor
+    // marks "Claude Code" on the drafts page when they know it was.
     id: "claude-code",
+    creditAs: "claude",
     match: ({ name }) => name === "claude-code" || /^claude-code\b/i.test(name)
   },
   {
@@ -151,7 +158,7 @@ export function identifyMcpAssistanceClient({
 
   for (const host of HOST_FINGERPRINTS) {
     if (!host.match({ name, title, meta, httpUa })) continue;
-    const labeled = labelFor(host.id, settings);
+    const labeled = labelFor(host.creditAs || host.id, settings);
     const museDetails = host.id === "muse-code" ? museContributorDetails(name) : null;
     const model = host.id === "codex"
       ? codexModel(meta)
@@ -259,9 +266,15 @@ export function stampDocumentAssistanceFromMcp(document, {
     // generative assistance". Recording nothing, as this did before, left an
     // AI-written board asserting human authorship by default and gave the
     // editor no way to correct it.
-    const provenance = identity?.system
+    // A Claude-family stamp updates the editor's "Claude Code" row in place
+    // rather than adding "Claude" beside it.
+    const system = identity?.system && isClaudeFamilyContributor(identity.system, settings)
+      ? formatGenerativeContributorLabel(
+        claudeFamilyStampSystem(base.provenance, settings), identity.model, settings)
+      : identity?.system;
+    const provenance = system
       ? upsertGenerativeProvenance(base.provenance, {
-        system: identity.system,
+        system,
         ...(identity.model ? { model: identity.model } : {}),
         ...(identity.reasoning ? { reasoning: identity.reasoning } : {})
       })

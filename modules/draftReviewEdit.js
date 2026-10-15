@@ -12,6 +12,7 @@ import {
   applyGenerativeContributorModel,
   applyProvenanceClientSetting,
   applyReviewedBy,
+  applyClaudeCodeSurface,
   identifyUnnamedGenerativeContributor,
   soleUnidentifiedGenerativeContributor,
   unidentifiedGenerativeContributor,
@@ -351,6 +352,16 @@ function parseProvenanceModels(params) {
     .map(({ host, value }) => ({ host, model: value }));
 }
 
+// Each Claude-family row posts its host; the checkbox posts it again only
+// when checked, since an unchecked box sends nothing.
+function parseClaudeSurfaces(params) {
+  const checked = new Set(params.getAll("claudeCodeHost").map(host => host.trim()));
+  return params.getAll("claudeSurfaceHost")
+    .map(host => host.trim())
+    .filter(Boolean)
+    .map(host => ({ host, claudeCode: checked.has(host) }));
+}
+
 function nonEmptyIdentify(value) {
   return typeof value === "string" && value.trim() !== "";
 }
@@ -401,6 +412,10 @@ function applyProvenanceEditor(document, form) {
     }
     for (const { host, value } of form.switches || []) {
       next = applyProvenanceClientSetting(next, { host: retarget(host), field: "switch", value });
+    }
+    // Last, so the rows above still address each contributor by its old name.
+    for (const { host, claudeCode } of form.claudeSurfaces || []) {
+      next = applyClaudeCodeSurface(next, { host, claudeCode });
     }
     if (form.collaboration !== undefined && form.collaboration !== "") {
       next = applyProvenanceCollaboration(next, {
@@ -677,6 +692,7 @@ export function parseFieldEditForm(params) {
     switches: parseHostValuePairs(params, "switchHost", "switchValue"),
     // Naming the unnamed placeholder: the row posts the client chosen for it.
     identifyHost: params.get("identifyHost") || "",
+    claudeSurfaces: parseClaudeSurfaces(params),
     items: isListField(field) ? parseListItems(field, params) : null
     ,classification: field === "classification" ? parseClassification(params) : null
   };

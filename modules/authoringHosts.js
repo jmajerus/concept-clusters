@@ -8,6 +8,9 @@
 // `family` is inactive registry metadata for a possible future reporting
 // feature. It must not affect contributor identity, upsert keying, API
 // responses, or byline text: each client surface remains distinct today.
+// The one exception is not `family` but the MCP frame: claude.ai web reports
+// itself as claude-code, so modules/mcpClientIdentity.js credits both as
+// "Claude" and only the editor marks "Claude Code" (drafts page checkbox).
 //
 // Lesson-credit templates and parse patterns live in authoringSettings.js.
 // Model picker + canonical labels (drafts UI, bylines): authoringModelSuggestions.js.

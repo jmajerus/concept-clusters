@@ -45,6 +45,7 @@ import {
   AUTHORING_PROVENANCE_SWITCH_LABELS,
   AUTHORING_PROVENANCE_SWITCHES,
   generativeHostKey,
+  isClaudeFamilyContributor,
   UNIDENTIFIED_GENERATIVE_SYSTEM,
   listGenerativeContributorsForEdit,
   resolveLessonByline,
@@ -2298,8 +2299,20 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
       <label class="field-label" for="${reasoningId}">reasoning</label>
       <select${form} id="${reasoningId}" name="${prefix}reasoningValue">${levelSelectOptions(AUTHORING_PROVENANCE_REASONING_LEVELS, AUTHORING_PROVENANCE_REASONING_LABELS, reasoning)}</select>
       <label class="field-label" for="${switchId}">switch</label>
-      <select${form} id="${switchId}" name="${prefix}switchValue">${levelSelectOptions(AUTHORING_PROVENANCE_SWITCHES, AUTHORING_PROVENANCE_SWITCH_LABELS, switchValue)}</select>
+      <select${form} id="${switchId}" name="${prefix}switchValue">${levelSelectOptions(AUTHORING_PROVENANCE_SWITCHES, AUTHORING_PROVENANCE_SWITCH_LABELS, switchValue)}</select>${claudeCodeToggle(host)}
     </div>`;
+  }
+  // The MCP frame credits every Claude surface as "Claude"; only the editor
+  // knows when it was Claude Code.
+  function claudeCodeToggle(host) {
+    if (!isClaudeFamilyContributor(host)) return "";
+    const claudeCodeKey = generativeHostKey(
+      AUTHORING_SETTINGS.hosts?.labels?.["claude-code"]?.system || "Claude Code");
+    const checked = generativeHostKey(host) === claudeCodeKey ? " checked" : "";
+    const toggleId = `provenance-claude-code-${escapeHtml(host.replace(/\s+/g, "-").toLowerCase())}`;
+    return `
+      <input${form} type="hidden" name="${prefix}claudeSurfaceHost" value="${escapeHtml(host)}">
+      <label class="field-label" for="${toggleId}"><input${form} type="checkbox" id="${toggleId}" name="${prefix}claudeCodeHost" value="${escapeHtml(host)}"${checked}> Claude Code</label>`;
   }
   const clientRows = generativeHosts.map(clientRow).join("");
 

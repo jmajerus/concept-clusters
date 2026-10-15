@@ -1259,6 +1259,97 @@ export function applyProvenanceClientSetting(document, {
   return next;
 }
 
+function claudeFamilySystems(settings = AUTHORING_SETTINGS) {
+  const labels = settings?.hosts?.labels || {};
+  return {
+    claude: labels.claude?.system || "Claude",
+    claudeCode: labels["claude-code"]?.system || "Claude Code"
+  };
+}
+
+/**
+ * True for a Claude or Claude Code contributor. The MCP call frame cannot
+ * tell those two surfaces apart (claude.ai web reports itself as claude-code),
+ * so the server always credits "Claude" and the editor alone may say
+ * "Claude Code".
+ */
+export function isClaudeFamilyContributor(name, settings = AUTHORING_SETTINGS) {
+  const { claude, claudeCode } = claudeFamilySystems(settings);
+  const key = generativeHostKey(name, settings);
+  return key === generativeHostKey(claude, settings) ||
+    key === generativeHostKey(claudeCode, settings);
+}
+
+/**
+ * The Claude-family name an MCP stamp should update: the editor's "Claude
+ * Code" when that is the only Claude-family row, otherwise "Claude". Keeps a
+ * later stamp from adding "Claude" beside a row the editor already marked.
+ */
+export function claudeFamilyStampSystem(provenance, settings = AUTHORING_SETTINGS) {
+  const { claude, claudeCode } = claudeFamilySystems(settings);
+  const hosts = new Set(contributorsByKind(provenance, "generative", settings)
+    .map(name => generativeHostKey(name, settings)));
+  return hosts.has(generativeHostKey(claudeCode, settings)) &&
+    !hosts.has(generativeHostKey(claude, settings))
+    ? claudeCode
+    : claude;
+}
+
+/**
+ * Rename one Claude-family contributor to "Claude Code" or back to "Claude"
+ * (drafts page checkbox). Model, reasoning, and switch carry over unchanged.
+ */
+export function applyClaudeCodeSurface(document, {
+  host,
+  claudeCode,
+  settings = AUTHORING_SETTINGS
+} = {}) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    throw new Error("document must be an object");
+  }
+  if (!nonEmptyString(host)) throw new Error("host is required");
+  if (!isClaudeFamilyContributor(host, settings)) {
+    throw new Error(`"${host}" is not a Claude contributor`);
+  }
+
+  const systems = claudeFamilySystems(settings);
+  const targetHost = claudeCode ? systems.claudeCode : systems.claude;
+  const sourceKey = generativeHostKey(host, settings);
+  const targetKey = generativeHostKey(targetHost, settings);
+  if (sourceKey === targetKey) return document;
+
+  const contributors = [...(document.provenance?.contributors || [])];
+  const expanded = contributors.map(entry => expandProvenanceContributor(entry, settings));
+  const isGenerativeHost = (entry, key) => entry?.kind === "generative" &&
+    generativeHostKey(entry.name, settings) === key;
+  const index = expanded.findIndex(entry => isGenerativeHost(entry, sourceKey));
+  if (index < 0) return document;
+  if (expanded.some(entry => isGenerativeHost(entry, targetKey))) {
+    throw new Error(`${targetHost} is already a contributor on this document`);
+  }
+
+  const existing = expanded[index];
+  const model = existing.model ||
+    splitGenerativeContributorLabel(existing.name, settings).model || "";
+  contributors[index] = compactProvenanceContributor({
+    kind: "generative",
+    name: formatGenerativeContributorLabel(targetHost, model, settings),
+    ...(model ? { model } : {}),
+    ...(existing.reasoning ? { reasoning: existing.reasoning } : {}),
+    ...(existing.switch ? { switch: existing.switch } : {})
+  }, settings);
+
+  const provenance = normalizeAuthoringProvenance(
+    reconcileCollaboration({ ...document.provenance, contributors }, settings),
+    settings
+  );
+  if (!provenance) throw new Error("renaming the contributor left invalid provenance");
+
+  const next = structuredClone(document);
+  next.provenance = provenance;
+  return next;
+}
+
 /**
  * Set or clear the optional reviewer name (drafts page). Not a contributor.
  */

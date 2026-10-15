@@ -473,11 +473,12 @@ export async function run() {
       }
     }
   });
-  // The exact Claude Code client surface remains contributor-visible.
+  // claude.ai web also reports itself as claude-code, so the frame credits
+  // only the family name; the editor marks "Claude Code" on the drafts page.
   assert.equal(substantialEdit.provenance.collaboration, "ai");
   assert.deepEqual(
     substantialEdit.provenance.contributors.map(entry => entry.name).sort(),
-    ["Claude Code", "Cursor"]
+    ["Claude", "Cursor"]
   );
 
   // role "drafted" (create_puzzle_draft) is the one moment that does
@@ -497,11 +498,12 @@ export async function run() {
   assert.equal(draftedDoc.provenance.collaboration, "ai");
   assert.deepEqual(
     draftedDoc.provenance.contributors.map(entry => entry.name),
-    ["Claude Code"]
+    ["Claude"]
   );
 
-  // Claude web and Claude Code are distinct client surfaces, so a later
-  // substantial Claude Code pass appends its own contributor row.
+  // The frame cannot tell Claude web from Claude Code, so a later
+  // claude-code pass over a Claude web board updates the one Claude row
+  // instead of appending a second contributor.
   const { document: claudeWebDrafted } = stampDocumentAssistanceFromMcp(
     { id: "demo-3", learningIntroduction: { requirement: "optional", content: { text: "Hi" } } },
     {
@@ -526,8 +528,31 @@ export async function run() {
   });
   assert.deepEqual(
     claudeCodeFollowUp.provenance.contributors.map(entry => entry.name),
-    ["Claude", "Claude Code"]
+    ["Claude"]
   );
+
+  // A row the editor already marked "Claude Code" is the one a later Claude
+  // stamp updates; it is not renamed back and gains no "Claude" sibling.
+  const { document: markedFollowUp } = stampDocumentAssistanceFromMcp({
+    id: "demo-4",
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Claude Code (Claude Opus 5.5)", reasoning: "medium" }]
+    }
+  }, {
+    role: "edited",
+    substantial: true,
+    ctx: {
+      mcpReq: {
+        envelope: {
+          "io.modelcontextprotocol/clientInfo": { name: "Anthropic/ClaudeAI" }
+        }
+      }
+    }
+  });
+  assert.deepEqual(markedFollowUp.provenance.contributors, [
+    { name: "Claude Code (Claude Opus 5.5)", reasoning: "medium" }
+  ]);
 
   // Reaching an authoring tool over MCP is itself the evidence of generative
   // authorship -- a human does not hand-call create_puzzle_draft -- so an
@@ -568,9 +593,11 @@ export async function run() {
     log: { tool: "create_puzzle_draft", draftId: "known-board" },
     server: { server: { getClientVersion: () => ({ name: "claude-code" }) } }
   });
-  assert.equal(known.stampRecord.client.system, "Claude Code");
+  assert.equal(known.stampRecord.client.system, "Claude");
+  assert.equal(known.stampRecord.client.hostId, "claude-code");
+  assert.equal(known.stampRecord.client.clientName, "claude-code");
   assert.equal(known.stampRecord.client.unidentified, undefined);
-  assert.deepEqual(known.document.provenance.contributors.map(entry => entry.name), ["Claude Code"]);
+  assert.deepEqual(known.document.provenance.contributors.map(entry => entry.name), ["Claude"]);
 
   // Without a log envelope there is nothing to write to, identified or not.
   assert.equal(

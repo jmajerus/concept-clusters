@@ -602,6 +602,37 @@ export async function run() {
     [{ name: "Claude Code" }]
   );
 
+  // The Claude Code checkbox: the frame credits every Claude surface as
+  // "Claude", and the editor alone marks "Claude Code". Model and reasoning
+  // carry over; unchecking renames it back.
+  const claudeRow = {
+    ...document,
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Claude (Opus 5.5)", model: "Claude Opus 5.5", reasoning: "medium" }]
+    }
+  };
+  const surfaceForm = params => parseFieldEditForm(new URLSearchParams({
+    section: "provenance", field: "editor", ...params
+  }));
+  const checkedForm = surfaceForm({ claudeSurfaceHost: "Claude", claudeCodeHost: "Claude" });
+  assert.deepEqual(checkedForm.claudeSurfaces, [{ host: "Claude", claudeCode: true }]);
+  const markedClaudeCode = applyDraftFieldValue(claudeRow, checkedForm, "");
+  assert.deepEqual(markedClaudeCode.provenance.contributors, [
+    { name: "Claude Code (Claude Opus 5.5)", reasoning: "medium" }
+  ]);
+  const unchecked = applyDraftFieldValue(
+    markedClaudeCode,
+    surfaceForm({ claudeSurfaceHost: "Claude Code" }),
+    ""
+  );
+  assert.deepEqual(unchecked.provenance.contributors, claudeRow.provenance.contributors);
+  // An unchanged box leaves the row as it was.
+  assert.deepEqual(
+    applyDraftFieldValue(claudeRow, surfaceForm({ claudeSurfaceHost: "Claude" }), "").provenance,
+    claudeRow.provenance
+  );
+
   // Once an agent is named, a genuinely second one still adds as a second.
   const secondAgent = applyDraftFieldValue(addedWhileUnnamed, {
     section: "provenance",

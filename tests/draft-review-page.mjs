@@ -1385,6 +1385,20 @@ export async function run() {
   assert.match(stampedProvenancePage, /add drafting client/);
   assert.doesNotMatch(stampedProvenancePage, /<option value="Codex">Codex<\/option>/);
   assert.match(stampedProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
+  // Only Claude-family rows carry the Claude Code checkbox, checked when the
+  // row already says Claude Code.
+  assert.doesNotMatch(stampedProvenancePage, /name="[^"]*claudeCodeHost"/);
+  const claudeRowPage = contributors => renderDraftPage({
+    ...baseDraft,
+    document: { ...baseDraft.document, provenance: { collaboration: "ai", contributors } }
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  const claudePage = claudeRowPage([{ name: "Claude (Claude Opus 5.5)" }]);
+  assert.match(claudePage, /name="[^"]*claudeSurfaceHost" value="Claude"/);
+  assert.match(claudePage, /type="checkbox" id="provenance-claude-code-claude" name="[^"]*claudeCodeHost" value="Claude">/);
+  assert.match(
+    claudeRowPage([{ name: "Claude Code" }]),
+    /type="checkbox" id="provenance-claude-code-claude-code" name="[^"]*claudeCodeHost" value="Claude Code" checked>/
+  );
 
   // A stored model differing only by case from a canonical suggestion must
   // still land on that option selected -- a case-sensitive comparison would
