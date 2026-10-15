@@ -602,6 +602,69 @@ export async function run() {
     [{ name: "Claude Code" }]
   );
 
+  // Claude rows are addressed by full name, since one puzzle may credit
+  // Claude with several models. The Claude Code checkbox renames a row and
+  // carries model and reasoning over; unchecking renames it back.
+  const claudeRow = {
+    ...document,
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Claude (Opus 5.5)", model: "Claude Opus 5.5", reasoning: "medium" }]
+    }
+  };
+  const provenanceForm = entries => parseFieldEditForm(new URLSearchParams([
+    ["section", "provenance"], ["field", "editor"], ...entries
+  ]));
+  const rowFields = (key, { model = "", reasoning = "", claudeCode = false } = {}) => [
+    ["modelHost", key], ["modelValue", model],
+    ["reasoningHost", key], ["reasoningValue", reasoning],
+    ["claudeSurfaceHost", key],
+    ...(claudeCode ? [["claudeCodeHost", key]] : [])
+  ];
+  const checkedForm = provenanceForm(rowFields("Claude (Opus 5.5)", {
+    model: "Claude Opus 5.5", reasoning: "medium", claudeCode: true
+  }));
+  assert.deepEqual(checkedForm.claudeSurfaces, [{ host: "Claude (Opus 5.5)", claudeCode: true }]);
+  const markedClaudeCode = applyDraftFieldValue(claudeRow, checkedForm, "");
+  assert.deepEqual(markedClaudeCode.provenance.contributors, [
+    { name: "Claude Code (Claude Opus 5.5)", reasoning: "medium" }
+  ]);
+  const unchecked = applyDraftFieldValue(markedClaudeCode, provenanceForm(rowFields(
+    "Claude Code (Claude Opus 5.5)", { model: "Claude Opus 5.5", reasoning: "medium" })), "");
+  assert.deepEqual(unchecked.provenance.contributors, claudeRow.provenance.contributors);
+  // An unchanged row and a blank "another Claude model" row change nothing.
+  assert.deepEqual(applyDraftFieldValue(claudeRow, provenanceForm([
+    ...rowFields("Claude (Opus 5.5)", { model: "Claude Opus 5.5", reasoning: "medium" }),
+    ["addClaudeModel", ""]
+  ]), "").provenance, claudeRow.provenance);
+
+  // A divergent model on the blank row records a second Claude contributor;
+  // each row is then edited on its own, by its own key.
+  const twoClaudes = applyDraftFieldValue(claudeRow, provenanceForm([
+    ...rowFields("Claude (Opus 5.5)", { model: "Claude Opus 5.5", reasoning: "medium" }),
+    ["addClaudeModel", "Claude Sonnet 5.5"], ["addClaudeCode", "1"]
+  ]), "");
+  assert.deepEqual(twoClaudes.provenance.contributors, [
+    { name: "Claude (Opus 5.5)", model: "Claude Opus 5.5", reasoning: "medium" },
+    { name: "Claude Code (Claude Sonnet 5.5)" }
+  ]);
+  const secondTuned = applyDraftFieldValue(twoClaudes, provenanceForm([
+    ...rowFields("Claude (Opus 5.5)", { model: "Claude Opus 5.5", reasoning: "medium" }),
+    ...rowFields("Claude Code (Claude Sonnet 5.5)", {
+      model: "Claude Sonnet 5.5", reasoning: "high", claudeCode: true
+    })
+  ]), "");
+  assert.deepEqual(secondTuned.provenance.contributors, [
+    { name: "Claude (Opus 5.5)", model: "Claude Opus 5.5", reasoning: "medium" },
+    { name: "Claude Code (Claude Sonnet 5.5)", reasoning: "high" }
+  ]);
+  // Giving the second row the first row's model and client merges the two.
+  const mergedBack = applyDraftFieldValue(secondTuned, provenanceForm([
+    ...rowFields("Claude (Opus 5.5)", { model: "Claude Opus 5.5", reasoning: "medium" }),
+    ...rowFields("Claude Code (Claude Sonnet 5.5)", { model: "Claude Opus 5.5", reasoning: "high" })
+  ]), "");
+  assert.deepEqual(mergedBack.provenance.contributors, claudeRow.provenance.contributors);
+
   // Once an agent is named, a genuinely second one still adds as a second.
   const secondAgent = applyDraftFieldValue(addedWhileUnnamed, {
     section: "provenance",

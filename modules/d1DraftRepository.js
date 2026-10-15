@@ -1081,6 +1081,34 @@ export class D1DraftRepository extends DraftRepository {
     ).run();
     return { id, draftId, capturedAt };
   }
+
+  // The raw client each stamped MCP call reported, oldest first, so the
+  // drafts page can show the editor what the frame said.
+  async listAssistanceStamps({ draftId, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const result = await this.database.prepare(`
+      SELECT captured_at, record_json FROM draft_assistance_stamps
+      WHERE draft_id = ? AND owner_subject = ?
+      ORDER BY captured_at ASC, id ASC
+    `).bind(draftId, owner).all();
+    return (result.results || []).flatMap(row => {
+      let record;
+      try {
+        record = JSON.parse(row.record_json);
+      } catch {
+        return [];
+      }
+      const client = record?.client || {};
+      return [{
+        capturedAt: row.captured_at,
+        tool: record?.tool || null,
+        hostId: client.hostId || null,
+        system: client.system || null,
+        clientName: client.clientName || null
+      }];
+    });
+  }
 }
 
 export default D1DraftRepository;

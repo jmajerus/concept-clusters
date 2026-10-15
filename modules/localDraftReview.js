@@ -2089,6 +2089,9 @@ export function createLocalDraftReviewHandler({
       const boardLimitWaiverRequests = draftId && typeof draftStore.listBoardLimitWaiverRequests === "function"
         ? await draftStore.listBoardLimitWaiverRequests({ draftId })
         : [];
+      const assistanceStamps = draftId && typeof draftStore.listAssistanceStamps === "function"
+        ? await draftStore.listAssistanceStamps({ draftId })
+        : [];
       const currentPublishedRevision = publishedRow && !publishedRow.withdrawnAt
         && Number.isInteger(publishedRow.revision)
         ? publishedRow.revision
@@ -2111,6 +2114,7 @@ export function createLocalDraftReviewHandler({
         reviewEvents,
         reviewIssues,
         boardLimitWaiverRequests,
+        assistanceStamps,
         inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
       }, {
         variant: "local",

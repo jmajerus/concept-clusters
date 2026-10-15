@@ -8,6 +8,11 @@ import {
   formatGenerativeContributorLabel,
   normalizeReasoningLevel,
   contributorsByKind,
+  isClaudeFamilyContributor,
+  claudeFamilyStampSystem,
+  hasClaudeRow,
+  applyClaudeRowEdits,
+  generativeHostKey,
   UNIDENTIFIED_GENERATIVE_SYSTEM
 } from "./authoringProvenance.js";
 import {
@@ -23,7 +28,12 @@ const HOST_FINGERPRINTS = Object.freeze([
     match: ({ name }) => name === "cursor-vscode" || /^cursor\b/i.test(name)
   },
   {
+    // claude.ai web also reports itself as claude-code (probed 2026-10-15:
+    // same clientInfo, _meta key, and Claude-User user-agent as a real Claude
+    // Code session), so the frame credits the family name only. The editor
+    // marks "Claude Code" on the drafts page when they know it was.
     id: "claude-code",
+    creditAs: "claude",
     match: ({ name }) => name === "claude-code" || /^claude-code\b/i.test(name)
   },
   {
@@ -151,7 +161,7 @@ export function identifyMcpAssistanceClient({
 
   for (const host of HOST_FINGERPRINTS) {
     if (!host.match({ name, title, meta, httpUa })) continue;
-    const labeled = labelFor(host.id, settings);
+    const labeled = labelFor(host.creditAs || host.id, settings);
     const museDetails = host.id === "muse-code" ? museContributorDetails(name) : null;
     const model = host.id === "codex"
       ? codexModel(meta)
@@ -259,9 +269,34 @@ export function stampDocumentAssistanceFromMcp(document, {
     // generative assistance". Recording nothing, as this did before, left an
     // AI-written board asserting human authorship by default and gave the
     // editor no way to correct it.
-    const provenance = identity?.system
+    // Claude rows are the editor's: once a puzzle credits Claude, a Claude
+    // stamp only adds a row for a model the frame named that no row has yet
+    // (Claude frames rarely name one). The stamp log keeps every call.
+    const claudeFamily = Boolean(identity?.system) &&
+      isClaudeFamilyContributor(identity.system, settings);
+    const stampSystem = claudeFamily
+      ? claudeFamilyStampSystem(base.provenance, settings)
+      : identity?.system;
+    const creditsClaude = claudeFamily &&
+      contributorsByKind(base.provenance, "generative", settings)
+        .some(name => isClaudeFamilyContributor(name, settings));
+    const system = claudeFamily
+      ? formatGenerativeContributorLabel(stampSystem, identity.model, settings)
+      : identity?.system;
+    const provenance = creditsClaude
+      ? (identity.model && !hasClaudeRow(base.provenance, system, settings)
+        ? applyClaudeRowEdits({ provenance: base.provenance }, {
+          added: {
+            model: identity.model,
+            claudeCode: generativeHostKey(stampSystem, settings) !==
+              generativeHostKey(identity.system, settings)
+          },
+          settings
+        }).provenance
+        : base.provenance)
+      : system
       ? upsertGenerativeProvenance(base.provenance, {
-        system: identity.system,
+        system,
         ...(identity.model ? { model: identity.model } : {}),
         ...(identity.reasoning ? { reasoning: identity.reasoning } : {})
       })
