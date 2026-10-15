@@ -758,8 +758,12 @@ plus a few small backend pieces that need somewhere to run:
   route-scoped Cache API to cache successful responses at the edge for 30
   seconds while browsers revalidate. In an open tab, the index is
   checked on the next navigation after 30 seconds; a changed index reloads
-  the selected route. If the index cannot be checked, public play shows a
-  retry message instead of serving a potentially withdrawn frozen puzzle.
+  the selected route. If the index cannot be reached at boot, public play
+  falls back to the deploy's static copy (the manifest and frozen modules)
+  and says so; navigation retries the index every 30 seconds and reloads
+  into live play once it answers. The static copy is as of the last Freeze,
+  so during an outage it can show a puzzle withdrawn since: freeze soon after
+  withdrawing one.
   Plain local static serving has no public-play meta tag and remains
   independent of D1.
 

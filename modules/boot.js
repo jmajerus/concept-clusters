@@ -23,15 +23,14 @@ export function failedModuleHint(error) {
 export function bootFailureCopy(error) {
   const detail = error instanceof Error ? error.message : String(error ?? "Unknown error");
   const modulePath = failedModuleHint(error);
-  const publicationUnavailable = /Publication index (?:unavailable|is incomplete)/.test(detail);
+  // An unreachable publication index is not a boot failure: public play
+  // falls back to the deploy's static copy (game.js).
   return {
     title: "Concept Clusters couldn’t load",
     body:
-      publicationUnavailable
-        ? "We couldn’t check the current published puzzles. Please try again shortly."
-        : "The puzzle app failed to start. This usually means the published site is incomplete — " +
-          "for example the puzzle or catalogue registry listing a file that was not deployed with it. " +
-          "Try refreshing after a full deploy lands.",
+      "The puzzle app failed to start. This usually means the published site is incomplete — " +
+      "for example the puzzle or catalogue registry listing a file that was not deployed with it. " +
+      "Try refreshing after a full deploy lands.",
     modulePath,
     detail
   };

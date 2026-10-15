@@ -84,14 +84,56 @@ export async function run(page) {
     await page.waitForFunction(() => !document.body.classList.contains("booting"));
     assert.notEqual(await page.locator("#puzzle-title").textContent(), "Corrected in D1");
 
+    // With the index unreachable, play falls back to the deploy's static
+    // copy and says so. That copy is as of the last freeze, so a puzzle
+    // withdrawn since is still in it: the accepted cost of having a backup.
     indexUnavailable = true;
     await page.evaluate(() => {
       const now = Date.now();
       Date.now = () => now + 31_000;
     });
     await Promise.all([page.waitForEvent("load"), page.locator("#browse-puzzles").click()]);
-    await page.locator("#boot-failure [role=alert]").waitFor({ state: "visible" });
-    assert.match(await page.locator("#boot-failure").textContent(), /couldn’t check the current published puzzles/i);
+    await page.locator("#snapshot-notice").waitFor({ state: "visible" });
+    assert.match(await page.textContent("#snapshot-notice"), /last site update/);
+    assert.equal(await page.locator("#boot-failure").isHidden(), true);
+    await page.goto(`${base}/?puzzle=energy-flow`);
+    await waitForTitle(page, "Energy flow in living systems");
+    assert.equal(await page.evaluate(() => window.CC.PUZZLES.some(puzzle => puzzle.id === "new-from-d1")), false,
+      "the snapshot carries only frozen puzzles");
+
+    // While the index is down, navigation keeps the snapshot and starts one
+    // background check, not one per navigation.
+    let indexRequests = 0;
+    page.on("request", request => {
+      if (new URL(request.url()).pathname === "/api/publications") indexRequests += 1;
+    });
+    await page.evaluate(() => {
+      const now = Date.now();
+      Date.now = () => now + 31_000;
+    });
+    await Promise.all([
+      page.waitForResponse(response => new URL(response.url()).pathname === "/api/publications"),
+      page.locator("#browse-puzzles").click()
+    ]);
+    await page.evaluate(() => history.back());
+    await page.locator("#snapshot-notice").waitFor({ state: "visible" });
+    assert.equal(indexRequests, 1, "navigations inside 30 seconds share one check");
+
+    // Once a check finds the index answering, the next navigation reloads
+    // into live play.
+    indexUnavailable = false;
+    await page.evaluate(() => {
+      const now = Date.now();
+      Date.now = () => now + 62_000;
+    });
+    await Promise.all([
+      page.waitForResponse(response => new URL(response.url()).pathname === "/api/publications" && response.ok()),
+      page.evaluate(() => history.forward())
+    ]);
+    await page.waitForFunction(() => window.CC?.publicIndexAnswered === true);
+    await Promise.all([page.waitForEvent("load"), page.evaluate(() => history.back())]);
+    await page.waitForFunction(() => window.CC?.PUZZLES?.some(puzzle => puzzle.id === "new-from-d1"));
+    assert.equal(await page.locator("#snapshot-notice").isHidden(), true);
   } finally {
     await new Promise(resolve => server.close(resolve));
   }

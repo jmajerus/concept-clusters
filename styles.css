@@ -1632,6 +1632,21 @@ body.boot-failed #context-nav {
   display: none !important;
 }
 
+#snapshot-notice {
+  max-width: 40rem;
+  margin: 8px auto 0;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--ink-soft);
+  background: var(--panel);
+  border-radius: 6px;
+}
+
+#snapshot-notice[hidden] {
+  display: none !important;
+}
+
 .boot-failure-card {
   max-width: 36rem;
   margin: 0 auto;
