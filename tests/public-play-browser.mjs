@@ -101,20 +101,36 @@ export async function run(page) {
     assert.equal(await page.evaluate(() => window.CC.PUZZLES.some(puzzle => puzzle.id === "new-from-d1")), false,
       "the snapshot carries only frozen puzzles");
 
-    // Navigation keeps the snapshot while the index is still down, and
-    // switches to live play once it answers.
+    // While the index is down, navigation keeps the snapshot and starts one
+    // background check, not one per navigation.
+    let indexRequests = 0;
+    page.on("request", request => {
+      if (new URL(request.url()).pathname === "/api/publications") indexRequests += 1;
+    });
     await page.evaluate(() => {
       const now = Date.now();
       Date.now = () => now + 31_000;
     });
-    await page.locator("#browse-puzzles").click();
+    await Promise.all([
+      page.waitForResponse(response => new URL(response.url()).pathname === "/api/publications"),
+      page.locator("#browse-puzzles").click()
+    ]);
+    await page.evaluate(() => history.back());
     await page.locator("#snapshot-notice").waitFor({ state: "visible" });
+    assert.equal(indexRequests, 1, "navigations inside 30 seconds share one check");
+
+    // Once a check finds the index answering, the next navigation reloads
+    // into live play.
     indexUnavailable = false;
     await page.evaluate(() => {
       const now = Date.now();
       Date.now = () => now + 62_000;
     });
-    // Back to the puzzle is a navigation like any other.
+    await Promise.all([
+      page.waitForResponse(response => new URL(response.url()).pathname === "/api/publications" && response.ok()),
+      page.evaluate(() => history.forward())
+    ]);
+    await page.waitForFunction(() => window.CC?.publicIndexAnswered === true);
     await Promise.all([page.waitForEvent("load"), page.evaluate(() => history.back())]);
     await page.waitForFunction(() => window.CC?.PUZZLES?.some(puzzle => puzzle.id === "new-from-d1"));
     assert.equal(await page.locator("#snapshot-notice").isHidden(), true);

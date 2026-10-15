@@ -74,8 +74,22 @@ let corpusFailures = 0;
 let publicIndexSignature = null;
 let publicIndexCheckedAt = 0;
 // True when public play booted from the static snapshot because the
-// publication index did not answer.
+// publication index did not answer. While it is, one background check at a
+// time, at most every 30 seconds, looks for the index; navigation never
+// waits on it, and the first navigation after it answers reloads into
+// live play.
 let publicIndexFallback = false;
+let publicIndexProbe = null;
+let publicIndexAnswered = false;
+
+function probePublicIndex() {
+  if (publicIndexProbe || Date.now() - publicIndexCheckedAt < 30_000) return;
+  publicIndexCheckedAt = Date.now();
+  publicIndexProbe = loadPublicPlayIndex(publicPlayIndexUrl)
+    .then(() => { publicIndexAnswered = true; })
+    .catch(() => {})
+    .finally(() => { publicIndexProbe = null; });
+}
 
 if (playCorpusUrl) {
   const corpus = await loadPlayCorpus(playCorpusUrl);
@@ -2003,21 +2017,21 @@ overviewRenderer = createOverviewRenderer({
 appNavigation = createAppNavigation({
   puzzles: PUZZLES,
   beforeRenderRoute: publicPlayIndexUrl ? async ({ initial }) => {
-    if (initial || Date.now() - publicIndexCheckedAt < 30_000) return true;
+    if (initial) return true;
     if (publicIndexFallback) {
-      // Stay on the snapshot until the index answers, then switch to it.
-      try {
-        await loadPublicPlayIndex(publicPlayIndexUrl);
-      } catch {
-        publicIndexCheckedAt = Date.now();
-        return true;
+      if (publicIndexAnswered) {
+        location.reload();
+        return false;
       }
-      location.reload();
-      return false;
+      probePublicIndex();
+      return true;
     }
+    if (Date.now() - publicIndexCheckedAt < 30_000) return true;
+    // Claimed before the request, so navigations meanwhile skip the check
+    // instead of each starting one.
+    publicIndexCheckedAt = Date.now();
     try {
       const next = await loadPublicPlayIndex(publicPlayIndexUrl);
-      publicIndexCheckedAt = Date.now();
       if (JSON.stringify(next) === publicIndexSignature) return true;
     } catch (error) {
       console.error("Could not refresh published puzzles", error);
@@ -2821,6 +2835,9 @@ window.addEventListener("pagehide", () => {
 window.CC = {
   get state() { return state; },
   get mode() { return mode; },
+  // Whether a background check found the publication index answering while
+  // playing the static snapshot.
+  get publicIndexAnswered() { return publicIndexAnswered; },
   isDone,
   isBridge,
   handleTap,
