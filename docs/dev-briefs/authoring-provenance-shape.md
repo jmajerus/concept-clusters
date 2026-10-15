@@ -58,7 +58,7 @@ inferred: names matching known AI hosts in
 new system appears.
 
 **Client surfaces are canonical.** Apart from Claude (below), the client that touched the draft remains
-the contributor identity everywhere: Claude and Claude Code, Gemini and
+the contributor identity everywhere: Gemini and
 Gemini CLI, Muse and Muse Code, Codex and ChatGPT (when identified), and
 Cursor remain separate rows, bylines, and model-editor choices. This is
 important because clients
