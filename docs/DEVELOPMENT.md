@@ -300,7 +300,7 @@ or completed grouped view across mode switches. Heading sorts inspect only
 confirmed memberships. Grouped views repeat bridges using the same node
 objects, with distinct row IDs; lens selections and feedback stay synchronized
 across those rows. View changes never write connection history, and solving
-does not automatically change the selected order.
+does not automatically change the single-table view's selected order.
 Within a cluster, ordinary members are alphabetical and bridges follow their
 revealed ideal endpoint, with alphabetical siblings and an indented glyph.
 Bridges without a placed endpoint occupy a final Shared connections section.
@@ -325,6 +325,23 @@ Show term info adds an optional final column using only each node's ordinary
 Column visibility is remembered in `ccTableShowTermInfo`; cluster columns keep
 their 44 px width, and descriptions wrap beside the sticky term column on
 mobile. Group and section headings update their spans as visibility changes.
+
+Separate completed clusters is an optional display preference stored in
+`ccTableSeparateCompleted`. It uses two instances of the membership table,
+with distinct heading and row IDs, and stacks them below 800 px of available
+board width. The split view gives small diagram canvases a wider display frame
+without changing their authored canvas dimensions. Working-table heading sorts
+remain available; the separate completed panel already groups its clusters.
+Completion follows the game's ordinary-member rule. Each completed cluster's
+last ordinary move determines its position, newest first; replay, diagram
+switches, and cluster resets therefore need no separate ordering metadata.
+Later bridge placements update the groups without changing their positions.
+Unfinished bridges remain in the working table and appear in completed groups
+only for confirmed memberships. A finished bridge leaves the working table
+once at least one completed group can display it. Every repeated row uses the
+same underlying node for feedback, canonical annotations, and lens selections.
+Keyboard focus follows a migrating row; vertical arrows stay within a panel,
+and horizontal arrows cross to the other panel at the outside column boundary.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer

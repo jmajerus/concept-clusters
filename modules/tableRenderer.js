@@ -22,6 +22,10 @@ export function createTableRenderer({
       try { state.tableShowTermInfo = storage?.getItem("ccTableShowTermInfo") === "true"; }
       catch { state.tableShowTermInfo = false; }
     }
+    if (state.tableSeparateCompleted == null) {
+      try { state.tableSeparateCompleted = storage?.getItem("ccTableSeparateCompleted") === "true"; }
+      catch { state.tableSeparateCompleted = false; }
+    }
     const cellPulses = new Map();
     const choiceKey = (node, ci) => JSON.stringify([node.word, ci]);
 
@@ -51,7 +55,7 @@ export function createTableRenderer({
     // Keep the view choice across diagram switches during this visit. It
     // changes only presentation, never connection history or saved answers.
     let order = state.tableOrder || { kind: "alphabetical" };
-    if (order.kind === "grouped" && state.made !== state.need) order = { kind: "alphabetical" };
+    if (order.kind === "grouped" && (state.made !== state.need || state.tableSeparateCompleted)) order = { kind: "alphabetical" };
     const toolbar = document.createElement("div");
     toolbar.className = "table-toolbar";
     toolbar.setAttribute("role", "group");
@@ -92,62 +96,108 @@ export function createTableRenderer({
       paint();
     });
     infoLabel.append(showInfo, "Show term info");
-    toolbar.append(alphabetical, grouped, rememberLabel, infoLabel);
+    const splitLabel = document.createElement("label");
+    splitLabel.className = "table-option";
+    splitLabel.title = "Move clusters into their own panel when all ordinary terms are placed, newest first. Bridges remain available until connected.";
+    const separateCompleted = document.createElement("input");
+    separateCompleted.id = "table-separate-completed";
+    separateCompleted.type = "checkbox";
+    separateCompleted.addEventListener("change", () => {
+      state.tableSeparateCompleted = separateCompleted.checked;
+      try { storage?.setItem("ccTableSeparateCompleted", String(separateCompleted.checked)); }
+      catch { /* The view still works when preferences cannot be saved. */ }
+      if (order.kind === "grouped") order = state.tableOrder = { kind: "alphabetical" };
+      paint();
+      workingPanel.scroll.scrollTop = 0;
+      if (completedPanel) completedPanel.scroll.scrollTop = 0;
+    });
+    splitLabel.append(separateCompleted, "Separate completed clusters");
+    toolbar.append(alphabetical, grouped, splitLabel, rememberLabel, infoLabel);
     const orderStatus = document.createElement("p");
     orderStatus.id = "table-order-status";
     orderStatus.className = "table-help";
     orderStatus.setAttribute("role", "status");
-    const scroll = document.createElement("div");
-    scroll.className = "table-scroll";
-    scroll.setAttribute("role", "region");
-    scroll.setAttribute("aria-label", "Term and cluster memberships");
-    scroll.tabIndex = 0;
-    const sheet = document.createElement("div");
-    sheet.className = "table-sheet";
-    sheet.style.setProperty("--table-members-width", `${puzzle.clusters.length * 44}px`);
-    const table = document.createElement("table");
-    table.className = "membership-table";
-    const caption = table.createCaption();
-    caption.className = "visually-hidden";
-    caption.textContent = `${puzzle.title}: check a term's membership in each cluster. Use arrow keys to move between cells and Space to check.`;
-    const colgroup = document.createElement("colgroup");
-    colgroup.append(document.createElement("col"));
-    puzzle.clusters.forEach(() => colgroup.append(document.createElement("col")));
-    const infoColumn = document.createElement("col");
-    infoColumn.className = "table-info-column";
-    infoColumn.hidden = !state.tableShowTermInfo;
-    colgroup.append(infoColumn);
-    table.append(colgroup);
-    const head = table.createTHead().insertRow();
-    const corner = document.createElement("th");
-    corner.scope = "col";
-    corner.textContent = "Term";
-    head.append(corner);
-    const headings = puzzle.clusters.map((cluster, ci) => {
-      const cell = document.createElement("th");
-      cell.scope = "col";
-      cell.id = `table-cluster-${ci}`;
-      cell.className = "table-cluster-heading";
-      cell.style.setProperty("--table-color", `var(--${cluster.color})`);
-      const label = document.createElement("button");
-      label.type = "button";
-      label.textContent = cluster.name;
-      label.title = `Bring connected terms for ${cluster.name} to the top`;
-      label.addEventListener("click", () => {
-        setOrder({ kind: "cluster", ci });
-        showTermInfo({ word: cluster.name, info: normalizeInfo(cluster.info) });
+    const panelLayout = document.createElement("div");
+    panelLayout.className = "table-panels";
+    const panels = [];
+    function createPanel(key, title) {
+      const section = document.createElement("section");
+      section.className = `table-panel table-panel-${key}`;
+      const titleEl = document.createElement("h3");
+      titleEl.id = `table-panel-${key}-title`;
+      titleEl.className = "table-panel-title";
+      titleEl.textContent = title;
+      section.setAttribute("aria-labelledby", titleEl.id);
+      const scroll = document.createElement("div");
+      scroll.className = "table-scroll";
+      scroll.setAttribute("role", "region");
+      scroll.setAttribute("aria-label", `${title}: term and cluster memberships`);
+      scroll.tabIndex = 0;
+      const sheet = document.createElement("div");
+      sheet.className = "table-sheet";
+      sheet.style.setProperty("--table-members-width", `${puzzle.clusters.length * 44}px`);
+      const table = document.createElement("table");
+      table.className = "membership-table";
+      const caption = table.createCaption();
+      caption.className = "visually-hidden";
+      caption.textContent = `${puzzle.title}, ${title}: check a term's membership in each cluster. Use arrow keys to move between cells and Space to check.`;
+      const colgroup = document.createElement("colgroup");
+      colgroup.append(document.createElement("col"));
+      puzzle.clusters.forEach(() => colgroup.append(document.createElement("col")));
+      const infoColumn = document.createElement("col");
+      infoColumn.className = "table-info-column";
+      infoColumn.hidden = !state.tableShowTermInfo;
+      colgroup.append(infoColumn);
+      table.append(colgroup);
+      const head = table.createTHead().insertRow();
+      const corner = document.createElement("th");
+      corner.scope = "col";
+      corner.textContent = "Term";
+      head.append(corner);
+      const headings = puzzle.clusters.map((cluster, ci) => {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        cell.id = key === "working" ? `table-cluster-${ci}` : `table-completed-cluster-${ci}`;
+        cell.className = "table-cluster-heading";
+        cell.style.setProperty("--table-color", `var(--${cluster.color})`);
+        const label = document.createElement("button");
+        label.type = "button";
+        label.textContent = cluster.name;
+        label.title = key === "working" ? `Bring connected terms for ${cluster.name} to the top` : `View the completed ${cluster.name} group`;
+        label.addEventListener("click", () => {
+          if (key === "working") setOrder({ kind: "cluster", ci });
+          else {
+            const group = table.querySelector(`tbody[data-cluster="${ci}"]`);
+            if (group) scroll.scrollTop += group.getBoundingClientRect().top - scroll.getBoundingClientRect().top - table.tHead.getBoundingClientRect().height;
+          }
+          showTermInfo({ word: cluster.name, info: normalizeInfo(cluster.info) });
+        });
+        cell.addEventListener("contextmenu", event => onClusterContextMenu(ci, event, label));
+        cell.append(label);
+        head.append(cell);
+        return cell;
       });
-      cell.addEventListener("contextmenu", event => onClusterContextMenu(ci, event, label));
-      cell.append(label);
-      head.append(cell);
-      return cell;
-    });
-    const infoHeading = document.createElement("th");
-    infoHeading.scope = "col";
-    infoHeading.className = "table-info-heading";
-    infoHeading.textContent = "Term info";
-    infoHeading.hidden = !state.tableShowTermInfo;
-    head.append(infoHeading);
+      const infoHeading = document.createElement("th");
+      infoHeading.scope = "col";
+      infoHeading.className = "table-info-heading";
+      infoHeading.textContent = "Term info";
+      infoHeading.hidden = !state.tableShowTermInfo;
+      head.append(infoHeading);
+      const empty = document.createElement("p");
+      empty.className = "table-panel-empty";
+      empty.textContent = key === "working"
+        ? "All terms are in completed clusters."
+        : "Completed clusters will appear here as you solve.";
+      sheet.append(table);
+      scroll.append(sheet);
+      section.append(titleEl, scroll, empty);
+      const panel = { key, section, titleEl, scroll, sheet, table, corner, headings, infoColumn, infoHeading, empty, rows: [] };
+      panels.push(panel);
+      return panel;
+    }
+    const workingPanel = createPanel("working", "Working terms");
+    let completedPanel = null;
+    panelLayout.append(workingPanel.section);
 
     const details = document.createElement("p");
     details.id = "table-details";
@@ -182,13 +232,13 @@ export function createTableRenderer({
     const rowCache = new Map();
     let rows = [];
     let rowSignature = "";
-    function createRow(node, groupKey) {
+    function createRow(node, groupKey, panel) {
       const row = document.createElement("tr");
       row.dataset.term = node.word;
-      const entry = { node, row };
+      const entry = { node, row, panel };
       const termCell = document.createElement("th");
       termCell.scope = "row";
-      termCell.id = `table-term-${node.id}-${groupKey}`;
+      termCell.id = `table-term-${node.id}-${panel.key}-${groupKey}`;
       const term = document.createElement("button");
       term.type = "button";
       term.className = "table-term";
@@ -218,7 +268,7 @@ export function createTableRenderer({
         const input = document.createElement("input");
         input.type = "checkbox";
         input.dataset.cluster = String(ci);
-        input.setAttribute("aria-labelledby", `${termCell.id} table-cluster-${ci}`);
+        input.setAttribute("aria-labelledby", `${termCell.id} ${panel.headings[ci].id}`);
         const wrongMark = document.createElement("span");
         wrongMark.className = "table-wrong-mark";
         wrongMark.textContent = "×";
@@ -249,10 +299,18 @@ export function createTableRenderer({
           const move = moves[event.key];
           if (!move) return;
           event.preventDefault();
-          const ri = rows.indexOf(entry);
-          const nextRow = Math.max(0, Math.min(rows.length - 1, ri + move[0]));
+          const ri = panel.rows.indexOf(entry);
+          let targetPanel = panel;
+          let nextRow = Math.max(0, Math.min(panel.rows.length - 1, ri + move[0]));
           const nextColumn = Math.max(0, Math.min(puzzle.clusters.length - 1, ci + move[1]));
-          rows[nextRow].cells[nextColumn].input.focus();
+          const neighbor = move[1] === 1 && ci === puzzle.clusters.length - 1 && panel === workingPanel
+            ? completedPanel : move[1] === -1 && ci === 0 && panel === completedPanel ? workingPanel : null;
+          if (state.tableSeparateCompleted && neighbor?.rows.length) {
+            targetPanel = neighbor;
+            nextRow = Math.min(ri, neighbor.rows.length - 1);
+          }
+          const targetColumn = targetPanel === panel ? nextColumn : move[1] === 1 ? 0 : puzzle.clusters.length - 1;
+          targetPanel.rows[nextRow]?.cells[targetColumn].input.focus();
         });
         label.append(input, wrongMark, wrongNote);
         cell.append(label);
@@ -274,10 +332,10 @@ export function createTableRenderer({
       return Object.assign(entry, { term, status, cells, indent, infoCell });
     }
 
-    function clusterGroup(ci) {
+    function clusterGroup(ci, candidates = sortedNodes) {
       // Use only confirmed memberships. An unplaced authored endpoint
       // cannot affect ordering, indentation, labels, or accessible names.
-      const confirmed = sortedNodes.filter(node => node.connected.includes(ci));
+      const confirmed = candidates.filter(node => node.connected.includes(ci));
       const concepts = confirmed.filter(node => !isBridge(node));
       const connections = confirmed.filter(isBridge);
       const endpoints = new Map();
@@ -302,72 +360,109 @@ export function createTableRenderer({
       };
     }
 
+    // Cluster completion follows the game's ordinary-member rule. The last
+    // ordinary move gives a stable completion order even after session replay
+    // or connections made in another mode; later bridge moves cannot reorder it.
+    function completedClusterOrder() {
+      const lastMove = new Map(state.moveHistory.map((move, index) => [move.source, index]));
+      return puzzle.clusters.map((_, ci) => {
+        const members = nodes.filter(node => !isBridge(node) && node.gs[0] === ci);
+        return { ci, complete: members.every(isDone),
+          lastMove: Math.max(-1, ...members.map(node => lastMove.get(node.id) ?? -1)) };
+      }).filter(cluster => cluster.complete)
+        .sort((a, b) => b.lastMove - a.lastMove || a.ci - b.ci).map(cluster => cluster.ci);
+    }
+
+    let previousCompleted = new Set();
     function renderRows() {
+      const split = state.tableSeparateCompleted;
+      if (split && !completedPanel) completedPanel = createPanel("completed", "Completed clusters");
+      if (split && !panelLayout.contains(completedPanel.section)) panelLayout.append(completedPanel.section);
+      if (!split) completedPanel?.section.remove();
+      panelLayout.classList.toggle("table-panels-split", split);
+      workingPanel.titleEl.hidden = !split;
+      const completed = completedClusterOrder();
+      const completedSet = new Set(completed);
+      const newlyCompleted = completed.some(ci => !previousCompleted.has(ci));
+      previousCompleted = completedSet;
+      const workingNodes = split ? sortedNodes.filter(node => isBridge(node)
+        ? !isDone(node) || !node.connected.some(ci => completedSet.has(ci))
+        : !completedSet.has(node.gs[0])) : sortedNodes;
       const groups = order.kind === "grouped"
         ? puzzle.clusters.map((_, ci) => clusterGroup(ci))
         : order.kind === "cluster"
-          ? [clusterGroup(order.ci), {
-            key: "others", members: sortedNodes.filter(node => !node.connected.includes(order.ci))
+          ? [clusterGroup(order.ci, workingNodes), {
+            key: "others", members: workingNodes.filter(node => !node.connected.includes(order.ci))
           }]
-          : [{ key: "all", members: sortedNodes }];
-      const signature = JSON.stringify([order.kind, state.tableShowTermInfo, groups.map(group => [
-        group.key, group.members.map(node => [node.id, group.endpoints?.get(node.id) || null])
+          : [{ key: "all", members: workingNodes }];
+      const plans = [{ panel: workingPanel, groups: split ? groups.filter(group => group.members.length) : groups }];
+      if (split) plans.push({ panel: completedPanel, groups: completed.map(ci => clusterGroup(ci)) });
+      const signature = JSON.stringify([order.kind, state.tableShowTermInfo, plans.map(({ panel, groups }) => [
+        panel.key, groups.map(group => [group.key, group.members.map(node => [node.id, group.endpoints?.get(node.id) || null])])
       ])]);
       if (signature === rowSignature) return;
       rowSignature = signature;
       const focused = document.activeElement;
-      const restoreFocus = table.contains(focused) && !!focused.closest("tbody");
+      const restoreFocus = container.contains(focused) && !!focused.closest("tbody");
       const focusedRow = restoreFocus && rows.find(entry => entry.row.contains(focused));
       const focusedColumn = focusedRow ? focusedRow.cells.findIndex(cell => cell.input === focused) : -1;
-      const bodies = groups.map(group => {
-        const body = document.createElement("tbody");
-        if (group.ci != null) {
-          body.className = "table-cluster-group";
-          body.dataset.cluster = String(group.ci);
-          body.style.setProperty("--table-group-color", `var(--${puzzle.clusters[group.ci].color})`);
-          body.style.setProperty("--table-group-bg", `var(--${puzzle.clusters[group.ci].color}-bg)`);
-        }
-        if (order.kind !== "alphabetical") {
-          const heading = body.insertRow();
-          heading.className = "table-group-heading";
-          const cell = document.createElement("th");
-          cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
-          cell.scope = "rowgroup";
-          cell.id = `table-group-${group.key}`;
-          const text = document.createElement("span");
-          text.textContent = group.ci == null
-            ? `Other terms · ${group.members.length}`
-            : `${puzzle.clusters[group.ci].name} · ${group.members.length} connected`;
-          cell.append(text);
-          heading.append(cell);
-          body.setAttribute("aria-labelledby", cell.id);
-        }
-        group.members.forEach(node => {
-          if (node.id === group.unattachedStart) {
-            const divider = body.insertRow();
-            divider.className = "table-connections-heading";
-            const cell = divider.insertCell();
-            cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
-            const text = document.createElement("span");
-            text.textContent = "Shared connections";
-            cell.append(text);
+      plans.forEach(({ panel, groups }) => {
+        const { table } = panel;
+        const bodies = groups.map(group => {
+          const body = document.createElement("tbody");
+          if (group.ci != null) {
+            body.className = "table-cluster-group";
+            body.dataset.cluster = String(group.ci);
+            body.style.setProperty("--table-group-color", `var(--${puzzle.clusters[group.ci].color})`);
+            body.style.setProperty("--table-group-bg", `var(--${puzzle.clusters[group.ci].color}-bg)`);
           }
-          const key = `${group.key}:${node.id}`;
-          if (!rowCache.has(key)) rowCache.set(key, createRow(node, group.key));
-          const entry = rowCache.get(key);
-          entry.parentWord = group.endpoints?.get(node.id) || null;
-          body.append(entry.row);
+          if (panel === completedPanel || order.kind !== "alphabetical") {
+            const heading = body.insertRow();
+            heading.className = "table-group-heading";
+            const cell = document.createElement("th");
+            cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
+            cell.scope = "rowgroup";
+            cell.id = `table-group-${panel.key}-${group.key}`;
+            const text = document.createElement("span");
+            text.textContent = group.ci == null
+              ? `Other terms · ${group.members.length}`
+              : `${puzzle.clusters[group.ci].name} · ${group.members.length} connected${panel === completedPanel ? " · complete" : ""}`;
+            cell.append(text);
+            heading.append(cell);
+            body.setAttribute("aria-labelledby", cell.id);
+          }
+          group.members.forEach(node => {
+            if (node.id === group.unattachedStart) {
+              const divider = body.insertRow();
+              divider.className = "table-connections-heading";
+              const cell = divider.insertCell();
+              cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
+              const text = document.createElement("span");
+              text.textContent = "Shared connections";
+              cell.append(text);
+            }
+            const key = `${panel.key}:${group.key}:${node.id}`;
+            if (!rowCache.has(key)) rowCache.set(key, createRow(node, group.key, panel));
+            const entry = rowCache.get(key);
+            entry.parentWord = group.endpoints?.get(node.id) || null;
+            body.append(entry.row);
+          });
+          return body;
         });
-        return body;
+        // Reuse row objects and their listeners. Rebuilding only row groups
+        // preserves shared bridge behavior and keyboard focus after a sort.
+        [...table.tBodies].forEach(body => body.remove());
+        table.append(...bodies);
+        panel.rows = groups.flatMap(group => group.members.map(node => rowCache.get(`${panel.key}:${group.key}:${node.id}`)));
+        panel.scroll.hidden = panel.rows.length === 0;
+        panel.empty.hidden = panel.rows.length !== 0;
       });
-      // Reuse row objects and their listeners. Rebuilding only row groups
-      // preserves shared bridge behavior and keyboard focus after a sort.
-      [...table.tBodies].forEach(body => body.remove());
-      table.append(...bodies);
-      rows = groups.flatMap(group => group.members.map(node => rowCache.get(`${group.key}:${node.id}`)));
+      rows = plans.flatMap(({ panel }) => panel.rows);
+      if (split && newlyCompleted) completedPanel.scroll.scrollTop = 0;
       if (restoreFocus) {
-        const replacement = rows.find(entry => entry.node === focusedRow?.node);
-        const target = table.contains(focused) ? focused
+        const replacement = rows.find(entry => entry.node === focusedRow?.node &&
+          entry.row.closest("tbody").dataset.cluster === String(focusedColumn)) || rows.find(entry => entry.node === focusedRow?.node);
+        const target = container.contains(focused) ? focused
           : focusedColumn >= 0 ? replacement?.cells[focusedColumn].input : replacement?.term;
         target?.focus({ preventScroll: true });
       }
@@ -377,27 +472,31 @@ export function createTableRenderer({
       order = next;
       state.tableOrder = order;
       paint();
-      scroll.scrollTop = 0;
+      workingPanel.scroll.scrollTop = 0;
     }
 
     function updateOrderControls() {
       const complete = state.made === state.need;
       alphabetical.setAttribute("aria-pressed", String(order.kind === "alphabetical"));
       grouped.setAttribute("aria-pressed", String(order.kind === "grouped"));
-      grouped.disabled = !complete;
-      grouped.title = complete ? "Show each cluster as a labeled group" : "Available when every term is connected";
-      corner.setAttribute("aria-sort", order.kind === "alphabetical" ? "ascending" : "none");
-      headings.forEach((heading, ci) => {
+      grouped.disabled = !complete || state.tableSeparateCompleted;
+      grouped.title = state.tableSeparateCompleted ? "Completed clusters are already grouped in the separate panel"
+        : complete ? "Show each cluster as a labeled group" : "Available when every term is connected";
+      workingPanel.corner.setAttribute("aria-sort", order.kind === "alphabetical" ? "ascending" : "none");
+      workingPanel.headings.forEach((heading, ci) => {
         const selected = order.kind === "cluster" && order.ci === ci;
         heading.firstChild.setAttribute("aria-pressed", String(selected));
         heading.classList.toggle("table-sorted-column", selected);
         heading.setAttribute("aria-sort", selected ? "other" : "none");
       });
-      const text = order.kind === "grouped"
+      const orderingText = order.kind === "grouped"
         ? "Grouped by cluster. Bridges follow their revealed ideal terms; other bridges appear under Shared connections."
         : order.kind === "cluster"
-          ? `${puzzle.clusters[order.ci].name} · ${clusterGroup(order.ci).members.length} connected. Other terms follow alphabetically.`
+          ? `${puzzle.clusters[order.ci].name} · ${workingPanel.rows.filter(entry => entry.node.connected.includes(order.ci)).length} connected. Other terms follow alphabetically.`
           : "Alphabetical order. Click a cluster heading to bring its connected terms to the top.";
+      const text = state.tableSeparateCompleted
+        ? `${completedPanel.table.tBodies.length} of ${puzzle.clusters.length} clusters complete. Newest completed cluster first. ${workingPanel.rows.length ? orderingText : "All terms are in completed clusters."}`
+        : orderingText;
       if (orderStatus.textContent !== text) orderStatus.textContent = text;
     }
 
@@ -406,37 +505,41 @@ export function createTableRenderer({
         entry.row.classList.toggle("table-active-row", i === ri);
         entry.cells.forEach(({ cell }, j) => cell.classList.toggle("table-active-column", j === ci));
       });
-      headings.forEach((heading, i) => heading.classList.toggle("table-active-column", i === ci));
+      panels.forEach(panel => panel.headings.forEach((heading, i) => heading.classList.toggle("table-active-column", i === ci)));
     }
-    scroll.addEventListener("mouseleave", () => {
-      if (!scroll.contains(document.activeElement)) { highlight(); clearTermInfo(); }
+    panelLayout.addEventListener("mouseleave", () => {
+      if (!panelLayout.contains(document.activeElement)) { highlight(); clearTermInfo(); }
     });
-    scroll.addEventListener("focusout", event => {
-      if (!scroll.contains(event.relatedTarget)) highlight();
+    panelLayout.addEventListener("focusout", event => {
+      if (!panelLayout.contains(event.relatedTarget)) highlight();
     });
-    sheet.append(table);
-    scroll.append(sheet);
-    container.append(help, toolbar, orderStatus, scroll, details);
+    container.append(help, toolbar, orderStatus, panelLayout, details);
 
     // Measure actual labels: long names need more height and right-side
     // overhang, rather than wider checkbox columns or clipped headings.
     function sizeHeadings() {
-      const width = Math.max(0, ...headings.map(heading => heading.firstChild.offsetWidth));
-      if (!width) return; // The lesson introduction can initially hide the board.
-      sheet.style.setProperty("--table-heading-height", `${Math.ceil(width * Math.sin(Math.PI / 3)) + 48}px`);
-      sheet.style.setProperty("--table-heading-overhang", `${Math.ceil(width / 2) + 18}px`);
+      panels.forEach(({ headings, sheet }) => {
+        const width = Math.max(0, ...headings.map(heading => heading.firstChild.offsetWidth));
+        if (!width) return; // The lesson introduction can initially hide the board.
+        sheet.style.setProperty("--table-heading-height", `${Math.ceil(width * Math.sin(Math.PI / 3)) + 48}px`);
+        sheet.style.setProperty("--table-heading-overhang", `${Math.ceil(width / 2) + 18}px`);
+      });
     }
     sizeHeadings();
     const resizeObserver = new ResizeObserver(sizeHeadings);
-    resizeObserver.observe(scroll);
-    document.fonts?.ready.then(() => { if (getState() === state && container.contains(sheet)) sizeHeadings(); });
+    resizeObserver.observe(panelLayout);
+    document.fonts?.ready.then(() => { if (getState() === state && container.contains(panelLayout)) sizeHeadings(); });
 
     function paint() {
       if (getState() !== state) return;
       showInfo.checked = state.tableShowTermInfo;
-      infoColumn.hidden = infoHeading.hidden = !showInfo.checked;
-      sheet.classList.toggle("table-show-info", showInfo.checked);
+      separateCompleted.checked = state.tableSeparateCompleted;
       renderRows();
+      panels.forEach(({ infoColumn, infoHeading, sheet }) => {
+        infoColumn.hidden = infoHeading.hidden = !showInfo.checked;
+        sheet.classList.toggle("table-show-info", showInfo.checked);
+      });
+      sizeHeadings();
       updateOrderControls();
       remember.checked = state.tableFeedback.rememberWrongChoices;
       const remembered = new Set(state.tableFeedback.wrongChoices.map(choice => JSON.stringify([choice.term, choice.clusterIndex])));
@@ -444,7 +547,7 @@ export function createTableRenderer({
         infoCell.hidden = !showInfo.checked;
         const connected = node.connected.length > 0;
         const bridge = isBridge(node) && connected;
-        const shared = order.kind === "grouped" && bridge;
+        const shared = (order.kind === "grouped" || state.tableSeparateCompleted) && bridge;
         const seed = !isBridge(node) && puzzle.clusters[node.gs[0]].seeds.includes(node.word);
         const active = row.classList.contains("table-active-row");
         row.className = withLensClass(`table-row${active ? " table-active-row" : ""}${bridge ? " table-bridge" : ""}${parentWord ? " table-nested-bridge" : ""}${connected && !isDone(node) ? " table-partial" : ""}`, node, state);
@@ -452,16 +555,19 @@ export function createTableRenderer({
         if (parentWord) row.dataset.idealEndpoint = parentWord;
         else delete row.dataset.idealEndpoint;
         const relationship = parentWord ? `Shared connection through ${parentWord}.` : "";
+        const sharedDescription = !shared ? "" : state.tableSeparateCompleted
+          ? "Shared bridge; confirmed connections also appear in completed clusters."
+          : "Shared bridge; repeated in each connected cluster.";
         const name = lensNodeAriaLabel(node, state, canonicalNodeAriaLabel(node, puzzle, nodes, node.word));
-        term.setAttribute("aria-label", [name, relationship, shared ? "Shared bridge; repeated in each connected cluster." : ""].filter(Boolean).join(" "));
-        term.title = [relationship, shared ? "Shared bridge; repeated in each connected cluster." : "", annotation(node)].filter(Boolean).join(" ") || node.word;
+        term.setAttribute("aria-label", [name, relationship, sharedDescription].filter(Boolean).join(" "));
+        term.title = [relationship, sharedDescription, annotation(node)].filter(Boolean).join(" ") || node.word;
         if (state.phase === "lens-selecting") term.setAttribute("aria-pressed", String(state.lensSelections.has(node.word)));
         else term.removeAttribute("aria-pressed");
         const badge = lensAssignmentBadge(node, state);
         status.className = `table-term-status${shared && !badge ? " table-shared-status" : ""}${badge?.tone ? ` lens-tone-${badge.tone}` : ""}`;
         status.textContent = badge
           ? `Lens ${badge.text}${state.phase === "complete" ? badge.correct ? " ✓" : badge.unanswered ? " · unanswered" : " · review" : ""}${shared ? " · shared" : ""}`
-          : seed ? "Seed" : bridge ? shared ? "Shared bridge" : isDone(node) ? "Bridge" : `${node.connected.length}/${node.gs.length} clusters` : "";
+          : seed ? "Seed" : bridge ? !isDone(node) ? `${node.connected.length}/${node.gs.length} clusters` : shared ? "Shared bridge" : "Bridge" : "";
         cells.forEach(({ cell, input, wrongMark, wrongNote }, ci) => {
           input.checked = node.connected.includes(ci);
           const locked = input.checked || isDone(node) || state.phase !== "assembling";
