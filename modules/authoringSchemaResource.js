@@ -188,7 +188,11 @@ function phaseSchema(phase) {
     if (!pass[collection] || !schema.properties[collection]?.items?.properties) continue;
     const itemSchema = schema.properties[collection].items;
     itemSchema.properties = pickProperties(itemSchema.properties, pass[collection]);
-    itemSchema.required = itemSchema.required.filter(name => pass[collection].includes(name));
+    // A pedagogy save patches existing items, matched by id or term, so
+    // neither identity field is required on its own.
+    itemSchema.required = pass.writeDomain === "pedagogy"
+      ? []
+      : itemSchema.required.filter(name => pass[collection].includes(name));
     itemSchema.additionalProperties = true;
   }
 

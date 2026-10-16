@@ -564,7 +564,8 @@ export async function run() {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
     });
-    assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /Read each bridge fact against its annotations/);
+    assert.doesNotMatch(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the\s+surface/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /more than 32 nodes/);
     assert.doesNotMatch(
@@ -585,6 +586,10 @@ export async function run() {
       arguments: { phase: "pedagogy" }
     });
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /do not have to be authored together/);
+    // The pass that saves bridge annotations is the pass that teaches them.
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /conceptId only when/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /Start with the bridges, before drafting lenses/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /not\s+a higher grade of lens/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /preserve those lenses/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /one,\s+two, or three honest answers/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /not a size to fill/);
@@ -689,6 +694,11 @@ export async function run() {
       vocabularyPedagogyGuidance.result.structuredContent.markdown,
       /contextual usage decision/
     );
+    // A profile replaces the generic pedagogy pass; its lesson brief comes along.
+    assert.match(
+      vocabularyPedagogyGuidance.result.structuredContent.markdown,
+      /real\s+line breaks/
+    );
     assert.match(
       vocabularyPedagogyGuidance.result.structuredContent.markdown,
       /one blank and one target term/
@@ -782,6 +792,10 @@ export async function run() {
     assert.match(
       triviaPedagogyGuidance.result.structuredContent.markdown,
       /Use lensMode=quiz for the quiz-led profile/
+    );
+    assert.match(
+      triviaPedagogyGuidance.result.structuredContent.markdown,
+      /real\s+line breaks/
     );
     assert.match(
       triviaPedagogyGuidance.result.structuredContent.markdown,
