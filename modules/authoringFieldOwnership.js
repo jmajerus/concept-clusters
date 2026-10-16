@@ -204,7 +204,13 @@ export const AUTHORING_PHASE_PASSES = Object.freeze({
   }),
   pedagogy: Object.freeze({
     writeDomain: "pedagogy",
-    root: Object.freeze(["lenses", "lensMode", "preSolve", "learningIntroduction"])
+    root: Object.freeze([
+      "bridges", "lenses", "lensMode", "preSolve", "learningIntroduction"
+    ]),
+    // Annotations are pedagogy-owned; id and term name the bridge to patch.
+    bridges: Object.freeze([
+      "id", "term", "conceptId", "relationKind", "direction", "idealTerms"
+    ])
   }),
   classification: Object.freeze({
     writeDomain: "classification",

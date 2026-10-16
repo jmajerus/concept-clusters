@@ -184,7 +184,16 @@
 // semantics, with "$patch": "delete" / "replace"); other lists replace whole.
 // Save responses report removals in `cleared` and likely-unintended keeps in
 // `kept`.
+// 6.18: same review bar. Bridge annotations are authored in the pedagogy
+// pass, which saves them, before its lenses; the review pass checks them.
+// Direction is read from each bridge fact, naming the kind it describes
+// (reciprocal exchange is bidirectional, not unset). Lens drafting checks
+// bridge terms among plausible exclusions, asks once for a cross-cluster
+// question, and looks once at runs of single-target lenses; none is a
+// quota. Profile passes are unchanged: profile puzzles do not annotate
+// bridges, and their pedagogy schema omits them. Direction from/to name
+// cluster ids.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 17
+  minor: 18
 });

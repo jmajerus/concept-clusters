@@ -80,6 +80,10 @@ export async function run() {
   assert.ok(AUTHORING_PHASE_PASSES.publication.root.includes("language"));
   assert.ok(!AUTHORING_PHASE_PASSES.core.bridges.includes("relationKind"));
   assert.ok(AUTHORING_PHASE_PASSES.review.bridges.includes("relationKind"));
+  // The pass that saves bridge annotations is the pass that shows them.
+  for (const field of PEDAGOGY_BRIDGE_FIELDS) {
+    assert.ok(AUTHORING_PHASE_PASSES.pedagogy.bridges.includes(field), field);
+  }
 
   const core = simplifiedPuzzleSchemaResult("core");
   assert.equal(core.domain, "content");
@@ -209,6 +213,18 @@ export async function run() {
   }
   assert.equal(pedagogyProjection.document.language, "en");
   for (const field of AUTHORING_PHASE_PASSES.pedagogy.root) {
+    if (field === "bridges") {
+      // Content owns the bridge array; the pedagogy pass writes only its
+      // annotation fields, naming each bridge by id or term.
+      for (const name of AUTHORING_PHASE_PASSES.pedagogy.bridges) {
+        assert.ok(
+          BRIDGE_FIELD_OWNERSHIP[name].domain === "pedagogy" ||
+            BRIDGE_FIELD_OWNERSHIP[name].identity,
+          `phase pedagogy bridge field ${name} must be pedagogy-owned or identity`
+        );
+      }
+      continue;
+    }
     assert.ok(
       Object.hasOwn(pedagogyProjection.document, field) ||
         pedagogyProjection.document[field] === undefined,

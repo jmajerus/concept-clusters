@@ -269,7 +269,9 @@ routine. `relationKind` classifies the relationship described by the bridge
 fact, not the bridge term in isolation. Leave it unset when none of the six
 broad kinds clearly fits.
 - `direction` is for a binary relationship whose meaning changes when reversed.
-  Omission is normal.
+  Read each bridge fact for the arrangement it describes: one-way flow,
+  reciprocal exchange (`bidirectional`, which omission does not say), a
+  common source, or a convergence. Omit it when the fact describes none.
 - `idealTerms` identifies the canonical endpoint in each connected cluster:
   the one term the bridge fact would naturally name. A player may tap any
   completed member to select the correct cluster, but the line resolves to

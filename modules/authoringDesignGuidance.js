@@ -224,17 +224,21 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
 - A binary bridge's optional direction (ternary bridges stay undirected)
   asserts a directional topology on top of relationKind, independent of
   it: through is A -> X -> B (flow, influence, or development from A
-  toward B, with explicit from/to cluster indices -- never infer them
+  toward B, with explicit from/to cluster ids -- never infer them
   from clusters' array order, which already aligns idealTerms and
   shouldn't silently flip meaning on a reorder); bidirectional is
   A <-> X <-> B (reciprocal influence or exchange); outward is
   A <- X -> B (the bridge supplies, shapes, or produces both sides);
   inward is A -> X <- B (both sides converge to produce or explain the
-  bridge). Add direction only when reversing it would make the bridge's
-  fact false or materially change its meaning -- omission is the normal
-  case, not a gap, and shared foundations, contrasts, and genuinely
-  unspecified connections should stay undirected rather than defaulting
-  to a direction for its own sake.
+  bridge). For each binary bridge, read its fact and ask whether it says
+  something flows, shapes, produces, or converges; dynamic and continuity
+  bridges are the first to check. When it does, record the kind the fact
+  describes rather than defaulting to through. Reciprocal exchange is
+  bidirectional, which unset does not say: unset asserts nothing, and is
+  right for shared foundations, contrasts, and genuinely unspecified
+  connections. Add direction only when reversing it would make the
+  bridge's fact false or materially change its meaning, never for its
+  own sake.
 - idealTerms names the canonical endpoint within each connected cluster:
   the one term a bridge's fact would naturally mention. A player can tap any
   completed member to select the correct cluster, but the authored line
@@ -243,7 +247,7 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Most bridges are honest whole-cluster relationships with no standout
   term; leave it (or any one entry) null rather than manufacture false
   precision. A ternary bridge -- three
-  cluster indices instead of two, for a relationship genuinely
+  cluster ids instead of two, for a relationship genuinely
   collective rather than pairwise -- takes idealTerms as three entries
   under the same rule, stays undirected (direction isn't supported for
   ternary), and takes at most one relationKind for the whole relation,
@@ -272,22 +276,29 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   reinforcing lens, not a stub and not a failed cross-cut. 1-6 unique
   targets is the legal range, not a size to fill:
   include every term that answers the question, omit every term that
-  does not. Cross-cutting is welcome when the question's real answers
-  already span clusters; it is not a higher grade of lens and not a
-  reason to churn, concatenate a second clause ("and …"), recruit extra
-  terms, or drop the lens when a span will not form. A lens a player
-  could answer by selecting one cluster's color is a legitimate
-  reinforcing lens when that is the honest question -- not a defect to
-  paper over. Broad
+  does not. A lens a player could answer by selecting one cluster's
+  color is a legitimate reinforcing lens when that is the honest
+  question -- not a defect to paper over, and not a reason to
+  concatenate a second clause ("and …") or recruit extra terms. Broad
   phrasing ("associated with," "known for," "connected to") usually
   admits more correct answers than the authored target set -- prefer
   bounded phrasing ("directly involved in," "primarily functions as") and
-  check the most plausible excluded node before finalizing: could a
-  knowledgeable player defend it as also correct? If so, narrow the
-  wording or include it. Order multiple lenses as a progression --
-  concrete attribute, then function, then comparison or synthesis when
-  those questions exist -- rather than as unrelated quizzes. Do not
-  invent a cross-cutting round just to complete that sequence.
+  check the most plausible excluded node before finalizing, including any
+  bridge term: could a knowledgeable player defend it as also correct? If
+  so, narrow the wording or include it. A bridge term already belongs to
+  two ideas, so a lens question often reaches it honestly; include it when
+  it answers and leave it out when it does not. Order multiple lenses as a
+  progression -- concrete attribute, then function, then comparison or
+  synthesis when those questions exist -- rather than as unrelated
+  quizzes. Once the lenses are drafted, ask whether the subject has a
+  question whose honest answers span clusters; the bridge facts are the
+  first place to look. If one exists, it can close the set as a
+  synthesis lens. It is not a higher grade of lens: if none does, the set
+  is complete without it; do not invent one. Several single-target lenses in a row usually means each
+  asks "which term is X?", one definition at a time. Check once whether
+  two of them are really one bounded question with two honest answers, or
+  whether quiz mode fits them better; if each stands on its own, keep
+  them.
 - learningIntroduction ("Before You Begin") is one optional Markdown document.
   Write the lesson the subject needs, in the order the subject needs: the
   learning objective, the domain (vocabulary, stakes, why it matters), and
@@ -501,7 +512,9 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   carry goes on puzzle info.citations when you find it. A later
   content-domain save, after the lesson exists, copies the cluster links
   that lesson text relies on into that same list. The server does not
-  write that list. Do not plan to rediscover either later.
+  write that list. Do not plan to rediscover either later. Once the draft
+  is saved, run check_puzzle_links with draft_id rather than trusting a
+  wiki: title from recall.
 - Provide help at the appropriate level of granularity; prefer a verified
   direct resource that advances this lesson. Omitting a link means no chip
   -- automatic Wikipedia search is not inferred.`;
@@ -527,6 +540,8 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   subject. Checking for redundant terms is a separate
   distinctness judgment; do not start it because of the node count alone.
 - Verify every retained direct link and citation against the claim it supports.
+  check_puzzle_links with draft_id reports each wiki: link's status and the
+  reachability of other links; a live response is not a reading of the page.
   Keep exact citation data gathered during research; this pass confirms and
   corrects it rather than performing a second generic source hunt. When a
   learningIntroduction exists and info.citations is missing the cluster
@@ -538,32 +553,50 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   search is not inferred.
 - Check that always-visible info and completion-gated facts remain distinct;
   no hover or help surface should silently replace text the player already read.
-- Bridge annotations (relationKind, direction, idealTerms, conceptId) are
+- Read each bridge fact against its annotations. Does relationKind name the
+  relationship the fact describes? Does any direction match it, and is a
+  one-way or reciprocal relationship the fact states left unset? Annotations
+  are authored in the pedagogy pass and saved with domain=pedagogy.
+- Read the lens set against the whole board. For each lens, check the most
+  plausible excluded term, including any bridge term: could a knowledgeable
+  player defend it as also correct? Check that several lenses form a
+  progression, and look once at any run of single-target lenses. Lens
+  changes are saved with domain=pedagogy.`;
+
+const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
+
+- Start with the bridges, before drafting lenses: rereading each bridge fact
+  is where cross-cluster questions come from.
+  Bridge annotations (relationKind, direction, idealTerms, conceptId) are
   saved with domain=pedagogy. Send \`bridges\` entries naming each changed
   bridge by id or term with only the annotation fields you change; \`null\`
   removes one.
 - Add relationKind only when the bridge clearly fits dynamic, foundation,
   cross-cutting, contrast, continuity, or evaluation. It classifies the
   relationship described by the bridge fact. Leave it unset when ambiguous.
-- Add binary direction only when reversing it changes the fact's meaning. Use
-  idealTerms only for the canonical term in a connected cluster the bridge fact
-  would naturally name; every valid cluster tap resolves to that endpoint, so
-  omit false precision. Use a ternary bridge only for a truly
+- For each binary bridge, ask whether its fact says something flows, shapes,
+  produces, or converges; dynamic and continuity bridges are the first to
+  check. When it does, record the direction kind the fact describes: through
+  (A -> X -> B, with from and to cluster ids), bidirectional (reciprocal
+  exchange, which unset does not say), outward (X supplies or shapes both
+  sides), or inward (both sides converge on X). Unset asserts nothing, and
+  is right for shared foundations, contrasts, and genuinely unspecified
+  connections. Add direction only when reversing it changes the fact's
+  meaning.
+- Use idealTerms only for the canonical term in a connected cluster the
+  bridge fact would naturally name; every valid cluster tap resolves to that
+  endpoint, so omit false precision. Use a ternary bridge only for a truly
   collective relation that changes if any one cluster is removed. Add
   conceptId only when the same underlying bridge concept is intentionally
-  shared with a bridge in another puzzle.`;
-
-const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
-
+  shared with a bridge in another puzzle.
 - Add lenses only when they create a worthwhile second way to think. Choose
   sequential, quiz, or assignment mode from the learning task rather than by
   habit; use preSolve only when sorting is a foregone conclusion and the lens
   is the real lesson.
 - Fit each lens to a learning objective. A focused question with one,
   two, or three honest answers is a complete lens, not something to pad
-  toward 6 or abandon because it is not cross-cutting. Cross-cutting is
-  welcome when the answers already span clusters; do not concatenate a
-  second clause, recruit extra terms, or drop the lens to force a span.
+  toward 6 or abandon because it is not cross-cutting. Do not concatenate
+  a second clause, recruit extra terms, or drop the lens to force a span.
   If the honest question is one cluster's color, keep a reinforcing lens.
   A real instance: a four-term Disturbance cluster was split by asking
   which two techniques make space itself look geometrically wrong, not
@@ -573,8 +606,19 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   lens, not a stub and not a failed cross-cut.
   1-6 unique targets is the legal range, not a size to fill: include
   every term that answers the question. Bound the wording so plausible
-  excluded terms are not also defensibly correct. Order multiple lenses
-  as a progression instead of unrelated trivia.
+  excluded terms, including any bridge term, are not also defensibly
+  correct. A bridge term already belongs to two ideas, so a lens question
+  often reaches it honestly; include it when it answers. Order multiple
+  lenses as a progression instead of unrelated trivia.
+- Once the lenses are drafted, ask whether the subject has a question whose
+  honest answers span clusters; the bridge facts are the first place to
+  look. If one exists, it can close the set as a synthesis lens. It is not
+  a higher grade of lens: if none does, the set is complete without it; do
+  not invent one.
+- Several single-target lenses in a row usually means each asks "which term
+  is X?", one definition at a time. Check once whether two of them are
+  really one bounded question with two honest answers, or whether quiz mode
+  fits them better. If each stands on its own, keep them.
 - Prefer a learningIntroduction. A lesson helps in almost every case,
   because the author cannot know what the player already knows. Write one lesson
   about the subject: the learning objective, the domain, and how the ideas
@@ -638,7 +682,9 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   derivedFrom in an MCP document. Do not invent a reviewer name or treat roles
   or per-scope assistance entries as publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
-  already obvious from the same catalogue.
+  already obvious from the same catalogue. The field is exactly
+  \`{ info?, entries }\`; each entry is a puzzle id and a reason to choose that
+  puzzle. Do not add \`order\` or \`boardOrder\`.
 - This pass binds to write domain pedagogy: save domain=pedagogy with only
   \`relatedPuzzles\` and \`language\`. The merge patch keeps lenses, the
   learning introduction, and bridge annotations as they are.
@@ -1114,8 +1160,8 @@ do not move a puzzle to a parent category because a static Git view omits a
 category that is published in D1.
 Drafts may be temporarily invalid. Open one with create_puzzle_draft (the
 puzzle goes in the document argument); save later passes with
-save_puzzle_draft (draft_id plus document, optionally domain for a content-
-or pedagogy-only pass), then validate_puzzle_draft (draft_id) and address
+save_puzzle_draft (draft_id plus document, optionally domain for a content-,
+pedagogy-, or classification-only pass), then validate_puzzle_draft (draft_id) and address
 every error. MCP maintains protected attribution and
 editorial metadata outside the agent document; existing values are preserved.
 Set stable category ids in category / categories / subcategories on the puzzle document. Use

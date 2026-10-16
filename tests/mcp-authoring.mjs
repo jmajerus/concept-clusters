@@ -397,6 +397,8 @@ export async function run() {
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.idealTerms);
     assert.ok(phasedSchemas.pedagogy.schema.properties.lenses);
     assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction);
+    assert.ok(phasedSchemas.pedagogy.schema.properties.bridges.items.properties.direction);
+    assert.deepEqual(phasedSchemas.pedagogy.schema.properties.bridges.items.required, []);
     assert.equal(phasedSchemas.core.domain, "content");
     assert.equal(phasedSchemas.pedagogy.domain, "pedagogy");
     assert.equal(phasedSchemas.publication.domain, "pedagogy");
@@ -429,6 +431,8 @@ export async function run() {
       ["content", "pedagogy"]
     );
     assert.ok(vocabularySchema.result.structuredContent.schema.properties.lenses);
+    // Profile puzzles do not annotate bridges.
+    assert.equal(vocabularySchema.result.structuredContent.schema.properties.bridges, undefined);
     assert.match(
       vocabularySchema.result.structuredContent.profileSummary,
       /Collegiate-level near-synonym clusters/
@@ -564,7 +568,8 @@ export async function run() {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
     });
-    assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /Read each bridge fact against its annotations/);
+    assert.doesNotMatch(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the\s+surface/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /more than 32 nodes/);
     assert.doesNotMatch(
@@ -585,6 +590,10 @@ export async function run() {
       arguments: { phase: "pedagogy" }
     });
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /do not have to be authored together/);
+    // The pass that saves bridge annotations is the pass that teaches them.
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /conceptId only when/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /Start with the bridges, before drafting lenses/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /not\s+a higher grade of lens/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /preserve those lenses/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /one,\s+two, or three honest answers/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /not a size to fill/);
