@@ -3,7 +3,7 @@ import { normalizedLensMode } from "./lensEngine.js";
 import { normalizeEffort } from "./playerLayoutEffort.js";
 
 export const PLAYER_SESSION_SCHEMA_VERSION = 1;
-export const PLAYER_SESSION_MODES = ["graph", "star", "sets"];
+export const PLAYER_SESSION_MODES = ["graph", "star", "sets", "table"];
 
 const PREFIX = `ccPlayerSession:v${PLAYER_SESSION_SCHEMA_VERSION}`;
 
@@ -41,6 +41,28 @@ function validMove(move) {
     typeof move === "object" &&
     typeof move.source === "string" &&
     typeof move.target === "string";
+}
+
+// Feedback is optional session metadata. Ignore malformed or obsolete
+// markers without losing a player's valid moves or lens progress.
+function normalizeTableFeedback(value, puzzle) {
+  const memberships = new Map(puzzle.clusters.flatMap((cluster, ci) =>
+    cluster.terms.map(term => [term, [ci]])
+  ));
+  puzzle.bridges.forEach(bridge => memberships.set(bridge.term, bridge.clusters));
+  const seen = new Set();
+  const wrongChoices = [];
+  for (const choice of Array.isArray(value?.wrongChoices) ? value.wrongChoices : []) {
+    const clusters = memberships.get(choice?.term);
+    const ci = choice?.clusterIndex;
+    if (!clusters || !Number.isInteger(ci) || ci < 0 ||
+        ci >= puzzle.clusters.length || clusters.includes(ci)) continue;
+    const key = JSON.stringify([choice.term, ci]);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    wrongChoices.push({ term: choice.term, clusterIndex: ci });
+  }
+  return { rememberWrongChoices: value?.rememberWrongChoices === true, wrongChoices };
 }
 
 const PLAYER_LENS_PHASES = new Set([
@@ -108,7 +130,11 @@ export function loadPlayerSession(storage, puzzle) {
     }
     // Layout effort is optional: a malformed record reads as none rather
     // than costing the player their whole session.
-    return { ...session, effort: normalizeEffort(session.effort) };
+    return {
+      ...session,
+      effort: normalizeEffort(session.effort),
+      tableFeedback: normalizeTableFeedback(session.tableFeedback, puzzle)
+    };
   } catch {
     return null;
   }
@@ -120,7 +146,8 @@ export function savePlayerSession(storage, puzzle, {
   layouts = {},
   completed = false,
   lens = null,
-  effort = {}
+  effort = {},
+  tableFeedback = null
 }) {
   if (!PLAYER_SESSION_MODES.includes(currentMode) ||
       !Array.isArray(moves) ||
@@ -141,7 +168,8 @@ export function savePlayerSession(storage, puzzle, {
     layouts,
     completed: !!completed,
     lens,
-    effort: normalizeEffort(effort)
+    effort: normalizeEffort(effort),
+    tableFeedback: normalizeTableFeedback(tableFeedback, puzzle)
   };
   try {
     storage.setItem(playerSessionKey(puzzle), JSON.stringify(session));

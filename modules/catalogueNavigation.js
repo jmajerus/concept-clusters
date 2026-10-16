@@ -12,7 +12,7 @@ import {
   resolveCategory
 } from "./catalogueRegistry.js";
 
-const VALID_MODES = new Set(["graph", "star", "sets"]);
+const VALID_MODES = new Set(["graph", "star", "sets", "table"]);
 
 export function parseCatalogueRoute(params, puzzles, catalogues) {
   const puzzleId = params.get("puzzle");

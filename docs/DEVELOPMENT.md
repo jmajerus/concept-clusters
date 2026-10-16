@@ -137,7 +137,7 @@ server's `ADMIN_KEY` in the ignored `.env`.
 | `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [Local development](DEVELOPMENT.md#local-development) |
 | `d1/migrations/` | Versioned schema for hosted authoring drafts, content documents, and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
-| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
+| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all four renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
@@ -243,18 +243,19 @@ anything ever imports from it directly):
 | `graphLayoutSchema.js` / `circleLayoutSchema.js` | Renderer-independent validation for authored Graph/Circle documents | `layoutDocument.js` revision fingerprint |
 | `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct inspectors; `/?draft=&view=play` hides the studio | `authorEngine.js`, `authoringBoard.js` |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring, hint-steered search, and `repairGraphLayout` (single-pill moves that strictly reduce defects) | `geometry.js`, `layoutHints.js` |
-| `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
+| `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, connectToCluster, checkClusterCompletion, showSolution }`; Table cell assignments reuse ordinary taps through `connectToCluster` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies (optional `onBackgroundClick` for construct) |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 | `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
+| `tableRenderer.js` | `createTableRenderer(...)` → `{ buildTable }`; alphabetic term rows, diagonal cluster headings, shared membership checkboxes and lens feedback; no coordinates or simulation | `idealTarget.js`, `lensEngine.js`, `termInfo.js`, injected dependencies |
 
-The three UI controllers, the authoring studio, and the final four engine/renderer modules use a
+The three UI controllers, the authoring studio, and the engine/renderer modules use a
 factory-with-injected-dependencies convention (mirroring Letter Punk's
 own `createGameEngine`/etc.) rather than closing over `game.js`
 internals. For the engine and renderers this matters because `state`
 and `mode` are *reassigned* — a fresh `state` object per `loadPuzzle`
 call, a new mode string per `setMode` call — so each factory takes
-`getState`/`getMode` accessors, not one-time values. The three renderers
+`getState`/`getMode` accessors, not one-time values. The four renderers
 also share `state` itself as a coordination point: whichever mode is active sets
 `state.paint`/`drawLinks`/`onLinkAdded` (and
 `state.captureManualOffset`/`reconcileManualOffset`, for Circle mode's
@@ -281,7 +282,7 @@ the current round, selection/reveal phase, and selected term words.
 Connection pairs use term text rather than transient numeric node ids;
 the compact numeric representation remains exclusive to share URLs.
 
-All three modes implement the renderer layout-adapter contract
+The three diagram modes implement the renderer layout-adapter contract
 (`capture`, `apply`, `validate`, `metrics`, and `autoLayout`). The same
 adapter serves player sessions and layout authoring; an authoring purpose
 selects the renderer's authored document shape while the default preserves the
@@ -289,6 +290,90 @@ player-session snapshot shape. Star resumes term and cluster-title
 positions, Graph resumes its term positions and player pins, and Circle
 resumes cluster centers and connected bridge pills (ordinary terms remain
 deterministically positioned inside their circle).
+
+Table remembers its mode and uses the same semantic moves and lens state,
+but stores no coordinates. Its adapter declares only `mode: "table"`;
+switching back to a diagram restores that diagram's own arrangement.
+Table is available in play and in `?author=layout` for inspection and playtesting.
+Its authoring preview exposes shared lens settings and their Try controls but
+hides coordinate saves, geometry metrics, layout passes, and diagram board size.
+It has no authoring layout document or capture adapter. Construct editing
+continues to use the diagram modes; draft Play and layout-preview links accept Table.
+Its `state.tableOrder` retains the current visit's alphabetical, focused-cluster,
+or completed grouped view across mode switches. Heading sorts inspect only
+confirmed memberships. Grouped views repeat bridges using the same node
+objects, with distinct row IDs; lens selections and feedback stay synchronized
+across those rows. View changes never write connection history, and solving
+does not automatically change the single-table view's selected order.
+Within a cluster, ordinary members are alphabetical and bridges follow their
+revealed ideal endpoint, with alphabetical siblings and an indented glyph.
+Bridges without a placed endpoint occupy a final Shared connections section.
+`clusterGroup` derives both order and parent annotations from confirmed
+memberships; its render signature includes endpoint identity so indentation
+updates even when the row sequence stays the same. Alphabetical and Other
+terms lists stay flat.
+
+Table feedback uses `connectToCluster`'s outcome from the shared rules engine
+to remember only incorrect choices. Every blocked unchecked cell uses the
+lens error palette for 650 ms; an existing check gets a cluster-color outline.
+Renderer disposal clears its timers. Optional `tableFeedback` session metadata
+stores the per-puzzle remember preference and rejected term/cluster pairs.
+Normalization ignores invalid markers without dropping moves or lens progress,
+and old sessions default to no notes. Markers stay unchecked, carry accessible
+descriptions, and are shared across repeated rows. Turning remembering off
+hides prior notes and stops recording; Start over clears them. Share URLs
+continue to contain only the puzzle's normal correct-move history.
+
+Show term info adds an optional final column using only each node's ordinary
+`info.text`. It never includes earned bridge facts or endpoint annotations.
+Column visibility is remembered in `ccTableShowTermInfo`; cluster columns keep
+their 44 px width, and descriptions wrap beside the sticky term column on
+mobile. Group and section headings update their spans as visibility changes.
+
+Separate completed clusters is an optional display preference stored in
+`ccTableSeparateCompleted`. It uses a working membership table and a completed
+area containing one compact table panel per cluster, with distinct heading and
+row IDs. Below 800 px of available board width, that area stacks beneath the
+working table. The split view gives small diagram canvases a wider display frame
+without changing their authored canvas dimensions. Working-table heading sorts
+remain available; the separate completed panel already groups its clusters.
+Completion follows the game's ordinary-member rule. Each completed cluster's
+last ordinary move determines its position, newest first; replay, diagram
+switches, and cluster resets therefore need no separate ordering metadata.
+Later bridge placements update the groups without changing their positions.
+Unfinished bridges remain in the working table and appear in completed groups
+only for confirmed memberships. A finished bridge leaves the working table
+once at least one completed group can display it. Every repeated row uses the
+same underlying node for canonical annotations and lens selections. The completed
+list creates no membership columns or inputs; unfinished bridge placements and
+remembered rejection markers remain in the working table. Panel group titles
+provide cluster details and context menus. The column heading row is shown only
+when term info is enabled, and descriptions fit the completed panel's available
+width. A responsive grid flows cluster panels across the available width and
+wraps them into additional rows. Completed panels have natural height and
+visible overflow, so all terms remain exposed without internal scrollbars.
+Once `made === need`, the working table hides and completed panels occupy the
+full board width, including during all lens phases. Keyboard focus follows a
+migrating checkbox to its completed term button. Vertical arrows stay within
+each cluster; horizontal arrows move to the adjacent cluster panel, or from
+the first cluster back into the working table while classification continues.
+
+`tableLensEffects.js` implements DOM counterparts of the SVG reveal effects.
+The game dispatches to the active renderer's effects while retaining shared cue
+resolution, answer targeting, reduced-motion policy, and directed trace plans.
+Ripple pulses term outlines; Spotlight dims non-answer rows; every displayed
+copy of an answer term participates. Explanation hover/tap pings the same
+labels. Cues wait for a target to become visible and finish before traces start.
+Directed trace legs reuse `lensFlowTracePlan` and `LENS_FLOW_TRACE_TIMING`;
+endpoint pulses and bridge underline sweeps follow the authored direction.
+Undirected and bidirectional bridges get simultaneous endpoint/bridge pulses
+without implying a one-way flow. A missing ideal endpoint uses the cluster
+title; unplaced ideal terms are never disclosed. Reduced-motion traces remain
+stationary until the next lens. Each run owns its timers, animations, observer,
+and temporary classes. Lens changes, row regrouping, Try replacement, and
+renderer disposal cancel them without firing a cancelled cue's continuation.
+Authoring Try and Try flow trace do not save settings or change lens answers;
+the working-copy controls still save through the shared layout-board API.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer
@@ -345,7 +430,7 @@ pass — including an uncrossing pass on a live player completion, not only
 Show Solution — then `freezeForLenses` stops movement so every round
 reuses a stable spatial map. After that freeze, a drag is still a literal
 placement so the last connected node can be nudged; taps continue to
-select lens answers. All three renderers read the same pure class result
+select lens answers. All four renderers read the same pure class result
 from `lensEngine.js` and otherwise retain their own layout logic. Related
 puzzles and the completion event are deferred until the final lens is
 finished.

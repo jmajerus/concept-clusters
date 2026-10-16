@@ -329,6 +329,34 @@ export async function run(page) {
     assert.ok(Math.abs((after.x - before.x) - (after.width - before.width) / 2) < 0.5, "moved by half the width change");
     assert.ok(Math.abs((after.y - before.y) - (after.height - before.height) / 2) < 0.5, "moved by half the height change");
     assert.equal(await page.evaluate(() => window.CC.state.solutionLayout), "pretty", "no new layout was asked for");
+
+    // Table inspects the same working copy and shares the lens settings,
+    // while its authoring preview never invents or saves coordinates.
+    await page.click("#mode-table");
+    await page.evaluate(() => CC.state.modeSwitchLayoutPromise);
+    assert.equal(await page.textContent("#layout-authoring-title"), "Table inspection");
+    assert.equal(await page.isVisible("#layout-authoring-prepare"), false);
+    assert.equal(await page.isVisible("#layout-authoring-save-layout"), false);
+    assert.equal(await page.isVisible("#board-settings"), false);
+    assert.equal(await page.isVisible("#lens-reveal-controls"), true);
+    await page.selectOption("#lens-reveal-cue-select", "both");
+    await page.waitForFunction(() => CC.state.puzzle.layout.board.lensRevealCue === "both"
+      && !document.getElementById("lens-reveal-cue-select").disabled);
+    const tableSaved = await draftStore.getDraft(draftId);
+    assert.equal(tableSaved.layout.board.lensRevealCue, "both");
+    assert.equal(tableSaved.layout.modes?.table, undefined);
+    assert.equal(tableSaved.revision, startRevision + 1);
+    const beforeTry = JSON.stringify(tableSaved.layout);
+    await page.click("#lens-reveal-try-btn");
+    await page.waitForSelector(".table-lens-cue-answer", { timeout: 5000 });
+    assert.equal(JSON.stringify((await draftStore.getDraft(draftId)).layout), beforeTry, "Table Try saves nothing");
+    await page.click("#lens-check");
+    await page.hover("#lens-explanation [data-lens-term='a1']");
+    await page.waitForSelector("#table-board .table-lens-ping", { timeout: 5000 });
+    await page.click("#mode-star");
+    await page.evaluate(() => CC.state.modeSwitchLayoutPromise);
+    assert.equal(await page.isVisible("#layout-authoring-prepare"), true);
+    assert.equal(await page.isVisible("#board-settings"), true);
   } finally {
     server.close();
     await rm(directory, { recursive: true, force: true });

@@ -66,6 +66,7 @@
           <button id="mode-graph" class="mode-btn">Graph</button>
           <button id="mode-star" class="mode-btn">Star</button>
           <button id="mode-sets" class="mode-btn">Circle</button>
+          <button id="mode-table" class="mode-btn">Table</button>
         </div>
         <!-- One slot, relabelled per puzzle by updateLearningIntroduction:
              "Lesson" (authored introduction, with its read/skip gate) or
@@ -126,6 +127,7 @@
 
       <div id="board-stage">
         <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
+        <div id="table-board" hidden></div>
         <div id="board-status" hidden role="status" aria-live="polite"></div>
       </div>
 
@@ -250,6 +252,7 @@
               <select id="lens-reveal-try-lens"></select>
             </label>
             <button id="lens-reveal-try-btn" type="button">Play</button>
+            <button id="lens-flow-trace-try-btn" type="button">Try flow trace</button>
           </div>
           <p class="board-settings-note">Try plays on this board and saves nothing.</p>
         </div>
@@ -277,9 +280,9 @@
       </div>
 
       <footer>
-        Tap a gray term, then tap a node in the cluster it belongs to.
+        <span id="play-instructions">Tap a gray term, then tap a node in the cluster it belongs to.
         Dashed terms are bridges — they belong to two clusters and need a
-        connection into each. <span id="drag-hint"></span>
+        connection into each.</span> <span id="drag-hint"></span>
       </footer>
     </div>
 

@@ -8,7 +8,7 @@
 // setMode call) and this module has no DOM elements of its own to
 // anchor a stable closure to the way game.js itself does.
 //
-// Two rendering modes (Graph, Sets) each need to react to a connection
+// The renderers each need to react to a connection
 // being made differently, but this module has no idea which one is
 // active -- it only ever calls hooks the active renderer has already
 // set on `state` itself (state.paint/drawLinks/onLinkAdded, plus
@@ -295,6 +295,31 @@ export function createGameEngine({
     }
   }
 
+  // A table cell selects a term and a cluster in one gesture. Reuse the
+  // ordinary connection path so feedback, history, canonical bridge
+  // endpoints, completion, and session persistence remain identical.
+  function connectToCluster(node, clusterIndex) {
+    const state = getState();
+    if (state.phase !== "assembling" || isDone(node) ||
+        node.connected.includes(clusterIndex)) return;
+    const seedWord = state.puzzle.clusters[clusterIndex]?.seeds?.[0];
+    const seed = state.nodes.find(candidate =>
+      candidate.word === seedWord && candidate.gs.length === 1 &&
+      candidate.gs[0] === clusterIndex && isDone(candidate)
+    );
+    if (!seed) return;
+    const madeBefore = state.made;
+    const incorrectBefore = state.incorrectMoveCount;
+    state.selected = null;
+    handleTap(node);
+    handleTap(seed);
+    showTermInfo(node);
+    // Views can show feedback for an actual rejected choice without
+    // reimplementing validation or treating a read-only cell as a mistake.
+    if (state.incorrectMoveCount > incorrectBefore) return "incorrect";
+    if (state.made > madeBefore) return "connected";
+  }
+
   function checkClusterCompletion() {
     const state = getState();
     state.puzzle.clusters.forEach((c, ci) => {
@@ -398,5 +423,5 @@ export function createGameEngine({
     state.onProgressChanged?.();
   }
 
-  return { handleTap, checkClusterCompletion, canFillCluster, fillCluster, showSolution };
+  return { handleTap, connectToCluster, checkClusterCompletion, canFillCluster, fillCluster, showSolution };
 }
