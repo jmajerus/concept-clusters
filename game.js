@@ -2282,6 +2282,7 @@ const { buildSetGraph } = createSetRenderer({
 
 const { buildTable } = createTableRenderer({
   container: document.getElementById("table-board"),
+  storage: localStorage,
   svg, getState: () => state, getSim: () => sim,
   isDone, isBridge, connectToCluster, handleTap: onBoardTap,
   showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,

@@ -12,7 +12,9 @@ Click a cluster heading to bring its confirmed memberships to the top, with a co
 
 Within each cluster view, ordinary terms remain alphabetical. Bridges appear directly beneath their revealed ideal endpoint with an indented ↳ glyph; bridges without a revealed endpoint appear alphabetically in a **Shared connections** section at the bottom. A bridge moves beneath its endpoint only after that endpoint is placed, preserving the puzzle's reveal timing.
 
-Wrong choices briefly tint the cell using the same red as incorrect lens selections. **Remember wrong choices** optionally keeps a gray × in the unchecked box, saved for that puzzle across reloads and mode switches. Repeated bridge rows share these notes. Turning the option off hides existing notes and stops recording new ones; **Start over** clears them.
+An unchecked cell that cannot accept a connection briefly turns red, including cells in completed rows. Clicking an existing check briefly highlights its cluster color. **Remember wrong choices** optionally keeps a gray × for genuine wrong choices, saved for that puzzle across reloads and mode switches. Repeated bridge rows share these notes. Turning the option off hides existing notes and stops recording new ones; **Start over** clears them.
+
+**Show term info** adds a column of wrapped descriptions to the right of the cluster columns, leaving cells blank where no description is provided. This display preference is remembered across puzzles and visits. Bridge explanations and ideal-endpoint annotations retain their usual reveal timing.
 
 This is a working prototype handed off from a Claude.ai design session. It runs by opening `index.html` directly in a browser — no build step, no server, no network required (D3 is vendored locally).
 

@@ -91,7 +91,14 @@ export async function run(page, baseURL) {
   await input(page, "carbon dioxide", 0).click();
   await input(page, "carbon dioxide", 2).click();
   assert.equal(await page.evaluate(() => CC.state.incorrectMoveCount), incorrectBefore, "read-only cells are not wrong attempts");
-  assert.equal(await page.locator(".table-cell-incorrect").count(), 0);
+  assert.match(await cell(page, "carbon dioxide", 2).getAttribute("class"), /table-cell-incorrect/,
+    "blocked empty cells still acknowledge a rejected placement");
+  assert.match(await cell(page, "carbon dioxide", 0).getAttribute("class"), /table-cell-connected-pulse/);
+  assert.doesNotMatch(await cell(page, "carbon dioxide", 0).getAttribute("class"), /table-cell-incorrect/,
+    "existing correct checks use their cluster color rather than red");
+  assert.equal(await input(page, "carbon dioxide", 0).isChecked(), true);
+  assert.equal(await page.evaluate(() => CC.state.tableFeedback.wrongChoices.length), 1,
+    "blocked placements do not add remembered wrong choices");
   await input(page, "oxygen", 2).click();
   await page.click("#mode-graph");
   await page.click("#mode-table");
@@ -115,6 +122,15 @@ export async function run(page, baseURL) {
   assert.equal(await row(page, "oxygen").count(), 2);
   assert.deepEqual(await mark(page, "oxygen", 2).evaluateAll(marks => marks.map(el => el.hidden)), [false, false]);
   assert.deepEqual(await input(page, "oxygen", 2).evaluateAll(inputs => inputs.map(el => el.checked)), [false, false]);
+  const notes = await page.evaluate(() => JSON.stringify(CC.state.tableFeedback.wrongChoices));
+  await input(page, "glucose", 2).first().click();
+  assert.deepEqual(await cell(page, "glucose", 2).evaluateAll(cells => cells.map(el => el.classList.contains("table-cell-incorrect"))), [true, true]);
+  assert.equal(await page.evaluate(() => JSON.stringify(CC.state.tableFeedback.wrongChoices)), notes);
+  await page.waitForFunction(() => !document.querySelector(".table-cell-incorrect"));
+  assert.deepEqual(await mark(page, "glucose", 2).evaluateAll(marks => marks.map(el => el.hidden)), [true, true]);
+  await input(page, "glucose", 0).first().click();
+  assert.deepEqual(await cell(page, "glucose", 0).evaluateAll(cells => cells.map(el => el.classList.contains("table-cell-connected-pulse"))), [true, true]);
+  assert.deepEqual(await input(page, "glucose", 0).evaluateAll(inputs => inputs.map(el => el.checked)), [true, true]);
 
   await page.click("#reset");
   await page.waitForFunction(() => CC.state.made === 0 && CC.state.phase === "assembling");

@@ -442,7 +442,7 @@ button:disabled {
   color: var(--panel);
 }
 .table-toolbar button:disabled { opacity: 0.5; cursor: default; }
-.table-remember {
+.table-option {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -451,7 +451,7 @@ button:disabled {
   font-size: 12px;
   cursor: pointer;
 }
-.table-remember input { width: 16px; height: 16px; margin: 0; }
+.table-option input { width: 16px; height: 16px; margin: 0; }
 #table-order-status { max-width: 60ch; }
 .table-scroll {
   width: max-content;
@@ -468,17 +468,21 @@ button:disabled {
   --table-term-width: 220px;
   --table-heading-height: 190px;
   --table-heading-overhang: 110px;
+  --table-info-width: 0px;
+  --table-info-column-width: 320px;
   width: max-content;
-  padding-right: var(--table-heading-overhang);
+  padding-right: max(0px, calc(var(--table-heading-overhang) - var(--table-info-width)));
 }
+.table-sheet.table-show-info { --table-info-width: var(--table-info-column-width); }
 .membership-table {
   table-layout: fixed;
   border-spacing: 0;
-  width: calc(var(--table-term-width) + var(--table-members-width));
+  width: calc(var(--table-term-width) + var(--table-members-width) + var(--table-info-width));
   font-size: 13px;
 }
 .membership-table col:first-child { width: var(--table-term-width); }
 .membership-table col:not(:first-child) { width: 44px; }
+.membership-table col.table-info-column { width: var(--table-info-width); }
 .membership-table thead {
   position: sticky;
   top: 0;
@@ -501,6 +505,7 @@ button:disabled {
   background: var(--paper);
   color: var(--ink-soft);
 }
+.membership-table thead .table-info-heading { padding: 10px 12px; color: var(--ink-soft); }
 .table-cluster-heading button {
   position: absolute;
   z-index: 1;
@@ -533,6 +538,13 @@ button:disabled {
   border-bottom: 1px solid var(--rule);
 }
 .membership-table td { padding: 0; text-align: center; }
+.membership-table .table-term-info {
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
 .membership-table .table-group-heading th {
   position: static;
   padding: 9px 12px;
@@ -618,6 +630,9 @@ button:disabled {
   background: var(--error-bg);
   box-shadow: inset 0 0 0 1px var(--error-line);
 }
+.membership-table .table-cell-connected-pulse {
+  box-shadow: inset 0 0 0 2px var(--table-color);
+}
 .table-wrong-mark {
   position: absolute;
   left: 50%;
@@ -640,7 +655,10 @@ button:disabled {
 .table-row:is(.lens-extra, .lens-assignment-incorrect) .table-term { color: var(--error); background: var(--error-bg); }
 .table-row:is(.lens-quiz-incorrect, .lens-assignment-unanswered) .table-term { border-left: 3px dashed var(--ink-soft); }
 @media (max-width: 600px) {
-  .table-sheet { --table-term-width: 160px; }
+  .table-sheet {
+    --table-term-width: 160px;
+    --table-info-column-width: min(320px, calc(100vw - 202px));
+  }
 }
 
 #board-stage {

@@ -8,7 +8,7 @@ export function createTableRenderer({
   container, svg, getState, getSim, isDone, isBridge,
   connectToCluster, handleTap, showTermInfo, clearTermInfo,
   focusTermInfo, blurTermInfo, updateSolutionHint, countEl,
-  onClusterContextMenu
+  onClusterContextMenu, storage = null
 }) {
   function buildTable() {
     const state = getState();
@@ -18,16 +18,24 @@ export function createTableRenderer({
     container.replaceChildren();
     state.selected = null;
     state.tableFeedback ||= { rememberWrongChoices: false, wrongChoices: [] };
-    const incorrectPulses = new Map();
+    if (state.tableShowTermInfo == null) {
+      try { state.tableShowTermInfo = storage?.getItem("ccTableShowTermInfo") === "true"; }
+      catch { state.tableShowTermInfo = false; }
+    }
+    const cellPulses = new Map();
     const choiceKey = (node, ci) => JSON.stringify([node.word, ci]);
 
-    function showIncorrectChoice(node, ci) {
+    function pulseCell(node, ci, tone) {
       const key = choiceKey(node, ci);
-      clearTimeout(incorrectPulses.get(key));
-      incorrectPulses.set(key, setTimeout(() => {
-        incorrectPulses.delete(key);
+      clearTimeout(cellPulses.get(key)?.timer);
+      const timer = setTimeout(() => {
+        cellPulses.delete(key);
         paint();
-      }, 650));
+      }, 650);
+      cellPulses.set(key, { tone, timer });
+    }
+
+    function rememberIncorrectChoice(node, ci) {
       const feedback = state.tableFeedback;
       if (feedback.rememberWrongChoices && !feedback.wrongChoices.some(choice =>
         choice.term === node.word && choice.clusterIndex === ci
@@ -61,7 +69,7 @@ export function createTableRenderer({
       if (state.made === state.need) setOrder({ kind: "grouped" });
     });
     const rememberLabel = document.createElement("label");
-    rememberLabel.className = "table-remember";
+    rememberLabel.className = "table-option";
     rememberLabel.title = "Keep gray × markers for wrong choices in this puzzle. Start over clears them.";
     const remember = document.createElement("input");
     remember.id = "table-remember-wrong";
@@ -72,7 +80,19 @@ export function createTableRenderer({
       state.onProgressChanged?.();
     });
     rememberLabel.append(remember, "Remember wrong choices");
-    toolbar.append(alphabetical, grouped, rememberLabel);
+    const infoLabel = document.createElement("label");
+    infoLabel.className = "table-option";
+    const showInfo = document.createElement("input");
+    showInfo.id = "table-show-info";
+    showInfo.type = "checkbox";
+    showInfo.addEventListener("change", () => {
+      state.tableShowTermInfo = showInfo.checked;
+      try { storage?.setItem("ccTableShowTermInfo", String(showInfo.checked)); }
+      catch { /* The view still works when preferences cannot be saved. */ }
+      paint();
+    });
+    infoLabel.append(showInfo, "Show term info");
+    toolbar.append(alphabetical, grouped, rememberLabel, infoLabel);
     const orderStatus = document.createElement("p");
     orderStatus.id = "table-order-status";
     orderStatus.className = "table-help";
@@ -93,6 +113,10 @@ export function createTableRenderer({
     const colgroup = document.createElement("colgroup");
     colgroup.append(document.createElement("col"));
     puzzle.clusters.forEach(() => colgroup.append(document.createElement("col")));
+    const infoColumn = document.createElement("col");
+    infoColumn.className = "table-info-column";
+    infoColumn.hidden = !state.tableShowTermInfo;
+    colgroup.append(infoColumn);
     table.append(colgroup);
     const head = table.createTHead().insertRow();
     const corner = document.createElement("th");
@@ -118,6 +142,12 @@ export function createTableRenderer({
       head.append(cell);
       return cell;
     });
+    const infoHeading = document.createElement("th");
+    infoHeading.scope = "col";
+    infoHeading.className = "table-info-heading";
+    infoHeading.textContent = "Term info";
+    infoHeading.hidden = !state.tableShowTermInfo;
+    head.append(infoHeading);
 
     const details = document.createElement("p");
     details.id = "table-details";
@@ -204,7 +234,13 @@ export function createTableRenderer({
         // activating it again; Reset cluster remains in the heading menu.
         input.addEventListener("change", () => {
           input.checked = node.connected.includes(ci);
-          if (connectToCluster(node, ci) === "incorrect") showIncorrectChoice(node, ci);
+          if (input.checked) {
+            pulseCell(node, ci, "connected");
+          } else {
+            const result = connectToCluster(node, ci);
+            if (result !== "connected") pulseCell(node, ci, "incorrect");
+            if (result === "incorrect") rememberIncorrectChoice(node, ci);
+          }
           showDetails(node);
           paint();
         });
@@ -224,12 +260,18 @@ export function createTableRenderer({
         input.addEventListener("focus", () => highlight(rows.indexOf(entry), ci));
         return { cell, input, wrongMark, wrongNote };
       });
+      const infoCell = row.insertCell();
+      infoCell.className = "table-term-info";
+      infoCell.hidden = !state.tableShowTermInfo;
+      // This is the ordinary authored description, available on hover
+      // already. Revealed bridge facts and endpoints stay in annotations.
+      infoCell.textContent = node.info?.text || "";
       row.addEventListener("mouseenter", () => showDetails(node));
       row.addEventListener("focusin", () => { focusTermInfo(node); showDetails(node); });
       row.addEventListener("focusout", event => {
         if (!row.contains(event.relatedTarget)) blurTermInfo(node);
       });
-      return Object.assign(entry, { term, status, cells, indent });
+      return Object.assign(entry, { term, status, cells, indent, infoCell });
     }
 
     function clusterGroup(ci) {
@@ -268,7 +310,7 @@ export function createTableRenderer({
             key: "others", members: sortedNodes.filter(node => !node.connected.includes(order.ci))
           }]
           : [{ key: "all", members: sortedNodes }];
-      const signature = JSON.stringify([order.kind, groups.map(group => [
+      const signature = JSON.stringify([order.kind, state.tableShowTermInfo, groups.map(group => [
         group.key, group.members.map(node => [node.id, group.endpoints?.get(node.id) || null])
       ])]);
       if (signature === rowSignature) return;
@@ -289,7 +331,7 @@ export function createTableRenderer({
           const heading = body.insertRow();
           heading.className = "table-group-heading";
           const cell = document.createElement("th");
-          cell.colSpan = puzzle.clusters.length + 1;
+          cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
           cell.scope = "rowgroup";
           cell.id = `table-group-${group.key}`;
           const text = document.createElement("span");
@@ -305,7 +347,7 @@ export function createTableRenderer({
             const divider = body.insertRow();
             divider.className = "table-connections-heading";
             const cell = divider.insertCell();
-            cell.colSpan = puzzle.clusters.length + 1;
+            cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
             const text = document.createElement("span");
             text.textContent = "Shared connections";
             cell.append(text);
@@ -391,11 +433,15 @@ export function createTableRenderer({
 
     function paint() {
       if (getState() !== state) return;
+      showInfo.checked = state.tableShowTermInfo;
+      infoColumn.hidden = infoHeading.hidden = !showInfo.checked;
+      sheet.classList.toggle("table-show-info", showInfo.checked);
       renderRows();
       updateOrderControls();
       remember.checked = state.tableFeedback.rememberWrongChoices;
       const remembered = new Set(state.tableFeedback.wrongChoices.map(choice => JSON.stringify([choice.term, choice.clusterIndex])));
-      rows.forEach(({ node, row, term, status, cells, indent, parentWord }) => {
+      rows.forEach(({ node, row, term, status, cells, indent, parentWord, infoCell }) => {
+        infoCell.hidden = !showInfo.checked;
         const connected = node.connected.length > 0;
         const bridge = isBridge(node) && connected;
         const shared = order.kind === "grouped" && bridge;
@@ -423,9 +469,10 @@ export function createTableRenderer({
           cell.classList.toggle("table-connected", input.checked);
           cell.classList.toggle("table-locked", locked);
           const key = choiceKey(node, ci);
-          const incorrect = incorrectPulses.has(key);
+          const incorrect = cellPulses.get(key)?.tone === "incorrect";
           const marked = !input.checked && remember.checked && remembered.has(key);
           cell.classList.toggle("table-cell-incorrect", incorrect);
+          cell.classList.toggle("table-cell-connected-pulse", cellPulses.get(key)?.tone === "connected");
           cell.classList.toggle("table-tried-wrong", marked);
           wrongMark.hidden = !marked || incorrect;
           wrongNote.hidden = !marked;
@@ -462,8 +509,8 @@ export function createTableRenderer({
     state.layoutAdapter = { mode: "table" };
     state.stopRenderer = () => {
       resizeObserver.disconnect();
-      incorrectPulses.forEach(timer => clearTimeout(timer));
-      incorrectPulses.clear();
+      cellPulses.forEach(({ timer }) => clearTimeout(timer));
+      cellPulses.clear();
       container.replaceChildren();
     };
     paint();

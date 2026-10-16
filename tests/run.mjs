@@ -33,6 +33,7 @@ import * as clusterMenu from "./cluster-menu.mjs";
 import * as tableMode from "./table-mode.mjs";
 import * as tableSorting from "./table-sorting.mjs";
 import * as tableFeedback from "./table-feedback.mjs";
+import * as tableInfo from "./table-info.mjs";
 import * as solution from "./solution.mjs";
 import * as layoutSanity from "./layout-sanity.mjs";
 import * as mobileLayout from "./mobile-layout.mjs";
@@ -155,7 +156,7 @@ import * as legacyBoardLift from "./legacy-board-lift.mjs";
 import * as firstPublishedBackfill from "./first-published-backfill.mjs";
 
 const allTests = [
-  tableMode, tableSorting, tableFeedback,
+  tableMode, tableSorting, tableFeedback, tableInfo,
   mcpAuthoringDomains, boardLimitWaivers, mcpWaiverChatApproval,
   smoke, solution, layoutSanity, mobileLayout, sharing, clusterLabelConnect, clusterMenu, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
   starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, starBridgePreconnect, playerSessions,
@@ -192,7 +193,7 @@ const quickTests = [
 
 const standardTests = [
   ...quickTests,
-  tableMode, tableSorting, tableFeedback,
+  tableMode, tableSorting, tableFeedback, tableInfo,
   mobileLayout, clusterLabelConnect, clusterMenu, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip, starBridgePreconnect,
   learningLessonSection,
   authoringAdminIndex, localCatalogueReview, localDevHttp, localDevHousekeep, playCorpus, boardAdministration, publicPlayBrowser
@@ -204,7 +205,7 @@ const standardTests = [
 // a contract consumed by both surfaces.
 const sideTests = {
   play: new Set([
-    tableMode, tableSorting, tableFeedback,
+    tableMode, tableSorting, tableFeedback, tableInfo,
     smoke, solution, layoutSanity, mobileLayout, sharing, clusterLabelConnect, clusterMenu,
     bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
     starDetangle, starPrettyPrint, playerSessions,
