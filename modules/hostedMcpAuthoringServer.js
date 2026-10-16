@@ -86,10 +86,14 @@ import {
 } from "./draftIdRename.js";
 import { CATEGORY_REGISTRATION_MODES } from "./categoryDiscovery.js";
 import {
+  corpusStatusSummary,
   filterAuthoringPuzzles,
   mergeAuthoringSearchPuzzles,
-  searchAuthoringPuzzles
+  searchAuthoringPuzzles,
+  sortByRecent
 } from "./authoringPuzzleSearch.js";
+import { PUZZLE_KINDS } from "./authoringProfiles.js";
+import { AGENT_CORPUS_STATUSES, RECENCY_WINDOWS } from "./puzzleCorpusStatus.js";
 import {
   cataloguesForValidation,
   catalogueInputDocument,
@@ -524,6 +528,34 @@ function analyticsTarget(toolName, args) {
   return { type: "global", id: "global" };
 }
 
+// Filters list_puzzles and search_puzzles share. Freeze-pipeline states
+// (cued, modified since Freeze, not in GitHub) are deliberately absent.
+const PUZZLE_FILTER_SHAPE = Object.freeze({
+  category: z.string().min(1).optional(),
+  catalogue_id: z.string().min(1).optional(),
+  subcategory: z.string().min(1).optional(),
+  tag: z.string().min(1).optional(),
+  puzzle_kind: z.enum([...PUZZLE_KINDS]).optional(),
+  has_lenses: z.boolean().optional(),
+  has_learning_introduction: z.boolean().optional(),
+  status: z.enum(Object.keys(AGENT_CORPUS_STATUSES)).optional(),
+  updated_within: z.enum([...RECENCY_WINDOWS]).optional()
+});
+
+function puzzleFilterOptions(args = {}) {
+  return {
+    category: args.category || null,
+    catalogueId: args.catalogue_id || null,
+    subcategory: args.subcategory || null,
+    tag: args.tag || null,
+    puzzleKind: args.puzzle_kind || null,
+    hasLenses: args.has_lenses ?? null,
+    hasLearningIntroduction: args.has_learning_introduction ?? null,
+    status: args.status || null,
+    updatedWithin: args.updated_within || null
+  };
+}
+
 function track(analytics, toolName, handler) {
   return async (args, ctx) => {
     const result = await handler(args, ctx);
@@ -746,13 +778,6 @@ export function createAuthoringMcpServer({
     });
   }
 
-  async function publishedAuthoringPuzzles({ categoryRegistry = null } = {}) {
-    return mergeAuthoringSearchPuzzles({
-      publishedRows: await publishedPuzzleRows(),
-      categoryRegistry
-    });
-  }
-
   async function publishedPuzzleDocument(puzzleId, categoryRegistry = null) {
     const published = (await publishedPuzzleRows())
       .find(row => row.id === puzzleId && row.document);
@@ -785,6 +810,7 @@ export function createAuthoringMcpServer({
       category: puzzle.category,
       ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
       ...(puzzle.subcategories ? { subcategories: { ...puzzle.subcategories } } : {}),
+      ...(puzzle.puzzleKind ? { puzzleKind: puzzle.puzzleKind } : {}),
       hasLenses: Boolean(puzzle.lenses?.length),
       hasLearningIntroduction: Boolean(puzzle.learningIntroduction)
     };
@@ -915,24 +941,65 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_puzzles", {
     title: "List puzzles",
-    description: "List the current authoring puzzle corpus. Optionally filter by category or catalogue id.",
+    description:
+      "List the authoring corpus by composable filters (all optional, combined with AND); " +
+      "returns total plus one page. With no filter it returns only the total -- narrow by " +
+      "category (list_categories has per-category counts) or another filter, or pass limit " +
+      "to page through everything. status and updated_within match the admin puzzle list's " +
+      "Show filters and Today / Past week / Past month groups; either one sorts newest first. " +
+      "include_drafts overlays your working copies; status=working or unpublished_changes " +
+      "implies it.",
     inputSchema: z.object({
-      category: z.string().min(1).optional(),
-      catalogue_id: z.string().min(1).optional()
+      ...PUZZLE_FILTER_SHAPE,
+      include_drafts: z.boolean().optional(),
+      limit: z.number().int().min(1).max(200).optional(),
+      offset: z.number().int().min(0).optional()
     }),
     annotations: READ_ONLY
-  }, tracked("list_puzzles", safe(async ({ category, catalogue_id }) => {
+  }, tracked("list_puzzles", safe(async ({
+    include_drafts = false,
+    limit,
+    offset = 0,
+    ...args
+  }) => {
+    const filters = puzzleFilterOptions(args);
+    const filtered = Object.values(filters).some(value => value != null);
     const taxonomy = await taxonomyContext();
-    const puzzles = filterAuthoringPuzzles(
-      await publishedAuthoringPuzzles({ categoryRegistry: taxonomy.categoryRegistry }),
-      {
-        category: category || null,
-        catalogueId: catalogue_id || null,
-        catalogues: taxonomy.catalogues,
-        categoryRegistry: taxonomy.categoryRegistry
-      }
-    ).map(puzzleListSummary);
-    return success(`Found ${puzzles.length} authoring puzzles.`, { puzzles });
+    const withDrafts = include_drafts
+      || filters.status === "working"
+      || filters.status === "unpublished_changes";
+    const corpus = mergeAuthoringSearchPuzzles({
+      publishedRows: taxonomy.publishedPuzzles,
+      drafts: withDrafts ? await ownerDrafts() : [],
+      categoryRegistry: taxonomy.categoryRegistry
+    });
+    if (!filtered && limit === undefined) {
+      return success(
+        `The authoring corpus has ${corpus.length} puzzles. Narrow by category ` +
+        "(list_categories has per-category counts) or another filter, or pass limit to page through it.",
+        { total: corpus.length, puzzles: [] }
+      );
+    }
+    let members = filterAuthoringPuzzles(corpus, {
+      ...filters,
+      catalogues: taxonomy.catalogues,
+      categoryRegistry: taxonomy.categoryRegistry
+    });
+    if (filters.status || filters.updatedWithin) members = sortByRecent(members);
+    const pageSize = limit ?? 50;
+    const includeChangeDomains = filters.status === "unpublished_changes";
+    const puzzles = members.slice(offset, offset + pageSize).map(puzzle => ({
+      ...puzzleListSummary(puzzle),
+      ...corpusStatusSummary(puzzle, { includeChangeDomains })
+    }));
+    const nextOffset = offset + puzzles.length;
+    const range = puzzles.length ? `${offset + 1}-${nextOffset} of ` : "0 of ";
+    return success(`Showing ${range}${members.length} authoring puzzles.`, {
+      total: members.length,
+      offset,
+      puzzles,
+      ...(nextOffset < members.length ? { next_offset: nextOffset } : {})
+    });
   })));
 
   server.registerTool("search_puzzles", {
@@ -942,22 +1009,22 @@ export function createAuthoringMcpServer({
       "Searches the authoring corpus and your working copies; a draft overlays the same id. " +
       "Prefer category (or catalogue_id) when checking gap-fill overlap so results stay neighbor-sized. " +
       "Call this with 2-3 planned anchor terms before create_puzzle_draft when filling a category gap. " +
-      "Set full_text=true to search facts, lessons, and other copy without a text: prefix.",
+      "Set full_text=true to search facts, lessons, and other copy without a text: prefix. " +
+      "Accepts the same filters as list_puzzles.",
     inputSchema: z.object({
       query: z.string().min(1),
-      category: z.string().min(1).optional(),
-      catalogue_id: z.string().min(1).optional(),
+      ...PUZZLE_FILTER_SHAPE,
       full_text: z.boolean().optional(),
       limit: z.number().int().min(1).max(25).optional()
     }),
     annotations: READ_ONLY
   }, tracked("search_puzzles", safe(async ({
     query,
-    category,
-    catalogue_id,
     full_text = false,
-    limit = 10
+    limit = 10,
+    ...args
   }) => {
+    const { category, catalogueId, ...filters } = puzzleFilterOptions(args);
     const taxonomy = await taxonomyContext();
     const puzzles = mergeAuthoringSearchPuzzles({
       publishedRows: taxonomy.publishedPuzzles,
@@ -968,9 +1035,10 @@ export function createAuthoringMcpServer({
       puzzles,
       taxonomy.categoryRegistry,
       {
+        ...filters,
         query,
-        category: category || null,
-        catalogueId: catalogue_id || null,
+        category,
+        catalogueId,
         catalogues: taxonomy.catalogues,
         fullText: full_text,
         limit
@@ -978,8 +1046,8 @@ export function createAuthoringMcpServer({
     );
     const scope = category
       ? ` in ${category}`
-      : catalogue_id
-        ? ` in catalogue ${catalogue_id}`
+      : catalogueId
+        ? ` in catalogue ${catalogueId}`
         : "";
     const authoringResult = {
       ...result,
