@@ -529,12 +529,23 @@ button:disabled {
   color: var(--table-group-color, var(--ink-soft));
   background: var(--table-group-bg, var(--paper));
 }
-.table-group-heading th > span {
+.table-group-heading th > span,
+.table-connections-heading td > span {
   position: sticky;
   left: 12px;
   display: block;
   width: calc(var(--table-term-width) - 24px);
   overflow-wrap: anywhere;
+}
+.membership-table .table-connections-heading td {
+  height: auto;
+  padding: 7px 12px;
+  border-top: 1px dashed var(--bridge-line);
+  color: var(--bridge);
+  background: var(--paper);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
 }
 .table-cluster-group > .table-row > th { background: var(--table-group-bg); }
 .table-term {
@@ -562,6 +573,16 @@ button:disabled {
   font-weight: 400;
 }
 .table-shared-status { max-width: 45px; }
+.table-nested-bridge .table-term { position: relative; padding-left: 28px; }
+.table-bridge-indent {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  pointer-events: none;
+}
+.table-bridge-indent[hidden] { display: none; }
 .table-check {
   display: grid;
   place-items: center;

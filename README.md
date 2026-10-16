@@ -10,6 +10,8 @@ Table keeps seed terms checked in their normal rows and shows bridges with a che
 
 Click a cluster heading to bring its confirmed memberships to the top, with a connected-term count that includes seeds and bridge connections. Once every term is connected, **Group by cluster** stacks labeled cluster groups and repeats shared bridges in each relevant group. **Alphabetical** restores one row per term. Completion never automatically changes the row order; the chosen view stays in place when switching to a diagram and back during the same visit.
 
+Within each cluster view, ordinary terms remain alphabetical. Bridges appear directly beneath their revealed ideal endpoint with an indented ↳ glyph; bridges without a revealed endpoint appear alphabetically in a **Shared connections** section at the bottom. A bridge moves beneath its endpoint only after that endpoint is placed, preserving the puzzle's reveal timing.
+
 This is a working prototype handed off from a Claude.ai design session. It runs by opening `index.html` directly in a browser — no build step, no server, no network required (D3 is vendored locally).
 
 ## Design brief (the decisions behind the code)

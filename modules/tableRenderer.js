@@ -135,7 +135,12 @@ export function createTableRenderer({
       word.textContent = node.word;
       const status = document.createElement("span");
       status.className = "table-term-status";
-      term.append(word, status);
+      const indent = document.createElement("span");
+      indent.className = "table-bridge-indent";
+      indent.textContent = "↳";
+      indent.setAttribute("aria-hidden", "true");
+      indent.hidden = true;
+      term.append(word, status, indent);
       term.setAttribute("aria-describedby", details.id);
       term.addEventListener("click", () => {
         showDetails(node);
@@ -183,15 +188,34 @@ export function createTableRenderer({
       row.addEventListener("focusout", event => {
         if (!row.contains(event.relatedTarget)) blurTermInfo(node);
       });
-      return Object.assign(entry, { term, status, cells });
+      return Object.assign(entry, { term, status, cells, indent });
     }
 
     function clusterGroup(ci) {
+      // Use only confirmed memberships. An unplaced authored endpoint
+      // cannot affect ordering, indentation, labels, or accessible names.
+      const confirmed = sortedNodes.filter(node => node.connected.includes(ci));
+      const concepts = confirmed.filter(node => !isBridge(node));
+      const connections = confirmed.filter(isBridge);
+      const endpoints = new Map();
+      const children = new Map();
+      const unattached = [];
+      connections.forEach(bridge => {
+        const word = bridge.idealTerms?.[bridge.gs.indexOf(ci)];
+        const endpoint = concepts.find(node => node.word === word && isDone(node));
+        if (!endpoint) { unattached.push(bridge); return; }
+        endpoints.set(bridge.id, endpoint.word);
+        if (!children.has(endpoint.word)) children.set(endpoint.word, []);
+        children.get(endpoint.word).push(bridge);
+      });
       return {
         key: `cluster-${ci}`, ci,
-        // Inspect only confirmed memberships, including partially connected
-        // bridges. Authored destinations must not influence an unsolved sort.
-        members: sortedNodes.filter(node => node.connected.includes(ci))
+        endpoints,
+        unattachedStart: unattached[0]?.id,
+        members: [
+          ...concepts.flatMap(node => [node, ...(children.get(node.word) || [])]),
+          ...unattached
+        ]
       };
     }
 
@@ -203,7 +227,9 @@ export function createTableRenderer({
             key: "others", members: sortedNodes.filter(node => !node.connected.includes(order.ci))
           }]
           : [{ key: "all", members: sortedNodes }];
-      const signature = JSON.stringify([order.kind, groups.map(group => [group.key, group.members.map(node => node.id)])]);
+      const signature = JSON.stringify([order.kind, groups.map(group => [
+        group.key, group.members.map(node => [node.id, group.endpoints?.get(node.id) || null])
+      ])]);
       if (signature === rowSignature) return;
       rowSignature = signature;
       const focused = document.activeElement;
@@ -234,9 +260,20 @@ export function createTableRenderer({
           body.setAttribute("aria-labelledby", cell.id);
         }
         group.members.forEach(node => {
+          if (node.id === group.unattachedStart) {
+            const divider = body.insertRow();
+            divider.className = "table-connections-heading";
+            const cell = divider.insertCell();
+            cell.colSpan = puzzle.clusters.length + 1;
+            const text = document.createElement("span");
+            text.textContent = "Shared connections";
+            cell.append(text);
+          }
           const key = `${group.key}:${node.id}`;
           if (!rowCache.has(key)) rowCache.set(key, createRow(node, group.key));
-          body.append(rowCache.get(key).row);
+          const entry = rowCache.get(key);
+          entry.parentWord = group.endpoints?.get(node.id) || null;
+          body.append(entry.row);
         });
         return body;
       });
@@ -274,7 +311,7 @@ export function createTableRenderer({
         heading.setAttribute("aria-sort", selected ? "other" : "none");
       });
       const text = order.kind === "grouped"
-        ? "Grouped by cluster. Shared bridges appear in each connected cluster."
+        ? "Grouped by cluster. Bridges follow their revealed ideal terms; other bridges appear under Shared connections."
         : order.kind === "cluster"
           ? `${puzzle.clusters[order.ci].name} · ${clusterGroup(order.ci).members.length} connected. Other terms follow alphabetically.`
           : "Alphabetical order. Click a cluster heading to bring its connected terms to the top.";
@@ -315,16 +352,20 @@ export function createTableRenderer({
       if (getState() !== state) return;
       renderRows();
       updateOrderControls();
-      rows.forEach(({ node, row, term, status, cells }) => {
+      rows.forEach(({ node, row, term, status, cells, indent, parentWord }) => {
         const connected = node.connected.length > 0;
         const bridge = isBridge(node) && connected;
         const shared = order.kind === "grouped" && bridge;
         const seed = !isBridge(node) && puzzle.clusters[node.gs[0]].seeds.includes(node.word);
         const active = row.classList.contains("table-active-row");
-        row.className = withLensClass(`table-row${active ? " table-active-row" : ""}${bridge ? " table-bridge" : ""}${connected && !isDone(node) ? " table-partial" : ""}`, node, state);
+        row.className = withLensClass(`table-row${active ? " table-active-row" : ""}${bridge ? " table-bridge" : ""}${parentWord ? " table-nested-bridge" : ""}${connected && !isDone(node) ? " table-partial" : ""}`, node, state);
+        indent.hidden = !parentWord;
+        if (parentWord) row.dataset.idealEndpoint = parentWord;
+        else delete row.dataset.idealEndpoint;
+        const relationship = parentWord ? `Shared connection through ${parentWord}.` : "";
         const name = lensNodeAriaLabel(node, state, canonicalNodeAriaLabel(node, puzzle, nodes, node.word));
-        term.setAttribute("aria-label", shared ? `${name}. Shared bridge; repeated in each connected cluster.` : name);
-        term.title = [shared ? "Shared bridge; repeated in each connected cluster." : "", annotation(node)].filter(Boolean).join(" ") || node.word;
+        term.setAttribute("aria-label", [name, relationship, shared ? "Shared bridge; repeated in each connected cluster." : ""].filter(Boolean).join(" "));
+        term.title = [relationship, shared ? "Shared bridge; repeated in each connected cluster." : "", annotation(node)].filter(Boolean).join(" ") || node.word;
         if (state.phase === "lens-selecting") term.setAttribute("aria-pressed", String(state.lensSelections.has(node.word)));
         else term.removeAttribute("aria-pressed");
         const badge = lensAssignmentBadge(node, state);

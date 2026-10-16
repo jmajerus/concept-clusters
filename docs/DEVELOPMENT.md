@@ -301,6 +301,13 @@ confirmed memberships. Grouped views repeat bridges using the same node
 objects, with distinct row IDs; lens selections and feedback stay synchronized
 across those rows. View changes never write connection history, and solving
 does not automatically change the selected order.
+Within a cluster, ordinary members are alphabetical and bridges follow their
+revealed ideal endpoint, with alphabetical siblings and an indented glyph.
+Bridges without a placed endpoint occupy a final Shared connections section.
+`clusterGroup` derives both order and parent annotations from confirmed
+memberships; its render signature includes endpoint identity so indentation
+updates even when the row sequence stays the same. Alphabetical and Other
+terms lists stay flat.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer
