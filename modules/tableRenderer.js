@@ -109,7 +109,6 @@ export function createTableRenderer({
       if (order.kind === "grouped") order = state.tableOrder = { kind: "alphabetical" };
       paint();
       workingPanel.scroll.scrollTop = 0;
-      if (completedPanel) completedPanel.scroll.scrollTop = 0;
     });
     splitLabel.append(separateCompleted, "Separate completed clusters");
     toolbar.append(alphabetical, grouped, splitLabel, rememberLabel, infoLabel);
@@ -120,20 +119,20 @@ export function createTableRenderer({
     const panelLayout = document.createElement("div");
     panelLayout.className = "table-panels";
     const panels = [];
-    function createPanel(key, title) {
-      const compact = key === "completed";
+    function createPanel(key, title, compact = false) {
       const section = document.createElement("section");
-      section.className = `table-panel table-panel-${key}`;
+      section.className = `table-panel ${compact ? "table-cluster-panel" : `table-panel-${key}`}`;
       const titleEl = document.createElement("h3");
       titleEl.id = `table-panel-${key}-title`;
       titleEl.className = "table-panel-title";
       titleEl.textContent = title;
+      titleEl.hidden = compact;
       section.setAttribute("aria-labelledby", titleEl.id);
       const scroll = document.createElement("div");
       scroll.className = "table-scroll";
       scroll.setAttribute("role", "region");
       scroll.setAttribute("aria-label", compact ? "Completed cluster terms" : `${title}: term and cluster memberships`);
-      scroll.tabIndex = 0;
+      if (!compact) scroll.tabIndex = 0;
       const sheet = document.createElement("div");
       sheet.className = "table-sheet";
       sheet.style.setProperty("--table-members-width", `${compact ? 0 : puzzle.clusters.length * 44}px`);
@@ -197,6 +196,23 @@ export function createTableRenderer({
     const workingPanel = createPanel("working", "Working terms");
     let completedPanel = null;
     panelLayout.append(workingPanel.section);
+
+    function createCompletedArea() {
+      const section = document.createElement("section");
+      section.className = "table-panel table-panel-completed";
+      const titleEl = document.createElement("h3");
+      titleEl.id = "table-panel-completed-title";
+      titleEl.className = "table-panel-title";
+      titleEl.textContent = "Completed clusters";
+      section.setAttribute("aria-labelledby", titleEl.id);
+      const cardsHost = document.createElement("div");
+      cardsHost.className = "table-cluster-panels";
+      const empty = document.createElement("p");
+      empty.className = "table-panel-empty";
+      empty.textContent = "Completed clusters will appear here as you solve.";
+      section.append(titleEl, cardsHost, empty);
+      return { section, cardsHost, empty, cards: new Map(), orderedCards: [] };
+    }
 
     const details = document.createElement("p");
     details.id = "table-details";
@@ -264,9 +280,14 @@ export function createTableRenderer({
             event.preventDefault();
             const nextRow = Math.max(0, Math.min(panel.rows.length - 1, ri + (event.key === "ArrowUp" ? -1 : 1)));
             panel.rows[nextRow]?.term.focus();
-          } else if (event.key === "ArrowLeft" && workingPanel.rows.length) {
+          } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
             event.preventDefault();
-            workingPanel.rows[Math.min(ri, workingPanel.rows.length - 1)].cells.at(-1).input.focus();
+            const at = completedPanel.orderedCards.indexOf(panel);
+            const neighbor = completedPanel.orderedCards[at + (event.key === "ArrowLeft" ? -1 : 1)];
+            if (neighbor) neighbor.rows[Math.min(ri, neighbor.rows.length - 1)]?.term.focus();
+            else if (event.key === "ArrowLeft" && workingPanel.rows.length) {
+              workingPanel.rows[Math.min(ri, workingPanel.rows.length - 1)].cells.at(-1).input.focus();
+            }
           }
         });
       }
@@ -315,8 +336,9 @@ export function createTableRenderer({
           const ri = panel.rows.indexOf(entry);
           const nextRow = Math.max(0, Math.min(panel.rows.length - 1, ri + move[0]));
           const nextColumn = Math.max(0, Math.min(puzzle.clusters.length - 1, ci + move[1]));
-          if (state.tableSeparateCompleted && move[1] === 1 && ci === puzzle.clusters.length - 1 && completedPanel?.rows.length) {
-            completedPanel.rows[Math.min(ri, completedPanel.rows.length - 1)].term.focus();
+          const firstCard = completedPanel?.orderedCards[0];
+          if (state.tableSeparateCompleted && move[1] === 1 && ci === puzzle.clusters.length - 1 && firstCard?.rows.length) {
+            firstCard.rows[Math.min(ri, firstCard.rows.length - 1)].term.focus();
           } else {
             panel.rows[nextRow]?.cells[nextColumn].input.focus();
           }
@@ -385,18 +407,17 @@ export function createTableRenderer({
         .sort((a, b) => b.lastMove - a.lastMove || a.ci - b.ci).map(cluster => cluster.ci);
     }
 
-    let previousCompleted = new Set();
     function renderRows() {
       const split = state.tableSeparateCompleted;
-      if (split && !completedPanel) completedPanel = createPanel("completed", "Completed clusters");
+      if (split && !completedPanel) completedPanel = createCompletedArea();
       if (split && !panelLayout.contains(completedPanel.section)) panelLayout.append(completedPanel.section);
       if (!split) completedPanel?.section.remove();
       panelLayout.classList.toggle("table-panels-split", split);
+      panelLayout.classList.toggle("table-panels-solved", split && state.made === state.need);
+      workingPanel.section.hidden = split && state.made === state.need;
       workingPanel.titleEl.hidden = !split;
       const completed = completedClusterOrder();
       const completedSet = new Set(completed);
-      const newlyCompleted = completed.some(ci => !previousCompleted.has(ci));
-      previousCompleted = completedSet;
       const workingNodes = split ? sortedNodes.filter(node => isBridge(node)
         ? !isDone(node) || !node.connected.some(ci => completedSet.has(ci))
         : !completedSet.has(node.gs[0])) : sortedNodes;
@@ -408,7 +429,19 @@ export function createTableRenderer({
           }]
           : [{ key: "all", members: workingNodes }];
       const plans = [{ panel: workingPanel, groups: split ? groups.filter(group => group.members.length) : groups }];
-      if (split) plans.push({ panel: completedPanel, groups: completed.map(ci => clusterGroup(ci)) });
+      if (split) {
+        completedPanel.orderedCards = completed.map(ci => {
+          if (!completedPanel.cards.has(ci)) {
+            completedPanel.cards.set(ci, createPanel(`completed-${ci}`, puzzle.clusters[ci].name, true));
+          }
+          const panel = completedPanel.cards.get(ci);
+          plans.push({ panel, groups: [clusterGroup(ci)] });
+          return panel;
+        });
+        completedPanel.cardsHost.classList.toggle("table-cluster-panels-show-info", state.tableShowTermInfo);
+        completedPanel.cardsHost.hidden = completed.length === 0;
+        completedPanel.empty.hidden = completed.length !== 0;
+      }
       const signature = JSON.stringify([order.kind, state.tableShowTermInfo, plans.map(({ panel, groups }) => [
         panel.key, groups.map(group => [group.key, group.members.map(node => [node.id, group.endpoints?.get(node.id) || null])])
       ])]);
@@ -418,6 +451,7 @@ export function createTableRenderer({
       const restoreFocus = container.contains(focused) && !!focused.closest("tbody");
       const focusedRow = restoreFocus && rows.find(entry => entry.row.contains(focused));
       const focusedColumn = focusedRow ? focusedRow.cells.findIndex(cell => cell.input === focused) : -1;
+      if (split) completedPanel.cardsHost.replaceChildren(...completedPanel.orderedCards.map(panel => panel.section));
       plans.forEach(({ panel, groups }) => {
         const { table } = panel;
         const bodies = groups.map(group => {
@@ -428,7 +462,7 @@ export function createTableRenderer({
             body.style.setProperty("--table-group-color", `var(--${puzzle.clusters[group.ci].color})`);
             body.style.setProperty("--table-group-bg", `var(--${puzzle.clusters[group.ci].color}-bg)`);
           }
-          if (panel === completedPanel || order.kind !== "alphabetical") {
+          if (panel.compact || order.kind !== "alphabetical") {
             const heading = body.insertRow();
             heading.className = "table-group-heading";
             const cell = document.createElement("th");
@@ -438,7 +472,7 @@ export function createTableRenderer({
             const text = document.createElement(panel.compact ? "button" : "span");
             text.textContent = group.ci == null
               ? `Other terms · ${group.members.length}`
-              : `${puzzle.clusters[group.ci].name} · ${group.members.length} connected${panel === completedPanel ? " · complete" : ""}`;
+              : `${puzzle.clusters[group.ci].name} · ${group.members.length} connected${panel.compact ? " · complete" : ""}`;
             if (panel.compact) {
               text.type = "button";
               text.className = "table-completed-cluster";
@@ -479,7 +513,6 @@ export function createTableRenderer({
         panel.empty.hidden = panel.rows.length !== 0;
       });
       rows = plans.flatMap(({ panel }) => panel.rows);
-      if (split && newlyCompleted) completedPanel.scroll.scrollTop = 0;
       if (restoreFocus) {
         const replacement = rows.find(entry => entry.node === focusedRow?.node &&
           entry.row.closest("tbody").dataset.cluster === String(focusedColumn)) || rows.find(entry => entry.node === focusedRow?.node);
@@ -516,7 +549,7 @@ export function createTableRenderer({
           ? `${puzzle.clusters[order.ci].name} · ${workingPanel.rows.filter(entry => entry.node.connected.includes(order.ci)).length} connected. Other terms follow alphabetically.`
           : "Alphabetical order. Click a cluster heading to bring its connected terms to the top.";
       const text = state.tableSeparateCompleted
-        ? `${completedPanel.table.tBodies.length} of ${puzzle.clusters.length} clusters complete. Newest completed cluster first. ${workingPanel.rows.length ? orderingText : "All terms are in completed clusters."}`
+        ? `${completedPanel.orderedCards.length} of ${puzzle.clusters.length} clusters complete. Newest completed cluster first. ${workingPanel.rows.length ? orderingText : "All terms are in completed clusters."}`
         : orderingText;
       if (orderStatus.textContent !== text) orderStatus.textContent = text;
     }

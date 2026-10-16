@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-export const name = "table panels: completed groups, bridge migration, completion order, and responsive layout";
+export const name = "table panels: flowing cluster panels, bridge migration, completion order, and lens selection";
 export const viewport = { width: 1200, height: 900 };
 const row = (scope, word) => scope.locator(`.table-row[data-term=${JSON.stringify(word)}]`);
 const input = (scope, word, ci) => row(scope, word).locator(`input[data-cluster="${ci}"]`);
@@ -39,6 +39,7 @@ export async function run(page, baseURL) {
   await page.locator("#table-cluster-0 button").click();
   await input(working, "carbon dioxide", 0).press("Space");
   assert.deepEqual(await clusters(completed), [0], "ordinary-member completion moves the cluster before bridges are finished");
+  assert.equal(await completed.locator(".table-cluster-panel").count(), 1);
   assert.deepEqual(await names(group(0)), ["carbon dioxide", "chlorophyll", "sunlight"]);
   assert.equal(await row(working, "carbon dioxide").count(), 0);
   assert.equal(await row(group(0), "carbon dioxide").locator(".table-term").evaluate(el => el === document.activeElement), true,
@@ -83,12 +84,9 @@ export async function run(page, baseURL) {
   assert.equal(await row(group(0), "oxygen").locator(".table-term").evaluate(el => el === document.activeElement), true,
     "a finished bridge's checkbox focus follows it into the compact list");
 
-  await completed.locator(".table-scroll").evaluate(el => { el.style.maxHeight = "120px"; el.scrollTop = el.scrollHeight; });
-  assert.ok(await completed.locator(".table-scroll").evaluate(el => el.scrollTop > 0));
   await input(working, "aerobic", 1).click();
   assert.deepEqual(await clusters(completed), [1, 0], "newly completed clusters are prepended");
-  assert.equal(await completed.locator(".table-scroll").evaluate(el => el.scrollTop), 0);
-  await completed.locator(".table-scroll").evaluate(el => { el.style.maxHeight = ""; });
+  assert.equal(await completed.locator(".table-cluster-panel").count(), 2);
   assert.equal(await row(group(1), "oxygen").getAttribute("data-ideal-endpoint"), "aerobic");
   assert.equal(await row(page, "oxygen").count(), 2);
 
@@ -119,11 +117,30 @@ export async function run(page, baseURL) {
   assert.equal(await row(group(1), "glucose").getAttribute("data-ideal-endpoint"), "ATP");
   for (const ci of [0, 2]) await input(working, "producers", ci).click();
   assert.deepEqual(await clusters(completed), [2, 0, 1], "bridge arrivals cannot rearrange completed clusters");
-  assert.equal(await working.locator(".table-panel-empty").isVisible(), true);
+  assert.equal(await working.isHidden(), true, "classification completion reclaims the working table's space");
   assert.equal(await working.locator(".table-scroll").isHidden(), true);
   assert.equal(await page.evaluate(() => CC.state.made === CC.state.need), true);
   assert.equal(await row(page, "producers").count(), 2);
   assert.equal(await page.locator("#table-group-clusters").isDisabled(), true, "the completed panel already groups every cluster");
+  const flow = await completed.evaluate(section => {
+    const area = section.getBoundingClientRect();
+    const board = document.querySelector(".table-panels").getBoundingClientRect();
+    const cards = [...section.querySelectorAll(".table-cluster-panel")];
+    return { fullWidth: Math.abs(area.width - board.width) < 1,
+      sideBySide: cards[1].getBoundingClientRect().left > cards[0].getBoundingClientRect().left,
+      allTermsExposed: cards.every(card => {
+        const scroll = card.querySelector(".table-scroll");
+        const bounds = scroll.getBoundingClientRect();
+        return getComputedStyle(scroll).maxHeight === "none" && getComputedStyle(scroll).overflowY === "visible" &&
+          scroll.scrollHeight <= scroll.clientHeight + 1 && [...card.querySelectorAll(".table-row")].every(row => {
+            const rect = row.getBoundingClientRect();
+            return rect.top >= bounds.top - 1 && rect.bottom <= bounds.bottom + 1;
+          });
+      }) };
+  });
+  assert.equal(flow.fullWidth, true);
+  assert.equal(flow.sideBySide, true);
+  assert.equal(flow.allTermsExposed, true, "every cluster exposes all its terms without internal vertical scrolling");
   assert.equal(await page.evaluate(() => {
     const ids = [...document.querySelectorAll("#table-board [id]")].map(el => el.id);
     return ids.length === new Set(ids).size && [...document.querySelectorAll(".table-check input")].every(el =>
@@ -132,6 +149,7 @@ export async function run(page, baseURL) {
 
   const history = await page.evaluate(() => JSON.stringify(CC.state.moveHistory));
   await split.uncheck();
+  assert.equal(await working.isVisible(), true);
   assert.deepEqual(await names(page), alphabetical, "the single-table index remains available");
   assert.equal(await completed.count(), 0);
   await split.check();
@@ -143,23 +161,22 @@ export async function run(page, baseURL) {
 
   await page.locator("#table-show-info").check();
   assert.ok((await group(1).locator(".table-term-info").allTextContents()).some(Boolean));
-  assert.equal(await completed.locator("thead").isVisible(), true);
+  assert.deepEqual(await completed.locator("thead").evaluateAll(heads => heads.map(head => head.hidden)), [false, false, false]);
   assert.equal(await group(1).locator(".table-group-heading th").evaluate(el => el.colSpan), 2);
   await page.setViewportSize({ width: 390, height: 844 });
   const mobile = await page.evaluate(() => {
-    const left = document.querySelector(".table-panel-working").getBoundingClientRect();
-    const right = document.querySelector(".table-panel-completed").getBoundingClientRect();
-    const scroll = document.querySelector(".table-panel-completed .table-scroll");
-    const term = scroll.querySelector(".table-row th");
-    const before = term.getBoundingClientRect().left;
-    scroll.scrollLeft = scroll.scrollWidth;
-    return { stacked: right.top >= left.bottom, width: document.documentElement.scrollWidth,
-      viewport: innerWidth, before, after: term.getBoundingClientRect().left,
-      wraps: [...scroll.querySelectorAll(".table-term-info")].every(el => el.scrollWidth <= el.clientWidth + 1) };
+    const cards = [...document.querySelectorAll(".table-cluster-panel")];
+    return { stacked: cards.every((card, i) => i === 0 || card.getBoundingClientRect().top >= cards[i - 1].getBoundingClientRect().bottom),
+      width: document.documentElement.scrollWidth, viewport: innerWidth,
+      noScrollbars: cards.every(card => {
+        const scroll = card.querySelector(".table-scroll");
+        return scroll.scrollHeight <= scroll.clientHeight + 1 && scroll.scrollWidth <= scroll.clientWidth + 1;
+      }),
+      wraps: [...document.querySelectorAll(".table-panel-completed .table-term-info")].every(el => el.scrollWidth <= el.clientWidth + 1) };
   });
   assert.equal(mobile.stacked, true);
   assert.ok(mobile.width <= mobile.viewport);
-  assert.ok(Math.abs(mobile.after - mobile.before) < 1);
+  assert.equal(mobile.noScrollbars, true);
   assert.equal(mobile.wraps, true);
 
   await page.setViewportSize(viewport);
@@ -179,13 +196,28 @@ export async function run(page, baseURL) {
   assert.equal(await row(working, "Borromean knot").count(), 0);
 
   await open(page, baseURL, "interpreting-a-text");
+  await page.locator("#table-show-info").uncheck();
   await page.click("#show-solution");
   await page.waitForFunction(() => CC.state.phase === "lens-selecting");
+  assert.equal(await working.isHidden(), true);
+  const lensCards = completed.locator(".table-cluster-panel");
+  assert.equal(await lensCards.count(), 3);
+  await lensCards.nth(0).locator(".table-term").first().focus();
+  await page.keyboard.press("ArrowRight");
+  assert.equal(await lensCards.nth(1).locator(".table-term").first().evaluate(el => el === document.activeElement), true,
+    "horizontal arrows move between cluster panels during lenses");
+  await page.keyboard.press("ArrowLeft");
+  assert.equal(await lensCards.nth(0).locator(".table-term").first().evaluate(el => el === document.activeElement), true);
   await row(group(0), "close reading").locator(".table-term").click();
   assert.deepEqual(await row(completed, "close reading").locator(".table-term").evaluateAll(buttons => buttons.map(el => el.getAttribute("aria-pressed"))), ["true", "true"]);
+  assert.equal(await row(group(0), "close reading").locator(".table-term").evaluate(el => el === document.activeElement), true);
   await row(group(0), "diction").locator(".table-term").click();
   await page.click("#lens-check");
   assert.match(await row(group(0), "diction").getAttribute("class"), /lens-correct/);
+  const sharedFeedback = await row(completed, "close reading").evaluateAll(rows => rows.map(row =>
+    [...row.classList].filter(name => name.startsWith("lens-")).sort().join(" ")));
+  assert.ok(sharedFeedback[0].length > 0 && sharedFeedback.every(value => value === sharedFeedback[0]),
+    "lens feedback stays synchronized across shared bridge panels");
 
   await open(page, baseURL, "when-systems-stop-seeing-people");
   await page.click("#show-solution");
@@ -201,5 +233,29 @@ export async function run(page, baseURL) {
   await page.locator("#lens-quiz-options button").filter({ hasText: "Howard Hawks" }).click();
   await page.click("#lens-check");
   assert.match(await row(completed, "Ball of Fire").getAttribute("class"), /lens-quiz-incorrect/);
+
+  // More clusters than fit across the board wrap into additional rows;
+  // all their terms remain exposed without a per-cluster scroll viewport.
+  const fixture = { id: "table-flow-six-clusters", title: "Six flowing clusters", category: "Science", bridges: [],
+    clusters: ["teal", "blue", "olive", "brown", "cyan", "orange"].map((color, ci) => ({
+      name: `Cluster ${ci + 1}`, color, fact: `Cluster ${ci + 1} is complete.`,
+      terms: [`${ci} first seed`, `${ci} second seed`, `${ci} concept`],
+      seeds: [`${ci} first seed`, `${ci} second seed`]
+    })) };
+  await page.evaluate(candidate => CC.openPuzzle(CC.registerPuzzle(candidate)), fixture);
+  await page.waitForFunction(() => CC.state.puzzle.id === "table-flow-six-clusters");
+  await page.click("#show-solution");
+  assert.equal(await working.isHidden(), true);
+  assert.equal(await completed.locator(".table-cluster-panel").count(), 6);
+  assert.equal(await completed.locator(".table-term").count(), 18);
+  const wrapped = await completed.locator(".table-cluster-panel").evaluateAll(cards => {
+    const first = cards[0].getBoundingClientRect();
+    return cards.some(card => card.getBoundingClientRect().left > first.left) &&
+      cards.some(card => card.getBoundingClientRect().top >= first.bottom) && cards.every(card => {
+        const scroll = card.querySelector(".table-scroll");
+        return scroll.scrollHeight <= scroll.clientHeight + 1 && getComputedStyle(scroll).overflowY === "visible";
+      });
+  });
+  assert.equal(wrapped, true);
   assert.deepEqual(errors, []);
 }

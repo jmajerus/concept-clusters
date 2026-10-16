@@ -327,9 +327,10 @@ their 44 px width, and descriptions wrap beside the sticky term column on
 mobile. Group and section headings update their spans as visibility changes.
 
 Separate completed clusters is an optional display preference stored in
-`ccTableSeparateCompleted`. It uses a working membership table and a compact
-completed term list, with distinct heading and row IDs, and stacks them below 800 px of available
-board width. The split view gives small diagram canvases a wider display frame
+`ccTableSeparateCompleted`. It uses a working membership table and a completed
+area containing one compact table panel per cluster, with distinct heading and
+row IDs. Below 800 px of available board width, that area stacks beneath the
+working table. The split view gives small diagram canvases a wider display frame
 without changing their authored canvas dimensions. Working-table heading sorts
 remain available; the separate completed panel already groups its clusters.
 Completion follows the game's ordinary-member rule. Each completed cluster's
@@ -341,12 +342,17 @@ only for confirmed memberships. A finished bridge leaves the working table
 once at least one completed group can display it. Every repeated row uses the
 same underlying node for canonical annotations and lens selections. The completed
 list creates no membership columns or inputs; unfinished bridge placements and
-remembered rejection markers remain in the working table. Its group titles
+remembered rejection markers remain in the working table. Panel group titles
 provide cluster details and context menus. The column heading row is shown only
 when term info is enabled, and descriptions fit the completed panel's available
-width. Keyboard focus follows a migrating checkbox to its completed term button;
-vertical arrows stay within a panel, and horizontal arrows cross between the
-working table's last membership column and the completed term buttons.
+width. A responsive grid flows cluster panels across the available width and
+wraps them into additional rows. Completed panels have natural height and
+visible overflow, so all terms remain exposed without internal scrollbars.
+Once `made === need`, the working table hides and completed panels occupy the
+full board width, including during all lens phases. Keyboard focus follows a
+migrating checkbox to its completed term button. Vertical arrows stay within
+each cluster; horizontal arrows move to the adjacent cluster panel, or from
+the first cluster back into the working table while classification continues.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer
