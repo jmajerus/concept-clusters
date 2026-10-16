@@ -226,4 +226,11 @@ function composableFilters() {
     fullText: true
   });
   assert.deepEqual(leak.matches, []);
+  for (const query of ["draft", "fresh-draft-bookkeeping"]) {
+    const bookkeeping = searchAuthoringPuzzles(mergeAuthoringSearchPuzzles({
+      drafts: [{ draftId: "fresh-draft-bookkeeping", document: doc("bookkept") }],
+      categoryRegistry: CATEGORIES
+    }), CATEGORIES, { query, fullText: true });
+    assert.deepEqual(bookkeeping.matches, [], `"${query}" must not match _searchSource or _draftId`);
+  }
 }

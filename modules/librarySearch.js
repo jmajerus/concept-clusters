@@ -191,7 +191,9 @@ function collectStringFields(value, path, out) {
   }
   if (value && typeof value === "object") {
     for (const [key, nested] of Object.entries(value)) {
-      if (FULLTEXT_SKIP_KEYS.has(key)) continue;
+      // A leading underscore marks runtime bookkeeping (_draftId,
+      // _searchSource, _searchTerms, ...), never authored prose.
+      if (FULLTEXT_SKIP_KEYS.has(key) || key.startsWith("_")) continue;
       collectStringFields(nested, joinPath(path, key), out);
     }
   }

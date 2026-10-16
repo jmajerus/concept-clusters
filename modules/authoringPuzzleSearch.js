@@ -88,12 +88,12 @@ export function mergeAuthoringSearchPuzzles({
     });
     if (!item) continue;
     publishedById.set(item.id, row);
-    setHidden(item, "_corpus", {
+    item._corpus = {
       published: !row.withdrawnAt,
       withdrawn: Boolean(row.withdrawnAt),
       hasWorkingCopy: false,
       updatedAt: row.updatedAt || ""
-    });
+    };
     byId.set(item.id, item);
   }
   for (const draft of drafts) {
@@ -107,17 +107,17 @@ export function mergeAuthoringSearchPuzzles({
     });
     if (!item) continue;
     const published = byId.get(item.id)?._corpus;
-    setHidden(item, "_corpus", {
+    item._corpus = {
       published: published?.published === true,
       withdrawn: published?.withdrawn === true,
       hasWorkingCopy: true,
       updatedAt: draft?.updatedAt || published?.updatedAt || ""
-    });
-    setHidden(item, "_changeBasis", {
+    };
+    item._changeBasis = {
       publishedRow: publishedById.get(item.id) || null,
       draft,
       categoryRegistry
-    });
+    };
     byId.set(item.id, item);
   }
   return [...byId.values()];
@@ -138,7 +138,7 @@ function corpusStatusOf(puzzle) {
     );
   }
   status.unpublishedChangeDomains = domains;
-  setHidden(puzzle, "_corpus", status);
+  puzzle._corpus = status;
   return status;
 }
 
@@ -152,11 +152,6 @@ export function corpusStatusSummary(puzzle, { includeChangeDomains = false } = {
       ? { unpublishedChangeDomains: [...status.unpublishedChangeDomains] }
       : {})
   };
-}
-
-// Corpus bookkeeping rides on the search item without being searchable prose.
-function setHidden(puzzle, key, value) {
-  Object.defineProperty(puzzle, key, { value, writable: true, configurable: true, enumerable: false });
 }
 
 function containsQuery(value, query) {
