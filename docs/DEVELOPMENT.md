@@ -310,7 +310,7 @@ updates even when the row sequence stays the same. Alphabetical and Other
 terms lists stay flat.
 
 Table feedback uses `connectToCluster`'s outcome from the shared rules engine
-to remember only genuine wrong choices. Every blocked unchecked cell uses the
+to remember only incorrect choices. Every blocked unchecked cell uses the
 lens error palette for 650 ms; an existing check gets a cluster-color outline.
 Renderer disposal clears its timers. Optional `tableFeedback` session metadata
 stores the per-puzzle remember preference and rejected term/cluster pairs.

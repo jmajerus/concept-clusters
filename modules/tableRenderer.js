@@ -70,7 +70,7 @@ export function createTableRenderer({
     });
     const rememberLabel = document.createElement("label");
     rememberLabel.className = "table-option";
-    rememberLabel.title = "Keep gray × markers for wrong choices in this puzzle. Start over clears them.";
+    rememberLabel.title = "Keep gray × markers for incorrect choices in this puzzle. Start over clears them.";
     const remember = document.createElement("input");
     remember.id = "table-remember-wrong";
     remember.type = "checkbox";
@@ -79,7 +79,7 @@ export function createTableRenderer({
       paint();
       state.onProgressChanged?.();
     });
-    rememberLabel.append(remember, "Remember wrong choices");
+    rememberLabel.append(remember, "Remember incorrect choices");
     const infoLabel = document.createElement("label");
     infoLabel.className = "table-option";
     const showInfo = document.createElement("input");

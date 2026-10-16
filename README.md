@@ -12,7 +12,7 @@ Click a cluster heading to bring its confirmed memberships to the top, with a co
 
 Within each cluster view, ordinary terms remain alphabetical. Bridges appear directly beneath their revealed ideal endpoint with an indented ↳ glyph; bridges without a revealed endpoint appear alphabetically in a **Shared connections** section at the bottom. A bridge moves beneath its endpoint only after that endpoint is placed, preserving the puzzle's reveal timing.
 
-An unchecked cell that cannot accept a connection briefly turns red, including cells in completed rows. Clicking an existing check briefly highlights its cluster color. **Remember wrong choices** optionally keeps a gray × for genuine wrong choices, saved for that puzzle across reloads and mode switches. Repeated bridge rows share these notes. Turning the option off hides existing notes and stops recording new ones; **Start over** clears them.
+An unchecked cell that cannot accept a connection briefly turns red, including cells in completed rows. Clicking an existing check briefly highlights its cluster color. **Remember incorrect choices** optionally keeps a gray × for incorrect choices, saved for that puzzle across reloads and mode switches. Repeated bridge rows share these notes. Turning the option off hides existing notes and stops recording new ones; **Start over** clears them.
 
 **Show term info** adds a column of wrapped descriptions to the right of the cluster columns, leaving cells blank where no description is provided. This display preference is remembered across puzzles and visits. Bridge explanations and ideal-endpoint annotations retain their usual reveal timing.
 
@@ -46,7 +46,7 @@ are revealed diagnostically, followed by a short explanation. Lenses are
 optional: they belong only where another classification adds genuine
 understanding.
 
-**Feedback is diagnostic, never punitive.** There is no mistake counter and no fail state. Wrong connections get a nudge that points back at the concept ("think about what those terms share"). Solved clusters and bridges each reveal a teaching fact, so the moment of success doubles as the teaching moment.
+**Feedback is diagnostic, never punitive.** There is no mistake counter and no fail state. Incorrect connections get a nudge that points back at the concept ("think about what those terms share"). Solved clusters and bridges each reveal a teaching fact, so the moment of success doubles as the teaching moment.
 
 **Physics assists in arranging the results in a clear and readable way.** The three diagram modes run a live force simulation to keep nodes and clusters legible as connections are made, rather than letting them pile up or overlap — Graph and Star modes each settle the whole node-link board from a cold start (Graph pulling a newly-connected term toward whichever term it was linked to, Star pulling it toward its cluster's label instead), while Circle mode only has to arrange the clusters and bridges, since docked terms stay fixed relative to their own circle. One visible consequence in Graph and Star modes: as bridges land, previously separate clusters visibly drift together into place. Table mode keeps its rows and columns fixed and does not run a simulation.
 

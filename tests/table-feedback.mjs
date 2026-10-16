@@ -47,7 +47,7 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=table&moves=`);
   await page.waitForFunction(() => window.CC?.state);
   if (await page.evaluate(() => CC.state.learningGated)) await page.locator("#learning-introduction #skip").click();
-  const remember = page.locator("#table-remember-wrong");
+  const remember = page.getByRole("checkbox", { name: "Remember incorrect choices", exact: true });
   assert.equal(await remember.isChecked(), false);
   await input(page, "carbon dioxide", 1).click();
   assert.match(await cell(page, "carbon dioxide", 1).getAttribute("class"), /table-cell-incorrect/);
