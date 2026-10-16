@@ -21,6 +21,8 @@ import {
   documentForEditor,
   redactMcpExcludedDocumentFields
 } from "./authoredPuzzleDocument.js";
+import { unpublishedChangeDomains } from "./draftReviewDiff.js";
+import { AGENT_CORPUS_STATUSES, updatedWithin } from "./puzzleCorpusStatus.js";
 
 const MATCH_KIND = Object.freeze({
   [PUZZLE_MATCH.TITLE]: "title",
@@ -78,12 +80,21 @@ export function mergeAuthoringSearchPuzzles({
     const item = puzzleForAuthoringSearch(puzzle, { searchSource: "git", categoryRegistry });
     if (item) byId.set(item.id, item);
   }
+  const publishedById = new Map();
   for (const row of publishedRows) {
     const item = puzzleForAuthoringSearch(row?.document, {
       searchSource: "published",
       categoryRegistry
     });
-    if (item) byId.set(item.id, item);
+    if (!item) continue;
+    publishedById.set(item.id, row);
+    item._corpus = {
+      published: !row.withdrawnAt,
+      withdrawn: Boolean(row.withdrawnAt),
+      hasWorkingCopy: false,
+      updatedAt: row.updatedAt || ""
+    };
+    byId.set(item.id, item);
   }
   for (const draft of drafts) {
     const document = draft?.document;
@@ -94,18 +105,96 @@ export function mergeAuthoringSearchPuzzles({
       id: puzzleId,
       categoryRegistry
     });
-    if (item) byId.set(item.id, item);
+    if (!item) continue;
+    const published = byId.get(item.id)?._corpus;
+    item._corpus = {
+      published: published?.published === true,
+      withdrawn: published?.withdrawn === true,
+      hasWorkingCopy: true,
+      updatedAt: draft?.updatedAt || published?.updatedAt || ""
+    };
+    item._changeBasis = {
+      publishedRow: publishedById.get(item.id) || null,
+      draft,
+      categoryRegistry
+    };
+    byId.set(item.id, item);
   }
   return [...byId.values()];
+}
+
+// Change domains cost a full partition diff, so they are computed only when a
+// status filter needs them, the same way the admin list computes its column.
+function corpusStatusOf(puzzle) {
+  const status = puzzle._corpus || {};
+  if (status.unpublishedChangeDomains) return status;
+  const { publishedRow, draft, categoryRegistry } = puzzle._changeBasis || {};
+  let domains = [];
+  if (publishedRow?.document && !publishedRow.withdrawnAt && draft?.document) {
+    domains = unpublishedChangeDomains(
+      documentForEditor(publishedRow.document, { categoryRegistry }),
+      documentForEditor(draft.document, { categoryRegistry }),
+      { publishedLayout: publishedRow.layout || null, draftLayout: draft.layout || null }
+    );
+  }
+  status.unpublishedChangeDomains = domains;
+  puzzle._corpus = status;
+  return status;
+}
+
+/** Corpus fields a list or search result reports beside the puzzle's identity. */
+export function corpusStatusSummary(puzzle, { includeChangeDomains = false } = {}) {
+  const status = includeChangeDomains ? corpusStatusOf(puzzle) : puzzle._corpus || {};
+  return {
+    ...(status.updatedAt ? { updatedAt: status.updatedAt } : {}),
+    ...(puzzle._draftId ? { draft_id: puzzle._draftId } : {}),
+    ...(includeChangeDomains && status.unpublishedChangeDomains?.length
+      ? { unpublishedChangeDomains: [...status.unpublishedChangeDomains] }
+      : {})
+  };
 }
 
 function containsQuery(value, query) {
   return typeof value === "string" && value.toLowerCase().includes(query);
 }
 
+function normalizedId(value) {
+  return String(value).trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+function puzzleHasSubcategory(puzzle, subcategory, category, categoryRegistry) {
+  const wanted = normalizedId(subcategory);
+  const categories = category
+    ? [category]
+    : categoriesForPuzzle(puzzle, categoryRegistry || undefined);
+  return categories.some(name => {
+    const id = subcategoryIdForPuzzle(puzzle, name, categoryRegistry || undefined);
+    return id && normalizedId(id) === wanted;
+  });
+}
+
+/**
+ * Narrow a merged authoring corpus. Every criterion is optional and they
+ * combine with AND. status and updatedWithin follow the admin puzzle list
+ * (see puzzleCorpusStatus.js); a puzzle's date is its working copy's when it
+ * has one, otherwise its published row's.
+ */
 export function filterAuthoringPuzzles(
   puzzles,
-  { category = null, catalogueId = null, catalogues = [], categoryRegistry = null } = {}
+  {
+    category = null,
+    catalogueId = null,
+    catalogues = [],
+    categoryRegistry = null,
+    subcategory = null,
+    tag = null,
+    puzzleKind = null,
+    hasLenses = null,
+    hasLearningIntroduction = null,
+    status = null,
+    updatedWithin: window = null,
+    now = new Date()
+  } = {}
 ) {
   let members = puzzles;
   if (catalogueId && catalogueId !== "all") {
@@ -119,7 +208,47 @@ export function filterAuthoringPuzzles(
       puzzleBelongsToCategory(puzzle, category, categoryRegistry || undefined)
     );
   }
+  if (subcategory) {
+    members = members.filter(puzzle =>
+      puzzleHasSubcategory(puzzle, subcategory, category, categoryRegistry)
+    );
+  }
+  if (tag) {
+    const wanted = tag.trim().toLowerCase();
+    members = members.filter(puzzle =>
+      (puzzle.tags || []).some(value => String(value).trim().toLowerCase() === wanted)
+    );
+  }
+  if (puzzleKind) {
+    members = members.filter(puzzle => (puzzle.puzzleKind || "topic-based") === puzzleKind);
+  }
+  if (typeof hasLenses === "boolean") {
+    members = members.filter(puzzle => Boolean(puzzle.lenses?.length) === hasLenses);
+  }
+  if (typeof hasLearningIntroduction === "boolean") {
+    members = members.filter(puzzle =>
+      Boolean(puzzle.learningIntroduction) === hasLearningIntroduction
+    );
+  }
+  if (status) {
+    const matches = AGENT_CORPUS_STATUSES[status];
+    if (!matches) throw new Error(`Unknown status: ${status}`);
+    members = members.filter(puzzle => matches(
+      status === "unpublished_changes" ? corpusStatusOf(puzzle) : puzzle._corpus || {}
+    ));
+  }
+  if (window) {
+    members = members.filter(puzzle => updatedWithin(puzzle._corpus?.updatedAt, window, now));
+  }
   return members;
+}
+
+/** Newest first, as the admin list's Recent arrangement orders working copies. */
+export function sortByRecent(puzzles) {
+  return [...puzzles].sort((left, right) =>
+    String(right._corpus?.updatedAt || "").localeCompare(String(left._corpus?.updatedAt || ""))
+    || String(left.title || "").localeCompare(String(right.title || ""))
+  );
 }
 
 function matchingBoardTerm(puzzle, query) {
@@ -197,7 +326,8 @@ export function searchAuthoringPuzzles(
     catalogueId = null,
     catalogues = [],
     fullText = false,
-    limit = 10
+    limit = 10,
+    ...filters
   } = {}
 ) {
   const trimmed = typeof query === "string" ? query.trim() : "";
@@ -212,6 +342,7 @@ export function searchAuthoringPuzzles(
     categoryRegistry: categories
   };
   const members = filterAuthoringPuzzles(puzzles, {
+    ...filters,
     category,
     catalogueId,
     catalogues,
@@ -246,7 +377,9 @@ export function searchAuthoringPuzzles(
       ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
       match,
       ...(puzzle._searchSource ? { source: puzzle._searchSource } : {}),
-      ...(puzzle._draftId ? { draft_id: puzzle._draftId } : {}),
+      ...corpusStatusSummary(puzzle, {
+        includeChangeDomains: filters.status === "unpublished_changes"
+      }),
       ...(detail ? { detail } : {})
     }))
   };

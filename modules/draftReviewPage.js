@@ -29,6 +29,13 @@ import { diffPublishedDraft, documentWithLesson, independentReviewDocument, less
 import { revisedLessonLabel, revisedMarkChangesLessonLine, samePlayerFacingProjection } from "./playerFacingRevision.js";
 import { draftBoardQuery, draftPlayQuery, layoutQuery, playQuery } from "./stagingPlayLinks.js";
 import {
+  RECENCY_ORDER,
+  hasUnpublishedChanges,
+  isPublishedLive,
+  isWorkingCopyStatus,
+  recencyKey
+} from "./puzzleCorpusStatus.js";
+import {
   CATEGORIES,
   categoryIdFor,
   categoryMetadataFor,
@@ -940,29 +947,11 @@ function renderNewPuzzleForm(categoryRegistry = CATEGORIES) {
   </form>`;
 }
 
-function isWorkingCopyStatus(item) {
-  return item.hasWorkingCopy === true && !isPublishedLive(item);
-}
-
-// Show-scope predicates. A published row carries the freeze flags from
-// contentFreezePlan.js: gitSeedCue means the published snapshot is exactly
-// what the last Freeze shipped (no freeze badge); otherwise it is uncued,
-// cued, or new to git -- all "modified since the last freeze". An unpublished
-// working copy is modified too.
-function isPublishedLive(item) {
-  return (item.published === true || item.d1Published === true)
-    && item.withdrawn !== true && item.d1Withdrawn !== true;
-}
-
-function hasUnpublishedChanges(item) {
-  return isPublishedLive(item) && (
-    item.unpublishedChangeDomains?.length > 0
-    || item.unpublishedChanges === true
-    || Number(item.publishedDiff?.total) > 0
-    || item.provenanceDiffersFromPublished === true
-    || item.layoutDiffersFromPublished === true
-  );
-}
+// Show-scope predicates live in puzzleCorpusStatus.js. A published row
+// carries the freeze flags from contentFreezePlan.js: gitSeedCue means the
+// published snapshot is exactly what the last Freeze shipped (no freeze
+// badge); otherwise it is uncued, cued, or new to git -- all "modified since
+// the last freeze". An unpublished working copy is modified too.
 
 const UNPUBLISHED_DOMAIN_LABELS = {
   content: "Content",
@@ -1092,20 +1081,6 @@ function normalizeCorpusItem(item, categoryRegistry = CATEGORIES) {
   };
 }
 
-function recencyKey(updatedAt, now = new Date()) {
-  const then = Date.parse(updatedAt);
-  if (!Number.isFinite(then)) return "undated";
-  const startOfToday = new Date(now);
-  startOfToday.setHours(0, 0, 0, 0);
-  if (then >= startOfToday.getTime()) return "today";
-  const weekAgo = startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000;
-  if (then >= weekAgo) return "week";
-  const monthAgo = startOfToday.getTime() - 29 * 24 * 60 * 60 * 1000;
-  if (then >= monthAgo) return "month";
-  return "older";
-}
-
-const RECENCY_ORDER = ["today", "week", "month", "older", "undated"];
 const RECENCY_LABELS = {
   today: "Today",
   week: "Past week",

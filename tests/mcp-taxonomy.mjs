@@ -263,7 +263,14 @@ export async function run() {
   const { request, call, close } = await connect(server);
 
   try {
-    const puzzleList = await call("list_puzzles");
+    const unfiltered = await call("list_puzzles");
+    assert.equal(unfiltered.total, 2, "An unfiltered list reports the corpus size");
+    assert.deepEqual(unfiltered.puzzles, [], "An unfiltered list does not dump the corpus");
+    const firstPage = await call("list_puzzles", { limit: 1 });
+    assert.equal(firstPage.total, 2);
+    assert.equal(firstPage.puzzles.length, 1);
+    assert.equal(firstPage.next_offset, 1);
+    const puzzleList = await call("list_puzzles", { limit: 200 });
     assert.deepEqual(
       new Set(puzzleList.puzzles.map(puzzle => puzzle.id)),
       new Set([gitPuzzleId, "d1-only-board"]),
