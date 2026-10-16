@@ -308,10 +308,16 @@ export function createGameEngine({
       candidate.gs[0] === clusterIndex && isDone(candidate)
     );
     if (!seed) return;
+    const madeBefore = state.made;
+    const incorrectBefore = state.incorrectMoveCount;
     state.selected = null;
     handleTap(node);
     handleTap(seed);
     showTermInfo(node);
+    // Views can show feedback for an actual rejected choice without
+    // reimplementing validation or treating a read-only cell as a mistake.
+    if (state.incorrectMoveCount > incorrectBefore) return "incorrect";
+    if (state.made > madeBefore) return "connected";
   }
 
   function checkClusterCompletion() {

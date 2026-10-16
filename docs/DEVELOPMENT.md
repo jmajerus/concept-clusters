@@ -309,6 +309,16 @@ memberships; its render signature includes endpoint identity so indentation
 updates even when the row sequence stays the same. Alphabetical and Other
 terms lists stay flat.
 
+Table rejection feedback uses `connectToCluster`'s outcome from the shared
+rules engine. A rejected cell uses the lens error palette for 650 ms;
+renderer disposal clears its timers. Optional `tableFeedback` session metadata
+stores the per-puzzle remember preference and rejected term/cluster pairs.
+Normalization ignores invalid markers without dropping moves or lens progress,
+and old sessions default to no notes. Markers stay unchecked, carry accessible
+descriptions, and are shared across repeated rows. Turning remembering off
+hides prior notes and stops recording; Start over clears them. Share URLs
+continue to contain only the puzzle's normal correct-move history.
+
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer
 reports the start and end of a player drag (`onPlayerDragStart` /

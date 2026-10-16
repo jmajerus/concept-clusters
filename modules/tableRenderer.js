@@ -17,6 +17,25 @@ export function createTableRenderer({
     svg.selectAll("*").remove();
     container.replaceChildren();
     state.selected = null;
+    state.tableFeedback ||= { rememberWrongChoices: false, wrongChoices: [] };
+    const incorrectPulses = new Map();
+    const choiceKey = (node, ci) => JSON.stringify([node.word, ci]);
+
+    function showIncorrectChoice(node, ci) {
+      const key = choiceKey(node, ci);
+      clearTimeout(incorrectPulses.get(key));
+      incorrectPulses.set(key, setTimeout(() => {
+        incorrectPulses.delete(key);
+        paint();
+      }, 650));
+      const feedback = state.tableFeedback;
+      if (feedback.rememberWrongChoices && !feedback.wrongChoices.some(choice =>
+        choice.term === node.word && choice.clusterIndex === ci
+      )) {
+        feedback.wrongChoices.push({ term: node.word, clusterIndex: ci });
+        state.onProgressChanged?.();
+      }
+    }
 
     const help = document.createElement("p");
     help.className = "table-help";
@@ -28,7 +47,7 @@ export function createTableRenderer({
     const toolbar = document.createElement("div");
     toolbar.className = "table-toolbar";
     toolbar.setAttribute("role", "group");
-    toolbar.setAttribute("aria-label", "Table row order");
+    toolbar.setAttribute("aria-label", "Table options");
     const alphabetical = document.createElement("button");
     alphabetical.id = "table-alphabetical";
     alphabetical.type = "button";
@@ -41,7 +60,19 @@ export function createTableRenderer({
     grouped.addEventListener("click", () => {
       if (state.made === state.need) setOrder({ kind: "grouped" });
     });
-    toolbar.append(alphabetical, grouped);
+    const rememberLabel = document.createElement("label");
+    rememberLabel.className = "table-remember";
+    rememberLabel.title = "Keep gray × markers for wrong choices in this puzzle. Start over clears them.";
+    const remember = document.createElement("input");
+    remember.id = "table-remember-wrong";
+    remember.type = "checkbox";
+    remember.addEventListener("change", () => {
+      state.tableFeedback.rememberWrongChoices = remember.checked;
+      paint();
+      state.onProgressChanged?.();
+    });
+    rememberLabel.append(remember, "Remember wrong choices");
+    toolbar.append(alphabetical, grouped, rememberLabel);
     const orderStatus = document.createElement("p");
     orderStatus.id = "table-order-status";
     orderStatus.className = "table-help";
@@ -158,12 +189,22 @@ export function createTableRenderer({
         input.type = "checkbox";
         input.dataset.cluster = String(ci);
         input.setAttribute("aria-labelledby", `${termCell.id} table-cluster-${ci}`);
+        const wrongMark = document.createElement("span");
+        wrongMark.className = "table-wrong-mark";
+        wrongMark.textContent = "×";
+        wrongMark.setAttribute("aria-hidden", "true");
+        wrongMark.hidden = true;
+        const wrongNote = document.createElement("span");
+        wrongNote.id = `${termCell.id}-wrong-${ci}`;
+        wrongNote.className = "visually-hidden";
+        wrongNote.textContent = "Previously tried: this term does not belong to this cluster.";
+        wrongNote.hidden = true;
         // Checked cells stay focusable for inspection and arrow navigation.
         // Their value, like a placed node in a diagram, cannot be undone by
         // activating it again; Reset cluster remains in the heading menu.
         input.addEventListener("change", () => {
           input.checked = node.connected.includes(ci);
-          connectToCluster(node, ci);
+          if (connectToCluster(node, ci) === "incorrect") showIncorrectChoice(node, ci);
           showDetails(node);
           paint();
         });
@@ -177,11 +218,11 @@ export function createTableRenderer({
           const nextColumn = Math.max(0, Math.min(puzzle.clusters.length - 1, ci + move[1]));
           rows[nextRow].cells[nextColumn].input.focus();
         });
-        label.append(input);
+        label.append(input, wrongMark, wrongNote);
         cell.append(label);
         cell.addEventListener("mouseenter", () => highlight(rows.indexOf(entry), ci));
         input.addEventListener("focus", () => highlight(rows.indexOf(entry), ci));
-        return { cell, input };
+        return { cell, input, wrongMark, wrongNote };
       });
       row.addEventListener("mouseenter", () => showDetails(node));
       row.addEventListener("focusin", () => { focusTermInfo(node); showDetails(node); });
@@ -352,6 +393,8 @@ export function createTableRenderer({
       if (getState() !== state) return;
       renderRows();
       updateOrderControls();
+      remember.checked = state.tableFeedback.rememberWrongChoices;
+      const remembered = new Set(state.tableFeedback.wrongChoices.map(choice => JSON.stringify([choice.term, choice.clusterIndex])));
       rows.forEach(({ node, row, term, status, cells, indent, parentWord }) => {
         const connected = node.connected.length > 0;
         const bridge = isBridge(node) && connected;
@@ -373,13 +416,24 @@ export function createTableRenderer({
         status.textContent = badge
           ? `Lens ${badge.text}${state.phase === "complete" ? badge.correct ? " ✓" : badge.unanswered ? " · unanswered" : " · review" : ""}${shared ? " · shared" : ""}`
           : seed ? "Seed" : bridge ? shared ? "Shared bridge" : isDone(node) ? "Bridge" : `${node.connected.length}/${node.gs.length} clusters` : "";
-        cells.forEach(({ cell, input }, ci) => {
+        cells.forEach(({ cell, input, wrongMark, wrongNote }, ci) => {
           input.checked = node.connected.includes(ci);
           const locked = input.checked || isDone(node) || state.phase !== "assembling";
           input.setAttribute("aria-readonly", String(locked));
           cell.classList.toggle("table-connected", input.checked);
           cell.classList.toggle("table-locked", locked);
-          input.title = input.checked ? seed ? "Starting clue" : "Connected" : locked ? "No connection" : "Connect to this cluster";
+          const key = choiceKey(node, ci);
+          const incorrect = incorrectPulses.has(key);
+          const marked = !input.checked && remember.checked && remembered.has(key);
+          cell.classList.toggle("table-cell-incorrect", incorrect);
+          cell.classList.toggle("table-tried-wrong", marked);
+          wrongMark.hidden = !marked || incorrect;
+          wrongNote.hidden = !marked;
+          if (marked) input.setAttribute("aria-describedby", wrongNote.id);
+          else input.removeAttribute("aria-describedby");
+          input.title = input.checked ? seed ? "Starting clue" : "Connected"
+            : marked ? "Previously tried: this term does not belong to this cluster"
+              : locked ? "No connection" : "Connect to this cluster";
         });
       });
       if (detailNode) details.textContent = annotation(detailNode);
@@ -406,7 +460,12 @@ export function createTableRenderer({
     state.detanglePromise = state.prettyPrintPromise = null;
     state.repairPlayerLayout = null;
     state.layoutAdapter = { mode: "table" };
-    state.stopRenderer = () => { resizeObserver.disconnect(); container.replaceChildren(); };
+    state.stopRenderer = () => {
+      resizeObserver.disconnect();
+      incorrectPulses.forEach(timer => clearTimeout(timer));
+      incorrectPulses.clear();
+      container.replaceChildren();
+    };
     paint();
   }
 

@@ -602,7 +602,8 @@ function persistPlayerSession({ captureLayout = false } = {}) {
     layouts,
     completed: state.phase === "complete",
     lens: captureLensSession(),
-    effort: state.layoutEffort || {}
+    effort: state.layoutEffort || {},
+    tableFeedback: state.tableFeedback
   });
 }
 
@@ -2176,7 +2177,8 @@ function resetCluster(ci) {
     filledClusterCount: state.filledClusterCount,
     resetClusterCount: (state.resetClusterCount || 0) + 1,
     summaryBeforeCompleteCount: state.summaryBeforeCompleteCount,
-    persistedMode: state.persistedMode
+    persistedMode: state.persistedMode,
+    tableFeedback: state.tableFeedback
   };
   clearPlayerSession(localStorage, sessionStoragePuzzle());
   restartBoard();
@@ -2587,6 +2589,7 @@ function applyLoadedPuzzle(puzzle, index, {
     layoutAuthoring: layoutAuthoringMode,
     // Deliberate post-solve drags per mode (playerLayoutEffort.js).
     layoutEffort: savedSession?.effort || {},
+    tableFeedback: savedSession?.tableFeedback || { rememberWrongChoices: false, wrongChoices: [] },
     // &layoutBudget=extended: the offline layout pass's larger search, which
     // can take most of a minute. Only the D1 authoring player honours it, so
     // a shared public link cannot make a player's Show Solution run it.

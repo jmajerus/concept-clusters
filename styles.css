@@ -434,6 +434,7 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-items: center;
   margin: 10px 0 4px;
 }
 .table-toolbar button[aria-pressed="true"] {
@@ -441,6 +442,16 @@ button:disabled {
   color: var(--panel);
 }
 .table-toolbar button:disabled { opacity: 0.5; cursor: default; }
+.table-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  cursor: pointer;
+}
+.table-remember input { width: 16px; height: 16px; margin: 0; }
 #table-order-status { max-width: 60ch; }
 .table-scroll {
   width: max-content;
@@ -584,6 +595,7 @@ button:disabled {
 }
 .table-bridge-indent[hidden] { display: none; }
 .table-check {
+  position: relative;
   display: grid;
   place-items: center;
   min-height: 44px;
@@ -602,6 +614,20 @@ button:disabled {
 .table-row.table-active-row > th,
 .table-row > .table-active-column { background: var(--paper); }
 .membership-table .table-connected { background: var(--table-bg); }
+.membership-table .table-cell-incorrect {
+  background: var(--error-bg);
+  box-shadow: inset 0 0 0 1px var(--error-line);
+}
+.table-wrong-mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--ink-soft);
+  font: 700 18px/1 var(--font-body);
+  pointer-events: none;
+}
+.table-wrong-mark[hidden] { display: none; }
 .table-bridge .table-term { color: var(--bridge); }
 .table-bridge.table-partial .table-term { border-left: 3px dashed var(--bridge); }
 .table-bridge:not(.table-partial) .table-term { border-left: 3px solid var(--bridge); }
