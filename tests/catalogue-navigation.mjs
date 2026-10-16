@@ -24,4 +24,18 @@ export async function run() {
     routeSearch({ kind: "puzzle", puzzleId: "energy-flow" }, null),
     "?puzzle=energy-flow"
   );
+  for (const route of [
+    { kind: "library" },
+    { kind: "catalogue", catalogueId: "getting-started" },
+    { kind: "related", puzzleIds: ["energy-flow"] },
+    { kind: "puzzle", puzzleId: "energy-flow" }
+  ]) {
+    assert.equal(new URLSearchParams(routeSearch(route, "table")).get("mode"), "table",
+      `${route.kind} links must preserve the Table view`);
+    assert.equal(new URLSearchParams(routeSearch(route, "unknown")).has("mode"), false);
+  }
+  assert.equal(
+    routeSearch({ kind: "puzzle", puzzleId: "energy-flow" }, "table", { admin: true, play: true }),
+    "?puzzle=energy-flow&mode=table&admin&play"
+  );
 }

@@ -4,13 +4,14 @@
 // changes its Construct board into a clean player preview. `/` still lands
 // on last-played or a random showcase.
 
-export const PLAY_MODES = ["graph", "star", "sets"];
+const DIAGRAM_MODES = ["graph", "star", "sets"];
+export const PLAY_MODES = [...DIAGRAM_MODES, "table"];
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-function queryWithMode(params, mode) {
+function queryWithMode(params, mode, allowedModes = PLAY_MODES) {
   if (mode) {
-    if (!PLAY_MODES.includes(mode)) throw new Error(`Unknown play mode: ${mode}`);
+    if (!allowedModes.includes(mode)) throw new Error(`Unknown play mode: ${mode}`);
     params.set("mode", mode);
   }
   // URLSearchParams serializes a flag as `play=`. Keep author-facing links
@@ -28,7 +29,7 @@ export function layoutQuery(puzzleId, mode = null) {
   if (!SLUG_RE.test(puzzleId)) {
     throw new Error(`Invalid puzzle id: ${puzzleId}`);
   }
-  return queryWithMode(new URLSearchParams({ puzzle: puzzleId, author: "layout" }), mode);
+  return queryWithMode(new URLSearchParams({ puzzle: puzzleId, author: "layout" }), mode, DIAGRAM_MODES);
 }
 
 export function playQuery(puzzleId, mode = null) {
@@ -44,7 +45,7 @@ export function draftBoardQuery(draftId, mode = null, revision = null) {
   }
   const params = new URLSearchParams({ puzzle: draftId });
   if (Number.isInteger(revision) && revision > 0) params.set("revision", String(revision));
-  return queryWithMode(params, mode);
+  return queryWithMode(params, mode, DIAGRAM_MODES);
 }
 
 export function draftPlayQuery(draftId, mode = null, revision = null) {
@@ -62,6 +63,7 @@ export function stagingPlayItems(puzzleId) {
     ["Play", playQuery(puzzleId)],
     ["Graph", playQuery(puzzleId, "graph")],
     ["Star", playQuery(puzzleId, "star")],
-    ["Sets", playQuery(puzzleId, "sets")]
+    ["Sets", playQuery(puzzleId, "sets")],
+    ["Table", playQuery(puzzleId, "table")]
   ];
 }
