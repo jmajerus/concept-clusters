@@ -327,8 +327,8 @@ their 44 px width, and descriptions wrap beside the sticky term column on
 mobile. Group and section headings update their spans as visibility changes.
 
 Separate completed clusters is an optional display preference stored in
-`ccTableSeparateCompleted`. It uses two instances of the membership table,
-with distinct heading and row IDs, and stacks them below 800 px of available
+`ccTableSeparateCompleted`. It uses a working membership table and a compact
+completed term list, with distinct heading and row IDs, and stacks them below 800 px of available
 board width. The split view gives small diagram canvases a wider display frame
 without changing their authored canvas dimensions. Working-table heading sorts
 remain available; the separate completed panel already groups its clusters.
@@ -339,9 +339,14 @@ Later bridge placements update the groups without changing their positions.
 Unfinished bridges remain in the working table and appear in completed groups
 only for confirmed memberships. A finished bridge leaves the working table
 once at least one completed group can display it. Every repeated row uses the
-same underlying node for feedback, canonical annotations, and lens selections.
-Keyboard focus follows a migrating row; vertical arrows stay within a panel,
-and horizontal arrows cross to the other panel at the outside column boundary.
+same underlying node for canonical annotations and lens selections. The completed
+list creates no membership columns or inputs; unfinished bridge placements and
+remembered rejection markers remain in the working table. Its group titles
+provide cluster details and context menus. The column heading row is shown only
+when term info is enabled, and descriptions fit the completed panel's available
+width. Keyboard focus follows a migrating checkbox to its completed term button;
+vertical arrows stay within a panel, and horizontal arrows cross between the
+working table's last membership column and the completed term buttons.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer

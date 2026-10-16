@@ -121,6 +121,7 @@ export function createTableRenderer({
     panelLayout.className = "table-panels";
     const panels = [];
     function createPanel(key, title) {
+      const compact = key === "completed";
       const section = document.createElement("section");
       section.className = `table-panel table-panel-${key}`;
       const titleEl = document.createElement("h3");
@@ -131,19 +132,21 @@ export function createTableRenderer({
       const scroll = document.createElement("div");
       scroll.className = "table-scroll";
       scroll.setAttribute("role", "region");
-      scroll.setAttribute("aria-label", `${title}: term and cluster memberships`);
+      scroll.setAttribute("aria-label", compact ? "Completed cluster terms" : `${title}: term and cluster memberships`);
       scroll.tabIndex = 0;
       const sheet = document.createElement("div");
       sheet.className = "table-sheet";
-      sheet.style.setProperty("--table-members-width", `${puzzle.clusters.length * 44}px`);
+      sheet.style.setProperty("--table-members-width", `${compact ? 0 : puzzle.clusters.length * 44}px`);
       const table = document.createElement("table");
-      table.className = "membership-table";
+      table.className = `membership-table${compact ? " table-completed-list" : ""}`;
       const caption = table.createCaption();
       caption.className = "visually-hidden";
-      caption.textContent = `${puzzle.title}, ${title}: check a term's membership in each cluster. Use arrow keys to move between cells and Space to check.`;
+      caption.textContent = compact
+        ? `${puzzle.title}, completed cluster terms. Use Up and Down to move between terms and Enter or Space for details or lens selections.`
+        : `${puzzle.title}, ${title}: check a term's membership in each cluster. Use arrow keys to move between cells and Space to check.`;
       const colgroup = document.createElement("colgroup");
       colgroup.append(document.createElement("col"));
-      puzzle.clusters.forEach(() => colgroup.append(document.createElement("col")));
+      if (!compact) puzzle.clusters.forEach(() => colgroup.append(document.createElement("col")));
       const infoColumn = document.createElement("col");
       infoColumn.className = "table-info-column";
       infoColumn.hidden = !state.tableShowTermInfo;
@@ -154,22 +157,18 @@ export function createTableRenderer({
       corner.scope = "col";
       corner.textContent = "Term";
       head.append(corner);
-      const headings = puzzle.clusters.map((cluster, ci) => {
+      const headings = compact ? [] : puzzle.clusters.map((cluster, ci) => {
         const cell = document.createElement("th");
         cell.scope = "col";
-        cell.id = key === "working" ? `table-cluster-${ci}` : `table-completed-cluster-${ci}`;
+        cell.id = `table-cluster-${ci}`;
         cell.className = "table-cluster-heading";
         cell.style.setProperty("--table-color", `var(--${cluster.color})`);
         const label = document.createElement("button");
         label.type = "button";
         label.textContent = cluster.name;
-        label.title = key === "working" ? `Bring connected terms for ${cluster.name} to the top` : `View the completed ${cluster.name} group`;
+        label.title = `Bring connected terms for ${cluster.name} to the top`;
         label.addEventListener("click", () => {
-          if (key === "working") setOrder({ kind: "cluster", ci });
-          else {
-            const group = table.querySelector(`tbody[data-cluster="${ci}"]`);
-            if (group) scroll.scrollTop += group.getBoundingClientRect().top - scroll.getBoundingClientRect().top - table.tHead.getBoundingClientRect().height;
-          }
+          setOrder({ kind: "cluster", ci });
           showTermInfo({ word: cluster.name, info: normalizeInfo(cluster.info) });
         });
         cell.addEventListener("contextmenu", event => onClusterContextMenu(ci, event, label));
@@ -191,7 +190,7 @@ export function createTableRenderer({
       sheet.append(table);
       scroll.append(sheet);
       section.append(titleEl, scroll, empty);
-      const panel = { key, section, titleEl, scroll, sheet, table, corner, headings, infoColumn, infoHeading, empty, rows: [] };
+      const panel = { key, compact, section, titleEl, scroll, sheet, table, corner, headings, infoColumn, infoHeading, empty, rows: [] };
       panels.push(panel);
       return panel;
     }
@@ -257,9 +256,23 @@ export function createTableRenderer({
         showDetails(node);
         if (state.phase !== "assembling") handleTap(node);
       });
+      if (panel.compact) {
+        term.addEventListener("focus", () => highlight(rows.indexOf(entry)));
+        term.addEventListener("keydown", event => {
+          const ri = panel.rows.indexOf(entry);
+          if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+            event.preventDefault();
+            const nextRow = Math.max(0, Math.min(panel.rows.length - 1, ri + (event.key === "ArrowUp" ? -1 : 1)));
+            panel.rows[nextRow]?.term.focus();
+          } else if (event.key === "ArrowLeft" && workingPanel.rows.length) {
+            event.preventDefault();
+            workingPanel.rows[Math.min(ri, workingPanel.rows.length - 1)].cells.at(-1).input.focus();
+          }
+        });
+      }
       termCell.append(term);
       row.append(termCell);
-      const cells = puzzle.clusters.map((cluster, ci) => {
+      const cells = panel.compact ? [] : puzzle.clusters.map((cluster, ci) => {
         const cell = row.insertCell();
         cell.style.setProperty("--table-color", `var(--${cluster.color})`);
         cell.style.setProperty("--table-bg", `var(--${cluster.color}-bg)`);
@@ -300,17 +313,13 @@ export function createTableRenderer({
           if (!move) return;
           event.preventDefault();
           const ri = panel.rows.indexOf(entry);
-          let targetPanel = panel;
-          let nextRow = Math.max(0, Math.min(panel.rows.length - 1, ri + move[0]));
+          const nextRow = Math.max(0, Math.min(panel.rows.length - 1, ri + move[0]));
           const nextColumn = Math.max(0, Math.min(puzzle.clusters.length - 1, ci + move[1]));
-          const neighbor = move[1] === 1 && ci === puzzle.clusters.length - 1 && panel === workingPanel
-            ? completedPanel : move[1] === -1 && ci === 0 && panel === completedPanel ? workingPanel : null;
-          if (state.tableSeparateCompleted && neighbor?.rows.length) {
-            targetPanel = neighbor;
-            nextRow = Math.min(ri, neighbor.rows.length - 1);
+          if (state.tableSeparateCompleted && move[1] === 1 && ci === puzzle.clusters.length - 1 && completedPanel?.rows.length) {
+            completedPanel.rows[Math.min(ri, completedPanel.rows.length - 1)].term.focus();
+          } else {
+            panel.rows[nextRow]?.cells[nextColumn].input.focus();
           }
-          const targetColumn = targetPanel === panel ? nextColumn : move[1] === 1 ? 0 : puzzle.clusters.length - 1;
-          targetPanel.rows[nextRow]?.cells[targetColumn].input.focus();
         });
         label.append(input, wrongMark, wrongNote);
         cell.append(label);
@@ -324,7 +333,10 @@ export function createTableRenderer({
       // This is the ordinary authored description, available on hover
       // already. Revealed bridge facts and endpoints stay in annotations.
       infoCell.textContent = node.info?.text || "";
-      row.addEventListener("mouseenter", () => showDetails(node));
+      row.addEventListener("mouseenter", () => {
+        if (panel.compact) highlight(rows.indexOf(entry));
+        showDetails(node);
+      });
       row.addEventListener("focusin", () => { focusTermInfo(node); showDetails(node); });
       row.addEventListener("focusout", event => {
         if (!row.contains(event.relatedTarget)) blurTermInfo(node);
@@ -420,13 +432,22 @@ export function createTableRenderer({
             const heading = body.insertRow();
             heading.className = "table-group-heading";
             const cell = document.createElement("th");
-            cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
+            cell.colSpan = (panel.compact ? 1 : puzzle.clusters.length + 1) + Number(state.tableShowTermInfo);
             cell.scope = "rowgroup";
             cell.id = `table-group-${panel.key}-${group.key}`;
-            const text = document.createElement("span");
+            const text = document.createElement(panel.compact ? "button" : "span");
             text.textContent = group.ci == null
               ? `Other terms · ${group.members.length}`
               : `${puzzle.clusters[group.ci].name} · ${group.members.length} connected${panel === completedPanel ? " · complete" : ""}`;
+            if (panel.compact) {
+              text.type = "button";
+              text.className = "table-completed-cluster";
+              text.addEventListener("click", () => {
+                const cluster = puzzle.clusters[group.ci];
+                showTermInfo({ word: cluster.name, info: normalizeInfo(cluster.info) });
+              });
+              cell.addEventListener("contextmenu", event => onClusterContextMenu(group.ci, event, text));
+            }
             cell.append(text);
             heading.append(cell);
             body.setAttribute("aria-labelledby", cell.id);
@@ -436,7 +457,7 @@ export function createTableRenderer({
               const divider = body.insertRow();
               divider.className = "table-connections-heading";
               const cell = divider.insertCell();
-              cell.colSpan = puzzle.clusters.length + 1 + Number(state.tableShowTermInfo);
+              cell.colSpan = (panel.compact ? 1 : puzzle.clusters.length + 1) + Number(state.tableShowTermInfo);
               const text = document.createElement("span");
               text.textContent = "Shared connections";
               cell.append(text);
@@ -463,7 +484,7 @@ export function createTableRenderer({
         const replacement = rows.find(entry => entry.node === focusedRow?.node &&
           entry.row.closest("tbody").dataset.cluster === String(focusedColumn)) || rows.find(entry => entry.node === focusedRow?.node);
         const target = container.contains(focused) ? focused
-          : focusedColumn >= 0 ? replacement?.cells[focusedColumn].input : replacement?.term;
+          : focusedColumn >= 0 ? replacement?.cells[focusedColumn]?.input || replacement?.term : replacement?.term;
         target?.focus({ preventScroll: true });
       }
     }
@@ -535,8 +556,9 @@ export function createTableRenderer({
       showInfo.checked = state.tableShowTermInfo;
       separateCompleted.checked = state.tableSeparateCompleted;
       renderRows();
-      panels.forEach(({ infoColumn, infoHeading, sheet }) => {
+      panels.forEach(({ compact, table, infoColumn, infoHeading, sheet }) => {
         infoColumn.hidden = infoHeading.hidden = !showInfo.checked;
+        table.tHead.hidden = compact && !showInfo.checked;
         sheet.classList.toggle("table-show-info", showInfo.checked);
       });
       sizeHeadings();

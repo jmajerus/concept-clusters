@@ -595,6 +595,30 @@ button:disabled {
   font-weight: 600;
   text-align: left;
 }
+.table-panel-completed { container-type: inline-size; }
+.table-panel-completed .table-scroll { width: 100%; }
+.table-panel-completed .table-sheet {
+  --table-heading-height: 40px;
+  --table-info-column-width: max(100px, calc(100cqw - var(--table-term-width) - 2px));
+  width: 100%;
+  padding-right: 0;
+}
+.table-completed-list { width: 100%; }
+.table-completed-list .table-group-heading th { padding: 0; }
+.table-completed-cluster {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.table-completed-list .table-connections-heading td > span { width: auto; }
+.table-completed-cluster:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 .table-cluster-group > .table-row > th { background: var(--table-group-bg); }
 .table-term {
   display: flex;

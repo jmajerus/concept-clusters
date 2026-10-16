@@ -41,8 +41,15 @@ export async function run(page, baseURL) {
   assert.deepEqual(await clusters(completed), [0], "ordinary-member completion moves the cluster before bridges are finished");
   assert.deepEqual(await names(group(0)), ["carbon dioxide", "chlorophyll", "sunlight"]);
   assert.equal(await row(working, "carbon dioxide").count(), 0);
-  assert.equal(await input(group(0), "carbon dioxide", 0).evaluate(el => el === document.activeElement), true,
-    "the active checkbox follows its term to the completed panel");
+  assert.equal(await row(group(0), "carbon dioxide").locator(".table-term").evaluate(el => el === document.activeElement), true,
+    "focus moves from the checkbox to its completed term button");
+  assert.equal(await completed.locator('input, .table-cluster-heading, col:not(:first-child):not(.table-info-column)').count(), 0,
+    "completed groups have no membership inputs, columns, or diagonal headings");
+  assert.equal(await completed.locator("thead").isHidden(), true, "the compact list starts directly with its cluster heading");
+  assert.equal(await group(0).locator(".table-group-heading th").evaluate(el => el.colSpan), 1);
+  await row(group(0), "carbon dioxide").locator(".table-term").press("ArrowDown");
+  assert.equal(await row(group(0), "chlorophyll").locator(".table-term").evaluate(el => el === document.activeElement), true);
+  assert.match(await page.locator("#term-info").textContent(), /green pigment/);
   assert.equal(await row(group(0), "oxygen").count(), 0, "unconfirmed bridges never leak into completed groups");
   await page.locator("#table-alphabetical").click();
 
@@ -51,6 +58,7 @@ export async function run(page, baseURL) {
   await input(working, "aerobic", 2).focus();
   await page.keyboard.press("ArrowRight");
   assert.equal(await page.evaluate(() => !!document.activeElement.closest(".table-panel-completed")), true);
+  assert.equal(await page.evaluate(() => document.activeElement.classList.contains("table-term")), true);
   await page.keyboard.press("ArrowLeft");
   assert.equal(await page.evaluate(() => !!document.activeElement.closest(".table-panel-working")), true);
   assert.equal(await page.evaluate(() => document.activeElement.dataset.cluster), "2");
@@ -65,24 +73,28 @@ export async function run(page, baseURL) {
   await page.getByRole("checkbox", { name: "Remember incorrect choices", exact: true }).check();
   await input(working, "oxygen", 2).click();
   await page.waitForFunction(() => !document.querySelector(".table-cell-incorrect"));
-  assert.deepEqual(await row(page, "oxygen").locator('input[data-cluster="2"] + .table-wrong-mark').evaluateAll(marks => marks.map(mark => mark.hidden)), [false, false]);
-  await input(group(0), "oxygen", 1).click();
+  assert.deepEqual(await row(working, "oxygen").locator('input[data-cluster="2"] + .table-wrong-mark').evaluateAll(marks => marks.map(mark => mark.hidden)), [false]);
+  const beforeInspection = await page.evaluate(() => CC.state.made);
+  await row(group(0), "oxygen").locator(".table-term").click();
+  assert.equal(await page.evaluate(() => CC.state.made), beforeInspection, "completed term buttons inspect without placing a connection");
+  await input(working, "oxygen", 1).click();
   assert.equal(await row(working, "oxygen").count(), 0, "a solved bridge with a completed destination leaves the working panel");
   assert.equal(await row(group(0), "oxygen").count(), 1);
-  assert.equal(await input(group(0), "oxygen", 1).evaluate(el => el === document.activeElement), true,
-    "a shared bridge can finish through its completed-group copy");
+  assert.equal(await row(group(0), "oxygen").locator(".table-term").evaluate(el => el === document.activeElement), true,
+    "a finished bridge's checkbox focus follows it into the compact list");
 
-  await completed.locator(".table-scroll").evaluate(el => { el.style.maxHeight = "240px"; el.scrollTop = el.scrollHeight; });
+  await completed.locator(".table-scroll").evaluate(el => { el.style.maxHeight = "120px"; el.scrollTop = el.scrollHeight; });
   assert.ok(await completed.locator(".table-scroll").evaluate(el => el.scrollTop > 0));
   await input(working, "aerobic", 1).click();
   assert.deepEqual(await clusters(completed), [1, 0], "newly completed clusters are prepended");
   assert.equal(await completed.locator(".table-scroll").evaluate(el => el.scrollTop), 0);
+  await completed.locator(".table-scroll").evaluate(el => { el.style.maxHeight = ""; });
   assert.equal(await row(group(1), "oxygen").getAttribute("data-ideal-endpoint"), "aerobic");
   assert.equal(await row(page, "oxygen").count(), 2);
 
   // Reset returns ordinary terms and unfinished bridges to play. A
   // subsequent completion in a diagram gets its own new position.
-  await page.locator("#table-completed-cluster-0 button").click({ button: "right" });
+  await group(0).locator(".table-completed-cluster").click({ button: "right" });
   await page.locator(".cluster-menu").getByRole("menuitem", { name: "Reset cluster", exact: true }).click();
   assert.equal(await split.isChecked(), true);
   assert.deepEqual(await clusters(completed), [1]);
@@ -131,7 +143,8 @@ export async function run(page, baseURL) {
 
   await page.locator("#table-show-info").check();
   assert.ok((await group(1).locator(".table-term-info").allTextContents()).some(Boolean));
-  assert.equal(await group(1).locator(".table-group-heading th").evaluate(el => el.colSpan), 5);
+  assert.equal(await completed.locator("thead").isVisible(), true);
+  assert.equal(await group(1).locator(".table-group-heading th").evaluate(el => el.colSpan), 2);
   await page.setViewportSize({ width: 390, height: 844 });
   const mobile = await page.evaluate(() => {
     const left = document.querySelector(".table-panel-working").getBoundingClientRect();
@@ -161,7 +174,8 @@ export async function run(page, baseURL) {
   assert.equal(await row(working, "Borromean knot").count(), 1);
   await page.click("#show-solution");
   assert.equal(await row(completed, "Borromean knot").count(), 3);
-  assert.deepEqual(await row(completed, "Borromean knot").locator("input:checked").evaluateAll(inputs => inputs.map(el => el.checked)), Array(9).fill(true));
+  assert.deepEqual(await row(completed, "Borromean knot").locator(".table-term-status").allTextContents(), Array(3).fill("Shared bridge"));
+  assert.equal(await completed.locator("input").count(), 0);
   assert.equal(await row(working, "Borromean knot").count(), 0);
 
   await open(page, baseURL, "interpreting-a-text");
