@@ -13,7 +13,7 @@ export async function run() {
   assert.equal(draftPlayQuery("energy-flow-review", "table", 3), "/?puzzle=energy-flow-review&play&revision=3&mode=table");
   assert.equal(layoutQuery("energy-flow"), "/?puzzle=energy-flow&author=layout");
   assert.equal(layoutQuery("energy-flow-review", "sets"), "/?puzzle=energy-flow-review&author=layout&mode=sets");
-  assert.throws(() => layoutQuery("energy-flow", "table"), /Unknown play mode/);
+  assert.equal(layoutQuery("energy-flow", "table"), "/?puzzle=energy-flow&author=layout&mode=table");
   assert.throws(() => draftBoardQuery("energy-flow-review", "table"), /Unknown play mode/);
   assert.throws(() => playQuery("energy-flow", "unknown"), /Unknown play mode/);
   assert.deepEqual(

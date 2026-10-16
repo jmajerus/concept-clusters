@@ -3,6 +3,7 @@
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { lensAssignmentBadge, lensNodeAriaLabel, withLensClass } from "./lensEngine.js";
 import { normalizeInfo } from "./termInfo.js";
+import { createTableLensEffects } from "./tableLensEffects.js";
 
 export function createTableRenderer({
   container, svg, getState, getSim, isDone, isBridge,
@@ -246,6 +247,7 @@ export function createTableRenderer({
     const sortedNodes = [...nodes].sort((a, b) => a.word.localeCompare(b.word));
     const rowCache = new Map();
     let rows = [];
+    const lensEffects = createTableLensEffects({ container, getRows: () => rows, getState: () => state });
     let rowSignature = "";
     function createRow(node, groupKey, panel) {
       const row = document.createElement("tr");
@@ -446,6 +448,7 @@ export function createTableRenderer({
         panel.key, groups.map(group => [group.key, group.members.map(node => [node.id, group.endpoints?.get(node.id) || null])])
       ])]);
       if (signature === rowSignature) return;
+      lensEffects.clear();
       rowSignature = signature;
       const focused = document.activeElement;
       const restoreFocus = container.contains(focused) && !!focused.closest("tbody");
@@ -668,7 +671,10 @@ export function createTableRenderer({
     state.detanglePromise = state.prettyPrintPromise = null;
     state.repairPlayerLayout = null;
     state.layoutAdapter = { mode: "table" };
+    state.tableLensEffects = lensEffects;
     state.stopRenderer = () => {
+      lensEffects.clear();
+      if (state.tableLensEffects === lensEffects) delete state.tableLensEffects;
       resizeObserver.disconnect();
       cellPulses.forEach(({ timer }) => clearTimeout(timer));
       cellPulses.clear();

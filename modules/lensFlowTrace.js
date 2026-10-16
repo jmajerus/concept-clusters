@@ -17,6 +17,7 @@ const TRAVEL_MS = 600;
 const COMET = 44;
 const REPEATS = 3;
 const ROUND_PAUSE_MS = 500;
+export const LENS_FLOW_TRACE_TIMING = Object.freeze({ beat: BEAT_MS, travel: TRAVEL_MS, repeats: REPEATS, pause: ROUND_PAUSE_MS });
 
 export function lensFlowTraceEnabled(puzzle) {
   return layoutBoardSetting(puzzle, "lensFlowTrace") === true;

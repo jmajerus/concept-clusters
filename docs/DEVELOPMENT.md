@@ -294,7 +294,11 @@ deterministically positioned inside their circle).
 Table remembers its mode and uses the same semantic moves and lens state,
 but stores no coordinates. Its adapter declares only `mode: "table"`;
 switching back to a diagram restores that diagram's own arrangement.
-Table is a player view and is unavailable in Construct or layout authoring.
+Table is available in play and in `?author=layout` for inspection and playtesting.
+Its authoring preview exposes shared lens settings and their Try controls but
+hides coordinate saves, geometry metrics, layout passes, and diagram board size.
+It has no authoring layout document or capture adapter. Construct editing
+continues to use the diagram modes; draft Play and layout-preview links accept Table.
 Its `state.tableOrder` retains the current visit's alphabetical, focused-cluster,
 or completed grouped view across mode switches. Heading sorts inspect only
 confirmed memberships. Grouped views repeat bridges using the same node
@@ -353,6 +357,23 @@ full board width, including during all lens phases. Keyboard focus follows a
 migrating checkbox to its completed term button. Vertical arrows stay within
 each cluster; horizontal arrows move to the adjacent cluster panel, or from
 the first cluster back into the working table while classification continues.
+
+`tableLensEffects.js` implements DOM counterparts of the SVG reveal effects.
+The game dispatches to the active renderer's effects while retaining shared cue
+resolution, answer targeting, reduced-motion policy, and directed trace plans.
+Ripple pulses term outlines; Spotlight dims non-answer rows; every displayed
+copy of an answer term participates. Explanation hover/tap pings the same
+labels. Cues wait for a target to become visible and finish before traces start.
+Directed trace legs reuse `lensFlowTracePlan` and `LENS_FLOW_TRACE_TIMING`;
+endpoint pulses and bridge underline sweeps follow the authored direction.
+Undirected and bidirectional bridges get simultaneous endpoint/bridge pulses
+without implying a one-way flow. A missing ideal endpoint uses the cluster
+title; unplaced ideal terms are never disclosed. Reduced-motion traces remain
+stationary until the next lens. Each run owns its timers, animations, observer,
+and temporary classes. Lens changes, row regrouping, Try replacement, and
+renderer disposal cancel them without firing a cancelled cue's continuation.
+Authoring Try and Try flow trace do not save settings or change lens answers;
+the working-copy controls still save through the shared layout-board API.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer

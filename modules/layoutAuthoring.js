@@ -91,6 +91,7 @@ export function createLayoutAuthoringController({
   const lensRevealTryCue = document.getElementById("lens-reveal-try-cue");
   const lensRevealTryLens = document.getElementById("lens-reveal-try-lens");
   const lensRevealTryBtn = document.getElementById("lens-reveal-try-btn");
+  const lensFlowTryBtn = document.getElementById("lens-flow-trace-try-btn");
   const siteSettingsEl = document.getElementById("site-settings");
   const siteLensRevealCue = document.getElementById("site-lens-reveal-cue");
   const siteLensHoverPing = document.getElementById("site-lens-hover-ping");
@@ -273,6 +274,14 @@ export function createLayoutAuthoringController({
   function updateLayoutAuthoringPanel() {
     const state = getState();
     if (!layoutAuthoringMode || !state) return;
+    const inspection = getMode() === "table";
+    layoutAuthoringEl.classList.toggle("table-inspection", inspection);
+    document.getElementById("layout-authoring-title").textContent = inspection ? "Table inspection" : "Layout authoring";
+    if (inspection) {
+      drawDefectMarks(null);
+      setLayoutAuthoringStatus("Play and inspect Table and its lens effects. This view has no coordinates to save.");
+      return;
+    }
     const prepared = authoringPrepared();
     const draft = localDraftFor(state);
     const metrics = prepared ? layoutMetrics() : null;
@@ -420,7 +429,7 @@ export function createLayoutAuthoringController({
 
   async function prepareLayoutAuthoringBoard() {
     const preparingState = getState();
-    if (!layoutAuthoringMode || !preparingState) return;
+    if (!layoutAuthoringMode || !preparingState || getMode() === "table") return;
     const label = MODE_LABELS[getMode()];
     const saved = savedModeLayout(preparingState);
     // Only a fresh solve starts from the saved layout. Prepare on an
@@ -535,6 +544,7 @@ export function createLayoutAuthoringController({
     const label = MODE_LABELS[switchedMode];
     syncLayoutActionVisibility();
     syncStarFreeStripButtons();
+    if (switchedMode === "table") { updateLayoutAuthoringPanel(); return; }
     syncFixedCheckbox(state);
     if (state.made !== state.need) {
       setLayoutAuthoringStatus("");
@@ -593,7 +603,7 @@ export function createLayoutAuthoringController({
   });
   layoutAuthoringClearBtn.addEventListener("click", () => {
     const state = getState();
-    if (!state) return;
+    if (!state || getMode() === "table") return;
     const { width, height } = boardSize();
     const cleared = clearLayoutDraft(storage, state.puzzle, getMode(), width, height);
     setLayoutAuthoringStatus(cleared ? "Local draft cleared." : "Draft could not be cleared.");
@@ -651,7 +661,7 @@ export function createLayoutAuthoringController({
     return layoutCanWriteBoard() && Boolean(getDraftId());
   }
 
-  if (layoutSideEl) layoutSideEl.hidden = !layoutCanWriteBoard();
+  if (layoutSideEl) layoutSideEl.hidden = !layoutAuthoringMode;
 
   function setBoardFlagStatus(key, text) {
     const card = EXPERIMENT_FLAGS.has(key) ? "copy" : "layout";
@@ -681,6 +691,7 @@ export function createLayoutAuthoringController({
   function syncBoardSizeControl() {
     const state = getState();
     const canWrite = layoutCanWriteBoard();
+    document.getElementById("board-settings").hidden = !canWrite || getMode() === "table";
     if (boardSizeFactorEl) boardSizeFactorEl.hidden = !canWrite;
     if (!boardSizeFactorInput || !state?.puzzle || !canWrite) return;
     const factor = boardSizeFactor(state.puzzle);
@@ -786,7 +797,7 @@ export function createLayoutAuthoringController({
     const state = getState();
     const settings = getSiteSettings() || {};
     const lenses = state?.puzzle?.lenses || [];
-    const offered = layoutCanWriteBoard() && lenses.length > 0 && state.lensMode !== "assignment";
+    const offered = layoutAuthoringMode && lenses.length > 0 && state.lensMode !== "assignment";
     if (lensRevealControlsEl) lensRevealControlsEl.hidden = !offered;
     if (offered) {
       const canWriteCopy = workingCopyCanWriteBoard();
@@ -848,6 +859,9 @@ export function createLayoutAuthoringController({
       cue: lensRevealTryCue?.value,
       lensIndex: Number(lensRevealTryLens?.value) || 0
     });
+  });
+  lensFlowTryBtn?.addEventListener("click", () => {
+    previewLensRevealCue?.({ traceOnly: true, lensIndex: Number(lensRevealTryLens?.value) || 0 });
   });
   siteLensRevealCue?.addEventListener("change", () => {
     persistSiteSettings({ lensRevealCue: siteLensRevealCue.value });
@@ -1102,6 +1116,7 @@ export function createLayoutAuthoringController({
       else updateLayoutAuthoringPanel();
     };
     setLayoutAuthoringStatus("");
+    if (getMode() === "table") { updateLayoutAuthoringPanel(); return; }
     syncPassForPuzzle(state);
     syncFixedCheckbox(state);
     updateLayoutAuthoringPanel();

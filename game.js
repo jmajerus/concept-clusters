@@ -381,12 +381,11 @@ const urlMode = pageParams.get("mode");
 let mode = VALID_MODES.includes(urlMode)
   ? urlMode
   : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "star");
-if (layoutAuthoringMode && mode === "table") mode = "star";
 const modeGraphBtn = document.getElementById("mode-graph");
 const modeStarBtn = document.getElementById("mode-star");
 const modeSetsBtn = document.getElementById("mode-sets");
 const modeTableBtn = document.getElementById("mode-table");
-modeTableBtn.hidden = layoutAuthoringMode;
+modeTableBtn.hidden = false;
 const dragHintEl = document.getElementById("drag-hint");
 modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
 modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
@@ -468,7 +467,7 @@ function updateModeControls() {
   modeGraphBtn.disabled = lensPreparing || layoutBusy;
   modeStarBtn.disabled = lensPreparing || layoutBusy;
   modeSetsBtn.disabled = lensPreparing || layoutBusy || authoringStudio?.isConstruct();
-  modeTableBtn.disabled = lensPreparing || layoutBusy || layoutAuthoringMode || authoringStudio?.isConstruct();
+  modeTableBtn.disabled = lensPreparing || layoutBusy || authoringStudio?.isConstruct();
   updateDragHint();
 }
 
@@ -662,7 +661,7 @@ function restorePlayerSession(session) {
 
 function setMode(newMode) {
   if (!VALID_MODES.includes(newMode) ||
-      (newMode === "table" && (layoutAuthoringMode || authoringStudio?.isConstruct()))) return;
+      (newMode === "table" && authoringStudio?.isConstruct())) return;
   if (authoringStudio?.isConstruct() && newMode === "sets") return;
   if (layoutAuthoringMode && newMode === mode) return;
   if (state?.phase === "lens-preparing") return;
@@ -1308,7 +1307,8 @@ function pingExplainedTerm(event) {
   const term = event.target.closest?.("[data-lens-term]");
   if (!term || !lensExplanationEl.contains(term)) return;
   if (event.type === "pointerover" && term.contains(event.relatedTarget)) return;
-  pingLensTerm(svg, term.dataset.lensTerm, { reducedMotion: prefersReducedMotion() });
+  if (mode === "table") state.tableLensEffects?.ping(term.dataset.lensTerm, { reducedMotion: prefersReducedMotion() });
+  else pingLensTerm(svg, term.dataset.lensTerm, { reducedMotion: prefersReducedMotion() });
 }
 lensExplanationEl.addEventListener("pointerover", pingExplainedTerm);
 lensExplanationEl.addEventListener("click", pingExplainedTerm);
@@ -1610,6 +1610,11 @@ function restoreLensSession(savedLens) {
 function traceRevealedLens({ redraw = false } = {}) {
   if (!lensFlowTraceEnabled(state?.puzzle)) return;
   if (redraw && !lensReviewIsVisible(state)) return;
+  if (mode === "table") {
+    state.tableLensEffects?.trace({ legs: lensFlowTracePlan(state.puzzle, currentLens(state)),
+      puzzle: state.puzzle, lens: currentLens(state), reducedMotion: prefersReducedMotion() });
+    return;
+  }
   playLensFlowTrace(
     svg,
     lensFlowTracePlan(state.puzzle, currentLens(state)),
@@ -1627,33 +1632,49 @@ function prefersReducedMotion() {
 // A rebuild under a still-visible explanation plays both again, since the
 // pills have moved.
 function revealLensOnBoard({ redraw = false } = {}) {
-  if (mode === "table") return;
   if (!state || (redraw && !lensReviewIsVisible(state))) return;
   const revealState = state;
+  const revealMode = mode;
   const quiz = state.lensMode === "quiz";
-  playLensRevealCue(svg, {
+  const options = {
     cue: state.lensMode === "assignment" ? "none" : resolveLensRevealCue({
       puzzle: state.puzzle,
       settings: siteSettings,
       reducedMotion: prefersReducedMotion()
     }),
     targets: lensRevealTargets(currentLens(state), quiz ? null : state.lensSelections),
+    reducedMotion: prefersReducedMotion(),
     onDone: () => {
-      if (state === revealState) traceRevealedLens({ redraw });
+      if (state === revealState && mode === revealMode) traceRevealedLens({ redraw });
     }
-  });
+  };
+  if (mode === "table") state.tableLensEffects?.reveal(options);
+  else playLensRevealCue(svg, options);
 }
 
 // The layout view's Try: one cue on one lens's answers, saved nowhere.
 // It is asked for, so it plays even with reduced motion on, and it brings
 // the first answer into view, since the cue waits until one is on screen.
-function previewLensRevealCue({ cue, lensIndex }) {
+function previewLensRevealCue({ cue, lensIndex, traceOnly = false }) {
   const lens = state?.puzzle?.lenses?.[lensIndex];
   if (!lens) return;
   const targets = lensRevealTargets(lens);
   clearLensFlowTrace(svg);
-  playLensRevealCue(svg, { cue, targets });
-  const pill = svg.selectAll("g.node")
+  state.tableLensEffects?.clear();
+  const previewState = state;
+  const previewMode = mode;
+  const trace = () => {
+    if (state !== previewState || mode !== previewMode || (!traceOnly && !lensFlowTraceEnabled(state.puzzle))) return;
+    const legs = lensFlowTracePlan(state.puzzle, lens);
+    if (mode === "table") state.tableLensEffects?.trace({ legs, puzzle: state.puzzle, lens, reducedMotion: prefersReducedMotion() });
+    else playLensFlowTrace(svg, legs, state.bridgeArmSegment, { reducedMotion: prefersReducedMotion() });
+  };
+  if (traceOnly) { clearLensRevealCue(svg); trace(); }
+  else if (mode === "table") state.tableLensEffects?.reveal({ cue, targets, reducedMotion: prefersReducedMotion(), onDone: trace });
+  else playLensRevealCue(svg, { cue, targets, onDone: trace });
+  const pill = mode === "table"
+    ? [...document.querySelectorAll("#table-board .table-row")].find(row => row.dataset.term === targets[0]?.word)?.querySelector(".table-term")
+    : svg.selectAll("g.node")
     .filter(node => node?.word === targets[0]?.word)
     .node();
   const box = pill?.getBoundingClientRect();
@@ -1742,6 +1763,7 @@ lensNextBtn.addEventListener("click", () => {
   }
   clearLensFlowTrace(svg);
   clearLensRevealCue(svg);
+  state.tableLensEffects?.clear();
   state.lensIndex++;
   if (state.lensMode === "quiz") {
     state.lensQuizSelection = null;
@@ -2295,6 +2317,7 @@ const { buildTable } = createTableRenderer({
 function buildForMode() {
   clearLensRevealCue(svg);
   clearLensFlowTrace(svg);
+  state.tableLensEffects?.clear();
   svg.node().style.display = mode === "table" ? "none" : "";
   document.getElementById("table-board").hidden = mode !== "table";
   if (mode !== "graph") clusterLegend.hide();

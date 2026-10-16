@@ -29,7 +29,7 @@ export function layoutQuery(puzzleId, mode = null) {
   if (!SLUG_RE.test(puzzleId)) {
     throw new Error(`Invalid puzzle id: ${puzzleId}`);
   }
-  return queryWithMode(new URLSearchParams({ puzzle: puzzleId, author: "layout" }), mode, DIAGRAM_MODES);
+  return queryWithMode(new URLSearchParams({ puzzle: puzzleId, author: "layout" }), mode);
 }
 
 export function playQuery(puzzleId, mode = null) {
