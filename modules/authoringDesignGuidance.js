@@ -563,56 +563,14 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   progression, and look once at any run of single-target lenses. Lens
   changes are saved with domain=pedagogy.`;
 
-// Bridge annotations are pedagogy-owned, so the pedagogy pass carries them.
-// Profiles' pedagogy passes reuse the save mechanics below.
-const BRIDGE_ANNOTATION_SAVE = `Bridge annotations (relationKind, direction, idealTerms, conceptId) are
-  saved with domain=pedagogy. Send \`bridges\` entries naming each changed
-  bridge by id or term with only the annotation fields you change; \`null\`
-  removes one.`;
-
-// The lesson brief every pedagogy pass carries, profiled or not: a profile
-// replaces the generic pedagogy pass, and its lesson is still a lesson.
-const LEARNING_INTRODUCTION_PHASE_GUIDANCE = `- Prefer a learningIntroduction. A lesson helps in almost every case,
-  because the author cannot know what the player already knows. Write one lesson
-  about the subject: the learning objective, the domain, and how the ideas
-  relate, including the groupings and why they hold. Teach the vocabulary
-  the subject turns on, and say what those ideas are, at the depth the
-  subject needs. Keep the subject's order. Where that lesson reaches a
-  board term whose meaning is not plain from the words themselves, use the
-  term and say what it is. A long board is not a list to work through. No
-  clusters, bridges, lenses, boards, sorting instructions, or
-  gameplay instructions. Those words name the machinery. Do not
-  author a preview, a teaser, or a split. Play shows the whole lesson before
-  the board. Reserve
-  required for material the puzzle truly depends on; otherwise prefer
-  optional or recommended. required holds the board until the learner
-  chooses Start puzzle in the lesson. Closing the dialog returns to the
-  invitation. info.citations is content, so this pedagogy save does not
-  write it and the server will not fill it in. Cluster links are already
-  in the read-only content context. After this save, a content-domain save
-  copies those cluster links the lesson text relies on into info.citations.
-  Add a term link only when the lesson depends on a source that exists only
-  on a term. Add a source for a claim that lives only in the lesson and has
-  no node. Do not start a new source hunt, and do not copy every term link.
-  The same URL may remain on its node. Do not also put it on
-  learningIntroduction.links. content.text is
-  Markdown with real line breaks in the string value (blank lines between
-  paragraphs, \`##\` headings on their own lines). The lesson dialog already
-  shows title; do not repeat it as the first line. Do not write the
-  two-character sequence backslash-n; the tool serializer encodes newlines. A
-  body stored as one line with \`\\n\` tokens renders as a single paragraph.
-  Do not include the human-managed legacy field learningIntroduction.credit.
-  Do not put byline text in content.text.
-  Never add dateCreated, dateModified, version, or
-  learningIntroduction.revision. Publication times stay on the published
-  row; version and the lesson revision stay off the document.
-  Do not send large. Lists and play compute it from the node count.`;
-
 const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
 
 - Start with the bridges, before drafting lenses: rereading each bridge fact
   is where cross-cluster questions come from.
-  ${BRIDGE_ANNOTATION_SAVE}
+  Bridge annotations (relationKind, direction, idealTerms, conceptId) are
+  saved with domain=pedagogy. Send \`bridges\` entries naming each changed
+  bridge by id or term with only the annotation fields you change; \`null\`
+  removes one.
 - Add relationKind only when the bridge clearly fits dynamic, foundation,
   cross-cutting, contrast, continuity, or evaluation. It classifies the
   relationship described by the bridge fact. Leave it unset when ambiguous.
@@ -661,7 +619,41 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   is X?", one definition at a time. Check once whether two of them are
   really one bounded question with two honest answers, or whether quiz mode
   fits them better. If each stands on its own, keep them.
-${LEARNING_INTRODUCTION_PHASE_GUIDANCE}
+- Prefer a learningIntroduction. A lesson helps in almost every case,
+  because the author cannot know what the player already knows. Write one lesson
+  about the subject: the learning objective, the domain, and how the ideas
+  relate, including the groupings and why they hold. Teach the vocabulary
+  the subject turns on, and say what those ideas are, at the depth the
+  subject needs. Keep the subject's order. Where that lesson reaches a
+  board term whose meaning is not plain from the words themselves, use the
+  term and say what it is. A long board is not a list to work through. No
+  clusters, bridges, lenses, boards, sorting instructions, or
+  gameplay instructions. Those words name the machinery. Do not
+  author a preview, a teaser, or a split. Play shows the whole lesson before
+  the board. Reserve
+  required for material the puzzle truly depends on; otherwise prefer
+  optional or recommended. required holds the board until the learner
+  chooses Start puzzle in the lesson. Closing the dialog returns to the
+  invitation. info.citations is content, so this pedagogy save does not
+  write it and the server will not fill it in. Cluster links are already
+  in the read-only content context. After this save, a content-domain save
+  copies those cluster links the lesson text relies on into info.citations.
+  Add a term link only when the lesson depends on a source that exists only
+  on a term. Add a source for a claim that lives only in the lesson and has
+  no node. Do not start a new source hunt, and do not copy every term link.
+  The same URL may remain on its node. Do not also put it on
+  learningIntroduction.links. content.text is
+  Markdown with real line breaks in the string value (blank lines between
+  paragraphs, \`##\` headings on their own lines). The lesson dialog already
+  shows title; do not repeat it as the first line. Do not write the
+  two-character sequence backslash-n; the tool serializer encodes newlines. A
+  body stored as one line with \`\\n\` tokens renders as a single paragraph.
+  Do not include the human-managed legacy field learningIntroduction.credit.
+  Do not put byline text in content.text.
+  Never add dateCreated, dateModified, version, or
+  learningIntroduction.revision. Publication times stay on the published
+  row; version and the lesson revision stay off the document.
+  Do not send large. Lists and play compute it from the node count.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
   they do not have to be authored together. It is normal to add or revise a
   learning introduction long after the lenses exist; preserve those lenses
@@ -841,14 +833,10 @@ through domain=pedagogy and the content core remains owned by domain=content.`,
   advanced near-synonym boards.
 - Multiple blanks and structured slot mapping remain deferred. Do not encode
   several unordered answers in one target list.
-${LEARNING_INTRODUCTION_PHASE_GUIDANCE}
-- A bridge, when the board has one, may carry annotations. Add relationKind
-  or direction only when the bridge fact clearly states that relationship.
-  ${BRIDGE_ANNOTATION_SAVE}
 
 This pass remains a pedagogy-domain pass: retrieve the pedagogy projection and
-save lenses, lensMode, any multi-cluster preSolve choice,
-learningIntroduction, and any bridge annotations with domain=pedagogy.`,
+save lenses, lensMode, any multi-cluster preSolve choice, and
+learningIntroduction with domain=pedagogy.`,
   publication: `## Vocabulary-in-context publication pass
 
 - Preserve the authored puzzleKind: "vocabulary-context"; the profile argument
@@ -966,14 +954,9 @@ and quiz-lens changes with domain=pedagogy.`,
   its categories themselves reward discovery. If preSolve is on, several
   substantial lenses are important so the puzzle does not collapse to one
   isolated question.
-${LEARNING_INTRODUCTION_PHASE_GUIDANCE}
-- A bridge, when the board has one, may carry annotations. Add relationKind
-  or direction only when the bridge fact clearly states that relationship.
-  ${BRIDGE_ANNOTATION_SAVE}
 
 This is a pedagogy-domain pass: retrieve the pedagogy projection and save
-lenses, lensMode, preSolve, learningIntroduction, and any bridge annotations
-with domain=pedagogy.`,
+lenses, lensMode, preSolve, and learningIntroduction with domain=pedagogy.`,
   publication: `## Trivia-quiz publication pass
 
 - Preserve puzzleKind: "trivia-quiz" as the authored puzzle type; the MCP

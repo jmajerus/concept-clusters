@@ -16,7 +16,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.26.0";
+export const AUTHORING_MCP_SERVER_VERSION = "1.27.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export { AUTHORING_PHASES };
 export { AUTHORING_PROFILES };
@@ -170,13 +170,18 @@ function phaseDescription(phase, pass) {
   );
 }
 
-function phaseSchema(phase) {
+function phaseSchema(phase, profile = null) {
   const pass = AUTHORING_PHASE_PASSES[phase];
   if (!pass) throw new Error(`Unknown authoring phase: ${phase}`);
   const schema = structuredClone(SIMPLIFIED_PUZZLE_SCHEMA);
   schema.title = `Simplified puzzle ${phase} authoring projection`;
   schema.description = phaseDescription(phase, pass);
-  schema.properties = pickProperties(schema.properties, pass.root);
+  // Profile puzzles do not annotate bridges; their pedagogy view is lenses
+  // and lesson only. The domain still preserves any annotation already saved.
+  const root = profile && pass.writeDomain === "pedagogy"
+    ? pass.root.filter(name => name !== "bridges")
+    : pass.root;
+  schema.properties = pickProperties(schema.properties, root);
   schema.required = phase === "core"
     ? schema.required.filter(name => pass.root.includes(name))
     : [];
@@ -224,7 +229,7 @@ export function simplifiedPuzzleSchemaResult(phase = "complete", profile = null)
       ...(pass.writeDomain ? { domain: pass.writeDomain } : {}),
       resourceUri: SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
       schemaId: SIMPLIFIED_PUZZLE_SCHEMA.$id,
-      schema: phaseSchema(phase)
+      schema: phaseSchema(phase, profile)
     }, profile);
   }
   return withProfile({

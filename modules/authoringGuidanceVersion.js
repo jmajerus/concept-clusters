@@ -190,8 +190,9 @@
 // (reciprocal exchange is bidirectional, not unset). Lens drafting checks
 // bridge terms among plausible exclusions, asks once for a cross-cluster
 // question, and looks once at runs of single-target lenses; none is a
-// quota. Profile pedagogy passes carry the lesson brief. Direction from/to
-// name cluster ids.
+// quota. Profile passes are unchanged: profile puzzles do not annotate
+// bridges, and their pedagogy schema omits them. Direction from/to name
+// cluster ids.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
   minor: 18

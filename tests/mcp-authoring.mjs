@@ -397,6 +397,8 @@ export async function run() {
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.idealTerms);
     assert.ok(phasedSchemas.pedagogy.schema.properties.lenses);
     assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction);
+    assert.ok(phasedSchemas.pedagogy.schema.properties.bridges.items.properties.direction);
+    assert.deepEqual(phasedSchemas.pedagogy.schema.properties.bridges.items.required, []);
     assert.equal(phasedSchemas.core.domain, "content");
     assert.equal(phasedSchemas.pedagogy.domain, "pedagogy");
     assert.equal(phasedSchemas.publication.domain, "pedagogy");
@@ -429,6 +431,8 @@ export async function run() {
       ["content", "pedagogy"]
     );
     assert.ok(vocabularySchema.result.structuredContent.schema.properties.lenses);
+    // Profile puzzles do not annotate bridges.
+    assert.equal(vocabularySchema.result.structuredContent.schema.properties.bridges, undefined);
     assert.match(
       vocabularySchema.result.structuredContent.profileSummary,
       /Collegiate-level near-synonym clusters/
@@ -694,11 +698,6 @@ export async function run() {
       vocabularyPedagogyGuidance.result.structuredContent.markdown,
       /contextual usage decision/
     );
-    // A profile replaces the generic pedagogy pass; its lesson brief comes along.
-    assert.match(
-      vocabularyPedagogyGuidance.result.structuredContent.markdown,
-      /real\s+line breaks/
-    );
     assert.match(
       vocabularyPedagogyGuidance.result.structuredContent.markdown,
       /one blank and one target term/
@@ -792,10 +791,6 @@ export async function run() {
     assert.match(
       triviaPedagogyGuidance.result.structuredContent.markdown,
       /Use lensMode=quiz for the quiz-led profile/
-    );
-    assert.match(
-      triviaPedagogyGuidance.result.structuredContent.markdown,
-      /real\s+line breaks/
     );
     assert.match(
       triviaPedagogyGuidance.result.structuredContent.markdown,
