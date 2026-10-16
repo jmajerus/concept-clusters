@@ -295,6 +295,12 @@ Table remembers its mode and uses the same semantic moves and lens state,
 but stores no coordinates. Its adapter declares only `mode: "table"`;
 switching back to a diagram restores that diagram's own arrangement.
 Table is a player view and is unavailable in Construct or layout authoring.
+Its `state.tableOrder` retains the current visit's alphabetical, focused-cluster,
+or completed grouped view across mode switches. Heading sorts inspect only
+confirmed memberships. Grouped views repeat bridges using the same node
+objects, with distinct row IDs; lens selections and feedback stay synchronized
+across those rows. View changes never write connection history, and solving
+does not automatically change the selected order.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer

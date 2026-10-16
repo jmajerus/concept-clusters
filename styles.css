@@ -430,6 +430,18 @@ button:disabled {
   color: var(--ink-soft);
 }
 .table-details { min-height: 2.5em; }
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 4px;
+}
+.table-toolbar button[aria-pressed="true"] {
+  background: var(--select);
+  color: var(--panel);
+}
+.table-toolbar button:disabled { opacity: 0.5; cursor: default; }
+#table-order-status { max-width: 60ch; }
 .table-scroll {
   width: max-content;
   max-width: 100%;
@@ -480,6 +492,7 @@ button:disabled {
 }
 .table-cluster-heading button {
   position: absolute;
+  z-index: 1;
   left: 22px;
   bottom: 12px;
   transform: rotate(-60deg);
@@ -494,7 +507,7 @@ button:disabled {
   font: 700 13px/20px var(--font-body);
   cursor: pointer;
 }
-.table-cluster-heading.table-active-column button { background: var(--rule); }
+.table-cluster-heading:is(.table-active-column, .table-sorted-column) button { background: var(--rule); }
 .membership-table tbody th {
   position: sticky;
   left: 0;
@@ -509,6 +522,21 @@ button:disabled {
   border-bottom: 1px solid var(--rule);
 }
 .membership-table td { padding: 0; text-align: center; }
+.membership-table .table-group-heading th {
+  position: static;
+  padding: 9px 12px;
+  border-top: 2px solid var(--table-group-color, var(--rule));
+  color: var(--table-group-color, var(--ink-soft));
+  background: var(--table-group-bg, var(--paper));
+}
+.table-group-heading th > span {
+  position: sticky;
+  left: 12px;
+  display: block;
+  width: calc(var(--table-term-width) - 24px);
+  overflow-wrap: anywhere;
+}
+.table-cluster-group > .table-row > th { background: var(--table-group-bg); }
 .table-term {
   display: flex;
   align-items: center;
@@ -533,6 +561,7 @@ button:disabled {
   font-size: 11px;
   font-weight: 400;
 }
+.table-shared-status { max-width: 45px; }
 .table-check {
   display: grid;
   place-items: center;

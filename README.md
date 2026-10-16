@@ -8,6 +8,8 @@ Four rendering modes share the same puzzle progress: Graph mode, a force-directe
 
 Table keeps seed terms checked in their normal rows and shows bridges with a check for each connected cluster. Ideal bridge endpoints remain in the shared graph and appear in annotations once revealed. Arrow keys move between cells, Space checks a membership, and term names open details or participate in lens rounds.
 
+Click a cluster heading to bring its confirmed memberships to the top, with a connected-term count that includes seeds and bridge connections. Once every term is connected, **Group by cluster** stacks labeled cluster groups and repeats shared bridges in each relevant group. **Alphabetical** restores one row per term. Completion never automatically changes the row order; the chosen view stays in place when switching to a diagram and back during the same visit.
+
 This is a working prototype handed off from a Claude.ai design session. It runs by opening `index.html` directly in a browser — no build step, no server, no network required (D3 is vendored locally).
 
 ## Design brief (the decisions behind the code)
