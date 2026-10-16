@@ -42,6 +42,7 @@ import { createClusterMenu } from "./modules/clusterMenu.js";
 import { createClusterSummary } from "./modules/clusterSummary.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
+import { createTableRenderer } from "./modules/tableRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
@@ -339,7 +340,7 @@ function trackPuzzleCompleted(puzzleId, mode, stats) {
 }
 
 // ---------- rendering mode ----------
-// Three independent rendering/interaction pathways over the same shared
+// Four rendering/interaction pathways over the same shared
 // game state (nodes, links, connected arrays never differ by mode) —
 // full graph mode (mode value: "graph") is the original per-term
 // force-directed board, connecting each term to whichever specific
@@ -348,15 +349,17 @@ function trackPuzzleCompleted(puzzleId, mode, stats) {
 // cluster's own title node instead — a more legible read of the same
 // state at the cost of a bit of the original's challenge (no cluster
 // names shown, longer tangled chains); "sets" renders clusters as
-// circles containing their terms. Called "full graph mode" rather than
+// circles containing their terms. "table" is a stable membership matrix
+// with a single checkbox activation per connection and no physics.
+// Called "full graph mode" rather than
 // plain "graph" wherever it could be confused with "star" (also a
 // node-link board), since sharing the "graph" name for both would be
 // ambiguous. The player's choice is remembered across visits — and
-// since this only special-cases "sets"/"star", a visitor whose
+// since modes are validated explicitly, a visitor whose
 // localStorage still has the old "traditional" value falls through to
 // the default mode unaffected, no migration needed.
 //
-// A manually-added &mode=graph, &mode=star, or &mode=sets in the URL
+// A manually-added &mode=graph, &mode=star, &mode=sets, or &mode=table in the URL
 // overrides that stored preference for this page view only -- for a
 // personal bookmark list where a particular puzzle is preferred in a
 // particular mode. Deliberately read-only and not written back to
@@ -365,7 +368,7 @@ function trackPuzzleCompleted(puzzleId, mode, stats) {
 // saved links, not something the Share button should start forcing on
 // other people who open a shared link -- see the note above the Share
 // handler.
-const VALID_MODES = ["graph", "star", "sets"];
+const VALID_MODES = ["graph", "star", "sets", "table"];
 
 // One cluster and nothing to assemble: the player only picks words for
 // the lenses. Circle is a stack of those words in the lower left, next
@@ -378,13 +381,17 @@ const urlMode = pageParams.get("mode");
 let mode = VALID_MODES.includes(urlMode)
   ? urlMode
   : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "star");
+if (layoutAuthoringMode && mode === "table") mode = "star";
 const modeGraphBtn = document.getElementById("mode-graph");
 const modeStarBtn = document.getElementById("mode-star");
 const modeSetsBtn = document.getElementById("mode-sets");
+const modeTableBtn = document.getElementById("mode-table");
+modeTableBtn.hidden = layoutAuthoringMode;
 const dragHintEl = document.getElementById("drag-hint");
 modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
 modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
+modeTableBtn.setAttribute("aria-pressed", String(mode === "table"));
 puzzleMetaEl.hidden = !adminMode;
 puzzleEditLinkEl.hidden = !canEditPuzzles;
 puzzleStatsBtn.hidden = !adminMode;
@@ -394,6 +401,17 @@ if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.t
 // Star modes, but only circles and bridge pills in Sets (a docked term
 // travels with its circle, not on its own).
 function updateDragHint() {
+  document.getElementById("play-instructions").textContent = mode === "table"
+    ? "Check a cell to connect its term to that cluster. Bridges can have checks in several columns."
+    : "Tap a gray term, then tap a node in the cluster it belongs to. Bridges belong to multiple clusters and need a connection into each.";
+  if (mode === "table") {
+    dragHintEl.textContent = lensPhaseActive(state)
+      ? state.phase === "lens-selecting" || state.phase === "lens-assigning"
+        ? "Activate a term name to work with the current lens."
+        : "Select a term name to examine its details."
+      : "Use arrow keys to move between cells and Space to check. Select a term name for details.";
+    return;
+  }
   if (lensPhaseActive(state)) {
     if (lensLayoutEditable(state)) {
       dragHintEl.textContent = state.phase === "lens-assigning"
@@ -446,9 +464,11 @@ function updateModeControls() {
   modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
+  modeTableBtn.setAttribute("aria-pressed", String(mode === "table"));
   modeGraphBtn.disabled = lensPreparing || layoutBusy;
   modeStarBtn.disabled = lensPreparing || layoutBusy;
   modeSetsBtn.disabled = lensPreparing || layoutBusy || authoringStudio?.isConstruct();
+  modeTableBtn.disabled = lensPreparing || layoutBusy || layoutAuthoringMode || authoringStudio?.isConstruct();
   updateDragHint();
 }
 
@@ -632,7 +652,7 @@ function restorePlayerSession(session) {
       ? "Saved completed puzzle restored."
       : state.made
         ? "Saved progress restored — continue where you left off."
-        : "Tap a gray term to begin.",
+        : mode === "table" ? "Check a cell to connect a term to its cluster." : "Tap a gray term to begin.",
     state.made === state.need ? "good" : undefined
   );
   state.paint();
@@ -640,6 +660,8 @@ function restorePlayerSession(session) {
 }
 
 function setMode(newMode) {
+  if (!VALID_MODES.includes(newMode) ||
+      (newMode === "table" && (layoutAuthoringMode || authoringStudio?.isConstruct()))) return;
   if (authoringStudio?.isConstruct() && newMode === "sets") return;
   if (layoutAuthoringMode && newMode === mode) return;
   if (state?.phase === "lens-preparing") return;
@@ -751,6 +773,7 @@ function rememberAuthoringArrangement() {
 modeGraphBtn.addEventListener("click", () => setMode("graph"));
 modeStarBtn.addEventListener("click", () => setMode("star"));
 modeSetsBtn.addEventListener("click", () => setMode("sets"));
+modeTableBtn.addEventListener("click", () => setMode("table"));
 
 // ---------- setup: library picker ----------
 // This compact global navigation deliberately stops one level above an
@@ -1065,6 +1088,14 @@ function updateSolutionHint() {
     return;
   }
   const busy = modeSwitchPolishing || stage === "animating" || stage === "polishing";
+  if (mode === "table") {
+    const complete = !!state && state.made === state.need;
+    showSolutionBtn.disabled = complete;
+    showSolutionBtn.setAttribute("aria-busy", "false");
+    showSolutionBtn.textContent = complete ? "Table complete" : "Show solution";
+    updateModeControls();
+    return;
+  }
   showSolutionBtn.disabled = busy || stage === "pretty";
   showSolutionBtn.setAttribute("aria-busy", String(busy));
   showSolutionBtn.textContent = stage === "animating"
@@ -1595,6 +1626,7 @@ function prefersReducedMotion() {
 // A rebuild under a still-visible explanation plays both again, since the
 // pills have moved.
 function revealLensOnBoard({ redraw = false } = {}) {
+  if (mode === "table") return;
   if (!state || (redraw && !lensReviewIsVisible(state))) return;
   const revealState = state;
   const quiz = state.lensMode === "quiz";
@@ -2065,7 +2097,7 @@ appNavigation = createAppNavigation({
 // object per loadPuzzle, a new mode string per setMode) -- the engine
 // always needs whatever's current, not a stale snapshot from whenever
 // createGameEngine happened to run.
-const { handleTap, checkClusterCompletion, canFillCluster, fillCluster, showSolution } = createGameEngine({
+const { handleTap, connectToCluster, checkClusterCompletion, canFillCluster, fillCluster, showSolution } = createGameEngine({
   getState: () => state,
   getMode: () => mode,
   isDone,
@@ -2246,13 +2278,24 @@ const { buildSetGraph } = createSetRenderer({
   onClusterContextMenu
 });
 
+const { buildTable } = createTableRenderer({
+  container: document.getElementById("table-board"),
+  svg, getState: () => state, getSim: () => sim,
+  isDone, isBridge, connectToCluster, handleTap: onBoardTap,
+  showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
+  updateSolutionHint, countEl, onClusterContextMenu
+});
+
 // Single dispatch point for "build whatever the current `mode` is",
 // used by both loadPuzzle and setMode rather than repeating the same
-// three-way branch in each.
+// mode branch in each.
 function buildForMode() {
   clearLensRevealCue(svg);
+  clearLensFlowTrace(svg);
+  svg.node().style.display = mode === "table" ? "none" : "";
+  document.getElementById("table-board").hidden = mode !== "table";
   if (mode !== "graph") clusterLegend.hide();
-  (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : buildSetGraph)();
+  (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : mode === "table" ? buildTable : buildSetGraph)();
 }
 
 layoutAuthoring = createLayoutAuthoringController({
@@ -2506,7 +2549,7 @@ function applyLoadedPuzzle(puzzle, index, {
   lensExplanationEl.replaceChildren();
   setMessage(authoringConstruct
     ? "Construct: add a term, or tap an unplaced term then a cluster member to join."
-    : "Tap a gray term to begin.");
+    : mode === "table" ? "Check a cell to connect a term to its cluster." : "Tap a gray term to begin.");
   if (sim) sim.stop();
   // Stop the previous puzzle's own renderer-specific state too (Sets
   // mode's live simulation in particular) before it's replaced below --
@@ -2911,7 +2954,8 @@ function replayInitialSharedState(initialParams) {
         state.lensStartPending = false;
         beginLensSequence();
       } else {
-        setMessage(state.made === state.need ? "Concept map complete. Well done." : "Tap a gray term to continue.");
+        setMessage(state.made === state.need ? "Concept map complete. Well done."
+          : mode === "table" ? "Check a cell to connect a term to its cluster." : "Tap a gray term to continue.");
         state.paint();
       }
       persistPlayerSession();

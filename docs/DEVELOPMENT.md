@@ -137,7 +137,7 @@ server's `ADMIN_KEY` in the ignored `.env`.
 | `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [Local development](DEVELOPMENT.md#local-development) |
 | `d1/migrations/` | Versioned schema for hosted authoring drafts, content documents, and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
-| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
+| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all four renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
@@ -243,18 +243,19 @@ anything ever imports from it directly):
 | `graphLayoutSchema.js` / `circleLayoutSchema.js` | Renderer-independent validation for authored Graph/Circle documents | `layoutDocument.js` revision fingerprint |
 | `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct inspectors; `/?draft=&view=play` hides the studio | `authorEngine.js`, `authoringBoard.js` |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring, hint-steered search, and `repairGraphLayout` (single-pill moves that strictly reduce defects) | `geometry.js`, `layoutHints.js` |
-| `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
+| `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, connectToCluster, checkClusterCompletion, showSolution }`; Table cell assignments reuse ordinary taps through `connectToCluster` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies (optional `onBackgroundClick` for construct) |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 | `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
+| `tableRenderer.js` | `createTableRenderer(...)` → `{ buildTable }`; alphabetic term rows, diagonal cluster headings, shared membership checkboxes and lens feedback; no coordinates or simulation | `idealTarget.js`, `lensEngine.js`, `termInfo.js`, injected dependencies |
 
-The three UI controllers, the authoring studio, and the final four engine/renderer modules use a
+The three UI controllers, the authoring studio, and the engine/renderer modules use a
 factory-with-injected-dependencies convention (mirroring Letter Punk's
 own `createGameEngine`/etc.) rather than closing over `game.js`
 internals. For the engine and renderers this matters because `state`
 and `mode` are *reassigned* — a fresh `state` object per `loadPuzzle`
 call, a new mode string per `setMode` call — so each factory takes
-`getState`/`getMode` accessors, not one-time values. The three renderers
+`getState`/`getMode` accessors, not one-time values. The four renderers
 also share `state` itself as a coordination point: whichever mode is active sets
 `state.paint`/`drawLinks`/`onLinkAdded` (and
 `state.captureManualOffset`/`reconcileManualOffset`, for Circle mode's
@@ -281,7 +282,7 @@ the current round, selection/reveal phase, and selected term words.
 Connection pairs use term text rather than transient numeric node ids;
 the compact numeric representation remains exclusive to share URLs.
 
-All three modes implement the renderer layout-adapter contract
+The three diagram modes implement the renderer layout-adapter contract
 (`capture`, `apply`, `validate`, `metrics`, and `autoLayout`). The same
 adapter serves player sessions and layout authoring; an authoring purpose
 selects the renderer's authored document shape while the default preserves the
@@ -289,6 +290,11 @@ player-session snapshot shape. Star resumes term and cluster-title
 positions, Graph resumes its term positions and player pins, and Circle
 resumes cluster centers and connected bridge pills (ordinary terms remain
 deterministically positioned inside their circle).
+
+Table remembers its mode and uses the same semantic moves and lens state,
+but stores no coordinates. Its adapter declares only `mode: "table"`;
+switching back to a diagram restores that diagram's own arrangement.
+Table is a player view and is unavailable in Construct or layout authoring.
 
 Layout effort (`modules/playerLayoutEffort.js`) records how much the player
 has arranged each mode's board, so polishing can respect it. Each renderer
@@ -345,7 +351,7 @@ pass — including an uncrossing pass on a live player completion, not only
 Show Solution — then `freezeForLenses` stops movement so every round
 reuses a stable spatial map. After that freeze, a drag is still a literal
 placement so the last connected node can be nudged; taps continue to
-select lens answers. All three renderers read the same pure class result
+select lens answers. All four renderers read the same pure class result
 from `lensEngine.js` and otherwise retain their own layout logic. Related
 puzzles and the completion event are deferred until the final lens is
 finished.

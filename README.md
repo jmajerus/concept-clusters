@@ -4,7 +4,9 @@
 
 An educational puzzle game built with D3. Players attach floating concept terms to partially built clusters; special *bridge* terms belong to multiple clusters and reveal why the concepts relate. Selected puzzles then reuse the completed map for *Concept Lenses*: short matching rounds that reveal cross-cutting attributes spanning the original groups. In short: **Build the categories. Connect the ideas. Change the lens.**
 
-Three rendering modes share the same underlying mechanic: Graph mode, a force-directed node-link diagram where each connection is drawn straight to whichever already-placed term you tapped; Star mode, the same board but with every connection drawn to its cluster's own label instead, trading some of Graph mode's tangle (and its hidden cluster names) for a more legible read; and Circle mode, where clusters are fixed circles with bridges drawn as connecting lines between them.
+Four rendering modes share the same puzzle progress: Graph mode, a force-directed node-link diagram where each connection is drawn straight to whichever already-placed term you tapped; Star mode, the same board but with every connection drawn to its cluster's own label instead, trading some of Graph mode's tangle (and its hidden cluster names) for a more legible read; Circle mode, where clusters are fixed circles with bridges drawn as connecting lines between them; and Table mode, a spreadsheet of terms with diagonal cluster headings and one checkbox per membership. Players can switch between modes while solving or examining the completed puzzle.
+
+Table keeps seed terms checked in their normal rows and shows bridges with a check for each connected cluster. Ideal bridge endpoints remain in the shared graph and appear in annotations once revealed. Arrow keys move between cells, Space checks a membership, and term names open details or participate in lens rounds.
 
 This is a working prototype handed off from a Claude.ai design session. It runs by opening `index.html` directly in a browser — no build step, no server, no network required (D3 is vendored locally).
 
@@ -38,7 +40,7 @@ understanding.
 
 **Feedback is diagnostic, never punitive.** There is no mistake counter and no fail state. Wrong connections get a nudge that points back at the concept ("think about what those terms share"). Solved clusters and bridges each reveal a teaching fact, so the moment of success doubles as the teaching moment.
 
-**Physics assists in arranging the results in a clear and readable way.** All three modes run a live force simulation to keep nodes and clusters legible as connections are made, rather than letting them pile up or overlap — Graph and Star modes each settle the whole node-link board from a cold start (Graph pulling a newly-connected term toward whichever term it was linked to, Star pulling it toward its cluster's label instead), while Circle mode only has to arrange the clusters and bridges, since docked terms stay fixed relative to their own circle. One visible consequence in Graph and Star modes: as bridges land, previously separate clusters visibly drift together into place.
+**Physics assists in arranging the results in a clear and readable way.** The three diagram modes run a live force simulation to keep nodes and clusters legible as connections are made, rather than letting them pile up or overlap — Graph and Star modes each settle the whole node-link board from a cold start (Graph pulling a newly-connected term toward whichever term it was linked to, Star pulling it toward its cluster's label instead), while Circle mode only has to arrange the clusters and bridges, since docked terms stay fixed relative to their own circle. One visible consequence in Graph and Star modes: as bridges land, previously separate clusters visibly drift together into place. Table mode keeps its rows and columns fixed and does not run a simulation.
 
 ## Want to add a puzzle, or work on the code?
 

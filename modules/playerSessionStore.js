@@ -3,7 +3,7 @@ import { normalizedLensMode } from "./lensEngine.js";
 import { normalizeEffort } from "./playerLayoutEffort.js";
 
 export const PLAYER_SESSION_SCHEMA_VERSION = 1;
-export const PLAYER_SESSION_MODES = ["graph", "star", "sets"];
+export const PLAYER_SESSION_MODES = ["graph", "star", "sets", "table"];
 
 const PREFIX = `ccPlayerSession:v${PLAYER_SESSION_SCHEMA_VERSION}`;
 

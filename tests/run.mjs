@@ -30,6 +30,7 @@ import { startServer, serverURL } from "./lib/server.mjs";
 import * as smoke from "./smoke.mjs";
 import * as clusterLabelConnect from "./cluster-label-connect.mjs";
 import * as clusterMenu from "./cluster-menu.mjs";
+import * as tableMode from "./table-mode.mjs";
 import * as solution from "./solution.mjs";
 import * as layoutSanity from "./layout-sanity.mjs";
 import * as mobileLayout from "./mobile-layout.mjs";
@@ -152,6 +153,7 @@ import * as legacyBoardLift from "./legacy-board-lift.mjs";
 import * as firstPublishedBackfill from "./first-published-backfill.mjs";
 
 const allTests = [
+  tableMode,
   mcpAuthoringDomains, boardLimitWaivers, mcpWaiverChatApproval,
   smoke, solution, layoutSanity, mobileLayout, sharing, clusterLabelConnect, clusterMenu, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
   starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, starBridgePreconnect, playerSessions,
@@ -188,6 +190,7 @@ const quickTests = [
 
 const standardTests = [
   ...quickTests,
+  tableMode,
   mobileLayout, clusterLabelConnect, clusterMenu, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip, starBridgePreconnect,
   learningLessonSection,
   authoringAdminIndex, localCatalogueReview, localDevHttp, localDevHousekeep, playCorpus, boardAdministration, publicPlayBrowser
@@ -199,6 +202,7 @@ const standardTests = [
 // a contract consumed by both surfaces.
 const sideTests = {
   play: new Set([
+    tableMode,
     smoke, solution, layoutSanity, mobileLayout, sharing, clusterLabelConnect, clusterMenu,
     bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
     starDetangle, starPrettyPrint, playerSessions,
