@@ -69,6 +69,8 @@ export function createLayoutAuthoringController({
   const layoutAuthoringFixedEl = document.getElementById("layout-authoring-fixed");
   const runPassBtn = document.getElementById("layout-authoring-run-pass");
   const savePassBtn = document.getElementById("layout-authoring-save-pass");
+  const passScopeLabel = document.getElementById("layout-authoring-pass-scope-label");
+  const passScopeSelect = document.getElementById("layout-authoring-pass-scope");
   const passEl = document.getElementById("layout-authoring-pass");
   // The progress area redraws every poll; only state changes are announced.
   const passAnnounceEl = document.getElementById("layout-authoring-pass-announce");
@@ -590,6 +592,7 @@ export function createLayoutAuthoringController({
     const switchedMode = getMode();
     const label = MODE_LABELS[switchedMode];
     syncLayoutActionVisibility();
+    syncPassScope();
     syncStarFreeStripButtons();
     if (switchedMode === "table") { updateLayoutAuthoringPanel(); return; }
     syncFixedCheckbox(state);
@@ -1003,6 +1006,36 @@ export function createLayoutAuthoringController({
   // True while the working copy on show changes the published board, which
   // the pass would lay out instead of the one on screen.
   let passBlocked = false;
+  // The modes and start size of the last dry run, which Save automatic
+  // layouts repeats so it saves what the report showed.
+  let dryRunScope = null;
+  const PASS_SCOPE_KEY = "ccLayoutPassScope:v1";
+  const PASS_MODES = ["graph", "sets", "star"];
+
+  // The author's last choice, which Table (no layout of its own) overrides
+  // on screen without forgetting.
+  let rememberedPassScope = "mode";
+  const passScopeModeOption = passScopeSelect?.querySelector('option[value="mode"]');
+
+  // Table has no layout to lay out, so there the picker shows, and a run
+  // covers, every mode; a diagram mode gets the author's choice back.
+  function syncPassScope() {
+    if (!passScopeSelect || !passScopeModeOption) return;
+    const mode = getMode();
+    const usable = PASS_MODES.includes(mode);
+    passScopeModeOption.disabled = !usable;
+    passScopeModeOption.textContent = usable ? `this mode (${MODE_LABELS[mode]})` : "this mode";
+    passScopeSelect.value = usable ? rememberedPassScope : "all";
+  }
+
+  // The modes a run covers: the one on screen, or every mode. The start size
+  // is the one in Board settings; the pass never shrinks below it.
+  function chosenPassScope() {
+    const mode = getMode();
+    const modes = passScopeSelect?.value === "all" || !PASS_MODES.includes(mode) ? null : [mode];
+    const minSize = boardSizeFactorInput ? canonicalBoardSizeFactor(boardSizeFactorInput.value) : null;
+    return { modes, minSize };
+  }
 
   const percent = size => {
     const value = Math.round(((Number(size) || 1) - 1) * 100);
@@ -1025,8 +1058,14 @@ export function createLayoutAuthoringController({
   function renderPassReport(job) {
     const result = job.result || {};
     const rows = Array.isArray(result.rows) ? result.rows : [];
+    const ranModes = job.modes?.length ? job.modes : null;
+    if (!job.write) dryRunScope = { modes: ranModes, minSize: job.minSize ?? null };
+    const scope = ranModes
+      ? `${ranModes.map(mode => MODE_LABELS[mode] || mode).join(", ")} only`
+      : "All modes";
     const size = result.sizeOwner === "auto"
-      ? `Board size ${percent(result.size)}${job.write ? (result.sizeAction ? ` (${result.sizeAction})` : "") : ""}`
+      ? `Board size ${percent(result.size)}${job.write ? (result.sizeAction ? ` (${result.sizeAction})` : "") : ""}` +
+        (result.suggestedSize != null ? `; with only this mode laid out the size stays, but the board would be clean at ${percent(result.suggestedSize)}` : "")
       : `Board size kept at ${percent(result.size)} (set by ${result.sizeOwner === "author" ? "an author" : "an author's layouts"})` +
         (result.suggestedSize != null ? `; the board would be clean at ${percent(result.suggestedSize)}` : "");
     // The pass reports a refused or invalid save as a "not saved (…)"
@@ -1049,7 +1088,7 @@ export function createLayoutAuthoringController({
       : unsaved
         ? `Automatic layouts saved with ${unsaved} not saved; see below.`
         : "Automatic layouts saved.";
-    passEl.innerHTML = `<div${unsaved ? ' data-tone="error"' : ""}>${escapeText(heading)} ${escapeText(size)}.</div><ul>${items}</ul>`;
+    passEl.innerHTML = `<div${unsaved ? ' data-tone="error"' : ""}>${escapeText(heading)} ${escapeText(scope)}. ${escapeText(size)}.</div><ul>${items}</ul>`;
     announcePass(`${job.startedAt}:done`, heading);
     passEl.hidden = false;
     // Saving is worth offering only when the dry run found something the
@@ -1114,7 +1153,8 @@ export function createLayoutAuthoringController({
     )) return;
     const puzzleId = state.puzzle.id;
     try {
-      const job = await layoutPass.start({ puzzleId, draftId: getDraftId(), write });
+      const scope = write && dryRunScope ? dryRunScope : chosenPassScope();
+      const job = await layoutPass.start({ puzzleId, draftId: getDraftId(), write, ...scope });
       // Another puzzle may have loaded while the request was in flight;
       // its panel must not show this puzzle's run.
       if (puzzleId !== passPuzzleId) return;
@@ -1129,6 +1169,15 @@ export function createLayoutAuthoringController({
 
   if (passAvailable) {
     runPassBtn.hidden = false;
+    if (passScopeLabel) passScopeLabel.hidden = false;
+    let savedScope = "";
+    try { savedScope = storage.getItem(PASS_SCOPE_KEY) || ""; } catch {}
+    if (savedScope === "mode" || savedScope === "all") rememberedPassScope = savedScope;
+    syncPassScope();
+    passScopeSelect?.addEventListener("change", () => {
+      rememberedPassScope = passScopeSelect.value;
+      try { storage.setItem(PASS_SCOPE_KEY, rememberedPassScope); } catch {}
+    });
     runPassBtn.addEventListener("click", () => startPass(false));
     savePassBtn.addEventListener("click", () => startPass(true));
   }
@@ -1137,6 +1186,7 @@ export function createLayoutAuthoringController({
     if (!passAvailable || !state?.puzzle) return;
     passPuzzleId = state.puzzle.id;
     passBlocked = false;
+    dryRunScope = null;
     try {
       const job = await layoutPass.status({ puzzleId: state.puzzle.id, draftId: getDraftId() });
       if (passPuzzleId !== state.puzzle.id) return;
@@ -1166,6 +1216,7 @@ export function createLayoutAuthoringController({
     const state = getState();
     syncLayoutActionVisibility();
     syncStarFreeStripButtons();
+    syncPassScope();
     if (!layoutAuthoringMode || !state) return;
     applyTimeLimit();
     // The renderer calls this after generated/curated placement and after

@@ -14,11 +14,26 @@ function cleanEnv(env) {
   return Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith("npm_config_")));
 }
 
+// The first line of a failed run says what went wrong; what follows is
+// detail (Playwright's install banner, a stack) that ends in decoration.
+export function passFailureMessage(stderr, code) {
+  return stderr.split("\n").map(line => line.trim()).find(Boolean)
+    || `layout pass exited with code ${code}`;
+}
+
+/** The pass's command-line arguments for one puzzle. */
+export function layoutPassArgs({ repositoryRoot, id, write, base, modes = null, minSize = null }) {
+  const args = [join(repositoryRoot, "tools", "layouts-auto.mjs"), id, "--json", "--lanes", "1", "--base", base];
+  if (write) args.push("--write");
+  if (modes?.length) args.push("--modes", modes.join(","));
+  if (minSize != null) args.push("--min-size", String(minSize));
+  return args;
+}
+
 /** Run the pass for one puzzle; resolves with that puzzle's result. */
-export function spawnLayoutPass({ repositoryRoot, id, write, base, env = process.env }) {
+export function spawnLayoutPass({ repositoryRoot, id, write, base, modes = null, minSize = null, env = process.env }) {
   return new Promise((resolve, reject) => {
-    const args = [join(repositoryRoot, "tools", "layouts-auto.mjs"), id, "--json", "--lanes", "1", "--base", base];
-    if (write) args.push("--write");
+    const args = layoutPassArgs({ repositoryRoot, id, write, base, modes, minSize });
     const child = spawn(process.execPath, args, { cwd: repositoryRoot, env: cleanEnv(env) });
     let stdout = "", stderr = "";
     child.stdout.on("data", chunk => { stdout += chunk; });
@@ -26,7 +41,7 @@ export function spawnLayoutPass({ repositoryRoot, id, write, base, env = process
     child.on("error", reject);
     child.on("close", code => {
       if (code !== 0) {
-        reject(new Error(stderr.trim().split("\n").slice(-3).join(" ") || `layout pass exited with code ${code}`));
+        reject(new Error(passFailureMessage(stderr, code)));
         return;
       }
       try {
@@ -53,12 +68,19 @@ export function createLayoutPassJobs({ run, now = () => new Date().toISOString()
     get(id) {
       return view(jobs.get(id));
     },
-    start(id, { write = false, base }) {
+    // modes (a list) and minSize narrow a run; both are kept on the job so
+    // Save automatic layouts can repeat the dry run it follows.
+    start(id, { write = false, base, modes = null, minSize = null }) {
       const current = jobs.get(id);
       if (current?.status === "running") return view(current);
+      const scope = {
+        ...(modes?.length ? { modes: [...modes] } : {}),
+        ...(minSize != null ? { minSize } : {})
+      };
       const job = {
         id,
         write: !!write,
+        ...scope,
         status: "running",
         startedAt: now(),
         finishedAt: null,
@@ -67,7 +89,7 @@ export function createLayoutPassJobs({ run, now = () => new Date().toISOString()
       };
       jobs.set(id, job);
       Promise.resolve()
-        .then(() => run({ id, write: !!write, base }))
+        .then(() => run({ id, write: !!write, base, ...scope }))
         .then(result => {
           Object.assign(job, { status: "done", result, finishedAt: now() });
         }, error => {
