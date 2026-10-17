@@ -2337,7 +2337,7 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
   // through the general add row. Left blank, it adds nothing; a model the
   // existing row already has merges into it. The frame's hint sits here, once.
   const creditsClaude = generativeHosts.some(({ rowKey }) => rowKey);
-  const addClaudeRow = creditsClaude ? `<div class="provenance-client-row provenance-client-add-claude" data-provenance-row data-host-key="claude">
+  const addClaudeRow = creditsClaude ? `<div class="provenance-client-row provenance-client-add-claude" data-provenance-row data-provenance-add data-host-key="claude">
       <label class="field-label" for="provenance-add-claude-model">another Claude model</label>
       <select${form} id="provenance-add-claude-model" name="${prefix}addClaudeModel" data-provenance-field="model">${modelSelectOptions("")}</select>
       <label class="field-label" for="provenance-add-claude-code"><input${form} type="checkbox" id="provenance-add-claude-code" name="${prefix}addClaudeCode" value="1" data-provenance-field="claudeCode"> Claude Code</label>
@@ -2359,7 +2359,7 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
     generativeHostKey(host) === generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM));
   // Reasoning/switch aren't offered on the add row itself -- they tune a
   // specific client's row, which this one becomes only once added and saved.
-  const addClientRow = unlistedHosts.length && !hasUnnamed ? `<div class="provenance-client-row provenance-client-add" data-provenance-row>
+  const addClientRow = unlistedHosts.length && !hasUnnamed ? `<div class="provenance-client-row provenance-client-add" data-provenance-row data-provenance-add>
       <label class="field-label" for="provenance-add-host">add drafting client</label>
       <select${form} id="provenance-add-host" name="${prefix}modelHost" data-provenance-host-select>${[
         `<option value="">(choose a drafting client)</option>`,

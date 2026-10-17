@@ -118,6 +118,8 @@ export const PROVENANCE_LAST_USED_SCRIPT = `(function () {
     // A row with nothing set leaves its memory alone; otherwise every field
     // the row offers is recorded as saved, blank included. Fields the row
     // lacks (the add rows have no reasoning) keep their remembered value.
+    // A ticked Claude Code box alone is a real edit on a credited row, but
+    // not on an add row, which adds nothing without a model.
     remember() {
       const memory = readMemory();
       for (const row of this.rows()) {
@@ -128,8 +130,9 @@ export const PROVENANCE_LAST_USED_SCRIPT = `(function () {
           const select = control(row, field);
           if (select) values[field] = select.value;
         }
-        if (!SELECT_FIELDS.some((field) => values[field])) continue;
         const box = control(row, "claudeCode");
+        const ticked = box && box.checked && !row.hasAttribute("data-provenance-add");
+        if (!ticked && !SELECT_FIELDS.some((field) => values[field])) continue;
         if (box) values.claudeCode = box.checked;
         memory[key] = Object.assign({}, memory[key], values);
       }

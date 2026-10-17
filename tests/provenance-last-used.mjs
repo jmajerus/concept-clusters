@@ -87,4 +87,27 @@ export async function run(page, baseURL) {
   await chip(claudeRow).click();
   assert.equal(await page.isChecked(`${claudeRow} [data-provenance-field="claudeCode"]`), true);
   assert.equal(await page.inputValue(`${claudeRow} [data-provenance-field="reasoning"]`), "high");
+
+  // Ticking Claude Code alone on a credited row is an edit worth
+  // remembering; the same tick on the "another Claude model" row adds
+  // nothing without a model, so it records nothing.
+  await page.evaluate(key => localStorage.removeItem(key), PROVENANCE_LAST_USED_STORAGE_KEY);
+  await load([{ name: "Claude" }]);
+  await page.check(`${claudeRow} [data-provenance-field="claudeCode"]`);
+  await Promise.all([
+    page.waitForURL("**/admin/drafts/review-fixture"),
+    page.click('button[type="submit"][form]:has-text("Save working copy")')
+  ]);
+  const tickOnly = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), PROVENANCE_LAST_USED_STORAGE_KEY);
+  assert.deepEqual(tickOnly.claude, { model: "", reasoning: "", switch: "", claudeCode: true });
+
+  await page.evaluate(key => localStorage.removeItem(key), PROVENANCE_LAST_USED_STORAGE_KEY);
+  await load([{ name: "Claude (Claude Opus 5)" }]);
+  await page.check('[data-provenance-add] [data-provenance-field="claudeCode"]');
+  await Promise.all([
+    page.waitForURL("**/admin/drafts/review-fixture"),
+    page.click('button[type="submit"][form]:has-text("Save working copy")')
+  ]);
+  const addRowTick = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), PROVENANCE_LAST_USED_STORAGE_KEY);
+  assert.equal(addRowTick.claude.claudeCode, false, "the credited row's untouched box, not the add row's tick");
 }
