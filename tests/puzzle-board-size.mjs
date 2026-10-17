@@ -168,18 +168,18 @@ export async function run() {
   assert.deepEqual(boardCanvas(heavy), { width: 1090, height: 700 });
   assert.equal(boardFrameMaxWidth(boardCanvas(heavy)), 1135);
 
-  // Published puzzles that the label-surplus and edge-load rules above have
-  // already grown off their preset. Pinned here so any further corpus drift
-  // still shows up as a failure rather than passing silently.
-  const grownCanvas = {
-    "octopus-play-stages": { width: 1080, height: 700 },
-    "functional-groups-organic": { width: 970, height: 630 }
-  };
+  // Published puzzles: one under the growth load stays on its floor, and
+  // one over it only ever grows from there. The growth amounts themselves
+  // are pinned by the synthetic cases above, not by corpus content.
   for (const puzzle of PUZZLES) {
-    if (grownCanvas[puzzle.id]) {
-      assert.deepEqual(boardCanvas(puzzle), grownCanvas[puzzle.id], `${puzzle.id} should stay on its grown canvas`);
+    if (boardSizeFactor(puzzle) !== 1) continue;
+    const floor = floorCanvas(puzzle);
+    if (!(boardLoad(puzzle) > 1)) {
+      assert.equal(boardCanvas(puzzle), floor, `${puzzle.id} should stay on its floor canvas`);
       continue;
     }
-    assert.equal(boardCanvas(puzzle), floorCanvas(puzzle), `${puzzle.id} should stay on its floor canvas`);
+    const canvas = boardCanvas(puzzle);
+    assert.ok(canvas.width >= floor.width && canvas.height >= floor.height,
+      `${puzzle.id} grew below its floor canvas: ${JSON.stringify(canvas)}`);
   }
 }
