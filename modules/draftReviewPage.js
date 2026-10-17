@@ -655,6 +655,8 @@ const PAGE_STYLE = `
   .layout-chip-auto { background: #dbeafe; }
   .layout-chip-none { background: #eee; color: #666; }
   .layout-chip-repair { box-shadow: inset 0 0 0 1.5px #dc2626; color: #991b1b; font-weight: 600; }
+  .corpus-pending { border-left: 3px solid #94a3b8; padding-left: 10px; }
+  .corpus-pending h2 { color: #475569; }
   .layout-auto-pass { background: transparent; box-shadow: inset 0 0 0 1px #94a3b8; color: #475569; white-space: nowrap; }
   .layout-auto-pass[data-auto-layout="done"] { box-shadow: inset 0 0 0 1px #2563eb; color: #1d4ed8; }
   .layout-auto-pass[data-auto-layout="failed"] { box-shadow: inset 0 0 0 1px #dc2626; color: #991b1b; }
@@ -1200,7 +1202,7 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const layoutsCell = local ? `<td>${renderSavedLayouts(layoutModes)}${renderAutoLayoutBadge(item.autoLayout)}</td>` : "";
   const layoutToFix = layoutModes.some(entry => !entry.saved || entry.repair) ? "1" : "0";
   const layoutWork = layoutToFix === "1" || autoLayoutNeedsLook(item) ? "1" : "0";
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-fix="${layoutToFix}" data-layout-work="${layoutWork}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-fix="${layoutToFix}" data-layout-work="${layoutWork}" data-auto-pending="${["pending", "running"].includes(item.autoLayout?.state) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
@@ -1223,6 +1225,21 @@ function renderCorpusGroup({ title, rows, variant, includeCategory = false }) {
       <table>
         ${corpusTableHead(variant, { includeCategory })}
         <tbody>${rows.map(item => renderCorpusRow(item, variant, { includeCategory })).join("\n")}</tbody>
+      </table>
+    </section>`;
+}
+
+// Layout work's Pending section, at the top of each arrangement: working
+// copies whose automatic layout pass has not finished. The filter script
+// moves their rows in while Layout work is shown, and back afterwards.
+function renderPendingSection(variant, { includeCategory = false } = {}) {
+  if (variant !== "local") return "";
+  return `<section class="corpus-group corpus-pending" data-pending-section hidden>
+      <h2>Pending</h2>
+      <p class="meta"><span data-pending-count></span> · automatic layout pass not finished yet; reload to see progress</p>
+      <table>
+        ${corpusTableHead(variant, { includeCategory })}
+        <tbody></tbody>
       </table>
     </section>`;
 }
@@ -1289,6 +1306,29 @@ const CORPUS_FILTER_SCRIPT = `
     if ((location.hash || "") === next) return;
     history.replaceState(null, "", location.pathname + location.search + next);
   }
+  // Under Layout work, rows whose automatic pass has not finished move into
+  // their arrangement's Pending section, newest first; a placeholder keeps
+  // each row's own place for when another filter is chosen.
+  function placePending(pendingShown) {
+    root.querySelectorAll("tr[data-auto-pending='1']").forEach(function (row) {
+      if (pendingShown && !row.__placeholder) {
+        var section = row.closest(".corpus-arrangement").querySelector("[data-pending-section] tbody");
+        row.__placeholder = document.createComment("pending row");
+        row.parentNode.insertBefore(row.__placeholder, row);
+        section.appendChild(row);
+      } else if (!pendingShown && row.__placeholder) {
+        row.__placeholder.parentNode.replaceChild(row, row.__placeholder);
+        row.__placeholder = null;
+      }
+    });
+    root.querySelectorAll("[data-pending-section] tbody").forEach(function (body) {
+      Array.prototype.slice.call(body.children)
+        .sort(function (a, b) {
+          return (b.getAttribute("data-updated-at") || "").localeCompare(a.getAttribute("data-updated-at") || "");
+        })
+        .forEach(function (row) { body.appendChild(row); });
+    });
+  }
   function apply() {
     var query = ((search && search.value) || "").trim().toLowerCase();
     var scope = selectedValue("puzzle-corpus-scope", "all");
@@ -1296,6 +1336,7 @@ const CORPUS_FILTER_SCRIPT = `
     if (byCategory) byCategory.hidden = arrange !== "category";
     if (byRecent) byRecent.hidden = arrange !== "recent";
     syncHash(arrange);
+    placePending(scope === "layouts");
     root.querySelectorAll("tr[data-puzzle-id]").forEach(function (row) {
       var hay = (row.getAttribute("data-filter") || "").toLowerCase();
       var hasDraft = row.getAttribute("data-has-draft") === "1";
@@ -1318,7 +1359,11 @@ const CORPUS_FILTER_SCRIPT = `
       row.hidden = !(matchQuery && matchScope);
     });
     root.querySelectorAll(".corpus-group").forEach(function (group) {
-      group.hidden = group.querySelectorAll("tr[data-puzzle-id]:not([hidden])").length === 0;
+      var shown = group.querySelectorAll("tr[data-puzzle-id]:not([hidden])").length;
+      group.hidden = shown === 0;
+      // Counts follow the filter, and Pending's moved rows.
+      var count = group.querySelector("[data-pending-count]") || group.querySelector(":scope > p.meta");
+      if (count) count.textContent = shown + (shown === 1 ? " puzzle" : " puzzles");
     });
   }
   if (location.hash === "#category") setArrange("category");
@@ -1410,8 +1455,8 @@ export function renderDraftListPage(rows, {
            <label><input type="radio" name="puzzle-corpus-arrange" value="recent" checked> Recent</label>
          </p>
        </div>
-       <div id="corpus-by-category" hidden>${categoryGroups}</div>
-       <div id="corpus-by-recent">${recentWorking}${recentPublished}${recentInactive}</div>
+       <div id="corpus-by-category" class="corpus-arrangement" hidden>${renderPendingSection(variant)}${categoryGroups}</div>
+       <div id="corpus-by-recent" class="corpus-arrangement">${renderPendingSection(variant, { includeCategory: true })}${recentWorking}${recentPublished}${recentInactive}</div>
        ${empty}
      </div>
      <script>${CORPUS_FILTER_SCRIPT}</script>`;

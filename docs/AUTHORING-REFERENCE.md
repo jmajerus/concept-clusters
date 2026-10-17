@@ -1702,7 +1702,11 @@ was left with), or `auto ✗` (failed; the tooltip says why).
 missing or marked mode, an automatic pass still to come or failed, or a
 finished one whose layouts are not published yet. Under **Recent** the
 newest are on top, so a working copy the pass has just laid out comes first.
-`auto ✓` with no `!` is ready to look over; a `!` marks a mode to edit.
+Puzzles whose automatic pass has not finished (`auto …`, `auto ▶`) sit
+apart in a **Pending** section at the top, so the main list is the work that
+is ready now; the list shows each puzzle as of when the page loaded, so
+reload to see progress. `auto ✓` with no `!` is ready to look over; a `!`
+marks a mode to edit.
 Publishing takes a reviewed puzzle off the list; one published with a mode
 still marked stays on it.
 
