@@ -9,11 +9,13 @@ export async function run(page, baseURL) {
   await page.emulateMedia({ reducedMotion: "reduce" });
 
   await page.goto(`${baseURL}/index.html`);
+  await page.waitForFunction(() => window.CC);
   const puzzleIds = await page.evaluate(() => CC.PUZZLES.map(puzzle => puzzle.id));
 
   // The click handler must yield before its CPU-bound candidate search so
   // the pressed/busy state reaches the screen immediately.
   await page.goto(`${baseURL}/index.html?puzzle=fundamental-forces&mode=graph&moves=`);
+  await page.waitForFunction(() => window.CC?.state);
   await page.evaluate(() => {
     const button = document.getElementById("show-solution");
     window.__solutionButtonStates = [];
@@ -43,6 +45,7 @@ export async function run(page, baseURL) {
 
   for (const puzzleId of puzzleIds) {
     await page.goto(`${baseURL}/index.html?puzzle=${puzzleId}&mode=graph&solved`);
+    await page.waitForFunction(() => window.CC?.state);
     if (await page.evaluate(() => CC.state.learningGated)) {
       await page.click("#learning-introduction #skip");
     }
@@ -81,6 +84,7 @@ export async function run(page, baseURL) {
   // A solved-board drag is a durable player preference and stays fixed
   // when the remaining graph is polished again.
   await page.goto(`${baseURL}/index.html?puzzle=fundamental-forces&mode=graph&solved`);
+  await page.waitForFunction(() => window.CC?.state);
   await page.evaluate(() => CC.state.prettyPrintPromise);
   const term = page.locator(".node").first();
   const box = await term.boundingBox();
