@@ -84,7 +84,8 @@ export async function startLayoutPass({
     cache: "no-store",
     body: JSON.stringify({
       write,
-      ...(modes?.length ? { modes } : {}),
+      // An explicit list, even an empty one, goes to the server to check.
+      ...(Array.isArray(modes) ? { modes } : {}),
       ...(minSize != null ? { minSize } : {})
     })
   });

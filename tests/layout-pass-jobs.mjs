@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createLayoutPassJobs, layoutPassArgs, passFailureMessage } from "../modules/layoutPassJobs.js";
 import { layoutPassSizePlan } from "../modules/layoutPassSizePlan.js";
+import { startLayoutPass } from "../modules/layoutApi.js";
 
 export const name = "layout pass jobs: one run per puzzle, kept until the next";
 
@@ -59,6 +60,23 @@ export async function run() {
   assert.deepEqual(args.slice(1), ["gamma", "--json", "--lanes", "1", "--base", "x", "--write", "--modes", "sets,star", "--min-size", "1.1"]);
   assert.deepEqual(layoutPassArgs({ repositoryRoot: "/r", id: "gamma", write: false, base: "x" }).slice(1),
     ["gamma", "--json", "--lanes", "1", "--base", "x"]);
+
+  // The page's request names its scope; an explicit empty list still goes
+  // to the server, which refuses it, rather than becoming an all-modes run.
+  const sent = [];
+  const fetchImpl = async (url, init) => {
+    sent.push({ url, body: JSON.parse(init.body) });
+    return new Response("{}", { status: 202 });
+  };
+  await startLayoutPass({ puzzleId: "gamma", draftId: "gamma-draft", modes: ["sets"], minSize: 1.1, fetchImpl });
+  await startLayoutPass({ puzzleId: "gamma", modes: [], fetchImpl });
+  await startLayoutPass({ puzzleId: "gamma", fetchImpl });
+  assert.equal(sent[0].url, "/admin/puzzles/gamma/layouts-auto?draft=gamma-draft");
+  assert.deepEqual(sent.map(request => request.body), [
+    { write: false, modes: ["sets"], minSize: 1.1 },
+    { write: false, modes: [] },
+    { write: false }
+  ]);
 
   // A failed run reports its first line, not the banner that ends it.
   assert.equal(passFailureMessage(

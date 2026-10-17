@@ -592,6 +592,7 @@ export function createLayoutAuthoringController({
     const switchedMode = getMode();
     const label = MODE_LABELS[switchedMode];
     syncLayoutActionVisibility();
+    syncPassScope();
     syncStarFreeStripButtons();
     if (switchedMode === "table") { updateLayoutAuthoringPanel(); return; }
     syncFixedCheckbox(state);
@@ -1011,6 +1012,22 @@ export function createLayoutAuthoringController({
   const PASS_SCOPE_KEY = "ccLayoutPassScope:v1";
   const PASS_MODES = ["graph", "sets", "star"];
 
+  // The author's last choice, which Table (no layout of its own) overrides
+  // on screen without forgetting.
+  let rememberedPassScope = "mode";
+  const passScopeModeOption = passScopeSelect?.querySelector('option[value="mode"]');
+
+  // Table has no layout to lay out, so there the picker shows, and a run
+  // covers, every mode; a diagram mode gets the author's choice back.
+  function syncPassScope() {
+    if (!passScopeSelect || !passScopeModeOption) return;
+    const mode = getMode();
+    const usable = PASS_MODES.includes(mode);
+    passScopeModeOption.disabled = !usable;
+    passScopeModeOption.textContent = usable ? `this mode (${MODE_LABELS[mode]})` : "this mode";
+    passScopeSelect.value = usable ? rememberedPassScope : "all";
+  }
+
   // The modes a run covers: the one on screen, or every mode. The start size
   // is the one in Board settings; the pass never shrinks below it.
   function chosenPassScope() {
@@ -1155,9 +1172,11 @@ export function createLayoutAuthoringController({
     if (passScopeLabel) passScopeLabel.hidden = false;
     let savedScope = "";
     try { savedScope = storage.getItem(PASS_SCOPE_KEY) || ""; } catch {}
-    if (passScopeSelect && (savedScope === "mode" || savedScope === "all")) passScopeSelect.value = savedScope;
+    if (savedScope === "mode" || savedScope === "all") rememberedPassScope = savedScope;
+    syncPassScope();
     passScopeSelect?.addEventListener("change", () => {
-      try { storage.setItem(PASS_SCOPE_KEY, passScopeSelect.value); } catch {}
+      rememberedPassScope = passScopeSelect.value;
+      try { storage.setItem(PASS_SCOPE_KEY, rememberedPassScope); } catch {}
     });
     runPassBtn.addEventListener("click", () => startPass(false));
     savePassBtn.addEventListener("click", () => startPass(true));
@@ -1197,6 +1216,7 @@ export function createLayoutAuthoringController({
     const state = getState();
     syncLayoutActionVisibility();
     syncStarFreeStripButtons();
+    syncPassScope();
     if (!layoutAuthoringMode || !state) return;
     applyTimeLimit();
     // The renderer calls this after generated/curated placement and after

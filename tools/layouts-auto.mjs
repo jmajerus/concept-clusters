@@ -98,6 +98,7 @@ function parseArgs(argv) {
     else if (arg === "--json") options.json = true;
     else if (arg === "--modes") {
       options.modes = value().split(",").map(mode => mode.trim()).filter(Boolean);
+      if (!options.modes.length) throw new Error(`--modes needs one or more of ${MODES.join(", ")}`);
       const unknown = options.modes.filter(mode => !MODES.includes(mode));
       if (unknown.length) throw new Error(`Unknown mode(s): ${unknown.join(", ")}`);
     } else if (arg === "--min-size") {
