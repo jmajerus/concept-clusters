@@ -21,19 +21,22 @@ export function passFailureMessage(stderr, code) {
     || `layout pass exited with code ${code}`;
 }
 
-/** The pass's command-line arguments for one puzzle. */
-export function layoutPassArgs({ repositoryRoot, id, write, base, modes = null, minSize = null }) {
-  const args = [join(repositoryRoot, "tools", "layouts-auto.mjs"), id, "--json", "--lanes", "1", "--base", base];
+/** The pass's command-line arguments for one puzzle or one working copy. */
+export function layoutPassArgs({ repositoryRoot, id, write, base, modes = null, minSize = null, draft = null }) {
+  const target = draft ? ["--draft", draft] : [id];
+  const args = [join(repositoryRoot, "tools", "layouts-auto.mjs"), ...target, "--json", "--lanes", "1", "--base", base];
   if (write) args.push("--write");
   if (modes?.length) args.push("--modes", modes.join(","));
   if (minSize != null) args.push("--min-size", String(minSize));
   return args;
 }
 
-/** Run the pass for one puzzle; resolves with that puzzle's result. */
-export function spawnLayoutPass({ repositoryRoot, id, write, base, modes = null, minSize = null, env = process.env }) {
+/** Run the pass for one puzzle (or working copy); resolves with its result. */
+export function spawnLayoutPass({ repositoryRoot, id, write, base, modes = null, minSize = null, draft = null, env = process.env }) {
   return new Promise((resolve, reject) => {
-    const args = layoutPassArgs({ repositoryRoot, id, write, base, modes, minSize });
+    const args = layoutPassArgs({ repositoryRoot, id, write, base, modes, minSize, draft });
+    // A working copy's run reports under its draft id.
+    const resultId = draft || id;
     const child = spawn(process.execPath, args, { cwd: repositoryRoot, env: cleanEnv(env) });
     let stdout = "", stderr = "";
     child.stdout.on("data", chunk => { stdout += chunk; });
@@ -46,7 +49,7 @@ export function spawnLayoutPass({ repositoryRoot, id, write, base, modes = null,
       }
       try {
         const report = JSON.parse(stdout.trim().split("\n").pop());
-        const puzzle = report.puzzles.find(entry => entry.id === id);
+        const puzzle = report.puzzles.find(entry => entry.id === resultId);
         if (!puzzle) throw new Error("the layout pass returned no result for this puzzle");
         if (puzzle.error) throw new Error(puzzle.error);
         resolve(puzzle);
@@ -58,8 +61,10 @@ export function spawnLayoutPass({ repositoryRoot, id, write, base, modes = null,
 }
 
 /**
- * In-memory jobs, one per puzzle id: at most one run at a time per puzzle,
- * and the last finished run kept so a reload can still show it.
+ * In-memory jobs, one per key: a puzzle id, or `draft:<id>` for a working
+ * copy. At most one run at a time per key, and the last finished run kept so
+ * a reload can still show it. `trigger` says who started it: "manual" (the
+ * panel) or "auto" (the watcher, autoLayoutWatcher.js).
  */
 export function createLayoutPassJobs({ run, now = () => new Date().toISOString() }) {
   const jobs = new Map();
@@ -70,16 +75,18 @@ export function createLayoutPassJobs({ run, now = () => new Date().toISOString()
     },
     // modes (a list) and minSize narrow a run; both are kept on the job so
     // Save automatic layouts can repeat the dry run it follows.
-    start(id, { write = false, base, modes = null, minSize = null }) {
+    start(id, { write = false, base, modes = null, minSize = null, draft = null, trigger = "manual" }) {
       const current = jobs.get(id);
       if (current?.status === "running") return view(current);
       const scope = {
         ...(modes?.length ? { modes: [...modes] } : {}),
-        ...(minSize != null ? { minSize } : {})
+        ...(minSize != null ? { minSize } : {}),
+        ...(draft ? { draft } : {})
       };
       const job = {
         id,
         write: !!write,
+        trigger,
         ...scope,
         status: "running",
         startedAt: now(),

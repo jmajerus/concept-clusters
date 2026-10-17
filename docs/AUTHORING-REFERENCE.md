@@ -1701,9 +1701,18 @@ all modes; one mode is quicker when only one mode needs work. **Save
 automatic layouts** then runs the same modes again and saves, after a
 confirmation, and reloads the board to show the result. A run takes from
 under a minute to a few minutes; the panel shows progress and keeps the last
-report. The pass works on the published puzzle. With a working copy open, the
-buttons work as long as the copy has the published board (the same clusters,
-terms, and bridges); a copy that changes the board has to be published first.
+report. The pass works on the published puzzle, or, with a working copy open,
+on that working copy, saving into it; players see those layouts once the
+working copy is published.
+
+On the shared authoring server the pass also runs by itself on working
+copies: a few minutes after a working copy's board (clusters, terms, and
+bridges) last changed, it lays out all three modes and saves them into the
+working copy, so the layout page usually opens on saved layouts. Edits that
+leave the board alone, such as facts or lenses, do not start it again. The
+panel shows the automatic run like one started by hand; if it finishes while
+the page is open, reload to see the layouts. A run that fails waits for the
+next board change, or for **Run layout pass**.
 
 For many puzzles at once, use the command line:
 
@@ -1717,7 +1726,8 @@ authoring server (`npm run dev`) and reports each board's remaining problems.
 It is a dry run unless given `--write`, which saves results to the live
 publication rows players see; start with a few puzzles before `--all`. Other
 options: `--modes graph,sets,star`, `--min-size <factor>` (the board size to
-start from, such as `1.1` for +10%), `--lanes <n>` (puzzles at once), and
+start from, such as `1.1` for +10%), `--draft <draft-id>` (one working copy
+instead of published puzzles), `--lanes <n>` (puzzles at once), and
 `--report <file>` (full results as JSON).
 
 For each board, strategies run in order until the board is clean: the live

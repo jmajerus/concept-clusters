@@ -149,6 +149,7 @@ import * as graphLayoutRepair from "./graph-layout-repair.mjs";
 import * as playerLayoutEffort from "./player-layout-effort.mjs";
 import * as playerLayoutPolish from "./player-layout-polish.mjs";
 import * as layoutPassJobs from "./layout-pass-jobs.mjs";
+import * as autoLayoutWatcher from "./auto-layout-watcher.mjs";
 import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
@@ -170,7 +171,7 @@ const allTests = [
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, singleClusterLayout,
+  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -190,7 +191,7 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
-  circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, singleClusterLayout,
+  circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
@@ -241,7 +242,7 @@ const sideTests = {
     authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
-    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, legacyBoardLift, firstPublishedBackfill
+    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill
   ]),
   shared: new Set([
     contentValidation,

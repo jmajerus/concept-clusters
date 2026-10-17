@@ -23,7 +23,9 @@ import { D1FreezePublicationRepository } from "./d1FreezePublicationRepository.j
 import { createFreezePublicationService } from "./freezePublicationService.js";
 import { LocalGitHubConfigError, resolveLocalGitHubConfig } from "./localGitHubConfig.js";
 import { refreshGithubProductionManifest, loadGithubProductionManifest } from "./githubProductionManifest.js";
-import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
+import { createDefaultLocalPlayCorpusHandler, draftLayoutPassKey, layoutPassJobsFor } from "./localPlayCorpus.js";
+import { AUTO_LAYOUT_DEFAULTS, createAutoLayoutWatcher } from "./autoLayoutWatcher.js";
+import { authoringWorkspacePaths } from "./authoringWorkspacePaths.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
@@ -806,22 +808,59 @@ export async function runLocalDev({
     process.exit(1);
   }
 
+  let started;
   try {
-    if (options.worker) {
-      return await startLocalWorkerDev({
+    started = options.worker
+      ? await startLocalWorkerDev({
         ...shared,
         wranglerArgs: options.wranglerArgs,
         tryCommand: suggestedBusyCommand({ worker: true })
+      })
+      : await startLocalStaticDev({
+        ...shared,
+        tryCommand: suggestedBusyCommand()
       });
-    }
-    return await startLocalStaticDev({
-      ...shared,
-      tryCommand: suggestedBusyCommand()
-    });
   } catch (error) {
     if (error.code === "EADDRINUSE") process.exit(1);
     throw error;
   }
+  await startAutoLayoutPass({ repositoryRoot, env, port: boundPort(started.server, options.port) });
+  return started;
+}
+
+// AUTO_LAYOUT_PASS=1 runs the layout pass on working copies whose board has
+// settled (autoLayoutWatcher.js). Only one server should: the authoring
+// server. Two would lay out the same working copies twice.
+async function startAutoLayoutPass({ repositoryRoot, env, port }) {
+  if (env.AUTO_LAYOUT_PASS !== "1") return null;
+  let workspace;
+  try {
+    workspace = await resolveLocalAuthoringWorkspace({ env, repositoryRoot });
+  } catch (error) {
+    console.error(`${formatDevTimestamp()} Automatic layout pass off: ${error instanceof Error ? error.message : String(error)}`);
+    return null;
+  }
+  const drafts = workspace.draftStore;
+  if (typeof drafts?.listChangedSince !== "function") {
+    console.error(`${formatDevTimestamp()} Automatic layout pass off: working copies are not in D1.`);
+    return null;
+  }
+  const minutes = Number(env.AUTO_LAYOUT_SETTLE_MINUTES);
+  const settleMs = Number.isFinite(minutes) && minutes >= 0
+    ? minutes * 60_000
+    : AUTO_LAYOUT_DEFAULTS.settleMs;
+  const watcher = createAutoLayoutWatcher({
+    listChangedSince: options => drafts.listChangedSince(options),
+    getDraft: draftId => drafts.getDraft(draftId),
+    jobs: layoutPassJobsFor(repositoryRoot),
+    jobKey: draftLayoutPassKey,
+    base: `http://127.0.0.1:${port}`,
+    statePath: authoringWorkspacePaths({ repositoryRoot, env }).autoLayoutPass,
+    settleMs,
+    log: line => console.log(`${formatDevTimestamp()} ${line}`)
+  });
+  console.log(`${formatDevTimestamp()} Automatic layout pass on: working copies are laid out ${settleMs / 60_000} min after their board last changed.`);
+  return watcher.start();
 }
 
 export default runLocalDev;

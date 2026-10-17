@@ -5,10 +5,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
-import { boardDiffersFromPublished } from "./draftReviewDiff.js";
 import { canonicalBoardSizeFactor } from "./puzzleBoardSize.js";
 import { LAYOUT_PASS_MODES } from "./layoutPassSizePlan.js";
-import { DraftNotFoundError } from "./draftRepository.js";
 import {
   seedPublishedCatalogues,
   seedPublishedCategories,
@@ -48,10 +46,18 @@ import {
 const LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/;
 const LAYOUT_PASS_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layouts-auto$/;
 
+const DRAFT_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** The job key a working copy's layout passes run under. */
+export function draftLayoutPassKey(draftId) {
+  return `draft:${draftId}`;
+}
+
 // One registry for the server: the default handler is rebuilt per request,
-// and a running pass must stay findable across requests.
+// and a running pass must stay findable across requests, including by the
+// automatic pass's watcher.
 const sharedLayoutPassJobs = new Map();
-function layoutPassJobsFor(repositoryRoot) {
+export function layoutPassJobsFor(repositoryRoot) {
   if (!sharedLayoutPassJobs.has(repositoryRoot)) {
     sharedLayoutPassJobs.set(repositoryRoot, createLayoutPassJobs({
       run: options => spawnLayoutPass({ ...options, repositoryRoot })
@@ -154,7 +160,6 @@ export function createLocalPlayCorpusHandler({
   contentDocuments,
   contentService = null,
   listDrafts = null,
-  getDraft = null,
   repositoryRoot,
   indexHtml = null,
   layoutPassJobs = null,
@@ -183,9 +188,9 @@ export function createLocalPlayCorpusHandler({
     // The authoring panel's Run layout pass: POST starts the automatic
     // layout pass for one published puzzle ({ write: true } saves its
     // results), GET reports the running or last finished run. With
-    // ?draft=<id> (the layout view is showing a working copy), GET also says
-    // whether that copy's board is the published one, and POST refuses when
-    // it is not: the pass would lay out a board the author is not looking at.
+    // ?draft=<id> (the layout view is showing a working copy) both act on
+    // that working copy instead, under the job key draft:<id>, which the
+    // automatic pass on new working copies shares (autoLayoutWatcher.js).
     const passMatch = urlPath.match(LAYOUT_PASS_ROUTE);
     if (passMatch) {
       if (!requestIsSameOriginIfSpecified(req)) {
@@ -196,46 +201,29 @@ export function createLocalPlayCorpusHandler({
       const jobs = layoutPassJobs || layoutPassJobsFor(repositoryRoot);
       const reading = req.method === "GET" || req.method === "HEAD";
       if (!reading && req.method !== "POST") return false;
-      await ensureSeeded();
       const draftId = requestUrl.searchParams.get("draft");
-      let published;
-      try {
-        published = await contentDocuments.getPublished({ kind: "puzzle", id });
-      } catch (error) {
-        if (!(error instanceof ContentDocumentNotFoundError)) throw error;
-        // A working copy that was never published is an ordinary state for
-        // the layout view to show, not an error.
-        if (reading && draftId) {
-          json(res, { status: "none", published: false });
+      if (draftId !== null && !DRAFT_ID_RE.test(draftId)) {
+        json(res, { error: "Invalid working copy id.", id }, 400);
+        return true;
+      }
+      const jobKey = draftId ? draftLayoutPassKey(draftId) : id;
+      if (!draftId) {
+        await ensureSeeded();
+        let published;
+        try {
+          published = await contentDocuments.getPublished({ kind: "puzzle", id });
+        } catch (error) {
+          if (!(error instanceof ContentDocumentNotFoundError)) throw error;
+          json(res, { error: "The layout pass runs on published puzzles; this one is not published.", id }, 404);
           return true;
         }
-        json(res, { error: "The layout pass runs on published puzzles; this one is not published.", id }, 404);
-        return true;
-      }
-      if (published.withdrawnAt) {
-        json(res, { error: "Puzzle withdrawn from authoring play", id }, 409);
-        return true;
-      }
-      let boardMatchesPublished = null;
-      if (draftId && typeof getDraft === "function") {
-        let draft = null;
-        try {
-          draft = await getDraft(draftId);
-        } catch (error) {
-          // A working copy deleted since the page loaded leaves the
-          // published board, which the pass already runs on.
-          if (!(error instanceof DraftNotFoundError)) throw error;
+        if (published.withdrawnAt) {
+          json(res, { error: "Puzzle withdrawn from authoring play", id }, 409);
+          return true;
         }
-        if (draft) boardMatchesPublished = !boardDiffersFromPublished(published.document, draft.document);
       }
       if (reading) {
-        json(res, boardMatchesPublished === null
-          ? jobs.get(id)
-          : { ...jobs.get(id), boardMatchesPublished });
-        return true;
-      }
-      if (boardMatchesPublished === false) {
-        json(res, { error: "This working copy changes the board. Publish it first, then run the layout pass.", id }, 409);
+        json(res, jobs.get(jobKey));
         return true;
       }
       let body;
@@ -261,7 +249,7 @@ export function createLocalPlayCorpusHandler({
         return true;
       }
       const base = `http://${req.headers.host || "127.0.0.1:8787"}`;
-      json(res, jobs.start(id, { write: body.write === true, base, modes, minSize }), 202);
+      json(res, jobs.start(jobKey, { write: body.write === true, base, modes, minSize, draft: draftId }), 202);
       return true;
     }
     // The layout view's Site settings card: GET reads every setting, PUT
@@ -573,9 +561,6 @@ export function createDefaultLocalPlayCorpusHandler({
         contentService,
         listDrafts: resolved.draftStore
           ? () => resolved.draftStore.listDrafts({ includeDocument: true })
-          : null,
-        getDraft: resolved.draftStore
-          ? draftId => resolved.draftStore.getDraft(draftId)
           : null,
         repositoryRoot,
         siteSettings: resolved.siteSettings || null,

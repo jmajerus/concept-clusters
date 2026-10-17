@@ -939,6 +939,31 @@ export class D1DraftRepository extends DraftRepository {
   }
 
   /**
+   * Working copies updated after `since` (an ISO time; null for all), oldest
+   * first, with only what a watcher needs to decide whether to look closer:
+   * the content hash moves with every document save but not with a layout
+   * save, and validation is cleared by every document save.
+   */
+  async listChangedSince({ actor, since = null, limit = 200 } = {}) {
+    const owner = normalizeDraftActor(actor).subject;
+    const boundedLimit = Math.max(1, Math.min(Number(limit) || 200, 500));
+    const result = await this.database.prepare(`
+      SELECT id, puzzle_id, revision, content_hash, updated_at, validation_json
+      FROM puzzle_drafts
+      WHERE owner_subject = ? AND (? IS NULL OR updated_at > ?)
+      ORDER BY updated_at ASC LIMIT ?
+    `).bind(owner, since, since, boundedLimit).all();
+    return result.results.map(row => ({
+      draftId: row.id,
+      puzzleId: row.puzzle_id,
+      revision: Number(row.revision),
+      contentHash: row.content_hash,
+      updatedAt: row.updated_at,
+      validation: row.validation_json ? parsedJson(row.validation_json, "Stored validation") : null
+    }));
+  }
+
+  /**
    * `expectedRevision` makes the delete a compare-and-delete, the same OCC
    * token save() uses. A rename copies a draft and then removes the source,
    * and without this the removal is unconditional: a save landing between the

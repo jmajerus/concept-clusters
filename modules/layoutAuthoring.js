@@ -997,18 +997,19 @@ export function createLayoutAuthoringController({
 
   // ---------- automatic layout pass ----------
   // Run layout pass is a dry run of tools/layouts-auto.mjs for this
-  // published puzzle on the local authoring server; Save automatic layouts
+  // published puzzle, or for the working copy when one is open, on the local
+  // authoring server; Save automatic layouts
   // runs it again with --write. Neither touches an author's own layouts or
   // board size, and both report per mode.
   const passAvailable = !!layoutPass && layoutAuthoringMode;
   let passPoll = null;
   let passPuzzleId = null;
-  // True while the working copy on show changes the published board, which
-  // the pass would lay out instead of the one on screen.
-  let passBlocked = false;
   // The modes and start size of the last dry run, which Save automatic
   // layouts repeats so it saves what the report showed.
   let dryRunScope = null;
+  // True when this page watched a run finish, so its saves came after the
+  // board on screen was loaded.
+  let passWatchedLive = false;
   const PASS_SCOPE_KEY = "ccLayoutPassScope:v1";
   const PASS_MODES = ["graph", "sets", "star"];
 
@@ -1083,11 +1084,16 @@ export function createLayoutAuthoringController({
       const tone = notSaved(row.action) || row.defects?.total !== 0 ? "error" : "good";
       return `<li data-tone="${tone}">${escapeText(label)}: ${escapeText(describeDefects(row.defects))} — ${escapeText(how)}</li>`;
     }).join("");
+    // The automatic pass on a working copy saves on its own, possibly while
+    // this page is open: it says so, and leaves reloading to the author.
+    const saved = unsaved
+      ? `automatic layouts saved with ${unsaved} not saved; see below.`
+      : "automatic layouts saved.";
     const heading = !job.write
       ? "Dry run finished; nothing saved yet."
-      : unsaved
-        ? `Automatic layouts saved with ${unsaved} not saved; see below.`
-        : "Automatic layouts saved.";
+      : job.trigger === "auto"
+        ? `Automatic pass after the last board change: ${saved}${passWatchedLive ? " Reload the page to see them." : ""}`
+        : saved[0].toUpperCase() + saved.slice(1);
     passEl.innerHTML = `<div${unsaved ? ' data-tone="error"' : ""}>${escapeText(heading)} ${escapeText(scope)}. ${escapeText(size)}.</div><ul>${items}</ul>`;
     announcePass(`${job.startedAt}:done`, heading);
     passEl.hidden = false;
@@ -1099,8 +1105,8 @@ export function createLayoutAuthoringController({
   function renderPassJob(job) {
     if (!passAvailable) return;
     const running = job.status === "running";
-    runPassBtn.disabled = running || passBlocked;
-    savePassBtn.disabled = running || passBlocked;
+    runPassBtn.disabled = running;
+    savePassBtn.disabled = running;
     if (job.status === "none") {
       passEl.hidden = true;
       savePassBtn.hidden = true;
@@ -1108,7 +1114,10 @@ export function createLayoutAuthoringController({
     }
     if (running) {
       passEl.hidden = false;
-      passEl.textContent = `${job.write ? "Saving automatic layouts" : "Running layout pass"}… ${elapsed(job.startedAt)} (each mode, then larger boards if needed; usually under a few minutes)`;
+      const what = job.trigger === "auto"
+        ? "Automatic layout pass running on this working copy"
+        : job.write ? "Saving automatic layouts" : "Running layout pass";
+      passEl.textContent = `${what}… ${elapsed(job.startedAt)} (each mode, then larger boards if needed; usually under a few minutes)`;
       announcePass(`${job.startedAt}:running`, job.write ? "Saving automatic layouts." : "Layout pass running.");
       return;
     }
@@ -1146,9 +1155,10 @@ export function createLayoutAuthoringController({
 
   async function startPass(write) {
     const state = getState();
-    if (!state?.puzzle || passBlocked) return;
-    if (write && !window.confirm(
-      "Save automatic layouts to the published puzzle? Players see them at once. " +
+    if (!state?.puzzle) return;
+    if (write && !window.confirm((getDraftId()
+      ? "Save automatic layouts to this working copy? Players see them once it is published. "
+      : "Save automatic layouts to the published puzzle? Players see them at once. ") +
       "Your own saved layouts and board size are never replaced."
     )) return;
     const puzzleId = state.puzzle.id;
@@ -1185,28 +1195,18 @@ export function createLayoutAuthoringController({
   async function syncPassForPuzzle(state) {
     if (!passAvailable || !state?.puzzle) return;
     passPuzzleId = state.puzzle.id;
-    passBlocked = false;
     dryRunScope = null;
+    passWatchedLive = false;
     try {
+      // With a working copy open, the pass runs on that working copy.
       const job = await layoutPass.status({ puzzleId: state.puzzle.id, draftId: getDraftId() });
       if (passPuzzleId !== state.puzzle.id) return;
-      // A working copy whose board is the published one can run the pass:
-      // its results are the board on screen.
-      const blocked = job.published === false
-        ? "The layout pass runs on published puzzles. Publish this one first, then run it."
-        : job.boardMatchesPublished === false
-          ? "This working copy changes the board. Publish it first, then run the layout pass."
-          : null;
-      if (blocked) {
-        passBlocked = true;
-        runPassBtn.disabled = true;
-        savePassBtn.hidden = true;
-        passEl.hidden = false;
-        passEl.textContent = blocked;
-        return;
-      }
       renderPassJob(job);
-      if (job.status === "running") pollPass(state.puzzle.id);
+      if (job.status === "running") {
+        // Saved layouts finishing now are not on the board already loaded.
+        passWatchedLive = true;
+        pollPass(state.puzzle.id);
+      }
     } catch {
       // The status route is optional; the buttons still work.
     }

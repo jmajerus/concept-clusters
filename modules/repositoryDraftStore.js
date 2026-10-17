@@ -117,6 +117,9 @@ export function createRepositoryDraftStore({ repository, actor }) {
     async listDrafts(options = {}) {
       return repository.list({ actor, ...options });
     },
+    async listChangedSince(options = {}) {
+      return repository.listChangedSince({ actor, ...options });
+    },
     async rememberReviewBaseline({
       draftId,
       document,
