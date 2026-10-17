@@ -433,6 +433,33 @@ export async function run(page) {
   const startedPass = await callPass("POST", "lab-d1-play", JSON.stringify({ write: false }));
   assert.equal(startedPass.status, 202, startedPass.body);
   assert.equal(JSON.parse(startedPass.body).write, false);
+  // A run narrowed to some modes from a start size keeps both on the job;
+  // a malformed scope is refused rather than widened to a full run.
+  const scopedPassHandler = createLocalPlayCorpusHandler({
+    contentDocuments: repo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    layoutPassJobs: createLayoutPassJobs({ run: async () => ({ rows: [] }) })
+  });
+  const postScope = async payload => {
+    const response = createResponse();
+    await scopedPassHandler({
+      method: "POST",
+      url: "/admin/puzzles/lab-d1-play/layouts-auto",
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() { yield Buffer.from(JSON.stringify(payload)); }
+    }, response);
+    return response;
+  };
+  assert.equal((await postScope({ modes: ["table"] })).status, 400);
+  assert.equal((await postScope({ modes: [] })).status, 400);
+  assert.equal((await postScope({ minSize: 1.07 })).status, 400);
+  const scopedStart = await postScope({ modes: ["sets"], minSize: 1.1 });
+  assert.equal(scopedStart.status, 202, scopedStart.body);
+  assert.deepEqual(
+    (({ modes, minSize }) => ({ modes, minSize }))(JSON.parse(scopedStart.body)),
+    { modes: ["sets"], minSize: 1.1 }
+  );
 
   // A working copy can run the pass while its board is the published one;
   // one that changes the board is told to publish first, and a working copy

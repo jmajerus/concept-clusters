@@ -11,6 +11,9 @@
 //   --write                   save results; without it this is a dry run
 //   --base <url>              authoring server (default http://127.0.0.1:8787)
 //   --lanes <n>               puzzles laid out at once (default 2)
+//   --min-size <factor>       board size to start from, e.g. 1.1 for +10%
+//                             (default: the default size, or the saved size
+//                             when only some modes run); never goes below it
 //   --report <path>           also write the full results as JSON
 //   --json                    print only the results, as JSON, to stdout
 //                             (the authoring panel's Run layout pass uses it)
@@ -24,10 +27,14 @@
 //      repairs single pills left in an overlap or across a line.
 // Per puzzle, when its board size is the pass's to choose, the board grows
 // in 5% steps up to +25% until every mode is clean, keeping the smallest
-// size that is, else the size with the fewest defects. The board size is
-// the pass's to choose only when no author has set one and no mode has an
-// author's layout, which a new size would move; otherwise the size where
-// the board would be clean is reported as a suggestion.
+// size that is, else the size with the fewest defects. It starts from
+// --min-size when given (a size the author finds comfortable) and never
+// goes below it. The board size is the pass's to choose only when no author
+// has set one and no mode has an author's layout, which a new size would
+// move; otherwise the size where the board would be clean is reported as a
+// suggestion. A run over only some modes never grows the board either, since
+// a new size would move the modes it does not look at: it lays out at its
+// start size, saves that size with its layouts, and suggests a larger one.
 //
 // Automatic layouts and sizes are tagged source: "auto". An author's saved
 // layout or board size is measured and reported, never replaced; the save
@@ -38,9 +45,11 @@
 import { writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { boardSizeOwner } from "../modules/layoutDocument.js";
+import { canonicalBoardSizeFactor } from "../modules/puzzleBoardSize.js";
+import { LAYOUT_PASS_MODES, layoutPassSizePlan } from "../modules/layoutPassSizePlan.js";
 import { DEFECT_TIERS, layoutDefects, tierCount } from "../modules/layoutAttention.js";
 
-const MODES = ["graph", "sets", "star"];
+const MODES = LAYOUT_PASS_MODES;
 const MODE_LABELS = { graph: "Graph", sets: "Circle", star: "Star" };
 const SIZE_STEP = 0.05;
 const SIZE_MAX = 1.25;
@@ -55,9 +64,10 @@ function npmFlags(env = process.env) {
   if (flag("write") === "true") args.push("--write");
   // An option with a value cannot survive npm without the separator: npm
   // keeps the flag as "true" and hands the value on as a puzzle id.
-  ["modes", "base", "lanes", "report"].forEach(name => {
+  ["modes", "min_size", "base", "lanes", "report"].forEach(name => {
     if (flag(name) !== undefined) {
-      throw new Error(`--${name} takes a value, so put -- before the options: npm run layouts:auto -- --${name} <value> …`);
+      const option = `--${name.replace("_", "-")}`;
+      throw new Error(`${option} takes a value, so put -- before the options: npm run layouts:auto -- ${option} <value> …`);
     }
   });
   return args;
@@ -69,6 +79,7 @@ function parseArgs(argv) {
     ids: [],
     all: false,
     modes: MODES,
+    minSize: null,
     write: false,
     base: "http://127.0.0.1:8787",
     lanes: 2,
@@ -89,6 +100,10 @@ function parseArgs(argv) {
       options.modes = value().split(",").map(mode => mode.trim()).filter(Boolean);
       const unknown = options.modes.filter(mode => !MODES.includes(mode));
       if (unknown.length) throw new Error(`Unknown mode(s): ${unknown.join(", ")}`);
+    } else if (arg === "--min-size") {
+      const raw = value();
+      options.minSize = canonicalBoardSizeFactor(Number(raw));
+      if (options.minSize == null) throw new Error(`--min-size needs a board size factor such as 1.1, not ${raw}`);
     } else if (arg === "--base") options.base = value().replace(/\/$/, "");
     else if (arg === "--lanes") options.lanes = Math.max(1, Number.parseInt(value(), 10) || 1);
     else if (arg === "--report") options.report = value();
@@ -179,11 +194,15 @@ async function solve(page, mode, { dropAuto }) {
     }
     window.CC.showSolution();
   }, { mode, dropAuto });
-  await page.waitForFunction(() => window.CC.state.solutionLayout === "pretty", null, { timeout: 600000 });
+  // The live (standard) search gives up after its time limit and leaves the
+  // board unpolished (layoutBudget.js); that ends the wait too.
+  await page.waitForFunction(() => window.CC.state.solutionLayout === "pretty" ||
+    window.CC.state.polishTimedOut === true, null, { timeout: 600000 });
   return page.evaluate(() => ({
     metrics: window.CC.state.layoutAdapter.metrics(),
     source: window.CC.state.layoutSource || null,
-    repaired: !!window.CC.state.graphLayoutStats?.repaired
+    repaired: !!window.CC.state.graphLayoutStats?.repaired,
+    timedOut: window.CC.state.polishTimedOut === true
   }));
 }
 
@@ -233,12 +252,15 @@ async function layOutBoard(browser, options, id, mode, size, authorLayout) {
   const liveResult = await solve(live, mode, { dropAuto: true });
   row.standardDefects = layoutDefects(mode, liveResult.metrics);
   row.defects = row.standardDefects;
-  row.strategy = "live search";
-  if (row.standardDefects.total === 0) return { row, page: live };
+  row.strategy = liveResult.timedOut ? "live search (timed out)" : "live search";
+  // A live search that ran out of time freezes the page for players and
+  // leaves their board unpolished, so it always goes on to the extended one.
+  if (row.standardDefects.total === 0 && !liveResult.timedOut) return { row, page: live };
   const extended = await openBoard(browser, options, id, mode, "extended", size);
   const extendedResult = await solve(extended, mode, { dropAuto: true });
   const extendedDefects = layoutDefects(mode, extendedResult.metrics);
-  if (fewerDefects(mode, extendedDefects, row.standardDefects)) {
+  if (fewerDefects(mode, extendedDefects, row.standardDefects) ||
+      (liveResult.timedOut && !fewerDefects(mode, row.standardDefects, extendedDefects))) {
     await live.close();
     row.defects = extendedDefects;
     row.strategy = extendedResult.repaired ? "extended search + repair" : "extended search";
@@ -296,15 +318,16 @@ async function layOutPuzzle(browser, options, id) {
   const probe = await openBoard(browser, options, id, options.modes[0], "standard");
   let ownership, saved;
   try {
-    ownership = await readOwnership(probe, options.modes);
+    // Every mode, not just the ones this run lays out: an author's layout in
+    // any mode pins the board size, since a new size would move it.
+    ownership = await readOwnership(probe, MODES);
     saved = await currentSize(probe);
   } finally {
     await probe.close();
   }
-  const sizeIsOurs = !ownership.authorSize && !ownership.authorModes.length;
-  // The pass starts its own sizes from the default; otherwise the size in
-  // use stays the base.
-  const base = sizeIsOurs ? 1 : saved;
+  const { sizeIsOurs, base, mayGrow } = layoutPassSizePlan({
+    ...ownership, saved, minSize: options.minSize, modes: options.modes
+  });
   const sizes = [base];
   for (let size = base + SIZE_STEP; size <= SIZE_MAX + 1e-9; size += SIZE_STEP) {
     sizes.push(Math.round(size * 100) / 100);
@@ -340,11 +363,11 @@ async function layOutPuzzle(browser, options, id) {
     if (clean) break;
   }
 
-  // The size to report and save: the best one when the size is ours,
-  // otherwise the current size, with any clean size as a suggestion.
+  // The size to report and save: the best one when the pass may grow the
+  // board, otherwise the start size, with any clean size as a suggestion.
   let chosen = best;
   try {
-    if (!sizeIsOurs && best.size !== base) {
+    if (!mayGrow && best.size !== base) {
       await Promise.all(best.pages.map(page => page.close()));
       const rows = [], pages = [];
       for (const mode of options.modes) {
@@ -360,7 +383,7 @@ async function layOutPuzzle(browser, options, id) {
       id,
       size: chosen.size,
       sizeOwner: ownership.authorSize ? "author" : ownership.authorModes.length ? "author layouts" : "auto",
-      suggestedSize: !sizeIsOurs && cleanAt != null && cleanAt !== base ? cleanAt : null,
+      suggestedSize: !mayGrow && cleanAt != null && cleanAt !== base ? cleanAt : null,
       rows: chosen.rows
     };
     if (!options.write) {
@@ -403,7 +426,7 @@ function summarize(puzzles, options) {
   });
   const grown = puzzles.filter(puzzle => puzzle.sizeOwner === "auto" && puzzle.size !== 1);
   if (grown.length) {
-    lines.push("", "Board size grown by the pass:");
+    lines.push("", "Board size set by the pass:");
     grown.forEach(puzzle => lines.push(`  ${puzzle.id}: ${percent(puzzle.size)}${puzzle.sizeAction ? ` (${puzzle.sizeAction})` : ""}`));
   }
   const suggested = puzzles.filter(puzzle => puzzle.suggestedSize != null);

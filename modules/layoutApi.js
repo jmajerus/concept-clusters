@@ -73,12 +73,20 @@ function layoutPassUrl(puzzleId, draftId) {
   return draftId ? `${path}?draft=${encodeURIComponent(draftId)}` : path;
 }
 
-export async function startLayoutPass({ puzzleId, draftId = null, write = false, fetchImpl = fetch }) {
+// modes narrows the run to some modes; minSize is the board size it starts
+// from (layouts-auto.mjs --modes and --min-size).
+export async function startLayoutPass({
+  puzzleId, draftId = null, write = false, modes = null, minSize = null, fetchImpl = fetch
+}) {
   const response = await fetchImpl(layoutPassUrl(puzzleId, draftId), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
-    body: JSON.stringify({ write })
+    body: JSON.stringify({
+      write,
+      ...(modes?.length ? { modes } : {}),
+      ...(minSize != null ? { minSize } : {})
+    })
   });
   const body = await responseBody(response);
   if (!response.ok) throw new Error(body.error || `Layout pass could not start (${response.status})`);

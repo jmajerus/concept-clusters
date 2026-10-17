@@ -205,6 +205,12 @@
           <button id="layout-authoring-save-layout" hidden>Save Layout</button>
           <button id="layout-authoring-clear">Clear draft</button>
           <button id="layout-authoring-run-pass" hidden>Run layout pass</button>
+          <label id="layout-authoring-pass-scope-label" class="layout-authoring-time-limit" title="Which modes the layout pass lays out. One mode keeps the board size; all modes may grow it from the size in Board settings." hidden>
+            for <select id="layout-authoring-pass-scope">
+              <option value="mode">this mode</option>
+              <option value="all">all modes</option>
+            </select>
+          </label>
           <button id="layout-authoring-save-pass" hidden>Save automatic layouts</button>
         </div>
         <div id="layout-authoring-pass" class="layout-authoring-pass" hidden></div>

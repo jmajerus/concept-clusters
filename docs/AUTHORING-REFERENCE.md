@@ -1696,7 +1696,9 @@ and whatever else stays marked, needs an author.
 For one puzzle, use the layout-authoring panel on the local authoring
 server. **Run layout pass** is a dry run: it reports, per mode, the problems
 left and the strategy that got there, plus the board size the pass chose or
-suggests. **Save automatic layouts** then runs it again and saves, after a
+suggests. The picker beside it runs the pass for the mode on screen or for
+all modes; one mode is quicker when only one mode needs work. **Save
+automatic layouts** then runs the same modes again and saves, after a
 confirmation, and reloads the board to show the result. A run takes from
 under a minute to a few minutes; the panel shows progress and keeps the last
 report. The pass works on the published puzzle. With a working copy open, the
@@ -1714,17 +1716,23 @@ The pass solves published puzzles in a headless browser against the local
 authoring server (`npm run dev`) and reports each board's remaining problems.
 It is a dry run unless given `--write`, which saves results to the live
 publication rows players see; start with a few puzzles before `--all`. Other
-options: `--modes graph,sets,star`, `--lanes <n>` (puzzles at once), and
+options: `--modes graph,sets,star`, `--min-size <factor>` (the board size to
+start from, such as `1.1` for +10%), `--lanes <n>` (puzzles at once), and
 `--report <file>` (full results as JSON).
 
 For each board, strategies run in order until the board is clean: the live
 search, then a larger search budget, which for Graph ends with a local
 repair of single pills. Where the board size is the pass's to choose, it
-grows the board in 5% steps up to +25% until every mode is clean, and keeps
-the smallest size that works. The size is the pass's to choose only when no
-author has set one and no mode has an author's layout, since a new size would
-move those layouts. Otherwise the current size stays and the report suggests
-the size at which the board would come out clean.
+starts from the size in Board settings (on the command line, `--min-size`,
+else the default) and never goes below it, so a roomier size you find
+comfortable stays the floor. A run over every mode grows the board from there
+in 5% steps up to +25% until every mode is clean, and keeps the smallest size
+that works. A run over one mode keeps its start size, since a new size would
+move the modes it does not lay out, and saves that size with its layout. The
+size is the pass's to choose only when no author has set one and no mode has
+an author's layout, since a new size would move those layouts. Otherwise the
+current size stays. Either way, when the pass did not grow the board itself,
+the report suggests the size at which the board would come out clean.
 
 Results are saved with `source: "auto"`: as exact positions when they pass
 the full check, otherwise as hints. An author's layout or board size is

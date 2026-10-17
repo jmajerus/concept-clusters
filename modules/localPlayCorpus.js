@@ -6,6 +6,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
 import { boardDiffersFromPublished } from "./draftReviewDiff.js";
+import { canonicalBoardSizeFactor } from "./puzzleBoardSize.js";
+import { LAYOUT_PASS_MODES } from "./layoutPassSizePlan.js";
 import { DraftNotFoundError } from "./draftRepository.js";
 import {
   seedPublishedCatalogues,
@@ -245,8 +247,21 @@ export function createLocalPlayCorpusHandler({
         json(res, { error: error instanceof Error ? error.message : String(error), id }, 400);
         return true;
       }
+      // A run can be narrowed to some modes and started from a board size;
+      // anything else in either is refused rather than widened to a full run.
+      const modes = body.modes ?? null;
+      if (modes !== null && (!Array.isArray(modes) || !modes.length ||
+          modes.some(mode => !LAYOUT_PASS_MODES.includes(mode)))) {
+        json(res, { error: `modes must list some of ${LAYOUT_PASS_MODES.join(", ")}.`, id }, 400);
+        return true;
+      }
+      const minSize = body.minSize == null ? null : canonicalBoardSizeFactor(body.minSize);
+      if (body.minSize != null && minSize == null) {
+        json(res, { error: "minSize must be a board size factor such as 1.1.", id }, 400);
+        return true;
+      }
       const base = `http://${req.headers.host || "127.0.0.1:8787"}`;
-      json(res, jobs.start(id, { write: body.write === true, base }), 202);
+      json(res, jobs.start(id, { write: body.write === true, base, modes, minSize }), 202);
       return true;
     }
     // The layout view's Site settings card: GET reads every setting, PUT
