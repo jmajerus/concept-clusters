@@ -66,8 +66,15 @@ export async function saveLayoutBoard({
 // The automatic layout pass for one published puzzle, run by the local
 // authoring server. `start` begins a run (a dry run unless `write`), and
 // `status` reports the running or last finished run.
-export async function startLayoutPass({ puzzleId, write = false, fetchImpl = fetch }) {
-  const response = await fetchImpl(`/admin/puzzles/${encodeURIComponent(puzzleId)}/layouts-auto`, {
+// With draftId (the layout view is showing a working copy), the server checks
+// that copy's board is the published one before running the pass on it.
+function layoutPassUrl(puzzleId, draftId) {
+  const path = `/admin/puzzles/${encodeURIComponent(puzzleId)}/layouts-auto`;
+  return draftId ? `${path}?draft=${encodeURIComponent(draftId)}` : path;
+}
+
+export async function startLayoutPass({ puzzleId, draftId = null, write = false, fetchImpl = fetch }) {
+  const response = await fetchImpl(layoutPassUrl(puzzleId, draftId), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
@@ -78,8 +85,8 @@ export async function startLayoutPass({ puzzleId, write = false, fetchImpl = fet
   return body;
 }
 
-export async function layoutPassStatus({ puzzleId, fetchImpl = fetch }) {
-  const response = await fetchImpl(`/admin/puzzles/${encodeURIComponent(puzzleId)}/layouts-auto`, {
+export async function layoutPassStatus({ puzzleId, draftId = null, fetchImpl = fetch }) {
+  const response = await fetchImpl(layoutPassUrl(puzzleId, draftId), {
     cache: "no-store"
   });
   const body = await responseBody(response);

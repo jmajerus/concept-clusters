@@ -5,6 +5,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
+import { boardDiffersFromPublished } from "./draftReviewDiff.js";
+import { DraftNotFoundError } from "./draftRepository.js";
 import {
   seedPublishedCatalogues,
   seedPublishedCategories,
@@ -150,6 +152,7 @@ export function createLocalPlayCorpusHandler({
   contentDocuments,
   contentService = null,
   listDrafts = null,
+  getDraft = null,
   repositoryRoot,
   indexHtml = null,
   layoutPassJobs = null,
@@ -177,7 +180,10 @@ export function createLocalPlayCorpusHandler({
     }
     // The authoring panel's Run layout pass: POST starts the automatic
     // layout pass for one published puzzle ({ write: true } saves its
-    // results), GET reports the running or last finished run.
+    // results), GET reports the running or last finished run. With
+    // ?draft=<id> (the layout view is showing a working copy), GET also says
+    // whether that copy's board is the published one, and POST refuses when
+    // it is not: the pass would lay out a board the author is not looking at.
     const passMatch = urlPath.match(LAYOUT_PASS_ROUTE);
     if (passMatch) {
       if (!requestIsSameOriginIfSpecified(req)) {
@@ -189,11 +195,18 @@ export function createLocalPlayCorpusHandler({
       const reading = req.method === "GET" || req.method === "HEAD";
       if (!reading && req.method !== "POST") return false;
       await ensureSeeded();
+      const draftId = requestUrl.searchParams.get("draft");
       let published;
       try {
         published = await contentDocuments.getPublished({ kind: "puzzle", id });
       } catch (error) {
         if (!(error instanceof ContentDocumentNotFoundError)) throw error;
+        // A working copy that was never published is an ordinary state for
+        // the layout view to show, not an error.
+        if (reading && draftId) {
+          json(res, { status: "none", published: false });
+          return true;
+        }
         json(res, { error: "The layout pass runs on published puzzles; this one is not published.", id }, 404);
         return true;
       }
@@ -201,8 +214,26 @@ export function createLocalPlayCorpusHandler({
         json(res, { error: "Puzzle withdrawn from authoring play", id }, 409);
         return true;
       }
+      let boardMatchesPublished = null;
+      if (draftId && typeof getDraft === "function") {
+        let draft = null;
+        try {
+          draft = await getDraft(draftId);
+        } catch (error) {
+          // A working copy deleted since the page loaded leaves the
+          // published board, which the pass already runs on.
+          if (!(error instanceof DraftNotFoundError)) throw error;
+        }
+        if (draft) boardMatchesPublished = !boardDiffersFromPublished(published.document, draft.document);
+      }
       if (reading) {
-        json(res, jobs.get(id));
+        json(res, boardMatchesPublished === null
+          ? jobs.get(id)
+          : { ...jobs.get(id), boardMatchesPublished });
+        return true;
+      }
+      if (boardMatchesPublished === false) {
+        json(res, { error: "This working copy changes the board. Publish it first, then run the layout pass.", id }, 409);
         return true;
       }
       let body;
@@ -527,6 +558,9 @@ export function createDefaultLocalPlayCorpusHandler({
         contentService,
         listDrafts: resolved.draftStore
           ? () => resolved.draftStore.listDrafts({ includeDocument: true })
+          : null,
+        getDraft: resolved.draftStore
+          ? draftId => resolved.draftStore.getDraft(draftId)
           : null,
         repositoryRoot,
         siteSettings: resolved.siteSettings || null,

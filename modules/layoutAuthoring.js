@@ -1000,6 +1000,9 @@ export function createLayoutAuthoringController({
   const passAvailable = !!layoutPass && layoutAuthoringMode;
   let passPoll = null;
   let passPuzzleId = null;
+  // True while the working copy on show changes the published board, which
+  // the pass would lay out instead of the one on screen.
+  let passBlocked = false;
 
   const percent = size => {
     const value = Math.round(((Number(size) || 1) - 1) * 100);
@@ -1057,8 +1060,8 @@ export function createLayoutAuthoringController({
   function renderPassJob(job) {
     if (!passAvailable) return;
     const running = job.status === "running";
-    runPassBtn.disabled = running || !!getDraftId();
-    savePassBtn.disabled = running || !!getDraftId();
+    runPassBtn.disabled = running || passBlocked;
+    savePassBtn.disabled = running || passBlocked;
     if (job.status === "none") {
       passEl.hidden = true;
       savePassBtn.hidden = true;
@@ -1086,7 +1089,7 @@ export function createLayoutAuthoringController({
       if (puzzleId !== passPuzzleId) return;
       let job;
       try {
-        job = await layoutPass.status({ puzzleId });
+        job = await layoutPass.status({ puzzleId, draftId: getDraftId() });
       } catch (error) {
         passEl.hidden = false;
         passEl.innerHTML = `<div data-tone="error">${escapeText(error.message)}</div>`;
@@ -1104,14 +1107,14 @@ export function createLayoutAuthoringController({
 
   async function startPass(write) {
     const state = getState();
-    if (!state?.puzzle || getDraftId()) return;
+    if (!state?.puzzle || passBlocked) return;
     if (write && !window.confirm(
       "Save automatic layouts to the published puzzle? Players see them at once. " +
       "Your own saved layouts and board size are never replaced."
     )) return;
     const puzzleId = state.puzzle.id;
     try {
-      const job = await layoutPass.start({ puzzleId, write });
+      const job = await layoutPass.start({ puzzleId, draftId: getDraftId(), write });
       // Another puzzle may have loaded while the request was in flight;
       // its panel must not show this puzzle's run.
       if (puzzleId !== passPuzzleId) return;
@@ -1133,16 +1136,25 @@ export function createLayoutAuthoringController({
   async function syncPassForPuzzle(state) {
     if (!passAvailable || !state?.puzzle) return;
     passPuzzleId = state.puzzle.id;
-    if (getDraftId()) {
-      runPassBtn.disabled = true;
-      savePassBtn.hidden = true;
-      passEl.hidden = false;
-      passEl.textContent = "The layout pass runs on the published puzzle. Open the puzzle without a working copy to run it.";
-      return;
-    }
+    passBlocked = false;
     try {
-      const job = await layoutPass.status({ puzzleId: state.puzzle.id });
+      const job = await layoutPass.status({ puzzleId: state.puzzle.id, draftId: getDraftId() });
       if (passPuzzleId !== state.puzzle.id) return;
+      // A working copy whose board is the published one can run the pass:
+      // its results are the board on screen.
+      const blocked = job.published === false
+        ? "The layout pass runs on published puzzles. Publish this one first, then run it."
+        : job.boardMatchesPublished === false
+          ? "This working copy changes the board. Publish it first, then run the layout pass."
+          : null;
+      if (blocked) {
+        passBlocked = true;
+        runPassBtn.disabled = true;
+        savePassBtn.hidden = true;
+        passEl.hidden = false;
+        passEl.textContent = blocked;
+        return;
+      }
       renderPassJob(job);
       if (job.status === "running") pollPass(state.puzzle.id);
     } catch {

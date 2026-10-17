@@ -14,6 +14,7 @@ import {
   htmlWithPlayCorpusMeta,
   PLAY_CORPUS_META_NAME
 } from "../modules/playCorpus.js";
+import { DraftNotFoundError } from "../modules/draftRepository.js";
 import { createLayoutPassJobs } from "../modules/layoutPassJobs.js";
 import { createLocalPlayCorpusHandler } from "../modules/localPlayCorpus.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
@@ -432,6 +433,60 @@ export async function run(page) {
   const startedPass = await callPass("POST", "lab-d1-play", JSON.stringify({ write: false }));
   assert.equal(startedPass.status, 202, startedPass.body);
   assert.equal(JSON.parse(startedPass.body).write, false);
+
+  // A working copy can run the pass while its board is the published one;
+  // one that changes the board is told to publish first, and a working copy
+  // deleted since the page loaded leaves the published board.
+  const publishedForPass = await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" });
+  const sameBoard = structuredClone(publishedForPass.document);
+  sameBoard.clusters[0].fact = "Reworded without touching the board.";
+  const newBoard = structuredClone(publishedForPass.document);
+  newBoard.clusters[0].floatingTerms = [...newBoard.clusters[0].floatingTerms, "an added term"];
+  const draftPass = createLocalPlayCorpusHandler({
+    contentDocuments: repo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    getDraft: async draftId => {
+      if (draftId === "same-board") return { draftId, document: sameBoard };
+      if (draftId === "new-board") return { draftId, document: newBoard };
+      throw new DraftNotFoundError(draftId);
+    },
+    layoutPassJobs: createLayoutPassJobs({ run: async () => ({ rows: [] }) })
+  });
+  const callDraftPass = async (method, draftId, payload) => {
+    const response = createResponse();
+    assert.equal(await draftPass({
+      method,
+      url: `/admin/puzzles/lab-d1-play/layouts-auto?draft=${draftId}`,
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() {
+        if (payload !== undefined) yield Buffer.from(payload);
+      }
+    }, response), true);
+    return response;
+  };
+  assert.equal(JSON.parse((await callDraftPass("GET", "same-board")).body).boardMatchesPublished, true);
+  assert.equal(JSON.parse((await callDraftPass("GET", "new-board")).body).boardMatchesPublished, false);
+  assert.equal(JSON.parse((await callDraftPass("GET", "deleted")).body).boardMatchesPublished, undefined);
+  // A working copy never published reads as such; starting a pass on it is
+  // still refused.
+  const neverPublished = async method => {
+    const response = createResponse();
+    await draftPass({
+      method,
+      url: "/admin/puzzles/never-published/layouts-auto?draft=same-board",
+      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      async *[Symbol.asyncIterator]() { if (method === "POST") yield Buffer.from("{}"); }
+    }, response);
+    return response;
+  };
+  assert.deepEqual(JSON.parse((await neverPublished("GET")).body), { status: "none", published: false });
+  assert.equal((await neverPublished("POST")).status, 404);
+  const refusedPass = await callDraftPass("POST", "new-board", "{}");
+  assert.equal(refusedPass.status, 409, refusedPass.body);
+  assert.match(JSON.parse(refusedPass.body).error, /changes the board/);
+  const draftStarted = await callDraftPass("POST", "same-board", "{}");
+  assert.equal(draftStarted.status, 202, draftStarted.body);
 
   // Writes are conditional on the row the request read: a stale write is
   // refused, and the endpoint re-reads and retries so a save that landed in

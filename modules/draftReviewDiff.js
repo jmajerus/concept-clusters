@@ -103,6 +103,24 @@ export function unpublishedChangeDomains(published, draft, {
   return changed;
 }
 
+// What a layout is laid out from: the clusters' names and terms and the
+// bridges between them. Facts, info, colors, lenses and the rest can change
+// without moving a pill, so a working copy that only changes those still
+// has the published puzzle's board.
+function boardShape(document) {
+  return {
+    clusters: (document?.clusters || []).map(({ id, name, terms, seeds, floatingTerms }) =>
+      ({ id, name, terms, seeds, floatingTerms })),
+    bridges: (document?.bridges || []).map(({ id, term, clusters, idealTerms, direction }) =>
+      ({ id, term, clusters, idealTerms, direction }))
+  };
+}
+
+/** Whether a working copy's board differs from the published puzzle's. */
+export function boardDiffersFromPublished(published, draft) {
+  return !valuesEqual(boardShape(published), boardShape(draft));
+}
+
 function fieldChange(before, after) {
   if (valuesEqual(before, after)) return null;
   return { before: before ?? null, after: after ?? null };

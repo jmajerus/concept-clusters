@@ -1699,8 +1699,9 @@ left and the strategy that got there, plus the board size the pass chose or
 suggests. **Save automatic layouts** then runs it again and saves, after a
 confirmation, and reloads the board to show the result. A run takes from
 under a minute to a few minutes; the panel shows progress and keeps the last
-report. The pass works on the published puzzle, so the buttons are disabled
-while a working copy is open.
+report. The pass works on the published puzzle. With a working copy open, the
+buttons work as long as the copy has the published board (the same clusters,
+terms, and bridges); a copy that changes the board has to be published first.
 
 For many puzzles at once, use the command line:
 
