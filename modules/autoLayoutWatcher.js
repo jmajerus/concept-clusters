@@ -204,8 +204,23 @@ export function createAutoLayoutWatcher({
     return best;
   }
 
+  // Entries recorded before the author-layout check have never had it;
+  // read each once, so one laid out by its author drops out of the queue.
+  async function checkUnchecked() {
+    for (const [draftId, entry] of Object.entries(state.drafts)) {
+      if ("authorEveryMode" in entry) continue;
+      try {
+        entry.authorEveryMode = authorLayoutInEveryMode((await getDraft(draftId)).layout);
+      } catch (error) {
+        if (error?.name !== "DraftNotFoundError") throw error;
+        delete state.drafts[draftId];
+      }
+    }
+  }
+
   async function tick() {
     await load();
+    await checkUnchecked();
     await scan();
     settleRunning();
     if (!running) {

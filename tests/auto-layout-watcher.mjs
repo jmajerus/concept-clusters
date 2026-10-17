@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { autoLayoutStatus, createAutoLayoutWatcher, readAutoLayoutState, readAutoLayoutStatuses } from "../modules/autoLayoutWatcher.js";
@@ -209,6 +209,20 @@ export async function run() {
     await tick();
     await watcher.tick();
     assert.equal(await statusOf("inherited-copy"), undefined);
+
+    // Entries recorded before the author-layout check get it once.
+    const recorded = await readAutoLayoutState(statePath);
+    save("older-entry", board(["v", "w", "x"]), authored);
+    recorded.drafts["older-entry"] = { contentHash: rows.get("older-entry").contentHash, boardKey: "k", boardChangedAt: iso() };
+    recorded.cursor = iso();
+    await writeFile(statePath, JSON.stringify(recorded));
+    const restarted = make();
+    clock += 10 * MINUTE;
+    const before = runs.length;
+    await restarted.tick();
+    await tick();
+    assert.equal(runs.length, before, "an older entry laid out by its author was run");
+    assert.equal((await readAutoLayoutState(statePath)).drafts["older-entry"].authorEveryMode, true);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
