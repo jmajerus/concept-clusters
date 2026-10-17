@@ -1687,11 +1687,24 @@ marked `!` needs repair, and its tooltip says why: defects recorded when the
 layout was saved, a hint whose saved starting point had defects, or a fixed
 layout the puzzle or board size has outdated, which players get as a hint or
 adapted, unchecked. The list judges from the saved layout alone, without
-laying out boards. **Layouts to fix** shows the puzzles with a missing or
-marked mode. Running the pass on them fills missing modes and replaces
+laying out boards. Running the pass fills missing modes and replaces
 outdated automatic layouts. It never replaces an author's layout, so an
 outdated author layout stays marked until an author saves it again; that,
 and whatever else stays marked, needs an author.
+
+On the server running the automatic pass, a working copy it is watching
+also gets a marker after its chips: `auto …` (the board changed since the
+last run; waiting for it to settle, or queued), `auto ▶` (running),
+`auto ✓` (finished on the current board; the tooltip lists what each mode
+was left with), or `auto ✗` (failed; the tooltip says why).
+
+**Layout work** lists every puzzle with layouts for a person to look at: a
+missing or marked mode, an automatic pass still to come or failed, or a
+finished one whose layouts are not published yet. Under **Recent** the
+newest are on top, so a working copy the pass has just laid out comes first.
+`auto ✓` with no `!` is ready to look over; a `!` marks a mode to edit.
+Publishing takes a reviewed puzzle off the list; one published with a mode
+still marked stays on it.
 
 For one puzzle, use the layout-authoring panel on the local authoring
 server. **Run layout pass** is a dry run: it reports, per mode, the problems

@@ -655,6 +655,9 @@ const PAGE_STYLE = `
   .layout-chip-auto { background: #dbeafe; }
   .layout-chip-none { background: #eee; color: #666; }
   .layout-chip-repair { box-shadow: inset 0 0 0 1.5px #dc2626; color: #991b1b; font-weight: 600; }
+  .layout-auto-pass { background: transparent; box-shadow: inset 0 0 0 1px #94a3b8; color: #475569; white-space: nowrap; }
+  .layout-auto-pass[data-auto-layout="done"] { box-shadow: inset 0 0 0 1px #2563eb; color: #1d4ed8; }
+  .layout-auto-pass[data-auto-layout="failed"] { box-shadow: inset 0 0 0 1px #dc2626; color: #991b1b; }
   .validation { padding: 10px 14px; border-radius: 6px; margin: 16px 0; }
   .validation-ok { background: #dcfce7; }
   .validation-fail { background: #fee2e2; }
@@ -1049,6 +1052,48 @@ function renderSavedLayouts(modes) {
   }).join("")}</span>`;
 }
 
+const AUTO_LAYOUT_MODE_NAMES = { graph: "Graph", sets: "Circle", star: "Star" };
+const formatWhen = iso => {
+  const time = Date.parse(iso || "");
+  return Number.isFinite(time) ? new Date(time).toISOString().replace("T", " ").slice(0, 16) + " UTC" : "";
+};
+
+// The automatic layout pass's marker after the mode chips, on working copies
+// the pass is watching (autoLayoutWatcher.js).
+function renderAutoLayoutBadge(status) {
+  if (!status) return "";
+  const { state } = status;
+  let mark, title;
+  if (state === "running") {
+    mark = "▶";
+    title = `Automatic layout pass running since ${formatWhen(status.since)}`;
+  } else if (state === "pending") {
+    mark = "…";
+    title = `Board changed since the last automatic layout pass; it runs once the board has settled${status.expectedAt ? `, from about ${formatWhen(status.expectedAt)}` : ""}`;
+  } else if (state === "done") {
+    mark = "✓";
+    const modes = Object.entries(status.defects || {})
+      .map(([mode, total]) => `${AUTO_LAYOUT_MODE_NAMES[mode] || mode} ${total === 0 ? "clean" : total == null ? "kept" : `${total} problem${total === 1 ? "" : "s"}`}`);
+    title = `Automatic layout pass finished ${formatWhen(status.at)} on the current board${modes.length ? `: ${modes.join(", ")}` : ""}`;
+  } else {
+    mark = "✗";
+    title = `Automatic layout pass failed ${formatWhen(status.at)}: ${status.error || "unknown error"}. It runs again when the board changes, or use Run layout pass.`;
+  }
+  return ` <span class="badge layout-chip layout-auto-pass" data-auto-layout="${state}" title="${escapeHtml(title)}">auto ${mark}</span>`;
+}
+
+// Layout work: a mode to fix, an automatic pass still to come or failed, or
+// one finished on layouts not yet published, waiting for a person to look.
+// Publishing ends the last; the others end when the layouts are sound.
+function autoLayoutNeedsLook(item) {
+  const state = item.autoLayout?.state;
+  if (!state) return false;
+  if (state !== "done") return true;
+  return !isPublishedLive(item)
+    || (item.unpublishedChangeDomains || []).includes("layout")
+    || item.layoutDiffersFromPublished === true;
+}
+
 function isCuedStatus(item) {
   return isPublishedLive(item) && item.cuedForFreeze === true;
 }
@@ -1152,9 +1197,10 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
     : emptyValue();
   const local = variant === "local";
   const layoutModes = local ? savedLayoutModes(item) : [];
-  const layoutsCell = local ? `<td>${renderSavedLayouts(layoutModes)}</td>` : "";
+  const layoutsCell = local ? `<td>${renderSavedLayouts(layoutModes)}${renderAutoLayoutBadge(item.autoLayout)}</td>` : "";
   const layoutToFix = layoutModes.some(entry => !entry.saved || entry.repair) ? "1" : "0";
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-fix="${layoutToFix}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  const layoutWork = layoutToFix === "1" || autoLayoutNeedsLook(item) ? "1" : "0";
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-fix="${layoutToFix}" data-layout-work="${layoutWork}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
@@ -1258,7 +1304,7 @@ const CORPUS_FILTER_SCRIPT = `
       var modified = row.getAttribute("data-modified") === "1";
       var unpublished = row.getAttribute("data-unpublished-changes") === "1";
       var cued = row.getAttribute("data-cued") === "1";
-      var layoutToFix = row.getAttribute("data-layout-fix") === "1";
+      var layoutWork = row.getAttribute("data-layout-work") === "1";
       var github = row.getAttribute("data-github");
       var matchQuery = !query || hay.indexOf(query) !== -1;
       var matchScope = scope === "all"
@@ -1267,7 +1313,7 @@ const CORPUS_FILTER_SCRIPT = `
         || (scope === "modified" && modified)
         || (scope === "unpublished" && unpublished)
         || (scope === "cued" && cued)
-        || (scope === "layouts" && layoutToFix)
+        || (scope === "layouts" && layoutWork)
         || (scope === "published" && publishedLive && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
     });
@@ -1356,7 +1402,7 @@ export function renderDraftListPage(rows, {
            <label title="Saved content, board settings, provenance, or layout differs from the published D1 snapshot"><input type="radio" name="puzzle-corpus-scope" value="unpublished"> Unpublished changes</label>
            <label title="Published D1 snapshot explicitly cued for the next Freeze into git"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
            <label title="Published in D1 with no private working copy (the Published only group under Recent)"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
-           ${variant === "local" ? `<label title="At least one mode (Graph, Star, Circle) has no saved layout, or a saved layout needs repair (! on its chip)"><input type="radio" name="puzzle-corpus-scope" value="layouts"> Layouts to fix</label>` : ""}
+           ${variant === "local" ? `<label title="Layouts that need a person: a mode with no saved layout or one that needs repair (! on its chip), an automatic layout pass still to come or failed (auto … ▶ ✗), or one finished on layouts not yet published (auto ✓). Newest first under Recent."><input type="radio" name="puzzle-corpus-scope" value="layouts"> Layout work</label>` : ""}
          </p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Arrange</span>

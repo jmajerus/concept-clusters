@@ -24,7 +24,7 @@ import { createFreezePublicationService } from "./freezePublicationService.js";
 import { LocalGitHubConfigError, resolveLocalGitHubConfig } from "./localGitHubConfig.js";
 import { refreshGithubProductionManifest, loadGithubProductionManifest } from "./githubProductionManifest.js";
 import { createDefaultLocalPlayCorpusHandler, draftLayoutPassKey, layoutPassJobsFor } from "./localPlayCorpus.js";
-import { AUTO_LAYOUT_DEFAULTS, createAutoLayoutWatcher } from "./autoLayoutWatcher.js";
+import { autoLayoutSettleMs, createAutoLayoutWatcher } from "./autoLayoutWatcher.js";
 import { authoringWorkspacePaths } from "./authoringWorkspacePaths.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
@@ -845,10 +845,7 @@ async function startAutoLayoutPass({ repositoryRoot, env, port }) {
     console.error(`${formatDevTimestamp()} Automatic layout pass off: working copies are not in D1.`);
     return null;
   }
-  const minutes = Number(env.AUTO_LAYOUT_SETTLE_MINUTES);
-  const settleMs = Number.isFinite(minutes) && minutes >= 0
-    ? minutes * 60_000
-    : AUTO_LAYOUT_DEFAULTS.settleMs;
+  const settleMs = autoLayoutSettleMs(env);
   const watcher = createAutoLayoutWatcher({
     listChangedSince: options => drafts.listChangedSince(options),
     getDraft: draftId => drafts.getDraft(draftId),

@@ -28,6 +28,15 @@ export const AUTO_LAYOUT_DEFAULTS = Object.freeze({
   settleMs: 5 * 60_000
 });
 
+/** AUTO_LAYOUT_SETTLE_MINUTES, else the default. */
+export function autoLayoutSettleMs(env = process.env) {
+  const minutes = Number(env.AUTO_LAYOUT_SETTLE_MINUTES);
+  return env.AUTO_LAYOUT_SETTLE_MINUTES != null && env.AUTO_LAYOUT_SETTLE_MINUTES !== "" &&
+    Number.isFinite(minutes) && minutes >= 0
+    ? minutes * 60_000
+    : AUTO_LAYOUT_DEFAULTS.settleMs;
+}
+
 const emptyState = now => ({ cursor: new Date(now).toISOString(), drafts: {} });
 
 export async function readAutoLayoutState(path, now = Date.now()) {
@@ -47,6 +56,34 @@ async function writeAutoLayoutState(path, state) {
   const temporary = `${path}.tmp`;
   await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`);
   await rename(temporary, path);
+}
+
+/**
+ * Where a working copy stands with the automatic pass, for the puzzle list:
+ * "running", "pending" (its board changed since the last run: settling or
+ * queued), "done" or "failed" on its current board, or null when the pass
+ * has not seen it.
+ */
+export function autoLayoutStatus(entry, job, { settleMs = AUTO_LAYOUT_DEFAULTS.settleMs } = {}) {
+  if (job?.status === "running") return { state: "running", since: job.startedAt };
+  if (!entry?.boardKey) return null;
+  if (entry.boardKey !== entry.laidOutBoardKey) {
+    const due = Date.parse(entry.boardChangedAt) + settleMs;
+    return { state: "pending", expectedAt: Number.isFinite(due) ? new Date(due).toISOString() : null };
+  }
+  if (entry.outcome === "done") return { state: "done", at: entry.laidOutAt, defects: entry.defects || null };
+  return { state: "failed", at: entry.laidOutAt, error: String(entry.outcome || "").replace(/^failed: /, "") };
+}
+
+/** Every tracked working copy's status, by draft id. */
+export async function readAutoLayoutStatuses({ statePath, jobs, jobKey, settleMs }) {
+  const state = await readAutoLayoutState(statePath);
+  const statuses = new Map();
+  for (const [draftId, entry] of Object.entries(state.drafts)) {
+    const status = autoLayoutStatus(entry, jobs.get(jobKey(draftId)), { settleMs });
+    if (status) statuses.set(draftId, status);
+  }
+  return statuses;
 }
 
 /**
@@ -108,6 +145,10 @@ export function createAutoLayoutWatcher({
       entry.laidOutBoardKey = running.boardKey;
       entry.laidOutAt = job.finishedAt || new Date(now()).toISOString();
       entry.outcome = job.status === "done" ? "done" : `failed: ${job.error || "unknown error"}`;
+      // Problems left per mode, for the puzzle list's tooltip.
+      entry.defects = job.status === "done"
+        ? Object.fromEntries((job.result?.rows || []).map(row => [row.mode, row.defects?.total ?? null]))
+        : null;
     }
     log(`Automatic layout pass for ${running.draftId}: ${entry?.outcome || job.status}.`);
     running = null;

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createAutoLayoutWatcher, readAutoLayoutState } from "../modules/autoLayoutWatcher.js";
+import { autoLayoutStatus, createAutoLayoutWatcher, readAutoLayoutState, readAutoLayoutStatuses } from "../modules/autoLayoutWatcher.js";
 import { createLayoutPassJobs } from "../modules/layoutPassJobs.js";
 
 export const name = "automatic layout pass: working copies laid out once their board settles";
@@ -96,7 +96,7 @@ export async function run() {
     // The pass's own layout saves do not set it off again, nor fetch the document.
     const fetchedBefore = fetched;
     saveLayout("new-copy");
-    runs[0].resolve({ id: "new-copy", rows: [] });
+    runs[0].resolve({ id: "new-copy", rows: [{ mode: "graph", defects: { total: 0 } }, { mode: "sets", defects: { total: 2 } }] });
     await tick();
     clock += 10 * MINUTE;
     await watcher.tick();
@@ -105,6 +105,11 @@ export async function run() {
     assert.equal(fetched, fetchedBefore, "a layout-only save fetched the document");
     const state = await readAutoLayoutState(statePath);
     assert.equal(state.drafts["new-copy"].outcome, "done");
+    assert.deepEqual(state.drafts["new-copy"].defects, { graph: 0, sets: 2 });
+    // The puzzle list reads the same state: done on the current board.
+    const listed = await readAutoLayoutStatuses({ statePath, jobs, jobKey: draftId => `draft:${draftId}`, settleMs: 5 * MINUTE });
+    assert.deepEqual(listed.get("new-copy"), { state: "done", at: state.drafts["new-copy"].laidOutAt, defects: { graph: 0, sets: 2 } });
+    assert.equal(listed.has("old-copy"), false, "an untracked working copy has no status");
 
     // A restart remembers what it laid out.
     watcher = make();
@@ -140,6 +145,12 @@ export async function run() {
     assert.equal(runs.length, 3, "a failed board was retried without a change");
     const saved = JSON.parse(await readFile(statePath, "utf8"));
     assert.equal(saved.drafts["new-copy"].outcome, "failed: browser could not start");
+    assert.deepEqual(autoLayoutStatus(saved.drafts["new-copy"], jobs.get("draft:new-copy")),
+      { state: "failed", at: saved.drafts["new-copy"].laidOutAt, error: "browser could not start" });
+    // A board changed since its last run reads as pending, due once settled.
+    assert.deepEqual(autoLayoutStatus({ boardKey: "b", laidOutBoardKey: "a", boardChangedAt: "2026-10-17T12:00:00.000Z" }, null, { settleMs: 5 * MINUTE }),
+      { state: "pending", expectedAt: "2026-10-17T12:05:00.000Z" });
+    assert.equal(autoLayoutStatus({ boardKey: "a", laidOutBoardKey: "a", outcome: "done" }, { status: "running", startedAt: "t" }).state, "running");
 
     // A run the author started by hand is left alone, not doubled.
     save("third-copy", board(["p", "q", "r"]));
