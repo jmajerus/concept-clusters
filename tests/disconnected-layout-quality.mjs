@@ -48,8 +48,10 @@ export async function run(page, baseURL) {
 
   for (const mode of ["graph", "star", "sets"]) {
     await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=${mode}&moves=`);
+    await page.waitForFunction(() => window.CC?.state);
     await page.evaluate(() => localStorage.clear());
     await page.reload();
+    await page.waitForFunction(() => window.CC?.state);
     await page.waitForFunction(
       () => CC.state.phase === "lens-quiz-answering",
       null,

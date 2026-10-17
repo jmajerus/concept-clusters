@@ -39,8 +39,10 @@ export async function run(page, baseURL) {
   page.on("pageerror", error => errors.push(String(error)));
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph&moves=`);
+  await page.waitForFunction(() => window.CC?.state);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await page.waitForFunction(() => window.CC?.state);
 
   await page.click("#show-solution");
   await page.waitForFunction(() => CC.state.phase === "lens-assigning");
@@ -204,6 +206,7 @@ export async function run(page, baseURL) {
   assert.equal(saved.lens.assignments.length, 14);
 
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=sets`);
+  await page.waitForFunction(() => window.CC?.state);
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
   assert.match(await page.textContent("#lens-assignment #result"), /13 of 15 concepts/i);
   assert.equal(await badgeText(page, "eligibility category"), "1");
@@ -212,6 +215,7 @@ export async function run(page, baseURL) {
   // state. The authored classification should still be available as a
   // wholly unanswered reveal, while untargeted terms stay unbadged.
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph&moves=`);
+  await page.waitForFunction(() => window.CC?.state);
   await page.click("#show-solution");
   await page.waitForFunction(() => CC.state.phase === "lens-assigning");
   assert.equal(await page.isDisabled("#lens-assignment #check"), false);

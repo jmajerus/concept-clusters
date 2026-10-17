@@ -11,11 +11,13 @@ export async function run(page, baseURL) {
   await page.emulateMedia({ reducedMotion: "reduce" });
 
   await page.goto(`${baseURL}/index.html`);
+  await page.waitForFunction(() => window.CC);
   const puzzleIds = await page.evaluate(() => CC.PUZZLES.map(puzzle => puzzle.id));
   let reorderedDensePuzzle = false;
 
   for (const puzzleId of puzzleIds) {
     await page.goto(`${baseURL}/index.html?puzzle=${puzzleId}&mode=sets&solved`);
+    await page.waitForFunction(() => window.CC?.state);
     if (await page.evaluate(() => CC.state.learningGated)) {
       await page.click("#learning-introduction #skip");
     }
@@ -74,6 +76,7 @@ export async function run(page, baseURL) {
 
   // A player-pinned circle is outside the automatic search space.
   await page.goto(`${baseURL}/index.html?puzzle=fundamental-forces&mode=sets&moves=`);
+  await page.waitForFunction(() => window.CC?.state);
   const cluster = page.locator(".set-cluster").first();
   const box = await cluster.boundingBox();
   assert.ok(box, "manual Circle drag target was not visible");

@@ -231,10 +231,11 @@ export function createSetRenderer({
     state.setSim.alpha(0.7).restart();
   }
 
-  // Point each cluster's heading away from its own bridges — a fixed
-  // "always north" heading collides with whichever bridge line happens
-  // to approach from that side, since a bridge can leave a circle at any
-  // angle depending on where its partner cluster currently is. Recomputed
+  // Keep each cluster's heading on a pole, top or bottom, unless a bridge
+  // arm or a neighbouring circle blocks both -- a fixed "always north"
+  // heading collides with whichever bridge line happens to approach from
+  // that side, since a bridge can leave a circle at any angle depending on
+  // where its partner cluster currently is. Recomputed
   // fresh on every repaint (not just once) since cluster positions now
   // keep changing as the live simulation settles — cheap enough at this
   // node count to not matter.
@@ -259,7 +260,15 @@ export function createSetRenderer({
 
   function computeHeadingPositions(puzzle, csNodes, clusterBoxes, stripHeight, W, H) {
     const bridgeDirs = puzzle.clusters.map(() => []);
+    // Each bridge's arms, approximated as running from every joined
+    // circle's centre to the centre of them all -- roughly where its pill
+    // sits. Headings are needed before pills are placed (polishing places
+    // bridges around them), so this estimate, not the drawn arm, is what a
+    // heading steers clear of.
+    const arms = [];
     puzzle.bridges.forEach(b => {
+      const hubX = b.clusters.reduce((sum, ci) => sum + csNodes[ci].x, 0) / b.clusters.length;
+      const hubY = b.clusters.reduce((sum, ci) => sum + csNodes[ci].y, 0) / b.clusters.length;
       // Point each participant toward the centroid of the other
       // participants. For a binary bridge this reduces to the original
       // opposite-endpoint direction; for a ternary bridge it points toward
@@ -271,6 +280,7 @@ export function createSetRenderer({
         const zy = others.reduce((sum, n) => sum + n.y, 0) / others.length;
         const dx = zx - a.x, dy = zy - a.y, len = Math.hypot(dx, dy) || 1;
         bridgeDirs[ci].push([dx / len, dy / len]);
+        arms.push({ x1: a.x, y1: a.y, x2: hubX, y2: hubY });
       });
     });
     return puzzle.clusters.map((c, ci) => {
@@ -341,14 +351,32 @@ export function createSetRenderer({
           : anchor === "end" ? [x - halfW * 2, x]
             : [x - halfW, x + halfW];
 
-      // Every (pole, lean) combination -- hugging each pole from either
-      // side, centered above/below, and dead left/right as a fallback for
-      // when hugging a pole doesn't fit the board vertically at all.
+      // Every (pole, lean) combination, tiered by how far the heading
+      // reaches past its circle. Centered above or below adds only one
+      // line of height; a lean or a dead left/right position pushes the
+      // heading's whole width out sideways, into whatever sits beside the
+      // circle. So a later tier is used only when every fitting placement
+      // before it is blocked -- crossed by a bridge arm, or run into
+      // another circle -- and bridge direction only breaks ties within a
+      // tier, which puts the heading on the pole its bridges leave from
+      // least (top when they don't say).
       const candidates = [
-        [-1, 0], [1, 0], [-1, -1], [-1, 1], [1, -1], [1, 1], [0, -1], [0, 1]
+        [0, -1, 0], [0, 1, 0],
+        [1, -1, -1], [1, -1, 1], [1, 1, -1], [1, 1, 1],
+        [2, 0, -1], [2, 0, 1]
       ];
-      let best = null, bestScore = -Infinity;
-      for (const [pole, lean] of candidates) {
+      const blockedAt = heading => {
+        const ink = headingInkRect(heading);
+        if (arms.some(arm => segmentIntersectsRect(arm, ink, 3))) return true;
+        const rect = headingRect(heading);
+        return csNodes.some((circle, cj) => cj !== ci && rectToCircle(rect, circle) < circle.r + 6);
+      };
+      const better = (a, b) =>
+        a.blocked !== b.blocked ? !a.blocked
+          : a.tier !== b.tier ? a.tier < b.tier
+            : a.score > b.score;
+      let best = null;
+      for (const [tier, pole, lean] of candidates) {
         const { x, y, anchor } = place(pole, lean);
         const [spanMin, spanMax] = spanOf(x, anchor);
         const fits = spanMin >= 0 && spanMax <= W && y >= stripHeight + 14 && y <= H - 10;
@@ -359,7 +387,8 @@ export function createSetRenderer({
         // real resulting offset means anything here.
         const dx = x - cx, dy = y - cy, len = Math.hypot(dx, dy) || 1;
         const score = (dx / len) * idealHx + (dy / len) * idealHy;
-        if (score > bestScore) { bestScore = score; best = { x, y, anchor }; }
+        const candidate = { x, y, anchor, tier, score, blocked: blockedAt({ x, y, halfW, anchor }) };
+        if (!best || better(candidate, best)) best = candidate;
       }
       if (!best) {
         const pole = Math.abs(idealHy) < 0.05 ? 0 : Math.sign(idealHy);
@@ -415,6 +444,12 @@ export function createSetRenderer({
       bottom: heading.y + HEADING_INK_H / 2
     };
   };
+
+  // Distance from a circle's centre to the nearest point of a rect.
+  const rectToCircle = (rect, circle) => Math.hypot(
+    circle.x - Math.max(rect.left, Math.min(circle.x, rect.right)),
+    circle.y - Math.max(rect.top, Math.min(circle.y, rect.bottom))
+  );
 
   // Where a bridge's arm to circle `ci` starts, as drawn: at its ideal
   // target's anchor when the link is ideal (a side end, or the top or
@@ -510,10 +545,6 @@ export function createSetRenderer({
     const circleMark = circle => ({ kind: "circle", x: circle.x, y: circle.y, r: circle.r });
     const rectMark = rect => ({ kind: "rect", ...rect });
     const spacing = touching => (touching ? "" : " (closer than the spacing check allows)");
-    const rectToCircle = (rect, circle) => Math.hypot(
-      circle.x - Math.max(rect.left, Math.min(circle.x, rect.right)),
-      circle.y - Math.max(rect.top, Math.min(circle.y, rect.bottom))
-    );
     const overlap = (label, touching, ...marks) => {
       if (!details) return;
       overlappingPairs.push(`${label}${spacing(touching)}`);

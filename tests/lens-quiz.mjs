@@ -37,8 +37,10 @@ export async function run(page, baseURL) {
   page.on("pageerror", error => errors.push(String(error)));
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph&moves=`);
+  await page.waitForFunction(() => window.CC?.state);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await page.waitForFunction(() => window.CC?.state);
 
   // film-classics is authored with preSolve: true, so a fresh load with no
   // saved session lands directly in the quiz round -- no #show-solution
@@ -166,6 +168,7 @@ export async function run(page, baseURL) {
   assert.equal(saved.lens.finalLensReview, true);
 
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=sets`);
+  await page.waitForFunction(() => window.CC?.state);
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
   assert.match(
     await page.textContent("#lens-completion"),
@@ -175,13 +178,16 @@ export async function run(page, baseURL) {
   // Mid-answer restore: reload before checking, confirm the phase and
   // selection round-trip rather than silently resetting to a fresh round.
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph&moves=`);
+  await page.waitForFunction(() => window.CC?.state);
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  await page.waitForFunction(() => window.CC?.state);
   await page.waitForFunction(() => CC.state.phase === "lens-quiz-answering");
   assert.deepEqual(await options.allTextContents(), displayedOptions);
   await page.locator("#lens-quiz-options .lens-quiz-option")
     .filter({ hasText: "Dorothy Arzner" }).click();
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
+  await page.waitForFunction(() => window.CC?.state);
   assert.equal(await page.evaluate(() => CC.state.phase), "lens-quiz-answering");
   assert.equal(await page.evaluate(() => CC.state.lensQuizSelection), "dorothy-arzner");
   assert.equal(await page.isDisabled("#lens-check"), false);
