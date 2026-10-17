@@ -60,6 +60,14 @@ export async function run() {
   assert.deepEqual(args.slice(1), ["gamma", "--json", "--lanes", "1", "--base", "x", "--write", "--modes", "sets,star", "--min-size", "1.1"]);
   assert.deepEqual(layoutPassArgs({ repositoryRoot: "/r", id: "gamma", write: false, base: "x" }).slice(1),
     ["gamma", "--json", "--lanes", "1", "--base", "x"]);
+  // A working copy's run names the draft, not a published puzzle id.
+  assert.deepEqual(layoutPassArgs({ repositoryRoot: "/r", id: "draft:new-copy", write: true, base: "x", draft: "new-copy" }).slice(1),
+    ["--draft", "new-copy", "--json", "--lanes", "1", "--base", "x", "--write"]);
+  const automatic = jobs.start("draft:new-copy", { write: true, base: "x", draft: "new-copy", trigger: "auto" });
+  assert.equal(automatic.trigger, "auto");
+  assert.equal(automatic.draft, "new-copy");
+  await tick();
+  assert.deepEqual(runs.at(-1).options, { id: "draft:new-copy", write: true, base: "x", draft: "new-copy" });
 
   // The page's request names its scope; an explicit empty list still goes
   // to the server, which refuses it, rather than becoming an all-modes run.

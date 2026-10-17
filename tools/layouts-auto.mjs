@@ -14,12 +14,17 @@
 //   --min-size <factor>       board size to start from, e.g. 1.1 for +10%
 //                             (default: the default size, or the saved size
 //                             when only some modes run); never goes below it
+//   --draft <draft-id>        lay out a working copy instead of a published
+//                             puzzle, saving into the working copy
 //   --report <path>           also write the full results as JSON
 //   --json                    print only the results, as JSON, to stdout
 //                             (the authoring panel's Run layout pass uses it)
 //
 // Needs the local authoring server (`npm run dev`), which reads and writes
 // the same D1 publication rows players see: --write changes live boards.
+// With --draft it reads and writes that working copy instead. A server
+// behind the admin sign-in (the LAN authoring server) is reached with the
+// ADMIN_KEY this process inherits.
 //
 // Per board the strategies run in order until the board is clean:
 //   1. the live (standard) search;
@@ -45,6 +50,7 @@
 import { writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { boardSizeOwner } from "../modules/layoutDocument.js";
+import { adminSessionCookie } from "../modules/localAdminAuth.js";
 import { canonicalBoardSizeFactor } from "../modules/puzzleBoardSize.js";
 import { LAYOUT_PASS_MODES, layoutPassSizePlan } from "../modules/layoutPassSizePlan.js";
 import { DEFECT_TIERS, layoutDefects, tierCount } from "../modules/layoutAttention.js";
@@ -64,7 +70,7 @@ function npmFlags(env = process.env) {
   if (flag("write") === "true") args.push("--write");
   // An option with a value cannot survive npm without the separator: npm
   // keeps the flag as "true" and hands the value on as a puzzle id.
-  ["modes", "min_size", "base", "lanes", "report"].forEach(name => {
+  ["modes", "min_size", "draft", "base", "lanes", "report"].forEach(name => {
     if (flag(name) !== undefined) {
       const option = `--${name.replace("_", "-")}`;
       throw new Error(`${option} takes a value, so put -- before the options: npm run layouts:auto -- ${option} <value> …`);
@@ -80,6 +86,7 @@ function parseArgs(argv) {
     all: false,
     modes: MODES,
     minSize: null,
+    draft: null,
     write: false,
     base: "http://127.0.0.1:8787",
     lanes: 2,
@@ -105,11 +112,18 @@ function parseArgs(argv) {
       const raw = value();
       options.minSize = canonicalBoardSizeFactor(Number(raw));
       if (options.minSize == null) throw new Error(`--min-size needs a board size factor such as 1.1, not ${raw}`);
+    } else if (arg === "--draft") {
+      options.draft = value();
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(options.draft)) throw new Error(`Invalid draft id ${options.draft}`);
     } else if (arg === "--base") options.base = value().replace(/\/$/, "");
     else if (arg === "--lanes") options.lanes = Math.max(1, Number.parseInt(value(), 10) || 1);
     else if (arg === "--report") options.report = value();
     else if (arg.startsWith("--")) throw new Error(`Unknown option ${arg}`);
     else options.ids.push(arg);
+  }
+  if (options.draft) {
+    if (options.all || options.ids.length) throw new Error("--draft lays out that one working copy; drop the puzzle ids and --all");
+    options.ids = [options.draft];
   }
   if (!options.all && !options.ids.length) {
     throw new Error("Name one or more puzzle ids, or pass --all (e.g. npm run layouts:auto -- --all)");
@@ -149,23 +163,34 @@ const percent = size => {
 
 // Open the published puzzle, not a working copy: on the authoring server
 // ?puzzle=<id> opens the draft when one exists, so load by corpus index.
+// With --draft, open that working copy's player view instead.
 async function openBoard(browser, options, id, mode, budget, size = null) {
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+  if (process.env.ADMIN_KEY) {
+    await page.context().addCookies([adminSessionCookie(process.env.ADMIN_KEY, options.base)]);
+  }
   await page.emulateMedia({ reducedMotion: "reduce" });
   const sizeParam = size == null ? "" : `&boardSize=${size}`;
-  await page.goto(`${options.base}/?library&mode=${mode}&layoutBudget=${budget}${sizeParam}`);
-  await page.waitForFunction(() => window.CC?.PUZZLES?.length, null, { timeout: 60000 });
-  const found = await page.evaluate(async id => {
-    const index = window.CC.PUZZLES.findIndex(puzzle => puzzle.id === id);
-    if (index < 0) return false;
-    await window.CC.loadPuzzle(index, { restoreSession: false, persistInitial: false, saveCurrent: false });
-    return true;
-  }, id);
-  if (!found) throw new Error(`No published puzzle "${id}"`);
+  if (options.draft) {
+    await page.goto(`${options.base}/?puzzle=${encodeURIComponent(options.draft)}&play&mode=${mode}&layoutBudget=${budget}${sizeParam}`);
+  } else {
+    await page.goto(`${options.base}/?library&mode=${mode}&layoutBudget=${budget}${sizeParam}`);
+    await page.waitForFunction(() => window.CC?.PUZZLES?.length, null, { timeout: 60000 });
+    const found = await page.evaluate(async id => {
+      const index = window.CC.PUZZLES.findIndex(puzzle => puzzle.id === id);
+      if (index < 0) return false;
+      await window.CC.loadPuzzle(index, { restoreSession: false, persistInitial: false, saveCurrent: false });
+      return true;
+    }, id);
+    if (!found) throw new Error(`No published puzzle "${id}"`);
+  }
+  // A working copy's puzzle id is its document's, which may differ from the
+  // draft id; its Construct board (need 0) is not the one to lay out.
   await page.waitForFunction(id => {
-    const state = window.CC.state;
-    return state?.puzzle?.id === id && (state.learningGated || (state.layoutAdapter && state.need > 0));
-  }, id, { timeout: 60000 });
+    const state = window.CC?.state;
+    return (id == null || state?.puzzle?.id === id) &&
+      (state?.learningGated || (state?.layoutAdapter && state.need > 0));
+  }, options.draft ? null : id, { timeout: 60000 });
   if (await page.evaluate(() => window.CC.state.learningGated)) {
     await page.click("#learning-introduction #skip");
     await page.waitForFunction(() => {
@@ -275,14 +300,21 @@ async function layOutBoard(browser, options, id, mode, size, authorLayout) {
 // exactly this result (an edit later turns it into a hint, never drops it).
 // Graph and Circle results with defects the strict check refuses are saved
 // as hints instead; Star layouts are always exact.
-async function saveLayout(page, id, mode) {
-  return page.evaluate(async ({ id, mode }) => {
+// Where results save: the working copy with --draft, else the published row.
+function layoutUrl(options, id) {
+  return options.draft
+    ? `/admin/drafts/${encodeURIComponent(options.draft)}/layout.json`
+    : `/admin/puzzles/${encodeURIComponent(id)}/layout.json`;
+}
+
+async function saveLayout(page, url, mode) {
+  return page.evaluate(async ({ url, mode }) => {
     const state = window.CC.state;
     const put = async fixed => {
       const layout = state.layoutAdapter.capture({ purpose: "authoring" });
       layout.source = "auto";
       if (mode !== "star") layout.fixed = fixed;
-      const reply = await fetch(`/admin/puzzles/${encodeURIComponent(id)}/layout.json?mode=${mode}`, {
+      const reply = await fetch(`${url}?mode=${mode}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
@@ -294,12 +326,12 @@ async function saveLayout(page, id, mode) {
     const exact = await put(true);
     if (exact.ok || mode === "star" || exact.status !== 400) return exact;
     return put(false);
-  }, { id, mode });
+  }, { url, mode });
 }
 
-async function saveBoardSize(page, id, size) {
-  return page.evaluate(async ({ id, size }) => {
-    const reply = await fetch(`/admin/puzzles/${encodeURIComponent(id)}/layout.json`, {
+async function saveBoardSize(page, url, size) {
+  return page.evaluate(async ({ url, size }) => {
+    const reply = await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
@@ -307,7 +339,7 @@ async function saveBoardSize(page, id, size) {
     });
     const body = await reply.json().catch(() => ({}));
     return { ok: reply.ok, status: reply.status, error: body.error, errors: body.errors };
-  }, { id, size });
+  }, { url, size });
 }
 
 const describeSave = response => (response.ok
@@ -392,13 +424,13 @@ async function layOutPuzzle(browser, options, id) {
       return summary;
     }
     if (sizeIsOurs) {
-      const sized = await saveBoardSize(chosen.pages[0], id, chosen.size);
+      const sized = await saveBoardSize(chosen.pages[0], layoutUrl(options, id), chosen.size);
       summary.sizeAction = sized.ok ? "saved" : `not saved (${describeSave(sized)})`;
     }
     for (let i = 0; i < chosen.rows.length; i++) {
       const row = chosen.rows[i];
       if (row.action === "author layout kept") continue;
-      const response = await saveLayout(chosen.pages[i], id, row.mode);
+      const response = await saveLayout(chosen.pages[i], layoutUrl(options, id), row.mode);
       row.action = response.ok
         ? (row.mode === "star" || response.fixed ? "saved" : "saved as hint")
         : `not saved (${describeSave(response)})`;

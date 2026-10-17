@@ -41,6 +41,7 @@ export function authoringWorkspacePaths({
     catalogues: join(root, "catalogues"),
     proposals: join(root, "proposals"),
     githubProductionManifest: join(root, GITHUB_PRODUCTION_MANIFEST_FILE),
+    autoLayoutPass: join(root, "auto-layout-pass.json"),
     inventoryFile: id => join(root, "inventories", `${id}.json`),
     splitPlanFile: id => join(root, "plans", `${id}-split-plan.json`),
     ledgerFile: id => join(root, "ledgers", `${id}-fit.json`),

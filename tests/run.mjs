@@ -92,6 +92,7 @@ import * as authoringDeployGuards from "./authoring-deploy-guards.mjs";
 import * as authorEngine from "./author-engine.mjs";
 import * as draftReviewPage from "./draft-review-page.mjs";
 import * as provenanceLastUsed from "./provenance-last-used.mjs";
+import * as layoutWorkPending from "./layout-work-pending.mjs";
 import * as draftReviewDiff from "./draft-review-diff.mjs";
 import * as draftReviewEdit from "./draft-review-edit.mjs";
 import * as localDraftReview from "./local-draft-review.mjs";
@@ -149,6 +150,7 @@ import * as graphLayoutRepair from "./graph-layout-repair.mjs";
 import * as playerLayoutEffort from "./player-layout-effort.mjs";
 import * as playerLayoutPolish from "./player-layout-polish.mjs";
 import * as layoutPassJobs from "./layout-pass-jobs.mjs";
+import * as autoLayoutWatcher from "./auto-layout-watcher.mjs";
 import * as singleClusterLayout from "./single-cluster-layout.mjs";
 import * as nonCryptographicHash from "./non-cryptographic-hash.mjs";
 import * as skillRevisionStamp from "./skill-revision-stamp.mjs";
@@ -166,11 +168,11 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensFlowTrace, lensRevealCue, lensAssignment, lensQuiz, catalogues, catalogueNavigation, metaCatalogues,
   learningIntroductionEngine, learningIntroduction, learningLessonSection,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, provenanceLastUsed, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename, localCatalogueReview, contentDocuments, playerFacingRevision, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest, authoringDeployGuards,   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringAssistanceLog, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus, boardAdministration, publicPlay, publicPlayBrowser,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, nodeCaseAudit, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, provenanceLastUsed, layoutWorkPending, draftReviewDiff, draftReviewEdit, localDraftReview, draftIdRename, localCatalogueReview, contentDocuments, playerFacingRevision, contentDocumentCitations, categoryRenamePreviousTitles, categoryRenamePropagation, contentFreezePlan, contentFreezeApply, freezePublication, githubProductionManifest, authoringDeployGuards,   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, mcpCallInvocation, authoringProvenance, modelSuggestions, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringAssistanceLog, authoringChangeScore, authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks, localDevHttp, localDevHousekeep, boot, puzzleManifest, playCorpus, boardAdministration, publicPlay, publicPlayBrowser,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   categoryReferenceMigration,
   contentCanonicalization,
-  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, singleClusterLayout,
+  geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
   wikiLinkCheck
@@ -190,13 +192,13 @@ const quickTests = [
   authoringFitCompleteness, authoringIntegratedCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringRecordSplitPlan, authoringChangeScore,
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
-  circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, singleClusterLayout,
+  circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
 ];
 
 const standardTests = [
   ...quickTests,
-  provenanceLastUsed,
+  provenanceLastUsed, layoutWorkPending,
   tableMode, tableSorting, tableFeedback, tableInfo, tablePanels, tableLensEffects,
   mobileLayout, clusterLabelConnect, clusterMenu, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip, starBridgePreconnect,
   learningLessonSection,
@@ -226,7 +228,7 @@ const sideTests = {
     mcpAuthoringDomains, starLayoutAuthoring, layoutAuthoringModes,
     starFreeStrip, starBridgePreconnect, puzzleSymmetryFlags, nodeCaseAudit, contentServices,
     authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage,
-    authoringAdminIndex, draftReviewPage, provenanceLastUsed, draftReviewDiff, draftReviewEdit,
+    authoringAdminIndex, draftReviewPage, provenanceLastUsed, layoutWorkPending, draftReviewDiff, draftReviewEdit,
     localDraftReview, draftIdRename, localCatalogueReview, contentDocuments,
     playerFacingRevision,
     contentDocumentCitations, categoryRenamePreviousTitles,
@@ -241,7 +243,7 @@ const sideTests = {
     authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
-    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, legacyBoardLift, firstPublishedBackfill
+    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill
   ]),
   shared: new Set([
     contentValidation,

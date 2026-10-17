@@ -66,8 +66,8 @@ export async function saveLayoutBoard({
 // The automatic layout pass for one published puzzle, run by the local
 // authoring server. `start` begins a run (a dry run unless `write`), and
 // `status` reports the running or last finished run.
-// With draftId (the layout view is showing a working copy), the server checks
-// that copy's board is the published one before running the pass on it.
+// With draftId (the layout view is showing a working copy), the pass runs on
+// that working copy and saves into it.
 function layoutPassUrl(puzzleId, draftId) {
   const path = `/admin/puzzles/${encodeURIComponent(puzzleId)}/layouts-auto`;
   return draftId ? `${path}?draft=${encodeURIComponent(draftId)}` : path;

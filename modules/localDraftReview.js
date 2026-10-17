@@ -19,6 +19,9 @@
 // remove, assuming the freeze merges.
 
 import { layoutAttention } from "./layoutAttention.js";
+import { autoLayoutSettleMs, readAutoLayoutStatuses } from "./autoLayoutWatcher.js";
+import { authoringWorkspacePaths } from "./authoringWorkspacePaths.js";
+import { draftLayoutPassKey, layoutPassJobsFor } from "./localPlayCorpus.js";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
@@ -498,7 +501,10 @@ export function createLocalDraftReviewHandler({
   // Wikipedia titles so a title checked anywhere recently is not asked
   // again. Other URLs are probed for reachability and are not stored.
   wikiLinkStore = null,
-  checkWikiLinks = document => checkDocumentLinks(document, { timeoutMs: 4000, store: wikiLinkStore })
+  checkWikiLinks = document => checkDocumentLinks(document, { timeoutMs: 4000, store: wikiLinkStore }),
+  // Map of draft id to automatic layout pass status for the puzzle list
+  // (autoLayoutWatcher.js), on the server that runs the pass; else null.
+  readAutoLayoutStatuses = null
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -2011,6 +2017,18 @@ export function createLocalDraftReviewHandler({
           freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
         }, githubSnapshot);
       });
+      if (readAutoLayoutStatuses) {
+        let statuses = new Map();
+        try {
+          statuses = await readAutoLayoutStatuses();
+        } catch {
+          // The list still renders; it just has no automatic pass badges.
+        }
+        corpus.forEach(row => {
+          const status = row.hasWorkingCopy && row.draftId ? statuses.get(row.draftId) : null;
+          if (status) row.autoLayout = status;
+        });
+      }
       html(res, renderDraftListPage(corpus, {
         variant: "local",
         githubProduction: githubSnapshot,
@@ -2183,7 +2201,15 @@ export function createDefaultLocalDraftReviewHandler({
         contentDocuments: resolved.contentDocuments,
         repositoryRoot,
         publicationActor: resolved.actor,
-        wikiLinkStore: resolved.wikiLinkStore || null
+        wikiLinkStore: resolved.wikiLinkStore || null,
+        readAutoLayoutStatuses: env.AUTO_LAYOUT_PASS === "1"
+          ? () => readAutoLayoutStatuses({
+            statePath: authoringWorkspacePaths({ repositoryRoot, env }).autoLayoutPass,
+            jobs: layoutPassJobsFor(repositoryRoot),
+            jobKey: draftLayoutPassKey,
+            settleMs: autoLayoutSettleMs(env)
+          })
+          : null
       });
       return handleRequest(req, res);
     } catch (error) {

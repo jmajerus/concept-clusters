@@ -1687,11 +1687,28 @@ marked `!` needs repair, and its tooltip says why: defects recorded when the
 layout was saved, a hint whose saved starting point had defects, or a fixed
 layout the puzzle or board size has outdated, which players get as a hint or
 adapted, unchecked. The list judges from the saved layout alone, without
-laying out boards. **Layouts to fix** shows the puzzles with a missing or
-marked mode. Running the pass on them fills missing modes and replaces
+laying out boards. Running the pass fills missing modes and replaces
 outdated automatic layouts. It never replaces an author's layout, so an
 outdated author layout stays marked until an author saves it again; that,
 and whatever else stays marked, needs an author.
+
+On the server running the automatic pass, a working copy it is watching
+also gets a marker after its chips: `auto …` (the board changed since the
+last run; waiting for it to settle, or queued), `auto ▶` (running),
+`auto ✓` (finished on the current board; the tooltip lists what each mode
+was left with), or `auto ✗` (failed; the tooltip says why).
+
+**Layout work** lists every puzzle with layouts for a person to look at: a
+missing or marked mode, an automatic pass still to come or failed, or a
+finished one whose layouts are not published yet. Under **Recent** the
+newest are on top, so a working copy the pass has just laid out comes first.
+Puzzles whose automatic pass has not finished (`auto …`, `auto ▶`) sit
+apart in a **Pending** section at the top, so the main list is the work that
+is ready now; the list shows each puzzle as of when the page loaded, so
+reload to see progress. `auto ✓` with no `!` is ready to look over; a `!`
+marks a mode to edit.
+Publishing takes a reviewed puzzle off the list; one published with a mode
+still marked stays on it.
 
 For one puzzle, use the layout-authoring panel on the local authoring
 server. **Run layout pass** is a dry run: it reports, per mode, the problems
@@ -1701,9 +1718,18 @@ all modes; one mode is quicker when only one mode needs work. **Save
 automatic layouts** then runs the same modes again and saves, after a
 confirmation, and reloads the board to show the result. A run takes from
 under a minute to a few minutes; the panel shows progress and keeps the last
-report. The pass works on the published puzzle. With a working copy open, the
-buttons work as long as the copy has the published board (the same clusters,
-terms, and bridges); a copy that changes the board has to be published first.
+report. The pass works on the published puzzle, or, with a working copy open,
+on that working copy, saving into it; players see those layouts once the
+working copy is published.
+
+On the shared authoring server the pass also runs by itself on working
+copies: a few minutes after a working copy's board (clusters, terms, and
+bridges) last changed, it lays out all three modes and saves them into the
+working copy, so the layout page usually opens on saved layouts. Edits that
+leave the board alone, such as facts or lenses, do not start it again. The
+panel shows the automatic run like one started by hand; if it finishes while
+the page is open, reload to see the layouts. A run that fails waits for the
+next board change, or for **Run layout pass**.
 
 For many puzzles at once, use the command line:
 
@@ -1717,7 +1743,8 @@ authoring server (`npm run dev`) and reports each board's remaining problems.
 It is a dry run unless given `--write`, which saves results to the live
 publication rows players see; start with a few puzzles before `--all`. Other
 options: `--modes graph,sets,star`, `--min-size <factor>` (the board size to
-start from, such as `1.1` for +10%), `--lanes <n>` (puzzles at once), and
+start from, such as `1.1` for +10%), `--draft <draft-id>` (one working copy
+instead of published puzzles), `--lanes <n>` (puzzles at once), and
 `--report <file>` (full results as JSON).
 
 For each board, strategies run in order until the board is clean: the live

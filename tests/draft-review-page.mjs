@@ -716,7 +716,7 @@ export async function run() {
     }
   }], { variant: "local" });
   assert.match(layoutList, />Layouts<\/th>/);
-  assert.match(layoutList, /value="layouts"> Layouts to fix/);
+  assert.match(layoutList, /value="layouts"> Layout work/);
   assert.match(layoutList, /data-layout-mode="graph" data-layout-source="auto" data-layout-use="hint"[^>]*>G hint</);
   assert.match(layoutList, /data-layout-mode="star" data-layout-source="author" data-layout-use="fixed"[^>]*>S fixed</,
     "Star layouts are always fixed");
@@ -753,6 +753,44 @@ export async function run() {
   assert.match(repairList, /data-layout-mode="sets"[^>]*title="Circle: [^"]*saved starting point had 2 lines through circles; players get a fresh search from it">C hint !</);
   assert.match(repairList, /class="badge layout-chip layout-chip-author layout-chip-repair"/);
   assert.match(repairList, /data-layout-fix="1"/);
+
+  // The automatic layout pass's marker, and Layout work: a mode to fix, a
+  // pass still to come or failed, or a finished pass whose layouts are not
+  // published yet. Publishing ends the last; a published row with a mode to
+  // fix stays.
+  const sound = {
+    schemaVersion: 1,
+    modes: { graph: { nodes: {} }, star: { nodes: {} }, sets: { nodes: {} } }
+  };
+  const autoRow = (draftId, autoLayout, extra = {}) => ({ ...baseDraft, draftId, savedLayout: sound, autoLayout, ...extra });
+  const autoList = renderDraftListPage([
+    autoRow("auto-done", { state: "done", at: "2026-10-17T12:00:00Z", defects: { graph: 0, sets: 2, star: null } }),
+    autoRow("auto-pending", { state: "pending", expectedAt: "2026-10-17T12:05:00Z" }),
+    autoRow("auto-running", { state: "running", since: "2026-10-17T12:01:00Z" }),
+    autoRow("auto-failed", { state: "failed", at: "2026-10-17T12:02:00Z", error: "browserType.launch: no browser" }),
+    autoRow("auto-published", { state: "done", at: "2026-10-17T12:00:00Z" }, { d1Published: true, unpublishedChangeDomains: [] }),
+    autoRow("auto-unpublished-layout", { state: "done", at: "2026-10-17T12:00:00Z" }, { d1Published: true, unpublishedChangeDomains: ["layout"] }),
+    autoRow("no-auto", null)
+  ], { variant: "local" });
+  const rowOf = draftId => autoList.match(new RegExp(`<tr[^>]*data-draft-id="${draftId}"[\\s\\S]*?</tr>`))[0];
+  assert.match(rowOf("auto-done"), /data-auto-layout="done" title="Automatic layout pass finished 2026-10-17 12:00 UTC on the current board: Graph clean, Circle 2 problems, Star kept">auto ✓</);
+  assert.match(rowOf("auto-pending"), /data-auto-layout="pending"[^>]*>auto …</);
+  assert.match(rowOf("auto-running"), /data-auto-layout="running"[^>]*>auto ▶</);
+  assert.match(rowOf("auto-failed"), /data-auto-layout="failed" title="[^"]*browserType\.launch: no browser[^"]*">auto ✗</);
+  assert.doesNotMatch(rowOf("no-auto"), /data-auto-layout/);
+  for (const draftId of ["auto-done", "auto-pending", "auto-running", "auto-failed", "auto-unpublished-layout"]) {
+    assert.match(rowOf(draftId), /data-layout-fix="0" data-layout-work="1"/, `${draftId} is layout work`);
+  }
+  assert.match(rowOf("auto-published"), /data-layout-work="0"/, "a published, reviewed board leaves Layout work");
+  assert.match(rowOf("no-auto"), /data-layout-work="0"/);
+  const publishedWithIssue = renderDraftListPage([
+    autoRow("issue", { state: "done", at: "2026-10-17T12:00:00Z" }, {
+      d1Published: true,
+      unpublishedChangeDomains: [],
+      savedLayout: { schemaVersion: 1, modes: { graph: { nodes: {} } } }
+    })
+  ], { variant: "local" });
+  assert.match(publishedWithIssue, /data-layout-fix="1" data-layout-work="1"/, "published with a mode still to fix stays");
   const freezeList = renderDraftListPage([{
     ...baseDraft,
     d1Published: true,

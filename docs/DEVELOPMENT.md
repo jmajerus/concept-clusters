@@ -45,6 +45,17 @@ or under `AUTHORING_DATA_DIR` when configured. Use
 `node tools/authoring-workspace.mjs` to print the resolved paths. Review logs
 and other scratch files belong there, not in the MCP protocol workspace.
 
+`AUTO_LAYOUT_PASS=1` turns on the automatic layout pass for working copies:
+the server checks D1 every minute for working copies changed since it was
+first turned on, and once a working copy's board (clusters, terms, bridges)
+has not changed for `AUTO_LAYOUT_SETTLE_MINUTES` (default 5), runs the layout
+pass on it and saves the results into the working copy. Runs go one at a time
+and never replace an author's layouts; see "The automatic layout pass" in
+[AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#the-automatic-layout-pass).
+Turn it on for one server only, the shared authoring server: two would lay
+out the same working copies twice. Its state is `auto-layout-pass.json` in
+the authoring data directory.
+
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:
 
@@ -236,7 +247,8 @@ anything ever imports from it directly):
 | `layoutPublication.js` | Save- and publish-time layout validation: strict for an exact layout being saved, shape-only for hints, lenient with `warnings`/`fallbackModes` for layouts a content edit outdated | `layoutDocument.js`, the three layout schemas |
 | `layoutRecentre.js` | Re-centres a layout onto another board size (positions keep their place relative to the centre), checks it still fits, and re-centres saved fixed layouts for an unchanged puzzle in memory on load and on a size change | `layoutDocument.js`, `layoutHints.js` |
 | `layoutAttention.js` | Which saved layouts need attention, from the stored document alone: defect counts by severity tier (shared with `tools/layouts-auto.mjs`) and fixed layouts outdated by a puzzle revision or board size. Feeds the puzzle list's Layouts chips | `layoutDocument.js`, `layoutHints.js`, `puzzleBoardSize.js`, `simplifiedPuzzleSchema.js` |
-| `layoutPassJobs.js` | Runs `tools/layouts-auto.mjs --json` for one puzzle as a child process for the layout-authoring panel's Run layout pass / Save automatic layouts; one run per puzzle, last result kept. Served by `localPlayCorpus.js` at `/admin/puzzles/<id>/layouts-auto` (POST starts, GET reports) | Node `child_process` |
+| `layoutPassJobs.js` | Runs `tools/layouts-auto.mjs --json` for one puzzle (or `--draft` working copy) as a child process for the layout-authoring panel's Run layout pass / Save automatic layouts and for the automatic pass; one run per puzzle or `draft:<id>`, last result kept. Served by `localPlayCorpus.js` at `/admin/puzzles/<id>/layouts-auto` (`?draft=<id>` for a working copy; POST starts, GET reports) | Node `child_process` |
+| `autoLayoutWatcher.js` | `AUTO_LAYOUT_PASS=1`: polls D1 for changed working copies and runs the layout pass on each once its board settles, one at a time, with its state in the authoring data directory | `layoutPassJobs.js`, D1 working copies |
 | `layoutBudget.js` | Search budgets: `standard` (live play) and `extended` (the automatic pass, `&layoutBudget=extended` on the D1 authoring player only) | nothing — data |
 | `playerLayoutEffort.js` | Classifies player drags and decides whether a board is the player's own (see "Saved player sessions") | nothing — pure |
 | `circleMemberOrder.js` | Circle member stacking: compact base order, the compact-stack radius, `pillAnchor` (an ideal line leaves its target from the facing side end, or the top or bottom centre of an end-row target), and the re-stack that avoids crossings between those lines, then hides the least of them under other pills, then prefers an end row facing the bridge | `geometry.js` |

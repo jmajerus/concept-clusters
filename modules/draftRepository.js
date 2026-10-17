@@ -139,6 +139,9 @@ export class DraftRepository {
     throw new Error("DraftRepository.popWorkingCopy is not implemented");
   }
   async list(_input) { throw new Error("DraftRepository.list is not implemented"); }
+  async listChangedSince(_input) {
+    throw new Error("DraftRepository.listChangedSince is not implemented");
+  }
   async delete(_input) { throw new Error("DraftRepository.delete is not implemented"); }
   async recordValidation(_input) {
     throw new Error("DraftRepository.recordValidation is not implemented");

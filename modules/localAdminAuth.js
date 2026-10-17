@@ -59,6 +59,14 @@ function sessionCookieHeader(value, maxAge = COOKIE_MAX_AGE) {
   return `${COOKIE_NAME}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/admin; HttpOnly; SameSite=Strict`;
 }
 
+/**
+ * The session cookie for a headless browser this server drives itself (the
+ * automatic layout pass), in the shape Playwright's addCookies takes.
+ */
+export function adminSessionCookie(adminKey, baseUrl) {
+  return { name: COOKIE_NAME, value: encodeURIComponent(adminKey), url: `${baseUrl.replace(/\/$/, "")}/admin` };
+}
+
 function clearedCookieHeader() {
   return `${COOKIE_NAME}=; Max-Age=0; Path=/admin; HttpOnly; SameSite=Strict`;
 }
