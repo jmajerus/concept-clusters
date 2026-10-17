@@ -63,6 +63,7 @@ import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { modelSuggestionsForHost } from "./authoringModelSuggestions.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { CLASSIFICATION_EDITOR_SCRIPT } from "./classificationEditorElement.js";
+import { PROVENANCE_CLIENTS_TAG, PROVENANCE_LAST_USED_SCRIPT } from "./provenanceLastUsedElement.js";
 import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
 import {
   boardLimitWaiverMatches,
@@ -766,6 +767,11 @@ const PAGE_STYLE = `
     font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
   }
   .provenance-client-row { margin: 8px 0; }
+  provenance-clients { display: block; }
+  .provenance-override .inline-edit button.provenance-use-last {
+    padding: 3px 10px; border-radius: 999px; border: 1px solid #93c5fd;
+    background: #eff6ff; color: #1d4ed8; font-size: 0.9em;
+  }
   .provenance-host {
     display: inline-block;
     min-width: 5.5em;
@@ -815,6 +821,7 @@ function pageShell(title, body) {
 <script>${COPY_FIELD_ELEMENT_SCRIPT}</script>
 <script>${REPEATABLE_LIST_ELEMENT_SCRIPT}</script>
 <script>${CLASSIFICATION_EDITOR_SCRIPT}</script>
+<script>${PROVENANCE_LAST_USED_SCRIPT}</script>
 </body>
 </html>`;
 }
@@ -2265,6 +2272,15 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
     ].join("");
   }
 
+  // Which "use last" memory a row reads and writes (provenanceLastUsedElement.js).
+  function lastUsedKey(host) {
+    return isClaudeFamilyContributor(host) ? "claude" : generativeHostKey(host);
+  }
+  function hostOption(host) {
+    return `<option value="${escapeHtml(host)}" data-host-key="${escapeHtml(lastUsedKey(host))}">${escapeHtml(host)}</option>`;
+  }
+  const useLastButton = `<button type="button" class="provenance-use-last" data-provenance-use-last hidden></button>`;
+
   function clientRow({ host, rowKey, model, reasoning, switch: switchValue }) {
     // A Claude row posts its full name (rowKey): one puzzle may credit Claude
     // with several models, so the host alone cannot say which row to edit.
@@ -2284,23 +2300,24 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
       generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM);
     const hostCell = unnamed
       ? `<label class="field-label" for="provenance-identify">drafting client</label>
-      <select${form} id="provenance-identify" name="${prefix}identifyHost">${[
+      <select${form} id="provenance-identify" name="${prefix}identifyHost" data-provenance-host-select>${[
         `<option value="">${escapeHtml(UNIDENTIFIED_GENERATIVE_SYSTEM)} (not identified)</option>`,
-        ...knownGenerativeHostSystems().map(known =>
-          `<option value="${escapeHtml(known)}">${escapeHtml(known)}</option>`)
+        ...knownGenerativeHostSystems().map(hostOption)
       ].join("")}</select>`
       : `<span class="provenance-host">${escapeHtml(host)}</span>`;
-    return `<div class="provenance-client-row${unnamed ? " provenance-client-unnamed" : ""}">
+    const hostKeyAttr = unnamed ? "" : ` data-host-key="${escapeHtml(lastUsedKey(host))}"`;
+    return `<div class="provenance-client-row${unnamed ? " provenance-client-unnamed" : ""}" data-provenance-row${hostKeyAttr}>
       ${hostCell}
       <input${form} type="hidden" name="${prefix}modelHost" value="${escapeHtml(key)}">
       <input${form} type="hidden" name="${prefix}reasoningHost" value="${escapeHtml(key)}">
       <input${form} type="hidden" name="${prefix}switchHost" value="${escapeHtml(key)}">
       <label class="field-label" for="${modelId}">model</label>
-      <select${form} id="${modelId}" name="${prefix}modelValue">${modelSelectOptions(model)}</select>
+      <select${form} id="${modelId}" name="${prefix}modelValue" data-provenance-field="model">${modelSelectOptions(model)}</select>
       <label class="field-label" for="${reasoningId}">reasoning</label>
-      <select${form} id="${reasoningId}" name="${prefix}reasoningValue">${levelSelectOptions(AUTHORING_PROVENANCE_REASONING_LEVELS, AUTHORING_PROVENANCE_REASONING_LABELS, reasoning)}</select>
+      <select${form} id="${reasoningId}" name="${prefix}reasoningValue" data-provenance-field="reasoning">${levelSelectOptions(AUTHORING_PROVENANCE_REASONING_LEVELS, AUTHORING_PROVENANCE_REASONING_LABELS, reasoning)}</select>
       <label class="field-label" for="${switchId}">switch</label>
-      <select${form} id="${switchId}" name="${prefix}switchValue">${levelSelectOptions(AUTHORING_PROVENANCE_SWITCHES, AUTHORING_PROVENANCE_SWITCH_LABELS, switchValue)}</select>${rowKey ? claudeCodeToggle(host, key, slugId) : ""}
+      <select${form} id="${switchId}" name="${prefix}switchValue" data-provenance-field="switch">${levelSelectOptions(AUTHORING_PROVENANCE_SWITCHES, AUTHORING_PROVENANCE_SWITCH_LABELS, switchValue)}</select>${rowKey ? claudeCodeToggle(host, key, slugId) : ""}
+      ${useLastButton}
     </div>`;
   }
   // The MCP frame credits every Claude surface as "Claude"; only the editor
@@ -2313,17 +2330,18 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
     const toggleId = `provenance-claude-code-${slugId}`;
     return `
       <input${form} type="hidden" name="${prefix}claudeSurfaceHost" value="${escapeHtml(key)}">
-      <label class="field-label" for="${toggleId}"><input${form} type="checkbox" id="${toggleId}" name="${prefix}claudeCodeHost" value="${escapeHtml(key)}"${checked}> Claude Code</label>`;
+      <label class="field-label" for="${toggleId}"><input${form} type="checkbox" id="${toggleId}" name="${prefix}claudeCodeHost" value="${escapeHtml(key)}" data-provenance-field="claudeCode"${checked}> Claude Code</label>`;
   }
   const clientRows = generativeHosts.map(clientRow).join("");
   // Once Claude is credited, a further Claude model is added here rather than
   // through the general add row. Left blank, it adds nothing; a model the
   // existing row already has merges into it. The frame's hint sits here, once.
   const creditsClaude = generativeHosts.some(({ rowKey }) => rowKey);
-  const addClaudeRow = creditsClaude ? `<div class="provenance-client-row provenance-client-add-claude">
+  const addClaudeRow = creditsClaude ? `<div class="provenance-client-row provenance-client-add-claude" data-provenance-row data-provenance-add data-host-key="claude">
       <label class="field-label" for="provenance-add-claude-model">another Claude model</label>
-      <select${form} id="provenance-add-claude-model" name="${prefix}addClaudeModel">${modelSelectOptions("")}</select>
-      <label class="field-label" for="provenance-add-claude-code"><input${form} type="checkbox" id="provenance-add-claude-code" name="${prefix}addClaudeCode" value="1"> Claude Code</label>${claudeReportedBy ? `
+      <select${form} id="provenance-add-claude-model" name="${prefix}addClaudeModel" data-provenance-field="model">${modelSelectOptions("")}</select>
+      <label class="field-label" for="provenance-add-claude-code"><input${form} type="checkbox" id="provenance-add-claude-code" name="${prefix}addClaudeCode" value="1" data-provenance-field="claudeCode"> Claude Code</label>
+      ${useLastButton}${claudeReportedBy ? `
       <span class="meta provenance-reported-by">reported by: ${claudeReportedBy}</span>` : ""}
     </div>` : "";
 
@@ -2341,14 +2359,15 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
     generativeHostKey(host) === generativeHostKey(UNIDENTIFIED_GENERATIVE_SYSTEM));
   // Reasoning/switch aren't offered on the add row itself -- they tune a
   // specific client's row, which this one becomes only once added and saved.
-  const addClientRow = unlistedHosts.length && !hasUnnamed ? `<div class="provenance-client-row provenance-client-add">
+  const addClientRow = unlistedHosts.length && !hasUnnamed ? `<div class="provenance-client-row provenance-client-add" data-provenance-row data-provenance-add>
       <label class="field-label" for="provenance-add-host">add drafting client</label>
-      <select${form} id="provenance-add-host" name="${prefix}modelHost">${[
+      <select${form} id="provenance-add-host" name="${prefix}modelHost" data-provenance-host-select>${[
         `<option value="">(choose a drafting client)</option>`,
-        ...unlistedHosts.map(host => `<option value="${escapeHtml(host)}">${escapeHtml(host)}</option>`)
+        ...unlistedHosts.map(hostOption)
       ].join("")}</select>
       <label class="field-label" for="provenance-add-model">model</label>
-      <select${form} id="provenance-add-model" name="${prefix}modelValue">${modelSelectOptions("")}</select>
+      <select${form} id="provenance-add-model" name="${prefix}modelValue" data-provenance-field="model">${modelSelectOptions("")}</select>
+      ${useLastButton}
     </div>` : "";
 
   return `<aside class="provenance-override">
@@ -2361,13 +2380,13 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
     <div class="inline-edit provenance-form">
       ${slot.hidden}
       <input${form} type="hidden" name="${prefix}authorName" value="${escapeHtml(author)}">
-      <div class="provenance-clients">
+      <${PROVENANCE_CLIENTS_TAG} class="provenance-clients" data-form="${WORKING_COPY_FORM_ID}">
         <p class="field-label">Drafting client</p>
-        <p class="meta">Confirmed by the MCP probe when a client identifies itself, or added here. Model, reasoning, and switch are optional -- set them only when you're confident what ran; they concatenate into the derived byline after the model (for example Grok 4.6 High Fast).</p>${hasUnnamed ? `<p class="meta">This puzzle records an agent that could not be named when it was written. Choosing a drafting client above fills that blank in place -- it does not add a second contributor. Leave it unidentified unless you have evidence of which client ran. A client the MCP probe confirmed is not editable here; correcting one of those is a removal, not a rename.</p>` : ""}
+        <p class="meta">Confirmed by the MCP probe when a client identifies itself, or added here. Model, reasoning, and switch are optional -- set them only when you're confident what ran; they concatenate into the derived byline after the model (for example Grok 4.6 High Fast). A "use last" button fills a row's blank fields with what you last saved for that client in this browser; nothing is filled until you click it.</p>${hasUnnamed ? `<p class="meta">This puzzle records an agent that could not be named when it was written. Choosing a drafting client above fills that blank in place -- it does not add a second contributor. Leave it unidentified unless you have evidence of which client ran. A client the MCP probe confirmed is not editable here; correcting one of those is a removal, not a rename.</p>` : ""}
         ${clientRows}
         ${addClaudeRow}
         ${addClientRow}
-      </div>
+      </${PROVENANCE_CLIENTS_TAG}>
       <div class="provenance-field">
         <label class="field-label" for="provenance-collaboration">collaboration</label>
         <select${form} id="provenance-collaboration" name="${prefix}collaboration">${options}</select>

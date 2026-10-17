@@ -1366,7 +1366,7 @@ export async function run() {
   assert.match(blankProvenancePage, /<h2>Provenance<\/h2>/);
   assert.match(blankProvenancePage, /No provenance has been recorded for this draft/);
   assert.match(blankProvenancePage, /add drafting client/);
-  assert.match(blankProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
+  assert.match(blankProvenancePage, /<option value="Muse Code"[^>]*>Muse Code<\/option>/);
 
   // A host already stamped (MCP auto-stamp or a prior manual add) gets one
   // editable model row. It must not also appear in the "add drafting client"
@@ -1383,8 +1383,8 @@ export async function run() {
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   assert.match(stampedProvenancePage, /id="provenance-model-codex"[\s\S]*?<option value="GPT-5\.6 Sol" selected>GPT-5\.6 Sol<\/option>/);
   assert.match(stampedProvenancePage, /add drafting client/);
-  assert.doesNotMatch(stampedProvenancePage, /<option value="Codex">Codex<\/option>/);
-  assert.match(stampedProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
+  assert.doesNotMatch(stampedProvenancePage, /<option value="Codex"[^>]*>Codex<\/option>/);
+  assert.match(stampedProvenancePage, /<option value="Muse Code"[^>]*>Muse Code<\/option>/);
   // Only Claude rows carry the Claude Code checkbox, addressed by the row's
   // full name and checked when the row already says Claude Code.
   assert.doesNotMatch(stampedProvenancePage, /name="[^"]*claudeCodeHost"/);
@@ -1396,10 +1396,10 @@ export async function run() {
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   const claudePage = claudeRowPage([{ name: "Claude (Claude Opus 5.5)" }]);
   assert.match(claudePage, /name="[^"]*modelHost" value="Claude \(Opus 5\.5\)"/);
-  assert.match(claudePage, /type="checkbox" id="provenance-claude-code-claude-\(opus-5\.5\)" name="[^"]*claudeCodeHost" value="Claude \(Opus 5\.5\)">/);
+  assert.match(claudePage, /type="checkbox" id="provenance-claude-code-claude-\(opus-5\.5\)" name="[^"]*claudeCodeHost" value="Claude \(Opus 5\.5\)" data-provenance-field="claudeCode">/);
   assert.match(
     claudeRowPage([{ name: "Claude Code" }]),
-    /type="checkbox" id="provenance-claude-code-claude-code" name="[^"]*claudeCodeHost" value="Claude Code" checked>/
+    /type="checkbox" id="provenance-claude-code-claude-code" name="[^"]*claudeCodeHost" value="Claude Code" data-provenance-field="claudeCode" checked>/
   );
   // Each Claude model is its own row; the blank row adds another, and the
   // general add row no longer offers a Claude client.
@@ -1411,9 +1411,9 @@ export async function run() {
   assert.match(twoClaudePage, /name="[^"]*modelHost" value="Claude Code \(Claude Sonnet 5\.5\)"/);
   assert.match(twoClaudePage, /another Claude model<\/label>\s*<select[^>]*name="[^"]*addClaudeModel"/);
   assert.match(twoClaudePage, /byline \(derived\):<\/span> Drafted with Claude \(Sonnet 5, Sonnet 5\.5\)/);
-  assert.doesNotMatch(twoClaudePage, /<option value="Claude Code">Claude Code<\/option>/);
-  assert.doesNotMatch(twoClaudePage, /<option value="Claude">Claude<\/option>/);
-  assert.match(stampedProvenancePage, /<option value="Claude">Claude<\/option>/);
+  assert.doesNotMatch(twoClaudePage, /<option value="Claude Code"[^>]*>Claude Code<\/option>/);
+  assert.doesNotMatch(twoClaudePage, /<option value="Claude"[^>]*>Claude<\/option>/);
+  assert.match(stampedProvenancePage, /<option value="Claude"[^>]*>Claude<\/option>/);
 
   // With the blank row, once: what the frame reported for this draft's
   // Claude calls, raw.
