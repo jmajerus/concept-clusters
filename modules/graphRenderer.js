@@ -502,16 +502,18 @@ export function createGraphRenderer({
           candidate = computePrettyGraphLayout({
             d3, puzzle, nodes, links: state.links, width: W, height: H, hint,
             budget: layoutBudget(state.layoutBudget).graph,
-            checkDeadline: layoutDeadline(state.layoutBudget)
+            checkDeadline: layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs)
           });
         } catch (error) {
           if (!(error instanceof LayoutTimeLimit)) throw error;
-          // The board is left unpolished and still editable. The polish
-          // stopped the simulation before it ever ticked, so a board solved
-          // on a mode switch is still piled where the last mode left its
-          // terms, and the lens phase freezes it straight after this. Settle
-          // the forces here, synchronously, so it is at least spread out.
-          if (getState() === state) {
+          // The search works on copies, so the board is left as the polish
+          // found it, unpolished and still editable. Only a board solved on
+          // a mode switch needs more: the polish stopped the simulation
+          // before it ever ticked, so it is still piled where the last mode
+          // left its terms, and the lens phase freezes it straight after
+          // this. Settle the forces there, synchronously, so it is at least
+          // spread out. Anywhere else that would scramble an arrangement.
+          if (getState() === state && state.modeSwitchPolishing) {
             sim.alpha(1).tick(300);
             renderPositions();
           }

@@ -6,7 +6,9 @@
 // The searches are synchronous, so a long one freezes the page until the
 // browser offers to stop it. "standard" therefore gives up after
 // timeLimitMs, under the browsers' hang warnings, and leaves the board as
-// it was; "extended" runs headless and has no limit.
+// it was; "extended" runs headless and has no limit. The layout authoring
+// panel can override the limit (state.layoutTimeLimitMs) for an author who
+// will wait out a longer freeze.
 
 const BUDGETS = {
   standard: {
@@ -44,11 +46,11 @@ export class LayoutTimeLimit extends Error {
 
 /**
  * A check to call inside a layout search loop. It throws LayoutTimeLimit
- * once the budget's time limit has passed since this call, and never
- * throws under a budget without one.
+ * once the time limit has passed since this call: overrideMs when given
+ * (0 for no limit), else the budget's own. It never throws without one.
  */
-export function layoutDeadline(name) {
-  const ms = layoutBudget(name).timeLimitMs;
+export function layoutDeadline(name, overrideMs = null) {
+  const ms = overrideMs ?? layoutBudget(name).timeLimitMs;
   if (!ms) return () => {};
   const end = performance.now() + ms;
   return () => {

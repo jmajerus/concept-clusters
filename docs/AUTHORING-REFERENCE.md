@@ -1611,7 +1611,14 @@ from its saved layout.
   recomputed)" or "Saved Star layout no longer matches exactly (…); adapted
   it to this board". Automatic layouts are labelled as such.
 - **Prepare layout** solves an unsolved board. On a board that is already
-  solved, it generates a fresh layout, ignoring the saved one.
+  solved, it generates a fresh layout, ignoring the saved one, unless the
+  last polish ran out of time: then it retries that polish.
+- **Polish limit** sets how long polishing may search before it stops
+  (8 seconds by default, as players get; 20 or 45 seconds, or no limit).
+  The page freezes while the search runs, and past about 20 seconds the
+  browser may offer to stop it; choose Wait to let it finish. A polish that
+  runs out of time leaves the board as it found it. The choice is kept in
+  this browser.
 - **Dragging** a term or cluster title is literal placement: the force
   simulation stays stopped. Drags save to a browser-local draft (Save draft,
   Load draft, Clear draft), which is scratch space and never published.

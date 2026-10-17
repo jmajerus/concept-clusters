@@ -762,7 +762,7 @@ export function createSetRenderer({
     };
 
     // Throws LayoutTimeLimit rather than hang the page (layoutBudget.js).
-    const checkDeadline = layoutDeadline(state.layoutBudget);
+    const checkDeadline = layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs);
     const search = (searchOrders, searchRotations, searchHint) => {
     let best = null;
     for (const order of searchOrders) {
@@ -1974,7 +1974,8 @@ export function createSetRenderer({
           candidate = computePrettyCircleLayout(hint);
         } catch (error) {
           if (!(error instanceof LayoutTimeLimit)) throw error;
-          // The board stays as it is, unpolished and still editable.
+          // The search works on copies, so the board stays as it is,
+          // unpolished and still editable.
           state.solutionLayout = before;
           state.polishTimedOut = true;
           updateSolutionHint();

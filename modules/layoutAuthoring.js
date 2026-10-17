@@ -20,6 +20,7 @@ import {
   starBridgePreconnectEnabled
 } from "./starLayoutRepository.js";
 import { layoutIsFixed } from "./layoutHints.js";
+import { layoutBudget } from "./layoutBudget.js";
 import { lensFlowTraceEnabled } from "./lensFlowTrace.js";
 import {
   globalLensRevealCue,
@@ -60,6 +61,7 @@ export function createLayoutAuthoringController({
   const layoutMetricOverlapsEl = document.getElementById("layout-metric-overlaps");
   const layoutMetricNearEdgeEl = document.getElementById("layout-metric-near-edge");
   const layoutAuthoringPrepareBtn = document.getElementById("layout-authoring-prepare");
+  const layoutTimeLimitSelect = document.getElementById("layout-authoring-time-limit");
   const layoutAuthoringSaveBtn = document.getElementById("layout-authoring-save");
   const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
   const layoutAuthoringSaveLayoutBtn = document.getElementById("layout-authoring-save-layout");
@@ -134,6 +136,42 @@ export function createLayoutAuthoringController({
   }
 
   syncLayoutActionVisibility();
+
+  // Polish time limit (layoutBudget.js). The live searches stop after the
+  // standard limit rather than freeze the page; an author who will wait out
+  // a longer freeze picks more here. The choice stays in this browser, and
+  // players always get the standard limit.
+  const TIME_LIMIT_KEY = "ccLayoutTimeLimit:v1";
+  const TIME_LIMIT_OPTIONS = [
+    ["", `${layoutBudget("standard").timeLimitMs / 1000} seconds`],
+    ["20000", "20 seconds"],
+    ["45000", "45 seconds"],
+    ["0", "No limit"]
+  ];
+
+  function chosenTimeLimitMs() {
+    const value = layoutTimeLimitSelect?.value || "";
+    return value === "" ? null : Number(value);
+  }
+
+  function applyTimeLimit() {
+    const state = getState();
+    if (layoutAuthoringMode && state) state.layoutTimeLimitMs = chosenTimeLimitMs();
+  }
+
+  if (layoutTimeLimitSelect) {
+    TIME_LIMIT_OPTIONS.forEach(([value, label]) => layoutTimeLimitSelect.add(new Option(label, value)));
+    let saved = "";
+    try { saved = storage.getItem(TIME_LIMIT_KEY) || ""; } catch {}
+    if (TIME_LIMIT_OPTIONS.some(([value]) => value === saved)) layoutTimeLimitSelect.value = saved;
+    layoutTimeLimitSelect.addEventListener("change", () => {
+      try { storage.setItem(TIME_LIMIT_KEY, layoutTimeLimitSelect.value); } catch {}
+      applyTimeLimit();
+    });
+  }
+
+  // The polish that last ran out of time, so Prepare can retry it.
+  let timedOutPolish = null;
 
   function boardSize() {
     const board = getBoard();
@@ -432,18 +470,25 @@ export function createLayoutAuthoringController({
     if (!layoutAuthoringMode || !preparingState || getMode() === "table") return;
     const label = MODE_LABELS[getMode()];
     const saved = savedModeLayout(preparingState);
+    const solved = preparingState.made === preparingState.need;
     // Only a fresh solve starts from the saved layout. Prepare on an
-    // already-solved board is the explicit "generate a new one" request.
-    const fromSaved = Boolean(saved) && preparingState.made !== preparingState.need;
+    // already-solved board is the explicit "generate a new one" request,
+    // except after a polish from the saved layout ran out of time: then it
+    // retries that polish, under whatever time limit is now picked.
+    const retryFromSaved = solved && preparingState.polishTimedOut &&
+      timedOutPolish?.state === preparingState && !timedOutPolish.fresh;
+    const fresh = solved && !retryFromSaved;
+    const fromSaved = Boolean(saved) && !fresh;
+    preparingState.polishTimedOut = false;
     layoutAuthoringPrepareBtn.disabled = true;
     setLayoutAuthoringStatus(fromSaved ? `Loading saved ${label} layout…` : "Generating a layout…");
     try {
       let generatedLayoutPromise = null;
-      if (preparingState.made !== preparingState.need) {
+      if (!solved) {
         showSolution();
       } else {
         // An explicit regenerate: renderers skip the saved layout for it.
-        preparingState.ignoreSavedLayout = true;
+        preparingState.ignoreSavedLayout = fresh;
         if (preparingState.layoutAdapter?.autoLayout) {
           generatedLayoutPromise = preparingState.layoutAdapter.autoLayout();
         } else if (preparingState.detangle) {
@@ -464,7 +509,7 @@ export function createLayoutAuthoringController({
       }
       if (getState() !== preparingState) return;
       if (preparingState.polishTimedOut) {
-        reportPolishTimedOut(label);
+        reportPolishTimedOut(label, preparingState, fresh);
         return;
       }
       const source = fromSaved
@@ -483,10 +528,12 @@ export function createLayoutAuthoringController({
   }
 
   // Polishing gave up rather than hang the page (layoutBudget.js): the
-  // board is left as the solve placed it, ready to drag and save.
-  function reportPolishTimedOut(label) {
+  // board is left as the polish found it, ready to drag and save, or to
+  // Prepare again under a longer limit.
+  function reportPolishTimedOut(label, state, fresh = false) {
+    timedOutPolish = { state, fresh };
     setLayoutAuthoringStatus(
-      `${label} polishing took too long and was stopped; the board is left unpolished. Drag to arrange it, then save.`,
+      `${label} polishing took too long and was stopped; the board is left unpolished. Drag to arrange it and save, or pick a longer polish limit and Prepare again.`,
       "error"
     );
     updateLayoutAuthoringPanel();
@@ -567,7 +614,7 @@ export function createLayoutAuthoringController({
     }
     if (getState() !== state || getMode() !== switchedMode) return;
     if (state.polishTimedOut) {
-      reportPolishTimedOut(label);
+      reportPolishTimedOut(label, state);
       return;
     }
     const source = saved
@@ -1108,6 +1155,7 @@ export function createLayoutAuthoringController({
     syncLayoutActionVisibility();
     syncStarFreeStripButtons();
     if (!layoutAuthoringMode || !state) return;
+    applyTimeLimit();
     // The renderer calls this after generated/curated placement and after
     // every literal author drag. Local storage is draft-only; the explicit
     // save action is the publication step when this is the D1 player.

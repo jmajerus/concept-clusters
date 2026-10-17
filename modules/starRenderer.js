@@ -1296,7 +1296,7 @@ export function createStarRenderer({
           const original = capturePositions();
           const originalLayout = evaluateLayout();
           // Throws LayoutTimeLimit rather than hang the page (layoutBudget.js).
-          const checkDeadline = layoutDeadline(state.layoutBudget);
+          const checkDeadline = layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs);
           try {
             // Settle every node toward its target with light charge and
             // collision, scored by how far it strays from the targets.

@@ -1091,7 +1091,8 @@ body.authoring-construct #share-status {
   cursor: default;
   opacity: 0.55;
 }
-.layout-authoring-fixed {
+.layout-authoring-fixed,
+.layout-authoring-time-limit {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1099,6 +1100,7 @@ body.authoring-construct #share-status {
   color: var(--ink-soft);
 }
 .layout-authoring-fixed[hidden] { display: none; }
+.layout-authoring-time-limit select { font-size: inherit; }
 .layout-authoring-pass {
   margin-top: 10px;
   font-size: 12.5px;
