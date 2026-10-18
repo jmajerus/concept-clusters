@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { autoLayoutStatus, createAutoLayoutWatcher, readAutoLayoutState, readAutoLayoutStatuses } from "../modules/autoLayoutWatcher.js";
 import { createLayoutPassJobs } from "../modules/layoutPassJobs.js";
+import { boardKey as boardKeyOf } from "../modules/draftReviewDiff.js";
 
 export const name = "automatic layout pass: working copies laid out once their board settles";
 
@@ -45,7 +46,14 @@ export async function run() {
       now: iso
     });
     const statePath = join(dir, "auto-layout-pass.json");
+    // Published rows by puzzle id, for working copies of published puzzles.
+    const published = new Map();
+    let publishedReadFails = false;
     const make = () => createAutoLayoutWatcher({
+      getPublished: async puzzleId => {
+        if (publishedReadFails) throw new Error("D1 unavailable");
+        return published.get(puzzleId) || null;
+      },
       listChangedSince: async ({ since }) => [...rows.values()]
         .filter(row => row.updatedAt > since)
         .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))
@@ -223,6 +231,153 @@ export async function run() {
     await tick();
     assert.equal(runs.length, before, "an older entry laid out by its author was run");
     assert.equal((await readAutoLayoutState(statePath)).drafts["older-entry"].authorEveryMode, true);
+
+    // A working copy of a published puzzle, first seen with the published
+    // board and a layout for every mode it inherits (a batch run's), is
+    // already laid out: no run, no marker. A different board, or a mode
+    // with no layout, still gets the pass.
+    const batchLayout = { schemaVersion: 1, modes: { graph: { source: "auto", nodes: {} }, sets: { source: "auto", nodes: {} }, star: { source: "auto", nodes: {} } } };
+    const publishedBoard = id => ({ ...board(["g", "h", "i"]), id });
+    for (const id of ["same-board", "new-board", "missing-mode"]) {
+      published.set(id, {
+        document: publishedBoard(id),
+        layout: id === "missing-mode"
+          ? { schemaVersion: 1, modes: { graph: { source: "auto", nodes: {} } } }
+          : batchLayout
+      });
+    }
+    const runsBefore = runs.length;
+    save("same-board", { ...publishedBoard("same-board"), clusters: [{ ...publishedBoard("same-board").clusters[0], fact: "A provenance-only or text edit." }] });
+    save("new-board", { ...board(["g", "h", "i", "j"]), id: "new-board" });
+    save("missing-mode", publishedBoard("missing-mode"));
+    await restarted.tick();
+    clock += 10 * MINUTE;
+    for (let i = 0; i < 3; i++) {
+      await restarted.tick();
+      await tick();
+      const pending = runs.slice(runsBefore).find(run => !run.settled);
+      if (pending) {
+        pending.settled = true;
+        pending.resolve({ id: pending.options.draft, rows: [{ mode: "graph", action: "saved", defects: { total: 0 } }] });
+        await tick();
+      }
+    }
+    const laidOut = runs.slice(runsBefore).map(run => run.options.draft).sort();
+    assert.deepEqual(laidOut, ["missing-mode", "new-board"], "the batch-laid-out working copy was run again");
+    assert.equal((await readAutoLayoutStatuses({ statePath, jobs, jobKey: id => `draft:${id}`, settleMs: 5 * MINUTE })).get("same-board"), undefined);
+
+    // An entry queued from its first sighting before this check gets it once.
+    const queued = await readAutoLayoutState(statePath);
+    published.set("queued-copy", { document: publishedBoard("queued-copy"), layout: batchLayout });
+    save("queued-copy", publishedBoard("queued-copy"));
+    queued.drafts["queued-copy"] = {
+      contentHash: rows.get("queued-copy").contentHash,
+      authorEveryMode: false,
+      boardKey: boardKeyOf(publishedBoard("queued-copy")),
+      boardChangedAt: iso()
+    };
+    queued.cursor = iso();
+    await writeFile(statePath, JSON.stringify(queued));
+    const upgraded = make();
+    clock += 10 * MINUTE;
+    const beforeUpgrade = runs.length;
+    await upgraded.tick();
+    await tick();
+    assert.equal(runs.length, beforeUpgrade, "a queued batch-laid-out entry was run");
+    assert.equal((await readAutoLayoutState(statePath)).drafts["queued-copy"].outcome, "already laid out");
+
+    // A failed published read is retried, not taken as "not laid out".
+    published.set("flaky-copy", { document: publishedBoard("flaky-copy"), layout: batchLayout });
+    save("flaky-copy", publishedBoard("flaky-copy"));
+    publishedReadFails = true;
+    await assert.rejects(upgraded.tick());
+    publishedReadFails = false;
+    clock += 10 * MINUTE;
+    const beforeRetry = runs.length;
+    await upgraded.tick();
+    await tick();
+    assert.equal(runs.length, beforeRetry, "a copy whose published read failed once was run");
+    assert.equal((await readAutoLayoutState(statePath)).drafts["flaky-copy"].outcome, "already laid out");
+
+    // A copy with an author layout in every mode is not marked laid out by
+    // that check, so clearing one of those layouts still brings the pass.
+    const authorAll = { schemaVersion: 1, modes: { graph: { nodes: {} }, sets: { nodes: {} }, star: { nodes: {} } } };
+    published.set("author-all", { document: publishedBoard("author-all"), layout: batchLayout });
+    save("author-all", publishedBoard("author-all"), authorAll);
+    await upgraded.tick();
+    clock += 10 * MINUTE;
+    await upgraded.tick();
+    await tick();
+    assert.notEqual((await readAutoLayoutState(statePath)).drafts["author-all"].outcome, "already laid out");
+    const beforeClear = runs.length;
+    rows.get("author-all").layout = { schemaVersion: 1, modes: { graph: { nodes: {} }, sets: { nodes: {} } } };
+    saveLayout("author-all");
+    clock += 10 * MINUTE;
+    await upgraded.tick();
+    await tick();
+    assert.equal(runs.length, beforeClear + 1, "clearing an author layout did not bring the pass back");
+    assert.equal(runs.at(-1).options.draft, "author-all");
+
+    // The board key reads the board, not its storage form: a published
+    // document's listed terms and bridge ids against a working copy's seeds
+    // and floating terms, in another order, are the same board. Changing a
+    // term, a cluster name, or a bridge's clusters is not.
+    const publishedForm = {
+      id: "forms",
+      clusters: [
+        { id: "a", name: "A", terms: ["x", "y", "z"], seeds: ["x", "y"], floatingTerms: ["z"] },
+        { id: "b", name: "B", terms: ["p", "q"], seeds: ["p", "q"] }
+      ],
+      bridges: [{ id: "bridge-one", term: "bridge one", clusters: ["a", "b"] }]
+    };
+    const workingForm = {
+      id: "forms",
+      category: "moved by a classification edit",
+      clusters: [
+        { id: "a", name: "A", fact: "Reworded.", seeds: ["y", "z"], floatingTerms: ["x"] },
+        { id: "b", name: "B", seeds: ["q", "p"] }
+      ],
+      bridges: [{ term: "bridge one", clusters: ["b", "a"], fact: "New fact." }]
+    };
+    assert.equal(boardKeyOf(workingForm), boardKeyOf(publishedForm), "storage form or a non-board edit counted as a board change");
+    const changedTerm = structuredClone(workingForm);
+    changedTerm.clusters[0].floatingTerms = ["w"];
+    assert.notEqual(boardKeyOf(changedTerm), boardKeyOf(publishedForm));
+    const renamed = structuredClone(workingForm);
+    renamed.clusters[1].name = "Bee";
+    assert.notEqual(boardKeyOf(renamed), boardKeyOf(publishedForm));
+    const rerouted = structuredClone(workingForm);
+    rerouted.bridges[0].clusters = ["a"];
+    assert.notEqual(boardKeyOf(rerouted), boardKeyOf(publishedForm));
+
+    // Keys stored in the old form are recomputed once; a board laid out
+    // under the old key stays laid out.
+    const legacy = await readAutoLayoutState(statePath);
+    save("old-key", publishedBoard("old-key"));
+    legacy.drafts["old-key"] = {
+      contentHash: rows.get("old-key").contentHash,
+      authorEveryMode: false,
+      baselineChecked: true,
+      boardKey: "an old-form key",
+      laidOutBoardKey: "an old-form key",
+      outcome: "done",
+      boardChangedAt: iso()
+    };
+    legacy.cursor = iso();
+    await writeFile(statePath, JSON.stringify(legacy));
+    const rekeyed = make();
+    // A later save that leaves the board alone must not look like a change.
+    save("old-key", { ...publishedBoard("old-key"), category: "reclassified" });
+    clock += 10 * MINUTE;
+    const beforeRekey = runs.length;
+    await rekeyed.tick();
+    clock += 10 * MINUTE;
+    await rekeyed.tick();
+    await tick();
+    assert.equal(runs.length, beforeRekey, "an old-form key made a laid-out board run again");
+    const rekeyedEntry = (await readAutoLayoutState(statePath)).drafts["old-key"];
+    assert.equal(rekeyedEntry.boardKey, boardKeyOf(publishedBoard("old-key")));
+    assert.equal(rekeyedEntry.laidOutBoardKey, rekeyedEntry.boardKey);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

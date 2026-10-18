@@ -103,15 +103,29 @@ export function unpublishedChangeDomains(published, draft, {
   return changed;
 }
 
-// What a layout is laid out from: the clusters' names and terms and the
-// bridges between them. Facts, info, colors, lenses and the rest can change
-// without moving a pill, so an edit to those leaves the board as it was.
+// What a layout is laid out from: each cluster's name and the set of its
+// terms, and the bridges between them. Facts, info, colors, lenses and the
+// rest can change without moving a pill, so an edit to those leaves the
+// board as it was. So can storage form: a published document lists a
+// cluster's terms, a working copy may keep only seeds and floating terms,
+// and which terms start placed, the order they are listed in, and bridge
+// ids do not change the solved board either.
+const sortedUnique = values => [...new Set((values || []).map(String))].sort();
 function boardShape(document) {
   return {
-    clusters: (document?.clusters || []).map(({ id, name, terms, seeds, floatingTerms }) =>
-      ({ id, name, terms, seeds, floatingTerms })),
-    bridges: (document?.bridges || []).map(({ id, term, clusters, idealTerms, direction }) =>
-      ({ id, term, clusters, idealTerms, direction }))
+    clusters: (document?.clusters || []).map(({ id, name, terms, seeds, floatingTerms }) => ({
+      id,
+      name,
+      terms: sortedUnique([...(terms || []), ...(seeds || []), ...(floatingTerms || [])])
+    })),
+    bridges: (document?.bridges || [])
+      .map(({ term, clusters, idealTerms, direction }) => ({
+        term,
+        clusters: sortedUnique(clusters),
+        idealTerms,
+        direction
+      }))
+      .sort((a, b) => String(a.term).localeCompare(String(b.term)))
   };
 }
 
