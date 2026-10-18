@@ -72,7 +72,8 @@ async function authoringMode(page, baseURL, mode) {
       "a fixed saved layout loads with its rows");
     const named = await page.evaluate(() => window.CC.state.layoutAdapter.metrics().obstructions);
     assert.ok(Array.isArray(named), "Circle metrics name their obstructions");
-    assert.equal(named.length, layout.metrics.lineHeadingIntersections + layout.metrics.lineCircleIntersections);
+    assert.equal(named.length, layout.metrics.lineHeadingIntersections + layout.metrics.lineCircleIntersections +
+      (layout.metrics.edgeNodeIntersections || 0));
     assert.equal(layout.metrics.obstructions, undefined, "saved metrics hold counts only");
     // A controlled obstruction: pull a bridge out past its own circle's
     // heading, so the drawn arm runs through that heading's text.

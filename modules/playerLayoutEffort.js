@@ -14,13 +14,13 @@
 
 // Defects in each mode as severity tiers, most severe first, the way each
 // engine ranks them: Graph's scoreGraphGeometry, Circle's
-// scoreCircleCandidate (lines through headings and through circles weigh
+// scoreCircleCandidate (lines through headings, circles and pills weigh
 // the same, so they share a tier), and Star's detangle compareLayouts
 // (whose edgeNodeIntersections already counts lines through titles). A
 // tier listing several metrics compares their sum.
 export const LAYOUT_DEFECTS = Object.freeze({
   graph: ["hardOverlaps", "lineCrossings", "edgeNodeIntersections"],
-  sets: ["hardOverlaps", "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
+  sets: ["hardOverlaps", "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections", "edgeNodeIntersections"]],
   star: ["lineCrossings", "edgeNodeIntersections", "overlaps"]
 });
 

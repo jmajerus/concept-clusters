@@ -16,11 +16,11 @@ import { layoutPointsFitBoard, recentreLayoutDocument } from "./layoutRecentre.j
 // comparePrettyLayouts). Graph's hardOverlaps already includes overlaps,
 // and Graph's and Circle's include items near the board's edge, which are
 // reported apart in the same tier (withoutEdgeOverlaps);
-// Circle weighs lines through headings and through circles the same, so
+// Circle weighs lines through headings, circles and pills the same, so
 // they share a tier (a tier listing several metrics compares their sum).
 export const DEFECT_TIERS = {
   graph: [["hardOverlaps", "boundsViolations"], "lineCrossings", "edgeNodeIntersections"],
-  sets: [["hardOverlaps", "boundsViolations"], "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections"]],
+  sets: [["hardOverlaps", "boundsViolations"], "lineCrossings", ["lineHeadingIntersections", "lineCircleIntersections", "edgeNodeIntersections"]],
   star: ["lineCrossings", "edgeTitleIntersections", ["edgeNodeIntersections", "edgeIntersections"], "overlaps"]
 };
 

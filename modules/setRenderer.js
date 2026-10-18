@@ -561,6 +561,7 @@ export function createSetRenderer({
       lineCrossings: 0,
       lineHeadingIntersections: 0,
       lineCircleIntersections: 0,
+      edgeNodeIntersections: 0,
       totalLength: 0
     };
 
@@ -658,6 +659,16 @@ export function createSetRenderer({
           defectMarks?.push({ kind: "line", ...segment }, circleMark(circle));
         }
       });
+      // A line under another bridge's pill reads as an extra arm of it.
+      bridgeRects.forEach((rect, bi) => {
+        const term = bridges[bi].bridge.term;
+        if (term === segment.bridge) return;
+        if (segmentIntersectsRect(segment, rect, 3)) {
+          metrics.edgeNodeIntersections++;
+          obstructions?.push(`${segment.bridge} → ${term} pill`);
+          defectMarks?.push({ kind: "line", ...segment }, rectMark(rect));
+        }
+      });
       for (let j = i + 1; j < segments.length; j++) {
         if (segment.bridge === segments[j].bridge) continue;
         if (segmentIntersection(segment, segments[j])) {
@@ -675,6 +686,7 @@ export function createSetRenderer({
         metrics.lineCrossings * 1e7 +
         metrics.lineHeadingIntersections * 1e6 +
         metrics.lineCircleIntersections * 1e6 +
+        metrics.edgeNodeIntersections * 1e6 +
         metrics.totalLength
     };
   }
@@ -835,6 +847,16 @@ export function createSetRenderer({
               let bestPoint = null;
               const offset = searchHint?.bridgeOffsets.get(node.word);
               const hintPoint = offset ? rotateOffset(offset, rotation - searchHint.rotation) : null;
+              // The bridges already placed stay put while this one's
+              // candidates are tried, so their pills and lines are fixed.
+              const placedBridges = [...bridgePointsByWord].map(([word, placed]) => {
+                const placedNode = state.nodes.find(candidate => candidate.word === word);
+                const placedBridge = puzzle.bridges.find(candidate => candidate.term === word);
+                return {
+                  rect: pointRect(placed, placedNode.w),
+                  segments: bridgeSegmentsForPoint(placedBridge, placed, circles, clusterBoxes, rowOffsets)
+                };
+              });
               for (const point of bridgeCandidatePoints(bridge, circles, bridgeIndex, hintPoint)) {
                 const rect = pointRect(point, node.w);
                 let hard = 0;
@@ -846,10 +868,9 @@ export function createSetRenderer({
                 preliminaryHeadings.forEach(heading => {
                   if (rectsOverlap(rect, heading, 8)) hard++;
                 });
-                for (const [word, placed] of bridgePointsByWord) {
-                  const placedNode = state.nodes.find(candidate => candidate.word === word);
-                  if (rectsOverlap(rect, pointRect(placed, placedNode.w), 12)) hard++;
-                }
+                placedBridges.forEach(placed => {
+                  if (rectsOverlap(rect, placed.rect, 12)) hard++;
+                });
                 const segments = bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes, rowOffsets);
                 let obstruction = 0, crossings = 0, length = 0;
                 segments.forEach(segment => {
@@ -866,12 +887,15 @@ export function createSetRenderer({
                       obstruction++;
                     }
                   });
-                  for (const [word, placed] of bridgePointsByWord) {
-                    const placedBridge = puzzle.bridges.find(candidate => candidate.term === word);
-                    bridgeSegmentsForPoint(placedBridge, placed, circles, clusterBoxes, rowOffsets)
-                      .forEach(other => { if (segmentIntersection(segment, other)) crossings++; });
-                  }
+                  placedBridges.forEach(placed => {
+                    if (segmentIntersectsRect(segment, placed.rect, 3)) obstruction++;
+                    placed.segments.forEach(other => { if (segmentIntersection(segment, other)) crossings++; });
+                  });
                 });
+                // Nor may this pill sit on a line already drawn.
+                placedBridges.forEach(placed => placed.segments.forEach(other => {
+                  if (segmentIntersectsRect(other, rect, 3)) obstruction++;
+                }));
                 const score = hard * 1e9 + crossings * 1e7 + obstruction * 1e6 + length -
                   (point.hinted ? HINT_BRIDGE_PREFERENCE : 0);
                 if (!bestPoint || score < bestPoint.score) {
@@ -2091,7 +2115,8 @@ export function createSetRenderer({
         setMessage(
           candidate.metrics.hardOverlaps === 0 &&
             candidate.metrics.lineCrossings === 0 &&
-            candidate.metrics.lineHeadingIntersections === 0
+            candidate.metrics.lineHeadingIntersections === 0 &&
+            candidate.metrics.edgeNodeIntersections === 0
             ? state.completedViaShowSolution
               ? "Solution shown — Circle layout polished."
               : "Circle layout polished."
