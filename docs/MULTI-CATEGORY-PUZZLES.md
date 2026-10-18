@@ -27,7 +27,7 @@ controls:
 
 - it must be a non-empty array of unique category ids;
 - its first entry must exactly match the `category` id;
-- it should normally contain no more than two or three categories;
+- it holds at most four categories: the primary and up to three secondary;
 - each category must contribute concepts, methods, or explanatory structure
   essential to the puzzle, not merely be a field in which the topic is useful.
 

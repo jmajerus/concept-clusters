@@ -37,10 +37,11 @@ for (const puzzle of PUZZLES) {
     if (!Array.isArray(puzzle.categories) || !puzzle.categories.length) {
       fail(puzzle.id, "categories must be a non-empty array when present");
     }
-    if (puzzle.categories.length > 3) {
+    // One primary and up to three secondary categories.
+    if (puzzle.categories.length > 4) {
       fail(
         puzzle.id,
-        `categories has ${puzzle.categories.length} entries; use catalogues rather than broad category inflation`
+        `categories has ${puzzle.categories.length} entries; the limit is 4 (one primary and up to three secondary), so use catalogues rather than broad category inflation`
       );
     }
     const unique = new Set();
