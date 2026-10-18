@@ -1,3 +1,5 @@
+import { recordD1Query } from "./d1RequestTiming.js";
+
 const DEFAULT_API_BASE = "https://api.cloudflare.com/client/v4";
 
 export class HttpD1Error extends Error {
@@ -53,6 +55,15 @@ export function createHttpD1Database({
   const endpoint = `${String(apiBase).replace(/\/+$/, "")}/accounts/${accountId}/d1/database/${databaseId}/query`;
 
   async function request(body) {
+    const startedAt = performance.now();
+    try {
+      return await send(body);
+    } finally {
+      recordD1Query(body, startedAt, performance.now());
+    }
+  }
+
+  async function send(body) {
     let response;
     try {
       response = await fetchImpl(endpoint, {
