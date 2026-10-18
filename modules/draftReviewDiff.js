@@ -69,6 +69,49 @@ export function valuesEqual(left, right) {
   return JSON.stringify(canon(left)) === JSON.stringify(canon(right));
 }
 
+const termSet = values => [...new Set((values || []).map(String))].sort();
+
+/**
+ * The published document and a working copy with differences of storage form
+ * taken out, so they are compared on what an author wrote. A published row
+ * lists each cluster's terms beside its seeds and floating terms, and gives
+ * bridges ids; a working copy may keep only the seeds and floating terms, and
+ * no bridge ids. A cluster's terms list that only repeats its seeds and
+ * floating terms is dropped, and a bridge's id when the same bridge on the
+ * other side has none. A real change to either still shows.
+ */
+export function alignStorageForm(published, draft) {
+  if (!published || !draft) return [published, draft];
+  const align = (document, peer) => {
+    const aligned = { ...document };
+    if (Array.isArray(document.clusters)) {
+      aligned.clusters = document.clusters.map(cluster => {
+        if (!Array.isArray(cluster?.terms)) return cluster;
+        // Working copies may hold invalid intermediates; anything but lists
+        // leaves the terms as they are.
+        if ((cluster.seeds != null && !Array.isArray(cluster.seeds)) ||
+            (cluster.floatingTerms != null && !Array.isArray(cluster.floatingTerms))) return cluster;
+        const placed = termSet([...(cluster.seeds || []), ...(cluster.floatingTerms || [])]);
+        if (!placed.length || JSON.stringify(termSet(cluster.terms)) !== JSON.stringify(placed)) return cluster;
+        const { terms: _terms, ...rest } = cluster;
+        return rest;
+      });
+    }
+    if (Array.isArray(document.bridges)) {
+      const peerBridges = Array.isArray(peer.bridges) ? peer.bridges : [];
+      aligned.bridges = document.bridges.map(bridge => {
+        if (bridge?.id == null) return bridge;
+        const match = peerBridges.find(other => other?.term === bridge.term);
+        if (!match || match.id != null) return bridge;
+        const { id: _id, ...rest } = bridge;
+        return rest;
+      });
+    }
+    return aligned;
+  };
+  return [align(published, draft), align(draft, published)];
+}
+
 /** Changed publication domains, using the same ownership as focused writes. */
 export function unpublishedChangeDomains(published, draft, {
   publishedLayout = null, draftLayout = null
@@ -78,9 +121,12 @@ export function unpublishedChangeDomains(published, draft, {
   // them, in the layout, so a lifted published row matches a draft that
   // still carries the same values in `board`.
   const publishedLift = liftLegacyBoard(published, publishedLayout);
-  const draftLift = liftLegacyBoard(draft, draftLayout);
-  const before = partitionAuthoredDocument(hoistDocumentCitations(publishedLift.document));
-  const after = partitionAuthoredDocument(hoistDocumentCitations(draftLift.document));
+  // A working copy with no layout of its own inherits the published one, as
+  // play and publishing treat it; clearing a layout saves an empty document.
+  const draftLift = liftLegacyBoard(draft, draftLayout ?? publishedLayout);
+  const [publishedDocument, draftDocument] = alignStorageForm(publishedLift.document, draftLift.document);
+  const before = partitionAuthoredDocument(hoistDocumentCitations(publishedDocument));
+  const after = partitionAuthoredDocument(hoistDocumentCitations(draftDocument));
   // Annotation-free bridge identities are context for pedagogy, not edits to it.
   for (const parts of [before, after]) {
     const annotations = (parts.pedagogy.bridges || []).filter(bridge =>
@@ -200,21 +246,25 @@ function bump(counts, kind) {
   counts[kind] += 1;
 }
 
+// Working copies may hold invalid intermediates: a field that is not a
+// list reads as empty rather than throwing.
+const listOf = value => (Array.isArray(value) ? value : []);
+
 function clusterTermMark(published, draft) {
-  const publishedTerms = published?.terms || [
-    ...(published?.seeds || []),
-    ...(published?.floatingTerms || [])
+  const publishedTerms = Array.isArray(published?.terms) ? published.terms : [
+    ...listOf(published?.seeds),
+    ...listOf(published?.floatingTerms)
   ];
-  const draftTerms = draft?.terms || [
-    ...(draft?.seeds || []),
-    ...(draft?.floatingTerms || [])
+  const draftTerms = Array.isArray(draft?.terms) ? draft.terms : [
+    ...listOf(draft?.seeds),
+    ...listOf(draft?.floatingTerms)
   ];
   const publishedSet = new Set(publishedTerms);
   const draftSet = new Set(draftTerms);
   const added = draftTerms.filter(term => !publishedSet.has(term));
   const removed = publishedTerms.filter(term => !draftSet.has(term));
-  const publishedSeeds = new Set(published?.seeds || []);
-  const draftSeeds = new Set(draft?.seeds || []);
+  const publishedSeeds = new Set(listOf(published?.seeds));
+  const draftSeeds = new Set(listOf(draft?.seeds));
   const seedChanged = [...new Set([...publishedSeeds, ...draftSeeds])]
     .filter(term => publishedSeeds.has(term) !== draftSeeds.has(term));
   const info = {};
@@ -289,6 +339,7 @@ function collectionDiff(publishedItems, draftItems, keyFields, markPair, counts)
 
 export function diffPublishedDraft(published, draft) {
   if (!published || !draft) return null;
+  [published, draft] = alignStorageForm(published, draft);
   published = hoistDocumentCitations(published);
   draft = hoistDocumentCitations(draft);
   const counts = { changed: 0, added: 0, removed: 0 };

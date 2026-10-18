@@ -1036,7 +1036,9 @@ export async function run() {
     assert.match(workingRow, /data-has-draft="1"/);
     assert.match(workingRow, /data-layout-mode="star" data-layout-source="author"/,
       "a working copy's row shows the working copy's layout");
-    await draftStore.clearLayout(comparisonId);
+    // Clearing a layout the working copy inherits saves an empty layout
+    // document (as the layout route does); no layout of its own inherits.
+    await draftStore.saveLayout({ draftId: comparisonId, layout: { schemaVersion: 1, modes: {} } });
     assert.match(await comparisonRow(), /data-unpublished-changes="1"/, "clearing a published layout is an edit too");
     const unpublishResult = createResponse();
     await handlePublish(postRequest(`/admin/drafts/${comparisonId}`, {

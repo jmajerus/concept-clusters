@@ -253,7 +253,8 @@ export async function mapDraftDetail(record, {
   const layoutDiffersFromPublished = Boolean(
     publishedDocument && !valuesEqual(
       liftLegacyBoard(publishedDocument, publishedLayout || null).layout ?? null,
-      liftLegacyBoard(record.document, record.layout || null).layout ?? null
+      // No layout of its own inherits the published one.
+      liftLegacyBoard(record.document, record.layout ?? publishedLayout ?? null).layout ?? null
     )
   );
   // One diff, read twice: the summary renders it and the shadow check scores
