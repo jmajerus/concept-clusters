@@ -34,6 +34,7 @@ import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview
 import { handleLocalModelSuggestions } from "./modelSuggestionsAdminPage.js";
 import { guardLocalAdmin } from "./localAdminAuth.js";
 import { withD1Timing } from "./d1RequestTiming.js";
+import { d1LargeColumnCacheEnabled } from "./d1LargeColumnCache.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
@@ -827,7 +828,28 @@ export async function runLocalDev({
     throw error;
   }
   await startAutoLayoutPass({ repositoryRoot, env, port: boundPort(started.server, options.port) });
+  warmD1LargeColumnCache({ repositoryRoot, env });
   return started;
+}
+
+// Fills the large-column cache (d1LargeColumnCache.js) in the background with
+// the lists the admin pages read, so the first load after a start does not
+// download the whole corpus. Same calls as the pages, so the queries match.
+async function warmD1LargeColumnCache({ repositoryRoot, env }) {
+  if (!d1LargeColumnCacheEnabled(env)) return;
+  const startedAt = performance.now();
+  try {
+    const { contentDocuments, draftRepository, actor } =
+      await resolveLocalAuthoringWorkspace({ env, repositoryRoot });
+    if (!contentDocuments) return;
+    await Promise.all([
+      ...["puzzle", "catalogue", "category"].map(kind => contentDocuments.listPublished({ kind })),
+      draftRepository.list({ actor })
+    ]);
+    console.log(`${formatDevTimestamp()} D1 large-column cache warmed in ${Math.round(performance.now() - startedAt)}ms.`);
+  } catch (error) {
+    console.error(`${formatDevTimestamp()} D1 large-column cache not warmed: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 // AUTO_LAYOUT_PASS=1 runs the layout pass on working copies whose board has

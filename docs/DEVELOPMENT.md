@@ -51,6 +51,19 @@ time, number of D1 HTTP calls, their summed time, their wall-clock time
 statement. `AUTHORING_D1_TIMING=2` also lists each call with its start
 offset, duration, and response size.
 
+The local server keeps the large columns of its list queries in memory
+(`modules/d1LargeColumnCache.js`): published documents' `document` and
+`layout_json`, and working copies' `document`, `content_json`,
+`pedagogy_json`, and `layout_json`. Each list still reads every other column
+from D1, plus the length of each large one, and reuses a row's cached large
+columns only while its `updated_at`, `content_hash`, `revision`, and lengths
+are unchanged; other rows are fetched whole. Every write to a large column
+must also set `updated_at` (`tests/d1-large-column-cache.mjs` checks every
+`UPDATE` in `modules/`, `tools/`, and new migrations). The server fills the
+cache in the background at start; a restart empties it, and
+`AUTHORING_D1_CACHE=0` turns it off. The timing log's `reused=` counts rows
+served from it.
+
 The local server and the `tools/` scripts reach D1 through the D1 REST API
 unless a D1 proxy is configured. The proxy (`src/d1-proxy-worker.ts`,
 `wrangler.d1-proxy.jsonc`) is a small Worker with a D1 binding that accepts
@@ -219,6 +232,7 @@ anything ever imports from it directly):
 | `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
 | `repositoryPublicationService.js` | Deterministic import plans, approval fingerprints, file preconditions, transactional publication, rollback, and live registry updates; backs `tools/content-jsonld.mjs`'s `content:import` only, not MCP | `contentInterchangeService.js`, Node filesystem/process APIs |
 | `puzzleDraftStore.js` | File-backed draft remnant for tests; not the stdio default | Node filesystem APIs |
+| `d1LargeColumnCache.js` | Local server's cache of the large columns of the corpus and working-copy list queries; always re-reads small columns and lengths | `d1RequestTiming.js` |
 | `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch`, over the REST API or the D1 proxy Worker | `fetch` |
 | `localD1Config.js` | Account, database, token (or D1 proxy URL and token), and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
 | `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
