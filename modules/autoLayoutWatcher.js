@@ -170,9 +170,10 @@ export function createAutoLayoutWatcher({
       entry.contentHash = row.contentHash;
       const wasAuthorEveryMode = entry.authorEveryMode === true;
       entry.authorEveryMode = authorLayoutInEveryMode(draft.layout);
-      // An author layout cleared since a run that found nothing to do: the
-      // pass has a mode to fill again.
-      if (wasAuthorEveryMode && !entry.authorEveryMode && entry.outcome === NOTHING_TO_DO) {
+      // An author layout cleared since the pass last had nothing to do: it
+      // has a mode to fill again.
+      if (wasAuthorEveryMode && !entry.authorEveryMode &&
+          (entry.outcome === NOTHING_TO_DO || entry.outcome === ALREADY_LAID_OUT)) {
         delete entry.laidOutBoardKey;
       }
       const key = boardKey(draft.document);
@@ -226,9 +227,16 @@ export function createAutoLayoutWatcher({
   // A working copy has no earlier board the first time it is seen. When its
   // board is the published one and every mode already has a layout (its own
   // or inherited), that board counts as laid out: the pass has nothing to add.
+  // A copy with an author layout in every mode is the author-layout skip's,
+  // so it is left unmarked here: clearing one of those must bring the pass.
   async function adoptExistingLayouts(entry, draft, key) {
-    entry.baselineChecked = true;
+    if (entry.authorEveryMode) {
+      entry.baselineChecked = true;
+      return;
+    }
+    // Marked checked only once the read succeeds, so a failed one is retried.
     const published = await getPublished(draft.document?.id);
+    entry.baselineChecked = true;
     if (published && boardKey(published.document) === key &&
         layoutInEveryMode(draft.layout ?? published.layout)) {
       entry.laidOutBoardKey = key;

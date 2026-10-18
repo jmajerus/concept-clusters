@@ -48,8 +48,12 @@ export async function run() {
     const statePath = join(dir, "auto-layout-pass.json");
     // Published rows by puzzle id, for working copies of published puzzles.
     const published = new Map();
+    let publishedReadFails = false;
     const make = () => createAutoLayoutWatcher({
-      getPublished: async puzzleId => published.get(puzzleId) || null,
+      getPublished: async puzzleId => {
+        if (publishedReadFails) throw new Error("D1 unavailable");
+        return published.get(puzzleId) || null;
+      },
       listChangedSince: async ({ since }) => [...rows.values()]
         .filter(row => row.updatedAt > since)
         .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))
@@ -281,6 +285,38 @@ export async function run() {
     await tick();
     assert.equal(runs.length, beforeUpgrade, "a queued batch-laid-out entry was run");
     assert.equal((await readAutoLayoutState(statePath)).drafts["queued-copy"].outcome, "already laid out");
+
+    // A failed published read is retried, not taken as "not laid out".
+    published.set("flaky-copy", { document: publishedBoard("flaky-copy"), layout: batchLayout });
+    save("flaky-copy", publishedBoard("flaky-copy"));
+    publishedReadFails = true;
+    await assert.rejects(upgraded.tick());
+    publishedReadFails = false;
+    clock += 10 * MINUTE;
+    const beforeRetry = runs.length;
+    await upgraded.tick();
+    await tick();
+    assert.equal(runs.length, beforeRetry, "a copy whose published read failed once was run");
+    assert.equal((await readAutoLayoutState(statePath)).drafts["flaky-copy"].outcome, "already laid out");
+
+    // A copy with an author layout in every mode is not marked laid out by
+    // that check, so clearing one of those layouts still brings the pass.
+    const authorAll = { schemaVersion: 1, modes: { graph: { nodes: {} }, sets: { nodes: {} }, star: { nodes: {} } } };
+    published.set("author-all", { document: publishedBoard("author-all"), layout: batchLayout });
+    save("author-all", publishedBoard("author-all"), authorAll);
+    await upgraded.tick();
+    clock += 10 * MINUTE;
+    await upgraded.tick();
+    await tick();
+    assert.notEqual((await readAutoLayoutState(statePath)).drafts["author-all"].outcome, "already laid out");
+    const beforeClear = runs.length;
+    rows.get("author-all").layout = { schemaVersion: 1, modes: { graph: { nodes: {} }, sets: { nodes: {} } } };
+    saveLayout("author-all");
+    clock += 10 * MINUTE;
+    await upgraded.tick();
+    await tick();
+    assert.equal(runs.length, beforeClear + 1, "clearing an author layout did not bring the pass back");
+    assert.equal(runs.at(-1).options.draft, "author-all");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
