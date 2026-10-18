@@ -23,6 +23,7 @@ import {
   PLAY_CORPUS_PATH
 } from "./playCorpus.js";
 import { layoutForMode } from "./layoutDocument.js";
+import { createServerTiming } from "./serverTiming.js";
 import { createLayoutPassJobs, spawnLayoutPass } from "./layoutPassJobs.js";
 import {
   readSiteSettingsOrDefaults,
@@ -305,22 +306,28 @@ export function createLocalPlayCorpusHandler({
     if (req.method !== "GET" && req.method !== "HEAD") return false;
     const puzzleMatch = urlPath.match(/^\/play\/puzzles\/([^/]+)\.json$/);
     if (urlPath === PLAY_CORPUS_PATH) {
+      const timing = createServerTiming();
       await ensureSeeded();
+      timing.phase("seed");
       const [puzzleRows, catalogueRows, categoryRows, draftRows, settings] = await Promise.all([
-        contentDocuments.listPublished({ kind: "puzzle" }),
-        contentDocuments.listPublished({ kind: "catalogue" }),
-        contentDocuments.listPublished({ kind: "category" }),
-        typeof listDrafts === "function" ? listDrafts() : [],
-        readSiteSettingsOrDefaults(siteSettings)
+        timing.timed("published-puzzles", contentDocuments.listPublished({ kind: "puzzle" })),
+        timing.timed("published-catalogues", contentDocuments.listPublished({ kind: "catalogue" })),
+        timing.timed("published-categories", contentDocuments.listPublished({ kind: "category" })),
+        timing.timed("working-copies", typeof listDrafts === "function" ? listDrafts() : []),
+        timing.timed("site-settings", readSiteSettingsOrDefaults(siteSettings))
       ]);
-      json(res, assemblePlayCorpus({
+      timing.phase("fetch");
+      const corpus = assemblePlayCorpus({
         puzzleRows,
         catalogueRows,
         categoryRows,
         draftRows: Array.isArray(draftRows) ? draftRows : [],
         puzzleOrder: puzzleIdsFromService(contentService),
         settings
-      }));
+      });
+      timing.phase("assemble");
+      timing.apply(res);
+      json(res, corpus);
       return true;
     }
     if (puzzleMatch) {

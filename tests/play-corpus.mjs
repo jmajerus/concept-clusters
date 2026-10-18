@@ -33,6 +33,7 @@ import {
   parseLayoutDocument
 } from "../modules/layoutDocument.js";
 import { startServer, serverURL } from "./lib/server.mjs";
+import { createServerTiming } from "../modules/serverTiming.js";
 
 export const heavy = true; // among the longest browser tests; the runner starts it first
 // Save endpoints stamp each mode's layout with savedAt (see
@@ -82,6 +83,19 @@ function createResponse() {
 }
 
 export async function run(page) {
+  {
+    let clock = 0;
+    const timing = createServerTiming(() => clock);
+    clock = 5;
+    timing.phase("fetch");
+    timing.measure("compare", () => { clock += 2; });
+    timing.measure("compare", () => { clock += 3; });
+    assert.equal(timing.header(), "fetch;dur=5.0, compare;dur=5.0", "phases, then per-row sums");
+    const headers = {};
+    timing.apply({ setHeader: (name, value) => { headers[name] = value; }, headersSent: false });
+    assert.equal(headers["Server-Timing"], timing.header());
+  }
+
   const { puzzle, errors } = compilePublishedPuzzle(labPuzzle);
   assert.equal(errors.length, 0, errors.join("; "));
   assert.equal(puzzle.id, "lab-d1-play");
@@ -866,6 +880,16 @@ export async function run(page) {
     const server = await startServer(root, { handleRequest: handleBrowserRequest });
     const baseURL = serverURL(server);
     try {
+      // The whole-corpus routes say where a navigation spends its time.
+      for (const [path, phases] of [
+        ["/play/corpus.json", ["working-copies", "fetch", "assemble"]],
+        ["/admin/drafts", ["published", "working-copies", "rows", "render"]]
+      ]) {
+        const timingHeader = (await fetch(`${baseURL}${path}`)).headers.get("server-timing") || "";
+        for (const phase of phases) {
+          assert.match(timingHeader, new RegExp(`(^|, )${phase};dur=\\d`), `${path} Server-Timing names ${phase}`);
+        }
+      }
       await page.goto(`${baseURL}/index.html`, { waitUntil: "networkidle" });
       await page.evaluate(() => localStorage.clear());
       await page.goto(

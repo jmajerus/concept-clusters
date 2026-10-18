@@ -22,6 +22,7 @@ import { layoutAttention } from "./layoutAttention.js";
 import { autoLayoutSettleMs, readAutoLayoutStatuses } from "./autoLayoutWatcher.js";
 import { authoringWorkspacePaths } from "./authoringWorkspacePaths.js";
 import { draftLayoutPassKey, layoutPassJobsFor } from "./localPlayCorpus.js";
+import { createServerTiming } from "./serverTiming.js";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
@@ -1940,6 +1941,7 @@ export function createLocalDraftReviewHandler({
       return true;
     }
     if (urlPath === "/admin/drafts") {
+      const timing = createServerTiming();
       const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
       let publishedRows = contentDocuments
         ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
@@ -1957,16 +1959,19 @@ export function createLocalDraftReviewHandler({
           publishedRows = await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true });
         }
       }
+      timing.phase("published");
       const notice = draftPublicationNoticeFromSearch(
         requestUrl.searchParams,
         publishedRows
       );
       const listed = await draftStore.listDrafts({ includeDocument: true });
+      timing.phase("working-copies");
       const categoryRegistry = await loadMergedCategoryRegistry({
         contentDocuments,
         contentService,
         actor: publicationActor
       });
+      timing.phase("categories");
       const publishedById = new Map(publishedRows.map(row => [row.id, row]));
       const freezeAdds = freezeAddIdsFromPublishedRows(publishedRows, gitPuzzleIds);
       const drafts = await Promise.all(listed.map(async metadata => {
@@ -1988,13 +1993,13 @@ export function createLocalDraftReviewHandler({
           ? documentForEditor(metadata.document, { categoryRegistry })
           : null;
         const publishedDiff = baseline && workingDocument
-          ? diffPublishedDraft(baseline, workingDocument)
+          ? timing.measure("diff", () => diffPublishedDraft(baseline, workingDocument))
           : null;
         const unpublishedDomains = baseline && workingDocument && !publishedRow.withdrawnAt
-          ? unpublishedChangeDomains(baseline, workingDocument, {
+          ? timing.measure("compare", () => unpublishedChangeDomains(baseline, workingDocument, {
             publishedLayout: publishedRow.layout || null,
             draftLayout: metadata.layout || null
-          })
+          }))
           : [];
         return {
           ...mapDraftListItem(metadata, {
@@ -2005,11 +2010,11 @@ export function createLocalDraftReviewHandler({
           // Checked against the working document: an edit outdates a fixed
           // layout the working copy inherited as well as one it saved.
           workingLayoutAttention: workingDocument
-            ? layoutAttention({
+            ? timing.measure("layout-check", () => layoutAttention({
               document: workingDocument,
               layout: metadata.layout ?? publishedRow?.layout ?? null,
               categoryRegistry
-            })
+            }))
             : {},
           unpublishedChanges: unpublishedDomains.length > 0,
           unpublishedChangeDomains: unpublishedDomains,
@@ -2022,9 +2027,13 @@ export function createLocalDraftReviewHandler({
           ...freezeFlagsFromPublished(publishedRow, gitPuzzleIds)
         };
       }));
+      // Includes reading each working copy's git checkout file, as well as
+      // the diff, compare and layout-check sums reported on their own.
+      timing.phase("rows");
       const githubSnapshot = await loadOrHydrateGithubProductionManifest({
         repositoryRoot
       });
+      timing.phase("github");
       const corpus = listPuzzleCorpusRows({
         publishedRows,
         drafts,
@@ -2045,11 +2054,11 @@ export function createLocalDraftReviewHandler({
         const layoutAttentionByMode = row.hasWorkingCopy
           ? row.workingLayoutAttention || {}
           : publishedRow?.document && publishedLayout
-            ? layoutAttention({
+            ? timing.measure("layout-check", () => layoutAttention({
               document: documentForEditor(publishedRow.document, { categoryRegistry }),
               layout: publishedLayout,
               categoryRegistry
-            })
+            }))
             : {};
         return withGithubProduction({
           ...row,
@@ -2071,12 +2080,16 @@ export function createLocalDraftReviewHandler({
           if (status) row.autoLayout = status;
         });
       }
-      html(res, renderDraftListPage(corpus, {
+      timing.phase("corpus");
+      const page = renderDraftListPage(corpus, {
         variant: "local",
         githubProduction: githubSnapshot,
         notice,
         categoryRegistry
-      }));
+      });
+      timing.phase("render");
+      timing.apply(res);
+      html(res, page);
       return true;
     }
     const match = urlPath.match(/^\/admin\/drafts\/([^/]+)$/);
