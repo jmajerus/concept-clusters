@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   diffPublishedDraft,
   unpublishedChangeDomains,
+  alignStorageForm,
   documentForChosenProposal,
   documentKeepingProvenance,
   documentWithLesson,
@@ -444,4 +445,40 @@ export async function run() {
   assert.equal(picked.learningIntroduction.credit, "Editor");
   assert.equal(picked.learningIntroduction.revision, 2);
   assert.equal(picked.clusters[1].fact, "Cells release energy.");
+
+  // Storage form is not a change: a published row lists each cluster's terms
+  // and gives bridges ids, a working copy may keep only seeds and floating
+  // terms and no ids. A real change still shows.
+  const publishedRow = {
+    id: "forms",
+    title: "Forms",
+    category: "Science",
+    clusters: [
+      { id: "a", name: "A", fact: "A fact.", terms: ["x", "y", "z"], seeds: ["x", "y"], floatingTerms: ["z"] },
+      { id: "b", name: "B", fact: "B fact.", terms: ["p", "q"], seeds: ["p", "q"] }
+    ],
+    bridges: [{ id: "bridge-one", term: "bridge one", clusters: ["a", "b"], fact: "Joins them." }]
+  };
+  const workingCopy = {
+    id: "forms",
+    title: "Forms",
+    category: "Science",
+    clusters: [
+      { id: "a", name: "A", fact: "A fact.", seeds: ["x", "y"], floatingTerms: ["z"] },
+      { id: "b", name: "B", fact: "B fact.", seeds: ["p", "q"] }
+    ],
+    bridges: [{ term: "bridge one", clusters: ["a", "b"], fact: "Joins them." }]
+  };
+  assert.deepEqual(unpublishedChangeDomains(publishedRow, workingCopy), [], "storage form counted as an unpublished change");
+  assert.equal(diffPublishedDraft(publishedRow, workingCopy).total, 0, "storage form marked on the draft page");
+  const newFact = structuredClone(workingCopy);
+  newFact.bridges[0].fact = "Joins them differently.";
+  assert.deepEqual(unpublishedChangeDomains(publishedRow, newFact), ["content"]);
+  const newSeeds = structuredClone(workingCopy);
+  newSeeds.clusters[0].seeds = ["x", "z"];
+  newSeeds.clusters[0].floatingTerms = ["y"];
+  assert.deepEqual(unpublishedChangeDomains(publishedRow, newSeeds), ["content"], "a real change of starting terms hidden");
+  // A terms list that is not just the seeds and floating terms stays.
+  const [keptTerms] = alignStorageForm({ clusters: [{ id: "c", terms: ["m", "n"], seeds: ["m"] }] }, { clusters: [] });
+  assert.deepEqual(keptTerms.clusters[0].terms, ["m", "n"]);
 }

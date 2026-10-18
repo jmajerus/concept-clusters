@@ -69,6 +69,45 @@ export function valuesEqual(left, right) {
   return JSON.stringify(canon(left)) === JSON.stringify(canon(right));
 }
 
+const termSet = values => [...new Set((values || []).map(String))].sort();
+
+/**
+ * The published document and a working copy with differences of storage form
+ * taken out, so they are compared on what an author wrote. A published row
+ * lists each cluster's terms beside its seeds and floating terms, and gives
+ * bridges ids; a working copy may keep only the seeds and floating terms, and
+ * no bridge ids. A cluster's terms list that only repeats its seeds and
+ * floating terms is dropped, and a bridge's id when the same bridge on the
+ * other side has none. A real change to either still shows.
+ */
+export function alignStorageForm(published, draft) {
+  if (!published || !draft) return [published, draft];
+  const align = (document, peer) => {
+    const aligned = { ...document };
+    if (Array.isArray(document.clusters)) {
+      aligned.clusters = document.clusters.map(cluster => {
+        if (!Array.isArray(cluster?.terms)) return cluster;
+        const placed = termSet([...(cluster.seeds || []), ...(cluster.floatingTerms || [])]);
+        if (!placed.length || JSON.stringify(termSet(cluster.terms)) !== JSON.stringify(placed)) return cluster;
+        const { terms: _terms, ...rest } = cluster;
+        return rest;
+      });
+    }
+    if (Array.isArray(document.bridges)) {
+      const peerBridges = Array.isArray(peer.bridges) ? peer.bridges : [];
+      aligned.bridges = document.bridges.map(bridge => {
+        if (bridge?.id == null) return bridge;
+        const match = peerBridges.find(other => other?.term === bridge.term);
+        if (!match || match.id != null) return bridge;
+        const { id: _id, ...rest } = bridge;
+        return rest;
+      });
+    }
+    return aligned;
+  };
+  return [align(published, draft), align(draft, published)];
+}
+
 /** Changed publication domains, using the same ownership as focused writes. */
 export function unpublishedChangeDomains(published, draft, {
   publishedLayout = null, draftLayout = null
@@ -79,8 +118,9 @@ export function unpublishedChangeDomains(published, draft, {
   // still carries the same values in `board`.
   const publishedLift = liftLegacyBoard(published, publishedLayout);
   const draftLift = liftLegacyBoard(draft, draftLayout);
-  const before = partitionAuthoredDocument(hoistDocumentCitations(publishedLift.document));
-  const after = partitionAuthoredDocument(hoistDocumentCitations(draftLift.document));
+  const [publishedDocument, draftDocument] = alignStorageForm(publishedLift.document, draftLift.document);
+  const before = partitionAuthoredDocument(hoistDocumentCitations(publishedDocument));
+  const after = partitionAuthoredDocument(hoistDocumentCitations(draftDocument));
   // Annotation-free bridge identities are context for pedagogy, not edits to it.
   for (const parts of [before, after]) {
     const annotations = (parts.pedagogy.bridges || []).filter(bridge =>
@@ -275,6 +315,7 @@ function collectionDiff(publishedItems, draftItems, keyFields, markPair, counts)
 
 export function diffPublishedDraft(published, draft) {
   if (!published || !draft) return null;
+  [published, draft] = alignStorageForm(published, draft);
   published = hoistDocumentCitations(published);
   draft = hoistDocumentCitations(draft);
   const counts = { changed: 0, added: 0, removed: 0 };
