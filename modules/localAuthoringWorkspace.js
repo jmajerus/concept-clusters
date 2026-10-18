@@ -2,6 +2,7 @@ import { D1DraftRepository } from "./d1DraftRepository.js";
 import { D1ContentDocumentRepository } from "./contentDocumentRepository.js";
 import { draftContentHash } from "./draftRepository.js";
 import { createHttpD1Database } from "./httpD1Database.js";
+import { createCachedD1Database, d1ReadCacheEnabled } from "./d1ReadCache.js";
 import { resolveLocalD1Config, resolveLocalDraftActor } from "./localD1Config.js";
 import { createRepositoryDraftStore } from "./repositoryDraftStore.js";
 import { createD1WikiLinkCheckStore } from "./wikiLinkCheckStore.js";
@@ -119,6 +120,17 @@ export function createLocalDraftRepository(draftStore) {
   };
 }
 
+// The cache is process-wide and keyed by database, so the per-request
+// workspaces the server resolves all share one cache.
+async function createLocalD1Database({ env, repositoryRoot }) {
+  const config = await resolveLocalD1Config({ env, repositoryRoot });
+  const http = createHttpD1Database(config);
+  if (!d1ReadCacheEnabled(env)) return http;
+  return createCachedD1Database(http, {
+    cacheKey: `${config.accountId}/${config.databaseId}`
+  });
+}
+
 export async function resolveLocalAuthoringWorkspace({
   env = process.env,
   repositoryRoot,
@@ -137,9 +149,7 @@ export async function resolveLocalAuthoringWorkspace({
     };
   }
   const resolvedActor = actor || resolveLocalDraftActor({ env });
-  const d1 = database || createHttpD1Database(
-    await resolveLocalD1Config({ env, repositoryRoot })
-  );
+  const d1 = database || await createLocalD1Database({ env, repositoryRoot });
   const repository = new D1DraftRepository(d1);
   return {
     actor: resolvedActor,

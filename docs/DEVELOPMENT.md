@@ -51,6 +51,17 @@ time, number of D1 HTTP calls, their summed time, their wall-clock time
 statement. `AUTHORING_D1_TIMING=2` also lists each call with its start
 offset, duration, and response size.
 
+The local authoring server keeps a read cache in front of D1
+(`modules/d1ReadCache.js`). D1 stays the only store: migration 0035 adds
+triggers that bump a per-table counter in `content_versions` on every write to
+`published_documents`, `puzzle_drafts`, `content_drafts`, and
+`wiki_link_checks`, whoever the writer is, and a cached result is reused only
+while those counters are unchanged. A request checks the counters once (and
+again after any write it makes), so a page that lists the corpus pays one small
+query instead of downloading it. The server fills the cache in the background
+at start. `AUTHORING_D1_CACHE=0` turns it off; without migration 0035 it is off
+by itself and every read goes to D1.
+
 `AUTO_LAYOUT_PASS=1` turns on the automatic layout pass for working copies:
 the server checks D1 every minute for working copies changed since it was
 first turned on, and once a working copy's board (clusters, terms, bridges)
@@ -199,6 +210,9 @@ anything ever imports from it directly):
 | `repositoryPublicationService.js` | Deterministic import plans, approval fingerprints, file preconditions, transactional publication, rollback, and live registry updates; backs `tools/content-jsonld.mjs`'s `content:import` only, not MCP | `contentInterchangeService.js`, Node filesystem/process APIs |
 | `puzzleDraftStore.js` | File-backed draft remnant for tests; not the stdio default | Node filesystem APIs |
 | `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch` | `fetch` |
+| `d1ReadCache.js` | Process-wide read cache in front of the local server's D1 HTTP client; reuses a plain SELECT on watched tables while their `content_versions` are unchanged | `d1RequestScope.js`, migration 0035 |
+| `d1RequestScope.js` | Per-request AsyncLocalStorage context shared by the D1 read cache and request timing | `node:async_hooks` |
+| `d1RequestTiming.js` | `AUTHORING_D1_TIMING`: per-request log of D1 round trips and cache hits | `d1RequestScope.js` |
 | `localD1Config.js` | Account, database, token, and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
 | `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |

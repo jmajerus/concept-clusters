@@ -34,6 +34,8 @@ import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview
 import { handleLocalModelSuggestions } from "./modelSuggestionsAdminPage.js";
 import { guardLocalAdmin } from "./localAdminAuth.js";
 import { withD1Timing } from "./d1RequestTiming.js";
+import { withD1RequestScope } from "./d1RequestScope.js";
+import { d1ReadCacheEnabled } from "./d1ReadCache.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
@@ -514,10 +516,10 @@ export async function startLocalStaticDev({
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
   const manifest = await preparePuzzleManifest(repositoryRoot);
-  const handler = withD1Timing(withLocalAdminAuth(
+  const handler = withD1RequestScope(withD1Timing(withLocalAdminAuth(
     handleRequest || createLocalDevDraftHandler(repositoryRoot),
     { host, env }
-  ), { env });
+  ), { env }));
   let server;
   try {
     server = await startServer(repositoryRoot, { host, port, handleRequest: handler });
@@ -648,10 +650,10 @@ export async function startLocalWorkerDev({
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
   const manifest = await preparePuzzleManifest(repositoryRoot);
-  const handler = withD1Timing(withLocalAdminAuth(
+  const handler = withD1RequestScope(withD1Timing(withLocalAdminAuth(
     handleRequest || createLocalDevDraftHandler(repositoryRoot),
     { host, env }
-  ), { env });
+  ), { env }));
   const wranglerPort = port === 8791 ? 8792 : 8791;
   const wrangler = spawn(
     join(repositoryRoot, "node_modules", ".bin", "wrangler"),
@@ -827,7 +829,34 @@ export async function runLocalDev({
     throw error;
   }
   await startAutoLayoutPass({ repositoryRoot, env, port: boundPort(started.server, options.port) });
+  warmD1ReadCache({ repositoryRoot, env });
   return started;
+}
+
+// Fills the D1 read cache (d1ReadCache.js) with the lists the admin pages
+// read, in the background, so the first page load after a start does not pay
+// for the whole corpus. Same calls as the pages, so the cache keys match.
+async function warmD1ReadCache({ repositoryRoot, env }) {
+  if (!d1ReadCacheEnabled(env)) return;
+  const startedAt = performance.now();
+  try {
+    const workspace = await resolveLocalAuthoringWorkspace({ env, repositoryRoot });
+    const { contentDocuments, draftRepository, wikiLinkStore, actor } = workspace;
+    if (!contentDocuments) return;
+    await Promise.all([
+      ...["puzzle", "catalogue", "category"].map(kind => contentDocuments.listPublished({ kind })),
+      ...["catalogue", "category"].map(kind => contentDocuments.listDrafts({ kind, actor })),
+      draftRepository.list({ actor }),
+      wikiLinkStore?.readAll()
+    ]);
+    if (contentDocuments.database?.cacheAvailable?.() === false) {
+      console.log(`${formatDevTimestamp()} D1 read cache off: content_versions is missing; apply D1 migration 0035.`);
+      return;
+    }
+    console.log(`${formatDevTimestamp()} D1 read cache warmed in ${Math.round(performance.now() - startedAt)}ms.`);
+  } catch (error) {
+    console.error(`${formatDevTimestamp()} D1 read cache not warmed: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 // AUTO_LAYOUT_PASS=1 runs the layout pass on working copies whose board has
