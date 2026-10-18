@@ -317,6 +317,67 @@ export async function run() {
     await tick();
     assert.equal(runs.length, beforeClear + 1, "clearing an author layout did not bring the pass back");
     assert.equal(runs.at(-1).options.draft, "author-all");
+
+    // The board key reads the board, not its storage form: a published
+    // document's listed terms and bridge ids against a working copy's seeds
+    // and floating terms, in another order, are the same board. Changing a
+    // term, a cluster name, or a bridge's clusters is not.
+    const publishedForm = {
+      id: "forms",
+      clusters: [
+        { id: "a", name: "A", terms: ["x", "y", "z"], seeds: ["x", "y"], floatingTerms: ["z"] },
+        { id: "b", name: "B", terms: ["p", "q"], seeds: ["p", "q"] }
+      ],
+      bridges: [{ id: "bridge-one", term: "bridge one", clusters: ["a", "b"] }]
+    };
+    const workingForm = {
+      id: "forms",
+      category: "moved by a classification edit",
+      clusters: [
+        { id: "a", name: "A", fact: "Reworded.", seeds: ["y", "z"], floatingTerms: ["x"] },
+        { id: "b", name: "B", seeds: ["q", "p"] }
+      ],
+      bridges: [{ term: "bridge one", clusters: ["b", "a"], fact: "New fact." }]
+    };
+    assert.equal(boardKeyOf(workingForm), boardKeyOf(publishedForm), "storage form or a non-board edit counted as a board change");
+    const changedTerm = structuredClone(workingForm);
+    changedTerm.clusters[0].floatingTerms = ["w"];
+    assert.notEqual(boardKeyOf(changedTerm), boardKeyOf(publishedForm));
+    const renamed = structuredClone(workingForm);
+    renamed.clusters[1].name = "Bee";
+    assert.notEqual(boardKeyOf(renamed), boardKeyOf(publishedForm));
+    const rerouted = structuredClone(workingForm);
+    rerouted.bridges[0].clusters = ["a"];
+    assert.notEqual(boardKeyOf(rerouted), boardKeyOf(publishedForm));
+
+    // Keys stored in the old form are recomputed once; a board laid out
+    // under the old key stays laid out.
+    const legacy = await readAutoLayoutState(statePath);
+    save("old-key", publishedBoard("old-key"));
+    legacy.drafts["old-key"] = {
+      contentHash: rows.get("old-key").contentHash,
+      authorEveryMode: false,
+      baselineChecked: true,
+      boardKey: "an old-form key",
+      laidOutBoardKey: "an old-form key",
+      outcome: "done",
+      boardChangedAt: iso()
+    };
+    legacy.cursor = iso();
+    await writeFile(statePath, JSON.stringify(legacy));
+    const rekeyed = make();
+    // A later save that leaves the board alone must not look like a change.
+    save("old-key", { ...publishedBoard("old-key"), category: "reclassified" });
+    clock += 10 * MINUTE;
+    const beforeRekey = runs.length;
+    await rekeyed.tick();
+    clock += 10 * MINUTE;
+    await rekeyed.tick();
+    await tick();
+    assert.equal(runs.length, beforeRekey, "an old-form key made a laid-out board run again");
+    const rekeyedEntry = (await readAutoLayoutState(statePath)).drafts["old-key"];
+    assert.equal(rekeyedEntry.boardKey, boardKeyOf(publishedBoard("old-key")));
+    assert.equal(rekeyedEntry.laidOutBoardKey, rekeyedEntry.boardKey);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

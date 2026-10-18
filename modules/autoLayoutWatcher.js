@@ -33,6 +33,8 @@ const NOTHING_TO_DO = "nothing to do";
 // What a working copy first seen with the published board, and a layout for
 // every mode already (its own or inherited, say from a batch run), records.
 const ALREADY_LAID_OUT = "already laid out";
+// Bumped when boardKey's form changes, so stored keys are recomputed once.
+const BOARD_KEY_VERSION = 2;
 
 // Whether a layout document has some layout, anyone's, for every mode.
 function layoutInEveryMode(layout) {
@@ -177,6 +179,7 @@ export function createAutoLayoutWatcher({
         delete entry.laidOutBoardKey;
       }
       const key = boardKey(draft.document);
+      entry.keyVersion = BOARD_KEY_VERSION;
       if (key !== entry.boardKey) {
         const firstSighting = !entry.boardKey;
         entry.boardKey = key;
@@ -252,9 +255,10 @@ export function createAutoLayoutWatcher({
   async function checkUnchecked() {
     for (const [draftId, entry] of Object.entries(state.drafts)) {
       const needsAuthorCheck = !("authorEveryMode" in entry);
+      const needsRekey = Boolean(entry.boardKey) && entry.keyVersion !== BOARD_KEY_VERSION;
       const needsBaseline = !entry.baselineChecked && !entry.outcome &&
         entry.boardKey && entry.boardKey !== entry.laidOutBoardKey;
-      if (!needsAuthorCheck && !needsBaseline) {
+      if (!needsAuthorCheck && !needsBaseline && !needsRekey) {
         entry.baselineChecked = true;
         continue;
       }
@@ -267,6 +271,14 @@ export function createAutoLayoutWatcher({
         continue;
       }
       if (needsAuthorCheck) entry.authorEveryMode = authorLayoutInEveryMode(draft.layout);
+      // A board laid out under the old key stays laid out under the new one;
+      // only the key's form changed. Only a later save can change the board.
+      if (needsRekey) {
+        const key = boardKey(draft.document);
+        if (entry.laidOutBoardKey && entry.laidOutBoardKey === entry.boardKey) entry.laidOutBoardKey = key;
+        entry.boardKey = key;
+        entry.keyVersion = BOARD_KEY_VERSION;
+      }
       if (needsBaseline && running?.draftId !== draftId) {
         await adoptExistingLayouts(entry, draft, entry.boardKey);
       } else {
