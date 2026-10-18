@@ -74,7 +74,7 @@ import {
   boardLimitWaiverTargets,
   boardLimitWaiverTypeSummaries
 } from "./boardLimitWaivers.js";
-import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
+import { creditableChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
@@ -1505,7 +1505,7 @@ export function createAuthoringMcpServer({
         ? { document: previousDocument }
         : await draftRepository.get({ draftId: draft_id, actor });
       previousDocument = previous.document;
-      substantial = isSubstantialChange(computeChangeScore(previous.document, stored));
+      substantial = isSubstantialChange(creditableChangeScore(previous.document, stored));
     } catch {
       // Ignore -- save() re-validates the draft and revision authoritatively.
     }
@@ -1626,7 +1626,8 @@ export function createAuthoringMcpServer({
         if (existingShelf.tags !== undefined) projection.tags = existingShelf.tags;
         if (existingShelf.level !== undefined) projection.level = existingShelf.level;
         const nextDocument = applyAuthoredDomain(previousDocument, "classification", projection);
-        const substantial = isSubstantialChange(computeChangeScore(previousDocument, nextDocument));
+        // A reshelving is never authorship (CREDITED_WRITE_DOMAINS).
+        const substantial = isSubstantialChange(creditableChangeScore(previousDocument, nextDocument));
         const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(
           nextDocument,
           {

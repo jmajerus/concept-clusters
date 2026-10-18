@@ -3,6 +3,7 @@ import {
   CHANGE_SCORE_CHAR_THRESHOLD,
   CHANGE_SCORE_FIELD_THRESHOLD,
   computeChangeScore,
+  creditableChangeScore,
   isSubstantialChange
 } from "../modules/authoringChangeScore.js";
 
@@ -145,4 +146,32 @@ export async function run() {
     true
   );
   assert.equal(isSubstantialChange(null), false);
+
+  // Only content and pedagogy are authorship: a reshelving that touches
+  // category, categories, subcategories, tags, and level scores nothing,
+  // however many fields it changes; a content or pedagogy edit still counts.
+  const shelved = {
+    id: "shelf",
+    title: "Shelf",
+    category: "Science",
+    clusters: [{ id: "a", name: "A", fact: "A fact.", terms: ["x", "y"], seeds: ["x", "y"] }],
+    bridges: [],
+    lenses: [{ id: "lens", prompt: "Which?", explanation: "Because." }]
+  };
+  const reshelved = {
+    ...shelved,
+    category: "Biology",
+    categories: ["Biology", "Chemistry"],
+    subcategories: { Biology: "genomics", Chemistry: "biochemistry" },
+    tags: ["one", "two", "three"],
+    level: "advanced"
+  };
+  assert.equal(computeChangeScore(shelved, reshelved).fieldsChanged >= CHANGE_SCORE_FIELD_THRESHOLD, true,
+    "the fixture should be substantial by the raw score");
+  assert.equal(creditableChangeScore(shelved, reshelved).fieldsChanged, 0);
+  assert.equal(isSubstantialChange(creditableChangeScore(shelved, reshelved)), false);
+  const rewrittenFact = { ...shelved, clusters: [{ ...shelved.clusters[0], fact: "x".repeat(CHANGE_SCORE_CHAR_THRESHOLD) }] };
+  assert.equal(isSubstantialChange(creditableChangeScore(shelved, rewrittenFact)), true, "a content rewrite still counts");
+  const rewrittenLens = { ...shelved, lenses: [{ ...shelved.lenses[0], explanation: "y".repeat(CHANGE_SCORE_CHAR_THRESHOLD) }] };
+  assert.equal(isSubstantialChange(creditableChangeScore(shelved, rewrittenLens)), true, "a pedagogy rewrite still counts");
 }
