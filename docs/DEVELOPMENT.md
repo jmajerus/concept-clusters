@@ -142,7 +142,8 @@ server's `ADMIN_KEY` in the ignored `.env`.
 | `index.html` | Entry point; loads everything |
 | `styles.css` | Visual design (lab-notebook direction: graph-paper board, marker-hue clusters) |
 | `puzzles/` | **The authoring format.** One file per puzzle, grouped into category subdirectories, each exporting its puzzle manifest; a resource-bearing puzzle may also have id-prefixed Markdown/assets beside it. `puzzles/index.js` is the Node/CI eager registry (`PUZZLES`); `puzzles/manifest.js` is the player snapshot, including board and layout fingerprints, generated from the registry by `npm run puzzles:build-manifest` and never committed: the Worker's `build.command` builds it at deploy, the dev server at start, and the test scripts before a run; full matching modules are fetched on demand. Adding a puzzle requires no game-code changes — see [AUTHORING.md](AUTHORING.md) |
-| `puzzles/categories.js` | Optional category `info`, stable subcategory registries, and category-relative membership helpers — see "Categories and subcategories" in [AUTHORING.md](AUTHORING.md) |
+| `puzzles/categories.js` | Category records and assignments, optional category `info`, stable subcategory registries, and category-relative membership helpers — category metadata is included in Freeze snapshots |
+| `puzzles/domains.js` | Fixed, code-owned domain vocabulary referenced by category records; kept separate from the D1-backed category snapshot |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned canonical simplified puzzle sources plus JSON-LD interchange/context and JSON Schema contracts — see [CANONICAL-CONTENT.md](CANONICAL-CONTENT.md) and [JSON-LD.md](JSON-LD.md) |
 | `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [Local development](DEVELOPMENT.md#local-development) |
@@ -235,7 +236,7 @@ anything ever imports from it directly):
 | `puzzleJsonLd.js` | Stable-ID puzzle import/export adapter | `jsonLdProfile.js`, category slugging |
 | `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
-| `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `puzzles/categories.js`; git `catalogues/index.js` in Node / production boot |
+| `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `puzzles/categories.js`, `puzzles/domains.js`; git `catalogues/index.js` in Node / production boot |
 | `librarySearch.js` | Library search matching: puzzle rank (title/category/tag, citation author/title, subcategory, board terms, optional full-text prose) and catalogue title/description, including nested catalogues | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |

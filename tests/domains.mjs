@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { PUZZLES } from "../puzzles/index.js";
-import { DOMAINS, domainForCategory } from "../puzzles/categories.js";
+import { domainForCategory } from "../puzzles/categories.js";
+import { DOMAINS } from "../puzzles/domains.js";
 import {
   allPuzzlesCatalogue,
   catalogueById,
@@ -26,7 +27,7 @@ export async function run(page, baseURL) {
   // subjects") until it was given a home under Art & Design alongside Art
   // and Music, matching the roadmap's own note that "film... will likely
   // arrive as sibling categories" there.
-  assert.equal(Object.keys(DOMAINS).length, 12);
+  assert.equal(Object.keys(DOMAINS).length, 13);
   assert.equal(domainForCategory("Computer Science"), "computing-engineering");
   assert.equal(domainForCategory("Engineering"), "computing-engineering");
   assert.equal(domainForCategory("Science"), "sciences-mathematics");

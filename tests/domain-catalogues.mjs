@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { DOMAINS, domainForCategory, categoriesForPuzzle } from "../puzzles/categories.js";
+import { domainForCategory, categoriesForPuzzle } from "../puzzles/categories.js";
+import { DOMAINS } from "../puzzles/domains.js";
 import { validateCatalogueCreation } from "../modules/catalogueValidation.js";
 import { isReservedCatalogueId } from "../modules/contentDocumentSeed.js";
 import {
