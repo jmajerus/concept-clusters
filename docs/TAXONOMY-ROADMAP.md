@@ -104,7 +104,7 @@ than leaving the term unlinked").
 | 7 | 📰 Communication & Media | Journalism, media studies, information literacy, evidence and sourcing. | `wiki:Communication studies` |
 | 8 | 🎨 Art & Design | Visual arts, music, film, graphic and product design, media production. | `wiki:The arts` |
 | 9 | 💼 Business & Management | Marketing, finance, accounting, leadership, organizational design. | `wiki:Business administration` |
-| 10 | 📚 Education & Teaching | Pedagogy, instructional design, assessment, study skills, training. | `wiki:Education` |
+| 10 | 📚 Literature & Classics | Narrative theory, classical epics and mythology, drama and poetics, literary criticism, and canonical texts across historical traditions. | — |
 | 11 | 🌍 Earth & Environment | Geology, climate, oceanography, ecology, geography, environmental policy. | `wiki:Earth science` |
 | 12 | 🌱 Life Sciences | Biology and its subfields — botany, zoology, microbiology, genomics, bioinformatics — as distinct from the clinical and population-health focus of Health & Medicine. | `wiki:Biology` |
 | 13 | Interdisciplinary Studies | Fields organized around a problem rather than a single discipline — peace and conflict, technology and society, and critical theory. | — |
@@ -194,10 +194,8 @@ itself is expected to split before this ships. They are marked.
 | Engineering | 1 | Computing & Engineering |
 | Music | 1 | Art & Design |
 
-Education & Teaching currently has no categories. It stays in the
-vocabulary as a deliberate signal of where content is missing — but it
-must not render as an empty heading, and no puzzle should be authored
-merely to fill it.
+Education & Teaching was removed from the vocabulary when its unused slot
+was reused for Literature & Classics; no categories had been assigned to it.
 
 ### On the categories that straddle
 

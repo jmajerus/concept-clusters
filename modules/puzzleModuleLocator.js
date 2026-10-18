@@ -11,16 +11,21 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { slugify } from "../puzzles/categories.js";
 
-export async function walkPuzzleModules(directory) {
+// This root-level vocabulary file lives beside the puzzle modules, but a
+// puzzle may still use the id `domains` in its category directory.
+const NON_PUZZLE_ROOT_MODULES = new Set(["domains.js"]);
+
+export async function walkPuzzleModules(directory, { depth = 0 } = {}) {
   const paths = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
       if (entry.name !== "layouts") {
-        paths.push(...await walkPuzzleModules(path));
+        paths.push(...await walkPuzzleModules(path, { depth: depth + 1 }));
       }
     } else if (entry.name.endsWith(".js") &&
-        !["index.js", "categories.js", "showcase.js"].includes(entry.name)) {
+        !["index.js", "categories.js", "showcase.js"].includes(entry.name) &&
+        !(depth === 0 && NON_PUZZLE_ROOT_MODULES.has(entry.name))) {
       paths.push(path);
     }
   }

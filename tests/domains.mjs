@@ -28,6 +28,14 @@ export async function run(page, baseURL) {
   // and Music, matching the roadmap's own note that "film... will likely
   // arrive as sibling categories" there.
   assert.equal(Object.keys(DOMAINS).length, 13);
+  assert.equal(
+    DOMAINS["interdisciplinary-studies"].title,
+    "Interdisciplinary Studies"
+  );
+  assert.equal(
+    DOMAINS["interdisciplinary-studies"].info.text,
+    "Fields organized around a problem rather than a single discipline — peace and conflict, technology and society, and critical theory."
+  );
   assert.equal(domainForCategory("Computer Science"), "computing-engineering");
   assert.equal(domainForCategory("Engineering"), "computing-engineering");
   assert.equal(domainForCategory("Science"), "sciences-mathematics");
