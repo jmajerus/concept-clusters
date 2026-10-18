@@ -8,6 +8,7 @@ import {
   draftMatchesCheckout,
   fetchLocalDraftReview,
   mapDraftDetail,
+  isDraftReviewRequest,
   mapDraftListItem,
   puzzleInCheckout,
   readCheckoutDocument
@@ -84,6 +85,17 @@ function createResponse() {
 }
 
 export async function run() {
+  // The authoring server's dispatch: working-copy routes, including layout
+  // clears, and layout writes addressed to a published puzzle.
+  const request = (method, url) => isDraftReviewRequest({ method, url });
+  assert.equal(request("GET", "/admin/drafts"), true);
+  assert.equal(request("DELETE", "/admin/drafts/lab/layout.json?mode=graph"), true);
+  assert.equal(request("PUT", "/admin/puzzles/lab/layout.json?mode=graph"), true);
+  assert.equal(request("DELETE", "/admin/puzzles/lab/layout.json"), true);
+  assert.equal(request("GET", "/admin/puzzles/lab/layout.json"), false, "the play route reads published layouts");
+  assert.equal(request("POST", "/admin/puzzles/lab/layouts-auto"), false);
+  assert.equal(request("PATCH", "/admin/drafts/lab"), false);
+
   const directory = await mkdtemp(join(tmpdir(), "concept-clusters-local-review-"));
   try {
     const contentService = createContentInterchangeService();

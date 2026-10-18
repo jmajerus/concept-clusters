@@ -320,16 +320,20 @@ let pendingInitialSharedParams = null;
 let overlayDraftId = null;
 let overlayPuzzle = null;
 // The working copy a layout save opened for the published board on screen.
-// Later layout saves go to it, and the picker opens it from then on.
+// Later layout saves go to it, and the picker opens it from then on. A
+// reply can arrive after the author has moved to another puzzle, so it is
+// tied to the puzzle the save was for and adopted only while that puzzle
+// is still the one on screen.
 let layoutWorkingCopyId = null;
 const layoutDraftId = () => overlayDraftId || layoutWorkingCopyId;
-function adoptLayoutWorkingCopy(draftId) {
-  layoutWorkingCopyId = draftId;
-  const puzzleId = state?.puzzle?.id;
-  if (puzzleId && !SEARCH_DRAFTS.some(draft => draft?.id === puzzleId || draft?._draftId === draftId)) {
+function adoptLayoutWorkingCopy(puzzleId, draftId) {
+  if (!puzzleId || !draftId) return;
+  if (!SEARCH_DRAFTS.some(draft => draft?.id === puzzleId || draft?._draftId === draftId)) {
     SEARCH_DRAFTS.push({ id: puzzleId, _draftId: draftId });
   }
+  if (state?.puzzle?.id === puzzleId && !overlayDraftId) layoutWorkingCopyId = draftId;
 }
+const adoptFor = puzzleId => draftId => adoptLayoutWorkingCopy(puzzleId, draftId);
 let authoringStudio = null;
 let catalogueStudio = null;
 let constructViewMode = "star";
@@ -2344,10 +2348,10 @@ layoutAuthoring = createLayoutAuthoringController({
   getBoard: () => ({ width: W, height: H }),
   showSolution,
   saveLayout: playSource === "d1"
-    ? args => saveLayout({ ...args, draftId: layoutDraftId(), onWorkingCopy: adoptLayoutWorkingCopy })
+    ? args => saveLayout({ ...args, draftId: layoutDraftId(), onWorkingCopy: adoptFor(args.puzzleId) })
     : null,
   saveLayoutBoard: playSource === "d1"
-    ? args => saveLayoutBoard({ ...args, draftId: layoutDraftId(), onWorkingCopy: adoptLayoutWorkingCopy })
+    ? args => saveLayoutBoard({ ...args, draftId: layoutDraftId(), onWorkingCopy: adoptFor(args.puzzleId) })
     : null,
   // The automatic layout pass needs the local authoring server.
   layoutPass: playSource === "d1"

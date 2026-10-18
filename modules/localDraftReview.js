@@ -491,6 +491,22 @@ function isWorkspaceConfigError(error) {
     || error instanceof HttpD1Error;
 }
 
+const DRAFT_LAYOUT_ROUTE = /^\/admin\/drafts\/([^/]+)\/layout(?:\.json)?$/;
+const PUBLISHED_LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/;
+
+/**
+ * Whether the authoring server should hand a request to the draft review
+ * handler: the working-copy pages and routes, and layout writes addressed
+ * to a published puzzle, which land on its working copy.
+ */
+export function isDraftReviewRequest(req) {
+  const method = req.method;
+  if (!["GET", "POST", "PUT", "DELETE"].includes(method)) return false;
+  const urlPath = (req.url || "").split("?")[0];
+  if (urlPath === "/admin/drafts" || urlPath.startsWith("/admin/drafts/")) return true;
+  return (method === "PUT" || method === "DELETE") && PUBLISHED_LAYOUT_ROUTE.test(urlPath);
+}
+
 export function createLocalDraftReviewHandler({
   draftStore,
   contentService = null,
@@ -606,13 +622,13 @@ export function createLocalDraftReviewHandler({
       return true;
     }
 
-    const layoutMatch = urlPath.match(/^\/admin\/drafts\/([^/]+)\/layout(?:\.json)?$/);
+    const layoutMatch = urlPath.match(DRAFT_LAYOUT_ROUTE);
     // Layouts are edited on the working copy, like every other domain, and
     // reach players when that copy is published. A layout write addressed
     // to the published puzzle lands on its working copy, opening one from
     // the published puzzle when there is none.
     const publishedLayoutMatch = req.method === "PUT" || req.method === "DELETE"
-      ? urlPath.match(/^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/)
+      ? urlPath.match(PUBLISHED_LAYOUT_ROUTE)
       : null;
     if (layoutMatch || publishedLayoutMatch) {
       if (!sameOrigin()) {
@@ -2242,11 +2258,7 @@ export function createDefaultLocalDraftReviewHandler({
   }
   let workspacePromise;
   return async function handleDefaultLocalDraftReview(req, res) {
-    if (req.method !== "GET" && req.method !== "POST" && req.method !== "PUT") return false;
-    const urlPath = (req.url || "").split("?")[0];
-    if (urlPath !== "/admin/drafts" && !urlPath.startsWith("/admin/drafts/")) {
-      return false;
-    }
+    if (!isDraftReviewRequest(req)) return false;
     try {
       workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });
       const resolved = await workspacePromise;
