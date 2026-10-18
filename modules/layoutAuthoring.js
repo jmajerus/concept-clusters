@@ -5,8 +5,10 @@
 //
 // Production and the authoring-server player both gate the actions with
 // ?admin so a reviewer at `/` sees the same chrome as production.
-// Experiment toggles save only when a working copy is open. Public play
-// keeps metadata and stats and cannot change the published record.
+// Every save lands on the puzzle's working copy, opening one from the
+// published puzzle when none is open; players see it once that copy is
+// published. Public play keeps metadata and stats and cannot change the
+// published record.
 
 import { LAYOUT_EXPERIMENT_KEYS, LAYOUT_MODES, layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
 import {
@@ -230,12 +232,13 @@ export function createLayoutAuthoringController({
   // Mode names as the player's mode buttons label them.
   const MODE_LABELS = { star: "Star", graph: "Graph", sets: "Circle" };
 
-  // Save Layout writes to the open working copy when one is loaded and to
-  // the published row otherwise. Only the published row reaches players.
+  // Save Layout writes to the working copy, which reaches players when it
+  // is published. Before the first save on a published board the saved
+  // layouts shown are the published puzzle's.
   function savedLayoutState(state) {
     const modes = LAYOUT_MODES.filter(mode => layoutForMode(state.puzzle?.layout, mode));
     if (!modes.length) return null;
-    const where = getDraftId() ? "draft" : "published";
+    const where = getDraftId() ? "working copy" : "published puzzle";
     const names = modes.map(mode => {
       const layout = layoutForMode(state.puzzle.layout, mode);
       const tags = [
@@ -250,9 +253,7 @@ export function createLayoutAuthoringController({
   function savedLayoutMessage(mode, fixed) {
     const draftId = getDraftId();
     const kind = fixed ? "layout (fixed positions)" : "layout as a hint";
-    return draftId
-      ? `${MODE_LABELS[mode]} ${kind} saved to draft "${draftId}". Publish the draft to show it to players.`
-      : `${MODE_LABELS[mode]} ${kind} saved to the published puzzle. Live for players.`;
+    return `${MODE_LABELS[mode]} ${kind} saved to working copy "${draftId}". Publish it from its edit page to show it to players.`;
   }
 
   // Graph and Circle can use a saved layout as a hint (layoutHints.js);
@@ -678,7 +679,7 @@ export function createLayoutAuthoringController({
     savingLayout = true;
     updateLayoutAuthoringPanel();
     const mode = getMode();
-    setLayoutAuthoringStatus(getDraftId() ? "Saving layout to draft…" : "Saving layout to published puzzle…");
+    setLayoutAuthoringStatus("Saving layout to working copy…");
     try {
       const saved = await saveLayout({ puzzleId: state.puzzle.id, mode, layout });
       const savedModeLayout = layoutForMode(saved, mode) || layout;
@@ -699,16 +700,11 @@ export function createLayoutAuthoringController({
   });
 
   // The cards beside the layout card. Everything on them saves into the
-  // layout document's board settings. Board settings (size, the Star
-  // free-term strip) save to the open working copy or else the published
-  // puzzle. Experiments change play, so they save on a working copy only.
+  // layout document's board settings on the working copy, like the
+  // layouts themselves.
   const EXPERIMENT_FLAGS = new Set(LAYOUT_EXPERIMENT_KEYS);
   function layoutCanWriteBoard() {
     return layoutAuthoringMode && typeof saveLayoutBoard === "function";
-  }
-
-  function workingCopyCanWriteBoard() {
-    return layoutCanWriteBoard() && Boolean(getDraftId());
   }
 
   if (layoutSideEl) layoutSideEl.hidden = !layoutAuthoringMode;
@@ -723,11 +719,10 @@ export function createLayoutAuthoringController({
   }
 
   function setBoardControlsDisabled(disabled) {
-    const noCopy = !workingCopyCanWriteBoard();
     if (starFreeStripBtn) starFreeStripBtn.disabled = disabled;
-    if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled || noCopy;
-    if (lensFlowTraceBtn) lensFlowTraceBtn.disabled = disabled || noCopy;
-    if (lensRevealCueSelect) lensRevealCueSelect.disabled = disabled || noCopy;
+    if (starBridgePreconnectBtn) starBridgePreconnectBtn.disabled = disabled;
+    if (lensFlowTraceBtn) lensFlowTraceBtn.disabled = disabled;
+    if (lensRevealCueSelect) lensRevealCueSelect.disabled = disabled;
     if (boardSizeFactorInput) boardSizeFactorInput.disabled = disabled;
   }
 
@@ -757,8 +752,7 @@ export function createLayoutAuthoringController({
   // open board: a setting that changes how the board starts restarts it.
   async function persistBoardFlag(key, value, afterSave = null) {
     const state = getState();
-    const experiment = EXPERIMENT_FLAGS.has(key);
-    if (!state?.puzzle || !(experiment ? workingCopyCanWriteBoard() : layoutCanWriteBoard())) return;
+    if (!state?.puzzle || !layoutCanWriteBoard()) return;
     setBoardControlsDisabled(true);
     try {
       // An explicit value, even the default (null), records the author's
@@ -786,23 +780,18 @@ export function createLayoutAuthoringController({
   function syncStarFreeStripButtons() {
     const state = getState();
     const canWriteLayout = layoutCanWriteBoard();
-    const canWriteCopy = workingCopyCanWriteBoard();
     // The free-term strip is Star's alone.
     if (starFreeStripBtn) starFreeStripBtn.hidden = !canWriteLayout || getMode() !== "star";
-    const copyTitle = name => canWriteCopy
-      ? "Changes play; saves on the open working copy"
-      : `Open a working copy to change ${name}`;
+    const copyTitle = "Changes play; saves on the working copy";
     if (starBridgePreconnectBtn) {
       starBridgePreconnectBtn.hidden = !canWriteLayout;
-      starBridgePreconnectBtn.disabled = !canWriteCopy;
-      starBridgePreconnectBtn.title = copyTitle("bridge pre-connect");
+      starBridgePreconnectBtn.title = copyTitle;
     }
     // The trace plays when a lens's answer is revealed, so it is offered
     // only where there are lenses.
     if (lensFlowTraceBtn) {
       lensFlowTraceBtn.hidden = !canWriteLayout || !state?.puzzle?.lenses?.length;
-      lensFlowTraceBtn.disabled = !canWriteCopy;
-      lensFlowTraceBtn.title = copyTitle("the lens flow trace");
+      lensFlowTraceBtn.title = copyTitle;
     }
     syncBoardSizeControl();
     syncLensRevealControls();
@@ -850,16 +839,13 @@ export function createLayoutAuthoringController({
     const offered = layoutAuthoringMode && lenses.length > 0 && state.lensMode !== "assignment";
     if (lensRevealControlsEl) lensRevealControlsEl.hidden = !offered;
     if (offered) {
-      const canWriteCopy = workingCopyCanWriteBoard();
       setOptions(lensRevealCueSelect, [
         ["", `Use site setting (${LENS_REVEAL_CUE_LABELS[globalLensRevealCue(settings)]})`],
         ...LENS_REVEAL_CUES.map(cueOption)
       ], puzzleLensRevealCue(state.puzzle) || "");
       if (lensRevealCueSelect) {
-        lensRevealCueSelect.disabled = !canWriteCopy;
-        lensRevealCueSelect.title = canWriteCopy
-          ? "Changes play; saves on the open working copy"
-          : "Open a working copy to change this puzzle's lens reveal";
+        lensRevealCueSelect.disabled = !layoutCanWriteBoard();
+        lensRevealCueSelect.title = "Changes play; saves on the working copy";
       }
       const effective = resolveLensRevealCue({ puzzle: state.puzzle, settings });
       const tryCue = TRY_CUES.includes(lensRevealTryCue?.value) ? lensRevealTryCue.value
@@ -1156,9 +1142,8 @@ export function createLayoutAuthoringController({
   async function startPass(write) {
     const state = getState();
     if (!state?.puzzle) return;
-    if (write && !window.confirm((getDraftId()
-      ? "Save automatic layouts to this working copy? Players see them once it is published. "
-      : "Save automatic layouts to the published puzzle? Players see them at once. ") +
+    if (write && !window.confirm(
+      "Save automatic layouts to this puzzle's working copy? Players see them once it is published. " +
       "Your own saved layouts and board size are never replaced."
     )) return;
     const puzzleId = state.puzzle.id;

@@ -1624,26 +1624,28 @@ from its saved layout.
   Load draft, Clear draft), which is scratch space and never published.
 - **Save Layout** saves the current mode's layout, as exact positions or a
   hint per the checkbox. Exact positions must pass the renderer's full check;
-  a hint needs only a usable shape. With a working copy open, it saves to that
-  draft (publish the draft to show it to players). Otherwise it saves straight
-  to the published puzzle, live for players, without publishing a new
-  document revision. Saving one mode never discards the others.
+  a hint needs only a usable shape. It saves to the puzzle's working copy,
+  opening one from the published puzzle when none is open; players see it
+  once that working copy is published. Saving one mode never discards the
+  others.
 - The **Board settings** card beside the panel holds the settings that cover
   every mode. **Board size** (the slider, in 5% steps from −25% to +25%) and
   the **Star free-term strip** button (in Star mode) save with the layout the
-  same way: to the open draft or else the published puzzle, with no content
-  publish. A size change keeps your arrangement, re-centred on the new
-  board.
+  same way, on the working copy. A size change keeps your arrangement,
+  re-centred on the new board.
   Setting the size back to 0% is recorded as an explicit choice, which the
   automatic pass then leaves alone.
-- The **Experiments** card below it holds settings that change play, so they
-  save on the open working copy and are disabled without one: **Bridge
+- The **Experiments** card below it holds settings that change play. They
+  save on the working copy like the rest: **Bridge
   pre-connect**, and the **lens flow trace** (on puzzles with lenses; answer a
   lens on the prepared board to see it). The working-copy editor's Board
   experiments section sets the same fields.
 
 The layout endpoints are `/admin/drafts/<draft-id>/layout.json` and
-`/admin/puzzles/<puzzle-id>/layout.json`. A save carries one mode's layout,
+`/admin/puzzles/<puzzle-id>/layout.json`. Both write the working copy: a
+save or clear addressed to a published puzzle lands on its working copy,
+opening one when there is none, and the reply names it (`draftId`, with
+`openedWorkingCopy: true` when it was just opened). A save carries one mode's layout,
 `{ "mode": "graph", "layout": … }`, or board settings, `{ "board": … }`; the
 server merges it into the stored document:
 
@@ -1664,11 +1666,16 @@ Each mode entry and the board settings also record `source` (`author` or
 
 ### Publishing
 
-**Publish** carries the working copy's layout to the published puzzle, with
-two protections. If a mode, or the board settings, was saved directly on the
-published puzzle more recently than on the working copy, the newer one is
-kept. And an author's layout is never replaced by an automatic one. The
-publication notice says when the published puzzle's version was kept.
+Layouts follow the same path as every other write domain: they are edited
+on the working copy, and **Publish** (or **Publish & Cue**) is the only way
+they reach players. Publishing carries the working copy's layout to the
+published puzzle as it is, so a mode cleared on the working copy is cleared
+for players too. Two protections apply. If the published puzzle holds a
+newer entry for a mode, or newer board settings, the newer one is kept. And
+an author's layout is never replaced by an automatic one. The publication
+notice says when the published puzzle's version was kept. The edit page asks
+before publishing while its own form has unsaved edits, since publishing
+sends the saved working copy.
 
 A content edit can make a saved layout stale. That never blocks publishing:
 the notice names each mode whose exact layout players get as a hint

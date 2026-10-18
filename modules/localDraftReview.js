@@ -22,6 +22,7 @@ import { layoutAttention } from "./layoutAttention.js";
 import { autoLayoutSettleMs, readAutoLayoutStatuses } from "./autoLayoutWatcher.js";
 import { authoringWorkspacePaths } from "./authoringWorkspacePaths.js";
 import { draftLayoutPassKey, layoutPassJobsFor } from "./localPlayCorpus.js";
+import { createServerTiming } from "./serverTiming.js";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
@@ -490,6 +491,22 @@ function isWorkspaceConfigError(error) {
     || error instanceof HttpD1Error;
 }
 
+const DRAFT_LAYOUT_ROUTE = /^\/admin\/drafts\/([^/]+)\/layout(?:\.json)?$/;
+const PUBLISHED_LAYOUT_ROUTE = /^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/;
+
+/**
+ * Whether the authoring server should hand a request to the draft review
+ * handler: the working-copy pages and routes, and layout writes addressed
+ * to a published puzzle, which land on its working copy.
+ */
+export function isDraftReviewRequest(req) {
+  const method = req.method;
+  if (!["GET", "POST", "PUT", "DELETE"].includes(method)) return false;
+  const urlPath = (req.url || "").split("?")[0];
+  if (urlPath === "/admin/drafts" || urlPath.startsWith("/admin/drafts/")) return true;
+  return (method === "PUT" || method === "DELETE") && PUBLISHED_LAYOUT_ROUTE.test(urlPath);
+}
+
 export function createLocalDraftReviewHandler({
   draftStore,
   contentService = null,
@@ -605,13 +622,46 @@ export function createLocalDraftReviewHandler({
       return true;
     }
 
-    const layoutMatch = urlPath.match(/^\/admin\/drafts\/([^/]+)\/layout(?:\.json)?$/);
-    if (layoutMatch) {
+    const layoutMatch = urlPath.match(DRAFT_LAYOUT_ROUTE);
+    // Layouts are edited on the working copy, like every other domain, and
+    // reach players when that copy is published. A layout write addressed
+    // to the published puzzle lands on its working copy, opening one from
+    // the published puzzle when there is none.
+    const publishedLayoutMatch = req.method === "PUT" || req.method === "DELETE"
+      ? urlPath.match(PUBLISHED_LAYOUT_ROUTE)
+      : null;
+    if (layoutMatch || publishedLayoutMatch) {
       if (!sameOrigin()) {
         json(res, { error: "Cross-origin submit is not allowed." }, 403);
         return true;
       }
-      const draftId = decodeURIComponent(layoutMatch[1]);
+      let draftId;
+      let openedWorkingCopy = false;
+      if (layoutMatch) {
+        draftId = decodeURIComponent(layoutMatch[1]);
+      } else {
+        const puzzleId = decodeURIComponent(publishedLayoutMatch[1]);
+        try {
+          const { draft, created } = await openPuzzleWorkingCopy({
+            getDraft: id => draftStore.getDraft(id),
+            createDraft: ({ draftId: id, document, seededFromPublished, basePublishedRevision }) =>
+              draftStore.createDraft({ draftId: id, document, seededFromPublished, basePublishedRevision }),
+            contentDocuments,
+            contentService,
+            categoryRegistry: await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            }),
+            puzzleId
+          });
+          draftId = draft.draftId || puzzleId;
+          openedWorkingCopy = created;
+        } catch (error) {
+          json(res, { error: formatActionError(error), id: puzzleId }, error.status || 404);
+          return true;
+        }
+      }
       // Each write is conditional on the draft this request read. When
       // another save lands in between, re-read and rebuild from the newer
       // layout, so neither save erases the other and author-over-auto is
@@ -660,6 +710,7 @@ export function createLocalDraftReviewHandler({
                 : await draftStore.clearLayout(draftId);
             json(res, {
               draftId,
+              ...(openedWorkingCopy ? { openedWorkingCopy } : {}),
               revision: cleared.revision,
               layout: cleared.layout || null
             });
@@ -668,6 +719,11 @@ export function createLocalDraftReviewHandler({
           // The body is read once; a retry rebuilds from it.
           bodyPayload ||= readRequestPayload(req);
           const { json: body } = await bodyPayload;
+          // A body that is not JSON would otherwise save as no layout at all.
+          if (!body || typeof body !== "object") {
+            json(res, { error: "Send the layout as JSON (Content-Type: application/json).", draftId }, 400);
+            return true;
+          }
           const submitted = body && Object.prototype.hasOwnProperty.call(body, "layout")
             ? body.layout
             : body;
@@ -703,6 +759,7 @@ export function createLocalDraftReviewHandler({
             const savedBoard = await draftStore.saveLayout({ draftId, layout: boardLayout, expectedUpdatedAt: record.updatedAt });
             json(res, {
               draftId,
+              ...(openedWorkingCopy ? { openedWorkingCopy } : {}),
               revision: savedBoard.revision,
               layout: savedBoard.layout || boardLayout,
               warnings: boardValidation.warnings
@@ -755,6 +812,7 @@ export function createLocalDraftReviewHandler({
           const saved = await draftStore.saveLayout({ draftId, layout, expectedUpdatedAt: record.updatedAt });
           json(res, {
             draftId,
+            ...(openedWorkingCopy ? { openedWorkingCopy } : {}),
             revision: saved.revision,
             layout: saved.layout || layout,
             warnings: validation.warnings
@@ -1899,6 +1957,7 @@ export function createLocalDraftReviewHandler({
       return true;
     }
     if (urlPath === "/admin/drafts") {
+      const timing = createServerTiming();
       const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
       let publishedRows = contentDocuments
         ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
@@ -1916,16 +1975,19 @@ export function createLocalDraftReviewHandler({
           publishedRows = await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true });
         }
       }
+      timing.phase("published");
       const notice = draftPublicationNoticeFromSearch(
         requestUrl.searchParams,
         publishedRows
       );
       const listed = await draftStore.listDrafts({ includeDocument: true });
+      timing.phase("working-copies");
       const categoryRegistry = await loadMergedCategoryRegistry({
         contentDocuments,
         contentService,
         actor: publicationActor
       });
+      timing.phase("categories");
       const publishedById = new Map(publishedRows.map(row => [row.id, row]));
       const freezeAdds = freezeAddIdsFromPublishedRows(publishedRows, gitPuzzleIds);
       const drafts = await Promise.all(listed.map(async metadata => {
@@ -1947,13 +2009,13 @@ export function createLocalDraftReviewHandler({
           ? documentForEditor(metadata.document, { categoryRegistry })
           : null;
         const publishedDiff = baseline && workingDocument
-          ? diffPublishedDraft(baseline, workingDocument)
+          ? timing.measure("diff", () => diffPublishedDraft(baseline, workingDocument))
           : null;
         const unpublishedDomains = baseline && workingDocument && !publishedRow.withdrawnAt
-          ? unpublishedChangeDomains(baseline, workingDocument, {
+          ? timing.measure("compare", () => unpublishedChangeDomains(baseline, workingDocument, {
             publishedLayout: publishedRow.layout || null,
             draftLayout: metadata.layout || null
-          })
+          }))
           : [];
         return {
           ...mapDraftListItem(metadata, {
@@ -1964,11 +2026,11 @@ export function createLocalDraftReviewHandler({
           // Checked against the working document: an edit outdates a fixed
           // layout the working copy inherited as well as one it saved.
           workingLayoutAttention: workingDocument
-            ? layoutAttention({
+            ? timing.measure("layout-check", () => layoutAttention({
               document: workingDocument,
               layout: metadata.layout ?? publishedRow?.layout ?? null,
               categoryRegistry
-            })
+            }))
             : {},
           unpublishedChanges: unpublishedDomains.length > 0,
           unpublishedChangeDomains: unpublishedDomains,
@@ -1981,9 +2043,13 @@ export function createLocalDraftReviewHandler({
           ...freezeFlagsFromPublished(publishedRow, gitPuzzleIds)
         };
       }));
+      // Includes reading each working copy's git checkout file, as well as
+      // the diff, compare and layout-check sums reported on their own.
+      timing.phase("rows");
       const githubSnapshot = await loadOrHydrateGithubProductionManifest({
         repositoryRoot
       });
+      timing.phase("github");
       const corpus = listPuzzleCorpusRows({
         publishedRows,
         drafts,
@@ -2004,11 +2070,11 @@ export function createLocalDraftReviewHandler({
         const layoutAttentionByMode = row.hasWorkingCopy
           ? row.workingLayoutAttention || {}
           : publishedRow?.document && publishedLayout
-            ? layoutAttention({
+            ? timing.measure("layout-check", () => layoutAttention({
               document: documentForEditor(publishedRow.document, { categoryRegistry }),
               layout: publishedLayout,
               categoryRegistry
-            })
+            }))
             : {};
         return withGithubProduction({
           ...row,
@@ -2030,12 +2096,16 @@ export function createLocalDraftReviewHandler({
           if (status) row.autoLayout = status;
         });
       }
-      html(res, renderDraftListPage(corpus, {
+      timing.phase("corpus");
+      const page = renderDraftListPage(corpus, {
         variant: "local",
         githubProduction: githubSnapshot,
         notice,
         categoryRegistry
-      }));
+      });
+      timing.phase("render");
+      timing.apply(res);
+      html(res, page);
       return true;
     }
     const match = urlPath.match(/^\/admin\/drafts\/([^/]+)$/);
@@ -2188,11 +2258,7 @@ export function createDefaultLocalDraftReviewHandler({
   }
   let workspacePromise;
   return async function handleDefaultLocalDraftReview(req, res) {
-    if (req.method !== "GET" && req.method !== "POST" && req.method !== "PUT") return false;
-    const urlPath = (req.url || "").split("?")[0];
-    if (urlPath !== "/admin/drafts" && !urlPath.startsWith("/admin/drafts/")) {
-      return false;
-    }
+    if (!isDraftReviewRequest(req)) return false;
     try {
       workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });
       const resolved = await workspacePromise;

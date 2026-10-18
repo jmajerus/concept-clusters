@@ -219,9 +219,8 @@
 
       <!-- Whole-puzzle cards beside the per-mode layout card, on the
            authoring server only. Board settings and Experiments save into
-           the layout document's board settings: board settings to the open
-           working copy, else the published puzzle; experiments change play,
-           so on a working copy only. Site settings apply to every puzzle. -->
+           the layout document's board settings on the puzzle's working copy,
+           opening one when none is open. Site settings apply to every puzzle. -->
       <div class="layout-side" hidden>
       <section id="board-settings" aria-labelledby="board-settings-title">
         <strong id="board-settings-title">Board settings</strong>
@@ -235,7 +234,7 @@
           <button id="star-free-strip-btn" type="button" hidden>Use free-term strip</button>
         </div>
         <p id="board-settings-status" class="board-settings-note" role="status">
-          Saves with the layout: to the open working copy, else the published puzzle.
+          Saves with the layout, on the working copy.
         </p>
       </section>
       <section id="board-experiments" aria-labelledby="board-experiments-title">
@@ -266,7 +265,7 @@
           <p class="board-settings-note">Try plays on this board and saves nothing.</p>
         </div>
         <p id="board-experiments-status" class="board-settings-note" role="status">
-          These change play, so they save on the open working copy.
+          These change play. They save on the working copy and reach players when it is published.
         </p>
       </section>
       <!-- Settings for every puzzle at once, live for players. A puzzle's

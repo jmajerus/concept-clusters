@@ -102,6 +102,15 @@ export function createAppNavigation({
     });
   }
 
+  // On authoring play, the D1 working copy for a puzzle id, if any.
+  function workingCopyIdFor(puzzleId) {
+    if (!draftPriority || !puzzleId) return null;
+    const draft = drafts.find(candidate =>
+      candidate?.id === puzzleId || candidate?._draftId === puzzleId
+    );
+    return draft?._draftId || draft?.id || null;
+  }
+
   function navigateTo(route, { replace = false, focus = true } = {}) {
     if (layoutAuthoringMode) return;
 
@@ -147,7 +156,11 @@ export function createAppNavigation({
   ) {
     if (!Number.isInteger(index) || !puzzles[index]) return;
     if (layoutAuthoringMode) {
-      void loadPuzzle(index);
+      // Layouts are edited on the working copy when the puzzle has one,
+      // as the `?puzzle=` route opens it.
+      const draftId = workingCopyIdFor(puzzles[index].id);
+      if (draftId && loadDraftOverlay) void loadDraftOverlay(draftId);
+      else void loadPuzzle(index);
       return;
     }
 
@@ -212,13 +225,7 @@ export function createAppNavigation({
     // board has the same puzzle id. Crucially, it enters loadDraftOverlay
     // rather than merely substituting data: that preserves Construct and
     // `&play` preview behavior. Explicit legacy `?draft=` remains compatible.
-    const puzzleId = params.get("puzzle");
-    const draft = draftPriority && puzzleId
-      ? drafts.find(candidate =>
-        candidate?.id === puzzleId || candidate?._draftId === puzzleId
-      )
-      : null;
-    const resolvedDraftId = draft?._draftId || draft?.id;
+    const resolvedDraftId = workingCopyIdFor(params.get("puzzle"));
     if (resolvedDraftId && loadDraftOverlay) {
       leaveCatalogueAuthoring?.();
       useAllPuzzlesContext();

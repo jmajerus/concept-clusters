@@ -154,6 +154,10 @@ export async function run() {
   assert.doesNotMatch(draftPage, /in GitHub snapshot/);
   assert.doesNotMatch(draftPage, /class="badge">submitted</);
   assert.match(draftPage, /value="publish"/);
+  // Publishing sends the saved working copy; the page asks first when its
+  // working-copy form has unsaved edits.
+  assert.match(draftPage, /<form method="post" action="[^"]+" data-publish-guard>/);
+  assert.match(draftPage, /form\[data-publish-guard\]/);
   assert.doesNotMatch(draftPage, /value="unpublish"/);
   assert.doesNotMatch(draftPage, /value="revert-published"/);
   assert.match(draftPage, /value="delete-draft"/);

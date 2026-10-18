@@ -251,24 +251,8 @@ export const LAYOUT_BOARD_KEYS = Object.freeze([
   "lensRevealCue"
 ]);
 
-// The board settings that change play rather than drawing. They save on a
-// working copy and reach players by publishing it, never by a write to a
-// published puzzle's layout.
+// The board settings that change play rather than drawing.
 export const LAYOUT_EXPERIMENT_KEYS = Object.freeze(["bridgePreconnect", "lensFlowTrace", "lensRevealCue"]);
-
-/**
- * Experiment settings that `next` changes from `current`. Unset and null
- * both mean the default, so moving between them is no change.
- */
-export function changedExperimentKeys(next, current) {
-  const nextBoard = normalizeLayoutDocument(next)?.board || {};
-  const currentBoard = normalizeLayoutDocument(current)?.board || {};
-  return LAYOUT_EXPERIMENT_KEYS.filter(key => (nextBoard[key] ?? null) !== (currentBoard[key] ?? null));
-}
-
-export function experimentOnPublishedError(keys) {
-  return `${keys.join(", ")} change${keys.length === 1 ? "s" : ""} play, so ${keys.length === 1 ? "it saves" : "they save"} on a working copy; open one and publish it.`;
-}
 
 /**
  * A board setting for a runtime puzzle: the layout document's value when it
