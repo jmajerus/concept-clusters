@@ -1,11 +1,15 @@
 {
   "id": "choice-under-influence",
   "title": "Choice Under Influence",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How interface presentation, defaults, wording, and emotional framing can steer people away from choices that reflect their own goals. The source uses deceptive patterns for practices also widely known as dark patterns.",
     "links": [

@@ -1,11 +1,15 @@
 {
   "id": "the-webs-bargain",
   "title": "The Web's Bargain",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "technology-work-control"
   },
-  "large": true,
   "info": {
     "text": "Why software moved into the browser, who gained control and convenience, which costs were transferred to users, and which native powers were displaced.",
     "links": [

@@ -7,7 +7,10 @@
     "psychology",
     "philosophy"
   ],
-  "large": true,
+  "subcategories": {
+    "psychology": "moral-psychology",
+    "sociology": "institutions-organizations"
+  },
   "info": {
     "text": "A diagnostic map separating distorted perception and moral judgment from the institutional and identity structures that can amplify them.",
     "links": [

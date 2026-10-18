@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "designed-not-to-choose",
   "title": "Designed not to choose",
   "category": "psychology",
@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "business-organizations"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "tags": [
     "book"
   ],
@@ -267,3 +270,308 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "designed-not-to-choose",
+      "puzzleRevision": "fnv1a32:9f686583",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:primitive anxiety": {
+          "x": 108.04,
+          "y": 194.86,
+          "pinned": false
+        },
+        "term:projection": {
+          "x": 53.5,
+          "y": 278.6,
+          "pinned": false
+        },
+        "term:splitting": {
+          "x": 50.35,
+          "y": 129.24,
+          "pinned": false
+        },
+        "term:ritual task performance": {
+          "x": 344.88,
+          "y": 23,
+          "pinned": false
+        },
+        "term:depersonalization": {
+          "x": 382.51,
+          "y": 168.18,
+          "pinned": false
+        },
+        "term:checks and counter-checks": {
+          "x": 539.25,
+          "y": 23,
+          "pinned": false
+        },
+        "term:task splitting": {
+          "x": 237.38,
+          "y": 119.41,
+          "pinned": false
+        },
+        "term:secondary anxiety": {
+          "x": 113.39,
+          "y": 356.69,
+          "pinned": false
+        },
+        "term:diffusion of responsibility": {
+          "x": 266.99,
+          "y": 437,
+          "pinned": false
+        },
+        "term:rigidity": {
+          "x": 47.2,
+          "y": 437,
+          "pinned": false
+        },
+        "term:containment": {
+          "x": 583.35,
+          "y": 362.08,
+          "pinned": false
+        },
+        "term:redesigning the role": {
+          "x": 412.66,
+          "y": 332.32,
+          "pinned": false
+        },
+        "term:acknowledging the anxiety": {
+          "x": 539.25,
+          "y": 211.96,
+          "pinned": false
+        },
+        "term:institutionalized splitting": {
+          "x": 107.05,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the kidney in bed 14": {
+          "x": 251.97,
+          "y": 269.95,
+          "pinned": false
+        },
+        "term:exit of the capable": {
+          "x": 517.76,
+          "y": 437,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2889.2,
+        "score": 2889.1958477387575
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:13:07.678Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "designed-not-to-choose",
+      "puzzleRevision": "fnv1a32:9f686583",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 155.58,
+          "y": 354.59,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 393.07,
+          "y": 181.44,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 804.42,
+          "y": 281.41,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 566.93,
+          "y": 454.56,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:institutionalized splitting": {
+          "x": 119.11,
+          "y": 203.72,
+          "pinned": false
+        },
+        "term:the kidney in bed 14": {
+          "x": 370.49,
+          "y": 364.18,
+          "pinned": false
+        },
+        "term:exit of the capable": {
+          "x": 781.84,
+          "y": 464.15,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "primitive anxiety",
+          "projection",
+          "splitting"
+        ],
+        "cluster:1": [
+          "ritual task performance",
+          "depersonalization",
+          "checks and counter-checks",
+          "task splitting"
+        ],
+        "cluster:2": [
+          "secondary anxiety",
+          "diffusion of responsibility",
+          "rigidity"
+        ],
+        "cluster:3": [
+          "containment",
+          "redesigning the role",
+          "acknowledging the anxiety"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 433.39940918637103
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:13:10.362Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "designed-not-to-choose",
+      "puzzleRevision": "fnv1a32:9f686583",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:primitive anxiety": {
+          "x": 235.54,
+          "y": 115.15
+        },
+        "term:projection": {
+          "x": 326.88,
+          "y": 22
+        },
+        "term:splitting": {
+          "x": 424.56,
+          "y": 112.38
+        },
+        "term:ritual task performance": {
+          "x": 867.55,
+          "y": 379.33
+        },
+        "term:depersonalization": {
+          "x": 599.97,
+          "y": 331.86
+        },
+        "term:checks and counter-checks": {
+          "x": 715.23,
+          "y": 483.14
+        },
+        "term:task splitting": {
+          "x": 895.9,
+          "y": 128.32
+        },
+        "term:secondary anxiety": {
+          "x": 434.76,
+          "y": 226.81
+        },
+        "term:diffusion of responsibility": {
+          "x": 511.27,
+          "y": 598
+        },
+        "term:rigidity": {
+          "x": 551.98,
+          "y": 443.71
+        },
+        "term:containment": {
+          "x": 54.65,
+          "y": 453.82
+        },
+        "term:redesigning the role": {
+          "x": 83,
+          "y": 598
+        },
+        "term:acknowledging the anxiety": {
+          "x": 98.75,
+          "y": 290.51
+        },
+        "term:institutionalized splitting": {
+          "x": 715.44,
+          "y": 22
+        },
+        "term:the kidney in bed 14": {
+          "x": 574.5,
+          "y": 167.68
+        },
+        "term:exit of the capable": {
+          "x": 277.84,
+          "y": 533.33
+        },
+        "cluster:0": {
+          "x": 482.94,
+          "y": 22
+        },
+        "cluster:1": {
+          "x": 755.32,
+          "y": 233.37
+        },
+        "cluster:2": {
+          "x": 437.47,
+          "y": 401.12
+        },
+        "cluster:3": {
+          "x": 228.21,
+          "y": 475.02
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:13:13.042Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:13:05.376Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

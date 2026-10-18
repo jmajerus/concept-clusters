@@ -3,15 +3,17 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "malignant-aggression",
   "title": "Malignant Aggression",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "psychology"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
   "tags": [
@@ -258,3 +260,273 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "malignant-aggression",
+      "puzzleRevision": "fnv1a32:9992c56d",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:Konrad Lorenz": {
+          "x": 225.94,
+          "y": 141.19,
+          "pinned": false
+        },
+        "term:benign aggression": {
+          "x": 78.29,
+          "y": 148.17,
+          "pinned": false
+        },
+        "term:instinctivism": {
+          "x": 169.08,
+          "y": 257.98,
+          "pinned": false
+        },
+        "term:hydraulic model": {
+          "x": 158.53,
+          "y": 23,
+          "pinned": false
+        },
+        "term:necrophilia": {
+          "x": 476.94,
+          "y": 197.54,
+          "pinned": false
+        },
+        "term:sadism": {
+          "x": 599.1,
+          "y": 186.53,
+          "pinned": false
+        },
+        "term:malignant aggression": {
+          "x": 555,
+          "y": 64.39,
+          "pinned": false
+        },
+        "term:syndrome of decay": {
+          "x": 564.45,
+          "y": 301.86,
+          "pinned": false
+        },
+        "term:love of the mechanical": {
+          "x": 375.8,
+          "y": 83.95,
+          "pinned": false
+        },
+        "term:biophilia": {
+          "x": 263.22,
+          "y": 327.96,
+          "pinned": false
+        },
+        "term:syndrome of growth": {
+          "x": 147.47,
+          "y": 402.02,
+          "pinned": false
+        },
+        "term:integration": {
+          "x": 282.27,
+          "y": 437,
+          "pinned": false
+        },
+        "term:Adolf Hitler": {
+          "x": 318.29,
+          "y": 227.98,
+          "pinned": false
+        },
+        "term:character orientation": {
+          "x": 404.8,
+          "y": 352.89,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2263.8,
+        "score": 2263.802166737811
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:51:27.218Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "malignant-aggression",
+      "puzzleRevision": "fnv1a32:9992c56d",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 243.09,
+          "y": 255.02,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 443.95,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 716.91,
+          "y": 255.02,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:Adolf Hitler": {
+          "x": 435.09,
+          "y": 275.95,
+          "pinned": false
+        },
+        "term:character orientation": {
+          "x": 724.1,
+          "y": 401.53,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Konrad Lorenz",
+          "benign aggression",
+          "instinctivism",
+          "hydraulic model"
+        ],
+        "cluster:1": [
+          "necrophilia",
+          "sadism",
+          "malignant aggression",
+          "syndrome of decay",
+          "love of the mechanical"
+        ],
+        "cluster:2": [
+          "biophilia",
+          "syndrome of growth",
+          "integration"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 239.27490435394822
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:51:29.948Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "malignant-aggression",
+      "puzzleRevision": "fnv1a32:9992c56d",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Konrad Lorenz": {
+          "x": 821.85,
+          "y": 359.38
+        },
+        "term:benign aggression": {
+          "x": 822.43,
+          "y": 505.94
+        },
+        "term:instinctivism": {
+          "x": 547.03,
+          "y": 323.9
+        },
+        "term:hydraulic model": {
+          "x": 690.78,
+          "y": 583.65
+        },
+        "term:necrophilia": {
+          "x": 442.7,
+          "y": 397.12
+        },
+        "term:sadism": {
+          "x": 335.63,
+          "y": 554.97
+        },
+        "term:malignant aggression": {
+          "x": 206.58,
+          "y": 590.76
+        },
+        "term:syndrome of decay": {
+          "x": 110.24,
+          "y": 452.46
+        },
+        "term:love of the mechanical": {
+          "x": 150.01,
+          "y": 282.15
+        },
+        "term:biophilia": {
+          "x": 545.94,
+          "y": 202.71
+        },
+        "term:syndrome of growth": {
+          "x": 654.06,
+          "y": 22
+        },
+        "term:integration": {
+          "x": 764.01,
+          "y": 113.93
+        },
+        "term:Adolf Hitler": {
+          "x": 532.3,
+          "y": 483.34
+        },
+        "term:character orientation": {
+          "x": 406.88,
+          "y": 248.65
+        },
+        "cluster:0": {
+          "x": 674.39,
+          "y": 419.06
+        },
+        "cluster:1": {
+          "x": 285.44,
+          "y": 420.7
+        },
+        "cluster:2": {
+          "x": 645.32,
+          "y": 158.7
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:51:32.320Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:51:24.918Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

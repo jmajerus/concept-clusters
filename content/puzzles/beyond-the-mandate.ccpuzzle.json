@@ -1,27 +1,32 @@
 {
   "id": "beyond-the-mandate",
   "title": "Beyond the Mandate",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "book"
   ],
   "info": {
     "text": "How a UN peacekeeping mandate, a Security Council withdrawal, and a State Department's avoidance of one word combined to let a genocide unfold in full view of an international community that had promised, after the Holocaust, never to let it happen again.",
+    "links": [
+      {
+        "href": "wiki:Rwandan genocide"
+      }
+    ],
     "citations": [
       {
         "title": "One Hundred Days of Silence: America and the Rwanda Genocide",
         "author": "Cohen, Jared A.",
         "publisher": "Lexington Books",
         "year": "2006"
-      }
-    ],
-    "links": [
-      {
-        "href": "wiki:Rwandan genocide"
       }
     ]
   },
@@ -31,20 +36,6 @@
       "name": "The Mandate Ceiling",
       "color": "teal",
       "fact": "On January 11, 1994, UNAMIR's force commander cabled UN headquarters that an informant had revealed plans to register Tutsi civilians in Kigali for what he called their extermination, and asked permission to raid the arms caches being stockpiled for it; the reply, drafted in Kofi Annan's own peacekeeping department, ordered him to take no action, calling the proposed raid 'beyond the mandate entrusted to UNAMIR.'",
-      "seeds": [
-        "Roméo Dallaire",
-        "Genocide Fax"
-      ],
-      "floatingTerms": [
-        "UNAMIR",
-        "Chapter VI Mandate"
-      ],
-      "terms": [
-        "Roméo Dallaire",
-        "Genocide Fax",
-        "UNAMIR",
-        "Chapter VI Mandate"
-      ],
       "termInfo": {
         "Chapter VI Mandate": {
           "text": "The UN Charter provision governing peaceful dispute settlement, under which most peacekeeping missions -- including UNAMIR -- operate: consent-based, and without authority to use force beyond self-defense.",
@@ -86,27 +77,27 @@
             "href": "wiki:Rwandan genocide"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Roméo Dallaire",
+        "Genocide Fax"
+      ],
+      "floatingTerms": [
+        "UNAMIR",
+        "Chapter VI Mandate"
+      ],
+      "terms": [
+        "Roméo Dallaire",
+        "Genocide Fax",
+        "UNAMIR",
+        "Chapter VI Mandate"
+      ]
     },
     {
       "id": "withdrawal",
       "name": "The Withdrawal",
       "color": "amber",
       "fact": "Ten days after ten Belgian peacekeepers were murdered guarding Rwanda's prime minister, the Security Council voted unanimously to cut UNAMIR from 2,500 troops to a token force of 270 -- even as the Secretary-General warned that the human cost of a full withdrawal 'could be very severe.'",
-      "seeds": [
-        "Resolution 912",
-        "Boutros-Ghali's Warning"
-      ],
-      "floatingTerms": [
-        "Token Force",
-        "Operation Turquoise"
-      ],
-      "terms": [
-        "Resolution 912",
-        "Boutros-Ghali's Warning",
-        "Token Force",
-        "Operation Turquoise"
-      ],
       "termInfo": {
         "Boutros-Ghali's Warning": {
           "text": "UN Secretary-General Boutros Boutros-Ghali's own preference was for reinforcement, not withdrawal; he later called the Council's decision a 'scandal.'",
@@ -148,27 +139,27 @@
             "href": "wiki:United Nations Security Council Resolution 912"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Resolution 912",
+        "Boutros-Ghali's Warning"
+      ],
+      "floatingTerms": [
+        "Token Force",
+        "Operation Turquoise"
+      ],
+      "terms": [
+        "Resolution 912",
+        "Boutros-Ghali's Warning",
+        "Token Force",
+        "Operation Turquoise"
+      ]
     },
     {
       "id": "the-word",
       "name": "The Word",
       "color": "magenta",
       "fact": "State Department officials were instructed to say only that 'acts of genocide' might have occurred, a distinction spokesperson Christine Shelley could not explain when a reporter asked how many acts it would take to make genocide -- because, as one internal document put it, a genocide finding could commit the U.S. government to actually 'do something.'",
-      "seeds": [
-        "Christine Shelley",
-        "Acts of Genocide"
-      ],
-      "floatingTerms": [
-        "National Intelligence Daily",
-        "Christopher's Authorization"
-      ],
-      "terms": [
-        "Christine Shelley",
-        "Acts of Genocide",
-        "National Intelligence Daily",
-        "Christopher's Authorization"
-      ],
       "termInfo": {
         "Acts of Genocide": {
           "text": "The qualified phrase State Department officials were permitted to use instead of 'genocide' itself -- a distinction with no clear definition, adopted specifically to avoid triggering the Genocide Convention's own legal obligations.",
@@ -210,7 +201,21 @@
             "href": "https://www.ushmm.org/genocide-prevention/countries/rwanda/turning-points/genocide-fax-part-i"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Christine Shelley",
+        "Acts of Genocide"
+      ],
+      "floatingTerms": [
+        "National Intelligence Daily",
+        "Christopher's Authorization"
+      ],
+      "terms": [
+        "Christine Shelley",
+        "Acts of Genocide",
+        "National Intelligence Daily",
+        "Christopher's Authorization"
+      ]
     }
   ],
   "bridges": [

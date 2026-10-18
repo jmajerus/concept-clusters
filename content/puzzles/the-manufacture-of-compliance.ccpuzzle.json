@@ -4,9 +4,11 @@
   "category": "psychology",
   "categories": [
     "psychology",
-    "history-society"
+    "history-society",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
   "tags": [

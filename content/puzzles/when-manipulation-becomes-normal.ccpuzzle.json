@@ -4,12 +4,13 @@
   "category": "business-organizations",
   "categories": [
     "business-organizations",
-    "computer-science"
+    "computer-science",
+    "science-technology-society"
   ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How strategic targets, experimentation, incentives, and organizational routines can turn an initially questionable tactic into standard practice, while distributing responsibility and eroding trust. Normalization of deviance is used here as an organizational lens, not to equate dark patterns with safety disasters.",
     "links": [

@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-hidden-transaction",
   "title": "The Hidden Transaction",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How a transaction can appear to offer one product, price, or payment arrangement while relevant costs, add-ons, or recurring obligations remain hidden until after the user has committed. The resulting harms can include lost money, time, attention, peace of mind, and control over one's own commitments.",
     "links": [
@@ -462,3 +466,358 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-hidden-transaction",
+      "puzzleRevision": "fnv1a32:92832010",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:advertised price": {
+          "x": 887.6,
+          "y": 455.91,
+          "pinned": false
+        },
+        "term:chosen product": {
+          "x": 881.66,
+          "y": 313.55,
+          "pinned": false
+        },
+        "term:one-off expectation": {
+          "x": 750.39,
+          "y": 534.59,
+          "pinned": false
+        },
+        "term:free trial": {
+          "x": 880.06,
+          "y": 585.58,
+          "pinned": false
+        },
+        "term:delayed disclosure": {
+          "x": 738.64,
+          "y": 272.48,
+          "pinned": false
+        },
+        "term:undisclosed add-on": {
+          "x": 860.19,
+          "y": 166.3,
+          "pinned": false
+        },
+        "term:obscured recurring terms": {
+          "x": 566.06,
+          "y": 220.29,
+          "pinned": false
+        },
+        "term:silent enrollment": {
+          "x": 709.87,
+          "y": 116.85,
+          "pinned": false
+        },
+        "term:checkout progress": {
+          "x": 471.2,
+          "y": 597,
+          "pinned": false
+        },
+        "term:time invested": {
+          "x": 601.69,
+          "y": 539.97,
+          "pinned": false
+        },
+        "term:stored payment method": {
+          "x": 417.59,
+          "y": 438.3,
+          "pinned": false
+        },
+        "term:missing notification": {
+          "x": 306.71,
+          "y": 593.18,
+          "pinned": false
+        },
+        "term:unexpected fee": {
+          "x": 226.53,
+          "y": 204.64,
+          "pinned": false
+        },
+        "term:unwanted item": {
+          "x": 350.54,
+          "y": 156.41,
+          "pinned": false
+        },
+        "term:recurring charge": {
+          "x": 336.64,
+          "y": 295.06,
+          "pinned": false
+        },
+        "term:time and attention loss": {
+          "x": 238.22,
+          "y": 40.52,
+          "pinned": false
+        },
+        "term:psychological strain": {
+          "x": 85,
+          "y": 141.34,
+          "pinned": false
+        },
+        "term:impaired autonomy": {
+          "x": 118.59,
+          "y": 302.41,
+          "pinned": false
+        },
+        "term:sneaking": {
+          "x": 779.69,
+          "y": 395.73,
+          "pinned": false
+        },
+        "term:commitment leverage": {
+          "x": 626.97,
+          "y": 393.33,
+          "pinned": false
+        },
+        "term:unintended transaction": {
+          "x": 234.42,
+          "y": 428.01,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3655.6,
+        "score": 3655.6026493075733
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:36:47.385Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-hidden-transaction",
+      "puzzleRevision": "fnv1a32:92832010",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 257.81,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 226.8,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 569.2,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 792.19,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:sneaking": {
+          "x": 336.25,
+          "y": 257.24,
+          "pinned": false
+        },
+        "term:commitment leverage": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:unintended transaction": {
+          "x": 754.76,
+          "y": 579.77,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "advertised price",
+          "chosen product",
+          "one-off expectation",
+          "free trial"
+        ],
+        "cluster:1": [
+          "delayed disclosure",
+          "undisclosed add-on",
+          "obscured recurring terms",
+          "silent enrollment"
+        ],
+        "cluster:2": [
+          "checkout progress",
+          "time invested",
+          "stored payment method",
+          "missing notification"
+        ],
+        "cluster:3": [
+          "unexpected fee",
+          "unwanted item",
+          "recurring charge",
+          "time and attention loss",
+          "psychological strain",
+          "impaired autonomy"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 280.86582624089897
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:36:49.536Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-hidden-transaction",
+      "puzzleRevision": "fnv1a32:92832010",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:advertised price": {
+          "x": 492.48,
+          "y": 146.75
+        },
+        "term:chosen product": {
+          "x": 291.42,
+          "y": 67
+        },
+        "term:one-off expectation": {
+          "x": 575.58,
+          "y": 22
+        },
+        "term:free trial": {
+          "x": 160.03,
+          "y": 22
+        },
+        "term:delayed disclosure": {
+          "x": 564.98,
+          "y": 192.23
+        },
+        "term:undisclosed add-on": {
+          "x": 803.15,
+          "y": 363.01
+        },
+        "term:obscured recurring terms": {
+          "x": 864.4,
+          "y": 173.79
+        },
+        "term:silent enrollment": {
+          "x": 886.45,
+          "y": 22
+        },
+        "term:checkout progress": {
+          "x": 716.6,
+          "y": 491.88
+        },
+        "term:time invested": {
+          "x": 493.97,
+          "y": 414.4
+        },
+        "term:stored payment method": {
+          "x": 395.56,
+          "y": 598
+        },
+        "term:missing notification": {
+          "x": 605.89,
+          "y": 598
+        },
+        "term:unexpected fee": {
+          "x": 218.47,
+          "y": 121.17
+        },
+        "term:unwanted item": {
+          "x": 60.95,
+          "y": 367.68
+        },
+        "term:recurring charge": {
+          "x": 346.17,
+          "y": 168.69
+        },
+        "term:time and attention loss": {
+          "x": 92.45,
+          "y": 201
+        },
+        "term:psychological strain": {
+          "x": 83,
+          "y": 521.17
+        },
+        "term:impaired autonomy": {
+          "x": 249.58,
+          "y": 526.08
+        },
+        "term:sneaking": {
+          "x": 634.89,
+          "y": 80.43
+        },
+        "term:commitment leverage": {
+          "x": 631.47,
+          "y": 349.85
+        },
+        "term:unintended transaction": {
+          "x": 448,
+          "y": 305.45
+        },
+        "cluster:0": {
+          "x": 423.55,
+          "y": 22
+        },
+        "cluster:1": {
+          "x": 708.09,
+          "y": 215.55
+        },
+        "cluster:2": {
+          "x": 515.62,
+          "y": 480.96
+        },
+        "cluster:3": {
+          "x": 241.29,
+          "y": 331.51
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:36:51.469Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:36:45.424Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

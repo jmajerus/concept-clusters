@@ -3,11 +3,12 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "power-without-a-center",
   "title": "Power Without a Center",
-  "category": "political-science",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "political-science",
     "philosophy"
   ],
@@ -177,3 +178,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "power-without-a-center",
+      "puzzleRevision": "fnv1a32:6a91366a",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:exercised, not possessed": {
+          "x": 491.78,
+          "y": 203.64,
+          "pinned": false
+        },
+        "term:no single center": {
+          "x": 334.28,
+          "y": 131.01,
+          "pinned": false
+        },
+        "term:a net-like organization": {
+          "x": 453.27,
+          "y": 23,
+          "pinned": false
+        },
+        "term:capillary power": {
+          "x": 570.75,
+          "y": 75.98,
+          "pinned": false
+        },
+        "term:productive power": {
+          "x": 409.16,
+          "y": 357.92,
+          "pinned": false
+        },
+        "term:power/knowledge": {
+          "x": 570.75,
+          "y": 339.27,
+          "pinned": false
+        },
+        "term:regimes of truth": {
+          "x": 514.86,
+          "y": 437,
+          "pinned": false
+        },
+        "term:discourse": {
+          "x": 330.43,
+          "y": 437,
+          "pinned": false
+        },
+        "term:points of resistance": {
+          "x": 85,
+          "y": 266.95,
+          "pinned": false
+        },
+        "term:coextensive with power": {
+          "x": 91.3,
+          "y": 437,
+          "pinned": false
+        },
+        "term:no single locus of revolt": {
+          "x": 161.42,
+          "y": 96.69,
+          "pinned": false
+        },
+        "term:the odd term": {
+          "x": 59.8,
+          "y": 137.44,
+          "pinned": false
+        },
+        "term:the same shape": {
+          "x": 292.79,
+          "y": 23,
+          "pinned": false
+        },
+        "term:immanent": {
+          "x": 350.59,
+          "y": 250.3,
+          "pinned": false
+        },
+        "term:strategic codification": {
+          "x": 241.91,
+          "y": 342.46,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2750.71,
+        "score": 2750.711817998413
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:21:03.323Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "power-without-a-center",
+      "puzzleRevision": "fnv1a32:6a91366a",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 720.59,
+          "y": 256.53,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 440.94,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 239.41,
+          "y": 256.53,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:the same shape": {
+          "x": 480,
+          "y": 256.53,
+          "pinned": false
+        },
+        "term:immanent": {
+          "x": 673.84,
+          "y": 422.27,
+          "pinned": false
+        },
+        "term:strategic codification": {
+          "x": 263.54,
+          "y": 444.9,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "exercised, not possessed",
+          "no single center",
+          "a net-like organization",
+          "capillary power"
+        ],
+        "cluster:1": [
+          "productive power",
+          "power/knowledge",
+          "regimes of truth",
+          "discourse"
+        ],
+        "cluster:2": [
+          "points of resistance",
+          "coextensive with power",
+          "no single locus of revolt",
+          "the odd term"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 435.94062826019353
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:21:06.119Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "power-without-a-center",
+      "puzzleRevision": "fnv1a32:6a91366a",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:exercised, not possessed": {
+          "x": 408.44,
+          "y": 22
+        },
+        "term:no single center": {
+          "x": 364.49,
+          "y": 193.09
+        },
+        "term:a net-like organization": {
+          "x": 615.83,
+          "y": 22
+        },
+        "term:capillary power": {
+          "x": 693.97,
+          "y": 174.35
+        },
+        "term:productive power": {
+          "x": 889.6,
+          "y": 382.64
+        },
+        "term:power/knowledge": {
+          "x": 892.75,
+          "y": 532.26
+        },
+        "term:regimes of truth": {
+          "x": 759.14,
+          "y": 598
+        },
+        "term:discourse": {
+          "x": 628.59,
+          "y": 598
+        },
+        "term:points of resistance": {
+          "x": 441.26,
+          "y": 558.63
+        },
+        "term:coextensive with power": {
+          "x": 261.47,
+          "y": 598
+        },
+        "term:no single locus of revolt": {
+          "x": 417.83,
+          "y": 366.18
+        },
+        "term:the odd term": {
+          "x": 110.63,
+          "y": 547.83
+        },
+        "term:the same shape": {
+          "x": 579.17,
+          "y": 294.05
+        },
+        "term:immanent": {
+          "x": 697.74,
+          "y": 318.69
+        },
+        "term:strategic codification": {
+          "x": 595.51,
+          "y": 458.13
+        },
+        "cluster:0": {
+          "x": 514.18,
+          "y": 163.35
+        },
+        "cluster:1": {
+          "x": 760.8,
+          "y": 451.94
+        },
+        "cluster:2": {
+          "x": 204.86,
+          "y": 400.55
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:21:09.067Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:21:00.455Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

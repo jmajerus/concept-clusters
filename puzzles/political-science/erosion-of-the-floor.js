@@ -3,11 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "erosion-of-the-floor",
   "title": "Erosion of the Floor",
-  "category": "political-science",
-  "large": true,
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "war",
     "international law",
@@ -337,3 +344,337 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "erosion-of-the-floor",
+      "puzzleRevision": "fnv1a32:5eb48fc7",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:distinction": {
+          "x": 174.03,
+          "y": 465.31,
+          "pinned": false
+        },
+        "term:proportionality": {
+          "x": 244.79,
+          "y": 356.3,
+          "pinned": false
+        },
+        "term:precaution in attack": {
+          "x": 85,
+          "y": 350.24,
+          "pinned": false
+        },
+        "term:hors de combat": {
+          "x": 66.1,
+          "y": 529.9,
+          "pinned": false
+        },
+        "term:Common Article 3": {
+          "x": 190.33,
+          "y": 597,
+          "pinned": false
+        },
+        "term:medical neutrality": {
+          "x": 309.26,
+          "y": 498.28,
+          "pinned": false
+        },
+        "term:starvation as a method of warfare": {
+          "x": 605.13,
+          "y": 375.93,
+          "pinned": false
+        },
+        "term:explosive weapons in populated areas": {
+          "x": 670.1,
+          "y": 118.64,
+          "pinned": false
+        },
+        "term:selective interpretation": {
+          "x": 787.08,
+          "y": 519.14,
+          "pinned": false
+        },
+        "term:attacks on health care": {
+          "x": 610.68,
+          "y": 597,
+          "pinned": false
+        },
+        "term:detention of medical personnel": {
+          "x": 842.07,
+          "y": 308.11,
+          "pinned": false
+        },
+        "term:genocide": {
+          "x": 313.51,
+          "y": 157.19,
+          "pinned": false
+        },
+        "term:the Genocide Convention": {
+          "x": 171.32,
+          "y": 188.48,
+          "pinned": false
+        },
+        "term:the duty to prevent": {
+          "x": 461.57,
+          "y": 23,
+          "pinned": false
+        },
+        "term:political groups": {
+          "x": 129.33,
+          "y": 23,
+          "pinned": false
+        },
+        "term:OHCHR": {
+          "x": 296.83,
+          "y": 244.57,
+          "pinned": false
+        },
+        "term:genocide accusations": {
+          "x": 290.72,
+          "y": 23,
+          "pinned": false
+        },
+        "term:military necessity": {
+          "x": 436.68,
+          "y": 597,
+          "pinned": false
+        },
+        "term:intent to destroy": {
+          "x": 399.74,
+          "y": 368.54,
+          "pinned": false
+        },
+        "term:crimes against humanity": {
+          "x": 451.85,
+          "y": 202.53,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4125.29,
+        "score": 4125.285060711927
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:31:04.221Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "erosion-of-the-floor",
+      "puzzleRevision": "fnv1a32:5eb48fc7",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 238.75,
+          "y": 310.37,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 573.26,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 811.25,
+          "y": 310.37,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:military necessity": {
+          "x": 256.23,
+          "y": 493.86,
+          "pinned": false
+        },
+        "term:intent to destroy": {
+          "x": 571.96,
+          "y": 345.65,
+          "pinned": false
+        },
+        "term:crimes against humanity": {
+          "x": 823.34,
+          "y": 506.11,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "distinction",
+          "proportionality",
+          "precaution in attack",
+          "hors de combat",
+          "Common Article 3",
+          "medical neutrality"
+        ],
+        "cluster:1": [
+          "starvation as a method of warfare",
+          "explosive weapons in populated areas",
+          "selective interpretation",
+          "attacks on health care",
+          "detention of medical personnel"
+        ],
+        "cluster:2": [
+          "genocide",
+          "the Genocide Convention",
+          "the duty to prevent",
+          "political groups",
+          "OHCHR",
+          "genocide accusations"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 404.67210379114255
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:31:06.678Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "erosion-of-the-floor",
+      "puzzleRevision": "fnv1a32:5eb48fc7",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:distinction": {
+          "x": 64.4,
+          "y": 97.33
+        },
+        "term:proportionality": {
+          "x": 506.8,
+          "y": 139.63
+        },
+        "term:precaution in attack": {
+          "x": 340.23,
+          "y": 22
+        },
+        "term:hors de combat": {
+          "x": 177.63,
+          "y": 162.71
+        },
+        "term:Common Article 3": {
+          "x": 532.89,
+          "y": 22
+        },
+        "term:medical neutrality": {
+          "x": 187.09,
+          "y": 202.69
+        },
+        "term:starvation as a method of warfare": {
+          "x": 568.95,
+          "y": 590.19
+        },
+        "term:explosive weapons in populated areas": {
+          "x": 520.1,
+          "y": 318.14
+        },
+        "term:selective interpretation": {
+          "x": 754.68,
+          "y": 413.49
+        },
+        "term:attacks on health care": {
+          "x": 870.7,
+          "y": 285.12
+        },
+        "term:detention of medical personnel": {
+          "x": 823.94,
+          "y": 598
+        },
+        "term:genocide": {
+          "x": 219.81,
+          "y": 380.2
+        },
+        "term:the Genocide Convention": {
+          "x": 92.45,
+          "y": 295.37
+        },
+        "term:the duty to prevent": {
+          "x": 79.85,
+          "y": 527.22
+        },
+        "term:political groups": {
+          "x": 368.57,
+          "y": 598
+        },
+        "term:OHCHR": {
+          "x": 35.75,
+          "y": 409
+        },
+        "term:genocide accusations": {
+          "x": 199.65,
+          "y": 598
+        },
+        "term:military necessity": {
+          "x": 433.14,
+          "y": 257.9
+        },
+        "term:intent to destroy": {
+          "x": 387.51,
+          "y": 485.44
+        },
+        "term:crimes against humanity": {
+          "x": 384.32,
+          "y": 389.36
+        },
+        "cluster:0": {
+          "x": 319.3,
+          "y": 156.62
+        },
+        "cluster:1": {
+          "x": 558.69,
+          "y": 376.55
+        },
+        "cluster:2": {
+          "x": 202.96,
+          "y": 448.14
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:31:09.481Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:31:01.582Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

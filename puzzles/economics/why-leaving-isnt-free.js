@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "why-leaving-isnt-free",
   "title": "Why leaving isn't free",
   "category": "economics",
@@ -11,6 +11,10 @@ export default definePuzzle(import.meta.url, {
     "economics",
     "sociology"
   ],
+  "subcategories": {
+    "economics": "microeconomics",
+    "sociology": "social-stratification"
+  },
   "tags": [
     "book"
   ],
@@ -231,3 +235,298 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "why-leaving-isnt-free",
+      "puzzleRevision": "fnv1a32:afcaf03f",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:search frictions": {
+          "x": 257.78,
+          "y": 96,
+          "pinned": false
+        },
+        "term:mobility costs": {
+          "x": 154.76,
+          "y": 23,
+          "pinned": false
+        },
+        "term:imperfect information": {
+          "x": 361.56,
+          "y": 23,
+          "pinned": false
+        },
+        "term:labor supply elasticity": {
+          "x": 233.18,
+          "y": 437,
+          "pinned": false
+        },
+        "term:wage markdown": {
+          "x": 392.82,
+          "y": 401,
+          "pinned": false
+        },
+        "term:employer concentration": {
+          "x": 548.7,
+          "y": 437,
+          "pinned": false
+        },
+        "term:gender wage gap": {
+          "x": 119.82,
+          "y": 334.47,
+          "pinned": false
+        },
+        "term:thin markets": {
+          "x": 59.8,
+          "y": 296.47,
+          "pinned": false
+        },
+        "term:quit elasticity": {
+          "x": 69.25,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the competitive benchmark": {
+          "x": 426.25,
+          "y": 150.3,
+          "pinned": false
+        },
+        "term:the minimum-wage puzzle": {
+          "x": 545.55,
+          "y": 269.67,
+          "pinned": false
+        },
+        "term:the one-cent question": {
+          "x": 551.85,
+          "y": 23,
+          "pinned": false
+        },
+        "term:why the curve slopes up": {
+          "x": 265.03,
+          "y": 265.26,
+          "pinned": false
+        },
+        "term:the uneven cost of leaving": {
+          "x": 103.9,
+          "y": 158.19,
+          "pinned": false
+        },
+        "term:raising the floor": {
+          "x": 424.67,
+          "y": 334.46,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2671.43,
+        "score": 2671.4254201535086
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:10:01.406Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "why-leaving-isnt-free",
+      "puzzleRevision": "fnv1a32:afcaf03f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 158.77,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 477.23,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 808.25,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 151.75,
+          "y": 318,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:why the curve slopes up": {
+          "x": 480,
+          "y": 318,
+          "pinned": false
+        },
+        "term:the uneven cost of leaving": {
+          "x": 717.67,
+          "y": 164.85,
+          "pinned": false
+        },
+        "term:raising the floor": {
+          "x": 242.33,
+          "y": 471.15,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "search frictions",
+          "mobility costs",
+          "imperfect information"
+        ],
+        "cluster:1": [
+          "labor supply elasticity",
+          "wage markdown",
+          "employer concentration"
+        ],
+        "cluster:2": [
+          "gender wage gap",
+          "thin markets",
+          "quit elasticity"
+        ],
+        "cluster:3": [
+          "the competitive benchmark",
+          "the minimum-wage puzzle",
+          "the one-cent question"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 398.66358802917426
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:10:05.144Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "why-leaving-isnt-free",
+      "puzzleRevision": "fnv1a32:afcaf03f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:search frictions": {
+          "x": 653.11,
+          "y": 453.08
+        },
+        "term:mobility costs": {
+          "x": 682.86,
+          "y": 215.99
+        },
+        "term:imperfect information": {
+          "x": 873.85,
+          "y": 195.14
+        },
+        "term:labor supply elasticity": {
+          "x": 370.33,
+          "y": 226.75
+        },
+        "term:wage markdown": {
+          "x": 243.3,
+          "y": 337.57
+        },
+        "term:employer concentration": {
+          "x": 89.3,
+          "y": 370.72
+        },
+        "term:gender wage gap": {
+          "x": 524.14,
+          "y": 148.55
+        },
+        "term:thin markets": {
+          "x": 247.8,
+          "y": 22
+        },
+        "term:quit elasticity": {
+          "x": 570.56,
+          "y": 22
+        },
+        "term:the competitive benchmark": {
+          "x": 755.79,
+          "y": 598
+        },
+        "term:the minimum-wage puzzle": {
+          "x": 382.91,
+          "y": 423.83
+        },
+        "term:the one-cent question": {
+          "x": 328.92,
+          "y": 598
+        },
+        "term:why the curve slopes up": {
+          "x": 548.4,
+          "y": 317.14
+        },
+        "term:the uneven cost of leaving": {
+          "x": 747.69,
+          "y": 43.11
+        },
+        "term:raising the floor": {
+          "x": 214.42,
+          "y": 480.88
+        },
+        "cluster:0": {
+          "x": 798.76,
+          "y": 365.1
+        },
+        "cluster:1": {
+          "x": 158.5,
+          "y": 170.2
+        },
+        "cluster:2": {
+          "x": 403.75,
+          "y": 34.05
+        },
+        "cluster:3": {
+          "x": 534.3,
+          "y": 598
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:10:08.115Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:09:58.431Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

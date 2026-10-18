@@ -3,15 +3,20 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "evolution-of-cooperation",
   "title": "The evolution of cooperation",
   "category": "economics",
   "categories": [
     "economics",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
-  "large": true,
+  "subcategories": {
+    "economics": "microeconomics",
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "political-science": "international-relations"
+  },
   "info": {
     "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything.",
     "links": [
@@ -384,3 +389,328 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "evolution-of-cooperation",
+      "puzzleRevision": "fnv1a32:cb8dc82e",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:prisoner's dilemma": {
+          "x": 671.6,
+          "y": 23,
+          "pinned": false
+        },
+        "term:dominant strategy": {
+          "x": 599.46,
+          "y": 163.79,
+          "pinned": false
+        },
+        "term:temptation payoff": {
+          "x": 754.89,
+          "y": 157.53,
+          "pinned": false
+        },
+        "term:sucker's payoff": {
+          "x": 823.52,
+          "y": 25.51,
+          "pinned": false
+        },
+        "term:niceness": {
+          "x": 282.53,
+          "y": 236.08,
+          "pinned": false
+        },
+        "term:forgiveness": {
+          "x": 334.48,
+          "y": 141.57,
+          "pinned": false
+        },
+        "term:clarity": {
+          "x": 230.79,
+          "y": 156.1,
+          "pinned": false
+        },
+        "term:echo effect": {
+          "x": 300.77,
+          "y": 392.17,
+          "pinned": false
+        },
+        "term:misperception": {
+          "x": 339.47,
+          "y": 509.55,
+          "pinned": false
+        },
+        "term:known last round": {
+          "x": 202.83,
+          "y": 482.22,
+          "pinned": false
+        },
+        "term:envy": {
+          "x": 262.52,
+          "y": 575.81,
+          "pinned": false
+        },
+        "term:clustering": {
+          "x": 466.77,
+          "y": 173.75,
+          "pinned": false
+        },
+        "term:evolutionary stability": {
+          "x": 582.03,
+          "y": 454.92,
+          "pinned": false
+        },
+        "term:territoriality": {
+          "x": 427.15,
+          "y": 409.47,
+          "pinned": false
+        },
+        "term:live and let live": {
+          "x": 518.73,
+          "y": 296.23,
+          "pinned": false
+        },
+        "term:tit for tat": {
+          "x": 388.38,
+          "y": 256.73,
+          "pinned": false
+        },
+        "term:provocability": {
+          "x": 202.38,
+          "y": 317.36,
+          "pinned": false
+        },
+        "term:shadow of the future": {
+          "x": 683.01,
+          "y": 305.54,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2812.76,
+        "score": 2812.7587115851566
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:02:13.541Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "evolution-of-cooperation",
+      "puzzleRevision": "fnv1a32:cb8dc82e",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 296.93,
+          "y": 245.28,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 753.07,
+          "y": 550.72,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 753.07,
+          "y": 245.28,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 296.93,
+          "y": 550.72,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:tit for tat": {
+          "x": 525,
+          "y": 550.72,
+          "pinned": false
+        },
+        "term:provocability": {
+          "x": 753.07,
+          "y": 398,
+          "pinned": false
+        },
+        "term:shadow of the future": {
+          "x": 296.93,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "prisoner's dilemma",
+          "dominant strategy",
+          "temptation payoff",
+          "sucker's payoff"
+        ],
+        "cluster:1": [
+          "niceness",
+          "forgiveness",
+          "clarity"
+        ],
+        "cluster:2": [
+          "echo effect",
+          "misperception",
+          "known last round",
+          "envy"
+        ],
+        "cluster:3": [
+          "clustering",
+          "evolutionary stability",
+          "territoriality",
+          "live and let live"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 373.35310675987176
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:02:15.917Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "evolution-of-cooperation",
+      "puzzleRevision": "fnv1a32:cb8dc82e",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:prisoner's dilemma": {
+          "x": 475.19,
+          "y": 22
+        },
+        "term:dominant strategy": {
+          "x": 502.34,
+          "y": 184.31
+        },
+        "term:temptation payoff": {
+          "x": 792.78,
+          "y": 22
+        },
+        "term:sucker's payoff": {
+          "x": 867.94,
+          "y": 153.77
+        },
+        "term:niceness": {
+          "x": 584.32,
+          "y": 392.1
+        },
+        "term:forgiveness": {
+          "x": 900.63,
+          "y": 283.72
+        },
+        "term:clarity": {
+          "x": 851.23,
+          "y": 385.57
+        },
+        "term:echo effect": {
+          "x": 587.04,
+          "y": 502.43
+        },
+        "term:misperception": {
+          "x": 670.7,
+          "y": 598
+        },
+        "term:known last round": {
+          "x": 493.89,
+          "y": 598
+        },
+        "term:envy": {
+          "x": 361.1,
+          "y": 598
+        },
+        "term:clustering": {
+          "x": 394.76,
+          "y": 267.65
+        },
+        "term:evolutionary stability": {
+          "x": 116.72,
+          "y": 481.35
+        },
+        "term:territoriality": {
+          "x": 64.1,
+          "y": 296.36
+        },
+        "term:live and let live": {
+          "x": 141.08,
+          "y": 157.53
+        },
+        "term:tit for tat": {
+          "x": 497.6,
+          "y": 324.07
+        },
+        "term:provocability": {
+          "x": 710.28,
+          "y": 469.77
+        },
+        "term:shadow of the future": {
+          "x": 342.45,
+          "y": 131.21
+        },
+        "cluster:0": {
+          "x": 635.91,
+          "y": 82.42
+        },
+        "cluster:1": {
+          "x": 716.38,
+          "y": 279.27
+        },
+        "cluster:2": {
+          "x": 398.43,
+          "y": 452.48
+        },
+        "cluster:3": {
+          "x": 237.75,
+          "y": 318.04
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:02:17.972Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:02:11.457Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

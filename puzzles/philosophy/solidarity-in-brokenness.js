@@ -3,19 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "solidarity-in-brokenness",
   "title": "Solidarity in Brokenness",
   "category": "philosophy",
   "categories": [
     "philosophy",
-    "psychology"
+    "psychology",
+    "critical-theory-cultural-studies"
   ],
   "subcategories": {
     "philosophy": "political-philosophy",
     "psychology": "psychoanalysis"
   },
-  "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
   ],
@@ -273,3 +273,317 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "solidarity-in-brokenness",
+      "puzzleRevision": "fnv1a32:fe41545f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:lacanian real void": {
+          "x": 215.99,
+          "y": 264.1,
+          "pinned": false
+        },
+        "term:structural split": {
+          "x": 346.35,
+          "y": 180.08,
+          "pinned": false
+        },
+        "term:objet petit a": {
+          "x": 87.88,
+          "y": 194.83,
+          "pinned": false
+        },
+        "term:constitutive lack": {
+          "x": 75.55,
+          "y": 336.78,
+          "pinned": false
+        },
+        "term:permanent alienation": {
+          "x": 204.01,
+          "y": 96.85,
+          "pinned": false
+        },
+        "term:radical self-sabotage": {
+          "x": 515.74,
+          "y": 420.54,
+          "pinned": false
+        },
+        "term:ideological refusal": {
+          "x": 670.22,
+          "y": 500.57,
+          "pinned": false
+        },
+        "term:unconscious protest": {
+          "x": 357.82,
+          "y": 347.53,
+          "pinned": false
+        },
+        "term:act of transgression": {
+          "x": 529.34,
+          "y": 597,
+          "pinned": false
+        },
+        "term:refusal of fulfillment": {
+          "x": 364.33,
+          "y": 524.55,
+          "pinned": false
+        },
+        "term:solidarity in brokenness": {
+          "x": 678.65,
+          "y": 215.63,
+          "pinned": false
+        },
+        "term:embracing incompleteness": {
+          "x": 547.35,
+          "y": 65.82,
+          "pinned": false
+        },
+        "term:critique of compulsory harmony": {
+          "x": 828.31,
+          "y": 374.28,
+          "pinned": false
+        },
+        "term:reclaiming alienation": {
+          "x": 864.08,
+          "y": 168.73,
+          "pinned": false
+        },
+        "term:non-totalized community": {
+          "x": 739.97,
+          "y": 29.39,
+          "pinned": false
+        },
+        "term:the ontological void": {
+          "x": 209.45,
+          "y": 432.25,
+          "pinned": false
+        },
+        "term:rejection of remediation": {
+          "x": 829.05,
+          "y": 592.38,
+          "pinned": false
+        },
+        "term:universal alienation": {
+          "x": 494.25,
+          "y": 244.7,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3753.04,
+        "score": 3753.040243789081
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:08:25.473Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "solidarity-in-brokenness",
+      "puzzleRevision": "fnv1a32:fe41545f",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 281.08,
+          "y": 315.59,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 768.92,
+          "y": 315.59,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 562.82,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:the ontological void": {
+          "x": 525,
+          "y": 315.59,
+          "pinned": false
+        },
+        "term:rejection of remediation": {
+          "x": 802.17,
+          "y": 503.5,
+          "pinned": false
+        },
+        "term:universal alienation": {
+          "x": 277.39,
+          "y": 491.25,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "lacanian real void",
+          "structural split",
+          "objet petit a",
+          "constitutive lack",
+          "permanent alienation"
+        ],
+        "cluster:1": [
+          "radical self-sabotage",
+          "ideological refusal",
+          "unconscious protest",
+          "act of transgression",
+          "refusal of fulfillment"
+        ],
+        "cluster:2": [
+          "solidarity in brokenness",
+          "embracing incompleteness",
+          "critique of compulsory harmony",
+          "reclaiming alienation",
+          "non-totalized community"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 459.74690488747325
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:08:27.992Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "solidarity-in-brokenness",
+      "puzzleRevision": "fnv1a32:fe41545f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:lacanian real void": {
+          "x": 76.7,
+          "y": 72.81
+        },
+        "term:structural split": {
+          "x": 660.29,
+          "y": 60.89
+        },
+        "term:objet petit a": {
+          "x": 373.91,
+          "y": 182.94
+        },
+        "term:constitutive lack": {
+          "x": 243.94,
+          "y": 22
+        },
+        "term:permanent alienation": {
+          "x": 226.76,
+          "y": 141.96
+        },
+        "term:radical self-sabotage": {
+          "x": 852.86,
+          "y": 145.16
+        },
+        "term:ideological refusal": {
+          "x": 822.13,
+          "y": 598
+        },
+        "term:unconscious protest": {
+          "x": 782.13,
+          "y": 22
+        },
+        "term:act of transgression": {
+          "x": 877,
+          "y": 299.77
+        },
+        "term:refusal of fulfillment": {
+          "x": 870.7,
+          "y": 483.92
+        },
+        "term:solidarity in brokenness": {
+          "x": 95.6,
+          "y": 237.72
+        },
+        "term:embracing incompleteness": {
+          "x": 500.86,
+          "y": 248.93
+        },
+        "term:critique of compulsory harmony": {
+          "x": 425,
+          "y": 483.26
+        },
+        "term:reclaiming alienation": {
+          "x": 86.15,
+          "y": 598
+        },
+        "term:non-totalized community": {
+          "x": 92.45,
+          "y": 432.32
+        },
+        "term:the ontological void": {
+          "x": 572.28,
+          "y": 22
+        },
+        "term:rejection of remediation": {
+          "x": 478.97,
+          "y": 598
+        },
+        "term:universal alienation": {
+          "x": 598.98,
+          "y": 195.55
+        },
+        "cluster:0": {
+          "x": 473,
+          "y": 127
+        },
+        "cluster:1": {
+          "x": 668.05,
+          "y": 404.12
+        },
+        "cluster:2": {
+          "x": 320.67,
+          "y": 389.9
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:08:30.469Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:08:22.747Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

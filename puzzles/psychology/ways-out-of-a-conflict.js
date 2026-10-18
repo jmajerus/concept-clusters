@@ -3,11 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "ways-out-of-a-conflict",
   "title": "Ways out of a conflict",
   "category": "psychology",
-  "large": true,
+  "categories": [
+    "psychology",
+    "peace-conflict-studies"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "psychology": "social-psychology"
+  },
   "tags": [
     "book"
   ],
@@ -329,3 +336,383 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "ways-out-of-a-conflict",
+      "puzzleRevision": "fnv1a32:b943508c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:blaming": {
+          "x": 765.13,
+          "y": 375.15,
+          "pinned": false
+        },
+        "term:criticizing": {
+          "x": 740.91,
+          "y": 476.98,
+          "pinned": false
+        },
+        "term:projection": {
+          "x": 846.33,
+          "y": 314.17,
+          "pinned": false
+        },
+        "term:self-criticism": {
+          "x": 861.14,
+          "y": 436.88,
+          "pinned": false
+        },
+        "term:giving in": {
+          "x": 501.66,
+          "y": 461.17,
+          "pinned": false
+        },
+        "term:lowering aspirations": {
+          "x": 406.46,
+          "y": 562.91,
+          "pinned": false
+        },
+        "term:denying own preferences": {
+          "x": 592.32,
+          "y": 579.13,
+          "pinned": false
+        },
+        "term:changing the topic": {
+          "x": 289.07,
+          "y": 425.35,
+          "pinned": false
+        },
+        "term:leaving the scene": {
+          "x": 160.82,
+          "y": 518.06,
+          "pinned": false
+        },
+        "term:denial": {
+          "x": 277.38,
+          "y": 548.4,
+          "pinned": false
+        },
+        "term:obsessional thinking": {
+          "x": 136.69,
+          "y": 355.3,
+          "pinned": false
+        },
+        "term:procrastination": {
+          "x": 615.88,
+          "y": 216.55,
+          "pinned": false
+        },
+        "term:passivity": {
+          "x": 591.32,
+          "y": 95.42,
+          "pinned": false
+        },
+        "term:waiting for the other's move": {
+          "x": 755.85,
+          "y": 97.98,
+          "pinned": false
+        },
+        "term:saying what is wanted": {
+          "x": 464.18,
+          "y": 161.52,
+          "pinned": false
+        },
+        "term:receptive listening": {
+          "x": 450.56,
+          "y": 334.97,
+          "pinned": false
+        },
+        "term:symmetry": {
+          "x": 457.35,
+          "y": 23,
+          "pinned": false
+        },
+        "term:summarizing statement": {
+          "x": 321.14,
+          "y": 51.74,
+          "pinned": false
+        },
+        "term:fight-submit": {
+          "x": 749.55,
+          "y": 597,
+          "pinned": false
+        },
+        "term:fight-freeze": {
+          "x": 737.28,
+          "y": 270.99,
+          "pinned": false
+        },
+        "term:contradicting response": {
+          "x": 623.18,
+          "y": 380.93,
+          "pinned": false
+        },
+        "term:asking instead of stating": {
+          "x": 288.83,
+          "y": 241.91,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3739.72,
+        "score": 3739.7212602147797
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:06:05.950Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "ways-out-of-a-conflict",
+      "puzzleRevision": "fnv1a32:b943508c",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 326.6,
+          "y": 219.15,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 723.4,
+          "y": 219.15,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 846.03,
+          "y": 466.32,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 203.97,
+          "y": 466.32,
+          "pinned": false
+        },
+        "cluster:4": {
+          "x": 525,
+          "y": 619.07,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:fight-submit": {
+          "x": 525,
+          "y": 219.15,
+          "pinned": false
+        },
+        "term:fight-freeze": {
+          "x": 169.2,
+          "y": 302.93,
+          "pinned": false
+        },
+        "term:contradicting response": {
+          "x": 436.51,
+          "y": 444.98,
+          "pinned": false
+        },
+        "term:asking instead of stating": {
+          "x": 781.68,
+          "y": 638.86,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "blaming",
+          "criticizing",
+          "projection",
+          "self-criticism"
+        ],
+        "cluster:1": [
+          "giving in",
+          "lowering aspirations",
+          "denying own preferences"
+        ],
+        "cluster:2": [
+          "changing the topic",
+          "leaving the scene",
+          "denial",
+          "obsessional thinking"
+        ],
+        "cluster:3": [
+          "procrastination",
+          "passivity",
+          "waiting for the other's move"
+        ],
+        "cluster:4": [
+          "saying what is wanted",
+          "receptive listening",
+          "symmetry",
+          "summarizing statement"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 631.8396147855095
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:06:08.126Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "ways-out-of-a-conflict",
+      "puzzleRevision": "fnv1a32:b943508c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:blaming": {
+          "x": 373.23,
+          "y": 22
+        },
+        "term:criticizing": {
+          "x": 548.42,
+          "y": 114.79
+        },
+        "term:projection": {
+          "x": 510.76,
+          "y": 22
+        },
+        "term:self-criticism": {
+          "x": 640.18,
+          "y": 22
+        },
+        "term:giving in": {
+          "x": 876.97,
+          "y": 251.68
+        },
+        "term:lowering aspirations": {
+          "x": 877,
+          "y": 394.93
+        },
+        "term:denying own preferences": {
+          "x": 640.74,
+          "y": 243.35
+        },
+        "term:changing the topic": {
+          "x": 712.46,
+          "y": 408.74
+        },
+        "term:leaving the scene": {
+          "x": 801.07,
+          "y": 545.7
+        },
+        "term:denial": {
+          "x": 692.89,
+          "y": 598
+        },
+        "term:obsessional thinking": {
+          "x": 545.94,
+          "y": 598
+        },
+        "term:procrastination": {
+          "x": 274.2,
+          "y": 230.08
+        },
+        "term:passivity": {
+          "x": 120.44,
+          "y": 283.35
+        },
+        "term:waiting for the other's move": {
+          "x": 126.5,
+          "y": 114.97
+        },
+        "term:saying what is wanted": {
+          "x": 374.57,
+          "y": 549.79
+        },
+        "term:receptive listening": {
+          "x": 336.64,
+          "y": 376.2
+        },
+        "term:symmetry": {
+          "x": 241.8,
+          "y": 598
+        },
+        "term:summarizing statement": {
+          "x": 98.58,
+          "y": 595.46
+        },
+        "term:fight-submit": {
+          "x": 737.58,
+          "y": 113.62
+        },
+        "term:fight-freeze": {
+          "x": 303.59,
+          "y": 96.99
+        },
+        "term:contradicting response": {
+          "x": 443.09,
+          "y": 230.25
+        },
+        "term:asking instead of stating": {
+          "x": 524.33,
+          "y": 412.52
+        },
+        "cluster:0": {
+          "x": 436.67,
+          "y": 84.33
+        },
+        "cluster:1": {
+          "x": 781.59,
+          "y": 295.92
+        },
+        "cluster:2": {
+          "x": 654.5,
+          "y": 522.26
+        },
+        "cluster:3": {
+          "x": 209.85,
+          "y": 333.23
+        },
+        "cluster:4": {
+          "x": 217.31,
+          "y": 480.3
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:06:10.410Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:06:03.276Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

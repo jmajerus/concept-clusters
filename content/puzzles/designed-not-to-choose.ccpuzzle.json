@@ -6,6 +6,9 @@
     "psychology",
     "business-organizations"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "tags": [
     "book"
   ],

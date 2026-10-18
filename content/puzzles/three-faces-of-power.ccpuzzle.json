@@ -4,7 +4,8 @@
   "category": "political-science",
   "categories": [
     "political-science",
-    "sociology"
+    "sociology",
+    "critical-theory-cultural-studies"
   ],
   "info": {
     "text": "Steven Lukes' argument that power operates in three progressively less visible ways -- through decisions actually made, through control of which issues ever reach a decision, and through the shaping of what people want in the first place.",
@@ -34,6 +35,14 @@
       "name": "The First Face: Decision-Making",
       "color": "teal",
       "fact": "Robert Dahl's pluralist starting point: study power by watching concrete decisions where people's preferences visibly conflict, then simply ask who prevails. If there is no observable conflict, on this view, there is little reason to think anyone has power at all.",
+      "info": {
+        "text": "The pluralist, behavioral starting point for studying power: watch actual decisions, and infer power from who gets their way when preferences visibly conflict.",
+        "links": [
+          {
+            "href": "wiki:Robert Dahl"
+          }
+        ]
+      },
       "seeds": [
         "decision-making",
         "observable conflict"
@@ -47,21 +56,14 @@
         "observable conflict",
         "who prevails",
         "policy preferences"
-      ],
-      "info": {
-        "text": "The pluralist, behavioral starting point for studying power: watch actual decisions, and infer power from who gets their way when preferences visibly conflict.",
-        "links": [
-          {
-            "href": "wiki:Robert Dahl"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "non-decision-making-power",
       "name": "The Second Face: Non-Decision-Making",
       "color": "brown",
       "fact": "Bachrach and Baratz argued Dahl missed an entire second face: power exercised before any decision is ever made, by controlling which issues even reach the agenda. A community's whole set of institutional norms and procedures -- its mobilization of bias -- can keep a grievance from ever becoming a visible decision at all.",
+      "info": "The second face of power: controlling which grievances ever reach the point of decision, rather than winning once they get there.",
       "seeds": [
         "agenda-setting",
         "non-decision-making"
@@ -73,14 +75,14 @@
         "agenda-setting",
         "non-decision-making",
         "mobilization of bias"
-      ],
-      "info": "The second face of power: controlling which grievances ever reach the point of decision, rather than winning once they get there."
+      ]
     },
     {
       "id": "shaping-wants",
       "name": "The Third Face: Shaping Wants",
       "color": "magenta",
       "fact": "Lukes' own radical addition: the most effective form of power prevents conflict from arising in the first place, by shaping what people believe, want, or think is even possible -- so thoroughly that they may actively consent to arrangements that work against their own real interests, the same ideological mechanism Gramsci had already described.",
+      "info": "Lukes' third and most radical face of power: shaping people's own wants and beliefs so thoroughly that no conflict, latent or otherwise, is left for anyone to notice.",
       "seeds": [
         "shaping preferences",
         "latent conflict"
@@ -92,8 +94,7 @@
         "shaping preferences",
         "latent conflict",
         "real interests"
-      ],
-      "info": "Lukes' third and most radical face of power: shaping people's own wants and beliefs so thoroughly that no conflict, latent or otherwise, is left for anyone to notice."
+      ]
     }
   ],
   "bridges": [
@@ -106,14 +107,14 @@
       ],
       "fact": "The two views share a decision-centered core: both still look for a conflict of interest, whether at the moment of decision itself or earlier, when non-decision-making determines which issues arrive on the agenda at all. Lukes calls this the second view's chief limitation -- it is only a qualified critique of the first, since it still requires a conflict someone could, in principle, observe.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "non-decision-making-power": "non-decision-making",
+        "decision-making-power": "decision-making"
+      },
       "direction": {
         "kind": "through",
         "from": "non-decision-making-power",
         "to": "decision-making-power"
-      },
-      "idealTerms": {
-        "non-decision-making-power": "non-decision-making",
-        "decision-making-power": "decision-making"
       }
     },
     {
@@ -125,14 +126,14 @@
       ],
       "fact": "Lukes' third dimension absorbs and radicalizes the second: mobilization of bias does not just keep issues off the agenda, it can shape people's very perceptions and preferences so effectively that the grievance never becomes a latent conflict in the first place -- the same ideological mechanism Gramsci had already described as manufacturing consent.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "non-decision-making-power": "mobilization of bias",
+        "shaping-wants": "shaping preferences"
+      },
       "direction": {
         "kind": "through",
         "from": "non-decision-making-power",
         "to": "shaping-wants"
-      },
-      "idealTerms": {
-        "non-decision-making-power": "mobilization of bias",
-        "shaping-wants": "shaping preferences"
       }
     },
     {

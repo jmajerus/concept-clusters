@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-civilizing-mission",
   "title": "The Civilizing Mission",
   "category": "political-science",
@@ -11,7 +11,10 @@ export default definePuzzle(import.meta.url, {
     "political-science",
     "philosophy"
   ],
-  "large": true,
+  "subcategories": {
+    "philosophy": "political-philosophy",
+    "political-science": "international-relations"
+  },
   "info": {
     "text": "Liberal thought has long paired a strong doctrine of self-determination with an equally strong exception for peoples judged not yet ready to exercise it -- a hierarchy inherited across Mill's writing, democratic peace theory, formal colonial ideology, and today's humanitarian intervention doctrine.",
     "links": [
@@ -369,3 +372,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-civilizing-mission",
+      "puzzleRevision": "fnv1a32:101aa837",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:barbarians": {
+          "x": 802.16,
+          "y": 172.42,
+          "pinned": false
+        },
+        "term:civilized nations": {
+          "x": 672.01,
+          "y": 200.05,
+          "pinned": false
+        },
+        "term:reciprocity": {
+          "x": 874.57,
+          "y": 84.19,
+          "pinned": false
+        },
+        "term:legitimate despotism": {
+          "x": 733.63,
+          "y": 47.48,
+          "pinned": false
+        },
+        "term:perpetual peace": {
+          "x": 687.8,
+          "y": 460.22,
+          "pinned": false
+        },
+        "term:democratic peace": {
+          "x": 737.71,
+          "y": 597,
+          "pinned": false
+        },
+        "term:monadic peace": {
+          "x": 630.92,
+          "y": 336.49,
+          "pinned": false
+        },
+        "term:dyadic peace": {
+          "x": 818.12,
+          "y": 487.12,
+          "pinned": false
+        },
+        "term:mission civilisatrice": {
+          "x": 305.04,
+          "y": 204.97,
+          "pinned": false
+        },
+        "term:white man's burden": {
+          "x": 299.52,
+          "y": 34.22,
+          "pinned": false
+        },
+        "term:assimilation": {
+          "x": 421.67,
+          "y": 107.58,
+          "pinned": false
+        },
+        "term:Jules Ferry": {
+          "x": 186.24,
+          "y": 115.34,
+          "pinned": false
+        },
+        "term:responsibility to protect": {
+          "x": 180.2,
+          "y": 597,
+          "pinned": false
+        },
+        "term:mass atrocity crimes": {
+          "x": 369.96,
+          "y": 597,
+          "pinned": false
+        },
+        "term:sovereignty as responsibility": {
+          "x": 292.59,
+          "y": 410.09,
+          "pinned": false
+        },
+        "term:third pillar": {
+          "x": 118.78,
+          "y": 444.36,
+          "pinned": false
+        },
+        "term:standard of civilization": {
+          "x": 795.21,
+          "y": 327.35,
+          "pinned": false
+        },
+        "term:sacred trust of civilisation": {
+          "x": 113.38,
+          "y": 269.88,
+          "pinned": false
+        },
+        "term:coercive democratization": {
+          "x": 488.17,
+          "y": 254.65,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3582.19,
+        "score": 3582.187709284929
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:30:10.474Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-civilizing-mission",
+      "puzzleRevision": "fnv1a32:101aa837",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 797.93,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 235.87,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 560.13,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 252.07,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:standard of civilization": {
+          "x": 757.63,
+          "y": 220.77,
+          "pinned": false
+        },
+        "term:sacred trust of civilisation": {
+          "x": 269.74,
+          "y": 597.86,
+          "pinned": false
+        },
+        "term:coercive democratization": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "barbarians",
+          "civilized nations",
+          "reciprocity",
+          "legitimate despotism"
+        ],
+        "cluster:1": [
+          "perpetual peace",
+          "democratic peace",
+          "monadic peace",
+          "dyadic peace"
+        ],
+        "cluster:2": [
+          "mission civilisatrice",
+          "white man's burden",
+          "assimilation",
+          "Jules Ferry"
+        ],
+        "cluster:3": [
+          "responsibility to protect",
+          "mass atrocity crimes",
+          "sovereignty as responsibility",
+          "third pillar"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 390.156878365952
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:30:13.067Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-civilizing-mission",
+      "puzzleRevision": "fnv1a32:101aa837",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:barbarians": {
+          "x": 864.52,
+          "y": 75.39
+        },
+        "term:civilized nations": {
+          "x": 651.45,
+          "y": 385.32
+        },
+        "term:reciprocity": {
+          "x": 905.35,
+          "y": 297.69
+        },
+        "term:legitimate despotism": {
+          "x": 877,
+          "y": 425.13
+        },
+        "term:perpetual peace": {
+          "x": 612.57,
+          "y": 598
+        },
+        "term:democratic peace": {
+          "x": 258.85,
+          "y": 598
+        },
+        "term:monadic peace": {
+          "x": 329.65,
+          "y": 494.18
+        },
+        "term:dyadic peace": {
+          "x": 583.94,
+          "y": 505.13
+        },
+        "term:mission civilisatrice": {
+          "x": 318.07,
+          "y": 22
+        },
+        "term:white man's burden": {
+          "x": 486.09,
+          "y": 22
+        },
+        "term:assimilation": {
+          "x": 574.18,
+          "y": 266.95
+        },
+        "term:Jules Ferry": {
+          "x": 732.31,
+          "y": 22
+        },
+        "term:responsibility to protect": {
+          "x": 98.75,
+          "y": 537.06
+        },
+        "term:mass atrocity crimes": {
+          "x": 83,
+          "y": 345.33
+        },
+        "term:sovereignty as responsibility": {
+          "x": 171.07,
+          "y": 139.88
+        },
+        "term:third pillar": {
+          "x": 57.8,
+          "y": 209.87
+        },
+        "term:standard of civilization": {
+          "x": 777.87,
+          "y": 583.88
+        },
+        "term:sacred trust of civilisation": {
+          "x": 416.72,
+          "y": 180.46
+        },
+        "term:coercive democratization": {
+          "x": 465.91,
+          "y": 391.04
+        },
+        "cluster:0": {
+          "x": 785.79,
+          "y": 237.6
+        },
+        "cluster:1": {
+          "x": 445.41,
+          "y": 598
+        },
+        "cluster:2": {
+          "x": 609.56,
+          "y": 113.05
+        },
+        "cluster:3": {
+          "x": 266.02,
+          "y": 339.84
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:30:15.757Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:30:08.099Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

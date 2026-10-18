@@ -3,15 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "how-couples-get-stuck",
   "title": "How couples get stuck",
   "category": "psychology",
   "categories": [
     "psychology",
-    "sociology"
+    "sociology",
+    "peace-conflict-studies"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "psychology": "social-psychology"
+  },
   "tags": [
     "book"
   ],
@@ -387,3 +391,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "how-couples-get-stuck",
+      "puzzleRevision": "fnv1a32:f98fa2e0",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:conflict-avoiding": {
+          "x": 564.11,
+          "y": 499.71,
+          "pinned": false
+        },
+        "term:validating": {
+          "x": 473.36,
+          "y": 597,
+          "pinned": false
+        },
+        "term:volatile": {
+          "x": 437.36,
+          "y": 498.7,
+          "pinned": false
+        },
+        "term:criticism": {
+          "x": 504.91,
+          "y": 221.38,
+          "pinned": false
+        },
+        "term:defensiveness": {
+          "x": 391.12,
+          "y": 249.88,
+          "pinned": false
+        },
+        "term:contempt": {
+          "x": 586.48,
+          "y": 281.86,
+          "pinned": false
+        },
+        "term:stonewalling": {
+          "x": 435.16,
+          "y": 131.04,
+          "pinned": false
+        },
+        "term:kitchen sinking": {
+          "x": 567.19,
+          "y": 114.61,
+          "pinned": false
+        },
+        "term:gentle start-up": {
+          "x": 256.94,
+          "y": 273.21,
+          "pinned": false
+        },
+        "term:taking responsibility": {
+          "x": 130.48,
+          "y": 373.5,
+          "pinned": false
+        },
+        "term:culture of appreciation": {
+          "x": 307.29,
+          "y": 433.17,
+          "pinned": false
+        },
+        "term:physiological self-soothing": {
+          "x": 268.53,
+          "y": 93.31,
+          "pinned": false
+        },
+        "term:the bagel method": {
+          "x": 126.19,
+          "y": 209.01,
+          "pinned": false
+        },
+        "term:solvable problem": {
+          "x": 682.33,
+          "y": 203.82,
+          "pinned": false
+        },
+        "term:perpetual problem": {
+          "x": 725.81,
+          "y": 349.42,
+          "pinned": false
+        },
+        "term:dreams within conflict": {
+          "x": 847.97,
+          "y": 229.98,
+          "pinned": false
+        },
+        "term:attack-defend mode": {
+          "x": 472.94,
+          "y": 370.37,
+          "pinned": false
+        },
+        "term:flooding": {
+          "x": 410.25,
+          "y": 23,
+          "pinned": false
+        },
+        "term:gridlock": {
+          "x": 602.55,
+          "y": 378.94,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3046.59,
+        "score": 3046.59206709184
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:02:50.514Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "how-couples-get-stuck",
+      "puzzleRevision": "fnv1a32:f98fa2e0",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 817.4,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 577.95,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 218.05,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 232.6,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:attack-defend mode": {
+          "x": 743.26,
+          "y": 517.82,
+          "pinned": false
+        },
+        "term:flooding": {
+          "x": 550.87,
+          "y": 408.72,
+          "pinned": false
+        },
+        "term:gridlock": {
+          "x": 323.65,
+          "y": 543.13,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "conflict-avoiding",
+          "validating",
+          "volatile"
+        ],
+        "cluster:1": [
+          "criticism",
+          "defensiveness",
+          "contempt",
+          "stonewalling",
+          "kitchen sinking"
+        ],
+        "cluster:2": [
+          "gentle start-up",
+          "taking responsibility",
+          "culture of appreciation",
+          "physiological self-soothing",
+          "the bagel method"
+        ],
+        "cluster:3": [
+          "solvable problem",
+          "perpetual problem",
+          "dreams within conflict"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 304.0205801315803
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:02:52.709Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "how-couples-get-stuck",
+      "puzzleRevision": "fnv1a32:f98fa2e0",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:conflict-avoiding": {
+          "x": 153.96,
+          "y": 462.43
+        },
+        "term:validating": {
+          "x": 51.5,
+          "y": 368.32
+        },
+        "term:volatile": {
+          "x": 127.71,
+          "y": 153.75
+        },
+        "term:criticism": {
+          "x": 325.16,
+          "y": 22
+        },
+        "term:defensiveness": {
+          "x": 218.14,
+          "y": 77.96
+        },
+        "term:contempt": {
+          "x": 562.99,
+          "y": 113.49
+        },
+        "term:stonewalling": {
+          "x": 470.43,
+          "y": 182.18
+        },
+        "term:kitchen sinking": {
+          "x": 642.63,
+          "y": 22
+        },
+        "term:gentle start-up": {
+          "x": 767.97,
+          "y": 566.21
+        },
+        "term:taking responsibility": {
+          "x": 606.36,
+          "y": 598
+        },
+        "term:culture of appreciation": {
+          "x": 415.49,
+          "y": 596.57
+        },
+        "term:physiological self-soothing": {
+          "x": 371.01,
+          "y": 371.03
+        },
+        "term:the bagel method": {
+          "x": 240.65,
+          "y": 598
+        },
+        "term:solvable problem": {
+          "x": 835.92,
+          "y": 241.21
+        },
+        "term:perpetual problem": {
+          "x": 701.5,
+          "y": 160.21
+        },
+        "term:dreams within conflict": {
+          "x": 870.7,
+          "y": 434.77
+        },
+        "term:attack-defend mode": {
+          "x": 324.2,
+          "y": 183.12
+        },
+        "term:flooding": {
+          "x": 512.78,
+          "y": 291.8
+        },
+        "term:gridlock": {
+          "x": 579.76,
+          "y": 213.04
+        },
+        "cluster:0": {
+          "x": 181.64,
+          "y": 289.71
+        },
+        "cluster:1": {
+          "x": 457.77,
+          "y": 37.21
+        },
+        "cluster:2": {
+          "x": 519.8,
+          "y": 468.03
+        },
+        "cluster:3": {
+          "x": 671.63,
+          "y": 358.09
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:02:54.720Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:02:48.115Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

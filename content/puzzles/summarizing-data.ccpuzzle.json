@@ -1,0 +1,477 @@
+{
+  "id": "summarizing-data",
+  "title": "Taming a Data Set — Center, Spread, and Shape",
+  "category": "math",
+  "subcategories": {
+    "math": "probability-statistics"
+  },
+  "info": {
+    "text": "A long column of numbers means nothing until it is summarized. This board organizes the summary concepts by the four questions they answer — where the middle sits, how widely values scatter, where one value stands, and what shape the whole traces — and the bridges mark exactly where the answers disagree, which is where the honest story lives.",
+    "links": [
+      {
+        "href": "wiki:Descriptive statistics"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Introductory Statistics, ch. 2: Descriptive Statistics (key terms)",
+        "author": "Barbara Illowsky and Susan Dean",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/introductory-statistics/pages/2-key-terms"
+      },
+      {
+        "title": "Standard score",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Standard_score"
+      },
+      {
+        "title": "Five-number summary",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Five-number_summary"
+      },
+      {
+        "title": "Multimodal distribution",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Multimodal_distribution"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "center",
+      "name": "Measures of center",
+      "color": "teal",
+      "fact": "Center summaries compress a whole data set into one value that stands for 'typical' — and they disagree about which value deserves the job.",
+      "termInfo": {
+        "mean": {
+          "text": "Add every value and divide by how many there are. The only center measure computed from every value, which makes it precise — and easy for one extreme value to drag.",
+          "links": [
+            {
+              "href": "wiki:Average"
+            }
+          ]
+        },
+        "median": {
+          "text": "The midpoint of the sorted list: half the values lie at or below it, half at or above. It may not be an actual data point, and it barely moves when outliers arrive.",
+          "links": [
+            {
+              "href": "wiki:Median"
+            }
+          ]
+        },
+        "mode": {
+          "text": "The value that appears most often. The only center summary that makes sense for categorical data, and the only one that can legitimately have ties.",
+          "links": [
+            {
+              "href": "wiki:Mode (statistics)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Average"
+          }
+        ]
+      },
+      "seeds": [
+        "mean",
+        "median"
+      ],
+      "floatingTerms": [
+        "mode"
+      ],
+      "terms": [
+        "mean",
+        "median",
+        "mode"
+      ]
+    },
+    {
+      "id": "spread",
+      "name": "Measures of spread",
+      "color": "blue",
+      "fact": "Spread summaries say how far apart the values stray — two data sets can share a center and still scatter completely differently.",
+      "termInfo": {
+        "interquartile range": {
+          "text": "Third quartile minus first: the width of the middle 50% of the data. The resistant partner of the median.",
+          "links": [
+            {
+              "href": "wiki:Interquartile range"
+            }
+          ]
+        },
+        "range": {
+          "text": "Largest value minus smallest. One number for spread, bought with total sensitivity to the two most extreme observations.",
+          "links": [
+            {
+              "href": "wiki:Range (statistics)"
+            }
+          ]
+        },
+        "standard deviation": {
+          "text": "The square root of the variance: roughly, the typical distance of values from the mean. Computed from every value, so outliers inflate it.",
+          "links": [
+            {
+              "href": "wiki:Standard deviation"
+            }
+          ]
+        },
+        "variance": {
+          "text": "The mean of squared deviations from the mean. It lives in squared units — which is why its square root, the standard deviation, is the number usually reported.",
+          "links": [
+            {
+              "href": "wiki:Variance"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Statistical dispersion"
+          }
+        ]
+      },
+      "seeds": [
+        "range",
+        "standard deviation"
+      ],
+      "floatingTerms": [
+        "variance",
+        "interquartile range"
+      ],
+      "terms": [
+        "range",
+        "standard deviation",
+        "variance",
+        "interquartile range"
+      ]
+    },
+    {
+      "id": "position",
+      "name": "Measures of position",
+      "color": "amber",
+      "fact": "Position summaries locate one individual value inside the distribution — not where the middle is, but where this value stands among the rest.",
+      "termInfo": {
+        "five-number summary": {
+          "text": "Minimum, first quartile, median, third quartile, maximum — the whole order-based story in five numbers, and the content of a box plot.",
+          "links": [
+            {
+              "href": "wiki:Five-number summary"
+            }
+          ]
+        },
+        "percentile": {
+          "text": "A number that divides ordered data into hundredths; scoring in the 86th percentile means 86% of the values lie below yours.",
+          "links": [
+            {
+              "href": "wiki:Percentile"
+            }
+          ]
+        },
+        "quartile": {
+          "text": "One of the three cut points that divide sorted data into quarters; the second quartile is the median itself.",
+          "links": [
+            {
+              "href": "wiki:Quartile"
+            }
+          ]
+        },
+        "z-score": {
+          "text": "How many standard deviations a value sits above (positive) or below (negative) the mean: z = (x − μ)/σ. Unit-free, so it compares values across different scales.",
+          "links": [
+            {
+              "href": "wiki:Standard score"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Order statistic"
+          }
+        ]
+      },
+      "seeds": [
+        "percentile",
+        "quartile"
+      ],
+      "floatingTerms": [
+        "z-score",
+        "five-number summary"
+      ],
+      "terms": [
+        "percentile",
+        "quartile",
+        "z-score",
+        "five-number summary"
+      ]
+    },
+    {
+      "id": "shape",
+      "name": "Shape and anomalies",
+      "color": "magenta",
+      "fact": "Shape summaries describe the silhouette the values trace together — symmetric, skewed, or many-peaked — and flag the values that refuse to fit it.",
+      "termInfo": {
+        "bimodality": {
+          "text": "Two peaks in the silhouette, often signaling two subpopulations in one data set; the mean and median can fall in the valley between, where no value is typical.",
+          "links": [
+            {
+              "href": "wiki:Multimodal distribution"
+            }
+          ]
+        },
+        "left skew": {
+          "text": "A long left tail of small values; the mean lands below the median — the mirror image of right skew.",
+          "links": [
+            {
+              "href": "wiki:Skewness"
+            }
+          ]
+        },
+        "outlier": {
+          "text": "An observation that does not fit the rest of the data; by the common rule, a point more than 1.5 interquartile ranges beyond the quartiles.",
+          "links": [
+            {
+              "href": "wiki:Outlier"
+            }
+          ]
+        },
+        "right skew": {
+          "text": "A long right tail of large values; the tail drags the mean above the median. The classic income-distribution shape.",
+          "links": [
+            {
+              "href": "wiki:Skewness"
+            }
+          ]
+        },
+        "symmetry": {
+          "text": "The silhouette mirrors around its center, and the three center measures agree — the baseline against which skew is defined (zero skewness).",
+          "links": [
+            {
+              "href": "wiki:Skewness"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Skewness"
+          }
+        ]
+      },
+      "seeds": [
+        "outlier",
+        "symmetry"
+      ],
+      "floatingTerms": [
+        "right skew",
+        "left skew",
+        "bimodality"
+      ],
+      "terms": [
+        "outlier",
+        "symmetry",
+        "right skew",
+        "left skew",
+        "bimodality"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "resistance",
+      "term": "resistance",
+      "clusters": [
+        "center",
+        "spread"
+      ],
+      "fact": "Resistant summaries depend only on order — an outlier barely moves the median or the interquartile range — while the mean and standard deviation are computed from every value, so one extreme point drags them both.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Robust statistics"
+          }
+        ]
+      }
+    },
+    {
+      "id": "order-statistics",
+      "term": "order statistics",
+      "clusters": [
+        "position",
+        "center"
+      ],
+      "fact": "Sort the data and the position summaries appear on their own: the median is the middle order statistic, quartiles are the quarter marks, and the five-number summary is five of them read in a row.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Order statistic"
+          }
+        ]
+      },
+      "relationKind": "foundation"
+    },
+    {
+      "id": "standardization",
+      "term": "standardization",
+      "clusters": [
+        "position",
+        "spread"
+      ],
+      "fact": "A z-score states a value's position in units of spread — distance from the mean divided by the standard deviation — which is what lets an SAT score and an ACT score compete on one scale.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Standard score"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tail",
+      "term": "tail",
+      "clusters": [
+        "shape",
+        "center"
+      ],
+      "fact": "The long tail pulls: skew a distribution right and the mean chases the tail until it lands above the median; skew left and the ordering reverses — which is why shape tells you which center to trust.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Skewness"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "shape",
+        "to": "center"
+      }
+    },
+    {
+      "id": "box-plot",
+      "term": "box plot",
+      "clusters": [
+        "position",
+        "spread",
+        "shape"
+      ],
+      "fact": "One box plot answers three questions at once: the five-number summary draws position, the box's width shows the interquartile range, and points beyond the 1.5×IQR fences are plotted as outliers, with lopsided whiskers revealing skew.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Box plot"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "position": "five-number summary",
+        "spread": "interquartile range",
+        "shape": "outlier"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "billionaire-mean",
+      "prompt": "One billionaire joins nine ordinary earners on the block. Which center measure jumps upward, telling a misleading story about the typical income?",
+      "explanation": "The mean is computed from every value, so one extreme income drags it upward; the median depends only on order and barely moves, and the mode sits with the most common incomes — which is why income reports quote medians.",
+      "targets": [
+        "mean"
+      ],
+      "reasons": {
+        "mean": "computed from every value, so an extreme income pulls it up"
+      }
+    },
+    {
+      "id": "middle-fifty",
+      "prompt": "You want to describe just the middle 50% of the incomes, with both extremes ignored entirely. Which two terms carry that description?",
+      "explanation": "Quartiles mark where the middle half begins and ends; the distance between them is the interquartile range. The range uses the extremes outright, and the variance and standard deviation fold in every value — none of them can ignore the tails the way the middle 50% can. Even the five-number summary fails here: it reports the minimum and maximum.",
+      "targets": [
+        "quartile",
+        "interquartile range"
+      ],
+      "reasons": {
+        "interquartile range": "Q3 − Q1 measures the spread of exactly that middle half",
+        "quartile": "Q1 and Q3 are the boundaries of the middle 50%"
+      }
+    },
+    {
+      "id": "sat-act-z",
+      "prompt": "An SAT score of 1800 (mean 1500, SD 300) and an ACT score of 24 (mean 21, SD 5): which term puts them on one scale for a fair comparison?",
+      "explanation": "A z-score divides the distance from the mean by the standard deviation, converting each score to 'standard deviations above average' — the SAT score is z = 1.0, the ACT score z = 0.6, so the SAT performance is stronger.",
+      "targets": [
+        "z-score"
+      ],
+      "reasons": {
+        "z-score": "position stated in spread units is exactly what makes different scales comparable"
+      }
+    },
+    {
+      "id": "skew-mirrors",
+      "prompt": "Which two terms describe mirror-image silhouettes — in one the mean lands above the median, in the other below it?",
+      "explanation": "A long right tail pulls the mean above the median; a long left tail pulls it below. Symmetry is the no-tail case — there the two coincide — and bimodality is about the number of peaks, not their stretch.",
+      "targets": [
+        "right skew",
+        "left skew"
+      ],
+      "reasons": {
+        "left skew": "long left tail drags the mean below the median",
+        "right skew": "long right tail drags the mean above the median"
+      }
+    },
+    {
+      "id": "outlier-shakeup",
+      "prompt": "A single impossible-looking value lands in your data set. Which three summaries get dragged away from where they were?",
+      "explanation": "Mean, standard deviation, and variance are all computed from every value — one extreme point contaminates all three. The order-based pair, the median and the interquartile range, shrugs it off.",
+      "targets": [
+        "mean",
+        "standard deviation",
+        "variance"
+      ],
+      "reasons": {
+        "mean": "uses every value, so the outlier pulls it",
+        "standard deviation": "every deviation from the mean is squared into it",
+        "variance": "the squared-deviation average itself, contaminated by the outlier's huge deviation"
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "rules-of-chance",
+        "reason": "Next in the statistics arc: the probability rules that model the chance underneath any data set."
+      },
+      {
+        "id": "from-sample-to-population",
+        "reason": "The arc's finale: how a sample earns the right to speak for a population."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Reading a Data Set",
+    "summary": "Four questions turn a column of numbers into an honest story: where is the middle, how wide is the scatter, where does one value stand, and what shape does the whole trace.",
+    "estimatedMinutes": 7,
+    "content": {
+      "text": "A data set is just a column of numbers until you summarize it. This lesson is about the four questions every summary answers — where is the middle, how spread out are the values, where does one particular value stand, and what does the overall shape look like — and about why the answers sometimes disagree, because the disagreements are where the story lives.\r\n\r\n## Where is the middle?\r\n\r\nThe mean is the familiar average: add every value, divide by how many there are. The median is the midpoint of the sorted list — half the values sit at or below it, half at or above. The mode is the most frequent value. They usually land close together, but not always, and the disagreements are informative: the mean is the only one that lets a single extreme value drag it around, while the median depends only on where values fall in the ordering. That difference is called resistance, and it is why reports about income and housing prices usually quote medians.\r\n\r\n## How spread out are the values?\r\n\r\nTwo neighborhoods can share a median income and still be utterly different places. Spread summaries say how far apart the values stray. The range is the distance from the smallest value to the largest — simple, but it listens only to the two most extreme points. The interquartile range does the opposite: after the quartiles cut the ordered data into quarters, the interquartile range measures the width of the middle 50%, ignoring the extremes entirely. The variance and standard deviation take the middle road: they use every value's distance from the mean. Variance averages the squared distances; the standard deviation is its square root, which puts the answer back in the original units.\r\n\r\nNotice the pairing: the median and the interquartile range are computed from order alone, so an outlier barely moves them, while the mean and standard deviation are computed from every value, so one wild point contaminates both. When you report a center, report the spread that shares its philosophy.\r\n\r\n## Where does one value stand?\r\n\r\nPosition summaries locate an individual inside the distribution. Quartiles and percentiles are cut points: the first quartile is the 25th percentile, and a quarter of the data lies below it. A z-score states a value's position in units of spread — subtract the mean, divide by the standard deviation — and the result says how many standard deviations above or below average the value sits. That single move makes different scales comparable, which is how an SAT score and an ACT score can compete for the same admission slot. The five-number summary — minimum, first quartile, median, third quartile, maximum — packs the whole order-based story into five numbers.\r\n\r\n## What shape is the distribution?\r\n\r\nPlot the values and the silhouette tells you what the summaries are hiding. A symmetric distribution mirrors around its center, and there the mean, median, and mode agree. A distribution with a long right tail is right-skewed, and the tail drags the mean above the median; left skew reverses the ordering. When the silhouette has two peaks — bimodality — the data may really be two populations in one column, and the mean and median can land in the valley between the peaks, where nobody actually lives. And any value that refuses to fit the pattern is an outlier, detectable as a point more than 1.5 interquartile ranges beyond the quartiles.\r\n\r\nThe box plot draws all of this at once: the five numbers shape the box and whiskers, the box's width is the interquartile range, points past the fences are drawn as individual outliers, and lopsided whiskers are the signature of skew. One picture, four questions answered — which is why it is usually the first graph drawn after the data arrives."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

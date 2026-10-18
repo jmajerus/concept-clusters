@@ -4,12 +4,14 @@
   "category": "psychology",
   "categories": [
     "psychology",
-    "computer-science"
+    "computer-science",
+    "science-technology-society"
   ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "psychology": "social-psychology",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How recognizing that a digital choice was engineered can transform an unwanted outcome into regret, self-blame, perceived betrayal, and lasting defensive behavior. Research on fraud victimization is used cautiously to illuminate deception-related aftermath, not to equate every dark pattern with fraud.",
     "links": [

@@ -4,9 +4,11 @@
   "category": "psychology",
   "categories": [
     "psychology",
-    "bioethics"
+    "bioethics",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
   "tags": [

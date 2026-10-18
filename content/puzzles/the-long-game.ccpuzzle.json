@@ -1,12 +1,16 @@
 {
   "id": "the-long-game",
   "title": "The Long Game",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "tags": [
     "activism",
     "peacebuilding",
@@ -26,20 +30,6 @@
       "name": "Continuous Mediation",
       "color": "blue",
       "fact": "In April 1915, at the height of World War I, over a thousand women from warring and neutral nations gathered at The Hague, building on the Woman's Peace Party Jane Addams had founded in Washington weeks earlier, and adopted a platform calling for continuous mediation by neutral nations as an alternative to war. The organization renamed itself the Women's International League for Peace and Freedom in 1919, and in 2000 helped secure the landmark UN resolution on Women, Peace and Security.",
-      "seeds": [
-        "the Hague Congress",
-        "Jane Addams"
-      ],
-      "floatingTerms": [
-        "the Woman's Peace Party",
-        "Women, Peace and Security"
-      ],
-      "terms": [
-        "the Hague Congress",
-        "Jane Addams",
-        "the Woman's Peace Party",
-        "Women, Peace and Security"
-      ],
       "termInfo": {
         "Jane Addams": {
           "text": "Settlement-house founder and suffragist who organized the Woman's Peace Party in 1915 and later became WILPF's first international president, winning the Nobel Peace Prize in 1931.",
@@ -81,27 +71,27 @@
             "href": "wiki:Women's International League for Peace and Freedom"
           }
         ]
-      }
+      },
+      "seeds": [
+        "the Hague Congress",
+        "Jane Addams"
+      ],
+      "floatingTerms": [
+        "the Woman's Peace Party",
+        "Women, Peace and Security"
+      ],
+      "terms": [
+        "the Hague Congress",
+        "Jane Addams",
+        "the Woman's Peace Party",
+        "Women, Peace and Security"
+      ]
     },
     {
       "id": "moving-the-vote",
       "name": "Moving the Vote",
       "color": "amber",
       "fact": "Peace Action descends from two Cold War-era organizations that merged in 1987: SANE, founded in 1957 to oppose nuclear testing, and the Nuclear Freeze campaign, whose 1980s call to 'freeze and reverse the arms race' won endorsements from over 370 city councils and 23 state legislatures before either organization ever won a vote in Congress. The merged group, renamed Peace Action in 1993, now pursues the same insider-legitimate channels at larger scale, including an annual Congressional Voter Guide scoring every member of Congress on peace and disarmament votes.",
-      "seeds": [
-        "the Nuclear Freeze campaign",
-        "the Congressional Voter Guide"
-      ],
-      "floatingTerms": [
-        "SANE",
-        "ballot-initiative organizing"
-      ],
-      "terms": [
-        "the Nuclear Freeze campaign",
-        "the Congressional Voter Guide",
-        "SANE",
-        "ballot-initiative organizing"
-      ],
       "termInfo": {
         "SANE": {
           "text": "The Committee for a SANE Nuclear Policy, founded in 1957 to oppose atmospheric nuclear testing -- one of the two Cold War organizations, alongside the Nuclear Freeze campaign, that merged to form Peace Action.",
@@ -143,27 +133,27 @@
             "href": "https://www.peaceaction.org/about/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "the Nuclear Freeze campaign",
+        "the Congressional Voter Guide"
+      ],
+      "floatingTerms": [
+        "SANE",
+        "ballot-initiative organizing"
+      ],
+      "terms": [
+        "the Nuclear Freeze campaign",
+        "the Congressional Voter Guide",
+        "SANE",
+        "ballot-initiative organizing"
+      ]
     },
     {
       "id": "speak-truth-to-power",
       "name": "Speak Truth to Power",
       "color": "brown",
       "fact": "Founded by Philadelphia Quakers in 1917 to give conscientious objectors an alternative to military service, AFSC's WWI and WWII relief work -- including feeding a million starving children in Germany and Austria in 1919 -- won it and its British counterpart the 1947 Nobel Peace Prize. In 1955 it published Speak Truth to Power, co-authored by Bayard Rustin, and in 1963 issued Martin Luther King Jr.'s Letter from Birmingham Jail as a standalone pamphlet.",
-      "seeds": [
-        "Speak Truth to Power",
-        "conscientious objector"
-      ],
-      "floatingTerms": [
-        "the 1947 Nobel Peace Prize",
-        "Letter from Birmingham Jail"
-      ],
-      "terms": [
-        "Speak Truth to Power",
-        "conscientious objector",
-        "the 1947 Nobel Peace Prize",
-        "Letter from Birmingham Jail"
-      ],
       "termInfo": {
         "Letter from Birmingham Jail": {
           "text": "Martin Luther King Jr.'s 1963 defense of nonviolent direct action against clergy who called it untimely -- AFSC published the first standalone pamphlet edition.",
@@ -205,27 +195,27 @@
             "href": "wiki:American Friends Service Committee"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Speak Truth to Power",
+        "conscientious objector"
+      ],
+      "floatingTerms": [
+        "the 1947 Nobel Peace Prize",
+        "Letter from Birmingham Jail"
+      ],
+      "terms": [
+        "Speak Truth to Power",
+        "conscientious objector",
+        "the 1947 Nobel Peace Prize",
+        "Letter from Birmingham Jail"
+      ]
     },
     {
       "id": "presence-as-protection",
       "name": "Presence as Protection",
       "color": "cyan",
       "fact": "Nonviolent Peaceforce, founded in 2002 after cofounder Mel Duncan pitched the idea to 9,000 fellow activists at a 1999 peace conference in the Hague, deploys unarmed, paid Protection Officers directly into active conflict zones -- South Sudan, Myanmar, Ukraine, Syria -- on the premise that a trained, nonpartisan presence can deter violence and protect civilians without carrying a weapon.",
-      "seeds": [
-        "Unarmed Civilian Protection",
-        "protective presence"
-      ],
-      "floatingTerms": [
-        "Early Warning Early Response",
-        "civilian-to-civilian action"
-      ],
-      "terms": [
-        "Unarmed Civilian Protection",
-        "protective presence",
-        "Early Warning Early Response",
-        "civilian-to-civilian action"
-      ],
       "termInfo": {
         "Early Warning Early Response": {
           "text": "A community-based monitoring system in which local volunteers flag emerging threats so Protection Officers and communities can act before violence occurs, rather than only responding after it.",
@@ -267,7 +257,21 @@
             "href": "https://nonviolentpeaceforce.org/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Unarmed Civilian Protection",
+        "protective presence"
+      ],
+      "floatingTerms": [
+        "Early Warning Early Response",
+        "civilian-to-civilian action"
+      ],
+      "terms": [
+        "Unarmed Civilian Protection",
+        "protective presence",
+        "Early Warning Early Response",
+        "civilian-to-civilian action"
+      ]
     }
   ],
   "bridges": [

@@ -1,27 +1,32 @@
 {
   "id": "the-military-industrial-complex",
   "title": "The Military-Industrial Complex",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "political-science": "public-policy"
+  },
   "tags": [
     "speech",
     "war"
   ],
   "info": {
     "text": "Dwight Eisenhower's warning that a permanent alliance between the armed forces and the arms industry -- and a parallel one between government funding and scientific research -- could quietly acquire more influence over American life than any citizen ever voted for.",
+    "links": [
+      {
+        "href": "wiki:Dwight D. Eisenhower's farewell address"
+      }
+    ],
     "citations": [
       {
         "title": "Farewell Address to the Nation",
         "author": "Eisenhower, Dwight D.",
         "year": "1961"
-      }
-    ],
-    "links": [
-      {
-        "href": "wiki:Dwight D. Eisenhower's farewell address"
       }
     ]
   },
@@ -31,6 +36,14 @@
       "name": "An Industry New to America",
       "color": "olive",
       "fact": "Eisenhower opens by noting something historically new: before this era, the United States kept no permanent armaments industry, relying instead on wartime improvisation -- converting civilian 'makers of plowshares' into makers of swords as needed -- but the Cold War, he argues, no longer permits that improvisation, so a standing arms industry and a new scale of defense spending have become permanent fixtures of American life.",
+      "info": {
+        "text": "Eisenhower's premise: for most of American history the country had no standing arms industry, but the Cold War made a permanent one seem unavoidable.",
+        "links": [
+          {
+            "href": "wiki:Arms industry"
+          }
+        ]
+      },
       "seeds": [
         "permanent armaments industry",
         "wartime improvisation"
@@ -42,35 +55,13 @@
         "permanent armaments industry",
         "wartime improvisation",
         "defense spending"
-      ],
-      "info": {
-        "text": "Eisenhower's premise: for most of American history the country had no standing arms industry, but the Cold War made a permanent one seem unavoidable.",
-        "links": [
-          {
-            "href": "wiki:Arms industry"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "military-industrial-complex",
       "name": "The Military-Industrial Complex",
       "color": "magenta",
       "fact": "Eisenhower names the conjunction of an immense military establishment and a large arms industry the military-industrial complex, warns that government must guard against its unwarranted influence, and describes its total influence -- economic, political, even spiritual -- as already felt in every city, every statehouse, and every federal office; the potential for a disastrous rise of misplaced power, he says, exists and will persist.",
-      "seeds": [
-        "military-industrial complex",
-        "unwarranted influence"
-      ],
-      "floatingTerms": [
-        "misplaced power",
-        "total influence"
-      ],
-      "terms": [
-        "military-industrial complex",
-        "unwarranted influence",
-        "misplaced power",
-        "total influence"
-      ],
       "termInfo": {
         "military-industrial complex": {
           "text": "Eisenhower's own term for the conjunction of an immense military establishment and a large, permanent arms industry -- and the specific danger of unchecked influence that conjunction creates.",
@@ -88,25 +79,27 @@
             "href": "wiki:Military–industrial complex"
           }
         ]
-      }
+      },
+      "seeds": [
+        "military-industrial complex",
+        "unwarranted influence"
+      ],
+      "floatingTerms": [
+        "misplaced power",
+        "total influence"
+      ],
+      "terms": [
+        "military-industrial complex",
+        "unwarranted influence",
+        "misplaced power",
+        "total influence"
+      ]
     },
     {
       "id": "the-scientific-technological-elite",
       "name": "The Scientific-Technological Elite",
       "color": "teal",
       "fact": "Eisenhower pairs his famous warning about arms and industry with a second, less-quoted one: as research grows costlier and increasingly funded by the federal government, the solitary inventor tinkering alone gives way to organized task forces of scientists, a government contract risks substituting for a researcher's own intellectual curiosity, and public policy itself risks becoming captive to a scientific-technological elite.",
-      "seeds": [
-        "scientific-technological elite",
-        "federal research funding"
-      ],
-      "floatingTerms": [
-        "solitary inventor"
-      ],
-      "terms": [
-        "scientific-technological elite",
-        "federal research funding",
-        "solitary inventor"
-      ],
       "termInfo": {
         "scientific-technological elite": {
           "text": "Eisenhower's own phrase for a class of scientists and technical experts whose influence over government research funding could let them capture public policy, much as arms manufacturers might capture defense policy.",
@@ -119,25 +112,25 @@
       },
       "info": {
         "text": "Eisenhower's second, less-quoted warning: that as scientific research becomes centralized and government-funded, public policy risks capture by a new kind of elite, just as surely as it risks capture by arms manufacturers."
-      }
+      },
+      "seeds": [
+        "scientific-technological elite",
+        "federal research funding"
+      ],
+      "floatingTerms": [
+        "solitary inventor"
+      ],
+      "terms": [
+        "scientific-technological elite",
+        "federal research funding",
+        "solitary inventor"
+      ]
     },
     {
       "id": "balance-and-the-citizens-check",
       "name": "Balance and the Citizen's Check",
       "color": "brown",
       "fact": "Eisenhower's remedy for both dangers is the same: balance -- between the private and public economy, the necessary and the merely desirable, the present moment and the future -- upheld by an alert and knowledgeable citizenry, since mortgaging the future to serve the present risks the next generation's political and spiritual inheritance along with its material one.",
-      "seeds": [
-        "alert and knowledgeable citizenry",
-        "balance"
-      ],
-      "floatingTerms": [
-        "mortgaging the future"
-      ],
-      "terms": [
-        "alert and knowledgeable citizenry",
-        "balance",
-        "mortgaging the future"
-      ],
       "termInfo": {
         "mortgaging the future": {
           "text": "Spending or risking the next generation's resources and freedoms to solve today's problems -- Eisenhower's warning that balance must hold across time, not just among competing programs.",
@@ -150,7 +143,19 @@
       },
       "info": {
         "text": "Eisenhower's proposed safeguard against both dangers: a citizenry alert enough to demand balance, including balance across time."
-      }
+      },
+      "seeds": [
+        "alert and knowledgeable citizenry",
+        "balance"
+      ],
+      "floatingTerms": [
+        "mortgaging the future"
+      ],
+      "terms": [
+        "alert and knowledgeable citizenry",
+        "balance",
+        "mortgaging the future"
+      ]
     }
   ],
   "bridges": [
@@ -190,14 +195,14 @@
       ],
       "fact": "Eisenhower's proposed check on the military-industrial complex is civic rather than institutional: only an alert and knowledgeable citizenry, he argues, can compel the proper meshing of the huge industrial and military machinery of defense with the nation's peaceful methods and goals.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "balance-and-the-citizens-check": "alert and knowledgeable citizenry",
+        "military-industrial-complex": "unwarranted influence"
+      },
       "direction": {
         "kind": "through",
         "from": "balance-and-the-citizens-check",
         "to": "military-industrial-complex"
-      },
-      "idealTerms": {
-        "balance-and-the-citizens-check": "alert and knowledgeable citizenry",
-        "military-industrial-complex": "unwarranted influence"
       }
     }
   ],

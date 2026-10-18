@@ -3,18 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-capacity-to-harm",
   "title": "The Capacity to Harm",
   "category": "psychology",
   "categories": [
     "psychology",
-    "history-society"
+    "history-society",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
-  "large": true,
   "tags": [
     "war",
     "genocide"
@@ -466,10 +467,421 @@ export default definePuzzle(import.meta.url, {
       {
         "name": "Claude (Sonnet 4.6)",
         "model": "Claude Sonnet 4.6"
-      },
-      {
-        "name": "Claude Code"
       }
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-capacity-to-harm",
+      "puzzleRevision": "fnv1a32:277a7357",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:operant conditioning": {
+          "x": 293.35,
+          "y": 453.2,
+          "pinned": false
+        },
+        "term:desensitization": {
+          "x": 398.77,
+          "y": 572.31,
+          "pinned": false
+        },
+        "term:authorization": {
+          "x": 445,
+          "y": 442.42,
+          "pinned": false
+        },
+        "term:target discrimination": {
+          "x": 88.15,
+          "y": 483.8,
+          "pinned": false
+        },
+        "term:mechanical distance": {
+          "x": 212.81,
+          "y": 597,
+          "pinned": false
+        },
+        "term:the option to refuse": {
+          "x": 717.86,
+          "y": 349.56,
+          "pinned": false
+        },
+        "term:eroding resistance": {
+          "x": 700.75,
+          "y": 182.76,
+          "pinned": false
+        },
+        "term:conformity to the group": {
+          "x": 865.55,
+          "y": 242.87,
+          "pinned": false
+        },
+        "term:incremental participation": {
+          "x": 774.97,
+          "y": 597,
+          "pinned": false
+        },
+        "term:escalating commitment": {
+          "x": 871.85,
+          "y": 432.46,
+          "pinned": false
+        },
+        "term:the minority who refused": {
+          "x": 600.76,
+          "y": 494.97,
+          "pinned": false
+        },
+        "term:war as a drug": {
+          "x": 567.94,
+          "y": 123.84,
+          "pinned": false
+        },
+        "term:the plague of nationalism": {
+          "x": 538.64,
+          "y": 288.62,
+          "pinned": false
+        },
+        "term:the myth of war": {
+          "x": 658.24,
+          "y": 23,
+          "pinned": false
+        },
+        "term:mythmakers": {
+          "x": 776.32,
+          "y": 68.29,
+          "pinned": false
+        },
+        "term:escape from meaninglessness": {
+          "x": 428.63,
+          "y": 23,
+          "pinned": false
+        },
+        "term:moral justification": {
+          "x": 210.63,
+          "y": 233.83,
+          "pinned": false
+        },
+        "term:dehumanization": {
+          "x": 72.14,
+          "y": 171.33,
+          "pinned": false
+        },
+        "term:euphemistic labeling": {
+          "x": 235.6,
+          "y": 64.91,
+          "pinned": false
+        },
+        "term:obedience defense": {
+          "x": 367.28,
+          "y": 195.38,
+          "pinned": false
+        },
+        "term:divided agency": {
+          "x": 83.28,
+          "y": 35.64,
+          "pinned": false
+        },
+        "term:cultural distance": {
+          "x": 75.55,
+          "y": 316.86,
+          "pinned": false
+        },
+        "term:othering": {
+          "x": 189.52,
+          "y": 365.24,
+          "pinned": false
+        },
+        "term:exhilaration": {
+          "x": 380.36,
+          "y": 334.11,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4561.76,
+        "score": 4561.75957607831
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": false,
+      "source": "author",
+      "savedAt": "2026-10-16T03:23:37.341Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-capacity-to-harm",
+      "puzzleRevision": "fnv1a32:277a7357",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 156.14,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 207.35,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 479.86,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 752.65,
+          "y": 318,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:othering": {
+          "x": 656.12,
+          "y": 140.99,
+          "pinned": false
+        },
+        "term:exhilaration": {
+          "x": 480,
+          "y": 318,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "operant conditioning",
+          "desensitization",
+          "authorization",
+          "target discrimination",
+          "mechanical distance"
+        ],
+        "cluster:1": [
+          "the option to refuse",
+          "eroding resistance",
+          "conformity to the group",
+          "incremental participation",
+          "escalating commitment",
+          "the minority who refused"
+        ],
+        "cluster:2": [
+          "war as a drug",
+          "the plague of nationalism",
+          "the myth of war",
+          "mythmakers",
+          "escape from meaninglessness"
+        ],
+        "cluster:3": [
+          "moral justification",
+          "dehumanization",
+          "euphemistic labeling",
+          "obedience defense",
+          "divided agency",
+          "cultural distance"
+        ]
+      },
+      "memberOrders": {
+        "cluster:0": [
+          "authorization",
+          "mechanical distance",
+          "target discrimination",
+          "operant conditioning",
+          "desensitization"
+        ],
+        "cluster:1": [
+          "the option to refuse",
+          "conformity to the group",
+          "incremental participation",
+          "the minority who refused",
+          "escalating commitment",
+          "eroding resistance"
+        ],
+        "cluster:2": [
+          "mythmakers",
+          "the myth of war",
+          "escape from meaninglessness",
+          "the plague of nationalism",
+          "war as a drug"
+        ],
+        "cluster:3": [
+          "dehumanization",
+          "cultural distance",
+          "euphemistic labeling",
+          "moral justification",
+          "obedience defense",
+          "divided agency"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 174.99130376179784
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-16T03:23:27.823Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-capacity-to-harm",
+      "puzzleRevision": "fnv1a32:277a7357",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:operant conditioning": {
+          "x": 87.15,
+          "y": 110.47
+        },
+        "term:desensitization": {
+          "x": 203.55,
+          "y": 204.66
+        },
+        "term:authorization": {
+          "x": 487.56,
+          "y": 99.68
+        },
+        "term:target discrimination": {
+          "x": 185.92,
+          "y": 22
+        },
+        "term:mechanical distance": {
+          "x": 482.03,
+          "y": 22
+        },
+        "term:the option to refuse": {
+          "x": 671.62,
+          "y": 50.06
+        },
+        "term:eroding resistance": {
+          "x": 600.07,
+          "y": 200.4
+        },
+        "term:conformity to the group": {
+          "x": 853.52,
+          "y": 354.09
+        },
+        "term:incremental participation": {
+          "x": 687.02,
+          "y": 307.23
+        },
+        "term:escalating commitment": {
+          "x": 873.85,
+          "y": 216.93
+        },
+        "term:the minority who refused": {
+          "x": 864.4,
+          "y": 22
+        },
+        "term:war as a drug": {
+          "x": 827.76,
+          "y": 533.08
+        },
+        "term:the plague of nationalism": {
+          "x": 467.67,
+          "y": 598
+        },
+        "term:the myth of war": {
+          "x": 448.23,
+          "y": 437.77
+        },
+        "term:mythmakers": {
+          "x": 712.77,
+          "y": 428.13
+        },
+        "term:escape from meaninglessness": {
+          "x": 687.1,
+          "y": 598
+        },
+        "term:moral justification": {
+          "x": 79.85,
+          "y": 320.72
+        },
+        "term:dehumanization": {
+          "x": 348.24,
+          "y": 504.8
+        },
+        "term:euphemistic labeling": {
+          "x": 222.83,
+          "y": 273.09
+        },
+        "term:obedience defense": {
+          "x": 229.7,
+          "y": 598
+        },
+        "term:divided agency": {
+          "x": 64.1,
+          "y": 452.59
+        },
+        "term:cultural distance": {
+          "x": 73.55,
+          "y": 598
+        },
+        "term:othering": {
+          "x": 376.65,
+          "y": 346.32
+        },
+        "term:exhilaration": {
+          "x": 485.71,
+          "y": 284.45
+        },
+        "cluster:0": {
+          "x": 301.89,
+          "y": 111.65
+        },
+        "cluster:1": {
+          "x": 731.64,
+          "y": 136.44
+        },
+        "cluster:2": {
+          "x": 580.09,
+          "y": 495.33
+        },
+        "cluster:3": {
+          "x": 190.07,
+          "y": 509.36
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-16T03:23:13.473Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:53:00.061Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -1,0 +1,555 @@
+{
+  "id": "rules-of-chance",
+  "title": "The Rules of Chance — How Probability Models Uncertainty",
+  "category": "math",
+  "subcategories": {
+    "math": "probability-statistics"
+  },
+  "info": {
+    "text": "Chance has grammar. This board organizes the rules of probability into five moves — set up the outcome space, combine events, condition on what you learn, count the possibilities, and check what the long run owes the model.",
+    "links": [
+      {
+        "href": "wiki:Probability"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Introductory Statistics, ch. 3: Probability Topics (key terms)",
+        "author": "Barbara Illowsky and Susan Dean",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/introductory-statistics/pages/3-key-terms"
+      },
+      {
+        "title": "Conditional probability",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Conditional_probability"
+      },
+      {
+        "title": "Combination",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Combination"
+      },
+      {
+        "title": "Expected value",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Expected_value"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "stage",
+      "name": "The stage: outcome sets",
+      "color": "teal",
+      "fact": "Probability begins by turning a situation into a set: a planned trial, the results it can produce, the set of all of them, and any subset worth asking about.",
+      "termInfo": {
+        "event": {
+          "text": "A subset of the sample space — any collection of outcomes worth a question, like 'drew a face card'. An event occurs when the realized outcome is one of its members.",
+          "links": [
+            {
+              "href": "wiki:Event (probability theory)"
+            }
+          ]
+        },
+        "experiment": {
+          "text": "A planned activity carried out under controlled conditions — drawing a card, rolling two dice. The thing the probabilities are about.",
+          "links": [
+            {
+              "href": "wiki:Experiment (probability theory)"
+            }
+          ]
+        },
+        "outcome": {
+          "text": "A particular result of an experiment — one card, one roll. The atoms of the sample space.",
+          "links": [
+            {
+              "href": "wiki:Outcome (probability)"
+            }
+          ]
+        },
+        "sample space": {
+          "text": "The set of all possible outcomes of an experiment: the 52 cards, the 36 sums of two dice. Everything probability counts lives here.",
+          "links": [
+            {
+              "href": "wiki:Sample space"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Probability space"
+          }
+        ]
+      },
+      "seeds": [
+        "outcome",
+        "event"
+      ],
+      "floatingTerms": [
+        "experiment",
+        "sample space"
+      ],
+      "terms": [
+        "outcome",
+        "event",
+        "experiment",
+        "sample space"
+      ]
+    },
+    {
+      "id": "combining",
+      "name": "Combining events",
+      "color": "blue",
+      "fact": "Events combine like sets — in both at once, in either, in the one's absence — and the addition rule turns those combinations into probability arithmetic.",
+      "termInfo": {
+        "addition rule": {
+          "text": "P(A or B) = P(A) + P(B) − P(A and B): add the separate probabilities, subtract the double-counted overlap. For mutually exclusive events the overlap is empty and the subtraction disappears.",
+          "links": [
+            {
+              "href": "wiki:Inclusion–exclusion principle"
+            }
+          ]
+        },
+        "complement": {
+          "text": "Everything in the sample space that is not A; P(Aᶜ) = 1 − P(A).",
+          "links": [
+            {
+              "href": "wiki:Complement (set theory)"
+            }
+          ]
+        },
+        "intersection": {
+          "text": "The 'and' event: an outcome is in A ∩ B only if it is in both at once.",
+          "links": [
+            {
+              "href": "wiki:Intersection (set theory)"
+            }
+          ]
+        },
+        "mutually exclusive": {
+          "text": "Events that cannot co-occur: P(A ∩ B) = 0. A card cannot be both a heart and a spade.",
+          "links": [
+            {
+              "href": "wiki:Mutual exclusivity"
+            }
+          ]
+        },
+        "union": {
+          "text": "The 'or' event: an outcome is in A ∪ B if it is in A, in B, or in both.",
+          "links": [
+            {
+              "href": "wiki:Union (set theory)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Probability axioms"
+          }
+        ]
+      },
+      "seeds": [
+        "union",
+        "mutually exclusive"
+      ],
+      "floatingTerms": [
+        "intersection",
+        "complement",
+        "addition rule"
+      ],
+      "terms": [
+        "union",
+        "mutually exclusive",
+        "intersection",
+        "complement",
+        "addition rule"
+      ]
+    },
+    {
+      "id": "conditioning",
+      "name": "Conditioning on knowledge",
+      "color": "amber",
+      "fact": "Information changes probabilities: learning that B happened re-sizes the chance of A — or leaves it exactly where it was, which is its own discovery.",
+      "termInfo": {
+        "Bayes' theorem": {
+          "text": "The rule that reverses conditioning: it computes P(B|A) — the chance of the cause given the effect — from P(A|B) and the base rates.",
+          "links": [
+            {
+              "href": "wiki:Bayes' theorem"
+            }
+          ]
+        },
+        "conditional probability": {
+          "text": "The probability of A once B is known to have happened, written P(A|B): with B as the new sample space, A's share of it.",
+          "links": [
+            {
+              "href": "wiki:Conditional probability"
+            }
+          ]
+        },
+        "independence": {
+          "text": "Knowing one event happened leaves the other's probability unchanged: P(A|B) = P(A). The events influence each other not at all.",
+          "links": [
+            {
+              "href": "wiki:Independence (probability theory)"
+            }
+          ]
+        },
+        "multiplication rule": {
+          "text": "P(A and B) = P(A) · P(B|A); for independent events it collapses to P(A) · P(B).",
+          "links": [
+            {
+              "href": "wiki:Conditional probability"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Conditional probability"
+          }
+        ]
+      },
+      "seeds": [
+        "conditional probability",
+        "independence"
+      ],
+      "floatingTerms": [
+        "multiplication rule",
+        "Bayes' theorem"
+      ],
+      "terms": [
+        "conditional probability",
+        "independence",
+        "multiplication rule",
+        "Bayes' theorem"
+      ]
+    },
+    {
+      "id": "counting",
+      "name": "Counting the outcomes",
+      "color": "magenta",
+      "fact": "When every outcome carries the same weight, probability collapses to counting — and order is what decides which counting tool you need.",
+      "termInfo": {
+        "combination": {
+          "text": "A selection of r of n items where order does not matter: C(n,r) = n!/(r!(n−r)!). A two-person committee is the same committee however you announce it.",
+          "links": [
+            {
+              "href": "wiki:Combination"
+            }
+          ]
+        },
+        "equally likely": {
+          "text": "The condition under which probability is pure counting: when every outcome carries the same weight, P(A) = outcomes in A ÷ total outcomes.",
+          "links": [
+            {
+              "href": "https://openstax.org/books/introductory-statistics/pages/3-key-terms",
+              "label": "OpenStax, Introductory Statistics ch. 3 key terms"
+            }
+          ]
+        },
+        "factorial": {
+          "text": "n! counts the arrangements of n items — 4! = 24 ways to order four books on a shelf. The raw material of the other counting tools.",
+          "links": [
+            {
+              "href": "wiki:Factorial"
+            }
+          ]
+        },
+        "permutation": {
+          "text": "An ordered selection of r of n items: P(n,r) = n!/(n−r)!. President-then-treasurer differs from treasurer-then-president.",
+          "links": [
+            {
+              "href": "wiki:Permutation"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Combination"
+          }
+        ]
+      },
+      "seeds": [
+        "factorial",
+        "permutation"
+      ],
+      "floatingTerms": [
+        "combination",
+        "equally likely"
+      ],
+      "terms": [
+        "factorial",
+        "permutation",
+        "combination",
+        "equally likely"
+      ]
+    },
+    {
+      "id": "long-run",
+      "name": "The long run",
+      "color": "olive",
+      "fact": "One roll is luck; the model still predicts the average of many rolls in advance — and the law of large numbers says the prediction comes true.",
+      "termInfo": {
+        "expected value": {
+          "text": "The probability-weighted average of the outcomes: each value times its probability, summed. A fair die's is 3.5 — a value no single roll can produce.",
+          "links": [
+            {
+              "href": "wiki:Expected value"
+            }
+          ]
+        },
+        "law of large numbers": {
+          "text": "The average of many independent repetitions of the same experiment converges to the expected value — the theorem that lets the long run be planned for.",
+          "links": [
+            {
+              "href": "wiki:Law of large numbers"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Expected value"
+          }
+        ]
+      },
+      "seeds": [
+        "expected value"
+      ],
+      "floatingTerms": [
+        "law of large numbers"
+      ],
+      "terms": [
+        "expected value",
+        "law of large numbers"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "influence",
+      "term": "influence",
+      "clusters": [
+        "combining",
+        "conditioning"
+      ],
+      "fact": "Mutually exclusive is about co-occurrence — the two events cannot happen together. Independence is about influence — one event does not change the other's probability. Exclusive events with positive probability are never independent: learning B happened drives P(A|B) to zero.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Independence (probability theory)"
+          }
+        ]
+      },
+      "relationKind": "contrast"
+    },
+    {
+      "id": "reduced-sample-space",
+      "term": "reduced sample space",
+      "clusters": [
+        "conditioning",
+        "stage"
+      ],
+      "fact": "To compute P(A|B), throw away every outcome outside B: B becomes the new sample space, and A's conditional probability is just A's share of it.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Conditional probability"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "conditioning",
+        "to": "stage"
+      }
+    },
+    {
+      "id": "classical-probability",
+      "term": "classical probability",
+      "clusters": [
+        "counting",
+        "stage"
+      ],
+      "fact": "When outcomes are equally likely, no experiment needs running: P(A) = favorable outcomes ÷ total outcomes — and the counting tools exist to evaluate that fraction for sample spaces like 52-card decks.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Probability"
+          }
+        ]
+      },
+      "relationKind": "foundation"
+    },
+    {
+      "id": "replacement",
+      "term": "replacement",
+      "clusters": [
+        "counting",
+        "conditioning"
+      ],
+      "fact": "Draw a card with replacement and the deck never changes, so each draw is independent of the last. Draw without replacement and the pool shrinks — every draw is now conditional on what left the deck.",
+      "info": {
+        "text": "OpenStax defines both sampling modes: with replacement, a member may be picked again; without replacement, only once.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/introductory-statistics/pages/3-key-terms",
+            "label": "OpenStax, Introductory Statistics ch. 3 (sampling with and without replacement)"
+          }
+        ]
+      },
+      "relationKind": "dynamic"
+    },
+    {
+      "id": "weighted-average",
+      "term": "weighted average",
+      "clusters": [
+        "long-run",
+        "stage"
+      ],
+      "fact": "The expected value weights every outcome of the sample space by its probability and adds: the fair die's is (1 + 2 + 3 + 4 + 5 + 6) ÷ 6 = 3.5 — a value no single roll can ever produce.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Expected value"
+          }
+        ]
+      },
+      "relationKind": "foundation"
+    },
+    {
+      "id": "convergence",
+      "term": "convergence",
+      "clusters": [
+        "long-run",
+        "conditioning"
+      ],
+      "fact": "The law of large numbers is stated for independent repetitions of the same experiment: as the trials accumulate, the running average converges to the expected value — which is why casinos and insurers can plan on it.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Law of large numbers"
+          }
+        ]
+      },
+      "relationKind": "foundation"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "deck-or-subset",
+      "prompt": "One term names the full set of 52 possible cards in a deck draw; the other names 'drawing a face card' — a subset of that set worth asking about. Which two terms?",
+      "explanation": "The 52 possible cards are the sample space — the full set of outcomes. 'Drawing a face card' selects 8 of them, which makes it an event: a subset worth a question. A single card would be an outcome, but the prompt names the whole set and a subset of it.",
+      "targets": [
+        "sample space",
+        "event"
+      ],
+      "reasons": {
+        "event": "'drew a face card' collects 8 outcomes into one question — a subset of the sample space",
+        "sample space": "all 52 possible cards form the set every draw is measured against"
+      }
+    },
+    {
+      "id": "heart-and-spade",
+      "prompt": "Draw one card. Which term describes the relationship between 'the card is a heart' and 'the card is a spade' — they cannot both be true of the same draw?",
+      "explanation": "A card cannot be both a heart and a spade: the two events cannot co-occur, which is exactly mutually exclusive. They are emphatically not independent — knowing the card is a heart drives 'spade' to zero, the exclusive-vs-independent contrast on the influence bridge.",
+      "targets": [
+        "mutually exclusive"
+      ],
+      "reasons": {
+        "mutually exclusive": "P(heart and spade) = 0 — one draw cannot land in both"
+      }
+    },
+    {
+      "id": "heart-or-face",
+      "prompt": "To compute P(heart or face card) you add the two separate probabilities and subtract a correction. Which two terms name, respectively, the 'or' event itself and that rule?",
+      "explanation": "'Heart or face card' is the union of the two events, and the addition rule is what computes its probability — add the separate probabilities, subtract the overlap the addition counted twice.",
+      "targets": [
+        "union",
+        "addition rule"
+      ],
+      "reasons": {
+        "addition rule": "P(A or B) = P(A) + P(B) − P(A and B) is exactly that add-then-subtract",
+        "union": "the 'or' event — outcomes in either set"
+      }
+    },
+    {
+      "id": "committee-vs-titles",
+      "prompt": "A 10-person club once picks a president and a treasurer, and later just picks a 2-person committee. Which two terms are the counting tools for those two tasks, in order?",
+      "explanation": "President-then-treasurer is an ordered selection — a permutation, nPr. A two-person committee is order-free — a combination, nCr. The factorial is the building block inside both formulas, not the tool for either task.",
+      "targets": [
+        "permutation",
+        "combination"
+      ],
+      "reasons": {
+        "combination": "the committee ignores order — C(10,2)",
+        "permutation": "the two titles are ordered — P(10,2)"
+      }
+    },
+    {
+      "id": "second-draw",
+      "prompt": "You draw twice from a deck without returning the first card. Which term names the kind of probability you compute for the second draw once you know what the first was?",
+      "explanation": "Without replacement the pool shrinks, so the second draw's probability must be computed given what the first was — a conditional probability. With replacement the draws would be independent; and the question asks forward, not the backward calculation Bayes' theorem performs.",
+      "targets": [
+        "conditional probability"
+      ],
+      "reasons": {
+        "conditional probability": "P(second | first) re-sizes the pool exactly as conditioning requires"
+      }
+    },
+    {
+      "id": "casino-plan",
+      "prompt": "Thousands of plays later, a player's average per game approaches the number the model predicted. Which two terms name that predicted number and the theorem that says the average really gets there?",
+      "explanation": "The expected value is the probability-weighted average the game is worth per play; the law of large numbers is the theorem that the running average of many independent plays actually converges there. One predicts, the other guarantees.",
+      "targets": [
+        "expected value",
+        "law of large numbers"
+      ],
+      "reasons": {
+        "expected value": "the probability-weighted average of the outcomes — the model's prediction",
+        "law of large numbers": "independent repetitions converge to that expectation"
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "summarizing-data",
+        "reason": "Start of the statistics arc: describing a data set before modeling the chance underneath it."
+      },
+      {
+        "id": "from-sample-to-population",
+        "reason": "Next in the arc: how the rules of chance become the machinery of statistical inference."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The Rules of Chance",
+    "summary": "Probability has strict rules: name the outcome space, combine events, update on what you learn, count what's equally likely, and hold the long run to the model's prediction.",
+    "estimatedMinutes": 7,
+    "content": {
+      "text": "Probability is the mathematics of not knowing — and it turns out that not-knowing has strict rules. This lesson walks them in the order you'd meet them: first the setup that names what could happen, then the rules for combining and updating, the counting tricks that make the numbers computable, and finally what the long run owes the model.\r\n\r\n## Naming what could happen\r\n\r\nEvery probabilistic story starts with an experiment — a planned activity under controlled conditions, like drawing a card or rolling two dice. Its outcomes are the individual results it can produce, the sample space is the set of every possible outcome, and an event is any subset of that set worth asking about — 'drew a face card' names eight of the 52 outcomes. All the machinery of probability is spoken in this set vocabulary.\r\n\r\n## Combining events\r\n\r\nBecause events are sets, they combine like sets. The union of two events is the 'or' event: outcomes in either. The intersection is the 'and' event: outcomes in both at once. The complement flips an event over: everything in the sample space that is not A. The addition rule converts these combinations into arithmetic: P(A or B) = P(A) + P(B) − P(A and B) — the subtraction removes the outcomes the addition counted twice. One special relationship gets its own name: events that cannot co-occur are mutually exclusive, and for them the intersection is empty, so the addition rule loses its subtraction term.\r\n\r\n## Updating with knowledge\r\n\r\nReal questions rarely start from scratch. Conditional probability re-sizes the question once something is known: P(A|B) treats B as the entire new sample space and asks what share of it A occupies. When knowing B doesn't move P(A) at all — when P(A|B) = P(A) — the events are independent, each irrelevant to the other. The multiplication rule runs the same idea forward: the probability that both A and B occur is P(A) times P(B|A), which collapses to P(A)·P(B) exactly when the two are independent. Bayes' theorem runs conditioning backward, letting you infer the probability of a cause from an observed effect.\r\n\r\n## Counting when everything is equally likely\r\n\r\nIf every outcome in the sample space is equally likely, probability needs no long-run data at all: P(A) is just the number of outcomes in A divided by the number in the sample space. All the work moves into counting, and order is the hinge. A factorial counts the arrangements of a whole set. A permutation counts ordered selections — president-then-treasurer differs from treasurer-then-president. A combination counts selections where order doesn't matter — a two-person committee is the same committee either way. Draw with replacement and every trial faces the same unchanged pool; draw without replacement and each draw shifts the pool, which is exactly what makes later draws conditional on earlier ones.\r\n\r\n## The long run\r\n\r\nOne roll is luck, but a probability model predicts something about many rolls. The expected value is the probability-weighted average of the outcomes: a fair die's is 3.5, though no single roll can produce it. The law of large numbers says why anyone should care: the average of many independent repetitions converges to the expected value. That bridge between a model on paper and what actually accumulates is why probability is useful to casinos, insurers, and anyone who must plan under uncertainty."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

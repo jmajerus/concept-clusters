@@ -214,7 +214,12 @@ const puzzle = definePuzzle(import.meta.url, {
       "idealTerms": [
         "metabolic acidosis",
         "Henderson-Hasselbalch equation"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 0
+      }
     },
     {
       "id": "renal-compensation",
@@ -229,10 +234,26 @@ const puzzle = definePuzzle(import.meta.url, {
       "idealTerms": [
         "respiratory acidosis",
         "net acid excretion"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 1
+      }
     }
   ],
   "lenses": [
+    {
+      "id": "kidney-adds",
+      "prompt": "What does the kidney add to the blood for each hydrogen ion it excretes on a urinary buffer?",
+      "explanation": "Buffering a fixed acid uses up bicarbonate. Reclaiming filtered bicarbonate only keeps what was already there; excreting acid is what replaces the buffer that was spent.",
+      "targets": [
+        "new bicarbonate"
+      ],
+      "reasons": {
+        "new bicarbonate": "Tubule cells make one bicarbonate for each hydrogen ion they send into the urine, and return it to the blood."
+      }
+    },
     {
       "id": "sources-of-new-bicarbonate",
       "prompt": "Which parts of net acid excretion each return a new bicarbonate to the blood?",
@@ -255,6 +276,17 @@ const puzzle = definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "metabolic alkalosis": "Losing hydrochloric acid leaves behind the bicarbonate the stomach's cells made alongside it, raising plasma bicarbonate."
+      }
+    },
+    {
+      "id": "lowering-pco2",
+      "prompt": "Which response lowers PCO₂ to offset a metabolic acidosis?",
+      "explanation": "The fall in PCO₂ is secondary, a response to the acidosis, so it is not a primary respiratory alkalosis. It begins within minutes but only partly restores pH.",
+      "targets": [
+        "respiratory compensation"
+      ],
+      "reasons": {
+        "respiratory compensation": "Faster, deeper breathing exhales more CO₂, moving PCO₂ down with bicarbonate and pulling the ratio back toward 20 to 1."
       }
     },
     {

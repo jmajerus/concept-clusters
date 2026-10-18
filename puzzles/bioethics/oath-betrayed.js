@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "oath-betrayed",
   "title": "Oath Betrayed",
   "category": "bioethics",
   "categories": [
     "bioethics",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism"
+  },
   "tags": [
     "book"
   ],
@@ -249,3 +253,208 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "oath-betrayed",
+      "puzzleRevision": "fnv1a32:058c0c36",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:Declaration of Tokyo": {
+          "x": 434.78,
+          "y": 231.7,
+          "pinned": false
+        },
+        "term:Nuremberg Code": {
+          "x": 573.9,
+          "y": 299.87,
+          "pinned": false
+        },
+        "term:AMA Code of Ethics": {
+          "x": 561.3,
+          "y": 121.64,
+          "pinned": false
+        },
+        "term:Prohibition on Participation": {
+          "x": 449.67,
+          "y": 430.36,
+          "pinned": false
+        },
+        "term:Physiological Monitoring": {
+          "x": 283.12,
+          "y": 123,
+          "pinned": false
+        },
+        "term:Experiments in Torture": {
+          "x": 113.99,
+          "y": 215.8,
+          "pinned": false
+        },
+        "term:No Enforcement Mechanism": {
+          "x": 110.88,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Non-Member Shield": {
+          "x": 429.34,
+          "y": 23,
+          "pinned": false
+        },
+        "term:calibration as research": {
+          "x": 273.34,
+          "y": 318.82,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 1818.41,
+        "score": 1818.4111738409274
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:52:03.996Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "oath-betrayed",
+      "puzzleRevision": "fnv1a32:058c0c36",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 161.82,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 474.18,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:calibration as research": {
+          "x": 480,
+          "y": 318,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Declaration of Tokyo",
+          "Nuremberg Code",
+          "AMA Code of Ethics",
+          "Prohibition on Participation"
+        ],
+        "cluster:1": [
+          "Physiological Monitoring",
+          "Experiments in Torture",
+          "No Enforcement Mechanism",
+          "Non-Member Shield"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 53.68898429642422
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:52:06.527Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "oath-betrayed",
+      "puzzleRevision": "fnv1a32:058c0c36",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Declaration of Tokyo": {
+          "x": 555.35,
+          "y": 26.63
+        },
+        "term:Nuremberg Code": {
+          "x": 714.35,
+          "y": 22
+        },
+        "term:AMA Code of Ethics": {
+          "x": 861.2,
+          "y": 63.39
+        },
+        "term:Prohibition on Participation": {
+          "x": 820.46,
+          "y": 256.02
+        },
+        "term:Physiological Monitoring": {
+          "x": 658.57,
+          "y": 398.73
+        },
+        "term:Experiments in Torture": {
+          "x": 755.84,
+          "y": 569.96
+        },
+        "term:No Enforcement Mechanism": {
+          "x": 561,
+          "y": 598
+        },
+        "term:Non-Member Shield": {
+          "x": 380.3,
+          "y": 584.36
+        },
+        "term:calibration as research": {
+          "x": 500.92,
+          "y": 232.83
+        },
+        "cluster:0": {
+          "x": 658.09,
+          "y": 156.34
+        },
+        "cluster:1": {
+          "x": 460.28,
+          "y": 425.44
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:52:08.956Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:52:01.496Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

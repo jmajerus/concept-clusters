@@ -1,11 +1,16 @@
 {
   "id": "two-imprisonments",
   "title": "Two Imprisonments",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "info": {
     "text": "Eugene V. Debs, railroad-union organizer turned five-time Socialist Party presidential candidate, whose politics were forged twice over in a federal prison cell -- first by the Pullman strike's defeat, and later by his own conviction for opposing the First World War.",
     "links": [
@@ -20,20 +25,6 @@
       "name": "Industrial Unionism",
       "color": "brown",
       "fact": "Debs founded the American Railway Union in 1893 on a new premise: organize every worker on the railroad together, regardless of craft, rather than splitting them into separate unions by trade. When Pullman workers -- paid less by the same company that also collected their rent as their landlord -- struck in 1894, the ARU backed them with a nationwide boycott of Pullman cars, until a federal injunction and the troops sent to enforce it broke the strike and put Debs in jail.",
-      "seeds": [
-        "industrial unionism",
-        "the Pullman boycott"
-      ],
-      "floatingTerms": [
-        "the American Railway Union",
-        "the federal injunction"
-      ],
-      "terms": [
-        "industrial unionism",
-        "the Pullman boycott",
-        "the American Railway Union",
-        "the federal injunction"
-      ],
       "termInfo": {
         "the American Railway Union": {
           "links": [
@@ -57,13 +48,35 @@
             "href": "wiki:Pullman Strike"
           }
         ]
-      }
+      },
+      "seeds": [
+        "industrial unionism",
+        "the Pullman boycott"
+      ],
+      "floatingTerms": [
+        "the American Railway Union",
+        "the federal injunction"
+      ],
+      "terms": [
+        "industrial unionism",
+        "the Pullman boycott",
+        "the American Railway Union",
+        "the federal injunction"
+      ]
     },
     {
       "id": "becoming-a-socialist",
       "name": "Becoming a Socialist",
       "color": "teal",
       "fact": "Debs's socialism was born, by his own account, in a jail cell: reading Marx during his six months in the Woodstock jail after the Pullman strike collapsed converted him from a trade unionist into a socialist, and he spent the following decades touring the country -- including aboard his own campaign train, the Red Special -- arguing that class struggle was not a betrayal of American values but their fulfillment.",
+      "info": {
+        "text": "Debs's conversion to socialism during his first imprisonment, and his subsequent decades building the Socialist Party of America into the country's most visible socialist movement.",
+        "links": [
+          {
+            "href": "wiki:Socialist Party of America"
+          }
+        ]
+      },
       "seeds": [
         "class struggle",
         "the Socialist Party of America"
@@ -77,35 +90,13 @@
         "the Socialist Party of America",
         "prison conversion",
         "the Red Special"
-      ],
-      "info": {
-        "text": "Debs's conversion to socialism during his first imprisonment, and his subsequent decades building the Socialist Party of America into the country's most visible socialist movement.",
-        "links": [
-          {
-            "href": "wiki:Socialist Party of America"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "prison-campaigns",
       "name": "Prison Campaigns",
       "color": "magenta",
       "fact": "In June 1918, Debs told a crowd in Canton, Ohio that the First World War was an imperialist war fought by workers on behalf of rival capitalist powers -- and was indicted under the Espionage Act for it. He ran for president one more time in 1920, campaigning, and eventually running, from prison, and still won nearly a million votes.",
-      "seeds": [
-        "the Canton speech",
-        "the Espionage Act"
-      ],
-      "floatingTerms": [
-        "an imperialist war",
-        "running from prison"
-      ],
-      "terms": [
-        "the Canton speech",
-        "the Espionage Act",
-        "an imperialist war",
-        "running from prison"
-      ],
       "termInfo": {
         "the Espionage Act": {
           "links": [
@@ -122,7 +113,21 @@
             "href": "wiki:Debs v. United States"
           }
         ]
-      }
+      },
+      "seeds": [
+        "the Canton speech",
+        "the Espionage Act"
+      ],
+      "floatingTerms": [
+        "an imperialist war",
+        "running from prison"
+      ],
+      "terms": [
+        "the Canton speech",
+        "the Espionage Act",
+        "an imperialist war",
+        "running from prison"
+      ]
     }
   ],
   "bridges": [
@@ -135,14 +140,14 @@
       ],
       "fact": "The Pullman strike's defeat is what actually produced Debs's socialism: watching the government side unmistakably with the company -- an injunction, then federal troops -- convinced him in his jail cell that organizing workers industry by industry could never be enough on its own, and that the fight had to become explicitly political.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "industrial-unionism": "the Pullman boycott",
+        "becoming-a-socialist": "prison conversion"
+      },
       "direction": {
         "kind": "through",
         "from": "industrial-unionism",
         "to": "becoming-a-socialist"
-      },
-      "idealTerms": {
-        "industrial-unionism": "the Pullman boycott",
-        "becoming-a-socialist": "prison conversion"
       }
     },
     {
@@ -154,14 +159,14 @@
       ],
       "fact": "Debs's socialism supplied the lens for his anti-war stand: if class struggle, not national loyalty, was the deeper truth of politics, then a war fought by workers on behalf of rival capitalist powers could only be read as an imperialist war -- exactly the argument that got him convicted a second time.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "becoming-a-socialist": "class struggle",
+        "prison-campaigns": "an imperialist war"
+      },
       "direction": {
         "kind": "through",
         "from": "becoming-a-socialist",
         "to": "prison-campaigns"
-      },
-      "idealTerms": {
-        "becoming-a-socialist": "class struggle",
-        "prison-campaigns": "an imperialist war"
       }
     },
     {

@@ -3,18 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "safe-legal-ethical-effective",
   "title": "Safe, Legal, Ethical, Effective",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "psychology"
   ],
   "subcategories": {
+    "peace-conflict-studies": "war-militarism",
     "psychology": "moral-psychology"
   },
-  "large": true,
   "tags": [
     "book"
   ],
@@ -365,3 +366,307 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "safe-legal-ethical-effective",
+      "puzzleRevision": "fnv1a32:0f3fcf62",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:PENS Task Force": {
+          "x": 329.66,
+          "y": 165.73,
+          "pinned": false
+        },
+        "term:Safe, Legal, Ethical, Effective": {
+          "x": 169.81,
+          "y": 273.67,
+          "pinned": false
+        },
+        "term:Ethics Code Standard 1.02": {
+          "x": 230.23,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Military-Majority Membership": {
+          "x": 445.19,
+          "y": 23.27,
+          "pinned": false
+        },
+        "term:Casebook Promise": {
+          "x": 72.46,
+          "y": 103.51,
+          "pinned": false
+        },
+        "term:Stephen Behnke": {
+          "x": 288.93,
+          "y": 453.52,
+          "pinned": false
+        },
+        "term:Department of Defense": {
+          "x": 446.69,
+          "y": 441.08,
+          "pinned": false
+        },
+        "term:Council Manipulation": {
+          "x": 362.97,
+          "y": 597,
+          "pinned": false
+        },
+        "term:Ethics Complaint Suppression": {
+          "x": 164.24,
+          "y": 583.76,
+          "pinned": false
+        },
+        "term:Jean Maria Arrigo": {
+          "x": 614.16,
+          "y": 449.56,
+          "pinned": false
+        },
+        "term:Hoffman Report": {
+          "x": 646.62,
+          "y": 591.54,
+          "pinned": false
+        },
+        "term:Coalition for an Ethical Psychology": {
+          "x": 802.84,
+          "y": 353.37,
+          "pinned": false
+        },
+        "term:National Security Interrogation Ban": {
+          "x": 556.92,
+          "y": 245.63,
+          "pinned": false
+        },
+        "term:Forced Departures": {
+          "x": 789.77,
+          "y": 564.75,
+          "pinned": false
+        },
+        "term:media strategy": {
+          "x": 66.1,
+          "y": 432.53,
+          "pinned": false
+        },
+        "term:PENS Listserv": {
+          "x": 514.01,
+          "y": 580.81,
+          "pinned": false
+        },
+        "term:PENS Rescission": {
+          "x": 360.14,
+          "y": 304.88,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3776.07,
+        "score": 3776.0737222481857
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:34:11.488Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "safe-legal-ethical-effective",
+      "puzzleRevision": "fnv1a32:0f3fcf62",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 282.83,
+          "y": 314.32,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 565.36,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 767.17,
+          "y": 314.32,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:media strategy": {
+          "x": 330.37,
+          "y": 513.38,
+          "pinned": false
+        },
+        "term:PENS Listserv": {
+          "x": 520.44,
+          "y": 387.79,
+          "pinned": false
+        },
+        "term:PENS Rescission": {
+          "x": 525,
+          "y": 236.32,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "PENS Task Force",
+          "Safe, Legal, Ethical, Effective",
+          "Ethics Code Standard 1.02",
+          "Military-Majority Membership",
+          "Casebook Promise"
+        ],
+        "cluster:1": [
+          "Stephen Behnke",
+          "Department of Defense",
+          "Council Manipulation",
+          "Ethics Complaint Suppression"
+        ],
+        "cluster:2": [
+          "Jean Maria Arrigo",
+          "Hoffman Report",
+          "Coalition for an Ethical Psychology",
+          "National Security Interrogation Ban",
+          "Forced Departures"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 372.2594221061912
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:34:14.026Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "safe-legal-ethical-effective",
+      "puzzleRevision": "fnv1a32:0f3fcf62",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:PENS Task Force": {
+          "x": 317.7,
+          "y": 391.9
+        },
+        "term:Safe, Legal, Ethical, Effective": {
+          "x": 237.48,
+          "y": 194.14
+        },
+        "term:Ethics Code Standard 1.02": {
+          "x": 320,
+          "y": 598
+        },
+        "term:Military-Majority Membership": {
+          "x": 108.2,
+          "y": 598
+        },
+        "term:Casebook Promise": {
+          "x": 70.4,
+          "y": 277
+        },
+        "term:Stephen Behnke": {
+          "x": 424.95,
+          "y": 144.34
+        },
+        "term:Department of Defense": {
+          "x": 500.01,
+          "y": 22
+        },
+        "term:Council Manipulation": {
+          "x": 681.26,
+          "y": 22
+        },
+        "term:Ethics Complaint Suppression": {
+          "x": 851.8,
+          "y": 120.18
+        },
+        "term:Jean Maria Arrigo": {
+          "x": 697.08,
+          "y": 225.82
+        },
+        "term:Hoffman Report": {
+          "x": 823,
+          "y": 306.7
+        },
+        "term:Coalition for an Ethical Psychology": {
+          "x": 829.75,
+          "y": 512.76
+        },
+        "term:National Security Interrogation Ban": {
+          "x": 514.86,
+          "y": 463.78
+        },
+        "term:Forced Departures": {
+          "x": 654.26,
+          "y": 598
+        },
+        "term:media strategy": {
+          "x": 340.73,
+          "y": 29.94
+        },
+        "term:PENS Listserv": {
+          "x": 552.79,
+          "y": 265.91
+        },
+        "term:PENS Rescission": {
+          "x": 412.41,
+          "y": 280.93
+        },
+        "cluster:0": {
+          "x": 160.62,
+          "y": 405.75
+        },
+        "cluster:1": {
+          "x": 582.69,
+          "y": 135.39
+        },
+        "cluster:2": {
+          "x": 695.19,
+          "y": 368.85
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:34:16.599Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:34:08.889Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

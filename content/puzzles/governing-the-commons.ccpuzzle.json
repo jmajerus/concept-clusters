@@ -5,8 +5,14 @@
   "categories": [
     "economics",
     "sociology",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "economics": "political-economy",
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "sociology": "institutions-organizations"
+  },
   "tags": [
     "book"
   ],

@@ -4,12 +4,13 @@
   "category": "psychology",
   "categories": [
     "psychology",
-    "history-society"
+    "history-society",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
-  "large": true,
   "tags": [
     "war",
     "genocide"
@@ -484,9 +485,6 @@
       {
         "name": "Claude (Sonnet 4.6)",
         "model": "Claude Sonnet 4.6"
-      },
-      {
-        "name": "Claude Code"
       }
     ]
   }

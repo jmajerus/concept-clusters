@@ -3,10 +3,17 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "legible-early",
   "title": "Legible Early",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide"
+  },
   "tags": [
     "war",
     "genocide"
@@ -130,7 +137,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "denial",
       "term": "denial",
       "clusters": [
         0,
@@ -157,7 +163,6 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "genocide-watch",
       "term": "Genocide Watch",
       "clusters": [
         0,
@@ -184,7 +189,6 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "the-duty-to-prevent",
       "term": "the duty to prevent",
       "clusters": [
         1,
@@ -304,3 +308,297 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "legible-early",
+      "puzzleRevision": "fnv1a32:eedac1db",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:classification": {
+          "x": 102.5,
+          "y": 184.6,
+          "pinned": false
+        },
+        "term:dehumanization": {
+          "x": 192.41,
+          "y": 82.27,
+          "pinned": false
+        },
+        "term:symbolization": {
+          "x": 62.95,
+          "y": 57.83,
+          "pinned": false
+        },
+        "term:discrimination": {
+          "x": 66.1,
+          "y": 314.66,
+          "pinned": false
+        },
+        "term:organization": {
+          "x": 467.95,
+          "y": 138.87,
+          "pinned": false
+        },
+        "term:extermination": {
+          "x": 341.36,
+          "y": 136.93,
+          "pinned": false
+        },
+        "term:polarization": {
+          "x": 506.66,
+          "y": 23,
+          "pinned": false
+        },
+        "term:preparation": {
+          "x": 583.35,
+          "y": 111.45,
+          "pinned": false
+        },
+        "term:persecution": {
+          "x": 386.46,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the responsibility to protect": {
+          "x": 379.53,
+          "y": 334.82,
+          "pinned": false
+        },
+        "term:the bystander effect": {
+          "x": 554.19,
+          "y": 437,
+          "pinned": false
+        },
+        "term:early warning": {
+          "x": 233.35,
+          "y": 208.65,
+          "pinned": false
+        },
+        "term:upstander": {
+          "x": 251.43,
+          "y": 437,
+          "pinned": false
+        },
+        "term:denial": {
+          "x": 284.91,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Genocide Watch": {
+          "x": 196.03,
+          "y": 336.3,
+          "pinned": false
+        },
+        "term:the duty to prevent": {
+          "x": 558.15,
+          "y": 251.64,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2827.26,
+        "score": 2827.261310572946
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:50:24.339Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "legible-early",
+      "puzzleRevision": "fnv1a32:eedac1db",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 435.72,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 243.81,
+          "y": 259.14,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 716.19,
+          "y": 259.14,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:denial": {
+          "x": 288.37,
+          "y": 420.97,
+          "pinned": false
+        },
+        "term:Genocide Watch": {
+          "x": 694.26,
+          "y": 443.6,
+          "pinned": false
+        },
+        "term:the duty to prevent": {
+          "x": 480,
+          "y": 259.14,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "classification",
+          "dehumanization",
+          "symbolization",
+          "discrimination"
+        ],
+        "cluster:1": [
+          "organization",
+          "extermination",
+          "polarization",
+          "preparation",
+          "persecution"
+        ],
+        "cluster:2": [
+          "the responsibility to protect",
+          "the bystander effect",
+          "early warning",
+          "upstander"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 418.0917065480165
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:50:27.268Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "legible-early",
+      "puzzleRevision": "fnv1a32:eedac1db",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:classification": {
+          "x": 830.52,
+          "y": 361.1
+        },
+        "term:dehumanization": {
+          "x": 550.05,
+          "y": 482.13
+        },
+        "term:symbolization": {
+          "x": 812.47,
+          "y": 503.49
+        },
+        "term:discrimination": {
+          "x": 691.82,
+          "y": 571.58
+        },
+        "term:organization": {
+          "x": 400.75,
+          "y": 342.18
+        },
+        "term:extermination": {
+          "x": 413.45,
+          "y": 472.08
+        },
+        "term:polarization": {
+          "x": 266.09,
+          "y": 565.94
+        },
+        "term:preparation": {
+          "x": 152.53,
+          "y": 502.28
+        },
+        "term:persecution": {
+          "x": 133.58,
+          "y": 366.09
+        },
+        "term:the responsibility to protect": {
+          "x": 330.98,
+          "y": 22
+        },
+        "term:the bystander effect": {
+          "x": 538.12,
+          "y": 22
+        },
+        "term:early warning": {
+          "x": 626.82,
+          "y": 169.61
+        },
+        "term:upstander": {
+          "x": 679.46,
+          "y": 44.44
+        },
+        "term:denial": {
+          "x": 503.76,
+          "y": 376.93
+        },
+        "term:Genocide Watch": {
+          "x": 590.95,
+          "y": 301.93
+        },
+        "term:the duty to prevent": {
+          "x": 286.43,
+          "y": 245.35
+        },
+        "cluster:0": {
+          "x": 689.13,
+          "y": 418.89
+        },
+        "cluster:1": {
+          "x": 271.19,
+          "y": 416.37
+        },
+        "cluster:2": {
+          "x": 462.98,
+          "y": 192.46
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:50:29.894Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:50:21.523Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

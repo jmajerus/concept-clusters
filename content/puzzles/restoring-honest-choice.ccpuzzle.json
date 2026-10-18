@@ -4,12 +4,13 @@
   "category": "business-organizations",
   "categories": [
     "business-organizations",
-    "computer-science"
+    "computer-science",
+    "science-technology-society"
   ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How professional commitments, ethical formation, organizational safeguards, and public accountability can work together to protect honest choice. The puzzle treats these remedies as complementary layers rather than interchangeable solutions.",
     "links": [

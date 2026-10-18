@@ -3,15 +3,21 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "governing-the-commons",
   "title": "Governing the commons",
   "category": "economics",
   "categories": [
     "economics",
     "sociology",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "economics": "political-economy",
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "sociology": "institutions-organizations"
+  },
   "tags": [
     "book"
   ],
@@ -288,3 +294,308 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "governing-the-commons",
+      "puzzleRevision": "fnv1a32:30a46b72",
+      "board": {
+        "width": 740,
+        "height": 530
+      },
+      "nodes": {
+        "term:tragedy of the commons": {
+          "x": 648.7,
+          "y": 355.45,
+          "pinned": false
+        },
+        "term:free riding": {
+          "x": 485.11,
+          "y": 367.32,
+          "pinned": false
+        },
+        "term:common-pool resource": {
+          "x": 655,
+          "y": 507,
+          "pinned": false
+        },
+        "term:open access": {
+          "x": 556.03,
+          "y": 453.09,
+          "pinned": false
+        },
+        "term:clearly defined boundaries": {
+          "x": 255.97,
+          "y": 341.36,
+          "pinned": false
+        },
+        "term:congruence with local conditions": {
+          "x": 388.89,
+          "y": 507,
+          "pinned": false
+        },
+        "term:collective-choice arrangements": {
+          "x": 116.5,
+          "y": 507,
+          "pinned": false
+        },
+        "term:monitoring": {
+          "x": 408.94,
+          "y": 291.94,
+          "pinned": false
+        },
+        "term:graduated sanctions": {
+          "x": 153.68,
+          "y": 155.31,
+          "pinned": false
+        },
+        "term:conflict-resolution mechanisms": {
+          "x": 116.5,
+          "y": 23,
+          "pinned": false
+        },
+        "term:recognition of the right to organize": {
+          "x": 564.3,
+          "y": 23,
+          "pinned": false
+        },
+        "term:nested enterprises": {
+          "x": 400.28,
+          "y": 157.18,
+          "pinned": false
+        },
+        "term:polycentric governance": {
+          "x": 332.46,
+          "y": 23,
+          "pinned": false
+        },
+        "term:credible commitment": {
+          "x": 540.96,
+          "y": 238.28,
+          "pinned": false
+        },
+        "term:quasi-voluntary compliance": {
+          "x": 103.9,
+          "y": 234.16,
+          "pinned": false
+        },
+        "term:external authority": {
+          "x": 661.3,
+          "y": 185,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3896.88,
+        "score": 3896.880992009682
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:06:45.104Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "governing-the-commons",
+      "puzzleRevision": "fnv1a32:30a46b72",
+      "board": {
+        "width": 1100,
+        "height": 710
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 550,
+          "y": 186.32,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 177.86,
+          "y": 363,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 550,
+          "y": 539.68,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 922.14,
+          "y": 363,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:credible commitment": {
+          "x": 550,
+          "y": 363,
+          "pinned": false
+        },
+        "term:quasi-voluntary compliance": {
+          "x": 267.76,
+          "y": 547.51,
+          "pinned": false
+        },
+        "term:external authority": {
+          "x": 775.87,
+          "y": 178.58,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "tragedy of the commons",
+          "free riding",
+          "common-pool resource",
+          "open access"
+        ],
+        "cluster:1": [
+          "clearly defined boundaries",
+          "congruence with local conditions",
+          "collective-choice arrangements"
+        ],
+        "cluster:2": [
+          "monitoring",
+          "graduated sanctions",
+          "conflict-resolution mechanisms"
+        ],
+        "cluster:3": [
+          "recognition of the right to organize",
+          "nested enterprises",
+          "polycentric governance"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 431.9878164557685
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:06:47.376Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "governing-the-commons",
+      "puzzleRevision": "fnv1a32:30a46b72",
+      "board": {
+        "width": 1100,
+        "height": 710
+      },
+      "nodes": {
+        "term:tragedy of the commons": {
+          "x": 706.02,
+          "y": 685.1
+        },
+        "term:free riding": {
+          "x": 462.81,
+          "y": 470.79
+        },
+        "term:common-pool resource": {
+          "x": 519.29,
+          "y": 688
+        },
+        "term:open access": {
+          "x": 373.97,
+          "y": 666.39
+        },
+        "term:clearly defined boundaries": {
+          "x": 206.42,
+          "y": 683.43
+        },
+        "term:congruence with local conditions": {
+          "x": 130.51,
+          "y": 461.22
+        },
+        "term:collective-choice arrangements": {
+          "x": 344.17,
+          "y": 337
+        },
+        "term:monitoring": {
+          "x": 664.79,
+          "y": 266.16
+        },
+        "term:graduated sanctions": {
+          "x": 513.19,
+          "y": 218.39
+        },
+        "term:conflict-resolution mechanisms": {
+          "x": 479.8,
+          "y": 22
+        },
+        "term:recognition of the right to organize": {
+          "x": 786.64,
+          "y": 449.06
+        },
+        "term:nested enterprises": {
+          "x": 958.39,
+          "y": 241.92
+        },
+        "term:polycentric governance": {
+          "x": 1010.7,
+          "y": 409.92
+        },
+        "term:credible commitment": {
+          "x": 572.72,
+          "y": 376.61
+        },
+        "term:quasi-voluntary compliance": {
+          "x": 275.48,
+          "y": 119.17
+        },
+        "term:external authority": {
+          "x": 585.67,
+          "y": 544.66
+        },
+        "cluster:0": {
+          "x": 445.6,
+          "y": 580.67
+        },
+        "cluster:1": {
+          "x": 322.87,
+          "y": 535.6
+        },
+        "cluster:2": {
+          "x": 667.62,
+          "y": 117.01
+        },
+        "cluster:3": {
+          "x": 796.55,
+          "y": 230.43
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:06:49.953Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.15,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:06:42.776Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

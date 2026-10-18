@@ -3,11 +3,12 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-scaffold-and-the-timetable",
   "title": "The Scaffold and the Timetable",
-  "category": "political-science",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "political-science",
     "philosophy"
   ],
@@ -178,3 +179,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-scaffold-and-the-timetable",
+      "puzzleRevision": "fnv1a32:eb9f6c5d",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:public torture": {
+          "x": 336.14,
+          "y": 287.06,
+          "pinned": false
+        },
+        "term:the spectacle of punishment": {
+          "x": 197.11,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the sovereign's vengeance": {
+          "x": 408.45,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the condemned body": {
+          "x": 561.3,
+          "y": 359.41,
+          "pinned": false
+        },
+        "term:the timetable": {
+          "x": 95.88,
+          "y": 142.8,
+          "pinned": false
+        },
+        "term:hierarchical observation": {
+          "x": 230.85,
+          "y": 23,
+          "pinned": false
+        },
+        "term:normalizing judgment": {
+          "x": 85,
+          "y": 292.29,
+          "pinned": false
+        },
+        "term:the examination": {
+          "x": 69.25,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the panopticon": {
+          "x": 442.18,
+          "y": 149.31,
+          "pinned": false
+        },
+        "term:visibility": {
+          "x": 321.32,
+          "y": 144.83,
+          "pinned": false
+        },
+        "term:self-surveillance": {
+          "x": 564.45,
+          "y": 201.63,
+          "pinned": false
+        },
+        "term:docile bodies": {
+          "x": 550.67,
+          "y": 58.82,
+          "pinned": false
+        },
+        "term:economy of power": {
+          "x": 213.21,
+          "y": 216.84,
+          "pinned": false
+        },
+        "term:internalization": {
+          "x": 401.77,
+          "y": 23,
+          "pinned": false
+        },
+        "term:who is seen": {
+          "x": 461.7,
+          "y": 275.1,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2812.27,
+        "score": 2812.271248669353
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:20:24.859Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-scaffold-and-the-timetable",
+      "puzzleRevision": "fnv1a32:eb9f6c5d",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 712.61,
+          "y": 377.77,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 247.39,
+          "y": 377.77,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 198.45,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:economy of power": {
+          "x": 480,
+          "y": 377.77,
+          "pinned": false
+        },
+        "term:internalization": {
+          "x": 290.16,
+          "y": 214.57,
+          "pinned": false
+        },
+        "term:who is seen": {
+          "x": 669.84,
+          "y": 214.57,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "public torture",
+          "the spectacle of punishment",
+          "the sovereign's vengeance",
+          "the condemned body"
+        ],
+        "cluster:1": [
+          "the timetable",
+          "hierarchical observation",
+          "normalizing judgment",
+          "the examination"
+        ],
+        "cluster:2": [
+          "the panopticon",
+          "visibility",
+          "self-surveillance",
+          "docile bodies"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 417.2123547882412
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:20:27.289Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-scaffold-and-the-timetable",
+      "puzzleRevision": "fnv1a32:eb9f6c5d",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:public torture": {
+          "x": 196.38,
+          "y": 221.79
+        },
+        "term:the spectacle of punishment": {
+          "x": 105.05,
+          "y": 65.58
+        },
+        "term:the sovereign's vengeance": {
+          "x": 316.21,
+          "y": 22
+        },
+        "term:the condemned body": {
+          "x": 502.87,
+          "y": 38.93
+        },
+        "term:the timetable": {
+          "x": 823.26,
+          "y": 333.14
+        },
+        "term:hierarchical observation": {
+          "x": 557.22,
+          "y": 469.89
+        },
+        "term:normalizing judgment": {
+          "x": 802.46,
+          "y": 487.72
+        },
+        "term:the examination": {
+          "x": 680.1,
+          "y": 594.26
+        },
+        "term:the panopticon": {
+          "x": 294.58,
+          "y": 561.64
+        },
+        "term:visibility": {
+          "x": 399,
+          "y": 486.37
+        },
+        "term:self-surveillance": {
+          "x": 157.79,
+          "y": 500.96
+        },
+        "term:docile bodies": {
+          "x": 162.15,
+          "y": 354.53
+        },
+        "term:economy of power": {
+          "x": 532.65,
+          "y": 256.01
+        },
+        "term:internalization": {
+          "x": 423.1,
+          "y": 357.91
+        },
+        "term:who is seen": {
+          "x": 306.81,
+          "y": 291.49
+        },
+        "cluster:0": {
+          "x": 366.82,
+          "y": 182.53
+        },
+        "cluster:1": {
+          "x": 695.79,
+          "y": 373.93
+        },
+        "cluster:2": {
+          "x": 289.35,
+          "y": 421.07
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:20:30.121Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:20:22.120Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -3,14 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-reconversion",
   "title": "The Reconversion",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "info": {
     "text": "A.J. Muste -- Dutch-American minister, Lawrence strike organizer, and for a time the leader of an actual Trotskyist party -- until a 1936 religious reconversion sent him back to Christian pacifism for good, and into three more decades leading the Fellowship of Reconciliation, training Bayard Rustin's generation in nonviolent direct action, and traveling to Hanoi at eighty-one to try to end the Vietnam War.",
     "links": [
@@ -205,3 +210,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-reconversion",
+      "puzzleRevision": "fnv1a32:1ffc4610",
+      "board": {
+        "width": 770,
+        "height": 550
+      },
+      "nodes": {
+        "term:the Lawrence strike": {
+          "x": 569.83,
+          "y": 171.18,
+          "pinned": false
+        },
+        "term:a forced resignation": {
+          "x": 501.32,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the Fellowship of Reconciliation": {
+          "x": 125.26,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Brookwood Labor College": {
+          "x": 675.55,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the American Workers Party": {
+          "x": 666.1,
+          "y": 322.3,
+          "pinned": false
+        },
+        "term:a religious reconversion": {
+          "x": 502.71,
+          "y": 382.89,
+          "pinned": false
+        },
+        "term:the sit-down strike": {
+          "x": 605.76,
+          "y": 527,
+          "pinned": false
+        },
+        "term:Musteites": {
+          "x": 719.65,
+          "y": 475.92,
+          "pinned": false
+        },
+        "term:training a new generation": {
+          "x": 302.91,
+          "y": 385.21,
+          "pinned": false
+        },
+        "term:the Hanoi trip": {
+          "x": 318.87,
+          "y": 527,
+          "pinned": false
+        },
+        "term:Nonviolence in an Aggressive World": {
+          "x": 129.1,
+          "y": 527,
+          "pinned": false
+        },
+        "term:the Spring Mobilization Committee": {
+          "x": 125.95,
+          "y": 265.99,
+          "pinned": false
+        },
+        "term:further left": {
+          "x": 710.2,
+          "y": 159.11,
+          "pinned": false
+        },
+        "term:what came back": {
+          "x": 454.7,
+          "y": 527,
+          "pinned": false
+        },
+        "term:the same fellowship, decades later": {
+          "x": 340.45,
+          "y": 155.55,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3579.8,
+        "score": 3579.803305131706
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:25:02.917Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-reconversion",
+      "puzzleRevision": "fnv1a32:1ffc4610",
+      "board": {
+        "width": 1150,
+        "height": 740
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 301.08,
+          "y": 302.15,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 575,
+          "y": 529.7,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 848.92,
+          "y": 302.15,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:further left": {
+          "x": 364.5,
+          "y": 489.46,
+          "pinned": false
+        },
+        "term:what came back": {
+          "x": 808.13,
+          "y": 512.09,
+          "pinned": false
+        },
+        "term:the same fellowship, decades later": {
+          "x": 575,
+          "y": 198.15,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "the Lawrence strike",
+          "a forced resignation",
+          "the Fellowship of Reconciliation",
+          "Brookwood Labor College"
+        ],
+        "cluster:1": [
+          "the American Workers Party",
+          "a religious reconversion",
+          "the sit-down strike",
+          "Musteites"
+        ],
+        "cluster:2": [
+          "training a new generation",
+          "the Hanoi trip",
+          "Nonviolence in an Aggressive World",
+          "the Spring Mobilization Committee"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 488.6110972997256
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:25:05.680Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-reconversion",
+      "puzzleRevision": "fnv1a32:1ffc4610",
+      "board": {
+        "width": 1150,
+        "height": 740
+      },
+      "nodes": {
+        "term:the Lawrence strike": {
+          "x": 285.12,
+          "y": 311.43
+        },
+        "term:a forced resignation": {
+          "x": 237.49,
+          "y": 665.64
+        },
+        "term:the Fellowship of Reconciliation": {
+          "x": 459.78,
+          "y": 698.81
+        },
+        "term:Brookwood Labor College": {
+          "x": 133.47,
+          "y": 506.21
+        },
+        "term:the American Workers Party": {
+          "x": 445.57,
+          "y": 203.07
+        },
+        "term:a religious reconversion": {
+          "x": 701.67,
+          "y": 152.63
+        },
+        "term:the sit-down strike": {
+          "x": 360.84,
+          "y": 24.23
+        },
+        "term:Musteites": {
+          "x": 702.74,
+          "y": 22
+        },
+        "term:training a new generation": {
+          "x": 808.49,
+          "y": 327.94
+        },
+        "term:the Hanoi trip": {
+          "x": 965.49,
+          "y": 415.67
+        },
+        "term:Nonviolence in an Aggressive World": {
+          "x": 1022.9,
+          "y": 654.98
+        },
+        "term:the Spring Mobilization Committee": {
+          "x": 747.03,
+          "y": 718
+        },
+        "term:further left": {
+          "x": 459.47,
+          "y": 374.29
+        },
+        "term:what came back": {
+          "x": 599.57,
+          "y": 290.07
+        },
+        "term:the same fellowship, decades later": {
+          "x": 617.4,
+          "y": 492.49
+        },
+        "cluster:0": {
+          "x": 339.6,
+          "y": 497.23
+        },
+        "cluster:1": {
+          "x": 548.25,
+          "y": 22
+        },
+        "cluster:2": {
+          "x": 842.56,
+          "y": 520.75
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:25:08.726Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.2,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:24:59.689Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

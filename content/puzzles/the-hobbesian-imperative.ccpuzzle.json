@@ -6,12 +6,21 @@
     "political-science",
     "philosophy"
   ],
+  "subcategories": {
+    "philosophy": "political-philosophy",
+    "political-science": "international-relations"
+  },
   "tags": [
     "realism",
     "international relations"
   ],
   "info": {
     "text": "Three foundational texts that ground politics in power rather than moral aspiration: Machiavelli's princely necessity, Hobbes's lawless state of nature, and Morgenthau's realist doctrine of national interest.",
+    "links": [
+      {
+        "href": "wiki:Realism (international relations)"
+      }
+    ],
     "citations": [
       {
         "title": "The Prince",
@@ -29,11 +38,6 @@
         "publisher": "Alfred A. Knopf",
         "year": "1948"
       }
-    ],
-    "links": [
-      {
-        "href": "wiki:Realism (international relations)"
-      }
     ]
   },
   "clusters": [
@@ -42,22 +46,6 @@
       "name": "Machiavelli's Prince",
       "color": "teal",
       "fact": "Machiavelli severs statecraft from conventional morality entirely: a ruler's necessità to preserve the state can require actions no private person's virtue would permit.",
-      "seeds": [
-        "feared rather than loved",
-        "virtù"
-      ],
-      "floatingTerms": [
-        "fortuna",
-        "necessità",
-        "the lion and the fox"
-      ],
-      "terms": [
-        "feared rather than loved",
-        "virtù",
-        "fortuna",
-        "necessità",
-        "the lion and the fox"
-      ],
       "termInfo": {
         "feared rather than loved": {
           "text": "Machiavelli's judgment that a prince who cannot be both should prefer being feared, since fear is a stabler foundation for obedience than love."
@@ -79,25 +67,29 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "feared rather than loved",
+        "virtù"
+      ],
+      "floatingTerms": [
+        "fortuna",
+        "necessità",
+        "the lion and the fox"
+      ],
+      "terms": [
+        "feared rather than loved",
+        "virtù",
+        "fortuna",
+        "necessità",
+        "the lion and the fox"
+      ]
     },
     {
       "id": "hobbes-leviathan",
       "name": "Hobbes's Leviathan",
       "color": "blue",
       "fact": "Hobbes reasons from a lawless state of nature to the conclusion that only a single, absolute sovereign — created and authorized by a social contract — can make peace possible at all.",
-      "seeds": [
-        "state of nature",
-        "social contract"
-      ],
-      "floatingTerms": [
-        "sovereign"
-      ],
-      "terms": [
-        "state of nature",
-        "social contract",
-        "sovereign"
-      ],
       "termInfo": {
         "social contract": {
           "text": "The mutual agreement by which individuals in the state of nature surrender their right to self-governance to a common sovereign in exchange for peace and protection.",
@@ -118,25 +110,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "state of nature",
+        "social contract"
+      ],
+      "floatingTerms": [
+        "sovereign"
+      ],
+      "terms": [
+        "state of nature",
+        "social contract",
+        "sovereign"
+      ]
     },
     {
       "id": "morgenthaus-realism",
       "name": "Morgenthau's Realism",
       "color": "amber",
       "fact": "Morgenthau formalizes realpolitik into a discipline: a nation's interest, defined specifically as power rather than ideology or morality, is what actually explains its foreign policy — and a stable balance of power is the closest substitute for a missing world sovereign.",
-      "seeds": [
-        "balance of power",
-        "six principles of realism"
-      ],
-      "floatingTerms": [
-        "interest defined as power"
-      ],
-      "terms": [
-        "balance of power",
-        "six principles of realism",
-        "interest defined as power"
-      ],
       "termInfo": {
         "balance of power": {
           "text": "A distribution of power among states such that no single one can dominate the rest — realism's substitute for a missing sovereign above the state system.",
@@ -152,7 +144,19 @@
         "six principles of realism": {
           "text": "Morgenthau's own six-point definition of political realism, laid out in Politics Among Nations, distinguishing it from moralistic and legalistic approaches to foreign policy."
         }
-      }
+      },
+      "seeds": [
+        "balance of power",
+        "six principles of realism"
+      ],
+      "floatingTerms": [
+        "interest defined as power"
+      ],
+      "terms": [
+        "balance of power",
+        "six principles of realism",
+        "interest defined as power"
+      ]
     }
   ],
   "bridges": [

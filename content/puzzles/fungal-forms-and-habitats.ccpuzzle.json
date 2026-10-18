@@ -1,0 +1,524 @@
+{
+  "id": "fungal-forms-and-habitats",
+  "title": "Hyphae, Yeasts, and Spore Factories — How Fungi Are Built and Multiply",
+  "category": "microbiology",
+  "subcategories": {
+    "microbiology": "mycology"
+  },
+  "info": {
+    "text": "How fungi are built and how they multiply: the growth forms from hyphal network to budding yeast, the wall and membrane chemistry only fungi have, the two great sexual spore factories, the asexual spores that do the daily spreading, and the two partnerships that reshaped life on land.",
+    "links": [
+      {
+        "href": "wiki:Mycology"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Fungus",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Fungus"
+      },
+      {
+        "title": "Antifungal",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Antifungal"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "growth-forms",
+      "name": "Growth forms",
+      "color": "teal",
+      "fact": "A fungus is either a weaving of microscopic threads, a single budding cell, or — for the pathogens that infect us — a shapeshifter that switches between the two as conditions change.",
+      "termInfo": {
+        "dimorphic fungus": {
+          "text": "A pathogen that grows as a mold in the environment and switches to yeast inside the warm body — Histoplasma, Blastomyces. Temperature flips the switch.",
+          "links": [
+            {
+              "href": "wiki:Dimorphic fungus"
+            }
+          ]
+        },
+        "hypha": {
+          "text": "A cylindrical filament 2–10 micrometres wide that grows only at its tip, guided by a vesicle cluster called the Spitzenkörper. Septa may divide it into compartments, or it may stay one multinucleate tube.",
+          "links": [
+            {
+              "href": "wiki:Hypha"
+            }
+          ]
+        },
+        "mycelium": {
+          "text": "The interconnected network of hyphae — the fungus's real body, hidden in soil or food. The visible fuzz on spoiled bread is this network at the surface.",
+          "links": [
+            {
+              "href": "wiki:Mycelium"
+            }
+          ]
+        },
+        "yeast": {
+          "text": "A unicellular fungus that reproduces by budding or fission instead of growing threads. Saccharomyces brews; Candida infects.",
+          "links": [
+            {
+              "href": "wiki:Yeast"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Fungal bodies come in two plans — filamentous and unicellular — and the threads, not the cells, are the default. The mold on food is not a film of microbes but one woven organism.",
+        "links": [
+          {
+            "href": "wiki:Fungus"
+          }
+        ]
+      },
+      "seeds": [
+        "hypha",
+        "yeast"
+      ],
+      "floatingTerms": [
+        "mycelium",
+        "dimorphic fungus"
+      ],
+      "terms": [
+        "hypha",
+        "mycelium",
+        "yeast",
+        "dimorphic fungus"
+      ]
+    },
+    {
+      "id": "chemistry",
+      "name": "Signature chemistry",
+      "color": "blue",
+      "fact": "Fungi are set apart by their building materials: walls of chitin and glucans — never cellulose — and membranes built on ergosterol instead of cholesterol. Medicine aims its antifungals at exactly this list.",
+      "termInfo": {
+        "chitin": {
+          "text": "The same nitrogen-rich polymer as insect shells, woven into fungal walls for rigidity. Insect exoskeleton chemistry inside a 'plant-like' wall — fungi are neither plant nor animal.",
+          "links": [
+            {
+              "href": "wiki:Chitin"
+            }
+          ]
+        },
+        "ergosterol": {
+          "text": "The fungal membrane sterol, doing the job cholesterol does in your cells. Amphotericin binds it; azoles block its synthesis — animal cells use cholesterol instead, which is why these drugs work at all.",
+          "links": [
+            {
+              "href": "wiki:Ergosterol"
+            }
+          ]
+        },
+        "glucan": {
+          "text": "The glucose polymer — beta-1,3-glucan — that stiffens the wall alongside chitin. Echinocandin drugs block its synthesis, the newest class of antifungals.",
+          "links": [
+            {
+              "href": "wiki:Glucan"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Fungi are the only organisms that combine chitin and glucans in their walls, and they build membranes on ergosterol rather than cholesterol — a chemical identity card.",
+        "links": [
+          {
+            "href": "wiki:Fungus"
+          }
+        ]
+      },
+      "seeds": [
+        "chitin",
+        "ergosterol"
+      ],
+      "floatingTerms": [
+        "glucan"
+      ],
+      "terms": [
+        "chitin",
+        "glucan",
+        "ergosterol"
+      ]
+    },
+    {
+      "id": "sexual-factories",
+      "name": "Sexual spore factories",
+      "color": "amber",
+      "fact": "The two great fungal lineages are named for their sexual machinery: sac fungi, whose asci produce ascospores, and club fungi, whose basidia produce basidiospores — often raised high on a fruiting body for the launch.",
+      "termInfo": {
+        "ascospore": {
+          "text": "A sexual spore formed inside an ascus after two nuclei fuse and undergo meiosis — typically eight per sac, packed like bullets.",
+          "links": [
+            {
+              "href": "wiki:Ascospore"
+            }
+          ]
+        },
+        "ascus": {
+          "text": "The sac cell of the ascomycetes: meiosis happens inside it, and many asci fire their ascospores simultaneously in a coordinated puff.",
+          "links": [
+            {
+              "href": "wiki:Ascus"
+            }
+          ]
+        },
+        "basidiocarp": {
+          "text": "The club-fungus fruiting body — the mushroom itself: a spore-producing surface raised into the air so wind can take the crop. Its gills are packed with basidia.",
+          "links": [
+            {
+              "href": "wiki:Basidiocarp"
+            }
+          ]
+        },
+        "basidiospore": {
+          "text": "A sexual spore grown on the outside of a basidium, usually four per club, and often shot off by a tiny water-droplet catapult.",
+          "links": [
+            {
+              "href": "wiki:Basidiospore"
+            }
+          ]
+        },
+        "basidium": {
+          "text": "The club cell of the basidiomycetes: after meiosis, spores bud from its surface on tiny stalks.",
+          "links": [
+            {
+              "href": "wiki:Basidium"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Ascomycetes (sac fungi) and basidiomycetes (club fungi) are named for their sexual machinery. Meiosis happens inside the ascus or on the basidium; the fruiting body is the launchpad.",
+        "links": [
+          {
+            "href": "wiki:Fungus"
+          }
+        ]
+      },
+      "seeds": [
+        "ascus",
+        "basidium"
+      ],
+      "floatingTerms": [
+        "ascospore",
+        "basidiospore",
+        "basidiocarp"
+      ],
+      "terms": [
+        "ascus",
+        "ascospore",
+        "basidium",
+        "basidiospore",
+        "basidiocarp"
+      ]
+    },
+    {
+      "id": "asexual-spores",
+      "name": "Asexual spores",
+      "color": "magenta",
+      "fact": "The spores that do the daily spreading need no mating: dry conidia drift on the wind, sporangia hold theirs until they burst, and the chytrids swim theirs around with a flagellum.",
+      "termInfo": {
+        "conidium": {
+          "text": "A dry, naked asexual spore budded off specialized hyphae — the dust that puffs from a ripe puffball's asexual cousins, and what Penicillium's green powder is made of.",
+          "links": [
+            {
+              "href": "wiki:Conidium"
+            }
+          ]
+        },
+        "sporangiospore": {
+          "text": "An asexual spore produced and carried inside a sporangium, a sac at the tip of a stalked hypha, released when the sac breaks.",
+          "links": [
+            {
+              "href": "wiki:Sporangium"
+            }
+          ]
+        },
+        "zoospore": {
+          "text": "A flagellated swimming spore — the chytrids' trick, and the reason those fungi need water. The amphibian-killing Batrachochytrium swims this way.",
+          "links": [
+            {
+              "href": "wiki:Zoospore"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "These are the workhorse propagules — no meiosis, no mating, just fast cloning at spore scale. Molds, mildews, and most plant diseases run on them.",
+        "links": [
+          {
+            "href": "wiki:Fungus"
+          }
+        ]
+      },
+      "seeds": [
+        "conidium",
+        "sporangiospore"
+      ],
+      "floatingTerms": [
+        "zoospore"
+      ],
+      "terms": [
+        "conidium",
+        "sporangiospore",
+        "zoospore"
+      ]
+    },
+    {
+      "id": "partnerships",
+      "name": "The great partnerships",
+      "color": "olive",
+      "fact": "Two partnerships changed the planet: the fungus-root union that feeds most of the plants alive, and the fungus-alga composite that can live on bare rock where neither partner survives alone.",
+      "termInfo": {
+        "lichen": {
+          "text": "A composite organism: a fungus (usually an ascomycete) farming algae or cyanobacteria inside a layered body it builds itself. Lichens live on bare rock, deserts, and tundra — and some survive space exposure.",
+          "links": [
+            {
+              "href": "wiki:Lichen"
+            }
+          ]
+        },
+        "mycorrhiza": {
+          "text": "The fungus-root partnership under roughly ninety percent of plant species: the fungus's hyphae extend the root's reach for water and minerals; the plant pays in sugar. Arbuscules are the exchange booths inside root cells.",
+          "links": [
+            {
+              "href": "wiki:Mycorrhiza"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Fungi invented two of evolution's great partnerships. Both reshape the fungus's body and extend its reach far beyond what hyphae alone could do.",
+        "links": [
+          {
+            "href": "wiki:Fungus"
+          }
+        ]
+      },
+      "seeds": [
+        "mycorrhiza"
+      ],
+      "floatingTerms": [
+        "lichen"
+      ],
+      "terms": [
+        "mycorrhiza",
+        "lichen"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "asexual-default",
+      "term": "reproduction without sex",
+      "clusters": [
+        "growth-forms",
+        "asexual-spores"
+      ],
+      "fact": "Sex is optional in fungi: yeasts multiply by simple budding, and the fuzzy coat on old bread is a mycelium raining dry conidia — asexual reproduction does most of the daily work of fungal life.",
+      "info": {
+        "text": "A single bread-mold colony can release tens of thousands of conidia per hour; that asexual engine is why fungi colonize so fast.",
+        "links": [
+          {
+            "href": "wiki:Fungus"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "growth-forms": "mycelium",
+        "asexual-spores": "conidium"
+      }
+    },
+    {
+      "id": "antifungal-targets",
+      "term": "the antifungal target list",
+      "clusters": [
+        "chemistry",
+        "growth-forms"
+      ],
+      "fact": "Fungi are eukaryotes like us, so medicine aims at their signature chemistry: amphotericin binds ergosterol and azoles starve its synthesis, while echinocandins block the glucan of the wall — selective, but only relatively.",
+      "info": {
+        "text": "The selectivity is relative: amphotericin can still touch human cholesterol membranes, which is why intravenous use injures kidneys.",
+        "links": [
+          {
+            "href": "wiki:Antifungal"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "chemistry": "ergosterol",
+        "growth-forms": "yeast"
+      }
+    },
+    {
+      "id": "two-economies",
+      "term": "two reproduction economies",
+      "clusters": [
+        "sexual-factories",
+        "asexual-spores"
+      ],
+      "fact": "The same fungus often runs both economies: asexual conidia do the daily spreading, while the elaborate ascus or basidium machinery — and the fruiting body that raises it — appears only when conditions demand a reshuffled generation.",
+      "info": {
+        "text": "Old mycology books listed the sexual and asexual stages as different species before their life cycles were joined.",
+        "links": [
+          {
+            "href": "wiki:Fungus"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "sexual-factories": "basidiocarp",
+        "asexual-spores": "conidium"
+      }
+    },
+    {
+      "id": "partnership-reshapes",
+      "term": "partnership reshapes the body",
+      "clusters": [
+        "partnerships",
+        "growth-forms"
+      ],
+      "fact": "Symbiosis is visible in the architecture: inside a lichen the fungus builds a wholly different layered body around its algal partner, and inside a plant root mycorrhizal hyphae branch into arbuscules built for nutrient exchange.",
+      "info": {
+        "text": "Over ninety percent of plant species depend on mycorrhizal partners — the partnership is the norm, not the exception.",
+        "links": [
+          {
+            "href": "wiki:Mycorrhiza"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "partnerships": "mycorrhiza",
+        "growth-forms": "hypha"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "partnerships",
+        "to": "growth-forms"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "thread-versus-weave",
+      "prompt": "Which term names the whole woven network rather than the single filament it is built from?",
+      "explanation": "The hypha is the filament — the unit of construction; the mycelium is the woven network of many hyphae. Yeast never builds threads, and a dimorphic fungus is defined by switching between forms.",
+      "targets": [
+        "mycelium"
+      ],
+      "reasons": {
+        "mycelium": "The network of many hyphae — the fungus's real body."
+      }
+    },
+    {
+      "id": "drug-bullseye",
+      "prompt": "Which two signature molecules are the direct targets of antifungal drug classes?",
+      "explanation": "Both are antifungal bullseyes: amphotericin binds ergosterol and azoles starve its synthesis; echinocandins block glucan. Chitin stiffens the wall too, but the flagship drug classes aim at ergosterol and glucan.",
+      "targets": [
+        "ergosterol",
+        "glucan"
+      ],
+      "reasons": {
+        "ergosterol": "Amphotericin binds it; azoles starve its synthesis.",
+        "glucan": "Echinocandins block its synthesis in the wall."
+      }
+    },
+    {
+      "id": "inside-the-sac",
+      "prompt": "Which spore forms inside a sac by meiosis — in multiples of eight?",
+      "explanation": "Inside an ascus, meiosis yields ascospores — typically eight per sac. Basidiospores form on the outside of a basidium, not inside a sac.",
+      "targets": [
+        "ascospore"
+      ],
+      "reasons": {
+        "ascospore": "The ascus's internal product — eight bullets per sac."
+      }
+    },
+    {
+      "id": "the-launchpad",
+      "prompt": "Which structure is the fruiting body built to raise club spores into the wind?",
+      "explanation": "The basidiocarp — the mushroom — exists to raise basidium-packed surfaces into the air so the basidiospores can launch. Ascospores fire from their own asci without it.",
+      "targets": [
+        "basidiocarp"
+      ],
+      "reasons": {
+        "basidiocarp": "The mushroom itself — gills packed with basidia."
+      }
+    },
+    {
+      "id": "the-swimmer",
+      "prompt": "Which asexual spore swims under its own power?",
+      "explanation": "Chytrid zoospores swim with a flagellum — the only fungal spores that do. Conidia ride the wind dry; sporangiospores wait inside a sac until it breaks.",
+      "targets": [
+        "zoospore"
+      ],
+      "reasons": {
+        "zoospore": "Flagellated — the chytrids' water-dependent trick."
+      }
+    },
+    {
+      "id": "no-mate-required",
+      "prompt": "Which two terms name structures that multiply a fungus with no mating at all?",
+      "explanation": "Budding is asexual cloning, so is conidium production — neither needs a mate. The ascus and basidium are the sex organs: meiosis happens in them and nowhere else on this list.",
+      "targets": [
+        "conidium",
+        "yeast"
+      ],
+      "reasons": {
+        "conidium": "Budded off hyphae by cloning — no meiosis.",
+        "yeast": "Budding cells — cloning again, no mating."
+      }
+    },
+    {
+      "id": "both-economies",
+      "prompt": "Which pairing shows both reproduction economies at once — the spore of daily spreading and the body built for the sexual launch?",
+      "explanation": "The two reproduction economies on one board: the conidium is the asexual workhorse of daily spreading, while the basidiocarp — the mushroom — is built only for the sexual launch of basidiospores. The same fungus often runs both.",
+      "targets": [
+        "conidium",
+        "basidiocarp"
+      ],
+      "reasons": {
+        "basidiocarp": "The sexual launchpad — raised into the wind for basidiospores.",
+        "conidium": "The asexual workhorse — no mating, daily cloning at spore scale."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "bacterial-architectures",
+        "reason": "Batch sibling: the bacterial cell and the fungal cell make the two great eukaryote-versus-prokaryote contrast boards — walls, shapes, and spores on both sides."
+      },
+      {
+        "id": "virus-build-and-takeover",
+        "reason": "Batch sibling: the minimal parasite versus the most architecturally ambitious one — both teach spores and takeover from opposite ends."
+      },
+      {
+        "id": "parasite-life-cycles",
+        "reason": "Batch sibling: fungi and parasites both run multi-stage life cycles with specialized dispersal forms — cyst and conidium play the same job on different boards."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "Fungi are neither plants nor animals, though they were classified as plants for centuries. They build their walls from chitin — insect-shell chemistry — and run their membranes on ergosterol instead of cholesterol. And their bodies are strange: the default fungus is not a cell but a thread, and a mushroom is merely the fruit of a vast hidden weaving.\r\n\r\nThe body comes in two plans. Filamentous fungi grow as hyphae — microscopic tubes that extend only at their tips and weave into a network called a mycelium. Yeasts give up the threads and live as single cells that multiply by budding. Some pathogenic fungi are shapeshifters, growing as molds in the soil and switching to the yeast form inside a warm body.\r\n\r\nReproduction runs on two economies. The asexual economy never stops: dry conidia drift from every mold, sporangia burst, and chytrid spores swim. The sexual economy is rarer and grander — meiosis happens inside an ascus (the sac that names the ascomycetes) or on a basidium (the club that names the basidiomycetes), and the familiar mushroom is a basidiocarp: a launchpad built to raise basidiospores into the wind.\r\n\r\nThat chemistry defines the partnerships too. A mycorrhiza weaves fungal hyphae around and into plant roots — the deal that feeds most of the plants on Earth. A lichen wraps an alga inside a fungus-built body tough enough for bare rock. Both are bodies no single species could build."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

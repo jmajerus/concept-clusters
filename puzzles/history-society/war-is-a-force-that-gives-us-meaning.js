@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "war-is-a-force-that-gives-us-meaning",
   "title": "War Is a Force That Gives Us Meaning",
   "category": "history-society",
   "categories": [
     "history-society",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism"
+  },
   "tags": [
     "book",
     "war"
@@ -281,3 +285,308 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "war-is-a-force-that-gives-us-meaning",
+      "puzzleRevision": "fnv1a32:63e9dda3",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:the myth of war": {
+          "x": 117.84,
+          "y": 437,
+          "pinned": false
+        },
+        "term:mythmakers": {
+          "x": 179.49,
+          "y": 334,
+          "pinned": false
+        },
+        "term:lost mythic status": {
+          "x": 78.7,
+          "y": 250.35,
+          "pinned": false
+        },
+        "term:exoticism": {
+          "x": 50.35,
+          "y": 372.93,
+          "pinned": false
+        },
+        "term:war as a drug": {
+          "x": 318.89,
+          "y": 112.14,
+          "pinned": false
+        },
+        "term:exhilaration": {
+          "x": 255.19,
+          "y": 23,
+          "pinned": false
+        },
+        "term:escape from meaninglessness": {
+          "x": 107.05,
+          "y": 63.72,
+          "pinned": false
+        },
+        "term:organized murder": {
+          "x": 567.6,
+          "y": 23,
+          "pinned": false
+        },
+        "term:moral collapse": {
+          "x": 377.93,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the inhuman enemy": {
+          "x": 564.45,
+          "y": 157.36,
+          "pinned": false
+        },
+        "term:the plague of nationalism": {
+          "x": 489.47,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the humanizing power of art": {
+          "x": 396.49,
+          "y": 267.04,
+          "pinned": false
+        },
+        "term:compassion for the enemy": {
+          "x": 287.7,
+          "y": 437,
+          "pinned": false
+        },
+        "term:grotesque beauty": {
+          "x": 221.13,
+          "y": 210.86,
+          "pinned": false
+        },
+        "term:the noble cause": {
+          "x": 453.54,
+          "y": 96.41,
+          "pinned": false
+        },
+        "term:the common enemy": {
+          "x": 567.6,
+          "y": 307.65,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2874.56,
+        "score": 2874.555165936821
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:28:11.742Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "war-is-a-force-that-gives-us-meaning",
+      "puzzleRevision": "fnv1a32:63e9dda3",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 802.51,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 471.19,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 164.81,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 157.49,
+          "y": 318,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:grotesque beauty": {
+          "x": 714.8,
+          "y": 468.13,
+          "pinned": false
+        },
+        "term:the noble cause": {
+          "x": 454.13,
+          "y": 307.28,
+          "pinned": false
+        },
+        "term:the common enemy": {
+          "x": 288.89,
+          "y": 169.34,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "the myth of war",
+          "mythmakers",
+          "lost mythic status",
+          "exoticism"
+        ],
+        "cluster:1": [
+          "war as a drug",
+          "exhilaration",
+          "escape from meaninglessness"
+        ],
+        "cluster:2": [
+          "organized murder",
+          "moral collapse",
+          "the inhuman enemy"
+        ],
+        "cluster:3": [
+          "the plague of nationalism",
+          "the humanizing power of art",
+          "compassion for the enemy"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 339.46432940418117
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:28:14.448Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "war-is-a-force-that-gives-us-meaning",
+      "puzzleRevision": "fnv1a32:63e9dda3",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:the myth of war": {
+          "x": 219.7,
+          "y": 42.55
+        },
+        "term:mythmakers": {
+          "x": 568.93,
+          "y": 230.41
+        },
+        "term:lost mythic status": {
+          "x": 374.27,
+          "y": 22
+        },
+        "term:exoticism": {
+          "x": 511.91,
+          "y": 22
+        },
+        "term:war as a drug": {
+          "x": 688.18,
+          "y": 207.36
+        },
+        "term:exhilaration": {
+          "x": 902.2,
+          "y": 36.92
+        },
+        "term:escape from meaninglessness": {
+          "x": 854.95,
+          "y": 262.64
+        },
+        "term:organized murder": {
+          "x": 762.63,
+          "y": 598
+        },
+        "term:moral collapse": {
+          "x": 640.12,
+          "y": 334.81
+        },
+        "term:the inhuman enemy": {
+          "x": 478.8,
+          "y": 330.61
+        },
+        "term:the plague of nationalism": {
+          "x": 324.84,
+          "y": 432.14
+        },
+        "term:the humanizing power of art": {
+          "x": 114.78,
+          "y": 381.57
+        },
+        "term:compassion for the enemy": {
+          "x": 95.6,
+          "y": 169.82
+        },
+        "term:grotesque beauty": {
+          "x": 623.42,
+          "y": 80.23
+        },
+        "term:the noble cause": {
+          "x": 757.24,
+          "y": 417.58
+        },
+        "term:the common enemy": {
+          "x": 373.52,
+          "y": 598
+        },
+        "cluster:0": {
+          "x": 483.16,
+          "y": 134.56
+        },
+        "cluster:1": {
+          "x": 775.76,
+          "y": 93.54
+        },
+        "cluster:2": {
+          "x": 566.72,
+          "y": 524.35
+        },
+        "cluster:3": {
+          "x": 308.44,
+          "y": 210.75
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:28:17.612Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:28:09.158Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "power-over-power-to",
   "title": "Power Over, Power To",
-  "category": "political-science",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "political-science",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "tags": [
     "book"
   ],
@@ -220,3 +224,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "power-over-power-to",
+      "puzzleRevision": "fnv1a32:5250038c",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:potency": {
+          "x": 284.35,
+          "y": 256.81,
+          "pinned": false
+        },
+        "term:mastery": {
+          "x": 192.98,
+          "y": 268.32,
+          "pinned": false
+        },
+        "term:productiveness": {
+          "x": 251.71,
+          "y": 366.19,
+          "pinned": false
+        },
+        "term:self-realization": {
+          "x": 386.65,
+          "y": 320.39,
+          "pinned": false
+        },
+        "term:domination": {
+          "x": 576.7,
+          "y": 128.59,
+          "pinned": false
+        },
+        "term:exploitation": {
+          "x": 494.79,
+          "y": 40.9,
+          "pinned": false
+        },
+        "term:sadism": {
+          "x": 599.1,
+          "y": 32.79,
+          "pinned": false
+        },
+        "term:flight from aloneness": {
+          "x": 551.85,
+          "y": 275.04,
+          "pinned": false
+        },
+        "term:rational authority": {
+          "x": 189.39,
+          "y": 23,
+          "pinned": false
+        },
+        "term:irrational authority": {
+          "x": 345.51,
+          "y": 84.16,
+          "pinned": false
+        },
+        "term:anonymous authority": {
+          "x": 93.06,
+          "y": 156.45,
+          "pinned": false
+        },
+        "term:conformity": {
+          "x": 53.5,
+          "y": 23,
+          "pinned": false
+        },
+        "term:competence": {
+          "x": 231.75,
+          "y": 169.95,
+          "pinned": false
+        },
+        "term:submission": {
+          "x": 468.98,
+          "y": 155.32,
+          "pinned": false
+        },
+        "term:freedom": {
+          "x": 483.06,
+          "y": 392.58,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2310.31,
+        "score": 2310.310680412277
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:16:36.645Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "power-over-power-to",
+      "puzzleRevision": "fnv1a32:5250038c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 196.57,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 708.38,
+          "y": 378.72,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 251.62,
+          "y": 378.72,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:competence": {
+          "x": 292.27,
+          "y": 214.1,
+          "pinned": false
+        },
+        "term:submission": {
+          "x": 480,
+          "y": 378.72,
+          "pinned": false
+        },
+        "term:freedom": {
+          "x": 667.73,
+          "y": 214.1,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "potency",
+          "mastery",
+          "productiveness",
+          "self-realization"
+        ],
+        "cluster:1": [
+          "domination",
+          "exploitation",
+          "sadism",
+          "flight from aloneness"
+        ],
+        "cluster:2": [
+          "rational authority",
+          "irrational authority",
+          "anonymous authority",
+          "conformity"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 370.2316586400926
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:16:39.029Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "power-over-power-to",
+      "puzzleRevision": "fnv1a32:5250038c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:potency": {
+          "x": 662.59,
+          "y": 23.09
+        },
+        "term:mastery": {
+          "x": 541.37,
+          "y": 122.36
+        },
+        "term:productiveness": {
+          "x": 756.18,
+          "y": 95.24
+        },
+        "term:self-realization": {
+          "x": 577.23,
+          "y": 241.54
+        },
+        "term:domination": {
+          "x": 563.14,
+          "y": 455.01
+        },
+        "term:exploitation": {
+          "x": 802.98,
+          "y": 438.32
+        },
+        "term:sadism": {
+          "x": 740.89,
+          "y": 527.55
+        },
+        "term:flight from aloneness": {
+          "x": 736.3,
+          "y": 297.34
+        },
+        "term:rational authority": {
+          "x": 377.33,
+          "y": 300.34
+        },
+        "term:irrational authority": {
+          "x": 415.42,
+          "y": 469.77
+        },
+        "term:anonymous authority": {
+          "x": 200.9,
+          "y": 570.55
+        },
+        "term:conformity": {
+          "x": 117.19,
+          "y": 440.17
+        },
+        "term:competence": {
+          "x": 456.12,
+          "y": 184.46
+        },
+        "term:submission": {
+          "x": 506.34,
+          "y": 354.99
+        },
+        "term:freedom": {
+          "x": 611.67,
+          "y": 361.26
+        },
+        "cluster:0": {
+          "x": 640.17,
+          "y": 130.63
+        },
+        "cluster:1": {
+          "x": 680.87,
+          "y": 440.96
+        },
+        "cluster:2": {
+          "x": 254.25,
+          "y": 410.66
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:16:41.618Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:16:33.572Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

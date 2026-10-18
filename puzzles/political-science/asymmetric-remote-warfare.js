@@ -3,15 +3,21 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "asymmetric-remote-warfare",
   "title": "Asymmetric & Remote Warfare",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
-    "history-society"
+    "history-society",
+    "science-technology-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "political-science": "international-relations",
+    "science-technology-society": "automation-accountability"
+  },
   "tags": [
     "book",
     "drones",
@@ -443,3 +449,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "asymmetric-remote-warfare",
+      "puzzleRevision": "fnv1a32:88123f17",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:AUMF": {
+          "x": 222.74,
+          "y": 302.64,
+          "pinned": false
+        },
+        "term:associated forces": {
+          "x": 253.09,
+          "y": 412.66,
+          "pinned": false
+        },
+        "term:War Powers Resolution": {
+          "x": 191.1,
+          "y": 179.93,
+          "pinned": false
+        },
+        "term:congressional deference": {
+          "x": 95.03,
+          "y": 339.9,
+          "pinned": false
+        },
+        "term:Disposition Matrix": {
+          "x": 494.2,
+          "y": 187.97,
+          "pinned": false
+        },
+        "term:Anwar al-Awlaki": {
+          "x": 362.48,
+          "y": 112.23,
+          "pinned": false
+        },
+        "term:Terror Tuesday": {
+          "x": 607.44,
+          "y": 91.44,
+          "pinned": false
+        },
+        "term:baseball cards": {
+          "x": 481.46,
+          "y": 39.71,
+          "pinned": false
+        },
+        "term:signature strikes": {
+          "x": 725.1,
+          "y": 203.32,
+          "pinned": false
+        },
+        "term:personality strikes": {
+          "x": 785.64,
+          "y": 352.92,
+          "pinned": false
+        },
+        "term:double-tap strikes": {
+          "x": 841.86,
+          "y": 96.52,
+          "pinned": false
+        },
+        "term:kill chain": {
+          "x": 855.02,
+          "y": 232.08,
+          "pinned": false
+        },
+        "term:metadata": {
+          "x": 462.19,
+          "y": 379,
+          "pinned": false
+        },
+        "term:SKYNET": {
+          "x": 373.27,
+          "y": 402.98,
+          "pinned": false
+        },
+        "term:machine learning": {
+          "x": 523.23,
+          "y": 486.47,
+          "pinned": false
+        },
+        "term:selectors": {
+          "x": 396.79,
+          "y": 495.28,
+          "pinned": false
+        },
+        "term:pattern-of-life analysis": {
+          "x": 603.39,
+          "y": 332.04,
+          "pinned": false
+        },
+        "term:JSOC": {
+          "x": 611.19,
+          "y": 196.06,
+          "pinned": false
+        },
+        "term:extrajudicial killing": {
+          "x": 345.89,
+          "y": 272.78,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2999.71,
+        "score": 2999.710531929704
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:32:53.669Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "asymmetric-remote-warfare",
+      "puzzleRevision": "fnv1a32:88123f17",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 281.81,
+          "y": 555.22,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 281.81,
+          "y": 240.78,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 768.19,
+          "y": 240.78,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 768.19,
+          "y": 555.22,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:pattern-of-life analysis": {
+          "x": 768.19,
+          "y": 398,
+          "pinned": false
+        },
+        "term:JSOC": {
+          "x": 525,
+          "y": 240.78,
+          "pinned": false
+        },
+        "term:extrajudicial killing": {
+          "x": 281.81,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "AUMF",
+          "associated forces",
+          "War Powers Resolution",
+          "congressional deference"
+        ],
+        "cluster:1": [
+          "Disposition Matrix",
+          "Anwar al-Awlaki",
+          "Terror Tuesday",
+          "baseball cards"
+        ],
+        "cluster:2": [
+          "signature strikes",
+          "personality strikes",
+          "double-tap strikes",
+          "kill chain"
+        ],
+        "cluster:3": [
+          "metadata",
+          "SKYNET",
+          "machine learning",
+          "selectors"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 350.00187573079626
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:32:56.173Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "asymmetric-remote-warfare",
+      "puzzleRevision": "fnv1a32:88123f17",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:AUMF": {
+          "x": 271.58,
+          "y": 236.19
+        },
+        "term:associated forces": {
+          "x": 73.55,
+          "y": 465.68
+        },
+        "term:War Powers Resolution": {
+          "x": 86.15,
+          "y": 294.91
+        },
+        "term:congressional deference": {
+          "x": 146.68,
+          "y": 116.58
+        },
+        "term:Disposition Matrix": {
+          "x": 362.54,
+          "y": 155.92
+        },
+        "term:Anwar al-Awlaki": {
+          "x": 286.67,
+          "y": 22
+        },
+        "term:Terror Tuesday": {
+          "x": 429.33,
+          "y": 22
+        },
+        "term:baseball cards": {
+          "x": 669.34,
+          "y": 22
+        },
+        "term:signature strikes": {
+          "x": 624.9,
+          "y": 309.99
+        },
+        "term:personality strikes": {
+          "x": 775.82,
+          "y": 128.93
+        },
+        "term:double-tap strikes": {
+          "x": 883.3,
+          "y": 255.26
+        },
+        "term:kill chain": {
+          "x": 889.87,
+          "y": 518
+        },
+        "term:metadata": {
+          "x": 547,
+          "y": 411.48
+        },
+        "term:SKYNET": {
+          "x": 502.31,
+          "y": 598
+        },
+        "term:machine learning": {
+          "x": 293.83,
+          "y": 598
+        },
+        "term:selectors": {
+          "x": 187.58,
+          "y": 527.29
+        },
+        "term:pattern-of-life analysis": {
+          "x": 628.5,
+          "y": 540.8
+        },
+        "term:JSOC": {
+          "x": 678.2,
+          "y": 205.82
+        },
+        "term:extrajudicial killing": {
+          "x": 446.3,
+          "y": 309.7
+        },
+        "cluster:0": {
+          "x": 260.07,
+          "y": 382.13
+        },
+        "cluster:1": {
+          "x": 549.77,
+          "y": 142.24
+        },
+        "cluster:2": {
+          "x": 778.82,
+          "y": 404.07
+        },
+        "cluster:3": {
+          "x": 428.17,
+          "y": 496.29
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:32:58.982Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:32:51.298Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

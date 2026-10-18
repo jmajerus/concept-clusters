@@ -1,13 +1,22 @@
 {
   "id": "the-quiet-rebellion",
   "title": "The Quiet Rebellion",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance"
+  },
   "info": {
     "text": "Mulford Q. Sibley, University of Minnesota political theorist, Quaker conscientious objector, and self-described democratic socialist, whose 611-page history of political thought running from Plato to Marx was itself evidence that his McCarthy-era arguments for pacifism, civil disobedience, and utopian thought as serious political theory came from someone who commanded the whole tradition, not from someone speaking outside it.",
+    "links": [
+      {
+        "href": "wiki:Mulford Q. Sibley"
+      }
+    ],
     "citations": [
       {
         "title": "Political Ideas and Ideologies: A History of Political Thought",
@@ -33,11 +42,6 @@
         "publisher": "Council on Religion and International Affairs",
         "year": "1970"
       }
-    ],
-    "links": [
-      {
-        "href": "wiki:Mulford Q. Sibley"
-      }
     ]
   },
   "clusters": [
@@ -46,20 +50,6 @@
       "name": "Kinds of Pacifism",
       "color": "teal",
       "fact": "Sibley's own scholarly project treated pacifism not as one position but a family of political theories: religious pacifism grounds refusal in a theological conviction -- his own tradition's peace testimony among them, alongside traditions as different as Hindu pacifism -- while political pacifism argues against violence on strategic, not devotional, grounds: that nonviolence simply works better.",
-      "seeds": [
-        "religious pacifism",
-        "political pacifism"
-      ],
-      "floatingTerms": [
-        "the peace testimony",
-        "Hindu pacifism"
-      ],
-      "terms": [
-        "religious pacifism",
-        "political pacifism",
-        "the peace testimony",
-        "Hindu pacifism"
-      ],
       "termInfo": {
         "the peace testimony": {
           "links": [
@@ -76,13 +66,35 @@
             "href": "wiki:Mulford Q. Sibley"
           }
         ]
-      }
+      },
+      "seeds": [
+        "religious pacifism",
+        "political pacifism"
+      ],
+      "floatingTerms": [
+        "the peace testimony",
+        "Hindu pacifism"
+      ],
+      "terms": [
+        "religious pacifism",
+        "political pacifism",
+        "the peace testimony",
+        "Hindu pacifism"
+      ]
     },
     {
       "id": "the-state-and-the-objector",
       "name": "The State and the Objector",
       "color": "brown",
       "fact": "Sibley's own WWII record supplied the raw material for Conscription of Conscience, his study with Philip Jacob of how the American state actually sorted its objectors: some accepted noncombatant service inside the military itself, some performed alternative civilian service instead, and a further, smaller group refused to cooperate with the whole apparatus at all and went to prison rather than accept any state-assigned alternative.",
+      "info": {
+        "text": "The real, unequal tracks the WWII draft system actually sorted objectors into, documented by Sibley's own study of the American state's machinery for conscientious objection.",
+        "links": [
+          {
+            "href": "wiki:Conscientious objector"
+          }
+        ]
+      },
       "seeds": [
         "conscientious objector",
         "alternative civilian service"
@@ -96,21 +108,21 @@
         "alternative civilian service",
         "noncombatant service",
         "absolutist refusal"
-      ],
-      "info": {
-        "text": "The real, unequal tracks the WWII draft system actually sorted objectors into, documented by Sibley's own study of the American state's machinery for conscientious objection.",
-        "links": [
-          {
-            "href": "wiki:Conscientious objector"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "conscience-law-and-the-academy",
       "name": "Conscience, Law, and the Academy",
       "color": "magenta",
       "fact": "Sibley's own career put these commitments on public display at the University of Minnesota: he argued conscience could create a positive obligation to disobey unjust law, not just a private excuse from it, wore a red tie as an open declaration of his own democratic socialism, taught utopian political thought as a serious rather than merely wishful genre, and as faculty advisor to the Student Peace Union became the subject of an actual, if ultimately unsuccessful, legislative investigation into communist influence on campus.",
+      "info": {
+        "text": "Sibley's own career-long insistence that conscience, utopian thinking, and open democratic-socialist commitment all belonged inside, not outside, serious political life and a university's own faculty.",
+        "links": [
+          {
+            "href": "wiki:Mulford Q. Sibley"
+          }
+        ]
+      },
       "seeds": [
         "the obligation to disobey",
         "democratic socialism"
@@ -124,15 +136,7 @@
         "democratic socialism",
         "utopian political thought",
         "the Student Peace Union"
-      ],
-      "info": {
-        "text": "Sibley's own career-long insistence that conscience, utopian thinking, and open democratic-socialist commitment all belonged inside, not outside, serious political life and a university's own faculty.",
-        "links": [
-          {
-            "href": "wiki:Mulford Q. Sibley"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [
@@ -160,14 +164,14 @@
       ],
       "fact": "Absolutist refusal is what the obligation to disobey looks like in practice: for Sibley, conscience was not simply a private excuse allowing quiet noncompliance with an unjust law, but a positive duty to resist -- publicly, and at real cost, exactly as the objectors who chose prison over any accommodation did.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "conscience-law-and-the-academy": "the obligation to disobey",
+        "the-state-and-the-objector": "absolutist refusal"
+      },
       "direction": {
         "kind": "through",
         "from": "conscience-law-and-the-academy",
         "to": "the-state-and-the-objector"
-      },
-      "idealTerms": {
-        "conscience-law-and-the-academy": "the obligation to disobey",
-        "the-state-and-the-objector": "absolutist refusal"
       }
     },
     {

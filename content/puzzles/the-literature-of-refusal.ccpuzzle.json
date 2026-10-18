@@ -4,8 +4,12 @@
   "category": "history-society",
   "categories": [
     "history-society",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance"
+  },
   "tags": [
     "book",
     "war",

@@ -1,12 +1,14 @@
 {
   "id": "malignant-aggression",
   "title": "Malignant Aggression",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "psychology"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
   "tags": [

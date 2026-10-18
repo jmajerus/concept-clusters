@@ -1,0 +1,361 @@
+{
+  "id": "phonemes-and-patterns",
+  "title": "Phonemes and Patterns",
+  "category": "linguistics",
+  "subcategories": {
+    "linguistics": "phonetics-phonology"
+  },
+  "info": {
+    "text": "How phonology turns raw sound into a system: the phoneme as a language's unit of contrast, the allophones it varies through, and the syllable patterns and melodic layers that organize them.",
+    "links": [
+      {
+        "href": "wiki:Phonology"
+      },
+      {
+        "href": "wiki:Phoneme"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Phonology",
+        "url": "https://en.wikipedia.org/wiki/Phonology"
+      },
+      {
+        "title": "Phoneme",
+        "url": "https://en.wikipedia.org/wiki/Phoneme"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "phoneme",
+      "name": "The phoneme & its variants",
+      "color": "teal",
+      "fact": "The machinery by which a language sorts continuously varying sounds into a small set of meaning-distinguishing categories.",
+      "termInfo": {
+        "allophone": {
+          "text": "A context-determined variant of a phoneme whose substitution never changes meaning: English [pʰ] in 'pot' and [p] in 'spot' are allophones of /p/.",
+          "links": [
+            {
+              "href": "wiki:Allophone"
+            }
+          ]
+        },
+        "complementary distribution": {
+          "text": "Two related sounds never occur in the same environment — English aspirated [pʰ] only syllable-initially, plain [p] elsewhere — so the position selects the variant.",
+          "links": [
+            {
+              "href": "wiki:Complementary distribution"
+            }
+          ]
+        },
+        "free variation": {
+          "text": "Two sounds occur in the same environment without changing meaning; the choice follows the speaker or habit, as with released versus unreleased final stops.",
+          "links": [
+            {
+              "href": "wiki:Free variation"
+            }
+          ]
+        },
+        "minimal pair": {
+          "text": "Two words identical except for one sound with different meanings — 'ship' versus 'sheep' — the standard evidence that two sounds are separate phonemes.",
+          "links": [
+            {
+              "href": "wiki:Minimal pair"
+            }
+          ]
+        },
+        "phone": {
+          "text": "Any actual speech sound produced, written in square brackets: [pʰ] and [p] are two distinct phones.",
+          "links": [
+            {
+              "href": "wiki:Phone (phonetics)"
+            }
+          ]
+        },
+        "phoneme": {
+          "text": "A family of sounds speakers treat as one unit; swapping it for a different phoneme changes word meaning — /p/ versus /b/ in 'pat'/'bat'.",
+          "links": [
+            {
+              "href": "wiki:Phoneme"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Phoneme"
+          }
+        ]
+      },
+      "seeds": [
+        "phoneme",
+        "allophone"
+      ],
+      "floatingTerms": [
+        "phone",
+        "minimal pair",
+        "complementary distribution",
+        "free variation"
+      ],
+      "terms": [
+        "phoneme",
+        "phone",
+        "allophone",
+        "minimal pair",
+        "complementary distribution",
+        "free variation"
+      ]
+    },
+    {
+      "id": "syllable",
+      "name": "Syllable & position",
+      "color": "blue",
+      "fact": "How a language strings sounds into syllables with named parts — and the positional rules about which sounds may go where.",
+      "termInfo": {
+        "coda": {
+          "text": "The consonant or consonants after the syllable's vowel — the /k/ at the end of 'sock'. English phonotactics forbids /h/ and /ŋ/ from certain positions: /ŋ/ occurs only in the coda.",
+          "links": [
+            {
+              "href": "wiki:Syllable"
+            }
+          ]
+        },
+        "onset": {
+          "text": "The consonant or cluster before the syllable's vowel — the /t/ in 'tea' or /str/ in 'string'.",
+          "links": [
+            {
+              "href": "wiki:Syllable"
+            }
+          ]
+        },
+        "phonotactics": {
+          "text": "A language's positional rules for sound sequences: English allows 'str-' to open a word but never /ŋ/, which appears only at syllable ends.",
+          "links": [
+            {
+              "href": "wiki:Phonotactics"
+            }
+          ]
+        },
+        "rime": {
+          "text": "The vowel plus any closing consonants — the part that rhymes: /aɪt/ in 'light' and 'night'.",
+          "links": [
+            {
+              "href": "wiki:Syllable"
+            }
+          ]
+        },
+        "syllable structure": {
+          "text": "The organization of speech into syllables with a vowel nucleus and consonal margins — the beats stress and timing count.",
+          "links": [
+            {
+              "href": "wiki:Syllable"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Syllable"
+          }
+        ]
+      },
+      "seeds": [
+        "syllable structure",
+        "onset"
+      ],
+      "floatingTerms": [
+        "rime",
+        "coda",
+        "phonotactics"
+      ],
+      "terms": [
+        "syllable structure",
+        "onset",
+        "rime",
+        "coda",
+        "phonotactics"
+      ]
+    },
+    {
+      "id": "melody",
+      "name": "Stress, tone & intonation",
+      "color": "amber",
+      "fact": "Meaning-bearing melody layered over the string of segments: loudness, pitch, and tune doing grammatical and attitudinal work.",
+      "termInfo": {
+        "intonation": {
+          "text": "The tune of a whole utterance — rising in questions, falling in statements — carrying sentence mood and attitude rather than word identity.",
+          "links": [
+            {
+              "href": "wiki:Intonation (linguistics)"
+            }
+          ]
+        },
+        "stress": {
+          "text": "Relative prominence on one syllable, contrastive in English: 'PERmit' (noun) versus 'perMIT' (verb).",
+          "links": [
+            {
+              "href": "wiki:Stress (linguistics)"
+            }
+          ]
+        },
+        "tone": {
+          "text": "Contrastive pitch on a syllable that distinguishes words — Mandarin mā 'mother' versus mà 'scold' differ only in pitch.",
+          "links": [
+            {
+              "href": "wiki:Tone (linguistics)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Prosody (linguistics)"
+          }
+        ]
+      },
+      "seeds": [
+        "stress",
+        "tone"
+      ],
+      "floatingTerms": [
+        "intonation"
+      ],
+      "terms": [
+        "stress",
+        "tone",
+        "intonation"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "phonological-environment",
+      "term": "phonological environment",
+      "clusters": [
+        "phoneme",
+        "syllable"
+      ],
+      "fact": "Both complementary distribution and phonotactics are positional claims: English /ŋ/ (as in 'sing') never begins a syllable, so where a sound may occur is what selects it.",
+      "info": {
+        "text": "Where a sound may occur is a fact about the language's system, not the vocal tract: complementary distribution states it for one phoneme's variants; phonotactics states it for the whole language.",
+        "links": [
+          {
+            "href": "wiki:Phonotactics"
+          }
+        ]
+      },
+      "idealTerms": {
+        "phoneme": "complementary distribution",
+        "syllable": "phonotactics"
+      }
+    },
+    {
+      "id": "suprasegmental-contrast",
+      "term": "suprasegmental contrast",
+      "clusters": [
+        "phoneme",
+        "melody"
+      ],
+      "fact": "Stress and tone distinguish words exactly as consonants and vowels do — English reCORD (verb) vs RECord (noun), Mandarin mā 'mother' vs mà 'scold'.",
+      "info": {
+        "text": "The phoneme principle — swap this, change the meaning — holds for pitch and loudness too, not just consonants and vowels.",
+        "links": [
+          {
+            "href": "wiki:Stress (linguistics)"
+          }
+        ]
+      },
+      "relationKind": "continuity"
+    },
+    {
+      "id": "syllable-as-carrier",
+      "term": "syllable as carrier",
+      "clusters": [
+        "syllable",
+        "melody"
+      ],
+      "fact": "Stress and tone attach to syllables, not segments: English stress picks one syllable of a word, and the vowels of unstressed syllables reduce toward schwa.",
+      "info": {
+        "text": "Melody rides on syllables: stress chooses among a word's syllables, tone rides each syllable's vowel, and the unstressed ones are where vowels reduce to schwa.",
+        "links": [
+          {
+            "href": "wiki:Vowel reduction"
+          }
+        ]
+      },
+      "idealTerms": {
+        "melody": "stress"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "non-contrastive-relationships",
+      "prompt": "Which terms describe relationships in which swapping one sound for another never changes a word's meaning?",
+      "explanation": "In all three relationships, substituting one sound for the other never changes a word's meaning: allophones are a phoneme's context-determined variants, complementary distribution places them where the other never occurs, and free variation lets either appear unpredictably. A minimal pair is the opposite — the one swap that does change meaning — and phone names a single produced sound, not a relationship.",
+      "targets": [
+        "allophone",
+        "complementary distribution",
+        "free variation"
+      ]
+    },
+    {
+      "id": "word-level-melody",
+      "prompt": "Which melodic terms distinguish individual words rather than shaping whole utterances?",
+      "explanation": "Stress distinguishes words from one another ('PERmit' vs 'perMIT') and tone distinguishes words in Mandarin (mā vs mà). Intonation is different: it is the tune of a whole utterance — questions rise, statements fall — and does not distinguish individual words.",
+      "targets": [
+        "stress",
+        "tone"
+      ]
+    },
+    {
+      "id": "syllable-anatomy",
+      "prompt": "Which terms name positions within a syllable?",
+      "explanation": "Onset, rime, and coda are the named positions within a syllable: onset before the vowel, rime as the vowel-plus-coda rhyming part, coda after the vowel. Syllable structure names the whole organization, and phonotactics states which sounds may fill which sequences — rules, not positions.",
+      "targets": [
+        "onset",
+        "rime",
+        "coda"
+      ]
+    },
+    {
+      "id": "positional-claims",
+      "prompt": "Which terms are statements about where a sound may occur?",
+      "explanation": "Both are claims about where a sound may occur: complementary distribution is that claim made about one phoneme's variants (English [pʰ] only syllable-initially, plain [p] elsewhere), and phonotactics is the same kind of claim at the language level (/ŋ/ never begins a syllable). Free variation is the opposite — no positional rule at all — and onset and coda are positions themselves, not claims about them.",
+      "targets": [
+        "complementary distribution",
+        "phonotactics"
+      ]
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "consonants-and-vowels",
+        "reason": "Play first: the contrasts organized on this board are built from the consonants and vowels described in Consonants and Vowels."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "From Sound to System",
+    "summary": "How languages sort raw sound into contrast: the phoneme and its allophones, the syllable templates that position sounds, and the melodic layers of stress, tone, and intonation.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "The previous lesson described speech sounds as physical gestures — place, manner, voicing, vowel dimensions. This lesson asks a different question: which of the infinitely many possible sound differences does a language actually treat as meaningful? English ignores the puff of air after the p in 'pot'; Thai builds word meanings on exactly that puff. Each language sorts the continuous stream of sound into a small inventory of contrastive categories, and each category is a **phoneme**.\r\n\r\nAny actual sound a speaker produces is a **phone**. English speakers treat [pʰ] of 'pot' and plain [p] of 'spot' as the same thing — the phoneme /p/ — and its two contextual variants are **allophones**. How do linguists discover a language's phonemes? Two tools do most of the work. A **minimal pair** — two words identical except for one sound, like 'ship' and 'sheep' — proves the two sounds are separate phonemes, because swapping them changes the meaning. And when no meaning ever changes, the sounds belong to one phoneme: English [pʰ] and [p] stand in **complementary distribution**, each appearing only where the other never does. When either sound may occur in the same spot with no change in meaning, the choice is **free variation**, down to the individual speaker. Crucially, the sorting differs by language: [n] and [ŋ] are separate phonemes in English ('sin' vs 'sing') but variants of one phoneme in Spanish, while aspiration is a full phoneme in Thai.\r\n\r\nSounds are also positioned. **Syllable structure** gives every utterance a rhythm of beats: each syllable has an **onset** (its opening consonant or cluster), a vowel nucleus, and optionally a **coda** (its closing consonant); the vowel-plus-coda part is the **rime**, the part that rhymes. On top of the template sit **phonotactics**, a language's positional rules: English allows 'str-' to open a word but never /ŋ/, which appears only in the coda, as in 'sing'. Where a sound may occur is a fact about the language's system, not about the human vocal tract.\r\n\r\nFinally, melody rides above the segments. **Stress** makes one syllable of a word more prominent, and in English that choice alone distinguishes nouns from verbs — 'PERmit' versus 'perMIT'. **Tone** gives each syllable a contrastive pitch, so Mandarin mā ('mother') and mà ('scold') differ only in melody. **Intonation** is the tune of a whole utterance, rising in questions and falling in statements. Stress and tone do for melody exactly what phonemes do for segments: swapping them changes what a word means.\r\n\r\nTogether, the two lessons give the full picture of the sound level of language: how speech sounds are produced, and how each language organizes them into the contrasts and patterns that carry meaning."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

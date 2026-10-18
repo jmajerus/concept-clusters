@@ -3,15 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "getting-inside-the-room",
   "title": "Getting Inside the Room",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "tags": [
     "activism",
     "protest tactics",
@@ -435,3 +439,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "getting-inside-the-room",
+      "puzzleRevision": "fnv1a32:aeff6e12",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:war is a women's issue": {
+          "x": 730.72,
+          "y": 359.32,
+          "pinned": false
+        },
+        "term:peace economy": {
+          "x": 886.72,
+          "y": 385.88,
+          "pinned": false
+        },
+        "term:feminist foreign policy": {
+          "x": 865.55,
+          "y": 225.87,
+          "pinned": false
+        },
+        "term:Mother's Day Proclamation": {
+          "x": 673.94,
+          "y": 171.67,
+          "pinned": false
+        },
+        "term:wearing pink": {
+          "x": 264.14,
+          "y": 245.51,
+          "pinned": false
+        },
+        "term:banner drop": {
+          "x": 147.1,
+          "y": 217.05,
+          "pinned": false
+        },
+        "term:costume protest": {
+          "x": 381.26,
+          "y": 180.8,
+          "pinned": false
+        },
+        "term:disrupt business as usual": {
+          "x": 237.25,
+          "y": 83.17,
+          "pinned": false
+        },
+        "term:hearing interruption": {
+          "x": 221.59,
+          "y": 388.1,
+          "pinned": false
+        },
+        "term:citizen's arrest": {
+          "x": 85.36,
+          "y": 474.64,
+          "pinned": false
+        },
+        "term:red-stained hands": {
+          "x": 215.81,
+          "y": 552.55,
+          "pinned": false
+        },
+        "term:posing as press": {
+          "x": 74.64,
+          "y": 329.39,
+          "pinned": false
+        },
+        "term:mass sit-in": {
+          "x": 466.34,
+          "y": 430.77,
+          "pinned": false
+        },
+        "term:not in our name": {
+          "x": 594.54,
+          "y": 451.68,
+          "pinned": false
+        },
+        "term:coalition organizing": {
+          "x": 537.89,
+          "y": 303.93,
+          "pinned": false
+        },
+        "term:religious ritual as dissent": {
+          "x": 487.91,
+          "y": 597,
+          "pinned": false
+        },
+        "term:maternal grief imagery": {
+          "x": 504.94,
+          "y": 72.28,
+          "pinned": false
+        },
+        "term:guerrilla theatre": {
+          "x": 375.33,
+          "y": 329.48,
+          "pinned": false
+        },
+        "term:courting arrest": {
+          "x": 347.71,
+          "y": 483.68,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3412.76,
+        "score": 3412.7565289987247
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:32:13.965Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "getting-inside-the-room",
+      "puzzleRevision": "fnv1a32:aeff6e12",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 799.34,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 559.69,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 236.31,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 250.66,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:maternal grief imagery": {
+          "x": 758.33,
+          "y": 575.01,
+          "pinned": false
+        },
+        "term:guerrilla theatre": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:courting arrest": {
+          "x": 314.29,
+          "y": 243.62,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "war is a women's issue",
+          "peace economy",
+          "feminist foreign policy",
+          "Mother's Day Proclamation"
+        ],
+        "cluster:1": [
+          "wearing pink",
+          "banner drop",
+          "costume protest",
+          "disrupt business as usual"
+        ],
+        "cluster:2": [
+          "hearing interruption",
+          "citizen's arrest",
+          "red-stained hands",
+          "posing as press"
+        ],
+        "cluster:3": [
+          "mass sit-in",
+          "not in our name",
+          "coalition organizing",
+          "religious ritual as dissent"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 327.1502205697472
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:32:16.354Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "getting-inside-the-room",
+      "puzzleRevision": "fnv1a32:aeff6e12",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:war is a women's issue": {
+          "x": 330.41,
+          "y": 156.82
+        },
+        "term:peace economy": {
+          "x": 284.67,
+          "y": 22
+        },
+        "term:feminist foreign policy": {
+          "x": 145.77,
+          "y": 83.58
+        },
+        "term:Mother's Day Proclamation": {
+          "x": 655.37,
+          "y": 22
+        },
+        "term:wearing pink": {
+          "x": 822.6,
+          "y": 22
+        },
+        "term:banner drop": {
+          "x": 729.04,
+          "y": 357.9
+        },
+        "term:costume protest": {
+          "x": 378.24,
+          "y": 257.24
+        },
+        "term:disrupt business as usual": {
+          "x": 861.25,
+          "y": 311.11
+        },
+        "term:hearing interruption": {
+          "x": 574.73,
+          "y": 398.49
+        },
+        "term:citizen's arrest": {
+          "x": 565.01,
+          "y": 598
+        },
+        "term:red-stained hands": {
+          "x": 366.59,
+          "y": 598
+        },
+        "term:posing as press": {
+          "x": 665.74,
+          "y": 461.9
+        },
+        "term:mass sit-in": {
+          "x": 282.04,
+          "y": 315.41
+        },
+        "term:not in our name": {
+          "x": 212.8,
+          "y": 598
+        },
+        "term:coalition organizing": {
+          "x": 197.91,
+          "y": 274.22
+        },
+        "term:religious ritual as dissent": {
+          "x": 105.05,
+          "y": 451.67
+        },
+        "term:maternal grief imagery": {
+          "x": 524.21,
+          "y": 172.96
+        },
+        "term:guerrilla theatre": {
+          "x": 611.92,
+          "y": 319.68
+        },
+        "term:courting arrest": {
+          "x": 351.99,
+          "y": 410.61
+        },
+        "cluster:0": {
+          "x": 444.72,
+          "y": 22
+        },
+        "cluster:1": {
+          "x": 722.19,
+          "y": 196.43
+        },
+        "cluster:2": {
+          "x": 479.73,
+          "y": 453.95
+        },
+        "cluster:3": {
+          "x": 282.04,
+          "y": 493.76
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:32:18.666Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:32:11.095Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

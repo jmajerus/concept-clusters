@@ -1,8 +1,9 @@
 {
   "id": "the-scaffold-and-the-timetable",
   "title": "The Scaffold and the Timetable",
-  "category": "political-science",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "political-science",
     "philosophy"
   ],
@@ -23,6 +24,14 @@
       "name": "The Scaffold",
       "color": "brown",
       "fact": "Foucault opens Discipline and Punish with the 1757 public execution of Damiens: publicly staged, deliberately excessive violence on the body of the condemned, meant to be witnessed by a crowd as living proof of the sovereign's power to destroy whoever defied it.",
+      "info": {
+        "text": "The pre-modern regime of punishment Foucault uses to open his history: violent, public, and staged as a reassertion of the sovereign's own power rather than a calculated correction of the offender.",
+        "links": [
+          {
+            "href": "wiki:Discipline and Punish"
+          }
+        ]
+      },
       "seeds": [
         "public torture",
         "the spectacle of punishment"
@@ -36,21 +45,21 @@
         "the spectacle of punishment",
         "the sovereign's vengeance",
         "the condemned body"
-      ],
-      "info": {
-        "text": "The pre-modern regime of punishment Foucault uses to open his history: violent, public, and staged as a reassertion of the sovereign's own power rather than a calculated correction of the offender.",
-        "links": [
-          {
-            "href": "wiki:Discipline and Punish"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "the-timetable",
       "name": "The Timetable",
       "color": "olive",
       "fact": "Eighty years after Damiens, Foucault sets a very different document beside it: a plain timetable regulating a young prisoner's day hour by hour. Discipline works through techniques like this one: hierarchical observation arranges people so they can always potentially be watched, normalizing judgment measures them against a norm rather than a law, and the examination fuses both into a documented, comparable record of who someone is.",
+      "info": {
+        "text": "The disciplinary techniques Foucault identifies as replacing spectacular punishment: fine-grained control of time, space, and activity, aimed at producing a certain kind of person rather than simply displaying a punishment.",
+        "links": [
+          {
+            "href": "wiki:Discipline and Punish"
+          }
+        ]
+      },
       "seeds": [
         "the timetable",
         "hierarchical observation"
@@ -64,21 +73,21 @@
         "hierarchical observation",
         "normalizing judgment",
         "the examination"
-      ],
-      "info": {
-        "text": "The disciplinary techniques Foucault identifies as replacing spectacular punishment: fine-grained control of time, space, and activity, aimed at producing a certain kind of person rather than simply displaying a punishment.",
-        "links": [
-          {
-            "href": "wiki:Discipline and Punish"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "the-panopticon",
       "name": "The Panopticon",
       "color": "cyan",
       "fact": "Bentham's unbuilt prison design became Foucault's diagram for how discipline actually works: a central tower makes every cell permanently visible while the watcher stays unseen, so the person being watched can never confirm whether anyone is actually looking -- and eventually starts supervising themselves, producing exactly what discipline is after: a docile body, obedient and useful without needing constant force at all.",
+      "info": {
+        "text": "Bentham's architectural design, taken up by Foucault as the general model of disciplinary power: permanent visibility that eventually makes external enforcement unnecessary.",
+        "links": [
+          {
+            "href": "wiki:Panopticon"
+          }
+        ]
+      },
       "seeds": [
         "the panopticon",
         "visibility"
@@ -92,15 +101,7 @@
         "visibility",
         "self-surveillance",
         "docile bodies"
-      ],
-      "info": {
-        "text": "Bentham's architectural design, taken up by Foucault as the general model of disciplinary power: permanent visibility that eventually makes external enforcement unnecessary.",
-        "links": [
-          {
-            "href": "wiki:Panopticon"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [
@@ -123,14 +124,14 @@
       ],
       "fact": "The panopticon is what makes hierarchical observation cheap: instead of needing an actual supervisor watching at all times, permanent visibility lets the mere possibility of being watched do the work, until the watched person internalizes it and keeps applying normalizing judgment to themselves even when no one is there.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "the-panopticon": "visibility",
+        "the-timetable": "hierarchical observation"
+      },
       "direction": {
         "kind": "through",
         "from": "the-panopticon",
         "to": "the-timetable"
-      },
-      "idealTerms": {
-        "the-panopticon": "visibility",
-        "the-timetable": "hierarchical observation"
       }
     },
     {

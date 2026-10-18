@@ -1,12 +1,16 @@
 {
   "id": "getting-inside-the-room",
   "title": "Getting Inside the Room",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "tags": [
     "activism",
     "protest tactics",
@@ -26,20 +30,6 @@
       "name": "Feminist Anti-Militarism",
       "color": "teal",
       "fact": "CODEPINK's founders declared in 2002 that war is a women's issue, then grew that claim into a broader 'peace economy' vision of redirecting military spending toward care -- and, by 2020, into a formal Feminist Foreign Policy Project that traces its own lineage back to Julia Ward Howe's 1870 Mother's Day Proclamation for peace.",
-      "seeds": [
-        "war is a women's issue",
-        "peace economy"
-      ],
-      "floatingTerms": [
-        "feminist foreign policy",
-        "Mother's Day Proclamation"
-      ],
-      "terms": [
-        "war is a women's issue",
-        "peace economy",
-        "feminist foreign policy",
-        "Mother's Day Proclamation"
-      ],
       "termInfo": {
         "Mother's Day Proclamation": {
           "text": "Julia Ward Howe's 1870 appeal for women worldwide to organize against war, written in reaction to the Civil War and the Franco-Prussian War -- the holiday's largely forgotten original meaning, which CODEPINK explicitly invokes in its own Mother's Day actions.",
@@ -81,27 +71,27 @@
             "href": "wiki:Antimilitarism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "war is a women's issue",
+        "peace economy"
+      ],
+      "floatingTerms": [
+        "feminist foreign policy",
+        "Mother's Day Proclamation"
+      ],
+      "terms": [
+        "war is a women's issue",
+        "peace economy",
+        "feminist foreign policy",
+        "Mother's Day Proclamation"
+      ]
     },
     {
       "id": "spectacle-as-strategy",
       "name": "Spectacle as Strategy",
       "color": "magenta",
       "fact": "CODEPINK names its own toolkit outright -- satire, street theater, creative visuals -- and then literalizes it: pink clothing as instant visual branding, oversized banner drops timed for photographers, and full costume theater running from vagina costumes at the 2012 Republican National Convention to blood-stained dolls and a coffin outside Donald Rumsfeld's house.",
-      "seeds": [
-        "wearing pink",
-        "banner drop"
-      ],
-      "floatingTerms": [
-        "costume protest",
-        "disrupt business as usual"
-      ],
-      "terms": [
-        "wearing pink",
-        "banner drop",
-        "costume protest",
-        "disrupt business as usual"
-      ],
       "termInfo": {
         "banner drop": {
           "text": "Unfurling a large painted banner from a building, overpass, or balcony, timed to be photographed -- CODEPINK's own how-to guide instructs activists to photograph the drop immediately for social media.",
@@ -143,27 +133,27 @@
             "href": "https://www.codepink.org/about"
           }
         ]
-      }
+      },
+      "seeds": [
+        "wearing pink",
+        "banner drop"
+      ],
+      "floatingTerms": [
+        "costume protest",
+        "disrupt business as usual"
+      ],
+      "terms": [
+        "wearing pink",
+        "banner drop",
+        "costume protest",
+        "disrupt business as usual"
+      ]
     },
     {
       "id": "confronting-the-institution",
       "name": "Confronting the Institution",
       "color": "amber",
       "fact": "Following its own 'disrupt business as usual' principle, CODEPINK has repeatedly walked directly into congressional hearing rooms: reading a citizen's-arrest warrant at Henry Kissinger in 2015, holding hands stained red in front of Condoleezza Rice in 2007 and again at a 2013 Syria hearing, and at least once trying to obtain press credentials under false pretenses to get inside a restricted hearing.",
-      "seeds": [
-        "hearing interruption",
-        "citizen's arrest"
-      ],
-      "floatingTerms": [
-        "red-stained hands",
-        "posing as press"
-      ],
-      "terms": [
-        "hearing interruption",
-        "citizen's arrest",
-        "red-stained hands",
-        "posing as press"
-      ],
       "termInfo": {
         "citizen's arrest": {
           "text": "A staged, scripted confrontation -- handcuffs, signs reading 'war criminal,' a read-aloud arrest warrant -- performed on a named official with no legal authority to actually detain them; its 2015 attempt on Henry Kissinger drew international coverage and a 'lowlife scum' rebuke from Senator John McCain.",
@@ -205,27 +195,27 @@
             "href": "wiki:Code Pink"
           }
         ]
-      }
+      },
+      "seeds": [
+        "hearing interruption",
+        "citizen's arrest"
+      ],
+      "floatingTerms": [
+        "red-stained hands",
+        "posing as press"
+      ],
+      "terms": [
+        "hearing interruption",
+        "citizen's arrest",
+        "red-stained hands",
+        "posing as press"
+      ]
     },
     {
       "id": "the-widening-field",
       "name": "The Widening Field",
       "color": "olive",
       "fact": "Jewish Voice for Peace, a Jewish anti-Zionist organization founded in 1996, scaled the same insider-disruption logic to a new order of magnitude during the Gaza war: an October 2023 Grand Central Station sit-in and a Capitol Rotunda occupation each drew hundreds of planned arrests, organized in coalition with groups like IfNotNow, and staged as an act of specifically Jewish religious witness -- a framing some other American Jewish organizations dispute.",
-      "seeds": [
-        "mass sit-in",
-        "not in our name"
-      ],
-      "floatingTerms": [
-        "coalition organizing",
-        "religious ritual as dissent"
-      ],
-      "terms": [
-        "mass sit-in",
-        "not in our name",
-        "coalition organizing",
-        "religious ritual as dissent"
-      ],
       "termInfo": {
         "coalition organizing": {
           "text": "JVP's Gaza-era actions were organized jointly with groups including IfNotNow and Jews for Racial and Economic Justice, combining separate organizations' membership bases into single, larger demonstrations.",
@@ -267,7 +257,21 @@
             "href": "https://www.jewishvoiceforpeace.org/faq/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "mass sit-in",
+        "not in our name"
+      ],
+      "floatingTerms": [
+        "coalition organizing",
+        "religious ritual as dissent"
+      ],
+      "terms": [
+        "mass sit-in",
+        "not in our name",
+        "coalition organizing",
+        "religious ritual as dissent"
+      ]
     }
   ],
   "bridges": [

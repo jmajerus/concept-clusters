@@ -3,18 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "achilles-in-vietnam",
   "title": "Achilles in Vietnam",
   "category": "psychology",
   "categories": [
     "psychology",
-    "history-society"
+    "history-society",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "war-militarism",
     "psychology": "moral-psychology"
   },
-  "large": true,
   "tags": [
     "book",
     "war"
@@ -290,3 +291,339 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "achilles-in-vietnam",
+      "puzzleRevision": "fnv1a32:6472a60c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:themis": {
+          "x": 572.29,
+          "y": 597,
+          "pinned": false
+        },
+        "term:legitimate authority": {
+          "x": 552.09,
+          "y": 468.85,
+          "pinned": false
+        },
+        "term:indignant rage": {
+          "x": 461.33,
+          "y": 594.61,
+          "pinned": false
+        },
+        "term:special comrade": {
+          "x": 828.91,
+          "y": 594.14,
+          "pinned": false
+        },
+        "term:moral horizon": {
+          "x": 897.05,
+          "y": 476.22,
+          "pinned": false
+        },
+        "term:interrupted grief": {
+          "x": 755.03,
+          "y": 464.98,
+          "pinned": false
+        },
+        "term:berserk state": {
+          "x": 682.54,
+          "y": 342.3,
+          "pinned": false
+        },
+        "term:loss of restraint": {
+          "x": 725.48,
+          "y": 206.42,
+          "pinned": false
+        },
+        "term:dishonoring the enemy": {
+          "x": 562.17,
+          "y": 244.5,
+          "pinned": false
+        },
+        "term:loss of trust": {
+          "x": 441.03,
+          "y": 79.15,
+          "pinned": false
+        },
+        "term:moral luck": {
+          "x": 327.59,
+          "y": 38.64,
+          "pinned": false
+        },
+        "term:social withdrawal": {
+          "x": 332.59,
+          "y": 171.59,
+          "pinned": false
+        },
+        "term:communalization": {
+          "x": 320.61,
+          "y": 319.91,
+          "pinned": false
+        },
+        "term:griefwork": {
+          "x": 296.26,
+          "y": 441.09,
+          "pinned": false
+        },
+        "term:unit cohesion": {
+          "x": 197.4,
+          "y": 377.97,
+          "pinned": false
+        },
+        "term:moral community": {
+          "x": 686.44,
+          "y": 597,
+          "pinned": false
+        },
+        "term:complicated grief": {
+          "x": 824.12,
+          "y": 326.12,
+          "pinned": false
+        },
+        "term:bearing witness": {
+          "x": 201.41,
+          "y": 241.83,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2844.09,
+        "score": 2844.0913318497333
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:26:48.591Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "achilles-in-vietnam",
+      "puzzleRevision": "fnv1a32:6472a60c",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 634.91,
+          "y": 169.65,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 880.67,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 634.91,
+          "y": 626.35,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 237.26,
+          "y": 539.13,
+          "pinned": false
+        },
+        "cluster:4": {
+          "x": 237.26,
+          "y": 256.87,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:moral community": {
+          "x": 685.73,
+          "y": 313.67,
+          "pinned": false
+        },
+        "term:complicated grief": {
+          "x": 829.85,
+          "y": 542.03,
+          "pinned": false
+        },
+        "term:bearing witness": {
+          "x": 237.26,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "themis",
+          "legitimate authority",
+          "indignant rage"
+        ],
+        "cluster:1": [
+          "special comrade",
+          "moral horizon",
+          "interrupted grief"
+        ],
+        "cluster:2": [
+          "berserk state",
+          "loss of restraint",
+          "dishonoring the enemy"
+        ],
+        "cluster:3": [
+          "loss of trust",
+          "moral luck",
+          "social withdrawal"
+        ],
+        "cluster:4": [
+          "communalization",
+          "griefwork",
+          "unit cohesion"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 321.018853867068
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:26:51.798Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "achilles-in-vietnam",
+      "puzzleRevision": "fnv1a32:6472a60c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:themis": {
+          "x": 505.77,
+          "y": 74.5
+        },
+        "term:legitimate authority": {
+          "x": 481.09,
+          "y": 206.7
+        },
+        "term:indignant rage": {
+          "x": 286.05,
+          "y": 22
+        },
+        "term:special comrade": {
+          "x": 801.51,
+          "y": 55.44
+        },
+        "term:moral horizon": {
+          "x": 822.19,
+          "y": 181.21
+        },
+        "term:interrupted grief": {
+          "x": 711.73,
+          "y": 297.43
+        },
+        "term:berserk state": {
+          "x": 480.77,
+          "y": 552.25
+        },
+        "term:loss of restraint": {
+          "x": 786.82,
+          "y": 598
+        },
+        "term:dishonoring the enemy": {
+          "x": 756.89,
+          "y": 436.68
+        },
+        "term:loss of trust": {
+          "x": 202.2,
+          "y": 598
+        },
+        "term:moral luck": {
+          "x": 365.44,
+          "y": 598
+        },
+        "term:social withdrawal": {
+          "x": 142.44,
+          "y": 348.64
+        },
+        "term:communalization": {
+          "x": 123.44,
+          "y": 196.68
+        },
+        "term:griefwork": {
+          "x": 235.56,
+          "y": 126.95
+        },
+        "term:unit cohesion": {
+          "x": 334.15,
+          "y": 181.96
+        },
+        "term:moral community": {
+          "x": 635.15,
+          "y": 42.32
+        },
+        "term:complicated grief": {
+          "x": 583.96,
+          "y": 403.01
+        },
+        "term:bearing witness": {
+          "x": 129.97,
+          "y": 263.61
+        },
+        "cluster:0": {
+          "x": 459.47,
+          "y": 22
+        },
+        "cluster:1": {
+          "x": 691.16,
+          "y": 230.52
+        },
+        "cluster:2": {
+          "x": 629.1,
+          "y": 557.51
+        },
+        "cluster:3": {
+          "x": 290.73,
+          "y": 461.6
+        },
+        "cluster:4": {
+          "x": 295.37,
+          "y": 263.61
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:26:54.834Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:26:45.966Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

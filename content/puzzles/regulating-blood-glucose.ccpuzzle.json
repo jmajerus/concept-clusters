@@ -325,8 +325,14 @@
           }
         ]
       },
+      "relationKind": "dynamic",
       "idealTerms": {
         "insulin-fed-state": "insulin"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "counterregulatory-backup",
+        "to": "insulin-fed-state"
       }
     },
     {
@@ -351,6 +357,17 @@
     }
   ],
   "lenses": [
+    {
+      "id": "brain-at-risk",
+      "prompt": "Which condition threatens the brain within minutes?",
+      "explanation": "Protecting the brain's supply is why the body keeps several hormones in reserve to defend against a fall, but only one to lower glucose.",
+      "targets": [
+        "hypoglycemia"
+      ],
+      "reasons": {
+        "hypoglycemia": "The brain burns glucose continuously and stores almost none, so a fall in blood glucose starves it quickly."
+      }
+    },
     {
       "id": "raise-falling-glucose",
       "prompt": "Which hormones raise blood glucose when it falls too low?",
@@ -381,6 +398,17 @@
         "ATP-sensitive potassium channels": "Rising ATP closes them, depolarizing the cell to trigger release.",
         "beta cells": "They are the cells that sense glucose and secrete insulin.",
         "glucokinase": "Its rate tracks blood glucose, setting how much ATP the cell makes."
+      }
+    },
+    {
+      "id": "one-store",
+      "prompt": "Which store does insulin fill after a meal and glucagon empty between meals?",
+      "explanation": "Muscle glycogen fuels only the muscle that holds it; the liver's store is the one that can return glucose to the blood, covering roughly a day without food.",
+      "targets": [
+        "liver glycogen"
+      ],
+      "reasons": {
+        "liver glycogen": "Glycogenesis fills it in the fed state, and glycogenolysis releases it as glucose during fasting."
       }
     },
     {

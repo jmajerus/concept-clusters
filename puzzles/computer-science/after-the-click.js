@@ -3,18 +3,20 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "after-the-click",
   "title": "After the Click",
   "category": "psychology",
   "categories": [
     "psychology",
-    "computer-science"
+    "computer-science",
+    "science-technology-society"
   ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "psychology": "social-psychology",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How recognizing that a digital choice was engineered can transform an unwanted outcome into regret, self-blame, perceived betrayal, and lasting defensive behavior. Research on fraud victimization is used cautiously to illuminate deception-related aftermath, not to equate every dark pattern with fraud.",
     "links": [
@@ -465,3 +467,378 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "after-the-click",
+      "puzzleRevision": "fnv1a32:85595fab",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:unexpected outcome": {
+          "x": 697.13,
+          "y": 378.31,
+          "pinned": false
+        },
+        "term:concealed condition discovered": {
+          "x": 843.5,
+          "y": 243.28,
+          "pinned": false
+        },
+        "term:fabricated signal exposed": {
+          "x": 859.25,
+          "y": 463.95,
+          "pinned": false
+        },
+        "term:manipulation recognized": {
+          "x": 550.69,
+          "y": 477.95,
+          "pinned": false
+        },
+        "term:intention mismatch": {
+          "x": 705.55,
+          "y": 563.95,
+          "pinned": false
+        },
+        "term:decision regret": {
+          "x": 185.75,
+          "y": 471.26,
+          "pinned": false
+        },
+        "term:self-blame": {
+          "x": 134.88,
+          "y": 587.35,
+          "pinned": false
+        },
+        "term:shame or humiliation": {
+          "x": 85,
+          "y": 349.36,
+          "pinned": false
+        },
+        "term:rumination": {
+          "x": 63,
+          "y": 502.78,
+          "pinned": false
+        },
+        "term:loss of self-trust": {
+          "x": 270.72,
+          "y": 597,
+          "pinned": false
+        },
+        "term:anger": {
+          "x": 538.5,
+          "y": 183.71,
+          "pinned": false
+        },
+        "term:perceived betrayal": {
+          "x": 658.21,
+          "y": 170.28,
+          "pinned": false
+        },
+        "term:credibility loss": {
+          "x": 566.25,
+          "y": 295.14,
+          "pinned": false
+        },
+        "term:complaint or exit": {
+          "x": 538.84,
+          "y": 66.38,
+          "pinned": false
+        },
+        "term:warning others": {
+          "x": 677.8,
+          "y": 23,
+          "pinned": false
+        },
+        "term:defensive vigilance": {
+          "x": 314.24,
+          "y": 251.74,
+          "pinned": false
+        },
+        "term:avoidance": {
+          "x": 224.03,
+          "y": 353.76,
+          "pinned": false
+        },
+        "term:generalized suspicion": {
+          "x": 153.18,
+          "y": 185.92,
+          "pinned": false
+        },
+        "term:trust erosion": {
+          "x": 431.08,
+          "y": 159.61,
+          "pinned": false
+        },
+        "term:reduced participation": {
+          "x": 298,
+          "y": 78.51,
+          "pinned": false
+        },
+        "term:retrospective reappraisal": {
+          "x": 356.21,
+          "y": 434.92,
+          "pinned": false
+        },
+        "term:violated trust": {
+          "x": 808.84,
+          "y": 59.93,
+          "pinned": false
+        },
+        "term:trust tax": {
+          "x": 439.87,
+          "y": 304.32,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4141.58,
+        "score": 4141.580109389491
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:37:42.215Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "after-the-click",
+      "puzzleRevision": "fnv1a32:85595fab",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 586.11,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 218.85,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 209.89,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 831.15,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:retrospective reappraisal": {
+          "x": 216.71,
+          "y": 556.35,
+          "pinned": false
+        },
+        "term:violated trust": {
+          "x": 499.13,
+          "y": 387.28,
+          "pinned": false
+        },
+        "term:trust tax": {
+          "x": 751.61,
+          "y": 230.41,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "unexpected outcome",
+          "concealed condition discovered",
+          "fabricated signal exposed",
+          "manipulation recognized",
+          "intention mismatch"
+        ],
+        "cluster:1": [
+          "decision regret",
+          "self-blame",
+          "shame or humiliation",
+          "rumination",
+          "loss of self-trust"
+        ],
+        "cluster:2": [
+          "anger",
+          "perceived betrayal",
+          "credibility loss",
+          "complaint or exit",
+          "warning others"
+        ],
+        "cluster:3": [
+          "defensive vigilance",
+          "avoidance",
+          "generalized suspicion",
+          "trust erosion",
+          "reduced participation"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 351.5118109272904
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:37:44.173Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "after-the-click",
+      "puzzleRevision": "fnv1a32:85595fab",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:unexpected outcome": {
+          "x": 416.29,
+          "y": 80.73
+        },
+        "term:concealed condition discovered": {
+          "x": 222.23,
+          "y": 215.62
+        },
+        "term:fabricated signal exposed": {
+          "x": 331.89,
+          "y": 146.75
+        },
+        "term:manipulation recognized": {
+          "x": 635.21,
+          "y": 110.87
+        },
+        "term:intention mismatch": {
+          "x": 542.33,
+          "y": 22
+        },
+        "term:decision regret": {
+          "x": 746.04,
+          "y": 314.34
+        },
+        "term:self-blame": {
+          "x": 908.5,
+          "y": 71.32
+        },
+        "term:shame or humiliation": {
+          "x": 877,
+          "y": 268.7
+        },
+        "term:rumination": {
+          "x": 908.5,
+          "y": 138.01
+        },
+        "term:loss of self-trust": {
+          "x": 883.3,
+          "y": 22
+        },
+        "term:anger": {
+          "x": 684.24,
+          "y": 501.44
+        },
+        "term:perceived betrayal": {
+          "x": 412.15,
+          "y": 280.8
+        },
+        "term:credibility loss": {
+          "x": 493.83,
+          "y": 579.57
+        },
+        "term:complaint or exit": {
+          "x": 775.04,
+          "y": 596.57
+        },
+        "term:warning others": {
+          "x": 630.25,
+          "y": 598
+        },
+        "term:defensive vigilance": {
+          "x": 79.85,
+          "y": 262.19
+        },
+        "term:avoidance": {
+          "x": 48.35,
+          "y": 558.92
+        },
+        "term:generalized suspicion": {
+          "x": 142.61,
+          "y": 598
+        },
+        "term:trust erosion": {
+          "x": 300.95,
+          "y": 597.22
+        },
+        "term:reduced participation": {
+          "x": 86.15,
+          "y": 436.57
+        },
+        "term:retrospective reappraisal": {
+          "x": 658.11,
+          "y": 178.13
+        },
+        "term:violated trust": {
+          "x": 374.64,
+          "y": 374.24
+        },
+        "term:trust tax": {
+          "x": 368.67,
+          "y": 503.28
+        },
+        "cluster:0": {
+          "x": 453.78,
+          "y": 215.62
+        },
+        "cluster:1": {
+          "x": 765.87,
+          "y": 60.89
+        },
+        "cluster:2": {
+          "x": 532.58,
+          "y": 476.62
+        },
+        "cluster:3": {
+          "x": 245.83,
+          "y": 486.8
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:37:46.159Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:37:40.257Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

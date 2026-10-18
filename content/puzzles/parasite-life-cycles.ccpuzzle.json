@@ -1,0 +1,479 @@
+{
+  "id": "parasite-life-cycles",
+  "title": "Two Hosts and a Costume Change — How Parasites Move Between Bodies",
+  "category": "microbiology",
+  "subcategories": {
+    "microbiology": "parasitology"
+  },
+  "info": {
+    "text": "How parasites organize their lives around other bodies: the three body plans parasitology sorts first, the roles hosts play in a complex life cycle, the costume changes between feeding and survival forms, and the classic routes between hosts — with malaria's famous inversion along the way.",
+    "links": [
+      {
+        "href": "wiki:Parasitology"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Parasitism",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Parasitism"
+      },
+      {
+        "title": "Giardia duodenalis",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Giardia_duodenalis"
+      },
+      {
+        "title": "Plasmodium falciparum",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Plasmodium_falciparum"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "body-plans",
+      "name": "Parasite body plans",
+      "color": "teal",
+      "fact": "The first sort any parasitologist makes is by body plan: single cell, worm, or something that lives on the outside — each plan forces a different style of life cycle.",
+      "termInfo": {
+        "ectoparasite": {
+          "text": "Lives on the outside: lice, mites, ticks, fleas. It feeds on the host but is exposed to grooming and medicine, so its life cycle keeps eggs and juveniles off-host.",
+          "links": [
+            {
+              "href": "wiki:Parasitism"
+            }
+          ]
+        },
+        "helminth": {
+          "text": "A parasitic worm: trematode flukes, cestode tapeworms, nematode roundworms. Multicellular and egg-laying — often too big for antibodies to kill, so the immune system settles for walling them off.",
+          "links": [
+            {
+              "href": "wiki:Parasitic worm"
+            }
+          ]
+        },
+        "protozoan": {
+          "text": "A single-celled eukaryotic parasite — Plasmodium (malaria), Trypanosoma (sleeping sickness), Entamoeba (amoebic dysentery), Giardia. Small enough to live inside cells or in the gut lumen.",
+          "links": [
+            {
+              "href": "wiki:Protozoa"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Parasitologists sort first by organism: protozoa are single-celled eukaryotes, helminths are worms — flukes, tapeworms, roundworms — and ectoparasites live on the outside. Most are extreme host specialists.",
+        "links": [
+          {
+            "href": "wiki:Parasitism"
+          }
+        ]
+      },
+      "seeds": [
+        "protozoan",
+        "ectoparasite"
+      ],
+      "floatingTerms": [
+        "helminth"
+      ],
+      "terms": [
+        "protozoan",
+        "helminth",
+        "ectoparasite"
+      ]
+    },
+    {
+      "id": "host-roles",
+      "name": "Roles in the life cycle",
+      "color": "blue",
+      "fact": "A complex life cycle assigns roles: one host hosts the sex, another hosts the multiplication, one population keeps the parasite simmering between outbreaks, and one merely ferries it along.",
+      "termInfo": {
+        "definitive host": {
+          "text": "The host where the parasite reproduces sexually — the primary host. For malaria it is the mosquito, not the human; for the beef tapeworm it is the human.",
+          "links": [
+            {
+              "href": "wiki:Host (biology)"
+            }
+          ]
+        },
+        "intermediate host": {
+          "text": "Holds the juvenile stages, which often multiply asexually and encyst: the snail in a fluke's cycle, the cow carrying tapeworm larvae, the human carrying malaria.",
+          "links": [
+            {
+              "href": "wiki:Host (biology)"
+            }
+          ]
+        },
+        "reservoir": {
+          "text": "The population — often wild or domestic animals — where the parasite lives permanently and from which human outbreaks are seeded: deer and mice for the Lyme spirochete.",
+          "links": [
+            {
+              "href": "wiki:Natural reservoir"
+            }
+          ]
+        },
+        "vector": {
+          "text": "The living carrier that ferries a parasite between hosts — the Anopheles mosquito for malaria, Ixodes ticks for Lyme. A biological vector hosts the parasite for part of its cycle; a mechanical one just carries it.",
+          "links": [
+            {
+              "href": "wiki:Disease vector"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Complex cycles cast hosts in roles: the definitive host hosts the sexual phase, the intermediate host hosts growth and multiplication, a reservoir population keeps the parasite endemic, and a vector ferries it between them.",
+        "links": [
+          {
+            "href": "wiki:Parasitism"
+          }
+        ]
+      },
+      "seeds": [
+        "vector",
+        "definitive host"
+      ],
+      "floatingTerms": [
+        "intermediate host",
+        "reservoir"
+      ],
+      "terms": [
+        "definitive host",
+        "intermediate host",
+        "reservoir",
+        "vector"
+      ]
+    },
+    {
+      "id": "forms",
+      "name": "Active and survival forms",
+      "color": "amber",
+      "fact": "Parasites change costumes as they move: a delicate feeding form inside the host, an armored shell for the journey outside, and juvenile forms built to find the next body.",
+      "termInfo": {
+        "cercaria": {
+          "text": "The free-swimming fluke larva, shed by the thousands from a snail. Schistosome cercariae paddle through fresh water and penetrate human skin directly — enzymes, not mouthparts; the tail is shed on entry.",
+          "links": [
+            {
+              "href": "wiki:Cercaria"
+            }
+          ]
+        },
+        "cyst": {
+          "text": "The environmentally stable form: a rigid two-layered wall, metabolism nearly stopped, viable for months in cold water and resistant to chlorine. Cysts are what feces deliver to the next water supply.",
+          "links": [
+            {
+              "href": "wiki:Giardia duodenalis"
+            }
+          ]
+        },
+        "larva": {
+          "text": "The juvenile worm form, often unrecognizable next to the adult: hookworm larvae hatch in soil and hunt bare feet; tapeworm larvae wait encysted in muscle as \"measly beef\".",
+          "links": [
+            {
+              "href": "wiki:Larva"
+            }
+          ]
+        },
+        "trophozoite": {
+          "text": "The active, feeding, multiplying protozoan form — Giardia's flagellated pear, clinging to the gut lining with its adhesive disc. Delicate: it dies within minutes outside the host.",
+          "links": [
+            {
+              "href": "wiki:Trophozoite"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Every stage of a complex cycle is built for a different job: feed and multiply inside one host, survive the outside world, then find the next body — often in a completely different shape.",
+        "links": [
+          {
+            "href": "wiki:Parasitism"
+          }
+        ]
+      },
+      "seeds": [
+        "cyst",
+        "larva"
+      ],
+      "floatingTerms": [
+        "trophozoite",
+        "cercaria"
+      ],
+      "terms": [
+        "trophozoite",
+        "cyst",
+        "larva",
+        "cercaria"
+      ]
+    },
+    {
+      "id": "routes",
+      "name": "Routes between hosts",
+      "color": "magenta",
+      "fact": "Getting to the next host is the whole game, and there are three classic routes: leave in feces and be swallowed, ride a biting carrier, or be eaten along with the next host's meal.",
+      "termInfo": {
+        "fecal-oral": {
+          "text": "Out with the feces, in with the food or water — the route of Giardia, Entamoeba, and every sanitation failure. It rewards armored cysts and heavy shedding: up to a billion Giardia cysts a day.",
+          "links": [
+            {
+              "href": "wiki:Fecal–oral route"
+            }
+          ]
+        },
+        "trophic transmission": {
+          "text": "Be eaten: tapeworm larvae wait in beef or pork muscle, fluke metacercariae cling to water plants, and the cycle completes when the definitive host swallows its meal — and its parasite.",
+          "links": [
+            {
+              "href": "wiki:Parasitism"
+            }
+          ]
+        },
+        "vector-borne": {
+          "text": "Ride a biting carrier: malaria's sporozoites travel in Anopheles saliva, Lyme's spirochetes in tick saliva. The vector's biting schedule becomes the parasite's travel schedule.",
+          "links": [
+            {
+              "href": "wiki:Disease vector"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Transmission is the whole game: a parasite that cannot reach the next host is dead on arrival. Each classic route selects for a different survival strategy.",
+        "links": [
+          {
+            "href": "wiki:Parasitism"
+          }
+        ]
+      },
+      "seeds": [
+        "fecal-oral",
+        "vector-borne"
+      ],
+      "floatingTerms": [
+        "trophic transmission"
+      ],
+      "terms": [
+        "fecal-oral",
+        "vector-borne",
+        "trophic transmission"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "definitive-vector",
+      "term": "the definitive vector",
+      "clusters": [
+        "host-roles",
+        "routes"
+      ],
+      "fact": "Malaria inverts the intuition: the mosquito that merely seems to 'transmit' the parasite is actually its definitive host — sexual reproduction happens in the insect — and the suffering human is only the intermediate host.",
+      "info": {
+        "text": "The inversion is easier to remember than the rule: define the definitive host by where sex happens, not by which host suffers — for malaria the answer is the insect.",
+        "links": [
+          {
+            "href": "wiki:Plasmodium falciparum"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "host-roles": "definitive host",
+        "routes": "vector-borne"
+      }
+    },
+    {
+      "id": "survival-armor",
+      "term": "survival armor",
+      "clusters": [
+        "forms",
+        "routes"
+      ],
+      "fact": "The cyst is the ticket for the fecal-oral ride: armored against chlorine, stomach acid, and months of cold water, Giardia cysts wait in untreated water for the next throat to swallow them — trophozoites could never make the trip.",
+      "info": {
+        "text": "Cyst walls resist chlorination and ozonolysis, which is why Giardia sneaks through municipal water treatment; boiling, not chlorine, is the field answer.",
+        "links": [
+          {
+            "href": "wiki:Giardia duodenalis"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "forms": "cyst",
+        "routes": "fecal-oral"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "forms",
+        "to": "routes"
+      }
+    },
+    {
+      "id": "amplification",
+      "term": "amplification",
+      "clusters": [
+        "host-roles",
+        "forms"
+      ],
+      "fact": "Intermediate hosts are multiplier stages: one Plasmodium sporozoite becomes some ninety thousand merozoites in a human liver, and one fluke miracidium becomes thousands of cercariae in a snail — asexual replication on an industrial scale.",
+      "info": {
+        "text": "Amplification is why one infected snail on a shoreline can seed a whole outbreak — and why the infectious dose of some parasites is a single organism.",
+        "links": [
+          {
+            "href": "wiki:Parasitism"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "host-roles": "intermediate host",
+        "forms": "cercaria"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "host-roles",
+        "to": "forms"
+      }
+    },
+    {
+      "id": "ectoparasite-vector",
+      "term": "riders that carry riders",
+      "clusters": [
+        "body-plans",
+        "routes"
+      ],
+      "fact": "Ectoparasites often work both sides of a route: the tick that feeds on you is an ectoparasite in its own right — and the vector that delivers Borrelia, the Lyme spirochete, from a deer reservoir.",
+      "info": {
+        "text": "Ticks are consummate double agents: three life stages, three hosts, and the ability to keep Borrelia circulating between deer and mice whether or not a human ever gets bitten.",
+        "links": [
+          {
+            "href": "wiki:Ixodes"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "body-plans": "ectoparasite",
+        "routes": "vector-borne"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "inside-or-outside",
+      "prompt": "Which body plan lives on the host's surface rather than inside it?",
+      "explanation": "Ectoparasites — lice, mites, ticks, fleas — live on the surface. Protozoa and helminths both live inside the host, in cells, gut, blood, or tissue.",
+      "targets": [
+        "ectoparasite"
+      ],
+      "reasons": {
+        "ectoparasite": "The outside dweller — exposed to grooming, preening, and topical medicine."
+      }
+    },
+    {
+      "id": "stage-casting",
+      "prompt": "Which two stages belong to protozoa rather than to worms?",
+      "explanation": "Trophozoite and cyst are the two protozoan costumes — feeding form and armored form. Larva and cercaria are worm juveniles; no protozoan has them.",
+      "targets": [
+        "trophozoite",
+        "cyst"
+      ],
+      "reasons": {
+        "cyst": "The protozoan's armored travel form.",
+        "trophozoite": "The protozoan's active feeding form."
+      }
+    },
+    {
+      "id": "who-hosts-sex",
+      "prompt": "In which role does the parasite reproduce sexually?",
+      "explanation": "The definitive host is defined by sex — sexual reproduction happens there and nowhere else. The intermediate host gets only multiplication; the vector gets transport.",
+      "targets": [
+        "definitive host"
+      ],
+      "reasons": {
+        "definitive host": "Sex happens here — that is the definition, not a side effect."
+      }
+    },
+    {
+      "id": "mosquito-role",
+      "prompt": "Which two roles does the female Anopheles mosquito play in the malaria cycle?",
+      "explanation": "The female Anopheles mosquito is both: the vector that ferries sporozoites in saliva, and — because fertilization happens in her gut — the malaria parasite's definitive host.",
+      "targets": [
+        "vector",
+        "definitive host"
+      ],
+      "reasons": {
+        "definitive host": "Sexual reproduction happens in her gut.",
+        "vector": "She ferries sporozoites from human to human in her saliva."
+      }
+    },
+    {
+      "id": "free-swimmer",
+      "prompt": "Which stage swims free in fresh water and penetrates a host's skin directly?",
+      "explanation": "The cercaria is the swimmer — shed in thousands from a snail, it paddles through fresh water and penetrates skin directly, shedding its tail on entry. Larvae wait or hunt; they do not swim.",
+      "targets": [
+        "cercaria"
+      ],
+      "reasons": {
+        "cercaria": "The fluke's fork-tailed swimmer — the schistosome's skin-piercing stage."
+      }
+    },
+    {
+      "id": "route-sorting",
+      "prompt": "Which route ends when the next host eats its meal — and its parasite — along with it?",
+      "explanation": "Trophic transmission completes the cycle by meal: tapeworm larvae in muscle, fluke metacercariae on water plants. The fecal-oral and vector-borne routes reach the host by swallowing water or being bitten instead.",
+      "targets": [
+        "trophic transmission"
+      ],
+      "reasons": {
+        "trophic transmission": "Transmission by being eaten — the food chain is the vehicle."
+      }
+    },
+    {
+      "id": "amplification-meeting",
+      "prompt": "Which pairing meets inside the snail: the host role where fluke larvae multiply, and the free-swimming stage it sheds?",
+      "explanation": "The intermediate host is the multiplier stage: one miracidium becomes thousands of cercariae inside the snail, which then sheds them into fresh water. No other host role multiplies the parasite this way, and no other stage is shed by the thousand.",
+      "targets": [
+        "intermediate host",
+        "cercaria"
+      ],
+      "reasons": {
+        "cercaria": "The product of that multiplication — shed by the thousand.",
+        "intermediate host": "Where asexual multiplication happens — the snail's role in the fluke cycle."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "bacterial-architectures",
+        "reason": "This board's tick bridge delivers Borrelia — the spirochete whose internal-flagella swimming that board teaches; pair them to see the parasite and its passenger in one picture."
+      },
+      {
+        "id": "virus-build-and-takeover",
+        "reason": "Batch sibling: viruses are the ultimate minimal parasites; this board shows the opposite extreme — complex life cycles with multiple hosts and costume changes."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "A parasite lives by spending someone else's body. The ones with the most complicated lives — protozoa like the malaria parasite, worms like tapeworms and flukes, and surface-dwellers like ticks — pass through several hosts and several body forms in a single lifetime, and each change of host demands a change of costume.\r\n\r\nThe roles in such a life cycle are precise. The definitive host is where the parasite reproduces sexually; the intermediate host hosts growth and often enormous asexual multiplication. A reservoir population — usually wild animals — keeps the parasite simmering between human outbreaks, and a vector, usually a biting insect or tick, ferries it between bodies.\r\n\r\nThe costume changes track the journey. A trophozoite is the active, feeding protozoan form, delicate and useless outside its host. A cyst is the same organism sealed behind a rigid wall, metabolism nearly stopped, able to survive chlorine, stomach acid, and months in cold water. Worms alternate adults, eggs, and larvae; flukes add a free-swimming cercaria that sheds its tail the moment it penetrates skin.\r\n\r\nPut the pieces together and famous cycles become readable. Malaria's mosquito is not a syringe but the parasite's definitive host — sex happens in the insect — while the human liver and blood stages are a multiplication factory. Giardia spreads by the fecal-oral route because its cyst is the one form that survives the trip. The tapeworm needs no armor at all: its larvae simply wait, encysted in meat, for the definitive host to eat its dinner."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

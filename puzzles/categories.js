@@ -40,11 +40,38 @@ export const CATEGORIES = {
       }
     }
   },
-  "Physics": {
+  Physics: {
+    slug: "physics",
     domain: "sciences-mathematics",
     info: {
       text: "How matter and energy behave — from classical motion and waves to quantum descriptions of light and particles.",
       link: "wiki:Physics"
+    },
+    subcategories: {
+      mechanics: {
+        title: "Mechanics",
+        info: {
+          text: "How forces, motion, momentum, energy, and rotation describe the behavior of bodies and mechanical systems."
+        }
+      },
+      electromagnetism: {
+        title: "Electromagnetism",
+        info: {
+          text: "How electric charges, currents, and electromagnetic fields interact and produce forces, induction, and waves."
+        }
+      },
+      "thermodynamics-statistical-physics": {
+        title: "Thermodynamics & Statistical Physics",
+        info: {
+          text: "How heat, work, entropy, and microscopic statistical behavior explain the properties and evolution of physical systems."
+        }
+      },
+      "quantum-physics": {
+        title: "Quantum Physics",
+        info: {
+          text: "How quantum states, measurement, superposition, and quantization describe matter and radiation at microscopic scales."
+        }
+      }
     }
   },
   Biology: {
@@ -120,11 +147,42 @@ export const CATEGORIES = {
       }
     }
   },
-  "Math": {
+  Math: {
+    slug: "math",
     domain: "sciences-mathematics",
-    info: { text: "The patterns and structures underneath numbers, shapes, and chance.", link: "wiki:Mathematics" }
+    info: {
+      text: "The patterns and structures underneath numbers, shapes, and chance.",
+      link: "wiki:Mathematics"
+    },
+    subcategories: {
+      algebra: {
+        title: "Algebra",
+        info: {
+          text: "How symbols, equations, functions, and algebraic structures express relationships and support general reasoning."
+        }
+      },
+      geometry: {
+        title: "Geometry",
+        info: {
+          text: "How shapes, sizes, spatial relationships, transformations, and geometric structures are described and reasoned about."
+        }
+      },
+      "calculus-analysis": {
+        title: "Calculus & Analysis",
+        info: {
+          text: "How limits, continuity, derivatives, integrals, and convergence describe change and accumulation."
+        }
+      },
+      "probability-statistics": {
+        title: "Probability & Statistics",
+        info: {
+          text: "How chance is modeled, data is summarized, and evidence supports estimation and inference under uncertainty."
+        }
+      }
+    }
   },
   "Computer Science": {
+    slug: "computer-science",
     domain: "computing-engineering",
     info: {
       text: "How computation is represented, constrained, and made usable—and what each layer of abstraction enables, hides, or sacrifices.",
@@ -138,7 +196,7 @@ export const CATEGORIES = {
           link: "wiki:Artificial intelligence"
         }
       },
-      "bioinformatics": {
+      bioinformatics: {
         title: "Bioinformatics",
         info: {
           text: "How biological observations become structured data, how algorithms compare them, and how computational analyses remain interpretable and reproducible.",
@@ -157,6 +215,30 @@ export const CATEGORIES = {
         info: {
           text: "How languages differ in types, execution, memory, and other design commitments—and how those choices show up when you write and run programs.",
           link: "wiki:Programming language"
+        }
+      },
+      "algorithms-data-structures": {
+        title: "Algorithms & Data Structures",
+        info: {
+          text: "How computational problems are solved through procedures and representations, and how correctness and efficiency are assessed."
+        }
+      },
+      "computer-systems": {
+        title: "Computer Systems",
+        info: {
+          text: "How hardware, operating systems, memory, concurrency, and storage cooperate to execute programs."
+        }
+      },
+      databases: {
+        title: "Databases",
+        info: {
+          text: "How data models, queries, indexes, transactions, and storage systems organize and retrieve persistent information."
+        }
+      },
+      "networks-security": {
+        title: "Networks & Security",
+        info: {
+          text: "How connected systems communicate, establish trust, and protect information and services against failures and attacks."
         }
       }
     }
@@ -210,9 +292,9 @@ export const CATEGORIES = {
       link: "wiki:Humanities"
     }
   },
-  "Philosophy": {
-    domain: "humanities",
+  Philosophy: {
     slug: "philosophy",
+    domain: "humanities",
     info: {
       text: "How people reason about what's true, what's real, and what's right.",
       link: "wiki:Philosophy"
@@ -223,6 +305,30 @@ export const CATEGORIES = {
         info: {
           text: "How power, authority, justice, and the state ought to be organized and justified, as distinct from how they actually operate.",
           link: "wiki:Political philosophy"
+        }
+      },
+      epistemology: {
+        title: "Epistemology",
+        info: {
+          text: "How knowledge, justification, evidence, and belief relate, and how skepticism and disagreement test claims to know."
+        }
+      },
+      ethics: {
+        title: "Ethics",
+        info: {
+          text: "How moral theories assess actions, character, duties, consequences, and the grounds of obligation."
+        }
+      },
+      metaphysics: {
+        title: "Metaphysics",
+        info: {
+          text: "How philosophers investigate existence, identity, causation, time, possibility, and the relation between mind and world."
+        }
+      },
+      logic: {
+        title: "Logic",
+        info: {
+          text: "How arguments are structured, when conclusions follow from premises, and how formal systems represent valid inference."
         }
       }
     }
@@ -248,23 +354,93 @@ export const CATEGORIES = {
           text: "How ordinary people come to do, permit, or excuse harm, and what it takes to refuse.",
           link: "wiki:Moral psychology"
         }
+      },
+      "cognitive-psychology": {
+        title: "Cognitive Psychology",
+        info: {
+          text: "How perception, attention, memory, language, reasoning, and decision-making organize mental activity."
+        }
+      },
+      "developmental-psychology": {
+        title: "Developmental Psychology",
+        info: {
+          text: "How cognition, emotion, identity, and relationships change across the lifespan through maturation and experience."
+        }
+      },
+      "social-psychology": {
+        title: "Social Psychology",
+        info: {
+          text: "How social situations, relationships, groups, and perceived norms shape individual thought, feeling, and behavior."
+        }
+      },
+      "learning-behavior": {
+        title: "Learning & Behavior",
+        info: {
+          text: "How conditioning, reinforcement, observation, and experience produce and change patterns of behavior."
+        }
       }
     }
   },
-  "Sociology": {
-    domain: "social-sciences",
+  Sociology: {
     slug: "sociology",
+    domain: "social-sciences",
     info: {
       text: "How groups, institutions, and social structures shape belief and behavior.",
       link: "wiki:Sociology"
+    },
+    subcategories: {
+      "social-stratification": {
+        title: "Social Stratification",
+        info: {
+          text: "How class, status, race, gender, and other social divisions structure inequality, mobility, and life chances."
+        }
+      },
+      "institutions-organizations": {
+        title: "Institutions & Organizations",
+        info: {
+          text: "How enduring rules, roles, and organized groups structure social life, coordinate activity, and reproduce authority."
+        }
+      },
+      "culture-socialization": {
+        title: "Culture & Socialization",
+        info: {
+          text: "How shared meanings, norms, identities, and practices are learned, negotiated, and transmitted through social life."
+        }
+      },
+      "social-change": {
+        title: "Social Change",
+        info: {
+          text: "How collective action, demographic shifts, technologies, and institutional transformations reshape societies over time."
+        }
+      }
     }
   },
-  "Economics": {
-    domain: "social-sciences",
+  Economics: {
     slug: "economics",
+    domain: "social-sciences",
     info: {
       text: "How people and institutions allocate scarce resources, and what that reveals about incentive and behavior.",
       link: "wiki:Economics"
+    },
+    subcategories: {
+      microeconomics: {
+        title: "Microeconomics",
+        info: {
+          text: "How households, firms, and markets respond to incentives, allocate resources, and interact under different market structures."
+        }
+      },
+      macroeconomics: {
+        title: "Macroeconomics",
+        info: {
+          text: "How output, employment, inflation, growth, and monetary and fiscal policy interact across an economy."
+        }
+      },
+      "political-economy": {
+        title: "Political Economy",
+        info: {
+          text: "How power, institutions, ownership, and public decisions shape economic systems and the distribution of resources."
+        }
+      }
     }
   },
   "Media & Information Literacy": {
@@ -512,10 +688,37 @@ export const CATEGORIES = {
     }
   },
   "Political Science": {
+    slug: "political-science",
     domain: "social-sciences",
     info: {
       text: "How societies organize power, govern themselves, and settle disputes over authority and rights.",
       link: "wiki:Political science"
+    },
+    subcategories: {
+      "international-relations": {
+        title: "International Relations",
+        info: {
+          text: "How states and other international actors cooperate, compete, negotiate, and organize security across borders."
+        }
+      },
+      "political-behavior": {
+        title: "Political Behavior",
+        info: {
+          text: "How people form political identities, participate, vote, mobilize, and respond to leaders and collective pressures."
+        }
+      },
+      "political-institutions-regimes": {
+        title: "Political Institutions & Regimes",
+        info: {
+          text: "How states organize authority through constitutions, legislatures, executives, bureaucracies, and democratic or authoritarian regimes."
+        }
+      },
+      "public-policy": {
+        title: "Public Policy",
+        info: {
+          text: "How public problems enter political agendas, how governments choose interventions, and how implementation and evaluation shape outcomes."
+        }
+      }
     }
   },
   Anthropology: {
@@ -555,6 +758,32 @@ export const CATEGORIES = {
     info: {
       text: "How language is structured, how meaning is built and communicated, and how linguistic expressions relate to the world.",
       link: "wiki:Linguistics"
+    },
+    subcategories: {
+      "phonetics-phonology": {
+        title: "Phonetics & Phonology",
+        info: {
+          text: "How speech sounds are produced, perceived, and organized into the patterned sound systems of languages."
+        }
+      },
+      "morphology-syntax": {
+        title: "Morphology & Syntax",
+        info: {
+          text: "How words are built from meaningful units and combined into phrases, clauses, and sentences."
+        }
+      },
+      "semantics-pragmatics": {
+        title: "Semantics & Pragmatics",
+        info: {
+          text: "How linguistic expressions encode meaning and how context, speaker intentions, and inference shape interpretation."
+        }
+      },
+      sociolinguistics: {
+        title: "Sociolinguistics",
+        info: {
+          text: "How language varies across communities and situations, and how identity, power, and social relationships shape its use."
+        }
+      }
     }
   },
   "Atmospheric Science": {
@@ -711,6 +940,121 @@ export const CATEGORIES = {
     info: {
       text: "How organisms interact with each other and their surroundings — the flows of energy and matter that link populations, communities, and the places they live.",
       link: "wiki:Ecology"
+    }
+  },
+  "Critical Theory & Cultural Studies": {
+    slug: "critical-theory-cultural-studies",
+    domain: "interdisciplinary-studies",
+    info: {
+      text: "How power, ideology, and culture shape what people believe, desire, and accept as natural, and how theory works to expose and contest those arrangements.",
+      link: "wiki:Critical theory"
+    }
+  },
+  Medicine: {
+    slug: "medicine",
+    domain: "health-medicine",
+    info: {
+      text: "How disease disrupts the body, and how clinicians diagnose, treat, and manage it, specialty by specialty.",
+      link: "wiki:Medicine"
+    },
+    subcategories: {
+      hematology: {
+        title: "Clinical Hematology",
+        info: {
+          text: "Disorders of the blood and blood-forming organs, from anemias and clotting disorders to leukemias and lymphomas.",
+          link: "wiki:Hematology"
+        }
+      },
+      "infectious-disease": {
+        title: "Infectious Disease",
+        info: {
+          text: "How infections present in patients, how they are diagnosed, and how they are treated and prevented clinically.",
+          link: "wiki:Infectious disease (medical specialty)"
+        }
+      },
+      oncology: {
+        title: "Oncology",
+        info: {
+          text: "How cancers arise, grow, and spread, and how they are staged and treated.",
+          link: "wiki:Oncology"
+        }
+      },
+      rheumatology: {
+        title: "Rheumatology",
+        info: {
+          text: "Autoimmune and inflammatory diseases of the joints, muscles, and connective tissue, and how they are recognized and managed.",
+          link: "wiki:Rheumatology"
+        }
+      }
+    }
+  },
+  "Peace & Conflict Studies": {
+    slug: "peace-conflict-studies",
+    domain: "interdisciplinary-studies",
+    info: {
+      text: "How violence arises and is justified, constrained, and resisted, from interpersonal conflict to war and genocide, and how nonviolent action and institutions work to build peace.",
+      link: "wiki:Peace and conflict studies"
+    },
+    subcategories: {
+      "atrocity-genocide": {
+        title: "Atrocity & Genocide",
+        info: {
+          text: "How mass atrocity and genocide are prepared, recognized, documented, and too often not prevented.",
+          link: "wiki:Genocide studies"
+        }
+      },
+      "conflict-resolution-peacebuilding": {
+        title: "Conflict Resolution & Peacebuilding",
+        info: {
+          text: "How conflicts between people, groups, and states are managed, transformed, or settled, and how cooperation is built and sustained.",
+          link: "wiki:Conflict resolution"
+        }
+      },
+      "nonviolence-civil-resistance": {
+        title: "Nonviolence & Civil Resistance",
+        info: {
+          text: "How individuals, movements, and institutions refuse and resist violence and injustice without using violence themselves.",
+          link: "wiki:Nonviolent resistance"
+        }
+      },
+      "war-militarism": {
+        title: "War & Militarism",
+        info: {
+          text: "How war is waged, justified, and sustained, and what its machinery, permissions, and moral costs do to the people inside it.",
+          link: "wiki:Militarism"
+        }
+      }
+    }
+  },
+  "Science, Technology & Society": {
+    slug: "science-technology-society",
+    domain: "interdisciplinary-studies",
+    info: {
+      text: "How technologies are designed, adopted, and governed, who gains and who bears the costs, and how technical systems reshape choice, work, and responsibility.",
+      link: "wiki:Science, technology and society"
+    },
+    subcategories: {
+      "automation-accountability": {
+        title: "Automation & Accountability",
+        info: {
+          text: "How delegating judgment to automated and remote systems changes who decides, who answers for the outcome, and what human oversight still means.",
+          link: "wiki:Algorithmic accountability"
+        }
+      },
+      "persuasive-deceptive-design": {
+        title: "Persuasive & Deceptive Design",
+        info: {
+          text: "How interfaces and digital systems steer, pressure, or deceive the people using them, and how honest choice can be restored.",
+          link: "wiki:Dark pattern"
+        }
+      },
+      "technology-work-control": {
+        title: "Technology, Work & Control",
+        info: {
+          text: "How shifts in technical platforms redistribute control, convenience, cost, and expertise among providers, users, and workers.",
+          link: "wiki:Social construction of technology"
+        }
+      }
     }
   }
 };

@@ -1,17 +1,22 @@
 {
   "id": "excusable-not-justifiable",
   "title": "Excusable, Not Justifiable",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "philosophy"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "philosophy": "ethics"
+  },
   "tags": [
     "just war theory",
     "ethics"
   ],
   "info": {
-    "text": "From Augustine's grief-stricken permission through Aquinas's threefold test to Michael Walzer's modern reckoning with dirty hands — the tradition that decides when a war may be fought, and why even a rightly fought one is never quite justified.",
+    "text": "Augustine's grief-stricken permission and Aquinas's threefold test decide when a war may even be fought — plus 'dirty hands,' a later term for the guilt that survives even a war held to every one of those conditions.",
     "links": [
       {
         "href": "wiki:Just war theory"
@@ -33,18 +38,6 @@
       "name": "Augustine's Reluctant Permission",
       "color": "teal",
       "fact": "Augustine treated war as a grief-stricken concession to a fallen world — permissible only for a just cause and waged with right intention, but never a good in itself, since its only legitimate aim was to restore the very peace it interrupted.",
-      "seeds": [
-        "just cause",
-        "right intention"
-      ],
-      "floatingTerms": [
-        "peace as the aim"
-      ],
-      "terms": [
-        "just cause",
-        "right intention",
-        "peace as the aim"
-      ],
       "termInfo": {
         "just cause": {
           "text": "A wrong already suffered or credibly threatened — without it, a war has no moral standing to begin at all.",
@@ -68,25 +61,25 @@
             "href": "wiki:Augustine of Hippo"
           }
         ]
-      }
+      },
+      "seeds": [
+        "just cause",
+        "right intention"
+      ],
+      "floatingTerms": [
+        "peace as the aim"
+      ],
+      "terms": [
+        "just cause",
+        "right intention",
+        "peace as the aim"
+      ]
     },
     {
       "id": "aquinas-systematizes",
       "name": "Aquinas's Threefold Test",
       "color": "olive",
       "fact": "Aquinas folded Augustine's scattered judgments into three explicit conditions in the Summa Theologica — legitimate authority, just cause, and right intention — but insisted that meeting all three made a war permissible to begin, not automatically righteous in how it was then fought.",
-      "seeds": [
-        "sovereign authority",
-        "the Summa Theologica"
-      ],
-      "floatingTerms": [
-        "necessary, not sufficient"
-      ],
-      "terms": [
-        "sovereign authority",
-        "the Summa Theologica",
-        "necessary, not sufficient"
-      ],
       "termInfo": {
         "necessary, not sufficient": {
           "text": "Aquinas's own caution: satisfying all three conditions makes a war permissible to begin — not automatically righteous in how it then unfolds."
@@ -110,25 +103,25 @@
             "href": "wiki:Thomas Aquinas"
           }
         ]
-      }
+      },
+      "seeds": [
+        "sovereign authority",
+        "the Summa Theologica"
+      ],
+      "floatingTerms": [
+        "necessary, not sufficient"
+      ],
+      "terms": [
+        "sovereign authority",
+        "the Summa Theologica",
+        "necessary, not sufficient"
+      ]
     },
     {
       "id": "the-wartime-half",
       "name": "The Wartime Half",
       "color": "amber",
       "fact": "Even a war cleared to begin must still be fought rightly: discrimination protects those who are not combatants, and proportionality limits force to what the legitimate aim actually requires — the tradition's second, harder half, tested hardest exactly when a community's survival feels imminently threatened.",
-      "seeds": [
-        "discrimination (noncombatant immunity)",
-        "proportionality"
-      ],
-      "floatingTerms": [
-        "supreme emergency"
-      ],
-      "terms": [
-        "discrimination (noncombatant immunity)",
-        "proportionality",
-        "supreme emergency"
-      ],
       "termInfo": {
         "discrimination (noncombatant immunity)": {
           "text": "The requirement to distinguish combatants from civilians and direct force only at the former.",
@@ -162,25 +155,25 @@
             "href": "wiki:Jus in bello"
           }
         ]
-      }
+      },
+      "seeds": [
+        "discrimination (noncombatant immunity)",
+        "proportionality"
+      ],
+      "floatingTerms": [
+        "supreme emergency"
+      ],
+      "terms": [
+        "discrimination (noncombatant immunity)",
+        "proportionality",
+        "supreme emergency"
+      ]
     },
     {
       "id": "the-ethics-of-excuse",
       "name": "The Ethics of Excuse",
       "color": "magenta",
       "fact": "A justification claims an act was never wrong; an excuse concedes the act stays wrong but holds the actor less blameworthy for committing it under the circumstances that forced their hand — and on this reading, no war, however carefully fought, ever graduates out of the second category into the first.",
-      "seeds": [
-        "justification",
-        "excuse"
-      ],
-      "floatingTerms": [
-        "moral residue"
-      ],
-      "terms": [
-        "justification",
-        "excuse",
-        "moral residue"
-      ],
       "termInfo": {
         "excuse": {
           "text": "A moral assessment holding that an act remains wrong, exactly as wrong as it looks, but the person who did it is not held fully responsible for it, because something overrode their capacity to choose freely."
@@ -199,7 +192,19 @@
             "href": "https://plato.stanford.edu/entries/moral-responsibility/"
           }
         ]
-      }
+      },
+      "seeds": [
+        "justification",
+        "excuse"
+      ],
+      "floatingTerms": [
+        "moral residue"
+      ],
+      "terms": [
+        "justification",
+        "excuse",
+        "moral residue"
+      ]
     }
   ],
   "bridges": [

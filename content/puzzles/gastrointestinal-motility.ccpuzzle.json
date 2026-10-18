@@ -1,0 +1,704 @@
+{
+  "id": "gastrointestinal-motility",
+  "title": "Gastrointestinal motility",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "gastrointestinal"
+  },
+  "info": {
+    "text": "How the gut wall times, coordinates, and shapes its contractions, from swallowing to defecation.",
+    "citations": [
+      {
+        "title": "Guyton and Hall Textbook of Medical Physiology, 14th ed., ch. 63–64",
+        "author": "John E. Hall, Michael E. Hall",
+        "publisher": "Elsevier",
+        "year": "2021"
+      },
+      {
+        "title": "Interstitial cells of Cajal as pacemakers in the gastrointestinal tract",
+        "author": "Kenton M. Sanders, Sang Don Koh, Sean M. Ward",
+        "publisher": "Annual Review of Physiology 68",
+        "year": "2006",
+        "pages": "307–343",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/16460275/"
+      },
+      {
+        "title": "The enteric nervous system and neurogastroenterology",
+        "author": "John B. Furness",
+        "publisher": "Nature Reviews Gastroenterology & Hepatology 9(5)",
+        "year": "2012",
+        "pages": "286–294",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/22392290/"
+      },
+      {
+        "title": "Interstitial cells of Cajal: clinical relevance in pediatric gastrointestinal motility disorders",
+        "author": "Florian Friedmacher, Udo Rolle",
+        "publisher": "Pediatric Surgery International 39",
+        "year": "2023",
+        "pages": "188",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10133055/"
+      },
+      {
+        "title": "23.3 The Mouth, Pharynx, and Esophagus — Anatomy and Physiology 2e",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-3-the-mouth-pharynx-and-esophagus"
+      },
+      {
+        "title": "23.4 The Stomach — Anatomy and Physiology 2e",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-4-the-stomach"
+      },
+      {
+        "title": "23.5 The Small and Large Intestines — Anatomy and Physiology 2e",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-5-the-small-and-large-intestines"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "electrical-rhythm",
+      "name": "Electrical rhythm",
+      "color": "teal",
+      "fact": "Interstitial cells of Cajal generate slow waves, rhythmic swings in membrane potential that spread through the electrically coupled smooth muscle. Slow waves set when contraction can happen; spike potentials firing at their peaks let calcium in and trigger it.",
+      "termInfo": {
+        "interstitial cells of Cajal": {
+          "text": "Pacemaker cells woven among the smooth muscle layers that generate and propagate slow waves.",
+          "links": [
+            {
+              "href": "wiki:Interstitial cell of Cajal"
+            }
+          ]
+        },
+        "slow waves": {
+          "text": "Rhythmic depolarizations of the gut wall, about 3 per minute in the stomach and up to 12 in the duodenum. Mostly they set timing rather than cause contraction themselves.",
+          "links": [
+            {
+              "href": "wiki:Slow-wave potential"
+            }
+          ]
+        },
+        "spike potentials": "True action potentials fired at slow-wave peaks when the membrane is depolarized enough; calcium enters through them and the muscle contracts."
+      },
+      "info": {
+        "text": "Gut smooth muscle works as an electrical syncytium: gap junctions let one rhythm spread through a whole sheet of cells.",
+        "links": [
+          {
+            "href": "https://pubmed.ncbi.nlm.nih.gov/16460275/",
+            "label": "Sanders et al.: ICC as pacemakers"
+          }
+        ]
+      },
+      "seeds": [
+        "slow waves",
+        "interstitial cells of Cajal"
+      ],
+      "floatingTerms": [
+        "spike potentials"
+      ],
+      "terms": [
+        "slow waves",
+        "interstitial cells of Cajal",
+        "spike potentials"
+      ]
+    },
+    {
+      "id": "enteric-nerves",
+      "name": "Enteric nervous system",
+      "color": "blue",
+      "fact": "The myenteric plexus, between the muscle layers, governs movement; the submucosal plexus governs local secretion, absorption, and blood flow. Enteric motor neurons excite the muscle with acetylcholine and relax it with nitric oxide.",
+      "termInfo": {
+        "acetylcholine": "Main excitatory transmitter of enteric motor neurons; it depolarizes the muscle and raises spike firing.",
+        "myenteric plexus": {
+          "text": "Nerve network between the circular and longitudinal muscle (Auerbach's plexus) that controls gut movement.",
+          "links": [
+            {
+              "href": "wiki:Myenteric plexus"
+            }
+          ]
+        },
+        "nitric oxide": "Main inhibitory transmitter of enteric motor neurons, released with vasoactive intestinal peptide (VIP); it relaxes the muscle.",
+        "submucosal plexus": {
+          "text": "Nerve network in the submucosa (Meissner's plexus) that controls local secretion, absorption, and blood flow.",
+          "links": [
+            {
+              "href": "wiki:Submucosal plexus"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The gut's own nervous system can run its reflexes even when cut off from the brain; sympathetic and parasympathetic nerves only adjust it.",
+        "links": [
+          {
+            "href": "https://pubmed.ncbi.nlm.nih.gov/22392290/",
+            "label": "Furness: the enteric nervous system"
+          }
+        ]
+      },
+      "seeds": [
+        "myenteric plexus",
+        "submucosal plexus"
+      ],
+      "floatingTerms": [
+        "acetylcholine",
+        "nitric oxide"
+      ],
+      "terms": [
+        "myenteric plexus",
+        "submucosal plexus",
+        "acetylcholine",
+        "nitric oxide"
+      ]
+    },
+    {
+      "id": "swallowing",
+      "name": "Swallowing",
+      "color": "amber",
+      "fact": "In the pharyngeal stage, a brainstem reflex seals the airway and opens the upper esophageal sphincter. Primary peristalsis carries the bolus down the esophagus, secondary peristalsis clears whatever remains, and the lower esophageal sphincter opens to admit it and otherwise stays closed against reflux.",
+      "termInfo": {
+        "lower esophageal sphincter": "Tonically closed ring at the stomach end of the esophagus (the gastroesophageal sphincter) that relaxes ahead of each swallow.",
+        "pharyngeal stage": "Involuntary stage coordinated by the brainstem swallowing center: the palate and epiglottis seal the airways and the upper sphincter opens.",
+        "primary peristalsis": "The esophageal wave that continues the swallow begun in the pharynx, reaching the stomach in about 8 to 10 seconds.",
+        "secondary peristalsis": "A new wave set off by distension when food is left in the esophagus after the primary wave passes.",
+        "upper esophageal sphincter": "Ring of muscle at the top of the esophagus that relaxes during the pharyngeal stage and closes behind the bolus."
+      },
+      "info": {
+        "text": "Swallowing starts voluntarily in the mouth; from the pharynx on it runs as an automatic reflex.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-3-the-mouth-pharynx-and-esophagus",
+            "label": "OpenStax: mouth, pharynx, and esophagus"
+          }
+        ]
+      },
+      "seeds": [
+        "upper esophageal sphincter",
+        "lower esophageal sphincter"
+      ],
+      "floatingTerms": [
+        "pharyngeal stage",
+        "primary peristalsis",
+        "secondary peristalsis"
+      ],
+      "terms": [
+        "upper esophageal sphincter",
+        "lower esophageal sphincter",
+        "pharyngeal stage",
+        "primary peristalsis",
+        "secondary peristalsis"
+      ]
+    },
+    {
+      "id": "gastric-mixing-emptying",
+      "name": "Gastric mixing and emptying",
+      "color": "magenta",
+      "fact": "Mixing waves sweep toward the antrum and grind food with gastric juice into chyme. The narrow pyloric sphincter passes only a few milliliters with each contraction, so most antral contents are driven back by retropulsion, and the strength of the antral contractions, the pyloric pump, sets the rate of emptying.",
+      "termInfo": {
+        "mixing waves": "Weak constrictor waves, driven by the gastric slow waves about every 20 seconds, that move from the body toward the antrum.",
+        "pyloric pump": "Intense antral peristalsis that forces chyme through the pylorus; its strength is the main control on emptying.",
+        "pyloric sphincter": {
+          "text": "Thick ring of circular muscle at the stomach outlet; partly open, it lets fluid through but holds back solids until they are ground fine.",
+          "links": [
+            {
+              "href": "wiki:Pylorus"
+            }
+          ]
+        },
+        "retropulsion": "Antral contents squirted back toward the stomach body when a contraction meets the closing pylorus, which mixes them further."
+      },
+      "info": {
+        "text": "The stomach body stores, the antrum grinds, and the pylorus meters chyme into the duodenum.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-4-the-stomach",
+            "label": "OpenStax: the stomach"
+          }
+        ]
+      },
+      "seeds": [
+        "pyloric sphincter",
+        "mixing waves"
+      ],
+      "floatingTerms": [
+        "pyloric pump",
+        "retropulsion"
+      ],
+      "terms": [
+        "pyloric sphincter",
+        "mixing waves",
+        "pyloric pump",
+        "retropulsion"
+      ]
+    },
+    {
+      "id": "small-intestine",
+      "name": "Small intestine",
+      "color": "olive",
+      "fact": "Segmentation contractions chop chyme, mix it with digestive juices, and press it against the absorbing mucosa, while weak peristaltic waves move it slowly onward. Intense irritation instead provokes a peristaltic rush that sweeps contents into the colon.",
+      "termInfo": {
+        "peristaltic rush": "Powerful, fast peristalsis set off by strong irritation of the mucosa, as in infectious diarrhea; it clears the intestine within minutes.",
+        "segmentation": {
+          "text": "Alternating rings of contraction that divide the intestine into segments and mix its contents rather than push them.",
+          "links": [
+            {
+              "href": "wiki:Segmentation contractions"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Chyme takes three to five hours to travel from the pylorus to the ileocecal valve.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-5-the-small-and-large-intestines",
+            "label": "OpenStax: the small and large intestines"
+          }
+        ]
+      },
+      "seeds": [
+        "segmentation"
+      ],
+      "floatingTerms": [
+        "peristaltic rush"
+      ],
+      "terms": [
+        "segmentation",
+        "peristaltic rush"
+      ]
+    },
+    {
+      "id": "colon-defecation",
+      "name": "Colon and defecation",
+      "color": "brown",
+      "fact": "Haustrations knead and slowly roll colonic contents so the colon can absorb water. A few times a day, mass movements push feces into the rectum and start the defecation reflex; the involuntary internal anal sphincter relaxes, and the voluntary external anal sphincter decides whether defecation proceeds.",
+      "termInfo": {
+        "defecation reflex": {
+          "text": "Rectal distension triggers a weak intrinsic reflex, greatly strengthened by a parasympathetic loop through the sacral spinal cord.",
+          "links": [
+            {
+              "href": "wiki:Defecation"
+            }
+          ]
+        },
+        "external anal sphincter": {
+          "text": "Striated-muscle ring under voluntary control through the pudendal nerve.",
+          "links": [
+            {
+              "href": "wiki:External anal sphincter"
+            }
+          ]
+        },
+        "haustrations": {
+          "text": "Sac-like bulges formed by combined circular and longitudinal contractions; they knead contents and roll them slowly forward.",
+          "links": [
+            {
+              "href": "wiki:Haustrum (anatomy)"
+            }
+          ]
+        },
+        "internal anal sphincter": {
+          "text": "Smooth-muscle ring that relaxes reflexively when the rectum fills.",
+          "links": [
+            {
+              "href": "wiki:Internal anal sphincter"
+            }
+          ]
+        },
+        "mass movements": "Strong peristaltic surges, one to three times a day, that drive feces along much of the colon into the rectum."
+      },
+      "info": {
+        "text": "Most colonic movement is slow mixing; propulsion comes in a few strong surges a day.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-5-the-small-and-large-intestines",
+            "label": "OpenStax: the small and large intestines"
+          }
+        ]
+      },
+      "seeds": [
+        "haustrations",
+        "mass movements"
+      ],
+      "floatingTerms": [
+        "defecation reflex",
+        "internal anal sphincter",
+        "external anal sphincter"
+      ],
+      "terms": [
+        "haustrations",
+        "mass movements",
+        "defecation reflex",
+        "internal anal sphincter",
+        "external anal sphincter"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "slow-wave-frequency-gradient",
+      "term": "slow-wave frequency gradient",
+      "clusters": [
+        "electrical-rhythm",
+        "small-intestine"
+      ],
+      "fact": "Slow-wave frequency falls from about 12 per minute in the duodenum to about 8 or 9 in the terminal ileum. Segmentation follows that rhythm, so upstream segments contract more often and the mixing drifts chyme toward the colon.",
+      "info": "The slow-wave rate is the ceiling on how often any segment can contract.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "electrical-rhythm": "slow waves",
+        "small-intestine": "segmentation"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "electrical-rhythm",
+        "to": "small-intestine"
+      }
+    },
+    {
+      "id": "peristaltic-reflex",
+      "term": "peristaltic reflex",
+      "clusters": [
+        "enteric-nerves",
+        "small-intestine"
+      ],
+      "fact": "Stretch from a bolus makes the myenteric plexus contract the wall behind it and relax the wall ahead of it, so the bolus moves forward. The intestine works this way even after its extrinsic nerves are cut.",
+      "info": {
+        "text": "Also called the law of the gut. The same reflex drives peristalsis in the esophagus and colon.",
+        "links": [
+          {
+            "href": "wiki:Peristalsis"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "enteric-nerves": "myenteric plexus"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "enteric-nerves",
+        "to": "small-intestine"
+      }
+    },
+    {
+      "id": "receptive-relaxation",
+      "term": "receptive relaxation",
+      "clusters": [
+        "swallowing",
+        "gastric-mixing-emptying"
+      ],
+      "fact": "As a swallow begins, a vagovagal reflex relaxes the lower esophageal sphincter and the stomach ahead of the bolus, so the stomach can fill with a meal without its pressure rising.",
+      "info": "Also called gastric accommodation. Guyton also uses the phrase for the relaxation ahead of any peristaltic wave.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "swallowing": "lower esophageal sphincter"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "swallowing",
+        "to": "gastric-mixing-emptying"
+      }
+    },
+    {
+      "id": "enterogastric-reflex",
+      "term": "enterogastric reflex",
+      "clusters": [
+        "small-intestine",
+        "gastric-mixing-emptying"
+      ],
+      "fact": "Distension, acid, fat, protein breakdown products, or hypertonic chyme in the duodenum weaken the pyloric pump and tighten the pylorus, so the stomach empties only as fast as the intestine can process its chyme.",
+      "info": "Hormones add a second brake: cholecystokinin released by fat in the duodenum also slows emptying.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "gastric-mixing-emptying": "pyloric pump"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "small-intestine",
+        "to": "gastric-mixing-emptying"
+      }
+    },
+    {
+      "id": "migrating-motor-complex",
+      "term": "migrating motor complex",
+      "clusters": [
+        "gastric-mixing-emptying",
+        "small-intestine"
+      ],
+      "fact": "Between meals, a band of intense contraction starts in the stomach about every 90 minutes and travels the length of the small intestine, sweeping out undigested solids and bacteria. A meal interrupts it.",
+      "info": {
+        "text": "Each cycle is triggered by motilin, a hormone from the upper small intestine.",
+        "links": [
+          {
+            "href": "wiki:Migrating motor complex"
+          }
+        ]
+      },
+      "relationKind": "continuity",
+      "direction": {
+        "kind": "through",
+        "from": "gastric-mixing-emptying",
+        "to": "small-intestine"
+      }
+    },
+    {
+      "id": "ileocecal-valve",
+      "term": "ileocecal valve",
+      "clusters": [
+        "small-intestine",
+        "colon-defecation"
+      ],
+      "fact": "The valve and its sphincter let ileal contents into the cecum and block backflow from the colon. Pressure from the ileal side opens it; distension of the cecum tightens it.",
+      "info": {
+        "text": "After a meal the gastroileal reflex relaxes the sphincter and speeds ileal emptying.",
+        "links": [
+          {
+            "href": "wiki:Ileocecal valve"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "bidirectional"
+      }
+    },
+    {
+      "id": "gastrocolic-reflex",
+      "term": "gastrocolic reflex",
+      "clusters": [
+        "gastric-mixing-emptying",
+        "colon-defecation"
+      ],
+      "fact": "Filling of the stomach sets off mass movements in the colon through autonomic nerves, which is why the urge to defecate often follows a meal.",
+      "info": {
+        "text": "A duodenocolic reflex from the duodenum does the same.",
+        "links": [
+          {
+            "href": "wiki:Gastrocolic reflex"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "colon-defecation": "mass movements"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "gastric-mixing-emptying",
+        "to": "colon-defecation"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "pacemaker-cells",
+      "prompt": "Which cells generate the gut's slow waves?",
+      "explanation": "Smooth muscle cells follow the rhythm through gap junctions; the interstitial cells of Cajal generate it. Losing these cells disturbs motility in disorders such as gastroparesis.",
+      "targets": [
+        "interstitial cells of Cajal"
+      ],
+      "reasons": {
+        "interstitial cells of Cajal": "They are the gut's pacemakers, setting and spreading the slow-wave rhythm."
+      }
+    },
+    {
+      "id": "calcium-entry",
+      "prompt": "Which electrical events, firing at slow-wave peaks, admit the calcium that triggers contraction?",
+      "explanation": "Slow waves mostly set the timing. Contraction follows the spike potentials that fire when a slow-wave peak crosses threshold, and nerve and hormone signals decide how many fire.",
+      "targets": [
+        "spike potentials"
+      ],
+      "reasons": {
+        "spike potentials": "Their channels let calcium into the muscle, and the calcium sets off contraction."
+      }
+    },
+    {
+      "id": "enteric-transmitters",
+      "prompt": "Which transmitters do enteric motor neurons release onto gut smooth muscle?",
+      "explanation": "Coordinated gut movement is built from these two commands, contract here and relax there. Acetylcholine contracts the wall behind a bolus; nitric oxide relaxes the wall ahead of it and opens the smooth-muscle sphincters.",
+      "targets": [
+        "acetylcholine",
+        "nitric oxide"
+      ],
+      "reasons": {
+        "acetylcholine": "The excitatory transmitter: it depolarizes the muscle and raises spike firing.",
+        "nitric oxide": "The inhibitory transmitter, released with VIP: it relaxes the muscle."
+      }
+    },
+    {
+      "id": "law-of-the-gut",
+      "prompt": "Which reflex, sometimes called the law of the gut, contracts the wall behind a bolus and relaxes it ahead?",
+      "explanation": "The peristaltic reflex is local: it runs within the gut wall even when extrinsic nerves are cut.",
+      "targets": [
+        "peristaltic reflex"
+      ],
+      "reasons": {
+        "peristaltic reflex": "Stretch from the bolus sets off contraction above and relaxation below through the myenteric plexus."
+      }
+    },
+    {
+      "id": "esophageal-waves",
+      "prompt": "Which waves carry a bolus down the esophagus?",
+      "explanation": "The primary wave is part of the swallow itself and usually suffices. Secondary peristalsis is the backup, triggered by whatever the first wave failed to clear.",
+      "targets": [
+        "primary peristalsis",
+        "secondary peristalsis"
+      ],
+      "reasons": {
+        "primary peristalsis": "The wave that continues the swallow begun in the pharynx.",
+        "secondary peristalsis": "A new wave set off by distension when food is left behind after the primary wave."
+      }
+    },
+    {
+      "id": "striated-sphincters",
+      "prompt": "Which sphincters are made of striated muscle?",
+      "explanation": "The gut begins and ends in skeletal muscle. The lower esophageal, pyloric, ileocecal, and internal anal sphincters are smooth muscle run by the enteric and autonomic nerves. Of the two striated sphincters, only the external anal sphincter can be held closed by choice; the upper esophageal sphincter opens by reflex.",
+      "targets": [
+        "upper esophageal sphincter",
+        "external anal sphincter"
+      ],
+      "reasons": {
+        "external anal sphincter": "Skeletal muscle at the end of the tract, under voluntary control through the pudendal nerve.",
+        "upper esophageal sphincter": "Skeletal muscle at the top of the esophagus, opened by the brainstem swallowing reflex."
+      }
+    },
+    {
+      "id": "mixing-not-moving",
+      "prompt": "Which movements mainly mix contents rather than move them along?",
+      "explanation": "Each region pairs a mixing movement with a propulsive one: the pyloric pump empties the stomach, peristalsis moves chyme through the small intestine, and mass movements drive feces into the rectum. Mixing serves digestion and absorption, so it occupies most of the time food spends in the gut.",
+      "targets": [
+        "mixing waves",
+        "retropulsion",
+        "segmentation",
+        "haustrations"
+      ],
+      "reasons": {
+        "haustrations": "Sac-like bulges that knead colonic contents against the absorbing wall.",
+        "mixing waves": "Weak constrictor waves that grind food with gastric juice into chyme.",
+        "retropulsion": "The backward jet that returns most antral chyme to the stomach body for further grinding.",
+        "segmentation": "Alternating rings of contraction that chop and mix chyme with digestive juices."
+      }
+    },
+    {
+      "id": "segmentation-drift",
+      "prompt": "Which term explains why segmentation slowly drifts chyme toward the colon?",
+      "explanation": "Segmentation itself mixes rather than propels, but its rate follows the local slow-wave frequency, which falls along the intestine.",
+      "targets": [
+        "slow-wave frequency gradient"
+      ],
+      "reasons": {
+        "slow-wave frequency gradient": "Upper segments contract more often than lower ones, so the mixing has a downstream bias."
+      }
+    },
+    {
+      "id": "duodenal-brake",
+      "prompt": "Which nervous reflex slows gastric emptying when acid or fat reaches the duodenum?",
+      "explanation": "The reflex runs through the enteric plexuses, sympathetic ganglia, and the vagus. Cholecystokinin adds a hormonal brake on emptying when fat arrives.",
+      "targets": [
+        "enterogastric reflex"
+      ],
+      "reasons": {
+        "enterogastric reflex": "Duodenal signals weaken the pyloric pump and tighten the pylorus."
+      }
+    },
+    {
+      "id": "organ-to-organ",
+      "prompt": "Which reflexes let a stimulus in one organ change motility in a different organ?",
+      "explanation": "These reflexes coordinate the tract as a whole, traveling through the vagus or autonomic ganglia. The peristaltic reflex and secondary peristalsis act where the stimulus is, and the defecation reflex acts within the rectum and anal canal it is triggered from.",
+      "targets": [
+        "receptive relaxation",
+        "enterogastric reflex",
+        "gastrocolic reflex"
+      ],
+      "reasons": {
+        "enterogastric reflex": "Chyme in the duodenum slows the stomach's emptying.",
+        "gastrocolic reflex": "Filling of the stomach sets off mass movements in the colon.",
+        "receptive relaxation": "A swallow relaxes the stomach before food reaches it."
+      }
+    },
+    {
+      "id": "fasting-sweep",
+      "prompt": "Which fasting pattern sweeps undigested solids out of the stomach and down the small intestine?",
+      "explanation": "Motilin triggers each cycle and a meal stops it. A peristaltic rush also clears the intestine, but it is a response to irritation, not a fasting rhythm.",
+      "targets": [
+        "migrating motor complex"
+      ],
+      "reasons": {
+        "migrating motor complex": "About every 90 minutes between meals, a band of strong contraction travels from the stomach through the small intestine."
+      }
+    },
+    {
+      "id": "backflow-barrier",
+      "prompt": "Which structure keeps colonic contents from flowing back into the ileum?",
+      "explanation": "Cecal distension tightens the ileocecal sphincter, protecting the small intestine from colonic contents and bacteria.",
+      "targets": [
+        "ileocecal valve"
+      ],
+      "reasons": {
+        "ileocecal valve": "Its lips and sphincter close when pressure builds on the colon side."
+      }
+    },
+    {
+      "id": "hirschsprung",
+      "prompt": "Which nerve networks are absent from the narrowed segment of colon in Hirschsprung disease?",
+      "explanation": "Enteric neurons fail to colonize the distal colon during development. The aganglionic segment acts as a functional obstruction, and the colon above it distends.",
+      "targets": [
+        "myenteric plexus",
+        "submucosal plexus"
+      ],
+      "reasons": {
+        "myenteric plexus": "Without it, the segment cannot relax and propagate peristalsis, so it stays contracted.",
+        "submucosal plexus": "Hirschsprung disease is a congenital absence of ganglion cells from both plexuses."
+      }
+    },
+    {
+      "id": "failed-relaxation",
+      "prompt": "Which sphincters fail to relax when the inhibitory neurons serving them are lost?",
+      "explanation": "Both are smooth-muscle sphincters kept tonically closed and opened by nitric-oxide neurons. The striated upper esophageal and external anal sphincters are run by somatic nerves instead, so these diseases spare them.",
+      "targets": [
+        "lower esophageal sphincter",
+        "internal anal sphincter"
+      ],
+      "reasons": {
+        "internal anal sphincter": "In Hirschsprung disease it no longer relaxes when the rectum fills; that missing reflex is a diagnostic sign.",
+        "lower esophageal sphincter": "In achalasia it stays closed when a swallow arrives, so food backs up in the esophagus."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "the-autonomic-nervous-system",
+        "reason": "See the extrinsic nerves that adjust the gut's own nervous system, including the vagus behind receptive relaxation."
+      },
+      {
+        "id": "gastric-acid-secretion",
+        "reason": "Follow the same meal through the stomach's chemistry, where duodenal hormones that slow emptying also brake acid secretion."
+      },
+      {
+        "id": "digestive-breakdown",
+        "reason": "Step back to the introductory survey of how the gut moves, mixes, and dismantles food."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "How the gut moves",
+    "summary": "The electrical rhythm, enteric nerves, and motor patterns that move food from mouth to rectum.",
+    "estimatedMinutes": 6,
+    "content": {
+      "text": "From the throat to the rectum, food is moved by the smooth muscle of the gut wall. Each region shapes its contractions to its job: the esophagus transports, the stomach stores, grinds, and meters, the small intestine mixes for digestion and absorption, and the colon holds contents while it absorbs water. Underneath all of it are two shared systems, an electrical rhythm built into the muscle and a nervous system built into the wall.\r\n\r\n## Electrical rhythm\r\n\r\nGut smooth muscle is never fully at rest. Interstitial cells of Cajal, pacemaker cells woven among the muscle layers, generate slow waves: rhythmic swings in membrane potential that spread through the muscle, which is electrically coupled by gap junctions. Slow waves run at about 3 per minute in the stomach and up to 12 per minute in the duodenum. In most of the gut they do not cause contraction by themselves. When a slow-wave peak carries the membrane past threshold, spike potentials fire, calcium enters, and the muscle contracts. Slow waves therefore set when contraction can happen, and nerves and hormones decide how strongly it does, by moving the membrane toward or away from threshold.\r\n\r\n## The enteric nervous system\r\n\r\nThe gut wall holds its own nervous system, with two networks. The myenteric plexus, between the circular and longitudinal muscle, governs movement. The submucosal plexus governs local secretion, absorption, and blood flow. Enteric motor neurons excite the muscle with acetylcholine and relax it with nitric oxide, released together with vasoactive intestinal peptide. Sympathetic and parasympathetic nerves adjust this system, but it can run its reflexes on its own. The most important is the peristaltic reflex, sometimes called the law of the gut: stretch from a bolus makes the wall contract behind it and relax ahead of it, so the bolus moves forward.\r\n\r\n## Swallowing\r\n\r\nSwallowing begins voluntarily as the tongue pushes food back. The pharyngeal stage is an involuntary reflex coordinated by the brainstem: the palate and epiglottis seal the airways, and the upper esophageal sphincter opens. Primary peristalsis continues the swallow down the esophagus. If food remains, the distension sets off secondary peristalsis to clear it. At the bottom, the lower esophageal sphincter stays tonically closed against reflux but relaxes ahead of each swallow. In achalasia, inhibitory myenteric neurons are lost and this sphincter fails to relax.\r\n\r\n## The stomach\r\n\r\nAs a swallow begins, receptive relaxation, a vagovagal reflex, relaxes the stomach so it can fill with a meal without its pressure rising. Weak mixing waves then sweep toward the antrum, grinding food with gastric juice into chyme. The pyloric sphincter at the outlet passes only a few milliliters with each contraction, so most of the antral contents are driven back toward the stomach body by retropulsion, which mixes them further. The strength of the antral contractions, called the pyloric pump, sets the rate of emptying. Feedback from the duodenum holds that rate in check. Through the enterogastric reflex, distension, acid, fat, and protein breakdown products in the duodenum weaken the pyloric pump and tighten the pylorus, and cholecystokinin adds a hormonal brake. The stomach thus empties only as fast as the intestine can handle its chyme.\r\n\r\n## The small intestine\r\n\r\nThe small intestine mostly mixes. Segmentation contractions divide it into short segments that relax and contract in alternation, chopping chyme, mixing it with digestive juices, and pressing it against the absorbing surface. Weak peristaltic waves move it slowly onward, taking three to five hours from pylorus to colon. A slow-wave frequency gradient gives the mixing a direction: slow waves run at about 12 per minute in the duodenum and 8 or 9 in the terminal ileum, so upstream segments contract more often and chyme drifts downstream. Strong irritation of the lining, as in infectious diarrhea, provokes a peristaltic rush that sweeps contents into the colon within minutes.\r\n\r\nBetween meals the pattern changes. About every 90 minutes, the migrating motor complex sends a band of intense contraction from the stomach down the length of the small intestine, sweeping out undigested solids and bacteria. Each cycle is triggered by the hormone motilin, and eating interrupts it. At the far end, the ileocecal valve lets ileal contents into the colon and blocks backflow; pressure from the ileum opens it, and distension of the cecum tightens it.\r\n\r\n## The colon and defecation\r\n\r\nIn the colon, haustrations knead contents in sac-like bulges and roll them slowly forward while water is absorbed. Propulsion comes in a few strong surges a day: mass movements push feces along much of the colon into the rectum. A meal often triggers them through the gastrocolic reflex, which is why the urge to defecate commonly follows breakfast. Rectal filling sets off the defecation reflex, a weak intrinsic reflex amplified by a parasympathetic loop through the sacral spinal cord. The internal anal sphincter, smooth muscle, relaxes on its own; the external anal sphincter, striated muscle under voluntary control, decides whether defecation proceeds. In Hirschsprung disease, both enteric plexuses are missing from a stretch of distal colon, which then stays contracted and blocks the passage of feces."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  }
+}

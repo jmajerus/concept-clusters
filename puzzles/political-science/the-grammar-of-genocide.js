@@ -3,15 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-grammar-of-genocide",
   "title": "The Grammar of Genocide",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide"
+  },
   "tags": [
     "genocide",
     "comparative history",
@@ -466,3 +469,407 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-grammar-of-genocide",
+      "puzzleRevision": "fnv1a32:0250f6a3",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Lebensraum": {
+          "x": 300,
+          "y": 345.18,
+          "pinned": false
+        },
+        "term:Year Zero": {
+          "x": 193.82,
+          "y": 326.37,
+          "pinned": false
+        },
+        "term:Strategic Objective No. 3": {
+          "x": 341.36,
+          "y": 497.91,
+          "pinned": false
+        },
+        "term:Turkification": {
+          "x": 182.87,
+          "y": 443.15,
+          "pinned": false
+        },
+        "term:Untermenschen": {
+          "x": 509.47,
+          "y": 218.37,
+          "pinned": false
+        },
+        "term:inyenzi": {
+          "x": 601.37,
+          "y": 156.17,
+          "pinned": false
+        },
+        "term:harmful microbes": {
+          "x": 605.93,
+          "y": 35.82,
+          "pinned": false
+        },
+        "term:genetically deformed": {
+          "x": 450.27,
+          "y": 78.43,
+          "pinned": false
+        },
+        "term:Sonderbehandlung": {
+          "x": 604.02,
+          "y": 443.38,
+          "pinned": false
+        },
+        "term:smash": {
+          "x": 530.64,
+          "y": 530.82,
+          "pinned": false
+        },
+        "term:Directive 7": {
+          "x": 715.36,
+          "y": 516.21,
+          "pinned": false
+        },
+        "term:relocation": {
+          "x": 616.18,
+          "y": 572.71,
+          "pinned": false
+        },
+        "term:the stab-in-the-back myth": {
+          "x": 261.5,
+          "y": 97.66,
+          "pinned": false
+        },
+        "term:Naser Orić's raids": {
+          "x": 78.7,
+          "y": 83.04,
+          "pinned": false
+        },
+        "term:hidden enemies": {
+          "x": 140.55,
+          "y": 218.34,
+          "pinned": false
+        },
+        "term:the Wannsee Conference": {
+          "x": 735.18,
+          "y": 195.09,
+          "pinned": false
+        },
+        "term:the Interahamwe": {
+          "x": 890.75,
+          "y": 141.51,
+          "pinned": false
+        },
+        "term:Drina Corps": {
+          "x": 793.9,
+          "y": 54.95,
+          "pinned": false
+        },
+        "term:the Tehcir Law": {
+          "x": 872.63,
+          "y": 279.68,
+          "pinned": false
+        },
+        "term:pretext": {
+          "x": 251.26,
+          "y": 246.12,
+          "pinned": false
+        },
+        "term:moral disengagement": {
+          "x": 468.63,
+          "y": 361.45,
+          "pinned": false
+        },
+        "term:the banality of evil": {
+          "x": 750.11,
+          "y": 374.77,
+          "pinned": false
+        },
+        "term:classification": {
+          "x": 613.57,
+          "y": 301.2,
+          "pinned": false
+        },
+        "term:collective blame": {
+          "x": 371.34,
+          "y": 236.63,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4466.51,
+        "score": 4466.507039051932
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:41:35.497Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-grammar-of-genocide",
+      "puzzleRevision": "fnv1a32:0250f6a3",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 801.39,
+          "y": 268.69,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 419.43,
+          "y": 607.23,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 419.43,
+          "y": 188.77,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 801.39,
+          "y": 527.31,
+          "pinned": false
+        },
+        "cluster:4": {
+          "x": 183.37,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:pretext": {
+          "x": 905.39,
+          "y": 398,
+          "pinned": false
+        },
+        "term:moral disengagement": {
+          "x": 536.03,
+          "y": 329.03,
+          "pinned": false
+        },
+        "term:the banality of evil": {
+          "x": 205.23,
+          "y": 197.22,
+          "pinned": false
+        },
+        "term:classification": {
+          "x": 373.46,
+          "y": 472.77,
+          "pinned": false
+        },
+        "term:collective blame": {
+          "x": 610.41,
+          "y": 567.27,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Lebensraum",
+          "Year Zero",
+          "Strategic Objective No. 3",
+          "Turkification"
+        ],
+        "cluster:1": [
+          "Untermenschen",
+          "inyenzi",
+          "harmful microbes",
+          "genetically deformed"
+        ],
+        "cluster:2": [
+          "Sonderbehandlung",
+          "smash",
+          "Directive 7",
+          "relocation"
+        ],
+        "cluster:3": [
+          "the stab-in-the-back myth",
+          "Naser Orić's raids",
+          "hidden enemies"
+        ],
+        "cluster:4": [
+          "the Wannsee Conference",
+          "the Interahamwe",
+          "Drina Corps",
+          "the Tehcir Law"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 929.0155832487587
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:41:38.505Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-grammar-of-genocide",
+      "puzzleRevision": "fnv1a32:0250f6a3",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Lebensraum": {
+          "x": 249.54,
+          "y": 22
+        },
+        "term:Year Zero": {
+          "x": 394.9,
+          "y": 22
+        },
+        "term:Strategic Objective No. 3": {
+          "x": 644.31,
+          "y": 22
+        },
+        "term:Turkification": {
+          "x": 815.99,
+          "y": 22
+        },
+        "term:Untermenschen": {
+          "x": 493.28,
+          "y": 598
+        },
+        "term:inyenzi": {
+          "x": 381.46,
+          "y": 598
+        },
+        "term:harmful microbes": {
+          "x": 258.59,
+          "y": 597.69
+        },
+        "term:genetically deformed": {
+          "x": 94.42,
+          "y": 577.82
+        },
+        "term:Sonderbehandlung": {
+          "x": 778.91,
+          "y": 319.56
+        },
+        "term:smash": {
+          "x": 823.23,
+          "y": 126.73
+        },
+        "term:Directive 7": {
+          "x": 905.35,
+          "y": 183.19
+        },
+        "term:relocation": {
+          "x": 908.5,
+          "y": 300.69
+        },
+        "term:the stab-in-the-back myth": {
+          "x": 98.75,
+          "y": 384.4
+        },
+        "term:Naser Orić's raids": {
+          "x": 76.7,
+          "y": 175.58
+        },
+        "term:hidden enemies": {
+          "x": 123.29,
+          "y": 32.22
+        },
+        "term:the Wannsee Conference": {
+          "x": 607.01,
+          "y": 315.94
+        },
+        "term:the Interahamwe": {
+          "x": 892.75,
+          "y": 598
+        },
+        "term:Drina Corps": {
+          "x": 761.73,
+          "y": 598
+        },
+        "term:the Tehcir Law": {
+          "x": 628.78,
+          "y": 598
+        },
+        "term:pretext": {
+          "x": 325.33,
+          "y": 117.68
+        },
+        "term:moral disengagement": {
+          "x": 429.98,
+          "y": 347.22
+        },
+        "term:the banality of evil": {
+          "x": 877,
+          "y": 444.15
+        },
+        "term:classification": {
+          "x": 536.57,
+          "y": 467.71
+        },
+        "term:collective blame": {
+          "x": 272.75,
+          "y": 428.19
+        },
+        "cluster:0": {
+          "x": 477.41,
+          "y": 153.46
+        },
+        "cluster:1": {
+          "x": 400.24,
+          "y": 500.04
+        },
+        "cluster:2": {
+          "x": 715.17,
+          "y": 179.92
+        },
+        "cluster:3": {
+          "x": 260.68,
+          "y": 234.97
+        },
+        "cluster:4": {
+          "x": 707.47,
+          "y": 467.95
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:41:41.678Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:41:31.976Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

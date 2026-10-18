@@ -287,6 +287,40 @@ import microcirculationAndLocalBloodFlow from "./physiology-medicine/microcircul
 import regulatingBloodGlucose from "./physiology-medicine/regulating-blood-glucose.js";
 import rhythmicExcitationOfTheHeart from "./physiology-medicine/rhythmic-excitation-of-the-heart.js";
 import theAutonomicNervousSystem from "./physiology-medicine/the-autonomic-nervous-system.js";
+import anemiaClassificationClinical from "./medicine/anemia-classification-clinical.js";
+import arthritisPatternRecognition from "./medicine/arthritis-pattern-recognition.js";
+import attackAndDefenseNetworks from "./computer-science/attack-and-defense-networks.js";
+import bacterialArchitectures from "./microbiology/bacterial-architectures.js";
+import bloodGroupsAndTransfusion from "./physiology-medicine/blood-groups-and-transfusion.js";
+import brassicasHorticulture from "./botany/brassicas-horticulture.js";
+import consonantsAndVowels from "./linguistics/consonants-and-vowels.js";
+import digestionAndAbsorptionOfNutrients from "./physiology-medicine/digestion-and-absorption-of-nutrients.js";
+import energyBalanceAndFoodIntake from "./physiology-medicine/energy-balance-and-food-intake.js";
+import excitationContractionCoupling from "./physiology-medicine/excitation-contraction-coupling.js";
+import forcesAndNewtonsLaws from "./physics/forces-and-newtons-laws.js";
+import fromSampleToPopulation from "./math/from-sample-to-population.js";
+import fungalFormsAndHabitats from "./microbiology/fungal-forms-and-habitats.js";
+import gastrointestinalMotility from "./physiology-medicine/gastrointestinal-motility.js";
+import gradingMuscleForce from "./physiology-medicine/grading-muscle-force.js";
+import gravityAndOrbits from "./physics/gravity-and-orbits.js";
+import hardPowerSoftPower from "./political-science/hard-power-soft-power.js";
+import howTheInternetMovesAMessage from "./computer-science/how-the-internet-moves-a-message.js";
+import infectionSyndromesBedside from "./medicine/infection-syndromes-bedside.js";
+import languageInSociety from "./linguistics/language-in-society.js";
+import locksAndKeysCryptography from "./computer-science/locks-and-keys-cryptography.js";
+import makingAndRecyclingRedBloodCells from "./physiology-medicine/making-and-recycling-red-blood-cells.js";
+import meaningBeyondWords from "./linguistics/meaning-beyond-words.js";
+import meetingTheDemandsOfExercise from "./physiology-medicine/meeting-the-demands-of-exercise.js";
+import momentumAndEnergyConservation from "./physics/momentum-and-energy-conservation.js";
+import morphemesAndSentences from "./linguistics/morphemes-and-sentences.js";
+import parasiteLifeCycles from "./microbiology/parasite-life-cycles.js";
+import phonemesAndPatterns from "./linguistics/phonemes-and-patterns.js";
+import rulesOfChance from "./math/rules-of-chance.js";
+import somaticSensationAndPain from "./physiology-medicine/somatic-sensation-and-pain.js";
+import summarizingData from "./math/summarizing-data.js";
+import tnmCancerStaging from "./medicine/tnm-cancer-staging.js";
+import trustOnTheWireTlsPki from "./computer-science/trust-on-the-wire-tls-pki.js";
+import virusBuildAndTakeover from "./microbiology/virus-build-and-takeover.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -569,6 +603,40 @@ export const PUZZLES = [
   regulatingBloodGlucose,
   rhythmicExcitationOfTheHeart,
   theAutonomicNervousSystem,
+  anemiaClassificationClinical,
+  arthritisPatternRecognition,
+  attackAndDefenseNetworks,
+  bacterialArchitectures,
+  bloodGroupsAndTransfusion,
+  brassicasHorticulture,
+  consonantsAndVowels,
+  digestionAndAbsorptionOfNutrients,
+  energyBalanceAndFoodIntake,
+  excitationContractionCoupling,
+  forcesAndNewtonsLaws,
+  fromSampleToPopulation,
+  fungalFormsAndHabitats,
+  gastrointestinalMotility,
+  gradingMuscleForce,
+  gravityAndOrbits,
+  hardPowerSoftPower,
+  howTheInternetMovesAMessage,
+  infectionSyndromesBedside,
+  languageInSociety,
+  locksAndKeysCryptography,
+  makingAndRecyclingRedBloodCells,
+  meaningBeyondWords,
+  meetingTheDemandsOfExercise,
+  momentumAndEnergyConservation,
+  morphemesAndSentences,
+  parasiteLifeCycles,
+  phonemesAndPatterns,
+  rulesOfChance,
+  somaticSensationAndPain,
+  summarizingData,
+  tnmCancerStaging,
+  trustOnTheWireTlsPki,
+  virusBuildAndTakeover,
 ];
 
 export default PUZZLES;

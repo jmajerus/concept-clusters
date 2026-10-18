@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "as-soon-as-made-ready",
   "title": "As Soon As Made Ready",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism"
+  },
   "info": {
     "text": "The Hiroshima bombing was a unique horror unleashed on the world. This puzzle doesn't condone massive civilian casualty counts as being the only possible way to end the war. It examines a narrower, documented question: the standing military order that authorized Nagasaki without any renewed presidential decision -- and a historiographical dispute that has run for decades, still unresolved, over whether atomic weapons needed to be used against Japanese cities at all.",
     "citations": [
@@ -278,3 +282,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "as-soon-as-made-ready",
+      "puzzleRevision": "fnv1a32:d8b61788",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:Leslie Groves": {
+          "x": 399.3,
+          "y": 108.97,
+          "pinned": false
+        },
+        "term:509th Composite Group": {
+          "x": 88.15,
+          "y": 133.64,
+          "pinned": false
+        },
+        "term:Handy Directive": {
+          "x": 190.74,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Thomas Handy": {
+          "x": 323.64,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Kokura": {
+          "x": 174.47,
+          "y": 372.07,
+          "pinned": false
+        },
+        "term:Fat Man": {
+          "x": 141.7,
+          "y": 437,
+          "pinned": false
+        },
+        "term:Three-Day Interval": {
+          "x": 78.7,
+          "y": 303.73,
+          "pinned": false
+        },
+        "term:Hibakusha": {
+          "x": 50.35,
+          "y": 433.57,
+          "pinned": false
+        },
+        "term:Soviet Entry into the Pacific War": {
+          "x": 514.05,
+          "y": 261.24,
+          "pinned": false
+        },
+        "term:Big Six": {
+          "x": 595.95,
+          "y": 128.56,
+          "pinned": false
+        },
+        "term:MAGIC Intercepts": {
+          "x": 430.13,
+          "y": 437,
+          "pinned": false
+        },
+        "term:Kyujo Incident": {
+          "x": 573.9,
+          "y": 437,
+          "pinned": false
+        },
+        "term:Truman's August 10 Intervention": {
+          "x": 266.47,
+          "y": 238.04,
+          "pinned": false
+        },
+        "term:Verification Delay": {
+          "x": 275.08,
+          "y": 437,
+          "pinned": false
+        },
+        "term:The August 9 Convergence": {
+          "x": 534.21,
+          "y": 23,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3221.51,
+        "score": 3221.505487381187
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:33:30.105Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "as-soon-as-made-ready",
+      "puzzleRevision": "fnv1a32:d8b61788",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 718.07,
+          "y": 381.68,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 190.63,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 241.93,
+          "y": 381.68,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:Truman's August 10 Intervention": {
+          "x": 695.12,
+          "y": 246.36,
+          "pinned": false
+        },
+        "term:Verification Delay": {
+          "x": 287.43,
+          "y": 212.62,
+          "pinned": false
+        },
+        "term:The August 9 Convergence": {
+          "x": 508,
+          "y": 381.68,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Leslie Groves",
+          "509th Composite Group",
+          "Handy Directive",
+          "Thomas Handy"
+        ],
+        "cluster:1": [
+          "Kokura",
+          "Fat Man",
+          "Three-Day Interval",
+          "Hibakusha"
+        ],
+        "cluster:2": [
+          "Soviet Entry into the Pacific War",
+          "Big Six",
+          "MAGIC Intercepts",
+          "Kyujo Incident"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 498.4835082374716
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:33:33.139Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "as-soon-as-made-ready",
+      "puzzleRevision": "fnv1a32:d8b61788",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Leslie Groves": {
+          "x": 352.49,
+          "y": 598
+        },
+        "term:509th Composite Group": {
+          "x": 167.38,
+          "y": 598
+        },
+        "term:Handy Directive": {
+          "x": 128.3,
+          "y": 438.34
+        },
+        "term:Thomas Handy": {
+          "x": 57.8,
+          "y": 324.22
+        },
+        "term:Kokura": {
+          "x": 104.98,
+          "y": 154.43
+        },
+        "term:Fat Man": {
+          "x": 181.72,
+          "y": 102.13
+        },
+        "term:Three-Day Interval": {
+          "x": 284.96,
+          "y": 22
+        },
+        "term:Hibakusha": {
+          "x": 421.71,
+          "y": 22
+        },
+        "term:Soviet Entry into the Pacific War": {
+          "x": 836.05,
+          "y": 259.44
+        },
+        "term:Big Six": {
+          "x": 837.78,
+          "y": 442.17
+        },
+        "term:MAGIC Intercepts": {
+          "x": 782.79,
+          "y": 553.81
+        },
+        "term:Kyujo Incident": {
+          "x": 644.11,
+          "y": 598
+        },
+        "term:Truman's August 10 Intervention": {
+          "x": 230.74,
+          "y": 266.65
+        },
+        "term:Verification Delay": {
+          "x": 599.97,
+          "y": 221.76
+        },
+        "term:The August 9 Convergence": {
+          "x": 433.84,
+          "y": 364.25
+        },
+        "cluster:0": {
+          "x": 281.2,
+          "y": 466.96
+        },
+        "cluster:1": {
+          "x": 428.02,
+          "y": 164.57
+        },
+        "cluster:2": {
+          "x": 646.17,
+          "y": 416.44
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:33:35.686Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:33:27.199Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

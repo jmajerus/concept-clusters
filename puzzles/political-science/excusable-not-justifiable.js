@@ -3,20 +3,25 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "excusable-not-justifiable",
   "title": "Excusable, Not Justifiable",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "philosophy"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "philosophy": "ethics"
+  },
   "tags": [
     "just war theory",
     "ethics"
   ],
   "info": {
-    "text": "From Augustine's grief-stricken permission through Aquinas's threefold test to Michael Walzer's modern reckoning with dirty hands — the tradition that decides when a war may be fought, and why even a rightly fought one is never quite justified.",
+    "text": "Augustine's grief-stricken permission and Aquinas's threefold test decide when a war may even be fought — plus 'dirty hands,' a later term for the guilt that survives even a war held to every one of those conditions.",
     "links": [
       {
         "href": "wiki:Just war theory"
@@ -339,3 +344,298 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "excusable-not-justifiable",
+      "puzzleRevision": "fnv1a32:f29d60d2",
+      "board": {
+        "width": 670,
+        "height": 480
+      },
+      "nodes": {
+        "term:just cause": {
+          "x": 403.52,
+          "y": 357.28,
+          "pinned": false
+        },
+        "term:right intention": {
+          "x": 273.43,
+          "y": 332.37,
+          "pinned": false
+        },
+        "term:peace as the aim": {
+          "x": 328.35,
+          "y": 457,
+          "pinned": false
+        },
+        "term:sovereign authority": {
+          "x": 234.17,
+          "y": 184.07,
+          "pinned": false
+        },
+        "term:the Summa Theologica": {
+          "x": 85,
+          "y": 117.99,
+          "pinned": false
+        },
+        "term:necessary, not sufficient": {
+          "x": 100.75,
+          "y": 315.89,
+          "pinned": false
+        },
+        "term:discrimination (noncombatant immunity)": {
+          "x": 392.21,
+          "y": 23,
+          "pinned": false
+        },
+        "term:proportionality": {
+          "x": 600.75,
+          "y": 23,
+          "pinned": false
+        },
+        "term:supreme emergency": {
+          "x": 452.68,
+          "y": 233.58,
+          "pinned": false
+        },
+        "term:justification": {
+          "x": 536.26,
+          "y": 348.83,
+          "pinned": false
+        },
+        "term:excuse": {
+          "x": 629.1,
+          "y": 404.18,
+          "pinned": false
+        },
+        "term:moral residue": {
+          "x": 607.05,
+          "y": 247.16,
+          "pinned": false
+        },
+        "term:sorrowful duty": {
+          "x": 470.47,
+          "y": 457,
+          "pinned": false
+        },
+        "term:jus in bello": {
+          "x": 186.83,
+          "y": 23,
+          "pinned": false
+        },
+        "term:dirty hands": {
+          "x": 555.46,
+          "y": 139.16,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2759.11,
+        "score": 2759.1105405609715
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:29:36.382Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "excusable-not-justifiable",
+      "puzzleRevision": "fnv1a32:f29d60d2",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 505,
+          "y": 468.71,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 188.17,
+          "y": 333,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 821.83,
+          "y": 333,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 505,
+          "y": 197.29,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:sorrowful duty": {
+          "x": 505,
+          "y": 333,
+          "pinned": false
+        },
+        "term:jus in bello": {
+          "x": 369,
+          "y": 333,
+          "pinned": false
+        },
+        "term:dirty hands": {
+          "x": 663.42,
+          "y": 161.14,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "just cause",
+          "right intention",
+          "peace as the aim"
+        ],
+        "cluster:1": [
+          "sovereign authority",
+          "the Summa Theologica",
+          "necessary, not sufficient"
+        ],
+        "cluster:2": [
+          "discrimination (noncombatant immunity)",
+          "proportionality",
+          "supreme emergency"
+        ],
+        "cluster:3": [
+          "justification",
+          "excuse",
+          "moral residue"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 545.4118302954518
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:29:38.934Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "excusable-not-justifiable",
+      "puzzleRevision": "fnv1a32:f29d60d2",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "nodes": {
+        "term:just cause": {
+          "x": 153.15,
+          "y": 458.5
+        },
+        "term:right intention": {
+          "x": 87.03,
+          "y": 322.95
+        },
+        "term:peace as the aim": {
+          "x": 149.96,
+          "y": 181.55
+        },
+        "term:sovereign authority": {
+          "x": 723.3,
+          "y": 628
+        },
+        "term:the Summa Theologica": {
+          "x": 548.45,
+          "y": 628
+        },
+        "term:necessary, not sufficient": {
+          "x": 354.69,
+          "y": 626.59
+        },
+        "term:discrimination (noncombatant immunity)": {
+          "x": 870.3,
+          "y": 234.26
+        },
+        "term:proportionality": {
+          "x": 839.8,
+          "y": 451.12
+        },
+        "term:supreme emergency": {
+          "x": 644.52,
+          "y": 238.07
+        },
+        "term:justification": {
+          "x": 404.21,
+          "y": 22
+        },
+        "term:excuse": {
+          "x": 622.52,
+          "y": 22
+        },
+        "term:moral residue": {
+          "x": 501.5,
+          "y": 269.66
+        },
+        "term:sorrowful duty": {
+          "x": 374.25,
+          "y": 155.29
+        },
+        "term:jus in bello": {
+          "x": 637.88,
+          "y": 505.28
+        },
+        "term:dirty hands": {
+          "x": 686.9,
+          "y": 104.49
+        },
+        "cluster:0": {
+          "x": 286.86,
+          "y": 331.69
+        },
+        "cluster:1": {
+          "x": 481.82,
+          "y": 450.67
+        },
+        "cluster:2": {
+          "x": 704.47,
+          "y": 381.92
+        },
+        "cluster:3": {
+          "x": 528.38,
+          "y": 116.01
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:29:41.488Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.05,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:29:33.333Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

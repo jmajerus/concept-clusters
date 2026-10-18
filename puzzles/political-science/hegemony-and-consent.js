@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "hegemony-and-consent",
   "title": "Hegemony and Consent",
-  "category": "political-science",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "political-science",
     "sociology"
   ],
+  "subcategories": {
+    "sociology": "culture-socialization"
+  },
   "info": {
     "text": "Antonio Gramsci's account of how a ruling class secures its dominance mainly by diffusing consent across civil society, with direct coercion held in reserve rather than doing most of the work -- and what contesting that dominance would actually require.",
     "links": [
@@ -183,3 +187,277 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "hegemony-and-consent",
+      "puzzleRevision": "fnv1a32:736df690",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:coercion": {
+          "x": 232.65,
+          "y": 128.38,
+          "pinned": false
+        },
+        "term:consent": {
+          "x": 79.75,
+          "y": 138.58,
+          "pinned": false
+        },
+        "term:political society": {
+          "x": 127.53,
+          "y": 24.6,
+          "pinned": false
+        },
+        "term:civil society": {
+          "x": 269.97,
+          "y": 23,
+          "pinned": false
+        },
+        "term:common sense": {
+          "x": 377.64,
+          "y": 287.11,
+          "pinned": false
+        },
+        "term:organic intellectuals": {
+          "x": 395.18,
+          "y": 437,
+          "pinned": false
+        },
+        "term:traditional intellectuals": {
+          "x": 539.25,
+          "y": 311.32,
+          "pinned": false
+        },
+        "term:intellectual and moral leadership": {
+          "x": 445.4,
+          "y": 101.12,
+          "pinned": false
+        },
+        "term:war of position": {
+          "x": 207.42,
+          "y": 293.56,
+          "pinned": false
+        },
+        "term:war of maneuver": {
+          "x": 69.25,
+          "y": 262,
+          "pinned": false
+        },
+        "term:passive revolution": {
+          "x": 78.7,
+          "y": 413.57,
+          "pinned": false
+        },
+        "term:diffusion": {
+          "x": 295.98,
+          "y": 207.34,
+          "pinned": false
+        },
+        "term:terrain": {
+          "x": 158.23,
+          "y": 186.94,
+          "pinned": false
+        },
+        "term:counter-hegemony": {
+          "x": 230.79,
+          "y": 437,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2510.78,
+        "score": 2510.782623223013
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:19:45.666Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "hegemony-and-consent",
+      "puzzleRevision": "fnv1a32:736df690",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 436.95,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 222.25,
+          "y": 258.52,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 737.75,
+          "y": 258.52,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:diffusion": {
+          "x": 311.33,
+          "y": 443.82,
+          "pinned": false
+        },
+        "term:terrain": {
+          "x": 645.64,
+          "y": 384.51,
+          "pinned": false
+        },
+        "term:counter-hegemony": {
+          "x": 480,
+          "y": 258.52,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "coercion",
+          "consent",
+          "political society",
+          "civil society"
+        ],
+        "cluster:1": [
+          "common sense",
+          "organic intellectuals",
+          "traditional intellectuals",
+          "intellectual and moral leadership"
+        ],
+        "cluster:2": [
+          "war of position",
+          "war of maneuver",
+          "passive revolution"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 426.244783916504
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:19:48.649Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "hegemony-and-consent",
+      "puzzleRevision": "fnv1a32:736df690",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:coercion": {
+          "x": 365.5,
+          "y": 22
+        },
+        "term:consent": {
+          "x": 464.75,
+          "y": 22
+        },
+        "term:political society": {
+          "x": 614.83,
+          "y": 22
+        },
+        "term:civil society": {
+          "x": 360.84,
+          "y": 166.53
+        },
+        "term:common sense": {
+          "x": 262.52,
+          "y": 252.64
+        },
+        "term:organic intellectuals": {
+          "x": 413.61,
+          "y": 514.28
+        },
+        "term:traditional intellectuals": {
+          "x": 235.13,
+          "y": 597.31
+        },
+        "term:intellectual and moral leadership": {
+          "x": 123.95,
+          "y": 390.61
+        },
+        "term:war of position": {
+          "x": 578.72,
+          "y": 506.47
+        },
+        "term:war of maneuver": {
+          "x": 836.55,
+          "y": 422.72
+        },
+        "term:passive revolution": {
+          "x": 732.04,
+          "y": 538.5
+        },
+        "term:diffusion": {
+          "x": 410.09,
+          "y": 277.47
+        },
+        "term:terrain": {
+          "x": 570.24,
+          "y": 260.02
+        },
+        "term:counter-hegemony": {
+          "x": 504.99,
+          "y": 372.5
+        },
+        "cluster:0": {
+          "x": 508.81,
+          "y": 144.6
+        },
+        "cluster:1": {
+          "x": 326.4,
+          "y": 373.79
+        },
+        "cluster:2": {
+          "x": 676.67,
+          "y": 369.31
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:19:51.599Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:19:42.829Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

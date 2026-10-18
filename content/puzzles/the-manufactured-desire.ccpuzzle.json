@@ -1,17 +1,18 @@
 {
   "id": "the-manufactured-desire",
   "title": "The Manufactured Desire",
-  "category": "philosophy",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "philosophy",
     "psychology",
     "sociology"
   ],
   "subcategories": {
     "philosophy": "political-philosophy",
-    "psychology": "psychoanalysis"
+    "psychology": "psychoanalysis",
+    "sociology": "culture-socialization"
   },
-  "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
   ],

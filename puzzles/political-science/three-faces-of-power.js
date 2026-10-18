@@ -3,13 +3,14 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "three-faces-of-power",
   "title": "Three Faces of Power",
   "category": "political-science",
   "categories": [
     "political-science",
-    "sociology"
+    "sociology",
+    "critical-theory-cultural-studies"
   ],
   "info": {
     "text": "Steven Lukes' argument that power operates in three progressively less visible ways -- through decisions actually made, through control of which issues ever reach a decision, and through the shaping of what people want in the first place.",
@@ -182,3 +183,267 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "three-faces-of-power",
+      "puzzleRevision": "fnv1a32:b01847b8",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:decision-making": {
+          "x": 288.25,
+          "y": 317.8,
+          "pinned": false
+        },
+        "term:observable conflict": {
+          "x": 387.35,
+          "y": 437,
+          "pinned": false
+        },
+        "term:who prevails": {
+          "x": 156.45,
+          "y": 299.58,
+          "pinned": false
+        },
+        "term:policy preferences": {
+          "x": 194.07,
+          "y": 437,
+          "pinned": false
+        },
+        "term:agenda-setting": {
+          "x": 214.48,
+          "y": 23,
+          "pinned": false
+        },
+        "term:non-decision-making": {
+          "x": 81.85,
+          "y": 96.7,
+          "pinned": false
+        },
+        "term:mobilization of bias": {
+          "x": 364.62,
+          "y": 61.61,
+          "pinned": false
+        },
+        "term:shaping preferences": {
+          "x": 495.82,
+          "y": 171.06,
+          "pinned": false
+        },
+        "term:latent conflict": {
+          "x": 570.75,
+          "y": 35.28,
+          "pinned": false
+        },
+        "term:real interests": {
+          "x": 573.9,
+          "y": 301.41,
+          "pinned": false
+        },
+        "term:which issues arrive": {
+          "x": 230.64,
+          "y": 173.84,
+          "pinned": false
+        },
+        "term:ideology": {
+          "x": 365.48,
+          "y": 197.81,
+          "pinned": false
+        },
+        "term:invisibility": {
+          "x": 419.33,
+          "y": 295.01,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2386.21,
+        "score": 2386.2122706285763
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:20:25.735Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "three-faces-of-power",
+      "puzzleRevision": "fnv1a32:b01847b8",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 695.46,
+          "y": 378.87,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 264.54,
+          "y": 378.87,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 196.25,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:which issues arrive": {
+          "x": 480,
+          "y": 378.87,
+          "pinned": false
+        },
+        "term:ideology": {
+          "x": 317.12,
+          "y": 232.41,
+          "pinned": false
+        },
+        "term:invisibility": {
+          "x": 661.27,
+          "y": 214.02,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "decision-making",
+          "observable conflict",
+          "who prevails",
+          "policy preferences"
+        ],
+        "cluster:1": [
+          "agenda-setting",
+          "non-decision-making",
+          "mobilization of bias"
+        ],
+        "cluster:2": [
+          "shaping preferences",
+          "latent conflict",
+          "real interests"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 367.22937170959665
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:20:28.711Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "three-faces-of-power",
+      "puzzleRevision": "fnv1a32:b01847b8",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:decision-making": {
+          "x": 558.95,
+          "y": 554.18
+        },
+        "term:observable conflict": {
+          "x": 880.15,
+          "y": 339.87
+        },
+        "term:who prevails": {
+          "x": 836.32,
+          "y": 501.44
+        },
+        "term:policy preferences": {
+          "x": 726.93,
+          "y": 598
+        },
+        "term:agenda-setting": {
+          "x": 98.44,
+          "y": 563.18
+        },
+        "term:non-decision-making": {
+          "x": 401.64,
+          "y": 578.01
+        },
+        "term:mobilization of bias": {
+          "x": 312.12,
+          "y": 195.81
+        },
+        "term:shaping preferences": {
+          "x": 528.04,
+          "y": 254.31
+        },
+        "term:latent conflict": {
+          "x": 783.5,
+          "y": 22
+        },
+        "term:real interests": {
+          "x": 823.31,
+          "y": 159.13
+        },
+        "term:which issues arrive": {
+          "x": 471.41,
+          "y": 421.24
+        },
+        "term:ideology": {
+          "x": 401.04,
+          "y": 303.63
+        },
+        "term:invisibility": {
+          "x": 700.63,
+          "y": 212.52
+        },
+        "cluster:0": {
+          "x": 679.65,
+          "y": 398.69
+        },
+        "cluster:1": {
+          "x": 246.25,
+          "y": 414.84
+        },
+        "cluster:2": {
+          "x": 597.62,
+          "y": 63.64
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:20:31.872Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:20:22.499Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

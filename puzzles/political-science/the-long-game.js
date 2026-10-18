@@ -3,15 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-long-game",
   "title": "The Long Game",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "tags": [
     "activism",
     "peacebuilding",
@@ -417,3 +421,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-long-game",
+      "puzzleRevision": "fnv1a32:9a7ba471",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:the Hague Congress": {
+          "x": 714.9,
+          "y": 144.13,
+          "pinned": false
+        },
+        "term:Jane Addams": {
+          "x": 736.21,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the Woman's Peace Party": {
+          "x": 865.55,
+          "y": 71.64,
+          "pinned": false
+        },
+        "term:Women, Peace and Security": {
+          "x": 859.25,
+          "y": 270.16,
+          "pinned": false
+        },
+        "term:the Nuclear Freeze campaign": {
+          "x": 430.96,
+          "y": 233.36,
+          "pinned": false
+        },
+        "term:the Congressional Voter Guide": {
+          "x": 315.88,
+          "y": 23,
+          "pinned": false
+        },
+        "term:SANE": {
+          "x": 445.43,
+          "y": 93.88,
+          "pinned": false
+        },
+        "term:ballot-initiative organizing": {
+          "x": 110.2,
+          "y": 106.37,
+          "pinned": false
+        },
+        "term:Speak Truth to Power": {
+          "x": 728.19,
+          "y": 407.42,
+          "pinned": false
+        },
+        "term:conscientious objector": {
+          "x": 868.7,
+          "y": 516.03,
+          "pinned": false
+        },
+        "term:the 1947 Nobel Peace Prize": {
+          "x": 537.26,
+          "y": 446.92,
+          "pinned": false
+        },
+        "term:Letter from Birmingham Jail": {
+          "x": 687.88,
+          "y": 597,
+          "pinned": false
+        },
+        "term:Unarmed Civilian Protection": {
+          "x": 324.23,
+          "y": 422.75,
+          "pinned": false
+        },
+        "term:protective presence": {
+          "x": 239.15,
+          "y": 249.64,
+          "pinned": false
+        },
+        "term:Early Warning Early Response": {
+          "x": 110.2,
+          "y": 392.8,
+          "pinned": false
+        },
+        "term:civilian-to-civilian action": {
+          "x": 192.48,
+          "y": 597,
+          "pinned": false
+        },
+        "term:postwar relief work": {
+          "x": 618.9,
+          "y": 275.99,
+          "pinned": false
+        },
+        "term:the Partial Test Ban Treaty": {
+          "x": 571.21,
+          "y": 23,
+          "pinned": false
+        },
+        "term:nonviolent intervention": {
+          "x": 414.02,
+          "y": 597,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4208.94,
+        "score": 4208.942698573753
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:32:26.713Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-long-game",
+      "puzzleRevision": "fnv1a32:9a7ba471",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 562.18,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 249.97,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 233.82,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 800.03,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:postwar relief work": {
+          "x": 550.87,
+          "y": 408.72,
+          "pinned": false
+        },
+        "term:the Partial Test Ban Treaty": {
+          "x": 291.32,
+          "y": 576.26,
+          "pinned": false
+        },
+        "term:nonviolent intervention": {
+          "x": 781.31,
+          "y": 197.12,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "the Hague Congress",
+          "Jane Addams",
+          "the Woman's Peace Party",
+          "Women, Peace and Security"
+        ],
+        "cluster:1": [
+          "the Nuclear Freeze campaign",
+          "the Congressional Voter Guide",
+          "SANE",
+          "ballot-initiative organizing"
+        ],
+        "cluster:2": [
+          "Speak Truth to Power",
+          "conscientious objector",
+          "the 1947 Nobel Peace Prize",
+          "Letter from Birmingham Jail"
+        ],
+        "cluster:3": [
+          "Unarmed Civilian Protection",
+          "protective presence",
+          "Early Warning Early Response",
+          "civilian-to-civilian action"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 380.53084360850784
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:32:29.136Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-long-game",
+      "puzzleRevision": "fnv1a32:9a7ba471",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:the Hague Congress": {
+          "x": 297.01,
+          "y": 215.15
+        },
+        "term:Jane Addams": {
+          "x": 434,
+          "y": 268.46
+        },
+        "term:the Woman's Peace Party": {
+          "x": 297.01,
+          "y": 22
+        },
+        "term:Women, Peace and Security": {
+          "x": 105.49,
+          "y": 90.37
+        },
+        "term:the Nuclear Freeze campaign": {
+          "x": 854.95,
+          "y": 22
+        },
+        "term:the Congressional Voter Guide": {
+          "x": 848.65,
+          "y": 344.77
+        },
+        "term:SANE": {
+          "x": 833.71,
+          "y": 150.53
+        },
+        "term:ballot-initiative organizing": {
+          "x": 694.71,
+          "y": 212.47
+        },
+        "term:Speak Truth to Power": {
+          "x": 708.14,
+          "y": 391.67
+        },
+        "term:conscientious objector": {
+          "x": 655.49,
+          "y": 598
+        },
+        "term:the 1947 Nobel Peace Prize": {
+          "x": 447.97,
+          "y": 543
+        },
+        "term:Letter from Birmingham Jail": {
+          "x": 854.95,
+          "y": 598
+        },
+        "term:Unarmed Civilian Protection": {
+          "x": 202.06,
+          "y": 265.33
+        },
+        "term:protective presence": {
+          "x": 269.81,
+          "y": 598
+        },
+        "term:Early Warning Early Response": {
+          "x": 108.2,
+          "y": 384.64
+        },
+        "term:civilian-to-civilian action": {
+          "x": 105.05,
+          "y": 546.93
+        },
+        "term:postwar relief work": {
+          "x": 533.65,
+          "y": 341.67
+        },
+        "term:the Partial Test Ban Treaty": {
+          "x": 637.64,
+          "y": 22
+        },
+        "term:nonviolent intervention": {
+          "x": 408.59,
+          "y": 401.31
+        },
+        "cluster:0": {
+          "x": 479.75,
+          "y": 135.15
+        },
+        "cluster:1": {
+          "x": 892.75,
+          "y": 188.79
+        },
+        "cluster:2": {
+          "x": 569,
+          "y": 470.43
+        },
+        "cluster:3": {
+          "x": 228.16,
+          "y": 427.21
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:32:31.819Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:32:23.971Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

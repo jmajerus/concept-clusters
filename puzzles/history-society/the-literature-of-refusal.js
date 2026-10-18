@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-literature-of-refusal",
   "title": "The Literature of Refusal",
   "category": "history-society",
   "categories": [
     "history-society",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance"
+  },
   "tags": [
     "book",
     "war",
@@ -274,3 +278,284 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-literature-of-refusal",
+      "puzzleRevision": "fnv1a32:573bc2be",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:War Is a Racket": {
+          "x": 69.25,
+          "y": 339.6,
+          "pinned": false
+        },
+        "term:War is the health of the State": {
+          "x": 230.33,
+          "y": 382.98,
+          "pinned": false
+        },
+        "term:Merchants of Death": {
+          "x": 78.7,
+          "y": 437,
+          "pinned": false
+        },
+        "term:All Quiet on the Western Front": {
+          "x": 116.92,
+          "y": 174.4,
+          "pinned": false
+        },
+        "term:Johnny Got His Gun": {
+          "x": 78.7,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Dulce et Decorum Est": {
+          "x": 318.96,
+          "y": 197.39,
+          "pinned": false
+        },
+        "term:Catch-22": {
+          "x": 377.85,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Slaughterhouse-Five": {
+          "x": 246.75,
+          "y": 23,
+          "pinned": false
+        },
+        "term:The Good Soldier Švejk": {
+          "x": 548.7,
+          "y": 23,
+          "pinned": false
+        },
+        "term:The Things They Carried": {
+          "x": 545.55,
+          "y": 190.42,
+          "pinned": false
+        },
+        "term:Testament of Youth": {
+          "x": 561.3,
+          "y": 437,
+          "pinned": false
+        },
+        "term:A Soldier's Declaration": {
+          "x": 438.8,
+          "y": 335.51,
+          "pinned": false
+        },
+        "term:Craiglockhart": {
+          "x": 432.56,
+          "y": 99.11,
+          "pinned": false
+        },
+        "term:shell shock": {
+          "x": 380.88,
+          "y": 437,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2717.98,
+        "score": 2717.981157371497
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:28:50.259Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-literature-of-refusal",
+      "puzzleRevision": "fnv1a32:573bc2be",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 158.01,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 801.99,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 174.06,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 480,
+          "y": 461.94,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:Craiglockhart": {
+          "x": 567.45,
+          "y": 316.43,
+          "pinned": false
+        },
+        "term:shell shock": {
+          "x": 289.16,
+          "y": 462.03,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "War Is a Racket",
+          "War is the health of the State",
+          "Merchants of Death"
+        ],
+        "cluster:1": [
+          "All Quiet on the Western Front",
+          "Johnny Got His Gun",
+          "Dulce et Decorum Est"
+        ],
+        "cluster:2": [
+          "Catch-22",
+          "Slaughterhouse-Five",
+          "The Good Soldier Švejk"
+        ],
+        "cluster:3": [
+          "The Things They Carried",
+          "Testament of Youth",
+          "A Soldier's Declaration"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 247.52026344469766
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:28:52.865Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-literature-of-refusal",
+      "puzzleRevision": "fnv1a32:573bc2be",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:War Is a Racket": {
+          "x": 450.75,
+          "y": 598
+        },
+        "term:War is the health of the State": {
+          "x": 635.67,
+          "y": 551.79
+        },
+        "term:Merchants of Death": {
+          "x": 282.45,
+          "y": 598
+        },
+        "term:All Quiet on the Western Front": {
+          "x": 393.4,
+          "y": 22
+        },
+        "term:Johnny Got His Gun": {
+          "x": 600.58,
+          "y": 22
+        },
+        "term:Dulce et Decorum Est": {
+          "x": 563.27,
+          "y": 184.93
+        },
+        "term:Catch-22": {
+          "x": 132.81,
+          "y": 453.78
+        },
+        "term:Slaughterhouse-Five": {
+          "x": 79.85,
+          "y": 299.81
+        },
+        "term:The Good Soldier Švejk": {
+          "x": 191.41,
+          "y": 161.86
+        },
+        "term:The Things They Carried": {
+          "x": 867.55,
+          "y": 179.55
+        },
+        "term:Testament of Youth": {
+          "x": 883.3,
+          "y": 359.7
+        },
+        "term:A Soldier's Declaration": {
+          "x": 517.58,
+          "y": 367.55
+        },
+        "term:Craiglockhart": {
+          "x": 708.53,
+          "y": 128.65
+        },
+        "term:shell shock": {
+          "x": 794.78,
+          "y": 465.7
+        },
+        "cluster:0": {
+          "x": 381.27,
+          "y": 476.26
+        },
+        "cluster:1": {
+          "x": 391.77,
+          "y": 228.73
+        },
+        "cluster:2": {
+          "x": 249.93,
+          "y": 356.04
+        },
+        "cluster:3": {
+          "x": 711.36,
+          "y": 309.15
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:28:55.558Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:28:47.914Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

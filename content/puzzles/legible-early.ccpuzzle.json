@@ -1,7 +1,14 @@
 {
   "id": "legible-early",
   "title": "Legible Early",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide"
+  },
   "tags": [
     "war",
     "genocide"
@@ -13,20 +20,6 @@
       "name": "The Legible Stages",
       "color": "teal",
       "fact": "Stanton's first four stages need no weapons, camp, or plan. A society sorts people into a group -- classification -- attaches a name or symbol to the sorting -- symbolization -- writes the sorting into law or custom -- discrimination -- and strips the target group of the qualities that would make its suffering register as suffering -- dehumanization. Each is visible in ordinary speech, media, and policy, well before anyone organizes anything.",
-      "seeds": [
-        "classification",
-        "dehumanization"
-      ],
-      "floatingTerms": [
-        "symbolization",
-        "discrimination"
-      ],
-      "terms": [
-        "classification",
-        "dehumanization",
-        "symbolization",
-        "discrimination"
-      ],
       "termInfo": {
         "classification": "Dividing people into 'us' and 'them' by ethnicity, race, religion, or nationality -- a sorting every culture does, and one that becomes dangerous only if it feeds the stages that follow.",
         "dehumanization": "One group denies the humanity of another, equating its members with animals, vermin, or disease -- the stage Stanton identifies as what overcomes the ordinary human revulsion against murder.",
@@ -40,13 +33,42 @@
             "href": "wiki:Ten stages of genocide"
           }
         ]
-      }
+      },
+      "seeds": [
+        "classification",
+        "dehumanization"
+      ],
+      "floatingTerms": [
+        "symbolization",
+        "discrimination"
+      ],
+      "terms": [
+        "classification",
+        "dehumanization",
+        "symbolization",
+        "discrimination"
+      ]
     },
     {
       "id": "turning-operational",
       "name": "Turning Operational",
       "color": "brown",
       "fact": "Once classification and dehumanization have done their social work, an apparatus can move: militias and special units get built and armed -- organization -- propaganda drives the population into unbridgeable camps -- polarization -- victims get registered, marked, or moved, often under the language of self-defense -- preparation -- rights and property are stripped in earnest -- persecution -- and mass killing is carried out as policy -- extermination, the machinery the earlier stages made possible.",
+      "termInfo": {
+        "extermination": "Mass killing carried out as deliberate state or group policy -- legally 'extermination' rather than murder, because by this stage the perpetrators no longer regard their victims as fully human.",
+        "organization": "Genocide is always organized -- by states, militias, or gangs -- with special units often trained and armed specifically to carry out killing.",
+        "persecution": "Expropriation, forced deportation, and property destruction begin in earnest -- genocidal massacres may already be occurring, still short of the coordinated mass killing to come.",
+        "polarization": "Extremists drive groups apart with propaganda and laws discouraging intermarriage or social contact, deliberately eliminating the moderate middle.",
+        "preparation": "Victims are identified and separated by ethnic or religious identity and death lists are drawn up, with official action often disguised as security or self-defense."
+      },
+      "info": {
+        "text": "The stages Stanton describes as needing an actual apparatus -- organized personnel, resources, and a plan -- rather than the ordinary social processes of the earlier stages.",
+        "links": [
+          {
+            "href": "wiki:Ten stages of genocide"
+          }
+        ]
+      },
       "seeds": [
         "organization",
         "extermination"
@@ -62,42 +84,13 @@
         "polarization",
         "preparation",
         "persecution"
-      ],
-      "termInfo": {
-        "extermination": "Mass killing carried out as deliberate state or group policy -- legally 'extermination' rather than murder, because by this stage the perpetrators no longer regard their victims as fully human.",
-        "organization": "Genocide is always organized -- by states, militias, or gangs -- with special units often trained and armed specifically to carry out killing.",
-        "persecution": "Expropriation, forced deportation, and property destruction begin in earnest -- genocidal massacres may already be occurring, still short of the coordinated mass killing to come.",
-        "polarization": "Extremists drive groups apart with propaganda and laws discouraging intermarriage or social contact, deliberately eliminating the moderate middle.",
-        "preparation": "Victims are identified and separated by ethnic or religious identity and death lists are drawn up, with official action often disguised as security or self-defense."
-      },
-      "info": {
-        "text": "The stages Stanton describes as needing an actual apparatus -- organized personnel, resources, and a plan -- rather than the ordinary social processes of the earlier stages.",
-        "links": [
-          {
-            "href": "wiki:Ten stages of genocide"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "whos-watching",
       "name": "Who's Actually Watching",
       "color": "magenta",
       "fact": "No single actor owns the obligation to watch. The international community claims a political responsibility to protect once mass-atrocity risk is clear; early-warning projects turn indicators into a running, public forecast; but none of it moves without someone choosing to be an upstander instead of defaulting to the bystander effect -- the well-documented assumption that surely someone else is already watching.",
-      "seeds": [
-        "the responsibility to protect",
-        "the bystander effect"
-      ],
-      "floatingTerms": [
-        "early warning",
-        "upstander"
-      ],
-      "terms": [
-        "the responsibility to protect",
-        "the bystander effect",
-        "early warning",
-        "upstander"
-      ],
       "termInfo": {
         "early warning": {
           "text": "Statistical and expert forecasting of where mass atrocities are most likely to begin -- the US Holocaust Memorial Museum's own project ranks over 160 countries by risk every year, precisely so action doesn't wait for the first killing.",
@@ -133,7 +126,21 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "the responsibility to protect",
+        "the bystander effect"
+      ],
+      "floatingTerms": [
+        "early warning",
+        "upstander"
+      ],
+      "terms": [
+        "the responsibility to protect",
+        "the bystander effect",
+        "early warning",
+        "upstander"
+      ]
     }
   ],
   "bridges": [

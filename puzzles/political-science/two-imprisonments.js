@@ -3,14 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "two-imprisonments",
   "title": "Two Imprisonments",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "info": {
     "text": "Eugene V. Debs, railroad-union organizer turned five-time Socialist Party presidential candidate, whose politics were forged twice over in a federal prison cell -- first by the Pullman strike's defeat, and later by his own conviction for opposing the First World War.",
     "links": [
@@ -209,3 +214,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "two-imprisonments",
+      "puzzleRevision": "fnv1a32:35d604ea",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:industrial unionism": {
+          "x": 409.06,
+          "y": 378.76,
+          "pinned": false
+        },
+        "term:the Pullman boycott": {
+          "x": 414.37,
+          "y": 125.37,
+          "pinned": false
+        },
+        "term:the American Railway Union": {
+          "x": 536.1,
+          "y": 252.86,
+          "pinned": false
+        },
+        "term:the federal injunction": {
+          "x": 548.7,
+          "y": 437,
+          "pinned": false
+        },
+        "term:class struggle": {
+          "x": 266.49,
+          "y": 115.08,
+          "pinned": false
+        },
+        "term:the Socialist Party of America": {
+          "x": 118.33,
+          "y": 23,
+          "pinned": false
+        },
+        "term:prison conversion": {
+          "x": 329.46,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the Red Special": {
+          "x": 69.25,
+          "y": 161.97,
+          "pinned": false
+        },
+        "term:the Canton speech": {
+          "x": 192.8,
+          "y": 352.48,
+          "pinned": false
+        },
+        "term:the Espionage Act": {
+          "x": 75.55,
+          "y": 306.68,
+          "pinned": false
+        },
+        "term:an imperialist war": {
+          "x": 311.45,
+          "y": 250.83,
+          "pinned": false
+        },
+        "term:running from prison": {
+          "x": 81.85,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the limits of the strike": {
+          "x": 542.4,
+          "y": 23,
+          "pinned": false
+        },
+        "term:capitalism's war": {
+          "x": 159.51,
+          "y": 205.21,
+          "pinned": false
+        },
+        "term:the state's answer": {
+          "x": 282.18,
+          "y": 437,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2985.71,
+        "score": 2985.705065262953
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:22:04.554Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "two-imprisonments",
+      "puzzleRevision": "fnv1a32:35d604ea",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 720.21,
+          "y": 375.56,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 239.79,
+          "y": 375.56,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 202.87,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:the limits of the strike": {
+          "x": 480,
+          "y": 426.56,
+          "pinned": false
+        },
+        "term:capitalism's war": {
+          "x": 263.73,
+          "y": 193.05,
+          "pinned": false
+        },
+        "term:the state's answer": {
+          "x": 696.27,
+          "y": 193.05,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "industrial unionism",
+          "the Pullman boycott",
+          "the American Railway Union",
+          "the federal injunction"
+        ],
+        "cluster:1": [
+          "class struggle",
+          "the Socialist Party of America",
+          "prison conversion",
+          "the Red Special"
+        ],
+        "cluster:2": [
+          "the Canton speech",
+          "the Espionage Act",
+          "an imperialist war",
+          "running from prison"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 470.6479164285266
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:22:07.450Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "two-imprisonments",
+      "puzzleRevision": "fnv1a32:35d604ea",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:industrial unionism": {
+          "x": 857,
+          "y": 345.96
+        },
+        "term:the Pullman boycott": {
+          "x": 529.07,
+          "y": 393.33
+        },
+        "term:the American Railway Union": {
+          "x": 858.1,
+          "y": 539.48
+        },
+        "term:the federal injunction": {
+          "x": 664.74,
+          "y": 598
+        },
+        "term:class struggle": {
+          "x": 269.82,
+          "y": 197.95
+        },
+        "term:the Socialist Party of America": {
+          "x": 206.76,
+          "y": 560.68
+        },
+        "term:prison conversion": {
+          "x": 365.3,
+          "y": 439.05
+        },
+        "term:the Red Special": {
+          "x": 75.32,
+          "y": 418.3
+        },
+        "term:the Canton speech": {
+          "x": 521.16,
+          "y": 22
+        },
+        "term:the Espionage Act": {
+          "x": 781.55,
+          "y": 22
+        },
+        "term:an imperialist war": {
+          "x": 507.11,
+          "y": 180.58
+        },
+        "term:running from prison": {
+          "x": 798.12,
+          "y": 184.78
+        },
+        "term:the limits of the strike": {
+          "x": 468.39,
+          "y": 587.36
+        },
+        "term:capitalism's war": {
+          "x": 387.25,
+          "y": 285.04
+        },
+        "term:the state's answer": {
+          "x": 649.4,
+          "y": 264.15
+        },
+        "cluster:0": {
+          "x": 703.96,
+          "y": 423.42
+        },
+        "cluster:1": {
+          "x": 222.43,
+          "y": 349.85
+        },
+        "cluster:2": {
+          "x": 651.05,
+          "y": 105.51
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:22:10.569Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:22:01.708Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;
