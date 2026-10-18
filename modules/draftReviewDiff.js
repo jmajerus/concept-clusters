@@ -87,6 +87,10 @@ export function alignStorageForm(published, draft) {
     if (Array.isArray(document.clusters)) {
       aligned.clusters = document.clusters.map(cluster => {
         if (!Array.isArray(cluster?.terms)) return cluster;
+        // Working copies may hold invalid intermediates; anything but lists
+        // leaves the terms as they are.
+        if ((cluster.seeds != null && !Array.isArray(cluster.seeds)) ||
+            (cluster.floatingTerms != null && !Array.isArray(cluster.floatingTerms))) return cluster;
         const placed = termSet([...(cluster.seeds || []), ...(cluster.floatingTerms || [])]);
         if (!placed.length || JSON.stringify(termSet(cluster.terms)) !== JSON.stringify(placed)) return cluster;
         const { terms: _terms, ...rest } = cluster;
@@ -228,21 +232,25 @@ function bump(counts, kind) {
   counts[kind] += 1;
 }
 
+// Working copies may hold invalid intermediates: a field that is not a
+// list reads as empty rather than throwing.
+const listOf = value => (Array.isArray(value) ? value : []);
+
 function clusterTermMark(published, draft) {
-  const publishedTerms = published?.terms || [
-    ...(published?.seeds || []),
-    ...(published?.floatingTerms || [])
+  const publishedTerms = Array.isArray(published?.terms) ? published.terms : [
+    ...listOf(published?.seeds),
+    ...listOf(published?.floatingTerms)
   ];
-  const draftTerms = draft?.terms || [
-    ...(draft?.seeds || []),
-    ...(draft?.floatingTerms || [])
+  const draftTerms = Array.isArray(draft?.terms) ? draft.terms : [
+    ...listOf(draft?.seeds),
+    ...listOf(draft?.floatingTerms)
   ];
   const publishedSet = new Set(publishedTerms);
   const draftSet = new Set(draftTerms);
   const added = draftTerms.filter(term => !publishedSet.has(term));
   const removed = publishedTerms.filter(term => !draftSet.has(term));
-  const publishedSeeds = new Set(published?.seeds || []);
-  const draftSeeds = new Set(draft?.seeds || []);
+  const publishedSeeds = new Set(listOf(published?.seeds));
+  const draftSeeds = new Set(listOf(draft?.seeds));
   const seedChanged = [...new Set([...publishedSeeds, ...draftSeeds])]
     .filter(term => publishedSeeds.has(term) !== draftSeeds.has(term));
   const info = {};

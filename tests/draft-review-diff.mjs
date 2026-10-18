@@ -486,4 +486,14 @@ export async function run() {
   // A terms list that is not just the seeds and floating terms stays.
   const [keptTerms] = alignStorageForm({ clusters: [{ id: "c", terms: ["m", "n"], seeds: ["m"] }] }, { clusters: [] });
   assert.deepEqual(keptTerms.clusters[0].terms, ["m", "n"]);
+  // A repairable intermediate with non-list seeds or floating terms is
+  // compared as it is, not thrown on.
+  const intermediate = structuredClone(workingCopy);
+  intermediate.clusters[0].seeds = {};
+  intermediate.clusters[0].terms = ["x", "y", "z"];
+  intermediate.clusters[1].floatingTerms = "q";
+  assert.doesNotThrow(() => unpublishedChangeDomains(publishedRow, intermediate));
+  assert.doesNotThrow(() => diffPublishedDraft(publishedRow, intermediate));
+  const [left] = alignStorageForm(intermediate, publishedRow);
+  assert.deepEqual(left.clusters[0].terms, ["x", "y", "z"]);
 }
