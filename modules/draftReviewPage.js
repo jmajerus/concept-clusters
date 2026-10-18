@@ -812,6 +812,24 @@ const PAGE_STYLE = `
   .review-issues-form select { font: inherit; padding: 6px 8px; margin-left: 6px; }
 `;
 
+// Publish sends the saved working copy, not this page's unsaved edits. The
+// working-copy form (and every field tied to it with form=) is snapshotted
+// once the page has loaded; publishing with a changed form asks first.
+const PUBLISH_UNSAVED_GUARD_SCRIPT = `(() => {
+  const form = document.getElementById(${JSON.stringify(WORKING_COPY_FORM_ID)});
+  const publish = document.querySelector("form[data-publish-guard]");
+  if (!form || !publish) return;
+  const snapshot = () => JSON.stringify([...new FormData(form)].filter(([, value]) => typeof value === "string"));
+  let saved = null;
+  addEventListener("load", () => { saved = snapshot(); });
+  publish.addEventListener("submit", event => {
+    if (saved === null || snapshot() === saved) return;
+    if (!confirm("This page has edits that are not saved to the working copy, and publishing leaves them out. Publish anyway? Cancel, then Save working copy, to include them.")) {
+      event.preventDefault();
+    }
+  });
+})();`;
+
 function pageShell(title, body) {
   return `<!doctype html>
 <html lang="en">
@@ -827,6 +845,7 @@ function pageShell(title, body) {
 <script>${REPEATABLE_LIST_ELEMENT_SCRIPT}</script>
 <script>${CLASSIFICATION_EDITOR_SCRIPT}</script>
 <script>${PROVENANCE_LAST_USED_SCRIPT}</script>
+<script>${PUBLISH_UNSAVED_GUARD_SCRIPT}</script>
 </body>
 </html>`;
 }
@@ -1946,7 +1965,7 @@ function renderSubmitForm(draft, variant = "hosted") {
       : ""}</p>
     <div class="actions">
       ${playButton}
-      <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}" data-publish-guard>
         ${renderRevisedCheckbox(canPublish && draft.playerTextDiffersFromPublished
           && revisedMarkChangesLessonLine(draft.firstPublishedAt))}
         <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>

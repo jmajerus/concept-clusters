@@ -1,6 +1,9 @@
 // Browser client for D1-backed authored layout overrides.
 // A layout request carries one mode payload; the server merges it into the
 // puzzle's existing mode-neutral envelope so saving Graph cannot erase Star.
+// Every write lands on the puzzle's working copy: one addressed to the
+// published puzzle opens its working copy, and `onWorkingCopy` hears that
+// copy's id so the page can keep editing it.
 
 import { layoutDocumentForMode, layoutForMode } from "./layoutDocument.js";
 
@@ -20,7 +23,8 @@ export async function saveLayout({
   draftId = null,
   mode = "star",
   layout,
-  fetchImpl = fetch
+  fetchImpl = fetch,
+  onWorkingCopy = null
 }) {
   const response = await fetchImpl(
     layoutPath({ puzzleId, draftId, mode }),
@@ -35,6 +39,7 @@ export async function saveLayout({
   if (!response.ok) {
     throw new Error(body.error || body.detail || `Layout save failed (${response.status})`);
   }
+  if (!draftId && body.draftId) onWorkingCopy?.(body.draftId);
   return body.layout || layoutDocumentForMode(mode, layout);
 }
 
@@ -44,7 +49,8 @@ export async function saveLayoutBoard({
   puzzleId,
   draftId = null,
   board,
-  fetchImpl = fetch
+  fetchImpl = fetch,
+  onWorkingCopy = null
 }) {
   const response = await fetchImpl(
     layoutPath({ puzzleId, draftId }),
@@ -60,6 +66,7 @@ export async function saveLayoutBoard({
     // Validation replies carry a generic error plus the specific reasons.
     throw new Error((body.errors || []).join("; ") || body.error || `Board settings save failed (${response.status})`);
   }
+  if (!draftId && body.draftId) onWorkingCopy?.(body.draftId);
   return body.layout;
 }
 
@@ -107,7 +114,8 @@ export async function clearLayout({
   puzzleId,
   draftId = null,
   mode = null,
-  fetchImpl = fetch
+  fetchImpl = fetch,
+  onWorkingCopy = null
 }) {
   const response = await fetchImpl(
     layoutPath({ puzzleId, draftId, mode }),
@@ -117,6 +125,7 @@ export async function clearLayout({
   if (!response.ok) {
     throw new Error(body.error || body.detail || `Layout clear failed (${response.status})`);
   }
+  if (!draftId && body.draftId) onWorkingCopy?.(body.draftId);
   return body.layout || null;
 }
 

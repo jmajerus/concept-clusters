@@ -228,16 +228,19 @@ revision under an open edit page.
 | `lensRevealCue` | `none`, `ripple`, `spotlight`, or `both`: overrides the site setting for this puzzle |
 
 `null` for a setting is an explicit "use the default", which also overrides
-a value an older puzzle document carries in `board`. Bridge pre-connect, the
-flow trace, and the reveal cue change play, so the layout page saves them
-only on an open working copy, never straight to a published puzzle; they
-reach players when that copy is published.
+a value an older puzzle document carries in `board`.
+
+Like every write domain, the layout is edited on the working copy. A layout
+write addressed to a published puzzle lands on its working copy, opening one
+from the published puzzle when there is none, and publishing that working
+copy is the only way a layout or board setting reaches players.
 
 A layout is not puzzle content, so it is not a projection of the document
 at all. It lives beside the document in one `layout_json` column on
 `puzzle_drafts` and on `published_documents`: outside the content hash, with
 no effect on `content_revised_at`, and with its own fingerprint in the public
-play index, so a layout change reaches players without a content publish.
+play index, so a publish that changes only the layout leaves the content
+revision alone.
 
 Its writers are people in layout authoring and the automatic layout pass,
 whose entries are tagged `source: "auto"` and never replace an author's.

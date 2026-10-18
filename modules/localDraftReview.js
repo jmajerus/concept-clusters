@@ -606,12 +606,45 @@ export function createLocalDraftReviewHandler({
     }
 
     const layoutMatch = urlPath.match(/^\/admin\/drafts\/([^/]+)\/layout(?:\.json)?$/);
-    if (layoutMatch) {
+    // Layouts are edited on the working copy, like every other domain, and
+    // reach players when that copy is published. A layout write addressed
+    // to the published puzzle lands on its working copy, opening one from
+    // the published puzzle when there is none.
+    const publishedLayoutMatch = req.method === "PUT" || req.method === "DELETE"
+      ? urlPath.match(/^\/admin\/puzzles\/([^/]+)\/layout(?:\.json)?$/)
+      : null;
+    if (layoutMatch || publishedLayoutMatch) {
       if (!sameOrigin()) {
         json(res, { error: "Cross-origin submit is not allowed." }, 403);
         return true;
       }
-      const draftId = decodeURIComponent(layoutMatch[1]);
+      let draftId;
+      let openedWorkingCopy = false;
+      if (layoutMatch) {
+        draftId = decodeURIComponent(layoutMatch[1]);
+      } else {
+        const puzzleId = decodeURIComponent(publishedLayoutMatch[1]);
+        try {
+          const { draft, created } = await openPuzzleWorkingCopy({
+            getDraft: id => draftStore.getDraft(id),
+            createDraft: ({ draftId: id, document, seededFromPublished, basePublishedRevision }) =>
+              draftStore.createDraft({ draftId: id, document, seededFromPublished, basePublishedRevision }),
+            contentDocuments,
+            contentService,
+            categoryRegistry: await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            }),
+            puzzleId
+          });
+          draftId = draft.draftId || puzzleId;
+          openedWorkingCopy = created;
+        } catch (error) {
+          json(res, { error: formatActionError(error), id: puzzleId }, error.status || 404);
+          return true;
+        }
+      }
       // Each write is conditional on the draft this request read. When
       // another save lands in between, re-read and rebuild from the newer
       // layout, so neither save erases the other and author-over-auto is
@@ -660,6 +693,7 @@ export function createLocalDraftReviewHandler({
                 : await draftStore.clearLayout(draftId);
             json(res, {
               draftId,
+              ...(openedWorkingCopy ? { openedWorkingCopy } : {}),
               revision: cleared.revision,
               layout: cleared.layout || null
             });
@@ -668,6 +702,11 @@ export function createLocalDraftReviewHandler({
           // The body is read once; a retry rebuilds from it.
           bodyPayload ||= readRequestPayload(req);
           const { json: body } = await bodyPayload;
+          // A body that is not JSON would otherwise save as no layout at all.
+          if (!body || typeof body !== "object") {
+            json(res, { error: "Send the layout as JSON (Content-Type: application/json).", draftId }, 400);
+            return true;
+          }
           const submitted = body && Object.prototype.hasOwnProperty.call(body, "layout")
             ? body.layout
             : body;
@@ -703,6 +742,7 @@ export function createLocalDraftReviewHandler({
             const savedBoard = await draftStore.saveLayout({ draftId, layout: boardLayout, expectedUpdatedAt: record.updatedAt });
             json(res, {
               draftId,
+              ...(openedWorkingCopy ? { openedWorkingCopy } : {}),
               revision: savedBoard.revision,
               layout: savedBoard.layout || boardLayout,
               warnings: boardValidation.warnings
@@ -755,6 +795,7 @@ export function createLocalDraftReviewHandler({
           const saved = await draftStore.saveLayout({ draftId, layout, expectedUpdatedAt: record.updatedAt });
           json(res, {
             draftId,
+            ...(openedWorkingCopy ? { openedWorkingCopy } : {}),
             revision: saved.revision,
             layout: saved.layout || layout,
             warnings: validation.warnings

@@ -282,11 +282,29 @@ export async function run(page) {
   assert.deepEqual(compiled.puzzle.bridges[0].clusters, [0, 1]);
   assert.deepEqual(compiled.puzzle.provenance, labPuzzle.provenance);
 
+  // Layout writes addressed to the published puzzle land on its working
+  // copy (localDraftReview.js), opened from the published puzzle; the play
+  // handler only reads layouts.
+  const layoutCopyDirectory = await mkdtemp(join(tmpdir(), "cc-play-corpus-layout-copy-"));
+  const layoutCopies = createPuzzleDraftStore({ directory: layoutCopyDirectory });
+  const layoutCopyHandler = draftStore => createLocalDraftReviewHandler({
+    draftStore,
+    contentDocuments: repo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    publicationActor: actor,
+    repositoryRoot: root
+  });
+  const handleLayoutCopy = layoutCopyHandler(layoutCopies);
+  const handleLayout = async (req, res) => (await handleRequest(req, res)) || handleLayoutCopy(req, res);
+  const copyLayout = async () => (await layoutCopies.getDraft("lab-d1-play")).layout;
+  const JSON_HEADERS = { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787", "content-type": "application/json" };
+  const publishedBeforeLayoutWrites = (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout;
+
   const saveLayoutResponse = createResponse();
-  assert.equal(await handleRequest({
+  assert.equal(await handleLayout({
     method: "PUT",
     url: "/admin/puzzles/lab-d1-play/layout.json",
-    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    headers: JSON_HEADERS,
     async *[Symbol.asyncIterator]() {
       yield Buffer.from(JSON.stringify({ layout }));
     }
@@ -296,8 +314,10 @@ export async function run(page) {
     JSON.parse(saveLayoutResponse.body).layout,
     layoutDocumentForMode("star", layout)
   );
+  assert.equal(JSON.parse(saveLayoutResponse.body).draftId, "lab-d1-play");
+  assert.equal(JSON.parse(saveLayoutResponse.body).openedWorkingCopy, true);
   assert.deepEqual(
-    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
+    (await copyLayout()),
     layoutDocumentForMode("star", layout)
   );
   const boardWithLayout = createResponse();
@@ -313,30 +333,27 @@ export async function run(page) {
   // erases the already-confirmed Star layout.
   for (const [mode, modeLayout] of [["graph", graphLayout], ["sets", circleLayout]]) {
     const response = createResponse();
-    assert.equal(await handleRequest({
+    assert.equal(await handleLayout({
       method: "PUT",
       url: `/admin/puzzles/lab-d1-play/layout.json?mode=${mode}`,
-      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      headers: JSON_HEADERS,
       async *[Symbol.asyncIterator]() {
         yield Buffer.from(JSON.stringify({ mode, layout: modeLayout }));
       }
     }, response), true);
     assert.equal(response.status, 200, response.body);
   }
-  const mergedPublishedLayout = (await repo.getPublished({
-    kind: "puzzle",
-    id: "lab-d1-play"
-  })).layout;
+  const mergedPublishedLayout = await copyLayout();
   assert.deepEqual(unstamped(mergedPublishedLayout.modes.star), layout);
   assert.deepEqual(unstamped(mergedPublishedLayout.modes.graph), graphLayout);
   assert.deepEqual(unstamped(mergedPublishedLayout.modes.sets), circleLayout);
 
   // The automatic layout pass never replaces an author's layout.
   const autoOverAuthor = createResponse();
-  assert.equal(await handleRequest({
+  assert.equal(await handleLayout({
     method: "PUT",
     url: "/admin/puzzles/lab-d1-play/layout.json?mode=graph",
-    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    headers: JSON_HEADERS,
     async *[Symbol.asyncIterator]() {
       yield Buffer.from(JSON.stringify({ mode: "graph", layout: { ...graphLayout, source: "auto", fixed: false } }));
     }
@@ -345,10 +362,10 @@ export async function run(page) {
   assert.match(autoOverAuthor.body, /never replaces/);
   // ...including when the write sends a whole layout document, no mode.
   const unscopedAuto = createResponse();
-  assert.equal(await handleRequest({
+  assert.equal(await handleLayout({
     method: "PUT",
     url: "/admin/puzzles/lab-d1-play/layout.json",
-    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    headers: JSON_HEADERS,
     async *[Symbol.asyncIterator]() {
       yield Buffer.from(JSON.stringify({
         layout: { schemaVersion: 1, modes: { graph: { ...graphLayout, source: "auto", fixed: false } } }
@@ -357,17 +374,17 @@ export async function run(page) {
   }, unscopedAuto), true);
   assert.equal(unscopedAuto.status, 409, unscopedAuto.body);
   assert.equal(
-    (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.modes.graph.source,
+    (await copyLayout()).modes.graph.source,
     undefined
   );
 
   // Board settings save with the layout, beside the per-mode layouts.
   const putBoard = async board => {
     const response = createResponse();
-    assert.equal(await handleRequest({
+    assert.equal(await handleLayout({
       method: "PUT",
       url: "/admin/puzzles/lab-d1-play/layout.json",
-      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      headers: JSON_HEADERS,
       async *[Symbol.asyncIterator]() {
         yield Buffer.from(JSON.stringify({ board }));
       }
@@ -376,33 +393,19 @@ export async function run(page) {
   };
   const sizedBoard = await putBoard({ sizeFactor: 1.1 });
   assert.equal(sizedBoard.status, 200, sizedBoard.body);
-  const afterBoard = (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout;
+  const afterBoard = (await copyLayout());
   assert.equal(afterBoard.board.sizeFactor, 1.1);
   assert.equal(afterBoard.board.source, "author");
   assert.ok(afterBoard.modes.star && afterBoard.modes.graph, "a board save keeps the mode layouts");
   assert.equal((await putBoard({ sizeFactor: 1.13 })).status, 400);
   const autoBoard = await putBoard({ sizeFactor: 1.2, source: "auto" });
   assert.equal(autoBoard.status, 409, autoBoard.body);
-  assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.sizeFactor, 1.1);
-  // Experiments change play, so a published layout never takes one directly:
-  // they reach players by publishing a working copy.
+  assert.equal((await copyLayout()).board.sizeFactor, 1.1);
+  // Experiments change play; they save on the working copy like the rest.
   const experiment = await putBoard({ lensFlowTrace: true });
-  assert.equal(experiment.status, 409, experiment.body);
-  assert.match(experiment.body, /working copy/);
-  assert.equal((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board.lensFlowTrace, undefined);
-  const wholeExperiment = createResponse();
-  assert.equal(await handleRequest({
-    method: "PUT",
-    url: "/admin/puzzles/lab-d1-play/layout.json",
-    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
-    async *[Symbol.asyncIterator]() {
-      yield Buffer.from(JSON.stringify({
-        layout: { ...afterBoard, board: { ...afterBoard.board, bridgePreconnect: true } }
-      }));
-    }
-  }, wholeExperiment), true);
-  assert.equal(wholeExperiment.status, 409, wholeExperiment.body);
-  // An explicit null where the setting is unset changes nothing, so it passes.
+  assert.equal(experiment.status, 200, experiment.body);
+  assert.equal((await copyLayout()).board.lensFlowTrace, true);
+  // An explicit null where the setting is unset is allowed.
   assert.equal((await putBoard({ sizeFactor: 1.1, lensRevealCue: null })).status, 200);
 
   // The layout-pass route checks the puzzle on reads as well as starts, and
@@ -502,37 +505,36 @@ export async function run(page) {
     error => error.name === "LayoutConflictError"
   );
   let interleaved = false;
-  const racingRepo = Object.create(repo);
-  racingRepo.saveLayout = async args => {
-    if (!interleaved && args.expectedUpdatedAt) {
-      interleaved = true;
-      // Another author save lands after this request read the row.
-      const current = await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" });
-      await new Promise(resolve => setTimeout(resolve, 2));
-      await repo.saveLayout({
-        id: "lab-d1-play",
-        layout: { ...current.layout, board: { ...current.layout.board, starFreeStrip: true } }
-      });
+  const racingCopies = {
+    ...layoutCopies,
+    saveLayout: async args => {
+      if (!interleaved && args.expectedUpdatedAt) {
+        interleaved = true;
+        // Another author save lands after this request read the copy.
+        const current = await layoutCopies.getDraft("lab-d1-play");
+        await new Promise(resolve => setTimeout(resolve, 2));
+        await layoutCopies.saveLayout({
+          draftId: "lab-d1-play",
+          layout: { ...current.layout, board: { ...current.layout.board, starFreeStrip: true } }
+        });
+      }
+      return layoutCopies.saveLayout(args);
     }
-    return repo.saveLayout(args);
   };
-  const racingHandler = createLocalPlayCorpusHandler({
-    contentDocuments: racingRepo,
-    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
-    repositoryRoot: root
-  });
+  const racingCopyHandler = layoutCopyHandler(racingCopies);
+  const racingHandler = async (req, res) => (await handleRequest(req, res)) || racingCopyHandler(req, res);
   const raced = createResponse();
   assert.equal(await racingHandler({
     method: "PUT",
     url: "/admin/puzzles/lab-d1-play/layout.json",
-    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    headers: JSON_HEADERS,
     async *[Symbol.asyncIterator]() {
       yield Buffer.from(JSON.stringify({ board: { sizeFactor: 1.15 } }));
     }
   }, raced), true);
   assert.equal(raced.status, 200, raced.body);
   assert.ok(interleaved);
-  const afterRace = (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout.board;
+  const afterRace = (await copyLayout()).board;
   assert.equal(afterRace.sizeFactor, 1.15, "the retried save applied");
   assert.equal(afterRace.starFreeStrip, true, "the save that landed in between was kept");
 
@@ -541,10 +543,10 @@ export async function run(page) {
     ["sets", { ...circleLayout, metrics: { ...circleLayout.metrics, lineCrossings: 1 } }]
   ]) {
     const rejected = createResponse();
-    assert.equal(await handleRequest({
+    assert.equal(await handleLayout({
       method: "PUT",
       url: `/admin/puzzles/lab-d1-play/layout.json?mode=${mode}`,
-      headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+      headers: JSON_HEADERS,
       async *[Symbol.asyncIterator]() {
         yield Buffer.from(JSON.stringify({ mode, layout: modeLayout }));
       }
@@ -554,10 +556,10 @@ export async function run(page) {
   }
 
   const unsupportedMode = createResponse();
-  assert.equal(await handleRequest({
+  assert.equal(await handleLayout({
     method: "PUT",
     url: "/admin/puzzles/lab-d1-play/layout.json?mode=bogus",
-    headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" },
+    headers: JSON_HEADERS,
     async *[Symbol.asyncIterator]() {
       yield Buffer.from(JSON.stringify({ mode: "bogus", layout: graphLayout }));
     }
@@ -566,19 +568,22 @@ export async function run(page) {
   assert.match(unsupportedMode.body, /Unsupported layout mode/);
 
   const clearGraph = createResponse();
-  assert.equal(await handleRequest({
+  assert.equal(await handleLayout({
     method: "DELETE",
     url: "/admin/puzzles/lab-d1-play/layout.json?mode=graph",
     headers: { host: "127.0.0.1:8787", origin: "http://127.0.0.1:8787" }
   }, clearGraph), true);
   assert.equal(clearGraph.status, 200, clearGraph.body);
-  const afterGraphClear = (await repo.getPublished({
-    kind: "puzzle",
-    id: "lab-d1-play"
-  })).layout;
+  const afterGraphClear = await copyLayout();
   assert.equal(afterGraphClear.modes.graph, undefined);
   assert.deepEqual(unstamped(afterGraphClear.modes.star), layout);
   assert.deepEqual(unstamped(afterGraphClear.modes.sets), circleLayout);
+
+  // None of these writes touched the published puzzle. Publishing the
+  // working copy is what shows its layouts to players.
+  assert.deepEqual((await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout, publishedBeforeLayoutWrites);
+  await repo.saveLayout({ id: "lab-d1-play", layout: await copyLayout() });
+  await rm(layoutCopyDirectory, { recursive: true, force: true });
 
   // A working copy starts without its own layout column. Its first selected
   // mode save must inherit the published envelope, or publishing that draft
@@ -851,6 +856,9 @@ export async function run(page) {
     });
     const handleDrafts = createLocalDraftReviewHandler({
       draftStore,
+      contentDocuments: repo,
+      contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+      publicationActor: actor,
       repositoryRoot: root
     });
     const handleBrowserRequest = async (req, res) =>
@@ -928,7 +936,7 @@ export async function run(page) {
       });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
-        document.getElementById("layout-authoring-status")?.textContent?.includes("saved to draft"),
+        document.getElementById("layout-authoring-status")?.textContent?.includes("saved to working copy"),
       null, { timeout: 15000 });
       assert.ok(
         (await draftStore.getDraft("lab-browser-unpublished-draft")).layout,
@@ -954,7 +962,7 @@ export async function run(page) {
       null, { timeout: 15000 });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
-        document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout as a hint saved to draft"),
+        document.getElementById("layout-authoring-status")?.textContent?.startsWith("Graph layout as a hint saved to working copy"),
       null, { timeout: 15000 });
       const draftModes = (await draftStore.getDraft("lab-browser-unpublished-draft")).layout?.modes || {};
       assert.ok(draftModes.star && draftModes.graph, "Graph save should keep the Star override");
@@ -1006,9 +1014,9 @@ export async function run(page) {
         && !document.getElementById("layout-authoring").hidden,
       null, { timeout: 15000 });
       assert.equal(await page.textContent("#layout-authoring-save-layout"), "Save Layout");
-      // Board settings sit beside the layout card. Without a working copy,
-      // bridge pre-connect (which changes play) is shown but cannot save;
-      // the free-term strip is Star's alone.
+      // Board settings sit beside the layout card. Every control saves on
+      // the working copy, opening one for a published board; the free-term
+      // strip is Star's alone.
       assert.equal(await page.isVisible("#board-settings"), true, "board settings card");
       assert.equal(
         await page.evaluate(() => document.getElementById("board-stage").nextElementSibling?.classList.contains("layout-authoring-row")),
@@ -1016,7 +1024,7 @@ export async function run(page) {
         "the layout view's cards follow the board"
       );
       assert.equal(await page.isVisible("#board-size-factor-input"), true, "board size");
-      assert.equal(await page.isDisabled("#star-bridge-preconnect-btn"), true, "pre-connect needs a working copy");
+      assert.equal(await page.isDisabled("#star-bridge-preconnect-btn"), false, "pre-connect saves on the working copy");
       const layoutViewMode = await page.evaluate(() => window.CC.state.layoutAdapter?.mode);
       assert.equal(await page.isVisible("#star-free-strip-btn"), layoutViewMode === "star", "free-term strip is Star's");
       await page.click("#layout-authoring-prepare");
@@ -1025,11 +1033,11 @@ export async function run(page) {
       });
       await page.click("#layout-authoring-save-layout");
       await page.waitForFunction(() =>
-        document.getElementById("layout-authoring-status")?.textContent?.includes("saved to the published puzzle"),
+        document.getElementById("layout-authoring-status")?.textContent?.includes('saved to working copy "lab-d1-play"'),
       null, { timeout: 15000 });
       assert.ok(
-        (await repo.getPublished({ kind: "puzzle", id: "lab-d1-play" })).layout,
-        "Save Layout did not persist the D1 override"
+        (await draftStore.getDraft("lab-d1-play")).layout,
+        "Save Layout on a published board did not open and save the working copy"
       );
 
       // Run layout pass is a dry run with a per-mode report; Save automatic
@@ -1061,9 +1069,24 @@ export async function run(page) {
         "error",
         "a partly refused save must not read as success"
       );
-      assert.deepEqual(passRuns.map(run => [run.id, run.write]), [["lab-d1-play", false], ["lab-d1-play", true]]);
+      // The save above opened the working copy, so the pass runs on it.
+      assert.deepEqual(passRuns.map(run => [run.id, run.write]), [["draft:lab-d1-play", false], ["draft:lab-d1-play", true]]);
       assert.match(passRuns[0].base, /^http:\/\/127\.0\.0\.1:/);
 
+      // Choosing the puzzle from the layout view's picker opens its working
+      // copy, as the `?puzzle=` route does, so layouts keep saving there.
+      await page.goto(`${baseURL}/?puzzle=lab-d1-play&author=layout`, { waitUntil: "networkidle" });
+      await page.evaluate(() => {
+        document.getElementById("layout-authoring-draft-state").textContent = "";
+        CC.openPuzzle(CC.PUZZLES.findIndex(puzzle => puzzle.id === "lab-d1-play"));
+      });
+      await page.waitForFunction(() =>
+        document.getElementById("layout-authoring-draft-state")?.textContent?.startsWith("Saved on working copy"),
+      null, { timeout: 15000 });
+
+      // The checks below play the published board, which `?puzzle=` opens
+      // only while the puzzle has no working copy.
+      await draftStore.deleteDraft("lab-d1-play");
       await page.goto(`${baseURL}/?puzzle=lab-d1-play`, { waitUntil: "networkidle" });
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"

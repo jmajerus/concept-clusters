@@ -319,6 +319,17 @@ let pendingInitialSharedParams = null;
 // board.
 let overlayDraftId = null;
 let overlayPuzzle = null;
+// The working copy a layout save opened for the published board on screen.
+// Later layout saves go to it, and the picker opens it from then on.
+let layoutWorkingCopyId = null;
+const layoutDraftId = () => overlayDraftId || layoutWorkingCopyId;
+function adoptLayoutWorkingCopy(draftId) {
+  layoutWorkingCopyId = draftId;
+  const puzzleId = state?.puzzle?.id;
+  if (puzzleId && !SEARCH_DRAFTS.some(draft => draft?.id === puzzleId || draft?._draftId === draftId)) {
+    SEARCH_DRAFTS.push({ id: puzzleId, _draftId: draftId });
+  }
+}
 let authoringStudio = null;
 let catalogueStudio = null;
 let constructViewMode = "star";
@@ -2333,16 +2344,16 @@ layoutAuthoring = createLayoutAuthoringController({
   getBoard: () => ({ width: W, height: H }),
   showSolution,
   saveLayout: playSource === "d1"
-    ? args => saveLayout({ ...args, draftId: overlayDraftId })
+    ? args => saveLayout({ ...args, draftId: layoutDraftId(), onWorkingCopy: adoptLayoutWorkingCopy })
     : null,
   saveLayoutBoard: playSource === "d1"
-    ? args => saveLayoutBoard({ ...args, draftId: overlayDraftId })
+    ? args => saveLayoutBoard({ ...args, draftId: layoutDraftId(), onWorkingCopy: adoptLayoutWorkingCopy })
     : null,
   // The automatic layout pass needs the local authoring server.
   layoutPass: playSource === "d1"
     ? { start: startLayoutPass, status: layoutPassStatus }
     : null,
-  getDraftId: () => overlayDraftId,
+  getDraftId: () => layoutDraftId(),
   previewBoardSize,
   previewLensRevealCue,
   getSiteSettings: () => siteSettings,
@@ -2759,6 +2770,7 @@ async function loadPuzzle(index, options = {}) {
   if (!browsePuzzle) return;
   overlayDraftId = null;
   overlayPuzzle = null;
+  layoutWorkingCopyId = null;
   authoringStudio?.hide();
   const generation = ++puzzleLoadGeneration;
   clearTimeout(playerLayoutSaveTimer);
@@ -2795,6 +2807,7 @@ async function loadDraftOverlay(draftId, options = {}) {
   }
   overlayDraftId = draftId;
   overlayPuzzle = null;
+  layoutWorkingCopyId = null;
   catalogueStudio?.hide();
   constructViewMode = "star";
   puzzleViewEl.classList.add("puzzle-loading");
@@ -2835,6 +2848,7 @@ async function loadCatalogueOverlay(catalogueId) {
   if (state) persistPlayerSession({ captureLayout: true });
   overlayDraftId = null;
   overlayPuzzle = null;
+  layoutWorkingCopyId = null;
   authoringStudio?.hide();
   setMessage("Loading catalogue…");
   try {

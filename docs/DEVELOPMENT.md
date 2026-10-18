@@ -154,7 +154,7 @@ server's `ADMIN_KEY` in the ignored `.env`.
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
 | `tests/` | Regression suite — `npm run test:quick` (node-only), `npm test` / `npm run test:standard` (standard, with browser), `npm run test:extended` (see below) |
-| `tools/layouts-auto.mjs` | Automatic layout pass over published puzzles (`npm run layouts:auto`): live then extended search, Graph repair, board-size escalation, and (with `--write`) automatic layouts that never replace an author's — see "Saved layouts" in [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#saved-layouts) |
+| `tools/layouts-auto.mjs` | Automatic layout pass over published puzzles (`npm run layouts:auto`): live then extended search, Graph repair, board-size escalation, and (with `--write`) automatic layouts saved to each puzzle's working copy, never replacing an author's — see "Saved layouts" in [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#saved-layouts) |
 | `tools/check-wiki-links.mjs` | Verifies `termInfo`/bridge/cluster `info` Wikipedia links resolve — run with `npm run check-wiki-links` (see below) |
 | `site/` | Symlinked public tree Wrangler serves as Worker static assets (`wrangler.jsonc` `assets.directory`); keeps `.wrangler/` out of the asset watcher |
 | `src/worker.js` | Cloudflare Worker: serves static assets, the D1-backed public publication read routes, `/api/event`, and `/admin` (see "Deployment & analytics" below) |
