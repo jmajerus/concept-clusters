@@ -3,7 +3,7 @@ import {
   CUE_FOR_FREEZE_CONFIRM,
   HOLD_FROM_FREEZE_CONFIRM
 } from "./contentFreezePlan.js";
-import { DOMAINS, RESERVED_DOMAIN_IDS } from "../puzzles/categories.js";
+import { DOMAINS, RESERVED_DOMAIN_IDS } from "../puzzles/domains.js";
 
 export const PUBLISH_AND_CUE_CONFIRM = "publish-and-cue";
 export const PUBLIC_PLAY_PUBLICATION_NOTE =

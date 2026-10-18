@@ -2,13 +2,13 @@ import {
   categoriesForPuzzle,
   categorySlugFor,
   domainForCategory,
-  DOMAINS,
   primaryCategoryForPuzzle,
   puzzleBelongsToCategory,
   puzzleLevel,
   PUZZLE_LEVELS,
   puzzlesForSubcategory
 } from "../puzzles/categories.js";
+import { DOMAINS } from "../puzzles/domains.js";
 
 let registryCatalogues = [];
 
@@ -194,7 +194,7 @@ export function domainCatalogueId(domainId) {
 }
 
 // A domain catalogue is All Puzzles filtered to one domain of
-// puzzles/categories.js's DOMAINS: every puzzle with at least one category
+// puzzles/domains.js's DOMAINS: every puzzle with at least one category
 // (primary or additional) in that domain, so a multidisciplinary puzzle
 // appears under several domains by the same mechanism it appears under
 // several categories (docs/TAXONOMY-ROADMAP.md). This is the domain

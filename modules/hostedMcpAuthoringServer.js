@@ -12,7 +12,7 @@ import {
 import * as z from "zod/v4";
 import { settleAgentPresentationColors } from "./colorPalette.js";
 import { checkDocumentLinks } from "./wikiLinkCheck.js";
-import { DOMAINS } from "../puzzles/categories.js";
+import { DOMAINS } from "../puzzles/domains.js";
 import {
   authoringGuidanceResult,
   authoringWorkflowGuidanceResult,

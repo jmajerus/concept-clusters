@@ -288,6 +288,23 @@ export const PUZZLES = [
       join(uninstallRoot, "puzzles", "science", "service-uninst.js")
     ));
 
+    // A root-level taxonomy companion is not an uninstallable puzzle module,
+    // while a category-local puzzle may validly use the id `domains`.
+    await writeFile(
+      join(uninstallRoot, "puzzles", "domains.js"),
+      "export const DOMAINS = {};\n"
+    );
+    await writeFile(
+      join(uninstallRoot, "puzzles", "science", "domains.js"),
+      "export default { id: 'domains' };\n"
+    );
+    const domainsUninstall = await uninstallPublisher.planPuzzleUninstall("domains");
+    assert.deepEqual(domainsUninstall.affectedPaths, ["puzzles/science/domains.js"]);
+    assert.equal(
+      await readFile(join(uninstallRoot, "puzzles", "domains.js"), "utf8"),
+      "export const DOMAINS = {};\n"
+    );
+
     await writeFile(
       join(uninstallRoot, "content", "puzzles", "service-restore.ccpuzzle.json"),
       "dirty\n"

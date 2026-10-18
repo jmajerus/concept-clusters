@@ -1,6 +1,5 @@
 import {
   CATEGORIES,
-  DOMAINS,
   GENERATED_SUBCATEGORY_IDS,
   categoriesForPuzzle,
   categorySlugFor,
@@ -12,6 +11,7 @@ import {
   subcategoryIdForPuzzle,
   subcategoriesForPuzzleSet
 } from "../puzzles/categories.js";
+import { DOMAINS } from "../puzzles/domains.js";
 import { loadPlayerSession } from "./playerSessionStore.js";
 import { computePuzzleStats } from "./puzzleStats.js";
 import { formatCitation, linkLabel, normalizeInfo, searchLink } from "./termInfo.js";

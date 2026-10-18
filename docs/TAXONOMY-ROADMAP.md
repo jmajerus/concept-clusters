@@ -2,8 +2,9 @@
 
 **Status: the "Now" stage below is implemented, and domain landing pages
 arrived early (2026-09-22) as derived catalogues -- see below; the rest
-is still roadmap.** `domain` exists on `puzzles/categories.js`, groups
-the category-browse screen's cards under headings, and each non-empty
+is still roadmap.** Category records in `puzzles/categories.js` carry a
+`domain` id from the fixed vocabulary in `puzzles/domains.js`. It groups the
+category-browse screen's cards under headings, and each non-empty
 domain is a derived `domain-<id>` catalogue with its own Library card. This document records decisions made in advance so
 that vocabulary stays stable as the catalog grows, and so that navigation
 can be switched on later without renaming things learners have already
@@ -53,8 +54,9 @@ course-catalog home page actually is.
 
 ## Domains are a property of the category registry, not of a puzzle
 
-`domain` lives in `puzzles/categories.js`, alongside `slug` and `info` —
-never as a field on a puzzle.
+The category's `domain` assignment lives in `puzzles/categories.js`,
+alongside `slug` and `info`; the stable domain vocabulary lives separately
+in `puzzles/domains.js`. A domain is never a field on a puzzle.
 
 ```js
 export const CATEGORIES = {
@@ -82,7 +84,7 @@ Consequences worth stating plainly:
   and presentation concern only.
 - Nothing about a puzzle's `id`, share links, or `?category=` URLs changes.
 
-## The twelve domains
+## The thirteen domains
 
 Descriptions are scope statements for authors deciding where something
 belongs, not player-facing copy. Wikipedia links are **candidates
@@ -102,9 +104,10 @@ than leaving the term unlinked").
 | 7 | 📰 Communication & Media | Journalism, media studies, information literacy, evidence and sourcing. | `wiki:Communication studies` |
 | 8 | 🎨 Art & Design | Visual arts, music, film, graphic and product design, media production. | `wiki:The arts` |
 | 9 | 💼 Business & Management | Marketing, finance, accounting, leadership, organizational design. | `wiki:Business administration` |
-| 10 | 📚 Education & Teaching | Pedagogy, instructional design, assessment, study skills, training. | `wiki:Education` |
+| 10 | 📚 Literature & Classics | Narrative theory, classical epics and mythology, drama and poetics, literary criticism, and canonical texts across historical traditions. | — |
 | 11 | 🌍 Earth & Environment | Geology, climate, oceanography, ecology, geography, environmental policy. | `wiki:Earth science` |
 | 12 | 🌱 Life Sciences | Biology and its subfields — botany, zoology, microbiology, genomics, bioinformatics — as distinct from the clinical and population-health focus of Health & Medicine. | `wiki:Biology` |
+| 13 | Interdisciplinary Studies | Fields organized around a problem rather than a single discipline — peace and conflict, technology and society, and critical theory. | — |
 
 ### Sciences & Mathematics and Computing & Engineering were five domains
 
@@ -191,10 +194,8 @@ itself is expected to split before this ships. They are marked.
 | Engineering | 1 | Computing & Engineering |
 | Music | 1 | Art & Design |
 
-Education & Teaching currently has no categories. It stays in the
-vocabulary as a deliberate signal of where content is missing — but it
-must not render as an empty heading, and no puzzle should be authored
-merely to fill it.
+Education & Teaching was removed from the vocabulary when its unused slot
+was reused for Literature & Classics; no categories had been assigned to it.
 
 ### On the categories that straddle
 
@@ -301,8 +302,10 @@ loose form.
 
 Sized by catalog growth rather than by date.
 
-**Now (~60 puzzles).** Add `domain` to `puzzles/categories.js` and render
-the Library's category list under domain headings. No puzzle-schema
+**Now (~60 puzzles).** Add the fixed domain vocabulary to
+`puzzles/domains.js`, assign category `domain` values in
+`puzzles/categories.js`, and render the Library's category list under
+domain headings. No puzzle-schema
 change, no new URL space, no additional click depth. `validate.mjs` gains
 one check: every `domain` value is a registered domain id. Reversible in
 an afternoon.
@@ -333,7 +336,7 @@ to fill headings — puzzles that exist because a domain looked empty rather
 than because the topic had genuine cluster structure. That is the opposite
 of every design rule in AUTHORING.md.
 
-Treat the twelve domains as **a vocabulary committed to now and a
+Treat the thirteen domains as **a vocabulary committed to now and a
 navigation layer switched on late.** The vocabulary costs nothing and
 prevents renaming later; the navigation is worth building only once it is
 describing something real.
@@ -356,7 +359,7 @@ Collected here so the eventual change is not archaeology.
   documents with optional `domain` alongside `title`, `id` (slug), `info`,
   and `subcategories`. `list_categories` and `get_category` return it. No
   authoring tool needs a new domain-creation call — the domain set is
-  fixed vocabulary in this document, not user-extensible content.
+  fixed vocabulary in `puzzles/domains.js`, not user-extensible content.
 - **JSON-LD.** The interchange format needs no change, since domain is not
   a puzzle property. Only the category registry serializes it.
 - **Emoji.** The icons in the table above are editorial shorthand for this

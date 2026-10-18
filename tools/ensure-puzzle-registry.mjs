@@ -10,7 +10,8 @@
 // Cross-disciplinary *Source modules are already imported for wrappers, so
 // path-based detection skips them without double registration. Puzzle modules
 // live in category subdirectories; generated companions at puzzles/*.js
-// (index, categories, showcase, manifest) are never treated as puzzles.
+// (index, categories, domains, showcase, manifest) are never treated as
+// puzzles.
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";

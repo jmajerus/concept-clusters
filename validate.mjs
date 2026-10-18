@@ -13,12 +13,12 @@ import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import { validateSubcategoryAssignments } from "./modules/categoryValidation.js";
 import {
   CATEGORIES,
-  DOMAINS,
   categoriesForPuzzle,
   categoryIdFor,
   categorySlugFor,
   slugify
 } from "./puzzles/categories.js";
+import { DOMAINS } from "./puzzles/domains.js";
 import { PUZZLES } from "./puzzles/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 

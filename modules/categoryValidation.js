@@ -1,13 +1,13 @@
 import { validateInfo } from "./contentValidation.js";
 import {
   CATEGORIES,
-  DOMAINS,
   RESERVED_SUBCATEGORY_IDS,
   categoryIdFor,
   categoryMetadataFor,
   categoriesForPuzzle,
   slugify
 } from "../puzzles/categories.js";
+import { DOMAINS } from "../puzzles/domains.js";
 
 function isObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
