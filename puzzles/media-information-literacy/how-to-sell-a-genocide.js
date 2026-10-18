@@ -3,16 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "how-to-sell-a-genocide",
   "title": "How to Sell a Genocide",
   "category": "media-information-literacy",
   "categories": [
     "media-information-literacy",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
   "subcategories": {
-    "media-information-literacy": "propaganda-disinformation"
+    "media-information-literacy": "propaganda-disinformation",
+    "peace-conflict-studies": "atrocity-genocide"
   },
   "tags": [
     "book"
@@ -417,10 +419,342 @@ export default definePuzzle(import.meta.url, {
     "contributors": [
       {
         "name": "Claude"
-      },
-      {
-        "name": "Claude Code"
       }
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "how-to-sell-a-genocide",
+      "puzzleRevision": "fnv1a32:5eab92d1",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:loaded vocabulary": {
+          "x": 561.94,
+          "y": 161.87,
+          "pinned": false
+        },
+        "term:human shields": {
+          "x": 593.25,
+          "y": 23,
+          "pinned": false
+        },
+        "term:passive voice": {
+          "x": 663.86,
+          "y": 261.45,
+          "pinned": false
+        },
+        "term:natural-disaster framing": {
+          "x": 731.82,
+          "y": 111.6,
+          "pinned": false
+        },
+        "term:hoax amplification": {
+          "x": 412.6,
+          "y": 214.21,
+          "pinned": false
+        },
+        "term:one-sided qualifiers": {
+          "x": 267.69,
+          "y": 129.83,
+          "pinned": false
+        },
+        "term:delegitimization": {
+          "x": 396.36,
+          "y": 368.45,
+          "pinned": false
+        },
+        "term:selective omission": {
+          "x": 416.68,
+          "y": 52.87,
+          "pinned": false
+        },
+        "term:context cut-off": {
+          "x": 513.27,
+          "y": 455.34,
+          "pinned": false
+        },
+        "term:confirmation standard": {
+          "x": 669.89,
+          "y": 416.43,
+          "pinned": false
+        },
+        "term:constraint narrative": {
+          "x": 607.74,
+          "y": 582.3,
+          "pinned": false
+        },
+        "term:narrative repetition": {
+          "x": 434.03,
+          "y": 592.31,
+          "pinned": false
+        },
+        "term:guest selection": {
+          "x": 260.99,
+          "y": 422.17,
+          "pinned": false
+        },
+        "term:source roles": {
+          "x": 136.56,
+          "y": 469.27,
+          "pinned": false
+        },
+        "term:official sourcing": {
+          "x": 234.49,
+          "y": 568.58,
+          "pinned": false
+        },
+        "term:token inclusion": {
+          "x": 147.02,
+          "y": 336.63,
+          "pinned": false
+        },
+        "term:racist tautology": {
+          "x": 533.68,
+          "y": 311.14,
+          "pinned": false
+        },
+        "term:agency comparison": {
+          "x": 798.33,
+          "y": 308.6,
+          "pinned": false
+        },
+        "term:owner pressure": {
+          "x": 281.35,
+          "y": 284.32,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3345.62,
+        "score": 3345.6182104082695
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:31:46.052Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "how-to-sell-a-genocide",
+      "puzzleRevision": "fnv1a32:5eab92d1",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 224.57,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 571.43,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 242.98,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 807.02,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:racist tautology": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:agency comparison": {
+          "x": 310.45,
+          "y": 237.74,
+          "pinned": false
+        },
+        "term:owner pressure": {
+          "x": 721.16,
+          "y": 539.87,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "loaded vocabulary",
+          "human shields",
+          "passive voice",
+          "natural-disaster framing"
+        ],
+        "cluster:1": [
+          "hoax amplification",
+          "one-sided qualifiers",
+          "delegitimization",
+          "selective omission"
+        ],
+        "cluster:2": [
+          "context cut-off",
+          "confirmation standard",
+          "constraint narrative",
+          "narrative repetition"
+        ],
+        "cluster:3": [
+          "guest selection",
+          "source roles",
+          "official sourcing",
+          "token inclusion"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 335.083774666896
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:31:48.626Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "how-to-sell-a-genocide",
+      "puzzleRevision": "fnv1a32:5eab92d1",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:loaded vocabulary": {
+          "x": 405.83,
+          "y": 428.59
+        },
+        "term:human shields": {
+          "x": 688.02,
+          "y": 598
+        },
+        "term:passive voice": {
+          "x": 551.09,
+          "y": 427.33
+        },
+        "term:natural-disaster framing": {
+          "x": 358.25,
+          "y": 598
+        },
+        "term:hoax amplification": {
+          "x": 78.32,
+          "y": 484.52
+        },
+        "term:one-sided qualifiers": {
+          "x": 83,
+          "y": 312.87
+        },
+        "term:delegitimization": {
+          "x": 464.03,
+          "y": 284.78
+        },
+        "term:selective omission": {
+          "x": 80.02,
+          "y": 141.06
+        },
+        "term:context cut-off": {
+          "x": 767.04,
+          "y": 22
+        },
+        "term:confirmation standard": {
+          "x": 709.36,
+          "y": 444.11
+        },
+        "term:constraint narrative": {
+          "x": 877,
+          "y": 132.54
+        },
+        "term:narrative repetition": {
+          "x": 817.94,
+          "y": 299.32
+        },
+        "term:guest selection": {
+          "x": 397.07,
+          "y": 150.32
+        },
+        "term:source roles": {
+          "x": 325.86,
+          "y": 22
+        },
+        "term:official sourcing": {
+          "x": 468.5,
+          "y": 22
+        },
+        "term:token inclusion": {
+          "x": 621.58,
+          "y": 22
+        },
+        "term:racist tautology": {
+          "x": 236.86,
+          "y": 472.19
+        },
+        "term:agency comparison": {
+          "x": 619.48,
+          "y": 297.72
+        },
+        "term:owner pressure": {
+          "x": 230.25,
+          "y": 113.95
+        },
+        "cluster:0": {
+          "x": 540.64,
+          "y": 576.06
+        },
+        "cluster:1": {
+          "x": 276.59,
+          "y": 289.08
+        },
+        "cluster:2": {
+          "x": 711.38,
+          "y": 163.97
+        },
+        "cluster:3": {
+          "x": 549.41,
+          "y": 154.55
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:31:51.458Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:31:43.545Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

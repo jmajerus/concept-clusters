@@ -3,15 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "deterrence-by-presence",
   "title": "Deterrence by Presence",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "book",
     "war",
@@ -479,3 +483,366 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "deterrence-by-presence",
+      "puzzleRevision": "fnv1a32:f55bc807",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "nodes": {
+        "term:refugee overcrowding": {
+          "x": 590.2,
+          "y": 475.51,
+          "pinned": false
+        },
+        "term:food scarcity": {
+          "x": 591.25,
+          "y": 627,
+          "pinned": false
+        },
+        "term:constant shelling": {
+          "x": 724.27,
+          "y": 576.32,
+          "pinned": false
+        },
+        "term:separation of men and boys": {
+          "x": 565.5,
+          "y": 284.23,
+          "pinned": false
+        },
+        "term:demilitarization agreement": {
+          "x": 298.18,
+          "y": 23,
+          "pinned": false
+        },
+        "term:rules of engagement": {
+          "x": 108.44,
+          "y": 23.19,
+          "pinned": false
+        },
+        "term:hostage-taking of peacekeepers": {
+          "x": 178.8,
+          "y": 212.91,
+          "pinned": false
+        },
+        "term:overrun observation posts": {
+          "x": 496.64,
+          "y": 87.27,
+          "pinned": false
+        },
+        "term:Security Council Resolution 819": {
+          "x": 387.51,
+          "y": 425.99,
+          "pinned": false
+        },
+        "term:NATO airstrikes suspended": {
+          "x": 199.12,
+          "y": 547.92,
+          "pinned": false
+        },
+        "term:force protection": {
+          "x": 360.83,
+          "y": 620.22,
+          "pinned": false
+        },
+        "term:the UN veto": {
+          "x": 211.49,
+          "y": 387,
+          "pinned": false
+        },
+        "term:Strategic Objective No. 3": {
+          "x": 754.27,
+          "y": 195.34,
+          "pinned": false
+        },
+        "term:Naser Orić's raids": {
+          "x": 912.06,
+          "y": 288.91,
+          "pinned": false
+        },
+        "term:Directive 7": {
+          "x": 823.13,
+          "y": 49.38,
+          "pinned": false
+        },
+        "term:Drina Corps": {
+          "x": 907.01,
+          "y": 143.19,
+          "pinned": false
+        },
+        "term:safe area": {
+          "x": 486.57,
+          "y": 569.03,
+          "pinned": false
+        },
+        "term:close air support": {
+          "x": 75.55,
+          "y": 379.55,
+          "pinned": false
+        },
+        "term:genocide": {
+          "x": 412.8,
+          "y": 257.02,
+          "pinned": false
+        },
+        "term:ethnic cleansing campaign": {
+          "x": 764.52,
+          "y": 400.58,
+          "pinned": false
+        },
+        "term:Operation Krivaja 95": {
+          "x": 675.13,
+          "y": 23,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4737.14,
+        "score": 4737.137716112109
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:42:20.318Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "deterrence-by-presence",
+      "puzzleRevision": "fnv1a32:f55bc807",
+      "board": {
+        "width": 1100,
+        "height": 820
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 550,
+          "y": 209.54,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 550,
+          "y": 626.46,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 226.56,
+          "y": 418,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 873.44,
+          "y": 418,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:safe area": {
+          "x": 443.44,
+          "y": 368.92,
+          "pinned": false
+        },
+        "term:close air support": {
+          "x": 484.45,
+          "y": 426.06,
+          "pinned": false
+        },
+        "term:genocide": {
+          "x": 342.23,
+          "y": 242.32,
+          "pinned": false
+        },
+        "term:ethnic cleansing campaign": {
+          "x": 807.8,
+          "y": 273.97,
+          "pinned": false
+        },
+        "term:Operation Krivaja 95": {
+          "x": 807.8,
+          "y": 562.03,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "refugee overcrowding",
+          "food scarcity",
+          "constant shelling",
+          "separation of men and boys"
+        ],
+        "cluster:1": [
+          "demilitarization agreement",
+          "rules of engagement",
+          "hostage-taking of peacekeepers",
+          "overrun observation posts"
+        ],
+        "cluster:2": [
+          "Security Council Resolution 819",
+          "NATO airstrikes suspended",
+          "force protection",
+          "the UN veto"
+        ],
+        "cluster:3": [
+          "Strategic Objective No. 3",
+          "Naser Orić's raids",
+          "Directive 7",
+          "Drina Corps"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 662.0973366713617
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:42:22.563Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "deterrence-by-presence",
+      "puzzleRevision": "fnv1a32:f55bc807",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "nodes": {
+        "term:refugee overcrowding": {
+          "x": 341.65,
+          "y": 376.97
+        },
+        "term:food scarcity": {
+          "x": 60.95,
+          "y": 381.38
+        },
+        "term:constant shelling": {
+          "x": 73.55,
+          "y": 237.07
+        },
+        "term:separation of men and boys": {
+          "x": 132.39,
+          "y": 71.59
+        },
+        "term:demilitarization agreement": {
+          "x": 908.1,
+          "y": 449.68
+        },
+        "term:rules of engagement": {
+          "x": 861.9,
+          "y": 628
+        },
+        "term:hostage-taking of peacekeepers": {
+          "x": 831.43,
+          "y": 243.66
+        },
+        "term:overrun observation posts": {
+          "x": 628.6,
+          "y": 339.95
+        },
+        "term:Security Council Resolution 819": {
+          "x": 450.98,
+          "y": 193.65
+        },
+        "term:NATO airstrikes suspended": {
+          "x": 332.81,
+          "y": 22
+        },
+        "term:force protection": {
+          "x": 543.1,
+          "y": 22
+        },
+        "term:the UN veto": {
+          "x": 842.13,
+          "y": 62.93
+        },
+        "term:Strategic Objective No. 3": {
+          "x": 599.11,
+          "y": 628
+        },
+        "term:Naser Orić's raids": {
+          "x": 414.44,
+          "y": 628
+        },
+        "term:Directive 7": {
+          "x": 270.66,
+          "y": 628
+        },
+        "term:Drina Corps": {
+          "x": 97.2,
+          "y": 628
+        },
+        "term:safe area": {
+          "x": 470.8,
+          "y": 356.61
+        },
+        "term:close air support": {
+          "x": 649.2,
+          "y": 161.22
+        },
+        "term:genocide": {
+          "x": 276.65,
+          "y": 189.86
+        },
+        "term:ethnic cleansing campaign": {
+          "x": 178.79,
+          "y": 490.11
+        },
+        "term:Operation Krivaja 95": {
+          "x": 493.75,
+          "y": 498.09
+        },
+        "cluster:0": {
+          "x": 196.56,
+          "y": 297.29
+        },
+        "cluster:1": {
+          "x": 734.66,
+          "y": 506.85
+        },
+        "cluster:2": {
+          "x": 402.58,
+          "y": 103.13
+        },
+        "cluster:3": {
+          "x": 343.04,
+          "y": 523.24
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:42:25.184Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.05,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:42:17.722Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

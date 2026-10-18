@@ -3,11 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "witness-without-a-sword",
   "title": "The Power to Name",
-  "category": "political-science",
-  "large": true,
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "war",
     "international law",
@@ -142,7 +149,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "political-will",
       "term": "political will",
       "clusters": [
         0,
@@ -152,7 +158,6 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "foundation"
     },
     {
-      "id": "biafra",
       "term": "Biafra",
       "clusters": [
         0,
@@ -174,7 +179,6 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "resolution-2730",
       "term": "Resolution 2730",
       "clusters": [
         0,
@@ -268,3 +272,327 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "witness-without-a-sword",
+      "puzzleRevision": "fnv1a32:f628bfe6",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:neutral intermediary": {
+          "x": 564.41,
+          "y": 420.8,
+          "pinned": false
+        },
+        "term:social media campaigning": {
+          "x": 624.58,
+          "y": 597,
+          "pinned": false
+        },
+        "term:confidential bilateral dialogue": {
+          "x": 824.45,
+          "y": 502.53,
+          "pinned": false
+        },
+        "term:the Global IHL Initiative": {
+          "x": 427.31,
+          "y": 552.27,
+          "pinned": false
+        },
+        "term:attacks on humanitarian personnel": {
+          "x": 526.02,
+          "y": 209.37,
+          "pinned": false
+        },
+        "term:annual reporting": {
+          "x": 707.12,
+          "y": 345.5,
+          "pinned": false
+        },
+        "term:témoignage": {
+          "x": 737.02,
+          "y": 139.53,
+          "pinned": false
+        },
+        "term:financial independence": {
+          "x": 644.86,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Medical Care Under Fire": {
+          "x": 834.61,
+          "y": 23.09,
+          "pinned": false
+        },
+        "term:withdrawal as protest": {
+          "x": 852.03,
+          "y": 228.82,
+          "pinned": false
+        },
+        "term:the Security Council veto": {
+          "x": 299.91,
+          "y": 255.07,
+          "pinned": false
+        },
+        "term:the Rome Statute": {
+          "x": 148.33,
+          "y": 346.76,
+          "pinned": false
+        },
+        "term:universal jurisdiction": {
+          "x": 278.06,
+          "y": 60.25,
+          "pinned": false
+        },
+        "term:non-ratification": {
+          "x": 280.59,
+          "y": 431.18,
+          "pinned": false
+        },
+        "term:Resolution 2286": {
+          "x": 148.45,
+          "y": 492.4,
+          "pinned": false
+        },
+        "term:the WHO Surveillance System": {
+          "x": 107.05,
+          "y": 168.06,
+          "pinned": false
+        },
+        "term:political will": {
+          "x": 414.31,
+          "y": 381.95,
+          "pinned": false
+        },
+        "term:Biafra": {
+          "x": 695.73,
+          "y": 228.8,
+          "pinned": false
+        },
+        "term:Resolution 2730": {
+          "x": 439.76,
+          "y": 29.81,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4147.66,
+        "score": 4147.661990422313
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:31:31.965Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "witness-without-a-sword",
+      "puzzleRevision": "fnv1a32:f628bfe6",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 562.73,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 266.04,
+          "y": 315.64,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 783.96,
+          "y": 315.64,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:political will": {
+          "x": 558.31,
+          "y": 343.01,
+          "pinned": false
+        },
+        "term:Biafra": {
+          "x": 299.44,
+          "y": 478.98,
+          "pinned": false
+        },
+        "term:Resolution 2730": {
+          "x": 780.13,
+          "y": 491.23,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "neutral intermediary",
+          "social media campaigning",
+          "confidential bilateral dialogue",
+          "the Global IHL Initiative",
+          "attacks on humanitarian personnel",
+          "annual reporting"
+        ],
+        "cluster:1": [
+          "témoignage",
+          "financial independence",
+          "Medical Care Under Fire",
+          "withdrawal as protest"
+        ],
+        "cluster:2": [
+          "the Security Council veto",
+          "the Rome Statute",
+          "universal jurisdiction",
+          "non-ratification",
+          "Resolution 2286",
+          "the WHO Surveillance System"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 315.6944766121324
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:31:34.539Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "witness-without-a-sword",
+      "puzzleRevision": "fnv1a32:f628bfe6",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:neutral intermediary": {
+          "x": 347.15,
+          "y": 206.56
+        },
+        "term:social media campaigning": {
+          "x": 695.89,
+          "y": 297.09
+        },
+        "term:confidential bilateral dialogue": {
+          "x": 458.83,
+          "y": 22
+        },
+        "term:the Global IHL Initiative": {
+          "x": 298.2,
+          "y": 158.64
+        },
+        "term:attacks on humanitarian personnel": {
+          "x": 421.97,
+          "y": 407.09
+        },
+        "term:annual reporting": {
+          "x": 252.26,
+          "y": 22
+        },
+        "term:témoignage": {
+          "x": 588.7,
+          "y": 501.45
+        },
+        "term:financial independence": {
+          "x": 870.7,
+          "y": 248.39
+        },
+        "term:Medical Care Under Fire": {
+          "x": 694.51,
+          "y": 598
+        },
+        "term:withdrawal as protest": {
+          "x": 873.85,
+          "y": 598
+        },
+        "term:the Security Council veto": {
+          "x": 311.24,
+          "y": 598
+        },
+        "term:the Rome Statute": {
+          "x": 484.55,
+          "y": 560.26
+        },
+        "term:universal jurisdiction": {
+          "x": 123.41,
+          "y": 267.31
+        },
+        "term:non-ratification": {
+          "x": 378.36,
+          "y": 456.91
+        },
+        "term:Resolution 2286": {
+          "x": 67.25,
+          "y": 411.43
+        },
+        "term:the WHO Surveillance System": {
+          "x": 105.05,
+          "y": 598
+        },
+        "term:political will": {
+          "x": 299.25,
+          "y": 261.2
+        },
+        "term:Biafra": {
+          "x": 661.78,
+          "y": 434.74
+        },
+        "term:Resolution 2730": {
+          "x": 391.86,
+          "y": 310.22
+        },
+        "cluster:0": {
+          "x": 537.75,
+          "y": 206.56
+        },
+        "cluster:1": {
+          "x": 797.78,
+          "y": 445.69
+        },
+        "cluster:2": {
+          "x": 207.99,
+          "y": 453.07
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:31:36.891Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:31:29.358Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

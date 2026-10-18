@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "what-gets-said-offstage",
   "title": "What gets said offstage",
   "category": "sociology",
@@ -11,7 +11,10 @@ export default definePuzzle(import.meta.url, {
     "sociology",
     "political-science"
   ],
-  "large": true,
+  "subcategories": {
+    "political-science": "political-behavior",
+    "sociology": "social-stratification"
+  },
   "tags": [
     "book"
   ],
@@ -251,3 +254,328 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "what-gets-said-offstage",
+      "puzzleRevision": "fnv1a32:65e9212a",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:public transcript": {
+          "x": 531.9,
+          "y": 157.58,
+          "pinned": false
+        },
+        "term:deference": {
+          "x": 538.09,
+          "y": 287.32,
+          "pinned": false
+        },
+        "term:flattery": {
+          "x": 650.57,
+          "y": 113.07,
+          "pinned": false
+        },
+        "term:hidden transcript": {
+          "x": 382.47,
+          "y": 514.14,
+          "pinned": false
+        },
+        "term:grumbling": {
+          "x": 410.94,
+          "y": 387.39,
+          "pinned": false
+        },
+        "term:fantasy of reversal": {
+          "x": 274.9,
+          "y": 393.82,
+          "pinned": false
+        },
+        "term:foot-dragging": {
+          "x": 731.28,
+          "y": 523.36,
+          "pinned": false
+        },
+        "term:false compliance": {
+          "x": 742.38,
+          "y": 384.47,
+          "pinned": false
+        },
+        "term:feigned ignorance": {
+          "x": 865.02,
+          "y": 474.17,
+          "pinned": false
+        },
+        "term:pilfering": {
+          "x": 822.61,
+          "y": 596.96,
+          "pinned": false
+        },
+        "term:sabotage": {
+          "x": 644.24,
+          "y": 597,
+          "pinned": false
+        },
+        "term:rumor": {
+          "x": 213.89,
+          "y": 173.45,
+          "pinned": false
+        },
+        "term:folktale": {
+          "x": 277.5,
+          "y": 111.28,
+          "pinned": false
+        },
+        "term:anonymity": {
+          "x": 187.16,
+          "y": 261.58,
+          "pinned": false
+        },
+        "term:euphemism": {
+          "x": 122,
+          "y": 179.63,
+          "pinned": false
+        },
+        "term:hidden transcript of practice": {
+          "x": 565.36,
+          "y": 452.79,
+          "pinned": false
+        },
+        "term:performed obedience": {
+          "x": 667.55,
+          "y": 245.03,
+          "pinned": false
+        },
+        "term:political disguise": {
+          "x": 317.5,
+          "y": 234.87,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2759.19,
+        "score": 2759.1903571426787
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:12:04.106Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "what-gets-said-offstage",
+      "puzzleRevision": "fnv1a32:65e9212a",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 799.73,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 231.67,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 564.33,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 250.27,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:hidden transcript of practice": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:performed obedience": {
+          "x": 788.01,
+          "y": 533.21,
+          "pinned": false
+        },
+        "term:political disguise": {
+          "x": 314.1,
+          "y": 241.3,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "public transcript",
+          "deference",
+          "flattery"
+        ],
+        "cluster:1": [
+          "hidden transcript",
+          "grumbling",
+          "fantasy of reversal"
+        ],
+        "cluster:2": [
+          "foot-dragging",
+          "false compliance",
+          "feigned ignorance",
+          "pilfering",
+          "sabotage"
+        ],
+        "cluster:3": [
+          "rumor",
+          "folktale",
+          "anonymity",
+          "euphemism"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 367.1236792347169
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:12:07.120Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "what-gets-said-offstage",
+      "puzzleRevision": "fnv1a32:65e9212a",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:public transcript": {
+          "x": 552.87,
+          "y": 598
+        },
+        "term:deference": {
+          "x": 462.13,
+          "y": 500.01
+        },
+        "term:flattery": {
+          "x": 422.13,
+          "y": 598
+        },
+        "term:hidden transcript": {
+          "x": 414.48,
+          "y": 22.55
+        },
+        "term:grumbling": {
+          "x": 548.36,
+          "y": 22
+        },
+        "term:fantasy of reversal": {
+          "x": 403.56,
+          "y": 189.77
+        },
+        "term:foot-dragging": {
+          "x": 551,
+          "y": 237.22
+        },
+        "term:false compliance": {
+          "x": 671.13,
+          "y": 496.83
+        },
+        "term:feigned ignorance": {
+          "x": 860.22,
+          "y": 216.33
+        },
+        "term:pilfering": {
+          "x": 874.58,
+          "y": 349.48
+        },
+        "term:sabotage": {
+          "x": 815.74,
+          "y": 447.32
+        },
+        "term:rumor": {
+          "x": 123.77,
+          "y": 457.59
+        },
+        "term:folktale": {
+          "x": 428.73,
+          "y": 324.27
+        },
+        "term:anonymity": {
+          "x": 69.21,
+          "y": 296.55
+        },
+        "term:euphemism": {
+          "x": 130.51,
+          "y": 197.87
+        },
+        "term:hidden transcript of practice": {
+          "x": 690.53,
+          "y": 116.58
+        },
+        "term:performed obedience": {
+          "x": 548.88,
+          "y": 390.07
+        },
+        "term:political disguise": {
+          "x": 247.48,
+          "y": 126.46
+        },
+        "cluster:0": {
+          "x": 361.69,
+          "y": 519.34
+        },
+        "cluster:1": {
+          "x": 522.07,
+          "y": 122.07
+        },
+        "cluster:2": {
+          "x": 723.08,
+          "y": 329.89
+        },
+        "cluster:3": {
+          "x": 248.43,
+          "y": 339.52
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:12:10.174Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:12:00.991Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

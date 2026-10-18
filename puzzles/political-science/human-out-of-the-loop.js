@@ -3,11 +3,20 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "human-out-of-the-loop",
   "title": "Human Out of the Loop",
-  "category": "political-science",
-  "large": true,
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science",
+    "science-technology-society"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "political-science": "international-relations",
+    "science-technology-society": "automation-accountability"
+  },
   "info": {
     "text": "Algorithmic targeting compresses the kill chain into machine time, erodes the human checkpoints meant to catch error, and lets a doctrine of clean, riskless precision go unexamined even as it fails on its own terms."
   },
@@ -353,3 +362,317 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "human-out-of-the-loop",
+      "puzzleRevision": "fnv1a32:342b44a1",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Sensor Fusion": {
+          "x": 433.73,
+          "y": 164.7,
+          "pinned": false
+        },
+        "term:Target Recognition": {
+          "x": 552.82,
+          "y": 80.89,
+          "pinned": false
+        },
+        "term:Algorithmic Combat Speed": {
+          "x": 275.66,
+          "y": 224.55,
+          "pinned": false
+        },
+        "term:Facial-Recognition Targeting": {
+          "x": 209.46,
+          "y": 23.38,
+          "pinned": false
+        },
+        "term:Micro-Drone Swarms": {
+          "x": 402.35,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Chain of Command": {
+          "x": 411.07,
+          "y": 457.42,
+          "pinned": false
+        },
+        "term:Meaningful Human Control": {
+          "x": 307.5,
+          "y": 597,
+          "pinned": false
+        },
+        "term:Algorithmic Decision-Making": {
+          "x": 529.99,
+          "y": 597,
+          "pinned": false
+        },
+        "term:Programmer Liability": {
+          "x": 129.74,
+          "y": 540.45,
+          "pinned": false
+        },
+        "term:War Crime Attribution": {
+          "x": 252.66,
+          "y": 412.9,
+          "pinned": false
+        },
+        "term:Surgical Strike": {
+          "x": 688.04,
+          "y": 317.11,
+          "pinned": false
+        },
+        "term:Zero-Casualty Warfare": {
+          "x": 706.57,
+          "y": 499.72,
+          "pinned": false
+        },
+        "term:Precision-Guided Munitions": {
+          "x": 856.1,
+          "y": 372.98,
+          "pinned": false
+        },
+        "term:Circular Error Probable": {
+          "x": 715.24,
+          "y": 151.63,
+          "pinned": false
+        },
+        "term:Collateral Damage": {
+          "x": 884.45,
+          "y": 191.75,
+          "pinned": false
+        },
+        "term:Target Verification": {
+          "x": 560.45,
+          "y": 405.28,
+          "pinned": false
+        },
+        "term:Human-in-the-Loop": {
+          "x": 432.38,
+          "y": 307.05,
+          "pinned": false
+        },
+        "term:Signature Strike": {
+          "x": 566.85,
+          "y": 236.29,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3743.36,
+        "score": 3743.3576442153944
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:30:54.607Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "human-out-of-the-loop",
+      "puzzleRevision": "fnv1a32:342b44a1",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 559.96,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 294.55,
+          "y": 317.02,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 755.45,
+          "y": 317.02,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:Target Verification": {
+          "x": 525,
+          "y": 317.02,
+          "pinned": false
+        },
+        "term:Human-in-the-Loop": {
+          "x": 284.13,
+          "y": 490.54,
+          "pinned": false
+        },
+        "term:Signature Strike": {
+          "x": 736.31,
+          "y": 478.29,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Sensor Fusion",
+          "Target Recognition",
+          "Algorithmic Combat Speed",
+          "Facial-Recognition Targeting",
+          "Micro-Drone Swarms"
+        ],
+        "cluster:1": [
+          "Chain of Command",
+          "Meaningful Human Control",
+          "Algorithmic Decision-Making",
+          "Programmer Liability",
+          "War Crime Attribution"
+        ],
+        "cluster:2": [
+          "Surgical Strike",
+          "Zero-Casualty Warfare",
+          "Precision-Guided Munitions",
+          "Circular Error Probable",
+          "Collateral Damage"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 411.9446003322896
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:30:57.372Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "human-out-of-the-loop",
+      "puzzleRevision": "fnv1a32:342b44a1",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Sensor Fusion": {
+          "x": 692.01,
+          "y": 184.68
+        },
+        "term:Target Recognition": {
+          "x": 411.73,
+          "y": 274.82
+        },
+        "term:Algorithmic Combat Speed": {
+          "x": 717.5,
+          "y": 22
+        },
+        "term:Facial-Recognition Targeting": {
+          "x": 341.89,
+          "y": 38.72
+        },
+        "term:Micro-Drone Swarms": {
+          "x": 536.3,
+          "y": 22
+        },
+        "term:Chain of Command": {
+          "x": 775.05,
+          "y": 283.32
+        },
+        "term:Meaningful Human Control": {
+          "x": 580.9,
+          "y": 337.83
+        },
+        "term:Algorithmic Decision-Making": {
+          "x": 854.95,
+          "y": 598
+        },
+        "term:Programmer Liability": {
+          "x": 877,
+          "y": 402.01
+        },
+        "term:War Crime Attribution": {
+          "x": 651.5,
+          "y": 598
+        },
+        "term:Surgical Strike": {
+          "x": 316.55,
+          "y": 573.42
+        },
+        "term:Zero-Casualty Warfare": {
+          "x": 431.16,
+          "y": 439.5
+        },
+        "term:Precision-Guided Munitions": {
+          "x": 101.9,
+          "y": 242.09
+        },
+        "term:Circular Error Probable": {
+          "x": 145.45,
+          "y": 591.1
+        },
+        "term:Collateral Damage": {
+          "x": 73.55,
+          "y": 429.57
+        },
+        "term:Target Verification": {
+          "x": 477.75,
+          "y": 598
+        },
+        "term:Human-in-the-Loop": {
+          "x": 841.01,
+          "y": 149.89
+        },
+        "term:Signature Strike": {
+          "x": 278.83,
+          "y": 216.8
+        },
+        "cluster:0": {
+          "x": 534.87,
+          "y": 147.58
+        },
+        "cluster:1": {
+          "x": 722.92,
+          "y": 441.64
+        },
+        "cluster:2": {
+          "x": 243.88,
+          "y": 404.5
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:31:00.514Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:30:51.422Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

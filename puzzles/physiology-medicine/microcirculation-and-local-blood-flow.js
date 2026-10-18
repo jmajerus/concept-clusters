@@ -341,7 +341,10 @@ const puzzle = definePuzzle(import.meta.url, {
       "idealTerms": [
         "shear stress",
         "active hyperemia"
-      ]
+      ],
+      "direction": {
+        "kind": "bidirectional"
+      }
     },
     {
       "id": "arteriolar-dilation",
@@ -415,8 +418,8 @@ const puzzle = definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "capillary pressure": "Blood pressure inside the capillary pushes fluid through its wall.",
-        "interstitial fluid pressure": "In loose tissue it is slightly negative, so it draws fluid outward.",
-        "interstitial colloid osmotic pressure": "Leaked protein in the tissue spaces pulls water toward it."
+        "interstitial colloid osmotic pressure": "Leaked protein in the tissue spaces pulls water toward it.",
+        "interstitial fluid pressure": "In loose tissue it is slightly negative, so it draws fluid outward."
       }
     },
     {
@@ -428,6 +431,41 @@ const puzzle = definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "plasma colloid osmotic pressure": "With too little albumin in the plasma, the inward pull weakens and fluid stays in the tissues."
+      }
+    },
+    {
+      "id": "safeguards-via-forces",
+      "prompt": "Which safeguards against edema work by weakening a Starling force that moves fluid out?",
+      "explanation": "Lymph flow is the third safeguard, but it works differently: it carries the excess fluid away instead of changing a force across the capillary wall.",
+      "targets": [
+        "interstitial compliance",
+        "protein washdown"
+      ],
+      "reasons": {
+        "interstitial compliance": "Stiff tissue spaces let a little extra fluid raise interstitial pressure sharply, so it stops drawing fluid outward.",
+        "protein washdown": "Diluting and removing tissue protein lowers the interstitial colloid osmotic pressure."
+      }
+    },
+    {
+      "id": "capillary-recruitment",
+      "prompt": "Which structures open more capillaries to flow as vasodilators build up in working muscle?",
+      "explanation": "Opening more capillaries raises flow and also shortens the distance oxygen must diffuse to each cell.",
+      "targets": [
+        "precapillary sphincters"
+      ],
+      "reasons": {
+        "precapillary sphincters": "These rings of smooth muscle relax as metabolites accumulate, letting blood into capillaries that were closed."
+      }
+    },
+    {
+      "id": "raising-capillary-pressure",
+      "prompt": "Which change in the resistance vessels lets more of the arterial pressure reach the capillaries?",
+      "explanation": "This is the link between flow control and fluid balance, and the reason exercising muscle swells.",
+      "targets": [
+        "arteriolar dilation"
+      ],
+      "reasons": {
+        "arteriolar dilation": "Wider arterioles spend less pressure upstream, so capillary pressure and filtration rise."
       }
     },
     {
@@ -458,6 +496,17 @@ const puzzle = definePuzzle(import.meta.url, {
       "reasons": {
         "endothelin": "Damaged endothelium releases this peptide, a powerful constrictor.",
         "myogenic response": "Stretched arteriolar muscle contracts, narrowing the vessel when pressure rises."
+      }
+    },
+    {
+      "id": "two-timescales",
+      "prompt": "Which condition triggers both the release of adenosine and the release of VEGF?",
+      "explanation": "The same signal, too little oxygen, drives short-term dilation of existing vessels and long-term growth of new ones.",
+      "targets": [
+        "tissue hypoxia"
+      ],
+      "reasons": {
+        "tissue hypoxia": "Within seconds it releases vasodilators such as adenosine; over weeks it releases VEGF and grows new vessels."
       }
     }
   ],

@@ -3,14 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "higher-law",
   "title": "Higher Law",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "philosophy"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "philosophy": "political-philosophy"
+  },
   "info": {
     "text": "Henry David Thoreau's 1849 argument for civil disobedience: that individual conscience, grounded in a transcendentalist faith in intuition and nature over tradition and law, outranks the state -- tested against his own night in jail for refusing to pay a tax that funded slavery and the Mexican War.",
     "links": [
@@ -189,3 +194,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "higher-law",
+      "puzzleRevision": "fnv1a32:1be85253",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:the poll tax": {
+          "x": 212.54,
+          "y": 163.49,
+          "pinned": false
+        },
+        "term:peaceable revolution": {
+          "x": 113.63,
+          "y": 52.32,
+          "pinned": false
+        },
+        "term:counter-friction": {
+          "x": 72.4,
+          "y": 208.36,
+          "pinned": false
+        },
+        "term:unjust laws": {
+          "x": 182.6,
+          "y": 282.87,
+          "pinned": false
+        },
+        "term:voluntary poverty": {
+          "x": 366.47,
+          "y": 145.23,
+          "pinned": false
+        },
+        "term:to live deliberately": {
+          "x": 498.87,
+          "y": 242.92,
+          "pinned": false
+        },
+        "term:economy": {
+          "x": 381.15,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the necessaries of life": {
+          "x": 518.48,
+          "y": 60.53,
+          "pinned": false
+        },
+        "term:conscience": {
+          "x": 273.79,
+          "y": 355.78,
+          "pinned": false
+        },
+        "term:self-reliance": {
+          "x": 184.93,
+          "y": 437,
+          "pinned": false
+        },
+        "term:intuition": {
+          "x": 375.23,
+          "y": 307.2,
+          "pinned": false
+        },
+        "term:nature as teacher": {
+          "x": 379.13,
+          "y": 437,
+          "pinned": false
+        },
+        "term:a higher law": {
+          "x": 87.19,
+          "y": 356.36,
+          "pinned": false
+        },
+        "term:attention": {
+          "x": 288.25,
+          "y": 248.92,
+          "pinned": false
+        },
+        "term:little to lose": {
+          "x": 268.05,
+          "y": 37.86,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2508.04,
+        "score": 2508.041778490374
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:21:40.732Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "higher-law",
+      "puzzleRevision": "fnv1a32:1be85253",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 687.6,
+          "y": 377.75,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 198.51,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 272.4,
+          "y": 377.75,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:a higher law": {
+          "x": 480,
+          "y": 377.75,
+          "pinned": false
+        },
+        "term:attention": {
+          "x": 302.66,
+          "y": 214.59,
+          "pinned": false
+        },
+        "term:little to lose": {
+          "x": 679.97,
+          "y": 191.96,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "the poll tax",
+          "peaceable revolution",
+          "counter-friction",
+          "unjust laws"
+        ],
+        "cluster:1": [
+          "voluntary poverty",
+          "to live deliberately",
+          "economy",
+          "the necessaries of life"
+        ],
+        "cluster:2": [
+          "conscience",
+          "self-reliance",
+          "intuition",
+          "nature as teacher"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 413.93900606697395
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:21:43.797Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "higher-law",
+      "puzzleRevision": "fnv1a32:1be85253",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:the poll tax": {
+          "x": 298.97,
+          "y": 559.45
+        },
+        "term:peaceable revolution": {
+          "x": 153.8,
+          "y": 511.74
+        },
+        "term:counter-friction": {
+          "x": 142.37,
+          "y": 346.72
+        },
+        "term:unjust laws": {
+          "x": 417.68,
+          "y": 471.13
+        },
+        "term:voluntary poverty": {
+          "x": 220.45,
+          "y": 211.73
+        },
+        "term:to live deliberately": {
+          "x": 143.72,
+          "y": 61.67
+        },
+        "term:economy": {
+          "x": 274.66,
+          "y": 22
+        },
+        "term:the necessaries of life": {
+          "x": 421.14,
+          "y": 24.24
+        },
+        "term:conscience": {
+          "x": 534.12,
+          "y": 490.74
+        },
+        "term:self-reliance": {
+          "x": 827.22,
+          "y": 365.98
+        },
+        "term:intuition": {
+          "x": 790.85,
+          "y": 481.7
+        },
+        "term:nature as teacher": {
+          "x": 693.16,
+          "y": 573.32
+        },
+        "term:a higher law": {
+          "x": 496.99,
+          "y": 375.19
+        },
+        "term:attention": {
+          "x": 502.11,
+          "y": 257.15
+        },
+        "term:little to lose": {
+          "x": 358.2,
+          "y": 270.21
+        },
+        "cluster:0": {
+          "x": 289.67,
+          "y": 406.77
+        },
+        "cluster:1": {
+          "x": 342.92,
+          "y": 156.23
+        },
+        "cluster:2": {
+          "x": 661.19,
+          "y": 395.01
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:21:47.453Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:21:38.081Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

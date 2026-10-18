@@ -4,28 +4,32 @@
   "category": "history-society",
   "categories": [
     "history-society",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism"
+  },
   "tags": [
     "book",
     "war"
   ],
   "info": {
     "text": "Chris Hedges' argument, drawn from fifteen years as a war correspondent, that societies sustain war through a seductive myth of glory and belonging -- one so intoxicating that even its horror can function as a drug -- and that only art and compassion for the enemy can break its hold.",
-    "citations": [
-      {
-        "title": "War Is a Force That Gives Us Meaning",
-        "author": "Hedges, Chris",
-        "publisher": "PublicAffairs",
-        "year": "2002"
-      }
-    ],
     "links": [
       {
         "href": "wiki:War Is a Force That Gives Us Meaning"
       },
       {
         "href": "wiki:Chris Hedges"
+      }
+    ],
+    "citations": [
+      {
+        "title": "War Is a Force That Gives Us Meaning",
+        "author": "Hedges, Chris",
+        "publisher": "PublicAffairs",
+        "year": "2002"
       }
     ]
   },
@@ -35,20 +39,6 @@
       "name": "The Myth of War",
       "color": "olive",
       "fact": "Hedges argues societies sustain war through a constructed myth -- glory, heroism, sacrifice -- peddled by mythmakers: historians, war correspondents, filmmakers, novelists, and the state itself; a war that loses its mythic status in the public imagination, like Korea or Vietnam in American memory, becomes impossible to sustain regardless of its actual military position.",
-      "seeds": [
-        "the myth of war",
-        "mythmakers"
-      ],
-      "floatingTerms": [
-        "lost mythic status",
-        "exoticism"
-      ],
-      "terms": [
-        "the myth of war",
-        "mythmakers",
-        "lost mythic status",
-        "exoticism"
-      ],
       "termInfo": {
         "exoticism": {
           "text": "One of the qualities Hedges says the myth supplies to make war attractive to imagine: strangeness, escape from the ordinary, a world unlike home."
@@ -67,25 +57,27 @@
             "href": "wiki:Propaganda"
           }
         ]
-      }
+      },
+      "seeds": [
+        "the myth of war",
+        "mythmakers"
+      ],
+      "floatingTerms": [
+        "lost mythic status",
+        "exoticism"
+      ],
+      "terms": [
+        "the myth of war",
+        "mythmakers",
+        "lost mythic status",
+        "exoticism"
+      ]
     },
     {
       "id": "war-as-addiction",
       "name": "War as Addiction",
       "color": "magenta",
       "fact": "Hedges, drawing on his own fifteen years as a war correspondent, describes combat's rush as a potent and often lethal addiction -- an intoxicating escape from the vapidness of ordinary life that appeals most to those who already have the least sense of purpose: refugees, the disenfranchised, and bored youth in comfortable societies alike.",
-      "seeds": [
-        "war as a drug",
-        "exhilaration"
-      ],
-      "floatingTerms": [
-        "escape from meaninglessness"
-      ],
-      "terms": [
-        "war as a drug",
-        "exhilaration",
-        "escape from meaninglessness"
-      ],
       "termInfo": {
         "escape from meaninglessness": {
           "text": "War's appeal to people who feel their ordinary lives lack purpose -- refugees, the disenfranchised, and bored youth in comfortable societies alike are, in Hedges' account, all susceptible to it."
@@ -101,25 +93,25 @@
       },
       "info": {
         "text": "Hedges' claim that war is not only glorified after the fact but genuinely intoxicating to live through -- a drug he says he ingested himself, for years."
-      }
+      },
+      "seeds": [
+        "war as a drug",
+        "exhilaration"
+      ],
+      "floatingTerms": [
+        "escape from meaninglessness"
+      ],
+      "terms": [
+        "war as a drug",
+        "exhilaration",
+        "escape from meaninglessness"
+      ]
     },
     {
       "id": "the-collapse-of-the-moral-universe",
       "name": "The Collapse of the Moral Universe",
       "color": "teal",
       "fact": "Beneath the myth, Hedges insists, war is simply organized murder; once it begins, the ordinary moral universe collapses and nearly any atrocity becomes justified in the minds of those who commit it, because the cause is held to be just and the enemy is held to be inhuman.",
-      "seeds": [
-        "organized murder",
-        "moral collapse"
-      ],
-      "floatingTerms": [
-        "the inhuman enemy"
-      ],
-      "terms": [
-        "organized murder",
-        "moral collapse",
-        "the inhuman enemy"
-      ],
       "termInfo": {
         "organized murder": {
           "text": "Hedges' blunt description of what war actually is, stripped of the myth."
@@ -140,25 +132,25 @@
             "href": "wiki:Dehumanization"
           }
         ]
-      }
+      },
+      "seeds": [
+        "organized murder",
+        "moral collapse"
+      ],
+      "floatingTerms": [
+        "the inhuman enemy"
+      ],
+      "terms": [
+        "organized murder",
+        "moral collapse",
+        "the inhuman enemy"
+      ]
     },
     {
       "id": "nationalism-and-its-antidotes",
       "name": "Nationalism and Its Antidotes",
       "color": "brown",
       "fact": "Hedges names nationalism -- a sense of communal struggle against a common enemy -- as war's great unifying force, capable of justifying almost any behavior; against it he sets art, which teaches understanding of a supposed enemy's humanity and which warring states censor or destroy for exactly that reason, and compassion, the only stance from which he believes a nation can end a war rather than merely win or lose one.",
-      "seeds": [
-        "the plague of nationalism",
-        "the humanizing power of art"
-      ],
-      "floatingTerms": [
-        "compassion for the enemy"
-      ],
-      "terms": [
-        "the plague of nationalism",
-        "the humanizing power of art",
-        "compassion for the enemy"
-      ],
       "termInfo": {
         "compassion for the enemy": {
           "text": "The stance Hedges argues is the only real alternative to war -- accepting one's own share of blame and seeing the enemy with compassion rather than hatred."
@@ -182,7 +174,19 @@
             "href": "wiki:Nationalism"
           }
         ]
-      }
+      },
+      "seeds": [
+        "the plague of nationalism",
+        "the humanizing power of art"
+      ],
+      "floatingTerms": [
+        "compassion for the enemy"
+      ],
+      "terms": [
+        "the plague of nationalism",
+        "the humanizing power of art",
+        "compassion for the enemy"
+      ]
     }
   ],
   "bridges": [
@@ -195,14 +199,14 @@
       ],
       "fact": "The myth doesn't just glorify war after the fact -- it supplies the specific ingredients, excitement, exoticism, a strange and grotesque beauty, that make war function as a drug for the people living inside it, not only for those who write about it afterward.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "the-myth-of-war": "mythmakers",
+        "war-as-addiction": "war as a drug"
+      },
       "direction": {
         "kind": "through",
         "from": "the-myth-of-war",
         "to": "war-as-addiction"
-      },
-      "idealTerms": {
-        "the-myth-of-war": "mythmakers",
-        "war-as-addiction": "war as a drug"
       }
     },
     {
@@ -214,14 +218,14 @@
       ],
       "fact": "Part of what makes war intoxicating, in Hedges' account, is that it hands the participant a noble cause and a sense of resolve -- and it's exactly that same conviction of a just, noble cause that licenses the moral collapse to come: atrocity becomes thinkable once the cause feels this righteous.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "war-as-addiction": "war as a drug",
+        "the-collapse-of-the-moral-universe": "moral collapse"
+      },
       "direction": {
         "kind": "through",
         "from": "war-as-addiction",
         "to": "the-collapse-of-the-moral-universe"
-      },
-      "idealTerms": {
-        "war-as-addiction": "war as a drug",
-        "the-collapse-of-the-moral-universe": "moral collapse"
       }
     },
     {
@@ -233,14 +237,14 @@
       ],
       "fact": "Nationalism supplies the common enemy that moral collapse requires to function -- a shared adversary who can be framed as inhuman -- and it's precisely this framing that art, when it survives, is able to undo by forcing a supposed enemy's humanity back into view.",
       "relationKind": "dynamic",
+      "idealTerms": {
+        "nationalism-and-its-antidotes": "the plague of nationalism",
+        "the-collapse-of-the-moral-universe": "the inhuman enemy"
+      },
       "direction": {
         "kind": "through",
         "from": "nationalism-and-its-antidotes",
         "to": "the-collapse-of-the-moral-universe"
-      },
-      "idealTerms": {
-        "nationalism-and-its-antidotes": "the plague of nationalism",
-        "the-collapse-of-the-moral-universe": "the inhuman enemy"
       }
     }
   ],

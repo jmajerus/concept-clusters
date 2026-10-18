@@ -2,7 +2,14 @@
   "id": "ways-out-of-a-conflict",
   "title": "Ways out of a conflict",
   "category": "psychology",
-  "large": true,
+  "categories": [
+    "psychology",
+    "peace-conflict-studies"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "psychology": "social-psychology"
+  },
   "tags": [
     "book"
   ],

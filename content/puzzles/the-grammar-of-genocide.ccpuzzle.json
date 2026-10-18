@@ -1,12 +1,15 @@
 {
   "id": "the-grammar-of-genocide",
   "title": "The Grammar of Genocide",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide"
+  },
   "tags": [
     "genocide",
     "comparative history",
@@ -51,20 +54,6 @@
       "name": "Grievance Fused to Objective",
       "color": "amber",
       "fact": "A river corridor, a living space claimed for a self-declared master race, a classless agrarian utopia purged of its old cities, a national economy remade under one ethnicity's ownership -- each of these was a concrete, statable objective, and in each case the campaign against a targeted population was framed as the means of achieving it, not as an end pursued for its own sake.",
-      "seeds": [
-        "Lebensraum",
-        "Year Zero"
-      ],
-      "floatingTerms": [
-        "Strategic Objective No. 3",
-        "Turkification"
-      ],
-      "terms": [
-        "Lebensraum",
-        "Year Zero",
-        "Strategic Objective No. 3",
-        "Turkification"
-      ],
       "termInfo": {
         "Lebensraum": {
           "text": "Nazi Germany's territorial doctrine calling for 'living space' in Eastern Europe to be settled by Germans -- a colonization project that required removing or exterminating the populations already living there.",
@@ -93,27 +82,27 @@
         "Year Zero": {
           "text": "The Khmer Rouge's claim to be restarting Cambodian history from a classless agrarian 'golden age,' which required eliminating the urban, educated, and religious classes it treated as remnants of a corrupt old society."
         }
-      }
+      },
+      "seeds": [
+        "Lebensraum",
+        "Year Zero"
+      ],
+      "floatingTerms": [
+        "Strategic Objective No. 3",
+        "Turkification"
+      ],
+      "terms": [
+        "Lebensraum",
+        "Year Zero",
+        "Strategic Objective No. 3",
+        "Turkification"
+      ]
     },
     {
       "id": "dehumanization",
       "name": "Dehumanization",
       "color": "magenta",
       "fact": "Untermenschen for the races claimed unfit to share German soil, cockroaches for Tutsi neighbors, harmful microbes for Armenian communities the Ottoman state diagnosed as a national disease, a genetic defect for Bosniak Muslims -- in each case, the same underlying move recurred independently, in unconnected eras and languages: the target population's membership in the human species was denied in so many words, before a single person was killed.",
-      "seeds": [
-        "Untermenschen",
-        "inyenzi"
-      ],
-      "floatingTerms": [
-        "harmful microbes",
-        "genetically deformed"
-      ],
-      "terms": [
-        "Untermenschen",
-        "inyenzi",
-        "harmful microbes",
-        "genetically deformed"
-      ],
       "termInfo": {
         "Untermenschen": {
           "text": "German for 'subhumans' -- Nazi racial doctrine's term for Jews, Roma, Slavs, and others deemed biologically inferior and unfit to share German-controlled territory, used in official policy and propaganda alike.",
@@ -147,27 +136,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Untermenschen",
+        "inyenzi"
+      ],
+      "floatingTerms": [
+        "harmful microbes",
+        "genetically deformed"
+      ],
+      "terms": [
+        "Untermenschen",
+        "inyenzi",
+        "harmful microbes",
+        "genetically deformed"
+      ]
     },
     {
       "id": "the-redescription",
       "name": "The Redescription",
       "color": "blue",
       "fact": "'Special treatment' for murder, 'resettlement' for death marches, 'unbearable insecurity' for extermination, 'smashed' for executed -- each regime built a vocabulary that let its own officials, soldiers, and neighbors carry out killing without describing it to themselves as killing.",
-      "seeds": [
-        "Sonderbehandlung",
-        "smash"
-      ],
-      "floatingTerms": [
-        "Directive 7",
-        "relocation"
-      ],
-      "terms": [
-        "Sonderbehandlung",
-        "smash",
-        "Directive 7",
-        "relocation"
-      ],
       "termInfo": {
         "Directive 7": {
           "text": "Signed by Republika Srpska president Radovan Karadžić on March 8, 1995, this directive ordered VRS troops to create 'an unbearable situation of total insecurity with no hope of further survival' for Srebrenica's and Žepa's inhabitants -- a policy outcome named without naming the killing that would produce it."
@@ -196,25 +185,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Sonderbehandlung",
+        "smash"
+      ],
+      "floatingTerms": [
+        "Directive 7",
+        "relocation"
+      ],
+      "terms": [
+        "Sonderbehandlung",
+        "smash",
+        "Directive 7",
+        "relocation"
+      ]
     },
     {
       "id": "disproportion-cited-as-origin",
       "name": "Disproportion Cited as Origin",
       "color": "olive",
       "fact": "A handful of raids, a discredited myth about a lost war, a suspicion with no evidence behind it -- in each case, a real or invented injury, disproportionate by any measure to what followed, was cited for years afterward as the reason a targeted population had brought its own destruction on itself.",
-      "seeds": [
-        "the stab-in-the-back myth",
-        "Naser Orić's raids"
-      ],
-      "floatingTerms": [
-        "hidden enemies"
-      ],
-      "terms": [
-        "the stab-in-the-back myth",
-        "Naser Orić's raids",
-        "hidden enemies"
-      ],
       "termInfo": {
         "Naser Orić's raids": {
           "text": "Bosniak forces commanded by Naser Orić, based in the Srebrenica enclave, raided and destroyed dozens of surrounding Serb villages between 1992 and early 1993, killing Serb civilians and giving Bosnian Serb commanders a grievance they cited for years afterward.",
@@ -235,27 +226,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "the stab-in-the-back myth",
+        "Naser Orić's raids"
+      ],
+      "floatingTerms": [
+        "hidden enemies"
+      ],
+      "terms": [
+        "the stab-in-the-back myth",
+        "Naser Orić's raids",
+        "hidden enemies"
+      ]
     },
     {
       "id": "ordinary-bureaucracy",
       "name": "Ordinary Bureaucracy",
       "color": "brown",
       "fact": "Fifteen officials over breakfast, an army corps with a chain of command, a ministry issuing telegrams province by province, neighbors organized into militia cells by local officials -- in each case, the killing was carried out as administration: assigned, scheduled, and logged by people doing a job, not by a mob.",
-      "seeds": [
-        "the Wannsee Conference",
-        "the Interahamwe"
-      ],
-      "floatingTerms": [
-        "Drina Corps",
-        "the Tehcir Law"
-      ],
-      "terms": [
-        "the Wannsee Conference",
-        "the Interahamwe",
-        "Drina Corps",
-        "the Tehcir Law"
-      ],
       "termInfo": {
         "Drina Corps": {
           "text": "The VRS army corps responsible for the eastern Bosnia front, tasked with executing the strategic goal against Srebrenica and, in July 1995, Operation Krivaja 95; its deputy commander during the assault, Radislav Krstić, later became the first person the ICTY convicted of genocide.",
@@ -289,7 +278,21 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "the Wannsee Conference",
+        "the Interahamwe"
+      ],
+      "floatingTerms": [
+        "Drina Corps",
+        "the Tehcir Law"
+      ],
+      "terms": [
+        "the Wannsee Conference",
+        "the Interahamwe",
+        "Drina Corps",
+        "the Tehcir Law"
+      ]
     }
   ],
   "bridges": [

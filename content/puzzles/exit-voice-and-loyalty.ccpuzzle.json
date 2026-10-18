@@ -7,6 +7,11 @@
     "sociology",
     "political-science"
   ],
+  "subcategories": {
+    "economics": "political-economy",
+    "political-science": "political-behavior",
+    "sociology": "institutions-organizations"
+  },
   "tags": [
     "book"
   ],

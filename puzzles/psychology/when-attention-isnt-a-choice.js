@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "when-attention-isnt-a-choice",
   "title": "When Attention Isn't a Choice",
   "category": "psychology",
@@ -11,6 +11,10 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "economics"
   ],
+  "subcategories": {
+    "economics": "microeconomics",
+    "psychology": "cognitive-psychology"
+  },
   "info": {
     "text": "Behavioral economics research showing that scarcity itself depletes the cognitive bandwidth available for attention and self-control -- evidence used to challenge theories that treat attentional discipline as equally available to everyone, regardless of material circumstances.",
     "links": [
@@ -173,3 +177,273 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "when-attention-isnt-a-choice",
+      "puzzleRevision": "fnv1a32:79f04417",
+      "board": {
+        "width": 670,
+        "height": 480
+      },
+      "nodes": {
+        "term:cognitive bandwidth": {
+          "x": 463.17,
+          "y": 23,
+          "pinned": false
+        },
+        "term:sugarcane farmers": {
+          "x": 455.93,
+          "y": 165.58,
+          "pinned": false
+        },
+        "term:pre-harvest scarcity": {
+          "x": 585,
+          "y": 258.9,
+          "pinned": false
+        },
+        "term:fluid intelligence": {
+          "x": 591.3,
+          "y": 92.23,
+          "pinned": false
+        },
+        "term:tunneling": {
+          "x": 233.62,
+          "y": 165.66,
+          "pinned": false
+        },
+        "term:financial preoccupation": {
+          "x": 94.45,
+          "y": 181.12,
+          "pinned": false
+        },
+        "term:narrowed focus": {
+          "x": 66.1,
+          "y": 23,
+          "pinned": false
+        },
+        "term:neglected tasks": {
+          "x": 197.84,
+          "y": 23,
+          "pinned": false
+        },
+        "term:disciplined attention": {
+          "x": 225.91,
+          "y": 306.17,
+          "pinned": false
+        },
+        "term:material conditions": {
+          "x": 399.52,
+          "y": 316.57,
+          "pinned": false
+        },
+        "term:reversed causal arrow": {
+          "x": 310.05,
+          "y": 457,
+          "pinned": false
+        },
+        "term:unequal starting bandwidth": {
+          "x": 103.9,
+          "y": 457,
+          "pinned": false
+        },
+        "term:finite bandwidth": {
+          "x": 328.53,
+          "y": 84.37,
+          "pinned": false
+        },
+        "term:evidence against free attention": {
+          "x": 544.76,
+          "y": 457,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2838,
+        "score": 2838.001279742817
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:17:20.394Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "when-attention-isnt-a-choice",
+      "puzzleRevision": "fnv1a32:79f04417",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 505,
+          "y": 472.2,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 756.15,
+          "y": 263.4,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 253.85,
+          "y": 263.4,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:finite bandwidth": {
+          "x": 726.66,
+          "y": 407.6,
+          "pinned": false
+        },
+        "term:evidence against free attention": {
+          "x": 253.78,
+          "y": 419.85,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "cognitive bandwidth",
+          "sugarcane farmers",
+          "pre-harvest scarcity",
+          "fluid intelligence"
+        ],
+        "cluster:1": [
+          "tunneling",
+          "financial preoccupation",
+          "narrowed focus",
+          "neglected tasks"
+        ],
+        "cluster:2": [
+          "disciplined attention",
+          "material conditions",
+          "reversed causal arrow",
+          "unequal starting bandwidth"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 270.5416001804784
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:17:23.156Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "when-attention-isnt-a-choice",
+      "puzzleRevision": "fnv1a32:79f04417",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "nodes": {
+        "term:cognitive bandwidth": {
+          "x": 347.7,
+          "y": 275.1
+        },
+        "term:sugarcane farmers": {
+          "x": 360.36,
+          "y": 439.99
+        },
+        "term:pre-harvest scarcity": {
+          "x": 247.52,
+          "y": 565.27
+        },
+        "term:fluid intelligence": {
+          "x": 96.08,
+          "y": 484.26
+        },
+        "term:tunneling": {
+          "x": 600.12,
+          "y": 247.25
+        },
+        "term:financial preoccupation": {
+          "x": 615.62,
+          "y": 22
+        },
+        "term:narrowed focus": {
+          "x": 783.24,
+          "y": 39.6
+        },
+        "term:neglected tasks": {
+          "x": 796.84,
+          "y": 182.31
+        },
+        "term:disciplined attention": {
+          "x": 923.85,
+          "y": 323.84
+        },
+        "term:material conditions": {
+          "x": 500.8,
+          "y": 352.85
+        },
+        "term:reversed causal arrow": {
+          "x": 903.6,
+          "y": 507.06
+        },
+        "term:unequal starting bandwidth": {
+          "x": 744.74,
+          "y": 628
+        },
+        "term:finite bandwidth": {
+          "x": 484.22,
+          "y": 187.46
+        },
+        "term:evidence against free attention": {
+          "x": 523.13,
+          "y": 561.25
+        },
+        "cluster:0": {
+          "x": 215.56,
+          "y": 374.49
+        },
+        "cluster:1": {
+          "x": 670.48,
+          "y": 164.53
+        },
+        "cluster:2": {
+          "x": 712.86,
+          "y": 392.97
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:17:26.181Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.05,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:17:17.042Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

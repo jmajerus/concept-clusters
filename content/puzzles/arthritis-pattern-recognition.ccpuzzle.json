@@ -1,0 +1,338 @@
+{
+  "id": "arthritis-pattern-recognition",
+  "title": "Four Arthritides, Four Patterns",
+  "category": "medicine",
+  "subcategories": {
+    "medicine": "rheumatology"
+  },
+  "info": {
+    "text": "Four joint diseases, four bedside patterns: rheumatoid arthritis (autoimmune, symmetric, erosive), osteoarthritis (mechanical, degenerative, joints only), gout (crystal, episodic, metabolic), and axial spondyloarthritis (inflammatory spine, HLA-B27). The board teaches how distribution, stiffness rhythm, serology, imaging, and systemic signs tell them apart — and why NSAIDs recur in all while disease control differs.",
+    "citations": [
+      {
+        "title": "Rheumatoid arthritis",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Rheumatoid_arthritis"
+      },
+      {
+        "title": "Osteoarthritis",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Osteoarthritis"
+      },
+      {
+        "title": "Gout",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Gout"
+      },
+      {
+        "title": "Ankylosing spondylitis (axial spondyloarthritis)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Ankylosing_spondylitis"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "rheumatoid",
+      "name": "Rheumatoid arthritis — autoimmune, symmetric, erosive",
+      "color": "teal",
+      "fact": "The autoimmune arthritis: symmetric small joints of the hands, hours-long morning stiffness easing with movement, rheumatoid factor and anti-CCP in the blood, bony erosions on film, organs involved beyond the joints — and methotrexate to slow the disease itself.",
+      "termInfo": {
+        "Bony erosions on X-ray": "As disease advances, bony erosions and subluxation appear; early films may show periarticular osteopenia and reduced joint space.",
+        "Lungs, eyes, skin beyond the joints": "A systemic autoimmune disease: skin, eyes, lungs, heart, nerves, and blood can be involved in 20–40% of people.",
+        "Methotrexate (first DMARD)": "Disease-modifying antirheumatic drugs slow the disease itself; methotrexate is the most important and usually the first. NSAIDs ease pain but do not affect the underlying disease; steroids bridge flares at the lowest dose.",
+        "Morning stiffness lasting hours": "Pain and stiffness worsen after rest and are usually worst in the morning; stiffness can last several hours but gradually improves with movement.",
+        "Rheumatoid factor and anti-CCP": "Anti-citrullinated protein antibodies are positive in 61–75% of RA cases with ~95% specificity; RF is non-specific (10% of healthy people). A negative test does not rule out seronegative RA — about a third of cases.",
+        "Symmetric small-joint swelling": "The wrists and hands are involved most, typically the same joints on both sides: MCP and PIP joints first, then feet."
+      },
+      "info": {
+        "text": "A long-term autoimmune disorder that primarily affects joints — and in 20–40% of people, other organs too.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Rheumatoid_arthritis",
+            "label": "Rheumatoid arthritis"
+          }
+        ]
+      },
+      "seeds": [
+        "Symmetric small-joint swelling",
+        "Rheumatoid factor and anti-CCP"
+      ],
+      "floatingTerms": [
+        "Morning stiffness lasting hours",
+        "Bony erosions on X-ray",
+        "Lungs, eyes, skin beyond the joints",
+        "Methotrexate (first DMARD)"
+      ],
+      "terms": [
+        "Symmetric small-joint swelling",
+        "Rheumatoid factor and anti-CCP",
+        "Morning stiffness lasting hours",
+        "Bony erosions on X-ray",
+        "Lungs, eyes, skin beyond the joints",
+        "Methotrexate (first DMARD)"
+      ]
+    },
+    {
+      "id": "osteo",
+      "name": "Osteoarthritis — mechanical, degenerative, joints only",
+      "color": "blue",
+      "fact": "The wear pattern: hard bony nodes at the finger joints and weight-bearing knees and hips, pain made worse by use with stiffness that fades within thirty minutes, never internal organs — and joint replacement when disability wins.",
+      "termInfo": {
+        "Heberden's and Bouchard's nodes": "Hard bony enlargements at the finger joints: Heberden's at the distal (DIP), Bouchard's at the proximal (PIP) interphalangeal joints.",
+        "Joint replacement for disability": "Joint replacement when disability persists despite other treatment; over 90% of hip and knee replacements trace to osteoarthritis, and artificial joints typically last over 20 years.",
+        "Only joints, not internal organs": "Unlike inflammatory arthritides, only the joints are affected — and in contrast to RA, osteoarthritic joints do not become hot or red; synovial fluid stays clear with low white-cell counts.",
+        "Pain with use, brief morning stiffness": "Pain is made worse by prolonged activity and relieved by rest; morning stiffness typically lasts less than thirty minutes.",
+        "Weight-bearing knees and hips": "The large weight-bearing joints — hips and knees — plus the joint at the thumb base and the neck and lower back spine joints."
+      },
+      "info": {
+        "text": "Degenerative breakdown of joint cartilage and underlying bone — the most common form of arthritis, driven by mechanical stress and low-grade inflammation.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Osteoarthritis",
+            "label": "Osteoarthritis"
+          }
+        ]
+      },
+      "seeds": [
+        "Heberden's and Bouchard's nodes",
+        "Weight-bearing knees and hips"
+      ],
+      "floatingTerms": [
+        "Pain with use, brief morning stiffness",
+        "Only joints, not internal organs",
+        "Joint replacement for disability"
+      ],
+      "terms": [
+        "Heberden's and Bouchard's nodes",
+        "Weight-bearing knees and hips",
+        "Pain with use, brief morning stiffness",
+        "Only joints, not internal organs",
+        "Joint replacement for disability"
+      ]
+    },
+    {
+      "id": "gout",
+      "name": "Gout — crystal, episodic, metabolic",
+      "color": "amber",
+      "fact": "The crystal disease: an overnight attack on the big toe that turns red, hot, and exquisitely swollen, proven by needle-shaped urate crystals under polarized light, driven by hyperuricemia that in time piles up as tophi — colchicine or NSAIDs for the attack, allopurinol to lower uric acid between them.",
+      "termInfo": {
+        "Allopurinol lowers uric acid": "Long-term prevention with urate-lowering: allopurinol blocks uric acid production and is the most commonly used agent; febuxostat is reserved for allopurinol intolerance.",
+        "Colchicine for the acute attack": "Acute attacks improve with NSAIDs, glucocorticoids, or colchicine; steroids and NSAIDs are equally effective, steroids possibly safer.",
+        "Hyperuricemia and tophi": "Persistently elevated urate (>7.0 mg/dL in men) drives attacks — kidney underexcretion is the cause in about 90% — and long-standing disease piles crystals into hard, painless tophi.",
+        "Needle-shaped urate crystals": "The definitive test: monosodium urate crystals in synovial fluid showing needle-like morphology and strong negative birefringence under polarized light. Blood uric acid may be normal during an attack.",
+        "Overnight attack, red hot swollen": "Pain begins at night and peaks within 24 hours — partly attributed to lower body temperature — maximal in under 12 hours, in a red, tender, hot, swollen joint.",
+        "Podagra: the big-toe joint": "The first metatarsophalangeal joint at the base of the big toe is affected most often — half of first attacks. Key differential to exclude: septic arthritis."
+      },
+      "info": {
+        "text": "Recurrent attacks of inflammatory arthritis from monosodium urate crystals; the key dangerous look-alike is septic arthritis.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Gout",
+            "label": "Gout"
+          }
+        ]
+      },
+      "seeds": [
+        "Podagra: the big-toe joint",
+        "Overnight attack, red hot swollen"
+      ],
+      "floatingTerms": [
+        "Needle-shaped urate crystals",
+        "Hyperuricemia and tophi",
+        "Colchicine for the acute attack",
+        "Allopurinol lowers uric acid"
+      ],
+      "terms": [
+        "Podagra: the big-toe joint",
+        "Overnight attack, red hot swollen",
+        "Needle-shaped urate crystals",
+        "Hyperuricemia and tophi",
+        "Colchicine for the acute attack",
+        "Allopurinol lowers uric acid"
+      ]
+    },
+    {
+      "id": "axial",
+      "name": "Axial spondyloarthritis — inflammatory spine, HLA-B27",
+      "color": "magenta",
+      "fact": "The axial pattern: back pain that improves with exercise and worsens at rest in a young adult, inflammation of the sacroiliac joints on imaging, HLA-B27 in most, uveitis and enthesitis beyond the spine, seronegativity for rheumatoid factor — NSAIDs first, TNF inhibitors when they fail.",
+      "termInfo": {
+        "Anterior uveitis, enthesitis": "Beyond the spine: anterior uveitis in about 30% (eye pain, redness, blurred vision), enthesitis where tendon meets bone, and association with psoriasis and inflammatory bowel disease.",
+        "HLA-B27": "More than 85–90% of diagnosed people carry HLA-B27 (up to 95% of European-descent patients). The test aids diagnosis but is not itself diagnostic.",
+        "Inflammatory back pain: better moving": "Diagnostic criteria: onset below 40, insidious, improvement with exercise, no improvement with rest, and night pain that eases on getting up.",
+        "NSAIDs first, then TNF inhibitors": "Unless contraindicated, everyone is recommended NSAIDs; TNF inhibitors (adalimumab, etanercept, infliximab and kin) or IL-17 blockers come next. There is no cure.",
+        "Sacroiliitis on X-ray or MRI": "The earliest X-ray changes are erosions and sclerosis where the spine joins the pelvis, though films can take 7–10 years; MRI shows the inflammation earlier.",
+        "Seronegative: no rheumatoid factor": "Classified as a seronegative spondyloarthropathy — rheumatoid factor is absent, which helps separate it from rheumatoid arthritis."
+      },
+      "info": {
+        "text": "Long-term inflammation where the spine joins the pelvis — the anchor disease of the spondyloarthritis family, onset typically between 20 and 30.",
+        "links": [
+          {
+            "href": "https://en.wikipedia.org/wiki/Ankylosing_spondylitis",
+            "label": "Ankylosing spondylitis (axial spondyloarthritis)"
+          }
+        ]
+      },
+      "seeds": [
+        "Inflammatory back pain: better moving",
+        "HLA-B27"
+      ],
+      "floatingTerms": [
+        "Sacroiliitis on X-ray or MRI",
+        "Anterior uveitis, enthesitis",
+        "Seronegative: no rheumatoid factor",
+        "NSAIDs first, then TNF inhibitors"
+      ],
+      "terms": [
+        "Inflammatory back pain: better moving",
+        "HLA-B27",
+        "Sacroiliitis on X-ray or MRI",
+        "Anterior uveitis, enthesitis",
+        "Seronegative: no rheumatoid factor",
+        "NSAIDs first, then TNF inhibitors"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-stiffness",
+      "term": "Stiffness is the tell",
+      "clusters": [
+        "rheumatoid",
+        "osteo"
+      ],
+      "fact": "The classic bedside discriminator between autoimmune and mechanical arthritis is the stiffness rhythm: rheumatoid morning stiffness lasts hours and improves with movement, while osteoarthritis pain follows use and its stiffness fades within thirty minutes.",
+      "info": "Ask two questions: how long is the morning stiffness, and does pain follow use or rest?",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "rheumatoid": "Morning stiffness lasting hours",
+        "osteo": "Pain with use, brief morning stiffness"
+      }
+    },
+    {
+      "id": "bridge-serology",
+      "term": "Serology divides the family",
+      "clusters": [
+        "rheumatoid",
+        "axial"
+      ],
+      "fact": "RA carries rheumatoid factor and anti-CCP, while the spondyloarthritis family is defined as seronegative — no rheumatoid factor — and leans instead on HLA-B27; a positive RF test points the workup to one of these, not the other.",
+      "info": "Blood tests divide the inflammatory arthritides before imaging does.",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "rheumatoid": "Rheumatoid factor and anti-CCP",
+        "axial": "Seronegative: no rheumatoid factor"
+      }
+    },
+    {
+      "id": "bridge-nsaids",
+      "term": "NSAIDs: symptom, not control",
+      "clusters": [
+        "rheumatoid",
+        "gout",
+        "axial"
+      ],
+      "fact": "NSAIDs recur as the symptomatic therapy in all three inflammatory arthritides — they reduce RA pain without touching the underlying disease, treat the acute gout attack, and are recommended for everyone with axial spondyloarthritis — while true disease control needs methotrexate, urate-lowering, or biologics.",
+      "info": "Symptom relief is shared; disease control is disease-specific.",
+      "relationKind": "cross-cutting"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "lens-stiffness-clock",
+      "prompt": "One patient cannot make a fist for two hours every morning; another's hands ache after gardening but loosen within half an hour. Which two findings carry those stories?",
+      "explanation": "The stiffness clock is the classic bedside discriminator: hours that improve with movement mean autoimmune inflammation; minutes that fade with activity mean wear.",
+      "targets": [
+        "Morning stiffness lasting hours",
+        "Pain with use, brief morning stiffness"
+      ],
+      "reasons": {
+        "Morning stiffness lasting hours": "Rheumatoid stiffness is prolonged and eases as the joints move.",
+        "Pain with use, brief morning stiffness": "Osteoarthritic pain follows use; stiffness fades within thirty minutes."
+      }
+    },
+    {
+      "id": "lens-serology-split",
+      "prompt": "Which pair of findings sends the workup down opposite roads — antibodies present in one disease, deliberately absent in the other?",
+      "explanation": "Serology splits the inflammatory arthritides: antibodies against citrullinated proteins on the autoimmune side, their absence plus HLA-B27 on the axial side.",
+      "targets": [
+        "Rheumatoid factor and anti-CCP",
+        "Seronegative: no rheumatoid factor"
+      ],
+      "reasons": {
+        "Rheumatoid factor and anti-CCP": "Anti-CCP: ~95% specificity for rheumatoid arthritis.",
+        "Seronegative: no rheumatoid factor": "The spondyloarthritis family is defined by rheumatoid factor's absence."
+      }
+    },
+    {
+      "id": "lens-nsaids-vs-dmard",
+      "prompt": "Which treatment slows its disease rather than merely easing symptoms — and in which disease would NSAIDs alone never be enough?",
+      "explanation": "NSAIDs appear in all three inflammatory arthritides but only as symptomatic therapy — the disease-modifying step is different in each.",
+      "targets": [
+        "Methotrexate (first DMARD)"
+      ],
+      "reasons": {
+        "Methotrexate (first DMARD)": "Disease-modifying: it changes the course of rheumatoid arthritis, unlike NSAIDs, which do not affect the underlying disease."
+      }
+    },
+    {
+      "id": "lens-hand-nodes",
+      "prompt": "Which two findings at opposite ends of the same fingers mark two different diseases — one autoimmune and symmetric at the knuckles, one hard, bony, and wear-related at the fingertips?",
+      "explanation": "Both are fingers, both swell — but the hand tells the disease: symmetric knuckle involvement with erosions, versus hard bony nodes at the far joints with hot-red absence.",
+      "targets": [
+        "Heberden's and Bouchard's nodes",
+        "Symmetric small-joint swelling"
+      ],
+      "reasons": {
+        "Heberden's and Bouchard's nodes": "Hard bony enlargements at the DIP (Heberden's) and PIP (Bouchard's) joints — the wear pattern.",
+        "Symmetric small-joint swelling": "The same MCP and PIP joints on both hands — the autoimmune pattern."
+      }
+    },
+    {
+      "id": "lens-crystal-proof",
+      "prompt": "Which finding under the microscope makes gout definitive — and which blood-and-lumps companion tells the years-long story behind it?",
+      "explanation": "The crystal story runs from blood to proof to chronic deposits: hyperuricemia causes the attacks, the fluid confirms them, and untreated years leave tophi.",
+      "targets": [
+        "Hyperuricemia and tophi",
+        "Needle-shaped urate crystals"
+      ],
+      "reasons": {
+        "Hyperuricemia and tophi": "Elevated urate drives the disease; long-standing disease piles crystals into tophi.",
+        "Needle-shaped urate crystals": "Needle-like, strongly negatively birefringent crystals in joint fluid — the definitive test."
+      }
+    },
+    {
+      "id": "lens-axial-rhythm",
+      "prompt": "Which two findings together identify the young adult whose back pain improves with exercise — the gene, and the inflammation where the spine meets the pelvis?",
+      "explanation": "Only the axial pattern hurts worse at rest and better with exercise — the opposite of mechanical pain — and it announces itself with eye and tendon disease beyond the joints.",
+      "targets": [
+        "HLA-B27",
+        "Sacroiliitis on X-ray or MRI"
+      ],
+      "reasons": {
+        "HLA-B27": "Carried by more than 85–90% of those diagnosed.",
+        "Sacroiliitis on X-ray or MRI": "Inflammation of the sacroiliac joints — the anatomical anchor of the axial pattern."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "preSolve": false,
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Four arthritides, four patterns",
+    "summary": "How joint distribution, stiffness rhythm, serology, imaging, and systemic signs separate rheumatoid arthritis, osteoarthritis, gout, and axial spondyloarthritis.",
+    "estimatedMinutes": 7,
+    "content": {
+      "text": "A swollen joint is a question, not an answer. The same complaint — pain, stiffness, swelling — can come from an autoimmune storm, simple wear, a pile of crystals, or an inflamed spine, and the treatment that helps one can do nothing for another. Clinicians tell them apart by patterns: which joints, what rhythm, what the blood shows, what imaging reveals, whether anything beyond the joints is involved.\r\n\r\nRheumatoid arthritis is the autoimmune pattern. It attacks the small joints of the hands — knuckles and finger joints — typically the same joints on both sides. Morning stiffness lasts for hours and eases with movement. The blood carries rheumatoid factor and, more specifically, anti-citrullinated protein antibodies; the X-ray, over time, shows bony erosions. Because it is systemic, the skin, eyes, lungs, heart, and nerves can join in — and because the immune system drives it, the treatment that matters is a disease-modifying drug, methotrexate first, not mere pain relief.\r\n\r\nOsteoarthritis is the wear pattern, the most common arthritis of all. It loads the joints that carry weight — knees, hips — and marks the finger joints with hard bony nodes: Heberden's at the fingertips, Bouchard's in the middle. Pain follows use and eases with rest; morning stiffness fades within thirty minutes. Only the joints are affected — no rash, no lung disease, and unlike rheumatoid joints they do not turn hot and red. When disability wins despite exercise and analgesics, joint replacement takes over.\r\n\r\nGout is the crystal pattern. Monosodium urate, kept high in the blood for years, crystallizes in a cool peripheral joint: the attack begins overnight, peaks within a day, and leaves the base of the big toe — podagra, in half of first attacks — red, hot, and exquisitely tender. The proof is seeing needle-shaped, strongly negatively birefringent crystals in joint fluid; the story behind them is hyperuricemia, mostly from kidneys that under-excrete uric acid, which in time piles into chalky tophi. Colchicine or NSAIDs end the attack; allopurinol lowers the urate between attacks.\r\n\r\nAxial spondyloarthritis is the inflammatory-spine pattern of young adults — onset typically between twenty and thirty. The back pain is inflammatory by definition: insidious, worse at rest and at night, better with exercise. Inflammation concentrates where the spine joins the pelvis — sacroiliitis on X-ray or MRI. More than eighty-five percent carry HLA-B27, and the disease extends beyond joints: anterior uveitis in about thirty percent, enthesitis where tendon meets bone, psoriasis and inflammatory bowel disease in the family. It is seronegative — rheumatoid factor absent — and its treatment ladder starts with NSAIDs for everyone and climbs to TNF inhibitors.\r\n\r\nThree crossings tie the four together. Stiffness is the tell between autoimmune and mechanical: hours versus minutes. Serology splits the inflammatory side: rheumatoid factor and anti-CCP here, seronegative with HLA-B27 there. And NSAIDs recur everywhere as symptom relief — easing rheumatoid pain, ending gout attacks, recommended for every aching spine — while genuine disease control stays disease-specific: methotrexate, urate-lowering, or biologics. One more caution lives inside the gout story: a red, hot, swollen joint can also be septic arthritis, and that infection must be excluded before crystals are blamed."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

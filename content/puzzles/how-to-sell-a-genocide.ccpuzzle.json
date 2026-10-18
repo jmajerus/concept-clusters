@@ -4,10 +4,12 @@
   "category": "media-information-literacy",
   "categories": [
     "media-information-literacy",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
   "subcategories": {
-    "media-information-literacy": "propaganda-disinformation"
+    "media-information-literacy": "propaganda-disinformation",
+    "peace-conflict-studies": "atrocity-genocide"
   },
   "tags": [
     "book"
@@ -430,9 +432,6 @@
     "contributors": [
       {
         "name": "Claude"
-      },
-      {
-        "name": "Claude Code"
       }
     ]
   }

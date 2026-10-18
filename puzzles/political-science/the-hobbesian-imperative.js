@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-hobbesian-imperative",
   "title": "The Hobbesian Imperative",
   "category": "political-science",
@@ -11,6 +11,10 @@ export default definePuzzle(import.meta.url, {
     "political-science",
     "philosophy"
   ],
+  "subcategories": {
+    "philosophy": "political-philosophy",
+    "political-science": "international-relations"
+  },
   "tags": [
     "realism",
     "international relations"
@@ -242,3 +246,277 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-hobbesian-imperative",
+      "puzzleRevision": "fnv1a32:98ca0549",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:feared rather than loved": {
+          "x": 440.4,
+          "y": 272.17,
+          "pinned": false
+        },
+        "term:virtù": {
+          "x": 404.37,
+          "y": 406.78,
+          "pinned": false
+        },
+        "term:fortuna": {
+          "x": 579.74,
+          "y": 314.55,
+          "pinned": false
+        },
+        "term:necessità": {
+          "x": 298.87,
+          "y": 327.41,
+          "pinned": false
+        },
+        "term:the lion and the fox": {
+          "x": 527.78,
+          "y": 437,
+          "pinned": false
+        },
+        "term:state of nature": {
+          "x": 489.35,
+          "y": 94.7,
+          "pinned": false
+        },
+        "term:social contract": {
+          "x": 366.24,
+          "y": 23,
+          "pinned": false
+        },
+        "term:sovereign": {
+          "x": 589.65,
+          "y": 23,
+          "pinned": false
+        },
+        "term:balance of power": {
+          "x": 278.33,
+          "y": 202.38,
+          "pinned": false
+        },
+        "term:six principles of realism": {
+          "x": 126.64,
+          "y": 110.9,
+          "pinned": false
+        },
+        "term:interest defined as power": {
+          "x": 142.28,
+          "y": 315.8,
+          "pinned": false
+        },
+        "term:anarchy": {
+          "x": 380.9,
+          "y": 139.24,
+          "pinned": false
+        },
+        "term:human nature": {
+          "x": 580.2,
+          "y": 191.76,
+          "pinned": false
+        },
+        "term:raison d'état": {
+          "x": 257.9,
+          "y": 437,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2518.87,
+        "score": 2518.867097803211
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:29:28.449Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-hobbesian-imperative",
+      "puzzleRevision": "fnv1a32:98ca0549",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 690.49,
+          "y": 375.86,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 202.28,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 269.51,
+          "y": 375.86,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:anarchy": {
+          "x": 301.22,
+          "y": 215.53,
+          "pinned": false
+        },
+        "term:human nature": {
+          "x": 658.78,
+          "y": 215.53,
+          "pinned": false
+        },
+        "term:raison d'état": {
+          "x": 480,
+          "y": 375.86,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "feared rather than loved",
+          "virtù",
+          "fortuna",
+          "necessità",
+          "the lion and the fox"
+        ],
+        "cluster:1": [
+          "state of nature",
+          "social contract",
+          "sovereign"
+        ],
+        "cluster:2": [
+          "balance of power",
+          "six principles of realism",
+          "interest defined as power"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 363.3333204921483
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:29:31.108Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-hobbesian-imperative",
+      "puzzleRevision": "fnv1a32:98ca0549",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:feared rather than loved": {
+          "x": 286.28,
+          "y": 598
+        },
+        "term:virtù": {
+          "x": 156.89,
+          "y": 536.61
+        },
+        "term:fortuna": {
+          "x": 141.48,
+          "y": 448.15
+        },
+        "term:necessità": {
+          "x": 393.36,
+          "y": 485.08
+        },
+        "term:the lion and the fox": {
+          "x": 122.58,
+          "y": 312.35
+        },
+        "term:state of nature": {
+          "x": 458.55,
+          "y": 231.89
+        },
+        "term:social contract": {
+          "x": 185.54,
+          "y": 127.81
+        },
+        "term:sovereign": {
+          "x": 255.39,
+          "y": 22
+        },
+        "term:balance of power": {
+          "x": 608.06,
+          "y": 231.01
+        },
+        "term:six principles of realism": {
+          "x": 809.6,
+          "y": 527.9
+        },
+        "term:interest defined as power": {
+          "x": 552.31,
+          "y": 480.47
+        },
+        "term:anarchy": {
+          "x": 531.39,
+          "y": 328.99
+        },
+        "term:human nature": {
+          "x": 325.59,
+          "y": 265.05
+        },
+        "term:raison d'état": {
+          "x": 423.06,
+          "y": 367.46
+        },
+        "cluster:0": {
+          "x": 272.54,
+          "y": 408.25
+        },
+        "cluster:1": {
+          "x": 349.38,
+          "y": 120.61
+        },
+        "cluster:2": {
+          "x": 706.86,
+          "y": 363.63
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:29:33.446Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:29:25.344Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

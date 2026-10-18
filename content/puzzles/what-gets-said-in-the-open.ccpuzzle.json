@@ -2,6 +2,9 @@
   "id": "what-gets-said-in-the-open",
   "title": "What gets said in the open",
   "category": "sociology",
+  "subcategories": {
+    "sociology": "institutions-organizations"
+  },
   "tags": [
     "book"
   ],

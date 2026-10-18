@@ -3,15 +3,17 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-nazi-doctors",
   "title": "The Nazi Doctors",
   "category": "psychology",
   "categories": [
     "psychology",
-    "bioethics"
+    "bioethics",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
   "tags": [
@@ -280,3 +282,212 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-nazi-doctors",
+      "puzzleRevision": "fnv1a32:81388a57",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:racial hygiene": {
+          "x": 573.9,
+          "y": 225.95,
+          "pinned": false
+        },
+        "term:life unworthy of life": {
+          "x": 508.87,
+          "y": 370.2,
+          "pinned": false
+        },
+        "term:Aktion T4": {
+          "x": 531.13,
+          "y": 113.37,
+          "pinned": false
+        },
+        "term:doubling": {
+          "x": 249.41,
+          "y": 150.4,
+          "pinned": false
+        },
+        "term:the Auschwitz self": {
+          "x": 311.04,
+          "y": 36.06,
+          "pinned": false
+        },
+        "term:psychic numbing": {
+          "x": 142.36,
+          "y": 205.57,
+          "pinned": false
+        },
+        "term:the prior self": {
+          "x": 165.75,
+          "y": 68.2,
+          "pinned": false
+        },
+        "term:the healing-killing paradox": {
+          "x": 398.06,
+          "y": 204.68,
+          "pinned": false
+        },
+        "term:selections": {
+          "x": 446.87,
+          "y": 46.06,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 1513.81,
+        "score": 1513.8050981672307
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:53:24.552Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-nazi-doctors",
+      "puzzleRevision": "fnv1a32:81388a57",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 469.2,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 166.8,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:the healing-killing paradox": {
+          "x": 344,
+          "y": 318,
+          "pinned": false
+        },
+        "term:selections": {
+          "x": 558,
+          "y": 318,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "racial hygiene",
+          "life unworthy of life",
+          "Aktion T4"
+        ],
+        "cluster:1": [
+          "doubling",
+          "the Auschwitz self",
+          "psychic numbing",
+          "the prior self"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 241.1596686981564
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:53:26.886Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-nazi-doctors",
+      "puzzleRevision": "fnv1a32:81388a57",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:racial hygiene": {
+          "x": 259.16,
+          "y": 34.28
+        },
+        "term:life unworthy of life": {
+          "x": 412.95,
+          "y": 95.54
+        },
+        "term:Aktion T4": {
+          "x": 147.65,
+          "y": 99.85
+        },
+        "term:doubling": {
+          "x": 254.05,
+          "y": 457.19
+        },
+        "term:the Auschwitz self": {
+          "x": 237.4,
+          "y": 596.03
+        },
+        "term:psychic numbing": {
+          "x": 395.47,
+          "y": 598
+        },
+        "term:the prior self": {
+          "x": 538.5,
+          "y": 594.45
+        },
+        "term:the healing-killing paradox": {
+          "x": 421.99,
+          "y": 297.99
+        },
+        "term:selections": {
+          "x": 178.92,
+          "y": 350.72
+        },
+        "cluster:0": {
+          "x": 255.05,
+          "y": 192.76
+        },
+        "cluster:1": {
+          "x": 384.91,
+          "y": 491.43
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:53:29.590Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:53:21.826Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

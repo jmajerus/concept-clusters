@@ -3,14 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "beyond-the-mandate",
   "title": "Beyond the Mandate",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "book"
   ],
@@ -356,3 +361,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "beyond-the-mandate",
+      "puzzleRevision": "fnv1a32:f4cb2373",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:Roméo Dallaire": {
+          "x": 555.59,
+          "y": 138.79,
+          "pinned": false
+        },
+        "term:Genocide Fax": {
+          "x": 580.2,
+          "y": 23,
+          "pinned": false
+        },
+        "term:UNAMIR": {
+          "x": 599.1,
+          "y": 219.33,
+          "pinned": false
+        },
+        "term:Chapter VI Mandate": {
+          "x": 531.2,
+          "y": 291.7,
+          "pinned": false
+        },
+        "term:Resolution 912": {
+          "x": 383.7,
+          "y": 319.17,
+          "pinned": false
+        },
+        "term:Boutros-Ghali's Warning": {
+          "x": 274.67,
+          "y": 437,
+          "pinned": false
+        },
+        "term:Token Force": {
+          "x": 261.98,
+          "y": 289.99,
+          "pinned": false
+        },
+        "term:Operation Turquoise": {
+          "x": 94.46,
+          "y": 431.32,
+          "pinned": false
+        },
+        "term:Christine Shelley": {
+          "x": 278.83,
+          "y": 84.44,
+          "pinned": false
+        },
+        "term:Acts of Genocide": {
+          "x": 421.12,
+          "y": 182.83,
+          "pinned": false
+        },
+        "term:National Intelligence Daily": {
+          "x": 107.05,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Christopher's Authorization": {
+          "x": 107.05,
+          "y": 238.53,
+          "pinned": false
+        },
+        "term:belgian peacekeepers": {
+          "x": 468.49,
+          "y": 437,
+          "pinned": false
+        },
+        "term:PDD-25": {
+          "x": 305.41,
+          "y": 201.47,
+          "pinned": false
+        },
+        "term:Bystanders to Genocide": {
+          "x": 434.94,
+          "y": 23,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2866.46,
+        "score": 2866.4562480315435
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:33:41.682Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "beyond-the-mandate",
+      "puzzleRevision": "fnv1a32:f4cb2373",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 726.55,
+          "y": 380.88,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 233.45,
+          "y": 380.88,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 192.24,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:belgian peacekeepers": {
+          "x": 480,
+          "y": 380.88,
+          "pinned": false
+        },
+        "term:PDD-25": {
+          "x": 283.19,
+          "y": 213.02,
+          "pinned": false
+        },
+        "term:Bystanders to Genocide": {
+          "x": 758.49,
+          "y": 222.27,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Roméo Dallaire",
+          "Genocide Fax",
+          "UNAMIR",
+          "Chapter VI Mandate"
+        ],
+        "cluster:1": [
+          "Resolution 912",
+          "Boutros-Ghali's Warning",
+          "Token Force",
+          "Operation Turquoise"
+        ],
+        "cluster:2": [
+          "Christine Shelley",
+          "Acts of Genocide",
+          "National Intelligence Daily",
+          "Christopher's Authorization"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 474.7563834171019
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:33:44.672Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "beyond-the-mandate",
+      "puzzleRevision": "fnv1a32:f4cb2373",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Roméo Dallaire": {
+          "x": 815.91,
+          "y": 435.64
+        },
+        "term:Genocide Fax": {
+          "x": 580.1,
+          "y": 353.82
+        },
+        "term:UNAMIR": {
+          "x": 773.92,
+          "y": 549.24
+        },
+        "term:Chapter VI Mandate": {
+          "x": 721.23,
+          "y": 315.69
+        },
+        "term:Resolution 912": {
+          "x": 467.91,
+          "y": 281.87
+        },
+        "term:Boutros-Ghali's Warning": {
+          "x": 331.44,
+          "y": 22
+        },
+        "term:Token Force": {
+          "x": 491.05,
+          "y": 22
+        },
+        "term:Operation Turquoise": {
+          "x": 637.46,
+          "y": 22.01
+        },
+        "term:Christine Shelley": {
+          "x": 317.67,
+          "y": 575.8
+        },
+        "term:Acts of Genocide": {
+          "x": 339.62,
+          "y": 351.75
+        },
+        "term:National Intelligence Daily": {
+          "x": 129.67,
+          "y": 543.73
+        },
+        "term:Christopher's Authorization": {
+          "x": 154.33,
+          "y": 322.94
+        },
+        "term:belgian peacekeepers": {
+          "x": 600.28,
+          "y": 193.8
+        },
+        "term:PDD-25": {
+          "x": 363.37,
+          "y": 232.94
+        },
+        "term:Bystanders to Genocide": {
+          "x": 467.53,
+          "y": 466.29
+        },
+        "cluster:0": {
+          "x": 665.38,
+          "y": 476.34
+        },
+        "cluster:1": {
+          "x": 448.24,
+          "y": 143.38
+        },
+        "cluster:2": {
+          "x": 266.05,
+          "y": 455.83
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:33:47.228Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:33:38.954Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

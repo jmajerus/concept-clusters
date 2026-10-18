@@ -1,0 +1,588 @@
+{
+  "id": "how-the-internet-moves-a-message",
+  "title": "How the Internet Moves a Message",
+  "category": "computer-science",
+  "subcategories": {
+    "computer-science": "networks-security"
+  },
+  "info": {
+    "text": "How the Internet protocol suite delivers a message: layered responsibilities, packets that share the wire, hop-by-hop routing, the choice between TCP and UDP, and the name service that turns words into addresses.",
+    "links": [
+      {
+        "href": "wiki:Internet protocol suite",
+        "label": "Internet protocol suite (Wikipedia)"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Requirements for Internet Hosts — Communication Layers (RFC 1122)",
+        "author": "R. Braden, ed.",
+        "publisher": "IETF",
+        "year": "1989",
+        "url": "https://www.rfc-editor.org/info/rfc1122/"
+      },
+      {
+        "title": "Domain Names — Implementation and Specification (RFC 1035)",
+        "author": "P. Mockapetris",
+        "publisher": "IETF",
+        "year": "1987",
+        "url": "https://www.rfc-editor.org/info/rfc1035/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "protocol-layers",
+      "name": "The four-layer stack",
+      "color": "teal",
+      "fact": "Delivery is organized as a stack of concerns, each solving one problem and serving the layer above: applications create the data, transport moves it host-to-host, the internet layer routes it across networks, and the link layer carries it across one local hop.",
+      "termInfo": {
+        "application layer": {
+          "text": "Where processes create user data and speak application protocols — HTTP for the web, DNS for names — treating everything below as a pipe.",
+          "links": [
+            {
+              "href": "wiki:Application layer"
+            }
+          ]
+        },
+        "internet layer": {
+          "text": "Gives every host an IP address and exchanges datagrams across network boundaries — the layer that makes many networks one Internet.",
+          "links": [
+            {
+              "href": "wiki:Internet layer"
+            }
+          ]
+        },
+        "link layer": {
+          "text": "Carries packets across one local link — the hop between machines that reach each other without a router.",
+          "links": [
+            {
+              "href": "wiki:Link layer"
+            }
+          ]
+        },
+        "transport layer": {
+          "text": "Moves data host-to-host and adds ports so the right program receives it; offers TCP's reliable pipe or UDP's quick dash.",
+          "links": [
+            {
+              "href": "wiki:Transport layer"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Internet protocol suite"
+          }
+        ]
+      },
+      "seeds": [
+        "application layer",
+        "transport layer"
+      ],
+      "floatingTerms": [
+        "internet layer",
+        "link layer"
+      ],
+      "terms": [
+        "application layer",
+        "transport layer",
+        "internet layer",
+        "link layer"
+      ]
+    },
+    {
+      "id": "packet-switching",
+      "name": "Chop, share, forward",
+      "color": "blue",
+      "fact": "Messages travel as packets — a header plus a payload — that share links on demand, are buffered and re-sent at every intermediate node, and are delivered best-effort: the network promises nothing.",
+      "termInfo": {
+        "best-effort delivery": {
+          "text": "The network's only promise: it will try. Lost, duplicated, or reordered packets are the hosts' problem.",
+          "links": [
+            {
+              "href": "wiki:Best-effort delivery"
+            }
+          ]
+        },
+        "packet": {
+          "text": "A short formatted message: a header that says where it is going, a payload that carries the data.",
+          "links": [
+            {
+              "href": "wiki:Network packet"
+            }
+          ]
+        },
+        "packet switching": {
+          "text": "Grouping data into packets that share links on demand, instead of reserving a circuit for each conversation.",
+          "links": [
+            {
+              "href": "wiki:Packet switching"
+            }
+          ]
+        },
+        "statistical multiplexing": {
+          "text": "Sharing a link by demand: capacity goes to whoever has packets waiting, so a silent conversation costs nothing.",
+          "links": [
+            {
+              "href": "wiki:Statistical time-division multiplexing"
+            }
+          ]
+        },
+        "store-and-forward": {
+          "text": "Each intermediate node receives, buffers, queues, and retransmits the packet — no bit flows end to end without being handed on.",
+          "links": [
+            {
+              "href": "wiki:Store and forward"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Packet switching"
+          }
+        ]
+      },
+      "seeds": [
+        "packet",
+        "packet switching"
+      ],
+      "floatingTerms": [
+        "store-and-forward",
+        "best-effort delivery",
+        "statistical multiplexing"
+      ],
+      "terms": [
+        "packet",
+        "packet switching",
+        "store-and-forward",
+        "best-effort delivery",
+        "statistical multiplexing"
+      ]
+    },
+    {
+      "id": "addressing-routing",
+      "name": "Finding the way",
+      "color": "amber",
+      "fact": "Every packet carries a destination IP address. Routers read it, consult their routing tables, and forward the packet one hop closer to a network that knows the destination more specifically.",
+      "termInfo": {
+        "IP address": {
+          "text": "The numeric label — 32 bits in IPv4, 128 in IPv6 — that names a host's interface on the Internet.",
+          "links": [
+            {
+              "href": "wiki:IP address"
+            }
+          ]
+        },
+        "hop": {
+          "text": "One pass through an intermediate node; hop count is one way routers measure a route's cost.",
+          "links": [
+            {
+              "href": "wiki:Hop (computer networking)"
+            }
+          ]
+        },
+        "router": {
+          "text": "A device that forwards packets between networks, reading each header and sending the packet one hop closer.",
+          "links": [
+            {
+              "href": "wiki:Router (computing)"
+            }
+          ]
+        },
+        "routing table": {
+          "text": "The router's map: destinations with a best next hop each, set by hand or learned from routing protocols.",
+          "links": [
+            {
+              "href": "wiki:Routing table"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Routing"
+          }
+        ]
+      },
+      "seeds": [
+        "IP address",
+        "router"
+      ],
+      "floatingTerms": [
+        "routing table",
+        "hop"
+      ],
+      "terms": [
+        "IP address",
+        "router",
+        "routing table",
+        "hop"
+      ]
+    },
+    {
+      "id": "transport-bargains",
+      "name": "Reliable pipe or quick dash",
+      "color": "magenta",
+      "fact": "Transport offers a choice of service: TCP spends a handshake, sequence numbers, and retransmission to build a dependable ordered byte stream, while UDP just sends and favors time over accuracy. A port number says which program on the machine receives the data.",
+      "termInfo": {
+        "TCP": {
+          "text": "The connection-oriented transport: it spends setup and bookkeeping to hand applications an ordered, reliable byte stream.",
+          "links": [
+            {
+              "href": "wiki:Transmission Control Protocol"
+            }
+          ]
+        },
+        "UDP": {
+          "text": "The connectionless transport: no handshake, no retransmission, no ordering — datagrams out the door, fast and fallible.",
+          "links": [
+            {
+              "href": "wiki:User Datagram Protocol"
+            }
+          ]
+        },
+        "port number": {
+          "text": "A 16-bit number in the transport header saying which program gets the data — 80 for a web server, 53 for DNS.",
+          "links": [
+            {
+              "href": "wiki:Port (computer networking)"
+            }
+          ]
+        },
+        "retransmission": {
+          "text": "TCP's repair for a silent network: if the acknowledgment timer expires, the data goes out again.",
+          "links": [
+            {
+              "href": "wiki:Retransmission (data networks)"
+            }
+          ]
+        },
+        "three-way handshake": {
+          "text": "SYN, SYN-ACK, ACK: the exchange that opens a TCP connection and agrees starting sequence numbers before any data flows.",
+          "links": [
+            {
+              "href": "wiki:Handshake"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Transmission Control Protocol"
+          },
+          {
+            "href": "wiki:User Datagram Protocol"
+          }
+        ]
+      },
+      "seeds": [
+        "TCP",
+        "UDP"
+      ],
+      "floatingTerms": [
+        "three-way handshake",
+        "retransmission",
+        "port number"
+      ],
+      "terms": [
+        "TCP",
+        "UDP",
+        "three-way handshake",
+        "retransmission",
+        "port number"
+      ]
+    },
+    {
+      "id": "name-resolution",
+      "name": "Names before numbers",
+      "color": "olive",
+      "fact": "Before anything can be addressed, the human-friendly domain name must be resolved into an IP address by a hierarchy of resolvers and name servers answering from resource records.",
+      "termInfo": {
+        "DNS resolver": {
+          "text": "The client-side agent that takes a name, queries the hierarchy on the user's behalf, and returns the address — usually from cache.",
+          "links": [
+            {
+              "href": "wiki:Domain Name System"
+            }
+          ]
+        },
+        "domain name": {
+          "text": "The human-readable name — www.example.com — read right to left from the top-level domain down through subdomains.",
+          "links": [
+            {
+              "href": "wiki:Domain name"
+            }
+          ]
+        },
+        "name server": {
+          "text": "A server that answers name queries: root servers refer queries onward; authoritative servers hold a zone's actual records.",
+          "links": [
+            {
+              "href": "wiki:Name server"
+            }
+          ]
+        },
+        "resource record": {
+          "text": "One entry in the DNS database: a name, a type (A for address, MX for mail, NS for delegation), a value, and a TTL.",
+          "links": [
+            {
+              "href": "wiki:Domain Name System"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Domain Name System"
+          }
+        ]
+      },
+      "seeds": [
+        "domain name",
+        "DNS resolver"
+      ],
+      "floatingTerms": [
+        "name server",
+        "resource record"
+      ],
+      "terms": [
+        "domain name",
+        "DNS resolver",
+        "name server",
+        "resource record"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "encapsulation",
+      "term": "encapsulation",
+      "clusters": [
+        "protocol-layers",
+        "packet-switching"
+      ],
+      "fact": "Descending the stack, each layer wraps the layer below's unit in its own header: application data becomes a transport segment's payload, the segment rides inside an IP packet, and the packet is framed onto the wire — so the packet a router forwards is the layered stack made physical.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "packet-switching": "packet"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "protocol-layers",
+        "to": "packet-switching"
+      }
+    },
+    {
+      "id": "hop-by-hop-forwarding",
+      "term": "the forwarding decision",
+      "clusters": [
+        "packet-switching",
+        "addressing-routing"
+      ],
+      "fact": "Store-and-forward exists so each router can read the destination address in the packet header, look it up in its routing table, and pass the packet one hop closer — packet switching and routing are one mechanism seen from two sides.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "packet-switching": "store-and-forward",
+        "addressing-routing": "routing table"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "packet-switching",
+        "to": "addressing-routing"
+      }
+    },
+    {
+      "id": "end-to-end-reliability",
+      "term": "end-to-end reliability",
+      "clusters": [
+        "packet-switching",
+        "transport-bargains"
+      ],
+      "fact": "The network deliberately offers only best-effort delivery; per the end-to-end principle, repairing the difference is the hosts' job — which is why TCP spends acknowledgments and retransmissions at the edges.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "packet-switching": "best-effort delivery",
+        "transport-bargains": "retransmission"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "packet-switching",
+        "to": "transport-bargains"
+      }
+    },
+    {
+      "id": "socket",
+      "term": "socket",
+      "clusters": [
+        "addressing-routing",
+        "transport-bargains"
+      ],
+      "fact": "The IP address delivers a packet to the right machine; the port number in the transport header delivers it to the right program on that machine — together they name one end of a conversation.",
+      "relationKind": "foundation",
+      "idealTerms": {
+        "addressing-routing": "IP address",
+        "transport-bargains": "port number"
+      }
+    },
+    {
+      "id": "dns-lookup",
+      "term": "DNS lookup",
+      "clusters": [
+        "name-resolution",
+        "addressing-routing"
+      ],
+      "fact": "Before any packet can carry a destination address, something must turn the domain name a user typed into an IP address; resolvers and name servers exist to answer exactly that question.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "name-resolution": "DNS resolver",
+        "addressing-routing": "IP address"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "name-resolution",
+        "to": "addressing-routing"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "layer-names",
+      "prompt": "Which of these concepts name one of the four layers of the TCP/IP suite — rather than a protocol, a mechanism, or an address?",
+      "explanation": "The suite (RFC 1122) names four abstraction layers. Every other concept on this board lives inside those layers — protocols like TCP and UDP, mechanisms like packet switching, addresses and records — but only these four name the layers themselves.",
+      "targets": [
+        "application layer",
+        "transport layer",
+        "internet layer",
+        "link layer"
+      ],
+      "reasons": {
+        "application layer": "Where processes create user data and speak application protocols; the top of the stack.",
+        "internet layer": "The layer that addresses hosts and exchanges datagrams across network boundaries.",
+        "link layer": "The layer that carries packets across one local link, the scope of a single hop.",
+        "transport layer": "The host-to-host layer that adds ports and offers the choice between TCP and UDP."
+      }
+    },
+    {
+      "id": "tcp-only-machinery",
+      "prompt": "Which concepts are machinery that only TCP runs — and UDP never touches?",
+      "explanation": "UDP is connectionless: it sends datagrams with no setup and no repair, favoring time over accuracy. Only TCP spends a three-way handshake to open a conversation, and only TCP retransmits when an acknowledgment never arrives. A port number is shared by both protocols, so it does not answer; TCP itself is the bargain, not a piece of its machinery.",
+      "targets": [
+        "three-way handshake",
+        "retransmission"
+      ],
+      "reasons": {
+        "retransmission": "UDP never resends; TCP keeps a timer per unacknowledged data and sends it again.",
+        "three-way handshake": "UDP has no connection to set up; TCP exchanges SYN, SYN-ACK, ACK before any data flows."
+      }
+    },
+    {
+      "id": "across-the-interior",
+      "prompt": "Follow one packet across the network's interior: which concepts name the node it meets, the span between nodes, the choice made there, and the buffering that makes it possible?",
+      "explanation": "Packets cross the interior one hop at a time: each router receives, buffers, and re-queues the packet — store-and-forward — and performs the forwarding decision, choosing the next hop toward the destination. The routing table is what gets consulted, not the choice itself; the IP address is what gets read; the packet is the traveler, not the meeting.",
+      "targets": [
+        "router",
+        "hop",
+        "the forwarding decision",
+        "store-and-forward"
+      ],
+      "reasons": {
+        "hop": "The single pass through an intermediate node — the unit of the journey.",
+        "router": "The intermediate node every packet meets on the way.",
+        "store-and-forward": "The receive-buffer-queue-resend cycle that makes handing on possible.",
+        "the forwarding decision": "Reading the destination and choosing the best next hop from the routing table — the work the stop exists for."
+      }
+    },
+    {
+      "id": "name-to-program",
+      "prompt": "From the name a user types to the program that receives the data: which concepts form that chain, in order?",
+      "explanation": "A resolver takes the domain name and queries the hierarchy until a name server answers with the IP address; later, the port number in the transport header says which program on that machine receives the data. The lookup is the whole journey, not a stop on it; resource records are what get read, not links in the chain; TCP and its handshake carry the bytes only after both endpoints are already known.",
+      "targets": [
+        "domain name",
+        "DNS resolver",
+        "name server",
+        "IP address",
+        "port number"
+      ],
+      "reasons": {
+        "DNS resolver": "The client-side agent that initiates and sequences the queries on the user's behalf.",
+        "IP address": "What the chain produces — the machine-readable destination the rest of the suite needs.",
+        "domain name": "What the user types — the human-readable start of the chain.",
+        "name server": "The server in the hierarchy that answers, or refers the query closer to an authoritative answer.",
+        "port number": "The last hop: which program on the destination machine gets the data."
+      }
+    },
+    {
+      "id": "shared-wire",
+      "prompt": "Which concepts explain how one shared cable carries many conversations at once, without reserving capacity for any of them?",
+      "explanation": "Chopping messages into packets is what lets traffic interleave: the link goes to whoever has a packet ready, and a silent conversation costs nothing — that is statistical multiplexing. Port numbers finish the job at the ends, sorting interleaved arrivals back into their separate conversations. Store-and-forward is about how far a packet moves, not how the wire is shared; best-effort delivery is a promise level, not a sharing scheme.",
+      "targets": [
+        "packet switching",
+        "statistical multiplexing",
+        "packet",
+        "port number"
+      ],
+      "reasons": {
+        "packet": "The small unit whose brevity lets conversations interleave instead of taking turns.",
+        "packet switching": "The umbrella technique: data grouped into packets that share links on demand.",
+        "port number": "Endpoint demultiplexing: sorting one machine's interleaved arrivals back into per-conversation channels.",
+        "statistical multiplexing": "Capacity allocated by demand — the formal name for sharing without reservation."
+      }
+    },
+    {
+      "id": "three-translations",
+      "prompt": "Moving one message takes three translations between different kinds of names. Which concepts name them?",
+      "explanation": "A domain name, spoken by humans, must become an IP address, spoken by routers — the DNS lookup. The address must become a program — the socket, address plus port. And the application's continuous data must become forwardable units — encapsulation, headers nested around payloads. The forwarding decision translates nothing; it chooses a path among addresses it already understands. Retransmission repairs rather than translates.",
+      "targets": [
+        "DNS lookup",
+        "socket",
+        "encapsulation"
+      ],
+      "reasons": {
+        "DNS lookup": "Human-readable name to machine-readable address — the translation everything downstream depends on.",
+        "encapsulation": "Application data to nested, forwardable units — each layer's unit becoming the payload of the next.",
+        "socket": "Machine to program — the address-plus-port endpoint that finishes the delivery."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "locks-and-keys-cryptography",
+        "reason": "The session keys TCP carries and the cipher suites protecting them are this board's toolbox: what encryption actually is, and how strangers agree on keys over the network built here."
+      },
+      {
+        "id": "trust-on-the-wire-tls-pki",
+        "reason": "TLS is this delivery system with trust layered on: the handshake, certificates, and chains of authority run on the packet journey explained here."
+      },
+      {
+        "id": "attack-and-defense-networks",
+        "reason": "Attacks are failures aimed at this system — floods overwhelm delivery, interception rides the wires — and the layered defenses answer them."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The greatest coordination machine",
+    "summary": "How a typed name becomes delivered data: layers, packets, routing, the transport choice, and the name system that starts it all.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "Type an address, press Enter, and half a second later a page appears. Nothing about that is automatic. The Internet is not one machine; it is thousands of independently owned networks that have agreed on a division of labor — a small set of public rules called the Internet protocol suite, or TCP/IP.\r\n\r\nThe division is into layers. Each layer has one job and treats the layer below as a service. Applications create meaning — a web request, a mail message. The transport layer carries data between programs on two machines. The internet layer carries it across whatever networks lie in between, using IP addresses. The link layer carries it across one physical cable or radio hop. As a message descends, each layer wraps it in its own header — a letter slipped into successively larger envelopes, each addressed to the next kind of handler.\r\n\r\nNobody reserves a wire for your download. The message is chopped into packets — small envelopes that interleave with everyone else's on the same fibers — and every router along the way buffers and re-sends them, consulting its routing table to pick the next hop toward the destination address. The network's only promise is best-effort: it tries, and that is all it promises.\r\n\r\nTwo more choices complete the picture. Because the network promises so little, applications pick a transport bargain. TCP does the patient work — a three-way handshake to open the conversation, sequence numbers, acknowledgments, retransmission — to manufacture an ordered, reliable stream at the edges. UDP just sends, which is the right bargain when fresh beats perfect, as in a live call. And before any packet exists, there are names: people type domain names, and the Domain Name System — a hierarchy of resolvers and name servers — turns each name into the IP address everything else needs.\r\n\r\n> **Reflection:** Next time a page loads slowly, which link in this chain do you suspect — the name lookup, the handshake, or a packet that had to be sent twice?"
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

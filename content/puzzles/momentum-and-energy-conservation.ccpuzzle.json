@@ -1,0 +1,262 @@
+{
+  "id": "momentum-and-energy-conservation",
+  "title": "What Stays Constant — Momentum and Energy",
+  "category": "physics",
+  "subcategories": {
+    "physics": "mechanics"
+  },
+  "info": {
+    "text": "Forces tell you how an interaction unfolds moment to moment; conservation tells you how it must end. Momentum — mass times velocity, direction included — is conserved in every interaction of a closed system, and total energy is never created or destroyed; which crashes keep kinetic energy as well, and which dissipate it into heat and sound, separates elastic from inelastic collisions — and explosions run the whole story backwards.",
+    "links": [
+      {
+        "href": "wiki:Momentum"
+      },
+      {
+        "href": "wiki:Conservation of energy"
+      },
+      {
+        "href": "wiki:Elastic collision"
+      }
+    ],
+    "citations": [
+      {
+        "title": "The Feynman Lectures on Physics, Vol. 1",
+        "author": "Richard P. Feynman",
+        "publisher": "Addison-Wesley",
+        "year": "1963",
+        "url": "https://www.feynmanlectures.caltech.edu/"
+      },
+      {
+        "title": "University Physics, Volume 1",
+        "author": "OpenStax",
+        "publisher": "OpenStax",
+        "year": "2016",
+        "url": "https://openstax.org/details/books/university-physics-volume-1"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "momentum-ledger",
+      "name": "Momentum and its bookkeeping",
+      "color": "teal",
+      "fact": "Momentum — mass times velocity, direction built in — is the quantity of motion. For a closed system one pure bookkeeping rule holds no matter how messy the internal forces get: the total momentum never changes, which is why the system's center of mass sails on at constant velocity through every internal crash.",
+      "termInfo": {
+        "center of mass": "The system's weighted average position, which moves as if all the mass were a single particle feeling only outside forces: however the parts collide, it coasts on at constant velocity.",
+        "closed system": "A collection of bodies with nothing getting in or out — no outside force to spoil the books. The condition under which conservation of momentum holds exactly.",
+        "conservation of momentum": "The bookkeeping rule no interaction has ever broken: add up every body's momentum in a closed system, and the total before equals the total after — the internal forces cancel in pairs.",
+        "impulse": "Force accumulated over the time it acts: J = FΔt, exactly the momentum change it delivers. The same change from a gentle push held long or a hard shove held brief.",
+        "momentum": "Mass times velocity, with the velocity's direction built in: p = mv. The quantity of motion that interactions redistribute but a closed system never loses."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Momentum"
+          }
+        ]
+      },
+      "seeds": [
+        "momentum",
+        "conservation of momentum"
+      ],
+      "floatingTerms": [
+        "impulse",
+        "closed system",
+        "center of mass"
+      ],
+      "terms": [
+        "momentum",
+        "conservation of momentum",
+        "impulse",
+        "closed system",
+        "center of mass"
+      ]
+    },
+    {
+      "id": "energy-transformations",
+      "name": "Energy and its transformations",
+      "color": "blue",
+      "fact": "Energy changes form without vanishing: work — force applied along a distance — converts it between motion and storage, as when a raised weight banks potential energy. Total energy is conserved, but mechanical energy is conservation with a catch: dissipation leaks it into heat and sound, where it stops being useful for pushing things around.",
+      "termInfo": {
+        "conservation of energy": "Energy is never created or destroyed, only converted among forms. The total always balances; the catch is what happens to the useful, mechanical share.",
+        "dissipation": "The leak: mechanical energy turning into heat and sound through friction, deformation, and drag — conserved as energy in total, but no longer able to push anything around.",
+        "potential energy": "Energy stored by configuration — a raised weight, a compressed spring — ready to become motion: the deposit that gravity or elasticity can draw on later.",
+        "work": "Force applied along a distance: W = Fd when they point the same way. The currency of energy conversion — positive work banks energy into a body, negative work draws it out."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Conservation of energy"
+          }
+        ]
+      },
+      "seeds": [
+        "potential energy",
+        "work"
+      ],
+      "floatingTerms": [
+        "conservation of energy",
+        "dissipation"
+      ],
+      "terms": [
+        "potential energy",
+        "work",
+        "conservation of energy",
+        "dissipation"
+      ]
+    },
+    {
+      "id": "the-crash-tells-you",
+      "name": "The crash tells you",
+      "color": "amber",
+      "fact": "Interactions divide into kinds by what survives: in an elastic collision the bodies rebound and kinetic energy survives along with the momentum; in an inelastic one deformation eats kinetic energy; when bodies stick together — perfectly inelastic — the loss is as large as the conservation laws allow. The coefficient of restitution grades every bounce between the extremes, from 1 to 0.",
+      "termInfo": {
+        "coefficient of restitution": "The bounce, graded: the ratio of separation speed to approach speed along the line of impact — 1 for perfectly elastic, 0 for perfectly sticky.",
+        "elastic collision": "A collision whose deformation fully springs back: the bodies rebound, and kinetic energy survives the encounter along with the momentum. Billiard balls come close; colliding atoms manage it exactly.",
+        "inelastic collision": "The everyday crash: some deformation stays, and part of the kinetic energy dissipates into heat and sound even as momentum is conserved exactly.",
+        "perfectly inelastic collision": "The sticking extreme: the bodies leave as one, keeping the momentum and losing the largest share of kinetic energy the conservation laws allow."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Elastic collision"
+          }
+        ]
+      },
+      "seeds": [
+        "elastic collision",
+        "inelastic collision"
+      ],
+      "floatingTerms": [
+        "perfectly inelastic collision",
+        "coefficient of restitution"
+      ],
+      "terms": [
+        "elastic collision",
+        "inelastic collision",
+        "perfectly inelastic collision",
+        "coefficient of restitution"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "kinetic-energy",
+      "term": "kinetic energy",
+      "clusters": [
+        "energy-transformations",
+        "the-crash-tells-you"
+      ],
+      "fact": "Momentum survives every crash; kinetic energy is the discriminating quantity — it survives only the elastic ones, and in the rest it dissipates into heat and sound, which is why the wreckage tells you which conservation law held.",
+      "info": "Watch this quantity, not momentum, to tell collision kinds apart: it is the only thing a crash consumes.",
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "energy-transformations": "conservation of energy",
+        "the-crash-tells-you": "elastic collision"
+      }
+    },
+    {
+      "id": "explosion",
+      "term": "explosion",
+      "clusters": [
+        "momentum-ledger",
+        "the-crash-tells-you"
+      ],
+      "fact": "A collision run in reverse: an explosion conserves momentum exactly as strictly as any crash, while kinetic energy increases — drawn out of stored potential energy. The same ledger, read backwards.",
+      "info": "The mirror interaction: everything the momentum lesson says still holds; only the kinetic-energy sign flips.",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "momentum-ledger": "conservation of momentum",
+        "the-crash-tells-you": "perfectly inelastic collision"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "cannon-recoil",
+      "prompt": "A cannon fires: the ball speeds forward and the cannon kicks back, but much more slowly. Which concepts account for the recoil being slower than the ball?",
+      "explanation": "Impulse would name the charge's force-time push, not the balance of the recoils; the closed system is the condition of the accounting, and the center of mass never moves at all in this shot — the slow backward drift of the heavy cannon against the fast ball is exactly equal and opposite momentum.",
+      "targets": [
+        "momentum",
+        "conservation of momentum"
+      ],
+      "reasons": {
+        "conservation of momentum": "The system's total was zero before the shot and stays zero after: ball and cannon carry equal, opposite momenta.",
+        "momentum": "Mass times velocity with direction: the ball's large mv forward equals the cannon's mv backward, so the heavy body must move slowly."
+      }
+    },
+    {
+      "id": "pendulum-in-the-lab",
+      "prompt": "A textbook pendulum swings forever, but a real one in a laboratory eventually stops. Which concepts name the difference between the two books?",
+      "explanation": "Work and potential energy name conversions and storage of energy that is still mechanical; the pendulum's loss is precisely the share that stops being either — the difference between the textbook's ideal and the lab's drag and squeak.",
+      "targets": [
+        "conservation of energy",
+        "dissipation"
+      ],
+      "reasons": {
+        "conservation of energy": "The textbook's rule: total energy is never created or destroyed, only converted.",
+        "dissipation": "The lab's leak: mechanical energy draining into heat and sound at the pivot and in the air until the swing dies."
+      }
+    },
+    {
+      "id": "clay-and-steel",
+      "prompt": "Two lumps of clay collide and stick as one; two hardened steel bearings collide and rebound with barely any loss. Which concepts pin down these extremes of the same scale?",
+      "explanation": "The two extremes and the number that grades between them. 'Inelastic collision' names the broad middle ground of everyday crashes, and momentum is the quantity all of these scenarios conserve equally — neither pins either end.",
+      "targets": [
+        "perfectly inelastic collision",
+        "elastic collision",
+        "coefficient of restitution"
+      ],
+      "reasons": {
+        "coefficient of restitution": "The grader itself: e = 0 for the sticky clay, e approaching 1 for the ringing steel — the scale's units.",
+        "elastic collision": "The bearings' end: rebound with kinetic energy fully surviving alongside momentum.",
+        "perfectly inelastic collision": "The clay's end: one body leaves the impact, with the largest kinetic-energy loss the laws allow."
+      }
+    },
+    {
+      "id": "the-film-backwards",
+      "prompt": "In which interaction do the momentum books balance exactly as in a crash, but the kinetic-energy ledger run the other way?",
+      "explanation": "In every collision kinetic energy falls — bouncy ones keep it, crashing ones dissipate it. The explosion alone gains kinetic energy, drawn from stored potential energy, while the momentum books balance exactly as in any crash; elastic collision keeps energy but never adds it.",
+      "targets": [
+        "explosion"
+      ],
+      "reasons": {
+        "explosion": "One body becoming many: momentum conserved, kinetic energy increasing from storage — the crash with time reversed."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "forces-and-newtons-laws",
+        "reason": "The foundation underneath: force, mass, and acceleration are exactly what these conservation ledgers tally between."
+      },
+      {
+        "id": "gravity-and-orbits",
+        "reason": "The ledgers written across the sky: orbits and escape velocity are momentum and energy accounts kept by gravity itself."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The books always balance",
+    "summary": "Momentum and energy are the ledgers an interaction cannot cook: what survives a crash tells you what kind of crash it was.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "## Two ledgers that cannot be cooked\r\n\r\nMomentum is mass times velocity, direction built in — the quantity of motion. For a closed system, one pure bookkeeping rule holds through every push, crash, and blast: the total never changes. Internal forces cancel in pairs, so the system's center of mass coasts on regardless of the drama inside. Impulse is how a force delivers momentum — a gentle push held long or a hard kick held brief, FΔt either way.\r\n\r\n## The energy books, with a catch\r\n\r\nEnergy keeps a different set of books. Work — force applied along a distance — moves energy between motion and storage: kinetic to potential and back as a weight rises and falls or a spring coils and releases. Total energy is never created or destroyed; the catch is that the mechanical share, the part that can still push things around, leaks. Dissipation turns it into heat and sound, where it still exists but no longer does useful work.\r\n\r\n## Reading the wreckage\r\n\r\nPut the ledgers side by side at a collision. Momentum always balances. Kinetic energy is the discriminating column: it survives the bouncy, elastic collisions; in inelastic crashes some dissipates; when bodies stick — the perfectly inelastic extreme — the loss is as large as allowed, and the coefficient of restitution grades the bounce from 1 to 0. Run the film backwards and you have an explosion: momentum conserved exactly, kinetic energy grown from storage. Stop tracking the force frame by frame; read the ledgers instead — what survives tells you what happened."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "generative assistance",
+        "kind": "generative"
+      },
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

@@ -4,8 +4,12 @@
   "category": "bioethics",
   "categories": [
     "bioethics",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism"
+  },
   "tags": [
     "book"
   ],

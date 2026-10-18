@@ -1,11 +1,15 @@
 {
   "id": "manufactured-pressure",
   "title": "Manufactured Pressure",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How fabricated time limits, scarcity claims, and social signals create pressure that narrows deliberation and steers people toward choices they might not otherwise make.",
     "links": [

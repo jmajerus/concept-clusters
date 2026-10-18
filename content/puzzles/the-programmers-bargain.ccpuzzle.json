@@ -1,8 +1,14 @@
 {
   "id": "the-programmers-bargain",
   "title": "The Programmer's Bargain",
-  "category": "computer-science",
-  "large": true,
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
+  "subcategories": {
+    "science-technology-society": "technology-work-control"
+  },
   "info": {
     "text": "How moving applications into the browser changed programming leverage, professional expertise, and the balance between domain design and delivery plumbing.",
     "links": [

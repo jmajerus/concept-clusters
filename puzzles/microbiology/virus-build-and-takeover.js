@@ -1,0 +1,846 @@
+// Generated from content/puzzles/virus-build-and-takeover.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+const puzzle = definePuzzle(import.meta.url, {
+  "id": "virus-build-and-takeover",
+  "title": "Anatomy of a Takeover — How a Virus Is Built and Replicates",
+  "category": "microbiology",
+  "subcategories": {
+    "microbiology": "virology"
+  },
+  "info": {
+    "text": "How a virus is built — a genome in a protein coat, sometimes wrapped in stolen membrane — and how it takes a cell over: the lytic timetable from docking to bursting, the genome tricks that decide its first move, and the temperate option to hide in the host's DNA until damage brings it out.",
+    "links": [
+      {
+        "href": "wiki:Virus"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Virus",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Virus"
+      },
+      {
+        "title": "Lytic cycle",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Lytic_cycle"
+      },
+      {
+        "title": "Lysogenic cycle",
+        "publisher": "Wikipedia",
+        "year": "2026",
+        "url": "https://en.wikipedia.org/wiki/Lysogenic_cycle"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "architecture",
+      "name": "Virion architecture",
+      "color": "teal",
+      "fact": "A virus particle is a genome wearing a coat: protein subunits stack into a shell, the shell hugs the nucleic acid, and some viruses wrap the whole thing in a membrane stolen from their last host cell.",
+      "terms": [
+        "virion",
+        "capsid",
+        "capsomere",
+        "nucleocapsid",
+        "envelope"
+      ],
+      "seeds": [
+        "capsid",
+        "envelope"
+      ],
+      "termInfo": {
+        "capsid": {
+          "text": "The protein coat that shelters the genome and carries the shapes a micrograph can sort. Built from many copies of one or a few proteins — an economy of design when your genome is tiny.",
+          "links": [
+            {
+              "href": "wiki:Capsid"
+            }
+          ]
+        },
+        "capsomere": {
+          "text": "The repeating protein subunit a capsid is built from. Identical capsomeres tile into helices or icosahedra — the reason viral coats look so geometric.",
+          "links": [
+            {
+              "href": "wiki:Capsomere"
+            }
+          ]
+        },
+        "envelope": {
+          "text": "A lipid membrane taken from the host — outer membrane, nuclear membrane, or endoplasmic reticulum — as the virus exits. Its proteins are viral; the lipids are borrowed, which is why soap and alcohol dismantle enveloped viruses so well.",
+          "links": [
+            {
+              "href": "wiki:Viral envelope"
+            }
+          ]
+        },
+        "nucleocapsid": {
+          "text": "The genome-plus-capsid unit: what an enveloped virus keeps inside its stolen membrane. Measles and influenza carry it as a helical core; herpes as an icosahedral shell.",
+          "links": [
+            {
+              "href": "wiki:Capsid"
+            }
+          ]
+        },
+        "virion": {
+          "text": "The complete, infectious particle — the thing that travels between hosts. Outside a cell a virion is inert; the takeover program runs only once it is inside.",
+          "links": [
+            {
+              "href": "wiki:Virion"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Viruses are obligate intracellular parasites: a virion outside a cell does nothing but wait. Everything here is either genome, coat, or wrapper — no metabolism of its own.",
+        "links": [
+          {
+            "href": "wiki:Virus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "genome",
+      "name": "Genome sense and shape",
+      "color": "blue",
+      "fact": "The genome's sense decides how the cell can read it: one kind of RNA is message-ready the instant it arrives, its mirror image must be copied before anything gets made, and some genomes arrive split into separate pieces.",
+      "terms": [
+        "positive-sense",
+        "negative-sense",
+        "segmented genome"
+      ],
+      "seeds": [
+        "positive-sense",
+        "negative-sense"
+      ],
+      "termInfo": {
+        "negative-sense": {
+          "text": "A (−)ssRNA genome is the complement of message: nothing can be made until a virus-carried RNA-dependent RNA polymerase copies it. Measles, influenza, rabies, and Ebola all travel this way.",
+          "links": [
+            {
+              "href": "wiki:Negative-strand RNA virus"
+            }
+          ]
+        },
+        "positive-sense": {
+          "text": "A (+)ssRNA genome reads directly as messenger RNA: the host ribosome starts translating the moment it is in the cytoplasm. Poliovirus and coronaviruses travel this way.",
+          "links": [
+            {
+              "href": "wiki:Positive-strand RNA virus"
+            }
+          ]
+        },
+        "segmented genome": {
+          "text": "A genome split into separate pieces, often one gene each. Influenza carries eight segments — and when two strains coinfect one cell, segments shuffle (reassortment), which is how pandemic flu strains are born.",
+          "links": [
+            {
+              "href": "wiki:Reassortment"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Viral genomes are DNA or RNA, never both — except when an enzyme shuttles between the two. Sense describes whether RNA reads as message immediately or must be copied first; it is the core of the Baltimore groups.",
+        "links": [
+          {
+            "href": "wiki:Virus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "symmetry",
+      "name": "Coat architectures",
+      "color": "amber",
+      "fact": "Micrographs sort virus coats into three great shapes: a stacked helix, a geometric shell built from repeated triangles, and custom machinery — a head bolted to a tail — that no simple formula describes.",
+      "terms": [
+        "helical",
+        "icosahedral",
+        "complex symmetry"
+      ],
+      "seeds": [
+        "helical",
+        "icosahedral"
+      ],
+      "termInfo": {
+        "complex symmetry": {
+          "text": "Neither helix nor shell: poxviruses with their brick-shaped, many-layered body plan, or T4's icosahedral head on a helical tail with baseplate and fibers — custom machinery built for injection.",
+          "links": [
+            {
+              "href": "wiki:Escherichia virus T4"
+            }
+          ]
+        },
+        "helical": {
+          "text": "Identical capsomeres stacked in a ribbon around the genome — tobacco mosaic virus's rigid rod, or the flexible coil inside the measles envelope. Simple, and scalable to any genome length.",
+          "links": [
+            {
+              "href": "wiki:Tobacco mosaic virus"
+            }
+          ]
+        },
+        "icosahedral": {
+          "text": "A shell of twenty triangular faces built from 60 or more capsomeres — the most common animal-virus architecture (adenovirus, poliovirus, herpes). The biggest volume for the fewest parts.",
+          "links": [
+            {
+              "href": "wiki:Icosahedron"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The coat is the only architecture a virus has, and evolution keeps rediscovering two efficient solutions — the helix and the icosahedron — plus custom machinery where infection demands it.",
+        "links": [
+          {
+            "href": "wiki:Virus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lytic",
+      "name": "The lytic program",
+      "color": "magenta",
+      "fact": "A virulent phage runs a fixed timetable: dock on the host, inject the genome, redirect the cell's metabolism, mass-produce parts, assemble new particles, and burst the cell open — about two hundred progeny in twenty-five minutes for T4.",
+      "terms": [
+        "attachment",
+        "penetration",
+        "biosynthesis",
+        "maturation",
+        "lysis"
+      ],
+      "seeds": [
+        "lysis",
+        "penetration"
+      ],
+      "termInfo": {
+        "attachment": {
+          "text": "First contact: tail fibers or surface proteins dock on a specific host receptor — the lock-picking that decides which cells a virus can even enter.",
+          "links": [
+            {
+              "href": "wiki:Viral entry"
+            }
+          ]
+        },
+        "biosynthesis": {
+          "text": "The hijack: host nucleic acid is degraded, and the cell's ribosomes and enzymes start making phage DNA and proteins on the virus's schedule — early genes redirect, late genes build parts.",
+          "links": [
+            {
+              "href": "wiki:Lytic cycle"
+            }
+          ]
+        },
+        "lysis": {
+          "text": "The exit: holins punch holes, endolysin chews the cell wall, and osmotic pressure bursts the cell open, releasing the progeny to find new hosts.",
+          "links": [
+            {
+              "href": "wiki:Lysis"
+            }
+          ]
+        },
+        "maturation": {
+          "text": "Assembly line: heads are filled with genomes, tails bolt on, and a finished virion snaps together — for T4, roughly two hundred per infected cell in about twenty-five minutes.",
+          "links": [
+            {
+              "href": "wiki:Lytic cycle"
+            }
+          ]
+        },
+        "penetration": {
+          "text": "The genome goes in — injected through a bacterial cell wall, or by membrane fusion or endocytosis in animal cells. For T4 the sheath contracts and DNA is squirted through the tail; the empty capsid stays outside.",
+          "links": [
+            {
+              "href": "wiki:Lytic cycle"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "This is the whole program in five steps — the one-step growth curve every virology student learns. Virulent phages can only run it; temperate ones can choose it.",
+        "links": [
+          {
+            "href": "wiki:Lytic cycle"
+          }
+        ]
+      }
+    },
+    {
+      "id": "temperate",
+      "name": "The hidden option",
+      "color": "olive",
+      "fact": "A temperate phage can skip the timetable: integrate into the host genome and ride silently through generations — the same strategy carries a different name inside animal cells, and DNA damage is the signal that ends the truce.",
+      "terms": [
+        "prophage",
+        "provirus",
+        "lysogen",
+        "induction"
+      ],
+      "seeds": [
+        "prophage",
+        "provirus"
+      ],
+      "termInfo": {
+        "induction": {
+          "text": "The end of the truce: UV light or DNA-damaging chemicals trip the cell's SOS response, the prophage excises from the chromosome, and the lytic program begins.",
+          "links": [
+            {
+              "href": "wiki:SOS response"
+            }
+          ]
+        },
+        "lysogen": {
+          "text": "A bacterial cell carrying a prophage. The prophage's repressor protein both keeps the virus quiet and grants superinfection immunity — protection against new infections by related phages.",
+          "links": [
+            {
+              "href": "wiki:Lysogenic cycle"
+            }
+          ]
+        },
+        "prophage": {
+          "text": "The integrated phage genome: dormant, replicated passively with its host at every division, mostly silent. It can carry toxin genes that convert harmless bacteria into killers — lysogenic conversion.",
+          "links": [
+            {
+              "href": "wiki:Prophage"
+            }
+          ]
+        },
+        "provirus": {
+          "text": "The same trick in animal cells: HIV copies its RNA to DNA and inserts a provirus into a chromosome, where it can hide for years — the reason antiretroviral therapy is lifelong.",
+          "links": [
+            {
+              "href": "wiki:Provirus"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Lysogeny is latency with a bacterial address: the phage genome integrates and mostly turns itself off. Lysogenic conversion shows why it matters — diphtheria, cholera, and botulism toxins are all phage genes riding silent.",
+        "links": [
+          {
+            "href": "wiki:Lysogenic cycle"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "budding-release",
+      "term": "budding release",
+      "clusters": [
+        0,
+        3
+      ],
+      "fact": "For an enveloped virus, exit and dressing are one act: budding through a host membrane releases the particle while wrapping it in its envelope — which is why 'enveloped versus naked' tracks how a virus leaves.",
+      "info": {
+        "text": "Enveloped viruses typically exit by budding or exocytosis; naked viruses usually wait for the cell to burst. The route of exit predicts sensitivity to soap and detergent.",
+        "links": [
+          {
+            "href": "wiki:Viral envelope"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "envelope",
+        "lysis"
+      ],
+      "direction": {
+        "kind": "bidirectional"
+      }
+    },
+    {
+      "id": "immediate-translation",
+      "term": "immediate translation",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "Sense decides the program's first move: a positive-sense RNA genome can be translated the moment penetration ends, but a negative-sense genome must first be copied by a viral RNA-dependent RNA polymerase before biosynthesis can start.",
+      "info": {
+        "text": "The Baltimore classification is built exactly on this question: how does each genome type get to messenger RNA? Groups IV and V differ only in the answer.",
+        "links": [
+          {
+            "href": "wiki:Baltimore classification"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "positive-sense",
+        "biosynthesis"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 3
+      }
+    },
+    {
+      "id": "injection-apparatus",
+      "term": "the injection apparatus",
+      "clusters": [
+        2,
+        3
+      ],
+      "fact": "Complex symmetry is lytic machinery: T4's tail fibers perform attachment and its contractile sheath drives DNA through the cell wall like a molecular syringe — the head-and-tail shape exists to run the program's opening move.",
+      "info": {
+        "text": "T4's contractile sheath was one of the first molecular machines imaged in action; its baseplate senses the cell surface and triggers the tail's collapse.",
+        "links": [
+          {
+            "href": "wiki:Escherichia virus T4"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "complex symmetry",
+        "penetration"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 3
+      }
+    },
+    {
+      "id": "lytic-switch",
+      "term": "the lytic switch",
+      "clusters": [
+        3,
+        4
+      ],
+      "fact": "Induction is the hinge between the two programs: DNA-damaging stress excises the prophage, and the cell that had been riding silent is thrown straight into the lytic timetable.",
+      "info": {
+        "text": "Induction matters beyond the lab: stress-woken prophages in gut and soil bacteria can carry toxin genes and spread them to new hosts by transduction.",
+        "links": [
+          {
+            "href": "wiki:Lysogenic cycle"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": [
+        "lysis",
+        "induction"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 4,
+        "to": 3
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "whole-particle",
+      "prompt": "Which single term names the complete, infectious virus particle rather than one of its parts?",
+      "explanation": "The virion is the whole infectious unit — genome, coat, and any wrapper. Capsid is the coat alone, nucleocapsid the coat plus genome, capsomere a subunit of the coat, and envelope just the stolen membrane.",
+      "targets": [
+        "virion"
+      ],
+      "reasons": {
+        "virion": "The whole unit that travels between hosts — everything else here is one of its parts."
+      }
+    },
+    {
+      "id": "information-not-hardware",
+      "prompt": "Which terms describe the genome itself rather than the structures wrapped around it?",
+      "explanation": "All three describe the genome itself: how its RNA reads, or whether it travels in pieces. Nucleocapsid and capsomere name hardware — structures built around that information.",
+      "targets": [
+        "positive-sense",
+        "negative-sense",
+        "segmented genome"
+      ],
+      "reasons": {
+        "negative-sense": "A property of the RNA — it must be copied before it reads.",
+        "positive-sense": "A property of the RNA — it reads as message directly.",
+        "segmented genome": "How the information is packaged: in separate pieces."
+      }
+    },
+    {
+      "id": "ready-mrna",
+      "prompt": "Which genome can a host ribosome translate immediately on entry, with no copying step first?",
+      "explanation": "A positive-sense RNA genome is already messenger RNA: the host ribosome begins translating it on arrival. A negative-sense genome cannot be read at all until a carried polymerase copies it into message first.",
+      "targets": [
+        "positive-sense"
+      ],
+      "reasons": {
+        "positive-sense": "It reads directly as mRNA — message-ready by definition."
+      }
+    },
+    {
+      "id": "syringe-pairing",
+      "prompt": "Which pairing names the phage shape and the takeover step its contractile tail performs?",
+      "explanation": "T4 is the head-and-tail complex, and its opening move is penetration: attachment only docks the fibers — the sheath contraction that drives DNA through the wall is the injection step.",
+      "targets": [
+        "complex symmetry",
+        "penetration"
+      ],
+      "reasons": {
+        "complex symmetry": "The head-and-tail architecture no simple formula describes.",
+        "penetration": "The injection step — DNA driven through the cell wall."
+      }
+    },
+    {
+      "id": "bracket-steps",
+      "prompt": "Which two steps bracket the takeover — its first and its last?",
+      "explanation": "Attachment opens the program (docking on the receptor) and lysis closes it (bursting the cell). Penetration, biosynthesis, and maturation run between them.",
+      "targets": [
+        "attachment",
+        "lysis"
+      ],
+      "reasons": {
+        "attachment": "First contact with the host receptor — the program's opening move.",
+        "lysis": "The burst that releases progeny — the program's final act."
+      }
+    },
+    {
+      "id": "states-not-events",
+      "prompt": "Which hidden-option terms name a state rather than an event?",
+      "explanation": "Prophage, provirus, and lysogen all name stable states — an integrated genome or the cell carrying it. Induction is the one event: the stress-triggered switch back to lysis.",
+      "targets": [
+        "prophage",
+        "provirus",
+        "lysogen"
+      ],
+      "reasons": {
+        "lysogen": "The cell that carries the prophage — a state, not a switch.",
+        "prophage": "The integrated, silent phage genome — a state.",
+        "provirus": "The animal-cell equivalent — also a state."
+      }
+    },
+    {
+      "id": "the-switch",
+      "prompt": "Which connection describes what UV damage does to a cell riding silent with a prophage?",
+      "explanation": "The lytic-switch bridge is the hinge between the hidden and burst programs: DNA-damaging stress trips the SOS response, the prophage excises, and the cell is thrown into the lytic timetable. Nothing about lysogeny reverses into a prophage — the switch runs one way.",
+      "targets": [
+        "the lytic switch"
+      ],
+      "reasons": {
+        "the lytic switch": "Induction: the prophage excises and the lytic timetable begins."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "bacterial-architectures",
+        "reason": "Neighboring boards in the batch: that one teaches the bacterial cell and its three gene-trading routes (transduction is a phage at work); this one teaches the virus doing it — the same takeover from the virus's side of the encounter."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "estimatedMinutes": 4,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Viruses sit at the edge of what we call alive. A virus particle — a virion — is no more than a genome in a protective coat, sometimes wrapped in a membrane stolen from the last cell it infected. It has no metabolism of its own. Everything a virus \"does\" is really a program its genome runs inside a host cell, using the cell's own machinery.\r\n\r\nThe coat is surprisingly mathematical. Identical protein subunits, called capsomeres, tile into one of a few efficient shapes: a helical ribbon, a twenty-faced icosahedral shell, or — for some bacterial viruses — custom machinery with a head, a tail, and fibers that grip the host.\r\n\r\nThe genome varies more than the coat. Viral genomes may be DNA or RNA, and RNA genomes come in two flavors with opposite first moves: a positive-sense genome is messenger RNA already, readable by the host ribosome the moment it arrives; a negative-sense genome is its mirror image and must be copied before anything can be made. Some genomes travel in segments, which lets related viruses swap parts when they share a cell.\r\n\r\nInfection follows a timetable. The virus attaches to a specific receptor, penetrates, redirects the cell to synthesize viral parts, assembles new virions, and releases them — often by bursting the cell. That is the lytic program. But bacterial phages have a second option: integrate into the host genome as a prophage and ride silent for generations — the same strategy animal viruses call a provirus. DNA damage ends the truce, inducing the hidden genome back into the lytic program.\r\n\r\nThat hidden option is one reason viruses keep reshaping life: silent prophages carry toxin genes — those behind diphtheria, cholera, and botulism — and occasionally wake and pass them to new hosts."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+});
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "virus-build-and-takeover",
+      "puzzleRevision": "fnv1a32:5fac4004",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 810.12,
+          "y": 130.64,
+          "pinned": true
+        },
+        "cluster:1": {
+          "x": 135.78,
+          "y": 177.74,
+          "pinned": true
+        },
+        "cluster:2": {
+          "x": 799.95,
+          "y": 483.63,
+          "pinned": true
+        },
+        "cluster:3": {
+          "x": 339.68,
+          "y": 457.67,
+          "pinned": true
+        },
+        "cluster:4": {
+          "x": 394.84,
+          "y": 121.19,
+          "pinned": true
+        }
+      },
+      "bridges": {
+        "term:budding release": {
+          "x": 636.2,
+          "y": 354.51,
+          "pinned": true
+        },
+        "term:immediate translation": {
+          "x": 135.18,
+          "y": 334.98,
+          "pinned": true
+        },
+        "term:the injection apparatus": {
+          "x": 598.72,
+          "y": 481.44,
+          "pinned": true
+        },
+        "term:the lytic switch": {
+          "x": 558.02,
+          "y": 242.59,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "virion",
+          "capsid",
+          "capsomere",
+          "nucleocapsid",
+          "envelope"
+        ],
+        "cluster:1": [
+          "positive-sense",
+          "negative-sense",
+          "segmented genome"
+        ],
+        "cluster:2": [
+          "helical",
+          "icosahedral",
+          "complex symmetry"
+        ],
+        "cluster:3": [
+          "attachment",
+          "penetration",
+          "biosynthesis",
+          "maturation",
+          "lysis"
+        ],
+        "cluster:4": [
+          "prophage",
+          "provirus",
+          "lysogen",
+          "induction"
+        ]
+      },
+      "memberOrders": {
+        "cluster:0": [
+          "virion",
+          "capsomere",
+          "nucleocapsid",
+          "envelope",
+          "capsid"
+        ],
+        "cluster:1": [
+          "negative-sense",
+          "segmented genome",
+          "positive-sense"
+        ],
+        "cluster:2": [
+          "helical",
+          "complex symmetry",
+          "icosahedral"
+        ],
+        "cluster:3": [
+          "lysis",
+          "biosynthesis",
+          "penetration",
+          "attachment",
+          "maturation"
+        ],
+        "cluster:4": [
+          "prophage",
+          "provirus",
+          "induction",
+          "lysogen"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 1511.6370660804519
+      },
+      "solutionLayout": null,
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-15T22:05:49.665Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "virus-build-and-takeover",
+      "puzzleRevision": "fnv1a32:5fac4004",
+      "board": {
+        "width": 1010,
+        "height": 650
+      },
+      "nodes": {
+        "term:virion": {
+          "x": 891.64,
+          "y": 502.27
+        },
+        "term:capsid": {
+          "x": 853.32,
+          "y": 574.57
+        },
+        "term:capsomere": {
+          "x": 753.77,
+          "y": 600.97
+        },
+        "term:nucleocapsid": {
+          "x": 635.68,
+          "y": 592.96
+        },
+        "term:envelope": {
+          "x": 601.24,
+          "y": 516.45
+        },
+        "term:positive-sense": {
+          "x": 244.79,
+          "y": 483.51
+        },
+        "term:negative-sense": {
+          "x": 346.6,
+          "y": 604.98
+        },
+        "term:segmented genome": {
+          "x": 160.06,
+          "y": 585.19
+        },
+        "term:helical": {
+          "x": 452.46,
+          "y": 37
+        },
+        "term:icosahedral": {
+          "x": 696.26,
+          "y": 37
+        },
+        "term:complex symmetry": {
+          "x": 322.13,
+          "y": 37
+        },
+        "term:attachment": {
+          "x": 93.83,
+          "y": 279.08
+        },
+        "term:penetration": {
+          "x": 208.17,
+          "y": 107.59
+        },
+        "term:biosynthesis": {
+          "x": 144.01,
+          "y": 355.78
+        },
+        "term:maturation": {
+          "x": 104.79,
+          "y": 164.89
+        },
+        "term:lysis": {
+          "x": 415.07,
+          "y": 294.11
+        },
+        "term:prophage": {
+          "x": 814.47,
+          "y": 136.63
+        },
+        "term:provirus": {
+          "x": 887.92,
+          "y": 242.13
+        },
+        "term:lysogen": {
+          "x": 905.46,
+          "y": 344.51
+        },
+        "term:induction": {
+          "x": 717.95,
+          "y": 173.02
+        },
+        "term:budding release": {
+          "x": 540.95,
+          "y": 407.59
+        },
+        "term:immediate translation": {
+          "x": 368.62,
+          "y": 392.07
+        },
+        "term:the injection apparatus": {
+          "x": 407.26,
+          "y": 183.78
+        },
+        "term:the lytic switch": {
+          "x": 573,
+          "y": 237.55
+        },
+        "cluster:0": {
+          "x": 771.57,
+          "y": 459.87
+        },
+        "cluster:1": {
+          "x": 416.55,
+          "y": 539.3
+        },
+        "cluster:2": {
+          "x": 567.41,
+          "y": 99.27
+        },
+        "cluster:3": {
+          "x": 239.86,
+          "y": 244.01
+        },
+        "cluster:4": {
+          "x": 775.06,
+          "y": 299.65
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "author",
+      "savedAt": "2026-10-15T22:24:29.453Z"
+    }
+  },
+  "board": {
+    "lensFlowTrace": true,
+    "source": "author",
+    "savedAt": "2026-10-15T22:23:21.195Z",
+    "sizeFactor": 1.05
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

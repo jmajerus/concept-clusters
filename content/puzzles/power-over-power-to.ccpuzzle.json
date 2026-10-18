@@ -1,11 +1,15 @@
 {
   "id": "power-over-power-to",
   "title": "Power Over, Power To",
-  "category": "political-science",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "political-science",
     "psychology"
   ],
+  "subcategories": {
+    "psychology": "psychoanalysis"
+  },
   "tags": [
     "book"
   ],
@@ -32,6 +36,13 @@
       "name": "Power To",
       "color": "teal",
       "fact": "Fromm insisted that power names two entirely different things easily confused with each other. Power to do something -- the capacity to act, to realize one's own faculties, what he called productiveness -- has nothing to do with dominating anyone else. It is potency and mastery in the sense of ability, not control, and it doesn't require another person's submission to exist at all.",
+      "termInfo": {
+        "productiveness": "Fromm's term, from Man for Himself, for the healthy exercise of a person's own faculties -- thinking, loving, working -- as ends in themselves, not as transactions with anyone else.",
+        "self-realization": "Growth in a person's own capacities, independent of anyone else's submission, authority, or control."
+      },
+      "info": {
+        "text": "Power as capacity and ability -- what a person can actually do, exercised for its own sake rather than over anyone else."
+      },
       "seeds": [
         "potency",
         "mastery"
@@ -45,20 +56,20 @@
         "mastery",
         "productiveness",
         "self-realization"
-      ],
-      "termInfo": {
-        "productiveness": "Fromm's term, from Man for Himself, for the healthy exercise of a person's own faculties -- thinking, loving, working -- as ends in themselves, not as transactions with anyone else.",
-        "self-realization": "Growth in a person's own capacities, independent of anyone else's submission, authority, or control."
-      },
-      "info": {
-        "text": "Power as capacity and ability -- what a person can actually do, exercised for its own sake rather than over anyone else."
-      }
+      ]
     },
     {
       "id": "power-over",
       "name": "Power Over",
       "color": "amber",
       "fact": "The other sense of power, domination over another person, Fromm traced to weakness rather than strength: the drive to dominate substitutes for a genuine selfhood someone lacks, a way of escaping the anxiety of being a separate, isolated individual by fusing with -- and controlling -- someone else instead. Sadism, in his account, is this same escape for aloneness carried to its most destructive form.",
+      "termInfo": {
+        "flight from aloneness": "Fromm's claim, from Escape from Freedom, that the drive to dominate is rooted in weakness, not strength -- an attempt to escape the anxiety of individual separateness by fusing with and controlling another person.",
+        "sadism": "For Fromm, the most destructive form the flight from aloneness can take: needing another person's submission not incidentally but as the whole point."
+      },
+      "info": {
+        "text": "Power as domination -- control over another person, which Fromm read as compensation for a lack rather than an expression of real strength."
+      },
       "seeds": [
         "domination",
         "exploitation"
@@ -72,34 +83,13 @@
         "exploitation",
         "sadism",
         "flight from aloneness"
-      ],
-      "termInfo": {
-        "flight from aloneness": "Fromm's claim, from Escape from Freedom, that the drive to dominate is rooted in weakness, not strength -- an attempt to escape the anxiety of individual separateness by fusing with and controlling another person.",
-        "sadism": "For Fromm, the most destructive form the flight from aloneness can take: needing another person's submission not incidentally but as the whole point."
-      },
-      "info": {
-        "text": "Power as domination -- control over another person, which Fromm read as compensation for a lack rather than an expression of real strength."
-      }
+      ]
     },
     {
       "id": "kinds-of-authority",
       "name": "Kinds of Authority",
       "color": "blue",
       "fact": "Fromm distinguished authority by what sustains it. Rational authority rests on demonstrated competence, holds between people who remain fundamentally equal, and is supposed to diminish as the less experienced party grows -- a teacher's authority over a student, ideally. Irrational authority requires the other person's submission to survive at all, exploits rather than develops them, and has to be continually fed. Anonymous authority is the newest and hardest to resist: no one gives an order, and unspoken conformity to what everyone else is already doing enforces itself instead.",
-      "seeds": [
-        "rational authority",
-        "irrational authority"
-      ],
-      "floatingTerms": [
-        "anonymous authority",
-        "conformity"
-      ],
-      "terms": [
-        "rational authority",
-        "irrational authority",
-        "anonymous authority",
-        "conformity"
-      ],
       "termInfo": {
         "anonymous authority": {
           "text": "Authority with no visible source -- no person, office, or law giving an order -- exercised instead through unspoken pressure to conform to what everyone else already seems to be doing or believing.",
@@ -127,7 +117,21 @@
       },
       "info": {
         "text": "Fromm's classification of authority by what actually sustains obedience to it -- competence, extracted submission, or invisible conformity."
-      }
+      },
+      "seeds": [
+        "rational authority",
+        "irrational authority"
+      ],
+      "floatingTerms": [
+        "anonymous authority",
+        "conformity"
+      ],
+      "terms": [
+        "rational authority",
+        "irrational authority",
+        "anonymous authority",
+        "conformity"
+      ]
     }
   ],
   "bridges": [

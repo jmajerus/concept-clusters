@@ -6,7 +6,10 @@
     "sociology",
     "political-science"
   ],
-  "large": true,
+  "subcategories": {
+    "political-science": "political-behavior",
+    "sociology": "social-stratification"
+  },
   "tags": [
     "book"
   ],

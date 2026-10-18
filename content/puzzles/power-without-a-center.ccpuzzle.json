@@ -1,8 +1,9 @@
 {
   "id": "power-without-a-center",
   "title": "Power Without a Center",
-  "category": "political-science",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "political-science",
     "philosophy"
   ],
@@ -23,6 +24,14 @@
       "name": "Not a Possession",
       "color": "teal",
       "fact": "Foucault flatly rejects a whole tradition of thinking about power as a possession -- something a sovereign, a class, or a state simply holds, appropriates, or transfers like a piece of wealth. Power is instead exercised through a net-like organization with no single center, reaching capillary-style into the smallest interactions rather than radiating down from one sovereign point.",
+      "info": {
+        "text": "Foucault's rejection of power as a possession held by a sovereign, class, or state -- power instead functions as a decentered network with no single point of origin.",
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
+      },
       "seeds": [
         "exercised, not possessed",
         "no single center"
@@ -36,21 +45,21 @@
         "no single center",
         "a net-like organization",
         "capillary power"
-      ],
-      "info": {
-        "text": "Foucault's rejection of power as a possession held by a sovereign, class, or state -- power instead functions as a decentered network with no single point of origin.",
-        "links": [
-          {
-            "href": "wiki:The History of Sexuality"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "power-produces",
       "name": "Power Produces",
       "color": "magenta",
       "fact": "Foucault's second major break: power is not fundamentally repressive, a force that only says no. It produces -- it produces knowledge, identities, and the very categories through which people understand themselves, which is exactly what his coinage power/knowledge is meant to capture: the two are not opposed, they constitute each other, generating the regimes of truth and discourse that decide what even counts as a sayable, knowable claim in the first place.",
+      "info": {
+        "text": "Foucault's argument that power is productive rather than purely repressive: it generates knowledge, identities, and the accepted categories of truth, rather than only prohibiting or forbidding.",
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
+      },
       "seeds": [
         "productive power",
         "power/knowledge"
@@ -64,21 +73,21 @@
         "power/knowledge",
         "regimes of truth",
         "discourse"
-      ],
-      "info": {
-        "text": "Foucault's argument that power is productive rather than purely repressive: it generates knowledge, identities, and the accepted categories of truth, rather than only prohibiting or forbidding.",
-        "links": [
-          {
-            "href": "wiki:The History of Sexuality"
-          }
-        ]
-      }
+      ]
     },
     {
       "id": "resistance-without-a-center",
       "name": "Resistance Without a Center",
       "color": "cyan",
       "fact": "Resistance gets the same treatment as power itself: Foucault insists that wherever there is power, there is resistance, and that this resistance is never external to power but its constant, odd term -- not one organized opposition (there is, he says, no single locus of great Refusal) but a swarm of mobile, plural points of resistance scattered through the same net-like field power itself occupies.",
+      "info": {
+        "text": "Foucault's claim that resistance shares power's own decentered structure: never a single organized opposition, but a plurality of mobile points scattered throughout the same network power occupies.",
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
+      },
       "seeds": [
         "points of resistance",
         "coextensive with power"
@@ -92,15 +101,7 @@
         "coextensive with power",
         "no single locus of revolt",
         "the odd term"
-      ],
-      "info": {
-        "text": "Foucault's claim that resistance shares power's own decentered structure: never a single organized opposition, but a plurality of mobile points scattered throughout the same network power occupies.",
-        "links": [
-          {
-            "href": "wiki:The History of Sexuality"
-          }
-        ]
-      }
+      ]
     }
   ],
   "bridges": [

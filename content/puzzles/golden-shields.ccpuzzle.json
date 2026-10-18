@@ -1,8 +1,15 @@
 {
   "id": "golden-shields",
   "title": "Golden Shields",
-  "category": "political-science",
-  "large": true,
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "political-science": "political-institutions-regimes"
+  },
   "tags": [
     "book"
   ],
@@ -23,22 +30,6 @@
       "name": "The Legal Machinery",
       "color": "teal",
       "fact": "Executive branch lawyers redefined torture in a formal legal opinion, granting the president authority to authorize coercive interrogation and stripping detainees of the legal status that would have entitled them to Geneva protections.",
-      "seeds": [
-        "Bybee Memo",
-        "Unlawful Enemy Combatant"
-      ],
-      "floatingTerms": [
-        "John Yoo",
-        "Office of Legal Counsel",
-        "Unitary Executive Theory"
-      ],
-      "terms": [
-        "Bybee Memo",
-        "Unlawful Enemy Combatant",
-        "John Yoo",
-        "Office of Legal Counsel",
-        "Unitary Executive Theory"
-      ],
       "termInfo": {
         "Bybee Memo": {
           "text": "The August 2002 Justice Department opinion, drafted by John Yoo and signed by Jay Bybee, that narrowed the legal definition of torture.",
@@ -80,27 +71,29 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Bybee Memo",
+        "Unlawful Enemy Combatant"
+      ],
+      "floatingTerms": [
+        "John Yoo",
+        "Office of Legal Counsel",
+        "Unitary Executive Theory"
+      ],
+      "terms": [
+        "Bybee Memo",
+        "Unlawful Enemy Combatant",
+        "John Yoo",
+        "Office of Legal Counsel",
+        "Unitary Executive Theory"
+      ]
     },
     {
       "id": "detention-network",
       "name": "The Detention Network",
       "color": "amber",
       "fact": "The state built a network of offshore and foreign-soil facilities and covert transfer routes specifically chosen to keep detainees outside the reach of domestic courts and international monitors.",
-      "seeds": [
-        "Guantanamo Bay Detention Camp",
-        "CIA Black Sites"
-      ],
-      "floatingTerms": [
-        "Extraordinary Rendition",
-        "Incommunicado Detention"
-      ],
-      "terms": [
-        "Guantanamo Bay Detention Camp",
-        "CIA Black Sites",
-        "Extraordinary Rendition",
-        "Incommunicado Detention"
-      ],
       "termInfo": {
         "CIA Black Sites": {
           "text": "Secret CIA-operated prisons located outside the United States, used to hold detainees beyond the reach of any court.",
@@ -134,29 +127,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Guantanamo Bay Detention Camp",
+        "CIA Black Sites"
+      ],
+      "floatingTerms": [
+        "Extraordinary Rendition",
+        "Incommunicado Detention"
+      ],
+      "terms": [
+        "Guantanamo Bay Detention Camp",
+        "CIA Black Sites",
+        "Extraordinary Rendition",
+        "Incommunicado Detention"
+      ]
     },
     {
       "id": "interrogation-program",
       "name": "The Interrogation Program",
       "color": "blue",
       "fact": "The program's techniques were reverse-engineered from military training designed to help soldiers resist torture, then repurposed as memo-authorized methods for extracting confessions from detainees.",
-      "seeds": [
-        "Enhanced Interrogation Techniques",
-        "Waterboarding"
-      ],
-      "floatingTerms": [
-        "Walling",
-        "SERE Program",
-        "Sleep Deprivation"
-      ],
-      "terms": [
-        "Enhanced Interrogation Techniques",
-        "Waterboarding",
-        "Walling",
-        "SERE Program",
-        "Sleep Deprivation"
-      ],
       "termInfo": {
         "Enhanced Interrogation Techniques": {
           "text": "The euphemism for the CIA's memo-authorized set of coercive methods, including waterboarding, walling, and prolonged sleep deprivation.",
@@ -198,7 +189,23 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Enhanced Interrogation Techniques",
+        "Waterboarding"
+      ],
+      "floatingTerms": [
+        "Walling",
+        "SERE Program",
+        "Sleep Deprivation"
+      ],
+      "terms": [
+        "Enhanced Interrogation Techniques",
+        "Waterboarding",
+        "Walling",
+        "SERE Program",
+        "Sleep Deprivation"
+      ]
     }
   ],
   "bridges": [

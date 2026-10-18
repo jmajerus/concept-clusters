@@ -1,0 +1,343 @@
+{
+  "id": "hard-power-soft-power",
+  "title": "Hard Power vs Soft Power",
+  "category": "political-science",
+  "subcategories": {
+    "political-science": "international-relations"
+  },
+  "info": {
+    "text": "Why coercion and purchased compliance are brittle, and why attraction endures: Nye's hard, soft, smart, and sharp power, taught through the instruments states actually use.",
+    "links": [
+      {
+        "href": "https://www.belfercenter.org/publication/joseph-nye-smart-power-iran-us-relations"
+      },
+      {
+        "href": "https://www.nature.com/articles/palcomms20178"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Soft Power: The Means to Success in World Politics",
+        "author": "Joseph S. Nye Jr.",
+        "publisher": "PublicAffairs",
+        "year": "2004"
+      },
+      {
+        "title": "The Future of Power",
+        "author": "Joseph S. Nye Jr.",
+        "publisher": "PublicAffairs",
+        "year": "2011"
+      },
+      {
+        "title": "Sharp Power: Rising Authoritarian Influence",
+        "author": "Christopher Walker and Jessica Ludwig",
+        "publisher": "National Endowment for Democracy",
+        "year": "2017"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "coercion-by-force",
+      "name": "Coercion by military force",
+      "color": "teal",
+      "fact": "Military coercion compels compliance through violence or its threat: intervention, deployments, blockades, buildups, and diplomacy conducted with force behind it. Nye counts this, with economic pressure, as hard power — outcomes got through coercion or payment.",
+      "termInfo": {
+        "arms buildup": "Accumulating weapons to intimidate rivals or prepare war; capacity displayed as leverage.",
+        "coercive diplomacy": "Negotiation with force behind it: demands backed by a threatened escalation if they are refused.",
+        "military intervention": "Armed force sent into another state to compel an outcome — Nye's paradigmatic hard-power stick, and the costliest instrument on this board.",
+        "naval blockade": "Sealing a coastline to strangle trade and supplies; siege warfare conducted through ships.",
+        "threat of force": "Compellence by announced violence — compliance extracted from what the other side believes you will do.",
+        "troop deployment": "Stationing forces abroad to signal resolve or prepare action; posture that threatens without yet striking."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Hard power"
+          }
+        ]
+      },
+      "seeds": [
+        "military intervention",
+        "troop deployment"
+      ],
+      "floatingTerms": [
+        "threat of force",
+        "naval blockade",
+        "coercive diplomacy",
+        "arms buildup"
+      ],
+      "terms": [
+        "military intervention",
+        "troop deployment",
+        "threat of force",
+        "naval blockade",
+        "coercive diplomacy",
+        "arms buildup"
+      ]
+    },
+    {
+      "id": "payment-and-pressure",
+      "name": "Payment and economic leverage",
+      "color": "blue",
+      "fact": "Economic statecraft buys or pressures compliance without firing a shot: sanctions, trade terms, alliance offers, protection promises, payments, and conditioned loans. Bloodless only by comparison — it still coerces, through deprivation and dependence.",
+      "termInfo": {
+        "alliance offer": "Promising partnership — and the protection and status inside it — to buy another state's alignment.",
+        "economic sanctions": "Withholding trade, finance, or aid to punish a target into compliance; pressure through deprivation.",
+        "loans conditioned on compliance": "Credit extended with political strings — dependence structured into the terms.",
+        "payments and bribes": "Cash or favors for compliance, from aboveboard aid conditions to covert payoffs.",
+        "promise of military protection": "Pledging to defend another state; security supplied in exchange for loyalty.",
+        "trade barrier reduction": "Easing tariffs or quotas as a reward; the carrot form of trade leverage."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.belfercenter.org/publication/joseph-nye-smart-power-iran-us-relations"
+          }
+        ]
+      },
+      "seeds": [
+        "economic sanctions",
+        "alliance offer"
+      ],
+      "floatingTerms": [
+        "trade barrier reduction",
+        "promise of military protection",
+        "payments and bribes",
+        "loans conditioned on compliance"
+      ],
+      "terms": [
+        "economic sanctions",
+        "alliance offer",
+        "trade barrier reduction",
+        "promise of military protection",
+        "payments and bribes",
+        "loans conditioned on compliance"
+      ]
+    },
+    {
+      "id": "attraction",
+      "name": "Attraction through culture, values, and legitimate policy",
+      "color": "amber",
+      "fact": "Soft power attracts instead of compelling: films and exchanges that fascinate, values a country actually lives up to, a protected free press, multilateral habits, and aid others judge legitimate. It works only where the audience finds it attractive.",
+      "termInfo": {
+        "Hollywood films": "American commercial cinema with global audiences, among Nye's purest examples of cultural attraction.",
+        "democratic values lived up to at home": "Liberty, equality, and the rule of law as actually practiced; values attract only when a country visibly honors them.",
+        "free press protection": "Safeguarding independent journalism at home and abroad; credibility no censored system can borrow.",
+        "legitimate development assistance": "Aid judged generous and fair by its recipients — the same money as foreign aid, experienced as admiration rather than purchase.",
+        "multilateral consultation": "Working through institutions and consulting others before acting; the habit that makes policies look legitimate.",
+        "student exchanges": "Study abroad that builds lasting affinity for a host country in future elites — attraction with a decades-long fuse."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.nature.com/articles/palcomms20178"
+          }
+        ]
+      },
+      "seeds": [
+        "Hollywood films",
+        "student exchanges"
+      ],
+      "floatingTerms": [
+        "democratic values lived up to at home",
+        "free press protection",
+        "multilateral consultation",
+        "legitimate development assistance"
+      ],
+      "terms": [
+        "Hollywood films",
+        "student exchanges",
+        "democratic values lived up to at home",
+        "free press protection",
+        "multilateral consultation",
+        "legitimate development assistance"
+      ]
+    },
+    {
+      "id": "combination-and-corruption",
+      "name": "Combining and corrupting the logics",
+      "color": "magenta",
+      "fact": "Strategists combine the logics or corrupt them: smart power weds coercion and attraction, public diplomacy courts foreign publics, and sharp power pierces open societies with censorship and manipulated information.",
+      "termInfo": {
+        "Confucius Institutes controversy": "The debate over Chinese state-funded language institutes on Western campuses: cultural exchange to defenders, vectors of censorship and self-censorship to critics.",
+        "cyber-enabled influence operation": "Covert digital campaigns — hacks, leaks, bot networks — that manipulate what a target public sees and believes.",
+        "outward-facing censorship": "Suppressing critical voices beyond one's borders — the information control sharp power exports.",
+        "public diplomacy campaign": "A state courting foreign publics directly — broadcasts, exchanges, messaging — to be admired rather than merely obeyed.",
+        "sharp power operations": "Walker and Ludwig's category for authoritarian influence that pierces open societies instead of attracting them.",
+        "smart power strategy": "Nye's doctrine of combining hard and soft power so each covers the other's failures; force alone, the evidence says, does not persuade."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.demdigest.org/advancing-or-retarding-democracy-soft-power-is-out-sharp-power-is-in/"
+          }
+        ]
+      },
+      "seeds": [
+        "smart power strategy",
+        "public diplomacy campaign"
+      ],
+      "floatingTerms": [
+        "sharp power operations",
+        "outward-facing censorship",
+        "Confucius Institutes controversy",
+        "cyber-enabled influence operation"
+      ],
+      "terms": [
+        "smart power strategy",
+        "public diplomacy campaign",
+        "sharp power operations",
+        "outward-facing censorship",
+        "Confucius Institutes controversy",
+        "cyber-enabled influence operation"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "foreign-aid",
+      "term": "foreign aid",
+      "clusters": [
+        "payment-and-pressure",
+        "attraction"
+      ],
+      "fact": "The same aid package works twice: as a bargained payment that buys compliance, and as attraction when recipients judge it legitimate and generous — which is why Nye's framework lets one instrument speak both logics.",
+      "info": {
+        "text": "Aid as both bargain and admiration: the instrument Nye's framework lets speak two logics at once.",
+        "links": [
+          {
+            "href": "https://www.belfercenter.org/publication/joseph-nye-smart-power-iran-us-relations"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "payment-and-pressure": "payments and bribes",
+        "attraction": "legitimate development assistance"
+      }
+    },
+    {
+      "id": "smart-power",
+      "term": "smart power",
+      "clusters": [
+        "coercion-by-force",
+        "payment-and-pressure",
+        "attraction"
+      ],
+      "fact": "Nye's smart power is the deliberate combination of coercion and payment with attraction, on the evidence that hard power alone does not translate into lasting influence — the hinge the whole board turns on.",
+      "info": {
+        "text": "Nye's combination doctrine: coercion and payment wedded to attraction, because force alone does not persuade.",
+        "links": [
+          {
+            "href": "https://www.the-american-interest.com/2007/11/01/smart-power/"
+          }
+        ]
+      }
+    },
+    {
+      "id": "information-manipulation",
+      "term": "information manipulation",
+      "clusters": [
+        "attraction",
+        "combination-and-corruption"
+      ],
+      "fact": "Walker and Ludwig's sharp-power critique: authoritarian manipulation pierces the open information environments that soft power depends on, corroding the very attraction it mimics.",
+      "info": {
+        "text": "Walker and Ludwig's corruption critique: manipulation that pierces open societies instead of attracting them.",
+        "links": [
+          {
+            "href": "https://www.demdigest.org/advancing-or-retarding-democracy-soft-power-is-out-sharp-power-is-in/"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "combination-and-corruption": "sharp power operations"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "culture-that-fascinates",
+      "prompt": "Which concepts are cultural exports that fascinate foreign publics — admired and adopted for their own sake, rather than forced, bought, or campaigned for?",
+      "explanation": "Each is a cultural export admired for its own sake — films watched and exchanges remembered fondly years later. A public diplomacy campaign is state-directed persuasion machinery, not an export that fascinates on its own, and the Confucius Institutes controversy names a debate about a vehicle, not the fascination itself.",
+      "targets": [
+        "Hollywood films",
+        "student exchanges"
+      ],
+      "reasons": {
+        "Hollywood films": "Commercial cinema with global audiences who choose it freely.",
+        "student exchanges": "Study abroad that builds affinity in future elites over decades."
+      }
+    },
+    {
+      "id": "short-of-attack",
+      "prompt": "Which concepts threaten, display, or impose costs without yet striking — pressure applied short of actual attack?",
+      "explanation": "Every one of these positions force or cost without yet using it to strike: threats announced, ships and troops displayed, arsenals accumulated, negotiations backed by escalation, sanctions imposed. Military intervention is the strike itself and is excluded — as are all the carrots, payments, and attractions.",
+      "targets": [
+        "threat of force",
+        "naval blockade",
+        "troop deployment",
+        "arms buildup",
+        "coercive diplomacy",
+        "economic sanctions"
+      ],
+      "reasons": {
+        "arms buildup": "Capacity accumulated as leverage, not yet used.",
+        "coercive diplomacy": "Demands backed by threatened escalation, not yet carried out.",
+        "economic sanctions": "Deprivation imposed without any violence.",
+        "naval blockade": "Strangulation positioned at sea, short of invasion.",
+        "threat of force": "Announced violence that has not happened.",
+        "troop deployment": "Forces stationed as signal, not yet engaged."
+      }
+    },
+    {
+      "id": "both-logics-at-once",
+      "prompt": "Which concepts work through two logics at once — payment and attraction in the same instrument, or doctrines that deliberately combine them?",
+      "explanation": "Each of these speaks two logics in one breath: aid as both purchase and admiration, and the doctrines that deliberately combine coercion with attraction. An alliance offer or a protection promise buys alignment with security goods but claims no admiration of its own, so neither answers.",
+      "targets": [
+        "foreign aid",
+        "legitimate development assistance",
+        "smart power",
+        "smart power strategy"
+      ],
+      "reasons": {
+        "foreign aid": "One package, two readings: bargained payment and admired generosity.",
+        "legitimate development assistance": "The same money as foreign aid, experienced as admiration.",
+        "smart power": "The combination doctrine itself, spanning all three logics.",
+        "smart power strategy": "The deliberate wedding of coercion to attraction."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "three-faces-of-power",
+        "reason": "The theory behind the board: Lukes' three faces show power working through decisions, agenda control, and shaped wants — the deeper account of what coercion, payment, and attraction each exploit."
+      },
+      {
+        "id": "witness-without-a-sword",
+        "reason": "The converse lesson: humanitarian witnesses with plenty of naming power and none of the compelling kind — what influence looks like when coercion is entirely absent."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Why force alone fails",
+    "summary": "Nye's hard, soft, smart, and sharp power: how states coerce, pay, attract — and corrupt.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "## Coercion, payment, and attraction\r\n\r\nJoseph Nye's distinction starts from a simple observation: states get others to comply in three different ways. Hard power coerces or pays — military intervention and naval blockades on one side, economic sanctions and conditioned loans on the other. Soft power attracts instead: Hollywood films and student exchanges that fascinate, democratic values a country actually lives up to, and foreign policies others judge legitimate. The same instrument can speak both logics — foreign aid buys compliance and, when seen as generous, admiration too.\r\n\r\nNye's further lesson is the one this puzzle turns on: hard power alone does not translate into lasting influence. Smart power is his name for combining coercion with attraction, and its mirror image is sharp power — Walker and Ludwig's term for authoritarian operations that pierce open societies with censorship and manipulated information, corroding the very attraction they mimic. As you play, notice which instruments purchase compliance and which earn admiration — and what each purchase costs."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Muse Code (Spark 1.3)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

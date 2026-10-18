@@ -417,6 +417,17 @@
       }
     },
     {
+      "id": "aa-measure",
+      "prompt": "Which measure tells hypoventilation apart from a gas-exchange defect as the cause of low arterial oxygen?",
+      "explanation": "Arterial oxygen alone cannot say where the problem lies. Comparing it with the alveolar value shows whether oxygen is being lost between alveolus and artery.",
+      "targets": [
+        "A–a gradient"
+      ],
+      "reasons": {
+        "A–a gradient": "Hypoventilation lowers alveolar and arterial oxygen together and leaves it normal; a gas-exchange defect widens it."
+      }
+    },
+    {
       "id": "widened-gradient",
       "prompt": "Which causes of low arterial oxygen widen the A–a gradient?",
       "explanation": "Hypoventilation and the thin air of high altitude lower alveolar oxygen first, so arterial oxygen falls with it and the gradient stays normal. Carbon monoxide lowers the oxygen content of blood while leaving arterial oxygen pressure normal.",
@@ -429,6 +440,17 @@
         "V/Q mismatch": "Poorly ventilated units pass on blood with low oxygen, and well-ventilated units cannot make up for it.",
         "diffusion limitation": "Blood leaves the capillary before its oxygen reaches the alveolar level.",
         "shunt": "Blood bypasses ventilated alveoli entirely and mixes into arterial blood."
+      }
+    },
+    {
+      "id": "shunt-test",
+      "prompt": "Which intervention's effect separates a shunt from V/Q mismatch?",
+      "explanation": "Shunted blood never meets the added oxygen, and blood from well-ventilated alveoli is already on the flat top of the dissociation curve, so a shunt resists correction.",
+      "targets": [
+        "supplemental oxygen"
+      ],
+      "reasons": {
+        "supplemental oxygen": "It raises arterial oxygen in V/Q mismatch but barely changes it in a large shunt."
       }
     }
   ],

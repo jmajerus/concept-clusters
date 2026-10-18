@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "choice-under-influence",
   "title": "Choice Under Influence",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How interface presentation, defaults, wording, and emotional framing can steer people away from choices that reflect their own goals. The source uses deceptive patterns for practices also widely known as dark patterns.",
     "links": [
@@ -430,3 +434,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "choice-under-influence",
+      "puzzleRevision": "fnv1a32:9d053f6f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:visual prominence": {
+          "x": 509.97,
+          "y": 151.32,
+          "pinned": false
+        },
+        "term:low contrast": {
+          "x": 456.9,
+          "y": 23,
+          "pinned": false
+        },
+        "term:familiar interface cues": {
+          "x": 337.73,
+          "y": 126.62,
+          "pinned": false
+        },
+        "term:scan reading": {
+          "x": 580.36,
+          "y": 31.06,
+          "pinned": false
+        },
+        "term:preselected default": {
+          "x": 535.97,
+          "y": 455.08,
+          "pinned": false
+        },
+        "term:obscured alternative": {
+          "x": 592.21,
+          "y": 293.81,
+          "pinned": false
+        },
+        "term:ambiguous wording": {
+          "x": 630.44,
+          "y": 585.93,
+          "pinned": false
+        },
+        "term:loaded refusal": {
+          "x": 482.83,
+          "y": 597,
+          "pinned": false
+        },
+        "term:default effect": {
+          "x": 747.25,
+          "y": 290.24,
+          "pinned": false
+        },
+        "term:limited attention": {
+          "x": 846.95,
+          "y": 184.06,
+          "pinned": false
+        },
+        "term:expectation matching": {
+          "x": 686.5,
+          "y": 147.54,
+          "pinned": false
+        },
+        "term:self-image pressure": {
+          "x": 878.15,
+          "y": 367.28,
+          "pinned": false
+        },
+        "term:mistaken click": {
+          "x": 132.47,
+          "y": 369.32,
+          "pinned": false
+        },
+        "term:unwanted consent": {
+          "x": 274.74,
+          "y": 361.01,
+          "pinned": false
+        },
+        "term:unintended purchase": {
+          "x": 188.75,
+          "y": 228.18,
+          "pinned": false
+        },
+        "term:impaired autonomy": {
+          "x": 204.64,
+          "y": 495.83,
+          "pinned": false
+        },
+        "term:perceptual steering": {
+          "x": 421.46,
+          "y": 286.31,
+          "pinned": false
+        },
+        "term:exploited heuristics": {
+          "x": 706.13,
+          "y": 439.78,
+          "pinned": false
+        },
+        "term:manufactured consent": {
+          "x": 369.14,
+          "y": 491.92,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3429.64,
+        "score": 3429.6431184890935
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:36:35.839Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "choice-under-influence",
+      "puzzleRevision": "fnv1a32:9d053f6f",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 241.13,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 222.76,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 808.87,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 525,
+          "y": 573.24,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:perceptual steering": {
+          "x": 309.53,
+          "y": 236.84,
+          "pinned": false
+        },
+        "term:exploited heuristics": {
+          "x": 593.4,
+          "y": 383.92,
+          "pinned": false
+        },
+        "term:manufactured consent": {
+          "x": 525,
+          "y": 426,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "visual prominence",
+          "low contrast",
+          "familiar interface cues",
+          "scan reading"
+        ],
+        "cluster:1": [
+          "preselected default",
+          "obscured alternative",
+          "ambiguous wording",
+          "loaded refusal"
+        ],
+        "cluster:2": [
+          "default effect",
+          "limited attention",
+          "expectation matching",
+          "self-image pressure"
+        ],
+        "cluster:3": [
+          "mistaken click",
+          "unwanted consent",
+          "unintended purchase",
+          "impaired autonomy"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 379.5691621869449
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:36:37.760Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "choice-under-influence",
+      "puzzleRevision": "fnv1a32:9d053f6f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:visual prominence": {
+          "x": 819.49,
+          "y": 111.99
+        },
+        "term:low contrast": {
+          "x": 534.05,
+          "y": 22
+        },
+        "term:familiar interface cues": {
+          "x": 553.71,
+          "y": 147.34
+        },
+        "term:scan reading": {
+          "x": 883.94,
+          "y": 22
+        },
+        "term:preselected default": {
+          "x": 752.68,
+          "y": 556.07
+        },
+        "term:obscured alternative": {
+          "x": 877,
+          "y": 294.4
+        },
+        "term:ambiguous wording": {
+          "x": 886.45,
+          "y": 467.87
+        },
+        "term:loaded refusal": {
+          "x": 713.48,
+          "y": 303.73
+        },
+        "term:default effect": {
+          "x": 257.49,
+          "y": 598
+        },
+        "term:limited attention": {
+          "x": 410.35,
+          "y": 598
+        },
+        "term:expectation matching": {
+          "x": 587.06,
+          "y": 598
+        },
+        "term:self-image pressure": {
+          "x": 330.26,
+          "y": 459.65
+        },
+        "term:mistaken click": {
+          "x": 336.93,
+          "y": 161.92
+        },
+        "term:unwanted consent": {
+          "x": 92.99,
+          "y": 297.28
+        },
+        "term:unintended purchase": {
+          "x": 173.87,
+          "y": 150.36
+        },
+        "term:impaired autonomy": {
+          "x": 163.34,
+          "y": 441.74
+        },
+        "term:perceptual steering": {
+          "x": 721.17,
+          "y": 211.31
+        },
+        "term:exploited heuristics": {
+          "x": 566.1,
+          "y": 372.56
+        },
+        "term:manufactured consent": {
+          "x": 478.73,
+          "y": 279.73
+        },
+        "cluster:0": {
+          "x": 695.78,
+          "y": 26.1
+        },
+        "cluster:1": {
+          "x": 757.05,
+          "y": 370.7
+        },
+        "cluster:2": {
+          "x": 485.01,
+          "y": 486.17
+        },
+        "cluster:3": {
+          "x": 260.53,
+          "y": 303.02
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:36:39.730Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:36:33.934Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

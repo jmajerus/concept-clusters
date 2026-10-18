@@ -3,11 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "golden-shields",
   "title": "Golden Shields",
-  "category": "political-science",
-  "large": true,
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "political-science": "political-institutions-regimes"
+  },
   "tags": [
     "book"
   ],
@@ -319,3 +326,307 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "golden-shields",
+      "puzzleRevision": "fnv1a32:2d443593",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Bybee Memo": {
+          "x": 691.73,
+          "y": 188.66,
+          "pinned": false
+        },
+        "term:Unlawful Enemy Combatant": {
+          "x": 815.13,
+          "y": 282.59,
+          "pinned": false
+        },
+        "term:John Yoo": {
+          "x": 588.68,
+          "y": 207.15,
+          "pinned": false
+        },
+        "term:Office of Legal Counsel": {
+          "x": 611.21,
+          "y": 59.82,
+          "pinned": false
+        },
+        "term:Unitary Executive Theory": {
+          "x": 805.82,
+          "y": 83.61,
+          "pinned": false
+        },
+        "term:Guantanamo Bay Detention Camp": {
+          "x": 486.69,
+          "y": 374.76,
+          "pinned": false
+        },
+        "term:CIA Black Sites": {
+          "x": 662.24,
+          "y": 438.06,
+          "pinned": false
+        },
+        "term:Extraordinary Rendition": {
+          "x": 562.22,
+          "y": 572.65,
+          "pinned": false
+        },
+        "term:Incommunicado Detention": {
+          "x": 370.46,
+          "y": 551.82,
+          "pinned": false
+        },
+        "term:Enhanced Interrogation Techniques": {
+          "x": 317.11,
+          "y": 200.29,
+          "pinned": false
+        },
+        "term:Waterboarding": {
+          "x": 241.62,
+          "y": 23,
+          "pinned": false
+        },
+        "term:Walling": {
+          "x": 169.9,
+          "y": 107.48,
+          "pinned": false
+        },
+        "term:SERE Program": {
+          "x": 184.44,
+          "y": 335.97,
+          "pinned": false
+        },
+        "term:Sleep Deprivation": {
+          "x": 112.25,
+          "y": 216.8,
+          "pinned": false
+        },
+        "term:Golden Shield": {
+          "x": 651.78,
+          "y": 302.27,
+          "pinned": false
+        },
+        "term:Ghost Detainees": {
+          "x": 301.67,
+          "y": 398.89,
+          "pinned": false
+        },
+        "term:Abu Ghraib": {
+          "x": 495.81,
+          "y": 158.81,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3541.57,
+        "score": 3541.570384046002
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:33:05.036Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "golden-shields",
+      "puzzleRevision": "fnv1a32:2d443593",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 572.26,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 754.04,
+          "y": 310.87,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 295.96,
+          "y": 310.87,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:Golden Shield": {
+          "x": 591.48,
+          "y": 421.66,
+          "pinned": false
+        },
+        "term:Ghost Detainees": {
+          "x": 525,
+          "y": 310.87,
+          "pinned": false
+        },
+        "term:Abu Ghraib": {
+          "x": 458.52,
+          "y": 421.66,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Bybee Memo",
+          "Unlawful Enemy Combatant",
+          "John Yoo",
+          "Office of Legal Counsel",
+          "Unitary Executive Theory"
+        ],
+        "cluster:1": [
+          "Guantanamo Bay Detention Camp",
+          "CIA Black Sites",
+          "Extraordinary Rendition",
+          "Incommunicado Detention"
+        ],
+        "cluster:2": [
+          "Enhanced Interrogation Techniques",
+          "Waterboarding",
+          "Walling",
+          "SERE Program",
+          "Sleep Deprivation"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 389.43239208144547
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:33:07.727Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "golden-shields",
+      "puzzleRevision": "fnv1a32:2d443593",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:Bybee Memo": {
+          "x": 769.2,
+          "y": 261.16
+        },
+        "term:Unlawful Enemy Combatant": {
+          "x": 608.1,
+          "y": 198.31
+        },
+        "term:John Yoo": {
+          "x": 857.78,
+          "y": 22
+        },
+        "term:Office of Legal Counsel": {
+          "x": 867.55,
+          "y": 150.13
+        },
+        "term:Unitary Executive Theory": {
+          "x": 537.56,
+          "y": 22
+        },
+        "term:Guantanamo Bay Detention Camp": {
+          "x": 392.08,
+          "y": 598
+        },
+        "term:CIA Black Sites": {
+          "x": 211.76,
+          "y": 531.4
+        },
+        "term:Extraordinary Rendition": {
+          "x": 611.96,
+          "y": 598
+        },
+        "term:Incommunicado Detention": {
+          "x": 544.19,
+          "y": 417.1
+        },
+        "term:Enhanced Interrogation Techniques": {
+          "x": 123.95,
+          "y": 345.79
+        },
+        "term:Waterboarding": {
+          "x": 295.32,
+          "y": 22
+        },
+        "term:Walling": {
+          "x": 397.5,
+          "y": 51.98
+        },
+        "term:SERE Program": {
+          "x": 57.8,
+          "y": 162.14
+        },
+        "term:Sleep Deprivation": {
+          "x": 159.11,
+          "y": 58.96
+        },
+        "term:Golden Shield": {
+          "x": 697.17,
+          "y": 352.26
+        },
+        "term:Ghost Detainees": {
+          "x": 461.68,
+          "y": 270.33
+        },
+        "term:Abu Ghraib": {
+          "x": 454.21,
+          "y": 137.39
+        },
+        "cluster:0": {
+          "x": 721.31,
+          "y": 40.91
+        },
+        "cluster:1": {
+          "x": 350.56,
+          "y": 392.21
+        },
+        "cluster:2": {
+          "x": 295.11,
+          "y": 187.54
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:33:10.238Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:33:02.511Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -1,12 +1,16 @@
 {
   "id": "deterrence-by-presence",
   "title": "Deterrence by Presence",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "book",
     "war",
@@ -59,20 +63,6 @@
       "name": "Inside the Enclave",
       "color": "teal",
       "fact": "The town's population swelled from roughly 9,000 to more than 40,000 as refugees fled a three-year campaign of ethnic cleansing across the surrounding valley, living on dwindling food under near-daily shelling -- and when the enclave finally fell in July 1995, the promised safety ended not in rescue but in women and children bused away while men and boys were pulled aside to be killed.",
-      "seeds": [
-        "refugee overcrowding",
-        "food scarcity"
-      ],
-      "floatingTerms": [
-        "constant shelling",
-        "separation of men and boys"
-      ],
-      "terms": [
-        "refugee overcrowding",
-        "food scarcity",
-        "constant shelling",
-        "separation of men and boys"
-      ],
       "termInfo": {
         "constant shelling": {
           "text": "Srebrenica and the Potočari compound were subjected to near-daily artillery and sniper fire for three years, intensifying sharply during the final 1995 offensive."
@@ -104,27 +94,27 @@
             "href": "wiki:Srebrenica massacre"
           }
         ]
-      }
+      },
+      "seeds": [
+        "refugee overcrowding",
+        "food scarcity"
+      ],
+      "floatingTerms": [
+        "constant shelling",
+        "separation of men and boys"
+      ],
+      "terms": [
+        "refugee overcrowding",
+        "food scarcity",
+        "constant shelling",
+        "separation of men and boys"
+      ]
     },
     {
       "id": "a-mandate-with-no-teeth",
       "name": "A Mandate With No Teeth",
       "color": "blue",
       "fact": "Dutchbat's own mandate had disarmed the population it was sent to protect in exchange for a promise of UN protection, while its rules of engagement left roughly 400 lightly armed soldiers too narrowly authorized to resist an organized offensive -- a design that, by embedding the mission among the population it was meant to protect, also made its own soldiers available as leverage against it.",
-      "seeds": [
-        "demilitarization agreement",
-        "rules of engagement"
-      ],
-      "floatingTerms": [
-        "hostage-taking of peacekeepers",
-        "overrun observation posts"
-      ],
-      "terms": [
-        "demilitarization agreement",
-        "rules of engagement",
-        "hostage-taking of peacekeepers",
-        "overrun observation posts"
-      ],
       "termInfo": {
         "demilitarization agreement": {
           "text": "A 1993 arrangement under which Bosniak defenders in Srebrenica surrendered heavy weapons to the UN in exchange for protection as a demilitarized safe area -- protection the enclave's own defenders no longer had the means to provide themselves."
@@ -151,27 +141,27 @@
             "href": "wiki:Dutchbat"
           }
         ]
-      }
+      },
+      "seeds": [
+        "demilitarization agreement",
+        "rules of engagement"
+      ],
+      "floatingTerms": [
+        "hostage-taking of peacekeepers",
+        "overrun observation posts"
+      ],
+      "terms": [
+        "demilitarization agreement",
+        "rules of engagement",
+        "hostage-taking of peacekeepers",
+        "overrun observation posts"
+      ]
     },
     {
       "id": "permission-withheld",
       "name": "Permission Withheld",
       "color": "amber",
       "fact": "Behind the 'safe area' sat a Security Council resolution with no enforcement plan of its own, a secret pact among Western capitals to stop bombing Bosnian Serb positions, and a chain of command built around protecting the peacekeeping mission itself -- a single discretionary veto sat between any request for help and an actual airstrike, and whoever held it bore no obligation to explain a refusal.",
-      "seeds": [
-        "Security Council Resolution 819",
-        "NATO airstrikes suspended"
-      ],
-      "floatingTerms": [
-        "force protection",
-        "the UN veto"
-      ],
-      "terms": [
-        "Security Council Resolution 819",
-        "NATO airstrikes suspended",
-        "force protection",
-        "the UN veto"
-      ],
       "termInfo": {
         "NATO airstrikes suspended": {
           "text": "In late May 1995, US, French, and British leaders privately agreed to suspend NATO airstrikes against Bosnian Serb forces without informing Dutch officials, despite earlier commitments to provide air support within two hours if an enclave was attacked."
@@ -203,27 +193,27 @@
             "href": "wiki:United Nations Protection Force"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Security Council Resolution 819",
+        "NATO airstrikes suspended"
+      ],
+      "floatingTerms": [
+        "force protection",
+        "the UN veto"
+      ],
+      "terms": [
+        "Security Council Resolution 819",
+        "NATO airstrikes suspended",
+        "force protection",
+        "the UN veto"
+      ]
     },
     {
       "id": "the-corridor",
       "name": "The Corridor",
       "color": "olive",
       "fact": "Three years before the enclave fell, the Bosnian Serb assembly had already declared eliminating the Drina as a border between Serb states a strategic goal, and raids launched from inside the enclave by its own defenders gave Mladić's forces a pretext for finishing it -- a goal a March 1995 directive would order completed by making daily life for Srebrenica's people 'unbearable.'",
-      "seeds": [
-        "Strategic Objective No. 3",
-        "Naser Orić's raids"
-      ],
-      "floatingTerms": [
-        "Directive 7",
-        "Drina Corps"
-      ],
-      "terms": [
-        "Strategic Objective No. 3",
-        "Naser Orić's raids",
-        "Directive 7",
-        "Drina Corps"
-      ],
       "termInfo": {
         "Directive 7": {
           "text": "Signed by Republika Srpska president Radovan Karadžić on March 8, 1995, this directive ordered VRS troops to create 'an unbearable situation of total insecurity with no hope of further survival' for Srebrenica's and Žepa's inhabitants -- the planning document behind the July offensive."
@@ -260,7 +250,21 @@
             "href": "wiki:Siege of Srebrenica"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Strategic Objective No. 3",
+        "Naser Orić's raids"
+      ],
+      "floatingTerms": [
+        "Directive 7",
+        "Drina Corps"
+      ],
+      "terms": [
+        "Strategic Objective No. 3",
+        "Naser Orić's raids",
+        "Directive 7",
+        "Drina Corps"
+      ]
     }
   ],
   "bridges": [

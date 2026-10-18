@@ -1,11 +1,16 @@
 {
   "id": "a-radical-revolution-of-values",
   "title": "A Radical Revolution of Values",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "info": {
     "text": "Martin Luther King Jr.'s final year: an argument that racism, militarism, and poverty were one interlocking structure -- the giant triplets, in his own phrase -- that required nothing less than a radical revolution of values to dismantle, tested directly in his last campaign for economic justice before his assassination in Memphis.",
     "links": [

@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "manufactured-pressure",
   "title": "Manufactured Pressure",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How fabricated time limits, scarcity claims, and social signals create pressure that narrows deliberation and steers people toward choices they might not otherwise make.",
     "links": [
@@ -449,3 +453,358 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "manufactured-pressure",
+      "puzzleRevision": "fnv1a32:2575a5d0",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:false deadline": {
+          "x": 715.7,
+          "y": 210.77,
+          "pinned": false
+        },
+        "term:artificial scarcity": {
+          "x": 574.24,
+          "y": 155.31,
+          "pinned": false
+        },
+        "term:invented demand": {
+          "x": 704.96,
+          "y": 71.84,
+          "pinned": false
+        },
+        "term:invented endorsement": {
+          "x": 850.47,
+          "y": 134.04,
+          "pinned": false
+        },
+        "term:countdown timer": {
+          "x": 681.72,
+          "y": 469.36,
+          "pinned": false
+        },
+        "term:limited-time message": {
+          "x": 830.7,
+          "y": 522.73,
+          "pinned": false
+        },
+        "term:low-stock warning": {
+          "x": 572,
+          "y": 569.87,
+          "pinned": false
+        },
+        "term:activity notification": {
+          "x": 790.56,
+          "y": 350.2,
+          "pinned": false
+        },
+        "term:testimonial": {
+          "x": 705.46,
+          "y": 597,
+          "pinned": false
+        },
+        "term:time pressure": {
+          "x": 293.59,
+          "y": 440.59,
+          "pinned": false
+        },
+        "term:scarcity bias": {
+          "x": 405.64,
+          "y": 374.9,
+          "pinned": false
+        },
+        "term:social proof": {
+          "x": 248.62,
+          "y": 559.1,
+          "pinned": false
+        },
+        "term:fear of missing out": {
+          "x": 394.01,
+          "y": 550.39,
+          "pinned": false
+        },
+        "term:compressed deliberation": {
+          "x": 228.37,
+          "y": 292.96,
+          "pinned": false
+        },
+        "term:reduced comparison": {
+          "x": 380.03,
+          "y": 201.42,
+          "pinned": false
+        },
+        "term:hasty purchase": {
+          "x": 66.1,
+          "y": 319.93,
+          "pinned": false
+        },
+        "term:misplaced trust": {
+          "x": 100.18,
+          "y": 184.83,
+          "pinned": false
+        },
+        "term:psychological strain": {
+          "x": 239.54,
+          "y": 109.86,
+          "pinned": false
+        },
+        "term:manufactured evidence": {
+          "x": 607.36,
+          "y": 326.12,
+          "pinned": false
+        },
+        "term:pressure cue": {
+          "x": 511.75,
+          "y": 444.23,
+          "pinned": false
+        },
+        "term:decision compression": {
+          "x": 142.33,
+          "y": 454.98,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3659.18,
+        "score": 3659.180593898714
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:37:08.228Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "manufactured-pressure",
+      "puzzleRevision": "fnv1a32:2575a5d0",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 790.65,
+          "y": 227.51,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 790.65,
+          "y": 568.49,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 259.35,
+          "y": 568.49,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 259.35,
+          "y": 227.51,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:manufactured evidence": {
+          "x": 764.78,
+          "y": 387.28,
+          "pinned": false
+        },
+        "term:pressure cue": {
+          "x": 525,
+          "y": 568.49,
+          "pinned": false
+        },
+        "term:decision compression": {
+          "x": 285.22,
+          "y": 408.72,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "false deadline",
+          "artificial scarcity",
+          "invented demand",
+          "invented endorsement"
+        ],
+        "cluster:1": [
+          "countdown timer",
+          "limited-time message",
+          "low-stock warning",
+          "activity notification",
+          "testimonial"
+        ],
+        "cluster:2": [
+          "time pressure",
+          "scarcity bias",
+          "social proof",
+          "fear of missing out"
+        ],
+        "cluster:3": [
+          "compressed deliberation",
+          "reduced comparison",
+          "hasty purchase",
+          "misplaced trust",
+          "psychological strain"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 375.88230738795926
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:37:10.140Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "manufactured-pressure",
+      "puzzleRevision": "fnv1a32:2575a5d0",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:false deadline": {
+          "x": 812.73,
+          "y": 130.25
+        },
+        "term:artificial scarcity": {
+          "x": 484.28,
+          "y": 183.18
+        },
+        "term:invented demand": {
+          "x": 753.27,
+          "y": 22
+        },
+        "term:invented endorsement": {
+          "x": 410.18,
+          "y": 22
+        },
+        "term:countdown timer": {
+          "x": 557.1,
+          "y": 333.58
+        },
+        "term:limited-time message": {
+          "x": 877,
+          "y": 449.16
+        },
+        "term:low-stock warning": {
+          "x": 739.94,
+          "y": 533.82
+        },
+        "term:activity notification": {
+          "x": 873.85,
+          "y": 267.31
+        },
+        "term:testimonial": {
+          "x": 861.87,
+          "y": 598
+        },
+        "term:time pressure": {
+          "x": 481.86,
+          "y": 449.08
+        },
+        "term:scarcity bias": {
+          "x": 506.53,
+          "y": 551.11
+        },
+        "term:social proof": {
+          "x": 329.86,
+          "y": 467.69
+        },
+        "term:fear of missing out": {
+          "x": 604.73,
+          "y": 598
+        },
+        "term:compressed deliberation": {
+          "x": 248.66,
+          "y": 102.18
+        },
+        "term:reduced comparison": {
+          "x": 76.7,
+          "y": 363.04
+        },
+        "term:hasty purchase": {
+          "x": 72.97,
+          "y": 518.05
+        },
+        "term:misplaced trust": {
+          "x": 203.88,
+          "y": 451.05
+        },
+        "term:psychological strain": {
+          "x": 83,
+          "y": 189.08
+        },
+        "term:manufactured evidence": {
+          "x": 665.77,
+          "y": 205.68
+        },
+        "term:pressure cue": {
+          "x": 614.13,
+          "y": 458.57
+        },
+        "term:decision compression": {
+          "x": 396.11,
+          "y": 334.89
+        },
+        "cluster:0": {
+          "x": 589.44,
+          "y": 35.42
+        },
+        "cluster:1": {
+          "x": 729.39,
+          "y": 366.78
+        },
+        "cluster:2": {
+          "x": 397.49,
+          "y": 598
+        },
+        "cluster:3": {
+          "x": 224.02,
+          "y": 288.16
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:37:12.060Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:37:06.293Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

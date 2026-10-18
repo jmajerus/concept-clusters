@@ -3,11 +3,17 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-programmers-bargain",
   "title": "The Programmer's Bargain",
-  "category": "computer-science",
-  "large": true,
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
+  "subcategories": {
+    "science-technology-society": "technology-work-control"
+  },
   "info": {
     "text": "How moving applications into the browser changed programming leverage, professional expertise, and the balance between domain design and delivery plumbing.",
     "links": [
@@ -464,3 +470,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-programmers-bargain",
+      "puzzleRevision": "fnv1a32:db6aff4c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:visual form designer": {
+          "x": 476.68,
+          "y": 434.34,
+          "pinned": false
+        },
+        "term:component palette": {
+          "x": 452.15,
+          "y": 597,
+          "pinned": false
+        },
+        "term:property inspector": {
+          "x": 347.57,
+          "y": 327.32,
+          "pinned": false
+        },
+        "term:design-time data binding": {
+          "x": 302.72,
+          "y": 501.94,
+          "pinned": false
+        },
+        "term:domain model": {
+          "x": 692.47,
+          "y": 172.9,
+          "pinned": false
+        },
+        "term:encapsulation": {
+          "x": 747.86,
+          "y": 286.9,
+          "pinned": false
+        },
+        "term:inheritance": {
+          "x": 871.07,
+          "y": 296.61,
+          "pinned": false
+        },
+        "term:design patterns": {
+          "x": 825.49,
+          "y": 174.98,
+          "pinned": false
+        },
+        "term:hand-coded controls": {
+          "x": 649.73,
+          "y": 408.9,
+          "pinned": false
+        },
+        "term:session state": {
+          "x": 713.56,
+          "y": 543.32,
+          "pinned": false
+        },
+        "term:browser workarounds": {
+          "x": 815.41,
+          "y": 434.84,
+          "pinned": false
+        },
+        "term:request plumbing": {
+          "x": 844.73,
+          "y": 590.35,
+          "pinned": false
+        },
+        "term:cross-browser compatibility": {
+          "x": 364.09,
+          "y": 138.29,
+          "pinned": false
+        },
+        "term:stack integration": {
+          "x": 187.08,
+          "y": 79.26,
+          "pinned": false
+        },
+        "term:deployment automation": {
+          "x": 196.96,
+          "y": 246.66,
+          "pinned": false
+        },
+        "term:framework fluency": {
+          "x": 495.4,
+          "y": 270.85,
+          "pinned": false
+        },
+        "term:lost leverage": {
+          "x": 583.67,
+          "y": 542.23,
+          "pinned": false
+        },
+        "term:displaced expertise": {
+          "x": 556.25,
+          "y": 121.36,
+          "pinned": false
+        },
+        "term:frameworks": {
+          "x": 628.45,
+          "y": 271.18,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3418.36,
+        "score": 3418.36314864944
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:32:50.361Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-programmers-bargain",
+      "puzzleRevision": "fnv1a32:db6aff4c",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 254.65,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 795.35,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 227.64,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 525,
+          "y": 568.36,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:lost leverage": {
+          "x": 316.29,
+          "y": 239.28,
+          "pinned": false
+        },
+        "term:displaced expertise": {
+          "x": 756.34,
+          "y": 579.35,
+          "pinned": false
+        },
+        "term:frameworks": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "visual form designer",
+          "component palette",
+          "property inspector",
+          "design-time data binding"
+        ],
+        "cluster:1": [
+          "domain model",
+          "encapsulation",
+          "inheritance",
+          "design patterns"
+        ],
+        "cluster:2": [
+          "hand-coded controls",
+          "session state",
+          "browser workarounds",
+          "request plumbing"
+        ],
+        "cluster:3": [
+          "cross-browser compatibility",
+          "stack integration",
+          "deployment automation",
+          "framework fluency"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 334.3535160735958
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:32:53.185Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-programmers-bargain",
+      "puzzleRevision": "fnv1a32:db6aff4c",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:visual form designer": {
+          "x": 551.74,
+          "y": 212.37
+        },
+        "term:component palette": {
+          "x": 843.02,
+          "y": 134.8
+        },
+        "term:property inspector": {
+          "x": 883.3,
+          "y": 289.71
+        },
+        "term:design-time data binding": {
+          "x": 861.63,
+          "y": 483.69
+        },
+        "term:domain model": {
+          "x": 537.33,
+          "y": 373.32
+        },
+        "term:encapsulation": {
+          "x": 737.65,
+          "y": 598
+        },
+        "term:inheritance": {
+          "x": 481.22,
+          "y": 598
+        },
+        "term:design patterns": {
+          "x": 339.27,
+          "y": 598
+        },
+        "term:hand-coded controls": {
+          "x": 389.01,
+          "y": 145.75
+        },
+        "term:session state": {
+          "x": 201.49,
+          "y": 141.88
+        },
+        "term:browser workarounds": {
+          "x": 281.5,
+          "y": 22
+        },
+        "term:request plumbing": {
+          "x": 697.41,
+          "y": 22
+        },
+        "term:cross-browser compatibility": {
+          "x": 155.78,
+          "y": 598
+        },
+        "term:stack integration": {
+          "x": 73.55,
+          "y": 433.21
+        },
+        "term:deployment automation": {
+          "x": 101.17,
+          "y": 265.23
+        },
+        "term:framework fluency": {
+          "x": 412.21,
+          "y": 308.5
+        },
+        "term:lost leverage": {
+          "x": 699.24,
+          "y": 162.65
+        },
+        "term:displaced expertise": {
+          "x": 429.19,
+          "y": 473.41
+        },
+        "term:frameworks": {
+          "x": 279.39,
+          "y": 239.23
+        },
+        "cluster:0": {
+          "x": 705.2,
+          "y": 340.54
+        },
+        "cluster:1": {
+          "x": 601.85,
+          "y": 515.5
+        },
+        "cluster:2": {
+          "x": 522.56,
+          "y": 22
+        },
+        "cluster:3": {
+          "x": 249.19,
+          "y": 401.84
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:32:55.827Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:32:47.961Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -4,13 +4,13 @@
   "category": "philosophy",
   "categories": [
     "philosophy",
-    "psychology"
+    "psychology",
+    "critical-theory-cultural-studies"
   ],
   "subcategories": {
     "philosophy": "political-philosophy",
     "psychology": "psychoanalysis"
   },
-  "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
   ],

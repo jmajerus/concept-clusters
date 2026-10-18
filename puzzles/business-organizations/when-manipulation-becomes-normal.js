@@ -3,18 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "when-manipulation-becomes-normal",
   "title": "When Manipulation Becomes Normal",
   "category": "business-organizations",
   "categories": [
     "business-organizations",
-    "computer-science"
+    "computer-science",
+    "science-technology-society"
   ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How strategic targets, experimentation, incentives, and organizational routines can turn an initially questionable tactic into standard practice, while distributing responsibility and eroding trust. Normalization of deviance is used here as an organizational lens, not to equate dark patterns with safety disasters.",
     "links": [
@@ -469,3 +470,378 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "when-manipulation-becomes-normal",
+      "puzzleRevision": "fnv1a32:d2bd2487",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:conversion target": {
+          "x": 700.46,
+          "y": 445.45,
+          "pinned": false
+        },
+        "term:retention target": {
+          "x": 603.3,
+          "y": 562.26,
+          "pinned": false
+        },
+        "term:data growth target": {
+          "x": 858.67,
+          "y": 442.27,
+          "pinned": false
+        },
+        "term:executive compensation": {
+          "x": 779.18,
+          "y": 597,
+          "pinned": false
+        },
+        "term:board oversight": {
+          "x": 774.01,
+          "y": 316.1,
+          "pinned": false
+        },
+        "term:analytics dashboard": {
+          "x": 726.49,
+          "y": 23,
+          "pinned": false
+        },
+        "term:A/B experiment": {
+          "x": 637.09,
+          "y": 145.83,
+          "pinned": false
+        },
+        "term:winning variant": {
+          "x": 571.4,
+          "y": 23,
+          "pinned": false
+        },
+        "term:KPI cascade": {
+          "x": 857.27,
+          "y": 79.56,
+          "pinned": false
+        },
+        "term:rapid rollout": {
+          "x": 768.64,
+          "y": 165.7,
+          "pinned": false
+        },
+        "term:tolerated complaint rate": {
+          "x": 195.06,
+          "y": 23.76,
+          "pinned": false
+        },
+        "term:successful precedent": {
+          "x": 293.99,
+          "y": 181.99,
+          "pinned": false
+        },
+        "term:ethical fading": {
+          "x": 227.05,
+          "y": 321.9,
+          "pinned": false
+        },
+        "term:competitor imitation": {
+          "x": 469.83,
+          "y": 198.24,
+          "pinned": false
+        },
+        "term:responsibility diffusion": {
+          "x": 108.6,
+          "y": 203.2,
+          "pinned": false
+        },
+        "term:customer distrust": {
+          "x": 289.2,
+          "y": 453.61,
+          "pinned": false
+        },
+        "term:employee ethical strain": {
+          "x": 387.63,
+          "y": 597,
+          "pinned": false
+        },
+        "term:reputational damage": {
+          "x": 128.43,
+          "y": 439.47,
+          "pinned": false
+        },
+        "term:regulatory exposure": {
+          "x": 207.39,
+          "y": 592.72,
+          "pinned": false
+        },
+        "term:market-wide distrust": {
+          "x": 482.38,
+          "y": 439.99,
+          "pinned": false
+        },
+        "term:authorized priorities": {
+          "x": 613.21,
+          "y": 302.26,
+          "pinned": false
+        },
+        "term:normalization of deviance": {
+          "x": 397.4,
+          "y": 23,
+          "pinned": false
+        },
+        "term:erosion of trust": {
+          "x": 369.5,
+          "y": 324.63,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4296.89,
+        "score": 4296.891314921038
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:38:00.454Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "when-manipulation-becomes-normal",
+      "puzzleRevision": "fnv1a32:d2bd2487",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 844.39,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 585.58,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 210.42,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 205.61,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:authorized priorities": {
+          "x": 758.23,
+          "y": 565.33,
+          "pinned": false
+        },
+        "term:normalization of deviance": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:erosion of trust": {
+          "x": 291.77,
+          "y": 230.67,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "conversion target",
+          "retention target",
+          "data growth target",
+          "executive compensation",
+          "board oversight"
+        ],
+        "cluster:1": [
+          "analytics dashboard",
+          "A/B experiment",
+          "winning variant",
+          "KPI cascade",
+          "rapid rollout"
+        ],
+        "cluster:2": [
+          "tolerated complaint rate",
+          "successful precedent",
+          "ethical fading",
+          "competitor imitation",
+          "responsibility diffusion"
+        ],
+        "cluster:3": [
+          "customer distrust",
+          "employee ethical strain",
+          "reputational damage",
+          "regulatory exposure",
+          "market-wide distrust"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 342.00764683584504
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:38:02.425Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "when-manipulation-becomes-normal",
+      "puzzleRevision": "fnv1a32:d2bd2487",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:conversion target": {
+          "x": 538.63,
+          "y": 62.19
+        },
+        "term:retention target": {
+          "x": 533.73,
+          "y": 254.64
+        },
+        "term:data growth target": {
+          "x": 318.71,
+          "y": 22
+        },
+        "term:executive compensation": {
+          "x": 502.44,
+          "y": 22
+        },
+        "term:board oversight": {
+          "x": 567.63,
+          "y": 133.09
+        },
+        "term:analytics dashboard": {
+          "x": 733.9,
+          "y": 173.47
+        },
+        "term:A/B experiment": {
+          "x": 769.71,
+          "y": 91.41
+        },
+        "term:winning variant": {
+          "x": 795.74,
+          "y": 363.72
+        },
+        "term:KPI cascade": {
+          "x": 905.35,
+          "y": 22
+        },
+        "term:rapid rollout": {
+          "x": 899.05,
+          "y": 283.13
+        },
+        "term:tolerated complaint rate": {
+          "x": 612.57,
+          "y": 551.72
+        },
+        "term:successful precedent": {
+          "x": 852.37,
+          "y": 598
+        },
+        "term:ethical fading": {
+          "x": 664.97,
+          "y": 288.07
+        },
+        "term:competitor imitation": {
+          "x": 395.36,
+          "y": 533.99
+        },
+        "term:responsibility diffusion": {
+          "x": 465.27,
+          "y": 598
+        },
+        "term:customer distrust": {
+          "x": 73.55,
+          "y": 73.72
+        },
+        "term:employee ethical strain": {
+          "x": 261.5,
+          "y": 598
+        },
+        "term:reputational damage": {
+          "x": 233.17,
+          "y": 194.66
+        },
+        "term:regulatory exposure": {
+          "x": 79.85,
+          "y": 598
+        },
+        "term:market-wide distrust": {
+          "x": 296.48,
+          "y": 355.61
+        },
+        "term:authorized priorities": {
+          "x": 692.87,
+          "y": 22
+        },
+        "term:normalization of deviance": {
+          "x": 766.23,
+          "y": 442.22
+        },
+        "term:erosion of trust": {
+          "x": 356.8,
+          "y": 465.67
+        },
+        "cluster:0": {
+          "x": 362.1,
+          "y": 105.72
+        },
+        "cluster:1": {
+          "x": 870.7,
+          "y": 135
+        },
+        "cluster:2": {
+          "x": 545.25,
+          "y": 428.97
+        },
+        "cluster:3": {
+          "x": 169.97,
+          "y": 415.56
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:38:04.572Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:37:58.374Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

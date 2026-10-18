@@ -3,14 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "out-of-the-spotlight",
   "title": "Out of the Spotlight",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
+    "political-science": "political-behavior"
+  },
   "info": {
     "text": "Bayard Rustin, raised Quaker, the chief organizer behind the 1963 March on Washington and the man who brought Gandhian nonviolence into the American civil rights movement, whose Communist youth, wartime draft resistance, and open homosexuality were repeatedly turned into weapons to keep him out of the movement's own spotlight.",
     "links": [
@@ -190,3 +195,297 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "out-of-the-spotlight",
+      "puzzleRevision": "fnv1a32:915f88a2",
+      "board": {
+        "width": 770,
+        "height": 550
+      },
+      "nodes": {
+        "term:refusing to report": {
+          "x": 310.51,
+          "y": 184.55,
+          "pinned": false
+        },
+        "term:the Journey of Reconciliation": {
+          "x": 116.41,
+          "y": 210.56,
+          "pinned": false
+        },
+        "term:War Without Violence": {
+          "x": 85,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the Free India Committee": {
+          "x": 97.6,
+          "y": 422.61,
+          "pinned": false
+        },
+        "term:A. Philip Randolph": {
+          "x": 521.68,
+          "y": 164.81,
+          "pinned": false
+        },
+        "term:the March on Washington": {
+          "x": 675.55,
+          "y": 230.74,
+          "pinned": false
+        },
+        "term:meticulous logistics": {
+          "x": 448.31,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the biggest demonstration yet": {
+          "x": 655.68,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the 1953 morals charge": {
+          "x": 564.1,
+          "y": 376.41,
+          "pinned": false
+        },
+        "term:forced to resign": {
+          "x": 697.6,
+          "y": 434.39,
+          "pinned": false
+        },
+        "term:Powell's threat": {
+          "x": 615.99,
+          "y": 527,
+          "pinned": false
+        },
+        "term:Thurmond's floor speech": {
+          "x": 236.97,
+          "y": 527,
+          "pinned": false
+        },
+        "term:the Young Communist League": {
+          "x": 438.91,
+          "y": 527,
+          "pinned": false
+        },
+        "term:one attack, three facts": {
+          "x": 269.64,
+          "y": 355.55,
+          "pinned": false
+        },
+        "term:twenty years of practice": {
+          "x": 261.73,
+          "y": 23,
+          "pinned": false
+        },
+        "term:credit not given": {
+          "x": 425.15,
+          "y": 284.79,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3940.67,
+        "score": 3940.6677551698804
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:24:30.261Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "out-of-the-spotlight",
+      "puzzleRevision": "fnv1a32:915f88a2",
+      "board": {
+        "width": 1150,
+        "height": 740
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 575,
+          "y": 541.29,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 307.76,
+          "y": 296.36,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 842.24,
+          "y": 296.36,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:one attack, three facts": {
+          "x": 804.7,
+          "y": 458.62,
+          "pinned": false
+        },
+        "term:twenty years of practice": {
+          "x": 345.3,
+          "y": 458.62,
+          "pinned": false
+        },
+        "term:credit not given": {
+          "x": 575,
+          "y": 296.36,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "refusing to report",
+          "the Journey of Reconciliation",
+          "War Without Violence",
+          "the Free India Committee"
+        ],
+        "cluster:1": [
+          "A. Philip Randolph",
+          "the March on Washington",
+          "meticulous logistics",
+          "the biggest demonstration yet"
+        ],
+        "cluster:2": [
+          "the 1953 morals charge",
+          "forced to resign",
+          "Powell's threat",
+          "Thurmond's floor speech",
+          "the Young Communist League"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 571.033379505703
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:24:33.075Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "out-of-the-spotlight",
+      "puzzleRevision": "fnv1a32:915f88a2",
+      "board": {
+        "width": 1150,
+        "height": 740
+      },
+      "nodes": {
+        "term:refusing to report": {
+          "x": 357.85,
+          "y": 210.32
+        },
+        "term:the Journey of Reconciliation": {
+          "x": 422.16,
+          "y": 22
+        },
+        "term:War Without Violence": {
+          "x": 630.79,
+          "y": 22
+        },
+        "term:the Free India Committee": {
+          "x": 765.56,
+          "y": 155.44
+        },
+        "term:A. Philip Randolph": {
+          "x": 901.55,
+          "y": 491.24
+        },
+        "term:the March on Washington": {
+          "x": 990.76,
+          "y": 648.93
+        },
+        "term:meticulous logistics": {
+          "x": 818.03,
+          "y": 718
+        },
+        "term:the biggest demonstration yet": {
+          "x": 611.08,
+          "y": 717.71
+        },
+        "term:the 1953 morals charge": {
+          "x": 387.35,
+          "y": 697.69
+        },
+        "term:forced to resign": {
+          "x": 216.07,
+          "y": 686.15
+        },
+        "term:Powell's threat": {
+          "x": 67.25,
+          "y": 690.88
+        },
+        "term:Thurmond's floor speech": {
+          "x": 92.45,
+          "y": 521.09
+        },
+        "term:the Young Communist League": {
+          "x": 192.69,
+          "y": 340.86
+        },
+        "term:one attack, three facts": {
+          "x": 426.71,
+          "y": 377.66
+        },
+        "term:twenty years of practice": {
+          "x": 623.22,
+          "y": 413.79
+        },
+        "term:credit not given": {
+          "x": 506.66,
+          "y": 548.12
+        },
+        "cluster:0": {
+          "x": 556.51,
+          "y": 209.06
+        },
+        "cluster:1": {
+          "x": 744.52,
+          "y": 560.27
+        },
+        "cluster:2": {
+          "x": 291.99,
+          "y": 525.41
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:24:36.130Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.2,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:24:27.412Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

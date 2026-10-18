@@ -1,15 +1,16 @@
 {
   "id": "safe-legal-ethical-effective",
   "title": "Safe, Legal, Ethical, Effective",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "psychology"
   ],
   "subcategories": {
+    "peace-conflict-studies": "war-militarism",
     "psychology": "moral-psychology"
   },
-  "large": true,
   "tags": [
     "book"
   ],

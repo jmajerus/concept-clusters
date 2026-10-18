@@ -3,20 +3,21 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-manufactured-desire",
   "title": "The Manufactured Desire",
-  "category": "philosophy",
+  "category": "critical-theory-cultural-studies",
   "categories": [
+    "critical-theory-cultural-studies",
     "philosophy",
     "psychology",
     "sociology"
   ],
   "subcategories": {
     "philosophy": "political-philosophy",
-    "psychology": "psychoanalysis"
+    "psychology": "psychoanalysis",
+    "sociology": "culture-socialization"
   },
-  "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
   ],
@@ -303,3 +304,317 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-manufactured-desire",
+      "puzzleRevision": "fnv1a32:e4866ea0",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:culture industry": {
+          "x": 204.68,
+          "y": 246.44,
+          "pinned": false
+        },
+        "term:pseudo-individualization": {
+          "x": 97.6,
+          "y": 109.58,
+          "pinned": false
+        },
+        "term:mass standardization": {
+          "x": 85,
+          "y": 354.37,
+          "pinned": false
+        },
+        "term:false needs": {
+          "x": 253.78,
+          "y": 122.88,
+          "pinned": false
+        },
+        "term:instrumental rationality": {
+          "x": 262.65,
+          "y": 410.49,
+          "pinned": false
+        },
+        "term:society of the spectacle": {
+          "x": 663.43,
+          "y": 391.41,
+          "pinned": false
+        },
+        "term:sign-value": {
+          "x": 564.8,
+          "y": 271.92,
+          "pinned": false
+        },
+        "term:simulacra and simulation": {
+          "x": 460.19,
+          "y": 436.17,
+          "pinned": false
+        },
+        "term:hyperreality": {
+          "x": 761.39,
+          "y": 519.68,
+          "pinned": false
+        },
+        "term:commodification of experience": {
+          "x": 602.22,
+          "y": 597,
+          "pinned": false
+        },
+        "term:ideological state apparatus": {
+          "x": 718.88,
+          "y": 23,
+          "pinned": false
+        },
+        "term:interpellation": {
+          "x": 893.9,
+          "y": 23,
+          "pinned": false
+        },
+        "term:performative authenticity": {
+          "x": 859.25,
+          "y": 189.64,
+          "pinned": false
+        },
+        "term:curated lifestyle": {
+          "x": 679.79,
+          "y": 205.31,
+          "pinned": false
+        },
+        "term:compulsory positivity": {
+          "x": 523.71,
+          "y": 62.08,
+          "pinned": false
+        },
+        "term:manufactured solace": {
+          "x": 354.38,
+          "y": 23,
+          "pinned": false
+        },
+        "term:substitution of image for need": {
+          "x": 396.62,
+          "y": 227.59,
+          "pinned": false
+        },
+        "term:commodified subjectivity": {
+          "x": 862.4,
+          "y": 391.97,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3753.5,
+        "score": 3753.4979116947798
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:07:50.479Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-manufactured-desire",
+      "puzzleRevision": "fnv1a32:e4866ea0",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 573.04,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 265.9,
+          "y": 310.48,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 784.1,
+          "y": 310.48,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:manufactured solace": {
+          "x": 558.47,
+          "y": 401.96,
+          "pinned": false
+        },
+        "term:substitution of image for need": {
+          "x": 269.8,
+          "y": 493.81,
+          "pinned": false
+        },
+        "term:commodified subjectivity": {
+          "x": 525,
+          "y": 310.48,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "culture industry",
+          "pseudo-individualization",
+          "mass standardization",
+          "false needs",
+          "instrumental rationality"
+        ],
+        "cluster:1": [
+          "society of the spectacle",
+          "sign-value",
+          "simulacra and simulation",
+          "hyperreality",
+          "commodification of experience"
+        ],
+        "cluster:2": [
+          "ideological state apparatus",
+          "interpellation",
+          "performative authenticity",
+          "curated lifestyle",
+          "compulsory positivity"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 463.79644073987834
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:07:52.494Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-manufactured-desire",
+      "puzzleRevision": "fnv1a32:e4866ea0",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:culture industry": {
+          "x": 70.4,
+          "y": 168.67
+        },
+        "term:pseudo-individualization": {
+          "x": 709.26,
+          "y": 22
+        },
+        "term:mass standardization": {
+          "x": 574.48,
+          "y": 72.81
+        },
+        "term:false needs": {
+          "x": 239.6,
+          "y": 162.86
+        },
+        "term:instrumental rationality": {
+          "x": 95.6,
+          "y": 22
+        },
+        "term:society of the spectacle": {
+          "x": 673.39,
+          "y": 598
+        },
+        "term:sign-value": {
+          "x": 743.98,
+          "y": 207.61
+        },
+        "term:simulacra and simulation": {
+          "x": 864.4,
+          "y": 484.25
+        },
+        "term:hyperreality": {
+          "x": 682.41,
+          "y": 246.56
+        },
+        "term:commodification of experience": {
+          "x": 848.65,
+          "y": 98.14
+        },
+        "term:ideological state apparatus": {
+          "x": 105.05,
+          "y": 388.78
+        },
+        "term:interpellation": {
+          "x": 462.58,
+          "y": 488.37
+        },
+        "term:performative authenticity": {
+          "x": 98.75,
+          "y": 598
+        },
+        "term:curated lifestyle": {
+          "x": 442.11,
+          "y": 598
+        },
+        "term:compulsory positivity": {
+          "x": 199.64,
+          "y": 346.13
+        },
+        "term:manufactured solace": {
+          "x": 149.87,
+          "y": 215.22
+        },
+        "term:substitution of image for need": {
+          "x": 482.54,
+          "y": 180.91
+        },
+        "term:commodified subjectivity": {
+          "x": 596.81,
+          "y": 431.6
+        },
+        "cluster:0": {
+          "x": 336.51,
+          "y": 61.82
+        },
+        "cluster:1": {
+          "x": 804.55,
+          "y": 369.12
+        },
+        "cluster:2": {
+          "x": 302.86,
+          "y": 431.6
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:07:54.768Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:07:48.264Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

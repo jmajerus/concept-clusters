@@ -3,18 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "restoring-honest-choice",
   "title": "Restoring Honest Choice",
   "category": "business-organizations",
   "categories": [
     "business-organizations",
-    "computer-science"
+    "computer-science",
+    "science-technology-society"
   ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How professional commitments, ethical formation, organizational safeguards, and public accountability can work together to protect honest choice. The puzzle treats these remedies as complementary layers rather than interchangeable solutions.",
     "links": [
@@ -499,3 +500,378 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "restoring-honest-choice",
+      "puzzleRevision": "fnv1a32:1da4fa85",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:public good": {
+          "x": 734.79,
+          "y": 162.08,
+          "pinned": false
+        },
+        "term:avoid harm": {
+          "x": 688.44,
+          "y": 44.25,
+          "pinned": false
+        },
+        "term:honesty and trustworthiness": {
+          "x": 852.95,
+          "y": 43.13,
+          "pinned": false
+        },
+        "term:respect for privacy": {
+          "x": 860,
+          "y": 235.9,
+          "pinned": false
+        },
+        "term:impact and risk evaluation": {
+          "x": 570.44,
+          "y": 154.35,
+          "pinned": false
+        },
+        "term:business ethics": {
+          "x": 221.66,
+          "y": 377.06,
+          "pinned": false
+        },
+        "term:computing ethics": {
+          "x": 100.52,
+          "y": 457.95,
+          "pinned": false
+        },
+        "term:stakeholder analysis": {
+          "x": 85,
+          "y": 297.31,
+          "pinned": false
+        },
+        "term:case-based reasoning": {
+          "x": 242.95,
+          "y": 533.86,
+          "pinned": false
+        },
+        "term:professional identity": {
+          "x": 377.57,
+          "y": 418.72,
+          "pinned": false
+        },
+        "term:ethics review": {
+          "x": 750.47,
+          "y": 464.59,
+          "pinned": false
+        },
+        "term:incentive redesign": {
+          "x": 690.29,
+          "y": 597,
+          "pinned": false
+        },
+        "term:autonomy testing": {
+          "x": 874.75,
+          "y": 401.58,
+          "pinned": false
+        },
+        "term:complaint escalation": {
+          "x": 856.31,
+          "y": 573.61,
+          "pinned": false
+        },
+        "term:protected dissent": {
+          "x": 607.98,
+          "y": 462.07,
+          "pinned": false
+        },
+        "term:FTC enforcement": {
+          "x": 247.56,
+          "y": 165.29,
+          "pinned": false
+        },
+        "term:clear disclosure": {
+          "x": 216.62,
+          "y": 23,
+          "pinned": false
+        },
+        "term:cancellation parity": {
+          "x": 97.3,
+          "y": 126.9,
+          "pinned": false
+        },
+        "term:statutory protection": {
+          "x": 386.08,
+          "y": 241.78,
+          "pinned": false
+        },
+        "term:independent oversight": {
+          "x": 375.71,
+          "y": 64.95,
+          "pinned": false
+        },
+        "term:professional obligation": {
+          "x": 696.75,
+          "y": 312.42,
+          "pinned": false
+        },
+        "term:institutionalized restraint": {
+          "x": 474.68,
+          "y": 592.64,
+          "pinned": false
+        },
+        "term:enforceable floor": {
+          "x": 523.83,
+          "y": 331.78,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4178.32,
+        "score": 4178.319061775205
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:38:15.780Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "restoring-honest-choice",
+      "puzzleRevision": "fnv1a32:1da4fa85",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 819.48,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 571.2,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 224.8,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 230.52,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:professional obligation": {
+          "x": 768.41,
+          "y": 215.23,
+          "pinned": false
+        },
+        "term:institutionalized restraint": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:enforceable floor": {
+          "x": 281.59,
+          "y": 215.23,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "public good",
+          "avoid harm",
+          "honesty and trustworthiness",
+          "respect for privacy",
+          "impact and risk evaluation"
+        ],
+        "cluster:1": [
+          "business ethics",
+          "computing ethics",
+          "stakeholder analysis",
+          "case-based reasoning",
+          "professional identity"
+        ],
+        "cluster:2": [
+          "ethics review",
+          "incentive redesign",
+          "autonomy testing",
+          "complaint escalation",
+          "protected dissent"
+        ],
+        "cluster:3": [
+          "FTC enforcement",
+          "clear disclosure",
+          "cancellation parity",
+          "statutory protection",
+          "independent oversight"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 334.75982978449224
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:38:17.843Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "restoring-honest-choice",
+      "puzzleRevision": "fnv1a32:1da4fa85",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:public good": {
+          "x": 194.17,
+          "y": 127.11
+        },
+        "term:avoid harm": {
+          "x": 283.01,
+          "y": 173.09
+        },
+        "term:honesty and trustworthiness": {
+          "x": 447.56,
+          "y": 162.9
+        },
+        "term:respect for privacy": {
+          "x": 109.94,
+          "y": 22
+        },
+        "term:impact and risk evaluation": {
+          "x": 525.75,
+          "y": 22
+        },
+        "term:business ethics": {
+          "x": 892.75,
+          "y": 505.88
+        },
+        "term:computing ethics": {
+          "x": 634.74,
+          "y": 154.16
+        },
+        "term:stakeholder analysis": {
+          "x": 713.09,
+          "y": 22
+        },
+        "term:case-based reasoning": {
+          "x": 877,
+          "y": 22
+        },
+        "term:professional identity": {
+          "x": 703.63,
+          "y": 208.35
+        },
+        "term:ethics review": {
+          "x": 487.67,
+          "y": 345.09
+        },
+        "term:incentive redesign": {
+          "x": 602.04,
+          "y": 598
+        },
+        "term:autonomy testing": {
+          "x": 811.58,
+          "y": 598
+        },
+        "term:complaint escalation": {
+          "x": 434.09,
+          "y": 598
+        },
+        "term:protected dissent": {
+          "x": 753.42,
+          "y": 500.04
+        },
+        "term:FTC enforcement": {
+          "x": 239.17,
+          "y": 598
+        },
+        "term:clear disclosure": {
+          "x": 202.08,
+          "y": 262.45
+        },
+        "term:cancellation parity": {
+          "x": 79.85,
+          "y": 174.43
+        },
+        "term:statutory protection": {
+          "x": 295.35,
+          "y": 406.26
+        },
+        "term:independent oversight": {
+          "x": 86.15,
+          "y": 488.79
+        },
+        "term:professional obligation": {
+          "x": 582.17,
+          "y": 274.58
+        },
+        "term:institutionalized restraint": {
+          "x": 687.05,
+          "y": 330.12
+        },
+        "term:enforceable floor": {
+          "x": 351.52,
+          "y": 515.15
+        },
+        "cluster:0": {
+          "x": 304.76,
+          "y": 22
+        },
+        "cluster:1": {
+          "x": 817.42,
+          "y": 166.68
+        },
+        "cluster:2": {
+          "x": 519.7,
+          "y": 461.5
+        },
+        "cluster:3": {
+          "x": 192.99,
+          "y": 446.56
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:38:19.736Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:38:13.846Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

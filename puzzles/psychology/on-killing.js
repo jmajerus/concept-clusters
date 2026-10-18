@@ -3,18 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "on-killing",
   "title": "On Killing",
   "category": "psychology",
   "categories": [
     "psychology",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "war-militarism",
     "psychology": "moral-psychology"
   },
-  "large": true,
   "tags": [
     "book",
     "war"
@@ -313,3 +314,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "on-killing",
+      "puzzleRevision": "fnv1a32:b13e05bf",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:instinctive resistance": {
+          "x": 341.19,
+          "y": 338.33,
+          "pinned": false
+        },
+        "term:posturing": {
+          "x": 328.45,
+          "y": 483.42,
+          "pinned": false
+        },
+        "term:ratio of fire": {
+          "x": 219.62,
+          "y": 439.66,
+          "pinned": false
+        },
+        "term:submission signals": {
+          "x": 170.94,
+          "y": 302.39,
+          "pinned": false
+        },
+        "term:physical distance": {
+          "x": 407.47,
+          "y": 175.36,
+          "pinned": false
+        },
+        "term:cultural distance": {
+          "x": 300.36,
+          "y": 63.21,
+          "pinned": false
+        },
+        "term:moral distance": {
+          "x": 443.08,
+          "y": 34.14,
+          "pinned": false
+        },
+        "term:mechanical distance": {
+          "x": 562.03,
+          "y": 128.68,
+          "pinned": false
+        },
+        "term:operant conditioning": {
+          "x": 688.27,
+          "y": 261.42,
+          "pinned": false
+        },
+        "term:desensitization": {
+          "x": 838.24,
+          "y": 210.92,
+          "pinned": false
+        },
+        "term:authorization": {
+          "x": 736.98,
+          "y": 117.5,
+          "pinned": false
+        },
+        "term:target discrimination": {
+          "x": 826.71,
+          "y": 371.93,
+          "pinned": false
+        },
+        "term:guilt": {
+          "x": 494.54,
+          "y": 597,
+          "pinned": false
+        },
+        "term:exhilaration": {
+          "x": 595.57,
+          "y": 587.93,
+          "pinned": false
+        },
+        "term:rationalization": {
+          "x": 383.62,
+          "y": 594.03,
+          "pinned": false
+        },
+        "term:psychiatric casualties": {
+          "x": 488.03,
+          "y": 465.26,
+          "pinned": false
+        },
+        "term:close combat": {
+          "x": 270.38,
+          "y": 200.34,
+          "pinned": false
+        },
+        "term:training simulators": {
+          "x": 520.02,
+          "y": 291.02,
+          "pinned": false
+        },
+        "term:rising firing rates": {
+          "x": 661.69,
+          "y": 430.19,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3313.1,
+        "score": 3313.101733095397
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:27:32.028Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "on-killing",
+      "puzzleRevision": "fnv1a32:b13e05bf",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 805.14,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 569.6,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 226.4,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 244.86,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:close combat": {
+          "x": 738.61,
+          "y": 557.34,
+          "pinned": false
+        },
+        "term:training simulators": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:rising firing rates": {
+          "x": 311.39,
+          "y": 238.66,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "instinctive resistance",
+          "posturing",
+          "ratio of fire",
+          "submission signals"
+        ],
+        "cluster:1": [
+          "physical distance",
+          "cultural distance",
+          "moral distance",
+          "mechanical distance"
+        ],
+        "cluster:2": [
+          "operant conditioning",
+          "desensitization",
+          "authorization",
+          "target discrimination"
+        ],
+        "cluster:3": [
+          "guilt",
+          "exhilaration",
+          "rationalization",
+          "psychiatric casualties"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 326.8941216678958
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:27:34.640Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "on-killing",
+      "puzzleRevision": "fnv1a32:b13e05bf",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:instinctive resistance": {
+          "x": 421.99,
+          "y": 342.65
+        },
+        "term:posturing": {
+          "x": 137.64,
+          "y": 520.45
+        },
+        "term:ratio of fire": {
+          "x": 60.95,
+          "y": 429.19
+        },
+        "term:submission signals": {
+          "x": 76.7,
+          "y": 280.53
+        },
+        "term:physical distance": {
+          "x": 109.24,
+          "y": 113.49
+        },
+        "term:cultural distance": {
+          "x": 239.31,
+          "y": 22
+        },
+        "term:moral distance": {
+          "x": 388.44,
+          "y": 22
+        },
+        "term:mechanical distance": {
+          "x": 541.15,
+          "y": 35.43
+        },
+        "term:operant conditioning": {
+          "x": 699.37,
+          "y": 109.03
+        },
+        "term:desensitization": {
+          "x": 855.11,
+          "y": 155
+        },
+        "term:authorization": {
+          "x": 899.05,
+          "y": 286.07
+        },
+        "term:target discrimination": {
+          "x": 873.85,
+          "y": 470.7
+        },
+        "term:guilt": {
+          "x": 599.31,
+          "y": 598
+        },
+        "term:exhilaration": {
+          "x": 483.78,
+          "y": 598
+        },
+        "term:rationalization": {
+          "x": 235.51,
+          "y": 598
+        },
+        "term:psychiatric casualties": {
+          "x": 560.02,
+          "y": 471.57
+        },
+        "term:close combat": {
+          "x": 203.34,
+          "y": 220.61
+        },
+        "term:training simulators": {
+          "x": 542.64,
+          "y": 207.29
+        },
+        "term:rising firing rates": {
+          "x": 719.19,
+          "y": 558.32
+        },
+        "cluster:0": {
+          "x": 227,
+          "y": 387.14
+        },
+        "cluster:1": {
+          "x": 353.13,
+          "y": 167.11
+        },
+        "cluster:2": {
+          "x": 718.79,
+          "y": 320.7
+        },
+        "cluster:3": {
+          "x": 369.09,
+          "y": 514.55
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:27:37.198Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:27:29.399Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

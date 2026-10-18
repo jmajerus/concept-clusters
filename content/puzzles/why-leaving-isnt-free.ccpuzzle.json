@@ -6,6 +6,10 @@
     "economics",
     "sociology"
   ],
+  "subcategories": {
+    "economics": "microeconomics",
+    "sociology": "social-stratification"
+  },
   "tags": [
     "book"
   ],

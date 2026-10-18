@@ -1,11 +1,15 @@
 {
   "id": "as-soon-as-made-ready",
   "title": "As Soon As Made Ready",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism"
+  },
   "info": {
     "text": "The Hiroshima bombing was a unique horror unleashed on the world. This puzzle doesn't condone massive civilian casualty counts as being the only possible way to end the war. It examines a narrower, documented question: the standing military order that authorized Nagasaki without any renewed presidential decision -- and a historiographical dispute that has run for decades, still unresolved, over whether atomic weapons needed to be used against Japanese cities at all.",
     "citations": [
@@ -23,20 +27,6 @@
       "name": "The Standing Order",
       "color": "teal",
       "fact": "A single written order, signed not by the President but by an Army officer acting on his behalf, authorized 'additional bombs' to be delivered 'as soon as made ready' -- requiring no further decision for each city bombed.",
-      "seeds": [
-        "Leslie Groves",
-        "509th Composite Group"
-      ],
-      "floatingTerms": [
-        "Handy Directive",
-        "Thomas Handy"
-      ],
-      "terms": [
-        "Leslie Groves",
-        "509th Composite Group",
-        "Handy Directive",
-        "Thomas Handy"
-      ],
       "termInfo": {
         "509th Composite Group": {
           "text": "The U.S. Army Air Forces unit that carried out both atomic bombings, operating under the same standing order for each.",
@@ -70,27 +60,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Leslie Groves",
+        "509th Composite Group"
+      ],
+      "floatingTerms": [
+        "Handy Directive",
+        "Thomas Handy"
+      ],
+      "terms": [
+        "Leslie Groves",
+        "509th Composite Group",
+        "Handy Directive",
+        "Thomas Handy"
+      ]
     },
     {
       "id": "compressed-timeline",
       "name": "The Compressed Timeline",
       "color": "amber",
       "fact": "The interval between the two bombings was compressed by weather forecasting rather than deliberation: the mission was moved up from its original date, and the crew diverted from its primary target only when cloud cover obscured it over the city. An estimated 40,000 people were killed instantly when the bomb fell on Nagasaki instead, with the death toll reaching roughly 70,000 by the end of the year.",
-      "seeds": [
-        "Kokura",
-        "Fat Man"
-      ],
-      "floatingTerms": [
-        "Three-Day Interval",
-        "Hibakusha"
-      ],
-      "terms": [
-        "Kokura",
-        "Fat Man",
-        "Three-Day Interval",
-        "Hibakusha"
-      ],
       "termInfo": {
         "Fat Man": {
           "text": "The plutonium implosion-type bomb dropped on Nagasaki, killing tens of thousands of civilians within its first day. Because its design differed from Hiroshima's, those deaths also gave the U.S. its first evidence of how a second, untested bomb design would perform against a city full of people.",
@@ -124,27 +114,27 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Kokura",
+        "Fat Man"
+      ],
+      "floatingTerms": [
+        "Three-Day Interval",
+        "Hibakusha"
+      ],
+      "terms": [
+        "Kokura",
+        "Fat Man",
+        "Three-Day Interval",
+        "Hibakusha"
+      ]
     },
     {
       "id": "historiographical-dispute",
       "name": "The Historiographical Dispute",
       "color": "blue",
       "fact": "Historians still dispute why Japan surrendered when it did: some point to the bombs themselves, others to the Soviet Union's entry into the war, and others to intercepted Japanese military communications showing genuine resistance to surrender even after both bombs fell.",
-      "seeds": [
-        "Soviet Entry into the Pacific War",
-        "Big Six"
-      ],
-      "floatingTerms": [
-        "MAGIC Intercepts",
-        "Kyujo Incident"
-      ],
-      "terms": [
-        "Soviet Entry into the Pacific War",
-        "Big Six",
-        "MAGIC Intercepts",
-        "Kyujo Incident"
-      ],
       "termInfo": {
         "Big Six": {
           "text": "The informal name for Japan's Supreme Council for the Direction of the War, still deadlocked over surrender terms after both bombs fell.",
@@ -178,7 +168,21 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "Soviet Entry into the Pacific War",
+        "Big Six"
+      ],
+      "floatingTerms": [
+        "MAGIC Intercepts",
+        "Kyujo Incident"
+      ],
+      "terms": [
+        "Soviet Entry into the Pacific War",
+        "Big Six",
+        "MAGIC Intercepts",
+        "Kyujo Incident"
+      ]
     }
   ],
   "bridges": [

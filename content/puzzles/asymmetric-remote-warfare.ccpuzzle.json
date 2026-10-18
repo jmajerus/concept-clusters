@@ -1,12 +1,18 @@
 {
   "id": "asymmetric-remote-warfare",
   "title": "Asymmetric & Remote Warfare",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
-    "history-society"
+    "history-society",
+    "science-technology-society"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "political-science": "international-relations",
+    "science-technology-society": "automation-accountability"
+  },
   "tags": [
     "book",
     "drones",
@@ -14,17 +20,17 @@
   ],
   "info": {
     "text": "Jeremy Scahill's Dirty Wars traces how the post-9/11 targeted-killing program grew into a covert, borderless war fought with drones, secret kill lists, and mass surveillance.",
+    "links": [
+      {
+        "href": "wiki:Dirty Wars"
+      }
+    ],
     "citations": [
       {
         "title": "Dirty Wars: The World Is a Battlefield",
         "author": "Scahill, Jeremy",
         "publisher": "Nation Books",
         "year": "2013"
-      }
-    ],
-    "links": [
-      {
-        "href": "wiki:Dirty Wars"
       }
     ]
   },
@@ -34,20 +40,6 @@
       "name": "The Borderless Battlefield",
       "color": "teal",
       "fact": "The 2001 AUMF's vague authorization to fight an ever-expanding roster of 'associated forces,' with no sunset clause and no stated geography, let a war meant for one moment and one enemy stretch into new countries without Congress ever voting to open them.",
-      "seeds": [
-        "AUMF",
-        "associated forces"
-      ],
-      "floatingTerms": [
-        "War Powers Resolution",
-        "congressional deference"
-      ],
-      "terms": [
-        "AUMF",
-        "associated forces",
-        "War Powers Resolution",
-        "congressional deference"
-      ],
       "termInfo": {
         "AUMF": {
           "text": "The 2001 joint resolution authorizing 'all necessary and appropriate force' against those responsible for the September 11 attacks, passed with no sunset clause and no stated geographic limit.",
@@ -88,27 +80,27 @@
             "href": "wiki:Authorization for Use of Military Force of 2001"
           }
         ]
-      }
+      },
+      "seeds": [
+        "AUMF",
+        "associated forces"
+      ],
+      "floatingTerms": [
+        "War Powers Resolution",
+        "congressional deference"
+      ],
+      "terms": [
+        "AUMF",
+        "associated forces",
+        "War Powers Resolution",
+        "congressional deference"
+      ]
     },
     {
       "id": "the-kill-list-bureaucracy",
       "name": "The Kill List Bureaucracy",
       "color": "amber",
       "fact": "The disposition matrix turned a presidential killing decision into a routine bureaucratic cycle of nominating, profiling, and re-approving names every few months — a cycle that in 2011 reached a U.S. citizen, Anwar al-Awlaki, with no indictment and no trial.",
-      "seeds": [
-        "Disposition Matrix",
-        "Anwar al-Awlaki"
-      ],
-      "floatingTerms": [
-        "Terror Tuesday",
-        "baseball cards"
-      ],
-      "terms": [
-        "Disposition Matrix",
-        "Anwar al-Awlaki",
-        "Terror Tuesday",
-        "baseball cards"
-      ],
       "termInfo": {
         "Anwar al-Awlaki": {
           "text": "An American-born cleric killed by a U.S. drone strike in Yemen in 2011 — the first time a sitting president had knowingly ordered the killing of a U.S. citizen through this process.",
@@ -150,27 +142,27 @@
             "href": "wiki:Disposition Matrix"
           }
         ]
-      }
+      },
+      "seeds": [
+        "Disposition Matrix",
+        "Anwar al-Awlaki"
+      ],
+      "floatingTerms": [
+        "Terror Tuesday",
+        "baseball cards"
+      ],
+      "terms": [
+        "Disposition Matrix",
+        "Anwar al-Awlaki",
+        "Terror Tuesday",
+        "baseball cards"
+      ]
     },
     {
       "id": "remote-targeting-methods",
       "name": "Remote Targeting Methods",
       "color": "magenta",
       "fact": "Most drone strikes were not aimed at a named individual at all: a signature strike fired on unidentified people whose observed behavior merely matched a pattern, trading a confirmed identity for a much lower and harder-to-verify bar for who counted as a legitimate target.",
-      "seeds": [
-        "signature strikes",
-        "personality strikes"
-      ],
-      "floatingTerms": [
-        "double-tap strikes",
-        "kill chain"
-      ],
-      "terms": [
-        "signature strikes",
-        "personality strikes",
-        "double-tap strikes",
-        "kill chain"
-      ],
       "termInfo": {
         "double-tap strikes": {
           "text": "A euphemism for the planned cold-blooded murder of first responders, including medics and ambulance drivers, who arrive to aid the wounded from an earlier attack at the same site.",
@@ -236,27 +228,27 @@
             "href": "wiki:Targeted killing"
           }
         ]
-      }
+      },
+      "seeds": [
+        "signature strikes",
+        "personality strikes"
+      ],
+      "floatingTerms": [
+        "double-tap strikes",
+        "kill chain"
+      ],
+      "terms": [
+        "signature strikes",
+        "personality strikes",
+        "double-tap strikes",
+        "kill chain"
+      ]
     },
     {
       "id": "pervasive-surveillance",
       "name": "Pervasive Surveillance",
       "color": "blue",
       "fact": "A former NSA and CIA director's blunt admission that 'we kill people based on metadata' captured how individual identity gave way to statistical probability: programs like SKYNET scored millions of ordinary people's likelihood of being a terrorist from nothing but their calling and travel habits.",
-      "seeds": [
-        "metadata",
-        "SKYNET"
-      ],
-      "floatingTerms": [
-        "machine learning",
-        "selectors"
-      ],
-      "terms": [
-        "metadata",
-        "SKYNET",
-        "machine learning",
-        "selectors"
-      ],
       "termInfo": {
         "SKYNET": {
           "text": "An NSA program, revealed in documents leaked by Edward Snowden, that applied machine-learning analysis to the cellphone metadata of tens of millions of people in Pakistan to score their likelihood of being a courier for a terrorist network.",
@@ -293,7 +285,21 @@
             "href": "wiki:Mass surveillance"
           }
         ]
-      }
+      },
+      "seeds": [
+        "metadata",
+        "SKYNET"
+      ],
+      "floatingTerms": [
+        "machine learning",
+        "selectors"
+      ],
+      "terms": [
+        "metadata",
+        "SKYNET",
+        "machine learning",
+        "selectors"
+      ]
     }
   ],
   "bridges": [

@@ -4,9 +4,14 @@
   "category": "economics",
   "categories": [
     "economics",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
-  "large": true,
+  "subcategories": {
+    "economics": "microeconomics",
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "political-science": "international-relations"
+  },
   "info": {
     "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything.",
     "links": [
@@ -21,20 +26,6 @@
       "name": "The one-shot dilemma",
       "color": "teal",
       "fact": "Played once, the dilemma has a clean answer: whatever the other side does, you score better by defecting. Both sides reason identically, both defect, and both end up worse off than if they had cooperated. That result is what everything else here is trying to escape.",
-      "seeds": [
-        "prisoner's dilemma",
-        "dominant strategy"
-      ],
-      "floatingTerms": [
-        "temptation payoff",
-        "sucker's payoff"
-      ],
-      "terms": [
-        "prisoner's dilemma",
-        "dominant strategy",
-        "temptation payoff",
-        "sucker's payoff"
-      ],
       "termInfo": {
         "dominant strategy": {
           "text": "A move that scores better than the alternative no matter what the other player does — which, in a single round of this game, is defection.",
@@ -76,25 +67,27 @@
             "href": "wiki:Prisoner's dilemma"
           }
         ]
-      }
+      },
+      "seeds": [
+        "prisoner's dilemma",
+        "dominant strategy"
+      ],
+      "floatingTerms": [
+        "temptation payoff",
+        "sucker's payoff"
+      ],
+      "terms": [
+        "prisoner's dilemma",
+        "dominant strategy",
+        "temptation payoff",
+        "sucker's payoff"
+      ]
     },
     {
       "id": "cluster-strategy",
       "name": "What made a strategy score well",
       "color": "blue",
       "fact": "Across both of Axelrod's tournaments the high scorers shared a shape: never the first to defect, quick to drop a grudge once the other side came back, and simple enough that an opponent could work out what they were doing. None of them ever beat a single opponent head to head.",
-      "seeds": [
-        "niceness",
-        "forgiveness"
-      ],
-      "floatingTerms": [
-        "clarity"
-      ],
-      "terms": [
-        "niceness",
-        "forgiveness",
-        "clarity"
-      ],
       "termInfo": {
         "clarity": {
           "text": "Being simple enough that the other player can work out your rule and see that cooperating with you pays. An unreadable strategy invites being treated as unresponsive.",
@@ -128,27 +121,25 @@
             "href": "wiki:The Evolution of Cooperation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "niceness",
+        "forgiveness"
+      ],
+      "floatingTerms": [
+        "clarity"
+      ],
+      "terms": [
+        "niceness",
+        "forgiveness",
+        "clarity"
+      ]
     },
     {
       "id": "cluster-breakdown",
       "name": "How cooperation unravels",
       "color": "amber",
       "fact": "None of this requires malice. A garbled move, a deadline both sides can see, or the urge to beat your partner rather than the field is enough to turn a working relationship into a long run of mutual punishment that neither side chose.",
-      "seeds": [
-        "misperception",
-        "envy"
-      ],
-      "floatingTerms": [
-        "echo effect",
-        "known last round"
-      ],
-      "terms": [
-        "echo effect",
-        "misperception",
-        "known last round",
-        "envy"
-      ],
       "termInfo": {
         "echo effect": {
           "text": "One defection copied back and forth, so a single move reverberates through many rounds of alternating retaliation.",
@@ -190,27 +181,27 @@
             "href": "wiki:The Evolution of Cooperation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "misperception",
+        "envy"
+      ],
+      "floatingTerms": [
+        "echo effect",
+        "known last round"
+      ],
+      "terms": [
+        "echo effect",
+        "misperception",
+        "known last round",
+        "envy"
+      ]
     },
     {
       "id": "cluster-spread",
       "name": "How cooperation takes hold",
       "color": "magenta",
       "fact": "Cooperation does not need everyone to convert at once. A small group of reciprocators that mostly meets itself can outscore a surrounding world of defectors — and once established, that pattern is very hard for defectors to break back into.",
-      "seeds": [
-        "live and let live",
-        "evolutionary stability"
-      ],
-      "floatingTerms": [
-        "clustering",
-        "territoriality"
-      ],
-      "terms": [
-        "clustering",
-        "evolutionary stability",
-        "territoriality",
-        "live and let live"
-      ],
       "termInfo": {
         "clustering": {
           "text": "A small group of reciprocators interacting mostly with each other can outscore a defecting majority, even while heavily outnumbered.",
@@ -252,7 +243,21 @@
             "href": "wiki:The Evolution of Cooperation"
           }
         ]
-      }
+      },
+      "seeds": [
+        "live and let live",
+        "evolutionary stability"
+      ],
+      "floatingTerms": [
+        "clustering",
+        "territoriality"
+      ],
+      "terms": [
+        "clustering",
+        "evolutionary stability",
+        "territoriality",
+        "live and let live"
+      ]
     }
   ],
   "bridges": [

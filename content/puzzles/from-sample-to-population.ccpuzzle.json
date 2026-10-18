@@ -1,0 +1,530 @@
+{
+  "id": "from-sample-to-population",
+  "title": "From Sample to Population — The Logic of Inference",
+  "category": "math",
+  "subcategories": {
+    "math": "probability-statistics"
+  },
+  "info": {
+    "text": "Statistical inference is how a sample earns the right to speak for a population: one law of sample behavior underwrites both ways of going on record — an interval that bets on the truth and a test that puts a claim on trial, with named margins and named mistakes.",
+    "links": [
+      {
+        "href": "wiki:Statistical inference"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Introductory Statistics, ch. 7: The Central Limit Theorem (key terms)",
+        "author": "Barbara Illowsky and Susan Dean",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/introductory-statistics/pages/7-key-terms"
+      },
+      {
+        "title": "Introductory Statistics, ch. 8: Confidence Intervals (key terms)",
+        "author": "Barbara Illowsky and Susan Dean",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/introductory-statistics/pages/8-key-terms"
+      },
+      {
+        "title": "Introductory Statistics, ch. 9: Hypothesis Testing with One Sample (key terms)",
+        "author": "Barbara Illowsky and Susan Dean",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/introductory-statistics/pages/9-key-terms"
+      },
+      {
+        "title": "Power (statistics)",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Power_(statistics)"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "worlds",
+      "name": "Two worlds",
+      "color": "teal",
+      "fact": "There is the population you care about and the sample you can actually afford — and each side has its own number for the same question: the parameter and the statistic.",
+      "termInfo": {
+        "parameter": {
+          "text": "A number describing the population — the true share, the true mean μ. Almost never observable; always the target.",
+          "links": [
+            {
+              "href": "wiki:Statistical parameter"
+            }
+          ]
+        },
+        "population": {
+          "text": "Everyone (or everything) the question is really about — every voter, every widget. What you'd measure if measuring everything were possible.",
+          "links": [
+            {
+              "href": "wiki:Statistical population"
+            }
+          ]
+        },
+        "sample": {
+          "text": "The part of the population actually observed; the 1,200 people polled. Inference's only source of evidence.",
+          "links": [
+            {
+              "href": "wiki:Sampling (statistics)"
+            }
+          ]
+        },
+        "statistic": {
+          "text": "A number computed from the sample — the poll's 53%, the sample mean x̄. The observable stand-in for its parameter.",
+          "links": [
+            {
+              "href": "wiki:Statistic"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Statistical inference"
+          }
+        ]
+      },
+      "seeds": [
+        "population",
+        "sample"
+      ],
+      "floatingTerms": [
+        "parameter",
+        "statistic"
+      ],
+      "terms": [
+        "population",
+        "sample",
+        "parameter",
+        "statistic"
+      ]
+    },
+    {
+      "id": "sampling-law",
+      "name": "The law of sample behavior",
+      "color": "blue",
+      "fact": "Samples refuse to agree with each other — but their disagreement has a shape, a width, and a guarantee, and that law is what lets one noisy sample speak for everyone.",
+      "termInfo": {
+        "central limit theorem": {
+          "text": "For large samples, the sampling distribution of the mean is approximately normal — centered on the parameter — whatever shape the population itself has.",
+          "links": [
+            {
+              "href": "wiki:Central limit theorem"
+            }
+          ]
+        },
+        "sampling distribution": {
+          "text": "The collection of a statistic's values over every possible sample — the pattern repeated polls trace. Where a statistic's behavior lives.",
+          "links": [
+            {
+              "href": "wiki:Sampling distribution"
+            }
+          ]
+        },
+        "standard error": {
+          "text": "The standard deviation of the sampling distribution — the typical distance a statistic lands from the parameter. It shrinks as samples grow: SE = σ/√n.",
+          "links": [
+            {
+              "href": "wiki:Standard error"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Sampling distribution"
+          }
+        ]
+      },
+      "seeds": [
+        "central limit theorem",
+        "standard error"
+      ],
+      "floatingTerms": [
+        "sampling distribution"
+      ],
+      "terms": [
+        "sampling distribution",
+        "standard error",
+        "central limit theorem"
+      ]
+    },
+    {
+      "id": "estimation",
+      "name": "Estimation",
+      "color": "amber",
+      "fact": "The honest way to answer 'what is the parameter?' is a guess plus its price: one number from the sample, an interval around it, a stated hit rate, and the margin that sets the interval's width.",
+      "termInfo": {
+        "confidence interval": {
+          "text": "The point estimate plus and minus a margin of error — an interval the method catches the parameter in, sample after sample, at the promised rate.",
+          "links": [
+            {
+              "href": "wiki:Confidence interval"
+            }
+          ]
+        },
+        "confidence level": {
+          "text": "The promised hit rate: 95% of intervals built this way contain the true parameter. A property of the method, not of any one interval.",
+          "links": [
+            {
+              "href": "wiki:Confidence interval"
+            }
+          ]
+        },
+        "margin of error": {
+          "text": "The half-width of the interval: a critical value times the standard error. The price of the guess, paid in sampling variability.",
+          "links": [
+            {
+              "href": "wiki:Margin of error"
+            }
+          ]
+        },
+        "point estimate": {
+          "text": "The single number a sample offers for the parameter — the statistic itself, taken as the best guess.",
+          "links": [
+            {
+              "href": "wiki:Point estimation"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Estimation"
+          }
+        ]
+      },
+      "seeds": [
+        "confidence interval",
+        "margin of error"
+      ],
+      "floatingTerms": [
+        "point estimate",
+        "confidence level"
+      ],
+      "terms": [
+        "point estimate",
+        "confidence interval",
+        "confidence level",
+        "margin of error"
+      ]
+    },
+    {
+      "id": "testing",
+      "name": "Testing a claim",
+      "color": "magenta",
+      "fact": "Put a default claim on trial, agree in advance on what counts as evidence against it, and let the sample testify — the machinery that turns a surprising statistic into a decision.",
+      "termInfo": {
+        "alternative hypothesis": {
+          "text": "The claim the evidence supports if the null is rejected — the researcher's suspicion, stated before the data arrives.",
+          "links": [
+            {
+              "href": "wiki:Statistical hypothesis test"
+            }
+          ]
+        },
+        "null hypothesis": {
+          "text": "The default claim on trial — no effect, no difference, exactly 50%. It is never proven; the only decisive verdict is rejection.",
+          "links": [
+            {
+              "href": "wiki:Statistical hypothesis test"
+            }
+          ]
+        },
+        "p-value": {
+          "text": "Assuming the null is true, the probability of a result at least as extreme as the observed one. Small means the sample is hard to explain by luck.",
+          "links": [
+            {
+              "href": "wiki:P-value"
+            }
+          ]
+        },
+        "significance level": {
+          "text": "The pre-declared threshold α for surprise — commonly 0.05. A p-value below it rejects the null; α is also the type I error rate accepted by decree.",
+          "links": [
+            {
+              "href": "wiki:Statistical significance"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Statistical hypothesis test"
+          }
+        ]
+      },
+      "seeds": [
+        "null hypothesis",
+        "p-value"
+      ],
+      "floatingTerms": [
+        "alternative hypothesis",
+        "significance level"
+      ],
+      "terms": [
+        "null hypothesis",
+        "alternative hypothesis",
+        "p-value",
+        "significance level"
+      ]
+    },
+    {
+      "id": "errors",
+      "name": "The two mistakes",
+      "color": "olive",
+      "fact": "A verdict can miss in exactly two directions — convicting the innocent or freeing the guilty — and statistics names both mistakes and the prize for avoiding the second one.",
+      "termInfo": {
+        "power": {
+          "text": "The chance the test catches a real effect: 1 − β. It grows with sample size, clearer effects, and a more generous α.",
+          "links": [
+            {
+              "href": "wiki:Power (statistics)"
+            }
+          ]
+        },
+        "type I error": {
+          "text": "Rejecting a null that was actually true — the false alarm. Its long-run rate is the significance level α.",
+          "links": [
+            {
+              "href": "wiki:Type I and type II errors"
+            }
+          ]
+        },
+        "type II error": {
+          "text": "Failing to reject a null that was actually false — the missed discovery. Its probability is β.",
+          "links": [
+            {
+              "href": "wiki:Type I and type II errors"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Type I and type II errors"
+          }
+        ]
+      },
+      "seeds": [
+        "type I error",
+        "type II error"
+      ],
+      "floatingTerms": [
+        "power"
+      ],
+      "terms": [
+        "type I error",
+        "type II error",
+        "power"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "inference",
+      "term": "inference",
+      "clusters": [
+        "worlds",
+        "estimation",
+        "testing"
+      ],
+      "fact": "Inference is the whole move: the parameter cannot be seen, so the sample's statistic speaks for it — estimation turns a statistic into an interval bet, and testing puts a claim about the parameter on trial before the statistic.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Statistical inference"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "worlds": "statistic",
+        "estimation": "confidence interval",
+        "testing": "null hypothesis"
+      }
+    },
+    {
+      "id": "unbiasedness",
+      "term": "unbiasedness",
+      "clusters": [
+        "sampling-law",
+        "worlds"
+      ],
+      "fact": "Each sample yields its own statistic, but the statistic's sampling distribution is centered on the parameter itself — the mean of all the sample means is μ. That centering is where the sample world touches the population world.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Bias of an estimator"
+          }
+        ]
+      },
+      "relationKind": "foundation"
+    },
+    {
+      "id": "precision",
+      "term": "precision",
+      "clusters": [
+        "estimation",
+        "sampling-law"
+      ],
+      "fact": "A confidence interval is the point estimate plus and minus a critical value times the standard error: the margin of error is sampling variability priced at the chosen confidence — which is why bigger samples buy narrower intervals.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Margin of error"
+          }
+        ]
+      },
+      "relationKind": "foundation"
+    },
+    {
+      "id": "tail-area",
+      "term": "tail area",
+      "clusters": [
+        "testing",
+        "sampling-law"
+      ],
+      "fact": "The p-value locates this sample's statistic inside the sampling distribution the null hypothesis predicts: the question is how far into the tail a statistic must fall before the null stops being believable.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:P-value"
+          }
+        ]
+      },
+      "relationKind": "foundation"
+    },
+    {
+      "id": "verdict",
+      "term": "verdict",
+      "clusters": [
+        "errors",
+        "testing"
+      ],
+      "fact": "Every test ends in one of two verdicts — reject the null or keep it — and each can be wrong in exactly one way: type I fires at a true claim, type II misses a false one. The significance level is the type I rate set by decree; power is one minus the type II rate.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Type I and type II errors"
+          }
+        ]
+      },
+      "relationKind": "contrast"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "poll-cast",
+      "prompt": "A poll contacts 1,200 voters and reports 53% support. Which two terms name, respectively, everyone the conclusion is about and the 1,200 actually contacted?",
+      "explanation": "Every voter in the country is the population — the whole the conclusion is about. The 1,200 actually polled are the sample, inference's only source of evidence.",
+      "targets": [
+        "population",
+        "sample"
+      ],
+      "reasons": {
+        "population": "all voters — the whole the poll exists to speak about",
+        "sample": "the 1,200 actually contacted — the observed part"
+      }
+    },
+    {
+      "id": "truth-and-standin",
+      "prompt": "The true share of all voters who support the measure is one number nobody can see; the poll's 53% is its computed stand-in. Which two terms name them?",
+      "explanation": "The true support among all voters is the parameter — a number nobody can observe. The poll's 53% is a statistic, computed from the sample, standing in for it.",
+      "targets": [
+        "parameter",
+        "statistic"
+      ],
+      "reasons": {
+        "parameter": "the population's unobservable true value",
+        "statistic": "the 53% — computed from the sample"
+      }
+    },
+    {
+      "id": "repeated-polls",
+      "prompt": "Pollsters repeat the poll many times, and each poll lands on a slightly different percentage. Which term names the pattern those repeated results trace?",
+      "explanation": "Repeat the poll with new samples and each gets its own percentage; the pattern those values trace is the sampling distribution. The standard error measures its width rather than being the pattern, and the central limit theorem supplies its shape.",
+      "targets": [
+        "sampling distribution"
+      ],
+      "reasons": {
+        "sampling distribution": "the collection of a statistic's values over all possible samples"
+      }
+    },
+    {
+      "id": "plus-minus-three",
+      "prompt": "The report reads '53%, ±3 points.' Which two terms name the ±3 points and the interval they build around 53%?",
+      "explanation": "The ±3 points are the margin of error — the interval's half-width; the interval it builds around 53% is the confidence interval. The point estimate is the 53% itself, not the ±3, and the confidence level is the promise, not the width.",
+      "targets": [
+        "margin of error",
+        "confidence interval"
+      ],
+      "reasons": {
+        "confidence interval": "53% minus 3 to 53% plus 3 — the interval the method stands behind",
+        "margin of error": "the ±3 — a critical value times the standard error"
+      }
+    },
+    {
+      "id": "skeptics-trial",
+      "prompt": "A skeptic assumes the measure truly has exactly 50% support and asks how unlikely a 53% poll would be. Which two terms name the default assumption and the probability of a result at least that surprising under it?",
+      "explanation": "The skeptic's working assumption — exactly 50%, nothing special — is the null hypothesis. The probability of a result at least this surprising under that assumption is the p-value. The alternative is the claim waiting if the null loses, and the significance level is the threshold, not the computed probability.",
+      "targets": [
+        "null hypothesis",
+        "p-value"
+      ],
+      "reasons": {
+        "null hypothesis": "the default on trial: no effect, exactly 50%",
+        "p-value": "the probability, under the null, of a result at least this extreme"
+      }
+    },
+    {
+      "id": "wrong-rejection",
+      "prompt": "The test rejects the 50% claim — but suppose the truth really was 50%. Which term names the mistake just made, and which names the long-run chance of making it that was set in advance?",
+      "explanation": "Rejecting a null that was actually true is a type I error — the false alarm — and the test's long-run chance of committing it is exactly the significance level α set in advance. The type II error is the opposite miss, and power is its complement.",
+      "targets": [
+        "type I error",
+        "significance level"
+      ],
+      "reasons": {
+        "significance level": "α — the type I rate accepted by decree before the data arrived",
+        "type I error": "rejecting a true null — the false alarm"
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "summarizing-data",
+        "reason": "Start of the statistics arc: describing a data set before generalizing from it."
+      },
+      {
+        "id": "rules-of-chance",
+        "reason": "The middle lesson: the probability rules this inference machinery leans on."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "From Sample to Population",
+    "summary": "How a sample earns the right to speak for a population: the law of sample behavior underwrites an interval bet on the truth and a trial verdict on a claim, with named margins and named mistakes.",
+    "estimatedMinutes": 8,
+    "content": {
+      "text": "A poll of 1,200 voters says 53%. Nobody polled everyone — so how can the number mean anything? Statistical inference is the answer, and this lesson walks its machinery: the two worlds every number lives in, the law that lets one world speak for the other, and the two ways to put a sample on record — an interval bet and a trial verdict.\r\n\r\n## Two worlds, two numbers\r\n\r\nThe population is everyone — or everything — the question is about; the sample is the part actually observed. Each world has its own number for the same question: the parameter is the population's value, the true share or true mean, and the statistic is the sample's computation of it. The parameter is almost never observable; the statistic is all we ever hold. Everything in this lesson is traffic between those two kinds of number.\r\n\r\n## The law of sample behavior\r\n\r\nDraw a different 1,200 people and the statistic moves — that is sampling variability, and it is not chaos. Imagine every possible sample's statistic laid out: that collection is the sampling distribution, and it has a measurable width called the standard error, which shrinks as samples grow. Its shape is the punchline: the central limit theorem says that for large samples the distribution of sample means is approximately normal — bell-shaped and centered exactly on the parameter — no matter what the population itself looks like. One noisy sample can speak for everyone because the crowd of all possible samples behaves predictably.\r\n\r\n## Estimation: betting an interval\r\n\r\nTo answer 'what is the parameter?', start with the point estimate — the statistic itself, the single best guess. An honest report never stops there: a confidence interval adds and subtracts a margin of error, and the margin is the standard error priced by how sure you demand to be. The confidence level is that promise read across repeated use: intervals built this way catch the true parameter in 95% of samples — not that this particular interval is 95% likely to be right, but that the method hits 95% of the time.\r\n\r\n## Testing a claim\r\n\r\nSometimes the question is not 'what is it?' but 'could this claim be true?'. Hypothesis testing puts a default — the null hypothesis, the claim of no effect, no difference, exactly 50% — on trial, with the alternative hypothesis waiting in case the evidence overturns it. The p-value is the evidence meter: assuming the null is true, it is the probability of a result at least as extreme as the one observed. The significance level, chosen before the data arrives, is the threshold — how surprising a sample must be before the default loses and is rejected.\r\n\r\n## The two mistakes\r\n\r\nAny verdict can miss in two directions. A type I error rejects a null that was actually true — the false alarm. A type II error keeps a null that was actually false — the missed discovery. The significance level is the type I rate accepted by decree, and the mistakes pull against each other: make rejection harder and false alarms fall while missed discoveries rise. The prize for escaping the second mistake has a name — power, the chance a test catches an effect that is really there, which grows with bigger samples and clearer effects.\r\n\r\nThe poll's '53%, ±3 points' is now a whole sentence: a statistic estimating a parameter, a margin of error priced by the standard error, a method that hits 95% of the time — and, if you ran a formal test against 50%, a verdict whose error rates were chosen in advance."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

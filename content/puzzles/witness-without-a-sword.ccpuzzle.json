@@ -1,8 +1,15 @@
 {
   "id": "witness-without-a-sword",
   "title": "The Power to Name",
-  "category": "political-science",
-  "large": true,
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "war",
     "international law",
@@ -17,24 +24,6 @@
       "name": "Breaking Its Own Silence",
       "color": "blue",
       "fact": "The ICRC's public voice has grown louder, and not by choice: in 2025 alone, at least 31 staff and volunteers of the Red Cross and Red Crescent Movement were killed in the course of their work. An organization built on quiet, confidential access finds it harder to stay quiet when its own people are the ones being buried.",
-      "seeds": [
-        "neutral intermediary",
-        "social media campaigning"
-      ],
-      "floatingTerms": [
-        "confidential bilateral dialogue",
-        "the Global IHL Initiative",
-        "attacks on humanitarian personnel",
-        "annual reporting"
-      ],
-      "terms": [
-        "neutral intermediary",
-        "social media campaigning",
-        "confidential bilateral dialogue",
-        "the Global IHL Initiative",
-        "attacks on humanitarian personnel",
-        "annual reporting"
-      ],
       "termInfo": {
         "annual reporting": {
           "text": "The ICRC's own yearly published account of its operations and the conditions it observed, country by country.",
@@ -52,13 +41,41 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "neutral intermediary",
+        "social media campaigning"
+      ],
+      "floatingTerms": [
+        "confidential bilateral dialogue",
+        "the Global IHL Initiative",
+        "attacks on humanitarian personnel",
+        "annual reporting"
+      ],
+      "terms": [
+        "neutral intermediary",
+        "social media campaigning",
+        "confidential bilateral dialogue",
+        "the Global IHL Initiative",
+        "attacks on humanitarian personnel",
+        "annual reporting"
+      ]
     },
     {
       "id": "breaking-the-silence",
       "name": "Breaking the Silence",
       "color": "magenta",
       "fact": "MSF's founders were originally Red Cross volunteers who broke from its policy of discretion after witnessing atrocities in Biafra they felt could not go unspoken. That founding choice still shapes the organization: funded almost entirely by private donors rather than governments, and willing to name a violation -- or walk away from a mission -- rather than stay silent about one.",
+      "termInfo": {
+        "témoignage": {
+          "text": "French for 'bearing witness' -- MSF's founding commitment to speaking out publicly about what its staff see, even at the cost of strict neutrality.",
+          "links": [
+            {
+              "href": "https://www.msf.org/who-we-are"
+            }
+          ]
+        }
+      },
       "seeds": [
         "témoignage",
         "financial independence"
@@ -72,41 +89,13 @@
         "financial independence",
         "Medical Care Under Fire",
         "withdrawal as protest"
-      ],
-      "termInfo": {
-        "témoignage": {
-          "text": "French for 'bearing witness' -- MSF's founding commitment to speaking out publicly about what its staff see, even at the cost of strict neutrality.",
-          "links": [
-            {
-              "href": "https://www.msf.org/who-we-are"
-            }
-          ]
-        }
-      }
+      ]
     },
     {
       "id": "accountability-gap",
       "name": "The Accountability Gap",
       "color": "amber",
       "fact": "The Rome Statute created a permanent court for the gravest violations, but its reach stops wherever a state withholds ratification or a permanent Council member exercises its veto -- and even where the system works exactly as designed, delivering the verified data the Council itself demanded, that evidence alone still can't compel a prosecution or a ceasefire.",
-      "seeds": [
-        "the Security Council veto",
-        "the Rome Statute"
-      ],
-      "floatingTerms": [
-        "universal jurisdiction",
-        "non-ratification",
-        "Resolution 2286",
-        "the WHO Surveillance System"
-      ],
-      "terms": [
-        "the Security Council veto",
-        "the Rome Statute",
-        "universal jurisdiction",
-        "non-ratification",
-        "Resolution 2286",
-        "the WHO Surveillance System"
-      ],
       "termInfo": {
         "Resolution 2286": {
           "text": "The Security Council resolution on protecting the wounded, sick, and medical and humanitarian personnel in armed conflict, adopted unanimously in 2016.",
@@ -148,7 +137,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "the Security Council veto",
+        "the Rome Statute"
+      ],
+      "floatingTerms": [
+        "universal jurisdiction",
+        "non-ratification",
+        "Resolution 2286",
+        "the WHO Surveillance System"
+      ],
+      "terms": [
+        "the Security Council veto",
+        "the Rome Statute",
+        "universal jurisdiction",
+        "non-ratification",
+        "Resolution 2286",
+        "the WHO Surveillance System"
+      ]
     }
   ],
   "bridges": [

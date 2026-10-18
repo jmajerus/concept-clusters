@@ -1,12 +1,14 @@
 {
   "id": "gandhis-truth",
   "title": "Gandhi's Truth",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "psychology"
   ],
   "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
     "psychology": "moral-psychology"
   },
   "tags": [

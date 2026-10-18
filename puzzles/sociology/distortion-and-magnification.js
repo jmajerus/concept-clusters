@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "distortion-and-magnification",
   "title": "Distortion and magnification",
   "category": "sociology",
@@ -12,7 +12,10 @@ export default definePuzzle(import.meta.url, {
     "psychology",
     "philosophy"
   ],
-  "large": true,
+  "subcategories": {
+    "psychology": "moral-psychology",
+    "sociology": "institutions-organizations"
+  },
   "info": {
     "text": "A diagnostic map separating distorted perception and moral judgment from the institutional and identity structures that can amplify them.",
     "links": [
@@ -420,3 +423,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "distortion-and-magnification",
+      "puzzleRevision": "fnv1a32:de5c6e97",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:information isolation": {
+          "x": 167.56,
+          "y": 242.59,
+          "pinned": false
+        },
+        "term:threat misperception": {
+          "x": 198.5,
+          "y": 417.01,
+          "pinned": false
+        },
+        "term:misinformation": {
+          "x": 310.76,
+          "y": 309.99,
+          "pinned": false
+        },
+        "term:loss of context": {
+          "x": 312.04,
+          "y": 170.66,
+          "pinned": false
+        },
+        "term:conditional dignity": {
+          "x": 675.5,
+          "y": 23,
+          "pinned": false
+        },
+        "term:moral exclusion": {
+          "x": 606.3,
+          "y": 161.79,
+          "pinned": false
+        },
+        "term:proportionality collapse": {
+          "x": 492.42,
+          "y": 34.42,
+          "pinned": false
+        },
+        "term:moral disengagement": {
+          "x": 460.64,
+          "y": 215.08,
+          "pinned": false
+        },
+        "term:role authority": {
+          "x": 667.04,
+          "y": 287.24,
+          "pinned": false
+        },
+        "term:procedural repetition": {
+          "x": 771.32,
+          "y": 168.22,
+          "pinned": false
+        },
+        "term:technical framing": {
+          "x": 657.67,
+          "y": 432.58,
+          "pinned": false
+        },
+        "term:diffusion of responsibility": {
+          "x": 829.08,
+          "y": 358.85,
+          "pinned": false
+        },
+        "term:in-group loyalty": {
+          "x": 506.31,
+          "y": 445.79,
+          "pinned": false
+        },
+        "term:betrayal framing": {
+          "x": 357.52,
+          "y": 444.6,
+          "pinned": false
+        },
+        "term:out-group homogeneity": {
+          "x": 430.75,
+          "y": 591.96,
+          "pinned": false
+        },
+        "term:identity fusion": {
+          "x": 589.89,
+          "y": 565.05,
+          "pinned": false
+        },
+        "term:threat narrative": {
+          "x": 267.37,
+          "y": 562.98,
+          "pinned": false
+        },
+        "term:normalization": {
+          "x": 825.58,
+          "y": 23,
+          "pinned": false
+        },
+        "term:legitimacy": {
+          "x": 548.75,
+          "y": 323.03,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3378.69,
+        "score": 3378.690878357596
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:38:50.138Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "distortion-and-magnification",
+      "puzzleRevision": "fnv1a32:de5c6e97",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 248.7,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 801.3,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 561.55,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 525,
+          "y": 234.45,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:threat narrative": {
+          "x": 313.31,
+          "y": 242.69,
+          "pinned": false
+        },
+        "term:normalization": {
+          "x": 759.31,
+          "y": 575.94,
+          "pinned": false
+        },
+        "term:legitimacy": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "information isolation",
+          "threat misperception",
+          "misinformation",
+          "loss of context"
+        ],
+        "cluster:1": [
+          "conditional dignity",
+          "moral exclusion",
+          "proportionality collapse",
+          "moral disengagement"
+        ],
+        "cluster:2": [
+          "role authority",
+          "procedural repetition",
+          "technical framing",
+          "diffusion of responsibility"
+        ],
+        "cluster:3": [
+          "in-group loyalty",
+          "betrayal framing",
+          "out-group homogeneity",
+          "identity fusion"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 301.8393691825126
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:38:52.210Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "distortion-and-magnification",
+      "puzzleRevision": "fnv1a32:de5c6e97",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:information isolation": {
+          "x": 393.02,
+          "y": 598
+        },
+        "term:threat misperception": {
+          "x": 572.29,
+          "y": 584.35
+        },
+        "term:misinformation": {
+          "x": 207.18,
+          "y": 598
+        },
+        "term:loss of context": {
+          "x": 67.25,
+          "y": 598
+        },
+        "term:conditional dignity": {
+          "x": 421.67,
+          "y": 334.52
+        },
+        "term:moral exclusion": {
+          "x": 117.64,
+          "y": 465.88
+        },
+        "term:proportionality collapse": {
+          "x": 95.6,
+          "y": 293.89
+        },
+        "term:moral disengagement": {
+          "x": 116.68,
+          "y": 108.66
+        },
+        "term:role authority": {
+          "x": 598.07,
+          "y": 280.23
+        },
+        "term:procedural repetition": {
+          "x": 340.69,
+          "y": 153.42
+        },
+        "term:technical framing": {
+          "x": 249.7,
+          "y": 22
+        },
+        "term:diffusion of responsibility": {
+          "x": 714.19,
+          "y": 22
+        },
+        "term:in-group loyalty": {
+          "x": 723.96,
+          "y": 207
+        },
+        "term:betrayal framing": {
+          "x": 735.03,
+          "y": 554.86
+        },
+        "term:out-group homogeneity": {
+          "x": 873.85,
+          "y": 274.03
+        },
+        "term:identity fusion": {
+          "x": 884.38,
+          "y": 440.76
+        },
+        "term:threat narrative": {
+          "x": 558.22,
+          "y": 420.22
+        },
+        "term:normalization": {
+          "x": 491.81,
+          "y": 199.03
+        },
+        "term:legitimacy": {
+          "x": 605.1,
+          "y": 147.51
+        },
+        "cluster:0": {
+          "x": 279.95,
+          "y": 464.29
+        },
+        "cluster:1": {
+          "x": 263.71,
+          "y": 299.69
+        },
+        "cluster:2": {
+          "x": 492.07,
+          "y": 22
+        },
+        "cluster:3": {
+          "x": 725.93,
+          "y": 383.43
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:38:54.444Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:38:48.200Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

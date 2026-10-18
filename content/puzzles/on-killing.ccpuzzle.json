@@ -4,12 +4,13 @@
   "category": "psychology",
   "categories": [
     "psychology",
-    "political-science"
+    "political-science",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "war-militarism",
     "psychology": "moral-psychology"
   },
-  "large": true,
   "tags": [
     "book",
     "war"

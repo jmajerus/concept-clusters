@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "exit-voice-and-loyalty",
   "title": "Exit, voice, and loyalty",
   "category": "economics",
@@ -12,6 +12,11 @@ export default definePuzzle(import.meta.url, {
     "sociology",
     "political-science"
   ],
+  "subcategories": {
+    "economics": "political-economy",
+    "political-science": "political-behavior",
+    "sociology": "institutions-organizations"
+  },
   "tags": [
     "book"
   ],
@@ -273,3 +278,298 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "exit-voice-and-loyalty",
+      "puzzleRevision": "fnv1a32:964aaa6f",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:slack": {
+          "x": 37.75,
+          "y": 132.3,
+          "pinned": false
+        },
+        "term:quality deterioration": {
+          "x": 167.15,
+          "y": 132,
+          "pinned": false
+        },
+        "term:recuperation": {
+          "x": 59.84,
+          "y": 24.44,
+          "pinned": false
+        },
+        "term:exit": {
+          "x": 520.1,
+          "y": 101.31,
+          "pinned": false
+        },
+        "term:switching": {
+          "x": 562.24,
+          "y": 23,
+          "pinned": false
+        },
+        "term:cost of exit": {
+          "x": 508.86,
+          "y": 199.05,
+          "pinned": false
+        },
+        "term:voice": {
+          "x": 602.25,
+          "y": 347.96,
+          "pinned": false
+        },
+        "term:complaint": {
+          "x": 579.33,
+          "y": 437,
+          "pinned": false
+        },
+        "term:pressure from within": {
+          "x": 475.6,
+          "y": 344.08,
+          "pinned": false
+        },
+        "term:public goods": {
+          "x": 171.23,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the state": {
+          "x": 70.19,
+          "y": 383.9,
+          "pinned": false
+        },
+        "term:no substitute": {
+          "x": 195.03,
+          "y": 312.51,
+          "pinned": false
+        },
+        "term:loyalty": {
+          "x": 595.95,
+          "y": 262.4,
+          "pinned": false
+        },
+        "term:lazy monopolist": {
+          "x": 69.25,
+          "y": 260.31,
+          "pinned": false
+        },
+        "term:exit of the quality-conscious": {
+          "x": 368.51,
+          "y": 90.99,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2129.7,
+        "score": 2129.6962218132967
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:09:03.441Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "exit-voice-and-loyalty",
+      "puzzleRevision": "fnv1a32:964aaa6f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 178.63,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 480,
+          "y": 457.37,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 761.78,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 198.22,
+          "y": 318,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:loyalty": {
+          "x": 640.79,
+          "y": 435.73,
+          "pinned": false
+        },
+        "term:lazy monopolist": {
+          "x": 283.96,
+          "y": 193.16,
+          "pinned": false
+        },
+        "term:exit of the quality-conscious": {
+          "x": 505.87,
+          "y": 328.72,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "slack",
+          "quality deterioration",
+          "recuperation"
+        ],
+        "cluster:1": [
+          "exit",
+          "switching",
+          "cost of exit"
+        ],
+        "cluster:2": [
+          "voice",
+          "complaint",
+          "pressure from within"
+        ],
+        "cluster:3": [
+          "public goods",
+          "the state",
+          "no substitute"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 278.5420315970424
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:09:06.085Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "exit-voice-and-loyalty",
+      "puzzleRevision": "fnv1a32:964aaa6f",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:slack": {
+          "x": 303.38,
+          "y": 456.01
+        },
+        "term:quality deterioration": {
+          "x": 242.34,
+          "y": 151.17
+        },
+        "term:recuperation": {
+          "x": 114.7,
+          "y": 306.9
+        },
+        "term:exit": {
+          "x": 357,
+          "y": 88.58
+        },
+        "term:switching": {
+          "x": 421.24,
+          "y": 22
+        },
+        "term:cost of exit": {
+          "x": 600.93,
+          "y": 137.05
+        },
+        "term:voice": {
+          "x": 692.32,
+          "y": 189.54
+        },
+        "term:complaint": {
+          "x": 813.5,
+          "y": 236.17
+        },
+        "term:pressure from within": {
+          "x": 827.94,
+          "y": 378.81
+        },
+        "term:public goods": {
+          "x": 732.58,
+          "y": 565.16
+        },
+        "term:the state": {
+          "x": 619.83,
+          "y": 598
+        },
+        "term:no substitute": {
+          "x": 450.07,
+          "y": 542.09
+        },
+        "term:loyalty": {
+          "x": 603.08,
+          "y": 248.9
+        },
+        "term:lazy monopolist": {
+          "x": 408.02,
+          "y": 408.38
+        },
+        "term:exit of the quality-conscious": {
+          "x": 440.14,
+          "y": 220.48
+        },
+        "cluster:0": {
+          "x": 265.58,
+          "y": 330.82
+        },
+        "cluster:1": {
+          "x": 510.79,
+          "y": 70.92
+        },
+        "cluster:2": {
+          "x": 706.88,
+          "y": 290.83
+        },
+        "cluster:3": {
+          "x": 597.21,
+          "y": 431.03
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:09:08.094Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:09:01.231Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -3,14 +3,19 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-military-industrial-complex",
   "title": "The Military-Industrial Complex",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "history-society"
   ],
+  "subcategories": {
+    "peace-conflict-studies": "war-militarism",
+    "political-science": "public-policy"
+  },
   "tags": [
     "speech",
     "war"
@@ -239,3 +244,308 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-military-industrial-complex",
+      "puzzleRevision": "fnv1a32:de73baed",
+      "board": {
+        "width": 700,
+        "height": 510
+      },
+      "nodes": {
+        "term:permanent armaments industry": {
+          "x": 386.6,
+          "y": 23,
+          "pinned": false
+        },
+        "term:wartime improvisation": {
+          "x": 611.85,
+          "y": 23,
+          "pinned": false
+        },
+        "term:defense spending": {
+          "x": 247.64,
+          "y": 65.43,
+          "pinned": false
+        },
+        "term:military-industrial complex": {
+          "x": 592.95,
+          "y": 373.24,
+          "pinned": false
+        },
+        "term:unwarranted influence": {
+          "x": 424.95,
+          "y": 320.88,
+          "pinned": false
+        },
+        "term:misplaced power": {
+          "x": 630.75,
+          "y": 227.28,
+          "pinned": false
+        },
+        "term:total influence": {
+          "x": 630.75,
+          "y": 487,
+          "pinned": false
+        },
+        "term:scientific-technological elite": {
+          "x": 245.13,
+          "y": 417.29,
+          "pinned": false
+        },
+        "term:federal research funding": {
+          "x": 97.6,
+          "y": 487,
+          "pinned": false
+        },
+        "term:solitary inventor": {
+          "x": 75.55,
+          "y": 351.79,
+          "pinned": false
+        },
+        "term:alert and knowledgeable citizenry": {
+          "x": 168.66,
+          "y": 183.38,
+          "pinned": false
+        },
+        "term:balance": {
+          "x": 44.05,
+          "y": 234.83,
+          "pinned": false
+        },
+        "term:mortgaging the future": {
+          "x": 88.15,
+          "y": 23,
+          "pinned": false
+        },
+        "term:immense military establishment": {
+          "x": 547.56,
+          "y": 155.48,
+          "pinned": false
+        },
+        "term:the technological revolution": {
+          "x": 450.92,
+          "y": 487,
+          "pinned": false
+        },
+        "term:proper meshing": {
+          "x": 361.98,
+          "y": 174.89,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3358.25,
+        "score": 3358.2521202594344
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:28:13.492Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-military-industrial-complex",
+      "puzzleRevision": "fnv1a32:de73baed",
+      "board": {
+        "width": 1060,
+        "height": 680
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 170.6,
+          "y": 348,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 530,
+          "y": 178.99,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 889.4,
+          "y": 348,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 530,
+          "y": 517.01,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:immense military establishment": {
+          "x": 254.13,
+          "y": 167.33,
+          "pinned": false
+        },
+        "term:the technological revolution": {
+          "x": 805.87,
+          "y": 167.33,
+          "pinned": false
+        },
+        "term:proper meshing": {
+          "x": 666,
+          "y": 348,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "permanent armaments industry",
+          "wartime improvisation",
+          "defense spending"
+        ],
+        "cluster:1": [
+          "military-industrial complex",
+          "unwarranted influence",
+          "misplaced power",
+          "total influence"
+        ],
+        "cluster:2": [
+          "scientific-technological elite",
+          "federal research funding",
+          "solitary inventor"
+        ],
+        "cluster:3": [
+          "alert and knowledgeable citizenry",
+          "balance",
+          "mortgaging the future"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 491.5366720785428
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:28:15.890Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-military-industrial-complex",
+      "puzzleRevision": "fnv1a32:de73baed",
+      "board": {
+        "width": 1060,
+        "height": 680
+      },
+      "nodes": {
+        "term:permanent armaments industry": {
+          "x": 771,
+          "y": 22
+        },
+        "term:wartime improvisation": {
+          "x": 225.12,
+          "y": 22
+        },
+        "term:defense spending": {
+          "x": 581.36,
+          "y": 22
+        },
+        "term:military-industrial complex": {
+          "x": 952.05,
+          "y": 155.38
+        },
+        "term:unwarranted influence": {
+          "x": 604.51,
+          "y": 407.61
+        },
+        "term:misplaced power": {
+          "x": 992.75,
+          "y": 332.07
+        },
+        "term:total influence": {
+          "x": 957.15,
+          "y": 471.66
+        },
+        "term:scientific-technological elite": {
+          "x": 736.05,
+          "y": 574.38
+        },
+        "term:federal research funding": {
+          "x": 533.5,
+          "y": 658
+        },
+        "term:solitary inventor": {
+          "x": 97.38,
+          "y": 658
+        },
+        "term:alert and knowledgeable citizenry": {
+          "x": 395.9,
+          "y": 320.04
+        },
+        "term:balance": {
+          "x": 42.05,
+          "y": 277.12
+        },
+        "term:mortgaging the future": {
+          "x": 144.22,
+          "y": 185.87
+        },
+        "term:immense military establishment": {
+          "x": 613.41,
+          "y": 196.36
+        },
+        "term:the technological revolution": {
+          "x": 951.8,
+          "y": 658
+        },
+        "term:proper meshing": {
+          "x": 475.99,
+          "y": 502.67
+        },
+        "cluster:0": {
+          "x": 415.01,
+          "y": 83.04
+        },
+        "cluster:1": {
+          "x": 809.29,
+          "y": 342.1
+        },
+        "cluster:2": {
+          "x": 304.19,
+          "y": 611.17
+        },
+        "cluster:3": {
+          "x": 156.29,
+          "y": 401.3
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:28:18.382Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:28:10.510Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

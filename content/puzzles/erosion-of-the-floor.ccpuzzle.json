@@ -1,8 +1,15 @@
 {
   "id": "erosion-of-the-floor",
   "title": "Erosion of the Floor",
-  "category": "political-science",
-  "large": true,
+  "category": "peace-conflict-studies",
+  "categories": [
+    "peace-conflict-studies",
+    "political-science"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
+    "political-science": "international-relations"
+  },
   "tags": [
     "war",
     "international law",
@@ -17,24 +24,6 @@
       "name": "The Legal Floor",
       "color": "teal",
       "fact": "Even wars have rules, says the ICRC -- and these are among the most basic: spare civilians, weigh harm against military gain, take precautions before striking, and never punish a doctor, or a hospital, for treating the wounded.",
-      "seeds": [
-        "distinction",
-        "proportionality"
-      ],
-      "floatingTerms": [
-        "precaution in attack",
-        "hors de combat",
-        "Common Article 3",
-        "medical neutrality"
-      ],
-      "terms": [
-        "distinction",
-        "proportionality",
-        "precaution in attack",
-        "hors de combat",
-        "Common Article 3",
-        "medical neutrality"
-      ],
       "termInfo": {
         "Common Article 3": {
           "text": "The provision common to all four 1949 Geneva Conventions setting minimum protections that apply 'in all circumstances,' including in conflicts not between states.",
@@ -84,29 +73,31 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "distinction",
+        "proportionality"
+      ],
+      "floatingTerms": [
+        "precaution in attack",
+        "hors de combat",
+        "Common Article 3",
+        "medical neutrality"
+      ],
+      "terms": [
+        "distinction",
+        "proportionality",
+        "precaution in attack",
+        "hors de combat",
+        "Common Article 3",
+        "medical neutrality"
+      ]
     },
     {
       "id": "patterns-of-erosion",
       "name": "Patterns of Erosion",
       "color": "brown",
       "fact": "Erosion rarely looks like open rejection of the rules: sieges starve instead of shooting, wide-area weapons move the killing indoors, hospitals get struck and their staff detained, and belligerents relabel the same acts as necessity instead of naming them as violations.",
-      "seeds": [
-        "starvation as a method of warfare",
-        "explosive weapons in populated areas"
-      ],
-      "floatingTerms": [
-        "selective interpretation",
-        "attacks on health care",
-        "detention of medical personnel"
-      ],
-      "terms": [
-        "starvation as a method of warfare",
-        "explosive weapons in populated areas",
-        "selective interpretation",
-        "attacks on health care",
-        "detention of medical personnel"
-      ],
       "termInfo": {
         "attacks on health care": {
           "text": "Direct violence against hospitals, clinics, ambulances, and health workers -- tracked in a standardized global dataset that has recorded thousands of verified incidents.",
@@ -152,31 +143,29 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "starvation as a method of warfare",
+        "explosive weapons in populated areas"
+      ],
+      "floatingTerms": [
+        "selective interpretation",
+        "attacks on health care",
+        "detention of medical personnel"
+      ],
+      "terms": [
+        "starvation as a method of warfare",
+        "explosive weapons in populated areas",
+        "selective interpretation",
+        "attacks on health care",
+        "detention of medical personnel"
+      ]
     },
     {
       "id": "the-crime-of-crimes",
       "name": "The Crime of Crimes",
       "color": "olive",
       "fact": "Genocide is legally narrow by design: acts committed with intent to destroy a national, ethnical, racial, or religious group, in whole or in part -- political groups and so-called 'cultural genocide' were both deliberately left out when the Convention was drafted in 1948. Proving that intent, not just documenting the acts, is what separates genocide from every other crime in this puzzle.",
-      "seeds": [
-        "genocide",
-        "the Genocide Convention"
-      ],
-      "floatingTerms": [
-        "the duty to prevent",
-        "political groups",
-        "OHCHR",
-        "genocide accusations"
-      ],
-      "terms": [
-        "genocide",
-        "the Genocide Convention",
-        "the duty to prevent",
-        "political groups",
-        "OHCHR",
-        "genocide accusations"
-      ],
       "termInfo": {
         "OHCHR": {
           "text": "The UN's principal human rights office doesn't make legal determinations itself -- it provides expertise, methodology, and secretariat support to the independent Human Rights Council-mandated Commissions of Inquiry that investigate and document patterns that may constitute genocide. The final legal determination remains for a court: the ICJ for a state's responsibility, the ICC or an ad hoc tribunal for an individual's.",
@@ -222,7 +211,25 @@
             }
           ]
         }
-      }
+      },
+      "seeds": [
+        "genocide",
+        "the Genocide Convention"
+      ],
+      "floatingTerms": [
+        "the duty to prevent",
+        "political groups",
+        "OHCHR",
+        "genocide accusations"
+      ],
+      "terms": [
+        "genocide",
+        "the Genocide Convention",
+        "the duty to prevent",
+        "political groups",
+        "OHCHR",
+        "genocide accusations"
+      ]
     }
   ],
   "bridges": [

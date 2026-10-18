@@ -3,15 +3,17 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-manufacture-of-compliance",
   "title": "The Manufacture of Compliance",
   "category": "psychology",
   "categories": [
     "psychology",
-    "history-society"
+    "history-society",
+    "peace-conflict-studies"
   ],
   "subcategories": {
+    "peace-conflict-studies": "atrocity-genocide",
     "psychology": "moral-psychology"
   },
   "tags": [
@@ -261,3 +263,232 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-manufacture-of-compliance",
+      "puzzleRevision": "fnv1a32:6c362a89",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:conformity to the group": {
+          "x": 410.71,
+          "y": 276.03,
+          "pinned": false
+        },
+        "term:the option to refuse": {
+          "x": 341.21,
+          "y": 437,
+          "pinned": false
+        },
+        "term:career pressure": {
+          "x": 570.75,
+          "y": 262.24,
+          "pinned": false
+        },
+        "term:Reserve Police Battalion 101": {
+          "x": 529.8,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the minority who refused": {
+          "x": 542.4,
+          "y": 94.87,
+          "pinned": false
+        },
+        "term:incremental participation": {
+          "x": 100.75,
+          "y": 218.09,
+          "pinned": false
+        },
+        "term:eroding resistance": {
+          "x": 225.34,
+          "y": 332.39,
+          "pinned": false
+        },
+        "term:escalating commitment": {
+          "x": 88.15,
+          "y": 433.16,
+          "pinned": false
+        },
+        "term:undiminished responsibility": {
+          "x": 148.87,
+          "y": 23,
+          "pinned": false
+        },
+        "term:moral disengagement": {
+          "x": 263.22,
+          "y": 172.82,
+          "pinned": false
+        },
+        "term:the persistence of choice": {
+          "x": 361.81,
+          "y": 23,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 2441.36,
+        "score": 2441.356125419114
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:48:09.471Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-manufacture-of-compliance",
+      "puzzleRevision": "fnv1a32:6c362a89",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 635.12,
+          "y": 383.17,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 324.88,
+          "y": 252.83,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:moral disengagement": {
+          "x": 598.79,
+          "y": 199.21,
+          "pinned": false
+        },
+        "term:the persistence of choice": {
+          "x": 361.21,
+          "y": 436.79,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "conformity to the group",
+          "the option to refuse",
+          "career pressure",
+          "Reserve Police Battalion 101",
+          "the minority who refused"
+        ],
+        "cluster:1": [
+          "incremental participation",
+          "eroding resistance",
+          "escalating commitment",
+          "undiminished responsibility"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 314.4829669984991
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:48:11.587Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-manufacture-of-compliance",
+      "puzzleRevision": "fnv1a32:6c362a89",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:conformity to the group": {
+          "x": 476.99,
+          "y": 443.62
+        },
+        "term:the option to refuse": {
+          "x": 607.51,
+          "y": 598
+        },
+        "term:career pressure": {
+          "x": 445.79,
+          "y": 598
+        },
+        "term:Reserve Police Battalion 101": {
+          "x": 258.73,
+          "y": 598
+        },
+        "term:the minority who refused": {
+          "x": 396.51,
+          "y": 260.23
+        },
+        "term:incremental participation": {
+          "x": 746.64,
+          "y": 22
+        },
+        "term:eroding resistance": {
+          "x": 822.84,
+          "y": 334.68
+        },
+        "term:escalating commitment": {
+          "x": 873.85,
+          "y": 168.03
+        },
+        "term:undiminished responsibility": {
+          "x": 554.53,
+          "y": 117.9
+        },
+        "term:moral disengagement": {
+          "x": 736.17,
+          "y": 479.82
+        },
+        "term:the persistence of choice": {
+          "x": 635.64,
+          "y": 318.36
+        },
+        "cluster:0": {
+          "x": 316.19,
+          "y": 429.68
+        },
+        "cluster:1": {
+          "x": 726.24,
+          "y": 179.98
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:48:13.953Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:48:06.511Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "control-and-exit",
   "title": "Control and Exit",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "persuasive-deceptive-design"
   },
-  "large": true,
   "info": {
     "text": "How interfaces make access conditional, refuse to accept a clear no, and create asymmetric paths in which compliance and entry are easy while privacy protection and exit are costly. This puzzle examines Forced Action, Nagging, Obstruction, and Hard to Cancel.",
     "links": [
@@ -474,3 +478,388 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "control-and-exit",
+      "puzzleRevision": "fnv1a32:369b1e78",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:access desired service": {
+          "x": 230.67,
+          "y": 364.63,
+          "pinned": false
+        },
+        "term:use core feature": {
+          "x": 72.4,
+          "y": 313.12,
+          "pinned": false
+        },
+        "term:decline request": {
+          "x": 88.73,
+          "y": 457.67,
+          "pinned": false
+        },
+        "term:end subscription": {
+          "x": 363.69,
+          "y": 466.56,
+          "pinned": false
+        },
+        "term:control personal data": {
+          "x": 221.55,
+          "y": 549.33,
+          "pinned": false
+        },
+        "term:create account": {
+          "x": 287.01,
+          "y": 141.55,
+          "pinned": false
+        },
+        "term:disclose personal data": {
+          "x": 177.61,
+          "y": 23,
+          "pinned": false
+        },
+        "term:install app": {
+          "x": 329.55,
+          "y": 23,
+          "pinned": false
+        },
+        "term:accept marketing": {
+          "x": 152.53,
+          "y": 188.61,
+          "pinned": false
+        },
+        "term:provide payment details": {
+          "x": 458.3,
+          "y": 108.65,
+          "pinned": false
+        },
+        "term:repeated prompt": {
+          "x": 686.25,
+          "y": 108.56,
+          "pinned": false
+        },
+        "term:easy enrollment": {
+          "x": 846.31,
+          "y": 165.49,
+          "pinned": false
+        },
+        "term:hidden cancellation": {
+          "x": 590.88,
+          "y": 230.84,
+          "pinned": false
+        },
+        "term:extra steps": {
+          "x": 733.35,
+          "y": 229.59,
+          "pinned": false
+        },
+        "term:channel switching": {
+          "x": 807.29,
+          "y": 23,
+          "pinned": false
+        },
+        "term:interrupted task": {
+          "x": 598.89,
+          "y": 597,
+          "pinned": false
+        },
+        "term:time and attention loss": {
+          "x": 663.76,
+          "y": 439.87,
+          "pinned": false
+        },
+        "term:fatigue": {
+          "x": 756.46,
+          "y": 331.66,
+          "pinned": false
+        },
+        "term:privacy loss": {
+          "x": 490.6,
+          "y": 515.6,
+          "pinned": false
+        },
+        "term:forced persistence": {
+          "x": 844.17,
+          "y": 469.93,
+          "pinned": false
+        },
+        "term:impaired autonomy": {
+          "x": 750.71,
+          "y": 597,
+          "pinned": false
+        },
+        "term:conditional access": {
+          "x": 372.22,
+          "y": 263.47,
+          "pinned": false
+        },
+        "term:asymmetric friction": {
+          "x": 497.52,
+          "y": 370.13,
+          "pinned": false
+        },
+        "term:resource depletion": {
+          "x": 881.3,
+          "y": 313.06,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4374.85,
+        "score": 4374.84909150133
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:37:26.603Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "control-and-exit",
+      "puzzleRevision": "fnv1a32:369b1e78",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 578.82,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 807.78,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 525,
+          "y": 217.18,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 242.22,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:conditional access": {
+          "x": 762.55,
+          "y": 584.58,
+          "pinned": false
+        },
+        "term:asymmetric friction": {
+          "x": 525,
+          "y": 398,
+          "pinned": false
+        },
+        "term:resource depletion": {
+          "x": 287.45,
+          "y": 211.42,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "access desired service",
+          "use core feature",
+          "decline request",
+          "end subscription",
+          "control personal data"
+        ],
+        "cluster:1": [
+          "create account",
+          "disclose personal data",
+          "install app",
+          "accept marketing",
+          "provide payment details"
+        ],
+        "cluster:2": [
+          "repeated prompt",
+          "easy enrollment",
+          "hidden cancellation",
+          "extra steps",
+          "channel switching"
+        ],
+        "cluster:3": [
+          "interrupted task",
+          "time and attention loss",
+          "fatigue",
+          "privacy loss",
+          "forced persistence",
+          "impaired autonomy"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 319.5369095560503
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:37:28.563Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "control-and-exit",
+      "puzzleRevision": "fnv1a32:369b1e78",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:access desired service": {
+          "x": 505,
+          "y": 195
+        },
+        "term:use core feature": {
+          "x": 295.9,
+          "y": 281.56
+        },
+        "term:decline request": {
+          "x": 373.37,
+          "y": 22
+        },
+        "term:end subscription": {
+          "x": 433.58,
+          "y": 273.61
+        },
+        "term:control personal data": {
+          "x": 546.54,
+          "y": 22
+        },
+        "term:create account": {
+          "x": 895.9,
+          "y": 447.37
+        },
+        "term:disclose personal data": {
+          "x": 710.88,
+          "y": 257.93
+        },
+        "term:install app": {
+          "x": 791.41,
+          "y": 322.5
+        },
+        "term:accept marketing": {
+          "x": 889.6,
+          "y": 22
+        },
+        "term:provide payment details": {
+          "x": 772.29,
+          "y": 109.09
+        },
+        "term:repeated prompt": {
+          "x": 635.97,
+          "y": 393.6
+        },
+        "term:easy enrollment": {
+          "x": 679.47,
+          "y": 524.45
+        },
+        "term:hidden cancellation": {
+          "x": 446.55,
+          "y": 430.35
+        },
+        "term:extra steps": {
+          "x": 410.23,
+          "y": 543.45
+        },
+        "term:channel switching": {
+          "x": 513.45,
+          "y": 598
+        },
+        "term:interrupted task": {
+          "x": 249.21,
+          "y": 189.94
+        },
+        "term:time and attention loss": {
+          "x": 92.45,
+          "y": 149.52
+        },
+        "term:fatigue": {
+          "x": 363.09,
+          "y": 349.32
+        },
+        "term:privacy loss": {
+          "x": 57.8,
+          "y": 425.29
+        },
+        "term:forced persistence": {
+          "x": 76.7,
+          "y": 568.36
+        },
+        "term:impaired autonomy": {
+          "x": 230.04,
+          "y": 577.58
+        },
+        "term:conditional access": {
+          "x": 629.89,
+          "y": 298.12
+        },
+        "term:asymmetric friction": {
+          "x": 498.78,
+          "y": 346.3
+        },
+        "term:resource depletion": {
+          "x": 304.93,
+          "y": 474.04
+        },
+        "cluster:0": {
+          "x": 378.05,
+          "y": 145.1
+        },
+        "cluster:1": {
+          "x": 867.55,
+          "y": 164.09
+        },
+        "cluster:2": {
+          "x": 498.27,
+          "y": 477.51
+        },
+        "cluster:3": {
+          "x": 181.59,
+          "y": 349.32
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:37:30.498Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:37:24.417Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

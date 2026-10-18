@@ -3,14 +3,18 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "the-webs-bargain",
   "title": "The Web's Bargain",
-  "category": "computer-science",
+  "category": "science-technology-society",
+  "categories": [
+    "science-technology-society",
+    "computer-science"
+  ],
   "subcategories": {
-    "computer-science": "computing-and-society"
+    "computer-science": "computing-and-society",
+    "science-technology-society": "technology-work-control"
   },
-  "large": true,
   "info": {
     "text": "Why software moved into the browser, who gained control and convenience, which costs were transferred to users, and which native powers were displaced.",
     "links": [
@@ -438,3 +442,338 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "the-webs-bargain",
+      "puzzleRevision": "fnv1a32:23bf3632",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:runs anywhere": {
+          "x": 291.34,
+          "y": 193.17,
+          "pinned": false
+        },
+        "term:no installation": {
+          "x": 187.39,
+          "y": 105.17,
+          "pinned": false
+        },
+        "term:one codebase": {
+          "x": 276.97,
+          "y": 319.09,
+          "pinned": false
+        },
+        "term:instant updates": {
+          "x": 165.8,
+          "y": 246.01,
+          "pinned": false
+        },
+        "term:centralized deployment": {
+          "x": 601.38,
+          "y": 440.34,
+          "pinned": false
+        },
+        "term:forced version replacement": {
+          "x": 797.81,
+          "y": 407.31,
+          "pinned": false
+        },
+        "term:usage telemetry": {
+          "x": 544.9,
+          "y": 594.9,
+          "pinned": false
+        },
+        "term:subscription enforcement": {
+          "x": 715.73,
+          "y": 595.69,
+          "pinned": false
+        },
+        "term:network dependence": {
+          "x": 311.98,
+          "y": 457.22,
+          "pinned": false
+        },
+        "term:input latency": {
+          "x": 358.62,
+          "y": 595.2,
+          "pinned": false
+        },
+        "term:memory overhead": {
+          "x": 169.99,
+          "y": 403.13,
+          "pinned": false
+        },
+        "term:interface inconsistency": {
+          "x": 189.32,
+          "y": 585.02,
+          "pinned": false
+        },
+        "term:durable local files": {
+          "x": 684.12,
+          "y": 255.39,
+          "pinned": false
+        },
+        "term:sustained background work": {
+          "x": 729.98,
+          "y": 59.25,
+          "pinned": false
+        },
+        "term:direct hardware integration": {
+          "x": 532.6,
+          "y": 136.02,
+          "pinned": false
+        },
+        "term:user-controlled versions": {
+          "x": 862.4,
+          "y": 212.23,
+          "pinned": false
+        },
+        "term:institutional convenience": {
+          "x": 441.32,
+          "y": 327.14,
+          "pinned": false
+        },
+        "term:cost shifting": {
+          "x": 452.74,
+          "y": 494.63,
+          "pinned": false
+        },
+        "term:lowest common denominator": {
+          "x": 346.54,
+          "y": 34.82,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3691.54,
+        "score": 3691.5419818078976
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:32:08.876Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "the-webs-bargain",
+      "puzzleRevision": "fnv1a32:23bf3632",
+      "board": {
+        "width": 1050,
+        "height": 780
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 525,
+          "y": 231.79,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 525,
+          "y": 564.21,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 254.65,
+          "y": 398,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 795.35,
+          "y": 398,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:institutional convenience": {
+          "x": 499.13,
+          "y": 387.28,
+          "pinned": false
+        },
+        "term:cost shifting": {
+          "x": 316.29,
+          "y": 554.64,
+          "pinned": false
+        },
+        "term:lowest common denominator": {
+          "x": 756.34,
+          "y": 218.73,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "runs anywhere",
+          "no installation",
+          "one codebase",
+          "instant updates"
+        ],
+        "cluster:1": [
+          "centralized deployment",
+          "forced version replacement",
+          "usage telemetry",
+          "subscription enforcement"
+        ],
+        "cluster:2": [
+          "network dependence",
+          "input latency",
+          "memory overhead",
+          "interface inconsistency"
+        ],
+        "cluster:3": [
+          "durable local files",
+          "sustained background work",
+          "direct hardware integration",
+          "user-controlled versions"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 314.26059107252433
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T00:32:10.905Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "the-webs-bargain",
+      "puzzleRevision": "fnv1a32:23bf3632",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:runs anywhere": {
+          "x": 558.15,
+          "y": 186.35
+        },
+        "term:no installation": {
+          "x": 457.09,
+          "y": 122.66
+        },
+        "term:one codebase": {
+          "x": 809.81,
+          "y": 22
+        },
+        "term:instant updates": {
+          "x": 452.29,
+          "y": 22
+        },
+        "term:centralized deployment": {
+          "x": 436.03,
+          "y": 277.92
+        },
+        "term:forced version replacement": {
+          "x": 858.1,
+          "y": 550.52
+        },
+        "term:usage telemetry": {
+          "x": 619.1,
+          "y": 287.44
+        },
+        "term:subscription enforcement": {
+          "x": 864.4,
+          "y": 339.15
+        },
+        "term:network dependence": {
+          "x": 542.53,
+          "y": 462.38
+        },
+        "term:input latency": {
+          "x": 392.84,
+          "y": 480.04
+        },
+        "term:memory overhead": {
+          "x": 75.71,
+          "y": 598
+        },
+        "term:interface inconsistency": {
+          "x": 465.57,
+          "y": 598
+        },
+        "term:durable local files": {
+          "x": 263.81,
+          "y": 412.9
+        },
+        "term:sustained background work": {
+          "x": 98.75,
+          "y": 37.56
+        },
+        "term:direct hardware integration": {
+          "x": 320.76,
+          "y": 231.25
+        },
+        "term:user-controlled versions": {
+          "x": 95.6,
+          "y": 451.38
+        },
+        "term:institutional convenience": {
+          "x": 718.85,
+          "y": 218.41
+        },
+        "term:cost shifting": {
+          "x": 438.09,
+          "y": 361.66
+        },
+        "term:lowest common denominator": {
+          "x": 279.09,
+          "y": 122.66
+        },
+        "cluster:0": {
+          "x": 644.35,
+          "y": 22
+        },
+        "cluster:1": {
+          "x": 704.61,
+          "y": 415.65
+        },
+        "cluster:2": {
+          "x": 259.25,
+          "y": 598
+        },
+        "cluster:3": {
+          "x": 111.07,
+          "y": 239.49
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T00:32:13.576Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T00:32:06.912Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

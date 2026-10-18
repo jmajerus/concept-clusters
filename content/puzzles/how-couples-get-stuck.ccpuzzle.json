@@ -4,9 +4,13 @@
   "category": "psychology",
   "categories": [
     "psychology",
-    "sociology"
+    "sociology",
+    "peace-conflict-studies"
   ],
-  "large": true,
+  "subcategories": {
+    "peace-conflict-studies": "conflict-resolution-peacebuilding",
+    "psychology": "social-psychology"
+  },
   "tags": [
     "book"
   ],

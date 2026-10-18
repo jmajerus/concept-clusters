@@ -1,0 +1,754 @@
+{
+  "id": "excitation-contraction-coupling",
+  "title": "Excitation–contraction coupling",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "muscle"
+  },
+  "info": {
+    "text": "Calcium carries the order from membrane to myosin: released by voltage in skeletal muscle, by calcium itself in the heart, and read through myosin rather than actin in smooth muscle.",
+    "links": [
+      {
+        "href": "wiki:Muscle contraction"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Guyton and Hall Textbook of Medical Physiology, 14th ed., chapters 6–9",
+        "author": "John E. Hall, Michael E. Hall",
+        "publisher": "Elsevier",
+        "year": "2021"
+      },
+      {
+        "title": "Cardiac excitation–contraction coupling",
+        "author": "Donald M. Bers",
+        "publisher": "Nature 415:198–205",
+        "year": "2002",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/11805843/"
+      },
+      {
+        "title": "Smooth muscle contraction and relaxation",
+        "author": "R. Clinton Webb",
+        "publisher": "Advances in Physiology Education 27:201–206",
+        "year": "2003",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/14627618/"
+      },
+      {
+        "title": "Anatomy and Physiology 2e, §10.2 Skeletal Muscle",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-2-skeletal-muscle"
+      },
+      {
+        "title": "Anatomy and Physiology 2e, §10.3 Muscle Fiber Contraction and Relaxation",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-3-muscle-fiber-contraction-and-relaxation"
+      },
+      {
+        "title": "Anatomy and Physiology 2e, §10.8 Smooth Muscle",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-8-smooth-muscle"
+      },
+      {
+        "title": "Anatomy and Physiology 2e, §19.2 Cardiac Muscle and Electrical Activity",
+        "publisher": "OpenStax",
+        "year": "2022",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-2-cardiac-muscle-and-electrical-activity"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "skeletal-calcium-release",
+      "name": "Skeletal calcium release",
+      "color": "teal",
+      "fact": "The muscle action potential runs down the T tubules into the fiber's interior. At each triad, where a tubule meets two sacs of sarcoplasmic reticulum, voltage sensors in the tubule wall are physically linked to ryanodine receptors in the store, so depolarization pulls the release channels open and calcium floods the cytosol.",
+      "termInfo": {
+        "T tubules": {
+          "text": "Transverse tubules: inward folds of the cell membrane that carry the action potential deep into the fiber, close to every myofibril.",
+          "links": [
+            {
+              "href": "wiki:T-tubule"
+            }
+          ]
+        },
+        "ryanodine receptors": {
+          "text": "The calcium-release channels in the membrane of the sarcoplasmic reticulum. Skeletal muscle uses the RyR1 form, heart the RyR2 form.",
+          "links": [
+            {
+              "href": "wiki:Ryanodine receptor"
+            }
+          ]
+        },
+        "triad": "One T tubule flanked by two terminal cisternae of the sarcoplasmic reticulum: the junction where the voltage sensor meets the release channel."
+      },
+      "info": {
+        "text": "How a surface voltage change opens calcium stores deep inside a skeletal fiber.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-2-skeletal-muscle"
+          }
+        ]
+      },
+      "seeds": [
+        "T tubules",
+        "ryanodine receptors"
+      ],
+      "floatingTerms": [
+        "triad"
+      ],
+      "terms": [
+        "T tubules",
+        "ryanodine receptors",
+        "triad"
+      ]
+    },
+    {
+      "id": "thin-filament-switch",
+      "name": "Thin-filament switch",
+      "color": "blue",
+      "fact": "At rest, tropomyosin lies along actin over the sites myosin needs. The troponin complex holds it there: troponin I binds actin, troponin T binds tropomyosin, and troponin C binds calcium. When calcium binds troponin C, the complex shifts and drags tropomyosin aside.",
+      "termInfo": {
+        "tropomyosin": {
+          "text": "A long rod lying in the groove of the actin filament, covering myosin's binding sites while the muscle rests.",
+          "links": [
+            {
+              "href": "wiki:Tropomyosin"
+            }
+          ]
+        },
+        "troponin C": {
+          "text": "The calcium-binding subunit of troponin; calcium binding here starts the shift that uncovers actin.",
+          "links": [
+            {
+              "href": "wiki:Troponin C"
+            }
+          ]
+        },
+        "troponin I": {
+          "text": "The inhibitory subunit, which binds actin and helps hold tropomyosin in its blocking position.",
+          "links": [
+            {
+              "href": "wiki:Troponin I"
+            }
+          ]
+        },
+        "troponin T": {
+          "text": "The subunit that binds the troponin complex to tropomyosin.",
+          "links": [
+            {
+              "href": "wiki:Troponin T"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The calcium-operated latch on the actin filament of skeletal and cardiac muscle.",
+        "links": [
+          {
+            "href": "wiki:Troponin"
+          }
+        ]
+      },
+      "seeds": [
+        "tropomyosin",
+        "troponin C"
+      ],
+      "floatingTerms": [
+        "troponin I",
+        "troponin T"
+      ],
+      "terms": [
+        "tropomyosin",
+        "troponin C",
+        "troponin I",
+        "troponin T"
+      ]
+    },
+    {
+      "id": "cross-bridge-cycle",
+      "name": "Cross-bridge cycle",
+      "color": "amber",
+      "fact": "Each myosin head cycles: ATP binding releases it from actin, myosin ATPase splits the ATP and cocks the head, the cocked head binds actin, and phosphate release drives the power stroke. Without fresh ATP the head stays locked on actin in the rigor state.",
+      "termInfo": {
+        "cocked myosin head": "Guyton's term for the head after ATP is split: ADP and phosphate stay bound and the head is set at a right angle, storing energy for the next pull.",
+        "cross-bridge detachment": "The release of the myosin head from actin when a new ATP binds it.",
+        "myosin ATPase": {
+          "text": "The enzyme activity of the myosin head itself, splitting ATP into ADP and phosphate; its speed sets how fast a muscle can shorten.",
+          "links": [
+            {
+              "href": "wiki:Myosin ATPase"
+            }
+          ]
+        },
+        "power stroke": {
+          "text": "The head's pivot while bound to actin, pulling the thin filament toward the center of the sarcomere.",
+          "links": [
+            {
+              "href": "wiki:Sliding filament theory"
+            }
+          ]
+        },
+        "rigor state": {
+          "text": "Myosin bound tightly to actin with no ATP to release it; after death this produces rigor mortis.",
+          "links": [
+            {
+              "href": "wiki:Rigor mortis"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The repeating attach–pull–release cycle of each myosin head.",
+        "links": [
+          {
+            "href": "wiki:Sliding filament theory"
+          }
+        ]
+      },
+      "seeds": [
+        "power stroke",
+        "myosin ATPase"
+      ],
+      "floatingTerms": [
+        "cocked myosin head",
+        "cross-bridge detachment",
+        "rigor state"
+      ],
+      "terms": [
+        "power stroke",
+        "myosin ATPase",
+        "cocked myosin head",
+        "cross-bridge detachment",
+        "rigor state"
+      ]
+    },
+    {
+      "id": "relaxation-and-reloading",
+      "name": "Relaxation and reloading",
+      "color": "magenta",
+      "fact": "Contraction ends when the signal and the calcium are removed. Acetylcholinesterase destroys acetylcholine at the neuromuscular junction, the SERCA pump spends ATP to drive calcium back into the sarcoplasmic reticulum, and calsequestrin binds that calcium inside the store so it can hold a large reserve for the next twitch.",
+      "termInfo": {
+        "SERCA pump": {
+          "text": "Sarco/endoplasmic reticulum Ca²⁺-ATPase, the calcium pump Guyton describes in the reticulum wall. Each cycle spends one ATP to move two calcium ions into the store. In the heart, phospholamban brakes it and sympathetic stimulation releases the brake.",
+          "links": [
+            {
+              "href": "wiki:SERCA"
+            }
+          ]
+        },
+        "acetylcholinesterase": {
+          "text": "The enzyme at the neuromuscular junction that splits acetylcholine within milliseconds, so one nerve impulse produces one muscle action potential.",
+          "links": [
+            {
+              "href": "wiki:Acetylcholinesterase"
+            }
+          ]
+        },
+        "calsequestrin": {
+          "text": "A calcium-binding protein inside the sarcoplasmic reticulum that holds stored calcium bound, letting the store keep many times more calcium than it could hold free.",
+          "links": [
+            {
+              "href": "wiki:Calsequestrin"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Ending the signal and refilling the calcium store.",
+        "links": [
+          {
+            "href": "wiki:SERCA"
+          }
+        ]
+      },
+      "seeds": [
+        "SERCA pump",
+        "acetylcholinesterase"
+      ],
+      "floatingTerms": [
+        "calsequestrin"
+      ],
+      "terms": [
+        "SERCA pump",
+        "acetylcholinesterase",
+        "calsequestrin"
+      ]
+    },
+    {
+      "id": "cardiac-trigger",
+      "name": "Cardiac trigger",
+      "color": "olive",
+      "fact": "Cardiac muscle needs calcium from outside the cell to open its stores. During the action potential plateau, trigger calcium enters from the extracellular fluid and opens the ryanodine receptors. This calcium-induced calcium release is graded: more trigger calcium releases more stored calcium and strengthens the beat.",
+      "termInfo": {
+        "calcium-induced calcium release": {
+          "text": "Release of stored calcium through ryanodine receptors opened by a rise in nearby calcium, the heart's amplifier.",
+          "links": [
+            {
+              "href": "wiki:Calcium-induced calcium release"
+            }
+          ]
+        },
+        "trigger calcium": "The small calcium current that enters a cardiac cell during the plateau of its action potential, much of it through the T tubules."
+      },
+      "info": {
+        "text": "How heart muscle uses a small calcium entry to release a large calcium store.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-2-cardiac-muscle-and-electrical-activity"
+          }
+        ]
+      },
+      "seeds": [
+        "calcium-induced calcium release"
+      ],
+      "floatingTerms": [
+        "trigger calcium"
+      ],
+      "terms": [
+        "calcium-induced calcium release",
+        "trigger calcium"
+      ]
+    },
+    {
+      "id": "smooth-muscle-activation",
+      "name": "Smooth-muscle activation",
+      "color": "brown",
+      "fact": "Smooth muscle has no troponin; its calcium switch acts on myosin. Calcium binds calmodulin, which activates myosin light-chain kinase to phosphorylate myosin and let its heads cycle; myosin phosphatase reverses that step. Actin filaments anchor to dense bodies, and hormones can trigger contraction without an action potential through pharmacomechanical coupling.",
+      "termInfo": {
+        "calmodulin": {
+          "text": "The calcium-binding protein smooth muscle uses in place of troponin; four calcium ions bind each molecule.",
+          "links": [
+            {
+              "href": "wiki:Calmodulin"
+            }
+          ]
+        },
+        "dense bodies": "Anchor points in the cytoplasm and on the cell membrane where smooth muscle's actin filaments attach, playing the part of Z discs.",
+        "myosin light-chain kinase": {
+          "text": "MLCK: activated by calcium–calmodulin, it uses ATP to phosphorylate myosin's regulatory light chain, which lets the head cycle.",
+          "links": [
+            {
+              "href": "wiki:Myosin light-chain kinase"
+            }
+          ]
+        },
+        "myosin phosphatase": {
+          "text": "Removes the phosphate from myosin's light chain and stops cycling. Its activity can be raised or lowered by signals such as nitric oxide and Rho kinase, changing force at a given calcium level.",
+          "links": [
+            {
+              "href": "wiki:Myosin-light-chain phosphatase"
+            }
+          ]
+        },
+        "pharmacomechanical coupling": "Contraction started by a hormone or transmitter acting on receptors, through second messengers that release calcium or sensitize the contractile machinery, with no action potential needed."
+      },
+      "info": {
+        "text": "A calcium switch on the thick filament, in cells built for slow, sustained force.",
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-8-smooth-muscle"
+          }
+        ]
+      },
+      "seeds": [
+        "calmodulin",
+        "myosin light-chain kinase"
+      ],
+      "floatingTerms": [
+        "myosin phosphatase",
+        "dense bodies",
+        "pharmacomechanical coupling"
+      ],
+      "terms": [
+        "calmodulin",
+        "myosin light-chain kinase",
+        "myosin phosphatase",
+        "dense bodies",
+        "pharmacomechanical coupling"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "dihydropyridine-receptors",
+      "term": "dihydropyridine receptors",
+      "clusters": [
+        "skeletal-calcium-release",
+        "cardiac-trigger"
+      ],
+      "fact": "Dihydropyridine receptors are the voltage sensors in the T-tubule wall of both skeletal and cardiac muscle, used two ways. In skeletal muscle each is linked directly to a ryanodine receptor and opens it by changing shape; in cardiac muscle it works as a calcium channel, admitting the trigger calcium that opens ryanodine receptors chemically.",
+      "info": {
+        "text": "Also called L-type calcium channels: the Cav1.1 form in skeletal muscle, Cav1.2 in the heart.",
+        "links": [
+          {
+            "href": "wiki:L-type calcium channel"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "skeletal-calcium-release": "ryanodine receptors",
+        "cardiac-trigger": "trigger calcium"
+      }
+    },
+    {
+      "id": "calcium-transient",
+      "term": "calcium transient",
+      "clusters": [
+        "skeletal-calcium-release",
+        "thin-filament-switch"
+      ],
+      "fact": "The calcium transient is the brief rise in cytosolic calcium after each action potential: calcium released through the ryanodine receptors reaches troponin C and moves tropomyosin. Contraction lasts as long as the transient does.",
+      "info": "The rise and fall of free calcium in the cytosol over one twitch or beat.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "skeletal-calcium-release": "ryanodine receptors",
+        "thin-filament-switch": "troponin C"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "skeletal-calcium-release",
+        "to": "thin-filament-switch"
+      }
+    },
+    {
+      "id": "myosin-binding-sites",
+      "term": "myosin-binding sites",
+      "clusters": [
+        "thin-filament-switch",
+        "cross-bridge-cycle"
+      ],
+      "fact": "Myosin-binding sites on actin are what the thin-filament switch controls: covered by tropomyosin at rest, exposed when calcium binds troponin C. A myosin head can make its power stroke only after binding an exposed site.",
+      "info": "Guyton calls them the active sites of the actin filament.",
+      "relationKind": "foundation",
+      "idealTerms": {
+        "thin-filament-switch": "tropomyosin",
+        "cross-bridge-cycle": "power stroke"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "thin-filament-switch",
+        "to": "cross-bridge-cycle"
+      }
+    },
+    {
+      "id": "sodium-calcium-exchanger",
+      "term": "sodium–calcium exchanger",
+      "clusters": [
+        "cardiac-trigger",
+        "relaxation-and-reloading"
+      ],
+      "fact": "Calcium that enters a cardiac cell as trigger calcium must leave again every beat. The sodium–calcium exchanger carries it out, letting three sodium ions in for each calcium ion it pushes out, while the SERCA pump returns the rest of the released calcium to the sarcoplasmic reticulum.",
+      "info": {
+        "text": "NCX: in human ventricle it removes roughly a quarter of each beat's calcium, the SERCA pump most of the rest.",
+        "links": [
+          {
+            "href": "wiki:Sodium-calcium exchanger"
+          }
+        ]
+      },
+      "relationKind": "continuity",
+      "idealTerms": {
+        "cardiac-trigger": "trigger calcium",
+        "relaxation-and-reloading": "SERCA pump"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "cardiac-trigger",
+        "to": "relaxation-and-reloading"
+      }
+    },
+    {
+      "id": "latch-state",
+      "term": "latch state",
+      "clusters": [
+        "cross-bridge-cycle",
+        "smooth-muscle-activation"
+      ],
+      "fact": "In the latch state, smooth-muscle myosin heads dephosphorylated by myosin phosphatase while still attached to actin detach very slowly. The cross-bridge cycle slows almost to a stop, so tension holds for long periods with little ATP spent, keeping vessels and sphincters toned cheaply.",
+      "info": "Guyton calls it the latch mechanism.",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "cross-bridge-cycle": "cross-bridge detachment",
+        "smooth-muscle-activation": "myosin phosphatase"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "surface-to-store",
+      "prompt": "Which concepts carry a skeletal fiber's electrical signal from its surface to the ryanodine receptors?",
+      "explanation": "The tubules take the action potential inward, the triad brings tubule and store together, and the dihydropyridine receptor senses the voltage and pulls the release channel open. The calcium transient comes after the channels open.",
+      "targets": [
+        "T tubules",
+        "triad",
+        "dihydropyridine receptors"
+      ],
+      "reasons": {
+        "T tubules": "They conduct the action potential from the surface into the fiber's depth.",
+        "dihydropyridine receptors": "They sense the depolarization and, linked to the ryanodine receptors, open them.",
+        "triad": "It is the junction where each tubule lies against the store's release channels."
+      }
+    },
+    {
+      "id": "malignant-hyperthermia",
+      "prompt": "In malignant hyperthermia, certain anesthetics hold mutant release channels open. Which two concepts carry that fault to the contractile machinery?",
+      "explanation": "A mutation in the skeletal ryanodine receptor lets anesthetic gases keep it open, so the calcium transient never ends: muscles stay contracted and burn ATP, generating heat. Dantrolene treats it by blocking the receptor.",
+      "targets": [
+        "ryanodine receptors",
+        "calcium transient"
+      ],
+      "reasons": {
+        "calcium transient": "With the channel stuck open, the calcium rise is sustained instead of brief.",
+        "ryanodine receptors": "The mutant channel is the release channel that stays open."
+      }
+    },
+    {
+      "id": "storing-calcium",
+      "prompt": "Which protein lets the sarcoplasmic reticulum store far more calcium than it could hold free?",
+      "explanation": "Calsequestrin binds calcium inside the store, keeping free calcium there low so the SERCA pump can keep loading it. The SERCA pump moves calcium in; calsequestrin is what lets the store hold so much.",
+      "targets": [
+        "calsequestrin"
+      ],
+      "reasons": {
+        "calsequestrin": "It binds stored calcium, multiplying the store's capacity."
+      }
+    },
+    {
+      "id": "troponin-anchors",
+      "prompt": "Which troponin subunits bind the complex to the thin filament's other proteins instead of to calcium?",
+      "explanation": "Troponin I grips actin and troponin T grips tropomyosin; troponin C is the calcium sensor between them.",
+      "targets": [
+        "troponin I",
+        "troponin T"
+      ],
+      "reasons": {
+        "troponin I": "It binds actin and helps hold the blocking position.",
+        "troponin T": "It binds the complex to tropomyosin."
+      }
+    },
+    {
+      "id": "what-calcium-uncovers",
+      "prompt": "When calcium binds troponin C and tropomyosin shifts, what does the shift expose?",
+      "explanation": "Tropomyosin's move uncovers the sites on actin where myosin heads attach, which is the step the switch exists to control.",
+      "targets": [
+        "myosin-binding sites"
+      ],
+      "reasons": {
+        "myosin-binding sites": "They are covered at rest and exposed by the shift."
+      }
+    },
+    {
+      "id": "phosphate-release",
+      "prompt": "Which step of the cycle does phosphate release from the bound myosin head drive?",
+      "explanation": "Once the cocked head binds actin, releasing phosphate lets it pivot and pull the thin filament; ADP leaves afterward.",
+      "targets": [
+        "power stroke"
+      ],
+      "reasons": {
+        "power stroke": "The pivot that pulls actin follows phosphate release."
+      }
+    },
+    {
+      "id": "fresh-atp",
+      "prompt": "What happens when a fresh ATP binds a myosin head that is attached to actin?",
+      "explanation": "ATP binding lowers myosin's affinity for actin and frees the head. Splitting that ATP comes next, and it re-cocks the head.",
+      "targets": [
+        "cross-bridge detachment"
+      ],
+      "reasons": {
+        "cross-bridge detachment": "ATP binding is what releases the head from actin."
+      }
+    },
+    {
+      "id": "stored-energy",
+      "prompt": "Which state holds the energy from splitting ATP, ready for the next pull?",
+      "explanation": "Hydrolysis happens before the head rebinds; the energy is held in the head's cocked position until the power stroke spends it.",
+      "targets": [
+        "cocked myosin head"
+      ],
+      "reasons": {
+        "cocked myosin head": "ADP and phosphate stay bound and the head is set to pull."
+      }
+    },
+    {
+      "id": "back-to-rest",
+      "prompt": "Once its motor neuron falls silent, which concepts return a skeletal fiber to rest?",
+      "explanation": "Acetylcholinesterase ends the signal at the junction, the SERCA pump clears calcium from the cytosol, and tropomyosin slides back over actin as calcium leaves troponin C. Calsequestrin holds calcium already in the store but does not lower cytosolic calcium itself.",
+      "targets": [
+        "acetylcholinesterase",
+        "SERCA pump",
+        "tropomyosin"
+      ],
+      "reasons": {
+        "SERCA pump": "It pumps calcium back into the store, ending the calcium transient.",
+        "acetylcholinesterase": "It destroys acetylcholine, so no new action potentials start.",
+        "tropomyosin": "It re-covers actin's binding sites once calcium falls."
+      }
+    },
+    {
+      "id": "outside-calcium",
+      "prompt": "Remove calcium from the fluid around the cells, and the heart soon stops contracting while skeletal muscle keeps working. Which concepts explain the difference?",
+      "explanation": "Skeletal dihydropyridine receptors open the store mechanically and need no outside calcium. In the heart the same receptors act as channels: the trigger calcium they admit is what opens the store, so without it there is no calcium-induced calcium release. Ryanodine receptors serve both muscles and do not explain the difference.",
+      "targets": [
+        "dihydropyridine receptors",
+        "trigger calcium",
+        "calcium-induced calcium release"
+      ],
+      "reasons": {
+        "calcium-induced calcium release": "The heart's store opens only in response to that trigger.",
+        "dihydropyridine receptors": "Their role differs: mechanical link in skeletal muscle, calcium channel in the heart.",
+        "trigger calcium": "It must come from outside the cell, so removing outside calcium removes it."
+      }
+    },
+    {
+      "id": "clearing-cardiac-calcium",
+      "prompt": "Which transporters lower cytosolic calcium after each heartbeat?",
+      "explanation": "The SERCA pump returns most of the calcium to the sarcoplasmic reticulum, and the exchanger sends the rest, about as much as entered, out of the cell. Calsequestrin binds calcium inside the store; it does not move calcium across a membrane.",
+      "targets": [
+        "SERCA pump",
+        "sodium–calcium exchanger"
+      ],
+      "reasons": {
+        "SERCA pump": "It pumps calcium back into the store.",
+        "sodium–calcium exchanger": "It carries calcium out across the cell membrane."
+      }
+    },
+    {
+      "id": "smooth-switch",
+      "prompt": "In smooth muscle, which proteins turn a rise in calcium into phosphorylated myosin?",
+      "explanation": "Calcium binds calmodulin, and the calcium–calmodulin complex activates the kinase that phosphorylates myosin's light chain. Myosin phosphatase works in the opposite direction.",
+      "targets": [
+        "calmodulin",
+        "myosin light-chain kinase"
+      ],
+      "reasons": {
+        "calmodulin": "It binds the calcium.",
+        "myosin light-chain kinase": "Activated by calmodulin, it phosphorylates myosin."
+      }
+    },
+    {
+      "id": "relax-at-high-calcium",
+      "prompt": "Which enzyme can relax smooth muscle even while its calcium stays high?",
+      "explanation": "Force depends on the balance between phosphorylating and dephosphorylating myosin. Raising phosphatase activity, as nitric oxide does through cGMP, relaxes the cell without lowering calcium.",
+      "targets": [
+        "myosin phosphatase"
+      ],
+      "reasons": {
+        "myosin phosphatase": "It removes myosin's phosphate, stopping cycling regardless of calcium."
+      }
+    },
+    {
+      "id": "no-action-potential",
+      "prompt": "Which concept names a hormone contracting smooth muscle with no action potential?",
+      "explanation": "Receptor-activated second messengers, such as IP₃, release stored calcium or sensitize myosin without any change in membrane voltage being needed.",
+      "targets": [
+        "pharmacomechanical coupling"
+      ],
+      "reasons": {
+        "pharmacomechanical coupling": "Contraction driven by receptor signaling rather than by depolarization."
+      }
+    },
+    {
+      "id": "z-disc-stand-in",
+      "prompt": "Which structures anchor smooth muscle's actin filaments, as Z discs do in skeletal muscle?",
+      "explanation": "Dense bodies in the cytoplasm and on the membrane hold actin filaments, so contraction pulls the cell's surface inward from many points.",
+      "targets": [
+        "dense bodies"
+      ],
+      "reasons": {
+        "dense bodies": "They are the anchor points for smooth muscle's thin filaments."
+      }
+    },
+    {
+      "id": "calcium-sensors",
+      "prompt": "Which proteins sense the calcium rise that starts contraction?",
+      "explanation": "Striated muscle reads calcium on the actin filament through troponin C; smooth muscle reads it through calmodulin and then acts on myosin. Calsequestrin also binds calcium, but only to store it.",
+      "targets": [
+        "troponin C",
+        "calmodulin"
+      ],
+      "reasons": {
+        "calmodulin": "The calcium sensor of smooth muscle.",
+        "troponin C": "The calcium sensor of skeletal and cardiac muscle."
+      }
+    },
+    {
+      "id": "atp-spenders",
+      "prompt": "Which enzymes or pumps spend ATP during a cycle of contraction and relaxation?",
+      "explanation": "Myosin splits ATP to power cross-bridges, the SERCA pump spends it to reload calcium, and the kinase uses it to phosphorylate smooth-muscle myosin. The sodium–calcium exchanger runs on the sodium gradient instead.",
+      "targets": [
+        "myosin ATPase",
+        "SERCA pump",
+        "myosin light-chain kinase"
+      ],
+      "reasons": {
+        "SERCA pump": "One ATP for every two calcium ions moved into the store.",
+        "myosin ATPase": "One ATP per cross-bridge cycle.",
+        "myosin light-chain kinase": "It transfers phosphate from ATP onto myosin."
+      }
+    },
+    {
+      "id": "attached-cheaply",
+      "prompt": "Which states keep myosin heads attached to actin while spending little or no ATP?",
+      "explanation": "In rigor the head cannot let go because no ATP is left to release it. In the latch state smooth-muscle heads hang on deliberately, detaching slowly, so tone is held at low cost.",
+      "targets": [
+        "rigor state",
+        "latch state"
+      ],
+      "reasons": {
+        "latch state": "Dephosphorylated heads detach very slowly, holding tension cheaply.",
+        "rigor state": "No ATP means no detachment."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "muscular-system",
+        "reason": "Start with the overview of the muscle fiber, its nerve command, fiber types, and fuel before the calcium details here."
+      },
+      {
+        "id": "rhythmic-excitation-of-the-heart",
+        "reason": "See the cardiac action potential whose plateau admits the trigger calcium.",
+        "via": [
+          "trigger calcium"
+        ]
+      },
+      {
+        "id": "membranes-set-cell-conditions",
+        "reason": "See the calcium pump and the sodium–calcium exchanger as transporters, and where the sodium gradient comes from.",
+        "via": [
+          "SERCA pump",
+          "sodium–calcium exchanger"
+        ]
+      },
+      {
+        "id": "gastrointestinal-motility",
+        "reason": "See the electrical rhythm that sets when gut smooth muscle contracts."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Calcium carries the order",
+    "summary": "How an action potential becomes myosin pulling on actin, and how skeletal, cardiac, and smooth muscle each release and read calcium.",
+    "estimatedMinutes": 7,
+    "content": {
+      "text": "Every contraction starts as an electrical change at the cell surface and ends with myosin pulling on actin. Excitation–contraction coupling is the chain between those two events, and calcium is the messenger at its center. Skeletal, cardiac, and smooth muscle all use calcium, but they release it and read it in different ways, and those differences explain much of how each kind of muscle behaves.\r\n\r\n## Releasing calcium in skeletal muscle\r\n\r\nA skeletal fiber is too thick for a signal at its surface to reach its center quickly. **T tubules** (transverse tubules) solve this: they are inward folds of the cell membrane that carry the action potential deep into the fiber. Each tubule runs between two sacs of the sarcoplasmic reticulum, the fiber's calcium store, forming a **triad**.\r\n\r\nAt the triad, voltage sensors in the tubule wall called **dihydropyridine receptors** sit directly against the store's release channels, the **ryanodine receptors**. When the action potential arrives, the sensors change shape and pull the release channels open. Calcium pours into the cytosol, producing the **calcium transient**: a brief rise in free calcium that lasts as long as the contraction does. In malignant hyperthermia, a mutant ryanodine receptor stays open in response to certain anesthetics, the transient never ends, and the muscles stay contracted and generate dangerous heat.\r\n\r\n## The thin-filament switch\r\n\r\nAt rest, myosin cannot grip actin because **tropomyosin**, a long protein lying along the actin filament, covers the **myosin-binding sites** (Guyton's active sites). The troponin complex holds it in place. **Troponin I** binds actin, **troponin T** binds tropomyosin, and **troponin C** binds calcium. When calcium binds troponin C, the complex changes shape and drags tropomyosin aside, exposing the sites.\r\n\r\n## The cross-bridge cycle\r\n\r\nEach myosin head then works through a repeating cycle. A fresh ATP binding the head causes **cross-bridge detachment** from actin. The head's own enzyme activity, **myosin ATPase**, splits that ATP; ADP and phosphate stay bound, and the head is left as a **cocked myosin head**, storing the energy for one pull. The cocked head binds an exposed site, phosphate is released, and the head pivots in the **power stroke**, pulling the thin filament along. If no new ATP arrives, the head stays locked onto actin in the **rigor state**; this is why muscles stiffen after death in rigor mortis.\r\n\r\n## Relaxation and reloading\r\n\r\nRelaxation needs both the signal and the calcium removed. **Acetylcholinesterase** at the neuromuscular junction destroys acetylcholine within milliseconds, so new action potentials stop. The **SERCA pump** in the reticulum wall spends ATP to drive calcium back into the store, and as calcium leaves troponin C, tropomyosin slides back over actin. Inside the store, **calsequestrin** binds the returning calcium, which lets the reticulum hold a large reserve for the next twitch.\r\n\r\n## The heart: calcium-induced calcium release\r\n\r\nCardiac muscle has the same tubules, sensors, release channels, and troponin switch, but its sensors are not mechanically linked to its release channels. During the long plateau of the cardiac action potential, the dihydropyridine receptors act as calcium channels and admit **trigger calcium** from the fluid outside the cell. That calcium opens the ryanodine receptors: **calcium-induced calcium release**. The release is graded, so more trigger calcium releases more stored calcium and produces a stronger beat. It also means the heart, unlike skeletal muscle, depends on calcium outside its cells to contract.\r\n\r\nWhat comes in must go out. Each beat, the **sodium–calcium exchanger** carries calcium out of the cell, letting three sodium ions in for each calcium ion it removes, while the SERCA pump returns the rest to the store.\r\n\r\n## Smooth muscle: a switch on myosin\r\n\r\nSmooth muscle has no troponin. Its calcium, from outside the cell and from its smaller reticulum, binds **calmodulin**. The calcium–calmodulin complex activates **myosin light-chain kinase**, which uses ATP to phosphorylate part of the myosin head and so lets it cycle. **Myosin phosphatase** removes that phosphate. The balance between the two enzymes sets force, so signals that change phosphatase activity, such as nitric oxide, can relax smooth muscle without lowering its calcium.\r\n\r\nWhen myosin is dephosphorylated while still attached, the heads let go very slowly. In this **latch state** smooth muscle holds tension for long periods at little ATP cost, which suits blood vessels and sphincters that must stay partly contracted all day. Smooth muscle's actin filaments anchor to **dense bodies** instead of Z discs. Many smooth muscles can also contract without any action potential: hormones and transmitters acting on receptors release calcium or sensitize the contractile machinery through second messengers, a route called **pharmacomechanical coupling**."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Opus 5.5)",
+        "model": "Claude Opus 5.5",
+        "reasoning": "medium"
+      }
+    ]
+  }
+}

@@ -6,9 +6,17 @@
     "political-science",
     "philosophy"
   ],
-  "large": true,
+  "subcategories": {
+    "philosophy": "political-philosophy",
+    "political-science": "international-relations"
+  },
   "info": {
     "text": "Liberal thought has long paired a strong doctrine of self-determination with an equally strong exception for peoples judged not yet ready to exercise it -- a hierarchy inherited across Mill's writing, democratic peace theory, formal colonial ideology, and today's humanitarian intervention doctrine.",
+    "links": [
+      {
+        "href": "wiki:Civilizing mission"
+      }
+    ],
     "citations": [
       {
         "title": "The Question of Intervention: John Stuart Mill and the Responsibility to Protect",
@@ -28,11 +36,6 @@
         "publisher": "Democratization",
         "year": "2009"
       }
-    ],
-    "links": [
-      {
-        "href": "wiki:Civilizing mission"
-      }
     ]
   },
   "clusters": [
@@ -41,20 +44,6 @@
       "name": "Mill's Civilizational Threshold",
       "color": "teal",
       "fact": "Mill confined the ordinary rules of international morality to relations among 'civilized nations'; he judged 'barbarians' incapable of the reciprocity those rules presuppose, leaving what he called 'legitimate despotism' -- aimed at their improvement -- as the only rule he thought fit to govern them.",
-      "seeds": [
-        "barbarians",
-        "civilized nations"
-      ],
-      "floatingTerms": [
-        "reciprocity",
-        "legitimate despotism"
-      ],
-      "terms": [
-        "barbarians",
-        "civilized nations",
-        "reciprocity",
-        "legitimate despotism"
-      ],
       "termInfo": {
         "barbarians": {
           "text": "Mill's term for peoples he judged not yet capable of the mutual obligations 'civilized' states owed one another -- and therefore, he argued, not owed the protections of ordinary international morality."
@@ -81,27 +70,27 @@
             "href": "wiki:A Few Words on Non-Intervention"
           }
         ]
-      }
+      },
+      "seeds": [
+        "barbarians",
+        "civilized nations"
+      ],
+      "floatingTerms": [
+        "reciprocity",
+        "legitimate despotism"
+      ],
+      "terms": [
+        "barbarians",
+        "civilized nations",
+        "reciprocity",
+        "legitimate despotism"
+      ]
     },
     {
       "id": "democratic-peace-theory",
       "name": "Democratic Peace Theory",
       "color": "blue",
       "fact": "Kant's 'perpetual peace' inspired the general claim that democracies are peaceful, but researchers split it in two: the well-supported 'dyadic' finding that democracies rarely fight each other, and the shakier 'monadic' claim that democracies act peacefully toward everyone -- a claim the evidence does not actually support.",
-      "seeds": [
-        "perpetual peace",
-        "democratic peace"
-      ],
-      "floatingTerms": [
-        "monadic peace",
-        "dyadic peace"
-      ],
-      "terms": [
-        "perpetual peace",
-        "democratic peace",
-        "monadic peace",
-        "dyadic peace"
-      ],
       "termInfo": {
         "democratic peace": {
           "text": "The empirical claim that democracies behave more peacefully than other states, especially toward one another.",
@@ -133,27 +122,27 @@
             "href": "wiki:Democratic peace theory"
           }
         ]
-      }
+      },
+      "seeds": [
+        "perpetual peace",
+        "democratic peace"
+      ],
+      "floatingTerms": [
+        "monadic peace",
+        "dyadic peace"
+      ],
+      "terms": [
+        "perpetual peace",
+        "democratic peace",
+        "monadic peace",
+        "dyadic peace"
+      ]
     },
     {
       "id": "mission-civilisatrice",
       "name": "Mission Civilisatrice",
       "color": "amber",
       "fact": "France's mission civilisatrice, championed by Jules Ferry, framed conquest as a moral duty to elevate 'backward' peoples through assimilation into French language, law, and religion; Kipling's 'white man's burden' cast the same duty in Anglo-American terms.",
-      "seeds": [
-        "mission civilisatrice",
-        "white man's burden"
-      ],
-      "floatingTerms": [
-        "assimilation",
-        "Jules Ferry"
-      ],
-      "terms": [
-        "mission civilisatrice",
-        "white man's burden",
-        "assimilation",
-        "Jules Ferry"
-      ],
       "termInfo": {
         "Jules Ferry": {
           "text": "The French statesman who most forcefully argued, before the National Assembly, that 'superior races' had a duty to civilize 'inferior' ones.",
@@ -190,27 +179,27 @@
             "href": "wiki:Civilizing mission"
           }
         ]
-      }
+      },
+      "seeds": [
+        "mission civilisatrice",
+        "white man's burden"
+      ],
+      "floatingTerms": [
+        "assimilation",
+        "Jules Ferry"
+      ],
+      "terms": [
+        "mission civilisatrice",
+        "white man's burden",
+        "assimilation",
+        "Jules Ferry"
+      ]
     },
     {
       "id": "responsibility-to-protect",
       "name": "Responsibility to Protect",
       "color": "magenta",
       "fact": "The 2001 ICISS report reconceived sovereignty as a responsibility rather than a license, obligating outside states to act -- the 'third pillar' -- when a government manifestly fails to protect its own population from mass atrocity crimes.",
-      "seeds": [
-        "responsibility to protect",
-        "mass atrocity crimes"
-      ],
-      "floatingTerms": [
-        "sovereignty as responsibility",
-        "third pillar"
-      ],
-      "terms": [
-        "responsibility to protect",
-        "mass atrocity crimes",
-        "sovereignty as responsibility",
-        "third pillar"
-      ],
       "termInfo": {
         "mass atrocity crimes": {
           "text": "The four crimes R2P names as triggering the international community's responsibility: genocide, war crimes, ethnic cleansing, and crimes against humanity.",
@@ -242,7 +231,21 @@
             "href": "wiki:Responsibility to protect"
           }
         ]
-      }
+      },
+      "seeds": [
+        "responsibility to protect",
+        "mass atrocity crimes"
+      ],
+      "floatingTerms": [
+        "sovereignty as responsibility",
+        "third pillar"
+      ],
+      "terms": [
+        "responsibility to protect",
+        "mass atrocity crimes",
+        "sovereignty as responsibility",
+        "third pillar"
+      ]
     }
   ],
   "bridges": [

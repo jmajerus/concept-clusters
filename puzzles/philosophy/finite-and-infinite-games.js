@@ -3,10 +3,17 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "finite-and-infinite-games",
   "title": "Finite and infinite games",
   "category": "philosophy",
+  "categories": [
+    "philosophy",
+    "peace-conflict-studies"
+  ],
+  "subcategories": {
+    "peace-conflict-studies": "conflict-resolution-peacebuilding"
+  },
   "info": {
     "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going.",
     "links": [
@@ -339,3 +346,287 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "finite-and-infinite-games",
+      "puzzleRevision": "fnv1a32:3853ed82",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:finite game": {
+          "x": 466.97,
+          "y": 49.88,
+          "pinned": true
+        },
+        "term:boundary": {
+          "x": 351.91,
+          "y": 88.25,
+          "pinned": true
+        },
+        "term:rules": {
+          "x": 441.6,
+          "y": 156.55,
+          "pinned": true
+        },
+        "term:title": {
+          "x": 527.59,
+          "y": 119.34,
+          "pinned": false
+        },
+        "term:infinite game": {
+          "x": 124.62,
+          "y": 71.72,
+          "pinned": true
+        },
+        "term:horizon": {
+          "x": 209.17,
+          "y": 161.73,
+          "pinned": true
+        },
+        "term:surprise": {
+          "x": 125.55,
+          "y": 202.18,
+          "pinned": true
+        },
+        "term:name": {
+          "x": 41.17,
+          "y": 155.11,
+          "pinned": true
+        },
+        "term:society": {
+          "x": 372.45,
+          "y": 309.54,
+          "pinned": false
+        },
+        "term:culture": {
+          "x": 291.21,
+          "y": 352.92,
+          "pinned": false
+        },
+        "term:power": {
+          "x": 445.02,
+          "y": 355.31,
+          "pinned": false
+        },
+        "term:strength": {
+          "x": 371.1,
+          "y": 404.78,
+          "pinned": false
+        },
+        "term:evil": {
+          "x": 331.45,
+          "y": 167.9,
+          "pinned": true
+        },
+        "term:veiling": {
+          "x": 440.85,
+          "y": 236.5,
+          "pinned": true
+        },
+        "term:deviancy": {
+          "x": 179.03,
+          "y": 293.59,
+          "pinned": true
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 1917.91,
+        "score": 1917.9109992235458
+      },
+      "solutionLayout": null,
+      "capturedSolved": true,
+      "fixed": true,
+      "source": "author",
+      "savedAt": "2026-10-08T20:41:15.417Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "finite-and-infinite-games",
+      "puzzleRevision": "fnv1a32:3853ed82",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 689.27,
+          "y": 378.76,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 270.73,
+          "y": 378.76,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 480,
+          "y": 196.47,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:evil": {
+          "x": 480,
+          "y": 378.76,
+          "pinned": false
+        },
+        "term:veiling": {
+          "x": 639.79,
+          "y": 232.46,
+          "pinned": false
+        },
+        "term:deviancy": {
+          "x": 320.21,
+          "y": 232.46,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "finite game",
+          "boundary",
+          "rules",
+          "title"
+        ],
+        "cluster:1": [
+          "infinite game",
+          "horizon",
+          "surprise",
+          "name"
+        ],
+        "cluster:2": [
+          "society",
+          "culture",
+          "power",
+          "strength"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 348.2356408177576
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:04:43.942Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "finite-and-infinite-games",
+      "puzzleRevision": "fnv1a32:3853ed82",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:finite game": {
+          "x": 216.51,
+          "y": 524.42
+        },
+        "term:boundary": {
+          "x": 343.45,
+          "y": 314.17
+        },
+        "term:rules": {
+          "x": 368.33,
+          "y": 478.85
+        },
+        "term:title": {
+          "x": 162.52,
+          "y": 430.64
+        },
+        "term:infinite game": {
+          "x": 396.86,
+          "y": 22
+        },
+        "term:horizon": {
+          "x": 403.89,
+          "y": 177.14
+        },
+        "term:surprise": {
+          "x": 514.54,
+          "y": 227.12
+        },
+        "term:name": {
+          "x": 555.07,
+          "y": 22
+        },
+        "term:society": {
+          "x": 454.9,
+          "y": 502.51
+        },
+        "term:culture": {
+          "x": 558.51,
+          "y": 387.92
+        },
+        "term:power": {
+          "x": 635.3,
+          "y": 598
+        },
+        "term:strength": {
+          "x": 507.85,
+          "y": 598
+        },
+        "term:evil": {
+          "x": 417.02,
+          "y": 262.75
+        },
+        "term:veiling": {
+          "x": 426.81,
+          "y": 410.6
+        },
+        "term:deviancy": {
+          "x": 482.4,
+          "y": 324.31
+        },
+        "cluster:0": {
+          "x": 290.29,
+          "y": 412.56
+        },
+        "cluster:1": {
+          "x": 497.43,
+          "y": 110.25
+        },
+        "cluster:2": {
+          "x": 566.73,
+          "y": 499.44
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:04:46.607Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:04:36.268Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

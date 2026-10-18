@@ -3,15 +3,17 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "gandhis-truth",
   "title": "Gandhi's Truth",
-  "category": "political-science",
+  "category": "peace-conflict-studies",
   "categories": [
+    "peace-conflict-studies",
     "political-science",
     "psychology"
   ],
   "subcategories": {
+    "peace-conflict-studies": "nonviolence-civil-resistance",
     "psychology": "moral-psychology"
   },
   "tags": [
@@ -256,3 +258,263 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "gandhis-truth",
+      "puzzleRevision": "fnv1a32:39e808ee",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:homo religiosus": {
+          "x": 538.98,
+          "y": 277.22,
+          "pinned": false
+        },
+        "term:disciplined subjectivity": {
+          "x": 431.64,
+          "y": 410.12,
+          "pinned": false
+        },
+        "term:the event": {
+          "x": 582.6,
+          "y": 392.87,
+          "pinned": false
+        },
+        "term:identity crisis": {
+          "x": 174.34,
+          "y": 410.23,
+          "pinned": false
+        },
+        "term:generativity": {
+          "x": 280.16,
+          "y": 329.55,
+          "pinned": false
+        },
+        "term:moratorium": {
+          "x": 53.5,
+          "y": 372.03,
+          "pinned": false
+        },
+        "term:the eight-stage life cycle": {
+          "x": 140.78,
+          "y": 236.29,
+          "pinned": false
+        },
+        "term:satyagraha": {
+          "x": 341.46,
+          "y": 181.7,
+          "pinned": false
+        },
+        "term:ahimsa": {
+          "x": 253.01,
+          "y": 138.59,
+          "pinned": false
+        },
+        "term:militant nonviolence": {
+          "x": 475.17,
+          "y": 132.41,
+          "pinned": false
+        },
+        "term:leverage of truth": {
+          "x": 333.39,
+          "y": 48.9,
+          "pinned": false
+        },
+        "term:actuality": {
+          "x": 416.74,
+          "y": 258.92,
+          "pinned": false
+        },
+        "term:Harilal": {
+          "x": 288.52,
+          "y": 437,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 1992.47,
+        "score": 1992.4747849929663
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:49:49.128Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "gandhis-truth",
+      "puzzleRevision": "fnv1a32:39e808ee",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 446.26,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 728.67,
+          "y": 253.87,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 231.33,
+          "y": 253.87,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:actuality": {
+          "x": 410.82,
+          "y": 294.91,
+          "pinned": false
+        },
+        "term:Harilal": {
+          "x": 677.87,
+          "y": 423.61,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "homo religiosus",
+          "disciplined subjectivity",
+          "the event"
+        ],
+        "cluster:1": [
+          "identity crisis",
+          "generativity",
+          "moratorium",
+          "the eight-stage life cycle"
+        ],
+        "cluster:2": [
+          "satyagraha",
+          "ahimsa",
+          "militant nonviolence",
+          "leverage of truth"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 193.29931842208956
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:49:51.552Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "gandhis-truth",
+      "puzzleRevision": "fnv1a32:39e808ee",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:homo religiosus": {
+          "x": 865.93,
+          "y": 473.62
+        },
+        "term:disciplined subjectivity": {
+          "x": 510.89,
+          "y": 453.08
+        },
+        "term:the event": {
+          "x": 745.39,
+          "y": 534.65
+        },
+        "term:identity crisis": {
+          "x": 251,
+          "y": 582.95
+        },
+        "term:generativity": {
+          "x": 386.39,
+          "y": 561.88
+        },
+        "term:moratorium": {
+          "x": 152.32,
+          "y": 497.25
+        },
+        "term:the eight-stage life cycle": {
+          "x": 101.9,
+          "y": 339.7
+        },
+        "term:satyagraha": {
+          "x": 446.43,
+          "y": 218.71
+        },
+        "term:ahimsa": {
+          "x": 197.09,
+          "y": 179.5
+        },
+        "term:militant nonviolence": {
+          "x": 220.93,
+          "y": 47.74
+        },
+        "term:leverage of truth": {
+          "x": 387.5,
+          "y": 22
+        },
+        "term:actuality": {
+          "x": 532.4,
+          "y": 290.27
+        },
+        "term:Harilal": {
+          "x": 435.62,
+          "y": 323.71
+        },
+        "cluster:0": {
+          "x": 709.84,
+          "y": 369.86
+        },
+        "cluster:1": {
+          "x": 305.85,
+          "y": 410.21
+        },
+        "cluster:2": {
+          "x": 332.58,
+          "y": 161.14
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:49:53.901Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:49:46.659Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

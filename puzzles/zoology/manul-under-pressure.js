@@ -3,7 +3,7 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "manul-under-pressure",
   "title": "The Manul Under Pressure",
   "category": "zoology",
@@ -227,7 +227,7 @@ export default definePuzzle(import.meta.url, {
     "estimatedMinutes": 4,
     "content": {
       "mediaType": "text/markdown",
-      "text": "**Pallas's cat** (*Otocolobus manul*), or manul, is a small wild cat of the cold, high steppes of Central Asia. The steppe shaped its body; this lesson is about the rest of its life: an unusual family history, a breeding year squeezed into a few weeks, a solitary life spread across huge ranges, and what happens when people press in on all of that.\n\n## A cat with no close relatives\n\nPeter Simon Pallas described the manul in 1776 as *Felis manul*, and for a long time it was filed with the small cats of the genus *Felis*. Even Reginald Pocock, who studied its unusual skull in 1907, still treated it as an odd form of *Felis*. It is now placed alone in its own genus, *Otocolobus*. Its nearest living relatives are the leopard cats of the genus *Prionailurus*, and the two lines split somewhere between about 8.6 and 4.8 million years ago.\n\n## A year in a few weeks\n\nThe manul breeds once a year, and the female is fertile for only 26 to 42 hours. Males are just as seasonal: in the breeding season their testosterone runs about three times higher than the rest of the year. After a gestation of 66 to 75 days, two to six kittens are born between late April and late May. They start hunting at about five months, so they are nearly grown before their first winter.\n\n## Alone across huge ranges\n\nAdult manuls live alone; the only lasting bond is a mother with her kittens. In Mongolia, radio-collared females used home ranges of 7.4 to 125 km² and males up to 207 km², overlapping their neighbours'. The cats moved between many dens, staying a few days to a few weeks in each. They were mostly active at dusk and dawn in summer and more active by day in autumn.\n\n## Common on the map, scarce on the ground\n\nSince 2020 the IUCN has listed the manul as Least Concern worldwide, because its range is enormous. National lists tell a different story: it is Endangered in China and has been Near Threatened in Mongolia since 2006. A cat that lives alone at low density across huge ranges is hard to count, and it can disappear from one valley without changing the global picture.\n\nThe pressures are local and human. Between 2005 and 2009, 54,147 km² of Tibetan grassland was poisoned to kill pikas, the manul's main prey; in Mongolia, rodent control used the poison bromadiolone. The fur trade once took more than 10,000 skins a year, and Mongolia alone exported 9,185 in 1987, before international trade ended in 1988. Herding dogs kill manuls in Iran, Kazakhstan and the Altai, and others die in traps set for small mammals.\n\n## Fragile in captivity\n\nZoos in North America and Europe have run managed breeding programmes for the manul since the 1980s, tracked in an international studbook, to keep a genetically healthy reserve population. They have found it unusually hard to keep. In North American zoos about 60% of newborn kittens died, mainly from toxoplasmosis, a parasitic disease spread by domestic cats. In the wild, manuls seem to meet the parasite rarely: a study in Mongolia found it in only 2 of 15 wild manuls and in none of the local house cats or prey animals tested, while every zoo manul tested had been exposed. Why the species is so vulnerable is not fully known, but cats that grow up without the parasite meet it for the first time in captivity. Some European zoos have sharply cut kitten deaths by giving kittens the antibiotic clindamycin.\n\nBreeding is hard too, because a fertile window of a day or two leaves very little room for error. The first manul kittens conceived by artificial insemination were born at the Cincinnati Zoo in 2011, after decades of research.\n\n## What specialization costs\n\nThe manul's way of life suits the steppe: a short, tightly timed breeding season, thin populations spread over vast ranges, and little contact with the diseases of house cats. The same traits make it hard to count, easy to lose locally, and difficult to keep and breed in zoos."
+      "text": "**Pallas's cat** (*Otocolobus manul*), or manul, is a small wild cat of the cold, high steppes of Central Asia. The steppe shaped its body; this lesson is about the rest of its life: an unusual family history, a breeding year squeezed into a few weeks, a solitary life spread across huge ranges, and what happens when people press in on all of that.\r\n\r\n## A cat with no close relatives\r\n\r\nPeter Simon Pallas described the manul in 1776 as *Felis manul*, and for a long time it was filed with the small cats of the genus *Felis*. Even Reginald Pocock, who studied its unusual skull in 1907, still treated it as an odd form of *Felis*. It is now placed alone in its own genus, *Otocolobus*. Its nearest living relatives are the leopard cats of the genus *Prionailurus*, and the two lines split somewhere between about 8.6 and 4.8 million years ago.\r\n\r\n## A year in a few weeks\r\n\r\nThe manul breeds once a year, and the female is fertile for only 26 to 42 hours. Males are just as seasonal: in the breeding season their testosterone runs about three times higher than the rest of the year. After a gestation of 66 to 75 days, two to six kittens are born between late April and late May. They start hunting at about five months, so they are nearly grown before their first winter.\r\n\r\n## Alone across huge ranges\r\n\r\nAdult manuls live alone; the only lasting bond is a mother with her kittens. In Mongolia, radio-collared females used home ranges of 7.4 to 125 km² and males up to 207 km², overlapping their neighbours'. The cats moved between many dens, staying a few days to a few weeks in each. They were mostly active at dusk and dawn in summer and more active by day in autumn.\r\n\r\n## Common on the map, scarce on the ground\r\n\r\nSince 2020 the IUCN has listed the manul as Least Concern worldwide, because its range is enormous. National lists tell a different story: it is Endangered in China and has been Near Threatened in Mongolia since 2006. A cat that lives alone at low density across huge ranges is hard to count, and it can disappear from one valley without changing the global picture.\r\n\r\nThe pressures are local and human. Between 2005 and 2009, 54,147 km² of Tibetan grassland was poisoned to kill pikas, the manul's main prey; in Mongolia, rodent control used the poison bromadiolone. The fur trade once took more than 10,000 skins a year, and Mongolia alone exported 9,185 in 1987, before international trade ended in 1988. Herding dogs kill manuls in Iran, Kazakhstan and the Altai, and others die in traps set for small mammals.\r\n\r\n## Fragile in captivity\r\n\r\nZoos in North America and Europe have run managed breeding programmes for the manul since the 1980s, tracked in an international studbook, to keep a genetically healthy reserve population. They have found it unusually hard to keep. In North American zoos about 60% of newborn kittens died, mainly from toxoplasmosis, a parasitic disease spread by domestic cats. In the wild, manuls seem to meet the parasite rarely: a study in Mongolia found it in only 2 of 15 wild manuls and in none of the local house cats or prey animals tested, while every zoo manul tested had been exposed. Why the species is so vulnerable is not fully known, but cats that grow up without the parasite meet it for the first time in captivity. Some European zoos have sharply cut kitten deaths by giving kittens the antibiotic clindamycin.\r\n\r\nBreeding is hard too, because a fertile window of a day or two leaves very little room for error. The first manul kittens conceived by artificial insemination were born at the Cincinnati Zoo in 2011, after decades of research.\r\n\r\n## What specialization costs\r\n\r\nThe manul's way of life suits the steppe: a short, tightly timed breeding season, thin populations spread over vast ranges, and little contact with the diseases of house cats. The same traits make it hard to count, easy to lose locally, and difficult to keep and breed in zoos."
     }
   },
   "provenance": {
@@ -244,3 +244,355 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "manul-under-pressure",
+      "puzzleRevision": "fnv1a32:b02845b3",
+      "board": {
+        "width": 1060,
+        "height": 680
+      },
+      "nodes": {
+        "term:Otocolobus manul": {
+          "x": 812.12,
+          "y": 505.49,
+          "pinned": false
+        },
+        "term:Peter Simon Pallas": {
+          "x": 965.82,
+          "y": 484.43,
+          "pinned": false
+        },
+        "term:Miocene split from the leopard cats": {
+          "x": 853.71,
+          "y": 301.04,
+          "pinned": false
+        },
+        "term:one spring litter a year": {
+          "x": 116.52,
+          "y": 451.37,
+          "pinned": false
+        },
+        "term:a fertile window of a day or two": {
+          "x": 311.53,
+          "y": 562.39,
+          "pinned": false
+        },
+        "term:first hunt at five months": {
+          "x": 102.93,
+          "y": 653.26,
+          "pinned": false
+        },
+        "term:solitary adults": {
+          "x": 669.15,
+          "y": 210.68,
+          "pinned": false
+        },
+        "term:huge, overlapping home ranges": {
+          "x": 489.47,
+          "y": 260.94,
+          "pinned": false
+        },
+        "term:a new den every few days": {
+          "x": 579.02,
+          "y": 65.53,
+          "pinned": false
+        },
+        "term:active at dusk and dawn": {
+          "x": 774.52,
+          "y": 80.24,
+          "pinned": false
+        },
+        "term:globally Least Concern": {
+          "x": 296.54,
+          "y": 181.5,
+          "pinned": false
+        },
+        "term:pika poisoning": {
+          "x": 156.6,
+          "y": 100.15,
+          "pinned": false
+        },
+        "term:Endangered in China": {
+          "x": 273.93,
+          "y": 357.18,
+          "pinned": false
+        },
+        "term:the pelt trade": {
+          "x": 268.54,
+          "y": 23,
+          "pinned": false
+        },
+        "term:herding dogs and traps": {
+          "x": 126.65,
+          "y": 258.74,
+          "pinned": false
+        },
+        "term:deadly toxoplasmosis": {
+          "x": 714.44,
+          "y": 645.13,
+          "pinned": false
+        },
+        "term:high zoo kitten mortality": {
+          "x": 903.8,
+          "y": 657,
+          "pinned": false
+        },
+        "term:first artificial insemination": {
+          "x": 627.32,
+          "y": 462.5,
+          "pinned": false
+        },
+        "term:spread thin": {
+          "x": 424.47,
+          "y": 99.52,
+          "pinned": false
+        },
+        "term:a calendar zoos can't fake": {
+          "x": 521.91,
+          "y": 657,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 4089.86,
+        "score": 4089.856509295662
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T02:29:33.096Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "manul-under-pressure",
+      "puzzleRevision": "fnv1a32:b02845b3",
+      "board": {
+        "width": 1160,
+        "height": 860
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 915.61,
+          "y": 277.31,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 451.81,
+          "y": 698,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 165.16,
+          "y": 438,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 451.81,
+          "y": 178,
+          "pinned": false
+        },
+        "cluster:4": {
+          "x": 915.61,
+          "y": 598.69,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:spread thin": {
+          "x": 253.33,
+          "y": 252.85,
+          "pinned": false
+        },
+        "term:a calendar zoos can't fake": {
+          "x": 713.56,
+          "y": 720.4,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "Otocolobus manul",
+          "Peter Simon Pallas",
+          "Miocene split from the leopard cats"
+        ],
+        "cluster:1": [
+          "one spring litter a year",
+          "a fertile window of a day or two",
+          "first hunt at five months"
+        ],
+        "cluster:2": [
+          "solitary adults",
+          "huge, overlapping home ranges",
+          "a new den every few days",
+          "active at dusk and dawn"
+        ],
+        "cluster:3": [
+          "globally Least Concern",
+          "pika poisoning",
+          "Endangered in China",
+          "the pelt trade",
+          "herding dogs and traps"
+        ],
+        "cluster:4": [
+          "deadly toxoplasmosis",
+          "high zoo kitten mortality",
+          "first artificial insemination"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 322.90105446517066
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T02:29:36.264Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "manul-under-pressure",
+      "puzzleRevision": "fnv1a32:b02845b3",
+      "board": {
+        "width": 1060,
+        "height": 680
+      },
+      "nodes": {
+        "term:Otocolobus manul": {
+          "x": 797.59,
+          "y": 22
+        },
+        "term:Peter Simon Pallas": {
+          "x": 983.3,
+          "y": 22
+        },
+        "term:Miocene split from the leopard cats": {
+          "x": 445.93,
+          "y": 203.81
+        },
+        "term:one spring litter a year": {
+          "x": 918.4,
+          "y": 658
+        },
+        "term:a fertile window of a day or two": {
+          "x": 731.36,
+          "y": 208.82
+        },
+        "term:first hunt at five months": {
+          "x": 961.25,
+          "y": 203.93
+        },
+        "term:solitary adults": {
+          "x": 751.03,
+          "y": 658
+        },
+        "term:huge, overlapping home ranges": {
+          "x": 558.62,
+          "y": 658
+        },
+        "term:a new den every few days": {
+          "x": 360.46,
+          "y": 607.19
+        },
+        "term:active at dusk and dawn": {
+          "x": 715.88,
+          "y": 521.32
+        },
+        "term:globally Least Concern": {
+          "x": 89.3,
+          "y": 658
+        },
+        "term:pika poisoning": {
+          "x": 191.6,
+          "y": 586.37
+        },
+        "term:Endangered in China": {
+          "x": 263.5,
+          "y": 287.3
+        },
+        "term:the pelt trade": {
+          "x": 64.1,
+          "y": 251.26
+        },
+        "term:herding dogs and traps": {
+          "x": 295.39,
+          "y": 462.05
+        },
+        "term:deadly toxoplasmosis": {
+          "x": 374.97,
+          "y": 22
+        },
+        "term:high zoo kitten mortality": {
+          "x": 655.05,
+          "y": 96.72
+        },
+        "term:first artificial insemination": {
+          "x": 192.33,
+          "y": 203.81
+        },
+        "term:spread thin": {
+          "x": 308.39,
+          "y": 658
+        },
+        "term:a calendar zoos can't fake": {
+          "x": 640.08,
+          "y": 325.51
+        },
+        "cluster:0": {
+          "x": 852.18,
+          "y": 91.04
+        },
+        "cluster:1": {
+          "x": 828,
+          "y": 261.36
+        },
+        "cluster:2": {
+          "x": 491.24,
+          "y": 456.93
+        },
+        "cluster:3": {
+          "x": 105.05,
+          "y": 421.85
+        },
+        "cluster:4": {
+          "x": 554.15,
+          "y": 22
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T02:29:39.372Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1.1,
+    "source": "auto",
+    "savedAt": "2026-10-08T02:29:29.848Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;

@@ -3,10 +3,13 @@
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default definePuzzle(import.meta.url, {
+const puzzle = definePuzzle(import.meta.url, {
   "id": "what-gets-said-in-the-open",
   "title": "What gets said in the open",
   "category": "sociology",
+  "subcategories": {
+    "sociology": "institutions-organizations"
+  },
   "tags": [
     "book"
   ],
@@ -269,3 +272,308 @@ export default definePuzzle(import.meta.url, {
     ]
   }
 });
+puzzle.layout = {
+  "schemaVersion": 1,
+  "modes": {
+    "graph": {
+      "schemaVersion": 1,
+      "puzzleId": "what-gets-said-in-the-open",
+      "puzzleRevision": "fnv1a32:15632d0b",
+      "board": {
+        "width": 640,
+        "height": 460
+      },
+      "nodes": {
+        "term:psychological safety": {
+          "x": 159.41,
+          "y": 145.05,
+          "pinned": false
+        },
+        "term:interpersonal risk": {
+          "x": 78.7,
+          "y": 23,
+          "pinned": false
+        },
+        "term:fitting in and going along": {
+          "x": 264.36,
+          "y": 59,
+          "pinned": false
+        },
+        "term:the learning zone": {
+          "x": 191.26,
+          "y": 302.97,
+          "pinned": false
+        },
+        "term:the comfort zone": {
+          "x": 72.4,
+          "y": 205.1,
+          "pinned": false
+        },
+        "term:the anxiety zone": {
+          "x": 72.4,
+          "y": 437,
+          "pinned": false
+        },
+        "term:the apathy zone": {
+          "x": 69.25,
+          "y": 348.25,
+          "pinned": false
+        },
+        "term:avoidable failure": {
+          "x": 364.3,
+          "y": 142.3,
+          "pinned": false
+        },
+        "term:the 85 percent finding": {
+          "x": 548.7,
+          "y": 161.35,
+          "pinned": false
+        },
+        "term:dangerous silence": {
+          "x": 564.45,
+          "y": 65.43,
+          "pinned": false
+        },
+        "term:framing the work": {
+          "x": 469.84,
+          "y": 437,
+          "pinned": false
+        },
+        "term:inviting participation": {
+          "x": 548.7,
+          "y": 373.89,
+          "pinned": false
+        },
+        "term:responding productively": {
+          "x": 431.44,
+          "y": 301.69,
+          "pinned": false
+        },
+        "term:what silence costs": {
+          "x": 449.29,
+          "y": 23,
+          "pinned": false
+        },
+        "term:the moment after": {
+          "x": 266.74,
+          "y": 255.47,
+          "pinned": false
+        },
+        "term:building toward the learning zone": {
+          "x": 268.46,
+          "y": 437,
+          "pinned": false
+        }
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "overlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "totalLength": 3171.58,
+        "score": 3171.5811882663643
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:11:08.019Z"
+    },
+    "sets": {
+      "schemaVersion": 1,
+      "puzzleId": "what-gets-said-in-the-open",
+      "puzzleRevision": "fnv1a32:15632d0b",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "stripHeight": 16,
+      "circles": {
+        "cluster:0": {
+          "x": 480,
+          "y": 465.85,
+          "pinned": false
+        },
+        "cluster:1": {
+          "x": 142.06,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:2": {
+          "x": 817.94,
+          "y": 318,
+          "pinned": false
+        },
+        "cluster:3": {
+          "x": 480,
+          "y": 170.15,
+          "pinned": false
+        }
+      },
+      "bridges": {
+        "term:what silence costs": {
+          "x": 722.51,
+          "y": 465.46,
+          "pinned": false
+        },
+        "term:the moment after": {
+          "x": 344,
+          "y": 318,
+          "pinned": false
+        },
+        "term:building toward the learning zone": {
+          "x": 214.86,
+          "y": 147.91,
+          "pinned": false
+        }
+      },
+      "clusterTerms": {
+        "cluster:0": [
+          "psychological safety",
+          "interpersonal risk",
+          "fitting in and going along"
+        ],
+        "cluster:1": [
+          "the learning zone",
+          "the comfort zone",
+          "the anxiety zone",
+          "the apathy zone"
+        ],
+        "cluster:2": [
+          "avoidable failure",
+          "the 85 percent finding",
+          "dangerous silence"
+        ],
+        "cluster:3": [
+          "framing the work",
+          "inviting participation",
+          "responding productively"
+        ]
+      },
+      "metrics": {
+        "hardOverlaps": 0,
+        "circleOverlaps": 0,
+        "headingOverlaps": 0,
+        "bridgeCircleOverlaps": 0,
+        "bridgeHeadingOverlaps": 0,
+        "bridgeBridgeOverlaps": 0,
+        "boundsViolations": 0,
+        "lineCrossings": 0,
+        "lineHeadingIntersections": 0,
+        "lineCircleIntersections": 0,
+        "totalLength": 485.41155422106186
+      },
+      "solutionLayout": "pretty",
+      "capturedSolved": true,
+      "source": "auto",
+      "fixed": true,
+      "savedAt": "2026-10-08T01:11:10.643Z"
+    },
+    "star": {
+      "schemaVersion": 1,
+      "puzzleId": "what-gets-said-in-the-open",
+      "puzzleRevision": "fnv1a32:15632d0b",
+      "board": {
+        "width": 960,
+        "height": 620
+      },
+      "nodes": {
+        "term:psychological safety": {
+          "x": 574.49,
+          "y": 345.87
+        },
+        "term:interpersonal risk": {
+          "x": 679.94,
+          "y": 179.31
+        },
+        "term:fitting in and going along": {
+          "x": 858.1,
+          "y": 120.56
+        },
+        "term:the learning zone": {
+          "x": 426.87,
+          "y": 453.09
+        },
+        "term:the comfort zone": {
+          "x": 889.6,
+          "y": 558.65
+        },
+        "term:the anxiety zone": {
+          "x": 765.5,
+          "y": 598
+        },
+        "term:the apathy zone": {
+          "x": 415.99,
+          "y": 598
+        },
+        "term:avoidable failure": {
+          "x": 521.92,
+          "y": 185.55
+        },
+        "term:the 85 percent finding": {
+          "x": 220.31,
+          "y": 22
+        },
+        "term:dangerous silence": {
+          "x": 530.04,
+          "y": 22
+        },
+        "term:framing the work": {
+          "x": 281.84,
+          "y": 403.31
+        },
+        "term:inviting participation": {
+          "x": 89.3,
+          "y": 148.62
+        },
+        "term:responding productively": {
+          "x": 255.78,
+          "y": 230.24
+        },
+        "term:what silence costs": {
+          "x": 692.01,
+          "y": 22
+        },
+        "term:the moment after": {
+          "x": 416.25,
+          "y": 299.81
+        },
+        "term:building toward the learning zone": {
+          "x": 213.33,
+          "y": 597.03
+        },
+        "cluster:0": {
+          "x": 805.3,
+          "y": 364.95
+        },
+        "cluster:1": {
+          "x": 589.42,
+          "y": 545.33
+        },
+        "cluster:2": {
+          "x": 383.29,
+          "y": 96.7
+        },
+        "cluster:3": {
+          "x": 105.97,
+          "y": 373.51
+        }
+      },
+      "metrics": {
+        "lineCrossings": 0,
+        "edgeNodeIntersections": 0,
+        "overlaps": 0
+      },
+      "source": "auto",
+      "savedAt": "2026-10-08T01:11:13.904Z"
+    }
+  },
+  "board": {
+    "sizeFactor": 1,
+    "source": "auto",
+    "savedAt": "2026-10-08T01:11:04.732Z"
+  }
+};
+puzzle.starLayout = puzzle.layout?.modes?.star || null;
+export default puzzle;
