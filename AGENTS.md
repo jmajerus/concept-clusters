@@ -1,1 +1,1 @@
-End each commit you made with `Co-Authored-By: <Tool> (<model>) <noreply address if any>`, e.g. `Co-Authored-By: Claude Code (Claude Opus 5.5) <noreply@anthropic.com>`, in place of your tool's default trailer.
+If your tool doesn't add a commit trailer itself, end each commit you made with `Co-Authored-By: <Tool> (<model>)`, e.g. `Co-Authored-By: Cursor (Grok 4.6)`.
