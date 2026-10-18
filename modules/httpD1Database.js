@@ -94,7 +94,7 @@ export function createHttpD1Database({
       );
     }
     const text = await response.text();
-    received.bytes = text.length;
+    received.bytes = Buffer.byteLength(text, "utf8");
     let payload;
     try {
       payload = text ? JSON.parse(text) : {};
