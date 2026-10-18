@@ -239,8 +239,8 @@ A layout is not puzzle content, so it is not a projection of the document
 at all. It lives beside the document in one `layout_json` column on
 `puzzle_drafts` and on `published_documents`: outside the content hash, with
 no effect on `content_revised_at`, and with its own fingerprint in the public
-play index, so a publish that changes only the layout leaves the content
-revision alone.
+play index, so a publish that changes only the layout changes only that
+fingerprint.
 
 Its writers are people in layout authoring and the automatic layout pass,
 whose entries are tagged `source: "auto"` and never replace an author's.
@@ -252,6 +252,64 @@ for publishing and the automatic pass are in
 [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#saved-layouts).
 How the client stores a player's own arrangement is in
 [DEVELOPMENT.md](DEVELOPMENT.md#saved-player-sessions).
+
+## Revisions and publication by domain
+
+Every write domain follows one rule. Edits accumulate on the working copy,
+and a publish carries that working copy to players as one new published
+revision. Each domain then says what a save does to the working copy's
+counters, and why when it differs from the baseline.
+
+Two counters and a few clocks are involved:
+
+- **Working-copy `revision`** guards against lost updates and numbers the undo
+  history. It is not a version players see. It increments on every save
+  that changes the assembled puzzle document. A save that changes nothing
+  leaves it alone. The exact cases, including the stale-cache refresh, are in
+  [How a save is stored](#how-a-save-is-stored).
+- **Published `revision`** is the version players get. Every publish
+  increments it once, whatever changed, including a publish that changes
+  only the layout. `published_document_revisions` keeps each revision's
+  document. It does not keep the layout.
+- **`updated_at`** moves with every write on either row: document, layout,
+  freeze cue, or withdrawal. Layout saves use it as their concurrency guard.
+- **`savedAt`** stamps each layout mode and the board settings. Publish
+  uses it to keep a newer published entry.
+- **`content_revised_at`** is the player-facing Revised mark (see
+  [How a save is stored](#how-a-save-is-stored)).
+
+| Domain | Writes land on | Working-copy `revision` | Undo snapshot | Reaches players | Why it differs |
+|---|---|---|---|---|---|
+| `content`, `classification`, `pedagogy` | Working copy, as a merge patch on one domain column | +1 | Yes | Publish | Baseline |
+| `provenance` | Working copy, written by the save it describes (MCP stamps, or the edit page's Save working copy) | +1, as part of that save | Yes | Publish | It records who made a save, so it never saves on its own |
+| `layout` (per-mode layouts and board settings) | Working copy, `layout_json` | Unchanged | No | Publish | Presentation, not content, and edited in a second tab. Bumping the revision would make the edit page's next save fail its `expected_revision` check, and drag-and-save cycles are not content history. `updated_at` guards concurrent layout saves instead |
+| `administration` (legacy `board`) | Nothing writes it | – | – | Lifted into the layout at publish | Read-only compatibility for older puzzles |
+| `system` | Infrastructure | – | – | – | Not authored. Freeze cues and withdrawals change `updated_at` only |
+| Categories and catalogues | Their own working copies on `content_drafts` | +1 | No | Publish, or `publish_to_authoring` on the MCP write | Shared taxonomy, outside any one puzzle |
+| Site settings | `site_settings`, live | None | No | Immediately | Site-wide rather than puzzle content, with no working copy to hold them |
+
+**The one puzzle-level exception.** `reassign_puzzle_classifications` with
+`publish_to_authoring` writes each working copy first, then publishes just
+the classification onto the live puzzle. That increments the published
+revision without a Revised mark and keeps the published layout. Shelf moves
+span many puzzles at once, and a separate publish for each would turn one
+reorganization into dozens of clicks. Every other puzzle write reaches
+players only through Publish or Publish & Cue on the edit page.
+
+**Unpublished changes.** Whether a working copy has unpublished changes is
+derived, the same way for every domain. `unpublishedChangeDomains` compares
+the working copy with its published puzzle, domain by domain. A working copy
+with no layout of its own inherits the published one, and legacy `board`
+values are compared where play reads them. No flag records that a domain was
+edited, so a change undone by hand stops counting as unpublished. The
+comparison runs when the puzzle list is built, and that route reports its
+cost in a `Server-Timing` header. Fingerprints computed at write time are
+the path if the comparison grows slow, versioned so that a change to the
+comparison rules recomputes them.
+
+`document_stale` is unrelated to publication. It marks the stored `document`
+column as a cache the domain columns have moved past (see
+[How a save is stored](#how-a-save-is-stored)).
 
 ## Projections and sub-schemas
 
