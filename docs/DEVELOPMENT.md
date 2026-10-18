@@ -60,9 +60,13 @@ columns only while its `updated_at`, `content_hash`, `revision`, and lengths
 are unchanged; other rows are fetched whole. Every write to a large column
 must also set `updated_at` (`tests/d1-large-column-cache.mjs` checks every
 `UPDATE` in `modules/`, `tools/`, and new migrations). The server fills the
-cache in the background at start; a restart empties it, and
+cache in the background at start, holds about 64 MB of cached text at most
+(least recently used out first), and is emptied by a restart;
 `AUTHORING_D1_CACHE=0` turns it off. The timing log's `reused=` counts rows
-served from it.
+served from it. One write can slip past it: rewriting a large column to a
+value of the same length in the same millisecond as the previous write. The
+lists then show the earlier value until that row's next write or a restart;
+D1 itself, saves, publishes, and freezes are unaffected.
 
 The local server and the `tools/` scripts reach D1 through the D1 REST API
 unless a D1 proxy is configured. The proxy (`src/d1-proxy-worker.ts`,

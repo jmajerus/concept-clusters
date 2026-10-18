@@ -24,6 +24,8 @@ export async function run() {
   await publishedListMatchesAndReuses();
   await draftListsMatch();
   await rowDeletedBetweenListAndFetch();
+  await rowRevisedBetweenListAndFetch();
+  await cacheStaysWithinItsBudget();
   largeColumnWritersSetUpdatedAt();
 }
 
@@ -166,6 +168,47 @@ async function rowDeletedBetweenListAndFetch() {
   const cached = createLargeColumnCachedD1Database(recorder, { cacheKey: "race" });
   const rows = (await cached.prepare(PUBLISHED).bind("puzzle").all()).results;
   assert.deepEqual(rows.map(row => row.id), ["kept"], "a row deleted mid-list is left out, not half-filled");
+}
+
+async function rowRevisedBetweenListAndFetch() {
+  clearD1LargeColumnCache();
+  const sqliteD1 = createSqliteD1();
+  const { sqlite } = sqliteD1;
+  insertPublished(sqlite, "moving", { document: '{"v":1}' });
+  let revised = false;
+  const recorder = recording(sqliteD1, {
+    beforeBatch: () => {
+      if (revised) return;
+      revised = true;
+      sqlite.prepare(`
+        UPDATE published_documents
+        SET document = '{"v":2}', cued_for_freeze_at = '2026-05-01', updated_at = '2026-05-01'
+        WHERE id = 'moving'
+      `).run();
+    }
+  });
+  const cached = createLargeColumnCachedD1Database(recorder, { cacheKey: "revised-mid-list" });
+  const [row] = (await cached.prepare(PUBLISHED).bind("puzzle").all()).results;
+  assert.deepEqual({ ...row }, direct(sqlite, PUBLISHED, ["puzzle"])[0],
+    "a row revised mid-list comes back whole as of the second read, never half old and half new");
+  assert.equal(row.cued_for_freeze_at, "2026-05-01");
+  assert.deepEqual((await cached.prepare(PUBLISHED).bind("puzzle").all()).results, direct(sqlite, PUBLISHED, ["puzzle"]),
+    "and the next list reuses it");
+  assert.deepEqual(recorder.log.batches, [1], "without fetching it again");
+}
+
+async function cacheStaysWithinItsBudget() {
+  clearD1LargeColumnCache();
+  const sqliteD1 = createSqliteD1();
+  const { sqlite } = sqliteD1;
+  const big = "x".repeat(1000);
+  for (const id of ["a", "b", "c"]) insertPublished(sqlite, id, { document: `{"id":"${id}","pad":"${big}"}` });
+  const recorder = recording(sqliteD1);
+  const cached = createLargeColumnCachedD1Database(recorder, { cacheKey: "budget", maxCachedChars: 2500 });
+  const list = async () => (await cached.prepare(PUBLISHED).bind("puzzle").all()).results;
+  assert.deepEqual(await list(), direct(sqlite, PUBLISHED, ["puzzle"]));
+  assert.deepEqual(await list(), direct(sqlite, PUBLISHED, ["puzzle"]), "evicted rows are fetched again, correctly");
+  assert.deepEqual(recorder.log.batches, [3, 1], "only the row that did not fit is fetched again");
 }
 
 // Every UPDATE of a cached table that writes a large column must also set
