@@ -238,8 +238,6 @@ export async function run() {
 
     const registry = `import energyFlow from "./science/energy-flow.js";
 
-// Cross-disciplinary membership
-
 export const PUZZLES = [
   energyFlow,
 ];

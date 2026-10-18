@@ -67,13 +67,19 @@ export function generatedCatalogueModule(catalogue) {
 export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   const variable = variableName(puzzle.id);
   const importPath = `./${relative("puzzles", moduleRelativePath)}`;
-  const commentMarker = "\n// Cross-disciplinary membership";
   const importLine = `import ${variable} from "${importPath}";`;
-  const markerIndex = registry.indexOf(commentMarker);
-  if (markerIndex < 0) {
+  // The new import goes after the last import that precedes the PUZZLES
+  // array, so the anchor is the array itself rather than a marker comment
+  // that hand edits can remove.
+  const imports = registry
+    .slice(0, Math.max(0, registry.indexOf("export const PUZZLES = [")))
+    .match(/^import .*$/gm);
+  const lastImport = imports?.at(-1);
+  const boundary = lastImport ? registry.indexOf(lastImport) + lastImport.length : -1;
+  if (boundary < 0) {
     throw new Error("Could not locate puzzle registry import boundary");
   }
-  const withImport = `${registry.slice(0, markerIndex)}\n${importLine}${registry.slice(markerIndex)}`;
+  const withImport = `${registry.slice(0, boundary)}\n${importLine}${registry.slice(boundary)}`;
   const arrayStart = withImport.indexOf("export const PUZZLES = [");
   const arrayEnd = withImport.indexOf("\n];", arrayStart);
   if (arrayStart < 0 || arrayEnd < 0) {

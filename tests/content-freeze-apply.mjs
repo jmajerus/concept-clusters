@@ -82,8 +82,6 @@ export async function run() {
     );
     await writeFile(join(root, "puzzles", "index.js"), `import energyFlow from "./science/energy-flow.js";
 
-// Cross-disciplinary membership
-
 export const PUZZLES = [
   energyFlow,
 ];
@@ -184,8 +182,6 @@ export const CATALOGUES = [
     await unlink(join(root, "puzzles", "science", "freeze-add-fixture.js"));
     await unlink(join(root, "content", "puzzles", "freeze-add-fixture.ccpuzzle.json"));
     await writeFile(join(root, "puzzles", "index.js"), `import energyFlow from "./science/energy-flow.js";
-
-// Cross-disciplinary membership
 
 export const PUZZLES = [
   energyFlow,

@@ -59,8 +59,8 @@ import choiceUnderInfluence from "./computer-science/choice-under-influence.js";
 import theHiddenTransaction from "./computer-science/the-hidden-transaction.js";
 import manufacturedPressure from "./computer-science/manufactured-pressure.js";
 import controlAndExit from "./computer-science/control-and-exit.js";
-import afterTheClickSource from "./computer-science/after-the-click.js";
-import whenManipulationBecomesNormalSource from "./business-organizations/when-manipulation-becomes-normal.js";
+import afterTheClick from "./computer-science/after-the-click.js";
+import whenManipulationBecomesNormal from "./business-organizations/when-manipulation-becomes-normal.js";
 import restoringHonestChoice from "./business-organizations/restoring-honest-choice.js";
 import whenSystemsStopSeeingPeople from "./history-society/when-systems-stop-seeing-people.js";
 import distortionAndMagnification from "./sociology/distortion-and-magnification.js";
@@ -287,21 +287,6 @@ import microcirculationAndLocalBloodFlow from "./physiology-medicine/microcircul
 import regulatingBloodGlucose from "./physiology-medicine/regulating-blood-glucose.js";
 import rhythmicExcitationOfTheHeart from "./physiology-medicine/rhythmic-excitation-of-the-heart.js";
 import theAutonomicNervousSystem from "./physiology-medicine/the-autonomic-nervous-system.js";
-// Cross-disciplinary membership is expressed on the canonical registry
-// object without cloning puzzle IDs or completion state. `category` is the
-// primary stable category id; `categories` contains the full id set. Browse
-// surfaces resolve those ids back to display titles through the registry.
-const afterTheClick = {
-  ...afterTheClickSource,
-  category: "psychology",
-  categories: ["psychology", "computer-science"]
-};
-
-const whenManipulationBecomesNormal = {
-  ...whenManipulationBecomesNormalSource,
-  categories: ["business-organizations", "computer-science"],
-  subcategories: { "computer-science": "computing-and-society" }
-};
 
 export const PUZZLES = [
   energyFlow,
