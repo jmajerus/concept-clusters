@@ -137,6 +137,38 @@ export async function run() {
     LocalD1ConfigError
   );
 
+  const proxied = await resolveLocalD1Config({
+    env: {
+      CLOUDFLARE_ACCOUNT_ID: "account-1",
+      CLOUDFLARE_API_TOKEN: "d1-token",
+      AUTHORING_D1_PROXY_URL: "https://d1-proxy.example.workers.dev/",
+      AUTHORING_D1_PROXY_TOKEN: "proxy-token"
+    },
+    repositoryRoot: process.cwd()
+  });
+  assert.deepEqual(proxied, {
+    endpoint: "https://d1-proxy.example.workers.dev/query",
+    token: "proxy-token"
+  }, "the proxy, when configured, replaces the REST API");
+  await assert.rejects(
+    () => resolveLocalD1Config({ env: { AUTHORING_D1_PROXY_URL: "https://d1-proxy.example" } }),
+    LocalD1ConfigError,
+    "a proxy URL without its token is a configuration error, not a silent REST fallback"
+  );
+  const proxyQueries = [];
+  const proxyDatabase = createHttpD1Database({
+    ...proxied,
+    fetchImpl: async (url, init) => {
+      proxyQueries.push({ url, authorization: init.headers.Authorization });
+      return jsonResponse({ success: true, result: [{ results: [{ value: 1 }] }] });
+    }
+  });
+  assert.equal(await proxyDatabase.prepare("SELECT 1 AS value").first("value"), 1);
+  assert.deepEqual(proxyQueries, [{
+    url: "https://d1-proxy.example.workers.dev/query",
+    authorization: "Bearer proxy-token"
+  }]);
+
   const queries = [];
   const row = {
     id: "http-draft",
