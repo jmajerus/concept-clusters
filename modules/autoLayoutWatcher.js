@@ -3,7 +3,9 @@
 // when one's board (clusters, terms, bridges) has held still for a while, it
 // runs the layout pass on that working copy (tools/layouts-auto.mjs --draft
 // --write) so the layout page opens on saved layouts instead of waiting for
-// live searches. Automatic layouts never replace an author's.
+// live searches. Automatic layouts never replace an author's, so a working
+// copy with an author's layout in every mode is left alone: no run, and no
+// marker on the puzzle list.
 //
 // D1 has no change notifications, so this polls, cheaply: one small query
 // for changed rows, and a document fetch only when a row's content hash has
@@ -22,6 +24,24 @@
 import { readFile, rename, writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { boardKey } from "./draftReviewDiff.js";
+import { layoutSource, normalizeLayoutDocument } from "./layoutDocument.js";
+
+const PASS_MODES = ["graph", "sets", "star"];
+// What a run that kept an author's layout in every mode records: nothing
+// for the pass to do, and nothing of its own to review.
+const NOTHING_TO_DO = "nothing to do";
+
+// A working copy with an author's own layout in every mode is not the pass's
+// business: it would only measure them.
+export function authorLayoutInEveryMode(layout) {
+  let document;
+  try {
+    document = normalizeLayoutDocument(layout ?? null);
+  } catch {
+    return false;
+  }
+  return PASS_MODES.every(mode => document?.modes?.[mode] && layoutSource(document.modes[mode]) === "author");
+}
 
 export const AUTO_LAYOUT_DEFAULTS = Object.freeze({
   pollMs: 60_000,
@@ -66,7 +86,8 @@ async function writeAutoLayoutState(path, state) {
  */
 export function autoLayoutStatus(entry, job, { settleMs = AUTO_LAYOUT_DEFAULTS.settleMs } = {}) {
   if (job?.status === "running") return { state: "running", since: job.startedAt };
-  if (!entry?.boardKey) return null;
+  if (!entry?.boardKey || entry.authorEveryMode) return null;
+  if (entry.boardKey === entry.laidOutBoardKey && entry.outcome === NOTHING_TO_DO) return null;
   if (entry.boardKey !== entry.laidOutBoardKey) {
     const due = Date.parse(entry.boardChangedAt) + settleMs;
     return { state: "pending", expectedAt: Number.isFinite(due) ? new Date(due).toISOString() : null };
@@ -117,7 +138,10 @@ export function createAutoLayoutWatcher({
     for (const row of rows) {
       if (row.updatedAt > state.cursor) state.cursor = row.updatedAt;
       const entry = state.drafts[row.draftId] ||= {};
-      if (row.contentHash === entry.contentHash) continue;
+      // A layout save leaves the content hash alone; it is only worth a look
+      // for a working copy skipped for its author layouts, which may have
+      // just cleared one.
+      if (row.contentHash === entry.contentHash && !entry.authorEveryMode) continue;
       let draft;
       try {
         draft = await getDraft(row.draftId);
@@ -127,6 +151,13 @@ export function createAutoLayoutWatcher({
         continue;
       }
       entry.contentHash = row.contentHash;
+      const wasAuthorEveryMode = entry.authorEveryMode === true;
+      entry.authorEveryMode = authorLayoutInEveryMode(draft.layout);
+      // An author layout cleared since a run that found nothing to do: the
+      // pass has a mode to fill again.
+      if (wasAuthorEveryMode && !entry.authorEveryMode && entry.outcome === NOTHING_TO_DO) {
+        delete entry.laidOutBoardKey;
+      }
       const key = boardKey(draft.document);
       if (key !== entry.boardKey) {
         entry.boardKey = key;
@@ -144,7 +175,10 @@ export function createAutoLayoutWatcher({
     if (entry) {
       entry.laidOutBoardKey = running.boardKey;
       entry.laidOutAt = job.finishedAt || new Date(now()).toISOString();
-      entry.outcome = job.status === "done" ? "done" : `failed: ${job.error || "unknown error"}`;
+      const rows = job.result?.rows || [];
+      entry.outcome = job.status !== "done"
+        ? `failed: ${job.error || "unknown error"}`
+        : rows.length && rows.every(row => row.action === "author layout kept") ? NOTHING_TO_DO : "done";
       // Problems left per mode, for the puzzle list's tooltip.
       entry.defects = job.status === "done"
         ? Object.fromEntries((job.result?.rows || []).map(row => [row.mode, row.defects?.total ?? null]))
@@ -160,7 +194,7 @@ export function createAutoLayoutWatcher({
     const t = now();
     let best = null;
     for (const [draftId, entry] of Object.entries(state.drafts)) {
-      if (!entry.boardKey || entry.boardKey === entry.laidOutBoardKey) continue;
+      if (!entry.boardKey || entry.boardKey === entry.laidOutBoardKey || entry.authorEveryMode) continue;
       const settledAt = Date.parse(entry.boardChangedAt) + settleMs;
       if (!(settledAt <= t)) continue;
       // A run the author started by hand is left to finish.
@@ -170,8 +204,23 @@ export function createAutoLayoutWatcher({
     return best;
   }
 
+  // Entries recorded before the author-layout check have never had it;
+  // read each once, so one laid out by its author drops out of the queue.
+  async function checkUnchecked() {
+    for (const [draftId, entry] of Object.entries(state.drafts)) {
+      if ("authorEveryMode" in entry) continue;
+      try {
+        entry.authorEveryMode = authorLayoutInEveryMode((await getDraft(draftId)).layout);
+      } catch (error) {
+        if (error?.name !== "DraftNotFoundError") throw error;
+        delete state.drafts[draftId];
+      }
+    }
+  }
+
   async function tick() {
     await load();
+    await checkUnchecked();
     await scan();
     settleRunning();
     if (!running) {

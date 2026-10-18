@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { autoLayoutStatus, createAutoLayoutWatcher, readAutoLayoutState, readAutoLayoutStatuses } from "../modules/autoLayoutWatcher.js";
@@ -25,13 +25,14 @@ export async function run() {
     const iso = () => new Date(clock).toISOString();
     // D1 stand-in: rows carry what the light query returns.
     const rows = new Map();
-    const save = (draftId, document) => {
+    const save = (draftId, document, layout = rows.get(draftId)?.layout ?? null) => {
       const previous = rows.get(draftId);
       rows.set(draftId, {
         draftId,
         updatedAt: iso(),
         contentHash: JSON.stringify(document),
-        document
+        document,
+        layout
       });
       return previous;
     };
@@ -48,12 +49,12 @@ export async function run() {
       listChangedSince: async ({ since }) => [...rows.values()]
         .filter(row => row.updatedAt > since)
         .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))
-        .map(({ document: _document, ...row }) => row),
+        .map(({ document: _document, layout: _layout, ...row }) => row),
       getDraft: async draftId => {
         fetched++;
         const row = rows.get(draftId);
         if (!row) throw Object.assign(new Error("gone"), { name: "DraftNotFoundError" });
-        return { draftId, document: row.document };
+        return { draftId, document: row.document, layout: row.layout };
       },
       jobs,
       jobKey: draftId => `draft:${draftId}`,
@@ -161,6 +162,67 @@ export async function run() {
     await tick();
     assert.equal(runs.length, 4);
     assert.equal(runs[3].options.write, false);
+    runs[3].resolve({ id: "third-copy", rows: [] });
+    await tick();
+    clock += 10 * MINUTE;
+    await watcher.tick();
+    await tick();
+    assert.equal(runs.length, 5, "the hand-started run leaves the board for the watcher");
+    runs[4].resolve({ id: "third-copy", rows: [] });
+    await tick();
+    await watcher.tick();
+
+    // An author's layout in every mode: no run, no marker. Clearing one
+    // (a layout-only save) gives the pass a mode to fill.
+    const authored = { schemaVersion: 1, modes: { graph: { nodes: {} }, sets: { nodes: {} }, star: { nodes: {} } } };
+    save("authored-copy", board(["m", "n", "o"]), authored);
+    await watcher.tick();
+    clock += 10 * MINUTE;
+    await watcher.tick();
+    await tick();
+    assert.equal(runs.length, 5, "a working copy laid out by its author was run");
+    const statusOf = async draftId => (await readAutoLayoutStatuses({
+      statePath, jobs, jobKey: id => `draft:${id}`, settleMs: 5 * MINUTE
+    })).get(draftId);
+    assert.equal(await statusOf("authored-copy"), undefined);
+    rows.get("authored-copy").layout = { schemaVersion: 1, modes: { graph: { nodes: {} }, sets: { nodes: {} } } };
+    saveLayout("authored-copy");
+    clock += 10 * MINUTE;
+    await watcher.tick();
+    await tick();
+    assert.equal(runs.length, 6, "a cleared author layout did not bring the pass back");
+    assert.equal(runs[5].options.draft, "authored-copy");
+    runs[5].resolve({ id: "authored-copy", rows: [{ mode: "star", action: "saved", defects: { total: 0 } }] });
+    await tick();
+    await watcher.tick();
+    assert.equal((await statusOf("authored-copy")).state, "done");
+
+    // A run that kept an author's layout in every mode (inherited, so the
+    // watcher could not tell beforehand) leaves nothing to review.
+    save("inherited-copy", board(["s", "t", "u"]));
+    await watcher.tick();
+    clock += 10 * MINUTE;
+    await watcher.tick();
+    await tick();
+    assert.equal(runs.at(-1).options.draft, "inherited-copy");
+    runs.at(-1).resolve({ id: "inherited-copy", rows: ["graph", "sets", "star"].map(mode => ({ mode, action: "author layout kept", defects: { total: 0 } })) });
+    await tick();
+    await watcher.tick();
+    assert.equal(await statusOf("inherited-copy"), undefined);
+
+    // Entries recorded before the author-layout check get it once.
+    const recorded = await readAutoLayoutState(statePath);
+    save("older-entry", board(["v", "w", "x"]), authored);
+    recorded.drafts["older-entry"] = { contentHash: rows.get("older-entry").contentHash, boardKey: "k", boardChangedAt: iso() };
+    recorded.cursor = iso();
+    await writeFile(statePath, JSON.stringify(recorded));
+    const restarted = make();
+    clock += 10 * MINUTE;
+    const before = runs.length;
+    await restarted.tick();
+    await tick();
+    assert.equal(runs.length, before, "an older entry laid out by its author was run");
+    assert.equal((await readAutoLayoutState(statePath)).drafts["older-entry"].authorEveryMode, true);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
