@@ -67,9 +67,14 @@ export async function run() {
   for (const [patch, expected] of domainCases) {
     assert.deepEqual(unpublishedChangeDomains(published, { ...published, ...patch }), expected);
   }
+  const liveLayout = { schemaVersion: 1, modes: { graph: { nodes: { a: { x: 1, y: 2 } } } } };
   assert.deepEqual(unpublishedChangeDomains(published, published, {
-    publishedLayout: { nodes: { a: { x: 1, y: 2 } } }
+    publishedLayout: liveLayout,
+    draftLayout: { schemaVersion: 1, modes: {} }
   }), ["layout"], "clearing a live layout is a layout change");
+  assert.deepEqual(unpublishedChangeDomains(published, published, {
+    publishedLayout: liveLayout
+  }), [], "a working copy with no layout of its own inherits the published one");
   assert.deepEqual(unpublishedChangeDomains(null, published), []);
   assert.equal(diffPublishedDraft(published, { ...published, language: "fr" }).total, 1,
     "language-only edits must also enable publication");

@@ -117,7 +117,9 @@ export function unpublishedChangeDomains(published, draft, {
   // them, in the layout, so a lifted published row matches a draft that
   // still carries the same values in `board`.
   const publishedLift = liftLegacyBoard(published, publishedLayout);
-  const draftLift = liftLegacyBoard(draft, draftLayout);
+  // A working copy with no layout of its own inherits the published one, as
+  // play and publishing treat it; clearing a layout saves an empty document.
+  const draftLift = liftLegacyBoard(draft, draftLayout ?? publishedLayout);
   const [publishedDocument, draftDocument] = alignStorageForm(publishedLift.document, draftLift.document);
   const before = partitionAuthoredDocument(hoistDocumentCitations(publishedDocument));
   const after = partitionAuthoredDocument(hoistDocumentCitations(draftDocument));
