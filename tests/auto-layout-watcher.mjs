@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { autoLayoutStatus, createAutoLayoutWatcher, readAutoLayoutState, readAutoLayoutStatuses } from "../modules/autoLayoutWatcher.js";
 import { createLayoutPassJobs } from "../modules/layoutPassJobs.js";
+import { boardKey as boardKeyOf } from "../modules/draftReviewDiff.js";
 
 export const name = "automatic layout pass: working copies laid out once their board settles";
 
@@ -45,7 +46,10 @@ export async function run() {
       now: iso
     });
     const statePath = join(dir, "auto-layout-pass.json");
+    // Published rows by puzzle id, for working copies of published puzzles.
+    const published = new Map();
     const make = () => createAutoLayoutWatcher({
+      getPublished: async puzzleId => published.get(puzzleId) || null,
       listChangedSince: async ({ since }) => [...rows.values()]
         .filter(row => row.updatedAt > since)
         .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))
@@ -223,6 +227,60 @@ export async function run() {
     await tick();
     assert.equal(runs.length, before, "an older entry laid out by its author was run");
     assert.equal((await readAutoLayoutState(statePath)).drafts["older-entry"].authorEveryMode, true);
+
+    // A working copy of a published puzzle, first seen with the published
+    // board and a layout for every mode it inherits (a batch run's), is
+    // already laid out: no run, no marker. A different board, or a mode
+    // with no layout, still gets the pass.
+    const batchLayout = { schemaVersion: 1, modes: { graph: { source: "auto", nodes: {} }, sets: { source: "auto", nodes: {} }, star: { source: "auto", nodes: {} } } };
+    const publishedBoard = id => ({ ...board(["g", "h", "i"]), id });
+    for (const id of ["same-board", "new-board", "missing-mode"]) {
+      published.set(id, {
+        document: publishedBoard(id),
+        layout: id === "missing-mode"
+          ? { schemaVersion: 1, modes: { graph: { source: "auto", nodes: {} } } }
+          : batchLayout
+      });
+    }
+    const runsBefore = runs.length;
+    save("same-board", { ...publishedBoard("same-board"), clusters: [{ ...publishedBoard("same-board").clusters[0], fact: "A provenance-only or text edit." }] });
+    save("new-board", { ...board(["g", "h", "i", "j"]), id: "new-board" });
+    save("missing-mode", publishedBoard("missing-mode"));
+    await restarted.tick();
+    clock += 10 * MINUTE;
+    for (let i = 0; i < 3; i++) {
+      await restarted.tick();
+      await tick();
+      const pending = runs.slice(runsBefore).find(run => !run.settled);
+      if (pending) {
+        pending.settled = true;
+        pending.resolve({ id: pending.options.draft, rows: [{ mode: "graph", action: "saved", defects: { total: 0 } }] });
+        await tick();
+      }
+    }
+    const laidOut = runs.slice(runsBefore).map(run => run.options.draft).sort();
+    assert.deepEqual(laidOut, ["missing-mode", "new-board"], "the batch-laid-out working copy was run again");
+    assert.equal((await readAutoLayoutStatuses({ statePath, jobs, jobKey: id => `draft:${id}`, settleMs: 5 * MINUTE })).get("same-board"), undefined);
+
+    // An entry queued from its first sighting before this check gets it once.
+    const queued = await readAutoLayoutState(statePath);
+    published.set("queued-copy", { document: publishedBoard("queued-copy"), layout: batchLayout });
+    save("queued-copy", publishedBoard("queued-copy"));
+    queued.drafts["queued-copy"] = {
+      contentHash: rows.get("queued-copy").contentHash,
+      authorEveryMode: false,
+      boardKey: boardKeyOf(publishedBoard("queued-copy")),
+      boardChangedAt: iso()
+    };
+    queued.cursor = iso();
+    await writeFile(statePath, JSON.stringify(queued));
+    const upgraded = make();
+    clock += 10 * MINUTE;
+    const beforeUpgrade = runs.length;
+    await upgraded.tick();
+    await tick();
+    assert.equal(runs.length, beforeUpgrade, "a queued batch-laid-out entry was run");
+    assert.equal((await readAutoLayoutState(statePath)).drafts["queued-copy"].outcome, "already laid out");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

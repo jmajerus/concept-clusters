@@ -44,6 +44,7 @@ import {
   writeLocalDevLease
 } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
+import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
 
 const DEFAULT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const DEFAULT_HOST = "127.0.0.1";
@@ -849,6 +850,15 @@ async function startAutoLayoutPass({ repositoryRoot, env, port }) {
   const watcher = createAutoLayoutWatcher({
     listChangedSince: options => drafts.listChangedSince(options),
     getDraft: draftId => drafts.getDraft(draftId),
+    getPublished: async puzzleId => {
+      if (!puzzleId || !workspace.contentDocuments) return null;
+      try {
+        return await workspace.contentDocuments.getPublished({ kind: "puzzle", id: puzzleId });
+      } catch (error) {
+        if (error instanceof ContentDocumentNotFoundError) return null;
+        throw error;
+      }
+    },
     jobs: layoutPassJobsFor(repositoryRoot),
     jobKey: draftLayoutPassKey,
     base: `http://127.0.0.1:${port}`,

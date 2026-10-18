@@ -30,6 +30,20 @@ const PASS_MODES = ["graph", "sets", "star"];
 // What a run that kept an author's layout in every mode records: nothing
 // for the pass to do, and nothing of its own to review.
 const NOTHING_TO_DO = "nothing to do";
+// What a working copy first seen with the published board, and a layout for
+// every mode already (its own or inherited, say from a batch run), records.
+const ALREADY_LAID_OUT = "already laid out";
+
+// Whether a layout document has some layout, anyone's, for every mode.
+function layoutInEveryMode(layout) {
+  let document;
+  try {
+    document = normalizeLayoutDocument(layout ?? null);
+  } catch {
+    return false;
+  }
+  return PASS_MODES.every(mode => Boolean(document?.modes?.[mode]));
+}
 
 // A working copy with an author's own layout in every mode is not the pass's
 // business: it would only measure them.
@@ -87,7 +101,8 @@ async function writeAutoLayoutState(path, state) {
 export function autoLayoutStatus(entry, job, { settleMs = AUTO_LAYOUT_DEFAULTS.settleMs } = {}) {
   if (job?.status === "running") return { state: "running", since: job.startedAt };
   if (!entry?.boardKey || entry.authorEveryMode) return null;
-  if (entry.boardKey === entry.laidOutBoardKey && entry.outcome === NOTHING_TO_DO) return null;
+  if (entry.boardKey === entry.laidOutBoardKey &&
+      (entry.outcome === NOTHING_TO_DO || entry.outcome === ALREADY_LAID_OUT)) return null;
   if (entry.boardKey !== entry.laidOutBoardKey) {
     const due = Date.parse(entry.boardChangedAt) + settleMs;
     return { state: "pending", expectedAt: Number.isFinite(due) ? new Date(due).toISOString() : null };
@@ -115,6 +130,8 @@ export async function readAutoLayoutStatuses({ statePath, jobs, jobKey, settleMs
 export function createAutoLayoutWatcher({
   listChangedSince,
   getDraft,
+  // The published row ({ document, layout }) for a puzzle id, or null.
+  getPublished = async () => null,
   jobs,
   jobKey,
   base,
@@ -160,8 +177,10 @@ export function createAutoLayoutWatcher({
       }
       const key = boardKey(draft.document);
       if (key !== entry.boardKey) {
+        const firstSighting = !entry.boardKey;
         entry.boardKey = key;
         entry.boardChangedAt = new Date(now()).toISOString();
+        if (firstSighting) await adoptExistingLayouts(entry, draft, key);
       }
     }
   }
@@ -204,16 +223,46 @@ export function createAutoLayoutWatcher({
     return best;
   }
 
-  // Entries recorded before the author-layout check have never had it;
-  // read each once, so one laid out by its author drops out of the queue.
+  // A working copy has no earlier board the first time it is seen. When its
+  // board is the published one and every mode already has a layout (its own
+  // or inherited), that board counts as laid out: the pass has nothing to add.
+  async function adoptExistingLayouts(entry, draft, key) {
+    entry.baselineChecked = true;
+    const published = await getPublished(draft.document?.id);
+    if (published && boardKey(published.document) === key &&
+        layoutInEveryMode(draft.layout ?? published.layout)) {
+      entry.laidOutBoardKey = key;
+      entry.laidOutAt = new Date(now()).toISOString();
+      entry.outcome = ALREADY_LAID_OUT;
+    }
+  }
+
+  // Entries recorded before a later check have never had it; read each
+  // once. A working copy laid out by its author drops out of the queue, and
+  // one still queued from its first sighting is checked for layouts it
+  // already has.
   async function checkUnchecked() {
     for (const [draftId, entry] of Object.entries(state.drafts)) {
-      if ("authorEveryMode" in entry) continue;
+      const needsAuthorCheck = !("authorEveryMode" in entry);
+      const needsBaseline = !entry.baselineChecked && !entry.outcome &&
+        entry.boardKey && entry.boardKey !== entry.laidOutBoardKey;
+      if (!needsAuthorCheck && !needsBaseline) {
+        entry.baselineChecked = true;
+        continue;
+      }
+      let draft;
       try {
-        entry.authorEveryMode = authorLayoutInEveryMode((await getDraft(draftId)).layout);
+        draft = await getDraft(draftId);
       } catch (error) {
         if (error?.name !== "DraftNotFoundError") throw error;
         delete state.drafts[draftId];
+        continue;
+      }
+      if (needsAuthorCheck) entry.authorEveryMode = authorLayoutInEveryMode(draft.layout);
+      if (needsBaseline && running?.draftId !== draftId) {
+        await adoptExistingLayouts(entry, draft, entry.boardKey);
+      } else {
+        entry.baselineChecked = true;
       }
     }
   }
