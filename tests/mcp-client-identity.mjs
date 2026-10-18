@@ -274,6 +274,20 @@ export async function run() {
     contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high" }]
   });
 
+  // Only content and pedagogy edits earn credit: a substantial save confined
+  // to classification or administration leaves the byline alone; the same
+  // save to content, pedagogy, or the whole document credits the client.
+  const credited = { id: "credit-demo", provenance: { collaboration: "ai", contributors: [{ name: "Claude" }] } };
+  const museServer = { server: { getClientVersion: () => ({ name: "muse-spark-1.3-contributor · high" }) } };
+  const creditNames = domain => stampDocumentAssistanceFromMcp(credited, {
+    role: "edited", substantial: true, domain, server: museServer
+  }).document.provenance.contributors.map(contributor => contributor.name);
+  assert.deepEqual(creditNames("classification"), ["Claude"], "a reshelving credited the client");
+  assert.deepEqual(creditNames("administration"), ["Claude"], "a settings change credited the client");
+  for (const domain of ["content", "pedagogy", "complete"]) {
+    assert.deepEqual(creditNames(domain), ["Claude", "Muse Code (Spark 1.3)"], `a substantial ${domain} edit was not credited`);
+  }
+
   // The native Muse Code server connection reports Meta's internal runtime
   // name. Match its exact name, independent of runtime version.
   const nativeMuseCode = identifyMcpAssistanceClient({

@@ -7,10 +7,28 @@
 // and is not an edit log -- see docs/dev-briefs/authoring-provenance-shape.md
 // ("Non-goals: not an edit log or changelog").
 
+import { partitionAuthoredDocument } from "./authoringDomains.js";
+
 // Provenance is attribution metadata, not puzzle content -- diffing it would
 // make the trigger circular (the previous
 // stamp decision would influence the next one).
 const DEFAULT_EXCLUDE_KEYS = Object.freeze(["provenance"]);
+
+// Only the content and pedagogy write domains are authorship. Classification
+// (the shelf) and administration (settings) can change many fields without
+// anyone writing the puzzle, so they never count toward credit.
+export const CREDITED_WRITE_DOMAINS = Object.freeze(["content", "pedagogy"]);
+
+function creditedParts(document) {
+  if (!document || typeof document !== "object") return document;
+  const parts = partitionAuthoredDocument(document);
+  return Object.fromEntries(CREDITED_WRITE_DOMAINS.map(domain => [domain, parts[domain]]));
+}
+
+/** The change score over the content and pedagogy domains alone. */
+export function creditableChangeScore(beforeDocument, afterDocument, options = {}) {
+  return computeChangeScore(creditedParts(beforeDocument), creditedParts(afterDocument), options);
+}
 
 /** Stable key for one array item: its own id when present, else its index. */
 function arrayItemKey(item, index) {

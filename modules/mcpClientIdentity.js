@@ -1,6 +1,7 @@
 // Map MCP call-frame identity to provenance contributor labels.
 // Fingerprints stay here; display labels come from authoringHosts.js.
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
+import { CREDITED_WRITE_DOMAINS } from "./authoringChangeScore.js";
 import { authoringHostLabel } from "./authoringHosts.js";
 import {
   upsertGenerativeProvenance,
@@ -260,7 +261,11 @@ export function stampDocumentAssistanceFromMcp(document, {
   const base = canonicalizeDocumentProvenance(document, { settings });
   let next = base;
 
-  const creditWorthy = role === "drafted" || (role === "edited" && substantial);
+  // Only writing the puzzle earns credit: creating it, or a substantial
+  // change to its content or pedagogy. A save confined to another domain
+  // (classification, administration) never does, whatever the caller scored.
+  const creditedDomain = domain === "complete" || CREDITED_WRITE_DOMAINS.includes(domain);
+  const creditWorthy = role === "drafted" || (role === "edited" && substantial && creditedDomain);
   if (creditWorthy) {
     // Arriving here at all is the evidence: a human does not hand-call an
     // authoring tool over MCP. So a credit-worthy write is recorded as
