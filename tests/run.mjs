@@ -51,6 +51,7 @@ import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
 import * as layoutAuthoringModes from "./layout-authoring-modes.mjs";
 import * as starFreeStrip from "./star-free-strip.mjs";
 import * as starBridgePreconnect from "./star-bridge-preconnect.mjs";
+import * as layoutKeepBest from "./layout-keep-best.mjs";
 import * as playerSessions from "./player-sessions.mjs";
 import * as circlePrettyPrint from "./circle-pretty-print.mjs";
 import * as graphPrettyPrint from "./graph-pretty-print.mjs";
@@ -164,7 +165,7 @@ const allTests = [
   tableMode, tableSorting, tableFeedback, tableInfo, tablePanels, tableLensEffects,
   mcpAuthoringDomains, boardLimitWaivers, mcpWaiverChatApproval,
   smoke, solution, layoutSanity, mobileLayout, sharing, clusterLabelConnect, clusterMenu, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
-  starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, starBridgePreconnect, playerSessions,
+  starDetangle, starPrettyPrint, starLayoutAuthoring, layoutAuthoringModes, starFreeStrip, starBridgePreconnect, layoutKeepBest, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensFlowTrace, lensRevealCue, lensAssignment, lensQuiz, catalogues, catalogueNavigation, metaCatalogues,
   learningIntroductionEngine, learningIntroduction, learningLessonSection,
@@ -200,7 +201,7 @@ const standardTests = [
   ...quickTests,
   provenanceLastUsed, layoutWorkPending,
   tableMode, tableSorting, tableFeedback, tableInfo, tablePanels, tableLensEffects,
-  mobileLayout, clusterLabelConnect, clusterMenu, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip, starBridgePreconnect,
+  mobileLayout, clusterLabelConnect, clusterMenu, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip, starBridgePreconnect, layoutKeepBest,
   learningLessonSection,
   authoringAdminIndex, localCatalogueReview, localDevHttp, localDevHousekeep, playCorpus, boardAdministration, publicPlayBrowser
 ];
@@ -221,7 +222,7 @@ const sideTests = {
     learningIntroductionEngine, learningLevel, domainCatalogues,
     multiCategory, subcategories, domains, infoLinks,
     librarySearch, librarySearchEngine, boot, puzzleManifest, publicPlay,
-    starFreeStrip, starBridgePreconnect, playCorpus, publicPlayBrowser, geometryVisibleSegment, circleMemberOrder, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, singleClusterLayout
+    starFreeStrip, starBridgePreconnect, layoutKeepBest, playCorpus, publicPlayBrowser, geometryVisibleSegment, circleMemberOrder, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, singleClusterLayout
   ]),
   authoring: new Set([
     tableLensEffects,

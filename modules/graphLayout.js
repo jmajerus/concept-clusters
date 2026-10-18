@@ -17,6 +17,7 @@ import {
 } from "./geometry.js";
 import { singleClusterTermHome } from "./lensLayout.js";
 import { angleDistance, rotateOffset } from "./layoutHints.js";
+import { LayoutTimeLimit } from "./layoutBudget.js";
 
 const PILL_H = 30;
 const SEARCH_CLUSTER_CAP = 7;
@@ -409,7 +410,7 @@ export function computePrettyGraphLayout(options) {
 }
 
 function searchForPrettyGraphLayout({
-  d3, puzzle, nodes, links, width, height, hint = null, budget = null, checkDeadline
+  d3, puzzle, nodes, links, width, height, hint = null, budget = null, checkDeadline, keepBestOnTimeLimit = false
 }) {
   const ringRotations = count => Array.from({ length: count }, (_, i) => -Math.PI / 2 + i * Math.PI * 2 / count);
   if (hint) {
@@ -422,16 +423,17 @@ function searchForPrettyGraphLayout({
       rotations,
       hint,
       budget,
-      checkDeadline
+      checkDeadline,
+      keepBestOnTimeLimit
     });
     if (hinted) return { ...hinted, source: "hint" };
   }
-  return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height, budget, checkDeadline }), source: "generated" };
+  return { ...searchGraphLayouts({ d3, puzzle, nodes, links, width, height, budget, checkDeadline, keepBestOnTimeLimit }), source: "generated" };
 }
 
 function searchGraphLayouts({
   d3, puzzle, nodes, links, width, height, orders: hintedOrders = null, rotations: hintedRotations = null, hint = null,
-  budget = null, checkDeadline = () => {}
+  budget = null, checkDeadline = () => {}, keepBestOnTimeLimit = false
 }) {
   const pinned = new Map(nodes
     .filter(node => Number.isFinite(node.fx) && Number.isFinite(node.fy))
@@ -447,6 +449,9 @@ function searchGraphLayouts({
   const placements = loneCluster ? loneClusterPlacements(width, height) : [null];
   let best = null;
 
+  // A budget that keeps its best stops at its time limit with the best
+  // found so far, marked stoppedEarly; otherwise LayoutTimeLimit goes up.
+  try {
   orders.forEach(order => rotations.forEach(rotation => scales.forEach(scale => {
     placements.forEach(placement => {
     checkDeadline();
@@ -533,5 +538,9 @@ function searchGraphLayouts({
     }
     });
   })));
+  } catch (error) {
+    if (!(error instanceof LayoutTimeLimit) || !keepBestOnTimeLimit || !best) throw error;
+    return { ...best, stoppedEarly: error.ms };
+  }
   return best;
 }

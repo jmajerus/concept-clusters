@@ -11,7 +11,7 @@ import { validateGraphLayoutDocument } from "./graphLayoutSchema.js";
 import { computePrettyGraphLayout, repairGraphLayout, scoreGraphGeometry } from "./graphLayout.js";
 import { hasDefects } from "./playerLayoutEffort.js";
 import { graphLayoutHint, layoutIsFixed } from "./layoutHints.js";
-import { layoutBudget, layoutDeadline, LayoutTimeLimit } from "./layoutBudget.js";
+import { layoutBudget, layoutDeadline, layoutKeepsBest, LayoutTimeLimit } from "./layoutBudget.js";
 import {
   afterNextPaint,
   animatePositionTargets,
@@ -502,7 +502,8 @@ export function createGraphRenderer({
           candidate = computePrettyGraphLayout({
             d3, puzzle, nodes, links: state.links, width: W, height: H, hint,
             budget: layoutBudget(state.layoutBudget).graph,
-            checkDeadline: layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs)
+            checkDeadline: layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs),
+            keepBestOnTimeLimit: layoutKeepsBest(state.layoutBudget)
           });
         } catch (error) {
           if (!(error instanceof LayoutTimeLimit)) throw error;
@@ -526,7 +527,9 @@ export function createGraphRenderer({
         if (!candidate || getState() !== state) return { cancelled: true };
         state.layoutSource = {
           kind: candidate.source,
-          fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null
+          fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null,
+          // The extended search's time limit kept its best so far.
+          stoppedEarlyMs: candidate.stoppedEarly || null
         };
         const targets = new Map(nodes.map(node => [
           node, candidate.positions.get(node.id)

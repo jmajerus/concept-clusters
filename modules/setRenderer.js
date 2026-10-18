@@ -52,7 +52,7 @@ import { normalizeInfo } from "./termInfo.js";
 import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { layoutForMode, layoutRevision } from "./layoutDocument.js";
 import { validateCircleLayoutDocument } from "./circleLayoutSchema.js";
-import { layoutBudget, layoutDeadline, LayoutTimeLimit } from "./layoutBudget.js";
+import { layoutBudget, layoutDeadline, layoutKeepsBest, LayoutTimeLimit } from "./layoutBudget.js";
 import { defectsWorse, hasDefects } from "./playerLayoutEffort.js";
 import {
   angleDistance,
@@ -792,10 +792,13 @@ export function createSetRenderer({
       return points;
     };
 
-    // Throws LayoutTimeLimit rather than hang the page (layoutBudget.js).
+    // Throws LayoutTimeLimit rather than hang the page (layoutBudget.js);
+    // a budget that keeps its best returns that instead, marked stoppedEarly.
     const checkDeadline = layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs);
+    const keepBest = layoutKeepsBest(state.layoutBudget);
     const search = (searchOrders, searchRotations, searchHint) => {
     let best = null;
+    try {
     for (const order of searchOrders) {
       for (const rotation of searchRotations) {
         for (const [scaleX, scaleY] of scalePairs) {
@@ -895,6 +898,10 @@ export function createSetRenderer({
           }
         }
       }
+    }
+    } catch (error) {
+      if (!(error instanceof LayoutTimeLimit) || !keepBest || !best) throw error;
+      return { ...best, stoppedEarly: error.ms };
     }
     return best;
     };
@@ -2016,7 +2023,9 @@ export function createSetRenderer({
         if (!candidate || getState() !== state) return { cancelled: true };
         state.layoutSource = {
           kind: candidate.source,
-          fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null
+          fixedErrors: curatedValidation && !curatedValidation.valid ? curatedValidation.errors : null,
+          // The extended search's time limit kept its best so far.
+          stoppedEarlyMs: candidate.stoppedEarly || null
         };
         const targets = new Map([
           ...state.setLayout.csNodes.map(node => [

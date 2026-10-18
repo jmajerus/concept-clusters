@@ -1750,7 +1750,10 @@ instead of published puzzles), `--lanes <n>` (puzzles at once), and
 
 For each board, strategies run in order until the board is clean: the live
 search, then a larger search budget, which for Graph ends with a local
-repair of single pills. Where the board size is the pass's to choose, it
+repair of single pills. On a large board the larger search could run for
+the better part of an hour, so it stops after 3 minutes per board and keeps
+the best layout found by then; the report marks that mode "stopped after
+3 min, best found", and any problems left show as `!` as usual. Where the board size is the pass's to choose, it
 starts from the size in Board settings (on the command line, `--min-size`,
 else the default) and never goes below it, so a roomier size you find
 comfortable stays the floor. A run over every mode grows the board from there
