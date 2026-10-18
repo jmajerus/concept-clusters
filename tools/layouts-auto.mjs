@@ -283,6 +283,9 @@ async function layOutBoard(browser, options, id, mode, size, authorLayout) {
   row.strategy = liveResult.timedOut ? "live search (timed out)" : "live search";
   // A live search that ran out of time freezes the page for players and
   // leaves their board unpolished, so it always goes on to the extended one.
+  // Whether the board kept was left unpolished by a search that ran out of
+  // time: never saved, since a Star layout saves as exact positions.
+  row.timedOut = !!liveResult.timedOut;
   if (row.standardDefects.total === 0 && !liveResult.timedOut) return { row, page: live };
   const extended = await openBoard(browser, options, id, mode, "extended", size);
   const extendedResult = await solve(extended, mode, { dropAuto: true });
@@ -291,10 +294,11 @@ async function layOutBoard(browser, options, id, mode, size, authorLayout) {
       (liveResult.timedOut && !fewerDefects(mode, row.standardDefects, extendedDefects))) {
     await live.close();
     row.defects = extendedDefects;
+    row.timedOut = !!extendedResult.timedOut;
     row.strategy = (extendedResult.repaired ? "extended search + repair" : "extended search") +
       (extendedResult.stoppedEarlyMs
         ? ` (stopped after ${Math.round(extendedResult.stoppedEarlyMs / 60_000)} min, best found)`
-        : "");
+        : extendedResult.timedOut ? " (timed out)" : "");
     return { row, page: extended };
   }
   await extended.close();
@@ -435,6 +439,10 @@ async function layOutPuzzle(browser, options, id) {
     for (let i = 0; i < chosen.rows.length; i++) {
       const row = chosen.rows[i];
       if (row.action === "author layout kept") continue;
+      if (row.timedOut) {
+        row.action = "not saved (timed out before polishing)";
+        continue;
+      }
       const response = await saveLayout(chosen.pages[i], layoutUrl(options, id), row.mode);
       row.action = response.ok
         ? (row.mode === "star" || response.fixed ? "saved" : "saved as hint")

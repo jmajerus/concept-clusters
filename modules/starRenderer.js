@@ -58,7 +58,7 @@ import {
 } from "./starLayoutSchema.js";
 import { layoutForMode } from "./layoutDocument.js";
 import { starLayoutTargets } from "./layoutHints.js";
-import { layoutBudget, layoutDeadline, LayoutTimeLimit } from "./layoutBudget.js";
+import { layoutBudget, layoutDeadline, layoutKeepsBest, LayoutTimeLimit } from "./layoutBudget.js";
 import {
   bridgeArmArrows,
   bridgeArrowPoints,
@@ -1296,7 +1296,13 @@ export function createStarRenderer({
           const original = capturePositions();
           const originalLayout = evaluateLayout();
           // Throws LayoutTimeLimit rather than hang the page (layoutBudget.js).
-          const checkDeadline = layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs);
+          // A budget that keeps its best stops the search there instead (see
+          // below), and from then on the check lets the repair finish.
+          const deadline = layoutDeadline(state.layoutBudget, state.layoutTimeLimitMs);
+          let stoppedEarlyMs = null;
+          const checkDeadline = () => {
+            if (stoppedEarlyMs == null) deadline();
+          };
           try {
             // Settle every node toward its target with light charge and
             // collision, scored by how far it strays from the targets.
@@ -1447,6 +1453,7 @@ export function createStarRenderer({
             };
 
             const fixedTitles = titleNodes.map(title => ({ x: title.x, y: title.y }));
+            try {
             evaluateTargets(buildPrettyTargets(null, 0, fixedTitles));
             const baseOrder = computeClusterOrder(puzzle);
             const permute = values => values.length <= 1
@@ -1498,6 +1505,14 @@ export function createStarRenderer({
                   ));
                 }
               });
+            }
+            } catch (error) {
+              // The extended search keeps the best candidate it has; without
+              // one, or under the live search, the board stays as it was.
+              if (!(error instanceof LayoutTimeLimit) || !layoutKeepsBest(state.layoutBudget) ||
+                  best.deviation === Infinity) throw error;
+              stoppedEarlyMs = error.ms;
+              state.layoutSource = { ...state.layoutSource, stoppedEarlyMs };
             }
 
             best = repairCandidate(best);
