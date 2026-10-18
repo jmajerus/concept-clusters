@@ -29,7 +29,8 @@
 // Per board the strategies run in order until the board is clean:
 //   1. the live (standard) search;
 //   2. the extended search budget (layoutBudget.js), which for Graph also
-//      repairs single pills left in an overlap or across a line.
+//      repairs single pills left in an overlap or across a line. It stops
+//      after a few minutes per board with the best layout found by then.
 // Per puzzle, when its board size is the pass's to choose, the board grows
 // in 5% steps up to +25% until every mode is clean, keeping the smallest
 // size that is, else the size with the fewest defects. It starts from
@@ -228,6 +229,7 @@ async function solve(page, mode, { dropAuto }) {
     metrics: window.CC.state.layoutAdapter.metrics(),
     source: window.CC.state.layoutSource || null,
     repaired: !!window.CC.state.graphLayoutStats?.repaired,
+    stoppedEarlyMs: window.CC.state.layoutSource?.stoppedEarlyMs || null,
     timedOut: window.CC.state.polishTimedOut === true
   }));
 }
@@ -289,7 +291,10 @@ async function layOutBoard(browser, options, id, mode, size, authorLayout) {
       (liveResult.timedOut && !fewerDefects(mode, row.standardDefects, extendedDefects))) {
     await live.close();
     row.defects = extendedDefects;
-    row.strategy = extendedResult.repaired ? "extended search + repair" : "extended search";
+    row.strategy = (extendedResult.repaired ? "extended search + repair" : "extended search") +
+      (extendedResult.stoppedEarlyMs
+        ? ` (stopped after ${Math.round(extendedResult.stoppedEarlyMs / 60_000)} min, best found)`
+        : "");
     return { row, page: extended };
   }
   await extended.close();
