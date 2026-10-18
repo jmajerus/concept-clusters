@@ -56,14 +56,15 @@ export function createHttpD1Database({
 
   async function request(body) {
     const startedAt = performance.now();
+    const received = { bytes: 0 };
     try {
-      return await send(body);
+      return await send(body, received);
     } finally {
-      recordD1Query(body, startedAt, performance.now());
+      recordD1Query(body, startedAt, performance.now(), received.bytes);
     }
   }
 
-  async function send(body) {
+  async function send(body, received) {
     let response;
     try {
       response = await fetchImpl(endpoint, {
@@ -80,6 +81,7 @@ export function createHttpD1Database({
       );
     }
     const text = await response.text();
+    received.bytes = text.length;
     let payload;
     try {
       payload = text ? JSON.parse(text) : {};

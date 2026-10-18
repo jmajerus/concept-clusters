@@ -3,13 +3,18 @@
 // AsyncLocalStorage context; httpD1Database.js reports every query it sends,
 // and the request logs one summary line when it ends. "wall" is the union of
 // the query intervals: wall close to "sum" means the queries ran one after
-// another, wall well below sum means they overlapped.
+// another, wall well below sum means they overlapped. AUTHORING_D1_TIMING=2
+// also lists every query with its start offset, duration, and response size.
 import { AsyncLocalStorage } from "node:async_hooks";
 
 const storage = new AsyncLocalStorage();
 
 export function d1TimingEnabled(env = process.env) {
-  return env?.AUTHORING_D1_TIMING === "1";
+  return env?.AUTHORING_D1_TIMING === "1" || d1TimingDetailed(env);
+}
+
+function d1TimingDetailed(env) {
+  return env?.AUTHORING_D1_TIMING === "2";
 }
 
 function sqlLabel(body) {
@@ -19,10 +24,10 @@ function sqlLabel(body) {
   return String(body?.sql || "").replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
-export function recordD1Query(body, startedAt, endedAt) {
+export function recordD1Query(body, startedAt, endedAt, bytes = 0) {
   const trace = storage.getStore();
   if (!trace) return;
-  trace.queries.push({ label: sqlLabel(body), startedAt, endedAt });
+  trace.queries.push({ label: sqlLabel(body), startedAt, endedAt, bytes });
 }
 
 function wallMs(queries) {
@@ -42,14 +47,25 @@ function wallMs(queries) {
   return total + (end - start);
 }
 
-export function summarizeD1Trace({ method, url, status, startedAt, endedAt, queries }) {
+function detailLines(startedAt, queries) {
+  return queries.map(query =>
+    `  +${Math.round(query.startedAt - startedAt)}ms ` +
+    `${Math.round(query.endedAt - query.startedAt)}ms ` +
+    `${Math.round(query.bytes / 1024)}KB ${query.label}`
+  );
+}
+
+export function summarizeD1Trace({ method, url, status, startedAt, endedAt, queries, detailed = false }) {
   const durations = queries.map(query => query.endedAt - query.startedAt);
   const sum = durations.reduce((total, ms) => total + ms, 0);
   const slowest = queries[durations.indexOf(Math.max(...durations))];
   const ms = value => `${Math.round(value)}ms`;
-  return `D1 ${method} ${url} ${status} total=${ms(endedAt - startedAt)} ` +
+  const bytes = queries.reduce((total, query) => total + query.bytes, 0);
+  const summary = `D1 ${method} ${url} ${status} total=${ms(endedAt - startedAt)} ` +
     `d1=${queries.length} sum=${ms(sum)} wall=${ms(wallMs(queries))} ` +
+    `size=${Math.round(bytes / 1024)}KB ` +
     `slowest=${ms(slowest.endedAt - slowest.startedAt)} ${slowest.label}`;
+  return detailed ? [summary, ...detailLines(startedAt, queries)].join("\n") : summary;
 }
 
 export function withD1Timing(handler, { env = process.env, log = console.log } = {}) {
@@ -65,7 +81,8 @@ export function withD1Timing(handler, { env = process.env, log = console.log } =
         status: res.statusCode,
         startedAt,
         endedAt: performance.now(),
-        queries: trace.queries
+        queries: trace.queries,
+        detailed: d1TimingDetailed(env)
       }));
     });
     return storage.run(trace, () => handler(req, res));

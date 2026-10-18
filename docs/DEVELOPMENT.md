@@ -48,7 +48,8 @@ and other scratch files belong there, not in the MCP protocol workspace.
 `AUTHORING_D1_TIMING=1` logs one line per request that touched D1: total
 time, number of D1 HTTP calls, their summed time, their wall-clock time
 (close to the sum means the calls ran one after another), and the slowest
-statement.
+statement. `AUTHORING_D1_TIMING=2` also lists each call with its start
+offset, duration, and response size.
 
 `AUTO_LAYOUT_PASS=1` turns on the automatic layout pass for working copies:
 the server checks D1 every minute for working copies changed since it was
