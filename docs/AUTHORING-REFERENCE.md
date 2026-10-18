@@ -1726,7 +1726,8 @@ On the shared authoring server the pass also runs by itself on working
 copies: a few minutes after a working copy's board (clusters, terms, and
 bridges) last changed, it lays out all three modes and saves them into the
 working copy, so the layout page usually opens on saved layouts. Edits that
-leave the board alone, such as facts or lenses, do not start it again. The
+leave the board alone, such as facts or lenses, do not start it again, and a
+working copy with your own layout in every mode is left alone. The
 panel shows the automatic run like one started by hand; if it finishes while
 the page is open, reload to see the layouts. A run that fails waits for the
 next board change, or for **Run layout pass**.
