@@ -71,14 +71,15 @@ export async function handleD1ProxyRequest(request: Request, env: D1ProxyEnv): P
   if (!env.D1_PROXY_TOKEN) return failure("D1 proxy token is not configured", 503);
   if (!(await authorized(request, env.D1_PROXY_TOKEN))) return failure("Unauthorized", 401);
 
-  let body: QueryBody;
+  let body: QueryBody | null;
   try {
     body = await request.json();
   } catch {
     return failure("Request body must be JSON", 400);
   }
 
-  const batch = (body as { batch?: unknown }).batch;
+  // A JSON null or a non-object body falls through to the shape error below.
+  const batch = body && typeof body === "object" ? (body as { batch?: unknown }).batch : undefined;
   const statements = Array.isArray(batch) ? batch : [body];
   if (!statements.length || !statements.every(isStatement)) {
     return failure("Expected { sql, params? } or { batch: [{ sql, params? }] }", 400);

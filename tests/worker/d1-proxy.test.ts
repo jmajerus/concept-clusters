@@ -52,6 +52,9 @@ describe("D1 proxy Worker", () => {
 
     const malformed = await post({ sql: "" });
     expect(malformed.status).toBe(400);
+    for (const body of [null, 7, "SELECT 1", []]) {
+      expect((await post(body)).status, JSON.stringify(body)).toBe(400);
+    }
 
     const broken = await post({ sql: "SELECT * FROM no_such_table" });
     expect(broken.status).toBe(400);
