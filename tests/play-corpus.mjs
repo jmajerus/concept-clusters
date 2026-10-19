@@ -283,6 +283,68 @@ export async function run(page) {
   assert.equal(payload.catalogues[0].title, "Lab set");
   assert.equal(payload.categories.Science.slug, "science");
 
+  // Seeding git content into D1 runs once per process, even when the
+  // default handler builds a fresh handler for every request: the seed
+  // pass lists every kind once more than the corpus itself does.
+  let listCalls = 0;
+  const countingRepo = new Proxy(repo, {
+    get(target, property) {
+      const value = target[property];
+      if (property === "listPublished") return (...args) => { listCalls += 1; return value.apply(target, args); };
+      return typeof value === "function" ? value.bind(target) : value;
+    }
+  });
+  const seedState = { seeded: false };
+  const perRequestHandler = () => createLocalPlayCorpusHandler({
+    contentDocuments: countingRepo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    seedState
+  });
+  const corpusCalls = [];
+  for (let request = 0; request < 2; request += 1) {
+    const before = listCalls;
+    const response = createResponse();
+    assert.equal(await perRequestHandler()({ method: "GET", url: "/play/corpus.json" }, response), true);
+    assert.equal(response.status, 200);
+    corpusCalls.push(listCalls - before);
+  }
+  assert.ok(corpusCalls[0] > corpusCalls[1], `the first corpus request seeds: ${corpusCalls.join(", ")}`);
+  assert.equal(corpusCalls[1], 3, "a later request only lists the three kinds it serves");
+  assert.equal(seedState.seeded, true);
+  // Concurrent first requests share one seed rather than each running it.
+  const concurrentState = { seeded: false };
+  const concurrentHandler = () => createLocalPlayCorpusHandler({
+    contentDocuments: countingRepo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    seedState: concurrentState
+  });
+  const beforeConcurrent = listCalls;
+  const concurrent = [createResponse(), createResponse()];
+  await Promise.all(concurrent.map(response =>
+    concurrentHandler()({ method: "GET", url: "/play/corpus.json" }, response)
+  ));
+  assert.deepEqual(concurrent.map(response => response.status), [200, 200]);
+  assert.equal(listCalls - beforeConcurrent, corpusCalls[0] + corpusCalls[1],
+    "two concurrent first requests seeded once between them");
+  // A failed seed is not remembered as done.
+  const failingState = { seeded: false };
+  const failingRepo = new Proxy(repo, {
+    get(target, property) {
+      if (property === "listPublished") return async () => { throw new Error("D1 unavailable"); };
+      const value = target[property];
+      return typeof value === "function" ? value.bind(target) : value;
+    }
+  });
+  await assert.rejects(() => createLocalPlayCorpusHandler({
+    contentDocuments: failingRepo,
+    contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+    repositoryRoot: root,
+    seedState: failingState
+  })({ method: "GET", url: "/play/corpus.json" }, createResponse()), /D1 unavailable/);
+  assert.deepEqual(failingState, { seeded: false, pending: null });
+
   const board = createResponse();
   assert.equal(await handleRequest({
     method: "GET",
@@ -945,6 +1007,29 @@ export async function run(page) {
           `${mode} lone cluster should rest lower-left, got (${place.x}, ${place.y})`
         );
       }
+
+      // The layout view of a working copy enters Play in place: the page
+      // loads once (no reload to add &play), and play.json is read once.
+      const layoutViewRequests = [];
+      const countLayoutViewRequest = request => {
+        const url = new URL(request.url());
+        if (request.resourceType() === "document" || url.pathname.endsWith("/play.json")) {
+          layoutViewRequests.push(request.resourceType() === "document" ? "document" : "play.json");
+        }
+      };
+      page.on("request", countLayoutViewRequest);
+      await page.goto(
+        `${baseURL}/?puzzle=lab-browser-unpublished-draft&author=layout`,
+        { waitUntil: "networkidle" }
+      );
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-browser-unpublished"
+        && !document.getElementById("layout-authoring")?.hidden,
+      null, { timeout: 15000 });
+      page.off("request", countLayoutViewRequest);
+      assert.deepEqual(layoutViewRequests, ["document", "play.json"],
+        "the layout view loaded the page or the playable board more than once");
+      assert.match(page.url(), /[?&]play(&|$)/, "the URL records Play without a reload");
 
       await page.goto(
         `${baseURL}/?puzzle=lab-browser-unpublished-draft&play&author=layout`,

@@ -96,6 +96,10 @@ export function createAuthoringStudio({
     onHide?.();
   }
 
+  // The board readPlayStatus last compiled, so a load that has just read it
+  // can enter Play without asking the server again.
+  let lastPlayPuzzle = null;
+
   async function readPlayStatus() {
     if (!draftId) return;
     const response = await fetch(
@@ -105,7 +109,8 @@ export function createAuthoringStudio({
     const body = await response.json().catch(() => ({}));
     playReady = response.ok && Boolean(body.puzzle);
     playErrors = playReady ? [] : (Array.isArray(body.errors) ? body.errors : [body.error || "Not playable yet"]);
-    return body.puzzle || null;
+    lastPlayPuzzle = body.puzzle || null;
+    return lastPlayPuzzle;
   }
 
   function paintBoard(focusWord = selected?.word) {
@@ -231,7 +236,9 @@ export function createAuthoringStudio({
     if (!play) show();
     await reload({ paint: !play, expectedRevision });
     if (play) {
-      await setMode("play");
+      // Nothing has been painted in Construct yet, so Play starts in place;
+      // only a switch away from a painted Construct board reloads the page.
+      await setMode("play", { fresh: true });
       return;
     }
     statusText = "Construct: add a term, or tap an unplaced term then a cluster member to join.";
@@ -239,13 +246,13 @@ export function createAuthoringStudio({
     render();
   }
 
-  async function setMode(nextMode) {
+  async function setMode(nextMode, { fresh = false } = {}) {
     if (nextMode === mode) {
       syncDraftViewInUrl();
       return;
     }
     if (nextMode === "play") {
-      const puzzle = await readPlayStatus();
+      const puzzle = fresh ? lastPlayPuzzle : await readPlayStatus();
       if (!playReady || !puzzle) {
         statusText = "Play needs a valid puzzle. Errors are listed below.";
         setMessage(statusText, "error");
@@ -254,7 +261,7 @@ export function createAuthoringStudio({
         return;
       }
       const params = new URLSearchParams(location.search);
-      if (!params.has("play") && params.get("view") !== "play") {
+      if (!fresh && !params.has("play") && params.get("view") !== "play") {
         params.set("play", "");
         const query = params.toString()
           .replace(/(^|&)admin=(?=&|$)/, "$1admin")

@@ -1923,12 +1923,21 @@ export function createLocalDraftReviewHandler({
     if (playMatch) {
       const draftId = decodeURIComponent(playMatch[1]);
       try {
-        const record = await draftStore.getDraft(draftId);
-        const categoryRegistry = await loadMergedCategoryRegistry({
+        // Read the registry alongside the working copy, and the published
+        // row as soon as the working copy names its puzzle.
+        const categoryRegistryLoad = loadMergedCategoryRegistry({
           contentDocuments,
           contentService,
           actor: publicationActor
         });
+        categoryRegistryLoad.catch(() => {});
+        const record = await draftStore.getDraft(draftId);
+        const documentPuzzleId = typeof record.document?.id === "string" ? record.document.id : null;
+        const publishedLoad = documentPuzzleId
+          ? publishedRowOrNull(contentDocuments, "puzzle", documentPuzzleId)
+          : null;
+        publishedLoad?.catch(() => {});
+        const categoryRegistry = await categoryRegistryLoad;
         const { puzzle, errors } = puzzleFromAuthoredDocument(
           documentForEditor(record.document, { categoryRegistry })
         );
@@ -1940,11 +1949,9 @@ export function createLocalDraftReviewHandler({
           }, 400);
           return true;
         }
-        const published = await publishedRowOrNull(
-          contentDocuments,
-          "puzzle",
-          puzzle.id
-        );
+        const published = publishedLoad && puzzle.id === documentPuzzleId
+          ? await publishedLoad
+          : await publishedRowOrNull(contentDocuments, "puzzle", puzzle.id);
         const layout = record.layout ?? published?.layout;
         const starLayout = layoutForMode(layout, "star");
         const playPuzzle = layout
