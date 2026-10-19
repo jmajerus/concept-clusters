@@ -15,6 +15,8 @@ import {
 } from "../modules/contentDocumentSeed.js";
 import { DraftNotFoundError } from "../modules/draftRepository.js";
 import { createCatalogueSkeleton } from "../modules/catalogueAuthorEngine.js";
+import { readFile } from "node:fs/promises";
+import { DatabaseSync } from "node:sqlite";
 export const name = "content documents: memory published row, history, revert";
 
 export async function run() {
@@ -496,6 +498,7 @@ export async function run() {
     (await repo.listOpenReviewProposals({ id: "old-git-puzzle" })).map(event => event.id),
     [filed.id, rival.id]
   );
+  assert.deepEqual(await repo.listPuzzleIdsWithOpenReviewProposals(), ["old-git-puzzle"]);
   await repo.recordPuzzleHumanReview({
     id: "old-git-puzzle",
     reviewedAt: "2026-09-14T12:10:00.000Z",
@@ -513,6 +516,7 @@ export async function run() {
   });
   const stillOpen = await repo.listOpenReviewProposals({ id: "old-git-puzzle" });
   assert.deepEqual(stillOpen, []);
+  assert.deepEqual(await repo.listPuzzleIdsWithOpenReviewProposals(), []);
   const acceptedProposal = await repo.getPuzzleReviewEvent({ id: "old-git-puzzle", eventId: filed.id });
   assert.equal(acceptedProposal.eventType, "proposed");
   assert.deepEqual(acceptedProposal.proposal, proposal);
@@ -548,7 +552,6 @@ export async function run() {
     (await repo.listPuzzleReviewEvents({ id: "old-git-puzzle", limit: 100 })).length,
     eventsBeforeChoice.length
   );
-  assert.deepEqual(await repo.listPuzzleIdsWithOpenReviewProposals(), ["old-git-puzzle"]);
   const choice = await repo.publish({
     kind: "puzzle",
     id: "old-git-puzzle",
@@ -576,7 +579,7 @@ export async function run() {
   assert.equal(choiceEvents.some(event =>
     event.eventType === "rejected" && event.sourceEventId === rival.id
   ), true);
-  assert.deepEqual(await repo.listPuzzleIdsWithOpenReviewProposals(), []);
+  await assertD1OpenReviewProposalIds();
   const proposalRows = [];
   let proposalSeq = 1;
   const proposalDatabase = {
@@ -970,4 +973,53 @@ function createCollidingPuzzleDatabase({ stamp }) {
       }
     }
   };
+}
+
+// The D1 query runs on real SQLite built from the review-event migrations,
+// so its NOT EXISTS is checked apart from the in-memory helper.
+async function assertD1OpenReviewProposalIds() {
+  const sqlite = new DatabaseSync(":memory:");
+  for (const migration of [
+    "0017_puzzle_review_events.sql",
+    "0018_puzzle_review_issue_threads.sql",
+    "0026_review_decision_chronicle.sql",
+    "0027_review_candidates.sql"
+  ]) {
+    const text = await readFile(new URL(`../d1/migrations/${migration}`, import.meta.url), "utf8");
+    for (const statement of text.replace(/--.*$/gm, "").split(";")) {
+      if (statement.includes("puzzle_review_events")) sqlite.exec(statement);
+    }
+  }
+  const insert = sqlite.prepare(`
+    INSERT INTO puzzle_review_events
+      (id, puzzle_id, reviewer_kind, reviewed_at, event_type, source_event_id)
+    VALUES (?, ?, ?, '2026-10-19T00:00:00.000Z', ?, ?)
+  `);
+  for (const row of [
+    [1, "open-puzzle", "agent", "proposed", null],
+    [2, "two-open", "agent", "proposed", null],
+    [10, "two-open", "agent", "proposed", null],
+    [3, "decided-puzzle", "agent", "proposed", null],
+    [4, "decided-puzzle", "human", "accepted", 3],
+    [5, "partly-decided", "agent", "proposed", null],
+    [6, "partly-decided", "agent", "proposed", null],
+    [7, "partly-decided", "human", "rejected", 5],
+    [8, "reviewed-only", "agent", "review", null],
+    // A decision on another puzzle that happens to cite id 1 does not
+    // decide open-puzzle's proposal.
+    [9, "elsewhere", "human", "rejected", 1]
+  ]) insert.run(...row);
+  const database = {
+    prepare(sql) {
+      const statement = sqlite.prepare(sql);
+      let params = [];
+      return {
+        bind(...next) { params = next; return this; },
+        async all() { return { results: statement.all(...params) }; }
+      };
+    }
+  };
+  const ids = await new D1ContentDocumentRepository(database).listPuzzleIdsWithOpenReviewProposals();
+  assert.deepEqual([...ids].sort(), ["open-puzzle", "partly-decided", "two-open"]);
+  sqlite.close();
 }

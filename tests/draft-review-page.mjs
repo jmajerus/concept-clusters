@@ -1209,7 +1209,7 @@ export async function run() {
   assert.doesNotMatch(historyPage, /· proposed/);
   assert.match(historyPage, /Tightened the cluster facts\./);
   assert.match(historyPage, /Rival rewrite notes\./);
-  assert.match(historyPage, /Not chosen: .*'s proposal was published as revision 8\./);
+  assert.match(historyPage, /Not chosen: .*proposal was published as revision 8\./);
   assert.doesNotMatch(historyPage, /kept against published revision 7/);
   assert.match(historyPage, /Changes from published revision 7: 1 changed/);
   assert.match(historyPage, /Winning fact\./);
