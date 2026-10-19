@@ -401,6 +401,26 @@ export async function run() {
     }).some(flag => flag.id === "no-spanning-lens"),
     true
   );
+  // A cluster that has not been converted to a term list must not throw.
+  // A real span on the clusters that do have terms still clears the flag.
+  assert.equal(
+    computeAuthoringFlags({
+      clusters: [{ name: "Alpha", seeds: ["a", "b"] }, { name: "Beta" }],
+      lenses: [{ id: "unconverted", targets: ["a", "b"] }]
+    }).some(flag => flag.id === "no-spanning-lens"),
+    true
+  );
+  assert.equal(
+    computeAuthoringFlags({
+      clusters: [
+        { terms: ["a one", "a two"] },
+        { terms: ["b one"] },
+        { name: "bare" }
+      ],
+      lenses: [{ id: "across", targets: ["a one", "b one"] }]
+    }).some(flag => flag.id === "no-spanning-lens"),
+    false
+  );
   const authoredSingle = {
     id: "single-cluster-lenses",
     title: "Single cluster lenses",

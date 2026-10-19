@@ -244,6 +244,15 @@ export function computeRelatedPuzzleViaFlags(puzzle) {
   return flags;
 }
 
+// lensSpansClusters reads cluster.terms.includes. Authored and intermediate
+// clusters may only have seeds, so give it a term list or an empty one.
+function clustersForSpanCheck(puzzle) {
+  const clusters = Array.isArray(puzzle?.clusters) ? puzzle.clusters : [];
+  return clusters.map(cluster => ({
+    terms: Array.isArray(cluster?.terms) ? cluster.terms : []
+  }));
+}
+
 // A non-quiz lens spans clusters when its targets name terms from at least
 // two clusters (lensSpansClusters). A bridge term alone does not count.
 // Quiz mode is a multiple-choice round, not a cross-cutting cut. The flag
@@ -253,7 +262,8 @@ export function computeSpanningLensFlags(puzzle) {
   if (normalizedLensMode(puzzle) === "quiz") return [];
   const lenses = Array.isArray(puzzle.lenses) ? puzzle.lenses : [];
   if (!lenses.length) return [];
-  if (lenses.some(lens => lensSpansClusters(puzzle, lens))) return [];
+  const spanned = { clusters: clustersForSpanCheck(puzzle) };
+  if (lenses.some(lens => lensSpansClusters(spanned, lens))) return [];
   return [{
     id: "no-spanning-lens",
     message: "No lens draws its targets from more than one cluster. " +
