@@ -883,7 +883,7 @@ export async function run(page) {
       // The whole-corpus routes say where a navigation spends its time.
       for (const [path, phases] of [
         ["/play/corpus.json", ["working-copies", "fetch", "assemble"]],
-        ["/admin/drafts", ["published", "working-copies", "rows", "render"]]
+        ["/admin/drafts", ["lists", "rows", "render"]]
       ]) {
         const timingHeader = (await fetch(`${baseURL}${path}`)).headers.get("server-timing") || "";
         for (const phase of phases) {

@@ -19,6 +19,7 @@
 // remove, assuming the freeze merges.
 
 import { layoutAttention } from "./layoutAttention.js";
+import { createDerivedRowMemo, registryFingerprint, rowMarkers } from "./derivedRowMemo.js";
 import { autoLayoutSettleMs, readAutoLayoutStatuses } from "./autoLayoutWatcher.js";
 import { authoringWorkspacePaths } from "./authoringWorkspacePaths.js";
 import { draftLayoutPassKey, layoutPassJobsFor } from "./localPlayCorpus.js";
@@ -522,7 +523,9 @@ export function createLocalDraftReviewHandler({
   checkWikiLinks = document => checkDocumentLinks(document, { timeoutMs: 4000, store: wikiLinkStore }),
   // Map of draft id to automatic layout pass status for the puzzle list
   // (autoLayoutWatcher.js), on the server that runs the pass; else null.
-  readAutoLayoutStatuses = null
+  readAutoLayoutStatuses = null,
+  // The corpus list's per-row checks, kept across loads (derivedRowMemo.js).
+  rowMemo = createDerivedRowMemo()
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -540,6 +543,13 @@ export function createLocalDraftReviewHandler({
     if (documentMatch && (req.method === "GET")) {
       const draftId = decodeURIComponent(documentMatch[1]);
       try {
+        // The registry is read alongside the working copy, not after it.
+        const categoryRegistryLoad = loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        });
+        categoryRegistryLoad.catch(() => {});
         const record = await draftStore.getDraft(draftId);
         const expectedRevision = Number.parseInt(requestUrl.searchParams.get("revision") || "", 10);
         if (Number.isInteger(expectedRevision) && expectedRevision > 0 && record.revision !== expectedRevision) {
@@ -557,11 +567,7 @@ export function createLocalDraftReviewHandler({
           // the authoring projection path; JSON-LD conversion belongs to the
           // explicit interchange tools and never happens as a draft read.
           document: documentForEditor(record.document, {
-            categoryRegistry: await loadMergedCategoryRegistry({
-              contentDocuments,
-              contentService,
-              actor: publicationActor
-            })
+            categoryRegistry: await categoryRegistryLoad
           })
         });
       } catch (error) {
@@ -1959,35 +1965,41 @@ export function createLocalDraftReviewHandler({
     if (urlPath === "/admin/drafts") {
       const timing = createServerTiming();
       const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
-      let publishedRows = contentDocuments
-        ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
-        : [];
-      if (contentDocuments && contentService) {
-        const seededIds = await seedPublishedPuzzles(
+      const publishedLoad = (async () => {
+        let rows = contentDocuments
+          ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
+          : [];
+        if (contentDocuments && contentService) {
+          const seededIds = await seedPublishedPuzzles(
+            contentDocuments,
+            contentService,
+            gitPuzzleIds,
+            { existingRows: rows }
+          );
+          // Seeding a brand-new git puzzle is rare once a corpus is settled;
+          // only pay for a second listPublished round trip when it happens.
+          if (seededIds.length) {
+            rows = await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true });
+          }
+        }
+        return rows;
+      })();
+      // The three lists are independent D1 reads; read them together.
+      const [publishedRows, listed, categoryRegistry] = await Promise.all([
+        publishedLoad,
+        draftStore.listDrafts({ includeDocument: true }),
+        loadMergedCategoryRegistry({
           contentDocuments,
           contentService,
-          gitPuzzleIds,
-          { existingRows: publishedRows }
-        );
-        // Seeding a brand-new git puzzle is rare once a corpus is settled;
-        // only pay for a second listPublished round trip when it happens.
-        if (seededIds.length) {
-          publishedRows = await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true });
-        }
-      }
-      timing.phase("published");
+          actor: publicationActor
+        })
+      ]);
+      timing.phase("lists");
       const notice = draftPublicationNoticeFromSearch(
         requestUrl.searchParams,
         publishedRows
       );
-      const listed = await draftStore.listDrafts({ includeDocument: true });
-      timing.phase("working-copies");
-      const categoryRegistry = await loadMergedCategoryRegistry({
-        contentDocuments,
-        contentService,
-        actor: publicationActor
-      });
-      timing.phase("categories");
+      const registryKey = registryFingerprint(categoryRegistry);
       const publishedById = new Map(publishedRows.map(row => [row.id, row]));
       const freezeAdds = freezeAddIdsFromPublishedRows(publishedRows, gitPuzzleIds);
       const drafts = await Promise.all(listed.map(async metadata => {
@@ -2002,43 +2014,57 @@ export function createLocalDraftReviewHandler({
           ? draftMatchesCheckout(metadata.document, checkoutDocument)
           : false;
         const publishedRow = publishedById.get(puzzleId);
-        const baseline = publishedRow?.document
-          ? documentForEditor(publishedRow.document, { categoryRegistry })
-          : null;
-        const workingDocument = metadata.document
-          ? documentForEditor(metadata.document, { categoryRegistry })
-          : null;
-        const publishedDiff = baseline && workingDocument
-          ? timing.measure("diff", () => diffPublishedDraft(baseline, workingDocument))
-          : null;
-        const unpublishedDomains = baseline && workingDocument && !publishedRow.withdrawnAt
-          ? timing.measure("compare", () => unpublishedChangeDomains(baseline, workingDocument, {
-            publishedLayout: publishedRow.layout || null,
-            draftLayout: metadata.layout || null
-          }))
-          : [];
+        // Everything below reads only these two rows and the registry, so it
+        // is recomputed only when one of them changes.
+        const computeChecks = () => {
+          const baseline = publishedRow?.document
+            ? documentForEditor(publishedRow.document, { categoryRegistry })
+            : null;
+          const workingDocument = metadata.document
+            ? documentForEditor(metadata.document, { categoryRegistry })
+            : null;
+          const publishedDiff = baseline && workingDocument
+            ? timing.measure("diff", () => diffPublishedDraft(baseline, workingDocument))
+            : null;
+          return {
+            unpublishedDomains: baseline && workingDocument && !publishedRow.withdrawnAt
+              ? timing.measure("compare", () => unpublishedChangeDomains(baseline, workingDocument, {
+                publishedLayout: publishedRow.layout || null,
+                draftLayout: metadata.layout || null
+              }))
+              : [],
+            // Checked against the working document: an edit outdates a fixed
+            // layout the working copy inherited as well as one it saved.
+            workingLayoutAttention: workingDocument
+              ? timing.measure("layout-check", () => layoutAttention({
+                document: workingDocument,
+                layout: metadata.layout ?? publishedRow?.layout ?? null,
+                categoryRegistry
+              }))
+              : {},
+            // Reuse the publication diff for shadow detection as well.
+            shadowsPublished: draftShadowsPublished({
+              published: baseline,
+              publishedDiff
+            })
+          };
+        };
+        const { unpublishedDomains, workingLayoutAttention, shadowsPublished } = registryKey
+          ? rowMemo.get(JSON.stringify([
+            "working-copy", metadata.draftId, puzzleId, rowMarkers(metadata),
+            rowMarkers(publishedRow), registryKey
+          ]), computeChecks)
+          : computeChecks();
         return {
           ...mapDraftListItem(metadata, {
             inCheckout,
             matchesCheckout
           }),
           workingLayout: metadata.layout || null,
-          // Checked against the working document: an edit outdates a fixed
-          // layout the working copy inherited as well as one it saved.
-          workingLayoutAttention: workingDocument
-            ? timing.measure("layout-check", () => layoutAttention({
-              document: workingDocument,
-              layout: metadata.layout ?? publishedRow?.layout ?? null,
-              categoryRegistry
-            }))
-            : {},
+          workingLayoutAttention,
           unpublishedChanges: unpublishedDomains.length > 0,
           unpublishedChangeDomains: unpublishedDomains,
-          // Reuse the publication diff for shadow detection as well.
-          shadowsPublished: draftShadowsPublished({
-            published: baseline,
-            publishedDiff
-          }),
+          shadowsPublished,
           freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
           ...freezeFlagsFromPublished(publishedRow, gitPuzzleIds)
         };
@@ -2067,14 +2093,19 @@ export function createLocalDraftReviewHandler({
           ? row.workingLayout ?? publishedLayout
           : publishedLayout;
         const publishedRow = publishedById.get(row.id);
+        const checkPublishedLayout = () => timing.measure("layout-check", () => layoutAttention({
+          document: documentForEditor(publishedRow.document, { categoryRegistry }),
+          layout: publishedLayout,
+          categoryRegistry
+        }));
         const layoutAttentionByMode = row.hasWorkingCopy
           ? row.workingLayoutAttention || {}
           : publishedRow?.document && publishedLayout
-            ? timing.measure("layout-check", () => layoutAttention({
-              document: documentForEditor(publishedRow.document, { categoryRegistry }),
-              layout: publishedLayout,
-              categoryRegistry
-            }))
+            ? registryKey
+              ? rowMemo.get(JSON.stringify([
+                "published", row.id, rowMarkers(publishedRow), registryKey
+              ]), checkPublishedLayout)
+              : checkPublishedLayout()
             : {};
         return withGithubProduction({
           ...row,
@@ -2112,53 +2143,105 @@ export function createLocalDraftReviewHandler({
     if (!match) return false;
     const draftId = decodeURIComponent(match[1]);
     try {
+      // Every D1 read is a round trip to the database's region, so the page
+      // starts each read as soon as its inputs exist instead of one after
+      // another: the category registry and the working copy together, then
+      // everything that needs only the working copy.
+      const categoryRegistryLoad = loadMergedCategoryRegistry({
+        contentDocuments,
+        contentService,
+        actor: publicationActor
+      });
+      let prefetchedDraft = draftStore.getDraft(draftId);
+      prefetchedDraft.catch(() => {});
+      const [, categoryRegistry] = await Promise.all([prefetchedDraft, categoryRegistryLoad])
+        .catch(async error => {
+          // A missing working copy is opened below; only the registry's own
+          // failure is fatal here.
+          if (!isMissingDraft(error)) throw error;
+          return [null, await categoryRegistryLoad];
+        });
       const opened = await loadOrSeedPuzzleDraft({
-        getDraft: id => draftStore.getDraft(id),
+        // The first read is the one already in flight; a retry after a
+        // create race reads again.
+        getDraft: id => {
+          if (prefetchedDraft && id === draftId) {
+            const pending = prefetchedDraft;
+            prefetchedDraft = null;
+            return pending;
+          }
+          return draftStore.getDraft(id);
+        },
         createDraft: ({ draftId: id, document, seededFromPublished, basePublishedRevision }) =>
           draftStore.createDraft({ draftId: id, document, seededFromPublished, basePublishedRevision }),
         contentDocuments,
         contentService,
-        categoryRegistry: await loadMergedCategoryRegistry({
-          contentDocuments,
-          contentService,
-          actor: publicationActor
-        }),
+        categoryRegistry,
         draftId
       });
       const record = opened.draft;
       const puzzleId = typeof record.document?.id === "string"
         ? record.document.id
         : record.puzzleId || null;
-      const inCheckout = await puzzleInCheckout(repositoryRoot, puzzleId);
-      const checkoutDocument = inCheckout
-        ? await readCheckoutDocument(repositoryRoot, puzzleId)
-        : null;
-      const matchesCheckout = inCheckout
-        ? draftMatchesCheckout(record.document, checkoutDocument)
-        : false;
-      const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-      const categoryRegistry = await loadMergedCategoryRegistry({
-        contentDocuments,
-        contentService,
-        actor: publicationActor
-      });
-      const draft = await mapDraftDetail(record, {
-        contentService,
-        contentDocuments,
-        inCheckout,
-        matchesCheckout,
-        publishedDocument: publishedRow && !publishedRow.withdrawnAt
-          ? publishedRow.document
-          : null,
-        publishedLayout: publishedRow && !publishedRow.withdrawnAt
-          ? publishedRow.layout
-          : null,
-        categoryRegistry,
-        checkWikiLinks
-      });
-      const githubSnapshot = await loadOrHydrateGithubProductionManifest({
-        repositoryRoot
-      });
+      const checkoutLoad = (async () => {
+        const inCheckout = await puzzleInCheckout(repositoryRoot, puzzleId);
+        const checkoutDocument = inCheckout
+          ? await readCheckoutDocument(repositoryRoot, puzzleId)
+          : null;
+        return {
+          inCheckout,
+          matchesCheckout: inCheckout
+            ? draftMatchesCheckout(record.document, checkoutDocument)
+            : false
+        };
+      })();
+      const publishedRowLoad = publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+      const draftLoad = Promise.all([checkoutLoad, publishedRowLoad])
+        .then(([{ inCheckout, matchesCheckout }, publishedRow]) => mapDraftDetail(record, {
+          contentService,
+          contentDocuments,
+          inCheckout,
+          matchesCheckout,
+          publishedDocument: publishedRow && !publishedRow.withdrawnAt
+            ? publishedRow.document
+            : null,
+          publishedLayout: publishedRow && !publishedRow.withdrawnAt
+            ? publishedRow.layout
+            : null,
+          categoryRegistry,
+          checkWikiLinks
+        }));
+      const [
+        publishedRow,
+        draft,
+        githubSnapshot,
+        customModelSuggestions,
+        reviewEvents,
+        reviewIssues,
+        boardLimitWaiverRequests,
+        assistanceStamps,
+        reviewCandidates
+      ] = await Promise.all([
+        publishedRowLoad,
+        draftLoad,
+        loadOrHydrateGithubProductionManifest({ repositoryRoot }),
+        contentDocuments?.database
+          ? new D1ModelSuggestionRepository(contentDocuments.database).list()
+          : [],
+        puzzleId && contentDocuments?.listPuzzleReviewEvents
+          ? contentDocuments.listPuzzleReviewEvents({ id: puzzleId })
+          : [],
+        puzzleId && contentDocuments?.listPuzzleReviewIssues
+          ? contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: true })
+          : [],
+        draftId && typeof draftStore.listBoardLimitWaiverRequests === "function"
+          ? draftStore.listBoardLimitWaiverRequests({ draftId })
+          : [],
+        draftId && typeof draftStore.listAssistanceStamps === "function"
+          ? draftStore.listAssistanceStamps({ draftId })
+          : [],
+        currentChoiceProposals(contentDocuments, record)
+      ]);
       // freezeAdd for this one puzzle is already fully determined by its own
       // publishedRow (see freezeFlagsFromPublished below) -- no need for a
       // separate full published_documents fetch just to check membership.
@@ -2166,26 +2249,10 @@ export function createLocalDraftReviewHandler({
         publishedRow,
         gitIdsFromContentService(contentService).puzzles
       );
-      const customModelSuggestions = contentDocuments?.database
-        ? await new D1ModelSuggestionRepository(contentDocuments.database).list()
-        : [];
-      const reviewEvents = puzzleId && contentDocuments?.listPuzzleReviewEvents
-        ? await contentDocuments.listPuzzleReviewEvents({ id: puzzleId })
-        : [];
-      const reviewIssues = puzzleId && contentDocuments?.listPuzzleReviewIssues
-        ? await contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: true })
-        : [];
-      const boardLimitWaiverRequests = draftId && typeof draftStore.listBoardLimitWaiverRequests === "function"
-        ? await draftStore.listBoardLimitWaiverRequests({ draftId })
-        : [];
-      const assistanceStamps = draftId && typeof draftStore.listAssistanceStamps === "function"
-        ? await draftStore.listAssistanceStamps({ draftId })
-        : [];
       const currentPublishedRevision = publishedRow && !publishedRow.withdrawnAt
         && Number.isInteger(publishedRow.revision)
         ? publishedRow.revision
         : null;
-      const reviewCandidates = await currentChoiceProposals(contentDocuments, record);
       const reviewAnchorDocument = reviewCandidates.length && publishedRow && !publishedRow.withdrawnAt
         ? publishedRow.document || null
         : null;
@@ -2257,6 +2324,8 @@ export function createDefaultLocalDraftReviewHandler({
     });
   }
   let workspacePromise;
+  // The inner handler is built per request; the row memo outlives it.
+  const rowMemo = createDerivedRowMemo();
   return async function handleDefaultLocalDraftReview(req, res) {
     if (!isDraftReviewRequest(req)) return false;
     try {
@@ -2269,6 +2338,7 @@ export function createDefaultLocalDraftReviewHandler({
         repositoryRoot,
         publicationActor: resolved.actor,
         wikiLinkStore: resolved.wikiLinkStore || null,
+        rowMemo,
         readAutoLayoutStatuses: env.AUTO_LAYOUT_PASS === "1"
           ? () => readAutoLayoutStatuses({
             statePath: authoringWorkspacePaths({ repositoryRoot, env }).autoLayoutPass,

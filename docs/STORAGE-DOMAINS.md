@@ -303,9 +303,12 @@ with no layout of its own inherits the published one, and legacy `board`
 values are compared where play reads them. No flag records that a domain was
 edited, so a change undone by hand stops counting as unpublished. The
 comparison runs when the puzzle list is built, and that route reports its
-cost in a `Server-Timing` header. Fingerprints computed at write time are
-the path if the comparison grows slow, versioned so that a change to the
-comparison rules recomputes them.
+cost in a `Server-Timing` header. The local server remembers each row's
+comparison and layout check (`modules/derivedRowMemo.js`) under the revision,
+content hash, and `updated_at` of the working copy and its published puzzle,
+plus a fingerprint of the category registry, so a list load recomputes only
+the rows that changed. A restart, which any change to the comparison rules
+needs, recomputes them all.
 
 `document_stale` is unrelated to publication. It marks the stored `document`
 column as a cache the domain columns have moved past (see
