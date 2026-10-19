@@ -1,0 +1,633 @@
+{
+  "id": "epithelial-transport",
+  "title": "Epithelial transport",
+  "category": "physiology-medicine",
+  "subcategories": {
+    "physiology-medicine": "cellular-membrane"
+  },
+  "info": {
+    "text": "Epithelia move salt and water between the body and the outside world. They do it by placing different transporters on the two sides of each cell, sealing the gaps between cells to a chosen degree, and letting water follow the salt.",
+    "links": [
+      {
+        "href": "wiki:Epithelial polarity"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Medical Physiology, 3rd ed., ch. 5 Transport of Solutes and Water",
+        "author": "Walter F. Boron, Emile L. Boulpaep",
+        "publisher": "Elsevier",
+        "year": "2017"
+      },
+      {
+        "title": "Guyton and Hall Textbook of Medical Physiology, 14th ed., ch. 4 and 28",
+        "author": "John E. Hall, Michael E. Hall",
+        "publisher": "Elsevier",
+        "year": "2021"
+      },
+      {
+        "title": "The nature of the frog skin potential",
+        "author": "V. Koefoed-Johnsen, H. H. Ussing",
+        "publisher": "Acta Physiologica Scandinavica 42(3–4)",
+        "year": "1958",
+        "pages": "298–308",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/13544986/"
+      },
+      {
+        "title": "Physiology of epithelial chloride and fluid secretion",
+        "author": "Raymond A. Frizzell, John W. Hanrahan",
+        "publisher": "Cold Spring Harbor Perspectives in Medicine 2(6)",
+        "year": "2012",
+        "pages": "a009563",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3367533/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "epithelial-architecture",
+      "name": "Epithelial architecture",
+      "color": "teal",
+      "fact": "An epithelium is a sheet of polarized cells. The apical membrane faces the lumen and the basolateral membrane faces the blood, each carrying its own set of transporters. Between neighboring cells runs the lateral intercellular space, sealed at its luminal end.",
+      "termInfo": {
+        "apical membrane": "The cell surface facing the lumen or the outside world, often folded into microvilli; in absorbing cells it holds the entry channels and carriers.",
+        "basolateral membrane": "The surface facing the blood and neighboring cells; it holds the sodium–potassium pump and the exit routes to the blood.",
+        "lateral intercellular space": "The narrow channel between adjacent cells below the tight junction, opening onto the basement membrane. Salt pumped into it raises its osmolarity slightly and draws water after it."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Epithelial polarity"
+          }
+        ]
+      },
+      "seeds": [
+        "apical membrane",
+        "basolateral membrane"
+      ],
+      "floatingTerms": [
+        "lateral intercellular space"
+      ],
+      "terms": [
+        "apical membrane",
+        "basolateral membrane",
+        "lateral intercellular space"
+      ]
+    },
+    {
+      "id": "routes-across-the-sheet",
+      "name": "Routes across the sheet",
+      "color": "blue",
+      "fact": "A solute crosses an epithelium either through the cells, entering by one membrane and leaving by the other (transcellular), or between them through the tight junctions (paracellular). Claudins set how permeable the junctions are: leaky epithelia let ions and water pass freely between cells, while tight epithelia force nearly everything through the cells.",
+      "termInfo": {
+        "claudins": {
+          "text": "The tight-junction proteins that set how permeable the paracellular path is, and to which ions; each epithelium expresses its own mix.",
+          "links": [
+            {
+              "href": "wiki:Claudin"
+            }
+          ]
+        },
+        "leaky epithelium": "An epithelium with permeable tight junctions and low electrical resistance, such as the proximal tubule or small intestine; it moves large volumes but cannot hold steep gradients.",
+        "paracellular route": {
+          "text": "Movement between cells, through the tight junction and lateral intercellular space; always passive, driven by concentration, voltage, or water flow.",
+          "links": [
+            {
+              "href": "wiki:Paracellular transport"
+            }
+          ]
+        },
+        "tight epithelium": "An epithelium whose tight junctions resist ion and water flow, such as the collecting duct and colon; it moves less but can hold steep gradients and makes the final adjustments.",
+        "transcellular route": {
+          "text": "Movement through the cell: in across one membrane and out across the other, each step by its own channel, carrier, or pump.",
+          "links": [
+            {
+              "href": "wiki:Transcellular transport"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Paracellular transport"
+          }
+        ]
+      },
+      "seeds": [
+        "transcellular route",
+        "paracellular route"
+      ],
+      "floatingTerms": [
+        "claudins",
+        "leaky epithelium",
+        "tight epithelium"
+      ],
+      "terms": [
+        "transcellular route",
+        "paracellular route",
+        "claudins",
+        "leaky epithelium",
+        "tight epithelium"
+      ]
+    },
+    {
+      "id": "absorbing-salt",
+      "name": "Absorbing salt",
+      "color": "amber",
+      "fact": "In the two-membrane model, sodium enters across the apical membrane down its gradient, through the epithelial sodium channel, and the basolateral pump exports it to the blood. The diuretic amiloride blocks the channel and stops this absorption in the collecting duct.",
+      "termInfo": {
+        "amiloride": {
+          "text": "A potassium-sparing diuretic that blocks the epithelial sodium channel in the collecting duct.",
+          "links": [
+            {
+              "href": "wiki:Amiloride"
+            }
+          ]
+        },
+        "epithelial sodium channel": {
+          "text": "ENaC, the apical channel through which sodium enters the cells of tight epithelia; aldosterone increases how many are in the membrane.",
+          "links": [
+            {
+              "href": "wiki:Epithelial sodium channel"
+            }
+          ]
+        },
+        "two-membrane model": {
+          "text": "The principle, first shown by Koefoed-Johnsen and Ussing in frog skin, that an epithelium absorbs salt by placing an entry pathway in one membrane and an exit pump in the other.",
+          "links": [
+            {
+              "href": "https://pubmed.ncbi.nlm.nih.gov/13544986/"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://pubmed.ncbi.nlm.nih.gov/13544986/",
+            "label": "Koefoed-Johnsen and Ussing: the frog skin potential"
+          }
+        ]
+      },
+      "seeds": [
+        "two-membrane model",
+        "epithelial sodium channel"
+      ],
+      "floatingTerms": [
+        "amiloride"
+      ],
+      "terms": [
+        "two-membrane model",
+        "epithelial sodium channel",
+        "amiloride"
+      ]
+    },
+    {
+      "id": "secreting-chloride",
+      "name": "Secreting chloride",
+      "color": "magenta",
+      "fact": "Secretory epithelia run the design in reverse for chloride. NKCC1 on the basolateral membrane loads the cell with chloride, which leaves through apical channels: CFTR when cAMP rises, calcium-activated chloride channels when calcium rises. Sodium and water follow into the lumen.",
+      "termInfo": {
+        "CFTR": {
+          "text": "Cystic fibrosis transmembrane conductance regulator: an apical chloride and bicarbonate channel opened by cAMP and protein kinase A, and the protein mutated in cystic fibrosis.",
+          "links": [
+            {
+              "href": "wiki:Cystic fibrosis transmembrane conductance regulator"
+            }
+          ]
+        },
+        "NKCC1": {
+          "text": "The basolateral Na⁺–K⁺–2Cl⁻ cotransporter: it spends the sodium gradient to load the cell with chloride, ready to exit apically. Loop diuretics block its kidney relative, NKCC2.",
+          "links": [
+            {
+              "href": "wiki:Na–K–Cl cotransporter"
+            }
+          ]
+        },
+        "calcium-activated chloride channel": {
+          "text": "An apical chloride channel (TMEM16A, also called anoctamin-1) opened by a rise in cytosolic calcium: a second exit for secretion alongside CFTR.",
+          "links": [
+            {
+              "href": "wiki:Calcium-dependent chloride channel"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3367533/",
+            "label": "Frizzell and Hanrahan: epithelial chloride secretion"
+          }
+        ]
+      },
+      "seeds": [
+        "CFTR",
+        "NKCC1"
+      ],
+      "floatingTerms": [
+        "calcium-activated chloride channel"
+      ],
+      "terms": [
+        "CFTR",
+        "NKCC1",
+        "calcium-activated chloride channel"
+      ]
+    },
+    {
+      "id": "water-following-salt",
+      "name": "Water following salt",
+      "color": "olive",
+      "fact": "Leaky epithelia absorb water in nearly the same proportion as salt, so the fluid they absorb is isosmotic. Water crosses the cells through aquaporins and passes between them through the junctions, and that paracellular flow carries some dissolved solutes along by solvent drag.",
+      "termInfo": {
+        "aquaporins": {
+          "text": "Water channels. In leaky epithelia such as the proximal tubule, aquaporin-1 lets water cross both membranes quickly; regulated aquaporin-2 in the collecting duct is where ADH acts.",
+          "links": [
+            {
+              "href": "wiki:Aquaporin"
+            }
+          ]
+        },
+        "isosmotic absorption": "Absorption of salt and water in the same proportion, as in the proximal tubule and small intestine, so the absorbed fluid has the osmolarity of plasma.",
+        "solvent drag": {
+          "text": "Solutes carried along by water moving between cells, as some potassium, calcium, and urea are in the proximal tubule.",
+          "links": [
+            {
+              "href": "wiki:Solvent drag"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Osmosis"
+          }
+        ]
+      },
+      "seeds": [
+        "isosmotic absorption",
+        "solvent drag"
+      ],
+      "floatingTerms": [
+        "aquaporins"
+      ],
+      "terms": [
+        "isosmotic absorption",
+        "solvent drag",
+        "aquaporins"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "tight-junction",
+      "term": "tight junction",
+      "clusters": [
+        "epithelial-architecture",
+        "routes-across-the-sheet"
+      ],
+      "fact": "The tight junction rings each cell near its apical surface and does two jobs. As a fence it keeps apical and basolateral membrane proteins from mixing, preserving polarity; as a gate it is the barrier every paracellular solute must cross.",
+      "info": {
+        "text": "Fence and gate in one structure.",
+        "links": [
+          {
+            "href": "wiki:Tight junction"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "epithelial-architecture": "apical membrane",
+        "routes-across-the-sheet": "paracellular route"
+      },
+      "direction": {
+        "kind": "undirected"
+      }
+    },
+    {
+      "id": "transepithelial-voltage",
+      "term": "transepithelial voltage",
+      "clusters": [
+        "absorbing-salt",
+        "secreting-chloride",
+        "routes-across-the-sheet"
+      ],
+      "fact": "Moving one ion across an epithelium separates charge, and the resulting transepithelial voltage pulls a counter-ion through the paracellular route. Sodium absorbed through ENaC leaves the lumen negative, drawing chloride after it; chloride secreted through CFTR also leaves the lumen negative, drawing sodium into it.",
+      "info": {
+        "text": "The voltage across the whole sheet, lumen relative to blood.",
+        "links": [
+          {
+            "href": "wiki:Transepithelial potential difference"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "absorbing-salt": "epithelial sodium channel",
+        "secreting-chloride": "CFTR",
+        "routes-across-the-sheet": "paracellular route"
+      }
+    },
+    {
+      "id": "sodium-potassium-pump",
+      "term": "sodium–potassium pump",
+      "clusters": [
+        "absorbing-salt",
+        "secreting-chloride"
+      ],
+      "fact": "Both designs run on the basolateral sodium–potassium pump. In absorption it exports the sodium that entered apically; in secretion it keeps cell sodium low so NKCC1 can load chloride. Basolateral potassium channels return the potassium the pump brings in.",
+      "info": {
+        "text": "One basolateral engine for two opposite jobs.",
+        "links": [
+          {
+            "href": "wiki:Sodium–potassium pump"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "absorbing-salt": "two-membrane model",
+        "secreting-chloride": "NKCC1"
+      },
+      "direction": {
+        "kind": "undirected"
+      }
+    },
+    {
+      "id": "osmotic-coupling",
+      "term": "osmotic coupling",
+      "clusters": [
+        "absorbing-salt",
+        "secreting-chloride",
+        "water-following-salt"
+      ],
+      "fact": "No pump moves water. Water follows whichever way salt is transported, by osmosis through the cells and the junctions, so absorbing salt absorbs water and secreting chloride secretes it.",
+      "info": {
+        "text": "Move the salt and the water comes with it.",
+        "links": [
+          {
+            "href": "wiki:Osmosis"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "absorbing-salt": "two-membrane model",
+        "secreting-chloride": "CFTR",
+        "water-following-salt": "isosmotic absorption"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "two-sides",
+      "prompt": "Which concepts give an epithelial cell its two distinct sides?",
+      "explanation": "Polarity needs two differently equipped membranes and a fence between them. The lateral intercellular space is the gap polarity leaves between cells, not what creates the two sides.",
+      "targets": [
+        "apical membrane",
+        "basolateral membrane",
+        "tight junction"
+      ],
+      "reasons": {
+        "apical membrane": "The lumen-facing side, with its own transporters.",
+        "basolateral membrane": "The blood-facing side, with a different set.",
+        "tight junction": "Its fence function keeps the two sets of membrane proteins from mixing."
+      }
+    },
+    {
+      "id": "apical-only-channels",
+      "prompt": "Which ion channels sit only in the lumen-facing membrane?",
+      "explanation": "Entry and exit pathways for ions are what make the apical membrane different. Aquaporins in leaky epithelia sit on both membranes, so water can cross the whole cell.",
+      "targets": [
+        "epithelial sodium channel",
+        "CFTR",
+        "calcium-activated chloride channel"
+      ],
+      "reasons": {
+        "CFTR": "The apical exit for chloride secretion when cAMP rises.",
+        "calcium-activated chloride channel": "The apical exit for chloride secretion when calcium rises.",
+        "epithelial sodium channel": "The apical entry step for sodium absorption."
+      }
+    },
+    {
+      "id": "basolateral-only",
+      "prompt": "Which transporters work only on the blood-facing membrane?",
+      "explanation": "The pump powers both absorption and secretion from the blood side; NKCC1 is the blood-side loader that secretion needs. The apical channels are their partners on the other membrane.",
+      "targets": [
+        "sodium–potassium pump",
+        "NKCC1"
+      ],
+      "reasons": {
+        "NKCC1": "It loads secretory cells with chloride from the blood side.",
+        "sodium–potassium pump": "It exports sodium to the blood in every transporting epithelium."
+      }
+    },
+    {
+      "id": "between-cells",
+      "prompt": "Which structures set how easily ions pass between epithelial cells?",
+      "explanation": "Claudins built into the tight junction decide whether an epithelium is leaky or tight. Leaky and tight epithelia are the result, not the structures that set it.",
+      "targets": [
+        "tight junction",
+        "claudins"
+      ],
+      "reasons": {
+        "claudins": "The junction proteins that set its permeability and ion selectivity.",
+        "tight junction": "The seal every paracellular solute must cross."
+      }
+    },
+    {
+      "id": "bulk-absorbers",
+      "prompt": "The proximal tubule and small intestine absorb large volumes of fluid with the osmolarity of plasma. Which two concepts name that kind of epithelium and the fluid it absorbs?",
+      "explanation": "Because water follows salt so easily, a leaky epithelium cannot build a gradient between lumen and blood; what it absorbs matches plasma. Solvent drag rides along with that flow.",
+      "targets": [
+        "leaky epithelium",
+        "isosmotic absorption"
+      ],
+      "reasons": {
+        "isosmotic absorption": "Salt and water leave the lumen in the same proportion.",
+        "leaky epithelium": "Permeable junctions let water and ions follow freely."
+      }
+    },
+    {
+      "id": "final-adjusters",
+      "prompt": "The collecting duct and colon make the final adjustments to sodium. Which two concepts name the kind of epithelium and its sodium entry step?",
+      "explanation": "Tight epithelia can pull sodium down to very low concentrations in the lumen because little leaks back between cells. Aldosterone adjusts the number of ENaC channels to set how much they reclaim.",
+      "targets": [
+        "tight epithelium",
+        "epithelial sodium channel"
+      ],
+      "reasons": {
+        "epithelial sodium channel": "The apical channel through which sodium enters these cells.",
+        "tight epithelium": "Its junctions resist backflow, so it can hold a steep gradient."
+      }
+    },
+    {
+      "id": "diuretic",
+      "prompt": "Which concept blocks sodium absorption in the collecting duct by closing its entry channel?",
+      "explanation": "With ENaC blocked, less sodium is reabsorbed and less potassium is secreted in exchange, so amiloride is a potassium-sparing diuretic.",
+      "targets": [
+        "amiloride"
+      ],
+      "reasons": {
+        "amiloride": "It blocks the epithelial sodium channel."
+      }
+    },
+    {
+      "id": "cholera",
+      "prompt": "Cholera toxin raises cAMP in intestinal cells, and liters of fluid pour into the gut. Which concepts carry the secretion from the opened channel to the flood of fluid?",
+      "explanation": "Chloride leaves through CFTR, sodium follows between cells, and water follows the salt. NKCC1 keeps loading the cell with chloride upstream of the channel, which is why the flow does not stop.",
+      "targets": [
+        "CFTR",
+        "transepithelial voltage",
+        "paracellular route",
+        "osmotic coupling"
+      ],
+      "reasons": {
+        "CFTR": "cAMP opens it, and chloride pours into the lumen.",
+        "osmotic coupling": "Water follows the salt into the lumen.",
+        "paracellular route": "Sodium follows that voltage between the cells.",
+        "transepithelial voltage": "The secreted chloride leaves the lumen negative."
+      }
+    },
+    {
+      "id": "cystic-fibrosis",
+      "prompt": "In cystic fibrosis, airway mucus is thick and dry. Which concepts explain why too little water reaches the airway surface?",
+      "explanation": "Water reaches the airway surface only by following secreted salt. When CFTR fails, the surface liquid thins and the mucus becomes thick and dry.",
+      "targets": [
+        "CFTR",
+        "osmotic coupling"
+      ],
+      "reasons": {
+        "CFTR": "The defective channel secretes too little chloride.",
+        "osmotic coupling": "Without secreted salt, water has nothing to follow."
+      }
+    },
+    {
+      "id": "counter-ion",
+      "prompt": "Sodium absorbed through apical channels leaves the lumen negative. Which concepts carry chloride after it?",
+      "explanation": "Absorbing one ion sets up a voltage that drives its counter-ion through the gaps between cells, so no chloride transporter is needed.",
+      "targets": [
+        "transepithelial voltage",
+        "paracellular route"
+      ],
+      "reasons": {
+        "paracellular route": "Chloride passes between the cells, through the junctions.",
+        "transepithelial voltage": "The lumen-negative voltage pushes chloride toward the blood."
+      }
+    },
+    {
+      "id": "carried-along",
+      "prompt": "Some potassium and urea leave the proximal tubule without a transporter of their own. Which concept carries them?",
+      "explanation": "In a leaky epithelium the paracellular water flow is large enough to carry solutes along with it.",
+      "targets": [
+        "solvent drag"
+      ],
+      "reasons": {
+        "solvent drag": "Water flowing between the cells sweeps dissolved solutes with it."
+      }
+    },
+    {
+      "id": "water-through-cells",
+      "prompt": "Through which proteins does water cross the cells of the proximal tubule?",
+      "explanation": "Water also passes between the cells, but much of it crosses through aquaporin-1 in the apical and basolateral membranes.",
+      "targets": [
+        "aquaporins"
+      ],
+      "reasons": {
+        "aquaporins": "Aquaporin-1 on both membranes makes the cells highly water-permeable."
+      }
+    },
+    {
+      "id": "two-in-series",
+      "prompt": "Which concepts describe movement that must cross two membranes in series?",
+      "explanation": "The paracellular route crosses no membrane at all; it passes between cells.",
+      "targets": [
+        "transcellular route",
+        "two-membrane model"
+      ],
+      "reasons": {
+        "transcellular route": "Entering by one membrane and leaving by the other.",
+        "two-membrane model": "The design that places an entry step in one membrane and an exit step in the other."
+      }
+    },
+    {
+      "id": "lateral-space",
+      "prompt": "Into which compartment does the basolateral pump deliver salt, drawing water after it?",
+      "explanation": "The narrow space between cells collects pumped salt; water enters it from the cell and through the junction, then flows on toward the capillaries.",
+      "targets": [
+        "lateral intercellular space"
+      ],
+      "reasons": {
+        "lateral intercellular space": "Salt pumped into it makes it slightly hyperosmotic, and water follows."
+      }
+    },
+    {
+      "id": "calcium-route",
+      "prompt": "Acetylcholine raises calcium in salivary and airway cells. Which channel lets their chloride out?",
+      "explanation": "Secretion has two triggers: cAMP opens CFTR, and calcium opens the calcium-activated channel.",
+      "targets": [
+        "calcium-activated chloride channel"
+      ],
+      "reasons": {
+        "calcium-activated chloride channel": "A rise in cytosolic calcium opens it."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "membranes-set-cell-conditions",
+        "reason": "Start with transport across a single membrane: the pumps, channels, and cotransporters an epithelium arranges on its two sides.",
+        "via": [
+          "sodium–potassium pump",
+          "aquaporins"
+        ]
+      },
+      {
+        "id": "how-the-kidney-forms-urine",
+        "reason": "See the two-membrane design at work in the tubule's reabsorption and secretion.",
+        "via": [
+          "sodium–potassium pump",
+          "leaky epithelium"
+        ]
+      },
+      {
+        "id": "gastric-acid-secretion",
+        "reason": "Follow a specialized secretory epithelium that pairs apical and basolateral transporters to make acid.",
+        "via": [
+          "apical membrane",
+          "basolateral membrane"
+        ]
+      },
+      {
+        "id": "concentrating-and-diluting-urine",
+        "reason": "See a tight epithelium whose water permeability ADH switches on and off.",
+        "via": [
+          "tight epithelium",
+          "aquaporins"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Salt moves, water follows",
+    "summary": "How epithelia absorb and secrete salt by placing different transporters on their two sides, and how water follows.",
+    "estimatedMinutes": 6,
+    "content": {
+      "text": "Every organ that exchanges fluid with the outside world, from the kidney tubule and the gut to the airways and sweat glands, does it through an epithelium: a single sheet of cells joined edge to edge. Moving salt and water across that sheet takes a different design from moving them across one cell membrane.\r\n\r\n## A polarized sheet\r\n\r\nEach epithelial cell has two sides. The **apical membrane** faces the lumen; the **basolateral membrane** faces the blood. They carry different transporters, and that difference is what lets the sheet move salt in one direction. Near the apical surface, each cell is ringed by a **tight junction** that does two jobs. As a fence, it keeps apical and basolateral proteins from mixing; as a gate, it seals the gap between neighboring cells. Below the junction, the cells are separated by a narrow **lateral intercellular space** that opens onto the blood side.\r\n\r\n## Two routes\r\n\r\nA solute can cross the sheet by the **transcellular route**, entering by one membrane and leaving by the other, or by the **paracellular route**, slipping between cells through the tight junction. Paracellular movement is always passive. How much it carries depends on **claudins**, the proteins that set how permeable each junction is. In a **leaky epithelium**, such as the proximal tubule or small intestine, ions and water pass easily between cells; it moves large volumes but cannot hold a steep gradient. In a **tight epithelium**, such as the collecting duct or colon, the junctions resist backflow, so the cells can pull a solute down to very low concentrations in the lumen.\r\n\r\n## Absorbing salt\r\n\r\nThe **two-membrane model**, worked out by Koefoed-Johnsen and Ussing in frog skin in 1958, explains how a sheet absorbs sodium. Sodium enters across the apical membrane, down its gradient, through the **epithelial sodium channel** (ENaC). The **sodium–potassium pump** on the basolateral membrane exports it to the blood, and basolateral potassium channels let the potassium the pump brings in leak back out. Aldosterone increases the number of ENaC channels, and the diuretic **amiloride** blocks them.\r\n\r\nMoving sodium alone separates charge. The result is a **transepithelial voltage**, lumen negative, which draws chloride after the sodium through the paracellular route.\r\n\r\n## Secreting chloride\r\n\r\nSecretory epithelia, such as the intestinal crypts, airways, and pancreatic ducts, run the design in reverse for chloride. **NKCC1**, a Na⁺–K⁺–2Cl⁻ cotransporter on the basolateral membrane, spends the sodium gradient the pump maintains to load the cell with chloride. The chloride leaves through apical channels: **CFTR**, opened by cAMP, and the **calcium-activated chloride channel**, opened by a rise in calcium. Again the lumen turns negative, and this time sodium follows between the cells. Cholera toxin holds CFTR open by keeping cAMP high; in cystic fibrosis, CFTR fails.\r\n\r\n## Water follows salt\r\n\r\nNo pump moves water. It moves by **osmotic coupling**: wherever salt is transported, water follows by osmosis. Salt pumped into the lateral intercellular space makes it slightly hyperosmotic, and water follows from the cell and through the junction. In leaky epithelia, water follows so readily that the absorbed fluid has the osmolarity of plasma: **isosmotic absorption**. Much of it crosses the cells through **aquaporins**; the rest passes between them, and that paracellular flow sweeps some dissolved solutes along by **solvent drag**. In tight epithelia, water can move only where aquaporins are inserted, which is how ADH controls the collecting duct."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 5.5)",
+        "model": "Claude Sonnet 5.5"
+      }
+    ]
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "id": "diffusion-of-social-change",
+  "title": "How New Ideas Spread Through Society",
+  "category": "sociology",
+  "categories": [
+    "sociology"
+  ],
+  "subcategories": {
+    "sociology": "social-change"
+  },
+  "info": {
+    "text": "Diffusion describes how ideas and practices move through social systems over time. Prospective adopters interpret the innovation, encounter it through communication channels, and decide whether to adopt, adapt, reject, or later discontinue it.",
+    "citations": [
+      {
+        "title": "Diffusion of Innovations, 5th Edition",
+        "author": "Everett M. Rogers",
+        "publisher": "Free Press / Simon & Schuster",
+        "year": "2003",
+        "url": "https://www.simonandschuster.com/books/Diffusion-of-Innovations-5th-Edition/Everett-M-Rogers/9780743222099"
+      },
+      {
+        "title": "Diffusion of Innovations in Service Organizations: Systematic Review and Recommendations",
+        "author": "Trisha Greenhalgh, Robert Macfarlane, Fraser Bate, and Olivia Kyriakidou",
+        "publisher": "The Milbank Quarterly",
+        "year": "2004",
+        "pages": "581-629",
+        "url": "https://onlinelibrary.wiley.com/doi/10.1111/j.0887-378X.2004.00325.x/full"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "perceived-innovation-attributes",
+      "name": "Perceived Innovation Attributes",
+      "color": "teal",
+      "fact": "Prospective adopters judge an innovation through its perceived relative advantage, fit with values and routines, complexity, ability to be tried, and visibility of results. These attributes help explain adoption but work in context; perceived advantage alone cannot guarantee acceptance.",
+      "termInfo": {
+        "relative advantage": "How much better a prospective adopter believes an innovation is than the practice it might replace; the comparison depends on needs and context.",
+        "compatibility": "How well an innovation appears to fit existing values, experiences, needs, and routines.",
+        "complexity": "How difficult an innovation is perceived to understand or use.",
+        "trialability": "Whether people can experiment with an innovation on a limited basis before fully adopting it.",
+        "observability": "How visible an innovation's results are to others, allowing them to discuss or evaluate it."
+      },
+      "seeds": [
+        "relative advantage",
+        "compatibility"
+      ],
+      "floatingTerms": [
+        "complexity",
+        "trialability",
+        "observability"
+      ],
+      "terms": [
+        "relative advantage",
+        "compatibility",
+        "complexity",
+        "trialability",
+        "observability"
+      ]
+    },
+    {
+      "id": "innovation-decision-process",
+      "name": "Innovation-Decision Process",
+      "color": "blue",
+      "fact": "Rogers's model describes a usual path from knowledge to persuasion, decision, implementation, and confirmation. People can adopt or reject an innovation, revisit a choice, discontinue use, or move through activities in a different order; the stages are a guide, not a fixed law.",
+      "termInfo": {
+        "knowledge": "A person learns that an innovation exists and gains some understanding of how it works.",
+        "persuasion": "A person develops an attitude toward an innovation and evaluates whether it seems worthwhile.",
+        "decision": "The person chooses to adopt or reject the innovation after considering it.",
+        "implementation": "The person puts an adopted innovation into use, sometimes adapting it to local needs.",
+        "confirmation": "The person seeks or evaluates further information after the choice and may continue, change, or discontinue use."
+      },
+      "seeds": [
+        "knowledge",
+        "confirmation"
+      ],
+      "floatingTerms": [
+        "persuasion",
+        "decision",
+        "implementation"
+      ],
+      "terms": [
+        "knowledge",
+        "confirmation",
+        "persuasion",
+        "decision",
+        "implementation"
+      ]
+    },
+    {
+      "id": "relative-adopter-timing",
+      "name": "Relative Timing of Adoption",
+      "color": "amber",
+      "fact": "The familiar adopter categories compare how early or late members of a social system adopt a particular innovation. They summarize relative timing, not permanent personality types, moral worth, or a universal pattern for every idea.",
+      "termInfo": {
+        "innovators": "The conventional category for people who adopt particularly early relative to others in a social system.",
+        "early adopters": "A category for people who adopt earlier than the majority of members in a social system.",
+        "early majority": "A category for people who adopt before the later part of the social system has adopted.",
+        "late majority": "A category for people who adopt after a substantial share of the system has already adopted.",
+        "laggards": "Rogers's conventional label for the relatively latest adopters in a particular system; it describes timing, not a personal defect."
+      },
+      "seeds": [
+        "innovators",
+        "laggards"
+      ],
+      "floatingTerms": [
+        "early adopters",
+        "early majority",
+        "late majority"
+      ],
+      "terms": [
+        "innovators",
+        "laggards",
+        "early adopters",
+        "early majority",
+        "late majority"
+      ]
+    },
+    {
+      "id": "channels-and-social-setting",
+      "name": "Channels and Social Setting",
+      "color": "magenta",
+      "fact": "Diffusion unfolds through communication among members of a social system. Mass media can make people aware of an innovation, while interpersonal channels often shape evaluation; opinion leaders influence peers and change agents intentionally promote change. Local networks and norms can enable or inhibit spread.",
+      "termInfo": {
+        "communication channel": "A means through which information about an innovation moves from one person to another.",
+        "mass media channel": "A broad communication route, such as radio or a newspaper, that can create awareness among many people.",
+        "interpersonal channel": "Communication through social contact, where peers can discuss an innovation and evaluate it in context.",
+        "opinion leader": "A person whose views influence others in a social system, often because peers see that person as credible or representative.",
+        "change agent": "A person who intentionally promotes an innovation or planned change to a group or community.",
+        "social system": "The interconnected members, norms, and relationships within which an innovation is communicated and adopted."
+      },
+      "seeds": [
+        "communication channel",
+        "social system"
+      ],
+      "floatingTerms": [
+        "mass media channel",
+        "interpersonal channel",
+        "opinion leader",
+        "change agent"
+      ],
+      "terms": [
+        "communication channel",
+        "social system",
+        "mass media channel",
+        "interpersonal channel",
+        "opinion leader",
+        "change agent"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "rate-of-adoption",
+      "term": "rate of adoption",
+      "clusters": [
+        "perceived-innovation-attributes",
+        "relative-adopter-timing"
+      ],
+      "fact": "The rate of adoption describes how adoption accumulates over time within a social system. Perceived attributes can help explain its speed, while adopter categories describe relative positions in that spread; the shape and pace vary by innovation and setting.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "perceived-innovation-attributes": "compatibility",
+        "relative-adopter-timing": "early majority"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "perceived-innovation-attributes",
+        "to": "relative-adopter-timing"
+      }
+    },
+    {
+      "id": "reinvention",
+      "term": "reinvention",
+      "clusters": [
+        "perceived-innovation-attributes",
+        "innovation-decision-process"
+      ],
+      "fact": "Reinvention is the modification of an innovation by users during adoption and implementation. Adaptation can improve fit with local needs, so diffusion does not always mean that every adopter copies an unchanged original.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "perceived-innovation-attributes": "compatibility",
+        "innovation-decision-process": "implementation"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "perceived-innovation-attributes",
+        "to": "innovation-decision-process"
+      }
+    },
+    {
+      "id": "interpersonal-influence",
+      "term": "interpersonal influence",
+      "clusters": [
+        "channels-and-social-setting",
+        "innovation-decision-process"
+      ],
+      "fact": "Interpersonal influence occurs when communication with peers or opinion leaders shapes how a person evaluates an innovation and decides whether to adopt it. Its effect depends on trust, perceived fit, and local norms.",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "channels-and-social-setting": "interpersonal channel",
+        "innovation-decision-process": "persuasion"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "channels-and-social-setting",
+        "to": "innovation-decision-process"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "attributes-of-use",
+      "prompt": "Which attributes describe perceived difficulty, the chance to try something on a limited basis, and the visibility of its results?",
+      "explanation": "These are distinct perceived attributes: complexity concerns difficulty, trialability permits limited experimentation, and observability makes results visible to others.",
+      "targets": [
+        "complexity",
+        "trialability",
+        "observability"
+      ],
+      "reasons": {
+        "complexity": "Describes perceived difficulty in understanding or using an innovation.",
+        "trialability": "Describes whether people can test an innovation before fully adopting it.",
+        "observability": "Describes whether others can see the results."
+      }
+    },
+    {
+      "id": "choice-use-reconsideration",
+      "prompt": "Which stage marks choosing adoption or rejection, which puts the idea into practice, and which re-evaluates the choice afterward?",
+      "explanation": "The decision stage is the choice, implementation is actual use, and confirmation is later evaluation. A person can still change course or discontinue use.",
+      "targets": [
+        "decision",
+        "implementation",
+        "confirmation"
+      ],
+      "reasons": {
+        "decision": "Marks the choice to adopt or reject.",
+        "implementation": "Puts an adopted innovation into practice.",
+        "confirmation": "Reconsiders the choice with later experience or information."
+      }
+    },
+    {
+      "id": "relative-adoption-timing",
+      "prompt": "Which categories describe intermediate positions between the earliest adopters and the relatively latest adopters?",
+      "explanation": "These categories compare timing within one social system. Their labels do not rank people's intelligence, character, or worth.",
+      "targets": [
+        "early adopters",
+        "early majority",
+        "late majority"
+      ],
+      "reasons": {
+        "early adopters": "Adopt earlier than most other members of the system.",
+        "early majority": "Adopt before the later portion of the system.",
+        "late majority": "Adopt after a substantial share has already adopted."
+      }
+    },
+    {
+      "id": "communication-channel-roles",
+      "prompt": "Which channel can reach many people to create awareness, and which relies on person-to-person exchange for discussion and evaluation?",
+      "explanation": "Mass media can spread initial awareness broadly; interpersonal channels let people discuss meaning and evaluate an innovation through social relationships. The roles can overlap and depend on context.",
+      "targets": [
+        "mass media channel",
+        "interpersonal channel"
+      ],
+      "reasons": {
+        "mass media channel": "Carries information broadly and can create awareness.",
+        "interpersonal channel": "Lets people exchange views and evaluate an innovation with others."
+      }
+    },
+    {
+      "id": "influence-and-promotion",
+      "prompt": "Which role influences peers within a social system, and which intentionally promotes an innovation?",
+      "explanation": "An opinion leader can shape peers' views through credibility or standing. A change agent has an intentional role in promoting planned change; a person may sometimes occupy both roles.",
+      "targets": [
+        "opinion leader",
+        "change agent"
+      ],
+      "reasons": {
+        "opinion leader": "Influences other members of a social system.",
+        "change agent": "Intentionally promotes an innovation or planned change."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "info": {
+      "text": "Collective actors can mobilize change, ideas and practices can spread through social ties, and institutions can then absorb or resist new arrangements."
+    },
+    "entries": [
+      {
+        "id": "gradual-institutional-change",
+        "reason": "Continue to the ways formal rules and institutional routines shift gradually after ideas and practices circulate."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "From first awareness to wider adoption",
+    "summary": "Learn how perceived fit, communication, decisions, and local context shape whether an idea spreads.",
+    "estimatedMinutes": 6,
+    "content": {
+      "text": "Diffusion is the spread of an idea, practice, or object that people perceive as new. The innovation need not be newly invented: it is new to the people considering it. Diffusion happens through communication channels over time within a social system, so adoption depends on social relationships and local meanings as well as the idea itself.\n\n## Why an innovation seems adoptable\n\nPeople judge a possible change in relation to their existing practices and needs. Relative advantage asks whether it seems better than an alternative; compatibility asks whether it fits values and routines. Complexity concerns perceived difficulty. Trialability lets someone experiment on a limited scale, while observability makes results visible to others. These attributes help explain adoption, but no simple checklist guarantees that an innovation will spread. A practice with clear benefits can still conflict with norms or daily constraints.\n\nConsider a school deciding whether to use a new timetable. Staff may see advantages for student learning, but ask whether it fits bus schedules and family routines, whether it is hard to administer, whether a small pilot is possible, and whether results can be seen. These judgments can differ across schools and groups. Users may also adapt the timetable during implementation; Rogers calls this reinvention. Local adaptation can improve fit, although the resulting practice may differ from the original proposal.\n\n## How people decide\n\nA common model traces an innovation-decision process through knowledge, persuasion, decision, implementation, and confirmation. A person first learns about the innovation, then evaluates it, chooses to adopt or reject, puts an adopted idea into use, and later reviews the choice. This is a useful outline, not a rule that everyone follows in exactly the same order. People can revisit earlier judgments, reject an idea, or discontinue it after trying it.\n\n## When people adopt\n\nAdopter categories compare relative timing within a social system: innovators, early adopters, early majority, late majority, and laggards. The names can sound like personality judgments, but they describe when people adopt one particular innovation relative to others in that setting. They do not imply that early is always wise or late is always resistant. The rate of adoption varies; a familiar S-shaped curve appears in many diffusion accounts, but it is not a law for every innovation or community.\n\n## How ideas travel\n\nMass media can make many people aware of an idea. Interpersonal conversations often matter when people ask whether it fits their circumstances and what other users experienced. Opinion leaders influence peers within a social system; change agents deliberately promote an innovation. Their roles are different even when a person sometimes occupies both. Trust, networks, and local norms shape whose information matters and whether an idea is accepted.\n\nDiffusion is therefore more than a message sent from an inventor to passive recipients. People interpret, discuss, adapt, adopt, reject, and sometimes abandon an innovation. Its spread can change social practices, but adoption is not automatically beneficial: consequences depend on what spreads, for whom, and under what conditions."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (gpt-6-luna)",
+        "reasoning": "max"
+      }
+    ]
+  },
+  "language": "en"
+}

@@ -1056,6 +1056,64 @@ export const CATEGORIES = {
         }
       }
     }
+  },
+  "Education & Learning Sciences": {
+    slug: "education-learning-sciences",
+    domain: "social-sciences",
+    info: {
+      text: "How teaching, curriculum, assessment, learning environments, and educational institutions shape what people learn and how they develop."
+    },
+    subcategories: {
+      assessment: {
+        title: "Assessment",
+        info: {
+          text: "How teachers and institutions gather evidence of learning — formative and summative, feedback, rubrics, and validity of interpretation."
+        }
+      },
+      "instructional-design": {
+        title: "Instructional Design",
+        info: {
+          text: "How courses and units are planned deliberately — from desired results and evidence backward to instruction."
+        }
+      },
+      "learning-sciences": {
+        title: "Learning Sciences",
+        info: {
+          text: "What cognitive science reveals about how people learn: memory, attention, load, practice, and transfer."
+        }
+      }
+    }
+  },
+  "Human Geography": {
+    slug: "human-geography",
+    domain: "social-sciences",
+    info: {
+      text: "How populations, migration, settlements, economic activity, and spatial inequalities organize human life across places and regions.",
+      link: "wiki:Human geography"
+    },
+    subcategories: {
+      "migration-geography": {
+        title: "Migration Geography",
+        info: {
+          text: "Why and how people move between places — the forces behind migration, the types it takes, the flows it forms, and what movers send back.",
+          link: "wiki:Human migration"
+        }
+      },
+      "population-geography": {
+        title: "Population Geography",
+        info: {
+          text: "How many people live where, how populations grow and change, and how demographers read a population's structure and momentum.",
+          link: "wiki:Population geography"
+        }
+      },
+      "urban-geography": {
+        title: "Urban Geography",
+        info: {
+          text: "Where and why cities arise, how they are arranged internally, and how urbanization reshapes the regions around them.",
+          link: "wiki:Urban geography"
+        }
+      }
+    }
   }
 };
 

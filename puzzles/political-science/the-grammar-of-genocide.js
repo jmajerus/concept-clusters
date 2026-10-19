@@ -234,7 +234,7 @@ const puzzle = definePuzzle(import.meta.url, {
       "id": "ordinary-bureaucracy",
       "name": "Ordinary Bureaucracy",
       "color": "brown",
-      "fact": "Fifteen officials over breakfast, an army corps with a chain of command, a ministry issuing telegrams province by province, neighbors organized into militia cells by local officials -- in each case, the killing was carried out as administration: assigned, scheduled, and logged by people doing a job, not by a mob.",
+      "fact": "Fifteen officials over breakfast, an army corps with a chain of command, a ministry issuing telegrams province by province, neighbors organized into militia cells by local officials -- in each case, the killing was carried out as administration: assigned, scheduled, and logged by people doing a job.",
       "terms": [
         "the Wannsee Conference",
         "the Interahamwe",
@@ -326,7 +326,7 @@ const puzzle = definePuzzle(import.meta.url, {
         2,
         4
       ],
-      "fact": "Hannah Arendt coined the phrase after watching Adolf Eichmann's 1961 trial: the men who administered genocide were not driven by exceptional hatred, but were functionaries following orders and filling roles inside a bureaucracy that had already done the moral work of redescribing what they were doing.",
+      "fact": "Administering genocide required no exceptional hatred from the people who carried it out -- only a role to fill inside a bureaucracy that had already done the moral work of redescribing the killing as something else. Hannah Arendt first identified the underlying failure watching Adolf Eichmann's 1961 trial: 'The longer one listened to him, the more obvious it became that his inability to speak was closely connected with an inability to think, namely, to think from the standpoint of somebody else.'",
       "info": {
         "text": "Arendt's account of Eichmann as a shallow, clichéd bureaucrat rather than a fanatic -- evidence, in her reading, that participation in genocide requires no special reservoir of hatred, only the right structure and permission.",
         "links": [

@@ -143,32 +143,34 @@ const puzzle = definePuzzle(import.meta.url, {
   "lenses": [
     {
       "id": "diagnosis-and-values",
-      "prompt": "Which of these are principles or diagnoses King articulated, rather than a specific, named campaign or strike?",
-      "explanation": "The giant triplets, a radical revolution of values, and agape are all conceptual tools King used to diagnose or prescribe, not specific campaigns: the first two name what was wrong and the change it demanded, and the third names the kind of love his entire nonviolent philosophy rested on.",
+      "prompt": "Which of these are the diagnosis King named in Beyond Vietnam, or the transformation he said it demanded — rather than the speech itself?",
+      "explanation": "The giant triplets and a thing-oriented society name what King said was wrong in his Riverside speech, and a radical revolution of values names the transformation he said it required — three conceptual tools from one speech, not the speech title itself and not the later campaigns or philosophy of love.",
       "targets": [
         "the giant triplets",
         "a radical revolution of values",
-        "agape"
+        "a thing-oriented society"
       ],
       "reasons": {
-        "a radical revolution of values": "The change King argued the giant triplets actually demanded, not a specific program.",
-        "agape": "The kind of love his entire nonviolent philosophy rested on, not a campaign or event.",
-        "the giant triplets": "A structural diagnosis of what was wrong, not a specific campaign."
+        "a radical revolution of values": "The transformation King argued the giant triplets demanded, not a specific program.",
+        "a thing-oriented society": "King's shorthand for what was wrong: a society oriented around things rather than people.",
+        "the giant triplets": "The structural diagnosis itself: racism, militarism, and extreme materialism as one interlocking system."
       }
     },
     {
-      "id": "built-together",
-      "prompt": "Which of these describe something built collectively by many people together, rather than a single speech or personal philosophy?",
-      "explanation": "The Beloved Community, the Poor People's Campaign, and Resurrection City are all fundamentally collective: not one person's insight or one person's suffering, but a coalition and, eventually, an actual encampment built by thousands of people together -- an aspiration and its two concrete, physical attempts at realization.",
+      "id": "enacted-and-grounded",
+      "prompt": "Which of these name something that was physically built, occupied, or enacted in a specific place — rather than a vision, a philosophy, or a national argument?",
+      "explanation": "These four terms name things that happened in a specific place with specific people: a strike in Memphis, a multiracial coalition that marched on Washington, the slogan workers carried on signs, and the encampment they built on the Mall. The Beloved Community, agape, the giant triplets — those are the vision and the diagnosis. These are where King and the movement showed up.",
       "targets": [
-        "the Beloved Community",
+        "the Memphis sanitation strike",
         "the Poor People's Campaign",
+        "I Am a Man",
         "Resurrection City"
       ],
       "reasons": {
-        "Resurrection City": "An actual, physical encampment built and inhabited by thousands of people on the Washington Mall.",
-        "the Beloved Community": "An entire integrated society, by definition something no one person could build alone.",
-        "the Poor People's Campaign": "A deliberately multiracial coalition, built to demonstrate reconciliation across group lines, not within one."
+        "I Am a Man": "The slogan carried on signs by striking workers — grounded in that strike's physical presence.",
+        "Resurrection City": "A literal city of tents built on the Washington Mall — the most physically specific node on the board.",
+        "the Memphis sanitation strike": "A labor action by specific workers in a specific city — the most local and concrete node on the board.",
+        "the Poor People's Campaign": "A named coalition with an actual march and encampment, not an aspiration."
       }
     }
   ],
@@ -177,6 +179,10 @@ const puzzle = definePuzzle(import.meta.url, {
     "contributors": [
       {
         "name": "Claude"
+      },
+      {
+        "name": "Muse Code (Spark 1.3)",
+        "reasoning": "high"
       }
     ]
   }

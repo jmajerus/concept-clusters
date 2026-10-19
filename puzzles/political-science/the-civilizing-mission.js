@@ -239,7 +239,6 @@ const puzzle = definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "standard-of-civilization",
       "term": "standard of civilization",
       "clusters": [
         0,
@@ -261,7 +260,6 @@ const puzzle = definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "sacred-trust-of-civilisation",
       "term": "sacred trust of civilisation",
       "clusters": [
         2,
@@ -288,7 +286,6 @@ const puzzle = definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "coercive-democratization",
       "term": "coercive democratization",
       "clusters": [
         1,

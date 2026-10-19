@@ -233,8 +233,7 @@ const puzzle = definePuzzle(import.meta.url, {
         "id": "a-radical-revolution-of-values",
         "reason": "Gandhi's satyagraha, refined through self-suffering rather than domination, is the acknowledged root of King's own agape and redemptive suffering -- watch the same logic operate first at the scale of a nation, then a generation later at the scale of one city.",
         "via": [
-          "satyagraha",
-          "redemptive suffering"
+          "satyagraha"
         ]
       }
     ]
@@ -246,14 +245,15 @@ const puzzle = definePuzzle(import.meta.url, {
     "estimatedMinutes": 4,
     "content": {
       "mediaType": "text/markdown",
-      "text": "In 1969, the psychoanalyst Erik H. Erikson published *Gandhi's Truth: On the Origins of Militant Nonviolence*, a study built around a small, nearly forgotten event: a three-week strike by textile mill workers in Ahmedabad, India, in the spring of 1918. Gandhi, 48 years old and newly returned from two decades in South Africa, mediated the dispute by fasting alongside the strikers -- one of the first full deployments of the method he called satyagraha. Erikson treats this local, largely successful negotiation as the moment a still-uncertain man became the figure the world would later call Mahatma.\n\nErikson had already coined the term identity crisis to describe the disorienting work of finding a stable adult self, and had proposed an eight-stage life cycle running from infancy through old age. Gandhi's Truth applies that framework to a single life: the South African years as a socially sanctioned moratorium, a period in which a young lawyer could experiment with causes and selves before any commitment became irrevocable, and Ahmedabad as the pivot into what Erikson called generativity -- care redirected from private concerns toward guiding a whole rising generation. Erikson also turns the method on himself, developing what he called disciplined subjectivity: an insistence that a biographer's own emotional engagement with a larger-than-life subject has to be examined and used, not pretended away."
+      "text": "In 1969, the psychoanalyst Erik H. Erikson published *Gandhi's Truth: On the Origins of Militant Nonviolence*, a study built around a small, nearly forgotten event: a three-week strike by textile mill workers in Ahmedabad, India, in the spring of 1918. Gandhi, 48 years old and newly returned from two decades in South Africa, mediated the dispute by fasting alongside the strikers -- one of the first full deployments of the method he called satyagraha. Erikson treats this local, largely successful negotiation as the moment a still-uncertain man became the figure the world would later call Mahatma.\r\n\r\nErikson had already coined the term identity crisis to describe the disorienting work of finding a stable adult self, and had proposed an eight-stage life cycle running from infancy through old age. Gandhi's Truth applies that framework to a single life: the South African years as a socially sanctioned moratorium, a period in which a young lawyer could experiment with causes and selves before any commitment became irrevocable, and Ahmedabad as the pivot into what Erikson called generativity -- care redirected from private concerns toward guiding a whole rising generation. Erikson also turns the method on himself, developing what he called disciplined subjectivity: an insistence that a biographer's own emotional engagement with a larger-than-life subject has to be examined and used, not pretended away."
     }
   },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude"
+        "name": "Claude (Opus 4.6)",
+        "model": "Claude Opus 4.6"
       }
     ]
   }

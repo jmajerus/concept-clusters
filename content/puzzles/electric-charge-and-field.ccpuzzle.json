@@ -1,0 +1,710 @@
+{
+  "id": "electric-charge-and-field",
+  "title": "Electric Charge and the Field — Physics at a Distance",
+  "category": "physics",
+  "subcategories": {
+    "physics": "electromagnetism"
+  },
+  "info": {
+    "text": "Electrostatics is the foundation everything electrical builds on: charge as a two-signed, quantized, conserved property of matter; the inverse-square force between charges; the electric field that replaces action at a distance; the potential landscape that stores energy per charge; and the conductor–insulator behavior that decides where charge can go. Sorting these terms reconstructs the ladder, one idea earning the next.",
+    "links": [
+      {
+        "href": "wiki:Electric charge"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Electric charge -- Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Electric_charge"
+      },
+      {
+        "title": "Electric field -- Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Electric_field"
+      },
+      {
+        "title": "Electric potential -- Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Electric_potential"
+      },
+      {
+        "title": "Electrostatic induction -- Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Electrostatic_induction"
+      },
+      {
+        "title": "Coulomb's law -- Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Coulomb%27s_law"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "what-charge-is",
+      "name": "What charge is",
+      "color": "teal",
+      "fact": "Charge is matter's two-signed bookkeeping property: it comes only in whole multiples of the elementary charge, and an isolated system's total never changes. An atom carrying extra or missing charge is an ion; net zero is neutral.",
+      "termInfo": {
+        "electric charge": {
+          "text": "Matter's two-signed physical property, measured in coulombs: what makes charges repel or attract and what every electrical quantity keeps track of.",
+          "links": [
+            {
+              "href": "wiki:Electric charge"
+            }
+          ]
+        },
+        "ion": {
+          "text": "An atom or molecule with a net charge from gaining electrons (negative anion) or losing them (positive cation).",
+          "links": [
+            {
+              "href": "wiki:Ion"
+            }
+          ]
+        },
+        "elementary charge": {
+          "text": "The quantum of charge, e ≈ 1.602×10⁻¹⁹ coulomb, the magnitude one electron or proton carries; all charge comes in integer multiples of it. Its size was measured by Millikan's oil-drop experiment.",
+          "links": [
+            {
+              "href": "wiki:Elementary charge"
+            }
+          ]
+        },
+        "conservation of charge": {
+          "text": "The total charge of an isolated system never changes: rubbing, ionizing, and current only move charge around, never create or destroy it.",
+          "links": [
+            {
+              "href": "wiki:Charge conservation"
+            }
+          ]
+        },
+        "electrically neutral": {
+          "text": "Net charge of zero — positive and negative charge exactly balanced. Neutral objects still respond to nearby charges by polarizing.",
+          "links": [
+            {
+              "href": "wiki:Electric charge"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The bookkeeping layer: what charge is, that it is quantized and conserved, and the words for an object's net amount — ion on one side, neutral at zero.",
+        "links": [
+          {
+            "href": "wiki:Electric charge"
+          }
+        ]
+      },
+      "seeds": [
+        "electric charge",
+        "ion"
+      ],
+      "floatingTerms": [
+        "elementary charge",
+        "conservation of charge",
+        "electrically neutral"
+      ],
+      "terms": [
+        "electric charge",
+        "ion",
+        "elementary charge",
+        "conservation of charge",
+        "electrically neutral"
+      ]
+    },
+    {
+      "id": "coulomb-force",
+      "name": "The Coulomb force",
+      "color": "blue",
+      "fact": "Two charges push or pull along the line between them with a force proportional to the product of their charges and to the inverse square of their separation — like repels like, opposites attract. Coulomb measured it with a torsion balance.",
+      "termInfo": {
+        "Coulomb's law": {
+          "text": "The law relating two point charges: force along the line between them, proportional to the product of the charges, inversely proportional to the square of the distance. Published by Charles-Augustin de Coulomb in 1785.",
+          "links": [
+            {
+              "href": "wiki:Coulomb's law"
+            }
+          ]
+        },
+        "electrostatic force": {
+          "text": "The push or pull between stationary charges — also called the Coulomb force; repulsive between like signs, attractive between unlike.",
+          "links": [
+            {
+              "href": "wiki:Coulomb's law"
+            }
+          ]
+        },
+        "inverse-square law": {
+          "text": "A force that weakens with the square of the distance: double the separation, one quarter the force. Gravity follows the same pattern, a resemblance the sources draw explicitly.",
+          "links": [
+            {
+              "href": "wiki:Inverse-square law"
+            }
+          ]
+        },
+        "torsion balance": {
+          "text": "Coulomb's instrument: a bar suspended by a thin fiber whose twist measures the tiny repulsion between charged spheres.",
+          "links": [
+            {
+              "href": "wiki:Coulomb's law"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The quantitative law of attraction and repulsion, the inverse-square shape it shares with gravity, and the instrument that first pinned it down.",
+        "links": [
+          {
+            "href": "wiki:Coulomb's law"
+          }
+        ]
+      },
+      "seeds": [
+        "Coulomb's law",
+        "electrostatic force"
+      ],
+      "floatingTerms": [
+        "inverse-square law",
+        "torsion balance"
+      ],
+      "terms": [
+        "Coulomb's law",
+        "electrostatic force",
+        "inverse-square law",
+        "torsion balance"
+      ]
+    },
+    {
+      "id": "the-field-idea",
+      "name": "The field idea",
+      "color": "amber",
+      "fact": "A charge fills the space around it with an electric field: the force a vanishingly small test charge would feel, per unit of its charge. Fields from several charges add vectorially, and field lines trace the direction a positive charge would be pushed.",
+      "termInfo": {
+        "electric field": {
+          "text": "The force per unit charge at each point of space, in volts per meter: a property of space set by the charges that are there. Measured in V/m, equivalent to N/C.",
+          "links": [
+            {
+              "href": "wiki:Electric field"
+            }
+          ]
+        },
+        "field line": {
+          "text": "A drawn curve tangent to the field everywhere, pointing the way a positive charge would be pushed; introduced by Faraday as lines of force. Line density shows strength.",
+          "links": [
+            {
+              "href": "wiki:Field line"
+            }
+          ]
+        },
+        "test charge": {
+          "text": "The idealized vanishingly small charge used to probe a field without disturbing it — the q in E = F/q.",
+          "links": [
+            {
+              "href": "wiki:Test particle"
+            }
+          ]
+        },
+        "superposition principle": {
+          "text": "Fields from several charges add as vectors: the net field at a point is the vector sum of what each source contributes alone.",
+          "links": [
+            {
+              "href": "wiki:Superposition principle"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The field reframes force-at-a-distance as a condition of space: defined per unit charge, probed with a test charge, drawn as field lines, combined by superposition.",
+        "links": [
+          {
+            "href": "wiki:Electric field"
+          }
+        ]
+      },
+      "seeds": [
+        "electric field",
+        "field line"
+      ],
+      "floatingTerms": [
+        "test charge",
+        "superposition principle"
+      ],
+      "terms": [
+        "electric field",
+        "field line",
+        "test charge",
+        "superposition principle"
+      ]
+    },
+    {
+      "id": "charge-in-matter",
+      "name": "Charge in matter",
+      "color": "magenta",
+      "fact": "Conductors hold electrons free to roam; insulators hold their charge fixed in place. Rubbing two materials together can transfer charge — the triboelectric effect — leaving an object with motionless net charge: static electricity.",
+      "termInfo": {
+        "conductor": {
+          "text": "A material — metal, saltwater, graphite — with charges free to move through it; excess charge spreads over its surface and drains to any contact. The word was coined by John Desaguliers after Stephen Gray's conduction experiments.",
+          "links": [
+            {
+              "href": "wiki:Electrical conductor"
+            }
+          ]
+        },
+        "insulator": {
+          "text": "A material whose charges are bound in place — glass, rubber, plastic — so it can hold a separated or excess charge indefinitely. Desaguliers' name for Gray's non-conductors.",
+          "links": [
+            {
+              "href": "wiki:Insulator (electricity)"
+            }
+          ]
+        },
+        "static electricity": {
+          "text": "The phenomenon of nonzero net charge at rest on a surface: the crackle of a sweater, the spark from a doorknob. 'Static' because the charge is not flowing.",
+          "links": [
+            {
+              "href": "wiki:Static electricity"
+            }
+          ]
+        },
+        "triboelectric effect": {
+          "text": "Charge transfer between two materials pressed and separated — the ancient amber-on-wool observation that gives electricity its name (ēlektron, amber).",
+          "links": [
+            {
+              "href": "wiki:Triboelectric effect"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Where charge can and cannot move: the two material classes, how rubbing transfers charge, and why stuck-on charge stays stuck.",
+        "links": [
+          {
+            "href": "wiki:Static electricity"
+          }
+        ]
+      },
+      "seeds": [
+        "conductor",
+        "insulator"
+      ],
+      "floatingTerms": [
+        "static electricity",
+        "triboelectric effect"
+      ],
+      "terms": [
+        "conductor",
+        "insulator",
+        "static electricity",
+        "triboelectric effect"
+      ]
+    },
+    {
+      "id": "polarization-and-induction",
+      "name": "Polarization and induction",
+      "color": "olive",
+      "fact": "A nearby charge redistributes charge in a neutral object without touching it: free electrons shift in a conductor, molecules stretch into tiny dipoles in an insulator. The near side ends up with opposite charge — which is why charged things attract uncharged ones.",
+      "termInfo": {
+        "electric polarization": {
+          "text": "The slight separation of positive and negative charge within an object — negative shifted toward a nearby positive charge, positive away — so the object stays neutral overall but acts charged locally.",
+          "links": [
+            {
+              "href": "wiki:Polarization density"
+            }
+          ]
+        },
+        "electrostatic induction": {
+          "text": "Redistribution of charge in an object caused by a nearby charge, without contact. Ground the object meanwhile and it can be left with a real net charge of the opposite sign — charging by induction, found by Stephen Gray.",
+          "links": [
+            {
+              "href": "wiki:Electrostatic induction"
+            }
+          ]
+        },
+        "electric dipole": {
+          "text": "A pair of equal and opposite charges separated by a small distance — the stretched-molecule state an insulator's molecules take in a field.",
+          "links": [
+            {
+              "href": "wiki:Electric dipole moment"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The contactless response: how a nearby charge polarizes a neutral object and induces charge separation — the mechanism behind charged-attracts-neutral.",
+        "links": [
+          {
+            "href": "wiki:Electrostatic induction"
+          }
+        ]
+      },
+      "seeds": [
+        "electric polarization",
+        "electrostatic induction"
+      ],
+      "floatingTerms": [
+        "electric dipole"
+      ],
+      "terms": [
+        "electric polarization",
+        "electrostatic induction",
+        "electric dipole"
+      ]
+    },
+    {
+      "id": "potential-and-voltage",
+      "name": "Potential and voltage",
+      "color": "brown",
+      "fact": "Electric potential is potential energy per unit charge at a point, measured against a reference. Voltage is the difference in potential between two points, and equipotential surfaces connect points at the same potential.",
+      "termInfo": {
+        "electric potential": {
+          "text": "Potential energy per unit charge at a point, in volts (joules per coulomb), measured against a reference such as infinity; a positive charge slides from high potential to low, like a ball down a hill.",
+          "links": [
+            {
+              "href": "wiki:Electric potential"
+            }
+          ]
+        },
+        "voltage": {
+          "text": "The difference in electric potential between two points — what '12 volts' across a battery terminal pair means; it is volts, not a stored substance.",
+          "links": [
+            {
+              "href": "wiki:Voltage"
+            }
+          ]
+        },
+        "equipotential": {
+          "text": "A surface of constant potential: no work is done moving a charge along it, and field lines meet it at right angles.",
+          "links": [
+            {
+              "href": "wiki:Equipotential"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The energy view: potential as a value at each point, voltage as the difference between two points, equipotentials as level surfaces where no work is done.",
+        "links": [
+          {
+            "href": "wiki:Electric potential"
+          }
+        ]
+      },
+      "seeds": [
+        "electric potential",
+        "voltage"
+      ],
+      "floatingTerms": [
+        "equipotential"
+      ],
+      "terms": [
+        "electric potential",
+        "voltage",
+        "equipotential"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-electric-force",
+      "term": "electric force",
+      "clusters": [
+        "what-charge-is",
+        "coulomb-force"
+      ],
+      "fact": "The two signs of charge are what Coulomb's law quantifies: the electric force between charges — push for like signs, pull for unlike — grows with the product of the charges and falls with the square of the distance.",
+      "info": {
+        "text": "The push or pull between stationary charges; also called the electrostatic or Coulomb force.",
+        "links": [
+          {
+            "href": "wiki:Coulomb's law"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "what-charge-is": "electric charge",
+        "coulomb-force": "Coulomb's law"
+      }
+    },
+    {
+      "id": "bridge-force-per-unit-charge",
+      "term": "force per unit charge",
+      "clusters": [
+        "coulomb-force",
+        "the-field-idea"
+      ],
+      "fact": "The field is defined by dividing the electrostatic force on a test charge by that charge, E = F/q — so the field of a point charge follows straight from Coulomb's law, replacing action at a distance with a condition of space itself.",
+      "info": {
+        "text": "The defining division behind the field: force on a test charge divided by that charge.",
+        "links": [
+          {
+            "href": "wiki:Electric field"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "coulomb-force": "electrostatic force",
+        "the-field-idea": "electric field"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "coulomb-force",
+        "to": "the-field-idea"
+      }
+    },
+    {
+      "id": "bridge-potential-gradient",
+      "term": "potential gradient",
+      "clusters": [
+        "the-field-idea",
+        "potential-and-voltage"
+      ],
+      "fact": "The field points down the potential hill (E = −∇φ): equipotential surfaces cut field lines at right angles, and moving a charge along one takes no work at all.",
+      "info": {
+        "text": "The rate at which potential changes with position — the slope of the potential hill the field follows.",
+        "links": [
+          {
+            "href": "wiki:Electric field"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "the-field-idea": "field line",
+        "potential-and-voltage": "equipotential"
+      }
+    },
+    {
+      "id": "bridge-electrical-conduction",
+      "term": "electrical conduction",
+      "clusters": [
+        "what-charge-is",
+        "charge-in-matter"
+      ],
+      "fact": "Whether an object keeps a net charge depends on its material: conduction lets charge flow away or spread through a conductor, while an insulator traps charge in place — which is exactly what makes static electricity stick around.",
+      "info": {
+        "text": "The movement of charge through a material — free in conductors, blocked in insulators.",
+        "links": [
+          {
+            "href": "wiki:Electrical conductor"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "what-charge-is": "electric charge",
+        "charge-in-matter": "static electricity"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "charge-in-matter",
+        "to": "what-charge-is"
+      }
+    },
+    {
+      "id": "bridge-charged-attracts-neutral",
+      "term": "why charged attracts neutral",
+      "clusters": [
+        "the-field-idea",
+        "polarization-and-induction"
+      ],
+      "fact": "No contact is needed: the charged object's field polarizes a neutral one, pulling opposite charge to the near side — an induced attraction strong enough to lift paper or stick a rubbed balloon to the wall.",
+      "info": {
+        "text": "The field does the touching: polarization by a field creates opposite-sign charge on the near side, and unlike charges attract.",
+        "links": [
+          {
+            "href": "wiki:Electrostatic induction"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "the-field-idea": "electric field",
+        "polarization-and-induction": "electric polarization"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "the-field-idea",
+        "to": "polarization-and-induction"
+      }
+    },
+    {
+      "id": "bridge-free-and-bound-charge",
+      "term": "free and bound charge",
+      "clusters": [
+        "charge-in-matter",
+        "polarization-and-induction"
+      ],
+      "fact": "Conductors and insulators answer a nearby charge in their own ways: conductors relocate free electrons across the whole object, while insulators only shift bound charge within each molecule — two limits of the same induction mechanism.",
+      "info": {
+        "text": "The two forms charge takes in matter: free charge that roams (conduction electrons) and bound charge fixed to atoms and molecules.",
+        "links": [
+          {
+            "href": "wiki:Electric charge"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "charge-in-matter": "conductor",
+        "polarization-and-induction": "electric polarization"
+      }
+    },
+    {
+      "id": "bridge-work-against-force",
+      "term": "work against the electric force",
+      "clusters": [
+        "potential-and-voltage",
+        "coulomb-force"
+      ],
+      "fact": "Potential is defined by the work per charge of moving against the electric force; the potential of a point charge is Coulomb's law integrated over distance — the same interaction in energy language.",
+      "info": {
+        "text": "Pushing a charge against the electric force stores energy: work per unit charge is exactly what potential measures.",
+        "links": [
+          {
+            "href": "wiki:Electric potential"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "potential-and-voltage": "electric potential",
+        "coulomb-force": "electrostatic force"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "lens-bookkeeping",
+      "prompt": "Which terms are statements about how much charge sits somewhere — the unit packet, a charged atom, or net zero?",
+      "explanation": "These three pin down amounts: the indivisible packet (e), an atom carrying extra or missing charge, and perfect balance. Conservation of charge is a law about totals never changing, not an amount; electric charge is the property itself, not a specific quantity present.",
+      "targets": [
+        "elementary charge",
+        "ion",
+        "electrically neutral"
+      ],
+      "reasons": {
+        "elementary charge": "The quantum e — the smallest amount that can sit anywhere.",
+        "ion": "An atom whose proton–electron balance is off by whole units of e.",
+        "electrically neutral": "Net amount exactly zero."
+      }
+    },
+    {
+      "id": "lens-law-shape",
+      "prompt": "Coulomb's law is the full relation. Which two terms name its distance-falloff pattern and the apparatus that first measured it?",
+      "explanation": "The pattern is the inverse-square law (double the distance, quarter the force); the instrument was Coulomb's torsion balance. Coulomb's law itself is the whole equation — charges and distance together — and the electrostatic force is the quantity it computes, not the pattern or the device.",
+      "targets": [
+        "inverse-square law",
+        "torsion balance"
+      ],
+      "reasons": {
+        "inverse-square law": "The falloff shape shared with Newtonian gravity.",
+        "torsion balance": "The twisted-fiber apparatus of Coulomb's 1785 measurement."
+      }
+    },
+    {
+      "id": "lens-field-toolkit",
+      "prompt": "Which terms belong to working with a field — probing it, drawing it, combining many sources?",
+      "explanation": "The toolkit: a test charge probes without disturbing, field lines draw, superposition combines. The electric field itself is the thing being probed, drawn, and summed — not one of the ways of working with it.",
+      "targets": [
+        "test charge",
+        "field line",
+        "superposition principle"
+      ],
+      "reasons": {
+        "test charge": "The vanishingly small probe behind E = F/q.",
+        "field line": "Faraday's picture of direction and strength.",
+        "superposition principle": "The vector-addition rule for multiple source charges."
+      }
+    },
+    {
+      "id": "lens-static-story",
+      "prompt": "Which terms explain how an object becomes statically charged and why the charge stays put?",
+      "explanation": "Rubbing transfers charge (triboelectric effect), the excess sits as motionless net charge (static electricity), and it stays put because an insulator's charges are bound — a conductor would drain it away. Conductor is the excluded opposite: it is what static charge could NOT sit on.",
+      "targets": [
+        "triboelectric effect",
+        "static electricity",
+        "insulator"
+      ],
+      "reasons": {
+        "triboelectric effect": "The rubbing that transfers electrons between materials.",
+        "static electricity": "The motionless net charge that results.",
+        "insulator": "Bound charges: the reason excess charge cannot leave."
+      }
+    },
+    {
+      "id": "lens-induction-steps",
+      "prompt": "A charged rod lifts neutral paper without touching it. Which terms name the steps of that trick?",
+      "explanation": "First the rod's electric field reaches across the gap; then induction redistributes charge in the paper; polarization is the resulting separation — opposite charge nearer the rod — so the net attraction follows. The electric dipole is the shape the paper's molecules take, not a step in the mechanism, and the electrostatic force is the final attraction, not how it is achieved.",
+      "targets": [
+        "electric field",
+        "electrostatic induction",
+        "electric polarization"
+      ],
+      "reasons": {
+        "electric field": "Reaches across the gap — no contact needed.",
+        "electrostatic induction": "Charge redistributes in the neutral object.",
+        "electric polarization": "Opposite charge ends up on the near side; unlike charges attract."
+      }
+    },
+    {
+      "id": "lens-comparing-potential",
+      "prompt": "Potential has a value at every point. Which terms compare that value across locations rather than define it at one?",
+      "explanation": "Voltage is the difference between two points; an equipotential joins points sharing the same value, so the difference across it is zero. Electric potential itself is the at-a-point definition — the quantity the other two compare.",
+      "targets": [
+        "voltage",
+        "equipotential"
+      ],
+      "reasons": {
+        "voltage": "Potential difference between two points — a battery's job to maintain.",
+        "equipotential": "All points equal: zero difference, zero work moving along it."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "current-and-circuits",
+        "reason": "Next rung of the ladder: the charges this board introduces at rest become the currents that do work — this board's conductors and potential carry straight over.",
+        "via": [
+          "conductor",
+          "voltage"
+        ]
+      },
+      {
+        "id": "magnetism-and-induction",
+        "reason": "The board that closes the circle: moving charge — currents — turns out to be the source of all magnetism, and changing fields push back.",
+        "via": [
+          "conservation of charge",
+          "electric field"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Physics at a distance",
+    "summary": "Trace electrostatics from charge as a conserved property to the field, induction, and the potential landscape — the ladder every electrical idea stands on.",
+    "estimatedMinutes": 5,
+    "content": {
+      "text": "Rub a balloon on your hair and it will stick to a wall. Nothing touched the wall. The explanation runs through the ideas this subject teaches, in a strict order: what charge is, how charges push and pull, how a charge fills space with a field, what charge does inside materials, and how the whole story can be retold in the language of energy.\r\n\r\nStart with charge itself. It is not a substance or a fluid; it is a property that matter carries, in two signs that Benjamin Franklin named positive and negative. Two facts make charge easy to bookkeep. First, it is quantized: every bit of charge is a whole-number multiple of the elementary charge, the tiny amount one electron or proton carries. Rubbing does not create charge — it transfers electrons between surfaces, the triboelectric effect, discovered when the ancients rubbed amber and it attracted lint. Second, it is conserved: the total charge of an isolated system never changes. An object with extra charge is negatively charged, one with a deficit is positive, an atom that gained or lost electrons is an ion, and an object with exactly equal positive and negative charge is electrically neutral — net zero. A charged object's stuck-on excess is static electricity, and it stays put only on insulators, because a conductor would let it drain away.\r\n\r\nHow strongly do two charges interact? Coulomb's law answers with a force along the line between them, proportional to the product of the two charges and to the inverse square of the separation — the same inverse-square pattern gravity follows, which is why an inverse-square law is a family resemblance among forces. Coulomb confirmed it in 1785 with a torsion balance, measuring the twist of a suspended bar pushed by repulsion. Like signs repel, opposite signs attract: that asymmetry between the two signs is what the law quantifies.\r\n\r\nCoulomb's law, though, describes a force reaching across empty space — action at a distance, which physicists found philosophically uncomfortable. The field idea replaces it. Each charge fills the space around it with an electric field, defined as the force per unit charge that a vanishingly small test charge would feel at each point. The field is a property of space itself: it exists whether or not another charge is around to feel it. Fields from several charges add vectorially — the superposition principle — and field lines draw the picture, their direction the way a positive charge would be pushed, their density the field's strength. Bring a charged object near a neutral one and its field does something remarkable: it polarizes the neutral object, shifting free electrons through a conductor or stretching each molecule into a tiny electric dipole in an insulator. The near side acquires opposite charge, so the two attract — no contact required. That is electrostatic induction, and it is why the balloon holds the wall.\r\n\r\nFinally, the energy retelling. Force describes pushes; potential describes hills. The electric potential at a point is the potential energy per unit charge a small charge would have there, measured against a reference like infinity. A voltage — the word from the fact that potential is measured in volts — is the difference in potential between two points, the thing a battery maintains between its terminals. Equipotential surfaces connect points of equal potential, cutting field lines at right angles, and moving a charge along one takes no work. The field, it turns out, always points down the potential hill.\r\n\r\nCharge, force, field, matter, potential: five rungs, one ladder. Every electrical device — wire, battery, motor, radio — stands on it."
+    },
+    "links": [
+      {
+        "href": "wiki:Electric charge"
+      },
+      {
+        "href": "wiki:Electric field"
+      },
+      {
+        "href": "wiki:Electric potential"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

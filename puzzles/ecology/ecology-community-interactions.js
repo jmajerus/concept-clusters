@@ -390,8 +390,8 @@ puzzle.layout = {
       "stripHeight": 16,
       "circles": {
         "cluster:0": {
-          "x": 520.08,
-          "y": 108.85,
+          "x": 489.02,
+          "y": 112.86,
           "pinned": true
         },
         "cluster:1": {
@@ -400,8 +400,8 @@ puzzle.layout = {
           "pinned": true
         },
         "cluster:2": {
-          "x": 770.65,
-          "y": 359.09,
+          "x": 778.67,
+          "y": 391.16,
           "pinned": true
         },
         "cluster:3": {
@@ -485,13 +485,14 @@ puzzle.layout = {
         "lineCrossings": 0,
         "lineHeadingIntersections": 0,
         "lineCircleIntersections": 0,
-        "totalLength": 343.96681720773984
+        "edgeNodeIntersections": 0,
+        "totalLength": 311.0646648990736
       },
       "solutionLayout": "pretty",
       "capturedSolved": true,
       "fixed": true,
       "source": "author",
-      "savedAt": "2026-10-14T17:25:44.071Z"
+      "savedAt": "2026-10-18T10:44:59.632Z"
     }
   }
 };

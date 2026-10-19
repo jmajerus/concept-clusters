@@ -1,0 +1,658 @@
+{
+  "id": "backward-design",
+  "title": "Backward Design — Planning From the Proof Backward",
+  "category": "education-learning-sciences",
+  "subcategories": {
+    "education-learning-sciences": "instructional-design"
+  },
+  "info": {
+    "text": "Backward design — the method at the center of Wiggins and McTighe's Understanding by Design framework — plans a course in reverse: fix the results learners should keep (Stage 1), decide what would count as proof (Stage 2), and only then plan instruction (Stage 3). This puzzle teaches the framework's own vocabulary, its three-stage machinery, the acquisition–meaning–transfer goal triad that justifies it, and the failure modes — the twin sins — it exists to correct.",
+    "citations": [
+      {
+        "title": "Understanding by Design (2nd ed.)",
+        "author": "Grant Wiggins and Jay McTighe",
+        "publisher": "ASCD",
+        "year": "2005"
+      },
+      {
+        "title": "Put Understanding First",
+        "author": "Grant Wiggins and Jay McTighe",
+        "publisher": "ASCD Educational Leadership 65(8)",
+        "year": "2008",
+        "url": "https://www.ascd.org/el/articles/put-understanding-first"
+      },
+      {
+        "title": "Understanding by Design",
+        "author": "Ryan S. Bowen",
+        "publisher": "Vanderbilt University Center for Teaching (archived)",
+        "year": "2017",
+        "url": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/"
+      },
+      {
+        "title": "Backward design",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Backward_design"
+      },
+      {
+        "title": "Understanding by Design",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Understanding_by_Design"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "planning-direction",
+      "name": "The Planning Direction",
+      "color": "teal",
+      "fact": "Backward design plans in reverse: fix the results first, then the evidence, then the teaching. Forward design — the classroom habit it names — starts from textbooks and beloved activities and hopes results follow.",
+      "termInfo": {
+        "backward design": {
+          "text": "The method Wiggins and McTighe named at the center of Understanding by Design: plan results, then evidence, then instruction — in that order. 'Backwards planning' is an informal synonym for the same move.",
+          "links": [
+            {
+              "href": "wiki:Backward design"
+            }
+          ]
+        },
+        "forward design": {
+          "text": "The habitual sequence backward design opposes: pick the textbook or beloved activities first, then write the assessments, and hope the intended results follow.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The framework's core move is a reversal of the habitual planning order; the contrast between the two directions organizes everything else on this board.",
+        "links": [
+          {
+            "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+            "label": "Bowen (2017), Understanding by Design — Vanderbilt CFT (archived)"
+          }
+        ]
+      },
+      "seeds": [
+        "backward design"
+      ],
+      "floatingTerms": [
+        "forward design"
+      ],
+      "terms": [
+        "backward design",
+        "forward design"
+      ]
+    },
+    {
+      "id": "desired-results",
+      "name": "Stage 1 — Desired Results",
+      "color": "blue",
+      "fact": "Stage 1 decides what learners should retain: big ideas stated as enduring understandings, pursued through essential questions, and prioritized through a filter from worth-being-familiar-with up through important-to-know-and-do.",
+      "termInfo": {
+        "big ideas": {
+          "text": "The conceptual anchor a course is organized around — a concept, theme, or principle like 'adaptation' or 'supply and demand'. An enduring understanding is a big idea stated in full-sentence form.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017), Stage One"
+            }
+          ]
+        },
+        "enduring understandings": {
+          "text": "Full-sentence statements of what students should keep after the course ends — 'Students will understand that…' — the top priority of Stage 1's filter.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017), Stage One"
+            }
+          ]
+        },
+        "essential questions": {
+          "text": "Open questions — 'Students will keep considering…' — that guide learners toward a big idea without handing them a settled answer; Stage 1 pairs them with the understandings.",
+          "links": [
+            {
+              "href": "wiki:Understanding by Design"
+            }
+          ]
+        },
+        "important to know and do": {
+          "text": "The middle ring of Stage 1's prioritization filter: knowledge and skills that are prerequisite to the enduring understandings — important, but not the destination.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017), Stage One"
+            }
+          ]
+        },
+        "knowledge worth being familiar with": {
+          "text": "The outer ring of Stage 1's filter: content that deserves exposure, not mastery. Naming it keeps the filter honest about what can be skipped.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017), Stage One"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Stage 1 pairs every 'Students will understand that…' statement with open questions that keep learners considering it, and filters all candidate content by how long it must last.",
+        "links": [
+          {
+            "href": "wiki:Understanding by Design"
+          },
+          {
+            "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+            "label": "Bowen (2017), Stage One — Identify Desired Results (archived)"
+          }
+        ]
+      },
+      "seeds": [
+        "big ideas",
+        "enduring understandings"
+      ],
+      "floatingTerms": [
+        "essential questions",
+        "knowledge worth being familiar with",
+        "important to know and do"
+      ],
+      "terms": [
+        "big ideas",
+        "enduring understandings",
+        "essential questions",
+        "knowledge worth being familiar with",
+        "important to know and do"
+      ]
+    },
+    {
+      "id": "acceptable-evidence",
+      "name": "Stage 2 — Acceptable Evidence",
+      "color": "amber",
+      "fact": "Stage 2 decides, before any teaching is planned, what would count as proof that the desired results occurred — typically a culminating performance task that asks learners to apply their learning authentically.",
+      "termInfo": {
+        "acceptable evidence": {
+          "text": "Stage 2's criterion: what would count as proof that the desired results occurred, specified before teaching begins. It is the standard, of which tasks are instances.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017), Stage Two"
+            }
+          ]
+        },
+        "authentic assessment": {
+          "text": "The quality bar for acceptable evidence: tasks mirroring how the learning is actually used beyond school, rather than proxies for recall.",
+          "links": [
+            {
+              "href": "wiki:Authentic assessment"
+            }
+          ]
+        },
+        "performance task": {
+          "text": "The assessment form UbD centers on: a realistic, often culminating task that requires learners to apply their understanding, not just recite it.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017), Stage Two"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Assessment here is designed, not improvised: the designer specifies the proof before choosing instruction, which is what makes the later lessons accountable to a fixed target.",
+        "links": [
+          {
+            "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+            "label": "Bowen (2017), Stage Two — Determine Acceptable Evidence (archived)"
+          }
+        ]
+      },
+      "seeds": [
+        "performance task",
+        "authentic assessment"
+      ],
+      "floatingTerms": [
+        "acceptable evidence"
+      ],
+      "terms": [
+        "performance task",
+        "authentic assessment",
+        "acceptable evidence"
+      ]
+    },
+    {
+      "id": "learning-plan",
+      "name": "Stage 3 — The Learning Plan",
+      "color": "magenta",
+      "fact": "Only in Stage 3, with results and evidence fixed, does the design turn to instruction: the learning experiences and enabling knowledge and skills students will need, sequenced by the WHERE elements — hook and hold them, equip and experience, rethink and rehearse, evaluate (Wiggins & McTighe).",
+      "termInfo": {
+        "enabling knowledge and skills": {
+          "text": "The facts, concepts, and skills students need in order to succeed on the performance tasks — the 'equip' of the WHERE sequence, identified only after the tasks exist.",
+          "links": [
+            {
+              "href": "wiki:Backward design"
+            }
+          ]
+        },
+        "hook problem": {
+          "text": "The 'H' of the WHERE sequence: an opening problem situation that hooks learners' interest and holds it — problem first, explanation second.",
+          "links": [
+            {
+              "href": "wiki:Backward design"
+            }
+          ]
+        },
+        "learning experiences": {
+          "text": "Stage 3's instruction: the activities and sequences students actually go through — chosen last, for their fit to the fixed evidence.",
+          "links": [
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017), Stage Three"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The learning plan is last by design: activities are selected and sequenced for their fit to the evidence, replacing the textbook-and-activities-first habit. The W-H-E-R-E mnemonic summarizes Wiggins and McTighe's elements of a good learning plan.",
+        "links": [
+          {
+            "href": "wiki:Backward design"
+          }
+        ]
+      },
+      "seeds": [
+        "learning experiences",
+        "enabling knowledge and skills"
+      ],
+      "floatingTerms": [
+        "hook problem"
+      ],
+      "terms": [
+        "learning experiences",
+        "enabling knowledge and skills",
+        "hook problem"
+      ]
+    },
+    {
+      "id": "goal-triad",
+      "name": "The Goal Triad",
+      "color": "olive",
+      "fact": "Schooling's long-term aims form a triad: acquisition of facts and skills as the entry tier, meaning made of content in the middle, and transfer — applying learning to novel situations — as the finish line.",
+      "termInfo": {
+        "acquisition": {
+          "text": "The triad's entry tier: discrete facts and skills. Necessary as a doorway, but schooling errs — in Wiggins and McTighe's diagnosis — when it treats acquisition as the goal.",
+          "links": [
+            {
+              "href": "https://www.ascd.org/el/articles/put-understanding-first",
+              "label": "Wiggins & McTighe (2008)"
+            }
+          ]
+        },
+        "meaning making": {
+          "text": "The triad's middle tier: learners actively constructing understanding of content, connecting it to what they know, rather than only receiving it.",
+          "links": [
+            {
+              "href": "https://www.ascd.org/el/articles/put-understanding-first",
+              "label": "Wiggins & McTighe (2008)"
+            }
+          ]
+        },
+        "transfer": {
+          "text": "The triad's finish line and the long-term aim of schooling: applying learning to novel situations that were never rehearsed.",
+          "links": [
+            {
+              "href": "https://www.ascd.org/el/articles/put-understanding-first",
+              "label": "Wiggins & McTighe (2008)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Wiggins and McTighe's 'Put Understanding First' argues schooling inverts this triad: it treats acquisition as the goal when it is only the doorway. Learning for understanding is the umbrella these three tiers operationalize.",
+        "links": [
+          {
+            "href": "https://www.ascd.org/el/articles/put-understanding-first",
+            "label": "Wiggins & McTighe (2008), Put Understanding First — ASCD Educational Leadership 65(8)"
+          }
+        ]
+      },
+      "seeds": [
+        "meaning making",
+        "transfer"
+      ],
+      "floatingTerms": [
+        "acquisition"
+      ],
+      "terms": [
+        "meaning making",
+        "transfer",
+        "acquisition"
+      ]
+    },
+    {
+      "id": "failure-modes",
+      "name": "The Failure Modes",
+      "color": "brown",
+      "fact": "The diagnoses this design order corrects: coverage — marching through content for its own sake — and activity focus — engaging hands with no learning target — the 'twin sins' of design, plus letting the textbook stand in for the syllabus.",
+      "termInfo": {
+        "activity focus": {
+          "text": "The second twin sin: designing engaging, hands-on activities with no explicit learning target behind them — 'mere homage' to doing.",
+          "links": [
+            {
+              "href": "https://www.ascd.org/el/articles/put-understanding-first",
+              "label": "Wiggins & McTighe (2008)"
+            },
+            {
+              "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+              "label": "Bowen (2017)"
+            }
+          ]
+        },
+        "coverage": {
+          "text": "The first twin sin: teaching by marching through content for its own sake, measuring success by what was presented rather than what was kept.",
+          "links": [
+            {
+              "href": "https://www.ascd.org/el/articles/put-understanding-first",
+              "label": "Wiggins & McTighe (2008)"
+            }
+          ]
+        },
+        "textbook as syllabus": {
+          "text": "The habit of letting the textbook's sequence stand in for curricular goals; the book should serve as a resource, not as the syllabus.",
+          "links": [
+            {
+              "href": "https://www.ascd.org/el/articles/put-understanding-first",
+              "label": "Wiggins & McTighe (2008)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Each failure mode is a planning order gone wrong, not a personality flaw: content-first, activity-first, or textbook-first designs all skip the question of what learners should keep.",
+        "links": [
+          {
+            "href": "https://www.ascd.org/el/articles/put-understanding-first",
+            "label": "Wiggins & McTighe (2008), Put Understanding First — ASCD Educational Leadership 65(8)"
+          },
+          {
+            "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+            "label": "Bowen (2017), Understanding by Design (archived)"
+          }
+        ]
+      },
+      "seeds": [
+        "activity focus",
+        "coverage"
+      ],
+      "floatingTerms": [
+        "textbook as syllabus"
+      ],
+      "terms": [
+        "activity focus",
+        "coverage",
+        "textbook as syllabus"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "results-before-methods",
+      "term": "results before methods",
+      "clusters": [
+        "planning-direction",
+        "learning-plan"
+      ],
+      "fact": "The point of reversing the order: the best designs derive backward from the learnings sought, so the learning plan exists only to serve results fixed in advance — not to fill the calendar or the textbook.",
+      "info": {
+        "links": [
+          {
+            "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+            "label": "Bowen (2017), Understanding by Design (archived)"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "planning-direction": "backward design"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "planning-direction",
+        "to": "learning-plan"
+      }
+    },
+    {
+      "id": "how-will-i-know",
+      "term": "how will I know?",
+      "clusters": [
+        "desired-results",
+        "acceptable-evidence"
+      ],
+      "fact": "Stage 2's guiding question — 'How will I know if students have achieved the desired results? What will I accept as evidence of student understanding?' — is asked only after Stage 1 has fixed those results.",
+      "info": {
+        "links": [
+          {
+            "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+            "label": "Bowen (2017), Stage Two (archived)"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "desired-results": "enduring understandings",
+        "acceptable-evidence": "acceptable evidence"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "desired-results",
+        "to": "acceptable-evidence"
+      }
+    },
+    {
+      "id": "alignment",
+      "term": "alignment",
+      "clusters": [
+        "acceptable-evidence",
+        "learning-plan"
+      ],
+      "fact": "Because evidence is fixed first, every learning experience is chosen for its fit to that evidence — instruction drives students toward exactly what the assessment demands, and off-target busywork becomes visible as such.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Backward design"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "acceptable-evidence": "acceptable evidence",
+        "learning-plan": "learning experiences"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "acceptable-evidence",
+        "to": "learning-plan"
+      }
+    },
+    {
+      "id": "recall-application-gap",
+      "term": "the recall–application gap",
+      "clusters": [
+        "learning-plan",
+        "goal-triad"
+      ],
+      "fact": "A student who acquired the content but flounders on an unfamiliar application problem shows 'not a failure of coverage but a failure of transfer' — so the learning plan must be built for application, not recall alone.",
+      "info": {
+        "links": [
+          {
+            "href": "https://www.ascd.org/el/articles/put-understanding-first",
+            "label": "Wiggins & McTighe (2008), Put Understanding First"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "learning-plan": "learning experiences",
+        "goal-triad": "transfer"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "goal-triad",
+        "to": "learning-plan"
+      }
+    },
+    {
+      "id": "durability",
+      "term": "durability",
+      "clusters": [
+        "desired-results",
+        "goal-triad"
+      ],
+      "fact": "Enduring understandings are selected precisely because big ideas transfer: meaning made of a big idea is what lets a learner answer questions that were never scripted.",
+      "info": {
+        "links": [
+          {
+            "href": "https://web.archive.org/web/20240104180643/https://cft.vanderbilt.edu/guides-sub-pages/understanding-by-design/",
+            "label": "Bowen (2017), Stage One (archived)"
+          },
+          {
+            "href": "https://www.ascd.org/el/articles/put-understanding-first",
+            "label": "Wiggins & McTighe (2008), Put Understanding First"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "desired-results": "enduring understandings",
+        "goal-triad": "transfer"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "goal-triad",
+        "to": "desired-results"
+      }
+    },
+    {
+      "id": "forward-design-habit",
+      "term": "the forward-design habit",
+      "clusters": [
+        "planning-direction",
+        "goal-triad"
+      ],
+      "fact": "Starting with activities and textbooks feels productive, but the habit yields acquisition without transfer — familiar recall that collapses the moment a problem looks unfamiliar.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Understanding by Design"
+          }
+        ]
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "planning-direction": "forward design",
+        "goal-triad": "acquisition"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "stage1-filter",
+      "prompt": "Stage 1's prioritization filter sorts candidate content into three rings, and only the top ring earns the title of enduring. Which two terms name the lower rings — content that matters but is not the destination?",
+      "explanation": "Stage 1's filter runs from worth being familiar with (exposure) up through important to know and do (prerequisites) to enduring understandings (retention). The big ideas and essential questions are not rings in the filter — they are what the top ring states and the open questions learners carry toward it.",
+      "label": "The Stage 1 filter",
+      "targets": [
+        "knowledge worth being familiar with",
+        "important to know and do"
+      ],
+      "reasons": {
+        "important to know and do": "the middle ring — prerequisite knowledge and skills, important but not the destination",
+        "knowledge worth being familiar with": "the outer ring — exposure, not mastery"
+      }
+    },
+    {
+      "id": "stage-order",
+      "prompt": "A designer has written the enduring understandings and is itching to plan some engaging lessons. In this framework's order, what must be specified before any instruction is planned?",
+      "explanation": "The framework's core discipline is the order: results (Stage 1), then acceptable evidence (Stage 2), then the learning plan (Stage 3). Evidence is specified before teaching so that every lesson is accountable to a fixed proof. The performance task is the signature form that evidence takes — an instance of the criterion, not the criterion itself.",
+      "label": "The design order",
+      "targets": [
+        "acceptable evidence"
+      ],
+      "reasons": {
+        "acceptable evidence": "Stage 2's product — the proof fixed in advance that Stage 3 instruction must serve"
+      }
+    },
+    {
+      "id": "triad-extremes",
+      "prompt": "Within the goal triad, which two terms sit at opposite ends of the ladder — the entry tier that schooling overemphasizes, and the finish line it too rarely reaches?",
+      "explanation": "Acquisition is the doorway — facts and skills; transfer is the finish line — novel application. Meaning making sits deliberately in the middle of the ladder: essential, but neither end.",
+      "label": "Entry and finish",
+      "targets": [
+        "acquisition",
+        "transfer"
+      ],
+      "reasons": {
+        "acquisition": "the entry tier — necessary, but schooling errs when it treats it as the goal",
+        "transfer": "the finish line — applying learning to situations never rehearsed"
+      }
+    },
+    {
+      "id": "twin-sins",
+      "prompt": "Wiggins and McTighe's 'twin sins' of instructional design both mistake a means for an end. Which two terms name the pair?",
+      "explanation": "Coverage marches through content for its own sake; activity focus engages hands with no learning target. 'Textbook as syllabus' is a related habit — outsourcing goals to a book's sequence — but the named twin sins are the first two.",
+      "label": "The twin sins",
+      "targets": [
+        "coverage",
+        "activity focus"
+      ],
+      "reasons": {
+        "activity focus": "the second twin sin — engaging hands with no learning target",
+        "coverage": "the first twin sin — marching through content for its own sake"
+      }
+    },
+    {
+      "id": "quiz-then-transfer",
+      "prompt": "A student aces the unit's recall quiz, then flounders on a genuinely new application problem. Which term names the diagnosis — and which goal-triad tier was never really built?",
+      "explanation": "Wiggins and McTighe's own diagnosis: the quiz score shows recall was present, the transfer-task failure shows 'not a failure of coverage but a failure of transfer.' The missing tier is the finish line — transfer — while acquisition was abundantly built.",
+      "label": "Reading the signature",
+      "targets": [
+        "the recall–application gap",
+        "transfer"
+      ],
+      "reasons": {
+        "the recall–application gap": "the diagnosis — acquired content that collapses on unfamiliar application",
+        "transfer": "the missing tier — the finish line the plan never served"
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "assessment-for-learning",
+        "reason": "Stage 2 fixes the acceptable evidence in advance; this board checks learning live against it — the planning proof and the during-teaching evidence loop are the two halves of accountable teaching."
+      },
+      {
+        "id": "how-learning-sticks",
+        "reason": "The learning science behind the design choices: transfer — the goal triad's finish line that backward design plans toward — is exactly the durable, schema-carrying learning the sibling board explains."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Planning Backward",
+    "summary": "Why backward design reverses the planning order — and what each of its three stages fixes.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "Planning a course usually starts in the middle: open the textbook, line up the chapters, plan some engaging lessons, and write the test the night before it is due. Grant Wiggins and Jay McTighe named that habit forward design and argued it is backwards in the wrong way. Their alternative, backward design — the method at the center of their Understanding by Design framework — plans in reverse: decide first what learners should keep, then what would count as proof, and only then what to actually do in class.\r\n\r\n## Why: the goal triad\r\n\r\nThe reversal exists to serve a claim about purpose. Schooling's long-term aims form a triad. At the entry tier sits acquisition — facts and discrete skills, necessary but never the destination. In the middle sits meaning making — learners actively constructing understanding of the content rather than just receiving it. At the finish line sits transfer — the ability to apply learning to situations that were never rehearsed. In their 2008 essay \"Put Understanding First,\" Wiggins and McTighe argue that most schooling works this ladder from the bottom and stops at acquisition, treating the doorway as the destination. Learning for understanding is the umbrella the whole triad operationalizes.\r\n\r\n## How: the three stages\r\n\r\nStage 1 identifies desired results. Designers name the big ideas worth keeping — stated in full as enduring understandings of the form \"Students will understand that…\" — and pair them with essential questions, open questions learners keep considering rather than answer and shelve. Stage 1 is also a filter: some content is only worth being familiar with, some is important to know and do, and only a small remainder qualifies as enduring.\r\n\r\nStage 2 determines acceptable evidence: what would count as proof that the desired results were achieved. The signature form is the performance task — a realistic problem that asks learners to apply their learning authentically, the way it is used beyond school.\r\n\r\nStage 3, and only Stage 3, plans instruction: the learning experiences and the enabling knowledge and skills students will need to succeed on that evidence. Wiggins and McTighe summarize the qualities of a good plan with the mnemonic WHERE: know Where you are headed and why; Hook and hold learners with a genuinely problematic opening — the hook problem; Equip them through Experience and Explore; invite Rethink and Rehearse; and let them Evaluate their own progress.\r\n\r\n## What goes wrong without it\r\n\r\nThe framework is a diagnosis as much as a method. Its twin sins are coverage — marching through content for its own sake — and activity focus — hands-on engagement with no learning target behind it. A third habit lets the textbook stand in for the syllabus, outsourcing the goals to a book's table of contents. Each skips the same question: what should learners keep? The cost has a recognizable signature: a student who aces the recall quiz but flounders on a genuinely new problem shows not a failure of coverage but a failure of transfer. The everyday virtue that prevents it is alignment — every activity chosen for its fit to evidence fixed in advance."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

@@ -275,7 +275,11 @@ const puzzle = definePuzzle(import.meta.url, {
         "mechanical distance"
       ],
       "reasons": {
-        "mechanical distance": "Training simulators recreate the same screen-and-sight remove found in real combat technology, so the conditioned reflex is first practiced on a target, not a person."
+        "authorization": "A legitimizing chain of command built into the military structure itself, not a moral conviction a soldier holds independently.",
+        "desensitization": "A measurable effect of repeated training exposure, not a belief about the enemy or the cause.",
+        "mechanical distance": "Training simulators recreate the same screen-and-sight remove found in real combat technology, so the conditioned reflex is first practiced on a target, not a person.",
+        "operant conditioning": "The specific conditioning technique itself -- pairing a reflexive action with a consequence until it no longer requires deliberation.",
+        "target discrimination": "A specific drill -- human-shaped, fall-when-hit targets -- engineered to bypass conscious deliberation."
       }
     },
     {
@@ -289,7 +293,10 @@ const puzzle = definePuzzle(import.meta.url, {
         "rationalization"
       ],
       "reasons": {
-        "authorization": "The same displacement Stanley Milgram's obedience experiments demonstrated in a laboratory: moral responsibility migrates to whoever gave the order."
+        "authorization": "The same displacement Stanley Milgram's obedience experiments demonstrated in a laboratory: moral responsibility migrates to whoever gave the order.",
+        "cultural distance": "Locates the weight of the act in the enemy's supposed otherness rather than in the killer's own choice to fire.",
+        "moral distance": "Locates the weight of the act in the cause's presumed rightness rather than in the individual decision to kill.",
+        "rationalization": "Locates the weight of the act in a story told afterward, constructed specifically to protect the killer's own self-image."
       }
     }
   ],
@@ -644,7 +651,7 @@ puzzle.layout = {
   "board": {
     "sizeFactor": 1,
     "source": "auto",
-    "savedAt": "2026-10-08T01:27:29.399Z"
+    "savedAt": "2026-10-18T06:08:24.483Z"
   }
 };
 puzzle.starLayout = puzzle.layout?.modes?.star || null;
