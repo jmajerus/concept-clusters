@@ -83,6 +83,21 @@ export async function resolveLocalD1Config({
   env = process.env,
   repositoryRoot
 } = {}) {
+  const proxyUrl = trimmed(env, "AUTHORING_D1_PROXY_URL");
+  if (proxyUrl) {
+    const proxyToken = trimmed(env, "AUTHORING_D1_PROXY_TOKEN");
+    if (!proxyToken) {
+      throw new LocalD1ConfigError(
+        "AUTHORING_D1_PROXY_URL is set but AUTHORING_D1_PROXY_TOKEN is not. " +
+        "Set it to the proxy Worker's D1_PROXY_TOKEN secret, or unset the URL " +
+        "to use the D1 REST API."
+      );
+    }
+    return {
+      endpoint: `${proxyUrl.replace(/\/+$/, "")}/query`,
+      token: proxyToken
+    };
+  }
   const accountId = trimmed(env, "CLOUDFLARE_ACCOUNT_ID");
   const token = trimmed(env, "CLOUDFLARE_API_TOKEN")
     || trimmed(env, "CLOUDFLARE_D1_TOKEN");

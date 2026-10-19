@@ -18,6 +18,7 @@
   },
   "include": [
     "src/authoring-worker.ts",
+    "src/d1-proxy-worker.ts",
     "src/authoring-worker-configuration.d.ts",
     "tests/worker/**/*.ts",
     "vitest.authoring.config.ts"

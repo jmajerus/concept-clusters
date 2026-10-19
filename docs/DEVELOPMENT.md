@@ -45,6 +45,33 @@ or under `AUTHORING_DATA_DIR` when configured. Use
 `node tools/authoring-workspace.mjs` to print the resolved paths. Review logs
 and other scratch files belong there, not in the MCP protocol workspace.
 
+`AUTHORING_D1_TIMING=1` logs one line per request that touched D1: total
+time, number of D1 HTTP calls, their summed time, their wall-clock time
+(close to the sum means the calls ran one after another), and the slowest
+statement. `AUTHORING_D1_TIMING=2` also lists each call with its start
+offset, duration, and response size.
+
+The local server and the `tools/` scripts reach D1 through the D1 REST API
+unless a D1 proxy is configured. The proxy (`src/d1-proxy-worker.ts`,
+`wrangler.d1-proxy.jsonc`) is a small Worker with a D1 binding that accepts
+the REST API's `/query` request and response shapes, so each query costs one
+hop to the nearest Cloudflare location instead of a trip into the REST API.
+To use it, set in `.env`:
+
+```
+AUTHORING_D1_PROXY_URL=https://concept-clusters-d1-proxy.<subdomain>.workers.dev
+AUTHORING_D1_PROXY_TOKEN=<the proxy's D1_PROXY_TOKEN secret>
+```
+
+The token lets its holder run any SQL, like a D1-edit API token; keep it out
+of git. Unset `AUTHORING_D1_PROXY_URL` to go back to the REST API. The proxy is
+deployed by hand, not by CI:
+
+```
+npx wrangler secret put D1_PROXY_TOKEN -c wrangler.d1-proxy.jsonc
+npx wrangler deploy -c wrangler.d1-proxy.jsonc
+```
+
 `AUTO_LAYOUT_PASS=1` turns on the automatic layout pass for working copies:
 the server checks D1 every minute for working copies changed since it was
 first turned on, and once a working copy's board (clusters, terms, bridges)
@@ -192,8 +219,8 @@ anything ever imports from it directly):
 | `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
 | `repositoryPublicationService.js` | Deterministic import plans, approval fingerprints, file preconditions, transactional publication, rollback, and live registry updates; backs `tools/content-jsonld.mjs`'s `content:import` only, not MCP | `contentInterchangeService.js`, Node filesystem/process APIs |
 | `puzzleDraftStore.js` | File-backed draft remnant for tests; not the stdio default | Node filesystem APIs |
-| `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch` | `fetch` |
-| `localD1Config.js` | Account, database, token, and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
+| `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch`, over the REST API or the D1 proxy Worker | `fetch` |
+| `localD1Config.js` | Account, database, token (or D1 proxy URL and token), and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
 | `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus the LAN server's running revision, LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel), and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |

@@ -1,3 +1,5 @@
+import { recordD1Query } from "./d1RequestTiming.js";
+
 const DEFAULT_API_BASE = "https://api.cloudflare.com/client/v4";
 
 export class HttpD1Error extends Error {
@@ -37,22 +39,45 @@ function normalizeResult(entry) {
   };
 }
 
+/**
+ * @param {{
+ *   accountId?: string,
+ *   databaseId?: string,
+ *   token?: string,
+ *   apiBase?: string,
+ *   endpoint?: string,
+ *   fetchImpl?: typeof fetch
+ * }} [options]
+ */
 export function createHttpD1Database({
   accountId,
   databaseId,
   token,
   apiBase = DEFAULT_API_BASE,
+  endpoint: endpointOverride = "",
   fetchImpl = globalThis.fetch
 } = {}) {
-  if (!accountId || !databaseId || !token) {
-    throw new HttpD1Error("D1 HTTP client requires accountId, databaseId, and token");
+  if (!token || (!endpointOverride && (!accountId || !databaseId))) {
+    throw new HttpD1Error("D1 HTTP client requires a token and either an endpoint or accountId and databaseId");
   }
   if (typeof fetchImpl !== "function") {
     throw new HttpD1Error("D1 HTTP client requires fetch");
   }
-  const endpoint = `${String(apiBase).replace(/\/+$/, "")}/accounts/${accountId}/d1/database/${databaseId}/query`;
+  // An endpoint override is the D1 proxy Worker (src/d1-proxy-worker.ts),
+  // which speaks the REST API's /query request and response shapes.
+  const endpoint = endpointOverride || `${String(apiBase).replace(/\/+$/, "")}/accounts/${accountId}/d1/database/${databaseId}/query`;
 
   async function request(body) {
+    const startedAt = performance.now();
+    const received = { bytes: 0 };
+    try {
+      return await send(body, received);
+    } finally {
+      recordD1Query(body, startedAt, performance.now(), received.bytes);
+    }
+  }
+
+  async function send(body, received) {
     let response;
     try {
       response = await fetchImpl(endpoint, {
@@ -69,6 +94,7 @@ export function createHttpD1Database({
       );
     }
     const text = await response.text();
+    received.bytes = Buffer.byteLength(text, "utf8");
     let payload;
     try {
       payload = text ? JSON.parse(text) : {};

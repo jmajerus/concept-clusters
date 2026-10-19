@@ -33,6 +33,7 @@ import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
 import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview.js";
 import { handleLocalModelSuggestions } from "./modelSuggestionsAdminPage.js";
 import { guardLocalAdmin } from "./localAdminAuth.js";
+import { withD1Timing } from "./d1RequestTiming.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
@@ -513,10 +514,10 @@ export async function startLocalStaticDev({
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
   const manifest = await preparePuzzleManifest(repositoryRoot);
-  const handler = withLocalAdminAuth(
+  const handler = withD1Timing(withLocalAdminAuth(
     handleRequest || createLocalDevDraftHandler(repositoryRoot),
     { host, env }
-  );
+  ), { env });
   let server;
   try {
     server = await startServer(repositoryRoot, { host, port, handleRequest: handler });
@@ -647,10 +648,10 @@ export async function startLocalWorkerDev({
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
   const manifest = await preparePuzzleManifest(repositoryRoot);
-  const handler = withLocalAdminAuth(
+  const handler = withD1Timing(withLocalAdminAuth(
     handleRequest || createLocalDevDraftHandler(repositoryRoot),
     { host, env }
-  );
+  ), { env });
   const wranglerPort = port === 8791 ? 8792 : 8791;
   const wrangler = spawn(
     join(repositoryRoot, "node_modules", ".bin", "wrangler"),

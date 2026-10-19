@@ -1,0 +1,19 @@
+{
+  // D1 proxy for the local authoring server: see src/d1-proxy-worker.ts.
+  // Deploy by hand (no CI job): npx wrangler deploy -c wrangler.d1-proxy.jsonc
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "concept-clusters-d1-proxy",
+  "main": "src/d1-proxy-worker.ts",
+  "compatibility_date": "2026-08-02",
+  "workers_dev": true,
+  "secrets": {
+    "required": ["D1_PROXY_TOKEN"]
+  },
+  "d1_databases": [
+    {
+      "binding": "AUTHORING_DB",
+      "database_name": "concept-clusters-authoring",
+      "database_id": "726254cf-2847-42a0-b061-7900342cfd7c"
+    }
+  ]
+}
