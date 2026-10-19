@@ -160,6 +160,7 @@ import * as boardLimitWaivers from "./board-limit-waivers.mjs";
 import * as mcpWaiverChatApproval from "./mcp-waiver-chat-approval.mjs";
 import * as legacyBoardLift from "./legacy-board-lift.mjs";
 import * as firstPublishedBackfill from "./first-published-backfill.mjs";
+import * as d1LargeColumnCache from "./d1-large-column-cache.mjs";
 
 const allTests = [
   tableMode, tableSorting, tableFeedback, tableInfo, tablePanels, tableLensEffects,
@@ -176,7 +177,7 @@ const allTests = [
   geometryVisibleSegment, circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, playerLayoutPolish, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
   nonCryptographicHash,
   skillRevisionStamp,
-  wikiLinkCheck
+  wikiLinkCheck, d1LargeColumnCache
 ];
 
 // Keep these lists intentional rather than making every new test quick or
@@ -194,7 +195,7 @@ const quickTests = [
   authoringDomains, authoringFieldOwnership, draftDomainColumns, localGitHubConfig, localD1Workspace, loadProjectEnv,
   authoringWorkspace, saveWorkingDraft, stagingPlayLinks, boot, puzzleManifest, publicPlay, librarySearchEngine, catalogueNavigation, geometryVisibleSegment,
   circleMemberOrder, layoutHints, layoutBoardSettings, legacyBoardLift, firstPublishedBackfill, graphLayoutRepair, playerLayoutEffort, layoutPassJobs, autoLayoutWatcher, singleClusterLayout,
-  categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck
+  categoryReferenceMigration, contentCanonicalization, nonCryptographicHash, skillRevisionStamp, wikiLinkCheck, d1LargeColumnCache
 ];
 
 const standardTests = [
@@ -244,7 +245,7 @@ const sideTests = {
     authoringFieldOwnership, draftDomainColumns, localGitHubConfig,
     localD1Workspace, loadProjectEnv, authoringWorkspace, saveWorkingDraft, stagingPlayLinks,
     localDevHttp, localDevHousekeep, playCorpus, boardAdministration, domains, wikiLinkCheck,
-    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill
+    boardLimitWaivers, mcpWaiverChatApproval, layoutPassJobs, autoLayoutWatcher, legacyBoardLift, firstPublishedBackfill, d1LargeColumnCache
   ]),
   shared: new Set([
     contentValidation,

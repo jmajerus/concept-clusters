@@ -24,6 +24,13 @@ function sqlLabel(body) {
   return String(body?.sql || "").replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
+// Rows whose large columns came from modules/d1LargeColumnCache.js.
+export function recordD1CacheReuse(rows) {
+  const trace = storage.getStore();
+  if (!trace || !rows) return;
+  trace.reusedRows = (trace.reusedRows || 0) + rows;
+}
+
 export function recordD1Query(body, startedAt, endedAt, bytes = 0) {
   const trace = storage.getStore();
   if (!trace) return;
@@ -55,7 +62,9 @@ function detailLines(startedAt, queries) {
   );
 }
 
-export function summarizeD1Trace({ method, url, status, startedAt, endedAt, queries, detailed = false }) {
+export function summarizeD1Trace({
+  method, url, status, startedAt, endedAt, queries, reusedRows = 0, detailed = false
+}) {
   const durations = queries.map(query => query.endedAt - query.startedAt);
   const sum = durations.reduce((total, ms) => total + ms, 0);
   const slowest = queries[durations.indexOf(Math.max(...durations))];
@@ -63,7 +72,7 @@ export function summarizeD1Trace({ method, url, status, startedAt, endedAt, quer
   const bytes = queries.reduce((total, query) => total + query.bytes, 0);
   const summary = `D1 ${method} ${url} ${status} total=${ms(endedAt - startedAt)} ` +
     `d1=${queries.length} sum=${ms(sum)} wall=${ms(wallMs(queries))} ` +
-    `size=${Math.round(bytes / 1024)}KB ` +
+    `size=${Math.round(bytes / 1024)}KB reused=${reusedRows} ` +
     `slowest=${ms(slowest.endedAt - slowest.startedAt)} ${slowest.label}`;
   return detailed ? [summary, ...detailLines(startedAt, queries)].join("\n") : summary;
 }
@@ -82,6 +91,7 @@ export function withD1Timing(handler, { env = process.env, log = console.log } =
         startedAt,
         endedAt: performance.now(),
         queries: trace.queries,
+        reusedRows: trace.reusedRows || 0,
         detailed: d1TimingDetailed(env)
       }));
     });
