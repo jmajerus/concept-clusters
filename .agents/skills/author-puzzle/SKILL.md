@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-Skill rev `1d607018` · 2026-10-19
+Skill rev `ba1c7788` · 2026-10-19
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. `save_puzzle_draft` writes the working copy only. The human
@@ -39,7 +39,7 @@ Never write those into `docs/`, `.agents/`, or `/tmp`.
 - A revision in hand: `save_puzzle_draft` on the native tool, with that integer as its own `expected_revision` argument. Copy it from the latest `create_puzzle_draft`, `get_puzzle_draft`, or `save_puzzle_draft` result.
 - The working file is the document only. Pass `expected_revision` separately. Do not assemble the save body with `printf` or `cat`.
 - To save `working/<id>.json`, run `node tools/save-working-draft.mjs <id> --expected-revision <draft.revision>` with the revision this file was based on. The helper submits that token. If the draft has moved, it exits and writes nothing. After a successful save it records the new revision in `working/<id>.revision`, and a later save of that same baseline can omit the flag. It does not create a missing draft, and it does not adopt whatever revision is current.
-- Content owns a bridge's `term`, `clusters`, `fact`, and `info`. Pedagogy owns `relationKind`, `direction`, `idealTerms`, and `conceptId`. `idealTerms` is a map. A merge patch keeps keys the patch does not mention. After retargeting a bridge, a pedagogy save must set each stale cluster id to `null`.
+- Content owns a bridge's `term`, `clusters`, `fact`, and `info`. Pedagogy owns `relationKind`, `direction`, `idealTerms`, and `conceptId` (`PEDAGOGY_BRIDGE_FIELDS` in `modules/authoringFieldOwnership.js`). `idealTerms` is a map. A merge patch keeps keys the patch does not mention. After retargeting a bridge, a pedagogy save must set each stale cluster id to `null`.
 - After any create or save error, call `get_puzzle_draft` for that id before retrying. If the revision moved, continue from the new revision. If a create failed and the draft exists, resume it. Do not send the same `expected_revision` again until that read confirms it is still current.
 - A native `save_puzzle_draft` or `create_puzzle_draft` does not write `working/<id>.json`. Do not read that file as the current draft, and do not run `save-working-draft.mjs` on it, unless this session just wrote the file from the latest `get_puzzle_draft` and recorded that revision in `working/<id>.revision`.
 - `info.citations` replaces the whole list, so a partial list deletes the citations left out.
