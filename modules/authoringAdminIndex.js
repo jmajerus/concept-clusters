@@ -249,6 +249,9 @@ export function renderFreezePlanLists(plan = emptyContentFreezePlan()) {
     ["Categories add", plan.categories?.add],
     ["Categories update", plan.categories?.update],
     ["Categories remove", plan.categories?.remove],
+    ["Model suggestions add", plan.modelSuggestions?.add],
+    ["Model suggestions update", plan.modelSuggestions?.update],
+    ["Model suggestions remove", plan.modelSuggestions?.remove],
     ["Puzzles published, not cued", plan.held?.puzzles, puzzleDetails],
     ["Catalogues published, not cued", plan.held?.catalogues],
     ["Categories published, not cued", plan.held?.categories]
@@ -345,6 +348,8 @@ function renderFreezeSection({
     puzzle names a subcategory that the published category registers and this checkout does not.
     A missing, withdrawn, or git-only dependency blocks Freeze. Published boards
     remain available to public play without a freeze cue.
+    Model vocabulary edits in D1 are included automatically and copied to the
+    offline model snapshot.
     Puzzle entries below show their category and subcategory assignments;
     <code>(none)</code> means the puzzle document has no subcategory assignment.
     ${applyHint} Git-seeded snapshots already in this checkout stay out of

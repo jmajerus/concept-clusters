@@ -1,6 +1,7 @@
 // Map MCP call-frame identity to provenance contributor labels.
 // Fingerprints stay here; display labels come from authoringHosts.js.
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
+import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import { CREDITED_WRITE_DOMAINS } from "./authoringChangeScore.js";
 import { authoringHostLabel } from "./authoringHosts.js";
 import {
@@ -257,7 +258,10 @@ export function stampDocumentAssistanceFromMcp(document, {
   if (!document || typeof document !== "object") {
     return { document, stampRecord: null };
   }
-  const identity = identifyMcpAssistanceClient({ ctx, server, settings });
+  const identified = identifyMcpAssistanceClient({ ctx, server, settings });
+  const identity = identified?.model
+    ? { ...identified, model: canonicalModelLabel(identified.model, settings.modelSuggestions) }
+    : identified;
   const base = canonicalizeDocumentProvenance(document, { settings });
   let next = base;
 

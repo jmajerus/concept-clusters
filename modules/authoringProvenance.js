@@ -270,15 +270,18 @@ export function stripRedundantHostModelPrefix(host, model) {
   return modelTrim;
 }
 
-function normalizeModelForContributor(host, model) {
-  return canonicalModelLabel(stripRedundantHostModelPrefix(host, model));
+function normalizeModelForContributor(host, model, settings = AUTHORING_SETTINGS) {
+  return canonicalModelLabel(
+    stripRedundantHostModelPrefix(host, model),
+    settings.modelSuggestions
+  );
 }
 
 /** Compose a generative contributor display/storage name from host + model. */
 export function formatGenerativeContributorLabel(host, model, settings = AUTHORING_SETTINGS) {
   const hostLabel = typeof host === "string" ? host.trim() : "";
   if (!hostLabel) return "";
-  const modelLabel = normalizeModelForContributor(hostLabel, model);
+  const modelLabel = normalizeModelForContributor(hostLabel, model, settings);
   if (!modelLabel) return hostLabel;
   if (settings.hosts?.includeModelInLabel === false) return hostLabel;
   return `${hostLabel} (${modelLabel})`;
@@ -422,7 +425,7 @@ function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
       return compactProvenanceContributor({
         kind: "generative",
         name,
-        ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {}),
+        ...(expanded.model ? { model: canonicalModelLabel(expanded.model, settings.modelSuggestions) } : {}),
         ...(expanded.reasoning ? { reasoning: expanded.reasoning } : {}),
         ...(expanded.switch ? { switch: expanded.switch } : {})
       }, settings);
@@ -434,7 +437,7 @@ function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
     return compactProvenanceContributor({
       kind: "generative",
       name: known?.system || expanded.name,
-      ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {}),
+      ...(expanded.model ? { model: canonicalModelLabel(expanded.model, settings.modelSuggestions) } : {}),
       ...(expanded.reasoning ? { reasoning: expanded.reasoning } : {}),
       ...(expanded.switch ? { switch: expanded.switch } : {})
     }, settings);
@@ -727,6 +730,7 @@ export function upsertGenerativeProvenance(
     const existingSplit = splitGenerativeContributorLabel(existingExpanded.name, settings);
     resolvedModel = existingExpanded.model || existingSplit.model || "";
   }
+  resolvedModel = canonicalModelLabel(resolvedModel, settings.modelSuggestions);
   const finalReasoning = reasoningProvided ? resolvedReasoning : (existingExpanded?.reasoning || "");
   const finalSwitch = switchProvided ? resolvedSwitch : (existingExpanded?.switch || "");
 
@@ -944,7 +948,10 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
     seen.set(key, {
       host: known?.system || split.host,
       ...(rowKey ? { rowKey } : {}),
-      model: canonicalModelLabel(stripClientTierLabelsFromModel(entry.model || split.model || "")),
+      model: canonicalModelLabel(
+        stripClientTierLabelsFromModel(entry.model || split.model || ""),
+        settings.modelSuggestions
+      ),
       reasoning: normalizeReasoningLevel(entry.reasoning) || "",
       switch: normalizeClientSwitch(entry.switch) || ""
     });
@@ -1029,8 +1036,9 @@ export function identifyUnnamedGenerativeContributor(document, {
   const existing = expandProvenanceContributor(contributors[index], settings);
   const known = knownHostLabelForName(hostLabel, settings);
   const canonicalHost = known?.system || hostLabel;
-  const modelValue = stripClientTierLabelsFromModel(
-    typeof model === "string" ? model.trim() : ""
+  const modelValue = canonicalModelLabel(
+    stripClientTierLabelsFromModel(typeof model === "string" ? model.trim() : ""),
+    settings.modelSuggestions
   );
   const composedName = formatGenerativeContributorLabel(canonicalHost, modelValue, settings);
   // Two separate collisions, both fatal, and neither may be normalized away.
@@ -1097,8 +1105,9 @@ export function applyGenerativeContributorModel(document, {
   if (!nonEmptyString(host)) throw new Error("host is required");
 
   const hostLabel = host.trim();
-  const modelValue = stripClientTierLabelsFromModel(
-    typeof model === "string" ? model.trim() : ""
+  const modelValue = canonicalModelLabel(
+    stripClientTierLabelsFromModel(typeof model === "string" ? model.trim() : ""),
+    settings.modelSuggestions
   );
   const known = knownHostLabelForName(hostLabel, settings);
   const canonicalHost = known?.system || hostLabel;
@@ -1355,8 +1364,10 @@ export function applyClaudeRowEdits(document, {
   }
   const systems = claudeFamilySystems(settings);
   const edits = rows.filter(row => nonEmptyString(row?.rowKey));
-  const addedModel = stripClientTierLabelsFromModel(
-    typeof added?.model === "string" ? added.model.trim() : "");
+  const addedModel = canonicalModelLabel(
+    stripClientTierLabelsFromModel(typeof added?.model === "string" ? added.model.trim() : ""),
+    settings.modelSuggestions
+  );
   if (!edits.length && !addedModel) return document;
 
   const composeRow = ({ host, model, reasoning, switch: switchValue }) =>
@@ -1380,9 +1391,12 @@ export function applyClaudeRowEdits(document, {
     const host = edit.claudeCode === undefined
       ? currentHost
       : (edit.claudeCode ? systems.claudeCode : systems.claude);
-    const model = edit.model === undefined
-      ? (expanded.model || splitGenerativeContributorLabel(expanded.name, settings).model || "")
-      : stripClientTierLabelsFromModel(typeof edit.model === "string" ? edit.model.trim() : "");
+    const model = canonicalModelLabel(
+      edit.model === undefined
+        ? (expanded.model || splitGenerativeContributorLabel(expanded.name, settings).model || "")
+        : stripClientTierLabelsFromModel(typeof edit.model === "string" ? edit.model.trim() : ""),
+      settings.modelSuggestions
+    );
     const reasoning = optionalSetting(edit.reasoning, normalizeReasoningLevel, "reasoning");
     const switchValue = optionalSetting(edit.switch, normalizeClientSwitch, "switch");
     return composeRow({
@@ -1445,7 +1459,11 @@ function collapseClaudeFamilyEntries(entries, settings = AUTHORING_SETTINGS) {
   const models = [];
   for (const entry of family) {
     const raw = entry.model || splitGenerativeContributorLabel(entry.name, settings).model || "";
-    const model = normalizeModelForContributor(host, stripClientTierLabelsFromModel(raw));
+    const model = normalizeModelForContributor(
+      host,
+      stripClientTierLabelsFromModel(raw),
+      settings
+    );
     if (model && !models.some(existing => contributorNameKey(existing) === contributorNameKey(model))) {
       models.push(model);
     }

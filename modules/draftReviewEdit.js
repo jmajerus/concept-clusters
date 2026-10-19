@@ -7,6 +7,7 @@ import { documentForEditor, documentForStorage } from "./authoredPuzzleDocument.
 import { PUZZLE_LEVELS } from "../puzzles/categories.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
+import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import {
   applyProvenanceCollaboration,
   applyGenerativeContributorModel,
@@ -373,7 +374,7 @@ function nonEmptyIdentify(value) {
   return typeof value === "string" && value.trim() !== "";
 }
 
-function applyProvenanceEditor(document, form) {
+function applyProvenanceEditor(document, form, settings = AUTHORING_SETTINGS) {
   let next = document;
   try {
     // Naming the unnamed placeholder runs before anything keyed on a host, so
@@ -382,32 +383,32 @@ function applyProvenanceEditor(document, form) {
     // intent from the add row only makes sense while the blank is the only
     // agent on record -- with another client already credited, choosing one
     // there is genuinely adding a second contributor.
-    const placeholder = unidentifiedGenerativeContributor(next.provenance);
-    const solePlaceholder = soleUnidentifiedGenerativeContributor(next.provenance);
+    const placeholder = unidentifiedGenerativeContributor(next.provenance, settings);
+    const solePlaceholder = soleUnidentifiedGenerativeContributor(next.provenance, settings);
     let namedAs = "";
     let models = [...(form.models || [])];
     if (placeholder && nonEmptyIdentify(form.identifyHost)) {
       namedAs = form.identifyHost.trim();
       // The placeholder's own row posts its model alongside the chosen client.
       const own = models.findIndex(({ host }) =>
-        generativeHostKey(host) === generativeHostKey(placeholder.name));
+        generativeHostKey(host, settings) === generativeHostKey(placeholder.name, settings));
       const model = own >= 0 ? models.splice(own, 1)[0].model : "";
-      next = identifyUnnamedGenerativeContributor(next, { host: namedAs, model });
+      next = identifyUnnamedGenerativeContributor(next, { host: namedAs, model, settings });
     } else if (solePlaceholder) {
       // Adding a client through the add row, with the placeholder still the
       // only agent on record, fills the blank rather than inventing a second
       // collaborator beside it -- there was one agent, now it has a name.
       const added = models.findIndex(({ host }) =>
-        host && generativeHostKey(host) !== generativeHostKey(solePlaceholder.name));
+        host && generativeHostKey(host, settings) !== generativeHostKey(solePlaceholder.name, settings));
       if (added >= 0) {
         const { host, model } = models.splice(added, 1)[0];
         namedAs = host;
-        next = identifyUnnamedGenerativeContributor(next, { host, model });
+        next = identifyUnnamedGenerativeContributor(next, { host, model, settings });
       }
     }
     // A row still addressed to the placeholder now belongs to the named client.
     const retarget = host => namedAs &&
-      generativeHostKey(host) === generativeHostKey(placeholder?.name || "")
+      generativeHostKey(host, settings) === generativeHostKey(placeholder?.name || "", settings)
       ? namedAs
       : host;
 
@@ -415,7 +416,7 @@ function applyProvenanceEditor(document, form) {
     // credit Claude with several models; they are edited together by key.
     // Anything else, including adding Claude where none is credited yet,
     // takes the host-keyed path.
-    const isClaudeRow = host => hasClaudeRow(next.provenance, retarget(host));
+    const isClaudeRow = host => hasClaudeRow(next.provenance, retarget(host), settings);
     const claudeRows = new Map();
     const claudeRow = host => {
       const key = retarget(host);
@@ -442,26 +443,29 @@ function applyProvenanceEditor(document, form) {
 
     next = applyClaudeRowEdits(next, {
       rows: [...claudeRows.values()],
-      added: form.addedClaudeRow || null
+      added: form.addedClaudeRow || null,
+      settings
     });
     for (const { host, model } of models) {
-      next = applyGenerativeContributorModel(next, { host: retarget(host), model });
+      next = applyGenerativeContributorModel(next, { host: retarget(host), model, settings });
     }
     for (const { host, value } of reasonings) {
-      next = applyProvenanceClientSetting(next, { host: retarget(host), field: "reasoning", value });
+      next = applyProvenanceClientSetting(next, { host: retarget(host), field: "reasoning", value, settings });
     }
     for (const { host, value } of switches) {
-      next = applyProvenanceClientSetting(next, { host: retarget(host), field: "switch", value });
+      next = applyProvenanceClientSetting(next, { host: retarget(host), field: "switch", value, settings });
     }
     if (form.collaboration !== undefined && form.collaboration !== "") {
       next = applyProvenanceCollaboration(next, {
         collaboration: form.collaboration,
-        authorName: typeof form.authorName === "string" ? form.authorName : null
+        authorName: typeof form.authorName === "string" ? form.authorName : null,
+        settings
       });
     }
     if (form.reviewedBy !== undefined && (form.reviewedBy.trim() || next.provenance)) {
       next = applyReviewedBy(next, {
-        reviewedBy: typeof form.reviewedBy === "string" ? form.reviewedBy : ""
+        reviewedBy: typeof form.reviewedBy === "string" ? form.reviewedBy : "",
+        settings
       });
     }
   } catch (error) {
@@ -534,7 +538,7 @@ function publishedAddressValue(published, address) {
   throw new DraftFieldError("There is no published wording for this field");
 }
 
-export function applyDraftFieldValue(document, form, value) {
+export function applyDraftFieldValue(document, form, value, { settings = AUTHORING_SETTINGS } = {}) {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     throw new DraftFieldError("Draft document must be a JSON object");
   }
@@ -610,13 +614,14 @@ export function applyDraftFieldValue(document, form, value) {
 
   if (section === "provenance") {
     if (field === "editor") {
-      return applyProvenanceEditor(next, form);
+      return applyProvenanceEditor(next, form, settings);
     }
     if (field === "collaboration") {
       try {
         return applyProvenanceCollaboration(next, {
           collaboration: value,
-          authorName: typeof form.authorName === "string" ? form.authorName : null
+          authorName: typeof form.authorName === "string" ? form.authorName : null,
+          settings
         });
       } catch (error) {
         throw new DraftFieldError(error?.message || "Could not set collaboration");
@@ -626,7 +631,8 @@ export function applyDraftFieldValue(document, form, value) {
       try {
         return applyGenerativeContributorModel(next, {
           host: id,
-          model: typeof value === "string" ? value : ""
+          model: typeof value === "string" ? value : "",
+          settings
         });
       } catch (error) {
         throw new DraftFieldError(error?.message || "Could not set generative model");
@@ -637,7 +643,8 @@ export function applyDraftFieldValue(document, form, value) {
         return applyProvenanceClientSetting(next, {
           host: id,
           field,
-          value: typeof value === "string" ? value : ""
+          value: typeof value === "string" ? value : "",
+          settings
         });
       } catch (error) {
         throw new DraftFieldError(error?.message || `Could not set ${field}`);
@@ -667,7 +674,10 @@ export function applyDraftFieldValue(document, form, value) {
   return next;
 }
 
-export function applyDraftFieldEdit(document, form, { publishedDocument = null } = {}) {
+export function applyDraftFieldEdit(document, form, {
+  publishedDocument = null,
+  settings = AUTHORING_SETTINGS
+} = {}) {
   const address = parseAddress(form);
   if (form.isRevertField || form.isRevert || form.confirm === REVERT_FIELD_CONFIRM) {
     if (address.field === "info.links") {
@@ -698,12 +708,17 @@ export function applyDraftFieldEdit(document, form, { publishedDocument = null }
       return next;
     }
     const value = publishedAddressValue(publishedDocument, address);
-    return applyDraftFieldValue(document, form, value);
+    return applyDraftFieldValue(document, form, value, { settings });
   }
   if (isListField(form.field) && Array.isArray(form.items)) {
-    return applyDraftFieldValue(document, form, form.items);
+    return applyDraftFieldValue(document, form, form.items, { settings });
   }
-  return applyDraftFieldValue(document, form, typeof form.value === "string" ? form.value : "");
+  return applyDraftFieldValue(
+    document,
+    form,
+    typeof form.value === "string" ? form.value : "",
+    { settings }
+  );
 }
 
 export function parseFieldEditForm(params) {
@@ -772,6 +787,7 @@ export async function persistDraftFieldEdit({
   draft,
   publishedDocument = null,
   categoryRegistry = null,
+  settings = AUTHORING_SETTINGS,
   form,
   saveDraft
 }) {
@@ -785,7 +801,7 @@ export async function persistDraftFieldEdit({
   const document = applyDraftFieldEdit(
     documentForEditor(draft.document, { categoryRegistry }),
     form,
-    { publishedDocument }
+    { publishedDocument, settings }
   );
   return saveDraft({
     document: documentForStorage(document, { categoryRegistry }),
@@ -808,6 +824,7 @@ export async function persistDraftWorkingCopy({
   params,
   expectedRevision,
   categoryRegistry = null,
+  settings = AUTHORING_SETTINGS,
   saveDraft
 }) {
   if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
@@ -820,7 +837,7 @@ export async function persistDraftWorkingCopy({
       ...form,
       isSaveField: true,
       isRevertField: false
-    });
+    }, { settings });
   }
   return saveDraft({
     document: documentForStorage(document, { categoryRegistry }),

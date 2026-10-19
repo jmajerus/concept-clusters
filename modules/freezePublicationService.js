@@ -2,7 +2,7 @@ import { GIT_SEED_ACTOR, isPendingFreezeCue } from "./contentFreezePlan.js";
 import { nonCryptographicHash } from "./nonCryptographicHash.js";
 
 function stablePlan(plan = {}) {
-  const kinds = ["puzzles", "catalogues", "categories"];
+  const kinds = ["puzzles", "catalogues", "categories", "modelSuggestions"];
   return Object.fromEntries(kinds.map(kind => [kind, {
     add: [...(plan[kind]?.add || [])].sort(),
     update: [...(plan[kind]?.update || [])].sort(),
@@ -15,7 +15,12 @@ const hash = value => nonCryptographicHash(value);
 function changesFor(plan = {}) {
   const verbs = [["add", "Add"], ["update", "Update"], ["remove", "Remove"]];
   const parts = [];
-  for (const [kind, label] of [["puzzles", "puzzle"], ["catalogues", "catalogue"], ["categories", "category"]]) {
+  for (const [kind, label] of [
+    ["puzzles", "puzzle"],
+    ["catalogues", "catalogue"],
+    ["categories", "category"],
+    ["modelSuggestions", "model suggestion"]
+  ]) {
     for (const [action, verb] of verbs) {
       const ids = plan[kind]?.[action] || [];
       for (const id of ids) parts.push(`${verb} ${label} ${id}`);

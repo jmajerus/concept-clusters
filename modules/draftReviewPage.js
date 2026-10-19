@@ -2220,7 +2220,7 @@ export function renderPuzzleReviewIssuesPage({
   return pageShell(`Review issues: ${draft.document?.title || draft.title || draftId}`, body);
 }
 
-function renderPuzzleMeta(document) {
+function renderPuzzleMeta(document, provenanceSettings = AUTHORING_SETTINGS) {
   const parts = [];
   if (document.preSolve) parts.push(badge("pre-solve", "accent"));
   if (document.lensMode) parts.push(badge(`lens: ${document.lensMode}`));
@@ -2234,7 +2234,7 @@ function renderPuzzleMeta(document) {
   for (const [label, value] of provenance) {
     parts.push(labeledLine(label, escapeHtml(value)));
   }
-  const provenanceL2 = renderProvenanceL2(document.provenance);
+  const provenanceL2 = renderProvenanceL2(document.provenance, provenanceSettings);
   if (provenanceL2) {
     parts.push(labeledLine("provenance", escapeHtml(provenanceL2)));
   }
@@ -2385,13 +2385,16 @@ function claudeReportedBySummary(stamps = []) {
   }).join(" · ");
 }
 
-function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [], assistanceStamps = [] }) {
+function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = null, assistanceStamps = [] }) {
   if (!edit?.draftId) return "";
 
+  const provenanceSettings = Array.isArray(customModelSuggestions)
+    ? { ...AUTHORING_SETTINGS, modelSuggestions: customModelSuggestions }
+    : AUTHORING_SETTINGS;
   const current = document?.provenance?.collaboration || "";
   const author = authorDisplayName(actor) || AUTHORING_SETTINGS.credit?.defaultAuthorName || "";
-  const l2 = renderProvenanceL2(document?.provenance);
-  const l1 = renderProvenanceL1(document?.provenance);
+  const l2 = renderProvenanceL2(document?.provenance, provenanceSettings);
+  const l1 = renderProvenanceL1(document?.provenance, provenanceSettings);
   const slot = copyHidden(edit, { section: "provenance", id: "", term: "", field: "editor" });
   const form = slot.form;
   const prefix = slot.prefix;
@@ -2399,13 +2402,13 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
     const selected = mode === current ? " selected" : "";
     return `<option value="${escapeHtml(mode)}"${selected}>${escapeHtml(mode)}</option>`;
   }).join("");
-  const generativeHosts = listGenerativeContributorsForEdit(document);
-  const modelSuggestions = modelSuggestionsForHost(customModelSuggestions);
+  const generativeHosts = listGenerativeContributorsForEdit(document, provenanceSettings);
+  const modelSuggestions = modelSuggestionsForHost(customModelSuggestions, {
+    authoritative: Array.isArray(customModelSuggestions)
+  });
 
   // A drafting client is confirmed by the MCP probe (or added here); model
-  // is best-effort and often unknown, so it's a plain dropdown rather than
-  // free text -- add a new one to authoringModelSuggestions.js as new
-  // releases show up, rather than typing it ad hoc per draft.
+  // names come from the complete D1 list, or the frozen snapshot offline.
   function modelSelectOptions(current) {
     const trimmed = typeof current === "string" ? current.trim() : "";
     const trimmedLower = trimmed.toLowerCase();
@@ -2578,12 +2581,13 @@ function authorDisplayName(actor) {
   return null;
 }
 
-function renderCreditsSection({ edit, intro, document, diff }) {
+function renderCreditsSection({ edit, intro, document, diff, provenanceSettings = AUTHORING_SETTINGS }) {
   const derived = resolveLessonByline({
     introduction: intro,
-    provenance: document?.provenance
+    provenance: document?.provenance,
+    settings: provenanceSettings
   });
-  const hasDerivedProvenance = Boolean(renderProvenanceL1(document?.provenance));
+  const hasDerivedProvenance = Boolean(renderProvenanceL1(document?.provenance, provenanceSettings));
   if (intro) {
     return `<h2>Learning introduction</h2>
       <p class="meta">
@@ -2723,7 +2727,7 @@ function renderPublicationNotice(notice) {
 export function renderDraftPage(draft, {
   variant = "hosted",
   actor = null,
-  customModelSuggestions = [],
+  customModelSuggestions = null,
   relatedPuzzleOptions = [],
   categoryRegistry,
   notice = null
@@ -2737,6 +2741,9 @@ export function renderDraftPage(draft, {
     );
   }
   const document = draft.document || {};
+  const provenanceSettings = Array.isArray(customModelSuggestions)
+    ? { ...AUTHORING_SETTINGS, modelSuggestions: customModelSuggestions }
+    : AUTHORING_SETTINGS;
   const clusters = document.clusters || [];
   const bridges = document.bridges || [];
   const clusterNameById = new Map(clusters.map(cluster => [cluster.id, cluster.name]));
@@ -2790,7 +2797,7 @@ export function renderDraftPage(draft, {
     ${renderSubcategoriesWas(diff?.fields?.subcategories, categoryRegistry)}
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.level)}
-    ${renderPuzzleMeta(document)}
+    ${renderPuzzleMeta(document, provenanceSettings)}
     ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions, assistanceStamps: draft.assistanceStamps })}
     ${renderInfo(document.info, {
@@ -2834,7 +2841,7 @@ export function renderDraftPage(draft, {
       ).join("")}</ul>
       ${renderWas(diff?.fields?.relatedPuzzles)}` : ""}
 
-    ${renderCreditsSection({ edit, intro, document, diff })}
+    ${renderCreditsSection({ edit, intro, document, diff, provenanceSettings })}
 
     ${edit.draftId ? `<p class="working-copy-save-foot">
       <button type="submit" form="${WORKING_COPY_FORM_ID}">Save working copy</button>
