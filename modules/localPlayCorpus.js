@@ -152,16 +152,18 @@ export function createLocalPlayCorpusHandler({
   indexHtml = null,
   layoutPassJobs = null,
   siteSettings = null,
-  actor = null
+  actor = null,
+  // Whether git content has been seeded into D1. A caller that builds this
+  // handler per request passes one long-lived state, or every request seeds.
+  seedState = { seeded: false }
 }) {
   if (!contentDocuments) throw new Error("contentDocuments is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
-  let seeded = false;
 
   async function ensureSeeded() {
-    if (seeded) return;
+    if (seedState.seeded) return;
     await buildPlayCorpusPayload({ contentDocuments, contentService });
-    seeded = true;
+    seedState.seeded = true;
   }
 
   return async function handleLocalPlayCorpus(req, res) {
@@ -383,6 +385,9 @@ export function createDefaultLocalPlayCorpusHandler({
     });
   }
   let workspacePromise;
+  // The handler is built per request; seeding git content into D1 happens
+  // once per process, as ensureSeeded intends.
+  const seedState = { seeded: false };
   return async function handleDefaultLocalPlayCorpus(req, res) {
     const urlPath = (req.url || "").split("?")[0];
     const isIndex = urlPath === "/" || urlPath === "/index.html";
@@ -407,7 +412,8 @@ export function createDefaultLocalPlayCorpusHandler({
           : null,
         repositoryRoot,
         siteSettings: resolved.siteSettings || null,
-        actor: resolved.actor || null
+        actor: resolved.actor || null,
+        seedState
       });
       return handleRequest(req, res);
     } catch (error) {
