@@ -321,6 +321,20 @@ import summarizingData from "./math/summarizing-data.js";
 import tnmCancerStaging from "./medicine/tnm-cancer-staging.js";
 import trustOnTheWireTlsPki from "./computer-science/trust-on-the-wire-tls-pki.js";
 import virusBuildAndTakeover from "./microbiology/virus-build-and-takeover.js";
+import assessmentForLearning from "./education-learning-sciences/assessment-for-learning.js";
+import backwardDesign from "./education-learning-sciences/backward-design.js";
+import citiesAndUrbanization from "./human-geography/cities-and-urbanization.js";
+import currentAndCircuits from "./physics/current-and-circuits.js";
+import diffusionOfSocialChange from "./sociology/diffusion-of-social-change.js";
+import electricChargeAndField from "./physics/electric-charge-and-field.js";
+import epithelialTransport from "./physiology-medicine/epithelial-transport.js";
+import gradualInstitutionalChange from "./sociology/gradual-institutional-change.js";
+import howLearningSticks from "./education-learning-sciences/how-learning-sticks.js";
+import magnetismAndInduction from "./physics/magnetism-and-induction.js";
+import migrationGeography from "./human-geography/migration-geography.js";
+import populationGeography from "./human-geography/population-geography.js";
+import signalTransduction from "./physiology-medicine/signal-transduction.js";
+import socialMovementMobilization from "./sociology/social-movement-mobilization.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -637,6 +651,20 @@ export const PUZZLES = [
   tnmCancerStaging,
   trustOnTheWireTlsPki,
   virusBuildAndTakeover,
+  assessmentForLearning,
+  backwardDesign,
+  citiesAndUrbanization,
+  currentAndCircuits,
+  diffusionOfSocialChange,
+  electricChargeAndField,
+  epithelialTransport,
+  gradualInstitutionalChange,
+  howLearningSticks,
+  magnetismAndInduction,
+  migrationGeography,
+  populationGeography,
+  signalTransduction,
+  socialMovementMobilization,
 ];
 
 export default PUZZLES;

@@ -10,7 +10,6 @@ const puzzle = definePuzzle(import.meta.url, {
   "categories": [
     "peace-conflict-studies",
     "political-science",
-    "history-society",
     "science-technology-society"
   ],
   "subcategories": {
@@ -47,13 +46,13 @@ const puzzle = definePuzzle(import.meta.url, {
       "fact": "The 2001 AUMF's vague authorization to fight an ever-expanding roster of 'associated forces,' with no sunset clause and no stated geography, let a war meant for one moment and one enemy stretch into new countries without Congress ever voting to open them.",
       "terms": [
         "AUMF",
-        "associated forces",
         "War Powers Resolution",
+        "associated forces",
         "congressional deference"
       ],
       "seeds": [
         "AUMF",
-        "associated forces"
+        "War Powers Resolution"
       ],
       "termInfo": {
         "AUMF": {
@@ -84,9 +83,7 @@ const puzzle = definePuzzle(import.meta.url, {
             }
           ]
         },
-        "congressional deference": {
-          "text": "Congress's practice of not exercising its own constitutional power to declare and limit war, leaving broad practical discretion over where and against whom force is used to the executive branch."
-        }
+        "congressional deference": "Congress's practice of not exercising its own constitutional power to declare and limit war, leaving broad practical discretion over where and against whom force is used to the executive branch."
       },
       "info": {
         "text": "The statutory and constitutional framework that governs where, and against whom, the United States claims authority to use lethal military force after September 11, 2001.",
@@ -133,9 +130,7 @@ const puzzle = definePuzzle(import.meta.url, {
             }
           ]
         },
-        "Terror Tuesday": {
-          "text": "The informal name for weekly White House meetings at which senior officials reviewed candidates for the kill list before the president gave final approval."
-        },
+        "Terror Tuesday": "The informal name for weekly White House meetings at which senior officials reviewed candidates for the kill list before the president gave final approval.",
         "baseball cards": {
           "text": "The nickname one official gave — and called 'macabre' himself — to the one-page biographical and intelligence summaries prepared on each kill-list candidate before a Terror Tuesday review.",
           "links": [
@@ -162,13 +157,13 @@ const puzzle = definePuzzle(import.meta.url, {
       "fact": "Most drone strikes were not aimed at a named individual at all: a signature strike fired on unidentified people whose observed behavior merely matched a pattern, trading a confirmed identity for a much lower and harder-to-verify bar for who counted as a legitimate target.",
       "terms": [
         "signature strikes",
-        "personality strikes",
         "double-tap strikes",
+        "personality strikes",
         "kill chain"
       ],
       "seeds": [
         "signature strikes",
-        "personality strikes"
+        "double-tap strikes"
       ],
       "termInfo": {
         "double-tap strikes": {
@@ -277,9 +272,7 @@ const puzzle = definePuzzle(import.meta.url, {
             }
           ]
         },
-        "selectors": {
-          "text": "Specific identifiers, such as a phone number or SIM card, used to isolate one person's communications data out of a much larger pool of bulk-collected metadata."
-        }
+        "selectors": "Specific identifiers, such as a phone number or SIM card, used to isolate one person's communications data out of a much larger pool of bulk-collected metadata."
       },
       "info": {
         "text": "The collection and algorithmic analysis of large-scale communications data to detect patterns of behavior, sometimes used to help identify targets for killing.",
@@ -293,7 +286,6 @@ const puzzle = definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "pattern-of-life-analysis",
       "term": "pattern-of-life analysis",
       "clusters": [
         3,
@@ -320,7 +312,6 @@ const puzzle = definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "jsoc",
       "term": "JSOC",
       "clusters": [
         1,
@@ -338,7 +329,6 @@ const puzzle = definePuzzle(import.meta.url, {
       "relationKind": "foundation"
     },
     {
-      "id": "extrajudicial-killing",
       "term": "extrajudicial killing",
       "clusters": [
         0,
@@ -403,23 +393,19 @@ const puzzle = definePuzzle(import.meta.url, {
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "How the same expansion of unaccountable executive power looks in other registers."
-    },
     "entries": [
       {
         "id": "the-hobbesian-imperative",
         "reason": "See the realpolitik case, made by Machiavelli, Hobbes, and Morgenthau, that a sovereign's first duty to survive can override any external legal constraint on its use of force.",
         "via": [
-          "reason of state",
-          "executive discretion"
+          "AUMF"
         ]
       },
       {
         "id": "the-military-industrial-complex",
         "reason": "Compare Eisenhower's warning about a self-perpetuating war economy with the self-perpetuating bureaucratic machinery this puzzle documents a half-century later.",
         "via": [
-          "institutional momentum"
+          "Disposition Matrix"
         ]
       }
     ]
@@ -431,7 +417,7 @@ const puzzle = definePuzzle(import.meta.url, {
     "estimatedMinutes": 4,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## A war without a map\n\nAfter September 11, 2001, Congress gave the president broad authority to use force against those responsible for the attacks. Over the following decade, that authority was stretched, quietly and with little public debate, to cover a widening set of countries and a widening set of enemies who had nothing to do with September 11 itself.\n\nAt the same time, the way individual targets were chosen changed. Killing a specific, named enemy gave way to killing people who merely matched a statistical or behavioral pattern. And the raw material for those patterns increasingly came from mass surveillance: communications data collected not because a person was already suspected of anything, but so that suspicion could be manufactured later, at scale, by machine.\n\nJournalist Jeremy Scahill spent years reporting from the countries where this new kind of war was actually fought — Yemen, Somalia, Pakistan — rather than from Washington briefing rooms. His book and documentary, both titled *Dirty Wars: The World Is a Battlefield*, follow the people who built this apparatus and the people who lived, and sometimes died, underneath it.\n\nAs you play, notice how often a single institution or process shows up wearing two different hats: sometimes as a legal safeguard, and sometimes as the very mechanism that lets a safeguard be quietly set aside.\n\n**Before you start:** what would it take for a government to convince you that it had correctly identified an enemy it could never publicly name?"
+      "text": "## A war without a map\r\n\r\nAfter September 11, 2001, Congress gave the president broad authority to use force against those responsible for the attacks. Over the following decade, that authority was stretched, quietly and with little public debate, to cover a widening set of countries and a widening set of enemies who had nothing to do with September 11 itself.\r\n\r\nAt the same time, the way individual targets were chosen changed. Killing a specific, named enemy gave way to killing people who merely matched a statistical or behavioral pattern. And the raw material for those patterns increasingly came from mass surveillance: communications data collected not because a person was already suspected of anything, but so that suspicion could be manufactured later, at scale, by machine.\r\n\r\nJournalist Jeremy Scahill spent years reporting from the countries where this new kind of war was actually fought — Yemen, Somalia, Pakistan — rather than from Washington briefing rooms. His book and documentary, both titled *Dirty Wars: The World Is a Battlefield*, follow the people who built this apparatus and the people who lived, and sometimes died, underneath it.\r\n\r\nAs you play, notice how often a single institution or process shows up wearing two different hats: sometimes as a legal safeguard, and sometimes as the very mechanism that lets a safeguard be quietly set aside.\r\n\r\n**Before you start:** what would it take for a government to convince you that it had correctly identified an enemy it could never publicly name?"
     },
     "links": [
       {
@@ -444,7 +430,8 @@ const puzzle = definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude"
+        "name": "Claude (Sonnet 5)",
+        "model": "Claude Sonnet 5"
       }
     ]
   }
@@ -455,106 +442,106 @@ puzzle.layout = {
     "graph": {
       "schemaVersion": 1,
       "puzzleId": "asymmetric-remote-warfare",
-      "puzzleRevision": "fnv1a32:88123f17",
+      "puzzleRevision": "fnv1a32:2175deb9",
       "board": {
         "width": 960,
         "height": 620
       },
       "nodes": {
         "term:AUMF": {
-          "x": 222.74,
-          "y": 302.64,
-          "pinned": false
-        },
-        "term:associated forces": {
-          "x": 253.09,
-          "y": 412.66,
-          "pinned": false
+          "x": 198.94,
+          "y": 362.09,
+          "pinned": true
         },
         "term:War Powers Resolution": {
-          "x": 191.1,
-          "y": 179.93,
-          "pinned": false
+          "x": 139.96,
+          "y": 282.44,
+          "pinned": true
+        },
+        "term:associated forces": {
+          "x": 236.96,
+          "y": 487.43,
+          "pinned": true
         },
         "term:congressional deference": {
-          "x": 95.03,
-          "y": 339.9,
-          "pinned": false
+          "x": 114.06,
+          "y": 444.29,
+          "pinned": true
         },
         "term:Disposition Matrix": {
-          "x": 494.2,
-          "y": 187.97,
+          "x": 495.98,
+          "y": 210.53,
           "pinned": false
         },
         "term:Anwar al-Awlaki": {
-          "x": 362.48,
-          "y": 112.23,
+          "x": 359.76,
+          "y": 143.23,
           "pinned": false
         },
         "term:Terror Tuesday": {
-          "x": 607.44,
-          "y": 91.44,
+          "x": 602.93,
+          "y": 107.08,
           "pinned": false
         },
         "term:baseball cards": {
-          "x": 481.46,
-          "y": 39.71,
+          "x": 473.94,
+          "y": 63.37,
           "pinned": false
         },
         "term:signature strikes": {
-          "x": 725.1,
-          "y": 203.32,
-          "pinned": false
-        },
-        "term:personality strikes": {
-          "x": 785.64,
-          "y": 352.92,
+          "x": 727.36,
+          "y": 208.08,
           "pinned": false
         },
         "term:double-tap strikes": {
-          "x": 841.86,
-          "y": 96.52,
+          "x": 833.86,
+          "y": 91.05,
+          "pinned": false
+        },
+        "term:personality strikes": {
+          "x": 801.33,
+          "y": 351.52,
           "pinned": false
         },
         "term:kill chain": {
-          "x": 855.02,
-          "y": 232.08,
+          "x": 859.36,
+          "y": 224.84,
           "pinned": false
         },
         "term:metadata": {
-          "x": 462.19,
-          "y": 379,
-          "pinned": false
+          "x": 505.23,
+          "y": 436.34,
+          "pinned": true
         },
         "term:SKYNET": {
-          "x": 373.27,
-          "y": 402.98,
-          "pinned": false
+          "x": 379.81,
+          "y": 457.28,
+          "pinned": true
         },
         "term:machine learning": {
-          "x": 523.23,
-          "y": 486.47,
-          "pinned": false
+          "x": 563.07,
+          "y": 523.27,
+          "pinned": true
         },
         "term:selectors": {
-          "x": 396.79,
-          "y": 495.28,
-          "pinned": false
+          "x": 409.99,
+          "y": 538.49,
+          "pinned": true
         },
         "term:pattern-of-life analysis": {
-          "x": 603.39,
-          "y": 332.04,
+          "x": 617.93,
+          "y": 347.38,
           "pinned": false
         },
         "term:JSOC": {
-          "x": 611.19,
-          "y": 196.06,
+          "x": 613.26,
+          "y": 211.26,
           "pinned": false
         },
         "term:extrajudicial killing": {
-          "x": 345.89,
-          "y": 272.78,
-          "pinned": false
+          "x": 371.33,
+          "y": 302.49,
+          "pinned": true
         }
       },
       "metrics": {
@@ -563,68 +550,68 @@ puzzle.layout = {
         "boundsViolations": 0,
         "lineCrossings": 0,
         "edgeNodeIntersections": 0,
-        "totalLength": 2999.71,
-        "score": 2999.710531929704
+        "totalLength": 3047.56,
+        "score": 3047.5593380223677
       },
-      "solutionLayout": "pretty",
+      "solutionLayout": null,
       "capturedSolved": true,
-      "source": "auto",
       "fixed": true,
-      "savedAt": "2026-10-08T01:32:53.669Z"
+      "source": "author",
+      "savedAt": "2026-10-19T08:26:41.619Z"
     },
     "sets": {
       "schemaVersion": 1,
       "puzzleId": "asymmetric-remote-warfare",
-      "puzzleRevision": "fnv1a32:88123f17",
+      "puzzleRevision": "fnv1a32:2175deb9",
       "board": {
-        "width": 1050,
-        "height": 780
+        "width": 960,
+        "height": 620
       },
       "stripHeight": 16,
       "circles": {
         "cluster:0": {
-          "x": 281.81,
-          "y": 555.22,
+          "x": 180.26,
+          "y": 467.41,
           "pinned": false
         },
         "cluster:1": {
-          "x": 281.81,
-          "y": 240.78,
+          "x": 180.26,
+          "y": 168.59,
           "pinned": false
         },
         "cluster:2": {
-          "x": 768.19,
-          "y": 240.78,
+          "x": 779.74,
+          "y": 168.59,
           "pinned": false
         },
         "cluster:3": {
-          "x": 768.19,
-          "y": 555.22,
+          "x": 779.74,
+          "y": 467.41,
           "pinned": false
         }
       },
       "bridges": {
         "term:pattern-of-life analysis": {
-          "x": 768.19,
-          "y": 398,
-          "pinned": false
+          "x": 672.51,
+          "y": 324.01,
+          "pinned": true
         },
         "term:JSOC": {
-          "x": 525,
-          "y": 240.78,
+          "x": 480,
+          "y": 168.59,
           "pinned": false
         },
         "term:extrajudicial killing": {
-          "x": 281.81,
-          "y": 398,
-          "pinned": false
+          "x": 292.5,
+          "y": 321.01,
+          "pinned": true
         }
       },
       "clusterTerms": {
         "cluster:0": [
           "AUMF",
-          "associated forces",
           "War Powers Resolution",
+          "associated forces",
           "congressional deference"
         ],
         "cluster:1": [
@@ -635,8 +622,8 @@ puzzle.layout = {
         ],
         "cluster:2": [
           "signature strikes",
-          "personality strikes",
           "double-tap strikes",
+          "personality strikes",
           "kill chain"
         ],
         "cluster:3": [
@@ -644,6 +631,32 @@ puzzle.layout = {
           "SKYNET",
           "machine learning",
           "selectors"
+        ]
+      },
+      "memberOrders": {
+        "cluster:0": [
+          "AUMF",
+          "congressional deference",
+          "War Powers Resolution",
+          "associated forces"
+        ],
+        "cluster:1": [
+          "Terror Tuesday",
+          "Anwar al-Awlaki",
+          "Disposition Matrix",
+          "baseball cards"
+        ],
+        "cluster:2": [
+          "kill chain",
+          "personality strikes",
+          "double-tap strikes",
+          "signature strikes"
+        ],
+        "cluster:3": [
+          "metadata",
+          "machine learning",
+          "selectors",
+          "SKYNET"
         ]
       },
       "metrics": {
@@ -657,18 +670,19 @@ puzzle.layout = {
         "lineCrossings": 0,
         "lineHeadingIntersections": 0,
         "lineCircleIntersections": 0,
-        "totalLength": 350.00187573079626
+        "edgeNodeIntersections": 0,
+        "totalLength": 865.6831218805428
       },
       "solutionLayout": "pretty",
       "capturedSolved": true,
-      "source": "auto",
       "fixed": true,
-      "savedAt": "2026-10-08T01:32:56.173Z"
+      "source": "author",
+      "savedAt": "2026-10-19T08:25:06.841Z"
     },
     "star": {
       "schemaVersion": 1,
       "puzzleId": "asymmetric-remote-warfare",
-      "puzzleRevision": "fnv1a32:88123f17",
+      "puzzleRevision": "fnv1a32:2175deb9",
       "board": {
         "width": 960,
         "height": 620
@@ -678,61 +692,61 @@ puzzle.layout = {
           "x": 271.58,
           "y": 236.19
         },
-        "term:associated forces": {
-          "x": 73.55,
-          "y": 465.68
-        },
         "term:War Powers Resolution": {
-          "x": 86.15,
+          "x": 99.18,
           "y": 294.91
+        },
+        "term:associated forces": {
+          "x": 83.57,
+          "y": 462.67
         },
         "term:congressional deference": {
           "x": 146.68,
           "y": 116.58
         },
         "term:Disposition Matrix": {
-          "x": 362.54,
+          "x": 357.53,
           "y": 155.92
         },
         "term:Anwar al-Awlaki": {
-          "x": 286.67,
-          "y": 22
+          "x": 289.68,
+          "y": 31.02
         },
         "term:Terror Tuesday": {
-          "x": 429.33,
-          "y": 22
+          "x": 473.42,
+          "y": 32.02
         },
         "term:baseball cards": {
-          "x": 669.34,
-          "y": 22
+          "x": 670.34,
+          "y": 32.02
         },
         "term:signature strikes": {
           "x": 624.9,
           "y": 309.99
         },
+        "term:double-tap strikes": {
+          "x": 872.28,
+          "y": 257.26
+        },
         "term:personality strikes": {
           "x": 775.82,
           "y": 128.93
         },
-        "term:double-tap strikes": {
-          "x": 883.3,
-          "y": 255.26
-        },
         "term:kill chain": {
-          "x": 889.87,
-          "y": 518
+          "x": 888.87,
+          "y": 517
         },
         "term:metadata": {
           "x": 547,
           "y": 411.48
         },
         "term:SKYNET": {
-          "x": 502.31,
-          "y": 598
+          "x": 489.28,
+          "y": 585.97
         },
         "term:machine learning": {
-          "x": 293.83,
-          "y": 598
+          "x": 300.84,
+          "y": 585.97
         },
         "term:selectors": {
           "x": 187.58,
@@ -770,16 +784,18 @@ puzzle.layout = {
       "metrics": {
         "lineCrossings": 0,
         "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
         "overlaps": 0
       },
-      "source": "auto",
-      "savedAt": "2026-10-08T01:32:58.982Z"
+      "source": "author",
+      "savedAt": "2026-10-19T08:30:32.118Z"
     }
   },
   "board": {
     "sizeFactor": 1,
-    "source": "auto",
-    "savedAt": "2026-10-08T01:32:51.298Z"
+    "source": "author",
+    "savedAt": "2026-10-19T08:25:41.998Z",
+    "lensFlowTrace": true
   }
 };
 puzzle.starLayout = puzzle.layout?.modes?.star || null;

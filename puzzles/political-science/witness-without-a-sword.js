@@ -20,9 +20,7 @@ const puzzle = definePuzzle(import.meta.url, {
     "international law",
     "humanitarian aid"
   ],
-  "info": {
-    "text": "How the ICRC, MSF, the WHO, and the international legal system respond to violations of the rules of war -- and why none of them can compel compliance."
-  },
+  "info": "How the ICRC, MSF, the WHO, and the international legal system respond to violations of the rules of war -- and why none of them can compel compliance.",
   "clusters": [
     {
       "id": "icrc-witness",
@@ -217,6 +215,7 @@ const puzzle = definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "confidential bilateral dialogue": "A direct, private conversation with a belligerent -- no institution required beyond the conversation itself.",
+        "social media campaigning": "A direct, public post exercised in the moment, the same immediacy as a private conversation -- just aimed outward instead of at one belligerent.",
         "témoignage": "A founding commitment to speak, not a program built up over years."
       }
     },
@@ -233,8 +232,11 @@ const puzzle = definePuzzle(import.meta.url, {
         "the WHO Surveillance System"
       ],
       "reasons": {
+        "Medical Care Under Fire": "A named, sustained awareness campaign, not a single act of witness the way témoignage is a founding commitment.",
         "Resolution 2286": "A single, specific Security Council resolution on protecting medical and humanitarian personnel, adopted in 2016.",
         "Resolution 2730": "A separate, later Security Council resolution on the same underlying problem, adopted in 2024.",
+        "the Global IHL Initiative": "A diplomatic coalition-building effort with its own name and membership, not a single conversation or a general condition like financial independence.",
+        "the Rome Statute": "The founding 1998 treaty that created the ICC itself -- a specific, dated document, not a general legal principle like universal jurisdiction.",
         "the WHO Surveillance System": "A named, standardized data system with its own launch date and methodology."
       }
     }
@@ -246,7 +248,7 @@ const puzzle = definePuzzle(import.meta.url, {
     "estimatedMinutes": 3,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## The power to name\n\nNo humanitarian organization can arrest a war criminal or force a ceasefire. What the ICRC, MSF, and the WHO actually have is evidence, access, and a voice -- used in very different ways, and increasingly under threat themselves.\n\nThe ICRC has traditionally worked through quiet, direct conversations with the parties to a conflict, alongside formal yearly reporting -- discretion as a survival strategy as much as a philosophy. That posture is shifting. In 2025 alone, dozens of Red Cross and Red Crescent staff and volunteers were killed in the course of their work, and the ICRC's own public statements have grown sharper and more frequent in response. MSF, founded by doctors who broke from the Red Cross over exactly this tension between speaking out and staying neutral, built public witness into its own charter from the start. The WHO runs the first standardized global system for counting attacks on health care, so the numbers from one country can actually be compared to the numbers from another.\n\nNone of that compels anyone to comply. The actual legal machinery -- the International Criminal Court, the UN Security Council -- depends on states choosing to cooperate, ratify, or simply not use a veto, even when the Council's own resolutions name the exact problem. As you play, notice that naming and compelling are two different kinds of power, not the same power in different amounts. The ICRC, MSF, and the WHO have plenty of the first. The second -- the power to compel a ceasefire, a prosecution, a withdrawal -- was never missing either; it sits with people who could be named, who choose each time whether to spend it. And the people doing the naming have themselves become targets of the very erosion they're documenting."
+      "text": "## The power to name\r\n\r\nNo humanitarian organization can arrest a war criminal or force a ceasefire. What the ICRC, MSF, and the WHO actually have is evidence, access, and a voice -- used in very different ways, and increasingly under threat themselves.\r\n\r\nThe ICRC has traditionally worked through quiet, direct conversations with the parties to a conflict, alongside formal yearly reporting -- discretion as a survival strategy as much as a philosophy. That posture is shifting. In 2025 alone, dozens of Red Cross and Red Crescent staff and volunteers were killed in the course of their work, and the ICRC's own public statements have grown sharper and more frequent in response. MSF, founded by doctors who broke from the Red Cross over exactly this tension between speaking out and staying neutral, built public witness into its own charter from the start. The WHO runs the first standardized global system for counting attacks on health care, so the numbers from one country can actually be compared to the numbers from another.\r\n\r\nNone of that compels anyone to comply. The actual legal machinery -- the International Criminal Court, the UN Security Council -- depends on states choosing to cooperate, ratify, or simply not use a veto, even when the Council's own resolutions name the exact problem. As you play, notice that naming and compelling are two different kinds of power, not the same power in different amounts. The ICRC, MSF, and the WHO have plenty of the first. The second -- the power to compel a ceasefire, a prosecution, a withdrawal -- was never missing either; it sits with people who could be named, who choose each time whether to spend it. And the people doing the naming have themselves become targets of the very erosion they're documenting."
     },
     "links": [
       {
@@ -267,7 +269,9 @@ const puzzle = definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude"
+        "name": "Claude (Sonnet 5)",
+        "model": "Claude Sonnet 5",
+        "reasoning": "high"
       }
     ]
   }

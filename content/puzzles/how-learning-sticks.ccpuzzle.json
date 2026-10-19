@@ -1,0 +1,668 @@
+{
+  "id": "how-learning-sticks",
+  "title": "How Learning Sticks — Memory, Load, and Practice",
+  "category": "education-learning-sciences",
+  "subcategories": {
+    "education-learning-sciences": "learning-sciences"
+  },
+  "info": {
+    "text": "Cognitive science has measured how learning actually works, and the findings routinely contradict what studying feels like. This puzzle teaches the memory architecture (working memory, long-term memory, schema), Sweller's cognitive-load budget, the retrieval-versus-restudy finding and its satellite effects, the scheduling results (spacing, cramming, interleaving, the forgetting curve), Bjork's desirable difficulties and the two memory strengths that explain them, and near and far transfer — the outcome all of it serves.",
+    "citations": [
+      {
+        "title": "Memory: A Contribution to Experimental Psychology (Über das Gedächtnis)",
+        "author": "Hermann Ebbinghaus",
+        "publisher": "Dover (English ed. 1913)",
+        "year": "1885"
+      },
+      {
+        "title": "The Magical Number Seven, Plus or Minus Two",
+        "author": "George A. Miller",
+        "publisher": "Psychological Review 63(2)",
+        "year": "1956"
+      },
+      {
+        "title": "Cognitive load during problem solving",
+        "author": "John Sweller",
+        "publisher": "Cognitive Science 12",
+        "year": "1988"
+      },
+      {
+        "title": "Test-enhanced learning: Taking memory tests improves long-term retention",
+        "author": "Henry L. Roediger and Jeffrey D. Karpicke",
+        "publisher": "Psychological Science 17(3)",
+        "year": "2006"
+      },
+      {
+        "title": "Distributed practice in verbal recall tasks: A review and quantitative synthesis",
+        "author": "Nicholas J. Cepeda et al.",
+        "publisher": "Psychological Bulletin 132(3)",
+        "year": "2006"
+      },
+      {
+        "title": "Making things hard on yourself, but in a good way: Creating desirable difficulties to enhance learning",
+        "author": "Robert A. Bjork and Elizabeth L. Bjork",
+        "publisher": "Psychology and the Real World",
+        "year": "2011"
+      },
+      {
+        "title": "Improving students' learning with effective learning techniques",
+        "author": "John Dunlosky et al.",
+        "publisher": "Psychological Science in the Public Interest 14(1)",
+        "year": "2013"
+      },
+      {
+        "title": "Testing effect",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Testing_effect"
+      },
+      {
+        "title": "Cognitive load",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Cognitive_load"
+      },
+      {
+        "title": "Spacing effect",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Spacing_effect"
+      },
+      {
+        "title": "Transfer of learning",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Transfer_of_learning"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "memory-architecture",
+      "name": "The Memory Architecture",
+      "color": "teal",
+      "fact": "Working memory — 'extremely limited in both capacity and duration' — is the gateway through which learning must pass into the vast long-term store; schema, organized knowledge built in long-term memory, is what grows the gateway's effective capacity over time.",
+      "termInfo": {
+        "long-term memory": {
+          "text": "The vast permanent store working memory feeds; in the classic gateway model, declarative knowledge enters it after being attended to and processed in working memory.",
+          "links": [
+            {
+              "href": "wiki:Cognitive load"
+            }
+          ]
+        },
+        "schema": {
+          "text": "An organized knowledge structure in long-term memory. Simon and Chase's 'chunk' names the same organizing act — and schemas are why experts feel less load than novices and carry their skill to new problems.",
+          "links": [
+            {
+              "href": "wiki:Cognitive load"
+            }
+          ]
+        },
+        "working memory": {
+          "text": "The limited workspace where conscious processing happens — 'extremely limited in both capacity and duration.' Miller (1956) put its span near 'seven units, plus or minus two.'",
+          "links": [
+            {
+              "href": "wiki:Cognitive load"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Miller (1956) put working memory near 'seven units, plus or minus two'; Simon and Chase (1973) coined 'chunk' for the organizing act — 'this chunking is also described as schema construction.' Experts feel less load than novices because their schemas do more of the work.",
+        "links": [
+          {
+            "href": "wiki:Cognitive load"
+          }
+        ]
+      },
+      "seeds": [
+        "long-term memory",
+        "working memory"
+      ],
+      "floatingTerms": [
+        "schema"
+      ],
+      "terms": [
+        "long-term memory",
+        "working memory",
+        "schema"
+      ]
+    },
+    {
+      "id": "cognitive-load",
+      "name": "The Load Budget",
+      "color": "blue",
+      "fact": "Sweller's cognitive load theory (late 1980s) treats the effort used in working memory as a budget with three named parts: the topic's inherent difficulty, the waste caused by how material is presented, and the effort put into building permanent knowledge.",
+      "termInfo": {
+        "cognitive load": {
+          "text": "The effort being used in the working memory. Sweller developed the theory in the late 1980s out of problem-solving research, to guide how material is presented so the budget goes to learning.",
+          "links": [
+            {
+              "href": "wiki:Cognitive load"
+            }
+          ]
+        },
+        "extraneous load": {
+          "text": "Load 'generated by the manner in which information is presented to learners and is under the control of instructional designers' — the named target of presentation effects like split-attention.",
+          "links": [
+            {
+              "href": "wiki:Cognitive load"
+            }
+          ]
+        },
+        "germane load": {
+          "text": "'The work put into creating a permanent store of knowledge' — effort spent building schemas rather than fighting the presentation or the topic's difficulty.",
+          "links": [
+            {
+              "href": "wiki:Cognitive load"
+            }
+          ]
+        },
+        "intrinsic load": {
+          "text": "'The inherent level of difficulty associated with a specific instructional topic' — irreducible, but manageable by teaching subschemas in isolation and combining them later.",
+          "links": [
+            {
+              "href": "wiki:Cognitive load"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Intrinsic load is 'the inherent level of difficulty associated with a specific instructional topic'; extraneous load is 'generated by the manner in which information is presented to learners and is under the control of instructional designers'; germane load is 'the work put into creating a permanent store of knowledge.' The triad's additivity has been questioned — they may circularly influence each other.",
+        "links": [
+          {
+            "href": "wiki:Cognitive load"
+          }
+        ]
+      },
+      "seeds": [
+        "cognitive load",
+        "intrinsic load"
+      ],
+      "floatingTerms": [
+        "extraneous load",
+        "germane load"
+      ],
+      "terms": [
+        "cognitive load",
+        "intrinsic load",
+        "extraneous load",
+        "germane load"
+      ]
+    },
+    {
+      "id": "retrieval",
+      "name": "Retrieval Beats Restudy",
+      "color": "amber",
+      "fact": "Long-term memory is increased when part of the learning period is devoted to retrieving information from memory: restudied material shows higher recall immediately, but retrieved material wins as time passes — and even failed retrieval attempts help.",
+      "termInfo": {
+        "forward testing effect": {
+          "text": "Testing on old material boosts learning of the NEW material that follows — retrieval warms up the machinery rather than merely spending it.",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        },
+        "generation effect": {
+          "text": "Self-generating an answer beats reading one — and even failed retrieval attempts help, provided feedback follows.",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        },
+        "rereading": {
+          "text": "The restudy strategy retrieval practice beats: restudied material shows higher recall immediately — which is exactly why rereading feels effective — and the advantage reverses as time passes.",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        },
+        "retrieval practice": {
+          "text": "Devoting learning time to pulling information out of memory instead of putting it in again — the finding behind the testing effect (also called active recall, practice testing, or test-enhanced learning). Low-stakes quizzing tracks better grades and pass rates (Sotola & Crede 2021).",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "First documented empirically by Edwina Abbott in 1909; C. A. Mace (1932) summarized it: 'Active repetition is very much more effective than passive repetition.' The finding is also called the testing effect, active recall, practice testing, or test-enhanced learning. Testing old material even helps learning of new material (the forward testing effect).",
+        "links": [
+          {
+            "href": "wiki:Testing effect"
+          }
+        ]
+      },
+      "seeds": [
+        "retrieval practice",
+        "rereading"
+      ],
+      "floatingTerms": [
+        "forward testing effect",
+        "generation effect"
+      ],
+      "terms": [
+        "retrieval practice",
+        "rereading",
+        "forward testing effect",
+        "generation effect"
+      ]
+    },
+    {
+      "id": "time-and-forgetting",
+      "name": "Time and Forgetting",
+      "color": "magenta",
+      "fact": "The schedule of study matters as much as its content: learning is more effective when study sessions are spaced out than massed into cramming, the forgetting curve erodes unreviewed material, and mixing problem types teaches more than blocking them by kind.",
+      "termInfo": {
+        "cramming": {
+          "text": "Massed presentation — the default before exams and the loser: spaced practice outperformed massed 'in 259 out of 271 cases' (Cepeda et al. 2006).",
+          "links": [
+            {
+              "href": "wiki:Spacing effect"
+            }
+          ]
+        },
+        "forgetting curve": {
+          "text": "Ebbinghaus's picture of memory's decay — the reason unreviewed material disappears and spaced retrieval works at all.",
+          "links": [
+            {
+              "href": "wiki:Forgetting curve"
+            }
+          ]
+        },
+        "interleaving": {
+          "text": "Mixing problem types instead of blocking them by kind. Rohrer's mixed-practice students were 'vastly superior' to grouped peers — and crucially learned WHEN to apply each formula.",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        },
+        "spacing effect": {
+          "text": "'Learning is more effective when study sessions are spaced out' — Ebbinghaus's 1885 finding, the phenomenon behind the distributed-practice schedule. Bahrick found 13 sessions 56 days apart matched 26 sessions 14 days apart.",
+          "links": [
+            {
+              "href": "wiki:Spacing effect"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "Ebbinghaus identified the effect in 1885: 'active recall with increasing time intervals reduces the probability of forgetting.' Cepeda et al. found spaced practice won 'in 259 out of 271 cases'; Bahrick found 13 sessions 56 days apart matched 26 sessions 14 days apart. Rohrer's mixed-practice math students were 'vastly superior' — and learned when to apply each formula.",
+        "links": [
+          {
+            "href": "wiki:Spacing effect"
+          }
+        ]
+      },
+      "seeds": [
+        "cramming",
+        "spacing effect"
+      ],
+      "floatingTerms": [
+        "forgetting curve",
+        "interleaving"
+      ],
+      "terms": [
+        "cramming",
+        "spacing effect",
+        "forgetting curve",
+        "interleaving"
+      ]
+    },
+    {
+      "id": "desirable-difficulty",
+      "name": "Difficulty That Helps",
+      "color": "olive",
+      "fact": "Bjork's inversion of the felt-quality rule: conditions that make practice harder can make memory stronger, because storage strength and retrieval strength are different currencies — fluent restudy feels like learning while building little retrieval strength.",
+      "termInfo": {
+        "desirable difficulty": {
+          "text": "Bjork's name for conditions that make practice harder in ways that strengthen memory — retrieval, spacing, interleaving — against the felt-quality rule that easy means learned.",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        },
+        "retrieval strength": {
+          "text": "How readily a memory comes to mind right now — the currency restudy inflates fast, which is why fluency feels like learning. Bjork and Bjork's new theory of disuse distinguishes it from storage strength.",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        },
+        "storage strength": {
+          "text": "How well a memory is woven in, regardless of current access — the deep currency that keeps old skills from fading. The two strengths can move in opposite directions.",
+          "links": [
+            {
+              "href": "wiki:Testing effect"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The retrieval effort hypothesis: 'difficult but successful retrievals are better for memory than easier successful retrievals.' Bjork and Bjork's new theory of disuse supplies the storage-strength/retrieval-strength distinction that explains why the easy, fluent option is often the weak one.",
+        "links": [
+          {
+            "href": "wiki:Testing effect"
+          }
+        ]
+      },
+      "seeds": [
+        "desirable difficulty",
+        "retrieval strength"
+      ],
+      "floatingTerms": [
+        "storage strength"
+      ],
+      "terms": [
+        "desirable difficulty",
+        "retrieval strength",
+        "storage strength"
+      ]
+    },
+    {
+      "id": "transfer",
+      "name": "Transfer Beyond the Original Context",
+      "color": "brown",
+      "fact": "Transfer of learning is applying what was learned to new situations — near transfer to similar contexts is common; far transfer to dissimilar ones is rare and precious — and it is the outcome every other finding on this board secretly serves.",
+      "termInfo": {
+        "far transfer": {
+          "text": "Transfer to a dissimilar context — rare, precious, and the honest test of whether principles, not just procedures, were learned.",
+          "links": [
+            {
+              "href": "wiki:Transfer of learning"
+            }
+          ]
+        },
+        "near transfer": {
+          "text": "Transfer to a similar context — a learned procedure applied to a look-alike problem; the common, well-documented kind.",
+          "links": [
+            {
+              "href": "wiki:Transfer of learning"
+            }
+          ]
+        },
+        "transfer": {
+          "text": "Applying what was learned to new situations — the outcome every other finding on this subject quietly serves, studied since Thorndike and Woodworth's 1901 'identical elements' work.",
+          "links": [
+            {
+              "href": "wiki:Transfer of learning"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The study of transfer goes back to Thorndike and Woodworth's 1901 'identical elements' tradition: what carries between contexts is what they share — which is why organized, principled knowledge travels better than isolated drills.",
+        "links": [
+          {
+            "href": "wiki:Transfer of learning"
+          }
+        ]
+      },
+      "seeds": [
+        "near transfer",
+        "transfer"
+      ],
+      "floatingTerms": [
+        "far transfer"
+      ],
+      "terms": [
+        "near transfer",
+        "transfer",
+        "far transfer"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "the-working-memory-bottleneck",
+      "term": "the working-memory bottleneck",
+      "clusters": [
+        "memory-architecture",
+        "cognitive-load"
+      ],
+      "fact": "Cognitive load is defined as the effort used in working memory, so the architecture's narrow gateway is what makes load worth budgeting — and schema construction is the escape route: organized knowledge ameliorates load.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Cognitive load"
+          }
+        ]
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "memory-architecture": "working memory",
+        "cognitive-load": "cognitive load"
+      }
+    },
+    {
+      "id": "retrieval-changes-storage",
+      "term": "retrieval changes storage",
+      "clusters": [
+        "memory-architecture",
+        "retrieval"
+      ],
+      "fact": "Retrieval is not read-only: testing builds multiple retrieval routes for memory and lasting inter-item connections, so the act of pulling knowledge through the architecture modifies what the architecture stores.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Testing effect"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "memory-architecture": "long-term memory",
+        "retrieval": "retrieval practice"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "retrieval",
+        "to": "memory-architecture"
+      }
+    },
+    {
+      "id": "effort-that-pays",
+      "term": "effort that pays",
+      "clusters": [
+        "retrieval",
+        "desirable-difficulty"
+      ],
+      "fact": "The retrieval effort hypothesis — difficult but successful retrievals are better for memory than easier successful retrievals — makes retrieval the paradigm desirable difficulty, with storage and retrieval strength explaining why easy fluency can fool the learner.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Testing effect"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "retrieval": "retrieval practice",
+        "desirable-difficulty": "desirable difficulty"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "desirable-difficulty",
+        "to": "retrieval"
+      }
+    },
+    {
+      "id": "spacing-amplifies-retrieval",
+      "term": "spacing amplifies retrieval",
+      "clusters": [
+        "retrieval",
+        "time-and-forgetting"
+      ],
+      "fact": "Spaced repetition amplifies the testing effect, with greater gains when testing is delayed — and without spaced retrievals, the forgetting curve quietly reclaims the material.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Testing effect"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "retrieval": "retrieval practice",
+        "time-and-forgetting": "spacing effect"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "time-and-forgetting",
+        "to": "retrieval"
+      }
+    },
+    {
+      "id": "interleaving-is-desirable-difficulty",
+      "term": "interleaving is a desirable difficulty",
+      "clusters": [
+        "time-and-forgetting",
+        "desirable-difficulty"
+      ],
+      "fact": "Mixed practice feels worse and performs vastly better than blocked practice — and it teaches when to apply each method, the signature of a difficulty that is desirable.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Spacing effect"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "time-and-forgetting": "interleaving",
+        "desirable-difficulty": "desirable difficulty"
+      }
+    },
+    {
+      "id": "schemas-carry-transfer",
+      "term": "schemas carry transfer",
+      "clusters": [
+        "memory-architecture",
+        "transfer"
+      ],
+      "fact": "Transfer rides on organized knowledge: schemas and their subschemas let experts see new problems as versions of known ones, which is why schema construction, not bare repetition, is the route to portable skill.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Transfer of learning"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "memory-architecture": "schema",
+        "transfer": "transfer"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "memory-architecture",
+        "to": "transfer"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "the-designers-share",
+      "prompt": "Sweller's theory names three parts of the working-memory budget. Which one is entirely under the instructional designer's control — the waste the presentation itself adds?",
+      "explanation": "Extraneous load is the part generated by how material is presented — fully under the instructional designer's control. Intrinsic load belongs to the topic itself, and germane load is the learner's own schema-building effort.",
+      "label": "The designer's share",
+      "targets": [
+        "extraneous load"
+      ],
+      "reasons": {
+        "extraneous load": "generated by the manner of presentation — designer-controlled"
+      }
+    },
+    {
+      "id": "tonight-versus-june",
+      "prompt": "Which two terms name the strategies whose ranking REVERSES as time passes — one winning the quiz tonight, the other the exam in June?",
+      "explanation": "Rereading wins the quiz tonight — restudied words show higher recall immediately — but retrieval practice wins the exam in June, as the advantage reverses with delay. That time course is exactly why the weaker-feeling method is the stronger one.",
+      "label": "Tonight versus June",
+      "targets": [
+        "rereading",
+        "retrieval practice"
+      ],
+      "reasons": {
+        "rereading": "the restudy strategy — immediate advantage that fades",
+        "retrieval practice": "the retrieving strategy — slower now, durable later"
+      }
+    },
+    {
+      "id": "the-two-currencies",
+      "prompt": "A student reviews notes until everything feels familiar, then stops. Which two terms name the currency that now feels full and the one actually left short?",
+      "explanation": "Restudy inflates retrieval strength — the memory comes to mind readily right now, which is the feeling of knowing. What it fails to build is storage strength — how well the knowledge is woven in for the long term. The two currencies can move in opposite directions.",
+      "label": "The two currencies",
+      "targets": [
+        "retrieval strength",
+        "storage strength"
+      ],
+      "reasons": {
+        "retrieval strength": "current accessibility — inflated fast by restudy, hence the feeling of knowing",
+        "storage strength": "how well the memory is woven in — what restudy leaves short"
+      }
+    },
+    {
+      "id": "ebbinghaus-double",
+      "prompt": "Which two terms name findings the field owes to a single 1885 experimenter — one a picture of decay, the other a discovery about schedules?",
+      "explanation": "Both come from the same experimenter: Ebbinghaus identified the spacing effect in 1885 — active recall with increasing time intervals reduces forgetting — and mapped the forgetting curve, the decay that makes spacing necessary. Interleaving is Rohrer's; cramming is the rival schedule, not a finding.",
+      "label": "One experimenter, two findings",
+      "targets": [
+        "spacing effect",
+        "forgetting curve"
+      ],
+      "reasons": {
+        "forgetting curve": "Ebbinghaus's decay picture",
+        "spacing effect": "Ebbinghaus's schedule discovery — spaced beats massed"
+      }
+    },
+    {
+      "id": "what-travels",
+      "prompt": "Every finding on this subject serves one outcome — learning that shows up somewhere other than where it was taught. Which term names that outcome, and which names the knowledge structure that makes it possible?",
+      "explanation": "Transfer is the outcome — learning that shows up somewhere other than where it happened — and schema is what makes it possible: organized knowledge lets experts see new problems as versions of known ones. Bare facts in long-term memory do not travel; organized ones do.",
+      "label": "What travels",
+      "targets": [
+        "transfer",
+        "schema"
+      ],
+      "reasons": {
+        "schema": "organized knowledge — what lets learning travel to new problems",
+        "transfer": "the outcome — applying learning beyond the original context"
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "backward-design",
+        "reason": "The design framework that turns this science into courses: backward design plans for transfer — the finish line this board's findings quietly serve — and sequences retrieval-friendly practice in Stage 3."
+      },
+      {
+        "id": "assessment-for-learning",
+        "reason": "The classroom expression of the science: hinge questions and exit tickets are retrieval practice with a shape, and the formative loop is what makes feedback actable."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "How Learning Sticks",
+    "summary": "The memory architecture, the load budget, retrieval versus restudy, desirable difficulties, and transfer — what cognitive science says makes learning last.",
+    "estimatedMinutes": 5,
+    "content": {
+      "text": "Cognitive science has spent more than a century measuring how learning actually works, and its findings routinely contradict what studying feels like. This lesson walks those findings: the memory architecture that constrains everything, the load budget that decides whether material teaches or overwhelms, the practice methods that build durable memory, the schedules and difficulties that feel worse and work better, and the outcome that makes it all matter — transfer.\r\n\r\n## The architecture and its budget\r\n\r\nEverything converges on working memory: the workspace where conscious processing happens, 'extremely limited in both capacity and duration.' Whatever is attended to there can pass into long-term memory, the vast permanent store. Working memory's effective capacity grows when knowledge is organized into schemas — structured bundles that let experts take in whole patterns where novices must hold pieces. John Sweller built cognitive load theory on that bottleneck: the effort used in working memory splits into intrinsic load (the topic's inherent difficulty), extraneous load (waste created by how material is presented — entirely under the designer's control), and germane load (the work put into creating a permanent store of knowledge). Good presentation is mostly extraneous-load management.\r\n\r\n## What builds memory\r\n\r\nThe most robust prescription in the field is retrieval practice: devoting part of learning time to pulling knowledge out of memory rather than putting it in again. The finding is over a century old — first documented in 1909 — and consistently strange: restudied material shows higher recall immediately, but retrieved material wins as time passes. Even failed retrieval attempts help (the generation effect), and testing old material boosts learning of the new (the forward testing effect).\r\n\r\nScheduling multiplies it. The spacing effect — Ebbinghaus, 1885 — says spaced sessions beat massed cramming: spaced practice won in 259 of 271 comparisons in Cepeda's review, and Bahrick found 13 sessions 56 days apart matched 26 sessions 14 days apart. Meanwhile the forgetting curve erodes whatever nothing retrieves. Mixing problem types — interleaving — outperforms blocking by kind, and, importantly, teaches when to apply each method.\r\n\r\n## Why harder can be better\r\n\r\nRobert Bjork's name for the pattern is desirable difficulties, and the theory explaining them distinguishes two currencies: retrieval strength — how readily a memory comes to mind right now — and storage strength — how well it is woven in. Rereading inflates retrieval strength fast, which is exactly why it feels effective. The methods that feel worse build the currency that lasts.\r\n\r\n## Where it lands\r\n\r\nThe point of all of it is transfer: applying learning to situations beyond the one where it happened. Near transfer, to similar contexts, is common; far transfer is rare and precious. What carries between contexts is organized knowledge — schemas — which is why schema construction, not bare exposure, is the destination of every good practice decision in this lesson."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "ZCode (GLM 5.3 Flash)",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

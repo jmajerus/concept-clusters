@@ -16,19 +16,10 @@
     "ethics"
   ],
   "info": {
-    "text": "Augustine's grief-stricken permission and Aquinas's threefold test decide when a war may even be fought — plus 'dirty hands,' a later term for the guilt that survives even a war held to every one of those conditions.",
+    "text": "From Augustine's grief-stricken permission through Aquinas's threefold test to Michael Walzer's modern reckoning with dirty hands — the tradition that decides when a war may be fought, and why even a rightly fought one is never quite justified.",
     "links": [
       {
         "href": "wiki:Just war theory"
-      }
-    ],
-    "citations": [
-      {
-        "title": "A Plea for Excuses: The Presidential Address",
-        "author": "Austin, J. L.",
-        "publisher": "Proceedings of the Aristotelian Society, New Series, Vol. 57",
-        "year": "1957",
-        "pages": "1–30"
       }
     ]
   },
@@ -283,7 +274,9 @@
         "proportionality"
       ],
       "reasons": {
+        "discrimination (noncombatant immunity)": "Limits who force may be directed at once fighting begins, rather than granting permission for fighting to start.",
         "necessary, not sufficient": "Aquinas's own caution against treating the three conditions as a green light rather than a floor.",
+        "proportionality": "Limits how much force may be used once fighting begins, rather than granting permission for it.",
         "right intention": "It doesn't grant permission to fight; it restricts why one may fight, ruling out hatred or domination as motives."
       }
     },
@@ -298,6 +291,9 @@
         "supreme emergency"
       ],
       "reasons": {
+        "dirty hands": "Walzer's term for a leader who does the necessary wrong thing and remains rightly guilty for having done it — guilt conceded, not denied.",
+        "excuse": "Names the category itself: a concession that the act was wrong, mitigated only by the circumstances that forced it.",
+        "moral residue": "The leftover guilt that marks an excuse rather than a justification — a true justification would leave nothing to regret.",
         "supreme emergency": "Walzer frames it as an exception the rules bend under extremity, not a license the doctrine grants — the grammar of excuse, not justification."
       }
     }
@@ -320,7 +316,7 @@
     "summary": "Aristotle and J. L. Austin on justification and excuse, why forgiveness is not a third exit from either, and the two-stage, two-part history of the doctrine that decides when war is permitted.",
     "estimatedMinutes": 6,
     "content": {
-      "text": "## Two Different Ways to Answer for a Wrong\n\nThis puzzle rests on a distinction with real depth in moral philosophy, and what follows only sketches it. The sources below repay the reader's time far better than a summary can.\n\nAristotle opens the inquiry in the *Nicomachean Ethics*, Book III: praise and blame belong to the voluntary; for the involuntary, we extend pardon, and sometimes pity. He asks what kind of compulsion or ignorance makes an act involuntary enough to excuse, and where that excuse runs out — his case of a tyrant who holds someone's family hostage unless they do something shameful sits close to the dilemmas this puzzle will raise.\n\nJ. L. Austin's 1956 essay \"A Plea for Excuses\" gives the distinction its sharpest modern statement: with a justification, a person admits doing the act but argues it wasn't bad; with an excuse, a person admits it was bad but declines full responsibility for having done it.\n\nA justification, on this view, is a vindication of the act itself. An excuse concedes the wrong and asks only for mercy toward the person who committed it.\n\nA further question sits entirely outside this puzzle's scope, and is worth naming only so it isn't mistaken for a third, gentler way out: forgiveness. Forgiveness is not a softer cousin of excuse, and a wrongdoer has no claim on it — it is not owed, not earned by good conduct, and not available for anyone to grant to themselves. It belongs solely to the party actually wronged, to extend or withhold as they choose, and choosing to extend it changes nothing about what was done: the act stays exactly as wrong as it was, and any justification or excuse it did or didn't earn stays exactly where this puzzle leaves it. Forgiveness answers a different question than this puzzle asks — not whether an act was permitted or excused, but what a wronged community owes itself afterward. Just war doctrine has a name for that separate territory, jus post bellum, justice after war. It belongs to a later puzzle, not this one.\n\nThis puzzle asks which of the two categories, justification or excuse, an entire tradition of doctrine actually earns for war — even a war that satisfies every rule that tradition has ever laid down.\n\n## A Doctrine Built in Two Stages, Then Split in Two Halves\n\nFor over a thousand years, thinkers in the Christian West wrestled with a hard question: can a tradition built on loving one's enemies ever permit killing them? An early answer treated war as a terrible last resort — never something to celebrate, only something to grieve, undertaken reluctantly and aimed at nothing but restoring the peace it disturbed.\n\nA few centuries later, a more systematic thinker took that reluctant, case-by-case wisdom and turned it into something closer to a checklist: explicit conditions that had to be satisfied before a war could even be considered permissible. That systematizing move is what let \"just war\" become a *doctrine* — teachable, checkable, arguable — rather than only a private moral instinct. But satisfying a checklist to *start* a war turned out to be only half the problem.\n\nOnce fighting actually begins, a separate set of questions takes over: who may be targeted, and how much force is too much? And modern theorists — writing in the shadow of total war, terrorism, and weapons that can erase whole cities — have had to reckon with a harder question still: what happens when the survival of an entire community seems to require breaking even these wartime rules? Is there ever a case where the rules themselves admit they might bend — and if a leader bends them, what is left over, morally, once the emergency has passed?\n\nThe fuller reckoning with law and the rules of war — the Geneva Conventions, and the modern campaign to restore their authority — belongs to a later puzzle. Here, the wartime half of the doctrine matters only for the moral question it raises: whether observing rules under fire is itself a form of the same reluctant permission Augustine began with, or something else entirely.\n\n## Before You Start\n\nAs you sort these terms, keep the opening distinction in mind: does a concept *vindicate* something, or only *excuse* it? Ask of each one: does this grant *permission* to fight, or does it only *limit* how that permission may be used once granted? And by the end, sit with the harder question this puzzle keeps circling back to: is war ever excusable — or does it represent, every time, an abject human failure?"
+      "text": "## Two Different Ways to Answer for a Wrong\n\nThis puzzle rests on a distinction with real depth in moral philosophy, and what follows only sketches it. The sources below repay the reader's time far better than a summary can.\n\nAristotle opens the inquiry in the *Nicomachean Ethics*, Book III: praise and blame belong to the voluntary; for the involuntary, we extend pardon, and sometimes pity. He asks what kind of compulsion or ignorance makes an act involuntary enough to excuse, and where that excuse runs out — his case of a tyrant who holds someone's family hostage unless they do something shameful sits close to the dilemmas this puzzle will raise.\n\nJ. L. Austin's 1956 essay \"A Plea for Excuses\" gives the distinction its sharpest modern statement: with a justification, a person admits doing the act but argues it wasn't bad; with an excuse, a person admits it was bad but declines full responsibility for having done it.\n\nA justification, on this view, is a vindication of the act itself. An excuse concedes the wrong and asks only for mercy toward the person who committed it.\n\nA further question sits entirely outside this puzzle's scope, and is worth naming only so it isn't mistaken for a third, gentler way out: forgiveness. Forgiveness is not a softer cousin of excuse, and a wrongdoer has no claim on it — it is not owed, not earned by good conduct, and not available for anyone to grant to themselves. It belongs solely to the party actually wronged, to extend or withhold as they choose, and choosing to extend it changes nothing about what was done: the act stays exactly as wrong as it was, and any justification or excuse it did or didn't earn stays exactly where this puzzle leaves it. Forgiveness answers a different question than this puzzle asks — not whether an act was permitted or excused, but what a wronged community owes itself afterward. Just war doctrine has a name for that separate territory, jus post bellum, justice after war. It belongs to a later puzzle, not this one.\n\nThis puzzle asks which of the two categories, justification or excuse, an entire tradition of doctrine actually earns for war — even a war that satisfies every rule that tradition has ever laid down.\n\n## A Doctrine Built in Two Stages, Then Split in Two Halves\n\nFor over a thousand years, thinkers in the Christian West wrestled with a hard question: can a tradition built on loving one's enemies ever permit killing them? An early answer treated war as a terrible last resort — never something to celebrate, only something to grieve, undertaken reluctantly and aimed at nothing but restoring the peace it disturbed.\n\nA few centuries later, a more systematic thinker took that reluctant, case-by-case wisdom and turned it into something closer to a checklist: explicit conditions that had to be satisfied before a war could even be considered permissible. That systematizing move is what let \"just war\" become a *doctrine* — teachable, checkable, arguable — rather than only a private moral instinct. But satisfying a checklist to *start* a war turned out to be only half the problem.\n\nOnce fighting actually begins, a separate set of questions takes over: who may be targeted, and how much force is too much? And modern theorists — writing in the shadow of total war, terrorism, and weapons that can erase whole cities — have had to reckon with a harder question still: what happens when the survival of an entire community seems to require breaking even these wartime rules? Is there ever a case where the rules themselves admit they might bend — and if a leader bends them, what is left over, morally, once the emergency has passed?\n\nThe fuller reckoning with law and the rules of war — the Geneva Conventions, and the modern campaign to restore their authority — belongs to a later puzzle. Here, the wartime half of the doctrine matters only for the moral question it raises: whether observing rules under fire is itself a form of the same reluctant permission Augustine began with, or something else entirely.\n\n## Before You Start\n\nKeep the opening distinction in mind: does a concept *vindicate* something, or only *excuse* it? Ask of each idea: does it grant *permission* to fight, or does it only *limit* how that permission may be used once granted? And by the end, sit with the harder question this inquiry keeps circling back to: is war ever excusable — or does it represent, every time, an abject human failure?"
     },
     "links": [
       {
@@ -346,6 +342,9 @@
     "contributors": [
       {
         "name": "Claude"
+      },
+      {
+        "name": "Muse Code"
       }
     ]
   }

@@ -5,7 +5,6 @@
   "categories": [
     "peace-conflict-studies",
     "political-science",
-    "history-society",
     "science-technology-society"
   ],
   "subcategories": {
@@ -69,9 +68,7 @@
             }
           ]
         },
-        "congressional deference": {
-          "text": "Congress's practice of not exercising its own constitutional power to declare and limit war, leaving broad practical discretion over where and against whom force is used to the executive branch."
-        }
+        "congressional deference": "Congress's practice of not exercising its own constitutional power to declare and limit war, leaving broad practical discretion over where and against whom force is used to the executive branch."
       },
       "info": {
         "text": "The statutory and constitutional framework that governs where, and against whom, the United States claims authority to use lethal military force after September 11, 2001.",
@@ -83,16 +80,16 @@
       },
       "seeds": [
         "AUMF",
-        "associated forces"
+        "War Powers Resolution"
       ],
       "floatingTerms": [
-        "War Powers Resolution",
+        "associated forces",
         "congressional deference"
       ],
       "terms": [
         "AUMF",
-        "associated forces",
         "War Powers Resolution",
+        "associated forces",
         "congressional deference"
       ]
     },
@@ -122,9 +119,7 @@
             }
           ]
         },
-        "Terror Tuesday": {
-          "text": "The informal name for weekly White House meetings at which senior officials reviewed candidates for the kill list before the president gave final approval."
-        },
+        "Terror Tuesday": "The informal name for weekly White House meetings at which senior officials reviewed candidates for the kill list before the president gave final approval.",
         "baseball cards": {
           "text": "The nickname one official gave — and called 'macabre' himself — to the one-page biographical and intelligence summaries prepared on each kill-list candidate before a Terror Tuesday review.",
           "links": [
@@ -231,16 +226,16 @@
       },
       "seeds": [
         "signature strikes",
-        "personality strikes"
+        "double-tap strikes"
       ],
       "floatingTerms": [
-        "double-tap strikes",
+        "personality strikes",
         "kill chain"
       ],
       "terms": [
         "signature strikes",
-        "personality strikes",
         "double-tap strikes",
+        "personality strikes",
         "kill chain"
       ]
     },
@@ -274,9 +269,7 @@
             }
           ]
         },
-        "selectors": {
-          "text": "Specific identifiers, such as a phone number or SIM card, used to isolate one person's communications data out of a much larger pool of bulk-collected metadata."
-        }
+        "selectors": "Specific identifiers, such as a phone number or SIM card, used to isolate one person's communications data out of a much larger pool of bulk-collected metadata."
       },
       "info": {
         "text": "The collection and algorithmic analysis of large-scale communications data to detect patterns of behavior, sometimes used to help identify targets for killing.",
@@ -414,23 +407,19 @@
     }
   ],
   "relatedPuzzles": {
-    "info": {
-      "text": "How the same expansion of unaccountable executive power looks in other registers."
-    },
     "entries": [
       {
         "id": "the-hobbesian-imperative",
         "reason": "See the realpolitik case, made by Machiavelli, Hobbes, and Morgenthau, that a sovereign's first duty to survive can override any external legal constraint on its use of force.",
         "via": [
-          "reason of state",
-          "executive discretion"
+          "AUMF"
         ]
       },
       {
         "id": "the-military-industrial-complex",
         "reason": "Compare Eisenhower's warning about a self-perpetuating war economy with the self-perpetuating bureaucratic machinery this puzzle documents a half-century later.",
         "via": [
-          "institutional momentum"
+          "Disposition Matrix"
         ]
       }
     ]
@@ -441,7 +430,7 @@
     "summary": "Context on the post-9/11 shift toward covert, remote, and data-driven warfare that journalist Jeremy Scahill documented in Dirty Wars.",
     "estimatedMinutes": 4,
     "content": {
-      "text": "## A war without a map\n\nAfter September 11, 2001, Congress gave the president broad authority to use force against those responsible for the attacks. Over the following decade, that authority was stretched, quietly and with little public debate, to cover a widening set of countries and a widening set of enemies who had nothing to do with September 11 itself.\n\nAt the same time, the way individual targets were chosen changed. Killing a specific, named enemy gave way to killing people who merely matched a statistical or behavioral pattern. And the raw material for those patterns increasingly came from mass surveillance: communications data collected not because a person was already suspected of anything, but so that suspicion could be manufactured later, at scale, by machine.\n\nJournalist Jeremy Scahill spent years reporting from the countries where this new kind of war was actually fought — Yemen, Somalia, Pakistan — rather than from Washington briefing rooms. His book and documentary, both titled *Dirty Wars: The World Is a Battlefield*, follow the people who built this apparatus and the people who lived, and sometimes died, underneath it.\n\nAs you play, notice how often a single institution or process shows up wearing two different hats: sometimes as a legal safeguard, and sometimes as the very mechanism that lets a safeguard be quietly set aside.\n\n**Before you start:** what would it take for a government to convince you that it had correctly identified an enemy it could never publicly name?"
+      "text": "## A war without a map\r\n\r\nAfter September 11, 2001, Congress gave the president broad authority to use force against those responsible for the attacks. Over the following decade, that authority was stretched, quietly and with little public debate, to cover a widening set of countries and a widening set of enemies who had nothing to do with September 11 itself.\r\n\r\nAt the same time, the way individual targets were chosen changed. Killing a specific, named enemy gave way to killing people who merely matched a statistical or behavioral pattern. And the raw material for those patterns increasingly came from mass surveillance: communications data collected not because a person was already suspected of anything, but so that suspicion could be manufactured later, at scale, by machine.\r\n\r\nJournalist Jeremy Scahill spent years reporting from the countries where this new kind of war was actually fought — Yemen, Somalia, Pakistan — rather than from Washington briefing rooms. His book and documentary, both titled *Dirty Wars: The World Is a Battlefield*, follow the people who built this apparatus and the people who lived, and sometimes died, underneath it.\r\n\r\nAs you play, notice how often a single institution or process shows up wearing two different hats: sometimes as a legal safeguard, and sometimes as the very mechanism that lets a safeguard be quietly set aside.\r\n\r\n**Before you start:** what would it take for a government to convince you that it had correctly identified an enemy it could never publicly name?"
     },
     "links": [
       {
@@ -454,7 +443,8 @@
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude"
+        "name": "Claude (Sonnet 5)",
+        "model": "Claude Sonnet 5"
       }
     ]
   }

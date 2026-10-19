@@ -19,12 +19,23 @@ const puzzle = definePuzzle(import.meta.url, {
     "book"
   ],
   "info": {
-    "text": "How executive-branch legal memos manufactured impunity for a secret detention and interrogation program -- and how that permissive legal culture spilled into the undisciplined abuse at Abu Ghraib.",
+    "text": "How executive-branch legal opinions manufactured impunity for a two-tier system of detention, acknowledged military prisons and secret CIA ones, and for the torture carried out in both.",
     "citations": [
       {
         "title": "The Dark Side: The Inside Story of How the War on Terror Turned Into a War on American Ideals",
         "author": "Mayer, Jane",
         "publisher": "Doubleday",
+        "year": "2008"
+      },
+      {
+        "title": "The Terror Presidency: Law and Judgment Inside the Bush Administration",
+        "author": "Goldsmith, Jack",
+        "publisher": "W. W. Norton",
+        "year": "2007"
+      },
+      {
+        "title": "Inquiry into the Treatment of Detainees in U.S. Custody",
+        "author": "U.S. Senate Committee on Armed Services",
         "year": "2008"
       }
     ]
@@ -34,17 +45,16 @@ const puzzle = definePuzzle(import.meta.url, {
       "id": "legal-machinery",
       "name": "The Legal Machinery",
       "color": "teal",
-      "fact": "Executive branch lawyers redefined torture in a formal legal opinion, granting the president authority to authorize coercive interrogation and stripping detainees of the legal status that would have entitled them to Geneva protections.",
+      "fact": "Executive branch lawyers redefined torture in a formal legal opinion and argued that the president's power as commander in chief overrode the statutes forbidding it.",
       "terms": [
         "Bybee Memo",
-        "Unlawful Enemy Combatant",
-        "John Yoo",
         "Office of Legal Counsel",
+        "John Yoo",
         "Unitary Executive Theory"
       ],
       "seeds": [
         "Bybee Memo",
-        "Unlawful Enemy Combatant"
+        "Office of Legal Counsel"
       ],
       "termInfo": {
         "Bybee Memo": {
@@ -72,41 +82,82 @@ const puzzle = definePuzzle(import.meta.url, {
           ]
         },
         "Unitary Executive Theory": {
-          "text": "The doctrine that the president holds essentially unchecked control over the executive branch, invoked to justify the interrogation program.",
+          "text": "The doctrine that the president holds essentially unchecked control over the executive branch, invoked to argue that statutes could not limit how the president directed interrogations.",
           "links": [
             {
               "href": "wiki:Unitary executive theory"
-            }
-          ]
-        },
-        "Unlawful Enemy Combatant": {
-          "text": "A legal classification placing a detainee outside the categories that would guarantee Geneva Convention protections or judicial review.",
-          "links": [
-            {
-              "href": "wiki:Unlawful combatant"
             }
           ]
         }
       }
     },
     {
-      "id": "detention-network",
-      "name": "The Detention Network",
+      "id": "acknowledged-prisons",
+      "name": "The Acknowledged Prisons",
       "color": "amber",
-      "fact": "The state built a network of offshore and foreign-soil facilities and covert transfer routes specifically chosen to keep detainees outside the reach of domestic courts and international monitors.",
+      "fact": "The military's prisons were officially acknowledged: prisoners were registered, the Red Cross visited, and from 2004 the courts could reach at least Guantanamo. Acknowledgment did not prevent abuse inside them.",
       "terms": [
         "Guantanamo Bay Detention Camp",
+        "Abu Ghraib",
+        "Red Cross Access",
+        "Combatant Status Review Tribunals"
+      ],
+      "seeds": [
+        "Guantanamo Bay Detention Camp",
+        "Abu Ghraib"
+      ],
+      "termInfo": {
+        "Abu Ghraib": {
+          "text": "The U.S. military prison in Iraq where photographs published in 2004 showed prisoners stripped, held in stress positions, and threatened with dogs. Army investigations found military intelligence personnel involved alongside the military police.",
+          "links": [
+            {
+              "href": "wiki:Abu Ghraib torture and prisoner abuse"
+            }
+          ]
+        },
+        "Combatant Status Review Tribunals": {
+          "text": "Military hearings the Pentagon set up in 2004, after the Supreme Court allowed Guantanamo prisoners to challenge their detention, to decide whether each prisoner was properly held as an enemy combatant.",
+          "links": [
+            {
+              "href": "wiki:Combatant Status Review Tribunal"
+            }
+          ]
+        },
+        "Guantanamo Bay Detention Camp": {
+          "text": "The U.S. military prison at Guantanamo Bay, Cuba, opened in January 2002 and chosen partly because its offshore status was argued to place it outside domestic legal jurisdiction.",
+          "links": [
+            {
+              "href": "wiki:Guantanamo Bay detention camp"
+            }
+          ]
+        },
+        "Red Cross Access": {
+          "text": "Registration of prisoners and confidential visits by the International Committee of the Red Cross, the ordinary outside check on how prisoners of war and other detainees are treated. The Red Cross visited Guantanamo from 2002, and its reports from Iraq documented abuse before the Abu Ghraib photographs became public.",
+          "links": [
+            {
+              "href": "wiki:International Committee of the Red Cross"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "secret-prisons",
+      "name": "The Secret Prisons",
+      "color": "magenta",
+      "fact": "The CIA held prisoners in a separate system that was never acknowledged while it operated: no registration, no Red Cross, and no court that could reach it.",
+      "terms": [
         "CIA Black Sites",
         "Extraordinary Rendition",
         "Incommunicado Detention"
       ],
       "seeds": [
-        "Guantanamo Bay Detention Camp",
-        "CIA Black Sites"
+        "CIA Black Sites",
+        "Extraordinary Rendition"
       ],
       "termInfo": {
         "CIA Black Sites": {
-          "text": "Secret CIA-operated prisons located outside the United States, used to hold detainees beyond the reach of any court.",
+          "text": "Secret CIA-operated prisons located outside the United States, used from 2002 to hold detainees beyond the reach of any court. The CIA's detention authority came from a presidential finding signed in September 2001.",
           "links": [
             {
               "href": "wiki:Black site"
@@ -118,14 +169,6 @@ const puzzle = definePuzzle(import.meta.url, {
           "links": [
             {
               "href": "wiki:Extraordinary rendition"
-            }
-          ]
-        },
-        "Guantanamo Bay Detention Camp": {
-          "text": "The U.S. military prison at Guantanamo Bay, Cuba, chosen partly because its offshore status was argued to place it outside domestic legal jurisdiction.",
-          "links": [
-            {
-              "href": "wiki:Guantanamo Bay detention camp"
             }
           ]
         },
@@ -201,22 +244,26 @@ const puzzle = definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "golden-shield",
-      "term": "Golden Shield",
+      "id": "unlawful-enemy-combatant",
+      "term": "Unlawful Enemy Combatant",
       "clusters": [
         0,
         1
       ],
-      "fact": "The OLC memos functioned as advance legal cover -- 'golden shields' -- that CIA personnel relied on before conducting renditions and running black sites, letting field officers act without individual criminal exposure.",
+      "fact": "The administration's determination that captured al-Qaeda and Taliban fighters were unlawful enemy combatants, outside the Geneva Conventions' protections, supplied the legal basis for holding them in military custody without charge or prisoner-of-war status; the 2004 tribunals at Guantanamo existed to rule on that same status.",
       "info": {
-        "text": "Mayer's own term for how OLC legal opinions functioned: as advance immunity for anyone who acted on their authorization.",
+        "text": "A legal classification placing a detainee outside the categories that would guarantee Geneva Convention protections or judicial review.",
         "links": [
           {
-            "href": "wiki:Torture Memos"
+            "href": "wiki:Unlawful combatant"
           }
         ]
       },
-      "relationKind": "dynamic",
+      "relationKind": "foundation",
+      "idealTerms": [
+        null,
+        "Combatant Status Review Tribunals"
+      ],
       "direction": {
         "kind": "through",
         "from": 0,
@@ -224,13 +271,40 @@ const puzzle = definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "golden-shield",
+      "term": "Golden Shield",
+      "clusters": [
+        0,
+        3
+      ],
+      "fact": "The Office of Legal Counsel's opinions served as advance legal cover that CIA interrogators relied on before using the authorized techniques, so that officers could act without facing prosecution under the torture statute.",
+      "info": {
+        "text": "Jack Goldsmith's phrase, in The Terror Presidency, for how agencies regarded a formal Office of Legal Counsel opinion: as protection in advance for anyone who acted within it. Goldsmith headed the office from late 2003 and withdrew the Bybee memo in 2004.",
+        "links": [
+          {
+            "href": "wiki:Torture Memos"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "Bybee Memo",
+        "Enhanced Interrogation Techniques"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 3
+      }
+    },
+    {
       "id": "ghost-detainees",
       "term": "Ghost Detainees",
       "clusters": [
-        1,
-        2
+        2,
+        1
       ],
-      "fact": "Detainees were kept off official rolls and hidden from the Red Cross specifically to allow extended, unmonitored interrogation without legal or medical oversight.",
+      "fact": "CIA prisoners were held inside military prisons, Abu Ghraib among them, without being registered, and were moved or hidden when the Red Cross visited -- secret detention operating inside the prisons that were supposed to be open to inspection.",
       "info": {
         "text": "A detainee held off official registries and hidden from the Red Cross, specifically to keep their interrogation outside any accountability structure.",
         "links": [
@@ -240,88 +314,145 @@ const puzzle = definePuzzle(import.meta.url, {
         ]
       },
       "relationKind": "dynamic",
+      "idealTerms": [
+        null,
+        "Red Cross Access"
+      ],
       "direction": {
         "kind": "through",
-        "from": 1,
-        "to": 2
+        "from": 2,
+        "to": 1
       }
     },
     {
-      "id": "abu-ghraib",
-      "term": "Abu Ghraib",
+      "id": "high-value-detainees",
+      "term": "High-Value Detainees",
       "clusters": [
-        0,
-        2
+        2,
+        1
       ],
-      "fact": "Abu Ghraib's abuse was undisciplined military-police conduct downstream of the legal permissiveness the memos created -- not the CIA's own authorized program, but its cultural runoff.",
+      "fact": "In September 2006 President Bush publicly acknowledged the CIA detention program and transferred fourteen of its prisoners from the black sites to Guantanamo, where the Red Cross was able to see them for the first time.",
       "info": {
-        "text": "The Iraqi military prison where photographs of military-police abuse became public in 2004, revealing conduct distinct from -- but enabled by -- the CIA's own memo-authorized program.",
+        "text": "The CIA's term for the senior al-Qaeda suspects it held longest in its secret prisons, fourteen of whom were moved to Guantanamo in 2006.",
         "links": [
           {
-            "href": "wiki:Abu Ghraib torture and prisoner abuse"
+            "href": "wiki:High-value detainee"
           }
         ]
       },
-      "relationKind": "dynamic",
+      "relationKind": "continuity",
+      "idealTerms": [
+        "CIA Black Sites",
+        "Guantanamo Bay Detention Camp"
+      ],
       "direction": {
         "kind": "through",
-        "from": 0,
-        "to": 2
+        "from": 2,
+        "to": 1
       }
+    },
+    {
+      "id": "torture",
+      "term": "Torture",
+      "clusters": [
+        1,
+        2,
+        3
+      ],
+      "fact": "What the memos defined away was done in both kinds of prison. CIA interrogators waterboarded prisoners at black sites; at Abu Ghraib, techniques Rumsfeld had approved for Guantanamo in December 2002, carried to Iraq by Guantanamo's commander in 2003, were used on prisoners. A 2008 Senate Armed Services Committee report found the abuse was not simply the work of a few soldiers acting on their own.",
+      "info": {
+        "text": "Severe physical or mental pain or suffering deliberately inflicted on a person in custody, prohibited absolutely by the Convention against Torture and by U.S. law. Enhanced interrogation techniques was the program's name for it.",
+        "links": [
+          {
+            "href": "wiki:Torture"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": [
+        "Abu Ghraib",
+        "CIA Black Sites",
+        "Enhanced Interrogation Techniques"
+      ]
     }
   ],
   "lenses": [
     {
       "id": "concealment-from-oversight",
-      "prompt": "Which concepts describe mechanisms built specifically to prevent outside legal or humanitarian oversight?",
-      "explanation": "Each of these functions to remove a detainee, a practice, or a decision from the reach of courts, the Red Cross, or public accountability -- concealment was not incidental to the program, it was engineered into its legal and physical design.",
+      "prompt": "Which concepts kept prisoners hidden from the Red Cross?",
+      "explanation": "Secret prisons abroad, transfers into other countries' custody, detention with no outside contact, and prisoners kept off the rolls even inside military prisons: each removed a prisoner from the one outside check that ordinarily reaches anyone held in wartime. Guantanamo, for all its other purposes, was visited by the Red Cross from 2002.",
       "targets": [
-        "Unlawful Enemy Combatant",
         "CIA Black Sites",
+        "Extraordinary Rendition",
         "Incommunicado Detention",
-        "Golden Shield",
         "Ghost Detainees"
-      ],
-      "reasons": {
-        "Golden Shield": "The memos existed to remove individual legal exposure before the fact, not to explain conduct after it.",
-        "Unlawful Enemy Combatant": "This classification was created specifically to place detainees outside the legal categories that would guarantee judicial review."
-      }
+      ]
+    },
+    {
+      "id": "crossing-the-line",
+      "prompt": "Which concepts describe CIA prisoners inside military custody?",
+      "explanation": "Ghost detainees were CIA prisoners hidden inside military prisons, off the books and away from the Red Cross. The high-value detainees crossed the same line in the opposite spirit: in 2006 they were moved into Guantanamo openly, and the Red Cross reached them for the first time. One crossing kept the secret; the other ended it.",
+      "targets": [
+        "Ghost Detainees",
+        "High-Value Detainees"
+      ]
     },
     {
       "id": "memo-to-method",
-      "prompt": "Which concepts trace a specific legal authorization directly into a specific interrogation practice?",
-      "explanation": "This is the direct pipeline from doctrine to practice: a legal opinion authorized a category of techniques, provided the cover to use them, and those techniques were themselves borrowed wholesale from a military program designed to resist -- not inflict -- coercion.",
+      "prompt": "Which specific techniques did the Office of Legal Counsel approve for CIA interrogators in August 2002?",
+      "explanation": "A companion opinion issued the same month as the Bybee memo, addressed to the CIA, approved a list of named techniques, these three among them. Enhanced interrogation techniques is the program's euphemism for the whole list, not a method on it.",
       "targets": [
-        "Bybee Memo",
-        "Golden Shield",
-        "Enhanced Interrogation Techniques",
         "Waterboarding",
+        "Walling",
+        "Sleep Deprivation"
+      ]
+    },
+    {
+      "id": "where-the-methods-came-from",
+      "prompt": "Which concept names the training the interrogation methods were adapted from?",
+      "explanation": "SERE training exposes U.S. service members to the abuse an enemy that ignored the Geneva Conventions might inflict, so they can learn to endure it. The program turned that catalogue of an enemy's conduct into its own methods.",
+      "targets": [
         "SERE Program"
-      ],
-      "reasons": {
-        "SERE Program": "The techniques were not invented for interrogation; they were repurposed from a program built to train resistance to them."
-      }
+      ]
+    },
+    {
+      "id": "the-word-avoided",
+      "prompt": "Which concept names what the program's euphemism stood for?",
+      "explanation": "The memos' work was to keep this word from applying. It applies anyway, in the secret prisons and the acknowledged ones alike.",
+      "targets": [
+        "Torture"
+      ]
     },
     {
       "id": "permissiveness-cascade",
-      "prompt": "Which concepts show legal permissiveness producing consequences that went beyond what the interrogation program itself formally authorized?",
-      "explanation": "The memos didn't just authorize a bounded program -- they created a legal climate that CIA personnel used to hide detainees and that produced undisciplined abuse at Abu Ghraib, well outside what any memo specifically sanctioned. The lesson isn't that these are the same program; it's that permissiveness cascades past its own stated limits.",
+      "prompt": "Which concepts carried a decision by senior officials into what was done to prisoners far from Washington?",
+      "explanation": "A classification decided in Washington let prisoners be held outside the Geneva Conventions; a legal opinion let interrogators act without fear of prosecution; and techniques a defense secretary approved for Guantanamo reached a prison in Iraq. Each carried a decision made at the top into a cell somewhere else, which is why responsibility for what happened there does not stop with the people in the room.",
       "targets": [
-        "Unitary Executive Theory",
+        "Unlawful Enemy Combatant",
         "Golden Shield",
-        "Abu Ghraib",
-        "Ghost Detainees"
-      ],
-      "reasons": {
-        "Abu Ghraib": "Abu Ghraib is the clearest evidence that the memos' permissiveness exceeded its own intended scope, not proof that it was the same thing as the CIA's program."
-      }
+        "Abu Ghraib"
+      ]
     }
   ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Permission Written in Advance",
+    "summary": "How legal opinions written after September 11 turned a decision to use coercion into something officers could treat as lawful before they acted.",
+    "estimatedMinutes": 6,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "## What a legal opinion is for\r\n\r\nOrdinarily a government lawyer's opinion describes the law: here is what a statute forbids, here is where the line falls. In the months after September 11, 2001, lawyers in the U.S. executive branch wrote opinions that ran the other way. The decision to use coercion on prisoners came first. The opinions were written so that the people carrying it out could treat it as lawful before they began.\r\n\r\nWhich office wrote them mattered. The Justice Department's Office of Legal Counsel issues opinions that the rest of the executive branch treats as binding. In August 2002 it produced what is now called the Bybee memo, drafted by John Yoo and signed by Jay Bybee. It defined torture so narrowly that only pain on the scale of organ failure or death would count. It also argued, drawing on the unitary executive theory, that statutes against torture could not restrict the president's power as commander in chief to direct interrogations.\r\n\r\n## Two kinds of prison\r\n\r\nA narrow definition protects an interrogator only if the prisoner's own protections are gone too. Early in 2002 the administration decided that captured al-Qaeda and Taliban fighters were unlawful enemy combatants, a status it argued put them outside the Geneva Conventions.\r\n\r\nThe military prison at Guantanamo Bay opened that January, chosen partly because the administration argued U.S. courts could not reach it. It was still an acknowledged prison: prisoners were registered, and the International Committee of the Red Cross, whose visits are the ordinary check on how prisoners are treated, began visiting that year. The CIA built a second system with none of that. From 2002 it ran black sites, secret prisons in other countries, and moved people between them, or into the hands of foreign governments known to torture, by extraordinary rendition. Its prisoners were held incommunicado, with no contact with family or lawyers and no acknowledgment that they were held at all. International law calls that enforced disappearance.\r\n\r\nThe two systems were not sealed off from each other. CIA prisoners were sometimes kept inside military prisons without being registered, ghost detainees moved out of sight when the Red Cross came. In 2004 the Supreme Court rejected the Guantanamo argument and allowed prisoners there to challenge their detention in federal court, and the Pentagon set up combatant status review tribunals to rule on each prisoner's status. The black sites had been running for two years by then, and nothing in that ruling reached them. Only in September 2006 did President Bush acknowledge the CIA program and move fourteen of its high-value detainees to Guantanamo, where the Red Cross saw them for the first time.\r\n\r\n## Where the methods came from\r\n\r\nThe program called its methods enhanced interrogation techniques. The plain word for them is torture. They included waterboarding, which simulates drowning; walling, in which a collar around the neck is used to slam a prisoner into a wall; and sleep deprivation authorized for up to 180 hours. None of them was devised for the program. They came from SERE, the military's Survival, Evasion, Resistance and Escape training, which exposes service members to what an enemy that ignored the Geneva Conventions might do to them, so they can learn to endure it. Methods the U.S. military had studied as the conduct of lawless captors became methods the United States used.\r\n\r\n## The shield, and where the methods traveled\r\n\r\nCIA officers wanted the opinions in hand before they acted. Jack Goldsmith, who took over the Office of Legal Counsel in late 2003 and withdrew the Bybee memo the following year, later described how agencies regarded opinions like these: as golden shields, protection in advance for anyone who acted within them. The shield held. In 2009 the Justice Department announced it would not prosecute officers who had relied in good faith on the department's own legal guidance.\r\n\r\nThe methods also traveled into the acknowledged prisons. In December 2002 Defense Secretary Donald Rumsfeld approved harsher techniques for Guantanamo, several drawn from the same SERE training. In 2003 Guantanamo's commander was sent to Iraq to bring its practices with him, and that September the U.S. command in Iraq issued an interrogation policy that drew on them. At Abu Ghraib, photographs published in 2004 showed prisoners stripped, held in stress positions, and threatened with dogs. A 2008 Senate Armed Services Committee report found that this was not simply the work of a few soldiers acting on their own: those techniques reached Iraq only after senior officials had approved them elsewhere. Being acknowledged had not protected anyone.\r\n\r\nEach link in this chain could point to another. The interrogators had a legal opinion. The lawyers could say they had only given advice. The officials who asked for that advice had the lawyers' word. When every participant can name someone else who made it permissible, where does the responsibility go?"
+    }
+  },
   "provenance": {
     "collaboration": "ai",
     "contributors": [
       {
         "name": "Claude"
+      },
+      {
+        "name": "Claude (Opus 5)",
+        "model": "Claude Opus 5"
       }
     ]
   }
@@ -332,95 +463,115 @@ puzzle.layout = {
     "graph": {
       "schemaVersion": 1,
       "puzzleId": "golden-shields",
-      "puzzleRevision": "fnv1a32:2d443593",
+      "puzzleRevision": "fnv1a32:e4168234",
       "board": {
         "width": 960,
         "height": 620
       },
       "nodes": {
         "term:Bybee Memo": {
-          "x": 691.73,
-          "y": 188.66,
-          "pinned": false
-        },
-        "term:Unlawful Enemy Combatant": {
-          "x": 815.13,
-          "y": 282.59,
-          "pinned": false
-        },
-        "term:John Yoo": {
-          "x": 588.68,
-          "y": 207.15,
+          "x": 677.56,
+          "y": 124.8,
           "pinned": false
         },
         "term:Office of Legal Counsel": {
-          "x": 611.21,
-          "y": 59.82,
-          "pinned": false
-        },
-        "term:Unitary Executive Theory": {
-          "x": 805.82,
-          "y": 83.61,
-          "pinned": false
-        },
-        "term:Guantanamo Bay Detention Camp": {
-          "x": 486.69,
-          "y": 374.76,
-          "pinned": false
-        },
-        "term:CIA Black Sites": {
-          "x": 662.24,
-          "y": 438.06,
-          "pinned": false
-        },
-        "term:Extraordinary Rendition": {
-          "x": 562.22,
-          "y": 572.65,
-          "pinned": false
-        },
-        "term:Incommunicado Detention": {
-          "x": 370.46,
-          "y": 551.82,
-          "pinned": false
-        },
-        "term:Enhanced Interrogation Techniques": {
-          "x": 317.11,
-          "y": 200.29,
-          "pinned": false
-        },
-        "term:Waterboarding": {
-          "x": 241.62,
+          "x": 790.25,
           "y": 23,
           "pinned": false
         },
+        "term:John Yoo": {
+          "x": 633.09,
+          "y": 30.03,
+          "pinned": false
+        },
+        "term:Unitary Executive Theory": {
+          "x": 825.34,
+          "y": 215.81,
+          "pinned": false
+        },
+        "term:Guantanamo Bay Detention Camp": {
+          "x": 659.87,
+          "y": 591.93,
+          "pinned": true
+        },
+        "term:Abu Ghraib": {
+          "x": 598.05,
+          "y": 426.19,
+          "pinned": false
+        },
+        "term:Red Cross Access": {
+          "x": 403.99,
+          "y": 591.99,
+          "pinned": true
+        },
+        "term:Combatant Status Review Tribunals": {
+          "x": 782.94,
+          "y": 446.52,
+          "pinned": false
+        },
+        "term:CIA Black Sites": {
+          "x": 309.91,
+          "y": 381.98,
+          "pinned": false
+        },
+        "term:Extraordinary Rendition": {
+          "x": 117.73,
+          "y": 472.42,
+          "pinned": false
+        },
+        "term:Incommunicado Detention": {
+          "x": 171.53,
+          "y": 287.19,
+          "pinned": false
+        },
+        "term:Enhanced Interrogation Techniques": {
+          "x": 375.64,
+          "y": 193.96,
+          "pinned": false
+        },
+        "term:Waterboarding": {
+          "x": 477.11,
+          "y": 26.47,
+          "pinned": false
+        },
         "term:Walling": {
-          "x": 169.9,
-          "y": 107.48,
+          "x": 366.32,
+          "y": 23,
           "pinned": false
         },
         "term:SERE Program": {
-          "x": 184.44,
-          "y": 335.97,
+          "x": 147.95,
+          "y": 130.71,
           "pinned": false
         },
         "term:Sleep Deprivation": {
-          "x": 112.25,
-          "y": 216.8,
+          "x": 243.03,
+          "y": 28.84,
+          "pinned": false
+        },
+        "term:Unlawful Enemy Combatant": {
+          "x": 634.81,
+          "y": 273.82,
           "pinned": false
         },
         "term:Golden Shield": {
-          "x": 651.78,
-          "y": 302.27,
-          "pinned": false
+          "x": 526.13,
+          "y": 115.69,
+          "pinned": true
         },
         "term:Ghost Detainees": {
-          "x": 301.67,
-          "y": 398.89,
+          "x": 278.27,
+          "y": 520.92,
           "pinned": false
         },
-        "term:Abu Ghraib": {
-          "x": 495.81,
-          "y": 158.81,
+        "term:High-Value Detainees": {
+          "x": 456.91,
+          "y": 446.02,
+          "pinned": false
+        },
+        "term:Torture": {
+          "x": 496.43,
+          "y": 318.98,
           "pinned": false
         }
       },
@@ -430,78 +581,123 @@ puzzle.layout = {
         "boundsViolations": 0,
         "lineCrossings": 0,
         "edgeNodeIntersections": 0,
-        "totalLength": 3541.57,
-        "score": 3541.570384046002
+        "totalLength": 4905.17,
+        "score": 4905.165514720557
       },
-      "solutionLayout": "pretty",
+      "solutionLayout": null,
       "capturedSolved": true,
-      "source": "auto",
       "fixed": true,
-      "savedAt": "2026-10-08T01:33:05.036Z"
+      "source": "author",
+      "savedAt": "2026-10-19T07:58:01.738Z"
     },
     "sets": {
       "schemaVersion": 1,
       "puzzleId": "golden-shields",
-      "puzzleRevision": "fnv1a32:2d443593",
+      "puzzleRevision": "fnv1a32:e4168234",
       "board": {
-        "width": 1050,
-        "height": 780
+        "width": 1010,
+        "height": 650
       },
       "stripHeight": 16,
       "circles": {
         "cluster:0": {
-          "x": 525,
-          "y": 572.26,
-          "pinned": false
+          "x": 796.86,
+          "y": 503.77,
+          "pinned": true
         },
         "cluster:1": {
-          "x": 754.04,
-          "y": 310.87,
-          "pinned": false
+          "x": 438.25,
+          "y": 473.7,
+          "pinned": true
         },
         "cluster:2": {
-          "x": 295.96,
-          "y": 310.87,
+          "x": 163.92,
+          "y": 182.35,
+          "pinned": true
+        },
+        "cluster:3": {
+          "x": 826.28,
+          "y": 188.1,
           "pinned": false
         }
       },
       "bridges": {
+        "term:Unlawful Enemy Combatant": {
+          "x": 672.32,
+          "y": 357.05,
+          "pinned": true
+        },
         "term:Golden Shield": {
-          "x": 591.48,
-          "y": 421.66,
-          "pinned": false
+          "x": 947.89,
+          "y": 371.12,
+          "pinned": true
         },
         "term:Ghost Detainees": {
-          "x": 525,
-          "y": 310.87,
-          "pinned": false
+          "x": 100.79,
+          "y": 397.54,
+          "pinned": true
         },
-        "term:Abu Ghraib": {
-          "x": 458.52,
-          "y": 421.66,
-          "pinned": false
+        "term:High-Value Detainees": {
+          "x": 333.19,
+          "y": 300.35,
+          "pinned": true
+        },
+        "term:Torture": {
+          "x": 571.01,
+          "y": 278.9,
+          "pinned": true
         }
       },
       "clusterTerms": {
         "cluster:0": [
           "Bybee Memo",
-          "Unlawful Enemy Combatant",
-          "John Yoo",
           "Office of Legal Counsel",
+          "John Yoo",
           "Unitary Executive Theory"
         ],
         "cluster:1": [
           "Guantanamo Bay Detention Camp",
+          "Abu Ghraib",
+          "Red Cross Access",
+          "Combatant Status Review Tribunals"
+        ],
+        "cluster:2": [
           "CIA Black Sites",
           "Extraordinary Rendition",
           "Incommunicado Detention"
         ],
-        "cluster:2": [
+        "cluster:3": [
           "Enhanced Interrogation Techniques",
           "Waterboarding",
           "Walling",
           "SERE Program",
           "Sleep Deprivation"
+        ]
+      },
+      "memberOrders": {
+        "cluster:0": [
+          "Bybee Memo",
+          "Unitary Executive Theory",
+          "Office of Legal Counsel",
+          "John Yoo"
+        ],
+        "cluster:1": [
+          "Abu Ghraib",
+          "Guantanamo Bay Detention Camp",
+          "Combatant Status Review Tribunals",
+          "Red Cross Access"
+        ],
+        "cluster:2": [
+          "Incommunicado Detention",
+          "Extraordinary Rendition",
+          "CIA Black Sites"
+        ],
+        "cluster:3": [
+          "Walling",
+          "Waterboarding",
+          "Enhanced Interrogation Techniques",
+          "Sleep Deprivation",
+          "SERE Program"
         ]
       },
       "metrics": {
@@ -515,117 +711,140 @@ puzzle.layout = {
         "lineCrossings": 0,
         "lineHeadingIntersections": 0,
         "lineCircleIntersections": 0,
-        "totalLength": 389.43239208144547
+        "edgeNodeIntersections": 0,
+        "totalLength": 1922.6482455547982
       },
       "solutionLayout": "pretty",
       "capturedSolved": true,
-      "source": "auto",
       "fixed": true,
-      "savedAt": "2026-10-08T01:33:07.727Z"
+      "source": "author",
+      "savedAt": "2026-10-19T08:03:04.188Z"
     },
     "star": {
       "schemaVersion": 1,
       "puzzleId": "golden-shields",
-      "puzzleRevision": "fnv1a32:2d443593",
+      "puzzleRevision": "fnv1a32:e4168234",
       "board": {
-        "width": 960,
-        "height": 620
+        "width": 1010,
+        "height": 650
       },
       "nodes": {
         "term:Bybee Memo": {
-          "x": 769.2,
-          "y": 261.16
-        },
-        "term:Unlawful Enemy Combatant": {
-          "x": 608.1,
-          "y": 198.31
-        },
-        "term:John Yoo": {
-          "x": 857.78,
-          "y": 22
+          "x": 676.92,
+          "y": 150.75
         },
         "term:Office of Legal Counsel": {
-          "x": 867.55,
-          "y": 150.13
+          "x": 892.55,
+          "y": 206.82
+        },
+        "term:John Yoo": {
+          "x": 904.73,
+          "y": 52.16
         },
         "term:Unitary Executive Theory": {
-          "x": 537.56,
-          "y": 22
+          "x": 693.52,
+          "y": 50.03
         },
         "term:Guantanamo Bay Detention Camp": {
-          "x": 392.08,
-          "y": 598
-        },
-        "term:CIA Black Sites": {
-          "x": 211.76,
-          "y": 531.4
-        },
-        "term:Extraordinary Rendition": {
-          "x": 611.96,
-          "y": 598
-        },
-        "term:Incommunicado Detention": {
-          "x": 544.19,
-          "y": 417.1
-        },
-        "term:Enhanced Interrogation Techniques": {
-          "x": 123.95,
-          "y": 345.79
-        },
-        "term:Waterboarding": {
-          "x": 295.32,
-          "y": 22
-        },
-        "term:Walling": {
-          "x": 397.5,
-          "y": 51.98
-        },
-        "term:SERE Program": {
-          "x": 57.8,
-          "y": 162.14
-        },
-        "term:Sleep Deprivation": {
-          "x": 159.11,
-          "y": 58.96
-        },
-        "term:Golden Shield": {
-          "x": 697.17,
-          "y": 352.26
-        },
-        "term:Ghost Detainees": {
-          "x": 461.68,
-          "y": 270.33
+          "x": 553.03,
+          "y": 483.73
         },
         "term:Abu Ghraib": {
-          "x": 454.21,
-          "y": 137.39
+          "x": 520.65,
+          "y": 331.15
+        },
+        "term:Red Cross Access": {
+          "x": 833.43,
+          "y": 454.84
+        },
+        "term:Combatant Status Review Tribunals": {
+          "x": 770.7,
+          "y": 326.42
+        },
+        "term:CIA Black Sites": {
+          "x": 139.35,
+          "y": 366.48
+        },
+        "term:Extraordinary Rendition": {
+          "x": 321.49,
+          "y": 597.96
+        },
+        "term:Incommunicado Detention": {
+          "x": 125.09,
+          "y": 597.69
+        },
+        "term:Enhanced Interrogation Techniques": {
+          "x": 303.71,
+          "y": 173.12
+        },
+        "term:Waterboarding": {
+          "x": 278.66,
+          "y": 41.01
+        },
+        "term:Walling": {
+          "x": 422.53,
+          "y": 45.02
+        },
+        "term:SERE Program": {
+          "x": 93.82,
+          "y": 157.01
+        },
+        "term:Sleep Deprivation": {
+          "x": 110.58,
+          "y": 41.01
+        },
+        "term:Unlawful Enemy Combatant": {
+          "x": 651.82,
+          "y": 235.43
+        },
+        "term:Golden Shield": {
+          "x": 522.05,
+          "y": 101.55
+        },
+        "term:Ghost Detainees": {
+          "x": 491.54,
+          "y": 597.6
+        },
+        "term:High-Value Detainees": {
+          "x": 372.28,
+          "y": 391.39
+        },
+        "term:Torture": {
+          "x": 306.55,
+          "y": 258.26
         },
         "cluster:0": {
-          "x": 721.31,
-          "y": 40.91
+          "x": 835.24,
+          "y": 128.19
         },
         "cluster:1": {
-          "x": 350.56,
-          "y": 392.21
+          "x": 631.37,
+          "y": 420.17
         },
         "cluster:2": {
-          "x": 295.11,
-          "y": 187.54
+          "x": 208.4,
+          "y": 478.72
+        },
+        "cluster:3": {
+          "x": 236.42,
+          "y": 105.04
         }
       },
       "metrics": {
         "lineCrossings": 0,
         "edgeNodeIntersections": 0,
+        "edgeTitleIntersections": 0,
         "overlaps": 0
       },
-      "source": "auto",
-      "savedAt": "2026-10-08T01:33:10.238Z"
+      "source": "author",
+      "savedAt": "2026-10-19T08:04:06.760Z"
     }
   },
   "board": {
-    "sizeFactor": 1,
-    "source": "auto",
-    "savedAt": "2026-10-08T01:33:02.511Z"
+    "sizeFactor": 1.05,
+    "source": "author",
+    "savedAt": "2026-10-19T08:01:29.138Z",
+    "lensFlowTrace": true
   }
 };
 puzzle.starLayout = puzzle.layout?.modes?.star || null;

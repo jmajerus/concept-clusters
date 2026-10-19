@@ -213,7 +213,6 @@ const puzzle = definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
-      "id": "belgian-peacekeepers",
       "term": "belgian peacekeepers",
       "clusters": [
         0,
@@ -235,15 +234,14 @@ const puzzle = definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "pdd-25",
       "term": "PDD-25",
       "clusters": [
         1,
         2
       ],
-      "fact": "Signed May 3 -- the same week Secretary Christopher was still withholding even the qualified phrase 'acts of genocide' -- Presidential Decision Directive 25 made resisting exactly the kind of reinforced peacekeeping mission Rwanda needed into declared U.S. policy.",
+      "fact": "President Clinton signed Presidential Decision Directive 25 on May 3 -- the same week Secretary Christopher was still withholding even the qualified phrase 'acts of genocide' -- making resistance to exactly the kind of reinforced peacekeeping mission Rwanda needed into declared U.S. policy.",
       "info": {
-        "text": "The Clinton administration's 'vital national interests test' for supporting UN peacekeeping operations, signed in the middle of the Rwandan genocide.",
+        "text": "President Clinton's 'vital national interests test' for supporting UN peacekeeping operations, signed May 3, 1994, in the middle of the Rwandan genocide.",
         "links": [
           {
             "href": "wiki:Presidential Decision Directive 25"
@@ -257,7 +255,6 @@ const puzzle = definePuzzle(import.meta.url, {
       ]
     },
     {
-      "id": "bystanders-to-genocide",
       "term": "Bystanders to Genocide",
       "clusters": [
         0,
