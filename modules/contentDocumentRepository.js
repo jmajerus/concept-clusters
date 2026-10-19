@@ -751,6 +751,22 @@ export class D1ContentDocumentRepository {
     return result.results.map(reviewEventRecord);
   }
 
+  // Ids only, for the puzzle list: which puzzles have an undecided proposal
+  // at all. Whether one is still choosable is the puzzle page's question.
+  async listPuzzleIdsWithOpenReviewProposals() {
+    const result = await this.database.prepare(`
+      SELECT DISTINCT proposed.puzzle_id AS puzzle_id
+      FROM puzzle_review_events AS proposed
+      WHERE proposed.event_type = 'proposed'
+        AND NOT EXISTS (
+          SELECT 1 FROM puzzle_review_events AS decision
+          WHERE decision.puzzle_id = proposed.puzzle_id
+            AND decision.source_event_id = proposed.id
+        )
+    `).all();
+    return result.results.map(row => row.puzzle_id);
+  }
+
   async getPuzzleReviewEvent({ id, eventId }) {
     assertDraftId(id);
     if (!Number.isInteger(eventId) || eventId < 1) {
@@ -1378,6 +1394,10 @@ export function createMemoryContentDocumentRepository() {
       ).sort((left, right) =>
         String(left.reviewedAt).localeCompare(String(right.reviewedAt)) || left.id - right.id
       );
+    },
+    async listPuzzleIdsWithOpenReviewProposals() {
+      return [...new Set(undecidedReviewProposals(reviewEvents.map(reviewEventRecord))
+        .map(event => event.puzzleId))];
     },
     async getPuzzleReviewEvent({ id, eventId }) {
       assertDraftId(id);

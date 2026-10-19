@@ -866,6 +866,12 @@ function renderGithubSnapshotStatus(inGithubProduction) {
 // That invisibility is what let one sit unnoticed beside a finished board.
 const SHADOW_BADGE = '<span class="badge badge-warn" title="Almost none of the published puzzle survives in this working copy: it is a separate document under the same id, not an edit of the live board. Publishing it would replace the live puzzle.">shadow</span>';
 
+function renderPendingReviewBadge(count) {
+  if (!(count > 0)) return "";
+  const label = count === 1 ? "review pending" : `${count} reviews pending`;
+  return ` <span class="badge badge-warn" title="Agent review proposals wait for a person to publish one or keep the published puzzle. Open the puzzle to choose.">${label}</span>`;
+}
+
 function renderPuzzlePathBadges(item, { detail = false } = {}) {
   // Computed before the withdrawn branch returns: a withdrawn row's id is
   // still spoken for (puzzleIdIsLive treats it as live), so a shadow over one
@@ -913,7 +919,8 @@ function listIntro(variant) {
        working copies that differ from their published D1 snapshot, including
        content, classification, pedagogy, admin settings, provenance, or layout.
        Badges in the Unpublished Changes column identify the changed domains. <strong>Cued</strong>
-       selects explicit freeze cues.
+       selects explicit freeze cues. <strong>Review pending</strong> selects
+       puzzles with agent review proposals waiting for a decision.
        <strong>Published only</strong> selects published puzzles with no private
        working copy. By category browses the corpus; Recent groups working
        copies by last update. Open a row to edit its working copy, creating
@@ -1221,13 +1228,13 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const layoutsCell = local ? `<td>${renderSavedLayouts(layoutModes)}${renderAutoLayoutBadge(item.autoLayout)}</td>` : "";
   const layoutToFix = layoutModes.some(entry => !entry.saved || entry.repair) ? "1" : "0";
   const layoutWork = layoutToFix === "1" || autoLayoutNeedsLook(item) ? "1" : "0";
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-fix="${layoutToFix}" data-layout-work="${layoutWork}" data-auto-pending="${["pending", "running"].includes(item.autoLayout?.state) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-published-live="${isPublishedLive(item) ? "1" : "0"}" data-modified="${isModifiedStatus(item) ? "1" : "0"}" data-unpublished-changes="${hasUnpublishedChanges(item) ? "1" : "0"}" data-cued="${isCuedStatus(item) ? "1" : "0"}" data-layout-fix="${layoutToFix}" data-layout-work="${layoutWork}" data-auto-pending="${["pending", "running"].includes(item.autoLayout?.state) ? "1" : "0"}" data-review-pending="${item.pendingReviewCount > 0 ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
     <td>${secondaryCategoryCell}</td>
     <td>${subcategoryCell}</td>
-    <td>${renderPuzzlePathBadges(item)}</td>
+    <td>${renderPuzzlePathBadges(item)}${renderPendingReviewBadge(item.pendingReviewCount)}</td>
     <td>${renderUnpublishedDomains(item)}</td>
     ${layoutsCell}
     <td>${renderGithubSnapshotStatus(item.inGithubProduction)}</td>
@@ -1365,6 +1372,7 @@ const CORPUS_FILTER_SCRIPT = `
       var unpublished = row.getAttribute("data-unpublished-changes") === "1";
       var cued = row.getAttribute("data-cued") === "1";
       var layoutWork = row.getAttribute("data-layout-work") === "1";
+      var reviewPending = row.getAttribute("data-review-pending") === "1";
       var github = row.getAttribute("data-github");
       var matchQuery = !query || hay.indexOf(query) !== -1;
       var matchScope = scope === "all"
@@ -1374,6 +1382,7 @@ const CORPUS_FILTER_SCRIPT = `
         || (scope === "unpublished" && unpublished)
         || (scope === "cued" && cued)
         || (scope === "layouts" && layoutWork)
+        || (scope === "review" && reviewPending)
         || (scope === "published" && publishedLive && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
     });
@@ -1465,6 +1474,7 @@ export function renderDraftListPage(rows, {
            <label title="Unpublished puzzles or published snapshots changed since the last Freeze; this is a static snapshot status"><input type="radio" name="puzzle-corpus-scope" value="modified"> Modified</label>
            <label title="Saved content, board settings, provenance, or layout differs from the published D1 snapshot"><input type="radio" name="puzzle-corpus-scope" value="unpublished"> Unpublished changes</label>
            <label title="Published D1 snapshot explicitly cued for the next Freeze into git"><input type="radio" name="puzzle-corpus-scope" value="cued"> Cued</label>
+           <label title="Agent review proposals waiting for a person to publish one or keep the published puzzle"><input type="radio" name="puzzle-corpus-scope" value="review"> Review pending</label>
            <label title="Published in D1 with no private working copy (the Published only group under Recent)"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
            ${variant === "local" ? `<label title="Layouts that need a person: a mode with no saved layout or one that needs repair (! on its chip), an automatic layout pass still to come or failed (auto … ▶ ✗), or one finished on layouts not yet published (auto ✓). Newest first under Recent."><input type="radio" name="puzzle-corpus-scope" value="layouts"> Layout work</label>` : ""}
          </p>

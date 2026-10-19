@@ -548,6 +548,7 @@ export async function run() {
     (await repo.listPuzzleReviewEvents({ id: "old-git-puzzle", limit: 100 })).length,
     eventsBeforeChoice.length
   );
+  assert.deepEqual(await repo.listPuzzleIdsWithOpenReviewProposals(), ["old-git-puzzle"]);
   const choice = await repo.publish({
     kind: "puzzle",
     id: "old-git-puzzle",
@@ -575,6 +576,7 @@ export async function run() {
   assert.equal(choiceEvents.some(event =>
     event.eventType === "rejected" && event.sourceEventId === rival.id
   ), true);
+  assert.deepEqual(await repo.listPuzzleIdsWithOpenReviewProposals(), []);
   const proposalRows = [];
   let proposalSeq = 1;
   const proposalDatabase = {
