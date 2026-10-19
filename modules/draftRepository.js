@@ -9,9 +9,10 @@ const TEXT_ENCODER = new TextEncoder();
 const DRAFT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export class DraftConflictError extends Error {
-  constructor(message) {
+  constructor(message, revision = null) {
     super(message);
     this.name = "DraftConflictError";
+    if (Number.isInteger(revision) && revision > 0) this.revision = revision;
   }
 }
 

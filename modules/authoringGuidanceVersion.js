@@ -195,8 +195,8 @@
 // cluster ids.
 // 6.19: same review bar. A missing concept-gathering map stays in the
 // conversation until a person approves it. A checkout may store that same
-// map at inventories/<id>.json. After a create or save error, read the
-// draft before retrying.
+// map at inventories/<id>.json. A create or save error names the current
+// revision when the row moved; that integer is the next expected_revision.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
   minor: 19
