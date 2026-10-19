@@ -7,7 +7,10 @@ import {
   slugify
 } from "../puzzles/categories.js";
 import { isReservedCatalogueId } from "./contentDocumentSeed.js";
-import { AUTHORING_MODEL_SUGGESTIONS } from "./authoringModelSuggestions.js";
+import {
+  AUTHORING_MODEL_SUGGESTIONS,
+  modelToHostSlug
+} from "./authoringModelSuggestions.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 
 const SPECIAL_MODEL_SUGGESTIONS = new Set(["auto", "custom model", "custom-model"]);
@@ -449,16 +452,27 @@ function automaticIdsFor(dependencies, kind) {
 
 function modelSuggestionPlan(modelSuggestions, gitModelSuggestions = FROZEN_MODEL_LABELS) {
   if (!Array.isArray(modelSuggestions)) return { add: [], update: [], remove: [] };
-  const configured = [...new Set(modelSuggestions
+  const configured = new Map(modelSuggestions
     .map(label => typeof label === "string" ? label.trim() : "")
-    .filter(label => label && !SPECIAL_MODEL_SUGGESTIONS.has(label.toLowerCase())))];
-  const frozen = [...new Set((gitModelSuggestions || [])
+    .filter(label => label && !SPECIAL_MODEL_SUGGESTIONS.has(label.toLowerCase()))
+    .map(label => [modelToHostSlug(label), label]));
+  const frozen = new Map((gitModelSuggestions || [])
     .map(label => typeof label === "string" ? label.trim() : "")
-    .filter(label => label && !SPECIAL_MODEL_SUGGESTIONS.has(label.toLowerCase())))];
+    .filter(label => label && !SPECIAL_MODEL_SUGGESTIONS.has(label.toLowerCase()))
+    .map(label => [modelToHostSlug(label), label]));
   return {
-    add: configured.filter(label => !frozen.includes(label)).sort(),
-    update: [],
-    remove: frozen.filter(label => !configured.includes(label)).sort()
+    add: [...configured]
+      .filter(([slug]) => !frozen.has(slug))
+      .map(([, label]) => label)
+      .sort(),
+    update: [...configured]
+      .filter(([slug, label]) => frozen.has(slug) && frozen.get(slug) !== label)
+      .map(([, label]) => label)
+      .sort(),
+    remove: [...frozen]
+      .filter(([slug]) => !configured.has(slug))
+      .map(([, label]) => label)
+      .sort()
   };
 }
 
