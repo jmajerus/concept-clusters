@@ -2,7 +2,8 @@
 // Quality gate for /author-puzzle. Schema-valid is not enough: a stop-gate
 // handoff needs the right artifact for each pass.
 // Reads JSON from a file path or stdin.
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { NODE_CAP_XLARGE } from "../../../../modules/puzzleBoardSize.js";
 import { AUTHORING_PROFILES } from "../../../../modules/authoringProfiles.js";
 import { boardLimit, boardLimitWaiverErrors } from "../../../../modules/boardLimitWaivers.js";
@@ -55,6 +56,26 @@ function parseArgs(argv) {
     else rest.push(arg);
   }
   return { level, ledgerPath, planPath, path: rest[0] || null };
+}
+
+// Fit reconciliation looks beside the working puzzle first
+// (`working/<id>-inventory.json`), then at the skill's inventory
+// (`inventories/<id>.json` next to that `working/` directory).
+function fitInventoryCandidates(puzzlePath) {
+  const primary = puzzlePath.replace(/\.json$/, "-inventory.json");
+  const candidates = [primary];
+  const directory = dirname(puzzlePath);
+  if (basename(directory) === "working") {
+    const id = basename(puzzlePath, ".json");
+    candidates.push(join(dirname(directory), "inventories", `${id}.json`));
+  }
+  return candidates;
+}
+
+function resolveFitInventoryPath(puzzlePath) {
+  if (!puzzlePath) return null;
+  const candidates = fitInventoryCandidates(puzzlePath);
+  return candidates.find(candidate => existsSync(candidate)) || candidates[0];
 }
 
 function loadDocument(path) {
@@ -841,7 +862,7 @@ try {
   }
   const document = loadDocument(args.path);
   const ledger = args.ledgerPath ? loadLedger(args.ledgerPath) : null;
-  const inventoryPath = args.path && args.path.replace(/\.json$/, "-inventory.json");
+  const inventoryPath = args.path ? resolveFitInventoryPath(args.path) : null;
   const report = check(document, args.level, {
     ledger,
     inventoryPath: args.level === "fit" ? inventoryPath : null,

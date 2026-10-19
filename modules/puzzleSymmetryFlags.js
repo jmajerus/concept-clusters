@@ -1,3 +1,5 @@
+import { lensSpansClusters, normalizedLensMode } from "./lensEngine.js";
+
 // Soft, non-blocking authoring signals. The analysis below describes one
 // submitted puzzle only -- it never assumes an inventory, authoring path,
 // model, or corpus baseline.
@@ -6,8 +8,12 @@
 // to MCP validation and to the draft-review page. A cluster count that
 // repeats the same number is a further sentence on that prompt, not a
 // second flag. Attachment — bridges joining clusters — is a normal result
-// of concept-gathering and is not flagged. A copied bridge relationKind
-// and an even lens-target count stay on the draft-review page only.
+// of concept-gathering and is not flagged. The even-count message still
+// asks, separately, whether a board with no bridge left a real relationship
+// off. That question is not its own flag and is not a reason to add a
+// bridge. A copied bridge relationKind and an even lens-target count stay
+// on the draft-review page only. A puzzle whose lenses all stay inside one
+// cluster raises no-spanning-lens on MCP validation. Quiz mode is exempt.
 //
 // Browser-safe (no Node APIs) so it can run in the hosted Worker, the
 // local stdio MCP server, and the admin review page's renderer alike, all
@@ -31,7 +37,7 @@ function signature(clusterCount, termCounts) {
   };
 }
 
-const RECHECK_CONCEPT_SET = "Re-read each cluster for two terms doing one job, and for a fact that names a concept missing from its terms; fix those on the board. That is not a licence to add or drop terms just to break an even count. If this board has no concept-gathering inventory, write that inventory in this review and stop for human approval before fitting it onto the board. Do not leave that inventory as an open issue. Keep even counts when the sourced map supports them, and do not change bridges because of this prompt.";
+const RECHECK_CONCEPT_SET = "Re-read each cluster for two terms doing one job, and for a fact that names a concept missing from its terms; fix those on the board. That is not a licence to add or drop terms just to break an even count. If this board has no concept-gathering inventory, write that map and stop for human approval before fitting it onto the board. Keep the map in the conversation. A checkout session may store the same map at inventories/<id>.json. Do not leave that inventory as an open issue. Keep even counts when the sourced map supports them, and do not change bridges because of this prompt.";
 
 // Document-only count signals. mcpFlags is the symmetry prompt (even term
 // counts). descriptors are draft-review notes that are not that prompt.
@@ -67,8 +73,9 @@ export function computeStructuralRegularity(puzzle) {
       message: `All ${count} clusters have exactly ${value} terms.${lockSentence} ` +
         "Most subjects are less even than this. Re-check each cluster for two terms doing one job, and for a fact that names a concept the term list omitted; fix those on the board. " +
         "That is not a licence to add or drop terms just to break an even count. " +
-        "If this board never had a concept-gathering pass, write that inventory in this review and stop for human approval before fitting it onto the board. Do not leave that inventory as an open issue. " +
-        "Keep even counts when the sourced map supports them, and do not change bridges because of this prompt.",
+        "If this board never had a concept-gathering pass, write that map and stop for human approval before fitting it onto the board. Keep the map in the conversation. A checkout session may store the same map at inventories/<id>.json. Do not leave that inventory as an open issue. " +
+        "Keep even counts when the sourced map supports them, and do not change bridges because of this prompt. " +
+        "An even count is not a reason to add or remove a bridge. Separately, a board with no bridge is a reason to ask whether a real relationship was left off. Do not add a bridge in order to change this flag.",
       signature: result.signature
     });
   }
@@ -237,6 +244,35 @@ export function computeRelatedPuzzleViaFlags(puzzle) {
   return flags;
 }
 
+// lensSpansClusters reads cluster.terms.includes. Authored and intermediate
+// clusters may only have seeds, so give it a term list or an empty one.
+function clustersForSpanCheck(puzzle) {
+  const clusters = Array.isArray(puzzle?.clusters) ? puzzle.clusters : [];
+  return clusters.map(cluster => ({
+    terms: Array.isArray(cluster?.terms) ? cluster.terms : []
+  }));
+}
+
+// A non-quiz lens spans clusters when its targets name terms from at least
+// two clusters (lensSpansClusters). A bridge term alone does not count.
+// Quiz mode is a multiple-choice round, not a cross-cutting cut. The flag
+// is a question, not a quota: a lens that stays inside one cluster is valid.
+export function computeSpanningLensFlags(puzzle) {
+  if (!puzzle || typeof puzzle !== "object") return [];
+  if (normalizedLensMode(puzzle) === "quiz") return [];
+  const lenses = Array.isArray(puzzle.lenses) ? puzzle.lenses : [];
+  if (!lenses.length) return [];
+  const spanned = { clusters: clustersForSpanCheck(puzzle) };
+  if (lenses.some(lens => lensSpansClusters(spanned, lens))) return [];
+  return [{
+    id: "no-spanning-lens",
+    message: "No lens draws its targets from more than one cluster. " +
+      "Worth asking whether a real second question was left unasked. " +
+      "A lens that stays inside one cluster is valid when that is the honest cut. " +
+      "Do not add targets, or join two questions, to clear this flag."
+  }];
+}
+
 // MCP+user flags: surfaced to both an authoring agent (validate_puzzle_draft)
 // and the human draft review page. lens-reasons-coverage lives here, not in
 // computeUserOnlyAuthoringFlags below -- an incomplete reasons map usually
@@ -246,6 +282,7 @@ export function computeAuthoringFlags(puzzle) {
   return [
     ...computeStructuralRegularity(puzzle).mcpFlags,
     ...computeLensShapeFlags(puzzle),
+    ...computeSpanningLensFlags(puzzle),
     ...computeLensReasonCoverageFlags(puzzle),
     ...computeRelatedPuzzleViaFlags(puzzle)
   ];

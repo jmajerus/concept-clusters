@@ -187,11 +187,22 @@ export function createPuzzleDraftStore({ directory }) {
     assertDraftId(draftId);
     assertDocumentSize(document);
     return withDraftMutation(draftId, async () => {
+      let existing = null;
       try {
-        await readFile(pathFor(draftId), "utf8");
-        throw new Error(`Draft "${draftId}" already exists`);
+        existing = JSON.parse(await readFile(pathFor(draftId), "utf8"));
       } catch (error) {
         if (error.code !== "ENOENT") throw error;
+      }
+      if (existing) {
+        const revision = Number(existing.revision);
+        const known = Number.isInteger(revision) && revision > 0 ? revision : null;
+        const error = new Error(
+          known
+            ? `Draft "${draftId}" already exists at revision ${known}`
+            : `Draft "${draftId}" already exists`
+        );
+        if (known) error.revision = known;
+        throw error;
       }
       const now = new Date().toISOString();
       const domains = partitionAuthoredDocument(document);

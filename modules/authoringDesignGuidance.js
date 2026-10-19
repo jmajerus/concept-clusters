@@ -165,10 +165,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   puzzle's own prose already names alongside included ones is the
   strongest signal of a real gap, much stronger than the raw count.
   If the prompt fires on a reviewed puzzle that has no concept-gathering
-  inventory, write that inventory in this review. Writing the map is the
-  repair: it is not a board edit, and it is not an open issue. Stop when
-  the map is saved. Fit it onto the board only after the human approves
-  it. Early boards were often sparse as well as even,
+  inventory, write that map in this review and keep it in the conversation.
+  A checkout session may store the same map at inventories/<id>.json.
+  Writing the map is the repair: it is not a board edit, and it is not an
+  open issue. Fit it onto the board only after the human approves it.
+  Early boards were often sparse as well as even,
   because each cluster was closed at a small finished number; gathering
   the omitted concepts usually changes the counts. Order matters: before
   choosing any count or range, enumerate the sourced distinctions,
@@ -529,10 +530,11 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   each cluster for two terms doing one job, and for a fact that already names
   a missing concept; fix those on the board. That is not a licence to add or
   drop terms just to break an even count, and it is not a reason to change
-  bridges. If the board has no concept-gathering inventory, write that
-  inventory in this review. That map is the repair. It is not a board edit
-  and not an open issue. Stop when it is saved, and fit it onto the board
-  only after the human approves it. Gathering what the small clusters left
+  bridges. If the board has no concept-gathering inventory, write that map
+  in this review and keep it in the conversation. A checkout session may
+  store the same map at inventories/<id>.json. That map is the repair. It
+  is not a board edit and not an open issue. Fit it onto the board only
+  after the human approves it. Gathering what the small clusters left
   out usually changes the counts. If they are still even, keep them.
 - If validation flags more than 32 nodes, split into relatedPuzzles rather
   than dropping essential terms. Do not split or drop terms because of canvas

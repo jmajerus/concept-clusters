@@ -217,6 +217,12 @@ async function recordPass(id, { outcome, comments = null, version, dryRun, conte
   };
   if (!dryRun) {
     const repository = contentDocuments || await defaultContentDocuments();
+    // durable is whether the content-document repository accepted the review.
+    // A review event updates the published puzzle row, so an id with no
+    // current published row throws ContentDocumentNotFoundError and durable
+    // stays false. unpublished is a different question: the id is absent
+    // from the Git puzzle list. An id can be missing from Git and still
+    // have a published row, which is why the two can disagree.
     let durable = false;
     try {
       await repository.recordPuzzleAgentReview({
@@ -235,8 +241,13 @@ async function recordPass(id, { outcome, comments = null, version, dryRun, conte
     const log = readLog();
     log.puzzles[id] = recorded;
     writeLog(log);
+    const path = reviewLogPath();
+    const repositoryNote = durable
+      ? "The draft repository accepted the review."
+      : "The draft repository did not accept the review.";
     return {
-      id, recorded, path: reviewLogPath(), wrote: true, durable,
+      id, recorded, path, wrote: true, durable,
+      where: `Wrote the local review log at ${path}. ${repositoryNote}`,
       ...(unpublished ? { unpublished: true } : {})
     };
   }

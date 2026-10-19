@@ -131,6 +131,10 @@ export async function run() {
     assert.match(schemaTool.description, /core, review, pedagogy, classification, or publication/);
     const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
     assert.match(saveTool.description, /^Every save requires expected_revision/);
+    assert.match(saveTool.description, /A validation or ownership rejection did not commit/);
+    assert.match(saveTool.description, /fetch failed, D1_ERROR, or a non-JSON response/);
+    const createTool = listed.result.tools.find(tool => tool.name === "create_puzzle_draft");
+    assert.match(createTool.description, /A validation or ownership rejection did not commit/);
     const revisionField = saveTool.inputSchema.properties.expected_revision;
     assert.equal(revisionField.type, "integer");
     assert.match(revisionField.description, /Copy draft\.revision/);
@@ -997,6 +1001,29 @@ export async function run() {
       }
     });
     assert.equal(replaced.result.structuredContent.draft.revision, 2);
+    const staleSave = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-service-fixture",
+        expected_revision: 1,
+        document: replacement
+      }
+    });
+    assert.equal(staleSave.result.isError, true);
+    assert.equal(staleSave.result.structuredContent.revision, 2);
+    assert.match(staleSave.result.structuredContent.error, /current revision is 2/);
+    const duplicateCreate = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-service-fixture",
+        puzzle_id: "mcp-service-fixture",
+        title: "MCP service fixture",
+        category: "Science"
+      }
+    });
+    assert.equal(duplicateCreate.result.isError, true);
+    assert.equal(duplicateCreate.result.structuredContent.revision, 2);
+    assert.match(duplicateCreate.result.structuredContent.error, /already exists at revision 2/);
 
     const valid = await request("tools/call", {
       name: "validate_puzzle_draft",
@@ -1276,6 +1303,9 @@ export async function run() {
     });
     assert.equal(brokenCreated.result.structuredContent.normalization.applied, false);
     assert.ok(brokenCreated.result.structuredContent.normalization.errors.some(e => e.includes("fact")));
+    assert.match(brokenCreated.result.content[0].text, /Stored with inconsistency/);
+    assert.match(brokenCreated.result.content[0].text, /fact/);
+    assert.doesNotMatch(simplifiedCreated.result.content[0].text, /Stored with inconsistency/);
     const brokenDraft = await request("tools/call", {
       name: "get_puzzle_draft",
       arguments: { draft_id: "mcp-broken-simplified-fixture" }

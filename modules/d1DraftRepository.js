@@ -508,7 +508,17 @@ export class D1DraftRepository extends DraftRepository {
       ));
     } catch (error) {
       if (String(error?.message || error).includes("UNIQUE constraint failed")) {
-        throw new DraftConflictError(`Draft "${draftId}" already exists`);
+        const row = await this.database.prepare(
+          `SELECT revision FROM puzzle_drafts WHERE id = ?`
+        ).bind(draftId).first();
+        const revision = Number(row?.revision);
+        const known = Number.isInteger(revision) && revision > 0 ? revision : null;
+        throw new DraftConflictError(
+          known
+            ? `Draft "${draftId}" already exists at revision ${known}`
+            : `Draft "${draftId}" already exists`,
+          known
+        );
       }
       // Older local D1 DBs may lack document_stale until migrate. That retry
       // still writes classification_json. A database missing the column fails

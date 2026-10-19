@@ -193,7 +193,13 @@
 // quota. Profile passes are unchanged: profile puzzles do not annotate
 // bridges, and their pedagogy schema omits them. Direction from/to name
 // cluster ids.
+// 6.19: same review bar. A missing concept-gathering map stays in the
+// conversation until a person approves it. A checkout may store that same
+// map at inventories/<id>.json. A validation or ownership rejection did not
+// commit. An error that names a current revision is the next
+// expected_revision. fetch failed, D1_ERROR, and a non-JSON response may
+// mean the write landed.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 6,
-  minor: 18
+  minor: 19
 });
