@@ -127,6 +127,17 @@ export async function run() {
   }], { variant: "local" });
   assert.match(withdrawnShadowRow, /badge">withdrawn<\/span>\s*<span class="badge badge-warn"[^>]*>shadow</);
 
+  const pendingReviewList = renderDraftListPage([
+    { id: "two-reviews", title: "Two reviews", category: "Science", hasWorkingCopy: true, published: true, pendingReviewCount: 2 },
+    { id: "one-review", title: "One review", category: "Science", hasWorkingCopy: true, published: true, pendingReviewCount: 1 },
+    { id: "no-review", title: "No review", category: "Science", hasWorkingCopy: true, published: true }
+  ], { variant: "local" });
+  assert.match(pendingReviewList, />2 reviews pending</);
+  assert.match(pendingReviewList, />review pending</);
+  assert.match(pendingReviewList, /data-puzzle-id="no-review"[^>]*data-review-pending="0"/);
+  assert.match(pendingReviewList, /data-puzzle-id="two-reviews"[^>]*data-review-pending="1"/);
+  assert.match(pendingReviewList, /value="review"> Review pending/);
+
   // A shadow reads the same diff marks as an edit, so the summary has to say
   // what they mean here, and the list badges the row that is otherwise
   // indistinguishable from a legitimate working copy.
@@ -1198,7 +1209,7 @@ export async function run() {
   assert.doesNotMatch(historyPage, /· proposed/);
   assert.match(historyPage, /Tightened the cluster facts\./);
   assert.match(historyPage, /Rival rewrite notes\./);
-  assert.match(historyPage, /Not chosen: .*'s proposal was published as revision 8\./);
+  assert.match(historyPage, /Not chosen: .*proposal was published as revision 8\./);
   assert.doesNotMatch(historyPage, /kept against published revision 7/);
   assert.match(historyPage, /Changes from published revision 7: 1 changed/);
   assert.match(historyPage, /Winning fact\./);

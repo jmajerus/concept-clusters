@@ -2002,16 +2002,20 @@ export function createLocalDraftReviewHandler({
         return rows;
       })();
       // The three lists are independent D1 reads; read them together.
-      const [publishedRows, listed, categoryRegistry] = await Promise.all([
+      const [publishedRows, listed, categoryRegistry, proposalPuzzleIds] = await Promise.all([
         publishedLoad,
         draftStore.listDrafts({ includeDocument: true }),
         loadMergedCategoryRegistry({
           contentDocuments,
           contentService,
           actor: publicationActor
-        })
+        }),
+        typeof contentDocuments?.listPuzzleIdsWithOpenReviewProposals === "function"
+          ? contentDocuments.listPuzzleIdsWithOpenReviewProposals().catch(() => [])
+          : []
       ]);
       timing.phase("lists");
+      const withOpenProposals = new Set(proposalPuzzleIds);
       const notice = draftPublicationNoticeFromSearch(
         requestUrl.searchParams,
         publishedRows
@@ -2066,6 +2070,13 @@ export function createLocalDraftReviewHandler({
             })
           };
         };
+        // Same test as the puzzle page's Choose a review, so the count never
+        // promises a choice that page will not offer. Only the few working
+        // copies with an undecided proposal pay for it.
+        const pendingReviewCount = withOpenProposals.has(puzzleId)
+          && Number.isInteger(metadata.reviewBasePublishedRevision)
+          ? (await currentChoiceProposals(contentDocuments, metadata).catch(() => [])).length
+          : 0;
         const { unpublishedDomains, workingLayoutAttention, shadowsPublished } = registryKey
           ? rowMemo.get(JSON.stringify([
             "working-copy", metadata.draftId, puzzleId, rowMarkers(metadata),
@@ -2082,6 +2093,7 @@ export function createLocalDraftReviewHandler({
           unpublishedChanges: unpublishedDomains.length > 0,
           unpublishedChangeDomains: unpublishedDomains,
           shadowsPublished,
+          pendingReviewCount,
           freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
           ...freezeFlagsFromPublished(publishedRow, gitPuzzleIds)
         };
