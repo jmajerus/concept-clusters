@@ -1,5 +1,6 @@
-// Shared model vocabulary for authoring attribution: picker suggestions and
-// canonical display labels. Not used for host inference — see authoringHosts.js.
+// Frozen model vocabulary snapshot for local/offline use. D1 is the editable
+// source of truth; Freeze refreshes this list from D1 before opening a release
+// pull request. Not used for host inference — see authoringHosts.js.
 //
 // Cursor and Codex expose the same picker formatting; Codex's MCP client reports
 // the chosen model as a slug (lowercase, spaces → hyphens). canonicalModelLabel()
@@ -54,7 +55,25 @@ export const AUTHORING_MODEL_SUGGESTIONS = Object.freeze([
   "Custom Model"
 ]);
 
-const SKIP_CANONICAL = new Set(["auto", "custom model"]);
+const SKIP_CANONICAL = new Set(["auto", "custom model", "custom-model"]);
+
+function configuredModelLabels(labels = []) {
+  const seen = new Set();
+  const result = [];
+  for (const label of Array.isArray(labels) ? labels : []) {
+    const candidate = typeof label === "string" ? label.trim() : "";
+    const key = modelToHostSlug(candidate);
+    if (!candidate || SKIP_CANONICAL.has(candidate.toLowerCase())
+      || SKIP_CANONICAL.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    result.push(candidate);
+  }
+  return result;
+}
+
+export function modelSuggestionSnapshotLabels(labels = []) {
+  return ["auto", ...configuredModelLabels(labels), "Custom Model"];
+}
 
 /**
  * Host slug for a picker label (Codex MCP reports models this way).
@@ -71,33 +90,58 @@ const CANONICAL_MODEL_BY_SLUG = new Map(
 );
 
 /**
- * Map a raw model string (picker label or host slug) to the canonical picker
- * label when recognized. Unknown strings pass through unchanged.
+ * Map a raw model string (picker label or host slug) to its canonical label
+ * when recognized. D1-backed labels are passed as additionalLabels; unknown
+ * strings pass through unchanged.
  */
-export function canonicalModelLabel(model) {
+export function canonicalModelLabel(model, additionalLabels = null) {
   if (typeof model !== "string" || !model.trim()) return "";
   const trimmed = model.trim();
   if (trimmed.toLowerCase() === "auto") return "auto";
-  return CANONICAL_MODEL_BY_SLUG.get(modelToHostSlug(trimmed)) || trimmed;
+  const slug = modelToHostSlug(trimmed);
+  if (Array.isArray(additionalLabels)) {
+    for (const candidate of configuredModelLabels(additionalLabels)) {
+      if (modelToHostSlug(candidate) === slug) return candidate;
+    }
+    return trimmed;
+  }
+  const builtIn = CANONICAL_MODEL_BY_SLUG.get(slug);
+  if (builtIn) return builtIn;
+  return trimmed;
 }
 
 /**
- * Shared suggestion strings for any generative host's model field: the
- * built-in seed list plus human-curated additions (stored in D1 via
- * D1ModelSuggestionRepository, editable from /admin/model-suggestions with
- * no code change). Custom labels already in the seed list are ignored;
- * "Custom Model" stays last.
+ * Shared suggestion strings for any generative host's model field. When a
+ * D1 list is supplied it is complete and authoritative; otherwise use the
+ * frozen snapshot for offline/local fallback.
  */
-export function modelSuggestionsForHost(customLabels = []) {
-  if (!customLabels.length) return AUTHORING_MODEL_SUGGESTIONS;
-  const seed = AUTHORING_MODEL_SUGGESTIONS.filter(label => label !== "Custom Model");
-  const seen = new Set(seed.map(label => label.toLowerCase()));
-  const extra = [];
-  for (const label of customLabels) {
-    const trimmed = typeof label === "string" ? label.trim() : "";
-    if (!trimmed || seen.has(trimmed.toLowerCase())) continue;
-    seen.add(trimmed.toLowerCase());
-    extra.push(trimmed);
+export function modelSuggestionsForHost(configuredLabels = null, { authoritative = false } = {}) {
+  if (!Array.isArray(configuredLabels)) {
+    return modelSuggestionSnapshotLabels(AUTHORING_MODEL_SUGGESTIONS);
   }
-  return [...seed, ...extra, "Custom Model"];
+  if (authoritative) return modelSuggestionSnapshotLabels(configuredLabels);
+
+  // Preserve the historical helper contract for callers that pass only
+  // additions. Runtime D1 callers pass the complete-catalog flag.
+  const merged = new Map(configuredModelLabels(AUTHORING_MODEL_SUGGESTIONS)
+    .map(label => [modelToHostSlug(label), label]));
+  for (const label of configuredModelLabels(configuredLabels)) {
+    merged.set(modelToHostSlug(label), label);
+  }
+  return modelSuggestionSnapshotLabels([...merged.values()]);
+}
+
+/** Replace only the exported array in this file, preserving the formatter. */
+export function replaceAuthoringModelSuggestionsSource(source, labels = []) {
+  const marker = "export const AUTHORING_MODEL_SUGGESTIONS = Object.freeze(";
+  const markerIndex = source.indexOf(marker);
+  const arrayStart = markerIndex < 0 ? -1 : source.indexOf("[", markerIndex + marker.length);
+  const arrayEnd = arrayStart < 0 ? -1 : source.indexOf("\n]);", arrayStart);
+  if (arrayStart < 0 || arrayEnd < 0) {
+    throw new Error("Could not locate the frozen authoring model suggestion list");
+  }
+  const arraySource = `[\n${modelSuggestionSnapshotLabels(labels)
+    .map(label => `  ${JSON.stringify(label)}`)
+    .join(",\n")}\n]`;
+  return `${source.slice(0, arrayStart)}${arraySource}${source.slice(arrayEnd + 2)}`;
 }

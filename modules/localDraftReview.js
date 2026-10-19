@@ -31,6 +31,7 @@ import { matchReviewIssue, nextReviewIssueId } from "./contentDocumentRepository
 import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "./draftReviewPage.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
+import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
@@ -160,6 +161,13 @@ function formatActionError(error) {
     return `${error.message}\n${error.errors.join("\n")}`;
   }
   return error.message;
+}
+
+async function provenanceModelSettings(contentDocuments) {
+  const database = contentDocuments?.database;
+  if (!database) return AUTHORING_SETTINGS;
+  const modelSuggestions = await new D1ModelSuggestionRepository(database).listForRuntime();
+  return { ...AUTHORING_SETTINGS, modelSuggestions };
 }
 
 const RECORDED_STATUSES = new Set([
@@ -1142,6 +1150,7 @@ export function createLocalDraftReviewHandler({
             draft: record,
             params,
             expectedRevision,
+            settings: await provenanceModelSettings(contentDocuments),
             categoryRegistry: await loadMergedCategoryRegistry({
               contentDocuments,
               contentService,
@@ -1188,6 +1197,7 @@ export function createLocalDraftReviewHandler({
           await persistDraftFieldEdit({
             draft: record,
             publishedDocument: publishedDocumentFromService(contentService, puzzleId),
+            settings: await provenanceModelSettings(contentDocuments),
             categoryRegistry: await loadMergedCategoryRegistry({
               contentDocuments,
               contentService,
@@ -2252,8 +2262,8 @@ export function createLocalDraftReviewHandler({
         draftLoad,
         loadOrHydrateGithubProductionManifest({ repositoryRoot }),
         contentDocuments?.database
-          ? new D1ModelSuggestionRepository(contentDocuments.database).list()
-          : [],
+          ? new D1ModelSuggestionRepository(contentDocuments.database).listForRuntime()
+          : null,
         puzzleId && contentDocuments?.listPuzzleReviewEvents
           ? contentDocuments.listPuzzleReviewEvents({ id: puzzleId })
           : [],

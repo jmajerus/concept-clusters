@@ -7,6 +7,8 @@ import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
 import { layoutDocumentForMode, liftLegacyBoard } from "./layoutDocument.js";
+import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
+import { replaceAuthoringModelSuggestionsSource } from "./authoringModelSuggestions.js";
 import {
   formattedJson,
   generatedCatalogueModule,
@@ -21,6 +23,7 @@ import {
 } from "./publicationArtifacts.js";
 import {
   freezePlanHasMissingDependencies,
+  freezePlanKindCount,
   freezePlanIsEmpty
 } from "./contentFreezePlan.js";
 import {
@@ -253,6 +256,21 @@ export async function applyContentFreeze({
       ...(gitRecord?.previousNames || [])
     ];
     categoriesSource = unregisterCategorySource(categoriesSource, name, previousNames);
+  }
+
+  if (freezePlanKindCount(plan.modelSuggestions)) {
+    if (!contentDocuments.database) {
+      throw new Error("Freezing model suggestions requires the D1 database");
+    }
+    const modelSuggestionsPath = join(repositoryRoot, "modules", "authoringModelSuggestions.js");
+    const modelSuggestionsSource = await currentFile(modelSuggestionsPath);
+    if (modelSuggestionsSource == null) {
+      throw new Error("Missing modules/authoringModelSuggestions.js");
+    }
+    const labels = await new D1ModelSuggestionRepository(contentDocuments.database).list();
+    await remember(modelSuggestionsPath);
+    queueWrite(files, modelSuggestionsPath,
+      replaceAuthoringModelSuggestionsSource(modelSuggestionsSource, labels));
   }
 
   queueWrite(files, puzzleRegistryPath, puzzleRegistry);

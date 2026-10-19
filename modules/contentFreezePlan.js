@@ -7,6 +7,16 @@ import {
   slugify
 } from "../puzzles/categories.js";
 import { isReservedCatalogueId } from "./contentDocumentSeed.js";
+import {
+  AUTHORING_MODEL_SUGGESTIONS,
+  modelToHostSlug
+} from "./authoringModelSuggestions.js";
+import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
+
+const SPECIAL_MODEL_SUGGESTIONS = new Set(["auto", "custom model", "custom-model"]);
+const FROZEN_MODEL_LABELS = AUTHORING_MODEL_SUGGESTIONS.filter(label =>
+  !SPECIAL_MODEL_SUGGESTIONS.has(label.trim().toLowerCase())
+);
 
 export const CUE_FOR_FREEZE_CONFIRM = "cue-for-freeze";
 export const HOLD_FROM_FREEZE_CONFIRM = "hold-from-freeze";
@@ -56,6 +66,7 @@ export function emptyContentFreezePlan() {
     puzzles: { add: [], update: [], remove: [] },
     catalogues: { add: [], update: [], remove: [] },
     categories: { add: [], update: [], remove: [] },
+    modelSuggestions: { add: [], update: [], remove: [] },
     held: { puzzles: [], catalogues: [], categories: [] },
     dependencies: { automatic: [], missing: [] },
     emptyCategories: []
@@ -69,7 +80,8 @@ export function freezePlanKindCount(kind = {}) {
 export function freezePlanChangeCount(plan = emptyContentFreezePlan()) {
   return freezePlanKindCount(plan.puzzles)
     + freezePlanKindCount(plan.catalogues)
-    + freezePlanKindCount(plan.categories);
+    + freezePlanKindCount(plan.categories)
+    + freezePlanKindCount(plan.modelSuggestions);
 }
 
 export function freezePlanIsEmpty(plan) {
@@ -92,15 +104,21 @@ export function freezePlanHasMissingDependencies(plan = emptyContentFreezePlan()
 }
 
 export function freezePlanSummary(plan = emptyContentFreezePlan()) {
-  const cued = freezePlanChangeCount(plan);
+  const cued = freezePlanKindCount(plan.puzzles)
+    + freezePlanKindCount(plan.catalogues)
+    + freezePlanKindCount(plan.categories);
+  const modelChanges = freezePlanKindCount(plan.modelSuggestions);
   const held = freezePlanHeldCount(plan);
   const automatic = freezePlanAutomaticCount(plan);
   const missing = freezePlanHasMissingDependencies(plan);
-  const cuedText = cued
-    ? `${cued} change${cued === 1 ? "" : "s"} cued${
+  const parts = [];
+  if (cued) parts.push(`${cued} change${cued === 1 ? "" : "s"} cued${
       automatic ? ` (${automatic} automatic)` : ""
-    }`
-    : "No changes cued";
+    }`);
+  if (modelChanges) {
+    parts.push(`${modelChanges} model suggestion change${modelChanges === 1 ? "" : "s"} ready`);
+  }
+  const cuedText = parts.length ? parts.join("; ") : "No changes cued";
   const suffixes = [];
   if (held) suffixes.push(`${held} locally published but not cued`);
   if (missing) suffixes.push("required supporting documents are missing");
@@ -147,10 +165,14 @@ export async function loadContentFreezePlan({
   gitCategoryRegistry = categoryRegistry
 } = {}) {
   if (!contentDocuments) return emptyContentFreezePlan();
-  const [publishedPuzzles, publishedCatalogues, publishedCategories] = await Promise.all([
+  const modelSuggestionRepository = contentDocuments.database
+    ? new D1ModelSuggestionRepository(contentDocuments.database)
+    : null;
+  const [publishedPuzzles, publishedCatalogues, publishedCategories, modelSuggestions] = await Promise.all([
     contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true }),
     contentDocuments.listPublished({ kind: "catalogue", includeWithdrawn: true }),
-    contentDocuments.listPublished({ kind: "category", includeWithdrawn: true })
+    contentDocuments.listPublished({ kind: "category", includeWithdrawn: true }),
+    modelSuggestionRepository ? modelSuggestionRepository.listForFreeze() : null
   ]);
   return planContentFreeze({
     publishedPuzzles,
@@ -159,6 +181,7 @@ export async function loadContentFreezePlan({
     gitPuzzleIds: gitIds.puzzles || [],
     gitCatalogueIds: gitIds.catalogues || [],
     gitCategoryIds: gitIds.categories || [],
+    modelSuggestions,
     categoryRegistry,
     gitCategoryRegistry
   });
@@ -427,7 +450,33 @@ function automaticIdsFor(dependencies, kind) {
     .map(dependency => dependency.id);
 }
 
-// Live D1 vs git registries → the freeze patch. Author cues are the roots;
+function modelSuggestionPlan(modelSuggestions, gitModelSuggestions = FROZEN_MODEL_LABELS) {
+  if (!Array.isArray(modelSuggestions)) return { add: [], update: [], remove: [] };
+  const configured = new Map(modelSuggestions
+    .map(label => typeof label === "string" ? label.trim() : "")
+    .filter(label => label && !SPECIAL_MODEL_SUGGESTIONS.has(label.toLowerCase()))
+    .map(label => [modelToHostSlug(label), label]));
+  const frozen = new Map((gitModelSuggestions || [])
+    .map(label => typeof label === "string" ? label.trim() : "")
+    .filter(label => label && !SPECIAL_MODEL_SUGGESTIONS.has(label.toLowerCase()))
+    .map(label => [modelToHostSlug(label), label]));
+  return {
+    add: [...configured]
+      .filter(([slug]) => !frozen.has(slug))
+      .map(([, label]) => label)
+      .sort(),
+    update: [...configured]
+      .filter(([slug, label]) => frozen.has(slug) && frozen.get(slug) !== label)
+      .map(([, label]) => label)
+      .sort(),
+    remove: [...frozen]
+      .filter(([slug]) => !configured.has(slug))
+      .map(([, label]) => label)
+      .sort()
+  };
+}
+
+// Live D1 vs git registries and frozen model vocabulary → the freeze patch. Author cues are the roots;
 // missing forward dependencies are automatically included where D1 has a
 // published snapshot not yet in git. A category already in git is included
 // the same way when a shipping puzzle names a subcategory that the published
@@ -442,6 +491,8 @@ function automaticIdsFor(dependencies, kind) {
  *   gitPuzzleIds?: string[],
  *   gitCatalogueIds?: string[],
  *   gitCategoryIds?: string[],
+ *   modelSuggestions?: string[] | null,
+ *   gitModelSuggestions?: string[],
  *   categoryRegistry?: Record<string, any>,
  *   gitCategoryRegistry?: Record<string, any>
  * }} options
@@ -453,6 +504,8 @@ export function planContentFreeze({
   gitPuzzleIds = [],
   gitCatalogueIds = [],
   gitCategoryIds = [],
+  modelSuggestions = null,
+  gitModelSuggestions = FROZEN_MODEL_LABELS,
   categoryRegistry = CATEGORIES,
   gitCategoryRegistry = categoryRegistry
 } = {}) {
@@ -478,6 +531,7 @@ export function planContentFreeze({
       automaticCatalogues
     ),
     categories,
+    modelSuggestions: modelSuggestionPlan(modelSuggestions, gitModelSuggestions),
     emptyCategories: emptyCategoryIds(categories, publishedPuzzles, categoryRegistry),
     held: {
       puzzles: heldIds(publishedPuzzles, automaticPuzzles),

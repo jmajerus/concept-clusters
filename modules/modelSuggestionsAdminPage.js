@@ -1,6 +1,5 @@
-// Human-facing editor for the drafts-page model dropdown's D1-backed
-// additions -- see authoringModelSuggestions.js for the built-in seed list
-// this is additive to, and d1ModelSuggestionRepository.js for storage.
+// Human-facing editor for the complete D1-backed model vocabulary. Freeze
+// projects this list into authoringModelSuggestions.js for local/offline use.
 
 import { authoringAdminNav } from "./authoringAdminIndex.js";
 import { AUTHORING_MODEL_SUGGESTIONS } from "./authoringModelSuggestions.js";
@@ -40,11 +39,15 @@ const PAGE_STYLE = `
 `;
 
 /**
- * @param {{ customLabels?: string[], error?: string|null }} options
+ * @param {{ customLabels?: string[], catalogManaged?: boolean, error?: string|null }} options
  */
-export function renderModelSuggestionsAdminPage({ customLabels = [], error = null } = {}) {
+export function renderModelSuggestionsAdminPage({
+  customLabels = [],
+  catalogManaged = false,
+  error = null
+} = {}) {
   const seedItems = AUTHORING_MODEL_SUGGESTIONS
-    .filter(label => label !== "Custom Model")
+    .filter(label => !["auto", "Custom Model"].includes(label))
     .map(label => `<li>${escapeHtml(label)}</li>`)
     .join("");
   const customItems = customLabels.length
@@ -57,11 +60,27 @@ export function renderModelSuggestionsAdminPage({ customLabels = [], error = nul
       </li>`).join("")
     : `<li class="meta">None added yet.</li>`;
 
+  const description = catalogManaged
+    ? `This D1 list is the source of model names offered on the
+    <code>/admin/drafts</code> model dropdown and used to format MCP model
+    slugs. Enter the preferred display label (for example,
+    <code>GPT-6 Luna</code>); <code>gpt-6-luna</code> resolves to it
+    immediately. Freeze copies the current list into the local/offline model
+    snapshot.`
+    : `Additions here are available immediately alongside the frozen model
+    snapshot. Enter the preferred display label (for example,
+    <code>GPT-6 Luna</code>); <code>gpt-6-luna</code> resolves to it. Apply
+    the model vocabulary D1 migration to make this editor manage the complete
+    list and include it in Freeze.`;
+  const catalogLists = catalogManaged
+    ? `<h2>Models in D1</h2><ul>${customItems}</ul>
+      <p class="meta"><code>auto</code> and <code>Custom Model</code> are
+      always available as special options.</p>`
+    : `<h2>Added here</h2><ul>${customItems}</ul>
+      <h2>Frozen fallback snapshot</h2><ul>${seedItems}</ul>`;
   const body = `<h1>Model suggestions</h1>
     <p class="meta">${authoringAdminNav()}</p>
-    <p class="meta">Options offered on the <code>/admin/drafts</code> model
-    dropdown for each drafting client. Add a newly released model here --
-    no code change or deploy needed; it's available immediately.</p>
+    <p class="meta">${description}</p>
     ${error ? `<p class="error">${escapeHtml(error)}</p>` : ""}
     <form class="add-model" method="post" action="${MODEL_SUGGESTIONS_ADMIN_PATH}">
       <input type="hidden" name="confirm" value="${ADD_MODEL_SUGGESTION_CONFIRM}">
@@ -69,10 +88,7 @@ export function renderModelSuggestionsAdminPage({ customLabels = [], error = nul
       <input type="text" id="model-suggestion-label" name="label" placeholder="e.g. Claude Opus 6" required autocomplete="off">
       <button type="submit">Add</button>
     </form>
-    <h2>Added here</h2>
-    <ul>${customItems}</ul>
-    <h2>Built in</h2>
-    <ul>${seedItems}</ul>`;
+    ${catalogLists}`;
 
   return `<!doctype html>
 <html lang="en">
@@ -141,6 +157,7 @@ export async function handleLocalModelSuggestions(req, res, { repositoryRoot, en
     return true;
   }
   const repository = new D1ModelSuggestionRepository(database);
+  const catalogManaged = await repository.hasCompleteCatalog();
 
   if (req.method === "POST") {
     const sameOrigin = isSameOriginRequest({
@@ -171,10 +188,17 @@ export async function handleLocalModelSuggestions(req, res, { repositoryRoot, en
       res.end();
       return true;
     }
-    html(res, renderModelSuggestionsAdminPage({ customLabels: await repository.list(), error }), 400);
+    html(res, renderModelSuggestionsAdminPage({
+      customLabels: await repository.list(),
+      catalogManaged,
+      error
+    }), 400);
     return true;
   }
 
-  html(res, renderModelSuggestionsAdminPage({ customLabels: await repository.list() }));
+  html(res, renderModelSuggestionsAdminPage({
+    customLabels: await repository.list(),
+    catalogManaged
+  }));
   return true;
 }

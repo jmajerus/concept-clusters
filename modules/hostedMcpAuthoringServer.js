@@ -77,6 +77,9 @@ import {
 import { creditableChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
+import { AUTHORING_SETTINGS } from "./authoringSettings.js";
+import { canonicalModelLabel } from "./authoringModelSuggestions.js";
+import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import { matchReviewIssue, nextReviewIssueId, publishedRowOrNull } from "./contentDocumentRepository.js";
 import {
@@ -420,11 +423,11 @@ function clipClientLabel(value) {
   return trimmed ? trimmed.slice(0, 200) : null;
 }
 
-function reviewClientStamp(ctx, mcpServer) {
-  const identity = identifyMcpAssistanceClient({ ctx, server: mcpServer });
+function reviewClientStamp(ctx, mcpServer, settings = AUTHORING_SETTINGS) {
+  const identity = identifyMcpAssistanceClient({ ctx, server: mcpServer, settings });
   return {
     clientSystem: clipClientLabel(identity?.system || null),
-    clientModel: clipClientLabel(identity?.model || null),
+    clientModel: clipClientLabel(canonicalModelLabel(identity?.model || "", settings.modelSuggestions)),
     clientName: clipClientLabel(identity?.clientName || observedMcpClientLabel({ ctx, server: mcpServer }))
   };
 }
@@ -647,6 +650,13 @@ export function createAuthoringMcpServer({
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
+
+  async function provenanceSettings() {
+    const database = contentDocuments?.database;
+    if (!database) return AUTHORING_SETTINGS;
+    const modelSuggestions = await new D1ModelSuggestionRepository(database).listForRuntime();
+    return { ...AUTHORING_SETTINGS, modelSuggestions };
+  }
 
   function requireD1ContentDocuments(operation = "read") {
     if (contentDocumentsConfigured === false ||
@@ -1291,10 +1301,12 @@ export function createAuthoringMcpServer({
       await assertPuzzleIdIsUnpublished(candidate);
     }
     const settled = settleAgentPresentationColors(document, null);
+    const modelSettings = await provenanceSettings();
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(settled, {
       ctx,
       server,
       role: "drafted",
+      settings: modelSettings,
       log: stampLog("create_puzzle_draft", args.draft_id || settled?.id, settled)
     });
     const draftId = args.draft_id || stamped.id;
@@ -1518,12 +1530,14 @@ export function createAuthoringMcpServer({
       retainMcpExcludedMetadata(stored, previousDocument),
       previousDocument
     );
+    const modelSettings = await provenanceSettings();
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {
       ctx,
       server,
       role: "edited",
       substantial,
       domain,
+      settings: modelSettings,
       log: stampLog("save_puzzle_draft", draft_id, stored)
     });
     let draft;
@@ -1628,6 +1642,7 @@ export function createAuthoringMcpServer({
         const nextDocument = applyAuthoredDomain(previousDocument, "classification", projection);
         // A reshelving is never authorship (CREDITED_WRITE_DOMAINS).
         const substantial = isSubstantialChange(creditableChangeScore(previousDocument, nextDocument));
+        const modelSettings = await provenanceSettings();
         const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(
           nextDocument,
           {
@@ -1636,6 +1651,7 @@ export function createAuthoringMcpServer({
             role: "edited",
             substantial,
             domain: "classification",
+            settings: modelSettings,
             log: stampLog("reassign_puzzle_classifications", draftId, nextDocument)
           }
         );
@@ -2135,7 +2151,7 @@ export function createAuthoringMcpServer({
           ? "Removing changes already filed in an open proposal leaves an invalid draft. Pass stack_on true to file this working copy on top of the preceding review."
           : `Draft ${draft_id} is not valid; fix and validate it before filing a proposal.`);
       }
-      const stamp = reviewClientStamp(ctx, server);
+      const stamp = reviewClientStamp(ctx, server, await provenanceSettings());
       const filed = await contentDocuments.recordPuzzleAgentReview({
         id: puzzleId,
         eventType: "proposed",
@@ -2184,7 +2200,7 @@ export function createAuthoringMcpServer({
         comments: reviewComments,
         draftRevision: stored.revision,
         guidance: AUTHORING_GUIDANCE_VERSION,
-        ...reviewClientStamp(ctx, server)
+        ...reviewClientStamp(ctx, server, await provenanceSettings())
       });
       const issueReminder = reviewComments && OPEN_ISSUE_LANGUAGE.test(reviewComments)
         ? "This completion comment may describe unresolved work. Open a separate action=open issue for each concern that remains."
@@ -2236,7 +2252,7 @@ export function createAuthoringMcpServer({
       guidance: AUTHORING_GUIDANCE_VERSION,
       issueId,
       eventType,
-      ...reviewClientStamp(ctx, server)
+      ...reviewClientStamp(ctx, server, await provenanceSettings())
     });
     issue = await reviewIssueFromHandle(puzzleId, issueId);
     const verb = action === "open" ? "Opened" : action === "resolve" ? "Resolved" : action === "reopen" ? "Reopened" : "Added a note to";
