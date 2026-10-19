@@ -131,9 +131,10 @@ export async function run() {
     assert.match(schemaTool.description, /core, review, pedagogy, classification, or publication/);
     const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
     assert.match(saveTool.description, /^Every save requires expected_revision/);
-    assert.match(saveTool.description, /Do not re-read the draft after a create or save error/);
+    assert.match(saveTool.description, /A validation or ownership rejection did not commit/);
+    assert.match(saveTool.description, /fetch failed, D1_ERROR, or a non-JSON response/);
     const createTool = listed.result.tools.find(tool => tool.name === "create_puzzle_draft");
-    assert.match(createTool.description, /Do not re-read the draft after a create or save error/);
+    assert.match(createTool.description, /A validation or ownership rejection did not commit/);
     const revisionField = saveTool.inputSchema.properties.expected_revision;
     assert.equal(revisionField.type, "integer");
     assert.match(revisionField.description, /Copy draft\.revision/);
