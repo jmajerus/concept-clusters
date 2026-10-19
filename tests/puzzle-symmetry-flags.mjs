@@ -48,6 +48,8 @@ export async function run() {
   assert.match(clusterFlags[0].message, /All 3 clusters have exactly 5 terms/);
   assert.doesNotMatch(clusterFlags[0].message, /cluster count matches/);
   assert.match(clusterFlags[0].message, /concept-gathering pass/);
+  assert.match(clusterFlags[0].message, /Keep the map in the conversation/);
+  assert.match(clusterFlags[0].message, /inventories\/<id>\.json/);
   assert.match(clusterFlags[0].message, /do not change bridges/i);
   assert.match(clusterFlags[0].message, /An even count is not a reason to add or remove a bridge/);
   assert.match(clusterFlags[0].message, /a board with no bridge is a reason to ask whether a real relationship was left off/);

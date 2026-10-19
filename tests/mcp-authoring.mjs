@@ -131,6 +131,9 @@ export async function run() {
     assert.match(schemaTool.description, /core, review, pedagogy, classification, or publication/);
     const saveTool = listed.result.tools.find(tool => tool.name === "save_puzzle_draft");
     assert.match(saveTool.description, /^Every save requires expected_revision/);
+    assert.match(saveTool.description, /call get_puzzle_draft for that id before retrying/);
+    const createTool = listed.result.tools.find(tool => tool.name === "create_puzzle_draft");
+    assert.match(createTool.description, /call get_puzzle_draft for that id before retrying/);
     const revisionField = saveTool.inputSchema.properties.expected_revision;
     assert.equal(revisionField.type, "integer");
     assert.match(revisionField.description, /Copy draft\.revision/);

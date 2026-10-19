@@ -37,7 +37,7 @@ function signature(clusterCount, termCounts) {
   };
 }
 
-const RECHECK_CONCEPT_SET = "Re-read each cluster for two terms doing one job, and for a fact that names a concept missing from its terms; fix those on the board. That is not a licence to add or drop terms just to break an even count. If this board has no concept-gathering inventory, write that inventory in this review and stop for human approval before fitting it onto the board. Do not leave that inventory as an open issue. Keep even counts when the sourced map supports them, and do not change bridges because of this prompt.";
+const RECHECK_CONCEPT_SET = "Re-read each cluster for two terms doing one job, and for a fact that names a concept missing from its terms; fix those on the board. That is not a licence to add or drop terms just to break an even count. If this board has no concept-gathering inventory, write that map and stop for human approval before fitting it onto the board. Keep the map in the conversation. A checkout session may store the same map at inventories/<id>.json. Do not leave that inventory as an open issue. Keep even counts when the sourced map supports them, and do not change bridges because of this prompt.";
 
 // Document-only count signals. mcpFlags is the symmetry prompt (even term
 // counts). descriptors are draft-review notes that are not that prompt.
@@ -73,7 +73,7 @@ export function computeStructuralRegularity(puzzle) {
       message: `All ${count} clusters have exactly ${value} terms.${lockSentence} ` +
         "Most subjects are less even than this. Re-check each cluster for two terms doing one job, and for a fact that names a concept the term list omitted; fix those on the board. " +
         "That is not a licence to add or drop terms just to break an even count. " +
-        "If this board never had a concept-gathering pass, write that inventory in this review and stop for human approval before fitting it onto the board. Do not leave that inventory as an open issue. " +
+        "If this board never had a concept-gathering pass, write that map and stop for human approval before fitting it onto the board. Keep the map in the conversation. A checkout session may store the same map at inventories/<id>.json. Do not leave that inventory as an open issue. " +
         "Keep even counts when the sourced map supports them, and do not change bridges because of this prompt. " +
         "An even count is not a reason to add or remove a bridge. Separately, a board with no bridge is a reason to ask whether a real relationship was left off. Do not add a bridge in order to change this flag.",
       signature: result.signature
